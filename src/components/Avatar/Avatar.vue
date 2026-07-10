@@ -12,8 +12,8 @@
     />
     <div
       v-else
-      class="flex h-full w-full items-center justify-center bg-surface-gray-2 uppercase text-ink-gray-5 select-none"
-      :class="[labelClasses, shapeClasses]"
+      class="flex h-full w-full items-center justify-center uppercase select-none"
+      :class="[labelClasses, fallbackThemeClasses, shapeClasses]"
     >
       <div :class="iconClasses" v-if="$slots.default">
         <slot></slot>
@@ -38,13 +38,26 @@
 
 <script setup lang="ts">
 import { ref, computed, useAttrs } from 'vue'
-import type { AvatarProps } from './types'
+import type { AvatarProps, AvatarTheme } from './types'
 
 const imgFetchError = ref(false)
 
 const props = withDefaults(defineProps<AvatarProps>(), {
   size: 'md',
   shape: 'circle',
+  theme: 'gray',
+})
+
+const fallbackThemeClasses = computed(() => {
+  const classes: Record<AvatarTheme, string> = {
+    gray: 'bg-surface-gray-2 text-ink-gray-5',
+    blue: 'bg-surface-blue-2 text-ink-blue-8',
+    green: 'bg-surface-green-2 text-ink-green-8',
+    amber: 'bg-surface-amber-2 text-ink-amber-8',
+    red: 'bg-surface-red-2 text-ink-red-8',
+    violet: 'bg-surface-violet-2 text-ink-violet-8',
+  }
+  return classes[props.theme]
 })
 
 // Let a consumer size the avatar with a Tailwind utility (`class="size-16"`)
@@ -60,7 +73,9 @@ const hasSizeOverride = computed(() => {
       ? attrs.class
       : ''
   return cls.split(/\s+/).some((token) => {
-    const base = token.includes(':') ? token.slice(token.lastIndexOf(':') + 1) : token
+    const base = token.includes(':')
+      ? token.slice(token.lastIndexOf(':') + 1)
+      : token
     return /^-?(size|w|h|min-w|max-w|min-h|max-h)-/.test(base)
   })
 })
@@ -142,7 +157,7 @@ const iconClasses = computed(() => {
   }[props.size]
 })
 
-function handleImageError(err) {
+function handleImageError(err: Event) {
   if (err.type) {
     imgFetchError.value = true
   }
@@ -155,5 +170,4 @@ defineSlots<{
   /** Small indicator shown at the bottom-right of the avatar */
   indicator?: () => any
 }>()
-
 </script>
