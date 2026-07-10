@@ -35,7 +35,7 @@
     name: 'theme',
     description: 'Visual color theme used for the fallback avatar',
     required: false,
-    type: '"gray" | "blue" | "green" | "amber" | "red" | "violet" | "orange" | "auto"',
+    type: '"gray" | "blue" | "green" | "amber" | "red" | "violet"',
     default: '"gray"'
   }
 ]

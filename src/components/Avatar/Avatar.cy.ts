@@ -65,11 +65,4 @@ describe('Avatar', () => {
       .and('have.class', 'text-ink-blue-8')
   })
 
-  it('Supports automatic fallback themes', () => {
-    cy.mount(Avatar, {
-      props: { 'data-cy': 'avatar', label: 'Abc', theme: 'auto' },
-    })
-
-    cy.get('[data-cy="avatar"] > div').should('not.have.class', 'bg-surface-gray-2')
-  })
 })

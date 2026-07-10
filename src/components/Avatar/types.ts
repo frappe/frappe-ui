@@ -5,8 +5,6 @@ export type AvatarTheme =
   | 'amber'
   | 'red'
   | 'violet'
-  | 'orange'
-  | 'auto'
 
 export interface AvatarProps {
   /** Image URL used for the avatar */

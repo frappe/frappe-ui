@@ -39,8 +39,6 @@ const knobs: Knob[] = [
       { label: 'amber', value: 'amber' },
       { label: 'red', value: 'red' },
       { label: 'violet', value: 'violet' },
-      { label: 'orange', value: 'orange' },
-      { label: 'auto', value: 'auto' },
     ],
   },
 ]

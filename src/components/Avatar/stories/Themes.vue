@@ -9,8 +9,6 @@ const themes: AvatarTheme[] = [
   'amber',
   'red',
   'violet',
-  'orange',
-  'auto',
 ]
 </script>
 
@@ -18,7 +16,7 @@ const themes: AvatarTheme[] = [
   <Avatar
     v-for="theme in themes"
     :key="theme"
-    :label="theme === 'auto' ? 'Jane Doe' : theme"
+    :label="theme"
     :theme="theme"
     size="lg"
   />

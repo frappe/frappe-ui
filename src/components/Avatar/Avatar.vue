@@ -40,8 +40,6 @@
 import { ref, computed, useAttrs } from 'vue'
 import type { AvatarProps, AvatarTheme } from './types'
 
-type ResolvedAvatarTheme = Exclude<AvatarTheme, 'auto'>
-
 const imgFetchError = ref(false)
 
 const props = withDefaults(defineProps<AvatarProps>(), {
@@ -51,17 +49,15 @@ const props = withDefaults(defineProps<AvatarProps>(), {
 })
 
 const fallbackThemeClasses = computed(() => {
-  const theme = props.theme === 'auto' ? getAutoTheme(props.label) : props.theme
-  const classes: Record<ResolvedAvatarTheme, string> = {
+  const classes: Record<AvatarTheme, string> = {
     gray: 'bg-surface-gray-2 text-ink-gray-5',
     blue: 'bg-surface-blue-2 text-ink-blue-8',
     green: 'bg-surface-green-2 text-ink-green-8',
     amber: 'bg-surface-amber-2 text-ink-amber-8',
     red: 'bg-surface-red-2 text-ink-red-8',
     violet: 'bg-surface-violet-2 text-ink-violet-8',
-    orange: 'bg-surface-amber-2 text-ink-amber-8',
   }
-  return classes[theme]
+  return classes[props.theme]
 })
 
 // Let a consumer size the avatar with a Tailwind utility (`class="size-16"`)
@@ -165,24 +161,6 @@ function handleImageError(err: Event) {
   if (err.type) {
     imgFetchError.value = true
   }
-}
-
-function getAutoTheme(label?: string): ResolvedAvatarTheme {
-  const themes: ResolvedAvatarTheme[] = [
-    'blue',
-    'green',
-    'amber',
-    'red',
-    'violet',
-  ]
-  const value = label || ''
-  let hash = 0
-
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) >>> 0
-  }
-
-  return themes[hash % themes.length]
 }
 
 defineSlots<{
