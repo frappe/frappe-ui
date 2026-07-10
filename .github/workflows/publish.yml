@@ -24,7 +24,7 @@ jobs:
           node-version: 24.15.0
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm install -g npm@latest
+      - run: npm --version
       - run: npm install
 
       - name: Determine publish tag
