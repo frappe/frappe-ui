@@ -27,7 +27,7 @@
   background-color: var(--bg-active);
 }
 .event.active .event-title {
-  color: var(--text-active, #fff);
+  color: var(--text-active, var(--ink-base));
 }
 .event.active .event-subtitle {
   color: var(--subtext-active);
