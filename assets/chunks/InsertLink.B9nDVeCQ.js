@@ -1,0 +1,1 @@
+import{y as t,ab as s,V as a,D as i}from"./framework.ByyYB-NO.js";import"./theme.BkFaERDs.js";const m=t({__name:"InsertLink",props:{editor:{}},setup(o){const e=o;function n(){e.editor.commands.openLinkEditor()}return(r,p)=>s(r.$slots,"default",a(i({onClick:n})))}});export{m as default};
