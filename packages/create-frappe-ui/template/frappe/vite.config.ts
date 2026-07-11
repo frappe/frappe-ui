@@ -5,7 +5,7 @@ import frappeui from 'frappe-ui/vite'
 export default defineConfig({
   plugins: [
     frappeui({
-      frontendRoute: '__BASE_ROUTE__',
+      frontendRoute: __BASE_ROUTE_CODE__,
     }),
     vue(),
   ],

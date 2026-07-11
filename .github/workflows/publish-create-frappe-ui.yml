@@ -1,0 +1,62 @@
+name: Publish create-frappe-ui on NPM
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if:
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/create-frappe-ui
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm install -g npm@latest
+      - run: npm test
+      - run: npm pack --dry-run
+
+      - name: Read package metadata
+        id: package
+        run: |
+          version=$(node --print "require('./package.json').version")
+          prerelease=${version#*-}
+          if [ "$prerelease" = "$version" ]; then
+            tag=latest
+          else
+            tag=${prerelease%%.*}
+          fi
+
+          if npm view "create-frappe-ui@$version" version >/dev/null 2>&1; then
+            published=true
+          else
+            published=false
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "published=$published" >> "$GITHUB_OUTPUT"
+
+      - name: Publish package
+        if: steps.package.outputs.published == 'false'
+        env:
+          PUBLISH_TAG: ${{ steps.package.outputs.tag }}
+        run: npm publish --access public --provenance --tag "$PUBLISH_TAG"

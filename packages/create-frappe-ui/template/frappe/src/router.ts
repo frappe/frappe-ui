@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
 
 const router = createRouter({
-  history: createWebHistory('__ROUTER_BASE__'),
+  history: createWebHistory(__ROUTER_BASE_CODE__),
   routes: [
     {
       path: '/',

@@ -7,6 +7,7 @@ an existing Frappe project.
 
 You can quickly set up `frappe-ui` with `npm create frappe-ui`. If you already
 have a Frappe app for which you want to build a frontend, start with **Step 2**.
+The initializer requires Node.js 20.19 or newer, or Node.js 22.12 or newer.
 
 ###  Create your Frappe app
 

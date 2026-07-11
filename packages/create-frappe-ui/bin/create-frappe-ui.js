@@ -49,8 +49,10 @@ async function main() {
   ensureTargetDir(targetDir, options.force)
   const context = {
     baseRoute: options.route,
+    baseRouteCode: JSON.stringify(options.route),
     projectName: toPackageName(path.basename(targetDir)),
     routerBase: toRouterBase(options.route),
+    routerBaseCode: JSON.stringify(toRouterBase(options.route)),
   }
   copyTemplate(BASE_TEMPLATE_DIR, targetDir, context)
   copyTemplate(
@@ -181,7 +183,7 @@ function ensureFrappeTargetDir(targetDir) {
   const appName = appsIndex >= 0 ? parts[appsIndex + 1] : ''
   const frontendFolder = appsIndex >= 0 ? parts.slice(appsIndex + 2) : []
 
-  if (!appName || frontendFolder.length === 0) {
+  if (!appName || frontendFolder.length !== 1) {
     fail(
       'Frappe backend projects must be created inside apps/<appname>/<folder>.',
     )
@@ -204,7 +206,9 @@ function copyTemplate(sourceDir, targetDir, context) {
       .readFileSync(sourcePath, 'utf8')
       .replaceAll('__PROJECT_NAME__', context.projectName)
       .replaceAll('__BASE_ROUTE__', context.baseRoute)
+      .replaceAll('__BASE_ROUTE_CODE__', context.baseRouteCode)
       .replaceAll('__ROUTER_BASE__', context.routerBase)
+      .replaceAll('__ROUTER_BASE_CODE__', context.routerBaseCode)
     fs.writeFileSync(targetPath, contents)
   }
 }

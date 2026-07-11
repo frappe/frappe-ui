@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Test create-frappe-ui
+        working-directory: packages/create-frappe-ui
+        run: npm test
+
       - name: Run vitest with coverage
         run: yarn test:coverage
 
