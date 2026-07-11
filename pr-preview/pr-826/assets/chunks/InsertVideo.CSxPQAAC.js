@@ -1,0 +1,1 @@
+import{y as n,ab as s,V as a,D as d}from"./framework.DVSKGVLN.js";import"./theme.Bx5kAGcw.js";const l=n({__name:"InsertVideo",props:{editor:{}},setup(e){const o=e;function r(){o.editor.chain().focus().selectAndUploadVideo().run()}return(t,i)=>s(t.$slots,"default",a(d({onClick:r})))}});export{l as default};
