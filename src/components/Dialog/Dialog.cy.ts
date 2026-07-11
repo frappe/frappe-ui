@@ -86,19 +86,90 @@ describe('Dialog', () => {
 
   // ---- New behavior props ----------------------------------------------------
 
-  it('dismissible=false blocks outside click and Escape from closing', () => {
-    cy.mount(Dialog, {
-      props: {
-        open: true,
-        title: 'Locked',
-        message: 'Cannot dismiss',
-        dismissible: false,
+  it('closes on outside click when dismissible', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const open = ref(true)
+        return { open }
+      },
+      render() {
+        return h(Dialog, {
+          open: this.open,
+          'onUpdate:open': (v: boolean) => (this.open = v),
+          title: 'Dismissible',
+        })
       },
     })
 
+    cy.mount(Wrapper)
+    cy.get('[role=dialog]').should('exist')
+    cy.get('.dialog-overlay').click(0, 0, { force: true })
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('dismissible=false blocks outside click and Escape from closing', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const open = ref(true)
+        return { open }
+      },
+      render() {
+        return h(Dialog, {
+          open: this.open,
+          'onUpdate:open': (v: boolean) => (this.open = v),
+          title: 'Locked',
+          message: 'Cannot dismiss',
+          dismissible: false,
+        })
+      },
+    })
+
+    cy.mount(Wrapper)
+    cy.get('[role=dialog]').should('exist')
+    cy.get('.dialog-overlay').click(0, 0, { force: true })
     cy.get('[role=dialog]').should('exist')
     cy.get('body').type('{esc}')
     cy.get('[role=dialog]').should('exist')
+  })
+
+  it('focuses and types into an input clicked inside a scrollable dialog', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Long form' },
+      slots: {
+        default: () =>
+          h(
+            'div',
+            {
+              'data-cy': 'tall-dialog-body',
+              style: {
+                height: '1200px',
+                display: 'flex',
+                alignItems: 'flex-end',
+              },
+            },
+            [
+              h('input', {
+                'data-cy': 'mouse-focus-input',
+                type: 'text',
+              }),
+            ],
+          ),
+      },
+    })
+
+    cy.get('.dialog-overlay').should(($overlay) => {
+      expect($overlay[0].scrollHeight).to.be.greaterThan(
+        $overlay[0].clientHeight,
+      )
+    })
+
+    // Cypress cannot synthesize fully trusted OS-level events, so this guards
+    // the click-to-focus behavior contract rather than the exact event chain.
+    cy.get('[data-cy=mouse-focus-input]')
+      .click()
+      .should('be.focused')
+      .type('Focused by mouse')
+      .should('have.value', 'Focused by mouse')
   })
 
   it('showCloseButton renders an accessible close affordance that closes the dialog', () => {
@@ -218,11 +289,7 @@ describe('Dialog', () => {
     cy.mount(Dialog, {
       props: { modelValue: true },
       slots: {
-        'body-header': h(
-          'div',
-          { 'data-cy': 'body-header' },
-          'legacy header',
-        ),
+        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
         'body-content': h(
           'div',
           { 'data-cy': 'body-content' },
@@ -261,11 +328,7 @@ describe('Dialog', () => {
     cy.mount(Dialog, {
       props: { modelValue: true },
       slots: {
-        'body-header': h(
-          'div',
-          { 'data-cy': 'body-header' },
-          'legacy header',
-        ),
+        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
       },
     })
 
@@ -320,11 +383,7 @@ describe('Dialog', () => {
         default: () =>
           h('div', { autofocus: '' }, [
             h('span', 'label'),
-            h(
-              'button',
-              { 'data-cy': 'toggle', type: 'button' },
-              'Toggle',
-            ),
+            h('button', { 'data-cy': 'toggle', type: 'button' }, 'Toggle'),
             h('button', { 'data-cy': 'second', type: 'button' }, 'Other'),
           ]),
       },

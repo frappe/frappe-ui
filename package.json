@@ -193,7 +193,7 @@
     "ora": "5.4.1",
     "prettier": "^3.3.2",
     "prosemirror-tables": "^1.8.1",
-    "reka-ui": "^2.5.0",
+    "reka-ui": "^2.9.9",
     "slugify": "^1.6.6",
     "socket.io-client": "^4.5.1",
     "tippy.js": "^6.3.7",
