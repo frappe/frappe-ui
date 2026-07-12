@@ -15,7 +15,7 @@ import type { Plugin } from 'vite'
  * still appears.
  */
 const FRAMEWORK_PKG_RE =
-  /[/\\]node_modules[/\\](?:vue|@vue[/\\]|vue-router|@vueuse[/\\])/
+  /[/\\]node_modules[/\\](?:vue[/\\]|@vue[/\\]|vue-router[/\\]|@vueuse[/\\])/
 
 export default function preventCircularChunks(): Plugin {
   return {
