@@ -8,6 +8,7 @@ import { lucideIcons } from 'frappe-ui/vite'
 
 import { createComponentTransformer } from './plugins/componentTransformer.ts'
 import colocatedComponentDocs from './plugins/colocatedComponentDocs.ts'
+import preventCircularChunks from './plugins/preventCircularChunks.ts'
 import type { SidebarSection } from './components/Docs/sidebarList.ts'
 
 // frappe-ui package root — this file lives at <root>/vitepress/index.node.ts.
@@ -118,6 +119,9 @@ export function defineDocsConfig(
     vite: {
       plugins: [
         lucideIcons(),
+        // Keep vue / @vueuse / vue-router in the VitePress `framework` chunk so
+        // production never ships a framework↔theme cycle (TDZ on load).
+        preventCircularChunks(),
         ...(colocatedDocs
           ? [
               colocatedComponentDocs(
