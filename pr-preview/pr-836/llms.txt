@@ -1,0 +1,96 @@
+# frappe-ui
+
+> Vue 3 component library and data-fetching utilities for building UIs on the Frappe Framework. Used by Frappe Cloud, Gameplan, Desk, Drive, and Insights. Components ship with TypeScript, dark mode via `[data-theme="dark"]`, and a semantic Tailwind preset (`ink-*` / `surface-*` / `outline-*` tokens).
+
+Built on Vue 3, TailwindCSS, Headless UI, reka-ui, TipTap, and lucide icons. Distributed as the `frappe-ui` npm package; import everything from `'frappe-ui'`.
+
+Two cross-cutting conventions to know before reading anything else:
+
+- **Color = `variant` + `theme`.** `variant` is visual style (`solid | outline | subtle | ghost`); `theme` is color tone (`gray | blue | red | green | …`). No `intent` / `severity` / `appearance` axis.
+- **Icons are CSS classes.** Render as `<span class="lucide-<name> size-4" aria-hidden="true" />`. Frappe-ui props that accept icons take the namespaced string `"lucide-edit"`.
+
+## Design principles
+
+- [PHILOSOPHY.md](https://raw.githubusercontent.com/frappe/frappe-ui/main/PHILOSOPHY.md): the 13 rules (P1–P13) that govern API shape across the library — naming, prop design, slots, composition, styling, a11y, deprecation policy.
+- [CONTEXT.md](https://raw.githubusercontent.com/frappe/frappe-ui/main/CONTEXT.md): canonical vocabulary (`open`, `variant`, `theme`, `dismissible`, `bare`, `chrome`, `action`, …). Reference for prop and slot names.
+
+## Getting started
+
+- [Introduction](https://ui.frappe.io/docs/introduction): what frappe-ui is, motivation, products using it.
+- [Getting started](https://ui.frappe.io/docs/getting-started): installation, Tailwind preset wiring, `FrappeUIProvider` setup.
+
+## Core components
+
+- [Alert](https://ui.frappe.io/docs/components/alert): inline banner with title, body, theme, variant.
+- [Avatar](https://ui.frappe.io/docs/components/avatar): user/entity avatar with image or label-derived initials.
+- [Badge](https://ui.frappe.io/docs/components/badge): status pill; same `variant` + `theme` axes as Button.
+- [Breadcrumbs](https://ui.frappe.io/docs/components/breadcrumbs): page-header trail; takes `items: { label, route }[]`.
+- [Button](https://ui.frappe.io/docs/components/button): primary trigger element; supports `route`/`link` for nav, `icon`/`iconLeft`/`iconRight`, `loading`, `disabled`.
+- [Calendar](https://ui.frappe.io/docs/components/calendar): month/week calendar view.
+- [Charts](https://ui.frappe.io/docs/components/charts): chart family (line, bar, etc.).
+- [Checkbox](https://ui.frappe.io/docs/components/checkbox): boolean input; standard labeling contract.
+- [CircularProgressBar](https://ui.frappe.io/docs/components/circularprogressbar): radial progress indicator.
+- [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`.
+- [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
+- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissible`/`bare`. Imperative API: `dialog.confirm`, `dialog.alert`, `dialog.prompt`.
+- [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
+- [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
+- [ErrorMessage](https://ui.frappe.io/docs/components/errormessage): inline error display.
+- [FileUploader](https://ui.frappe.io/docs/components/fileuploader): Frappe-native file upload with progress.
+- [FormControl](https://ui.frappe.io/docs/components/formcontrol): the default labeled-field wrapper; pick `type` to render text/textarea/select/checkbox/autocomplete with the shared `label`/`description`/`error`/`required` contract.
+- [ItemListRow](https://ui.frappe.io/docs/components/itemlistrow): single-row list item primitive.
+- [ListView](https://ui.frappe.io/docs/components/listview): table/grid list with selection, sorting, virtualization.
+- [MonthPicker](https://ui.frappe.io/docs/components/monthpicker): month input.
+- [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `string[]`.
+- [Password](https://ui.frappe.io/docs/components/password): masked input with show/hide.
+- [Popover](https://ui.frappe.io/docs/components/popover): anchored floating panel; `v-model:open`, `#target` + `#body` slots.
+- [Progress](https://ui.frappe.io/docs/components/progress): linear progress bar.
+- [Rating](https://ui.frappe.io/docs/components/rating): star-rating input.
+- [Select](https://ui.frappe.io/docs/components/select): fixed-options single-value select.
+- [Sidebar](https://ui.frappe.io/docs/components/sidebar): app-shell sidebar primitive.
+- [Slider](https://ui.frappe.io/docs/components/slider): numeric range input.
+- [Switch](https://ui.frappe.io/docs/components/switch): boolean toggle for settings.
+- [Tabs](https://ui.frappe.io/docs/components/tabs): full content tabs and inline TabButtons.
+- [Textarea](https://ui.frappe.io/docs/components/textarea): multi-line text input.
+- [TextEditor](https://ui.frappe.io/docs/components/texteditor): TipTap-based rich editor (heavy — use only when needed).
+- [TextInput](https://ui.frappe.io/docs/components/textinput): single-line text input.
+- [TimePicker](https://ui.frappe.io/docs/components/timepicker): time input.
+- [Toast](https://ui.frappe.io/docs/components/toast): imperative notifications: `toast.success/error/info`.
+- [Tooltip](https://ui.frappe.io/docs/components/tooltip): hover hint; not for actionable content (use Popover/Dropdown).
+- [Tree](https://ui.frappe.io/docs/components/tree): hierarchical list.
+
+## Design system
+
+- [Background color tokens](https://ui.frappe.io/docs/design-system/background-color): `bg-surface-*` semantic surface tokens.
+- [Text color tokens](https://ui.frappe.io/docs/design-system/text): `text-ink-*` semantic foreground tokens.
+- [Border color tokens](https://ui.frappe.io/docs/design-system/border-color): `border-outline-*` semantic border tokens.
+- [Border radius](https://ui.frappe.io/docs/design-system/border-radius): radius scale.
+- [Drop shadow](https://ui.frappe.io/docs/design-system/drop-shadow): shadow scale.
+
+## Data fetching
+
+Recommended (v3 composables, in the `frappe-ui` exports):
+
+- `useCall` — Vue composable for any whitelisted Frappe method. Options: `url`, `method`, `params` (object or function for reactivity), `immediate`, `refetch`, `cacheKey` (IndexedDB persistence), `transform`, `beforeSubmit`, `onSuccess`, `onError`. Returns a reactive object with `data`, `error`, `loading`, `isFinished`, `promise`, `execute`/`fetch`/`reload`, `submit(params)`, `reset`, `abort`. Use `immediate: false` + `submit()` for writes. Source: https://github.com/frappe/frappe-ui/blob/main/src/data-fetching/useCall/useCall.ts.
+- `useList` — paginated list composable on top of `useCall`. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useList.
+- `useDoc` — single doctype document composable. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useDoc.
+- `useDoctype` — doctype metadata composable. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useDoctype.
+- `useNewDoc` — scaffolding for new-doc forms. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useNewDoc.
+
+Legacy (still exported for migration, not recommended for new code):
+
+- [Resource](https://ui.frappe.io/docs/data-fetching/resource): `createResource` — base data fetcher.
+- [List resource](https://ui.frappe.io/docs/data-fetching/list-resource): `createListResource` — paginated list.
+- [Document resource](https://ui.frappe.io/docs/data-fetching/document-resource): `createDocumentResource` — single doc.
+
+## Other
+
+- [Icons](https://ui.frappe.io/docs/other/icons): the lucide icon-class system; how `<span class="lucide-* size-*" aria-hidden="true" />` works.
+- [Directives](https://ui.frappe.io/docs/other/directives): Vue directives shipped with frappe-ui.
+- [Utilities](https://ui.frappe.io/docs/other/utilities): helper functions exported from the package.
+
+## Optional
+
+- [v1-release plan](https://github.com/frappe/frappe-ui/tree/main/v1-release): API-freeze plan, component specs, ADRs. Read when contributing to frappe-ui itself or making decisions about API direction.
+- [GitHub repository](https://github.com/frappe/frappe-ui): source, issues, releases.
+- [Changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md): notable changes per release.
