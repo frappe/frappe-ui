@@ -12,7 +12,7 @@ import RecipeExample from '@/components/recipes/RecipeExample.vue'
 
 <Hero class="not-prose" />
 
-<RecipeExample base="discussions">
+<RecipeExample base="discussions" eager>
 <template #desktop>
 
 <<< ../components/recipes/DiscussionsDesktop.vue
