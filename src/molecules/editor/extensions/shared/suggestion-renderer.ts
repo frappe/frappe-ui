@@ -71,12 +71,14 @@ export function createSuggestionRenderer(
   }
 
   // Attach `renderer.el` (the wrapper VueRenderer always creates) rather than
-  // `renderer.element` (its firstElementChild): reka's FocusScope-based popup has
-  // no synchronous first child, so `element` is null and nothing would mount.
-  // `.el` is an undocumented tiptap internal, so a tiptap major could break this
-  // (guarded by suggestion-renderer.test.ts).
+  // `renderer.element` (its firstElementChild): the popup renders nothing until it
+  // has items, so `element` is null at onStart and nothing would mount. `el` is a
+  // public, typed field on VueRenderer, so a tiptap release that drops it fails the
+  // build here instead of breaking silently; instanceof narrows Element ->
+  // HTMLElement. Guarded by suggestion-renderer.test.ts.
   function getWrapper(): HTMLElement | null {
-    return (renderer as unknown as { el: HTMLElement | null } | null)?.el ?? null
+    const el = renderer?.el
+    return el instanceof HTMLElement ? el : null
   }
 
   // Attach the wrapper to the body and position it. Re-callable from a later
