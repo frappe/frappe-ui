@@ -45,6 +45,13 @@
     required: false,
     type: 'number',
     default: '6'
+  },
+  {
+    name: 'duration',
+    description: 'Duration in ms of the fill animation when `value` changes. Ignored when `intervals` is true.',
+    required: false,
+    type: 'number',
+    default: '700'
   }
 ]
 
