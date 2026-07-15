@@ -99,8 +99,14 @@ const iframeLoading = computed(() => (props.eager ? 'eager' : 'lazy'))
 let observer: IntersectionObserver | undefined
 onMounted(() => {
   mounted.value = true
-  // Eager recipe already booted its iframe in SSR — no observer needed.
-  if (visible.value) return
+  // Eager recipe already booted its iframe in SSR — no observer needed. Warm
+  // the shown variant's component chunk from here so it downloads alongside the
+  // iframe's app boot; being same-origin, the iframe reuses it from cache
+  // instead of waiting on its own dynamic import.
+  if (visible.value) {
+    variant.value?.preload?.()
+    return
+  }
   // Older browsers without IntersectionObserver can't lazy-boot; load eagerly
   // so the previews still appear instead of the callback throwing on mount.
   if (typeof IntersectionObserver === 'undefined') {

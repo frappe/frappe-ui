@@ -1,4 +1,8 @@
-import { defineAsyncComponent, type Component } from 'vue'
+import {
+  defineAsyncComponent,
+  type AsyncComponentLoader,
+  type Component,
+} from 'vue'
 import { recipeSlugs } from './slugs'
 
 export type Platform = 'desktop' | 'mobile'
@@ -10,6 +14,13 @@ export interface RecipeVariant {
   /** Render the demo client-side only (e.g. the tiptap editor is not SSR-safe). */
   csr?: boolean
   component: Component
+  /**
+   * Kick off the dynamic import behind `component` without mounting it. The
+   * gallery calls this for the eager (above-the-fold) recipe so its chunk is
+   * warm in the shared same-origin HTTP cache by the time the demo iframe's
+   * own app boots and imports it — turning that import into a cache hit.
+   */
+  preload: AsyncComponentLoader
 }
 
 /**
@@ -27,19 +38,33 @@ export interface RecipeGroup {
   mobile?: RecipeVariant
 }
 
+// Take the raw dynamic-import loader (not a pre-wrapped component) so we can
+// both render it lazily and expose it as `preload` for cache-warming.
 function desktop(
   slug: string,
-  component: Component,
+  loader: AsyncComponentLoader,
   csr = false,
 ): RecipeVariant {
-  return { slug, platform: 'desktop', component, csr }
+  return {
+    slug,
+    platform: 'desktop',
+    component: defineAsyncComponent(loader),
+    preload: loader,
+    csr,
+  }
 }
 function mobile(
   slug: string,
-  component: Component,
+  loader: AsyncComponentLoader,
   csr = false,
 ): RecipeVariant {
-  return { slug, platform: 'mobile', component, csr }
+  return {
+    slug,
+    platform: 'mobile',
+    component: defineAsyncComponent(loader),
+    preload: loader,
+    csr,
+  }
 }
 
 // Full-page, copy-pastable screens. Each variant is one self-contained SFC in
@@ -62,11 +87,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'discussions-desktop',
-      defineAsyncComponent(() => import('./DiscussionsDesktop.vue')),
+      () => import('./DiscussionsDesktop.vue'),
     ),
     mobile: mobile(
       'discussions-mobile',
-      defineAsyncComponent(() => import('./DiscussionsMobile.vue')),
+      () => import('./DiscussionsMobile.vue'),
     ),
   },
   {
@@ -83,12 +108,12 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'compose-desktop',
-      defineAsyncComponent(() => import('./ComposeDesktop.vue')),
+      () => import('./ComposeDesktop.vue'),
       true,
     ),
     mobile: mobile(
       'compose-mobile',
-      defineAsyncComponent(() => import('./ComposeMobile.vue')),
+      () => import('./ComposeMobile.vue'),
       true,
     ),
   },
@@ -105,11 +130,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'deals-desktop',
-      defineAsyncComponent(() => import('./DealsDesktop.vue')),
+      () => import('./DealsDesktop.vue'),
     ),
     mobile: mobile(
       'deals-mobile',
-      defineAsyncComponent(() => import('./DealsMobile.vue')),
+      () => import('./DealsMobile.vue'),
     ),
   },
   {
@@ -125,11 +150,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'tickets-desktop',
-      defineAsyncComponent(() => import('./TicketsDesktop.vue')),
+      () => import('./TicketsDesktop.vue'),
     ),
     mobile: mobile(
       'tickets-mobile',
-      defineAsyncComponent(() => import('./TicketsMobile.vue')),
+      () => import('./TicketsMobile.vue'),
     ),
   },
   {
@@ -147,11 +172,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'mail-desktop',
-      defineAsyncComponent(() => import('./MailDesktop.vue')),
+      () => import('./MailDesktop.vue'),
     ),
     mobile: mobile(
       'mail-mobile',
-      defineAsyncComponent(() => import('./MailMobile.vue')),
+      () => import('./MailMobile.vue'),
     ),
   },
   {
@@ -169,11 +194,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'files-desktop',
-      defineAsyncComponent(() => import('./FilesDesktop.vue')),
+      () => import('./FilesDesktop.vue'),
     ),
     mobile: mobile(
       'files-mobile',
-      defineAsyncComponent(() => import('./FilesMobile.vue')),
+      () => import('./FilesMobile.vue'),
     ),
   },
   {
@@ -191,11 +216,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'tasks-desktop',
-      defineAsyncComponent(() => import('./TasksDesktop.vue')),
+      () => import('./TasksDesktop.vue'),
     ),
     mobile: mobile(
       'tasks-mobile',
-      defineAsyncComponent(() => import('./TasksMobile.vue')),
+      () => import('./TasksMobile.vue'),
     ),
   },
   {
@@ -212,11 +237,11 @@ export const recipeGroups: RecipeGroup[] = [
     ],
     desktop: desktop(
       'accounting-desktop',
-      defineAsyncComponent(() => import('./AccountingDesktop.vue')),
+      () => import('./AccountingDesktop.vue'),
     ),
     mobile: mobile(
       'accounting-mobile',
-      defineAsyncComponent(() => import('./AccountingMobile.vue')),
+      () => import('./AccountingMobile.vue'),
     ),
   },
 ]
