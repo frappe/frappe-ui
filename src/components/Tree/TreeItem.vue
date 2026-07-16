@@ -18,8 +18,12 @@
   >
     <div
       data-slot="row"
-      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-md px-1.5 hover:bg-surface-gray-2"
-      :class="ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : ''"
+      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-md px-1.5"
+      :class="[
+        ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
+        // When the row is fully overridden via #item, the consumer owns its hover/selected surface
+        $slots.item ? '' : 'hover:bg-surface-gray-2',
+      ]"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
       @dragstart="ctx.onDragStart($event, node, parent)"
