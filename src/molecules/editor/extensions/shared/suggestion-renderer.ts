@@ -113,7 +113,10 @@ export function createSuggestionRenderer(
       if (!isActive || !renderer) return
       const token = ++renderToken
 
-      renderer.updateProps(props)
+      // Skip the plugin's transient `loading` dispatch (empty items) so the
+      // popover doesn't unmount/remount on every keystroke.
+      const loading = (props as SuggestionProps & { loading?: boolean }).loading
+      if (!loading) renderer.updateProps(props)
 
       if (!props.clientRect) return
       if (token !== renderToken) return

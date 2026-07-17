@@ -118,6 +118,20 @@ describe('createSuggestionRenderer', () => {
     expect(document.body.contains(renderer.el)).toBe(true)
   })
 
+  it('keeps previous items during a transient loading update', () => {
+    const api = createSuggestionRenderer(FakeComponent)
+    api.onStart(makeProps({ items: [{ label: 'a' }] } as never))
+    const renderer = instances[0]
+
+    api.onUpdate(makeProps({ items: [], loading: true } as never))
+
+    expect(renderer.props.items).toEqual([{ label: 'a' }])
+
+    api.onUpdate(makeProps({ items: [{ label: 'b' }], loading: false } as never))
+
+    expect(renderer.props.items).toEqual([{ label: 'b' }])
+  })
+
   it('returns false on Escape so the suggestion plugin runs onExit', () => {
     const api = createSuggestionRenderer(FakeComponent)
     api.onStart(makeProps())
