@@ -1,35 +1,34 @@
 <template>
-  <div
-    v-if="items.length"
-    ref="container"
-    class="relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg bg-surface-base p-1 text-base shadow-lg"
-    :class="containerClass"
-  >
-    <button
-      v-for="(item, index) in items"
-      :key="index"
-      :ref="
-        (el) => {
-          if (el) itemRefs[index] = el as HTMLButtonElement
-        }
-      "
-      :class="[
-        'flex w-full items-center whitespace-nowrap rounded-md px-2 py-1.5 text-sm text-ink-gray-9',
-        index === selectedIndex ? 'bg-surface-gray-2' : '',
-        itemClass,
-      ]"
-      @click="selectItem(index)"
-      @mouseover="selectedIndex = index"
-    >
-      <slot :item="item" :index="index">
-        <span>{{ item.display || item.title || item.name }}</span>
-      </slot>
-    </button>
+  <div>
     <div
-      v-if="!items.length && showNoResults"
-      class="px-3 py-1.5 text-sm text-ink-gray-5"
+      v-if="items.length || showNoResults"
+      ref="container"
+      class="relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg bg-surface-base p-1 text-base shadow-lg"
+      :class="containerClass"
     >
-      No results
+      <button
+        v-for="(item, index) in items"
+        :key="index"
+        :ref="
+          (el) => {
+            if (el) itemRefs[index] = el as HTMLButtonElement
+          }
+        "
+        :class="[
+          'flex w-full items-center whitespace-nowrap rounded-md px-2 py-1.5 text-sm text-ink-gray-9',
+          index === selectedIndex ? 'bg-surface-gray-2' : '',
+          itemClass,
+        ]"
+        @click="selectItem(index)"
+        @mouseover="selectedIndex = index"
+      >
+        <slot :item="item" :index="index">
+          <span>{{ item.display || item.title || item.name }}</span>
+        </slot>
+      </button>
+      <div v-if="!items.length" class="px-3 py-1.5 text-sm text-ink-gray-5">
+        No results
+      </div>
     </div>
   </div>
 </template>
