@@ -1,49 +1,51 @@
 <template>
-  <EditorPopover
-    v-if="items.length || showNoResults"
-    dialog-label="Suggestions"
-    :autofocus="false"
-    :trapped="false"
-    :loop="false"
-    :content-class="[
-      'relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg p-1 text-base',
-      containerClass,
-    ]"
-  >
-    <template v-if="items.length">
-      <template
-        v-for="(group, groupIndex) in groupedItems"
-        :key="group.label ?? groupIndex"
-      >
-        <!-- Same idiom as the Dropdown group label (`dropdownClasses.groupLabel`). -->
-        <div
-          v-if="group.label"
-          class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
+  <div>
+    <EditorPopover
+      v-if="items.length || showNoResults"
+      dialog-label="Suggestions"
+      :autofocus="false"
+      :trapped="false"
+      :loop="false"
+      :content-class="[
+        'relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg p-1 text-base',
+        containerClass,
+      ]"
+    >
+      <template v-if="items.length">
+        <template
+          v-for="(group, groupIndex) in groupedItems"
+          :key="group.label ?? groupIndex"
         >
-          {{ group.label }}
-        </div>
-        <SuggestionListItem
-          v-for="{ item, index } in group.entries"
-          :key="index"
-          :ref="(el) => setItemRef(el, index)"
-          :item="item"
-          :selected="index === selectedIndex"
-          :item-class="itemClass"
-          @select="selectItem(index)"
-          @hover="selectedIndex = index"
-        >
-          <template #default="{ item: slotItem }">
-            <slot :item="slotItem" :index="index">
-              <span>{{
-                slotItem.display || slotItem.title || slotItem.name
-              }}</span>
-            </slot>
-          </template>
-        </SuggestionListItem>
+          <!-- Same idiom as the Dropdown group label (`dropdownClasses.groupLabel`). -->
+          <div
+            v-if="group.label"
+            class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
+          >
+            {{ group.label }}
+          </div>
+          <SuggestionListItem
+            v-for="{ item, index } in group.entries"
+            :key="index"
+            :ref="(el) => setItemRef(el, index)"
+            :item="item"
+            :selected="index === selectedIndex"
+            :item-class="itemClass"
+            @select="selectItem(index)"
+            @hover="selectedIndex = index"
+          >
+            <template #default="{ item: slotItem }">
+              <slot :item="slotItem" :index="index">
+                <span>{{
+                  slotItem.display || slotItem.title || slotItem.name
+                }}</span>
+              </slot>
+            </template>
+          </SuggestionListItem>
+        </template>
       </template>
-    </template>
-    <div v-else class="px-3 py-1.5 text-sm text-ink-gray-5">No results</div>
-  </EditorPopover>
+      <div v-else class="px-3 py-1.5 text-sm text-ink-gray-5">No results</div>
+    </EditorPopover>
+  </div>
 </template>
 
 <script setup lang="ts">
