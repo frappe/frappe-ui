@@ -215,7 +215,11 @@ function setVideoOptions(options: {
 </script>
 
 <template>
-  <NodeViewWrapper as="div" :class="wrapperClasses(node.attrs.float)">
+  <NodeViewWrapper
+    as="div"
+    data-drag-handle
+    :class="wrapperClasses(node.attrs.float)"
+  >
     <div
       ref="containerRef"
       class="group relative isolate overflow-hidden not-prose rounded"
