@@ -159,7 +159,7 @@ export function getMenuBackgroundColor(item: { theme?: MenuTheme }) {
   }
 
   return [
-    'focus:bg-surface-gray-2 data-[highlighted]:bg-surface-alpha-gray-2 data-[state=open]:bg-surface-gray-2',
+    'focus:bg-surface-alpha-gray-2 data-[highlighted]:bg-surface-alpha-gray-2 data-[state=open]:bg-surface-alpha-gray-2',
     'data-[state=checked]:bg-surface-gray-3',
     'data-[highlighted]:data-[state=checked]:bg-surface-gray-4',
   ].join(' ')
