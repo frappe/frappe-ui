@@ -30,27 +30,38 @@ const contentStyle = computed(() =>
 <template>
   <FrappeUIProvider>
     <MobileNavSheet />
-    <div class="grid lg:grid-cols-[220px_1fr]">
-      <Sidebar class="hidden lg:flex" />
+    <!-- `isolate` keeps the navbar's z-index inside the page's own stacking
+         context, so dialogs portalled to <body> still render over it. -->
+    <div class="isolate">
+      <!-- Full-width site chrome. Consumers override the whole slot, or pass
+           extras to the default Navbar's #actions/#brand/#search slots. -->
+      <slot name="navbar">
+        <Navbar :is-docs="true" />
+      </slot>
 
-      <div class="min-w-0 w-full isolate">
-        <!-- Default site chrome. Consumers override the whole slot, or pass
-             extras to the default Navbar's #actions/#brand/#search slots. -->
-        <slot name="navbar">
-          <Navbar :is-docs="true" />
-        </slot>
+      <div class="grid lg:grid-cols-[220px_1fr]">
+        <Sidebar class="hidden lg:flex" />
 
-        <div class="p-4 sm:p-5 lg:p-10 flex gap-5 min-w-0">
-          <main class="mx-auto lg:max-w-[740px] flex-1 min-w-0">
-            <Content
-              as="article"
-              class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none"
-              :class="[frontmatter.pageClass, { 'align-tables': tableFirstCol }]"
-              :style="contentStyle"
-            />
-            <PrevNextBtns />
-          </main>
-          <OnThisPage v-if="frontmatter.outline !== false" />
+        <div class="min-w-0 w-full">
+          <!-- Capped and centered: without it the prose + outline pair drifts
+               left of the free space on wide screens. -->
+          <div
+            class="p-4 sm:p-5 lg:p-10 flex gap-5 min-w-0 mx-auto w-full max-w-[1080px]"
+          >
+            <main class="mx-auto lg:max-w-[740px] flex-1 min-w-0">
+              <Content
+                as="article"
+                class="prose prose-v3 prose-p:mb-4 text-[15px] !max-w-none [&_h1]:mt-0 [&>*:first-child]:mt-0"
+                :class="[
+                  frontmatter.pageClass,
+                  { 'align-tables': tableFirstCol },
+                ]"
+                :style="contentStyle"
+              />
+              <PrevNextBtns />
+            </main>
+            <OnThisPage v-if="frontmatter.outline !== false" />
+          </div>
         </div>
       </div>
     </div>
