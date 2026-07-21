@@ -34,7 +34,13 @@
             :label="section.label"
             :items="section.items"
             :collapsible="section.collapsible"
-          />
+          >
+            <!-- Forward the per-item slot so `:sections` consumers can customise each
+                 row (e.g. a trailing actions menu), matching SidebarSection's own slot. -->
+            <template v-if="slots['sidebar-item']" #sidebar-item="itemProps">
+              <slot name="sidebar-item" v-bind="itemProps" />
+            </template>
+          </SidebarSection>
         </div>
 
         <div class="mt-auto">
