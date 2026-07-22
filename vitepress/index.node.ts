@@ -63,6 +63,10 @@ export interface DefineDocsConfigOptions {
 // CodeMirror, socket.io): pre-bundling those would move their cost onto every
 // cold start to benefit three pages. They stay page-local — a playground is
 // imported only by the page that renders it (see `playgroundDir`).
+//
+// This list is hand-maintained and will drift. The symptom of a stale entry is
+// `docs:dev` printing "optimized dependencies changed. reloading" and doing a
+// full reload on first load; the line above it names the dep to add here.
 const OPTIMIZE_DEPS_INCLUDE = [
   'vue-router',
   '@vueuse/core',
