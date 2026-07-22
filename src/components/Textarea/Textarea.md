@@ -4,7 +4,7 @@ A multi-line input for entering longer text. Supports clear editing and flexible
 
 ## Playground
 
-<ClientOnly><TextareaBuilder /></ClientOnly>
+<ComponentPlayground name="Textarea" />
 
 <ComponentPreview name="Textarea-Default" layout="stacked" />
 

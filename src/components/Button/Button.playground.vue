@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Save' },
@@ -73,16 +73,14 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode">
     <template #preview="{ values }">
       <Button
         :theme="values.theme"
         :variant="values.variant"
         :size="values.size"
         :label="values.label"
-        :icon-left="
-          !values.icon && values.iconLeft ? 'lucide-plus' : undefined
-        "
+        :icon-left="!values.icon && values.iconLeft ? 'lucide-plus' : undefined"
         :icon="values.icon ? 'lucide-plus' : undefined"
         :icon-right="
           !values.icon && values.iconRight ? 'lucide-chevron-right' : undefined
@@ -91,5 +89,5 @@ function buildCode(v: Record<string, any>) {
         :disabled="values.disabled"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

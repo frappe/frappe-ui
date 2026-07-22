@@ -4,7 +4,7 @@ Displays a clear message to indicate errors or issues. Helps users understand pr
 
 ## Playground
 
-<ClientOnly><ErrorMessageBuilder /></ClientOnly>
+<ComponentPlayground name="ErrorMessage" />
 
 ## String Message
 <ComponentPreview name="ErrorMessage-Examples" />

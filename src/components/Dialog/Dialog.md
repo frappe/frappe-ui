@@ -4,7 +4,7 @@ A flexible overlay for showing messages, forms, or actions. Keeps focus on conte
 
 ## Playground
 
-<ClientOnly><DialogBuilder /></ClientOnly>
+<ComponentPlayground name="Dialog" />
 
 ## Share
 

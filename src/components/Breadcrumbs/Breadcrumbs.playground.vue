@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Breadcrumbs } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const allItems = [
   { label: 'Workspace' },
@@ -32,17 +32,15 @@ function itemsFor(count: number) {
 function buildCode(v: Record<string, any>) {
   const count = Number(v.count)
   const items = itemsFor(count)
-  const lines = items
-    .map((i) => `    { label: '${i.label}' },`)
-    .join('\n')
+  const lines = items.map((i) => `    { label: '${i.label}' },`).join('\n')
   return `<Breadcrumbs :items="[\n${lines}\n  ]" />`
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="80px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="80px">
     <template #preview="{ values }">
       <Breadcrumbs :items="itemsFor(Number(values.count))" />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

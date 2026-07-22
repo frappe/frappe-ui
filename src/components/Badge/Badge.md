@@ -4,7 +4,7 @@ A small label used to highlight status, counts, or metadata associated with an e
 
 ## Playground
 
-<ClientOnly><BadgeBuilder /></ClientOnly>
+<ComponentPlayground name="Badge" />
 
 ## Event status
 

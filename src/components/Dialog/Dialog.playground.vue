@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Dialog, Button } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const open = ref(false)
 
@@ -10,7 +10,8 @@ const knobs: Knob[] = [
   {
     name: 'message',
     type: 'text',
-    default: 'This will permanently remove the project. This action cannot be undone.',
+    default:
+      'This will permanently remove the project. This action cannot be undone.',
     width: '22rem',
   },
   {
@@ -67,7 +68,7 @@ function actionsFor(enabled: boolean) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="160px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="160px">
     <template #preview="{ values }">
       <Button label="Open dialog" @click="open = true" />
       <Dialog
@@ -76,11 +77,13 @@ function actionsFor(enabled: boolean) {
         :message="values.message"
         :size="values.size"
         :position="values.position"
-        :icon="values.icon ? { name: 'lucide-trash-2', theme: 'red' } : undefined"
+        :icon="
+          values.icon ? { name: 'lucide-trash-2', theme: 'red' } : undefined
+        "
         :actions="actionsFor(values.actions)"
         :dismissible="values.dismissible"
         :show-close-button="values.showCloseButton"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

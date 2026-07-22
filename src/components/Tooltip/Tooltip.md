@@ -4,7 +4,7 @@ A popup that displays information related to an element when the element receive
 
 ## Playground
 
-<ClientOnly><TooltipBuilder /></ClientOnly>
+<ComponentPlayground name="Tooltip" />
 
 ## Default
 <ComponentPreview name="Tooltip-Examples" />

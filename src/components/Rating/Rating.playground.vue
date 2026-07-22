@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Rating } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const model = ref(3)
 
@@ -43,7 +43,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="100px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="100px">
     <template #preview="{ values }">
       <Rating
         v-model="model"
@@ -53,5 +53,5 @@ function buildCode(v: Record<string, any>) {
         :readonly="values.readonly"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

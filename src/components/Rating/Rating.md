@@ -4,7 +4,7 @@ Lets users rate items using stars in a simple, interactive way. Provides immedia
 
 ## Playground
 
-<ClientOnly><RatingBuilder /></ClientOnly>
+<ComponentPlayground name="Rating" />
 
 <ComponentPreview name="Rating-Default" layout="stacked" />
 

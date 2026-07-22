@@ -5,7 +5,7 @@ model and provides built-in Clear All / Select All footer controls.
 
 ## Playground
 
-<ClientOnly><MultiSelectBuilder /></ClientOnly>
+<ComponentPlayground name="MultiSelect" />
 
 ## Default
 

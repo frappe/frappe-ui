@@ -12,7 +12,10 @@ import preventCircularChunks from './plugins/preventCircularChunks.ts'
 import type { SidebarSection } from './components/Docs/sidebarList.ts'
 
 // frappe-ui package root — this file lives at <root>/vitepress/index.node.ts.
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const packageRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+)
 
 type HeadConfig = NonNullable<UserConfig['head']>[number]
 
@@ -38,7 +41,7 @@ export interface DefineDocsConfigOptions {
   sidebar: SidebarSection[]
   // Merged with generated OG/Twitter defaults.
   head?: HeadConfig[]
-  // Absolute source roots for component story/types snippet resolution.
+  // Absolute source roots for component story/types/playground resolution.
   sourceRoots?: string[]
   // Opt-in: generate @include proxy pages for colocated component docs.
   // `true` uses rootDir defaults; pass options to customize. Off by default
@@ -58,8 +61,8 @@ export interface DefineDocsConfigOptions {
 //
 // Deliberately *excludes* the heavy, page-specific deps (echarts, TipTap,
 // CodeMirror, socket.io): pre-bundling those would move their cost onto every
-// cold start to benefit three pages. They stay lazy — see the deep-import
-// convention in docs/components/builders.
+// cold start to benefit three pages. They stay page-local — a playground is
+// imported only by the page that renders it (see `playgroundDir`).
 const OPTIMIZE_DEPS_INCLUDE = [
   'vue-router',
   '@vueuse/core',
@@ -190,7 +193,10 @@ export function defineDocsConfig(
           // specifier to the browser barrel — never the Node config entry this
           // file lives in. This sidesteps SSR export-condition ambiguity: the
           // `node` condition only ever serves VitePress' Node config loader.
-          'frappe-ui/vitepress': path.resolve(packageRoot, 'vitepress/index.ts'),
+          'frappe-ui/vitepress': path.resolve(
+            packageRoot,
+            'vitepress/index.ts',
+          ),
           ...alias,
         },
       },

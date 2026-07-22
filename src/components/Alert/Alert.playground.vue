@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Alert } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'title', type: 'text', default: 'Heads up', width: '14rem' },
@@ -45,7 +45,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <div class="w-full max-w-md">
         <Alert
@@ -57,5 +57,5 @@ function buildCode(v: Record<string, any>) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

@@ -9,7 +9,7 @@ A radio-group based tab control for switching between compact views.
 
 ## Playground
 
-<ClientOnly><TabButtonsBuilder /></ClientOnly>
+<ComponentPlayground name="TabButtons" />
 
 ## Variants
 

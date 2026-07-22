@@ -5,7 +5,7 @@ interface where a single choice is required.
 
 ## Playground
 
-<ClientOnly><SelectBuilder /></ClientOnly>
+<ComponentPlayground name="Select" />
 
 ## Example
 <ComponentPreview name="Select-Example" />

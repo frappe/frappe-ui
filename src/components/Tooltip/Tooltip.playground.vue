@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Tooltip, Button } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'text', type: 'text', default: 'Save changes', width: '16rem' },
@@ -36,7 +36,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="160px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="160px">
     <template #preview="{ values }">
       <Tooltip
         :text="values.text"
@@ -47,5 +47,5 @@ function buildCode(v: Record<string, any>) {
         <Button label="Hover me" />
       </Tooltip>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

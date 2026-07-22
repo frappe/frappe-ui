@@ -13,9 +13,10 @@ import {
 } from '@vue/compiler-dom'
 
 export interface ComponentTransformerOptions {
-  // Absolute source root dirs, each holding `<Component>/stories/*.vue` and
-  // `<Component>/types.ts`. When omitted, defaults resolve relative to each
-  // markdown file (backward compatible with the in-repo docs layout).
+  // Absolute source root dirs, each holding `<Component>/stories/*.vue`,
+  // `<Component>/types.ts` and `<Component>/<Component>.playground.vue`. When
+  // omitted, defaults resolve relative to each markdown file (backward
+  // compatible with the in-repo docs layout).
   sourceRoots?: string[]
 }
 
@@ -220,6 +221,38 @@ function transformPropsTable(
   state.tokens.splice(tokenIdx + 1, 0, code, close)
 }
 
+// `<ComponentPlayground name="Button" />` renders the interactive knobs demo
+// that lives at `<root>/Button/Button.playground.vue`. It's rewritten into a
+// static import on the page rather than resolved through a globally
+// registered component: an async global pops in a beat after the page paints,
+// and a static global barrel would drag every component's playground (and with
+// them CodeMirror, the charts and the editor) onto every page.
+function transformPlayground(
+  state: StateCore,
+  tokenIdx: number,
+  tag: ParsedTag,
+  roots: string[],
+  mdPath: string,
+): string | null {
+  const name = tag.attrs.name
+  if (!name) return null
+
+  const importName = `${name}Playground`
+  const componentPath = resolveSourcePath(
+    roots,
+    `${name}/${name}.playground.vue`,
+  )
+  if (!existsSync(componentPath)) {
+    console.warn(
+      `[componentTransformer] <ComponentPlayground name="${name}"> in ${mdPath} has no playground at ${componentPath} — skipping.`,
+    )
+    return null
+  }
+
+  state.tokens[tokenIdx].content = `<${importName} />`
+  return `import ${importName} from '${componentPath}'`
+}
+
 function install(md: MarkdownRenderer, options: ComponentTransformerOptions) {
   md.core.ruler.after('inline', 'component-preview', (state) => {
     const env = state.env as MarkdownEnv
@@ -247,6 +280,16 @@ function install(md: MarkdownRenderer, options: ComponentTransformerOptions) {
             continue
           }
           const importStmt = transformPreview(state, i, tag, roots)
+          if (importStmt) imports.push(importStmt)
+        }
+      } else if (token.content.includes('<ComponentPlayground')) {
+        const tag = parseSingleTag(token.content, 'ComponentPlayground')
+        if (tag) {
+          if (!roots.length) {
+            warnMissingRoots('ComponentPlayground', mdPath)
+            continue
+          }
+          const importStmt = transformPlayground(state, i, tag, roots, mdPath)
           if (importStmt) imports.push(importStmt)
         }
       } else if (token.content.includes('<PropsTable')) {

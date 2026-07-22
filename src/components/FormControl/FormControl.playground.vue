@@ -1,20 +1,32 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Select } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import { FormControl } from 'frappe-ui'
+import type { Knob } from 'frappe-ui/vitepress'
 
-const model = ref<string>('')
+const model = ref<any>('')
 
-const options = [
+const selectOptions = [
   { label: 'Backlog', value: 'backlog' },
   { label: 'In progress', value: 'in_progress' },
-  { label: 'Review', value: 'review' },
   { label: 'Done', value: 'done' },
 ]
 
 const knobs: Knob[] = [
+  {
+    name: 'type',
+    type: 'tabs',
+    default: 'text',
+    options: [
+      { label: 'text', value: 'text' },
+      { label: 'textarea', value: 'textarea' },
+      { label: 'select', value: 'select' },
+      { label: 'checkbox', value: 'checkbox' },
+      { label: 'combobox', value: 'combobox' },
+      { label: 'date', value: 'date' },
+    ],
+  },
   { name: 'label', type: 'text', default: 'Status', width: '12rem' },
-  { name: 'placeholder', type: 'text', default: 'Select status', width: '14rem' },
+  { name: 'description', type: 'text', default: '', width: '20rem' },
   {
     name: 'size',
     type: 'tabs',
@@ -22,8 +34,6 @@ const knobs: Knob[] = [
     options: [
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
-      { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   {
@@ -33,42 +43,46 @@ const knobs: Knob[] = [
     options: [
       { label: 'subtle', value: 'subtle' },
       { label: 'outline', value: 'outline' },
-      { label: 'ghost', value: 'ghost' },
     ],
   },
   { name: 'required', type: 'switch', default: false },
-  { name: 'disabled', type: 'switch', default: false },
 ]
 
 function buildCode(v: Record<string, any>) {
   const attrs = []
+  if (v.type !== 'text') attrs.push(`type="${v.type}"`)
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
-  if (v.disabled) attrs.push('disabled')
-  attrs.push(':options="options"')
+  if (v.type === 'select' || v.type === 'combobox') {
+    attrs.push(':options="options"')
+  }
   attrs.push('v-model="value"')
-  return ['<Select', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return ['<FormControl', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+}
+
+function optionsFor(type: string) {
+  return type === 'select' || type === 'combobox' ? selectOptions : undefined
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="140px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="160px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
-        <Select
+        <FormControl
           v-model="model"
+          :type="values.type"
           :label="values.label || undefined"
-          :placeholder="values.placeholder || undefined"
+          :description="values.description || undefined"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"
-          :disabled="values.disabled"
-          :options="options"
+          :options="optionsFor(values.type)"
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

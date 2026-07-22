@@ -4,7 +4,7 @@ A toggle input for turning options on or off. Clearly indicates state changes an
 
 ## Playground
 
-<ClientOnly><SwitchBuilder /></ClientOnly>
+<ComponentPlayground name="Switch" />
 
 <ComponentPreview name="Switch-Default" layout="stacked" />
 

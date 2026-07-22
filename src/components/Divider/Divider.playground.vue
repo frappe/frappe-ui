@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Divider } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   {
@@ -27,7 +27,8 @@ const knobs: Knob[] = [
 
 function buildCode(v: Record<string, any>) {
   const attrs: string[] = []
-  if (v.orientation !== 'horizontal') attrs.push(`orientation="${v.orientation}"`)
+  if (v.orientation !== 'horizontal')
+    attrs.push(`orientation="${v.orientation}"`)
   if (v.position !== 'center') attrs.push(`position="${v.position}"`)
   if (v.withAction) attrs.push(`:action="{ label: 'Add row' }"`)
   if (!attrs.length) return '<Divider />'
@@ -36,7 +37,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="140px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="140px">
     <template #preview="{ values }">
       <div
         :class="
@@ -62,5 +63,5 @@ function buildCode(v: Record<string, any>) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

@@ -4,7 +4,7 @@ Separates content visually, either horizontally or vertically. It can also host 
 
 ## Playground
 
-<ClientOnly><DividerBuilder /></ClientOnly>
+<ComponentPlayground name="Divider" />
 
 ## Examples
 

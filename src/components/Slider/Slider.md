@@ -4,7 +4,7 @@ A slider input for selecting a single value or a range of values within a minimu
 
 ## Playground
 
-<ClientOnly><SliderBuilder /></ClientOnly>
+<ComponentPlayground name="Slider" />
 
 <ComponentPreview name="Slider-Default" layout="stacked" />
 

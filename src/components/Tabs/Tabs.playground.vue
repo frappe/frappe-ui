@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Tabs } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const tabs = [
   { label: 'Overview', icon: 'lucide-layout-dashboard' },
@@ -41,7 +41,7 @@ function tabsFor(icons: boolean) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="220px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="220px">
     <template #preview="{ values }">
       <div
         class="w-full max-w-md overflow-hidden rounded-lg border border-outline-gray-1"
@@ -56,5 +56,5 @@ function tabsFor(icons: boolean) {
         </Tabs>
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

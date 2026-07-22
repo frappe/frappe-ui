@@ -13,7 +13,7 @@ import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
 
 ## Playground
 
-<ClientOnly><CodeEditorBuilder /></ClientOnly>
+<ComponentPlayground name="CodeEditor" />
 
 <ComponentPreview name="CodeEditor-Default" layout="stacked" class="mt-4" />
 

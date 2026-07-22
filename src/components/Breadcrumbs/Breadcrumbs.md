@@ -4,7 +4,7 @@ A navigation aid that shows the user’s current location within a hierarchy and
 
 ## Playground
 
-<ClientOnly><BreadcrumbsBuilder /></ClientOnly>
+<ComponentPlayground name="Breadcrumbs" />
 
 ## Example
 

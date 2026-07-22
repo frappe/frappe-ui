@@ -5,7 +5,7 @@ toggle rows, disabled items, custom triggers, and a built-in kebab pattern.
 
 ## Playground
 
-<ClientOnly><DropdownBuilder /></ClientOnly>
+<ComponentPlayground name="Dropdown" />
 
 ## Simple
 A plain actions menu with icons. The default trigger is an auto-generated `<Button>` — pass `button: { label }` to override its text.

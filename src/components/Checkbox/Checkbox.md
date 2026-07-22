@@ -4,7 +4,7 @@ Allows users to select or deselect an option, commonly used in forms and setting
 
 ## Playground
 
-<ClientOnly><CheckboxBuilder /></ClientOnly>
+<ComponentPlayground name="Checkbox" />
 
 <ComponentPreview name="Checkbox-Default" layout="stacked" />
 
