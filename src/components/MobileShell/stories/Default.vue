@@ -18,22 +18,14 @@ const tab = ref('home')
     preview box instead of covering the page. (A story-only concern.)
   -->
   <div
-    class="mx-auto h-[600px] w-[360px] transform-gpu overflow-hidden rounded-xl border bg-surface-white"
+    class="mx-auto h-[600px] w-[360px] transform-gpu overflow-hidden border bg-surface-white"
   >
     <MobileShell>
       <PageHeaderMobile>
         <span class="text-base font-semibold text-ink-gray-8">Home</span>
       </PageHeaderMobile>
 
-      <div class="p-4">
-        <p
-          v-for="n in 30"
-          :key="n"
-          class="mb-3 text-base text-ink-gray-7"
-        >
-          Row {{ n }} — scroll; the header and tab bar stay fixed.
-        </p>
-      </div>
+      <div class="p-4">Lorem ipsum dolor</div>
 
       <template #nav>
         <MobileNav>

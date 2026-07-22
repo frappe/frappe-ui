@@ -9,6 +9,7 @@ import {
   SidebarLabel,
   PageHeader,
   Button,
+  SidebarHeader,
 } from 'frappe-ui'
 
 const community = ref('design')
@@ -33,10 +34,12 @@ const spaces = [
 
 <template>
   <!-- Bounded height so the shell's `h-full` has something to fill in the preview. -->
-  <div class="h-[560px] overflow-hidden rounded-md border bg-surface-white">
+  <div
+    class="h-[560px] overflow-hidden rounded-md border w-full bg-surface-white"
+  >
     <DesktopShell>
       <template #rail>
-        <Rail>
+        <Rail class="border-r">
           <RailItem
             label="Home"
             variant="ghost"
@@ -52,7 +55,9 @@ const spaces = [
               :active="community === c.id"
               @click="community = c.id"
             >
-              <span class="text-2xs-medium uppercase text-ink-gray-5">{{ c.initials }}</span>
+              <span class="text-2xs-medium uppercase text-ink-gray-5">{{
+                c.initials
+              }}</span>
             </RailItem>
           </div>
           <RailItem label="Search" variant="ghost" icon="lucide-search" />
@@ -60,9 +65,13 @@ const spaces = [
       </template>
 
       <template #sidebar>
-        <Sidebar disable-collapse width="14rem">
-          <div class="px-3 py-2 text-base font-medium text-ink-gray-8">Acme Design</div>
-          <div class="flex-1 overflow-y-auto px-2 pb-2">
+        <Sidebar class="border-r" disable-collapse width="14rem">
+          <SidebarHeader
+            title="Acme Design"
+            subtitle="v1.0.0-beta"
+            :menu-items="[{ label: 'Log out', icon: 'lucide-log-out' }]"
+          />
+          <div class="flex-1 overflow-y-auto space-y-0.5 px-2 pb-2">
             <SidebarLabel class="px-2">Spaces</SidebarLabel>
             <SidebarItem
               v-for="s in spaces"
@@ -70,7 +79,9 @@ const spaces = [
               :active="s === space"
               @click="space = s"
             >
-              <template #prefix><span class="lucide-hash size-4" aria-hidden="true" /></template>
+              <template #prefix
+                ><span class="lucide-hash size-4" aria-hidden="true"
+              /></template>
               {{ s }}
             </SidebarItem>
           </div>
@@ -83,15 +94,7 @@ const spaces = [
         <Button variant="subtle" icon-left="lucide-plus" label="New post" />
       </PageHeader>
 
-      <div class="p-5">
-        <p
-          v-for="n in 40"
-          :key="n"
-          class="mb-3 text-base text-ink-gray-7"
-        >
-          Row {{ n }} — scroll the content; the header stays pinned above it.
-        </p>
-      </div>
+      <div class="p-5">Lorem ipsum dolor</div>
     </DesktopShell>
   </div>
 </template>
