@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, type DefaultTheme, type UserConfig } from 'vitepress'
 import { transformerStyleToClass } from '@shikijs/transformers'
 // @ts-ignore — JS package without bundled types
-import { lucideIcons } from 'frappe-ui/vite'
+import { lucideIcons, barrelImports } from 'frappe-ui/vite'
 
 import { createComponentTransformer } from './plugins/componentTransformer.ts'
 import colocatedComponentDocs from './plugins/colocatedComponentDocs.ts'
@@ -49,6 +49,44 @@ export interface DefineDocsConfigOptions {
   // Hook for extra markdown-it plugins.
   markdownConfig?: (md: any) => void
 }
+
+// Deps every docs page pulls in through the shared theme. Vite's startup scan
+// walks raw `src/` SFCs (the `frappe-ui` alias) rather than a prebundled
+// package, so it misses these; they then surface during the browser's module
+// crawl, forcing a mid-load optimizer run plus the "optimized dependencies
+// changed. reloading" full reload.
+//
+// Deliberately *excludes* the heavy, page-specific deps (echarts, TipTap,
+// CodeMirror, socket.io): pre-bundling those would move their cost onto every
+// cold start to benefit three pages. They stay lazy — see the deep-import
+// convention in docs/components/builders.
+const OPTIMIZE_DEPS_INCLUDE = [
+  'vue-router',
+  '@vueuse/core',
+  'reka-ui',
+  '@headlessui/vue',
+  '@floating-ui/vue',
+  '@popperjs/core',
+  'tippy.js',
+  'vue-sonner',
+  'feather-icons',
+  'fuzzysort',
+  'shiki',
+  'marked',
+  'dompurify',
+  'idb-keyval',
+  // dayjs + the plugins the library registers eagerly
+  'dayjs',
+  'dayjs/plugin/relativeTime',
+  'dayjs/plugin/localizedFormat',
+  'dayjs/plugin/updateLocale',
+  'dayjs/plugin/isToday',
+  'dayjs/plugin/duration',
+  'dayjs/plugin/utc',
+  'dayjs/plugin/timezone',
+  'dayjs/plugin/advancedFormat',
+  'dayjs/plugin/customParseFormat',
+]
 
 function generatedHead(name: string, description: string): HeadConfig[] {
   return [
@@ -118,6 +156,11 @@ export function defineDocsConfig(
     },
     vite: {
       plugins: [
+        // Rewrites `import { X } from 'frappe-ui'` to a deep import of the
+        // module declaring X. Without it a single component drags the whole
+        // re-export barrel — and with it echarts, TipTap and CodeMirror —
+        // into every page's dev module graph.
+        barrelImports(),
         lucideIcons(),
         // reka-ui 2.9 + VitePress both use @vueuse 14; pin shared Vue ecosystem
         // packages into the framework chunk so CI never ships a framework→theme
@@ -131,6 +174,15 @@ export function defineDocsConfig(
             ]
           : []),
       ],
+      // The `frappe-ui` alias points at raw `src/`, so Vite's startup scan
+      // walks SFCs rather than a prebundled package and misses most of the
+      // library's third-party deps. They then surface one-by-one during the
+      // browser's module crawl, forcing a mid-load optimizer run and the
+      // "optimized dependencies changed. reloading" full reload (~40s cold).
+      // Declaring them up front collapses that into a single startup pass.
+      optimizeDeps: {
+        include: OPTIMIZE_DEPS_INCLUDE,
+      },
       resolve: {
         alias: {
           '@/components': path.resolve(rootDir, 'components'),

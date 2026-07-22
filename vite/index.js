@@ -4,12 +4,22 @@ import { frappeTypes } from './frappeTypes.js'
 import { jinjaBootData } from './jinjaBootData.js'
 import { buildConfig } from './buildConfig.js'
 import { siteBanner } from './siteBanner.js'
+import { barrelImports } from './barrelImports.js'
 
 function frappeuiPlugin(options = {}) {
   let plugins = []
   const frontendRoute = options.frontendRoute
 
   const lucideIconsOpt = options.lucideIcons ?? true
+  const barrelImportsOpt = options.barrelImports ?? true
+
+  if (barrelImportsOpt) {
+    // Keep `import { Button } from 'frappe-ui'` in source, but resolve it to
+    // the declaring module so dev never has to serve the whole barrel.
+    plugins.push(
+      barrelImports(typeof barrelImportsOpt === 'object' ? barrelImportsOpt : {}),
+    )
+  }
   const frappeProxyOpt = options.frappeProxy ?? true
   const jinjaBootDataOpt = options.jinjaBootData ?? true
   const buildConfigOpt = options.buildConfig ?? true
@@ -66,3 +76,4 @@ function frappeuiPlugin(options = {}) {
 
 export default frappeuiPlugin
 export { lucideIcons } from './lucideIcons.js'
+export { barrelImports } from './barrelImports.js'
