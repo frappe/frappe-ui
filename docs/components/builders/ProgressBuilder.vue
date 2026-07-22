@@ -19,15 +19,7 @@ const knobs: Knob[] = [
   { name: 'hint', type: 'switch', default: true },
   { name: 'intervals', type: 'switch', default: false },
   { name: 'intervalCount', type: 'text', default: '6', width: '4rem' },
-  { name: 'duration', type: 'text', default: '700', width: '5rem' },
 ]
-
-const DEFAULT_DURATION = 700
-
-function duration(v: Record<string, any>) {
-  const parsed = Number(v.duration)
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_DURATION
-}
 
 function buildCode(v: Record<string, any>) {
   const attrs: string[] = [`:value="${Number(v.value) || 0}"`]
@@ -38,9 +30,6 @@ function buildCode(v: Record<string, any>) {
     attrs.push('intervals')
     const ic = Number(v.intervalCount)
     if (ic && ic !== 6) attrs.push(`:interval-count="${ic}"`)
-  } else {
-    const d = duration(v)
-    if (d !== DEFAULT_DURATION) attrs.push(`:duration="${d}"`)
   }
   return ['<Progress', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
@@ -61,7 +50,6 @@ function buildCode(v: Record<string, any>) {
           :hint="values.hint"
           :intervals="values.intervals"
           :interval-count="Number(values.intervalCount) || 6"
-          :duration="duration(values)"
         />
       </div>
     </template>

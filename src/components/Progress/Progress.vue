@@ -30,8 +30,8 @@
       <!-- Continuous Progress Bar -->
       <div
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-10 transition-[width] ease-linear motion-reduce:transition-none"
-        :style="`width: ${props.value}%; transition-duration: ${transitionDuration}ms`"
+        class="h-full bg-surface-gray-10 transition-[width] duration-700 ease-linear motion-reduce:transition-none"
+        :style="`width: ${props.value}%`"
       ></div>
 
       <!-- Interval Progress Bar -->
@@ -55,7 +55,6 @@ import type { ProgressProps } from './types'
 
 const MIN_VALUE = 0
 const MAX_VALUE = 100
-const DEFAULT_DURATION = 700
 
 const props = withDefaults(defineProps<ProgressProps>(), {
   size: 'sm',
@@ -63,18 +62,7 @@ const props = withDefaults(defineProps<ProgressProps>(), {
   label: '',
   intervals: false,
   intervalCount: 6,
-  // must stay a literal: the props table renders this expression verbatim
-  duration: 700,
 })
-
-// An unusable duration would be dropped from the inline style, leaving the
-// fill to animate at the transition utility's own duration rather than at
-// ours. `0` is a valid opt-out, so this cannot be a truthiness check.
-const transitionDuration = computed(() =>
-  Number.isFinite(props.duration) && props.duration >= 0
-    ? props.duration
-    : DEFAULT_DURATION,
-)
 
 const indicatorContainerClasses = computed(() => {
   const heightClass = {

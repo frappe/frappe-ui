@@ -16,7 +16,4 @@ export interface ProgressProps {
 
   /** Number of intervals to display if `intervals` is true */
   intervalCount?: number
-
-  /** Duration in ms of the fill animation when `value` changes. Ignored when `intervals` is true. */
-  duration?: number
 }
