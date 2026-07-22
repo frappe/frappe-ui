@@ -5,7 +5,7 @@ import { Breadcrumbs } from 'frappe-ui'
 <template>
   <Breadcrumbs
     :items="[
-      { label: 'Home', route: { name: 'Home' } },
+      { label: 'Home', route: '/' },
       { label: 'Views', route: '/components' },
       { label: 'List', route: '/components/breadcrumbs' },
     ]"

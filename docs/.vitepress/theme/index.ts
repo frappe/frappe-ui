@@ -24,5 +24,13 @@ export default {
     DocsTheme.enhanceApp?.(ctx)
     ctx.app.use(router)
     registerBuilders(ctx.app)
+
+    // A demo whose component throws in setup() (e.g. a `<router-link>` pointing at
+    // a named route this stub router doesn't register) must not blank the whole
+    // page. Log it clearly and let VitePress render the rest — the broken demo is
+    // the only casualty, and the message names the offending component.
+    ctx.app.config.errorHandler = (err, _instance, info) => {
+      console.error(`[docs] demo render error (${info}):`, err)
+    }
   },
 } satisfies Theme
