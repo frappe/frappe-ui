@@ -133,10 +133,7 @@ const grouped_rows = ref([
     :columns="group_columns"
     :rows="grouped_rows"
     :options="{
-      getRowRoute: (row) => ({
-        name: 'User',
-        params: { userId: row.id },
-      }),
+      getRowRoute: (row) => `/users/${row.id}`,
       selectable: true,
       showTooltip: true,
       resizeColumn: true,

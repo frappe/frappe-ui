@@ -26,10 +26,13 @@ export default {
 
     // A demo whose component throws in setup() (e.g. a `<router-link>` pointing at
     // a named route this stub router doesn't register) must not blank the whole
-    // page. Log it clearly and let VitePress render the rest — the broken demo is
-    // the only casualty, and the message names the offending component.
-    ctx.app.config.errorHandler = (err, _instance, info) => {
-      console.error(`[docs] demo render error (${info}):`, err)
+    // page. Log it and let VitePress render the rest — the broken demo is the
+    // only casualty. `info` is a bare docs URL in production builds, so name the
+    // component too: without it every failure logs an identical, untraceable line.
+    ctx.app.config.errorHandler = (err, instance, info) => {
+      const type = instance?.$?.type as { __file?: string; __name?: string }
+      const where = type?.__file ?? type?.__name ?? 'unknown component'
+      console.error(`[docs] demo render error in ${where} (${info}):`, err)
     }
   },
 } satisfies Theme

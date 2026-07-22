@@ -44,10 +44,7 @@ const rows = [
     :columns="columns"
     :rows="rows"
     :options="{
-      getRowRoute: (row) => ({
-        name: 'User',
-        params: { userId: row.id },
-      }),
+      getRowRoute: (row) => `/users/${row.id}`,
       selectable: true,
       showTooltip: true,
       resizeColumn: true,
