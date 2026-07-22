@@ -22,6 +22,12 @@ import { init, parse } from 'es-module-lexer'
  * imports are left alone, as is any named import this plugin cannot map — an
  * unknown name falls back to a residual barrel import so behaviour never
  * silently changes.
+ *
+ * Dev-only (`apply: 'serve'`). Every win above is a property of unbundled ESM;
+ * a production build resolves the barrel and tree-shakes it anyway, while the
+ * rewrite would bake absolute filesystem paths into the graph — changing
+ * chunking and bypassing any `rollupOptions.external` entry for the package.
+ * Pass `apply: 'build'` or `null` to override.
  */
 export function barrelImports(options = {}) {
   const {
@@ -29,11 +35,22 @@ export function barrelImports(options = {}) {
     packages = ['frappe-ui'],
     // Extensions whose source may contain rewritable imports.
     include = /\.(vue|ts|tsx|js|jsx|mts|mjs)($|\?)/,
-    exclude = /[\\/]node_modules[\\/](?!frappe-ui)/,
+    // Skip installed dependencies, but not the target packages' own sources —
+    // those are the bulk of the rewrite when one is symlinked into node_modules.
+    exclude = new RegExp(
+      String.raw`[\\/]node_modules[\\/](?!(?:${packages
+        // `/` in a scoped name is a path separator, so match either flavour.
+        .map((p) =>
+          p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '[\\\\/]'),
+        )
+        .join('|')})[\\/])`,
+    ),
     // Only rewrite when the package resolves to a working copy rather than an
     // installed dependency. See `isWorkingCopy` — rewriting an installed package
     // is a net loss, so this defaults on. Set false to force the rewrite.
     linkedOnly = true,
+    // Vite `apply`. See the note above on why this is dev-only by default.
+    apply = 'serve',
   } = options
 
   // bare specifier -> Map<exportName, { module, imported }>
@@ -200,6 +217,7 @@ export function barrelImports(options = {}) {
   return {
     name: 'frappeui-barrel-imports',
     enforce: 'pre',
+    ...(apply ? { apply } : {}),
 
     async configResolved(config) {
       resolver = config.createResolver({ ssr: false })
@@ -257,9 +275,13 @@ export function barrelImports(options = {}) {
           // happily spans several statements to reach a later `} from
           // 'frappe-ui'`, swallowing unrelated imports into the clause.
           // Import clauses never contain a brace, so this cannot over-match.
-          // Anchored to line start so import statements quoted *inside* source
-          // (the docs render `"import { X } from 'frappe-ui'"` as sample code)
-          // are left alone — rewriting those produces invalid syntax.
+          //
+          // What keeps the docs' sample code safe is `include`: markdown never
+          // reaches this plugin, so fenced samples are untouched. The line
+          // anchor only adds cover for samples inlined mid-line in a string.
+          // A sample import sitting on its own line inside a template literal
+          // or a `<pre>` block *would* still be rewritten — no such case exists
+          // in this repo, but that is the edge to watch if one ever appears.
           String.raw`^[ \t]*import\s+(type\s+)?\{([^}]*)\}\s*from\s*(['"])` +
             pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
             String.raw`\3`,
@@ -279,7 +301,16 @@ export function barrelImports(options = {}) {
           const dropped = m[2]
             .split(',')
             .map((raw) => raw.trim())
-            .filter((part) => part && !kept.has(part.split(/\s+as\s+/).pop().trim()))
+            .filter(
+              (part) =>
+                part &&
+                !kept.has(
+                  part
+                    .split(/\s+as\s+/)
+                    .pop()
+                    .trim(),
+                ),
+            )
 
           const byModule = new Map()
           const residual = []
@@ -288,7 +319,9 @@ export function barrelImports(options = {}) {
             // A module that reaches its own export through the barrel would
             // become a self-import; leave those on the barrel.
             if (!hit || hit.module === file) {
-              residual.push(`${spec.imported}${spec.local === spec.imported ? '' : ` as ${spec.local}`}`)
+              residual.push(
+                `${spec.imported}${spec.local === spec.imported ? '' : ` as ${spec.local}`}`,
+              )
               continue
             }
             if (!byModule.has(hit.module)) byModule.set(hit.module, [])
