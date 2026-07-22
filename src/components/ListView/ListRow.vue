@@ -21,9 +21,17 @@
         : {}),
     }"
   >
+    <!-- With `getRowRoute` the row is already wrapped in an <a>, so it must not
+         nest a <button>. A `display: contents` div is the way to take an element
+         out of layout while keeping its child a direct box of the <a>. The old
+         `:is="'template'"` looked like "no wrapper" but made Vue create a real
+         <template> element, which the UA stylesheet hides — so every row
+         silently disappeared whenever `getRowRoute` was set. -->
     <component
-      :is="list.options.getRowRoute ? 'template' : 'button'"
-      class="[all:unset] hover:[all:unset]"
+      :is="list.options.getRowRoute ? 'div' : 'button'"
+      :class="
+        list.options.getRowRoute ? 'contents' : '[all:unset] hover:[all:unset]'
+      "
     >
       <div
         class="grid items-center gap-4 px-2"
