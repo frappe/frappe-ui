@@ -19,22 +19,10 @@ export interface SuggestionFloatingOptions {
 }
 
 /**
- * The imperative Floating UI + VueRenderer lifecycle extracted from
- * `createSuggestionExtension().render()`.
+ * The imperative Floating UI + VueRenderer lifecycle for suggestion popups,
+ * extracted from `createSuggestionExtension().render()`.
  *
- * Canonical import path:
- *   `#molecules/editor/extensions/shared/suggestion-renderer`
- *
- * Owns four correctness fixes over the original inline implementation:
- *   1. Escape -> `return false` so the suggestion plugin itself runs `onExit`
- *      (the old code called `popup.hide()` + `return true`, which swallowed the
- *      key and left the plugin state active).
- *   2. Per-query stale-result token: a render token captured in `onStart`/each
- *      `onUpdate` so a late prop update from a superseded query cannot clobber a
- *      newer one.
- *   3. `onUpdate` no-ops after `onExit`/destroy (guards against a queued async
- *      update arriving after teardown).
- *   4. `component.ref` typed via `SuggestionListExpose` instead of `any`.
+ * Import path: `#molecules/editor/extensions/shared/suggestion-renderer`
  */
 export function createSuggestionRenderer(
   component: Component,
@@ -48,9 +36,9 @@ export function createSuggestionRenderer(
   let renderer: VueRenderer | null = null
   let floatingEl: HTMLElement | null = null
   let getReferenceClientRect: (() => DOMRect | null) | null = null
-  // Fix 3: once exited/destroyed, late async updates must not resurrect anything.
+  // Once exited/destroyed, late async updates must not resurrect anything.
   let isActive = false
-  // Fix 2: monotonic token; a stale onUpdate (from a superseded query) bails.
+  // Monotonic token; a stale onUpdate from a superseded query bails.
   let renderToken = 0
 
   function getListExpose(): SuggestionListExpose | null {
@@ -82,6 +70,32 @@ export function createSuggestionRenderer(
     })
   }
 
+  // Attach `renderer.el` (the wrapper VueRenderer always creates) rather than
+  // `renderer.element` (its firstElementChild): the popup renders nothing until it
+  // has items, so `element` is null at onStart and nothing would mount. `el` is a
+  // public, typed field on VueRenderer, so a tiptap release that drops it fails the
+  // build here instead of breaking silently; instanceof narrows Element ->
+  // HTMLElement. Guarded by suggestion-renderer.test.ts.
+  function getWrapper(): HTMLElement | null {
+    const el = renderer?.el
+    return el instanceof HTMLElement ? el : null
+  }
+
+  // Attach the wrapper to the body and position it. Re-callable from a later
+  // onUpdate if the initial attach couldn't complete.
+  function attach(props: SuggestionProps, token: number): void {
+    if (!isActive || token !== renderToken || !renderer) return
+    if (floatingEl) return
+    const wrapper = getWrapper()
+    if (!props.clientRect || !wrapper) return
+
+    floatingEl = wrapper
+    floatingEl.style.position = 'absolute'
+    document.body.appendChild(floatingEl)
+    getReferenceClientRect = props.clientRect as () => DOMRect | null
+    updatePosition()
+  }
+
   return {
     onStart(props: SuggestionProps) {
       isActive = true
@@ -92,34 +106,29 @@ export function createSuggestionRenderer(
         props,
       })
 
-      if (!props.clientRect || !renderer.element) return
-      // A newer query already superseded this start before mount completed.
-      if (token !== renderToken || !isActive) return
-
-      floatingEl = renderer.element as HTMLElement
-      floatingEl.style.position = 'absolute'
-      document.body.appendChild(floatingEl)
-      getReferenceClientRect = props.clientRect as () => DOMRect | null
-      updatePosition()
+      attach(props, token)
     },
 
     onUpdate(props: SuggestionProps) {
-      // Fix 3: ignore updates that arrive after onExit/destroy.
       if (!isActive || !renderer) return
       const token = ++renderToken
 
-      renderer.updateProps(props)
+      // Skip the plugin's transient `loading` dispatch (empty items) so the
+      // popover doesn't unmount/remount on every keystroke.
+      const loading = (props as SuggestionProps & { loading?: boolean }).loading
+      if (!loading) renderer.updateProps(props)
 
       if (!props.clientRect) return
-      // Fix 2: a newer query bumped the token between updateProps and now.
       if (token !== renderToken) return
 
       getReferenceClientRect = props.clientRect as () => DOMRect | null
-      updatePosition()
+      // Late-attach if the initial mount couldn't; otherwise just reposition.
+      if (!floatingEl) attach(props, token)
+      else updatePosition()
     },
 
     onKeyDown(props: SuggestionKeyDownProps): boolean {
-      // Fix 1: let the suggestion plugin handle Escape (it runs onExit).
+      // Let the suggestion plugin handle Escape (it runs onExit).
       if (props.event.key === 'Escape') return false
 
       const list = getListExpose()
@@ -129,7 +138,6 @@ export function createSuggestionRenderer(
 
     onExit() {
       isActive = false
-      // Invalidate any in-flight render/update tokens.
       renderToken++
       floatingEl?.remove()
       renderer?.destroy()
