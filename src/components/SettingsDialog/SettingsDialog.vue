@@ -12,8 +12,21 @@
       orientation="vertical"
       activation-mode="manual"
       :unmount-on-hide="unmountOnHide"
-      class="flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden sm:h-[min(860px,calc(100vh-8rem))] sm:min-h-[560px] sm:w-auto sm:flex-row"
+      class="relative flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden sm:h-[min(860px,calc(100vh-8rem))] sm:min-h-[560px] sm:w-auto sm:flex-row"
     >
+      <!-- Bare mode suppresses the base Dialog's close button, so provide one
+           here. Setting the v-model closes the dialog and lets route-driven
+           consumers react (e.g. navigate back) via their own watcher. -->
+      <Button
+        class="absolute right-3 top-3 z-10"
+        variant="ghost"
+        label="Close"
+        @click="modelValue = false"
+      >
+        <template #icon>
+          <span class="lucide-x size-4 text-ink-gray-9" />
+        </template>
+      </Button>
       <Dialog.Title as-child>
         <h1 class="sr-only"><slot name="title">Settings</slot></h1>
       </Dialog.Title>
@@ -33,6 +46,7 @@
 import { useEventListener } from '@vueuse/core'
 import { TabsRoot } from 'reka-ui'
 import { Dialog } from '../Dialog'
+import { Button } from '../Button'
 import type { SettingsDialogProps } from './types'
 
 const props = withDefaults(defineProps<SettingsDialogProps>(), {
