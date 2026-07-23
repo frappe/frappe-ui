@@ -127,7 +127,13 @@ import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarItemIcon from './SidebarItemIcon.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
-const props = defineProps<SidebarItemProps>()
+// `active`/`isActive` must default to `undefined`, not Vue's implicit boolean
+// `false` — "not passed" and "passed false" are different states here: absence
+// falls through to the deprecated alias and then to route inference.
+const props = withDefaults(defineProps<SidebarItemProps>(), {
+  active: undefined,
+  isActive: undefined,
+})
 
 const isCollapsed = inject(
   sidebarCollapsedKey,
