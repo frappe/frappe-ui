@@ -27,7 +27,9 @@
           </template>
         </SidebarHeader>
 
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+        <!-- -mx/px: rows sit flush with the clip edge, so without this the
+             active item's shadow ring is cut off at both sides. -->
+        <div class="-mx-1 flex-1 overflow-y-auto overflow-x-hidden px-1">
           <SidebarSection
             v-for="section in sections"
             :key="section.label"
