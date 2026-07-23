@@ -58,6 +58,38 @@ describe('Progress', () => {
       })
   })
 
+  it('fill transition', () => {
+    cy.mount(Progress, {
+      props: {
+        label: 'label',
+        value: 20,
+      },
+    })
+
+    // the continuous fill animates its width, with the default duration.
+    // the curve is linear on purpose: callers update `value` on a timer, and
+    // a decelerating curve visibly stutters each time it is retargeted.
+    cy.get('[role=progressbar] div')
+      .should('have.class', 'motion-reduce:transition-none')
+      .and('have.css', 'transition-property', 'width')
+      .and('have.css', 'transition-duration', '0.7s')
+      .and('have.css', 'transition-timing-function', 'linear')
+  })
+
+  it('interval bar has no width transition', () => {
+    cy.mount(Progress, {
+      props: {
+        label: 'label',
+        value: 60,
+        intervals: true,
+      },
+    })
+
+    cy.get('[role=progressbar] div').each((x) => {
+      cy.wrap(x).should('not.have.css', 'transition-property', 'width')
+    })
+  })
+
   it('sizes', () => {
     const sizeclasses = {
       sm: 'h-[2px]',

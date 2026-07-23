@@ -30,7 +30,7 @@
       <!-- Continuous Progress Bar -->
       <div
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-10"
+        class="h-full bg-surface-gray-10 transition-[width] duration-700 ease-linear motion-reduce:transition-none"
         :style="`width: ${props.value}%`"
       ></div>
 
