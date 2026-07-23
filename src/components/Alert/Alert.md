@@ -4,7 +4,7 @@ A prominent message used to communicate important information, warnings, or stat
 
 ## Playground
 
-<ClientOnly><AlertBuilder /></ClientOnly>
+<ComponentPlayground name="Alert" />
 
 ## Themes
 <ComponentPreview name="Alert-Themes" />

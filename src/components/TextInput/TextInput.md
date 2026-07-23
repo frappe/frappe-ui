@@ -4,7 +4,7 @@ A flexible input for entering text, numbers etc. Supports many sizes, styles, an
 
 ## Playground
 
-<ClientOnly><TextInputBuilder /></ClientOnly>
+<ComponentPlayground name="TextInput" />
 
 <ComponentPreview name="TextInput-Default" layout="stacked" />
 

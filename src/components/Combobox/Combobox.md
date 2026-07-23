@@ -4,7 +4,7 @@ Lets users choose from available options or type their own. Provides clear, resp
 
 ## Playground
 
-<ClientOnly><ComboboxBuilder /></ClientOnly>
+<ComponentPlayground name="Combobox" />
 
 ## Simple
 A plain repo picker — just pass `options` as an array of strings.

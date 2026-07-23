@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Avatar } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'John Doe', width: '12rem' },
@@ -54,11 +54,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground
-    :knobs="knobs"
-    :code="buildCode"
-    preview-min-height="120px"
-  >
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <Avatar
         :label="values.label"
@@ -68,5 +64,5 @@ function buildCode(v: Record<string, any>) {
         :theme="values.theme"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

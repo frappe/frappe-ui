@@ -4,7 +4,7 @@ Organizes content into separate panels that users can switch between. Makes navi
 
 ## Playground
 
-<ClientOnly><TabsBuilder /></ClientOnly>
+<ComponentPlayground name="Tabs" />
 
 ## Orientation
 <ComponentPreview name="Tabs-Orientation" />

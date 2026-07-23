@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Slider } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const model = ref<number[]>([40])
 
@@ -46,12 +46,12 @@ function valueFor(range: boolean) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
         <Slider
           :model-value="valueFor(values.range)"
-          @update:model-value="(v: number[]) => (model = v)"
+          @update:model-value="(v) => (model = v ?? [])"
           :label="values.label || undefined"
           :min="Number(values.min) || 0"
           :max="Number(values.max) || 100"
@@ -61,5 +61,5 @@ function valueFor(range: boolean) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

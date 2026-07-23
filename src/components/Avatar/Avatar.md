@@ -4,7 +4,7 @@ A visual representation of a user, typically shown as an image, initials, or an 
 
 ## Playground
 
-<ClientOnly><AvatarBuilder /></ClientOnly>
+<ComponentPlayground name="Avatar" />
 
 ## Shapes
 <ComponentPreview name="Avatar-Shapes" />

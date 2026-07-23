@@ -1,14 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Password } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import { MultiSelect } from 'frappe-ui'
+import type { Knob } from 'frappe-ui/vitepress'
 
-const model = ref('')
+const model = ref<string[]>([])
+
+const options = [
+  { label: 'Bug', value: 'bug' },
+  { label: 'Feature', value: 'feature' },
+  { label: 'Docs', value: 'docs' },
+  { label: 'Question', value: 'question' },
+  { label: 'Polish', value: 'polish' },
+]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Password', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  { name: 'placeholder', type: 'text', default: '••••••••', width: '12rem' },
+  { name: 'label', type: 'text', default: 'Labels', width: '12rem' },
+  {
+    name: 'placeholder',
+    type: 'text',
+    default: 'Select labels',
+    width: '14rem',
+  },
   {
     name: 'size',
     type: 'tabs',
@@ -30,39 +42,39 @@ const knobs: Knob[] = [
       { label: 'ghost', value: 'ghost' },
     ],
   },
-  { name: 'required', type: 'switch', default: false },
+  { name: 'hideSearch', type: 'switch', default: false },
   { name: 'disabled', type: 'switch', default: false },
 ]
 
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.description) attrs.push(`description="${v.description}"`)
   if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
-  if (v.required) attrs.push('required')
+  if (v.hideSearch) attrs.push('hide-search')
   if (v.disabled) attrs.push('disabled')
+  attrs.push(':options="options"')
   attrs.push('v-model="value"')
-  return ['<Password', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return ['<MultiSelect', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="160px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
-        <Password
+        <MultiSelect
           v-model="model"
           :label="values.label || undefined"
-          :description="values.description || undefined"
           :placeholder="values.placeholder || undefined"
           :size="values.size"
           :variant="values.variant"
-          :required="values.required"
+          :hide-search="values.hideSearch"
           :disabled="values.disabled"
+          :options="options"
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

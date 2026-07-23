@@ -18,6 +18,12 @@
   src: url('./fonts/Inter-Italic.var.woff2') format('woff2-variations');
 }
 
+/* Anchor jumps (#heading links, "On this page") would otherwise land the
+   heading under the 3rem sticky navbar. */
+html {
+  scroll-padding-top: 5rem;
+}
+
 body {
   background-color: var(--surface-base);
   color: var(--ink-gray-9);

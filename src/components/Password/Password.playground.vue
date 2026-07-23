@@ -1,30 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Combobox } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import { Password } from 'frappe-ui'
+import type { Knob } from 'frappe-ui/vitepress'
 
-const model = ref<string>('')
-
-const options = [
-  { label: 'Backlog', value: 'backlog' },
-  { label: 'In progress', value: 'in_progress' },
-  { label: 'Review', value: 'review' },
-  { label: 'Done', value: 'done' },
-  { label: 'Archived', value: 'archived' },
-]
+const model = ref('')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Status', width: '12rem' },
-  { name: 'placeholder', type: 'text', default: 'Pick or search…', width: '16rem' },
-  {
-    name: 'trigger',
-    type: 'tabs',
-    default: 'input',
-    options: [
-      { label: 'input', value: 'input' },
-      { label: 'button', value: 'button' },
-    ],
-  },
+  { name: 'label', type: 'text', default: 'Password', width: '12rem' },
+  { name: 'description', type: 'text', default: '', width: '20rem' },
+  { name: 'placeholder', type: 'text', default: '••••••••', width: '12rem' },
   {
     name: 'size',
     type: 'tabs',
@@ -53,34 +37,32 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
+  if (v.description) attrs.push(`description="${v.description}"`)
   if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
-  if (v.trigger !== 'input') attrs.push(`trigger="${v.trigger}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
   if (v.disabled) attrs.push('disabled')
-  attrs.push(':options="options"')
   attrs.push('v-model="value"')
-  return ['<Combobox', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return ['<Password', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="160px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
-        <Combobox
+        <Password
           v-model="model"
           :label="values.label || undefined"
+          :description="values.description || undefined"
           :placeholder="values.placeholder || undefined"
-          :trigger="values.trigger"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"
           :disabled="values.disabled"
-          :options="options"
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

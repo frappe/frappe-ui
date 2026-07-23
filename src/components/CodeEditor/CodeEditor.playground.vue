@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const seeds: Record<string, string> = {
   javascript: `function greet(name) {\n  return \`Hello, \${name}!\`\n}`,
@@ -79,7 +79,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="180px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="180px">
     <template #preview="{ values }">
       <div class="w-full max-w-xl space-y-3">
         <CodeEditor
@@ -98,5 +98,5 @@ function buildCode(v: Record<string, any>) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

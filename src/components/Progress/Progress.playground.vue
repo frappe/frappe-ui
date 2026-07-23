@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Progress } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'value', type: 'text', default: '60', width: '5rem' },
@@ -36,11 +36,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground
-    :knobs="knobs"
-    :code="buildCode"
-    preview-min-height="100px"
-  >
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="100px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
         <Progress
@@ -53,5 +49,5 @@ function buildCode(v: Record<string, any>) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

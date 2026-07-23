@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { Dropdown } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const options = [
   { label: 'Edit', icon: 'lucide-pencil', onClick: () => {} },
   { label: 'Duplicate', icon: 'lucide-copy', onClick: () => {} },
   { label: 'Archive', icon: 'lucide-archive', onClick: () => {} },
-  { label: 'Delete', icon: 'lucide-trash-2', theme: 'red', onClick: () => {} },
+  {
+    label: 'Delete',
+    icon: 'lucide-trash-2',
+    theme: 'red' as const,
+    onClick: () => {},
+  },
 ]
 
 const knobs: Knob[] = [
@@ -44,7 +49,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="220px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="220px">
     <template #preview="{ values }">
       <Dropdown
         :button="{ label: values.label }"
@@ -53,5 +58,5 @@ function buildCode(v: Record<string, any>) {
         :options="options"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

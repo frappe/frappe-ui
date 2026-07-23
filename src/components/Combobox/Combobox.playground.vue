@@ -1,15 +1,35 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Textarea } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import { Combobox } from 'frappe-ui'
+import type { Knob } from 'frappe-ui/vitepress'
 
-const model = ref('')
+const model = ref<string>('')
+
+const options = [
+  { label: 'Backlog', value: 'backlog' },
+  { label: 'In progress', value: 'in_progress' },
+  { label: 'Review', value: 'review' },
+  { label: 'Done', value: 'done' },
+  { label: 'Archived', value: 'archived' },
+]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Notes', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  { name: 'placeholder', type: 'text', default: 'Write something…', width: '16rem' },
-  { name: 'rows', type: 'text', default: '3', width: '4rem' },
+  { name: 'label', type: 'text', default: 'Status', width: '12rem' },
+  {
+    name: 'placeholder',
+    type: 'text',
+    default: 'Pick or search…',
+    width: '16rem',
+  },
+  {
+    name: 'trigger',
+    type: 'tabs',
+    default: 'input',
+    options: [
+      { label: 'input', value: 'input' },
+      { label: 'button', value: 'button' },
+    ],
+  },
   {
     name: 'size',
     type: 'tabs',
@@ -38,35 +58,34 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.description) attrs.push(`description="${v.description}"`)
   if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
-  const rowsNum = Number(v.rows)
-  if (rowsNum && rowsNum !== 3) attrs.push(`:rows="${rowsNum}"`)
+  if (v.trigger !== 'input') attrs.push(`trigger="${v.trigger}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
   if (v.disabled) attrs.push('disabled')
+  attrs.push(':options="options"')
   attrs.push('v-model="value"')
-  return ['<Textarea', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
+  return ['<Combobox', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="140px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="160px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
-        <Textarea
+        <Combobox
           v-model="model"
           :label="values.label || undefined"
-          :description="values.description || undefined"
           :placeholder="values.placeholder || undefined"
-          :rows="Number(values.rows) || 3"
+          :trigger="values.trigger"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"
           :disabled="values.disabled"
+          :options="options"
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

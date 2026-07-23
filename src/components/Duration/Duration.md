@@ -6,7 +6,7 @@ the component parses it on commit.
 
 ## Playground
 
-<ClientOnly><DurationBuilder /></ClientOnly>
+<ComponentPlayground name="Duration" />
 
 <ComponentPreview name="Duration-Default" layout="stacked" />
 

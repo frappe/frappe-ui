@@ -4,7 +4,7 @@ Visually represents progress or completion of a task. Updates dynamically to giv
 
 ## Playground
 
-<ClientOnly><ProgressBuilder /></ClientOnly>
+<ComponentPlayground name="Progress" />
 
 ## Examples
 <ComponentPreview name="Progress-Examples" />

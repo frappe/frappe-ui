@@ -6,7 +6,9 @@ const tab = ref('home')
 </script>
 
 <template>
-  <div class="mx-auto w-[360px] overflow-hidden rounded-xl border bg-surface-white">
+  <div
+    class="mx-auto w-[360px] overflow-hidden border-b border-l border-r bg-surface-white"
+  >
     <MobileNav>
       <MobileNavItem
         label="Home"

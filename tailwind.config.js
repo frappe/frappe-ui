@@ -35,6 +35,12 @@ export default {
     './experimental/**/*.{vue,js,ts,jsx,tsx}',
     './docs/**/*.{vue,js,ts,md}',
     './docs/.vitepress/**/*.{vue,js,ts,css}',
+    // Build artifacts, not sources. Without these negations the two globs
+    // above sweep in ~900 files / 90MB of prebundled deps and built output,
+    // which Tailwind re-reads on every CSS rebuild — and `cache/deps_temp_*`
+    // is renamed mid-optimize, so PostCSS intermittently dies with ENOENT.
+    '!./docs/.vitepress/cache/**',
+    '!./docs/.vitepress/dist/**',
     // Reusable VitePress theme (Layout/Navbar/Sidebar live here now) — without
     // this, theme-only classes like `lg:grid-cols-[220px_1fr]` aren't emitted
     // and the docs layout collapses.

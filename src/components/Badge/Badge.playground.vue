@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Badge } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Gamma' },
@@ -58,14 +58,24 @@ function buildCode(v: Record<string, any>) {
       '  <template #suffix><span class="lucide-chevron-down" /></template>',
     )
   }
-  return ['<Badge', ...attrs.map((a) => '  ' + a), '>', ...slots, '</Badge>'].join('\n')
+  return [
+    '<Badge',
+    ...attrs.map((a) => '  ' + a),
+    '>',
+    ...slots,
+    '</Badge>',
+  ].join('\n')
 }
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode">
     <template #preview="{ values }">
-      <Badge :theme="values.theme" :variant="values.variant" :size="values.size">
+      <Badge
+        :theme="values.theme"
+        :variant="values.variant"
+        :size="values.size"
+      >
         <template v-if="values.prefix" #prefix>
           <span class="lucide-check" />
         </template>
@@ -75,5 +85,5 @@ function buildCode(v: Record<string, any>) {
         </template>
       </Badge>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

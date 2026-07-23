@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ErrorMessage } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   {
@@ -17,9 +17,9 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="80px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="80px">
     <template #preview="{ values }">
       <ErrorMessage :message="values.message" />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

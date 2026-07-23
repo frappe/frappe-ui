@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   {
@@ -77,9 +77,7 @@ function buildCode(v: Record<string, any>) {
     ...(v.prefix
       ? ['    <template #prefix><span class="lucide-star" /></template>']
       : []),
-    ...(v.suffix
-      ? ['    <template #suffix><span>14</span></template>']
-      : []),
+    ...(v.suffix ? ['    <template #suffix><span>14</span></template>'] : []),
     ...(hasSlots ? ['  </TabButtons>'] : []),
     '</' + 'template>',
   ].join('\n')
@@ -87,11 +85,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground
-    :knobs="knobs"
-    :code="buildCode"
-    preview-min-height="220px"
-  >
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="220px">
     <template #preview="{ values }">
       <TabButtons
         v-model="modelValue"
@@ -102,7 +96,7 @@ function buildCode(v: Record<string, any>) {
       >
         <template v-if="values.prefix" #prefix="{ button }">
           <span
-            :class="iconByValue[button.modelValue]"
+            :class="iconByValue[String(button.modelValue)]"
             class="size-4 shrink-0"
           />
         </template>
@@ -110,10 +104,10 @@ function buildCode(v: Record<string, any>) {
           <span
             class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
           >
-            {{ countByValue[button.modelValue] }}
+            {{ countByValue[String(button.modelValue)] }}
           </span>
         </template>
       </TabButtons>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

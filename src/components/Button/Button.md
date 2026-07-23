@@ -4,7 +4,7 @@ An interactive element used to trigger actions, submit forms, or navigate betwee
 
 ## Playground
 
-<ClientOnly><ButtonBuilder /></ClientOnly>
+<ComponentPlayground name="Button" />
 
 ## Section controls
 

@@ -1,23 +1,20 @@
 <script setup lang="ts">
 // Default docs navbar — fully themeConfig-driven, so any consumer gets site
-// chrome (brand, breadcrumbs, search, theme toggle, GitHub) for free. The
+// chrome (brand, search, theme toggle, GitHub) for free. The
 // shared Layout renders this in its `#navbar` slot by default; consumers can
 // inject extra controls via the `#actions` slot, swap the brand via `#brand`,
 // or replace search via `#search` — or override the whole `#navbar` slot.
-import { computed } from 'vue'
-import { useData, useRoute, withBase } from 'vitepress'
-import { Button, Breadcrumbs } from 'frappe-ui'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useData, withBase } from 'vitepress'
+import { Button } from 'frappe-ui'
 
 import Search from './Docs/Search.vue'
-import { isActiveLink } from './Docs/sidebarList'
 import { setTheme, useTheme } from '../composables/useTheme'
 
-// `isDocs` is true on prose pages — the sidebar shows the logo there, so the
-// navbar renders breadcrumbs instead of the brand on large screens.
-const props = defineProps<{ isDocs?: boolean }>()
+// `isDocs` is true on prose pages — it drops the "Docs" link.
+defineProps<{ isDocs?: boolean }>()
 
-const { theme, site } = useData()
-const route = useRoute()
+const { theme } = useData()
 
 const name = computed(() => theme.value.name ?? '')
 const logo = computed(() => theme.value.logo ?? '')
@@ -26,24 +23,14 @@ const docsLink = computed(
   () => theme.value.sidebar?.[0]?.items?.[0]?.link ?? '/',
 )
 
-// Breadcrumb trail for the active page: Section / Page.
-const crumbs = computed(() => {
-  if (!props.isDocs) return []
-  const labels: { label: string; link?: string }[] = []
-  for (const section of theme.value.sidebar ?? []) {
-    if (!section.items) {
-      labels.push({ label: section.text, link: section.link })
-    } else {
-      for (const item of section.items) {
-        labels.push({ label: `${section.text}/${item.text}`, link: item.link })
-      }
-    }
-  }
-  const active = labels.find((x) =>
-    isActiveLink(route.path, x.link, site.value.base),
-  )?.label
-  return active?.split('/').map((label) => ({ label })) ?? []
+// The header only needs a border once content sits behind it.
+const scrolled = ref(false)
+const onScroll = () => (scrolled.value = window.scrollY > 0)
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
 })
+onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 const currentTheme = useTheme()
 const toggleTheme = () =>
@@ -52,14 +39,14 @@ const toggleTheme = () =>
 
 <template>
   <header
-    class="sticky top-0 z-20 flex h-12 items-center gap-3 border-b bg-surface-base px-4 sm:px-5"
+    class="sticky top-0 z-20 flex h-12 items-center gap-3 border-b bg-surface-base/80 backdrop-blur-[10px] px-4 sm:px-5"
+    :class="scrolled ? 'border-outline-gray-1' : 'border-transparent'"
   >
     <slot name="brand">
       <a
         v-if="logo || name"
         :href="withBase('/')"
         class="flex items-center gap-1.5 min-w-0"
-        :class="{ 'lg:hidden': isDocs }"
       >
         <img
           v-if="logo"
@@ -76,13 +63,13 @@ const toggleTheme = () =>
       </a>
     </slot>
 
-    <Breadcrumbs
-      v-if="isDocs"
-      :items="crumbs"
-      class="hidden min-w-0 lg:flex [&_span]:capitalize"
-    />
+    <div class="flex flex-1 justify-center px-2">
+      <slot name="search">
+        <Search class="hidden w-full max-w-md md:flex" />
+      </slot>
+    </div>
 
-    <nav class="ml-auto flex items-center gap-2 sm:gap-3">
+    <nav class="flex items-center gap-2 sm:gap-3">
       <slot name="actions" />
 
       <a
@@ -92,10 +79,6 @@ const toggleTheme = () =>
       >
         Docs
       </a>
-
-      <slot name="search">
-        <Search class="hidden md:flex" />
-      </slot>
 
       <Button
         v-if="githubUrl"

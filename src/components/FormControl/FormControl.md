@@ -4,7 +4,7 @@ A uniform wrapper for form inputs. `FormControl` picks an underlying control fro
 
 ## Playground
 
-<ClientOnly><FormControlBuilder /></ClientOnly>
+<ComponentPlayground name="FormControl" />
 
 ## Example
 

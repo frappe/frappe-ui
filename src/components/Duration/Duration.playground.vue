@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Duration } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 const model = ref<number | null>(5445)
 
@@ -63,7 +63,8 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder !== '1h 30m 45s') attrs.push(`placeholder="${v.placeholder}"`)
+  if (v.placeholder !== '1h 30m 45s')
+    attrs.push(`placeholder="${v.placeholder}"`)
   if (format && format !== 'short') attrs.push(`format="${format}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
@@ -75,7 +76,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
         <Duration
@@ -91,5 +92,5 @@ function buildCode(v: Record<string, any>) {
         />
       </div>
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>
