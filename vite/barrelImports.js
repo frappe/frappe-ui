@@ -99,6 +99,17 @@ export function barrelImports(options = {}) {
   }
 
   /**
+   * Turn an absolute filesystem path into a specifier Vite's import analysis
+   * accepts. Vite serves out-of-tree files through the `/@fs/` prefix and only
+   * with forward slashes; a raw Windows path (`C:\repo\Button.vue`) fails
+   * import analysis because the backslashes and drive letter aren't a valid URL.
+   * On POSIX `path.resolve` already uses `/`, so this just prefixes `/@fs`.
+   */
+  function toFsSpecifier(absPath) {
+    return path.posix.join('/@fs', absPath.replace(/\\/g, '/'))
+  }
+
+  /**
    * Split an import/export clause body (`A, B as C, type D`) into specifiers.
    * Shared by both sides of the rewrite: the barrel's `export { ... } from`
    * clauses and the author's `import { ... } from` clauses have identical
@@ -334,16 +345,15 @@ export function barrelImports(options = {}) {
             // The barrel may rename (`export { default as Tabs }`); import the
             // module's own name and alias back to what the author wrote.
             const only = items.length === 1 ? items[0] : null
+            const spec = JSON.stringify(toFsSpecifier(module))
             if (only && only.hit.imported === 'default') {
-              lines.push(`import ${only.local} from ${JSON.stringify(module)}`)
+              lines.push(`import ${only.local} from ${spec}`)
               continue
             }
             const names = items.map(({ local, hit }) =>
               hit.imported === local ? local : `${hit.imported} as ${local}`,
             )
-            lines.push(
-              `import { ${names.join(', ')} } from ${JSON.stringify(module)}`,
-            )
+            lines.push(`import { ${names.join(', ')} } from ${spec}`)
           }
           const leftover = [...residual, ...dropped]
           if (leftover.length) {
