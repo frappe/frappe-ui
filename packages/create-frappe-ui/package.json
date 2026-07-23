@@ -1,0 +1,26 @@
+{
+  "name": "create-frappe-ui",
+  "version": "1.0.0-beta.21",
+  "description": "Create a minimal Vue app with Frappe UI",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "bin": {
+    "create-frappe-ui": "./bin/create-frappe-ui.js"
+  },
+  "files": [
+    "bin",
+    "template"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frappe/frappe-ui.git",
+    "directory": "packages/create-frappe-ui"
+  },
+  "author": "Frappe Technologies Pvt. Ltd.",
+  "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}
