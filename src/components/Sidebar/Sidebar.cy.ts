@@ -118,6 +118,11 @@ describe('<SidebarItem />', () => {
     cy.get('[data-slot=sidebar-item][data-state=active]').should('exist')
   })
 
+  it('falls back to the deprecated `isActive` when `active` is not passed', () => {
+    cy.mount(SidebarItem, { props: { label: 'Design', isActive: true } })
+    cy.get('[data-slot=sidebar-item][data-state=active]').should('exist')
+  })
+
   it('renders #prefix, default, and #suffix slots', () => {
     cy.mount(SidebarItem, {
       slots: {
