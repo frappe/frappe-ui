@@ -5,7 +5,9 @@
 // slot (`#desktop` / `#mobile`) from a `<<<` include so VitePress highlights it.
 //
 // The iframe src is only set once the block scrolls near the viewport, so the
-// page doesn't boot every app shell at once.
+// page doesn't boot every app shell at once. The exception is the first recipe
+// (`eager`), which sits in the first fold: it renders its iframe straight into
+// the server HTML so the browser fetches the demo before Vue even hydrates.
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { withBase } from 'vitepress'
@@ -20,6 +22,12 @@ const props = defineProps<{
   height?: string
   /** Preview height for the mobile variant. */
   mobileHeight?: string
+  /**
+   * Boot this recipe's iframe immediately instead of waiting for it to scroll
+   * near the viewport. Set on the first recipe so the above-the-fold preview
+   * starts loading with the page rather than after hydration + observer.
+   */
+  eager?: boolean
 }>()
 
 const group = computed(() => getRecipeGroup(props.base))
@@ -80,12 +88,25 @@ const tabOptions = [
   { label: 'Code', value: 'code' },
 ]
 
-// Boot the iframe only when the block nears the viewport.
+// Boot the iframe only when the block nears the viewport — except the first
+// recipe, which starts visible so its iframe is in the SSR HTML and begins
+// loading before hydration.
 const root = useTemplateRef<HTMLElement>('root')
-const visible = ref(false)
+const visible = ref(props.eager ?? false)
+// Above-the-fold recipe: fetch its iframe with the highest priority; the rest
+// stay lazy so they don't compete for the network during first paint.
+const iframeLoading = computed(() => (props.eager ? 'eager' : 'lazy'))
 let observer: IntersectionObserver | undefined
 onMounted(() => {
   mounted.value = true
+  // Eager recipe already booted its iframe in SSR — no observer needed. Warm
+  // the shown variant's component chunk from here so it downloads alongside the
+  // iframe's app boot; being same-origin, the iframe reuses it from cache
+  // instead of waiting on its own dynamic import.
+  if (visible.value) {
+    variant.value?.preload?.()
+    return
+  }
   // Older browsers without IntersectionObserver can't lazy-boot; load eagerly
   // so the previews still appear instead of the callback throwing on mount.
   if (typeof IntersectionObserver === 'undefined') {
@@ -152,7 +173,7 @@ onBeforeUnmount(() => observer?.disconnect())
           v-if="visible"
           :src="src"
           :title="heading"
-          loading="lazy"
+          :loading="iframeLoading"
           class="w-[390px] rounded border bg-surface-base shadow-lg"
           :style="{ height: frameHeight }"
         />
@@ -162,7 +183,7 @@ onBeforeUnmount(() => observer?.disconnect())
           v-if="visible"
           :src="src"
           :title="heading"
-          loading="lazy"
+          :loading="iframeLoading"
           class="w-full rounded border bg-surface-base"
           :style="{ height: frameHeight }"
         />
