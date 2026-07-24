@@ -48,6 +48,14 @@ chips stay resolvable after the query narrows the list.
 
 <ComponentPreview name="MultiSelect-AsyncOptions" />
 
+## Search Prefix and Suffix
+
+Use `#search-prefix` and `#search-suffix` to add content around the popover's
+search input without changing the trigger slots. Both slots receive the current
+`query` plus `setQuery`, `clearQuery`, and `focusSearch` helpers.
+
+<ComponentPreview name="MultiSelect-SearchSlots" />
+
 ## Custom Footer
 
 Replace the default Clear All / Select All footer with a custom one. The slot
