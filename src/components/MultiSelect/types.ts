@@ -136,6 +136,29 @@ export type MultiSelectTriggerSlotProps = MultiSelectSlotProps
 export type MultiSelectPrefixSlotProps = MultiSelectSlotProps
 export type MultiSelectSuffixSlotProps = MultiSelectSlotProps
 
+export interface MultiSelectSearchSlotProps {
+  /** Current search query — empty when the user hasn't typed since opening. */
+  query: string
+
+  /** Whether the multi-select is disabled. */
+  disabled: boolean
+
+  /** Whether the multi-select is loading options. */
+  loading: boolean
+
+  /** Updates the search query and emits `update:query`. */
+  setQuery: (value: string) => void
+
+  /** Clears the search query and emits `update:query`. */
+  clearQuery: () => void
+
+  /** Moves focus to the search input. */
+  focusSearch: () => void
+}
+
+export type MultiSelectSearchPrefixSlotProps = MultiSelectSearchSlotProps
+export type MultiSelectSearchSuffixSlotProps = MultiSelectSearchSlotProps
+
 export interface MultiSelectSummarySlotProps extends MultiSelectSlotProps {
   /** Default label text the trigger would render (e.g. placeholder,
    * single selected label, or `"N selected"`). Use it as a fallback. */
@@ -211,6 +234,12 @@ export interface MultiSelectSlots {
 
   /** Overrides the rendered description content. */
   description?: () => any
+
+  /** Content rendered before the in-popover search input. */
+  'search-prefix'?: (props: MultiSelectSearchPrefixSlotProps) => any
+
+  /** Content rendered after the in-popover search input and loading indicator. */
+  'search-suffix'?: (props: MultiSelectSearchSuffixSlotProps) => any
 
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: MultiSelectItemSlotProps) => any

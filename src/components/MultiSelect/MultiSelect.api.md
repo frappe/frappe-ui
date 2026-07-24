@@ -173,6 +173,16 @@
     type: 'any'
   },
   {
+    name: 'search-prefix',
+    description: 'Content rendered before the in-popover search input.',
+    type: 'MultiSelectSearchSlotProps'
+  },
+  {
+    name: 'search-suffix',
+    description: 'Content rendered after the in-popover search input and loading indicator.',
+    type: 'MultiSelectSearchSlotProps'
+  },
+  {
     name: 'item-prefix',
     description: 'Shared content rendered before the standard row label.',
     type: 'MultiSelectItemSlotProps'
@@ -222,14 +232,14 @@
     type: 'unknown[]'
   },
   {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: 'unknown[]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   }
 ]
 </script>

@@ -26,6 +26,7 @@ import '../shared/selection/popoverMotion.css'
 import type {
   MultiSelectEmits,
   MultiSelectProps,
+  MultiSelectSearchSlotProps,
   MultiSelectSlotProps,
   MultiSelectSlots,
 } from './types'
@@ -207,6 +208,24 @@ function setOpen(value: boolean) {
   open.value = value
 }
 
+function setQuery(value: string) {
+  if (props.disabled) return
+  query.value = value
+  hasTypedSinceOpen.value = true
+  emit('update:query', value)
+}
+
+function clearQuery() {
+  setQuery('')
+}
+
+function focusSearch() {
+  const el = document.getElementById(
+    `${inputId.value}-search-input`,
+  ) as HTMLInputElement | null
+  el?.focus()
+}
+
 const slotProps = computed<MultiSelectSlotProps>(() => ({
   open: open.value,
   disabled: Boolean(props.disabled),
@@ -215,6 +234,15 @@ const slotProps = computed<MultiSelectSlotProps>(() => ({
   displayValue: displayValue.value,
   clearAll,
   setOpen,
+}))
+
+const searchSlotProps = computed<MultiSelectSearchSlotProps>(() => ({
+  query: typedQuery.value,
+  disabled: Boolean(props.disabled),
+  loading: Boolean(props.loading),
+  setQuery,
+  clearQuery,
+  focusSearch,
 }))
 
 function handleRootModelValueChange(value: string | string[] | undefined) {
@@ -415,7 +443,13 @@ defineSlots<MultiSelectSlots>()
                 data-slot="search"
                 class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
               >
+                <slot
+                  v-if="$slots['search-prefix']"
+                  name="search-prefix"
+                  v-bind="searchSlotProps"
+                />
                 <ComboboxInput
+                  :id="`${inputId}-search-input`"
                   data-slot="input"
                   :value="query"
                   :disabled="disabled"
@@ -427,6 +461,11 @@ defineSlots<MultiSelectSlots>()
                 <LoadingIndicator
                   v-if="loading"
                   class="size-4 shrink-0 text-ink-gray-5"
+                />
+                <slot
+                  v-if="$slots['search-suffix']"
+                  name="search-suffix"
+                  v-bind="searchSlotProps"
                 />
               </div>
 

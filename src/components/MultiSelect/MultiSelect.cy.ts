@@ -90,6 +90,68 @@ describe('MultiSelect', () => {
     cy.get('@onQuery').should('have.been.calledWith', 'app')
   })
 
+  it('renders search slots with scoped query controls', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options,
+        'onUpdate:query': cy.spy().as('onQuery'),
+      },
+      slots: {
+        'search-prefix': ({ query }) =>
+          h('span', { 'data-cy': 'search-prefix' }, query || 'Search'),
+        'search-suffix': ({ query, setQuery, clearQuery, focusSearch }) =>
+          h('div', { 'data-cy': 'search-suffix' }, [
+            h('span', { 'data-cy': 'search-query' }, query),
+            h(
+              'button',
+              {
+                type: 'button',
+                'data-cy': 'set-query',
+                onClick: () => setQuery('ba'),
+              },
+              'Set query',
+            ),
+            h(
+              'button',
+              {
+                type: 'button',
+                'data-cy': 'clear-query',
+                onClick: () => {
+                  clearQuery()
+                  focusSearch()
+                },
+              },
+              'Clear query',
+            ),
+          ]),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]')
+      .find('[data-cy="search-prefix"]')
+      .should('not.exist')
+    cy.get('[data-slot="trigger"]').find('.lucide-chevron-down').should('exist')
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="search"] [data-cy="search-prefix"]').should(
+      'contain.text',
+      'Search',
+    )
+    cy.get('[data-slot="search"] [data-cy="search-suffix"]').should('exist')
+
+    cy.get('[data-cy="set-query"]').click()
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[data-cy="search-query"]').should('have.text', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    cy.get('@onQuery').should('have.been.calledWith', 'ba')
+
+    cy.get('[data-cy="clear-query"]').click()
+    cy.get('[data-slot="input"]').should('have.value', '')
+    cy.get('[role=option]').should('have.length', 3)
+    cy.get('@onQuery').should('have.been.calledWith', '')
+    cy.get('[data-slot="input"]').should('be.focused')
+  })
+
   it('clearAll and selectAll via default footer', () => {
     cy.mount(MultiSelect, {
       props: {
