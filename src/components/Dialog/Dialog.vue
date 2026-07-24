@@ -2,9 +2,24 @@
   <DialogRoot v-model:open="isOpen">
     <DialogPortal>
       <DialogOverlay
-        class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 overflow-y-auto dialog-overlay outline-none"
+        class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"
         :data-dialog="resolved.title"
         @after-leave="$emit('after-leave')"
+      />
+      <!--
+        The scroll container is a plain element, NOT the DialogOverlay, and the
+        content is a sibling of the overlay (the standard reka structure).
+        reka-ui's DialogOverlay has an internal `@pointerdown.left.prevent`
+        (DialogOverlayImpl); when focusable content is nested inside the overlay,
+        a pointerdown on any field bubbles up to it and its `preventDefault()`
+        cancels the browser's native focus-on-click. The result: only the
+        auto-focused field is usable and clicking a second field (e.g. a
+        textarea) silently fails, dropping the keystrokes into the first field.
+        Keeping the content out of the overlay restores click-to-focus.
+      -->
+      <div
+        class="fixed inset-0 overflow-y-auto"
+        :class="{ 'pointer-events-none': !isOpen }"
       >
         <div
           class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
@@ -155,7 +170,7 @@
             </DialogClose>
           </DialogContent>
         </div>
-      </DialogOverlay>
+      </div>
     </DialogPortal>
   </DialogRoot>
 </template>
