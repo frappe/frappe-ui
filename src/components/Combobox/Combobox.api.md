@@ -63,7 +63,7 @@
   },
   {
     name: 'query',
-    description: 'Controls the search query. Optional — the combobox owns it otherwise.',
+    description: 'Controls the search query. Optional — the combobox owns it otherwise.\n\nWhen it is bound the consumer owns the query: the combobox never resets it\non its own — not on open, not on close, not on mount. It still follows the\ncommitted option\'s label in `trigger="input"` mode, where the input is the\nvalue display rather than a filter. Unbound, `trigger="button"` mode still\nclears the search box every time the popover opens.',
     required: false,
     type: 'string',
     default: '""'

@@ -24,6 +24,7 @@ import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import {
   InputDescription,
   InputError,
@@ -91,6 +92,9 @@ const slots = useSlots()
 const model = defineModel<ComboboxOptionValue | null>({ default: null })
 const open = defineModel<boolean>('open', { default: false })
 const query = defineModel<string>('query', { default: '' })
+// Bound, the query is the consumer's — the component never resets it on its
+// own (see `skipInitialDisplaySync` and the open watcher below).
+const isQueryBound = useIsModelBound('query')
 
 const rootRef = ref<{ highlightFirstItem?: () => void } | null>(null)
 const inputRef = useTemplateRef('inputRef')
@@ -430,15 +434,35 @@ watch(
 
 watch(open, (isOpen, wasOpen) => {
   if (isOpen === wasOpen) return
+
   if (isOpen) {
+    if (!isButtonMode.value) return
     // On open in button mode, start the filter fresh — no leftover label
-    // like "In Progress" in the search input.
-    if (isButtonMode.value) query.value = ''
+    // like "In Progress" in the search input. A bound query is the
+    // consumer's, so it survives instead; treat it as an active filter so the
+    // search box and the list agree. (Input mode is untouched: there the
+    // query IS the display value and follows the model, not the open state.)
+    if (isQueryBound()) hasTypedSinceOpen.value = query.value !== ''
+    else query.value = ''
     return
   }
+
   hasTypedSinceOpen.value = false
-  query.value = isButtonMode.value ? '' : displayValue.value
+  // Input mode: the input is the value display, so it goes back to showing the
+  // committed label — that is model sync, not a reset, and it applies to a
+  // bound query too. Button mode's clear is a plain reset, so it is skipped
+  // when the consumer owns the query.
+  if (!isButtonMode.value) query.value = displayValue.value
+  else if (!isQueryBound()) query.value = ''
 })
+
+// Same reasoning as the open watcher, for a combobox that mounts already open:
+// a consumer-seeded query in button mode is an active filter from the start.
+// Input mode is excluded because there a non-empty query may just be the
+// committed label, which must not filter the list to itself.
+if (isButtonMode.value && isQueryBound() && query.value !== '') {
+  hasTypedSinceOpen.value = true
+}
 
 defineExpose<SelectionExposed>({ clear, focus })
 defineSlots<ComboboxSlots>()

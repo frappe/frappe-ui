@@ -70,6 +70,11 @@ enough to just observe typing.
 <MultiSelect v-model="value" v-model:query="query" :options="options" />
 ```
 
+Once bound, the query is yours: the component never resets it on its own — not
+on open, not on close, not on mount. A seeded query survives opening the
+popover and filters the list right away. Without the binding nothing outside
+tracks the query, so it still clears each time the popover opens.
+
 ## Reading the Selected Options
 
 `@update:modelValue` gives the selected values. `@update:selectedOptions` fires

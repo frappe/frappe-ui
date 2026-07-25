@@ -217,6 +217,81 @@ describe('MultiSelect', () => {
     cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
   })
 
+  // A bound `v-model:query` belongs to the consumer — the component must never
+  // reset it on its own. Unbound, the query still clears on every open.
+  describe('query ownership', () => {
+    const BoundQuery = defineComponent({
+      setup() {
+        const query = ref('ba')
+        return { query }
+      },
+      render() {
+        return h('div', [
+          h(MultiSelect, {
+            options,
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          }),
+          h('span', { 'data-cy': 'query' }, this.query),
+        ])
+      },
+    })
+
+    it('keeps a seeded v-model:query when the popover opens, and filters with it', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+
+      cy.get('[data-slot="input"]').should('have.value', 'ba')
+      cy.get('[data-cy="query"]').should('have.text', 'ba')
+      cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    })
+
+    it('keeps a seeded v-model:query across close and reopen', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('[data-cy="query"]').should('have.text', 'ba')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').should('have.value', 'ba')
+      cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    })
+
+    it('never emits an empty update:query just from opening', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options,
+          query: 'ba',
+          'onUpdate:query': cy.spy().as('onQuery'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role=option]').should('have.length', 1)
+      cy.get('@onQuery').should('not.have.been.called')
+    })
+
+    it('still resets the query on open when it is not bound', () => {
+      cy.mount(MultiSelect, { props: { options } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('ba')
+      cy.get('[role=option]').should('have.length', 1)
+
+      cy.get('[data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').should('have.value', '')
+      cy.get('[role=option]').should('have.length', 3)
+    })
+  })
+
   it('clear and selectAll via default footer', () => {
     cy.mount(MultiSelect, {
       props: {

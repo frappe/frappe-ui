@@ -75,6 +75,11 @@ export interface MultiSelectProps extends InputLabelingProps {
   /**
    * Controls the in-popover search query. Optional — the component owns the
    * query when this is not bound, so `v-model:query` is never required.
+   *
+   * When it is bound the consumer owns the query: the component never resets
+   * it on its own — not on open, not on close, not on mount. Only typing (or
+   * the `setQuery` slot prop) changes it, and a seeded query filters the list
+   * immediately. Unbound, the query still clears every time the popover opens.
    */
   query?: string
 

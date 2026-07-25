@@ -105,7 +105,15 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Controls the popover visibility. */
   open?: boolean
 
-  /** Controls the search query. Optional — the combobox owns it otherwise. */
+  /**
+   * Controls the search query. Optional — the combobox owns it otherwise.
+   *
+   * When it is bound the consumer owns the query: the combobox never resets it
+   * on its own — not on open, not on close, not on mount. It still follows the
+   * committed option's label in `trigger="input"` mode, where the input is the
+   * value display rather than a filter. Unbound, `trigger="button"` mode still
+   * clears the search box every time the popover opens.
+   */
   query?: string
 
   /** Opens the popover when the input receives focus. */

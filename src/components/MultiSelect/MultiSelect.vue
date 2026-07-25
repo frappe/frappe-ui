@@ -15,6 +15,7 @@ import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import {
   InputDescription,
@@ -73,6 +74,9 @@ const open = defineModel<boolean>('open', { default: false })
 // Optional outside-in control of the search box. Unbound, `defineModel`
 // keeps the value local, so `v-model:query` is never required.
 const query = defineModel<string>('query', { default: '' })
+// Bound, the query is the consumer's — the component never resets it (see the
+// open watcher at the bottom of this block).
+const isQueryBound = useIsModelBound('query')
 
 const hasTypedSinceOpen = ref(false)
 
@@ -313,6 +317,16 @@ watch(
 
 watch(open, (isOpen, wasOpen) => {
   if (isOpen === wasOpen) return
+
+  // A bound `query` belongs to the consumer: resetting it here would emit
+  // `update:query('')` and wipe whatever they seeded. Leave it alone and treat
+  // a surviving query as an active filter, otherwise the search box would read
+  // "ba" over an unfiltered list.
+  if (isQueryBound()) {
+    hasTypedSinceOpen.value = query.value !== ''
+    return
+  }
+
   if (query.value !== '') query.value = ''
   hasTypedSinceOpen.value = false
 })

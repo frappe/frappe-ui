@@ -183,6 +183,128 @@ describe('Combobox', () => {
     })
   })
 
+  // A bound `v-model:query` belongs to the consumer — the combobox must never
+  // reset it on its own. Unbound, button mode still clears it on every open.
+  describe('query ownership', () => {
+    const BoundQuery = defineComponent({
+      setup() {
+        const query = ref('ma')
+        return { query }
+      },
+      render() {
+        return h('div', [
+          h(Combobox, {
+            options: fruits,
+            trigger: 'button',
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          }),
+          h('span', { 'data-cy': 'query' }, this.query),
+        ])
+      },
+    })
+
+    it('keeps a seeded v-model:query when the popover opens, and filters with it', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('keeps a seeded v-model:query across close and reopen', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('never emits an empty update:query just from opening', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          trigger: 'button',
+          query: 'ma',
+          'onUpdate:query': cy.spy().as('onUpdateQuery'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role="option"]').should('have.length', 1)
+      cy.get('@onUpdateQuery').should('not.have.been.called')
+    })
+
+    it('still resets the query on open when it is not bound (button mode)', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, trigger: 'button' },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').type('ma')
+      cy.get('[role="option"]').should('have.length', 1)
+
+      cy.get('[data-slot="search"] [data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        '',
+      )
+      cy.get('[role="option"]').should('have.length', 3)
+    })
+
+    it('input mode keeps following the committed label with a bound query', () => {
+      const InputModeBoundQuery = defineComponent({
+        setup() {
+          const query = ref('ma')
+          const value = ref<string | null>(null)
+          return { query, value }
+        },
+        render() {
+          return h(Combobox, {
+            options: fruits,
+            open: true,
+            modelValue: this.value,
+            'onUpdate:modelValue': (v: any) => {
+              this.value = v
+            },
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          })
+        },
+      })
+
+      cy.mount(InputModeBoundQuery)
+
+      cy.get('[role="combobox"]').should('have.value', 'ma')
+      cy.contains('[role="option"]', 'Mango').click()
+      cy.get('[role="combobox"]').should('have.value', 'Mango')
+    })
+  })
+
   describe('filterable', () => {
     it('filterable=false keeps every option visible while typing', () => {
       cy.mount(Combobox, {
