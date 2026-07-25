@@ -6,8 +6,8 @@ before the tag rather than carried through `1.x`.
 
 This covers whole exports — components, composables, and the one prop value
 that pulls a component in with it. Member-level deprecations (individual props,
-slots, and emits on components that survive) are tracked in each component's
-spec under its own "Removed" or "Deprecate" section, not here.
+slots, and emits on components that survive) are tracked separately — for the
+selection family, in [`selection-removals.md`](./selection-removals.md).
 
 `Autocomplete` is the largest item and has its own doc:
 [`autocomplete-removal.md`](./autocomplete-removal.md).

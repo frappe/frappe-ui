@@ -14,6 +14,10 @@ This directory contains the active planning docs for `frappe-ui` v1.
   - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
 - [`deprecated-removals.md`](./deprecated-removals.md)
   - The ADR-0008 work list: every deprecated export that must be deleted before `1.0.0`, verified against `src/index.ts`, with what replaces each one.
+- [`selection-removals.md`](./selection-removals.md)
+  - Members deleted from `Select`, `Combobox`, and `MultiSelect` before
+    `1.0.0`, with what replaces each one. Member-level counterpart to
+    `deprecated-removals.md`, which covers whole exports.
 - [`autocomplete-removal.md`](./autocomplete-removal.md)
   - Pending removal of `Autocomplete`: internal blockers, verified external call-site counts, and what must happen before a removal date is set. The largest single item on that list.
 

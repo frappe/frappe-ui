@@ -5,9 +5,13 @@ The contract for the three components that pick a value: `Select`,
 vocabulary, a set of styling hooks, and their popover behavior. Where a rule
 below is not marked as component-specific, it holds for all three.
 
-Each component also has its own spec with the full prop and slot list:
-[`select.md`](./select.md), [`combobox.md`](./combobox.md),
-[`multiselect.md`](./multiselect.md).
+The full prop, emit, and slot list for each component is generated from its
+source and lives beside it:
+[`Select.api.md`](../src/components/Select/Select.api.md),
+[`Combobox.api.md`](../src/components/Combobox/Combobox.api.md),
+[`MultiSelect.api.md`](../src/components/MultiSelect/MultiSelect.api.md).
+Read those for names, types, and defaults. This document does not repeat them,
+so it cannot fall behind them.
 
 ## Choosing one
 
@@ -277,6 +281,96 @@ Grouping `Select` later would be additive and would use the same
 All three share `size` (`sm`/`md`/`lg`/`xl`), `variant`
 (`subtle`/`outline`/`ghost`), `placeholder`, `disabled`, `emptyText`, the
 labeling props, and the four positioning props.
+
+## Select
+
+`Select` takes a flat array. A `{ group, options }` entry has no `value`, so it
+is dropped on the way in rather than rendered as a group. There is no search
+box to narrow a long list either, so the list has to be short enough to scan.
+Picking a row closes the menu.
+
+## MultiSelect
+
+The trigger collapses the selection into one line: the placeholder when
+nothing is picked, the option's label when exactly one is, and `"N selected"`
+from two upward. `#summary` replaces that text and receives it as `summary`,
+so you can render comma-separated labels and still fall back.
+
+The trigger reserves enough width for the placeholder and for the longest
+`"N selected"` it could ever show, so it does not jump as the count climbs from
+one digit to two. `#summary` turns that off — the trigger becomes
+content-sized, so give it a width if you need the layout to hold still.
+
+With exactly one option selected the trigger reuses `#item-prefix`, or the
+option's `icon`, to draw the prefix — the same renderer as the row, without a
+second slot. `#prefix` takes over the whole prefix area instead, for any number
+of selections, which is where stacked avatars go.
+
+Picking a row does not close the popover. `update:selectedOptions` fires
+alongside `update:modelValue`, carrying your original option objects rather
+than normalized copies, so extra fields survive.
+
+The footer holds Clear All and Select All. `#footer` replaces it and receives
+`selectAll` next to `clear`. `selectAll` skips disabled options.
+
+For a chips trigger, take `#trigger` and render `selectedOptions` yourself.
+[`TagsTrigger.vue`](../src/components/MultiSelect/stories/TagsTrigger.vue) is
+the worked example.
+
+## Combobox
+
+`Combobox` has two trigger modes, and they are more different than the prop
+name suggests.
+
+In the default `trigger="input"` mode the trigger is the search input. Typing
+filters the list, and the same input displays the committed value, so it
+follows the selected option's label. Emptying it clears the selection. The
+popover is at least as wide as the trigger.
+
+Set `trigger="button"` and the trigger becomes a button showing the selected
+label or the placeholder, with the search box moved into the popover header
+where it takes focus on open. The popover sizes itself. The search box here is
+only a filter, so emptying it leaves the value alone. A `#trigger` slot puts
+the component in button mode whatever the prop says, since the caller has
+replaced the trigger wholesale.
+
+The button's prefix resolves in order: `#item-prefix` with the selected option
+when there is one, then that option's `icon`, then `#prefix` when nothing is
+selected.
+
+Typing only ever changes the query. The value changes when a row is chosen, or
+when `allowCustomValue` accepts what was typed.
+
+`allowCustomValue` is free-form acceptance. With it on, a query that matches
+nothing can become the value: a "Create …" row appears, Enter or a click
+commits the raw string, and an unknown `modelValue` set from outside is kept
+rather than dropped. It is suspended while `loading`.
+
+Custom rows are the richer version of the same idea, and the two compose. A
+row is `{ type: 'custom', key, label, onClick }`. Choosing one calls
+`onClick({ query })` and closes the popover unless `keepOpen` is set. It never
+sets the value, never shows a checkmark, and never comes back as
+`selectedOption`.
+
+`condition` decides when a custom row shows, and it outranks filtering. It runs
+before the user has typed anything, and it keeps running under
+`filterable="false"` — it is your visibility rule, not a search. A custom row
+with no `condition` is filtered by label like any other row, and does switch
+off with `filterable="false"`.
+
+```ts
+{
+  type: 'custom',
+  key: 'create',
+  label: 'Create new',
+  condition: ({ query }) => query.length > 0,
+  onClick: ({ query }) => createItem(query),
+}
+```
+
+`update:selectedOption` fires beside `update:modelValue` with the resolved
+option, or `null` when the value is cleared. `focus` and `blur` forward the
+input's own events.
 
 ## What this family does not do
 

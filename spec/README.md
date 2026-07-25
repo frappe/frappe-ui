@@ -25,9 +25,6 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`popover.md`](./popover.md)
 - [`hover-card.md`](./hover-card.md)
 - [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
-  - [`select.md`](./select.md)
-  - [`combobox.md`](./combobox.md)
-  - [`multiselect.md`](./multiselect.md)
 - [`dropdown.md`](./dropdown.md) — the action menu
 - [`item-list-row.md`](./item-list-row.md) — the row shell both families use
 

@@ -69,7 +69,7 @@ const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
  * Reka's `SelectContent` only honours `side` / `align` / `sideOffset` in
  * `popper` mode. Select's default is `item-aligned` — the menu is anchored
  * over the trigger so the selected row lands on the value, macOS-style — and
- * `select.md` commits to that staying the default for callers who never pass
+ * `spec/selection.md` commits to that staying the default for callers who never pass
  * positioning props. So the mode follows the props: the moment any of them is
  * set, positioning becomes standard popper placement.
  */
