@@ -1153,4 +1153,33 @@ describe('Combobox', () => {
         .and('have.attr', 'data-invalid', 'true')
     })
   })
+
+  // The selection family publishes these as public styling hooks. They are
+  // frozen at 1.0.0 — see src/components/shared/selection/types.ts.
+  describe('styling hooks', () => {
+    it('marks the panel shell with data-slot="content-body"', () => {
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"] [data-slot="content-body"]').should('exist')
+    })
+
+    it('marks the content element with data-selection', () => {
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"]')
+        .should('have.attr', 'data-selection')
+        .and('eq', '')
+    })
+
+    it('sets data-loading on the content element only while loading', () => {
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits, loading: true },
+      })
+      // Present-but-empty while loading — match on presence, not a value.
+      cy.get('[data-slot="content"]')
+        .should('have.attr', 'data-loading')
+        .and('eq', '')
+
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"]').should('not.have.attr', 'data-loading')
+    })
+  })
 })

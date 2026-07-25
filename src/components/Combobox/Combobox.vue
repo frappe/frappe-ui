@@ -688,8 +688,10 @@ defineSlots<ComboboxSlots>()
         <ComboboxPortal :to="portalTo">
           <ComboboxContent
             data-slot="content"
+            data-selection
             :data-variant="variant"
             :data-size="size"
+            :data-loading="loading ? '' : undefined"
             :class="[
               'z-[100]',
               !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',

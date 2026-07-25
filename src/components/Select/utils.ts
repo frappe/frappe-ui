@@ -14,7 +14,7 @@ export const EMPTY_VALUE_PREFIX = '__frappe_ui_select_empty__'
 /**
  * Inner padding for the trigger's value area. Mirrors the px portion of
  * `triggerSizeClasses` and is used to align the absolutely-positioned
- * trigger-value overlay with the rest of the trigger content.
+ * `SelectValue` measurement overlay with the rest of the trigger content.
  */
 export function triggerContentPaddingClasses(size: SelectionSize) {
   return {

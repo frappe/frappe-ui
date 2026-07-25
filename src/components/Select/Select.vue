@@ -317,8 +317,14 @@ defineExpose(exposed)
       >
         <template v-if="$slots.trigger">
           <slot name="trigger" v-bind="controlSlotProps" />
+          <!--
+          Invisible measurement overlay. reka's item-aligned positioning
+          anchors the menu on the trigger's `SelectValue` rect, which a custom
+          `#trigger` would otherwise remove. Internal plumbing only — it
+          deliberately carries no `data-slot`, so how Select measures the
+          trigger stays free to change after 1.0.0.
+        -->
           <div
-            data-slot="trigger-value"
             :class="[
               'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
               triggerContentPadding,

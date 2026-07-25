@@ -356,6 +356,22 @@ describe('Select', () => {
       .and('include', 'min-width')
   })
 
+  it('publishes no data-slot for the custom-trigger measurement overlay', () => {
+    // The invisible SelectValue overlay is internal plumbing for reka's
+    // item-aligned measurement. It must stay in the DOM but must not carry a
+    // public marker — see src/components/shared/selection/types.ts.
+    cy.mount(Select, {
+      props: { options, modelValue: 'def' },
+      slots: {
+        trigger: () => h('div', { 'data-cy': 'trigger-content' }, 'Pick one'),
+      },
+    })
+
+    cy.get('[data-slot="trigger-value"]').should('not.exist')
+    // The overlay element itself is still there, doing its job.
+    cy.get('[data-slot="trigger"] [aria-hidden="true"]').should('exist')
+  })
+
   it('opens without an enter/exit animation (instant motion)', () => {
     // The menu is anchored item-aligned over the trigger, so a
     // scale-from-trigger entrance would read as a glitch. Both pointer and
