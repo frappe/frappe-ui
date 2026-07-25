@@ -67,7 +67,13 @@ export function isSelectableOption(
 export function resolveItemSlotsFromRaw(
   raw: ComboboxSelectableOption | ComboboxCustomOption,
 ): ResolvedItemSlots {
-  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(raw, 'Combobox')
+  // Only `slots` is passed through: the deprecated `render` alias that the
+  // shared helper still resolves for MultiSelect is gone from Combobox's
+  // public option shape.
+  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(
+    { slots: raw.slots as ResolvedItemSlots | undefined },
+    'Combobox',
+  )
 }
 
 export function normalizeSimpleOption(
@@ -88,7 +94,6 @@ export function normalizeSimpleOption(
     return {
       ...option,
       type: 'custom',
-      slot: option.slot ?? option.slotName,
       resolvedSlots: resolveItemSlotsFromRaw(option),
     }
   }
@@ -100,7 +105,6 @@ export function normalizeSimpleOption(
   return {
     ...option,
     type: 'option',
-    slot: option.slot ?? option.slotName,
     resolvedSlots: resolveItemSlotsFromRaw(option),
   }
 }
@@ -159,19 +163,42 @@ export function matchesSelectableOption(
   item: NormalizedSelectableOption,
   currentQuery: string,
 ) {
-  return matchesByLabelOrValue(item, currentQuery)
+  // `value` widens to `string | number`; coerce so numeric ids stay searchable.
+  return matchesByLabelOrValue(
+    { label: item.label, value: String(item.value) },
+    currentQuery,
+  )
 }
 
+/**
+ * Consumer-declared visibility for a `type: 'custom'` row.
+ *
+ * `condition` is authoritative and runs even before the user has typed, so a
+ * custom row can gate itself on selection state. It is NOT client filtering,
+ * which is why `filterable: false` does not switch it off.
+ */
+export function customOptionIsVisible(
+  item: NormalizedCustomOption,
+  currentQuery: string,
+) {
+  if (!item.condition) return true
+  return item.condition(buildCustomOptionContext(currentQuery))
+}
+
+/**
+ * Client-side query filter for custom rows that declare no `condition`.
+ *
+ * This is ordinary substring filtering, so it runs on the same path as
+ * selectable rows and is disabled by `filterable: false` — otherwise a
+ * server-search combobox would silently lose its condition-less action rows.
+ * Rows that declare a `condition` opt out entirely: `condition` already
+ * decided, and filtering again would override it.
+ */
 export function matchesCustomOption(
   item: NormalizedCustomOption,
   currentQuery: string,
 ) {
-  const context = buildCustomOptionContext(currentQuery)
-
-  if (item.condition) {
-    return item.condition(context)
-  }
-
+  if (item.condition) return true
   if (!currentQuery) return true
 
   return item.label.toLowerCase().includes(currentQuery.toLowerCase())
@@ -180,7 +207,7 @@ export function matchesCustomOption(
 export function buildCustomOptionContext(
   query: string,
 ): ComboboxCustomOptionContext {
-  return { query, searchTerm: query }
+  return { query }
 }
 
 export const inputClasses =

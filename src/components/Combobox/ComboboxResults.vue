@@ -11,7 +11,11 @@ import LoadingIndicator from '../LoadingIndicator.vue'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
-import type { ComboboxItemSlotProps, ComboboxSize } from './types'
+import type {
+  ComboboxItemSlotProps,
+  ComboboxOptionValue,
+  ComboboxSize,
+} from './types'
 import {
   CREATE_OPTION_VALUE,
   EMPTY_SELECTABLE_VALUE_PREFIX,
@@ -35,7 +39,7 @@ const props = withDefaults(
     groups: NormalizedGroup[]
     size: ComboboxSize
     query: string
-    model: string | null
+    model: ComboboxOptionValue | null
     loading: boolean
     emptyText: string
     showCreateOption: boolean
@@ -67,32 +71,13 @@ function getItemSlotProps(item: NormalizedItem): ComboboxItemSlotProps {
   }
 }
 
-function getLegacySlotProps(item: NormalizedItem) {
-  return {
-    ...getItemSlotProps(item),
-    option: item,
-    searchTerm: props.query,
-  }
-}
-
 function getDynamicItemSlotName(item: NormalizedItem) {
   return item.slot ? `item-${item.slot}` : undefined
-}
-
-function getLegacyDirectSlotName(item: NormalizedItem) {
-  return item.slotName
 }
 
 function shouldUseDynamicItemSlot(item: NormalizedItem) {
   const slotName = getDynamicItemSlotName(item)
   return Boolean(slotName && props.slotFns[slotName])
-}
-
-function shouldUseLegacyDirectSlot(item: NormalizedItem) {
-  const slotName = getLegacyDirectSlotName(item)
-  return Boolean(
-    slotName && !shouldUseDynamicItemSlot(item) && props.slotFns[slotName],
-  )
 }
 
 function getGroupKey(group: NormalizedGroup, index: number) {
@@ -121,7 +106,6 @@ function getItemTextValue(item: NormalizedItem) {
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
 }
-
 </script>
 
 <template>
@@ -213,9 +197,8 @@ function handleSelect(item: NormalizedItem, event: Event) {
                      is intentionally more specific than the generic
                      `#item` fallback.
                   2. global `#item` template slot
-                  3. item.slots.item (or legacy function-form item.render)
-                  4. legacy per-item direct slot (`#<slotName>`)
-                  5. default row shell
+                  3. item.slots.item
+                  4. default row shell
               -->
               <component
                 :is="ItemSlotRender"
@@ -229,13 +212,6 @@ function handleSelect(item: NormalizedItem, event: Event) {
                 v-else-if="item.resolvedSlots.item"
                 :render="item.resolvedSlots.item"
                 :slot-props="getItemSlotProps(item)"
-              />
-
-              <component
-                :is="ItemSlotRender"
-                v-else-if="shouldUseLegacyDirectSlot(item)"
-                :render="slotFns[getLegacyDirectSlotName(item)!]!"
-                :slot-props="getLegacySlotProps(item)"
               />
 
               <ItemListRow

@@ -16,6 +16,26 @@ Button-triggered combobox via `trigger="button"`. The search input moves into th
 
 <ComponentPreview name="Combobox-EmojiPicker" layout="stacked" />
 
+## Server Search
+Combobox substring-filters `options` on the client as soon as the user types. When the options already come from a server search, set `:filterable="false"` so the list is shown exactly as the backend returned it — otherwise fuzzy, ranked, or id-based matches are silently dropped by a second literal substring pass on the client.
+
+```vue
+<Combobox
+  v-model="value"
+  v-model:query="query"
+  :options="results"
+  :loading="loading"
+  :filterable="false"
+/>
+```
+
+`v-model:query` is optional — `#search-prefix` / `#search-suffix` and the `#footer` slot props also hand out the current query. A `type: 'custom'` row's `condition` callback is consumer-declared visibility rather than client filtering, so it keeps running with `filterable: false`.
+
+## Search Row
+In `trigger="button"` mode the search input moves into the popover header. That row carries `data-slot="search"` and exposes `#search-prefix` and `#search-suffix`, both receiving `{ query, setQuery, disabled, focus }`.
+
+`hideSearch` removes the row entirely for short static lists. The `#search-*` slots live inside the row, so they disappear with it. In the default `trigger="input"` mode there is no in-popover row at all and `hideSearch` has no effect — the trigger *is* the search input.
+
 ## Grouped Options
 Options split into named groups. `#item-prefix` renders a colored swatch per row.
 

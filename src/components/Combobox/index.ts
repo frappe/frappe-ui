@@ -1,2 +1,25 @@
 export { default as Combobox } from './Combobox.vue'
-export * from './types'
+export type {
+  ComboboxControlSlotProps,
+  ComboboxCustomOption,
+  ComboboxCustomOptionContext,
+  ComboboxEmits,
+  ComboboxEmptySlotProps,
+  ComboboxGroupLabelSlotProps,
+  ComboboxGroupedOption,
+  ComboboxItemSlotProps,
+  ComboboxItemSlots,
+  ComboboxOption,
+  ComboboxOptionValue,
+  ComboboxProps,
+  ComboboxSearchSlotProps,
+  ComboboxSelectableOption,
+  ComboboxSimpleOption,
+  ComboboxSize,
+  ComboboxSlotFn,
+  ComboboxSlots,
+  ComboboxVariant,
+  PopoverAlign,
+  PopoverSide,
+  SelectionExposed,
+} from './types'

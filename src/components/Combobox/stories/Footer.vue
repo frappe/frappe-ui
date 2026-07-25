@@ -41,7 +41,7 @@ const countries = [
       open-on-focus
       class="w-64"
     >
-      <template #footer="{ query, selectedOption, clearSelection, setOpen }">
+      <template #footer="{ query, selectedOption, clear, setOpen }">
         <div
           class="flex items-center justify-between border-t border-outline-gray-1 px-3 py-2 text-sm text-ink-gray-5"
         >
@@ -53,7 +53,7 @@ const countries = [
           <button
             v-if="selectedOption"
             class="text-ink-gray-7 hover:text-ink-gray-8"
-            @click="clearSelection"
+            @click="clear"
           >
             Clear
           </button>
