@@ -103,6 +103,10 @@ describe('Dialog', () => {
 
     cy.mount(Wrapper)
     cy.get('[role=dialog]').should('exist')
+    // `force` is required for any outside target: a modal Reka dialog sets
+    // `pointer-events: none` on <body>, so nothing outside the content is a hit
+    // target. The dismiss itself is driven by DismissableLayer's document-level
+    // pointerdown listener, which still sees the event.
     cy.get('.dialog-overlay').click(0, 0, { force: true })
     cy.get('[role=dialog]').should('not.exist')
   })
@@ -157,11 +161,21 @@ describe('Dialog', () => {
       },
     })
 
+    // Overflow lives on the scroll container, not on the overlay — the overlay
+    // is a bare backdrop so that field pointerdowns never reach its
+    // `pointerdown.left.prevent` handler.
     cy.get('.dialog-overlay').should(($overlay) => {
-      expect($overlay[0].scrollHeight).to.be.greaterThan(
-        $overlay[0].clientHeight,
+      expect($overlay[0].scrollHeight).to.equal($overlay[0].clientHeight)
+    })
+    cy.get('.dialog-scroll-container').should(($scroller) => {
+      expect($scroller[0].scrollHeight).to.be.greaterThan(
+        $scroller[0].clientHeight,
       )
     })
+    // The structural guard for the bug this test covers: nesting the content
+    // back inside the overlay would silently kill click-to-focus again.
+    cy.get('.dialog-scroll-container').find('[role=dialog]').should('exist')
+    cy.get('.dialog-overlay').find('[role=dialog]').should('not.exist')
 
     // Cypress cannot synthesize fully trusted OS-level events, so this guards
     // the click-to-focus behavior contract rather than the exact event chain.
