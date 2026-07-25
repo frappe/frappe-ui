@@ -5,21 +5,25 @@ This directory contains the active planning docs for `frappe-ui` v1.
 ## Start here
 
 - [`plan.md`](./plan.md)
-  - Main source of truth for scope, blockers, component direction, data migration, TextEditor, and release gates.
+  - Main source of truth for scope, blockers, component direction, data
+    migration, TextEditor, and release gates.
 
 ## Supporting docs
 
-- **Migration guide** — published at <https://ui.frappe.io/docs/migration> (source: [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)). Per-component before/after tables for app teams upgrading to v1.
+- **Migration guide** — published at <https://ui.frappe.io/docs/migration>
+  (source:
+  [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)).
+  Per-component before/after tables for app teams upgrading to v1.
 - [`changelog.md`](./changelog.md)
-  - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
+  - Rolling v1 changelog for consumer-facing changes, deprecations, and
+    migration notes.
 - [`deprecated-removals.md`](./deprecated-removals.md)
-  - The ADR-0008 work list: every deprecated export that must be deleted before `1.0.0`, verified against `src/index.ts`, with what replaces each one.
-- [`selection-removals.md`](./selection-removals.md)
-  - Members deleted from `Select`, `Combobox`, and `MultiSelect` before
-    `1.0.0`, with what replaces each one. Member-level counterpart to
-    `deprecated-removals.md`, which covers whole exports.
+  - The ADR-0008 work list: every deprecated export that must be deleted before
+    `1.0.0`, verified against `src/index.ts`, with what replaces each one.
 - [`autocomplete-removal.md`](./autocomplete-removal.md)
-  - Pending removal of `Autocomplete`: internal blockers, verified external call-site counts, and what must happen before a removal date is set. The largest single item on that list.
+  - Pending removal of `Autocomplete`: internal blockers, verified external
+    call-site counts, and what must happen before a removal date is set. The
+    largest single item on that list.
 
 ## Component API contracts
 

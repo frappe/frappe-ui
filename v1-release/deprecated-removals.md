@@ -1,13 +1,14 @@
 # Deprecated exports to remove before `1.0.0`
 
-The work list for [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md):
-nothing marked `@deprecated` ships in `1.0.0`, so everything below is deleted
-before the tag rather than carried through `1.x`.
+The work list for
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md): nothing marked
+`@deprecated` ships in `1.0.0`, so everything below is deleted before the tag
+rather than carried through `1.x`.
 
-This covers whole exports — components, composables, and the one prop value
-that pulls a component in with it. Member-level deprecations (individual props,
-slots, and emits on components that survive) are tracked separately — for the
-selection family, in [`selection-removals.md`](./selection-removals.md).
+This covers whole exports — components, composables, and the one prop value that
+pulls a component in with it. Member-level removals (individual props, slots,
+and emits on components that survive) go in the published migration guide,
+[`docs/content/docs/migration.md`](../docs/content/docs/migration.md).
 
 `Autocomplete` is the largest item and has its own doc:
 [`autocomplete-removal.md`](./autocomplete-removal.md).
@@ -17,36 +18,36 @@ selection family, in [`selection-removals.md`](./selection-removals.md).
 Verified against `src/index.ts` on 2026-07-26. Every row below is **still
 exported today**.
 
-| Export | Lives in | Replaced by | Warns at runtime |
-| --- | --- | --- | --- |
-| `Card` | `src/components/Card.vue` | layout markup, or a domain-specific component in the app | no |
-| `ConfirmDialog` | `src/components/ConfirmDialog.vue` | `dialog.confirm(...)` | no |
-| `confirmDialog` | `src/utils/confirmDialog.js` | `dialog.confirm(...)` | yes |
-| `FeatherIcon` | `src/components/FeatherIcon.vue` | a `lucide-*` string, or the `Icon` component | on feather-name icon props, via `warnFeatherIconUsage` in `src/utils/iconString.ts` — not on the component itself |
-| `Input` | `src/components/Input.vue` | `TextInput` or `FormControl` | yes |
-| `ListItem` | `src/components/ListItem.vue` | list primitives from `frappe-ui/list`, or app-owned row markup | no |
-| `MonthPicker` (whole barrel) | `src/components/MonthPicker/` | `Select` | no |
-| `Toast` (the SFC) | `src/components/Toast/Toast.vue` | the imperative `toast(...)` API | yes |
-| `ThemeSwitcher` (whole barrel) | `src/components/ThemeSwitcher/` | `Select` plus the `useTheme` composable | yes |
-| TextEditor root exports | `src/components/TextEditor/index.ts` | the `frappe-ui/editor` subpath | no |
-| TextEditor extension barrels | `src/components/TextEditor/extensions/{image,suggestion}` | extensions from `frappe-ui/editor` | no |
-| `FormControl type="autocomplete"` | `src/components/FormControl/` (`types.ts` union + `FormControl.vue`) | `Combobox` | yes |
-| `Autocomplete` (whole barrel) | `src/components/Autocomplete/` | `Combobox` (single) / `MultiSelect` (multiple) | yes |
+| Export                            | Lives in                                                             | Replaced by                                                    | Warns at runtime                                                                                                  |
+| --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `Card`                            | `src/components/Card.vue`                                            | layout markup, or a domain-specific component in the app       | no                                                                                                                |
+| `ConfirmDialog`                   | `src/components/ConfirmDialog.vue`                                   | `dialog.confirm(...)`                                          | no                                                                                                                |
+| `confirmDialog`                   | `src/utils/confirmDialog.js`                                         | `dialog.confirm(...)`                                          | yes                                                                                                               |
+| `FeatherIcon`                     | `src/components/FeatherIcon.vue`                                     | a `lucide-*` string, or the `Icon` component                   | on feather-name icon props, via `warnFeatherIconUsage` in `src/utils/iconString.ts` — not on the component itself |
+| `Input`                           | `src/components/Input.vue`                                           | `TextInput` or `FormControl`                                   | yes                                                                                                               |
+| `ListItem`                        | `src/components/ListItem.vue`                                        | list primitives from `frappe-ui/list`, or app-owned row markup | no                                                                                                                |
+| `MonthPicker` (whole barrel)      | `src/components/MonthPicker/`                                        | `Select`                                                       | no                                                                                                                |
+| `Toast` (the SFC)                 | `src/components/Toast/Toast.vue`                                     | the imperative `toast(...)` API                                | yes                                                                                                               |
+| `ThemeSwitcher` (whole barrel)    | `src/components/ThemeSwitcher/`                                      | `Select` plus the `useTheme` composable                        | yes                                                                                                               |
+| TextEditor root exports           | `src/components/TextEditor/index.ts`                                 | the `frappe-ui/editor` subpath                                 | no                                                                                                                |
+| TextEditor extension barrels      | `src/components/TextEditor/extensions/{image,suggestion}`            | extensions from `frappe-ui/editor`                             | no                                                                                                                |
+| `FormControl type="autocomplete"` | `src/components/FormControl/` (`types.ts` union + `FormControl.vue`) | `Combobox`                                                     | yes                                                                                                               |
+| `Autocomplete` (whole barrel)     | `src/components/Autocomplete/`                                       | `Combobox` (single) / `MultiSelect` (multiple)                 | yes                                                                                                               |
 
-Twelve of the thirteen rows come from the one `// Deprecated component
-compatibility` block in `src/index.ts` (lines 103–132). Two rows sit outside
-it and are the easy ones to miss:
+Twelve of the thirteen rows come from the one
+`// Deprecated component compatibility` block in `src/index.ts` (lines 103–132).
+Two rows sit outside it and are the easy ones to miss:
 
 - **`FormControl type="autocomplete"`** is a value in a prop union, not an
   export, so it does not appear in that block. It goes at the same time as
   `Autocomplete` — removing it narrows `FormControl`'s `type` union (a second
-  breaking change) and lets `Autocomplete/deprecationKey.ts` and the
-  `provide()` in `FormControl.vue` disappear with it.
-- **`Autocomplete`** is exported from `src/index.ts:36` among the ordinary form
-  controls and carries no `@deprecated` JSDoc, even though it warns on mount
-  and is the subject of its own removal doc. Either mark it `@deprecated` so
-  ADR-0008 catches it mechanically, or accept that this list is what catches
-  it.
+  breaking change) and lets `Autocomplete/deprecationKey.ts` and the `provide()`
+  in `FormControl.vue` disappear with it.
+- **`Autocomplete`** used to sit among the ordinary form controls in
+  `src/index.ts` with no `@deprecated` JSDoc, even though it warns on mount and
+  has its own removal doc — so ADR-0008's mechanical rule missed the largest
+  removal on the list. It now carries the marker and sits in the deprecated
+  block with everything else.
 
 The TextEditor rows are one deletion each in `src/index.ts`, but seven
 `@deprecated` names behind them (`default`, `TextEditor`,

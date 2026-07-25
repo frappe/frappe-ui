@@ -84,12 +84,133 @@ Behavior changes that apply even if you don't touch your code:
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
 
-| Before                              | After                                 |
-| ----------------------------------- | ------------------------------------- |
-| Dropdown `{ group, items }`         | `{ group, options }`                  |
-| Select `#item-*` slot prop `option` | slot prop `item`                      |
-| chevron / trailing content          | `#suffix` slot (replaces chevron)     |
-| Combobox `createOption`             | `type: 'custom'` option + `condition` |
+Upgrade all three pickers together. They share an option shape and a slot
+vocabulary, and most apps use more than one.
+
+Removed members are deleted, not aliased — a call site that still uses one
+breaks at the tag rather than warning.
+
+### Shared
+
+| Before                                  | After                                        |
+| --------------------------------------- | -------------------------------------------- |
+| Dropdown `{ group, items }`             | `{ group, options }`                         |
+| `#option` slot                          | `#item-label`, plus `#item-prefix` for icons |
+| `option` item slot prop                 | `item`                                       |
+| `clearSelection` / `clearAll` slot prop | `clear`                                      |
+| chevron / trailing content              | `#suffix` slot (replaces the chevron)        |
+
+Option values are `string | number` everywhere. `Select` no longer accepts
+`bigint` or object values.
+
+### Select
+
+| Before                           | After                                                    |
+| -------------------------------- | -------------------------------------------------------- |
+| `displayValue` trigger slot prop | `selectedOption.label`                                   |
+| `data-slot="trigger-value"`      | nothing — it marked an invisible element used to measure |
+
+### Combobox
+
+| Before                                                              | After                                      |
+| ------------------------------------------------------------------- | ------------------------------------------ |
+| `slotName` on custom options                                        | `slot`, which dispatches to `#item-<slot>` |
+| `searchTerm` in the custom-option context                           | `query`                                    |
+| `input` emit                                                        | `@update:query`                            |
+| `render` on options                                                 | `slots`                                    |
+| `placement`, `ComboboxPlacement`                                    | `side` + `align`                           |
+| `createOption`                                                      | `type: 'custom'` option + `condition`      |
+| `reset()` on a template ref                                         | `clear()`                                  |
+| `SimpleOption`, `GroupedOption`, `SelectableOption`, `CustomOption` | the `Combobox`-prefixed names              |
+
+### MultiSelect
+
+| Before                   | After                                                               |
+| ------------------------ | ------------------------------------------------------------------- |
+| `compareFn` prop         | nothing — an option is selected when its `value` is in `modelValue` |
+| `displayValue` slot prop | `summary` on `#summary`, or `selectedOptions`                       |
+| `toggleOpen` slot prop   | `setOpen(boolean)`                                                  |
+
+### Custom rows
+
+`Select` and `MultiSelect` lost `#option`, and `Combobox` lost `render`. They
+were the same idea — hand the whole row to the consumer. All three are replaced
+by region slots on a row the component owns.
+
+```vue
+<!-- Before: one slot for the whole label area -->
+<Select v-model="chartType" :options="options">
+  <template #option="{ option }">
+    <div class="flex items-center gap-2">
+      <component :is="option.icon" class="size-4" />
+      <span>{{ option.label }}</span>
+    </div>
+  </template>
+</Select>
+
+<!-- After: one slot per region -->
+<Select v-model="chartType" :options="options">
+  <template #item-prefix="{ item }">
+    <component :is="item.icon" class="size-4" />
+  </template>
+  <template #item-label="{ item }">{{ item.label }}</template>
+</Select>
+```
+
+An icon is rendered from `option.icon` automatically now, so the common case
+needs no slot at all — set `icon` and drop both templates.
+
+`Combobox`'s `render` moves the same way: the function form becomes
+`slots.item`, and the object form maps to `slots` key for key. Use these for
+lists built in JavaScript, where no template is in reach:
+
+```ts
+const users = fetchedUsers.map((user) => ({
+  label: user.name,
+  value: user.id,
+  slots: {
+    prefix: ({ item }) => h(Avatar, { image: item.image, class: 'size-4' }),
+  },
+}))
+```
+
+Full-row takeover is still there — `slots.item`, or the `#item` template slot.
+
+### Custom options on Combobox
+
+Two renames land on the same option object:
+
+```ts
+// Before
+{
+  type: 'custom',
+  key: 'create-new',
+  slotName: 'create-new',
+  onClick: ({ searchTerm }) => createItem(searchTerm),
+  condition: ({ searchTerm }) => Boolean(searchTerm),
+}
+
+// After
+{
+  type: 'custom',
+  key: 'create-new',
+  slot: 'create-new',
+  onClick: ({ query }) => createItem(query),
+  condition: ({ query }) => Boolean(query),
+}
+```
+
+The slot the row lands in is renamed with it. `#create-new` becomes
+`#item-create-new`, and it receives `{ item, query, selected }` instead of
+`{ option, searchTerm }`. `onClick` and `condition` keep their names.
+
+### If you filter on the server
+
+`Combobox` and `MultiSelect` filter their options in the browser by default.
+When the options already come back from a search endpoint, that filters them a
+second time and drops fuzzy, ranked, or id-based matches. Pass
+`:filterable="false"` to turn it off. Apps that forked the component for this
+reason can move back.
 
 For the deprecated `Autocomplete`, see
 [Autocomplete (deprecated)](#autocomplete-deprecated).
@@ -104,14 +225,14 @@ warning and the new prop wins.
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
 | `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
-| `hideOnBlur`                                       | `dismissible`                                                                                       |
-| `matchTargetWidth`                                 | `matchTriggerWidth`                                                                                 |
-| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                 |
-| `popoverClass`                                     | `data-slot` CSS hooks (no-op + warns)                                                               |
+| `hideOnBlur`                                      | `dismissible`                                                                                      |
+| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                |
+| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                |
+| `popoverClass`                                    | `data-slot` CSS hooks (no-op + warns)                                                              |
 | `transition="default"`                            | built-in motion (no-op)                                                                            |
-| `#target` slot                                     | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
-| `#body` slot                                       | `#default` + `bare` prop (renders without the panel shell)                                          |
-| `#body-main` slot                                  | `#default`                                                                                          |
+| `#target` slot                                    | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
+| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                         |
+| `#body-main` slot                                 | `#default`                                                                                         |
 
 Hover-driven panels move to the new [`HoverCard`](./components/hovercard)
 component, which keeps `hoverDelay` / `leaveDelay` in seconds.
@@ -228,7 +349,8 @@ token migration is not idempotent because some v2 names overlap with v0 names.
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
 `text-xl` → `text-lg`, ...). Apps that still have pre-v2 color tokens can pass
-`--force`, but review the output carefully because color tokens may double-shift.
+`--force`, but review the output carefully because color tokens may
+double-shift.
 
 ## Editor
 
