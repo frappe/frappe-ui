@@ -1,6 +1,6 @@
 # Combobox
 
-Lets users choose from available options or type their own. Provides clear, responsive feedback for every interaction.
+Lets users pick one option from a searchable list. Set `allowCustomValue` when the typed text should be accepted as its own value.
 
 ## Playground
 
@@ -16,29 +16,19 @@ Button-triggered combobox via `trigger="button"`. The search input moves into th
 
 <ComponentPreview name="Combobox-EmojiPicker" layout="stacked" />
 
-## Server Search
-Combobox substring-filters `options` on the client as soon as the user types. When the options already come from a server search, set `:filterable="false"` so the list is shown exactly as the backend returned it — otherwise fuzzy, ranked, or id-based matches are silently dropped by a second literal substring pass on the client.
-
-```vue
-<Combobox
-  v-model="value"
-  v-model:query="query"
-  :options="results"
-  :loading="loading"
-  :filterable="false"
-/>
-```
-
-`v-model:query` is optional — `#search-prefix` / `#search-suffix` and the `#footer` slot props also hand out the current query. A `type: 'custom'` row's `condition` callback is consumer-declared visibility rather than client filtering, so it keeps running with `filterable: false`.
-
-Once bound, the query is yours: the combobox never resets it on its own — not on open, not on close, not on mount, not on `clear()`. In `trigger="button"` mode a seeded query survives opening the popover and filters the list right away, where an unbound query would be cleared on every open. In the default `trigger="input"` mode the input is the value display, so the query keeps following the committed option's label — that is model sync, not a reset.
-
-`clear()` empties the selection and nothing else. In `trigger="button"` mode whatever you typed in the search box stays. In `trigger="input"` mode the input goes blank anyway, because there the query follows the model.
-
 ## Search Row
 In `trigger="button"` mode the search input moves into the popover header. That row carries `data-slot="search"` and exposes `#search-prefix` and `#search-suffix`, both receiving `{ query, setQuery, disabled, focus }`.
 
+<ComponentPreview name="Combobox-SearchSlots" layout="stacked" />
+
 `hideSearch` removes the row entirely for short static lists. The `#search-*` slots live inside the row, so they disappear with it. In the default `trigger="input"` mode there is no in-popover row at all and `hideSearch` has no effect — the trigger *is* the search input.
+
+## Server Search
+Fetch options from a server as the user types. Listen to `@update:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Three things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, and merge the selected item into the options array so the trigger stays resolvable after the query narrows the list.
+
+<ComponentPreview name="Combobox-ServerSearch" layout="stacked" />
+
+A `type: 'custom'` row's `condition` callback is consumer-declared visibility rather than client filtering, so it keeps running with `filterable: false`.
 
 ## Grouped Options
 Options split into named groups. `#item-prefix` renders a colored swatch per row.
@@ -76,7 +66,7 @@ The `#footer` slot renders below the list and stays pinned to the bottom of the 
 <ComponentPreview name="Combobox-Footer" layout="stacked" />
 
 ## In Dialog
-Combobox rendered inside a Dialog. Verifies focus restores to the trigger after the popover closes, even when wrapped by the Dialog's focus scope.
+Combobox inside a Dialog. Focus returns to the trigger when the popover closes, even inside the Dialog's focus scope, so no extra wiring is needed.
 
 <ComponentPreview name="Combobox-InDialog" layout="stacked" />
 
@@ -84,5 +74,41 @@ Combobox rendered inside a Dialog. Verifies focus restores to the trigger after 
 `Combobox` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the input.
 
 <ComponentPreview name="Combobox-Labeling" />
+
+## Template Ref
+A template ref exposes `{ clear, focus }` — the same shape as `Select` and `MultiSelect`. `focus()` moves focus to the input in `trigger="input"` mode, and to the button in `trigger="button"` mode.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const picker = useTemplateRef('picker')
+
+function reset() {
+  picker.value?.clear()
+  picker.value?.focus()
+}
+</script>
+
+<template>
+  <Combobox ref="picker" v-model="value" :options="options" />
+</template>
+```
+
+`clear()` empties the selection and nothing else. In `trigger="button"` mode whatever you typed in the search box stays. In `trigger="input"` mode the input goes blank anyway, because there the query follows the model.
+
+## Notes
+
+- `v-model:query` is optional. `#search-prefix`, `#search-suffix`, and
+  `#footer` all hand out the current query, and `@update:query` alone is enough
+  just to observe typing.
+- In `trigger="input"` mode the input is the value display, so an unbound query
+  keeps following the committed option's label — that is model sync, not a
+  reset.
+- Use `#item-prefix`, `#item-label`, and `#item-suffix` to customize the
+  standard option row; reach for `#item` only when you need to replace the row
+  shell too.
+- For a single choice with no search, use [`Select`](./select); for several
+  values, use [`MultiSelect`](./multiselect).
 
 <!-- @include: ./Combobox.api.md -->

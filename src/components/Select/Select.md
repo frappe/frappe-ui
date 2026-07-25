@@ -31,14 +31,30 @@ The `#footer` slot renders below the option list and stays pinned to the bottom 
 
 <ComponentPreview name="Select-Labeling" />
 
+## Template Ref
+A template ref exposes `{ clear, focus }` — the same shape as `Combobox` and `MultiSelect`. `clear()` empties the selection; `focus()` moves focus to the trigger.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const picker = useTemplateRef('picker')
+
+function reset() {
+  picker.value?.clear()
+  picker.value?.focus()
+}
+</script>
+
+<template>
+  <Select ref="picker" v-model="value" :options="options" />
+</template>
+```
+
 ## Notes
 
-- Prefer `#item-prefix`, `#item-label`, and `#item-suffix` when you want to
-  customize the standard option row; reach for `#item` only when you need to
-  replace the row shell too.
 - Use `v-model:open` when a parent owns the menu state; use `setOpen` from the
   slot props when the code lives inside `#trigger` or `#footer`.
-- A template ref exposes `{ clear, focus }`.
 - By default, `Select` sizes itself to fit its option content. Set
   `class="w-full"` when you want a full-width trigger.
 - `Select` accepts flat options only — no groups. Empty and nullish options are
@@ -46,5 +62,7 @@ The `#footer` slot renders below the option list and stays pinned to the bottom 
 - The menu is placed item-aligned (anchored over the trigger) by default.
   Passing `side`, `align`, or `offset` switches it to standard popper
   placement; `portalTo` changes the teleport target either way.
+- For a searchable single-choice picker, use [`Combobox`](./combobox); for
+  several values, use [`MultiSelect`](./multiselect).
 
 <!-- @include: ./Select.api.md -->
