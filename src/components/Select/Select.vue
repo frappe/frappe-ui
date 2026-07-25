@@ -245,7 +245,12 @@ const displayValue = computed(() => {
 // longer options (Linear-style). Trigger width shifts as the value changes.
 const selectSizingText = computed(() => displayValue.value || props.placeholder)
 
-function getOptionSlotName(option: SelectNormalizedOption) {
+// Return type is annotated, not inferred: `SelectSlots` keys its dynamic
+// entries as `` `item-${string}` ``, and a plain inferred `string` cannot
+// index that.
+function getOptionSlotName(
+  option: SelectNormalizedOption,
+): `item-${string}` | undefined {
   return option.slot ? `item-${option.slot}` : undefined
 }
 

@@ -159,6 +159,16 @@ export interface MultiSelectSearchSlotProps {
   focus: (options?: FocusOptions) => void
 }
 
+/**
+ * `#footer` gets the shared control shape plus one addition, so it is named
+ * for the same reason `MultiSelectSummarySlotProps` is: a consumer annotating
+ * a footer handler needs something to import.
+ */
+export interface MultiSelectFooterSlotProps extends MultiSelectSlotProps {
+  /** Selects every enabled option across all groups. */
+  selectAll: () => void
+}
+
 export interface MultiSelectSummarySlotProps extends MultiSelectSlotProps {
   /** Default label text the trigger would render (e.g. placeholder,
    * single selected label, or `"N selected"`). Use it as a fallback. */
@@ -249,12 +259,7 @@ interface MultiSelectFixedSlots {
    * Replaces the default Clear All / Select All footer. Receives the shared
    * control slot props plus `selectAll`.
    */
-  footer?: (
-    props: MultiSelectSlotProps & {
-      /** Selects every enabled option across all groups. */
-      selectAll: () => void
-    },
-  ) => any
+  footer?: (props: MultiSelectFooterSlotProps) => any
 
   /** Replaces the entire row. */
   item?: (props: MultiSelectItemSlotProps) => any

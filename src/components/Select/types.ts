@@ -107,7 +107,12 @@ export interface SelectItemSlotProps {
   selected: boolean
 }
 
-export interface SelectSlots {
+/**
+ * Fixed slot names. Kept separate from `SelectSlots` so the dynamic
+ * `` `item-${string}` `` index signature can be intersected in without
+ * constraining names that don't match the pattern.
+ */
+interface SelectFixedSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: SelectTriggerSlotProps) => any
 
@@ -134,6 +139,24 @@ export interface SelectSlots {
    */
   item?: (props: SelectItemSlotProps) => any
 
+  /** Fallback content rendered when no options are available. */
+  empty?: () => any
+
+  /** Content rendered below the option list. Stays pinned below the
+   * scrollable options. Receives the same shape as `#trigger`. */
+  footer?: (props: SelectSlotProps) => any
+}
+
+/**
+ * Item slot names: the three fixed regions of the row shell, plus any
+ * `#item-<name>` dispatched from an option's `slot` field.
+ *
+ * The index signature is deliberately narrowed to `` `item-${string}` `` —
+ * `Select` resolves `option.slot` to `` `item-${option.slot}` ``, so this is
+ * exactly the runtime behavior, and every fixed slot name stays typechecked
+ * instead of every typo compiling clean.
+ */
+interface SelectItemSlotsByName {
   /** Content rendered before the standard option label. */
   'item-prefix'?: (props: SelectItemSlotProps) => any
 
@@ -143,15 +166,13 @@ export interface SelectSlots {
   /** Content rendered after the standard option label. */
   'item-suffix'?: (props: SelectItemSlotProps) => any
 
-  /** Fallback content rendered when no options are available. */
-  empty?: () => any
-
-  /** Content rendered below the option list. Stays pinned below the
-   * scrollable options. Receives the same shape as `#trigger`. */
-  footer?: (props: SelectSlotProps) => any
-
-  [slotName: string]: ((props: any) => any) | undefined
+  /** Per-option dynamic slot, selected by the option's `slot` field. */
+  [slotName: `item-${string}`]:
+    | ((props: SelectItemSlotProps) => any)
+    | undefined
 }
+
+export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
 export interface SelectEmits {
   /** Fired when the selected value changes. */

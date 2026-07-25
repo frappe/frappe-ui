@@ -491,7 +491,8 @@ payload-identity rule in §6.6.
 | `setOpen()` in slot props | **add** | yes | yes |
 | `selectedOption(s)` | singular | plural | singular |
 | `displayValue` | **remove** | **remove** | keep (input mode needs it) |
-| `#item`, `#group-label` | **add** | yes | yes |
+| `#item` | **add** | yes | yes |
+| `#group-label` | n/a — no grouping (§7.1) | yes | yes |
 | `#search-prefix` / `#search-suffix` | n/a | **add (#856)** | **add (#856)** |
 | `#summary` | no | yes | no |
 | exposed `{ clear, focus }` | **add** | **add** | **rename `reset`** |
@@ -803,6 +804,97 @@ the migration guide. `dropdown.md` and other sub-specs should be checked for
 the same assumption.
 
 ---
+
+## 7. Implementation record
+
+Where the shipped implementation departed from this document, and why. Written
+during implementation, not before it.
+
+### 7.1 `Select` has no grouped options, so it gets no `#group-label`
+
+§4 originally listed `#group-label` as an addition for `Select`. It cannot have
+one: `SelectOption` is flat, the template iterates a single list with no Reka
+`SelectGroup` / `SelectLabel`, and `spec/select.md` states Select accepts flat
+options only in v1. `#item` was added; `#group-label` was not. Adding grouping
+to `Select` is separate work, and additive whenever it happens.
+
+### 7.2 `Select`'s positioning props switch it out of item-aligned mode
+
+Reka's `SelectContent` only honours `side` / `align` / `sideOffset` when
+`position="popper"`. `Select` defaults to `item-aligned` — the menu anchored
+over the trigger, macOS-style — and `spec/select.md:90-92` promises callers who
+pass none of these props keep that placement.
+
+So the three props are deliberately **not** given `withDefaults` values. They
+stay `undefined` until set, and the component switches to `position="popper"`
+the moment any one of them is provided, using `'bottom'` / `'start'` / `4` for
+whichever were left out. `portalTo` is a normal default because it applies in
+both modes.
+
+Consequence: the generated `Select.api.md` shows no default for `side`, `align`
+and `offset`, because vue-component-meta reads `withDefaults`. The defaults are
+documented in the prop JSDoc instead.
+
+### 7.3 `MultiSelectFooterSlotProps` survives, named
+
+§3.5 said to delete both bespoke footer types. `Select`'s is gone as specified.
+`MultiSelect`'s came back as
+`MultiSelectFooterSlotProps extends MultiSelectSlotProps { selectAll }`.
+
+The intent of §3.5 was to kill the *bespoke* footer shape — three unrelated
+shapes for one slot name — not to ban a named type for `base + one addition`.
+Deleting it outright left `selectAll` in an anonymous inline intersection, which
+made the component inconsistent with itself (`#summary`'s extra prop kept a
+named type) and gave consumers no type to import when annotating a footer
+handler.
+
+### 7.4 Combobox's custom rows split into two visibility paths
+
+§6.5 left one question open: `matchesCustomOption` substring-matches a custom
+row's label, and it ran through `alwaysMatch`, so `filterable: false` would not
+have disabled it — a server-search Combobox could still lose its action rows.
+
+Resolved by splitting the predicate. A row that declares a `condition` is
+governed only by that condition, which is consumer-declared visibility and
+therefore never filtered. A row without one falls back to a label substring
+match, which is ordinary client filtering and is switched off by
+`filterable: false`.
+
+### 7.5 `v-model:query` emits more often than `update:query` used to
+
+Both `MultiSelect` and `Combobox` now implement `query` with `defineModel`, so
+every internal query write emits — not just the ones that previously did.
+
+On `Combobox` this means an extra emit at mount when a `modelValue` is preset,
+and one after each selection (the query is set to the committed option's label).
+This is required for a bound `v-model:query` to stay in sync and matches how
+`open` already behaves, but it is a real behavior change for existing
+`@update:query` listeners and belongs in the changelog.
+
+**Open — the two components disagree on a seeded query.** `Combobox` guards its
+initial display sync so a consumer-supplied `query` wins on first render.
+`MultiSelect` clears the query when the popover opens (long-standing behavior),
+which now emits `update:query('')` and overwrites whatever the parent seeded.
+Both are defensible alone; together they are inconsistent. Needs a decision
+before the freeze ships.
+
+### 7.6 Styling-contract divergences still outstanding
+
+`data-slot` was unified on `search` and `chevron` was added to `Select` and
+`MultiSelect` per §3.7. Three related divergences surfaced during
+implementation and are **not** yet resolved:
+
+- **`Select` publishes `data-slot="trigger-value"`**, which has no counterpart
+  on the other two. It marks the invisible `SelectValue` overlay that keeps
+  Reka's item-aligned measurement working under a custom `#trigger` — an
+  implementation detail currently exposed as a public styling hook. Candidate
+  for removal from the frozen contract.
+- **`content-body`** exists on `Select` (via `PopoverPanel`) and `MultiSelect`
+  (hand-rolled), but not on `Combobox`.
+- **`MultiSelect`'s content element carries `data-selection` and `data-loading`;
+  `Combobox`'s carries neither.** Same class of problem as `data-slot` — a
+  public styling hook that only one component in the family offers — and not
+  covered anywhere in this document.
 
 ## Task list
 

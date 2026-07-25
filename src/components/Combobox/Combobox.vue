@@ -38,8 +38,8 @@ import type {
   ComboboxSelectableOption,
   ComboboxSlots,
   ComboboxControlSlotProps,
-  SelectionExposed,
 } from './types'
+import type { SelectionExposed } from '../shared/selection/types'
 import {
   buildCustomOptionContext,
   customOptionIsVisible,

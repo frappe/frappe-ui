@@ -6,11 +6,15 @@
  * even after the copies diverge.
  */
 
-/** Popover placement relative to the trigger. */
-export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-
-/** Popover alignment along the chosen `side`. */
-export type PopoverAlign = 'start' | 'center' | 'end'
+/**
+ * Popover placement relative to the trigger, and alignment along that side.
+ *
+ * Re-exported from `Popover` rather than redeclared: a structurally identical
+ * copy compiles fine even after the two drift, which is exactly the failure
+ * this module exists to prevent. `Popover` owns the canonical declaration and
+ * `src/index.ts` publishes it once from there.
+ */
+export type { PopoverAlign, PopoverSide } from '../../Popover/types'
 
 /**
  * The `defineExpose` shape every selection component shares, so a template

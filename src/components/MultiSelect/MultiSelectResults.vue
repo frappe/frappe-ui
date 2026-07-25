@@ -139,7 +139,7 @@ function getItemTextValue(item: NormalizedOption) {
                      is intentionally more specific than the generic
                      `#item` fallback.
                   2. global `#item` template slot
-                  3. item.slots.item (or legacy function-form item.render)
+                  3. item.slots.item
                   4. default row shell
               -->
               <component

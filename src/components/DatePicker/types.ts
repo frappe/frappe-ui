@@ -2,8 +2,11 @@ import type { Dayjs } from 'dayjs/esm'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
-export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-export type PopoverAlign = 'start' | 'center' | 'end'
+// Re-exported, not redeclared: `index.ts` does `export * from './types'`, so a
+// local copy publishes a second structurally identical `PopoverSide` at the
+// package root that can drift from `Popover`'s without a compile error.
+import type { PopoverAlign, PopoverSide } from '../Popover/types'
+export type { PopoverAlign, PopoverSide }
 
 // Shared props for both single date and range pickers
 export interface CommonDatePickerProps extends InputLabelingProps {
@@ -229,9 +232,7 @@ export interface DateRangePickerActionsSlotProps {
    * Commits both endpoints atomically. Normalizes order so the earlier
    * date becomes `from`. Use for fixed-window presets ("Last 7 days").
    */
-  setRange: (
-    range: [string | Date | Dayjs, string | Date | Dayjs],
-  ) => void
+  setRange: (range: [string | Date | Dayjs, string | Date | Dayjs]) => void
   clear: () => void
   close: () => void
 }

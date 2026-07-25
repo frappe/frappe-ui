@@ -9,7 +9,7 @@
     name: 'modelValue',
     description: 'Array of selected option values.',
     required: false,
-    type: 'string[]',
+    type: '(string | number)[]',
     default: '[]'
   },
   {
@@ -55,6 +55,13 @@
     default: 'false'
   },
   {
+    name: 'query',
+    description: 'Controls the in-popover search query. Optional — the component owns the\nquery when this is not bound, so `v-model:query` is never required.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
     name: 'hideSearch',
     description: 'Hides the in-popover search input.',
     required: false,
@@ -67,6 +74,13 @@
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'filterable',
+    description: 'Client-side query filtering. Defaults to `true`. Set to `false` for\npickers whose options come from a server search — the backend already\ndecided what matches, and a second literal substring pass on the client\nsilently drops fuzzy, ranked, or id-based results. This turns off query\nfiltering only; nothing else about the component changes.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
   },
   {
     name: 'emptyText',
@@ -102,12 +116,6 @@
     required: false,
     type: 'string | HTMLElement',
     default: '"body"'
-  },
-  {
-    name: 'compareFn',
-    description: 'Custom equality function used to resolve which options are currently\nselected for display and rendering. When omitted, the component uses\nstrict equality on `option.value` against entries in `modelValue`.',
-    required: false,
-    type: '((a: MultiSelectOption, b: MultiSelectOption) => boolean)'
   },
   {
     name: 'label',
@@ -174,13 +182,33 @@
   },
   {
     name: 'search-prefix',
-    description: 'Content rendered before the in-popover search input.',
+    description: 'Content rendered before the in-popover search input. Renders inside the\nsearch row, so it is not rendered at all when `hide-search` is set.',
     type: 'MultiSelectSearchSlotProps'
   },
   {
     name: 'search-suffix',
-    description: 'Content rendered after the in-popover search input and loading indicator.',
+    description: 'Content rendered after the in-popover search input and loading\nindicator. Renders inside the search row, so it is not rendered at all\nwhen `hide-search` is set.',
     type: 'MultiSelectSearchSlotProps'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'MultiSelectGroupLabelSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when there are no results.',
+    type: 'MultiSelectEmptySlotProps'
+  },
+  {
+    name: 'footer',
+    description: 'Replaces the default Clear All / Select All footer. Receives the shared\ncontrol slot props plus `selectAll`.',
+    type: 'MultiSelectFooterSlotProps'
+  },
+  {
+    name: 'item',
+    description: 'Replaces the entire row.',
+    type: 'MultiSelectItemSlotProps'
   },
   {
     name: 'item-prefix',
@@ -196,32 +224,6 @@
     name: 'item-suffix',
     description: 'Shared content rendered after the standard row label area.',
     type: 'MultiSelectItemSlotProps'
-  },
-  {
-    name: 'item',
-    description: 'Replaces the entire row.',
-    type: 'MultiSelectItemSlotProps'
-  },
-  {
-    name: 'group-label',
-    description: 'Custom renderer for group labels.',
-    type: 'MultiSelectGroupLabelSlotProps'
-  },
-  {
-    name: 'empty',
-    description: 'Fallback content rendered when there are no results.',
-    type: 'MultiSelectEmptySlotProps'
-  },
-  {
-    name: 'footer',
-    description: 'Replaces the default Clear All / Select All footer.',
-    type: 'MultiSelectFooterSlotProps'
-  },
-  {
-    name: 'option',
-    description: '',
-    type: '{ item: MultiSelectOption; }',
-    deprecated: 'compatibility alias for `#item-label`.'
   }
 ]
 
@@ -239,14 +241,20 @@
   {
     name: 'update:query',
     description: 'Fired when the query changes.',
-    type: '[value: string]'
+    type: 'unknown[]'
+  },
+  {
+    name: 'update:selectedOptions',
+    description: 'Fired when the selected options changes.',
+    type: '[value: MultiSelectOption[]]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable name="MultiSelect" :data="propsData"/>
+<PropsTable name="MultiSelect" :data="propsData"/> 
 
-<SlotsTable :data="slotsData"/>
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data="emitsData"/>
+<EmitsTable :data="emitsData"/> 
+

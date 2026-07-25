@@ -1,6 +1,6 @@
 import {
   matchesByLabelOrValue,
-  resolveItemSlotsFromRaw as resolveItemSlotsFromRawShared,
+  resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
   MultiSelectGroupedOption,
@@ -40,12 +40,6 @@ export function isGroupedOption(
   return typeof option === 'object' && option !== null && 'group' in option
 }
 
-export function resolveItemSlotsFromRaw(
-  raw: MultiSelectOption,
-): ResolvedItemSlots {
-  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(raw, 'MultiSelect')
-}
-
 export function normalizeOption(
   option: MultiSelectOption | null | undefined,
 ): NormalizedOption | null {
@@ -54,7 +48,10 @@ export function normalizeOption(
 
   return {
     ...option,
-    resolvedSlots: resolveItemSlotsFromRaw(option),
+    resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+      option.slots,
+      'MultiSelect',
+    ),
   }
 }
 
@@ -107,11 +104,6 @@ export function normalizeMultiSelectOptions(
   return groups
 }
 
-// `String(item.value)` keeps numeric option values searchable — the shared
-// matcher only reads `label` / `value` as strings.
 export function matchesOption(item: NormalizedOption, currentQuery: string) {
-  return matchesByLabelOrValue(
-    { label: item.label, value: String(item.value) },
-    currentQuery,
-  )
+  return matchesByLabelOrValue(item, currentQuery)
 }

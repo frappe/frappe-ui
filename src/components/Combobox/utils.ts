@@ -1,6 +1,6 @@
 import {
   matchesByLabelOrValue,
-  resolveItemSlotsFromRaw as resolveItemSlotsFromRawShared,
+  resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
   ComboboxCustomOption,
@@ -64,18 +64,6 @@ export function isSelectableOption(
   return item.type === 'option'
 }
 
-export function resolveItemSlotsFromRaw(
-  raw: ComboboxSelectableOption | ComboboxCustomOption,
-): ResolvedItemSlots {
-  // Only `slots` is passed through: the deprecated `render` alias that the
-  // shared helper still resolves for MultiSelect is gone from Combobox's
-  // public option shape.
-  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(
-    { slots: raw.slots as ResolvedItemSlots | undefined },
-    'Combobox',
-  )
-}
-
 export function normalizeSimpleOption(
   option: ComboboxSimpleOption | null | undefined,
 ): NormalizedItem | null {
@@ -94,7 +82,10 @@ export function normalizeSimpleOption(
     return {
       ...option,
       type: 'custom',
-      resolvedSlots: resolveItemSlotsFromRaw(option),
+      resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+        option.slots,
+        'Combobox',
+      ),
     }
   }
 
@@ -105,7 +96,10 @@ export function normalizeSimpleOption(
   return {
     ...option,
     type: 'option',
-    resolvedSlots: resolveItemSlotsFromRaw(option),
+    resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+      option.slots,
+      'Combobox',
+    ),
   }
 }
 
@@ -163,11 +157,7 @@ export function matchesSelectableOption(
   item: NormalizedSelectableOption,
   currentQuery: string,
 ) {
-  // `value` widens to `string | number`; coerce so numeric ids stay searchable.
-  return matchesByLabelOrValue(
-    { label: item.label, value: String(item.value) },
-    currentQuery,
-  )
+  return matchesByLabelOrValue(item, currentQuery)
 }
 
 /**

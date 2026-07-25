@@ -19,7 +19,4 @@ export type {
   ComboboxSlotFn,
   ComboboxSlots,
   ComboboxVariant,
-  PopoverAlign,
-  PopoverSide,
-  SelectionExposed,
 } from './types'

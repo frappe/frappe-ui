@@ -1,6 +1,5 @@
 import type { Component, VNodeChild } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
-import type { SelectionExposed } from '../shared/selection/types'
 
 export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
 export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -225,7 +224,12 @@ export interface ComboboxEmptySlotProps {
   query: string
 }
 
-export interface ComboboxSlots {
+/**
+ * Fixed slot names. Kept separate from `ComboboxSlots` so the dynamic
+ * `` `item-${string}` `` index signature can be intersected in without
+ * constraining names that don't match the pattern.
+ */
+interface ComboboxFixedSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: ComboboxControlSlotProps) => any
 
@@ -260,15 +264,6 @@ export interface ComboboxSlots {
    */
   'search-suffix'?: (props: ComboboxSearchSlotProps) => any
 
-  /** Shared content rendered before the standard row label. */
-  'item-prefix'?: (props: ComboboxItemSlotProps) => any
-
-  /** Shared content rendered for the standard row label area. */
-  'item-label'?: (props: ComboboxItemSlotProps) => any
-
-  /** Shared content rendered after the standard row label area. */
-  'item-suffix'?: (props: ComboboxItemSlotProps) => any
-
   /** Replaces the entire row. */
   item?: (props: ComboboxItemSlotProps) => any
 
@@ -281,9 +276,35 @@ export interface ComboboxSlots {
   /** Content rendered after the list. Stays pinned below the scrollable
    * options. */
   footer?: (props: ComboboxControlSlotProps) => any
-
-  [slotName: string]: ((props: any) => any) | undefined
 }
+
+/**
+ * Item slot names: the three fixed regions of the row shell, plus any
+ * `#item-<name>` dispatched from an option's `slot` field.
+ *
+ * The index signature is deliberately narrowed to `` `item-${string}` `` —
+ * `ComboboxResults` resolves `item.slot` to `` `item-${item.slot}` ``, so this
+ * is exactly the runtime behavior, and every fixed slot name stays typechecked
+ * instead of every typo compiling clean.
+ */
+interface ComboboxItemSlotsByName {
+  /** Shared content rendered before the standard row label. */
+  'item-prefix'?: (props: ComboboxItemSlotProps) => any
+
+  /** Shared content rendered for the standard row label area. */
+  'item-label'?: (props: ComboboxItemSlotProps) => any
+
+  /** Shared content rendered after the standard row label area. */
+  'item-suffix'?: (props: ComboboxItemSlotProps) => any
+
+  /** Per-option dynamic slot, selected by the option's `slot` field. */
+  [slotName: `item-${string}`]:
+    | ((props: ComboboxItemSlotProps) => any)
+    | undefined
+}
+
+export interface ComboboxSlots
+  extends ComboboxFixedSlots, ComboboxItemSlotsByName {}
 
 export interface ComboboxEmits {
   /** Fired when the committed value changes. */
@@ -306,5 +327,3 @@ export interface ComboboxEmits {
   /** Fired when the input loses focus. */
   blur: [event: FocusEvent]
 }
-
-export type { SelectionExposed }
