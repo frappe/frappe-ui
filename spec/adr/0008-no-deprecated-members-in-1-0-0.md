@@ -25,6 +25,10 @@ whole components, survive it.
 The sweep runs one component family at a time, each as its own change set. The
 `1.0.0` tag waits for all of them.
 
+The library-wide list of deprecated exports this applies to lives in
+[`v1-release/deprecated-removals.md`](../../v1-release/deprecated-removals.md).
+Member-level deprecations stay in each component's spec.
+
 ## Consequences
 
 - The last free window to remove things closes at `1.0.0`. Anything not

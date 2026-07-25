@@ -2,9 +2,9 @@
 
 Status: accepted direction for `frappe-ui` v1 planning.
 
-This document defines the exact public API for `Select`. It is a sub-spec of
-[`selection.md`](./selection.md) and
-inherits the shared design rules from that document.
+This document defines the exact public API for `Select`. The rules it shares
+with `Combobox` and `MultiSelect` — option shape, slot vocabulary, positioning,
+motion, and styling hooks — are in [`selection.md`](./selection.md).
 
 ## Role
 
@@ -26,17 +26,7 @@ If the UI needs search, use `Combobox`. If the UI is choosing actions, use
 ### Types
 
 ```ts
-type SelectOptionValue = string | number | bigint | Record<string, any>
-
-type SlotFn<TProps> = (props: TProps) => VNodeChild
-
-interface ItemSlots<TProps> {
-  prefix?: SlotFn<TProps>
-  label?: SlotFn<TProps>
-  suffix?: SlotFn<TProps>
-  /** Full-row replacement; mutually exclusive with prefix/label/suffix */
-  item?: SlotFn<TProps>
-}
+type SelectOptionValue = string | number
 
 type SelectOption =
   | string
@@ -47,19 +37,20 @@ type SelectOption =
       icon?: string | Component
       description?: string
       slot?: string
-      slots?: ItemSlots<SelectOptionSlotProps>
       [key: string]: any
     }
+
+type SelectNormalizedOption = Exclude<SelectOption, string>
 
 type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 type PopoverAlign = 'start' | 'center' | 'end'
 
+// Extends `InputLabelingProps`: `label`, `description`, `error`, `required`, `id`.
 interface SelectProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
   variant?: 'subtle' | 'outline' | 'ghost'
   placeholder?: string
   disabled?: boolean
-  id?: string
   modelValue?: SelectOptionValue
   open?: boolean
   options?: SelectOption[]
@@ -71,6 +62,14 @@ interface SelectProps {
 }
 ```
 
+A value is a `string` or a `number`. Objects and `bigint` are not values —
+carry the record an option came from as extra fields on the option instead, and
+let `value` be its id. `''` is a real value, not "nothing".
+
+`Select` has no per-option `slots` object; that is a `Combobox` and
+`MultiSelect` feature. Per-option customization on `Select` goes through
+`option.slot` and the `#item-<name>` template slot.
+
 Defaults:
 
 - `size = 'sm'`
@@ -78,14 +77,14 @@ Defaults:
 - `placeholder = 'Select option'`
 - `open = false`
 - `options = []`
-- `side = 'bottom'`
-- `align = 'start'`
-- `offset = 4`
 - `portalTo = 'body'`
 - `emptyText = 'No options'`
 
-Positioning follows the shared popover positioning conventions in
-[`selection.md`](./selection.md).
+`side`, `align`, and `offset` have no defaults. Left unset, the menu is
+item-aligned (anchored over the trigger so the selected row lands on the
+value); setting any one of them switches to ordinary popper placement, where
+the two you left out fall back to `'bottom'` / `'start'` / `4`. See
+[Positioning](./selection.md#positioning).
 
 `side`, `align`, `offset`, and `portalTo` are additive in v1.x: they did not
 exist in previous versions of `Select`, so no migration is needed. Apps that
@@ -114,42 +113,49 @@ There is no separate component-level `select` event in v1.
 Guaranteed slot props:
 
 ```ts
-type SelectTriggerSlotProps = {
+// `#trigger`, `#prefix`, `#suffix`, and `#footer` all receive the same shape.
+type SelectSlotProps = {
   open: boolean
   disabled: boolean
-  selectedOption: Exclude<SelectOption, string> | null
-  displayValue: string
+  selectedOption: SelectNormalizedOption | null
+  clear: () => void
+  setOpen: (value: boolean) => void
 }
 
-// `#trigger`, `#prefix`, and `#suffix` all receive the same shape.
-type SelectSlotProps = SelectTriggerSlotProps
+type SelectTriggerSlotProps = SelectSlotProps
 type SelectPrefixSlotProps = SelectSlotProps
 type SelectSuffixSlotProps = SelectSlotProps
 
-type SelectOptionSlotProps = {
-  option: Exclude<SelectOption, string>
+type SelectItemSlotProps = {
+  item: SelectNormalizedOption
+  selected: boolean
 }
 ```
 
+`clear` and `setOpen` are the inside-out helpers: content rendered inside a
+slot has no reference to the model or open state the parent owns.
+
 Supported slots:
 
-- `#trigger="{ open, disabled, selectedOption, displayValue }"`
+- `#trigger="{ open, disabled, selectedOption, clear, setOpen }"`
   - advanced trigger customization
-- `#prefix="{ open, disabled, selectedOption, displayValue }"`
+- `#prefix="{ open, disabled, selectedOption, clear, setOpen }"`
   - convenience slot inside the default trigger shell. `selectedOption`
     is always `null` here (prefix renders pre-selection)
-- `#suffix="{ open, disabled, selectedOption, displayValue }"`
+- `#suffix="{ open, disabled, selectedOption, clear, setOpen }"`
   - convenience slot inside the default trigger shell. **Replaces the
     default chevron** — render an explicit chevron fallback when your
     slot content is conditional
-- `#item-prefix="{ option }"`
-- `#item-label="{ option }"`
-- `#item-suffix="{ option }"`
-- `#item-<slot>="{ option }"`
-- `#option="{ option }"`
-  - compatibility alias for item label customization through `v1.x`
+- `#label="{ required }"` and `#description`
+  - override the rendered labeling content
+- `#item-prefix="{ item, selected }"`
+- `#item-label="{ item, selected }"`
+- `#item-suffix="{ item, selected }"`
+- `#item-<slot>="{ item, selected }"`
+- `#item="{ item, selected }"`
+  - replaces the entire row, shell included
 - `#empty`
-- `#footer`
+- `#footer="{ open, disabled, selectedOption, clear, setOpen }"`
 
 Exact slot rules:
 
@@ -158,26 +164,25 @@ Exact slot rules:
 - if `option.slot` is set, it maps to `#item-<slot>` and overrides the label
   region
 - `#item-label` is the preferred label-region slot
-- `#option` remains supported as the compatibility fallback for the label region
-  when `#item-label` is not used
+- a per-option `slot` is more specific than `#item`, so it keeps the row shell
+  and fills the label region rather than handing the whole row to `#item`
 - `#item-prefix` and `#item-suffix` customize only those regions of the standard
   option row shell
 - `#item-suffix` renders before the built-in selected checkmark indicator
 - `#footer` is rendered once after the option list
 - `#empty` is rendered when there are no normalized options
 
-Per-region precedence for each option row (following shared design rule 9):
+Per-region precedence for each option row (the family rule is in
+[Customizing rows](./selection.md#customizing-rows)):
 
-- Prefix: `#item-prefix` slot > `option.slots.prefix` > `option.icon`
-  auto-rendered (`lucide-*` string → Tailwind plugin, Component →
-  rendered directly) > default (empty)
+- Full row: `#item` slot replaces the standard row shell and skips all
+  per-region rendering, unless the option's `slot` matches a template slot
+- Prefix: `#item-prefix` slot > `option.icon` auto-rendered (`lucide-*`
+  string → Tailwind plugin, Component → rendered directly) > default (empty)
 - Label: `#item-<slot>` slot (for `option.slot`) > `#item-label` slot >
-  `#option` slot (compatibility) > `option.slots.label` > default
-  (`label` + optional `description`)
-- Suffix: `#item-suffix` slot > `option.slots.suffix` > default (built-in
-  selected checkmark indicator)
-- Full row: `option.slots.item` replaces the standard row shell and skips
-  all per-region rendering; there is no full-row template slot on `Select`
+  default (`label` + optional `description`)
+- Suffix: `#item-suffix` slot > default (built-in selected checkmark
+  indicator)
 
 ## Option normalization and behavior
 
@@ -193,9 +198,11 @@ Display rules:
 
 - if a selected option exists, its `label` is the default display value
 - otherwise the trigger shows `placeholder`
-- `displayValue` exposed to `#trigger` is the selected option label or `''`
-- `selectedOption` exposed to `#trigger` is the normalized object option or
-  `null`
+- a selected option whose `value` and `label` are both blank shows the
+  placeholder rather than an empty trigger
+- `selectedOption` exposed to the trigger slots is the normalized object option
+  or `null`. There is no `displayValue` slot prop on `Select` — read
+  `selectedOption.label`
 
 Row behavior:
 
@@ -205,15 +212,15 @@ Row behavior:
 - selecting an enabled option updates `modelValue` and closes the list through
   select semantics
 - selected rows render a built-in trailing checkmark indicator
-- `option.icon` is allowed in the item shape but is **not** rendered by default;
-  consumers should use `#item-prefix` or trigger slots when they want icon
-  rendering
+- `option.icon` is auto-rendered in the prefix region when no `#item-prefix`
+  slot overrides it (`lucide-*` string → Tailwind plugin, Component →
+  rendered directly)
 - default label rendering is `label` plus optional `description`
 
 ## Disabled handling
 
-Follows the shared disabled-option rule (shared design rule 8 in the main
-RFC):
+Follows the family rule in
+[Disabled, loading, and empty](./selection.md#disabled-loading-and-empty):
 
 - disabled options are skipped by keyboard navigation and typeahead
 - disabled options cannot be selected by click or keyboard
@@ -248,8 +255,7 @@ State hooks should include, where relevant:
 
 ## Motion
 
-`Select` follows the shared popover motion conventions (shared design rule
-10 in the main RFC):
+`Select` follows the family's [Motion](./selection.md#motion) rules:
 
 - content scales in from the trigger via
   `transform-origin: var(--reka-select-content-transform-origin)` on the
@@ -295,19 +301,17 @@ These stay supported:
 - `#trigger`
 - `#prefix`
 - `#suffix`
-- `#option`
+- `#item`, `#item-prefix`, `#item-label`, `#item-suffix`, `#item-<slot>`
 - `#footer`
 - string options
 
-## Deprecate
+## Removed
 
-Keep working, but deprecate for ordinary customization:
-
-- `#option` as the primary documented customization API once `#item-label`
-  exists
-
-`#option` should remain as an alias/fallback for the label region through
-`v1.x`.
+- `#option` — the label-region slot from the pre-v1 component. Replaced by
+  `#item-label` (and `#item-prefix` for the icon half of the old pattern).
+  Under [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md) it is deleted
+  rather than carried through `1.x` as an alias.
+- `displayValue` on the trigger slot props. Read `selectedOption.label`.
 
 ## Migration path
 
@@ -328,15 +332,18 @@ Keep working, but deprecate for ordinary customization:
 
 ```vue
 <Select v-model="chartType" :options="options">
-  <template #item-prefix="{ option }">
-    <component :is="option.icon" class="size-4" />
+  <template #item-prefix="{ item }">
+    <component :is="item.icon" class="size-4" />
   </template>
 
-  <template #item-label="{ option }">
-    {{ option.label }}
+  <template #item-label="{ item }">
+    {{ item.label }}
   </template>
 </Select>
 ```
+
+`option.icon` is auto-rendered now, so an icon-only customization needs no
+slot at all — set `icon` on the option and drop both templates.
 
 ## Changelog
 
@@ -344,8 +351,8 @@ Keep working, but deprecate for ordinary customization:
 
 - **`option.icon` is auto-rendered in the prefix region.** Setting `icon` on
   an option now shows that icon automatically — no `#item-prefix` slot needed
-  for the common case. Precedence: `#item-prefix` slot → `option.slots.prefix`
-  → `option.icon` → empty. Existing prefix slots are unaffected.
+  for the common case. Precedence: `#item-prefix` slot → `option.icon` →
+  empty. Existing prefix slots are unaffected.
 
 - **`option.icon` accepts `lucide-*` strings.** Pass `icon: 'lucide-user'`
   directly in an option definition — rendered via the Tailwind CSS-mask plugin,

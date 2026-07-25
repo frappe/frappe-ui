@@ -4,7 +4,7 @@ This is the main planning document for the `frappe-ui` v1 release.
 
 Keep separate docs only where that genuinely helps:
 
-- [`../spec/selection.md`](../spec/selection.md) for the accepted menu/selection API direction
+- [`../spec/selection.md`](../spec/selection.md) and [`../spec/dropdown.md`](../spec/dropdown.md) for the selection and menu API contracts
 - [`../spec/dialog.md`](../spec/dialog.md) for the accepted Dialog + imperative `dialog.*` API direction
 - [`../spec/inputs.md`](../spec/inputs.md) for the accepted input-family API direction (TextInput, Textarea, Password, Checkbox, Switch, Rating, Slider, ErrorMessage; FileUploader covered separately)
 
@@ -133,7 +133,8 @@ We have only agreed on a small set of broad component decisions so far.
 
 For the selection/menu family, `ItemListRow` is the shared row primitive used internally by `Dropdown`, `Select`, `Combobox`, and `MultiSelect`. Each higher-level component owns its own listbox shell (keyboard nav, grouping, empty/footer slots, etc.); only the row presentation is shared.
 
-Use [`../spec/selection.md`](../spec/selection.md) as the source of truth for that family.
+Use [`../spec/selection.md`](../spec/selection.md) for the pickers and
+[`../spec/dropdown.md`](../spec/dropdown.md) for the menu.
 
 ### Still open
 
@@ -290,18 +291,28 @@ Use medium-aggressive warnings in development:
 
 ### Deprecated but retained exports
 
-Keep exported for migration:
+Superseded by [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md):
+nothing marked `@deprecated` ships in `1.0.0`, so each deprecated export is
+removed before the tag rather than retained through `1.x`.
+
+The full removal queue — verified against `src/index.ts`, with replacements —
+is [`deprecated-removals.md`](./deprecated-removals.md). The short list below
+is what this plan originally named; it is a subset and is kept only for
+context.
 
 - v1 resource APIs
 - v2 composables
-- `Resource.vue`
+- `Resource.vue` (already gone — the file no longer exists)
 - `Input.vue`
 - `Autocomplete`
 - `FeatherIcon`
 
+Note that the v1 resource APIs and v2 composables are not actually marked
+`@deprecated` in code, so ADR-0008 does not reach them. See
+[`deprecated-removals.md`](./deprecated-removals.md#not-in-scope-for-adr-0008).
+
 ### Special handling
 
-- `Resource.vue`: deprecated and hidden from standard docs
 - `Input.vue`: deprecated in favor of the modern input/control stack
 - `Autocomplete`: deprecated in favor of the split selection/menu components
 - `FeatherIcon`: export retained for back-compat. Components that accept icon-name props (e.g. `Button.icon`, `Dialog.icon`, `Dropdown` item icons) continue to render feather names through `FeatherIcon` so existing call sites do not break. Internal **hardcoded** icon usages migrate to `lucide-*` strings via the shared Tailwind plugin. Docs recommend `lucide-*` (or a passed `Component`) for new code.
@@ -323,11 +334,13 @@ Also remove internal `FeatherIcon` use across core components.
 
 ### 2. Selection/input family stabilization
 
-See [`../spec/selection.md`](../spec/selection.md).
+See [`../spec/selection.md`](../spec/selection.md) and
+[`../spec/dropdown.md`](../spec/dropdown.md).
 
 Key items:
 
-- deprecate `Autocomplete` in favor of separate higher-level components
+- remove `Autocomplete` in favor of `Combobox` / `MultiSelect` — see
+  [`autocomplete-removal.md`](./autocomplete-removal.md)
 - finalize `ItemListRow` as the shared row primitive
 - finalize `Select`, `Combobox`, `Dropdown`, `MultiSelect`, `FormControl`, and `Switch`
 - align the family on `v-model`, `v-model:open`, shared trigger/item slot vocabulary, and `@update:query`

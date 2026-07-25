@@ -12,6 +12,10 @@ This directory contains the active planning docs for `frappe-ui` v1.
 - **Migration guide** — published at <https://ui.frappe.io/docs/migration> (source: [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)). Per-component before/after tables for app teams upgrading to v1.
 - [`changelog.md`](./changelog.md)
   - Rolling v1 changelog for consumer-facing changes, deprecations, and migration notes.
+- [`deprecated-removals.md`](./deprecated-removals.md)
+  - The ADR-0008 work list: every deprecated export that must be deleted before `1.0.0`, verified against `src/index.ts`, with what replaces each one.
+- [`autocomplete-removal.md`](./autocomplete-removal.md)
+  - Pending removal of `Autocomplete`: internal blockers, verified external call-site counts, and what must happen before a removal date is set. The largest single item on that list.
 
 ## Component API contracts
 

@@ -2,9 +2,9 @@
 
 Status: accepted direction for `frappe-ui` v1 planning.
 
-This document defines the exact public API for `Combobox`. It is a sub-spec of
-[`selection.md`](./selection.md) and
-inherits the shared design rules from that document.
+This document defines the exact public API for `Combobox`. The rules it shares
+with `Select` and `MultiSelect` — option shape, slot vocabulary, positioning,
+motion, and styling hooks — are in [`selection.md`](./selection.md).
 
 ## Role
 
@@ -33,8 +33,8 @@ type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
 type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 type PopoverAlign = 'start' | 'center' | 'end'
 
-/** @deprecated alias for `align` */
-type ComboboxPlacement = PopoverAlign
+/** Value accepted by a selectable option and by `v-model`. */
+type ComboboxOptionValue = string | number
 
 type SlotFn<TProps> = (props: TProps) => VNodeChild
 
@@ -49,7 +49,7 @@ interface ItemSlots<TProps> {
 interface ComboboxSelectableOption {
   type?: 'option'
   label: string
-  value: string
+  value: ComboboxOptionValue
   icon?: string | Component
   description?: string
   disabled?: boolean
@@ -70,8 +70,7 @@ interface ComboboxCustomOption {
   onClick: (context: { query: string }) => void
   keepOpen?: boolean
   condition?: (context: { query: string }) => boolean
-  /** @deprecated use `slots` — function → `slots.item`; object → `slots` */
-  render?: (() => VNode) | ItemSlots<ComboboxItemSlotProps>
+  [key: string]: any
 }
 
 type ComboboxSimpleOption =
@@ -99,16 +98,17 @@ Notes:
 ### Props
 
 ```ts
+// Extends `InputLabelingProps`: `label`, `description`, `error`, `required`, `id`.
 interface ComboboxProps {
-  modelValue?: string | null
+  modelValue?: ComboboxOptionValue | null
   options?: ComboboxOption[]
   trigger?: 'input' | 'button'
   variant?: ComboboxVariant
   size?: ComboboxSize
   placeholder?: string
   disabled?: boolean
-  id?: string
   open?: boolean
+  query?: string
   openOnFocus?: boolean
   openOnClick?: boolean
   side?: PopoverSide
@@ -118,8 +118,8 @@ interface ComboboxProps {
   allowCustomValue?: boolean
   loading?: boolean
   emptyText?: string
-  /** @deprecated alias for `align` */
-  placement?: ComboboxPlacement
+  hideSearch?: boolean
+  filterable?: boolean
 }
 ```
 
@@ -132,8 +132,9 @@ Defaults:
 - `placeholder = 'Select option'`
 - `disabled = false`
 - `open = false`
+- `query = ''`
 - `openOnFocus = false`
-- `openOnClick = false`
+- `openOnClick = true`
 - `side = 'bottom'`
 - `align = 'start'`
 - `offset = 4`
@@ -141,9 +142,17 @@ Defaults:
 - `allowCustomValue = false`
 - `loading = false`
 - `emptyText = 'No results'`
+- `hideSearch = false`
+- `filterable = true`
 
 `id`, when provided, is forwarded to the focusable input element so a
 `<label for="...">` associates correctly.
+
+`hideSearch` removes the in-popover search row in `trigger="button"` mode; in
+input mode the trigger *is* the search input, so the prop has nothing to hide.
+`filterable="false"` turns off client-side query filtering for server-driven
+option lists — see
+[Search and filtering](./selection.md#search-and-filtering).
 
 Loading behavior:
 
@@ -173,31 +182,23 @@ Providing a `#trigger` slot implicitly activates button mode regardless
 of the `trigger` prop value, since the caller is replacing the trigger
 shell wholesale.
 
-Positioning follows the shared popover positioning conventions in
-[`selection.md`](./selection.md).
-
-Compatibility rules for `placement`:
-
-- `placement` remains supported through `v1.x`
-- if `placement` is provided without `align`, it is silently mapped
-  one-to-one: `'start'` / `'center'` / `'end'` → same value on `align`
-- if both `placement` and `align` are provided, `align` wins and a dev warning
-  is emitted
-- docs should show `align` in primary examples
+Positioning follows [Positioning](./selection.md#positioning).
 
 State conventions:
 
 - selected value uses `v-model` / `modelValue`
 - menu visibility uses `v-model:open`
-- query state stays internal; searchable components emit `update:query` but do
-  not accept a `v-model:query` in v1
-- `Combobox` does not accept a value prop for the input query directly
+- search text uses `v-model:query`. Bound, the query belongs to the consumer
+  and the component never resets it — not on open, not on close, not on mount.
+  In `trigger="input"` mode it still follows the committed option's label,
+  because there the input is the value display. Unbound, `trigger="button"`
+  mode clears the search box every time the popover opens
 
 ### Emits
 
 ```ts
 interface ComboboxEmits {
-  'update:modelValue': [value: string | null]
+  'update:modelValue': [value: ComboboxOptionValue | null]
   'update:open': [value: boolean]
   'update:query': [value: string]
   'update:selectedOption': [
@@ -205,21 +206,13 @@ interface ComboboxEmits {
   ]
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
-  input: [value: string]
 }
 ```
 
 Custom-option context:
 
-- `onClick` and `condition` on a `type: 'custom'` option receive an object
-  context. In v1 the canonical field is `query`
-- for backward compatibility, the context object also carries `searchTerm`
-  with the same value through `v1.x`, so existing handlers destructuring
-  `({ searchTerm })` continue to work unchanged
-- `searchTerm` is marked deprecated in types; apps should migrate to
-  `query`
-- the two fields are always kept in sync; apps must not rely on only one of
-  them being present
+- `onClick` and `condition` on a `type: 'custom'` option receive
+  `{ query }` — the only field in the context
 
 Emit rules:
 
@@ -228,8 +221,6 @@ Emit rules:
 - `update:open` fires on open/close transitions driven by user interaction or
   selection
 - `update:query` fires on every user-driven change to the input query
-- `input` is kept as a compatibility alias of `update:query` and should emit
-  the same value; `update:query` is the preferred event
 - `update:selectedOption` fires alongside `update:modelValue` with the resolved
   option object, or `null` when the selection is cleared
 - custom options do **not** emit `update:modelValue`; they call their own
@@ -240,20 +231,32 @@ Emit rules:
 Guaranteed slot props:
 
 ```ts
-type ComboboxTriggerSlotProps = {
+// `#trigger`, `#prefix`, `#suffix`, and `#footer` all receive the same shape.
+// `selectedOption` is always `null` inside `#prefix` since the prefix slot only
+// renders before a selection — the field is still exposed for symmetry.
+type ComboboxControlSlotProps = {
   open: boolean
   disabled: boolean
   query: string
   selectedOption: ComboboxSelectableOption | null
   displayValue: string
+  clear: () => void
+  setOpen: (value: boolean) => void
 }
 
-// `#trigger`, `#prefix`, and `#suffix` all receive the same shape. `selectedOption`
-// is always `null` inside `#prefix` since the prefix slot only renders before
-// a selection — the field is still exposed for symmetry.
-type ComboboxSlotProps = ComboboxTriggerSlotProps
-type ComboboxPrefixSlotProps = ComboboxSlotProps
-type ComboboxSuffixSlotProps = ComboboxSlotProps
+type ComboboxSlotProps = ComboboxControlSlotProps
+type ComboboxTriggerSlotProps = ComboboxControlSlotProps
+type ComboboxPrefixSlotProps = ComboboxControlSlotProps
+type ComboboxSuffixSlotProps = ComboboxControlSlotProps
+
+// `#search-prefix` and `#search-suffix`, which live inside the in-popover
+// search row and disappear with it when `hideSearch` is set.
+type ComboboxSearchSlotProps = {
+  query: string
+  setQuery: (value: string) => void
+  disabled: boolean
+  focus: (options?: FocusOptions) => void
+}
 
 type ComboboxItemSlotProps = {
   item: ComboboxSelectableOption | ComboboxCustomOption
@@ -272,23 +275,29 @@ type ComboboxEmptySlotProps = {
 
 Supported slots:
 
-- `#trigger="{ open, disabled, query, selectedOption, displayValue }"`
+- `#trigger="{ open, disabled, query, selectedOption, displayValue, clear, setOpen }"`
   - renders a custom button-like trigger in place of the default input
     shell. When present, `Combobox` moves the search input **into the
     popover header** instead of using the trigger as the input. Use this
     for assignee pickers, status pills, emoji reactions, and any other
     button-initiated search flow.
-- `#prefix="{ open, disabled, query, selectedOption, displayValue }"`
+- `#prefix="{ ...ComboboxControlSlotProps }"`
   - convenience slot rendered inside the default input shell, before the input.
     Receives the same shape as `#trigger` and `#suffix`. `selectedOption` is
     always `null` here because the prefix only renders pre-selection
-- `#suffix="{ open, disabled, query, selectedOption, displayValue }"`
+- `#suffix="{ ...ComboboxControlSlotProps }"`
   - convenience slot rendered after the input (input mode) or after the
     label (button mode). **Replaces the default chevron** when provided —
     render an explicit chevron fallback when your slot content is
     conditional. Typical use: an inline clear button. The slot's button
     should call `@click.stop` and `@pointerdown.stop` so the press does
     not toggle the popover
+- `#search-prefix="{ query, setQuery, disabled, focus }"`
+- `#search-suffix="{ query, setQuery, disabled, focus }"`
+  - decorate the in-popover search row (button mode only). Both live inside
+    that row, so `hideSearch` removes them along with it
+- `#label="{ required }"` and `#description`
+  - override the rendered labeling content
 - `#item-prefix="{ item, query, selected }"`
   - custom leading content for the standard option row shell
 - `#item-label="{ item, query, selected }"`
@@ -303,7 +312,7 @@ Supported slots:
   - optional custom group label rendering
 - `#empty="{ query }"`
   - empty state rendered when the filtered result set is empty
-- `#footer`
+- `#footer="{ ...ComboboxControlSlotProps }"`
   - rendered once after the option list, inside the popover
 
 Exact slot rules:
@@ -345,6 +354,8 @@ Normalization rules:
 Filtering rules:
 
 - filtering is internal to `Combobox` and is based on the current query
+- `filterable="false"` switches query filtering off entirely, for options that
+  come back already matched from a server search
 - for selectable options, a case-insensitive substring match against `label`
   (and `value`) is used by default
 - for custom options, `condition({ query })` is evaluated when present and
@@ -413,7 +424,8 @@ Row behavior:
 - `item.icon` is auto-rendered in the prefix region when no consumer
   slot (`#item-prefix` or `item.slots.prefix`) overrides it:
   - strings starting with `lucide-` render through the shared Lucide
-    Tailwind plugin (see the main RFC) — e.g. `icon: 'lucide-edit'`
+    Tailwind plugin — e.g. `icon: 'lucide-edit'`. Write the class out in
+    full; a name built at runtime is invisible to Tailwind's scanner
   - Vue `Component` values render directly as `<component :is>`
   - other strings are ignored (back-compat with FeatherIcon strings
     is not provided here — consumers that need FeatherIcon should use
@@ -422,8 +434,8 @@ Row behavior:
 
 ## Disabled handling
 
-Follows the shared disabled-option rule (shared design rule 8 in the main
-RFC):
+Follows the family rule in
+[Disabled, loading, and empty](./selection.md#disabled-loading-and-empty):
 
 - disabled selectable options are skipped by keyboard navigation and
   typeahead
@@ -438,14 +450,14 @@ RFC):
 
 ## Rendering precedence
 
-Rows follow the per-region precedence from shared design rule 9. For each
-visible item:
+Rows follow the per-region precedence in
+[Customizing rows](./selection.md#customizing-rows). For each visible item:
 
 Full row (if any of these provide a full-row renderer, per-region rendering
 below is skipped):
 
 1. `#item` slot
-2. `item.slots.item` (or function-form legacy `item.render`)
+2. `item.slots.item`
 
 Prefix region:
 
@@ -469,29 +481,24 @@ Suffix region:
 3. default: built-in selected checkmark indicator for selectable options;
    empty for custom options
 
-Back-compat note:
-
-- the old semantic where `type: 'custom'` options with a `render()` function
-  replaced the row is preserved: a function-form `render` is aliased to
-  `slots.item`, and an object-form `render` is aliased to `slots`
-- existing code like `render: () => h(...)` continues to produce a full-row
-  takeover
-
 ## Imperative API
 
-`Combobox` should continue to expose:
+A template ref on `Combobox` gives back the family's shared shape:
 
 ```ts
-interface ComboboxExposed {
-  reset: () => void
+interface SelectionExposed {
+  clear: () => void
+  focus: (options?: FocusOptions) => void
 }
 ```
 
 Rules:
 
-- `reset()` clears the query, clears the selected value, and emits
+- `clear()` clears the selected value and the query together, and emits
   `update:modelValue(null)` and `update:selectedOption(null)`
-- `reset()` does not open or close the popover on its own
+- `clear()` does not open or close the popover on its own
+- `focus()` moves focus to the trigger input in input mode; in button mode it
+  prefers the mounted in-popover search input and falls back to the trigger
 
 ## Styling hooks
 
@@ -524,8 +531,7 @@ State hooks should include, where relevant:
 
 ## Motion
 
-`Combobox` follows the shared popover motion conventions (shared design
-rule 10 in the main RFC):
+`Combobox` follows the family's [Motion](./selection.md#motion) rules:
 
 - content scales in from the trigger via
   `transform-origin: var(--reka-combobox-content-transform-origin)` on the
@@ -572,18 +578,13 @@ Current API stays supported:
 - `disabled`
 - `openOnFocus`
 - `openOnClick`
-- `placement` (as an alias for `align`)
 - `allowCustomValue`
 - `update:selectedOption`
 - `focus`
 - `blur`
-- `input`
-- `slotName`
-- `render`
 - `type: 'custom'`
 - `#prefix`
 - current dynamic slot behavior for custom items
-- imperative `reset()`
 
 ## Add / prefer
 
@@ -593,8 +594,7 @@ Current API stays supported:
 
 ### Query event
 
-- `@update:query` is the preferred event
-- keep `@input` working as a compatibility alias in v1.x
+- `@update:query`, or `v-model:query` when the consumer wants to own the text
 
 ### Preferred trigger API
 
@@ -618,7 +618,7 @@ should converge on:
 ```ts
 {
   label: string
-  value: string
+  value: ComboboxOptionValue
   icon?: string | Component
   description?: string
   disabled?: boolean
@@ -644,41 +644,28 @@ existing naming convention:
 }
 ```
 
-Preferred change here should be limited to:
+`onClick` and `condition` keep their names — they already match broader
+library convention.
 
-- `slot` over `slotName`
-- `query` over `searchTerm` in the custom option context
-
-Keep these existing names as canonical because they already match broader
-library convention:
-
-- `onClick`
-- `condition`
-
-Dynamic custom item slots should be namespaced as:
+Dynamic custom item slots are namespaced as:
 
 - `#item-<slot>`
 
-## Deprecate
+## Removed
 
-Keep working, but deprecate in favor of the new names only where the change is
-clearly worth it:
+Under [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md) these are
+deleted rather than carried through `1.x` as aliases:
 
-- `slotName` on custom options, in favor of `slot`
-- `searchTerm` in custom-option context, in favor of `query`
-- `input` event for query updates, in favor of `update:query`
-- `render` on options, in favor of `slots` —
-  - function-form `render` (full-row takeover) maps to `slots.item`
-  - object-form `render` (`{ prefix, label, suffix, item }`) maps one-to-one
-    to `slots`
-- `placement` prop, in favor of `align`
+| Removed | Replacement |
+| --- | --- |
+| `slotName` on custom options | `slot` |
+| `searchTerm` in custom-option context | `query` |
+| `input` emit | `update:query` |
+| `render` on options | `slots` — function form → `slots.item`, object form → `slots` |
+| `placement` prop (and `ComboboxPlacement`) | `align` |
+| imperative `reset()` | `clear()` from `SelectionExposed` |
 
-Do not deprecate:
-
-- `onClick`
-- `condition`
-- `type: 'custom'`
-- imperative `reset()`
+Nothing on `Combobox` is `@deprecated` today.
 
 ## Migration path
 
@@ -804,9 +791,8 @@ wanted:
 }
 ```
 
-The old function-form `render` is aliased to `slots.item` and the old
-object-form `render` is aliased one-to-one to `slots`, so existing code
-continues to work unchanged through `v1.x`.
+`render` is gone. Function-form `render` becomes `slots.item`; object-form
+`render` becomes `slots` one-to-one.
 
 ## Changelog
 

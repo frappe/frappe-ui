@@ -2,9 +2,10 @@
 
 Status: accepted direction for `frappe-ui` v1 planning.
 
-This document defines the exact public API for `MultiSelect`. It is a sub-spec
-of [`selection.md`](./selection.md)
-and inherits the shared design rules from that document.
+This document defines the exact public API for `MultiSelect`. The rules it
+shares with `Select` and `Combobox` — option shape, slot vocabulary,
+positioning, motion, and styling hooks — are in
+[`selection.md`](./selection.md).
 
 ## Role
 
@@ -47,7 +48,7 @@ interface ItemSlots<TProps> {
 
 interface MultiSelectOption {
   label: string
-  value: string
+  value: string | number
   icon?: string | Component
   description?: string
   disabled?: boolean
@@ -69,23 +70,24 @@ type MultiSelectOptions = Array<MultiSelectOption | MultiSelectGroupedOption>
 ### Props
 
 ```ts
+// Extends `InputLabelingProps`: `label`, `description`, `error`, `required`, `id`.
 interface MultiSelectProps {
-  modelValue?: string[]
+  modelValue?: Array<string | number>
   options?: MultiSelectOptions
   variant?: MultiSelectVariant
   size?: MultiSelectSize
   placeholder?: string
   disabled?: boolean
-  id?: string
   open?: boolean
+  query?: string
   hideSearch?: boolean
   loading?: boolean
+  filterable?: boolean
   emptyText?: string
   side?: PopoverSide
   align?: PopoverAlign
   offset?: number
   portalTo?: string | HTMLElement
-  compareFn?: (a: MultiSelectOption, b: MultiSelectOption) => boolean
 }
 ```
 
@@ -98,8 +100,10 @@ Defaults:
 - `placeholder = 'Select option'`
 - `disabled = false`
 - `open = false`
+- `query = ''`
 - `hideSearch = false`
 - `loading = false`
+- `filterable = true`
 - `emptyText = 'No results'`
 - `side = 'bottom'`
 - `align = 'start'`
@@ -110,13 +114,16 @@ State conventions:
 
 - selected values use `v-model` / `modelValue` (array of option values)
 - menu visibility uses `v-model:open`
-- query state stays internal; `MultiSelect` emits `update:query` but does not
-  accept a `v-model:query` in v1
-- `compareFn` overrides the default `===` value equality used to decide which
-  options are selected; it is invoked with full option objects
+- search text uses `v-model:query`. Bound, the query belongs to the consumer
+  and the component never resets it — not on open, not on close, not on mount;
+  a seeded query filters the list immediately. Unbound, it clears every time
+  the popover opens
 
-Positioning follows the shared popover positioning conventions in
-[`selection.md`](./selection.md).
+There is no value-equality hook. Selection is `option.value` against the
+entries in `modelValue`, and values are `string | number` — see
+[Options](./selection.md#options).
+
+Positioning follows [Positioning](./selection.md#positioning).
 `side`, `align`, `offset`, and `portalTo` did not exist in previous versions
 of `MultiSelect`, so their addition is purely additive.
 
@@ -124,7 +131,8 @@ of `MultiSelect`, so their addition is purely additive.
 
 ```ts
 interface MultiSelectEmits {
-  'update:modelValue': [value: string[]]
+  'update:modelValue': [value: Array<string | number>]
+  'update:selectedOptions': [value: MultiSelectOption[]]
   'update:open': [value: boolean]
   'update:query': [value: string]
 }
@@ -134,6 +142,8 @@ Emit rules:
 
 - `update:modelValue` fires with the new array whenever the selection changes
   (add, remove, clear-all, select-all)
+- `update:selectedOptions` fires alongside it with the original option objects
+  resolved out of `options`, so custom fields on an option survive
 - `update:open` fires on open/close transitions driven by user interaction
 - `update:query` fires on every user-driven change to the search input
 - disabled options do not toggle selection and do not emit
@@ -144,18 +154,17 @@ Emit rules:
 Guaranteed slot props:
 
 ```ts
-// Shared shape for `#trigger`, `#prefix`, `#suffix`, and `#summary`
-// (the latter adds `summary`). `clearAll` / `toggleOpen` are exposed
-// on every slot so consumers don't need to hoist into `#trigger` just
-// to clear the selection or toggle the popover.
+// Shared shape for `#trigger`, `#prefix`, `#suffix`, `#summary` (adds
+// `summary`), and `#footer` (adds `selectAll`). `clear` and `setOpen` are
+// exposed on every slot so consumers don't need to hoist into `#trigger`
+// just to clear the selection or toggle the popover.
 type MultiSelectSlotProps = {
   open: boolean
   disabled: boolean
   query: string
   selectedOptions: MultiSelectOption[]
-  displayValue: string
-  clearAll: () => void
-  toggleOpen: () => void
+  clear: () => void
+  setOpen: (value: boolean) => void
 }
 
 type MultiSelectTriggerSlotProps = MultiSelectSlotProps
@@ -173,11 +182,17 @@ type MultiSelectItemSlotProps = {
   selected: boolean
 }
 
-type MultiSelectFooterSlotProps = {
-  clearAll: () => void
+type MultiSelectFooterSlotProps = MultiSelectSlotProps & {
   selectAll: () => void
-  selectedOptions: MultiSelectOption[]
+}
+
+// `#search-prefix` and `#search-suffix`, which live inside the search row
+// and disappear with it when `hideSearch` is set.
+type MultiSelectSearchSlotProps = {
   query: string
+  setQuery: (value: string) => void
+  disabled: boolean
+  focus: (options?: FocusOptions) => void
 }
 
 type MultiSelectGroupLabelSlotProps = {
@@ -191,15 +206,15 @@ type MultiSelectEmptySlotProps = {
 
 Supported slots:
 
-- `#trigger="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
+- `#trigger="{ open, disabled, query, selectedOptions, clear, setOpen }"`
   - preferred advanced trigger slot; replaces the default button trigger
-- `#prefix="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
+- `#prefix="{ ...MultiSelectSlotProps }"`
   - convenience slot rendered before the trigger label. When provided,
     it owns the entire prefix area regardless of selection count — use
     it for aggregate visuals like stacked avatars across multiple
     selections. If omitted, the trigger auto-renders the selected
     option's `#item-prefix` / `icon` when exactly one is selected
-- `#summary="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen, summary }"`
+- `#summary="{ ...MultiSelectSlotProps, summary }"`
   - overrides the trigger's label region. Receives the default summary
     text as `summary` — placeholder, single label, or `"N selected"` —
     so the consumer can fall back to it or replace entirely (e.g. with
@@ -207,12 +222,18 @@ Supported slots:
     default phantom-sizer (which only knows the default summary's
     worst-case width), so the trigger is content-sized — pin a width
     on the trigger (or wrap with one) if you need a stable layout
-- `#suffix="{ open, disabled, query, selectedOptions, displayValue, clearAll, toggleOpen }"`
+- `#suffix="{ ...MultiSelectSlotProps }"`
   - convenience slot rendered after the trigger label. **Replaces the
     default chevron** — render an explicit chevron fallback when your
     slot content is conditional. Use `@click.stop` / `@pointerdown.stop`
     so the press doesn't toggle the popover. Canonical home for a
-    clear-all button — call `clearAll` from the slot prop
+    clear-all button — call `clear` from the slot prop
+- `#label="{ required }"` and `#description`
+  - override the rendered labeling content
+- `#search-prefix="{ query, setQuery, disabled, focus }"`
+- `#search-suffix="{ query, setQuery, disabled, focus }"`
+  - decorate the search row. Both live inside it, so `hideSearch` removes
+    them along with it
 - `#item-prefix="{ item, query, selected }"`
 - `#item-label="{ item, query, selected }"`
 - `#item-suffix="{ item, query, selected }"`
@@ -222,9 +243,10 @@ Supported slots:
   - dynamic named label slot selected via `item.slot`
 - `#group-label="{ group }"`
 - `#empty="{ query }"`
-- `#footer="{ clearAll, selectAll, selectedOptions, query }"`
-  - compatibility alias for the current `#footer` slot; default footer contains
-    Clear All / Select All buttons
+- `#footer="{ ...MultiSelectSlotProps, selectAll }"`
+  - replaces the default footer, which contains Clear All / Select All
+    buttons. Clear All is `clear` from the shared shape; Select All is the
+    extra `selectAll`
 
 Exact slot rules:
 
@@ -248,13 +270,14 @@ Normalization rules:
 - nullish entries in `options` are ignored
 - options with missing or `undefined` `value` are omitted
 - grouped entries with empty `options` after filtering are omitted
-- `compareFn`, when provided, is used to resolve which options are currently
-  selected for display and rendering; otherwise `option.value` strict equality
-  against entries in `modelValue` is used
+- which options count as selected is resolved by `option.value` strict
+  equality against the entries in `modelValue`
 
 Filtering rules:
 
 - filtering is internal to `MultiSelect` and is based on the current query
+- `filterable="false"` switches query filtering off entirely, for options that
+  come back already matched from a server search
 - a case-insensitive substring match against `label` (and `value`) is used by
   default
 - filtering never removes already-selected options from the selection; it
@@ -266,7 +289,7 @@ Selection behavior:
 - disabled options cannot be toggled and do not emit `update:modelValue`
 - the popover does not auto-close on selection; it stays open until the user
   closes it
-- `clearAll` empties `modelValue`
+- `clear` empties `modelValue`
 - `selectAll` sets `modelValue` to the concatenated values of every enabled,
   non-disabled option across all groups
 
@@ -285,12 +308,13 @@ Search behavior:
 
 Display rules:
 
-- when at least one option is selected, the trigger shows the comma-separated
-  labels of the selected options
-- otherwise the trigger shows `placeholder`
-- `displayValue` exposed to `#trigger` is the same comma-separated string or
-  `''`
-- `selectedOptions` exposed to `#trigger` is the resolved option objects
+- with exactly one option selected, the trigger shows that option's `label`
+- with two or more, it collapses to `"N selected"` so the trigger width does
+  not balloon
+- with none, it shows `placeholder`
+- `#summary` overrides that text and receives it as `summary`. There is no
+  `displayValue` slot prop
+- `selectedOptions` exposed to the trigger slots is the resolved option objects
   array, preserving `modelValue` order
 
 Disabled handling:
@@ -303,8 +327,8 @@ Disabled handling:
 
 ## Rendering precedence
 
-Rows follow the per-region precedence from shared design rule 9. For each
-visible item:
+Rows follow the per-region precedence in
+[Customizing rows](./selection.md#customizing-rows). For each visible item:
 
 Full row:
 
@@ -315,15 +339,16 @@ Prefix region:
 
 1. `#item-prefix` slot
 2. `item.slots.prefix`
-3. default: empty
+3. `item.icon` auto-rendered (`lucide-*` string → Tailwind plugin,
+   Component → rendered directly)
+4. default: empty
 
 Label region:
 
 1. `#item-<slot>` slot matching `item.slot`
 2. `#item-label` slot
-3. `#option` slot (compatibility)
-4. `item.slots.label`
-5. default: `label` plus optional `description`
+3. `item.slots.label`
+4. default: `label` plus optional `description`
 
 Suffix region:
 
@@ -336,11 +361,15 @@ Suffix region:
 Stable hooks for `MultiSelect` should include:
 
 - `data-slot="trigger"`
+- `data-slot="chevron"`
 - `data-slot="content"`
+- `data-slot="content-body"`
 - `data-slot="search"`
+- `data-slot="input"`
 - `data-slot="group"`
 - `data-slot="group-label"`
 - `data-slot="item"`
+- `data-slot="loading"`
 - `data-slot="empty"`
 - `data-slot="footer"`
 - `data-variant`
@@ -363,8 +392,7 @@ State hooks should include, where relevant:
 
 ## Motion
 
-`MultiSelect` follows the shared popover motion conventions (shared design
-rule 10 in the main RFC):
+`MultiSelect` follows the family's [Motion](./selection.md#motion) rules:
 
 - content scales in from the trigger via
   `transform-origin: var(--reka-popper-transform-origin)` (or the
@@ -407,8 +435,6 @@ Current API stays supported:
 - `options`
 - `hideSearch`
 - `loading`
-- `compareFn`
-- `#option`
 - `#footer`
 
 ## Add / prefer
@@ -424,10 +450,10 @@ Current API stays supported:
 
 ### Query event
 
-- `@update:query`
+- `@update:query`, or `v-model:query` when the consumer wants to own the text
 
-Query stays internal otherwise. The old version of `MultiSelect` did not
-expose a search event, so no alias is needed.
+The old version of `MultiSelect` exposed no search event, so no alias is
+needed.
 
 ### Preferred trigger API
 
@@ -452,7 +478,7 @@ but richer object items should converge on:
 ```ts
 {
   label: string
-  value: string
+  value: string | number
   icon?: string | Component
   description?: string
   disabled?: boolean
@@ -472,21 +498,25 @@ local multi-select variants just for grouped pickers:
 }
 ```
 
-## Deprecate
+## Removed
 
-Keep working, but deprecate for ordinary customization:
+Under [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md) these are
+deleted rather than carried through `1.x` as aliases:
 
-- `#option` as the primary documented customization API once `#item-label`
-  exists
+| Removed | Replacement |
+| --- | --- |
+| `#option` slot | `#item-label` (and `#item-prefix` for the icon half) |
+| `compareFn` prop | none — selection is `option.value` against `modelValue` |
+| `displayValue` slot prop | `#summary`'s `summary`, or `selectedOptions` |
+| `clearAll` slot prop | `clear` |
+| `toggleOpen` slot prop | `setOpen(boolean)` |
 
-`#option` remains as an alias for the label region through `v1.x`. Its slot
-prop signature (`{ item }`) continues to work unchanged.
+Nothing on `MultiSelect` is `@deprecated` today.
 
-Do not deprecate:
+Not going anywhere:
 
 - `hideSearch`
 - `loading`
-- `compareFn`
 - default footer behavior
 
 ## Scope guard
