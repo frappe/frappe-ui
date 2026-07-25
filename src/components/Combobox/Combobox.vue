@@ -244,12 +244,12 @@ const showEmpty = computed(
   () => !props.loading && !showCreateOption.value && !hasVisibleItems.value,
 )
 
-// Clears the selection. The query is reset alongside it so clearing while
-// the popover is open doesn't leave a stale filter behind.
+// Clears the selection, and nothing else — same meaning as `clear()` on Select
+// and MultiSelect. The query is left alone: in input mode the display-sync
+// watcher below already follows the model down to an empty input, and in
+// button mode the query is a separate filter that the user still owns.
 function clear() {
   model.value = null
-  query.value = ''
-  hasTypedSinceOpen.value = false
   emit('update:selectedOption', null)
 }
 

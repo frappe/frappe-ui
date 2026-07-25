@@ -305,6 +305,141 @@ describe('Combobox', () => {
     })
   })
 
+  // `clear()` means one thing across the selection family: it clears the
+  // selection. The search query is not part of that — in input mode the query
+  // follows the model down on its own, and in button mode it is a separate
+  // filter the user still owns.
+  describe('clear() semantics', () => {
+    it('input mode: the trigger stops showing the cleared option label', () => {
+      const InputMode = defineComponent({
+        setup() {
+          const value = ref<string | null>('Apple')
+          return { value }
+        },
+        render() {
+          return h('div', [
+            h(Combobox, {
+              ref: 'picker',
+              options: fruits,
+              modelValue: this.value,
+              'onUpdate:modelValue': (v: any) => {
+                this.value = v
+              },
+            }),
+            h(
+              'button',
+              {
+                'data-cy': 'clear',
+                onClick: () => (this.$refs.picker as any)?.clear(),
+              },
+              'clear',
+            ),
+            h('span', { 'data-cy': 'value' }, String(this.value)),
+          ])
+        },
+      })
+
+      cy.mount(InputMode)
+
+      cy.get('[role="combobox"]').should('have.value', 'Apple')
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-cy="value"]').should('have.text', 'null')
+      cy.get('[role="combobox"]').should('have.value', '')
+    })
+
+    it('button mode: a typed query survives clearing the selection', () => {
+      const ButtonMode = defineComponent({
+        setup() {
+          const value = ref<string | null>('Apple')
+          return { value }
+        },
+        render() {
+          return h(
+            Combobox,
+            {
+              options: fruits,
+              trigger: 'button',
+              open: true,
+              modelValue: this.value,
+              'onUpdate:modelValue': (v: any) => {
+                this.value = v
+              },
+            },
+            {
+              footer: ({ clear }: any) =>
+                h('button', { 'data-cy': 'clear', onClick: clear }, 'clear'),
+            },
+          )
+        },
+      })
+
+      cy.mount(ButtonMode)
+
+      cy.get('[data-slot="search"] [data-slot="input"]').type('ma')
+      cy.get('[role="option"]').should('have.length', 1)
+
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-slot="trigger"]').should('contain.text', 'Select option')
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('button mode: a bound v-model:query survives clearing the selection', () => {
+      const BoundQueryClear = defineComponent({
+        setup() {
+          const query = ref('ma')
+          const value = ref<string | null>('Apple')
+          return { query, value }
+        },
+        render() {
+          return h('div', [
+            h(
+              Combobox,
+              {
+                options: fruits,
+                trigger: 'button',
+                open: true,
+                modelValue: this.value,
+                'onUpdate:modelValue': (v: any) => {
+                  this.value = v
+                },
+                query: this.query,
+                'onUpdate:query': (value: string) => {
+                  this.query = value
+                },
+              },
+              {
+                footer: ({ clear }: any) =>
+                  h('button', { 'data-cy': 'clear', onClick: clear }, 'clear'),
+              },
+            ),
+            h('span', { 'data-cy': 'query' }, this.query),
+          ])
+        },
+      })
+
+      cy.mount(BoundQueryClear)
+
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+  })
+
   describe('filterable', () => {
     it('filterable=false keeps every option visible while typing', () => {
       cy.mount(Combobox, {
@@ -939,7 +1074,7 @@ describe('Combobox', () => {
   })
 
   describe('imperative API', () => {
-    it('exposes `clear()` which clears query and selection', () => {
+    it('exposes `clear()`, which clears the selection and nothing else', () => {
       cy.mount(Combobox, {
         props: {
           modelValue: 'Apple',
@@ -957,7 +1092,10 @@ describe('Combobox', () => {
 
       cy.get('@onUpdate').should('have.been.calledWith', null)
       cy.get('@onSelectedOption').should('have.been.calledWith', null)
-      cy.get('@onUpdateQuery').should('have.been.calledWith', '')
+      // `clear()` never writes the query itself. The only `update:query` here
+      // is the mount-time display sync ("Apple"); the model is controlled by a
+      // spy that never accepts the change, so nothing drives the query down.
+      cy.get('@onUpdateQuery').should('not.have.been.calledWith', '')
     })
 
     it('exposes `focus()` which focuses the input (input mode)', () => {

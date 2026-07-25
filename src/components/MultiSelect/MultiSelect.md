@@ -71,9 +71,9 @@ enough to just observe typing.
 ```
 
 Once bound, the query is yours: the component never resets it on its own — not
-on open, not on close, not on mount. A seeded query survives opening the
-popover and filters the list right away. Without the binding nothing outside
-tracks the query, so it still clears each time the popover opens.
+on open, not on close, not on mount, not on `clear()`. A seeded query survives
+opening the popover and filters the list right away. Without the binding nothing
+outside tracks the query, so it still clears each time the popover opens.
 
 ## Reading the Selected Options
 
@@ -136,8 +136,8 @@ wires `aria-invalid` + `aria-errormessage` onto the trigger.
 ## Template Ref
 
 A template ref exposes `{ clear, focus }`, the same shape as the rest of the
-selection family. `clear()` clears the selection; `focus()` moves focus to the
-trigger.
+selection family. `clear()` empties the selection and leaves the search query
+alone; `focus()` moves focus to the trigger.
 
 ```vue
 <script setup lang="ts">

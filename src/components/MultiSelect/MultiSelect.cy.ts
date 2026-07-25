@@ -313,6 +313,28 @@ describe('MultiSelect', () => {
     cy.get('@onUpdate').should('have.been.calledWith', [])
   })
 
+  // `clear()` clears the selection and nothing else — the search query belongs
+  // to the user, whether they typed it or bound it.
+  it('clear() leaves the search query alone', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options,
+        open: true,
+        modelValue: ['apple'],
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[data-slot="input"]').type('ba')
+    cy.get('[role=option]').should('have.length', 1)
+
+    cy.get('[data-slot="footer"] button').contains('Clear All').click()
+
+    cy.get('@onUpdate').should('have.been.calledWith', [])
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+  })
+
   it('exposes clear and focus on a template ref', () => {
     const Wrapper = defineComponent({
       setup() {

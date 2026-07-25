@@ -109,10 +109,11 @@ export interface ComboboxProps extends InputLabelingProps {
    * Controls the search query. Optional — the combobox owns it otherwise.
    *
    * When it is bound the consumer owns the query: the combobox never resets it
-   * on its own — not on open, not on close, not on mount. It still follows the
-   * committed option's label in `trigger="input"` mode, where the input is the
-   * value display rather than a filter. Unbound, `trigger="button"` mode still
-   * clears the search box every time the popover opens.
+   * on its own — not on open, not on close, not on mount, not on `clear()`. It
+   * still follows the committed option's label in `trigger="input"` mode, where
+   * the input is the value display rather than a filter. Unbound,
+   * `trigger="button"` mode still clears the search box every time the popover
+   * opens.
    */
   query?: string
 
@@ -190,7 +191,11 @@ export interface ComboboxControlSlotProps {
   /** Resolved display text for the committed value. */
   displayValue: string
 
-  /** Clears the current selection (sets the model to `null`). */
+  /**
+   * Clears the current selection (sets the model to `null`) and nothing else.
+   * The search query is left as it is; in `trigger="input"` mode the input
+   * still empties, because there the query follows the model.
+   */
   clear: () => void
 
   /** Sets the popover open state (no-op while disabled). */

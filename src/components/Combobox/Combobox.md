@@ -31,7 +31,9 @@ Combobox substring-filters `options` on the client as soon as the user types. Wh
 
 `v-model:query` is optional — `#search-prefix` / `#search-suffix` and the `#footer` slot props also hand out the current query. A `type: 'custom'` row's `condition` callback is consumer-declared visibility rather than client filtering, so it keeps running with `filterable: false`.
 
-Once bound, the query is yours: the combobox never resets it on its own — not on open, not on close, not on mount. In `trigger="button"` mode a seeded query survives opening the popover and filters the list right away, where an unbound query would be cleared on every open. In the default `trigger="input"` mode the input is the value display, so the query keeps following the committed option's label — that is model sync, not a reset.
+Once bound, the query is yours: the combobox never resets it on its own — not on open, not on close, not on mount, not on `clear()`. In `trigger="button"` mode a seeded query survives opening the popover and filters the list right away, where an unbound query would be cleared on every open. In the default `trigger="input"` mode the input is the value display, so the query keeps following the committed option's label — that is model sync, not a reset.
+
+`clear()` empties the selection and nothing else. In `trigger="button"` mode whatever you typed in the search box stays. In `trigger="input"` mode the input goes blank anyway, because there the query follows the model.
 
 ## Search Row
 In `trigger="button"` mode the search input moves into the popover header. That row carries `data-slot="search"` and exposes `#search-prefix` and `#search-suffix`, both receiving `{ query, setQuery, disabled, focus }`.

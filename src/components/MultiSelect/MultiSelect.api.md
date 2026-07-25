@@ -56,7 +56,7 @@
   },
   {
     name: 'query',
-    description: 'Controls the in-popover search query. Optional — the component owns the\nquery when this is not bound, so `v-model:query` is never required.\n\nWhen it is bound the consumer owns the query: the component never resets\nit on its own — not on open, not on close, not on mount. Only typing (or\nthe `setQuery` slot prop) changes it, and a seeded query filters the list\nimmediately. Unbound, the query still clears every time the popover opens.',
+    description: 'Controls the in-popover search query. Optional — the component owns the\nquery when this is not bound, so `v-model:query` is never required.\n\nWhen it is bound the consumer owns the query: the component never resets\nit on its own — not on open, not on close, not on mount, not on `clear()`.\nOnly typing (or the `setQuery` slot prop) changes it, and a seeded query\nfilters the list immediately. Unbound, the query still clears every time\nthe popover opens.',
     required: false,
     type: 'string',
     default: '""'

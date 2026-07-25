@@ -21,7 +21,7 @@ export type { PopoverAlign, PopoverSide } from '../../Popover/types'
  * ref works the same way whichever picker it points at.
  */
 export interface SelectionExposed {
-  /** Clears the current selection. */
+  /** Clears the current selection. It leaves the search query alone. */
   clear: () => void
 
   /** Moves focus to the component's control. */

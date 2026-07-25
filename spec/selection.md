@@ -72,16 +72,22 @@ popover open after a click. Both callbacks receive `{ query }`.
 All three are optional. Unbound, the component holds the state itself.
 
 A bound query belongs to you. The component never clears it — not on open, not
-on close, not on mount — so a query you seed filters the list on first render
-and survives the popover closing. Left unbound, the query clears every time the
-popover opens. On `Combobox` in its default input mode the query doubles as the
-value display, so it follows the committed option's label either way.
+on close, not on mount, not on `clear()` — so a query you seed filters the list
+on first render and survives the popover closing. Left unbound, the query clears
+every time the popover opens. On `Combobox` in its default input mode the query
+doubles as the value display, so it follows the committed option's label either
+way.
 
 Every trigger and footer slot hands you `setOpen(boolean)` to open or close the
 popover and `clear()` to empty the selection. They exist because slot content
 has no reference to the state the parent owns. They complement `v-model:open`
 rather than replace it: one drives the component from outside, the other from
 inside.
+
+`clear()` means the same thing on all three: it empties the selection and
+nothing else. It never touches the query. On `Combobox` in input mode the input
+still goes blank, because there the query follows the model down to an empty
+value.
 
 A template ref on any of the three gives you `{ clear, focus }`:
 
