@@ -8,6 +8,8 @@ interface where a single choice is required.
 <ComponentPlayground name="Select" />
 
 ## Example
+The trigger hugs the selected value and the menu expands outward to fit longer options. Options with `disabled: true` render but can't be picked.
+
 <ComponentPreview name="Select-Example" />
 
 ## Custom Option Layout
@@ -15,11 +17,10 @@ Use `#item-prefix` and `#item-label` to tailor the standard row — for example,
 
 <ComponentPreview name="Select-OptionSlot" />
 
-## States
-<ComponentPreview name="Select-States" />
+## Custom Trigger
+Use `#trigger` to replace the trigger content entirely. The slot receives `{ open, disabled, selectedOption, clear, setOpen }`. For lighter changes, `#prefix` and `#suffix` sit inside the default trigger shell — `#suffix` replaces the chevron.
 
-## Trigger Slots
-<ComponentPreview name="Select-TriggerSlots" />
+<ComponentPreview name="Select-CustomTrigger" />
 
 ## Footer
 The `#footer` slot renders below the option list and stays pinned to the bottom of the popover — it does not scroll with the options. It receives the same shape as `#trigger`, `#prefix`, and `#suffix`: `{ open, disabled, selectedOption, clear, setOpen }`.
@@ -59,6 +60,9 @@ function reset() {
   `class="w-full"` when you want a full-width trigger.
 - `Select` accepts flat options only — no groups. Empty and nullish options are
   omitted. Option values are `string | number`.
+- For the common "Sort by" pattern, add a first option with an empty-string
+  value and `disabled: true`. It shows as the resting label without becoming
+  selectable.
 - The menu is placed item-aligned (anchored over the trigger) by default.
   Passing `side`, `align`, or `offset` switches it to standard popper
   placement; `portalTo` changes the teleport target either way.

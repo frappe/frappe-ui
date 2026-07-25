@@ -43,9 +43,9 @@ function clearSearch(setQuery: (value: string) => void, focus: () => void) {
       </button>
       <kbd
         v-else
-        class="shrink-0 rounded border border-outline-gray-2 bg-surface-gray-1 px-1.5 py-0.5 text-p-xs text-ink-gray-5"
+        class="shrink-0 flex items-center justify-center rounded-sm size-5 border border-outline-gray-2 bg-surface-gray-1 text-p-xs text-ink-gray-5"
       >
-        ⌘ K
+        F
       </kbd>
     </template>
   </MultiSelect>
