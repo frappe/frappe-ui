@@ -215,7 +215,7 @@ without replacing anything:
 | `trigger` | the trigger |
 | `chevron` | the default trailing chevron |
 | `content` | the positioned popover |
-| `content-body` | the scrollable body inside it (`MultiSelect`) |
+| `content-body` | the panel shell holding search, list, and footer |
 | `search` | the in-popover search row |
 | `input` | a search or trigger input |
 | `group` | a group of options |
@@ -229,16 +229,31 @@ without replacing anything:
 | `empty` | the empty state |
 | `footer` | the pinned footer below the list |
 
+Not every component renders every part. `Select` has no search box, so it emits
+no `search`, `input`, `loading`, `group`, or `group-label`. `item-list-row` and
+`item-prefix` come from `ItemListRow`, which the pickers render inside rather
+than own.
+
+The scrollable list itself carries no marker on any of the three. To change its
+height or scrollbar you currently have to reach through `content-body`.
+
 State comes through separate attributes: `data-state` (`open`/`closed` on the
 popover, `checked`/`unchecked` on rows), `data-disabled` on rows, `data-motion`
 on the popover, and `data-size` / `data-variant` where the component has those
-props. `MultiSelect` also marks its popover with `data-selection` and
-`data-loading`.
+props.
+
+`Combobox` and `MultiSelect` also mark their popover with `data-selection` and
+`data-loading`. Both follow the bare-attribute convention: `data-selection` is
+always present and always empty — it marks the popover as belonging to this
+family so the shared motion rules can target it without touching `Dropdown` —
+and `data-loading` is present and empty while loading, and absent otherwise.
+Neither is ever the string `"true"`.
 
 These names are as public as prop names. After `1.0.0` one cannot be renamed or
 dropped without a major version. Adding one is free and can happen any time.
-(`Select` also marks an invisible value overlay it needs for item-aligned
-measurement; that one is plumbing and not part of this contract.)
+(`Select` also renders an invisible value overlay it needs for item-aligned
+measurement. That one deliberately carries no marker — it is plumbing, and
+labelling it would freeze it into this contract.)
 
 ## What differs between the three
 
