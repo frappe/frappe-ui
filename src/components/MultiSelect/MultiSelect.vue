@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, watch } from 'vue'
+import { computed, ref, useAttrs, useSlots, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -23,8 +23,10 @@ import {
   LabelingWrapper,
 } from '../InputLabeling'
 import '../shared/selection/popoverMotion.css'
+import type { SelectionExposed } from '../shared/selection/types'
 import type {
   MultiSelectEmits,
+  MultiSelectOption,
   MultiSelectProps,
   MultiSelectSearchSlotProps,
   MultiSelectSlotProps,
@@ -33,6 +35,7 @@ import type {
 import {
   EMPTY_VALUE_PREFIX,
   inputFontSizeClasses,
+  isGroupedOption,
   matchesOption,
   normalizeMultiSelectOptions,
   triggerBaseClasses,
@@ -53,6 +56,7 @@ const props = withDefaults(defineProps<MultiSelectProps>(), {
   disabled: false,
   hideSearch: false,
   loading: false,
+  filterable: true,
   emptyText: 'No results',
   side: 'bottom',
   align: 'start',
@@ -64,11 +68,16 @@ const emit = defineEmits<MultiSelectEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
 
-const model = defineModel<string[]>({ default: () => [] })
+const model = defineModel<Array<string | number>>({ default: () => [] })
 const open = defineModel<boolean>('open', { default: false })
+// Optional outside-in control of the search box. Unbound, `defineModel`
+// keeps the value local, so `v-model:query` is never required.
+const query = defineModel<string>('query', { default: '' })
 
-const query = ref('')
 const hasTypedSinceOpen = ref(false)
+
+const searchInputRef = useTemplateRef('searchInput')
+const triggerRef = useTemplateRef<HTMLButtonElement>('trigger')
 
 const {
   inputId,
@@ -106,38 +115,37 @@ const allOptions = computed<NormalizedOption[]>(() =>
   normalizedGroups.value.flatMap((group) => group.options),
 )
 
+// The consumer's own option objects, untouched by normalization. Handed back
+// through `update:selectedOptions` so custom fields survive identity-intact —
+// the family rule is that anything returning an option returns the original.
+const rawOptions = computed<MultiSelectOption[]>(() =>
+  (props.options ?? []).flatMap((entry) => {
+    if (!entry) return []
+    return isGroupedOption(entry) ? entry.options : [entry]
+  }),
+)
+
 const { toInternal: getInternalValue, toExternal: toExternalValue } =
   useEmptyValueMapping(allOptions, EMPTY_VALUE_PREFIX)
 
-const safeModel = computed<string[]>(() =>
+const safeModel = computed<Array<string | number>>(() =>
   Array.isArray(model.value) ? model.value : [],
 )
 
-const internalModel = computed<string[]>(() =>
+const internalModel = computed<Array<string | number>>(() =>
   safeModel.value.map((value) => {
     const option = allOptions.value.find((item) => item.value === value)
     return option ? getInternalValue(option) : value
   }),
 )
 
-function findOptionByValue(value: string): NormalizedOption | null {
-  if (props.compareFn) {
-    const probe = { label: value, value } as NormalizedOption
-    return (
-      allOptions.value.find((option) => props.compareFn!(option, probe)) ?? null
-    )
-  }
-  return allOptions.value.find((option) => option.value === value) ?? null
-}
-
 const selectedOptions = computed(() =>
   safeModel.value
-    .map((value) => findOptionByValue(value))
+    .map(
+      (value) =>
+        allOptions.value.find((option) => option.value === value) ?? null,
+    )
     .filter((option): option is NormalizedOption => Boolean(option)),
-)
-
-const displayValue = computed(() =>
-  selectedOptions.value.map((option) => option.label).join(', '),
 )
 
 // The compact label shown in the default button trigger. For exactly
@@ -174,6 +182,7 @@ const filteredGroups = useFilteredGroups({
   hasTypedSinceOpen,
   query,
   matches: matchesOption,
+  filterable: () => props.filterable ?? true,
 })
 
 const hasVisibleItems = computed(() =>
@@ -189,14 +198,31 @@ const allSelected = computed(() => {
   return selectable.every((option) => selected.has(option.value))
 })
 
-function clearAll() {
-  model.value = []
+// Single write path for the selection so `update:selectedOptions` cannot
+// drift from `update:modelValue`.
+function setModel(values: Array<string | number>) {
+  model.value = values
+  emit(
+    'update:selectedOptions',
+    values
+      .map(
+        (value) =>
+          rawOptions.value.find((option) => option.value === value) ?? null,
+      )
+      .filter((option): option is MultiSelectOption => Boolean(option)),
+  )
+}
+
+function clear() {
+  setModel([])
 }
 
 function selectAll() {
-  model.value = allOptions.value
-    .filter((option) => !option.disabled)
-    .map((option) => option.value)
+  setModel(
+    allOptions.value
+      .filter((option) => !option.disabled)
+      .map((option) => option.value),
+  )
 }
 
 function handleTriggerClick() {
@@ -211,19 +237,27 @@ function setOpen(value: boolean) {
 function setQuery(value: string) {
   if (props.disabled) return
   query.value = value
-  hasTypedSinceOpen.value = true
-  emit('update:query', value)
 }
 
-function clearQuery() {
-  setQuery('')
+function focusSearch(options?: FocusOptions) {
+  // `ComboboxInput` renders a single `<input>` root, so the instance's `$el`
+  // is that element. Resolved through the template ref rather than
+  // `getElementById` so the internal id template stays internal.
+  const instance = searchInputRef.value as {
+    $el?: HTMLInputElement
+  } | null
+  const el = (instance?.$el ?? instance) as HTMLInputElement | null
+  el?.focus(options)
 }
 
-function focusSearch() {
-  const el = document.getElementById(
-    `${inputId.value}-search-input`,
-  ) as HTMLInputElement | null
-  el?.focus()
+/** Focuses the default trigger, falling back to the popover search input. */
+function focus(options?: FocusOptions) {
+  const target = triggerRef.value
+  if (target) {
+    target.focus(options)
+    return
+  }
+  focusSearch(options)
 }
 
 const slotProps = computed<MultiSelectSlotProps>(() => ({
@@ -231,24 +265,22 @@ const slotProps = computed<MultiSelectSlotProps>(() => ({
   disabled: Boolean(props.disabled),
   query: typedQuery.value,
   selectedOptions: selectedOptions.value,
-  displayValue: displayValue.value,
-  clearAll,
+  clear,
   setOpen,
 }))
 
 const searchSlotProps = computed<MultiSelectSearchSlotProps>(() => ({
   query: typedQuery.value,
-  disabled: Boolean(props.disabled),
-  loading: Boolean(props.loading),
   setQuery,
-  clearQuery,
-  focusSearch,
+  disabled: Boolean(props.disabled),
+  focus: focusSearch,
 }))
 
-function handleRootModelValueChange(value: string | string[] | undefined) {
-  const arr = Array.isArray(value) ? value : value ? [value] : []
-  const mapped = arr.map(toExternalValue)
-  model.value = mapped
+function handleRootModelValueChange(value: unknown) {
+  const values = Array.isArray(value) ? value : value == null ? [] : [value]
+  setModel(
+    values.map((item) => toExternalValue(item)) as Array<string | number>,
+  )
 }
 
 function handleRootOpenChange(value: boolean) {
@@ -256,12 +288,7 @@ function handleRootOpenChange(value: boolean) {
 }
 
 function handleInputChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const value = target.value
-
-  query.value = value
-  hasTypedSinceOpen.value = true
-  emit('update:query', value)
+  setQuery((event.target as HTMLInputElement).value)
 }
 
 const triggerClasses = computed(() => [
@@ -271,12 +298,26 @@ const triggerClasses = computed(() => [
   triggerVariantClasses(props.variant, Boolean(props.disabled)),
 ])
 
+// Query filtering is gated on the user having typed since the popover opened.
+// Deriving that from the query itself (rather than setting it at each write
+// site) keeps it correct for every path into the query: typing, the slot's
+// `setQuery`, a bound `v-model:query`, and the reset below. In particular,
+// clearing must restore "hasn't typed", not assert the opposite.
+watch(
+  query,
+  (value) => {
+    hasTypedSinceOpen.value = value !== ''
+  },
+  { immediate: true },
+)
+
 watch(open, (isOpen, wasOpen) => {
   if (isOpen === wasOpen) return
-  query.value = ''
+  if (query.value !== '') query.value = ''
   hasTypedSinceOpen.value = false
 })
 
+defineExpose<SelectionExposed>({ clear, focus })
 defineSlots<MultiSelectSlots>()
 </script>
 
@@ -322,6 +363,7 @@ defineSlots<MultiSelectSlots>()
       -->
         <button
           v-else
+          ref="trigger"
           type="button"
           :class="[
             triggerClasses,
@@ -401,6 +443,7 @@ defineSlots<MultiSelectSlots>()
 
           <slot name="suffix" v-bind="slotProps">
             <span
+              data-slot="chevron"
               :class="[
                 'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
                 open && 'rotate-180',
@@ -449,6 +492,7 @@ defineSlots<MultiSelectSlots>()
                   v-bind="searchSlotProps"
                 />
                 <ComboboxInput
+                  ref="searchInput"
                   :id="`${inputId}-search-input`"
                   data-slot="input"
                   :value="query"
@@ -487,10 +531,8 @@ defineSlots<MultiSelectSlots>()
                   <slot
                     name="footer"
                     v-bind="{
-                      clearAll,
+                      ...slotProps,
                       selectAll,
-                      selectedOptions,
-                      query: typedQuery,
                     }"
                   />
                 </div>
@@ -504,7 +546,7 @@ defineSlots<MultiSelectSlots>()
                   v-if="safeModel.length > 0"
                   variant="ghost"
                   size="sm"
-                  @click="clearAll"
+                  @click="clear"
                 >
                   Clear All
                 </Button>

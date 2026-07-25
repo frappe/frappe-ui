@@ -13,9 +13,9 @@ const options = [
   { label: 'Orange', value: 'orange' },
 ]
 
-function clearSearch(clearQuery: () => void, focusSearch: () => void) {
-  clearQuery()
-  focusSearch()
+function clearSearch(setQuery: (value: string) => void, focus: () => void) {
+  setQuery('')
+  focus()
 }
 </script>
 
@@ -30,14 +30,14 @@ function clearSearch(clearQuery: () => void, focusSearch: () => void) {
       <span class="lucide-search size-4 shrink-0 text-ink-gray-5" />
     </template>
 
-    <template #search-suffix="{ query, clearQuery, focusSearch }">
+    <template #search-suffix="{ query, setQuery, focus }">
       <button
         v-if="query"
         type="button"
         aria-label="Clear search"
         class="grid size-5 shrink-0 place-items-center rounded text-ink-gray-5 hover:bg-surface-gray-2 hover:text-ink-gray-8"
         @pointerdown.prevent
-        @click="clearSearch(clearQuery, focusSearch)"
+        @click="clearSearch(setQuery, focus)"
       >
         <span class="lucide-x size-3.5" />
       </button>

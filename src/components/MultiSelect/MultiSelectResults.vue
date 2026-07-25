@@ -26,7 +26,7 @@ const props = defineProps<{
   groups: NormalizedGroup[]
   size: MultiSelectSize
   query: string
-  selectedValues: string[]
+  selectedValues: Array<string | number>
   loading: boolean
   hideSearch: boolean
   emptyText: string
@@ -72,7 +72,6 @@ const { toInternal: getInternalValue } = useEmptyValueMapping(
 function getItemTextValue(item: NormalizedOption) {
   return `${item.label} ${item.value}`.trim()
 }
-
 </script>
 
 <template>
@@ -202,13 +201,6 @@ function getItemTextValue(item: NormalizedOption) {
                     v-else-if="slotFns['item-label']"
                     :render="slotFns['item-label']"
                     :slot-props="getItemSlotProps(item)"
-                  />
-
-                  <component
-                    :is="ItemSlotRender"
-                    v-else-if="slotFns['option']"
-                    :render="slotFns['option']"
-                    :slot-props="{ item }"
                   />
 
                   <component

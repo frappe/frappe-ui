@@ -1,11 +1,11 @@
-import type { Component, VNode, VNodeChild } from 'vue'
+import type { Component, VNodeChild } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
 export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
 
-export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-export type PopoverAlign = 'start' | 'center' | 'end'
+import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
+export type { PopoverSide, PopoverAlign }
 
 export type MultiSelectSlotFn<TProps> = (props: TProps) => VNodeChild
 
@@ -25,19 +25,17 @@ export interface MultiSelectItemSlots<TProps> {
 
 export interface MultiSelectOption {
   label: string
-  value: string
+  value: string | number
   icon?: string | Component
   description?: string
   disabled?: boolean
+  /**
+   * Dispatches this row to the `#item-<slot>` template slot, e.g.
+   * `slot: 'member'` renders `#item-member` in the row's label region.
+   */
   slot?: string
   /** Per-item inline slot implementations for the row shell. */
   slots?: MultiSelectItemSlots<MultiSelectItemSlotProps>
-  /** @deprecated use `slot` */
-  slotName?: string
-  /** @deprecated use `slots` — function form maps to `slots.item`, object form to `slots` */
-  render?:
-    | (() => VNode | VNode[])
-    | MultiSelectItemSlots<MultiSelectItemSlotProps>
   [key: string]: any
 }
 
@@ -54,7 +52,7 @@ export type MultiSelectOptions = Array<
 
 export interface MultiSelectProps extends InputLabelingProps {
   /** Array of selected option values. */
-  modelValue?: string[]
+  modelValue?: Array<string | number>
 
   /** Options rendered in the popover. */
   options?: MultiSelectOptions
@@ -74,11 +72,26 @@ export interface MultiSelectProps extends InputLabelingProps {
   /** Controls the popover visibility. */
   open?: boolean
 
+  /**
+   * Controls the in-popover search query. Optional — the component owns the
+   * query when this is not bound, so `v-model:query` is never required.
+   */
+  query?: string
+
   /** Hides the in-popover search input. */
   hideSearch?: boolean
 
   /** Replaces the results with a loading state. */
   loading?: boolean
+
+  /**
+   * Client-side query filtering. Defaults to `true`. Set to `false` for
+   * pickers whose options come from a server search — the backend already
+   * decided what matches, and a second literal substring pass on the client
+   * silently drops fuzzy, ranked, or id-based results. This turns off query
+   * filtering only; nothing else about the component changes.
+   */
+  filterable?: boolean
 
   /** Fallback empty-state copy. */
   emptyText?: string
@@ -94,20 +107,13 @@ export interface MultiSelectProps extends InputLabelingProps {
 
   /** Teleport target for the popover content. */
   portalTo?: string | HTMLElement
-
-  /**
-   * Custom equality function used to resolve which options are currently
-   * selected for display and rendering. When omitted, the component uses
-   * strict equality on `option.value` against entries in `modelValue`.
-   */
-  compareFn?: (a: MultiSelectOption, b: MultiSelectOption) => boolean
 }
 
 /**
- * Shared shape for `#trigger`, `#prefix`, `#suffix`, and (with an added
- * `summary` field) `#summary`. The imperative helpers `clearAll` and
- * `setOpen` are exposed on every slot so consumers don't need to hoist
- * into `#trigger` just to clear the selection.
+ * Shared shape for `#trigger`, `#prefix`, `#suffix`, `#footer` (with an added
+ * `selectAll`), and `#summary` (with an added `summary`). The imperative
+ * helpers `clear` and `setOpen` are exposed on every slot so consumers don't
+ * need to hoist into `#trigger` just to clear the selection.
  */
 export interface MultiSelectSlotProps {
   /** Whether the popover is open. */
@@ -122,11 +128,8 @@ export interface MultiSelectSlotProps {
   /** Resolved option objects for the selected values, in `modelValue` order. */
   selectedOptions: MultiSelectOption[]
 
-  /** Comma-joined labels of the selected options, or `''` when nothing is selected. */
-  displayValue: string
-
   /** Clears all selected values. */
-  clearAll: () => void
+  clear: () => void
 
   /** Sets the popover open state. */
   setOpen: (value: boolean) => void
@@ -136,28 +139,25 @@ export type MultiSelectTriggerSlotProps = MultiSelectSlotProps
 export type MultiSelectPrefixSlotProps = MultiSelectSlotProps
 export type MultiSelectSuffixSlotProps = MultiSelectSlotProps
 
+/**
+ * Props for `#search-prefix` and `#search-suffix`.
+ *
+ * Both slots render inside the search row, which only exists while
+ * `hide-search` is not set — they disappear silently when it is.
+ */
 export interface MultiSelectSearchSlotProps {
   /** Current search query — empty when the user hasn't typed since opening. */
   query: string
 
+  /** Updates the search query and emits `update:query`. Pass `''` to clear. */
+  setQuery: (value: string) => void
+
   /** Whether the multi-select is disabled. */
   disabled: boolean
 
-  /** Whether the multi-select is loading options. */
-  loading: boolean
-
-  /** Updates the search query and emits `update:query`. */
-  setQuery: (value: string) => void
-
-  /** Clears the search query and emits `update:query`. */
-  clearQuery: () => void
-
   /** Moves focus to the search input. */
-  focusSearch: () => void
+  focus: (options?: FocusOptions) => void
 }
-
-export type MultiSelectSearchPrefixSlotProps = MultiSelectSearchSlotProps
-export type MultiSelectSearchSuffixSlotProps = MultiSelectSearchSlotProps
 
 export interface MultiSelectSummarySlotProps extends MultiSelectSlotProps {
   /** Default label text the trigger would render (e.g. placeholder,
@@ -186,21 +186,12 @@ export interface MultiSelectEmptySlotProps {
   query: string
 }
 
-export interface MultiSelectFooterSlotProps {
-  /** Clears all selected values. */
-  clearAll: () => void
-
-  /** Selects every enabled option across all groups. */
-  selectAll: () => void
-
-  /** Resolved option objects for the selected values, in `modelValue` order. */
-  selectedOptions: MultiSelectOption[]
-
-  /** Current search query — empty when the user hasn't typed since opening. */
-  query: string
-}
-
-export interface MultiSelectSlots {
+/**
+ * Fixed slot names. Kept separate from `MultiSelectSlots` so the dynamic
+ * `` `item-${string}` `` index signature can be intersected in without
+ * constraining names that don't match the pattern.
+ */
+interface MultiSelectFixedSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: MultiSelectTriggerSlotProps) => any
 
@@ -235,12 +226,50 @@ export interface MultiSelectSlots {
   /** Overrides the rendered description content. */
   description?: () => any
 
-  /** Content rendered before the in-popover search input. */
-  'search-prefix'?: (props: MultiSelectSearchPrefixSlotProps) => any
+  /**
+   * Content rendered before the in-popover search input. Renders inside the
+   * search row, so it is not rendered at all when `hide-search` is set.
+   */
+  'search-prefix'?: (props: MultiSelectSearchSlotProps) => any
 
-  /** Content rendered after the in-popover search input and loading indicator. */
-  'search-suffix'?: (props: MultiSelectSearchSuffixSlotProps) => any
+  /**
+   * Content rendered after the in-popover search input and loading
+   * indicator. Renders inside the search row, so it is not rendered at all
+   * when `hide-search` is set.
+   */
+  'search-suffix'?: (props: MultiSelectSearchSlotProps) => any
 
+  /** Custom renderer for group labels. */
+  'group-label'?: (props: MultiSelectGroupLabelSlotProps) => any
+
+  /** Fallback content rendered when there are no results. */
+  empty?: (props: MultiSelectEmptySlotProps) => any
+
+  /**
+   * Replaces the default Clear All / Select All footer. Receives the shared
+   * control slot props plus `selectAll`.
+   */
+  footer?: (
+    props: MultiSelectSlotProps & {
+      /** Selects every enabled option across all groups. */
+      selectAll: () => void
+    },
+  ) => any
+
+  /** Replaces the entire row. */
+  item?: (props: MultiSelectItemSlotProps) => any
+}
+
+/**
+ * Item slot names: the three fixed regions of the row shell, the whole-row
+ * takeover, and any `#item-<name>` dispatched from an option's `slot` field.
+ *
+ * The index signature is deliberately narrowed to `` `item-${string}` `` —
+ * `MultiSelectResults` resolves `option.slot` to `` `item-${option.slot}` ``,
+ * so this is exactly the runtime behavior, and every fixed slot name stays
+ * typechecked instead of every typo compiling clean.
+ */
+interface MultiSelectItemSlotsByName {
   /** Shared content rendered before the standard row label. */
   'item-prefix'?: (props: MultiSelectItemSlotProps) => any
 
@@ -250,31 +279,28 @@ export interface MultiSelectSlots {
   /** Shared content rendered after the standard row label area. */
   'item-suffix'?: (props: MultiSelectItemSlotProps) => any
 
-  /** Replaces the entire row. */
-  item?: (props: MultiSelectItemSlotProps) => any
-
-  /** Custom renderer for group labels. */
-  'group-label'?: (props: MultiSelectGroupLabelSlotProps) => any
-
-  /** Fallback content rendered when there are no results. */
-  empty?: (props: MultiSelectEmptySlotProps) => any
-
-  /** Replaces the default Clear All / Select All footer. */
-  footer?: (props: MultiSelectFooterSlotProps) => any
-
-  /** @deprecated compatibility alias for `#item-label`. */
-  option?: (props: { item: MultiSelectOption }) => any
-
-  [slotName: string]: ((props: any) => any) | undefined
+  /** Per-option dynamic slot, selected by the option's `slot` field. */
+  [slotName: `item-${string}`]:
+    | ((props: MultiSelectItemSlotProps) => any)
+    | undefined
 }
+
+export interface MultiSelectSlots
+  extends MultiSelectFixedSlots, MultiSelectItemSlotsByName {}
 
 export interface MultiSelectEmits {
   /** Fired when the selection changes. */
-  'update:modelValue': [value: string[]]
+  'update:modelValue': [value: Array<string | number>]
+
+  /**
+   * Fired alongside `update:modelValue` with the original option objects
+   * resolved out of `options`, so custom fields on an option survive.
+   */
+  'update:selectedOptions': [value: MultiSelectOption[]]
 
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 
-  /** Fired when the user types in the search input. */
+  /** Fired when the search query changes. */
   'update:query': [value: string]
 }

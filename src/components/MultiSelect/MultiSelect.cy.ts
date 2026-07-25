@@ -67,16 +67,56 @@ describe('MultiSelect', () => {
     cy.get('[data-cy="item-label"]').should('exist')
   })
 
-  it('supports legacy #option slot', () => {
+  it('emits update:selectedOptions with the original option objects', () => {
+    const richOptions = [
+      { label: 'Apple', value: 'apple', kind: 'pome' },
+      { label: 'Banana', value: 'banana', kind: 'berry' },
+    ]
+
     cy.mount(MultiSelect, {
-      props: { options },
-      slots: {
-        option: () => h('div', { 'data-cy': 'option' }, ['custom']),
+      props: {
+        options: richOptions,
+        'onUpdate:selectedOptions': cy.spy().as('onSelectedOptions'),
       },
     })
 
     cy.get('[data-slot="trigger"]').click()
-    cy.get('[data-cy="option"]').should('have.length', 3)
+    cy.get('[role=option]').eq(1).click()
+
+    cy.get('@onSelectedOptions').should('have.been.calledWith', [
+      richOptions[1],
+    ])
+  })
+
+  it('supports numeric option values', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options: [
+          { label: 'One', value: 1 },
+          { label: 'Two', value: 2 },
+          { label: 'Twenty', value: 20 },
+        ],
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    // numeric values stay searchable — the filter coerces with String()
+    cy.get('[data-slot="input"]').type('2')
+    cy.get('[role=option]').should('have.length', 2)
+
+    cy.get('[role=option]').eq(0).click()
+    cy.get('@onUpdate').should('have.been.calledWith', [2])
+  })
+
+  it('filterable=false renders exactly the given options', () => {
+    cy.mount(MultiSelect, {
+      props: { options, filterable: false },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="input"]').type('zzz')
+    cy.get('[role=option]').should('have.length', 3)
   })
 
   it('emits update:query on search input', () => {
@@ -99,9 +139,10 @@ describe('MultiSelect', () => {
       slots: {
         'search-prefix': ({ query }) =>
           h('span', { 'data-cy': 'search-prefix' }, query || 'Search'),
-        'search-suffix': ({ query, setQuery, clearQuery, focusSearch }) =>
+        'search-suffix': ({ query, setQuery, focus, disabled }) =>
           h('div', { 'data-cy': 'search-suffix' }, [
             h('span', { 'data-cy': 'search-query' }, query),
+            h('span', { 'data-cy': 'search-disabled' }, String(disabled)),
             h(
               'button',
               {
@@ -117,8 +158,8 @@ describe('MultiSelect', () => {
                 type: 'button',
                 'data-cy': 'clear-query',
                 onClick: () => {
-                  clearQuery()
-                  focusSearch()
+                  setQuery('')
+                  focus()
                 },
               },
               'Clear query',
@@ -130,7 +171,7 @@ describe('MultiSelect', () => {
     cy.get('[data-slot="trigger"]')
       .find('[data-cy="search-prefix"]')
       .should('not.exist')
-    cy.get('[data-slot="trigger"]').find('.lucide-chevron-down').should('exist')
+    cy.get('[data-slot="trigger"] [data-slot="chevron"]').should('exist')
 
     cy.get('[data-slot="trigger"]').click()
     cy.get('[data-slot="search"] [data-cy="search-prefix"]').should(
@@ -152,7 +193,31 @@ describe('MultiSelect', () => {
     cy.get('[data-slot="input"]').should('be.focused')
   })
 
-  it('clearAll and selectAll via default footer', () => {
+  it('hides the search slots when hide-search is set', () => {
+    cy.mount(MultiSelect, {
+      props: { options, hideSearch: true },
+      slots: {
+        'search-prefix': () => h('span', { 'data-cy': 'search-prefix' }, 'P'),
+        'search-suffix': () => h('span', { 'data-cy': 'search-suffix' }, 'S'),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="search"]').should('not.exist')
+    cy.get('[data-cy="search-prefix"]').should('not.exist')
+    cy.get('[data-cy="search-suffix"]').should('not.exist')
+  })
+
+  it('accepts a query prop and filters with it', () => {
+    cy.mount(MultiSelect, {
+      props: { options, query: 'ba', open: true },
+    })
+
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+  })
+
+  it('clear and selectAll via default footer', () => {
     cy.mount(MultiSelect, {
       props: {
         options,
@@ -171,6 +236,50 @@ describe('MultiSelect', () => {
 
     cy.get('[data-slot="footer"] button').contains('Clear All').click()
     cy.get('@onUpdate').should('have.been.calledWith', [])
+  })
+
+  it('exposes clear and focus on a template ref', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const picker = ref<{
+          clear: () => void
+          focus: () => void
+        } | null>(null)
+        const value = ref(['apple', 'banana'])
+        return { picker, value }
+      },
+      render() {
+        return h('div', [
+          h(MultiSelect, {
+            ref: 'picker',
+            options,
+            modelValue: this.value,
+            'onUpdate:modelValue': (v: Array<string | number>) => {
+              this.value = v as string[]
+            },
+          }),
+          h(
+            'button',
+            {
+              'data-cy': 'clear',
+              onClick: () => {
+                this.picker?.clear()
+                this.picker?.focus()
+              },
+            },
+            'clear',
+          ),
+        ])
+      },
+    })
+
+    cy.mount(Wrapper)
+
+    cy.get('[data-slot="trigger"]').should('contain.text', '2 selected')
+    cy.get('[data-cy="clear"]').click()
+    cy.get('[data-slot="trigger"]')
+      .should('contain.text', 'Select option')
+      .and('be.focused')
   })
 
   it('renders grouped options with labels', () => {

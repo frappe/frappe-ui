@@ -54,7 +54,6 @@ export function normalizeOption(
 
   return {
     ...option,
-    slot: option.slot ?? option.slotName,
     resolvedSlots: resolveItemSlotsFromRaw(option),
   }
 }
@@ -108,6 +107,11 @@ export function normalizeMultiSelectOptions(
   return groups
 }
 
+// `String(item.value)` keeps numeric option values searchable — the shared
+// matcher only reads `label` / `value` as strings.
 export function matchesOption(item: NormalizedOption, currentQuery: string) {
-  return matchesByLabelOrValue(item, currentQuery)
+  return matchesByLabelOrValue(
+    { label: item.label, value: String(item.value) },
+    currentQuery,
+  )
 }
