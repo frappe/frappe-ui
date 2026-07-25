@@ -18,7 +18,7 @@
         Keeping the content out of the overlay restores click-to-focus.
       -->
       <div
-        class="fixed inset-0 overflow-y-auto"
+        class="fixed inset-0 overflow-y-auto dialog-scroll-container"
         :class="{ 'pointer-events-none': !isOpen }"
       >
         <div
