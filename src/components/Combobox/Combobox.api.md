@@ -23,7 +23,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"input" | "button"',
+    type: '"button" | "input"',
     default: '"input"'
   },
   {
@@ -254,12 +254,22 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'unknown[]'
+    type: '[value: ComboboxOptionValue | null]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
-    type: 'unknown[]'
+    type: '[value: boolean]'
+  },
+  {
+    name: 'blur',
+    description: '',
+    type: '[event: FocusEvent]'
   },
   {
     name: 'focus',
@@ -267,19 +277,9 @@
     type: '[event: FocusEvent]'
   },
   {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: 'unknown[]'
-  },
-  {
     name: 'update:selectedOption',
     description: 'Fired when the selected option changes.',
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
-  },
-  {
-    name: 'blur',
-    description: '',
-    type: '[event: FocusEvent]'
   }
 ]
 </script>

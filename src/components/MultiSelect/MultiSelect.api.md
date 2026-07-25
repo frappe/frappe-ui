@@ -231,17 +231,17 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'unknown[]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: 'unknown[]'
+    type: '[value: (string | number)[]]'
   },
   {
     name: 'update:query',
     description: 'Fired when the query changes.',
-    type: 'unknown[]'
+    type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'update:selectedOptions',
