@@ -62,7 +62,7 @@ describe('Select', () => {
       slots: {
         prefix: h('span', { 'data-cy': 'prefix' }, 'prefix'),
         suffix: h('span', { 'data-cy': 'suffix' }, 'suffix'),
-        option: h('span', { 'data-cy': 'option' }, 'option'),
+        'item-label': h('span', { 'data-cy': 'item-label' }, 'label'),
         footer: h('span', { 'data-cy': 'footer' }, 'footer'),
       },
     })
@@ -72,8 +72,135 @@ describe('Select', () => {
 
     cy.get('button').click()
 
-    cy.get('[data-cy="option"]').should('exist')
+    cy.get('[data-cy="item-label"]').should('exist')
     cy.get('[data-slot="footer"]').find('[data-cy="footer"]').should('exist')
+  })
+
+  it('renders a data-slot="chevron" indicator by default', () => {
+    cy.mount(Select, { props: { options } })
+    cy.get('[data-slot="trigger"] [data-slot="chevron"]').should('exist')
+  })
+
+  it('#item replaces the entire option row', () => {
+    cy.mount(Select, {
+      props: { options, modelValue: 'def' },
+      slots: {
+        item: ({ item, selected }: any) =>
+          h(
+            'div',
+            { 'data-cy': 'custom-item', 'data-selected': String(selected) },
+            item.label,
+          ),
+      },
+    })
+
+    cy.get('[role=combobox]').click()
+    cy.get('[data-cy="custom-item"]').should('have.length', options.length)
+    // The default row shell is gone when #item takes over.
+    cy.get('[role=option]')
+      .first()
+      .find('[data-slot="item-list-row"]')
+      .should('not.exist')
+    cy.get('[data-cy="custom-item"]')
+      .eq(1)
+      .should('have.attr', 'data-selected', 'true')
+  })
+
+  it('a per-option slot wins over the generic #item slot', () => {
+    cy.mount(Select, {
+      props: {
+        options: [
+          { label: 'Plain', value: 'plain' },
+          { label: 'Special', value: 'special', slot: 'special' },
+        ],
+      },
+      slots: {
+        item: () => h('div', { 'data-cy': 'generic-item' }, 'generic'),
+        'item-special': () =>
+          h('div', { 'data-cy': 'special-item' }, 'special'),
+      },
+    })
+
+    cy.get('[role=combobox]').click()
+    cy.get('[data-cy="generic-item"]').should('have.length', 1)
+    cy.get('[data-cy="special-item"]').should('have.length', 1)
+  })
+
+  it('exposes clear() and focus()', () => {
+    const Harness = defineComponent({
+      setup() {
+        const selectRef = ref<any>(null)
+        const value = ref('def')
+
+        return () =>
+          h('div', [
+            h(Select, {
+              ref: selectRef,
+              options,
+              modelValue: value.value,
+              'onUpdate:modelValue': (next: any) => {
+                value.value = next
+              },
+            }),
+            h(
+              'button',
+              { 'data-cy': 'clear', onClick: () => selectRef.value?.clear() },
+              'Clear',
+            ),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () => selectRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[role=combobox]').should('have.text', 'def')
+    cy.get('[data-cy="clear"]').click()
+    cy.get('[role=combobox]').should('have.text', 'Select option')
+
+    cy.get('[data-cy="focus"]').click()
+    cy.get('[role=combobox]').should('have.focus')
+  })
+
+  it('#footer receives the control slot props', () => {
+    cy.mount(Select, {
+      props: { options, modelValue: 'def' },
+      slots: {
+        footer: ({ selectedOption, clear, setOpen }: any) =>
+          h('div', [
+            h('span', { 'data-cy': 'footer-label' }, selectedOption?.label),
+            h('button', { 'data-cy': 'footer-clear', onClick: clear }, 'Clear'),
+            h(
+              'button',
+              { 'data-cy': 'footer-close', onClick: () => setOpen(false) },
+              'Close',
+            ),
+          ]),
+      },
+    })
+
+    cy.get('[role=combobox]').click()
+    cy.get('[data-cy="footer-label"]').should('have.text', 'def')
+    cy.get('[data-cy="footer-clear"]').click()
+    cy.get('[data-cy="footer-label"]').should('have.text', '')
+    cy.get('[data-cy="footer-close"]').click()
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('switches to popper placement when a positioning prop is set', () => {
+    cy.mount(Select, {
+      props: { options, side: 'bottom', align: 'start', offset: 4 },
+    })
+
+    cy.get('[role=combobox]').click()
+    cy.get('[data-slot="content"]').should('have.attr', 'data-side', 'bottom')
   })
 
   it('normalizes mixed string and object options', () => {
@@ -212,11 +339,11 @@ describe('Select', () => {
         modelValue: 'def',
       },
       slots: {
-        trigger: ({ displayValue }) =>
+        trigger: ({ selectedOption }: any) =>
           h(
             'div',
             { 'data-cy': 'trigger-content' },
-            displayValue || 'Pick one',
+            selectedOption?.label || 'Pick one',
           ),
       },
     })

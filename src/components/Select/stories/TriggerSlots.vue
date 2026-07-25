@@ -72,7 +72,7 @@ const options = [
           variant="outline"
           class="w-full"
         >
-          <template #trigger="{ displayValue, open }">
+          <template #trigger="{ selectedOption, open }">
             <div class="flex w-full items-center gap-3">
               <div
                 class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-gray-2"
@@ -82,7 +82,7 @@ const options = [
 
               <div class="min-w-0 flex-1 py-1.5">
                 <div class="truncate">
-                  {{ displayValue || 'Choose reviewer' }}
+                  {{ selectedOption?.label || 'Choose reviewer' }}
                 </div>
                 <div class="truncate text-p-sm text-ink-gray-5">
                   Design review queue

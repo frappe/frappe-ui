@@ -1,2 +1,14 @@
 export { default as Select } from './Select.vue'
-export * from './types'
+export type {
+  SelectEmits,
+  SelectItemSlotProps,
+  SelectNormalizedOption,
+  SelectOption,
+  SelectOptionValue,
+  SelectPrefixSlotProps,
+  SelectProps,
+  SelectSlotProps,
+  SelectSlots,
+  SelectSuffixSlotProps,
+  SelectTriggerSlotProps,
+} from './types'

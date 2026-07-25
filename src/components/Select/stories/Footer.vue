@@ -39,7 +39,7 @@ const timezones = [
 <template>
   <div class="grid gap-3">
     <Select v-model="value" :options="timezones" placeholder="Pick a timezone">
-      <template #footer="{ selectedOption, clearSelection }">
+      <template #footer="{ selectedOption, clear, setOpen }">
         <div
           class="flex items-center justify-between border-t border-outline-gray-1 px-3 py-2 text-sm text-ink-gray-5"
         >
@@ -47,7 +47,12 @@ const timezones = [
           <button
             v-if="selectedOption"
             class="text-ink-gray-7 hover:text-ink-gray-8"
-            @click="clearSelection"
+            @click="
+              () => {
+                clear()
+                setOpen(false)
+              }
+            "
           >
             Clear
           </button>
