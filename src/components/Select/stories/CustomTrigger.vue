@@ -2,48 +2,42 @@
 import { ref } from 'vue'
 import { Select } from 'frappe-ui'
 
-const reviewer = ref('mariam')
+const frequency = ref('mentions')
 
 const options = [
-  { label: 'Faris', value: 'faris' },
-  { label: 'Aakvatech', value: 'aakvatech' },
-  { label: 'Hadi', value: 'hadi' },
-  { label: 'Mariam', value: 'mariam' },
-  { label: 'Suhail', value: 'suhail' },
+  { label: 'for every message', value: 'all' },
+  { label: 'for @mentions only', value: 'mentions' },
+  { label: 'never', value: 'never' },
 ]
 </script>
 
 <template>
-  <Select
-    v-model="reviewer"
-    :options="options"
-    variant="outline"
-    class="w-[320px] max-w-full"
-  >
-    <template #trigger="{ selectedOption, open }">
-      <div class="flex w-full items-center gap-3">
-        <div
-          class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-gray-2"
-        >
-          <span class="lucide-users size-4 text-ink-gray-6" />
-        </div>
-
-        <div class="min-w-0 flex-1 py-1.5">
-          <div class="truncate">
-            {{ selectedOption?.label || 'Choose reviewer' }}
-          </div>
-          <div class="truncate text-p-sm text-ink-gray-5">
-            Design review queue
-          </div>
-        </div>
-
+  <!--
+    An inline trigger reads as part of the sentence rather than as a form
+    control. `#prefix` / `#suffix` can't get here — they add to the default
+    trigger shell, while `#trigger` replaces it. `variant="ghost"` and
+    `size="sm"` keep the shell from drawing a border or a tall row.
+  -->
+  <p class="max-w-md text-base text-ink-gray-7">
+    Notify me
+    <Select
+      v-model="frequency"
+      :options="options"
+      variant="ghost"
+      size="sm"
+      class="!px-0"
+    >
+      <template #trigger="{ selectedOption, open }">
         <span
           :class="[
-            'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]',
-            open ? 'rotate-180' : '',
+            'rounded px-1 -mx-1 font-medium text-ink-gray-8 decoration-outline-gray-3 underline-offset-4 transition-colors duration-150',
+            open ? 'bg-surface-gray-3' : 'underline hover:bg-surface-gray-3',
           ]"
-        />
-      </div>
-    </template>
-  </Select>
+        >
+          {{ selectedOption?.label }}
+        </span>
+      </template>
+    </Select>
+    in this project.
+  </p>
 </template>
