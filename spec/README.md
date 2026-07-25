@@ -24,12 +24,12 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`date-picker.md`](./date-picker.md)
 - [`popover.md`](./popover.md)
 - [`hover-card.md`](./hover-card.md)
-- [`selection.md`](./selection.md)
-  - [`item-list-row.md`](./item-list-row.md)
-  - [`dropdown.md`](./dropdown.md)
+- [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
   - [`select.md`](./select.md)
   - [`combobox.md`](./combobox.md)
   - [`multiselect.md`](./multiselect.md)
+- [`dropdown.md`](./dropdown.md) — the action menu
+- [`item-list-row.md`](./item-list-row.md) — the row shell both families use
 
 ## Freeze work
 
@@ -38,12 +38,6 @@ If these disagree, update the lower-authority document or mark it historical.
   typed). Proposes five verbs, a policy for when and how a component may hand
   back a DOM element, and a required `*Exposed` type. Excludes `frappe/`,
   `ListView`, and `Calendar`. **Proposed.**
-
-- [`selection-api-finalization.md`](./selection-api-finalization.md) — audit
-  and freeze plan for the shipped `Select` / `MultiSelect` / `Combobox`
-  surface. Reverses the deprecation policy in `selection.md` §13: nothing
-  `@deprecated` ships in `1.0.0`, including `Autocomplete`. The library-wide
-  sweep proceeds one component family at a time; this is the first.
 
 ## ADRs
 

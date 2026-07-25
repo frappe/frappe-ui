@@ -1,10 +1,8 @@
 # ItemListRow Spec
 
-Status: accepted direction for `frappe-ui` v1 planning.
-
-This document defines the exact public API for `ItemListRow`. It is a sub-spec
-of [`selection.md`](./selection.md)
-and inherits the shared design rules from that document.
+This document defines the public API for `ItemListRow`, the row shell shared by
+the selection pickers ([`selection.md`](./selection.md)) and the action menu
+([`dropdown.md`](./dropdown.md)).
 
 ## Role
 

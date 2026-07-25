@@ -23,9 +23,9 @@ The last two are where this surface went most wrong (13 members on Calendar, 4
 on ListView, almost all of it duplicating slot props). Their replacements should
 be built to the rules below rather than inheriting the old shape.
 
-Related: [`selection-api-finalization.md`](./selection-api-finalization.md)
-already settled this for `Select`, `Combobox`, and `MultiSelect`. This document
-applies the same thinking to the rest of the library.
+Related: [`selection.md`](./selection.md) already settles this for `Select`,
+`Combobox`, and `MultiSelect` — all three expose exactly `{ clear, focus }`.
+This document applies the same thinking to the rest of the library.
 
 ---
 
