@@ -19,23 +19,22 @@
       </span>
     </div>
 
-    <div
+    <ProgressRoot
+      :model-value="clampedValue"
+      :max="MAX_VALUE"
+      :get-value-label="() => valueLabel"
       class="overflow-hidden rounded-xl"
       :class="indicatorContainerClasses"
-      :aria-valuemax="MAX_VALUE"
-      :aria-valuemin="MIN_VALUE"
-      :aria-valuenow="props.value"
-      role="progressbar"
     >
       <!-- Continuous Progress Bar -->
       <!-- Scaled rather than resized: `transform` is composited, where animating
            `width` reflows the bar on every frame. The fill carries no radius of
            its own — the container clips it — so scaling distorts nothing. -->
-      <div
+      <ProgressIndicator
         v-if="!props.intervals"
         class="h-full w-full origin-left bg-surface-gray-10 transition-transform duration-300 ease-linear motion-reduce:transition-none"
         :style="`transform: scaleX(${fillScale})`"
-      ></div>
+      />
 
       <!-- Interval Progress Bar -->
       <div
@@ -48,12 +47,13 @@
             : 'bg-surface-gray-2'
         "
       ></div>
-    </div>
+    </ProgressRoot>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { ProgressIndicator, ProgressRoot } from 'reka-ui'
 import type { ProgressProps } from './types'
 
 const MIN_VALUE = 0
@@ -75,30 +75,35 @@ const indicatorContainerClasses = computed(() => {
     xl: 'h-3',
   }[props.size]
 
-  const layoutClasses = props.intervals
-    ? 'flex space-x-1'
-    : 'relative bg-surface-gray-2'
+  const layoutClasses = props.intervals ? 'flex space-x-1' : 'bg-surface-gray-2'
 
   return [heightClass, layoutClasses]
 })
 
 /**
- * Fraction the continuous fill is scaled to. Clamped because a scale above 1
- * would be silently clipped by the container and a negative one would flip the
- * fill across its origin, where the old `width: N%` simply resolved to nothing.
+ * Clamped because a fill scale above 1 would be silently clipped by the
+ * container and a negative one would flip the fill across its origin. It also
+ * keeps `ProgressRoot` quiet — it treats an out-of-range value as invalid,
+ * logs an error and falls back to indeterminate.
  */
-const fillScale = computed(() => {
-  const clamped = Math.min(Math.max(props.value, MIN_VALUE), MAX_VALUE)
-  return clamped / MAX_VALUE
-})
+const clampedValue = computed(() =>
+  Math.min(Math.max(Number(props.value), MIN_VALUE), MAX_VALUE),
+)
 
-const filledIntervalCount = computed(() => {
-  if (props.value > MAX_VALUE) {
-    return props.intervalCount
-  }
+/** Fraction the continuous fill is scaled to. */
+const fillScale = computed(() => clampedValue.value / MAX_VALUE)
 
-  return Math.round((props.value / MAX_VALUE) * props.intervalCount)
-})
+/**
+ * A bare percentage (reka-ui's default) says how far along the bar is but not
+ * what it measures, so prefer the visible label when there is one.
+ */
+const valueLabel = computed(
+  () => props.label || `${Math.round(clampedValue.value)}%`,
+)
+
+const filledIntervalCount = computed(() =>
+  Math.round((clampedValue.value / MAX_VALUE) * props.intervalCount),
+)
 
 defineSlots<{
   /** Custom content for the hint area (usually displays the progress value).

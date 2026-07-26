@@ -2,12 +2,10 @@ import Progress from './Progress.vue'
 
 describe('Progress', () => {
   it('Renders', () => {
-    const val = '20'
-
     cy.mount(Progress, {
       props: {
         label: 'label',
-        value: val,
+        value: 20,
       },
     })
 
@@ -16,6 +14,18 @@ describe('Progress', () => {
     cy.get('[role=progressbar] div')
       .should('have.attr', 'style')
       .and('include', 'transform: scaleX(0.2)')
+  })
+
+  it('exposes the value to assistive tech', () => {
+    cy.mount(Progress, { props: { label: 'Uploading', value: 20 } })
+
+    cy.get('[role=progressbar]')
+      .should('have.attr', 'aria-valuenow', '20')
+      .and('have.attr', 'aria-valuemin', '0')
+      .and('have.attr', 'aria-valuemax', '100')
+      // the visible label, not a bare "20%", says what the bar measures
+      .and('have.attr', 'aria-label', 'Uploading')
+      .and('have.attr', 'data-state', 'loading')
   })
 
   it('clamps the fill scale to 0..1', () => {
