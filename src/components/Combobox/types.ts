@@ -1,14 +1,14 @@
-import type { Component, VNode, VNodeChild } from 'vue'
+import type { Component, VNodeChild } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
 export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
 
-export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-export type PopoverAlign = 'start' | 'center' | 'end'
+import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
+export type { PopoverSide, PopoverAlign }
 
-/** @deprecated alias for `align` */
-export type ComboboxPlacement = PopoverAlign
+/** Value accepted by a selectable option and by `v-model`. */
+export type ComboboxOptionValue = string | number
 
 export type ComboboxSlotFn<TProps> = (props: TProps) => VNodeChild
 
@@ -29,24 +29,19 @@ export interface ComboboxItemSlots<TProps> {
 export type ComboboxSelectableOption = {
   type?: 'option'
   label: string
-  value: string
+  value: ComboboxOptionValue
   icon?: string | Component
   description?: string
   disabled?: boolean
+  /** Dispatches the row to the `#item-<slot>` template slot. */
   slot?: string
   /** Per-item inline slot implementations for the row shell. */
   slots?: ComboboxItemSlots<ComboboxItemSlotProps>
-  /** @deprecated use `slot` */
-  slotName?: string
-  /** @deprecated use `slots` — function form maps to `slots.item`, object form to `slots` */
-  render?: (() => VNode | VNode[]) | ComboboxItemSlots<ComboboxItemSlotProps>
   [key: string]: any
 }
 
 export type ComboboxCustomOptionContext = {
   query: string
-  /** @deprecated use `query` */
-  searchTerm: string
 }
 
 export type ComboboxCustomOption = {
@@ -56,28 +51,20 @@ export type ComboboxCustomOption = {
   icon?: string | Component
   description?: string
   disabled?: boolean
+  /** Dispatches the row to the `#item-<slot>` template slot. */
   slot?: string
   /** Per-item inline slot implementations for the row shell. */
   slots?: ComboboxItemSlots<ComboboxItemSlotProps>
-  /** @deprecated use `slot` */
-  slotName?: string
   onClick: (context: ComboboxCustomOptionContext) => void
   keepOpen?: boolean
   condition?: (context: ComboboxCustomOptionContext) => boolean
-  /** @deprecated use `slots` — function form maps to `slots.item`, object form to `slots` */
-  render?: (() => VNode | VNode[]) | ComboboxItemSlots<ComboboxItemSlotProps>
   [key: string]: any
 }
-
-export type SelectableOption = ComboboxSelectableOption
-export type CustomOption = ComboboxCustomOption
 
 export type ComboboxSimpleOption =
   | string
   | ComboboxSelectableOption
   | ComboboxCustomOption
-
-export type SimpleOption = ComboboxSimpleOption
 
 export interface ComboboxGroupedOption {
   key?: string | number
@@ -86,10 +73,12 @@ export interface ComboboxGroupedOption {
   options: ComboboxSimpleOption[]
 }
 
-export type GroupedOption = ComboboxGroupedOption
 export type ComboboxOption = ComboboxSimpleOption | ComboboxGroupedOption
 
 export interface ComboboxProps extends InputLabelingProps {
+  /** Committed value. `null` when nothing is selected. */
+  modelValue?: ComboboxOptionValue | null
+
   /** Options rendered in the popover. */
   options?: ComboboxOption[]
 
@@ -116,6 +105,18 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Controls the popover visibility. */
   open?: boolean
 
+  /**
+   * Controls the search query. Optional — the combobox owns it otherwise.
+   *
+   * When it is bound the consumer owns the query: the combobox never resets it
+   * on its own — not on open, not on close, not on mount, not on `clear()`. It
+   * still follows the committed option's label in `trigger="input"` mode, where
+   * the input is the value display rather than a filter. Unbound,
+   * `trigger="button"` mode still clears the search box every time the popover
+   * opens.
+   */
+  query?: string
+
   /** Opens the popover when the input receives focus. */
   openOnFocus?: boolean
 
@@ -134,18 +135,6 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Teleport target for the popover content. */
   portalTo?: string | HTMLElement
 
-  /**
-   * Free-form acceptance: the typed query is accepted as the model value
-   * when nothing matches, and external `modelValue` updates with unknown
-   * strings are preserved. The combobox also renders a built-in "Create X"
-   * row as a click affordance.
-   *
-   * For richer create-new UX (custom label / icon / persistence callback),
-   * prefer a `type: 'custom'` option with `condition` instead — see the
-   * Create New story. The two are independent and can be combined.
-   */
-  allowCustomValue?: boolean
-
   /** Replaces the results with a loading state. */
   loading?: boolean
 
@@ -153,10 +142,25 @@ export interface ComboboxProps extends InputLabelingProps {
   emptyText?: string
 
   /**
-   * Alignment of the popover along the trigger edge.
-   * @deprecated use `align` instead; `placement` is kept as a back-compat alias
+   * Hides the in-popover search row (button mode only — in input mode the
+   * trigger *is* the search input).
+   *
+   * The `#search-prefix` / `#search-suffix` slots live inside that row and
+   * are not rendered when this is `true`.
    */
-  placement?: ComboboxPlacement
+  hideSearch?: boolean
+
+  /**
+   * Client-side substring filtering of `options` as the user types.
+   *
+   * Set to `false` for pickers whose options come from a server search: the
+   * backend already decided what matches, and a second literal substring
+   * pass on the client silently drops fuzzy, ranked, or id-based results.
+   *
+   * A custom option's `condition` callback is consumer-declared visibility
+   * rather than client filtering, so it keeps running either way.
+   */
+  filterable?: boolean
 }
 
 export interface ComboboxControlSlotProps {
@@ -175,11 +179,29 @@ export interface ComboboxControlSlotProps {
   /** Resolved display text for the committed value. */
   displayValue: string
 
-  /** Clears the current selection (sets the model to `null`). */
-  clearSelection: () => void
+  /**
+   * Clears the current selection (sets the model to `null`) and nothing else.
+   * The search query is left as it is; in `trigger="input"` mode the input
+   * still empties, because there the query follows the model.
+   */
+  clear: () => void
 
   /** Sets the popover open state (no-op while disabled). */
   setOpen: (value: boolean) => void
+}
+
+export interface ComboboxSearchSlotProps {
+  /** Current search query — empty when the user hasn't typed since opening. */
+  query: string
+
+  /** Updates the search query and emits `update:query`. */
+  setQuery: (value: string) => void
+
+  /** Whether the combobox is disabled. */
+  disabled: boolean
+
+  /** Moves focus to the in-popover search input. */
+  focus: (options?: FocusOptions) => void
 }
 
 export interface ComboboxItemSlotProps {
@@ -203,7 +225,12 @@ export interface ComboboxEmptySlotProps {
   query: string
 }
 
-export interface ComboboxSlots {
+/**
+ * Fixed slot names. Kept separate from `ComboboxSlots` so the dynamic
+ * `` `item-${string}` `` index signature can be intersected in without
+ * constraining names that don't match the pattern.
+ */
+interface ComboboxFixedSlots {
   /** Fully custom trigger renderer. */
   trigger?: (props: ComboboxControlSlotProps) => any
 
@@ -226,14 +253,17 @@ export interface ComboboxSlots {
    */
   suffix?: (props: ComboboxControlSlotProps) => any
 
-  /** Shared content rendered before the standard row label. */
-  'item-prefix'?: (props: ComboboxItemSlotProps) => any
+  /**
+   * Content rendered before the in-popover search input (button mode only).
+   * Not rendered when `hideSearch` is set.
+   */
+  'search-prefix'?: (props: ComboboxSearchSlotProps) => any
 
-  /** Shared content rendered for the standard row label area. */
-  'item-label'?: (props: ComboboxItemSlotProps) => any
-
-  /** Shared content rendered after the standard row label area. */
-  'item-suffix'?: (props: ComboboxItemSlotProps) => any
+  /**
+   * Content rendered after the in-popover search input (button mode only).
+   * Not rendered when `hideSearch` is set.
+   */
+  'search-suffix'?: (props: ComboboxSearchSlotProps) => any
 
   /** Replaces the entire row. */
   item?: (props: ComboboxItemSlotProps) => any
@@ -247,15 +277,44 @@ export interface ComboboxSlots {
   /** Content rendered after the list. Stays pinned below the scrollable
    * options. */
   footer?: (props: ComboboxControlSlotProps) => any
-
-  [slotName: string]: ((props: any) => any) | undefined
 }
 
+/**
+ * Item slot names: the three fixed regions of the row shell, plus any
+ * `#item-<name>` dispatched from an option's `slot` field.
+ *
+ * The index signature is deliberately narrowed to `` `item-${string}` `` —
+ * `ComboboxResults` resolves `item.slot` to `` `item-${item.slot}` ``, so this
+ * is exactly the runtime behavior, and every fixed slot name stays typechecked
+ * instead of every typo compiling clean.
+ */
+interface ComboboxItemSlotsByName {
+  /** Shared content rendered before the standard row label. */
+  'item-prefix'?: (props: ComboboxItemSlotProps) => any
+
+  /** Shared content rendered for the standard row label area. */
+  'item-label'?: (props: ComboboxItemSlotProps) => any
+
+  /** Shared content rendered after the standard row label area. */
+  'item-suffix'?: (props: ComboboxItemSlotProps) => any
+
+  /** Per-option dynamic slot, selected by the option's `slot` field. */
+  [slotName: `item-${string}`]:
+    | ((props: ComboboxItemSlotProps) => any)
+    | undefined
+}
+
+export interface ComboboxSlots
+  extends ComboboxFixedSlots, ComboboxItemSlotsByName {}
+
 export interface ComboboxEmits {
+  /** Fired when the committed value changes. */
+  'update:modelValue': [value: ComboboxOptionValue | null]
+
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 
-  /** Fired when the query changes due to user input. */
+  /** Fired when the query changes. */
   'update:query': [value: string]
 
   /** Fired when the resolved selected option changes. */
@@ -268,12 +327,4 @@ export interface ComboboxEmits {
 
   /** Fired when the input loses focus. */
   blur: [event: FocusEvent]
-
-  /** @deprecated compatibility alias for `update:query`. */
-  input: [value: string]
-}
-
-export interface ComboboxExposed {
-  reset: () => void
-  focus: () => void
 }

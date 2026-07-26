@@ -22,7 +22,7 @@ const tagOptions: Tag[] = [
   { label: 'Docs', value: 'docs', theme: 'green' },
 ]
 
-function removeTag(value: string) {
+function removeTag(value: string | number) {
   tags.value = tags.value.filter((v) => v !== value)
 }
 </script>

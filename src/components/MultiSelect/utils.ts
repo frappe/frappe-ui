@@ -1,6 +1,6 @@
 import {
   matchesByLabelOrValue,
-  resolveItemSlotsFromRaw as resolveItemSlotsFromRawShared,
+  resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
   MultiSelectGroupedOption,
@@ -40,12 +40,6 @@ export function isGroupedOption(
   return typeof option === 'object' && option !== null && 'group' in option
 }
 
-export function resolveItemSlotsFromRaw(
-  raw: MultiSelectOption,
-): ResolvedItemSlots {
-  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(raw, 'MultiSelect')
-}
-
 export function normalizeOption(
   option: MultiSelectOption | null | undefined,
 ): NormalizedOption | null {
@@ -54,8 +48,10 @@ export function normalizeOption(
 
   return {
     ...option,
-    slot: option.slot ?? option.slotName,
-    resolvedSlots: resolveItemSlotsFromRaw(option),
+    resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+      option.slots,
+      'MultiSelect',
+    ),
   }
 }
 

@@ -4,9 +4,9 @@
 // Covers:
 // - Basic prompt with `text` + `select` fields (and a `defaultValue`).
 // - `type: 'combobox'` for searchable pickers, plus grouped options and
-//   `allowCreate: true` (mirrors Combobox's `allowCustomValue` so the typed
-//   query becomes the value when no option matches — useful for
-//   category-style fields where users can add new entries inline).
+//   `allowCreate: true` (adds a "Create …" row so the typed query becomes
+//   the value when no option matches — useful for category-style fields
+//   where users can add new entries inline).
 // - Per-field `validate` — sync, async, and cross-field. Validators run
 //   after the built-in `required` check, in parallel across all fields.
 //   Returning a non-empty string marks the field invalid and renders that
@@ -148,7 +148,7 @@ function createAccount() {
         placeholder: 'jane@example.com',
         // Sync validator — runs in the same parallel pass as `username`.
         validate: (value: string) => {
-          if (!value.includes('@')) return 'That doesn\'t look like an email.'
+          if (!value.includes('@')) return "That doesn't look like an email."
           return null
         },
       },
@@ -160,7 +160,10 @@ function createAccount() {
         // Cross-field validation via the second argument.
         validate: (value: string, all) => {
           if (value.length < 8) return 'Use at least 8 characters.'
-          if (typeof all.username === 'string' && value.includes(all.username)) {
+          if (
+            typeof all.username === 'string' &&
+            value.includes(all.username)
+          ) {
             return 'Password must not contain your username.'
           }
           return null

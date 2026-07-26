@@ -67,16 +67,56 @@ describe('MultiSelect', () => {
     cy.get('[data-cy="item-label"]').should('exist')
   })
 
-  it('supports legacy #option slot', () => {
+  it('emits update:selectedOptions with the original option objects', () => {
+    const richOptions = [
+      { label: 'Apple', value: 'apple', kind: 'pome' },
+      { label: 'Banana', value: 'banana', kind: 'berry' },
+    ]
+
     cy.mount(MultiSelect, {
-      props: { options },
-      slots: {
-        option: () => h('div', { 'data-cy': 'option' }, ['custom']),
+      props: {
+        options: richOptions,
+        'onUpdate:selectedOptions': cy.spy().as('onSelectedOptions'),
       },
     })
 
     cy.get('[data-slot="trigger"]').click()
-    cy.get('[data-cy="option"]').should('have.length', 3)
+    cy.get('[role=option]').eq(1).click()
+
+    cy.get('@onSelectedOptions').should('have.been.calledWith', [
+      richOptions[1],
+    ])
+  })
+
+  it('supports numeric option values', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options: [
+          { label: 'One', value: 1 },
+          { label: 'Two', value: 2 },
+          { label: 'Twenty', value: 20 },
+        ],
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    // numeric values stay searchable — the filter coerces with String()
+    cy.get('[data-slot="input"]').type('2')
+    cy.get('[role=option]').should('have.length', 2)
+
+    cy.get('[role=option]').eq(0).click()
+    cy.get('@onUpdate').should('have.been.calledWith', [2])
+  })
+
+  it('filterable=false renders exactly the given options', () => {
+    cy.mount(MultiSelect, {
+      props: { options, filterable: false },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="input"]').type('zzz')
+    cy.get('[role=option]').should('have.length', 3)
   })
 
   it('emits update:query on search input', () => {
@@ -90,7 +130,169 @@ describe('MultiSelect', () => {
     cy.get('@onQuery').should('have.been.calledWith', 'app')
   })
 
-  it('clearAll and selectAll via default footer', () => {
+  it('renders search slots with scoped query controls', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options,
+        'onUpdate:query': cy.spy().as('onQuery'),
+      },
+      slots: {
+        'search-prefix': ({ query }) =>
+          h('span', { 'data-cy': 'search-prefix' }, query || 'Search'),
+        'search-suffix': ({ query, setQuery, focus, disabled }) =>
+          h('div', { 'data-cy': 'search-suffix' }, [
+            h('span', { 'data-cy': 'search-query' }, query),
+            h('span', { 'data-cy': 'search-disabled' }, String(disabled)),
+            h(
+              'button',
+              {
+                type: 'button',
+                'data-cy': 'set-query',
+                onClick: () => setQuery('ba'),
+              },
+              'Set query',
+            ),
+            h(
+              'button',
+              {
+                type: 'button',
+                'data-cy': 'clear-query',
+                onClick: () => {
+                  setQuery('')
+                  focus()
+                },
+              },
+              'Clear query',
+            ),
+          ]),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]')
+      .find('[data-cy="search-prefix"]')
+      .should('not.exist')
+    cy.get('[data-slot="trigger"] [data-slot="chevron"]').should('exist')
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="search"] [data-cy="search-prefix"]').should(
+      'contain.text',
+      'Search',
+    )
+    cy.get('[data-slot="search"] [data-cy="search-suffix"]').should('exist')
+
+    cy.get('[data-cy="set-query"]').click()
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[data-cy="search-query"]').should('have.text', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    cy.get('@onQuery').should('have.been.calledWith', 'ba')
+
+    cy.get('[data-cy="clear-query"]').click()
+    cy.get('[data-slot="input"]').should('have.value', '')
+    cy.get('[role=option]').should('have.length', 3)
+    cy.get('@onQuery').should('have.been.calledWith', '')
+    cy.get('[data-slot="input"]').should('be.focused')
+  })
+
+  it('hides the search slots when hide-search is set', () => {
+    cy.mount(MultiSelect, {
+      props: { options, hideSearch: true },
+      slots: {
+        'search-prefix': () => h('span', { 'data-cy': 'search-prefix' }, 'P'),
+        'search-suffix': () => h('span', { 'data-cy': 'search-suffix' }, 'S'),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="search"]').should('not.exist')
+    cy.get('[data-cy="search-prefix"]').should('not.exist')
+    cy.get('[data-cy="search-suffix"]').should('not.exist')
+  })
+
+  it('accepts a query prop and filters with it', () => {
+    cy.mount(MultiSelect, {
+      props: { options, query: 'ba', open: true },
+    })
+
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+  })
+
+  // A bound `v-model:query` belongs to the consumer — the component must never
+  // reset it on its own. Unbound, the query still clears on every open.
+  describe('query ownership', () => {
+    const BoundQuery = defineComponent({
+      setup() {
+        const query = ref('ba')
+        return { query }
+      },
+      render() {
+        return h('div', [
+          h(MultiSelect, {
+            options,
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          }),
+          h('span', { 'data-cy': 'query' }, this.query),
+        ])
+      },
+    })
+
+    it('keeps a seeded v-model:query when the popover opens, and filters with it', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+
+      cy.get('[data-slot="input"]').should('have.value', 'ba')
+      cy.get('[data-cy="query"]').should('have.text', 'ba')
+      cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    })
+
+    it('keeps a seeded v-model:query across close and reopen', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('[data-cy="query"]').should('have.text', 'ba')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').should('have.value', 'ba')
+      cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+    })
+
+    it('never emits an empty update:query just from opening', () => {
+      cy.mount(MultiSelect, {
+        props: {
+          options,
+          query: 'ba',
+          'onUpdate:query': cy.spy().as('onQuery'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role=option]').should('have.length', 1)
+      cy.get('@onQuery').should('not.have.been.called')
+    })
+
+    it('still resets the query on open when it is not bound', () => {
+      cy.mount(MultiSelect, { props: { options } })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').type('ba')
+      cy.get('[role=option]').should('have.length', 1)
+
+      cy.get('[data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="input"]').should('have.value', '')
+      cy.get('[role=option]').should('have.length', 3)
+    })
+  })
+
+  it('clear and selectAll via default footer', () => {
     cy.mount(MultiSelect, {
       props: {
         options,
@@ -109,6 +311,72 @@ describe('MultiSelect', () => {
 
     cy.get('[data-slot="footer"] button').contains('Clear All').click()
     cy.get('@onUpdate').should('have.been.calledWith', [])
+  })
+
+  // `clear()` clears the selection and nothing else — the search query belongs
+  // to the user, whether they typed it or bound it.
+  it('clear() leaves the search query alone', () => {
+    cy.mount(MultiSelect, {
+      props: {
+        options,
+        open: true,
+        modelValue: ['apple'],
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[data-slot="input"]').type('ba')
+    cy.get('[role=option]').should('have.length', 1)
+
+    cy.get('[data-slot="footer"] button').contains('Clear All').click()
+
+    cy.get('@onUpdate').should('have.been.calledWith', [])
+    cy.get('[data-slot="input"]').should('have.value', 'ba')
+    cy.get('[role=option]').should('have.length', 1).and('contain', 'Banana')
+  })
+
+  it('exposes clear and focus on a template ref', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const picker = ref<{
+          clear: () => void
+          focus: () => void
+        } | null>(null)
+        const value = ref(['apple', 'banana'])
+        return { picker, value }
+      },
+      render() {
+        return h('div', [
+          h(MultiSelect, {
+            ref: 'picker',
+            options,
+            modelValue: this.value,
+            'onUpdate:modelValue': (v: Array<string | number>) => {
+              this.value = v as string[]
+            },
+          }),
+          h(
+            'button',
+            {
+              'data-cy': 'clear',
+              onClick: () => {
+                this.picker?.clear()
+                this.picker?.focus()
+              },
+            },
+            'clear',
+          ),
+        ])
+      },
+    })
+
+    cy.mount(Wrapper)
+
+    cy.get('[data-slot="trigger"]').should('contain.text', '2 selected')
+    cy.get('[data-cy="clear"]').click()
+    cy.get('[data-slot="trigger"]')
+      .should('contain.text', 'Select option')
+      .and('be.focused')
   })
 
   it('renders grouped options with labels', () => {

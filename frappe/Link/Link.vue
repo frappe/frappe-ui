@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useSlots, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useSlots, watch } from 'vue'
 import { Combobox } from '../../src/components/Combobox'
 import type {
   ComboboxCustomOption,
@@ -147,6 +147,11 @@ const loadOptions = (txt: string = '') => {
 const handleInputChange = debounce((value: string) => {
   loadOptions(value || '')
 }, 300)
+
+// The last keystroke leaves a search scheduled 300ms out. Without this it
+// still fires after the component is gone — a wasted request whose rejection
+// has nobody left to handle it.
+onBeforeUnmount(() => handleInputChange.cancel())
 
 const clearValue = () => {
   model.value = null

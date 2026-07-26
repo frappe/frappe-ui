@@ -4,9 +4,9 @@ Status: accepted direction for `frappe-ui` v1 planning.
 
 This document defines the exact public API for the rebuilt `Popover` and the
 shared `PopoverPanel` shell. `Popover` is a general-purpose floating-panel
-primitive built on reka-ui's `PopoverRoot`. It shares the popover positioning
-conventions in [`selection.md`](./selection.md) (shared design rule 7) and the
-popover motion conventions (shared design rule 10).
+primitive built on reka-ui's `PopoverRoot`. It shares the positioning props
+(`side`, `align`, `offset`, `portalTo`) and the popover motion described in
+[`selection.md`](./selection.md).
 
 The hover-on-trigger behavior is split out into a separate `HoverCard`
 component (see [HoverCard split](#hovercard-split)); `Popover` keeps
@@ -126,8 +126,8 @@ Defaults:
   `PopoverContent`, styled `fill-surface-elevation-2` to match the shell.
   `data-slot="arrow"`.
 
-Positioning follows the shared popover positioning conventions in
-[`selection.md`](./selection.md).
+Positioning uses the same four props (`side`, `align`, `offset`, `portalTo`)
+and defaults as the selection family — see [`selection.md`](./selection.md).
 
 State conventions:
 
@@ -213,7 +213,7 @@ slot-prop-only on the deprecated `#target` slot and are not exposed.
 
 ## Back-compat and precedence
 
-Rule (shared with the rest of the family, shared design rule 7):
+Rule (shared with the rest of the family):
 
 - when **both** the old and the new surface are bound, the **new one wins** and
   a **one-time** dev warning fires (via `warnDeprecated`)
@@ -264,8 +264,8 @@ Gameplan rule still applies in apps: gray shades only, never color shades.
 
 ## Motion
 
-`Popover` follows the shared popover motion conventions (shared design rule 10)
-via the existing `usePopoverMotion` composable + shared popover motion CSS:
+`Popover` uses the same popover motion as the rest of the family, via the
+existing `usePopoverMotion` composable + shared popover motion CSS:
 
 - content scales in from the trigger via
   `transform-origin: var(--reka-popover-content-transform-origin)` on the

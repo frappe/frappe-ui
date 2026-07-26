@@ -5,8 +5,8 @@ import {
   ref,
   useAttrs,
   useSlots,
+  useTemplateRef,
   watch,
-  watchEffect,
 } from 'vue'
 import {
   ComboboxAnchor,
@@ -24,6 +24,7 @@ import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import {
   InputDescription,
   InputError,
@@ -32,14 +33,17 @@ import {
 } from '../InputLabeling'
 import type {
   ComboboxEmits,
-  ComboboxExposed,
+  ComboboxOptionValue,
   ComboboxProps,
+  ComboboxSearchSlotProps,
   ComboboxSelectableOption,
   ComboboxSlots,
   ComboboxControlSlotProps,
 } from './types'
+import type { SelectionExposed } from '../shared/selection/types'
 import {
   buildCustomOptionContext,
+  customOptionIsVisible,
   inputClasses,
   inputFontSizeClasses,
   isSelectableOption,
@@ -53,7 +57,8 @@ import {
 } from './utils'
 import type {
   NormalizedCustomOption,
-  NormalizedSelectableOption,
+  NormalizedGroup,
+  NormalizedItem,
 } from './utils'
 
 defineOptions({
@@ -70,25 +75,32 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   openOnFocus: false,
   openOnClick: true,
   side: 'bottom',
+  align: 'start',
   offset: 4,
   portalTo: 'body',
-  allowCustomValue: false,
   loading: false,
   emptyText: 'No results',
+  hideSearch: false,
+  filterable: true,
 })
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
 
-const model = defineModel<string | null>({ default: null })
-
-const open = ref(props.open ?? false)
+const model = defineModel<ComboboxOptionValue | null>({ default: null })
+const open = defineModel<boolean>('open', { default: false })
+const query = defineModel<string>('query', { default: '' })
+// Bound, the query is the consumer's — the component never resets it on its
+// own (see `skipInitialDisplaySync` and the open watcher below).
+const isQueryBound = useIsModelBound('query')
 
 const rootRef = ref<{ highlightFirstItem?: () => void } | null>(null)
-const query = ref('')
+const inputRef = useTemplateRef('inputRef')
+const searchInputRef = useTemplateRef('searchInputRef')
+const triggerButtonRef = useTemplateRef('triggerButtonRef')
+const anchorRef = useTemplateRef('anchorRef')
 const hasTypedSinceOpen = ref(false)
-const hasWarnedPlacement = ref(false)
 
 const { motion: contentMotion, onPointerDown: markPointerDown } =
   usePopoverMotion(open)
@@ -165,28 +177,10 @@ const selectedOption = computed<ComboboxSelectableOption | null>(() => {
 
 const displayValue = computed(() => {
   if (selectedOption.value) return selectedOption.value.label
-  return model.value ?? ''
+  return model.value === null || model.value === undefined
+    ? ''
+    : String(model.value)
 })
-
-const resolvedAlign = computed(() => {
-  if (props.align !== undefined) return props.align
-  return props.placement ?? 'start'
-})
-
-if (import.meta.env.DEV) {
-  watchEffect(() => {
-    if (
-      props.align !== undefined &&
-      props.placement &&
-      !hasWarnedPlacement.value
-    ) {
-      console.warn(
-        '[Combobox] `placement` is deprecated and ignored when `align` is provided. Use `align` instead.',
-      )
-      hasWarnedPlacement.value = true
-    }
-  })
-}
 
 const triggerClasses = computed(() => [
   triggerBaseClasses,
@@ -213,37 +207,36 @@ const isButtonMode = computed(
   () => Boolean(slots.trigger) || props.trigger === 'button',
 )
 
-const filteredGroups = useFilteredGroups({
+const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
   groups: normalizedGroups,
   open,
   hasTypedSinceOpen,
   query,
-  // Selectable rows: query-driven substring match. Custom rows: skip here
-  // and let `alwaysMatch` consult `condition` so the row's visibility is
-  // bespoke (works even before the user types, when the typed-query path
-  // is otherwise bypassed).
+  filterable: () => props.filterable ?? true,
+  // `matches` is the client-side query filter — it runs only once the user
+  // types and is switched off by `filterable: false`. Both row kinds go
+  // through it, including custom rows that declare no `condition` (their
+  // label substring match is ordinary filtering, not declared visibility).
   matches: (item, q) =>
-    item.type === 'custom' ? true : matchesSelectableOption(item, q),
+    item.type === 'custom'
+      ? matchesCustomOption(item, q)
+      : matchesSelectableOption(item, q),
+  // `alwaysMatch` carries consumer-declared visibility: a custom row's
+  // `condition` is authoritative and runs even before the user types, so it
+  // is deliberately unaffected by `filterable`.
   alwaysMatch: (item) =>
-    item.type !== 'custom' || matchesCustomOption(item, typedQuery.value),
+    item.type !== 'custom' || customOptionIsVisible(item, typedQuery.value),
 })
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
 
-const showCreateOption = computed(
-  () =>
-    props.allowCustomValue &&
-    !props.loading &&
-    hasTypedSinceOpen.value &&
-    query.value.length > 0 &&
-    !hasVisibleItems.value,
-)
+const showEmpty = computed(() => !props.loading && !hasVisibleItems.value)
 
-const showEmpty = computed(
-  () => !props.loading && !showCreateOption.value && !hasVisibleItems.value,
-)
-
-function clearSelection() {
+// Clears the selection, and nothing else — same meaning as `clear()` on Select
+// and MultiSelect. The query is left alone: in input mode the display-sync
+// watcher below already follows the model down to an empty input, and in
+// button mode the query is a separate filter that the user still owns.
+function clear() {
   model.value = null
   emit('update:selectedOption', null)
 }
@@ -257,7 +250,14 @@ function setOpen(value: boolean) {
   open.value = value
 }
 
-// Shared shape for the #trigger, #prefix, #suffix, and #footer slots. `clearSelection`
+function setQuery(value: string) {
+  if (props.disabled) return
+  query.value = value
+  // Clearing the query restores the "hasn't typed since opening" state.
+  hasTypedSinceOpen.value = value !== ''
+}
+
+// Shared shape for the #trigger, #prefix, #suffix, and #footer slots. `clear`
 // and `setOpen` are exposed alongside the read-only fields so consumers
 // can wire clear / open affordances (e.g. a custom #trigger or an inline
 // button in #suffix) without hoisting into #trigger or managing the model
@@ -268,33 +268,32 @@ const controlSlotProps = computed<ComboboxControlSlotProps>(() => ({
   query: typedQuery.value,
   selectedOption: selectedOption.value,
   displayValue: displayValue.value,
-  clearSelection,
+  clear,
   setOpen,
 }))
 
-function commitSelectableOption(value: string) {
+const searchSlotProps = computed<ComboboxSearchSlotProps>(() => ({
+  query: typedQuery.value,
+  setQuery,
+  disabled: Boolean(props.disabled),
+  focus: focusSearch,
+}))
+
+function commitSelectableOption(value: ComboboxOptionValue) {
   const option =
     allSelectableOptions.value.find((item) => item.value === value) ?? null
 
   model.value = value
   emit('update:selectedOption', option)
-  query.value = option?.label ?? value
+  query.value = option?.label ?? String(value)
   hasTypedSinceOpen.value = false
 }
 
-function commitCustomValue(value: string) {
-  if (!value) return
-
-  model.value = value
-  emit('update:selectedOption', null)
-  query.value = value
-  hasTypedSinceOpen.value = false
-  open.value = false
-}
-
-function handleRootModelValueChange(value: string | null | undefined) {
+function handleRootModelValueChange(
+  value: ComboboxOptionValue | null | undefined,
+) {
   if (value == null) {
-    clearSelection()
+    clear()
     return
   }
 
@@ -305,11 +304,6 @@ function handleRootModelValueChange(value: string | null | undefined) {
 
   if (selectableOption) {
     commitSelectableOption(selectableOption.value)
-    return
-  }
-
-  if (props.allowCustomValue && !props.loading) {
-    commitCustomValue(externalValue)
   }
 }
 
@@ -323,21 +317,13 @@ function handleInputChange(event: Event) {
 
   query.value = value
   hasTypedSinceOpen.value = true
-  emit('update:query', value)
-  emit('input', value)
 
   // In input mode the input IS the selected-value display, so clearing it
   // clears the model. In button mode the input lives in the popover and is
   // only a filter — emptying it must not wipe the selection.
-  if (value === '' && !isButtonMode.value) clearSelection()
+  if (value === '' && !isButtonMode.value) clear()
 
   nextTick(() => rootRef.value?.highlightFirstItem?.())
-}
-
-function handleInputEnter(event: KeyboardEvent) {
-  if (!showCreateOption.value) return
-  event.preventDefault()
-  commitCustomValue(query.value)
 }
 
 function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
@@ -347,11 +333,6 @@ function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
   item.onClick(buildCustomOptionContext(typedQuery.value))
 
   if (!item.keepOpen) open.value = false
-}
-
-function handleCreateOptionSelect(event: Event) {
-  event.preventDefault()
-  commitCustomValue(query.value)
 }
 
 function handleFocusScopeMountAutoFocus(event: Event) {
@@ -366,41 +347,48 @@ function handleFocusScopeMountAutoFocus(event: Event) {
   if (!isButtonMode.value) event.preventDefault()
 }
 
-function reset() {
-  query.value = ''
-  hasTypedSinceOpen.value = false
-  model.value = null
-  emit('update:query', '')
-  emit('update:selectedOption', null)
+/** Unwraps a template ref that may hold a component instance or an element. */
+function toElement(target: unknown): HTMLElement | null {
+  if (!target) return null
+  if (target instanceof HTMLElement) return target
+  const el = (target as { $el?: unknown }).$el
+  return el instanceof HTMLElement ? el : null
 }
 
-function focus() {
-  const id = isButtonMode.value
-    ? `${inputId.value}-search-input`
-    : inputId.value
-  const el = document.getElementById(id) as HTMLInputElement | null
-  el?.focus()
+/** Focuses the in-popover search input (button mode, popover open). */
+function focusSearch(options?: FocusOptions) {
+  toElement(searchInputRef.value)?.focus(options)
 }
 
-watch(
-  () => props.open,
-  (value) => {
-    if (value === undefined) return
-    open.value = value
-  },
-)
+/**
+ * Focuses the combobox's control: the in-popover search input when button
+ * mode has it mounted, otherwise the trigger (button mode) or the input
+ * (input mode).
+ */
+function focus(options?: FocusOptions) {
+  const target = isButtonMode.value
+    ? (toElement(searchInputRef.value) ??
+      toElement(triggerButtonRef.value) ??
+      toElement(anchorRef.value))
+    : toElement(inputRef.value)
 
-watch(open, (value, previousValue) => {
-  if (value === previousValue) return
-  emit('update:open', value)
-})
+  target?.focus(options)
+}
+
+// A consumer-supplied `query` owns the input text on first render; without
+// this the immediate sync below would overwrite it with the (usually empty)
+// display value.
+let skipInitialDisplaySync = query.value !== ''
 
 watch(
   () => displayValue.value,
   (value) => {
+    const skip = skipInitialDisplaySync
+    skipInitialDisplaySync = false
+
     // Button mode keeps query decoupled — input is just a filter, the trigger
     // shows the selected value independently.
-    if (isButtonMode.value) return
+    if (isButtonMode.value || skip) return
     if (!open.value || !hasTypedSinceOpen.value) query.value = value
   },
   { immediate: true },
@@ -408,17 +396,37 @@ watch(
 
 watch(open, (isOpen, wasOpen) => {
   if (isOpen === wasOpen) return
+
   if (isOpen) {
+    if (!isButtonMode.value) return
     // On open in button mode, start the filter fresh — no leftover label
-    // like "In Progress" in the search input.
-    if (isButtonMode.value) query.value = ''
+    // like "In Progress" in the search input. A bound query is the
+    // consumer's, so it survives instead; treat it as an active filter so the
+    // search box and the list agree. (Input mode is untouched: there the
+    // query IS the display value and follows the model, not the open state.)
+    if (isQueryBound()) hasTypedSinceOpen.value = query.value !== ''
+    else query.value = ''
     return
   }
+
   hasTypedSinceOpen.value = false
-  query.value = isButtonMode.value ? '' : displayValue.value
+  // Input mode: the input is the value display, so it goes back to showing the
+  // committed label — that is model sync, not a reset, and it applies to a
+  // bound query too. Button mode's clear is a plain reset, so it is skipped
+  // when the consumer owns the query.
+  if (!isButtonMode.value) query.value = displayValue.value
+  else if (!isQueryBound()) query.value = ''
 })
 
-defineExpose<ComboboxExposed>({ reset, focus })
+// Same reasoning as the open watcher, for a combobox that mounts already open:
+// a consumer-seeded query in button mode is an active filter from the start.
+// Input mode is excluded because there a non-empty query may just be the
+// committed label, which must not filter the list to itself.
+if (isButtonMode.value && isQueryBound() && query.value !== '') {
+  hasTypedSinceOpen.value = true
+}
+
+defineExpose<SelectionExposed>({ clear, focus })
 defineSlots<ComboboxSlots>()
 </script>
 
@@ -478,8 +486,12 @@ defineSlots<ComboboxSlots>()
         Click + pointerdown are attached on the anchor so they forward
         to the child via `as-child` — this makes consumer-supplied
         `#trigger` elements "just work" without wiring handlers.
+
+        `anchorRef` is the `focus()` fallback for a consumer-supplied
+        `#trigger`, which we have no direct ref to.
       -->
           <ComboboxAnchor
+            ref="anchorRef"
             as-child
             @click="handleTriggerClick"
             @pointerdown="markPointerDown"
@@ -500,6 +512,7 @@ defineSlots<ComboboxSlots>()
         -->
             <button
               v-else
+              ref="triggerButtonRef"
               type="button"
               :class="[
                 triggerClasses,
@@ -607,6 +620,7 @@ defineSlots<ComboboxSlots>()
 
             <ComboboxInput
               :id="inputId"
+              ref="inputRef"
               v-bind="{ ...inputAttrs, ...inputAriaAttrs }"
               data-slot="input"
               :data-variant="variant"
@@ -618,7 +632,6 @@ defineSlots<ComboboxSlots>()
               @input="handleInputChange"
               @focus="emit('focus', $event)"
               @blur="emit('blur', $event)"
-              @keydown.enter="handleInputEnter"
             />
 
             <slot name="suffix" v-bind="controlSlotProps">
@@ -636,15 +649,17 @@ defineSlots<ComboboxSlots>()
         <ComboboxPortal :to="portalTo">
           <ComboboxContent
             data-slot="content"
+            data-selection
             :data-variant="variant"
             :data-size="size"
+            :data-loading="loading ? '' : undefined"
             :class="[
               'z-[100]',
               !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',
             ]"
             position="popper"
             :side="side"
-            :align="resolvedAlign"
+            :align="align"
             :side-offset="offset"
           >
             <!--
@@ -677,13 +692,24 @@ defineSlots<ComboboxSlots>()
                 :motion="contentMotion"
                 class="origin-[var(--reka-combobox-content-transform-origin)]"
               >
+                <!--
+                  The in-popover search row exists only in button mode, and
+                  `hideSearch` removes it entirely — the `#search-prefix` /
+                  `#search-suffix` slots live inside it and disappear with it.
+                -->
                 <div
-                  v-if="isButtonMode"
-                  data-slot="content-search"
+                  v-if="isButtonMode && !hideSearch"
+                  data-slot="search"
                   class="flex items-center gap-2 border-b border-outline-gray-1 px-3"
                 >
+                  <slot
+                    v-if="$slots['search-prefix']"
+                    name="search-prefix"
+                    v-bind="searchSlotProps"
+                  />
                   <ComboboxInput
                     :id="`${inputId}-search-input`"
+                    ref="searchInputRef"
                     v-bind="inputAttrs"
                     data-slot="input"
                     :value="query"
@@ -693,7 +719,11 @@ defineSlots<ComboboxSlots>()
                     @input="handleInputChange"
                     @focus="emit('focus', $event)"
                     @blur="emit('blur', $event)"
-                    @keydown.enter="handleInputEnter"
+                  />
+                  <slot
+                    v-if="$slots['search-suffix']"
+                    name="search-suffix"
+                    v-bind="searchSlotProps"
                   />
                 </div>
 
@@ -704,12 +734,10 @@ defineSlots<ComboboxSlots>()
                   :model="model ?? null"
                   :loading="loading"
                   :empty-text="emptyText"
-                  :show-create-option="showCreateOption"
                   :show-empty="showEmpty"
                   :slot-fns="slots"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
-                  @select-create="handleCreateOptionSelect"
                 />
 
                 <div v-if="$slots.footer" data-slot="footer">

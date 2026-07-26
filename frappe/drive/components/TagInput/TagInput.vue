@@ -9,8 +9,7 @@ import {
 } from 'reka-ui'
 import Combobox from '../../../../src/components/Combobox/Combobox.vue'
 import { getLabel, getIcon, RenderIcon, getValue } from './utils'
-import { type SimpleOption } from '../../../../src/components/Combobox/types'
-import { TagInputProps } from './types'
+import { type SimpleOption, TagInputProps } from './types'
 import LucideX from '~icons/lucide/x'
 
 const props = defineProps<TagInputProps>()
@@ -20,7 +19,10 @@ const rerenderCombobox = ref(0)
 
 const optionsWithIcons = computed(() => {
   if (!props.renderIcon) return options.value
-  return options.value.map((k) =>
+  // `k: any` keeps this deprecated component's loose behaviour: a raw
+  // `SimpleOption` union cannot be spread, and tightening it here cascades
+  // through the rest of the file.
+  return options.value.map((k: any) =>
     getIcon(k) ? k : { ...k, icon: props.renderIcon(k) },
   )
 })

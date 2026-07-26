@@ -19,8 +19,8 @@ covered separately.
 It also covers the v1 stance on the deprecated `Input.vue` and `Autocomplete`,
 and the `FormControl type='autocomplete'` route.
 
-It is a sibling of [`selection.md`](./selection.md)
-and inherits any shared design rules from that document where they apply.
+It is a sibling of [`selection.md`](./selection.md), which covers the pickers
+these controls sit next to.
 
 ## Scope
 

@@ -1,10 +1,13 @@
 # Dropdown Spec
 
-Status: accepted direction for `frappe-ui` v1 planning.
+This document defines the public API for `Dropdown`, the menu component. It
+stands alone: the rules it shares with the selection pickers (positioning,
+motion, row customization, styling hooks, `lucide-*` icons) are stated here in
+full rather than by reference.
 
-This document defines the exact public API for `Dropdown`. It is a sub-spec of
-[`selection.md`](./selection.md) and
-inherits the shared design rules from that document.
+`Dropdown` composes [`ItemListRow`](./item-list-row.md) for row presentation
+and owns its own menu shell. For picking a value rather than running an action,
+see [`selection.md`](./selection.md).
 
 ## Role
 
@@ -65,8 +68,10 @@ Defaults:
 - `portalTo = 'body'`
 - `emptyText = 'No options'`
 
-Positioning follows the shared popover positioning conventions in
-[`selection.md`](./selection.md).
+`side` picks which side of the trigger the menu opens on, `align` how it lines
+up along that side, `offset` the gap in px, and `portalTo` where the content is
+teleported. `start` and `end` are direction-aware and flip under `dir="rtl"`.
+These are the same four props and the same defaults the selection pickers use.
 
 Compatibility rules for `placement`:
 
@@ -266,6 +271,13 @@ Notes:
 - `slot` is the preferred name for dynamic label slot selection
 - keep `onClick` and `condition` as canonical names
 
+`icon` takes a Vue component or a string, the same as in the selection
+pickers. Strings starting with `lucide-` render as that Lucide icon
+(`icon: 'lucide-pen'`), sized and colored by the component — `text-ink-red-6`
+on a `theme: 'red'` row, `text-ink-gray-6` otherwise. Write the class out in
+full; a name built at runtime is invisible to Tailwind's scanner and renders
+nothing. Other strings still route to `FeatherIcon` for back-compat.
+
 ## Rendering and behavior rules
 
 ### Grouping and visibility
@@ -306,8 +318,7 @@ Notes:
 
 ### Disabled handling
 
-Follows the shared disabled-option rule (shared design rule 8 in the main
-RFC):
+Disabled rows behave the same way here as in the selection pickers:
 
 - disabled items are skipped by keyboard navigation and typeahead
 - disabled leaf actions do not call `onClick` and do not follow `route`
@@ -324,8 +335,7 @@ For each visible item:
 3. else determine the row by combining template slots, `item.slots`, and
    the default shell (see per-region precedence below)
 
-Per-region precedence for standard action rows (following shared design
-rule 9):
+Per-region precedence for standard action rows:
 
 Full row (if any of these provide a full-row renderer, the per-region
 renderers below are skipped):
@@ -386,8 +396,7 @@ State hooks should include, where relevant:
 
 ## Motion
 
-`Dropdown` follows the shared popover motion conventions (shared design
-rule 10 in the main RFC):
+`Dropdown` uses the same popover motion as the selection pickers:
 
 - content scales in from the trigger via
   `transform-origin: var(--reka-dropdown-menu-content-transform-origin)` on

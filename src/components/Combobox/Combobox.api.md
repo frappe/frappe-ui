@@ -6,6 +6,13 @@
 
   const propsData = [
   {
+    name: 'modelValue',
+    description: 'Committed value. `null` when nothing is selected.',
+    required: false,
+    type: 'ComboboxOptionValue | null',
+    default: 'null'
+  },
+  {
     name: 'options',
     description: 'Options rendered in the popover.',
     required: false,
@@ -51,7 +58,15 @@
     name: 'open',
     description: 'Controls the popover visibility.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'query',
+    description: 'Controls the search query. Optional — the combobox owns it otherwise.\n\nWhen it is bound the consumer owns the query: the combobox never resets it\non its own — not on open, not on close, not on mount, not on `clear()`. It\nstill follows the committed option\'s label in `trigger="input"` mode, where\nthe input is the value display rather than a filter. Unbound,\n`trigger="button"` mode still clears the search box every time the popover\nopens.',
+    required: false,
+    type: 'string',
+    default: '""'
   },
   {
     name: 'openOnFocus',
@@ -78,7 +93,8 @@
     name: 'align',
     description: 'Preferred popover alignment.',
     required: false,
-    type: 'PopoverAlign'
+    type: 'PopoverAlign',
+    default: '"start"'
   },
   {
     name: 'offset',
@@ -95,13 +111,6 @@
     default: '"body"'
   },
   {
-    name: 'allowCustomValue',
-    description: 'Free-form acceptance: the typed query is accepted as the model value\nwhen nothing matches, and external `modelValue` updates with unknown\nstrings are preserved. The combobox also renders a built-in "Create X"\nrow as a click affordance.\n\nFor richer create-new UX (custom label / icon / persistence callback),\nprefer a `type: \'custom\'` option with `condition` instead — see the\nCreate New story. The two are independent and can be combined.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
     name: 'loading',
     description: 'Replaces the results with a loading state.',
     required: false,
@@ -116,11 +125,18 @@
     default: '"No results"'
   },
   {
-    name: 'placement',
-    description: 'Alignment of the popover along the trigger edge.',
+    name: 'hideSearch',
+    description: 'Hides the in-popover search row (button mode only — in input mode the\ntrigger *is* the search input).\n\nThe `#search-prefix` / `#search-suffix` slots live inside that row and\nare not rendered when this is `true`.',
     required: false,
-    type: 'PopoverAlign',
-    deprecated: 'use `align` instead; `placement` is kept as a back-compat alias'
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'filterable',
+    description: 'Client-side substring filtering of `options` as the user types.\n\nSet to `false` for pickers whose options come from a server search: the\nbackend already decided what matches, and a second literal substring\npass on the client silently drops fuzzy, ranked, or id-based results.\n\nA custom option\'s `condition` callback is consumer-declared visibility\nrather than client filtering, so it keeps running either way.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
   },
   {
     name: 'label',
@@ -151,13 +167,6 @@
     description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
     required: false,
     type: 'string'
-  },
-  {
-    name: 'modelValue',
-    description: '',
-    required: false,
-    type: 'string | null',
-    default: 'null'
   }
 ]
 
@@ -188,19 +197,14 @@
     type: 'ComboboxControlSlotProps'
   },
   {
-    name: 'item-prefix',
-    description: 'Shared content rendered before the standard row label.',
-    type: 'ComboboxItemSlotProps'
+    name: 'search-prefix',
+    description: 'Content rendered before the in-popover search input (button mode only).\nNot rendered when `hideSearch` is set.',
+    type: 'ComboboxSearchSlotProps'
   },
   {
-    name: 'item-label',
-    description: 'Shared content rendered for the standard row label area.',
-    type: 'ComboboxItemSlotProps'
-  },
-  {
-    name: 'item-suffix',
-    description: 'Shared content rendered after the standard row label area.',
-    type: 'ComboboxItemSlotProps'
+    name: 'search-suffix',
+    description: 'Content rendered after the in-popover search input (button mode only).\nNot rendered when `hideSearch` is set.',
+    type: 'ComboboxSearchSlotProps'
   },
   {
     name: 'item',
@@ -221,6 +225,21 @@
     name: 'footer',
     description: 'Content rendered after the list. Stays pinned below the scrollable\noptions.',
     type: 'ComboboxControlSlotProps'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Shared content rendered before the standard row label.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Shared content rendered for the standard row label area.',
+    type: 'ComboboxItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Shared content rendered after the standard row label area.',
+    type: 'ComboboxItemSlotProps'
   }
 ]
 
@@ -228,7 +247,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: string | null]'
+    type: '[value: ComboboxOptionValue | null]'
   },
   {
     name: 'update:query',
@@ -251,11 +270,6 @@
     type: '[event: FocusEvent]'
   },
   {
-    name: 'input',
-    description: '',
-    type: '[value: string]'
-  },
-  {
     name: 'update:selectedOption',
     description: 'Fired when the selected option changes.',
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
@@ -264,8 +278,9 @@
 </script>
 ## API Reference
 
-<PropsTable name="Combobox" :data="propsData"/>
+<PropsTable name="Combobox" :data="propsData"/> 
 
-<SlotsTable :data="slotsData"/>
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data="emitsData"/>
+<EmitsTable :data="emitsData"/> 
+

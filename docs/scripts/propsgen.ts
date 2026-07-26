@@ -2,6 +2,7 @@ import * as url from 'url'
 import path from 'path'
 import fs from 'fs'
 
+import ts from 'typescript'
 import type { MetaCheckerOptions } from 'vue-component-meta'
 import { createChecker } from 'vue-component-meta'
 
@@ -32,6 +33,68 @@ function parseTypeStr(type: string) {
     return type.replace(' | undefined', '').trim()
   }
   return type
+}
+
+// Names Vue's language tooling gives the emit types it generates for an SFC:
+// `__VLS_ModelEmit` holds one entry per `defineModel()`, `__VLS_Emit` holds the
+// `defineEmits<T>()` type argument.
+const MODEL_EMIT_TYPE = '__VLS_ModelEmit'
+const DECLARED_EMIT_TYPE = '__VLS_Emit'
+
+// Mirrors vue-component-meta's own type printing so recovered types read
+// exactly like the ones it resolves itself.
+function printType(typeChecker: ts.TypeChecker, type: ts.Type) {
+  const str = typeChecker.typeToString(
+    type,
+    undefined,
+    ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.NoTruncation,
+  )
+  return str.includes('import(') ? str.replace(/import\(.*?\)\./g, '') : str
+}
+
+/**
+ * Payload types for a component's emits, read off the emit types Vue generates
+ * for the SFC rather than off `$emit`.
+ *
+ * vue-component-meta derives each emit's payload from the call signatures of
+ * `$emit`, which Vue builds from `__VLS_ModelEmit & __VLS_Emit`. An event
+ * declared *both* by `defineModel()` and in the `defineEmits<T>()` type
+ * argument therefore ends up with an intersection of two tuples as its payload,
+ * and TypeScript cannot infer named rest args back out of a tuple intersection
+ * — the signature collapses to `(event, ...args: unknown[])` and the docs lose
+ * the real type. The declared types survive intact in the generated file, so
+ * read them straight from there.
+ *
+ * `defineEmits<T>()` is applied last: when both declare an event, the
+ * hand-written interface is the documented contract.
+ */
+function getDeclaredEmitTypes(vuePath: string) {
+  const types = new Map<string, string>()
+  const program = tsconfigChecker.getProgram()
+  const sourceFile = program?.getSourceFile(vuePath)
+  if (!program || !sourceFile) return types
+
+  const typeChecker = program.getTypeChecker()
+
+  for (const aliasName of [MODEL_EMIT_TYPE, DECLARED_EMIT_TYPE]) {
+    const declaration = sourceFile.statements.find(
+      (statement): statement is ts.TypeAliasDeclaration =>
+        ts.isTypeAliasDeclaration(statement) && statement.name.text === aliasName,
+    )
+    if (!declaration) continue
+
+    const symbol = typeChecker.getSymbolAtLocation(declaration.name)
+    const emitsType = symbol
+      ? typeChecker.getDeclaredTypeOfSymbol(symbol)
+      : typeChecker.getTypeAtLocation(declaration.type)
+
+    for (const emit of emitsType.getProperties()) {
+      const payload = typeChecker.getTypeOfSymbolAtLocation(emit, declaration)
+      types.set(emit.getName(), printType(typeChecker, payload))
+    }
+  }
+
+  return types
 }
 
 // Return the `@deprecated` message, `true` if the tag is present without
@@ -187,7 +250,11 @@ function camelCase(name: string) {
   return name.charAt(0).toLowerCase() + name.slice(1)
 }
 
-function extractTableData(name: string, data: any) {
+function extractTableData(name: string, data: any, vuePath: string) {
+  // Only consulted for emits vue-component-meta could not resolve, so
+  // components it already types correctly keep their existing output.
+  const declaredEmitTypes = getDeclaredEmitTypes(vuePath)
+
   const props = data.props
     .filter((x: any) => !x.global)
     .map((x: any) =>
@@ -218,7 +285,10 @@ function extractTableData(name: string, data: any) {
       withOptional({
         name: x.name,
         description: getEventDescription(x.name, x.description),
-        type: x.type,
+        type:
+          x.type === 'unknown[]'
+            ? (declaredEmitTypes.get(x.name) ?? x.type)
+            : x.type,
         deprecated: getDeprecation(x.tags),
       }),
     )
@@ -517,7 +587,7 @@ selectedFolders.forEach((folder) => {
 
     const components = ordered.map((d) => {
       const meta = tsconfigChecker.getComponentMeta(d.vuePath)
-      return extractTableData(d.name, meta)
+      return extractTableData(d.name, meta, d.vuePath)
     })
 
     const metaFilePath = path.join(rootDir, folder, `${folder}.api.md`)

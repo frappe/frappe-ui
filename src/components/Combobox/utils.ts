@@ -1,6 +1,6 @@
 import {
   matchesByLabelOrValue,
-  resolveItemSlotsFromRaw as resolveItemSlotsFromRawShared,
+  resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
   ComboboxCustomOption,
@@ -24,9 +24,8 @@ export {
 
 export { triggerBaseClassesFocusWithin as triggerBaseClasses } from '../shared/selection/utils'
 
-/** Sentinel values used internally — never exposed to consumers. */
+/** Sentinel value used internally — never exposed to consumers. */
 export const EMPTY_SELECTABLE_VALUE_PREFIX = '__frappe_ui_combobox_empty__:'
-export const CREATE_OPTION_VALUE = '__frappe_ui_combobox_create__'
 
 export type ResolvedItemSlots = ComboboxItemSlots<ComboboxItemSlotProps>
 
@@ -64,12 +63,6 @@ export function isSelectableOption(
   return item.type === 'option'
 }
 
-export function resolveItemSlotsFromRaw(
-  raw: ComboboxSelectableOption | ComboboxCustomOption,
-): ResolvedItemSlots {
-  return resolveItemSlotsFromRawShared<ResolvedItemSlots>(raw, 'Combobox')
-}
-
 export function normalizeSimpleOption(
   option: ComboboxSimpleOption | null | undefined,
 ): NormalizedItem | null {
@@ -88,8 +81,10 @@ export function normalizeSimpleOption(
     return {
       ...option,
       type: 'custom',
-      slot: option.slot ?? option.slotName,
-      resolvedSlots: resolveItemSlotsFromRaw(option),
+      resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+        option.slots,
+        'Combobox',
+      ),
     }
   }
 
@@ -100,8 +95,10 @@ export function normalizeSimpleOption(
   return {
     ...option,
     type: 'option',
-    slot: option.slot ?? option.slotName,
-    resolvedSlots: resolveItemSlotsFromRaw(option),
+    resolvedSlots: resolveItemSlots<ResolvedItemSlots>(
+      option.slots,
+      'Combobox',
+    ),
   }
 }
 
@@ -162,16 +159,35 @@ export function matchesSelectableOption(
   return matchesByLabelOrValue(item, currentQuery)
 }
 
+/**
+ * Consumer-declared visibility for a `type: 'custom'` row.
+ *
+ * `condition` is authoritative and runs even before the user has typed, so a
+ * custom row can gate itself on selection state. It is NOT client filtering,
+ * which is why `filterable: false` does not switch it off.
+ */
+export function customOptionIsVisible(
+  item: NormalizedCustomOption,
+  currentQuery: string,
+) {
+  if (!item.condition) return true
+  return item.condition(buildCustomOptionContext(currentQuery))
+}
+
+/**
+ * Client-side query filter for custom rows that declare no `condition`.
+ *
+ * This is ordinary substring filtering, so it runs on the same path as
+ * selectable rows and is disabled by `filterable: false` — otherwise a
+ * server-search combobox would silently lose its condition-less action rows.
+ * Rows that declare a `condition` opt out entirely: `condition` already
+ * decided, and filtering again would override it.
+ */
 export function matchesCustomOption(
   item: NormalizedCustomOption,
   currentQuery: string,
 ) {
-  const context = buildCustomOptionContext(currentQuery)
-
-  if (item.condition) {
-    return item.condition(context)
-  }
-
+  if (item.condition) return true
   if (!currentQuery) return true
 
   return item.label.toLowerCase().includes(currentQuery.toLowerCase())
@@ -180,7 +196,7 @@ export function matchesCustomOption(
 export function buildCustomOptionContext(
   query: string,
 ): ComboboxCustomOptionContext {
-  return { query, searchTerm: query }
+  return { query }
 }
 
 export const inputClasses =

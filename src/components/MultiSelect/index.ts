@@ -11,6 +11,7 @@ export type {
   MultiSelectOptions,
   MultiSelectPrefixSlotProps,
   MultiSelectProps,
+  MultiSelectSearchSlotProps,
   MultiSelectSize,
   MultiSelectSlotProps,
   MultiSelectSlots,

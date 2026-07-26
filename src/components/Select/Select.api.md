@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: '"sm" | "md" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -60,6 +60,31 @@
     default: '"No options"'
   },
   {
+    name: 'side',
+    description: 'Preferred popover side. Defaults to `\'bottom\'`.\n\nSetting `side`, `align`, or `offset` switches the menu from its default\nitem-aligned placement (anchored over the trigger, macOS-style) to\nstandard popper placement below/beside the trigger.',
+    required: false,
+    type: 'PopoverSide'
+  },
+  {
+    name: 'align',
+    description: 'Preferred popover alignment. Defaults to `\'start\'`. See `side`.',
+    required: false,
+    type: 'PopoverAlign'
+  },
+  {
+    name: 'offset',
+    description: 'Gap in px between trigger and content. Defaults to `4`. See `side`.',
+    required: false,
+    type: 'number'
+  },
+  {
+    name: 'portalTo',
+    description: 'Teleport target for the popover content.',
+    required: false,
+    type: 'string | HTMLElement',
+    default: '"body"'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -95,7 +120,7 @@
   {
     name: 'trigger',
     description: 'Fully custom trigger renderer.',
-    type: 'SelectTriggerSlotProps'
+    type: 'SelectSlotProps'
   },
   {
     name: 'label',
@@ -110,18 +135,27 @@
   {
     name: 'prefix',
     description: 'Content rendered before the trigger value. Receives the same shape\nas `#trigger` and `#suffix` (`SelectSlotProps`).',
-    type: 'SelectTriggerSlotProps'
+    type: 'SelectSlotProps'
   },
   {
     name: 'suffix',
     description: 'Content rendered after the trigger value. Providing this slot\n**replaces the default chevron** — render your own fallback when\nyour slot content is conditional.',
-    type: 'SelectTriggerSlotProps'
+    type: 'SelectSlotProps'
   },
   {
-    name: 'option',
-    description: 'Shared renderer for option labels.',
-    type: 'SelectItemSlotProps',
-    deprecated: 'use `#item-label` for per-row label customization. `#option` remains as a back-compat alias through v1.x.'
+    name: 'item',
+    description: 'Replaces the entire option row, including the row shell. A per-option\n`slot` (`#item-<name>`) takes precedence over this slot.',
+    type: 'SelectItemSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when no options are available.',
+    type: 'any'
+  },
+  {
+    name: 'footer',
+    description: 'Content rendered below the option list. Stays pinned below the\nscrollable options. Receives the same shape as `#trigger`.',
+    type: 'SelectSlotProps'
   },
   {
     name: 'item-prefix',
@@ -137,16 +171,6 @@
     name: 'item-suffix',
     description: 'Content rendered after the standard option label.',
     type: 'SelectItemSlotProps'
-  },
-  {
-    name: 'empty',
-    description: 'Fallback content rendered when no options are available.',
-    type: 'any'
-  },
-  {
-    name: 'footer',
-    description: 'Content rendered below the option list. Stays pinned below the scrollable options.',
-    type: 'SelectFooterSlotProps'
   }
 ]
 

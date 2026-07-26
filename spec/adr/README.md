@@ -13,3 +13,5 @@ Specs describe the current contract. ADRs explain why decisions were made. Super
 | [0005 — 2px focus ring](./0005-focus-ring-2px.md) | Accepted | `focus-visible:ring-2` matches Figma's 2px focus shadow. |
 | [0006 — Numbered radius tokens](./0006-numbered-radius-tokens.md) | Accepted | `rounded-1`…`rounded-9` are canonical; named aliases deprecated. |
 | [0007 — Named typography style utilities](./0007-typography-style-utilities.md) | Accepted | `text-{size}-medium` utilities for Figma's medium-weight tracking. |
+| [0008 — No deprecated members in `1.0.0`](./0008-no-deprecated-members-in-1-0-0.md) | Accepted | Everything `@deprecated` is deleted before the stable tag. |
+| [0009 — Client filtering is opt-out](./0009-client-filtering-is-opt-out.md) | Accepted | `filterable` exists so server-driven options aren't filtered twice. |

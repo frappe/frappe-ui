@@ -17,11 +17,11 @@ const options = [
 
 <template>
   <MultiSelect v-model="state" :options="options" class="w-64">
-    <template #footer="{ clearAll, selectAll, selectedOptions }">
+    <template #footer="{ clear, selectAll, selectedOptions }">
       <div
         class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5"
       >
-        <Button theme="red" variant="ghost" @click="clearAll">
+        <Button theme="red" variant="ghost" @click="clear">
           <template #prefix>
             <span class="lucide-trash-2 size-4" />
           </template>

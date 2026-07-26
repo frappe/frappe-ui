@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, watchEffect } from 'vue'
-import { Switch, TabButtons } from 'frappe-ui'
+import { Switch, TabButtons, TextInput } from 'frappe-ui'
 
 export type KnobOption = { label: string; value: string }
 type VisibleWhen = (values: Record<string, any>) => boolean
@@ -116,11 +116,11 @@ function onCopy() {
       <div class="flex flex-col gap-3 bg-surface-gray-1 p-4">
         <div v-for="knob in rowKnobs" :key="knob.name" class="knob-row">
           <span class="knob-label">{{ knob.name }}</span>
-          <input
+          <TextInput
             v-if="knob.type === 'text'"
             v-model="values[knob.name]"
-            type="text"
-            class="h-7 rounded-md border border-outline-gray-2 bg-surface-base px-2 text-sm text-ink-gray-8 focus:border-outline-gray-3 focus:outline-none"
+            :aria-label="knob.name"
+            variant="outline"
             :style="{ width: knob.width ?? '10rem' }"
           />
           <TabButtons
@@ -129,7 +129,10 @@ function onCopy() {
             :options="knob.options"
           />
         </div>
-        <div v-if="switchKnobs.length" class="flex flex-wrap items-center gap-6">
+        <div
+          v-if="switchKnobs.length"
+          class="flex flex-wrap items-center gap-6"
+        >
           <div
             v-for="knob in switchKnobs"
             :key="knob.name"
@@ -146,10 +149,7 @@ function onCopy() {
 
       <div class="component-preview-code relative">
         <div v-if="highlightedCode" v-html="highlightedCode" />
-        <pre
-          v-else
-          class="shiki"
-        ><code>{{ generatedCode }}</code></pre>
+        <pre v-else class="shiki"><code>{{ generatedCode }}</code></pre>
         <button
           type="button"
           class="copy"

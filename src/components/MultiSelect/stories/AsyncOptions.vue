@@ -32,6 +32,9 @@ const ALL_MEMBERS: Member[] = [
 ]
 
 // Mocks a server endpoint: 400ms latency + substring match on label/value.
+// A real backend would rank and fuzzy-match, which is why the picker below
+// passes `:filterable="false"` — a second client-side substring pass would
+// silently drop anything the server matched but the query doesn't contain.
 function searchMembersApi(query: string): Promise<Member[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -92,6 +95,7 @@ function onOpen(isOpen: boolean) {
     v-model="value"
     :options="options"
     :loading="loading"
+    :filterable="false"
     placeholder="Search members…"
     empty-text="No members found"
     class="w-80"

@@ -83,7 +83,7 @@ export const itemClasses =
  * Used as the default filter predicate by MultiSelect and Combobox.
  */
 export function matchesByLabelOrValue(
-  item: { label: string; value: string },
+  item: { label: string; value: string | number },
   query: string,
 ) {
   const normalizedQuery = query.toLowerCase()
@@ -91,39 +91,22 @@ export function matchesByLabelOrValue(
 
   return (
     item.label.toLowerCase().includes(normalizedQuery) ||
-    item.value.toLowerCase().includes(normalizedQuery)
+    String(item.value).toLowerCase().includes(normalizedQuery)
   )
 }
 
 /**
- * Resolve the deprecated `render` alias into a normalized `slots` object.
- *
- * - `render` as a function → maps to `slots.item` (full-row takeover).
- * - `render` as an object  → merged one-to-one into slots.
- * - `slots` always wins on key conflict.
+ * Normalize an option's per-item `slots` object into a plain, always-defined
+ * slot map.
  *
  * In dev, warns when `slots.item` is mixed with `slots.prefix` / `slots.label`
  * / `slots.suffix` (mutually exclusive — `slots.item` wins).
  */
-export function resolveItemSlotsFromRaw<TSlots>(
-  raw: { render?: unknown; slots?: TSlots },
+export function resolveItemSlots<TSlots>(
+  slots: TSlots | undefined,
   componentName: string,
 ): TSlots {
-  const legacy = raw.render
-  let legacySlots: TSlots | undefined
-
-  if (typeof legacy === 'function') {
-    legacySlots = {
-      item: () => (legacy as () => unknown)(),
-    } as unknown as TSlots
-  } else if (legacy && typeof legacy === 'object') {
-    legacySlots = legacy as TSlots
-  }
-
-  const resolved: TSlots = {
-    ...(legacySlots ?? ({} as TSlots)),
-    ...(raw.slots ?? ({} as TSlots)),
-  } as TSlots
+  const resolved: TSlots = { ...(slots ?? ({} as TSlots)) } as TSlots
 
   if (import.meta.env.DEV) {
     const r = resolved as Record<string, unknown>

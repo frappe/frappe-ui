@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, useAttrs, useSlots } from 'vue'
+import { computed, useAttrs, useSlots, useTemplateRef } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
+import type { SelectionExposed } from '../shared/selection/types'
 import type {
+  SelectItemSlotProps,
   SelectNormalizedOption,
   SelectOption,
   SelectOptionValue,
   SelectProps,
+  SelectSlotProps,
   SelectSlots,
-  SelectTriggerSlotProps,
 } from './types'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import {
@@ -55,10 +57,32 @@ const props = withDefaults(defineProps<SelectProps>(), {
   placeholder: 'Select option',
   options: () => [],
   emptyText: 'No options',
+  portalTo: 'body',
 })
 
 const attrs = useAttrs()
 const slots = useSlots()
+
+const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
+
+/**
+ * Reka's `SelectContent` only honours `side` / `align` / `sideOffset` in
+ * `popper` mode. Select's default is `item-aligned` — the menu is anchored
+ * over the trigger so the selected row lands on the value, macOS-style — and
+ * `spec/selection.md` commits to that staying the default for callers who never pass
+ * positioning props. So the mode follows the props: the moment any of them is
+ * set, positioning becomes standard popper placement.
+ */
+const usesPopperPosition = computed(
+  () =>
+    props.side !== undefined ||
+    props.align !== undefined ||
+    props.offset !== undefined,
+)
+
+const side = computed(() => props.side ?? 'bottom')
+const align = computed(() => props.align ?? 'start')
+const offset = computed(() => props.offset ?? 4)
 
 const {
   inputId,
@@ -176,19 +200,27 @@ const selectedOption = computed(() => {
   )
 })
 
-function clearSelection() {
+function clear() {
   model.value = undefined
 }
 
-// Shared shape for the #trigger, #prefix, and #suffix slots. `clearSelection`
-// is exposed alongside the read-only fields so consumers can wire a clear
-// affordance without managing the model themselves.
-const triggerSlotProps = computed<SelectTriggerSlotProps>(() => ({
+function setOpen(value: boolean) {
+  open.value = value
+}
+
+function focus(options?: FocusOptions) {
+  triggerRef.value?.$el?.focus(options)
+}
+
+// Shared shape for the #trigger, #prefix, #suffix, and #footer slots. `clear`
+// and `setOpen` are exposed alongside the read-only fields so slot content can
+// drive the selection and the menu without a reference to the parent's state.
+const controlSlotProps = computed<SelectSlotProps>(() => ({
   open: open.value,
   disabled: Boolean(props.disabled),
   selectedOption: selectedOption.value,
-  displayValue: displayValue.value,
-  clearSelection,
+  clear,
+  setOpen,
 }))
 
 function isBlank(value: unknown) {
@@ -213,8 +245,27 @@ const displayValue = computed(() => {
 // longer options (Linear-style). Trigger width shifts as the value changes.
 const selectSizingText = computed(() => displayValue.value || props.placeholder)
 
-function getOptionSlotName(option: SelectNormalizedOption) {
+// Return type is annotated, not inferred: `SelectSlots` keys its dynamic
+// entries as `` `item-${string}` ``, and a plain inferred `string` cannot
+// index that.
+function getOptionSlotName(
+  option: SelectNormalizedOption,
+): `item-${string}` | undefined {
   return option.slot ? `item-${option.slot}` : undefined
+}
+
+/**
+ * A per-option `slot` is more specific than the generic `#item` slot, so it
+ * keeps the default row shell and fills the label region instead of handing
+ * the whole row to `#item`. Mirrors MultiSelect / Combobox precedence.
+ */
+function usesDynamicItemSlot(option: SelectNormalizedOption) {
+  const name = getOptionSlotName(option)
+  return Boolean(name && slots[name])
+}
+
+function getItemSlotProps(option: SelectNormalizedOption): SelectItemSlotProps {
+  return { item: option, selected: option.value === model.value }
 }
 
 function getOptionKey(option: SelectNormalizedOption, index: number) {
@@ -222,6 +273,9 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
 }
 
 defineSlots<SelectSlots>()
+
+const exposed: SelectionExposed = { clear, focus }
+defineExpose(exposed)
 </script>
 
 <template>
@@ -244,6 +298,7 @@ defineSlots<SelectSlots>()
     <SelectRoot v-model="internalModel" v-model:open="open" v-bind="rootAttrs">
       <SelectTrigger
         :id="inputId"
+        ref="trigger"
         data-slot="trigger"
         v-bind="triggerAttrs"
         :class="[
@@ -261,9 +316,15 @@ defineSlots<SelectSlots>()
         :data-required="required ? 'true' : undefined"
       >
         <template v-if="$slots.trigger">
-          <slot name="trigger" v-bind="triggerSlotProps" />
+          <slot name="trigger" v-bind="controlSlotProps" />
+          <!--
+          Invisible measurement overlay. reka's item-aligned positioning
+          anchors the menu on the trigger's `SelectValue` rect, which a custom
+          `#trigger` would otherwise remove. Internal plumbing only — it
+          deliberately carries no `data-slot`, so how Select measures the
+          trigger stays free to change after 1.0.0.
+        -->
           <div
-            data-slot="trigger-value"
             :class="[
               'pointer-events-none absolute inset-0 flex items-center overflow-hidden',
               triggerContentPadding,
@@ -298,14 +359,14 @@ defineSlots<SelectSlots>()
           <template v-if="selectedOption && slots['item-prefix']">
             <slot
               name="item-prefix"
-              v-bind="{ item: selectedOption, option: selectedOption }"
+              v-bind="getItemSlotProps(selectedOption)"
             />
           </template>
           <OptionIcon
             v-else-if="selectedOption?.icon"
             :icon="selectedOption.icon"
           />
-          <slot v-else name="prefix" v-bind="triggerSlotProps" />
+          <slot v-else name="prefix" v-bind="controlSlotProps" />
 
           <div class="grid min-w-0 text-left truncate">
             <SelectValue
@@ -328,18 +389,26 @@ defineSlots<SelectSlots>()
             />
           </div>
 
-          <slot name="suffix" v-bind="triggerSlotProps">
+          <slot name="suffix" v-bind="controlSlotProps">
             <span
+              data-slot="chevron"
               class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4"
             />
           </slot>
         </template>
       </SelectTrigger>
 
-      <SelectPortal>
+      <SelectPortal :to="portalTo">
         <SelectContent
           data-slot="content"
           class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
+          :class="
+            usesPopperPosition ? 'min-w-[--reka-select-trigger-width]' : null
+          "
+          :position="usesPopperPosition ? 'popper' : 'item-aligned'"
+          :side="side"
+          :align="align"
+          :side-offset="offset"
         >
           <!--
           `instant` (no scale-from-trigger enter, no exit) rather than the
@@ -369,7 +438,33 @@ defineSlots<SelectSlots>()
                   data-slot="item"
                   :class="[itemClasses, itemRootClasses]"
                 >
+                  <!--
+                  Full-row takeover precedence:
+                    1. a per-option `slot` matching an `#item-<slot>` template
+                       slot → default row shell with that slot filling the
+                       label region (handled below).
+                    2. global `#item` template slot → replaces the whole row.
+                    3. default row shell.
+
+                  `SelectItemText` still wraps the custom row: reka's
+                  item-aligned positioning measures the item-text rect to
+                  anchor the menu over the trigger.
+                -->
+                  <SelectItemText
+                    v-if="
+                      slots.item && !usesDynamicItemSlot(internalOption.option)
+                    "
+                    as="div"
+                    class="w-full min-w-0"
+                  >
+                    <slot
+                      name="item"
+                      v-bind="getItemSlotProps(internalOption.option)"
+                    />
+                  </SelectItemText>
+
                   <ItemListRow
+                    v-else
                     :size="itemSize"
                     :selected="internalOption.option.value === model"
                     :disabled="internalOption.option.disabled"
@@ -393,10 +488,7 @@ defineSlots<SelectSlots>()
                       <slot
                         v-if="slots['item-prefix']"
                         name="item-prefix"
-                        v-bind="{
-                          item: internalOption.option,
-                          option: internalOption.option,
-                        }"
+                        v-bind="getItemSlotProps(internalOption.option)"
                       />
                       <OptionIcon
                         v-else-if="internalOption.option.icon"
@@ -413,41 +505,24 @@ defineSlots<SelectSlots>()
                     -->
                       <SelectItemText as="div" class="min-w-0">
                         <slot
-                          v-if="
-                            getOptionSlotName(internalOption.option) &&
-                            slots[getOptionSlotName(internalOption.option)!]
-                          "
+                          v-if="usesDynamicItemSlot(internalOption.option)"
                           :name="getOptionSlotName(internalOption.option)!"
-                          v-bind="{
-                            item: internalOption.option,
-                            option: internalOption.option,
-                          }"
+                          v-bind="getItemSlotProps(internalOption.option)"
                         />
                         <slot
                           v-else
                           name="item-label"
-                          v-bind="{
-                            item: internalOption.option,
-                            option: internalOption.option,
-                          }"
+                          v-bind="getItemSlotProps(internalOption.option)"
                         >
-                          <slot
-                            name="option"
-                            v-bind="{
-                              item: internalOption.option,
-                              option: internalOption.option,
-                            }"
+                          <div class="truncate">
+                            {{ internalOption.option.label }}
+                          </div>
+                          <div
+                            v-if="internalOption.option.description"
+                            class="truncate text-p-sm text-ink-gray-5"
                           >
-                            <div class="truncate">
-                              {{ internalOption.option.label }}
-                            </div>
-                            <div
-                              v-if="internalOption.option.description"
-                              class="truncate text-p-sm text-ink-gray-5"
-                            >
-                              {{ internalOption.option.description }}
-                            </div>
-                          </slot>
+                            {{ internalOption.option.description }}
+                          </div>
                         </slot>
                       </SelectItemText>
                     </template>
@@ -455,10 +530,7 @@ defineSlots<SelectSlots>()
                     <template #suffix>
                       <slot
                         name="item-suffix"
-                        v-bind="{
-                          item: internalOption.option,
-                          option: internalOption.option,
-                        }"
+                        v-bind="getItemSlotProps(internalOption.option)"
                       />
                       <SelectItemIndicator
                         class="ml-1 inline-flex items-center justify-center"
@@ -472,7 +544,7 @@ defineSlots<SelectSlots>()
             </SelectViewport>
 
             <div v-if="$slots.footer" data-slot="footer">
-              <slot name="footer" v-bind="{ selectedOption, clearSelection }" />
+              <slot name="footer" v-bind="controlSlotProps" />
             </div>
           </PopoverPanel>
         </SelectContent>

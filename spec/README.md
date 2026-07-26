@@ -24,12 +24,17 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`date-picker.md`](./date-picker.md)
 - [`popover.md`](./popover.md)
 - [`hover-card.md`](./hover-card.md)
-- [`selection.md`](./selection.md)
-  - [`item-list-row.md`](./item-list-row.md)
-  - [`dropdown.md`](./dropdown.md)
-  - [`select.md`](./select.md)
-  - [`combobox.md`](./combobox.md)
-  - [`multiselect.md`](./multiselect.md)
+- [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
+- [`dropdown.md`](./dropdown.md) — the action menu
+- [`item-list-row.md`](./item-list-row.md) — the row shell both families use
+
+## Freeze work
+
+- [`imperative-api.md`](./imperative-api.md) — library-wide audit of what
+  components hand back through a template ref (`defineExpose` — 28 sites, 4
+  typed). Proposes five verbs, a policy for when and how a component may hand
+  back a DOM element, and a required `*Exposed` type. Excludes `frappe/`,
+  `ListView`, and `Calendar`. **Proposed.**
 
 ## ADRs
 

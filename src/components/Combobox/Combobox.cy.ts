@@ -131,13 +131,12 @@ describe('Combobox', () => {
   })
 
   describe('query and search', () => {
-    it('emits update:query and input, filters options, and clears value when cleared', () => {
+    it('emits update:query, filters options, and clears value when cleared', () => {
       cy.mount(Combobox, {
         props: {
           modelValue: 'Apple',
           options: fruits,
           'onUpdate:query': cy.spy().as('onUpdateQuery'),
-          onInput: cy.spy().as('onInput'),
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
           'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
         },
@@ -146,7 +145,6 @@ describe('Combobox', () => {
       cy.get('[role="combobox"]').clear().type('ma')
       cy.get('@onUpdateQuery').should('have.been.calledWith', 'm')
       cy.get('@onUpdateQuery').should('have.been.calledWith', 'ma')
-      cy.get('@onInput').should('have.been.calledWith', 'ma')
 
       cy.get('[role="option"]').should('have.length', 1)
       cy.get('[role="option"]').should('contain.text', 'Mango')
@@ -176,39 +174,431 @@ describe('Combobox', () => {
         .should('have.length', 1)
         .and('contain.text', 'Design')
     })
+
+    it('accepts an external `query` (v-model:query)', () => {
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits, query: 'ma' },
+      })
+      cy.get('[role="combobox"]').should('have.value', 'ma')
+    })
   })
 
-  describe('allowCustomValue', () => {
-    it('shows the built-in create row and commits raw query as value', () => {
+  // A bound `v-model:query` belongs to the consumer — the combobox must never
+  // reset it on its own. Unbound, button mode still clears it on every open.
+  describe('query ownership', () => {
+    const BoundQuery = defineComponent({
+      setup() {
+        const query = ref('ma')
+        return { query }
+      },
+      render() {
+        return h('div', [
+          h(Combobox, {
+            options: fruits,
+            trigger: 'button',
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          }),
+          h('span', { 'data-cy': 'query' }, this.query),
+        ])
+      },
+    })
+
+    it('keeps a seeded v-model:query when the popover opens, and filters with it', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('keeps a seeded v-model:query across close and reopen', () => {
+      cy.mount(BoundQuery)
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('never emits an empty update:query just from opening', () => {
       cy.mount(Combobox, {
         props: {
           options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
+          trigger: 'button',
+          query: 'ma',
+          'onUpdate:query': cy.spy().as('onUpdateQuery'),
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[role="option"]').should('have.length', 1)
+      cy.get('@onUpdateQuery').should('not.have.been.called')
+    })
+
+    it('still resets the query on open when it is not bound (button mode)', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, trigger: 'button' },
+      })
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').type('ma')
+      cy.get('[role="option"]').should('have.length', 1)
+
+      cy.get('[data-slot="search"] [data-slot="input"]').type('{esc}')
+      cy.get('[data-slot="content"]').should('not.exist')
+
+      cy.get('[data-slot="trigger"]').click()
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        '',
+      )
+      cy.get('[role="option"]').should('have.length', 3)
+    })
+
+    it('input mode keeps following the committed label with a bound query', () => {
+      const InputModeBoundQuery = defineComponent({
+        setup() {
+          const query = ref('ma')
+          const value = ref<string | null>(null)
+          return { query, value }
+        },
+        render() {
+          return h(Combobox, {
+            options: fruits,
+            open: true,
+            modelValue: this.value,
+            'onUpdate:modelValue': (v: any) => {
+              this.value = v
+            },
+            query: this.query,
+            'onUpdate:query': (value: string) => {
+              this.query = value
+            },
+          })
+        },
+      })
+
+      cy.mount(InputModeBoundQuery)
+
+      cy.get('[role="combobox"]').should('have.value', 'ma')
+      cy.contains('[role="option"]', 'Mango').click()
+      cy.get('[role="combobox"]').should('have.value', 'Mango')
+    })
+  })
+
+  // `clear()` means one thing across the selection family: it clears the
+  // selection. The search query is not part of that — in input mode the query
+  // follows the model down on its own, and in button mode it is a separate
+  // filter the user still owns.
+  describe('clear() semantics', () => {
+    it('input mode: the trigger stops showing the cleared option label', () => {
+      const InputMode = defineComponent({
+        setup() {
+          const value = ref<string | null>('Apple')
+          return { value }
+        },
+        render() {
+          return h('div', [
+            h(Combobox, {
+              ref: 'picker',
+              options: fruits,
+              modelValue: this.value,
+              'onUpdate:modelValue': (v: any) => {
+                this.value = v
+              },
+            }),
+            h(
+              'button',
+              {
+                'data-cy': 'clear',
+                onClick: () => (this.$refs.picker as any)?.clear(),
+              },
+              'clear',
+            ),
+            h('span', { 'data-cy': 'value' }, String(this.value)),
+          ])
+        },
+      })
+
+      cy.mount(InputMode)
+
+      cy.get('[role="combobox"]').should('have.value', 'Apple')
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-cy="value"]').should('have.text', 'null')
+      cy.get('[role="combobox"]').should('have.value', '')
+    })
+
+    it('button mode: a typed query survives clearing the selection', () => {
+      const ButtonMode = defineComponent({
+        setup() {
+          const value = ref<string | null>('Apple')
+          return { value }
+        },
+        render() {
+          return h(
+            Combobox,
+            {
+              options: fruits,
+              trigger: 'button',
+              open: true,
+              modelValue: this.value,
+              'onUpdate:modelValue': (v: any) => {
+                this.value = v
+              },
+            },
+            {
+              footer: ({ clear }: any) =>
+                h('button', { 'data-cy': 'clear', onClick: clear }, 'clear'),
+            },
+          )
+        },
+      })
+
+      cy.mount(ButtonMode)
+
+      cy.get('[data-slot="search"] [data-slot="input"]').type('ma')
+      cy.get('[role="option"]').should('have.length', 1)
+
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-slot="trigger"]').should('contain.text', 'Select option')
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+
+    it('button mode: a bound v-model:query survives clearing the selection', () => {
+      const BoundQueryClear = defineComponent({
+        setup() {
+          const query = ref('ma')
+          const value = ref<string | null>('Apple')
+          return { query, value }
+        },
+        render() {
+          return h('div', [
+            h(
+              Combobox,
+              {
+                options: fruits,
+                trigger: 'button',
+                open: true,
+                modelValue: this.value,
+                'onUpdate:modelValue': (v: any) => {
+                  this.value = v
+                },
+                query: this.query,
+                'onUpdate:query': (value: string) => {
+                  this.query = value
+                },
+              },
+              {
+                footer: ({ clear }: any) =>
+                  h('button', { 'data-cy': 'clear', onClick: clear }, 'clear'),
+              },
+            ),
+            h('span', { 'data-cy': 'query' }, this.query),
+          ])
+        },
+      })
+
+      cy.mount(BoundQueryClear)
+
+      cy.get('[data-cy="clear"]').click()
+
+      cy.get('[data-cy="query"]').should('have.text', 'ma')
+      cy.get('[data-slot="search"] [data-slot="input"]').should(
+        'have.value',
+        'ma',
+      )
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+    })
+  })
+
+  describe('filterable', () => {
+    it('filterable=false keeps every option visible while typing', () => {
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits, filterable: false },
+      })
+
+      cy.get('[role="combobox"]').type('zzz')
+      cy.get('[role="option"]').should('have.length', 3)
+    })
+
+    it('filterable=false still keeps condition-less custom rows visible', () => {
+      cy.mount(Combobox, {
+        props: {
+          open: true,
+          filterable: false,
+          options: [
+            { label: 'Apple', value: 'apple' },
+            {
+              type: 'custom',
+              key: 'invite',
+              label: 'Invite someone',
+              onClick: () => null,
+            },
+          ],
+        },
+      })
+
+      cy.get('[role="combobox"]').type('zzz')
+      cy.contains('[role="option"]', 'Invite someone').should('exist')
+      cy.contains('[role="option"]', 'Apple').should('exist')
+    })
+
+    it('condition-less custom rows are filtered by label while filterable', () => {
+      cy.mount(Combobox, {
+        props: {
+          open: true,
+          options: [
+            { label: 'Apple', value: 'apple' },
+            {
+              type: 'custom',
+              key: 'invite',
+              label: 'Invite someone',
+              onClick: () => null,
+            },
+          ],
+        },
+      })
+
+      cy.get('[role="combobox"]').type('invite')
+      cy.contains('[role="option"]', 'Invite someone').should('exist')
+      cy.contains('[role="option"]', 'Apple').should('not.exist')
+    })
+
+    it('`condition` stays authoritative when filterable=false', () => {
+      cy.mount(Combobox, {
+        props: {
+          open: true,
+          filterable: false,
+          options: [
+            { label: 'Apple', value: 'apple' },
+            {
+              type: 'custom',
+              key: 'create',
+              label: 'Create new',
+              onClick: () => null,
+              condition: ({ query }: any) => Boolean(query),
+            },
+          ],
+        },
+      })
+
+      cy.contains('[role="option"]', 'Create new').should('not.exist')
+      cy.get('[role="combobox"]').type('x')
+      cy.contains('[role="option"]', 'Create new').should('exist')
+    })
+  })
+
+  describe('numeric option values', () => {
+    const numeric = [
+      { label: 'One', value: 1 },
+      { label: 'Two', value: 2 },
+    ]
+
+    it('selects a numeric value and emits it unchanged', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: numeric,
+          open: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
+      })
+
+      cy.contains('[role="option"]', 'Two').click()
+      cy.get('@onUpdate').should('have.been.calledWith', 2)
+    })
+
+    it('numeric values stay searchable through the substring filter', () => {
+      cy.mount(Combobox, {
+        props: { options: numeric, open: true },
+      })
+
+      cy.get('[role="combobox"]').type('2')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Two')
+    })
+
+    it('renders the selected numeric option label in the trigger', () => {
+      cy.mount(Combobox, {
+        props: { options: numeric, modelValue: 1 },
+      })
+      cy.get('[role="combobox"]').should('have.value', 'One')
+    })
+  })
+
+  // Free-form values are a `type: 'custom'` row whose `onClick` sets the
+  // model — there is no dedicated prop. These guard that path, since it is
+  // now the only way to accept text that is not already an option.
+  describe('create-new via a custom row', () => {
+    const withCreateRow = (onCreate: any) => ({
+      options: [
+        ...fruits,
+        {
+          type: 'custom' as const,
+          key: 'create',
+          label: 'Create',
+          slot: 'create',
+          condition: ({ query }: { query: string }) => Boolean(query.trim()),
+          onClick: ({ query }: { query: string }) => onCreate(query.trim()),
+        },
+      ],
+      openOnFocus: true,
+    })
+
+    it('clicking the row commits the typed query', () => {
+      cy.mount(Combobox, {
+        props: withCreateRow(cy.spy().as('onCreate')),
+        slots: { 'item-create': ({ query }: any) => `Create "${query}"` },
       })
 
       cy.get('[role="combobox"]').focus().type('dragonfruit')
-      cy.get('[role="option"]').should('have.length', 1)
-      cy.get('[role="option"]')
-        .first()
-        .should('contain.text', 'Create "dragonfruit"')
-      cy.get('[role="option"]').first().click()
-      cy.get('@onUpdate').should('have.been.calledWith', 'dragonfruit')
+      cy.contains('[role="option"]', 'Create "dragonfruit"').click()
+      cy.get('@onCreate').should('have.been.calledWith', 'dragonfruit')
     })
 
-    it('pressing Enter commits the custom value', () => {
+    it('pressing Enter commits the typed query', () => {
       cy.mount(Combobox, {
-        props: {
-          options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        },
+        props: withCreateRow(cy.spy().as('onCreate')),
       })
+
       cy.get('[role="combobox"]').focus().type('papaya{enter}')
-      cy.get('@onUpdate').should('have.been.calledWith', 'papaya')
+      cy.get('@onCreate').should('have.been.calledWith', 'papaya')
+    })
+
+    it('keeps an external value that matches no option', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, modelValue: 'papaya' },
+      })
+      cy.get('[role="combobox"]').should('have.value', 'papaya')
     })
   })
 
@@ -310,44 +700,8 @@ describe('Combobox', () => {
     })
   })
 
-  describe('legacy render alias', () => {
-    it('function-form render maps to slots.item (full-row)', () => {
-      cy.mount(Combobox, {
-        props: {
-          open: true,
-          options: [
-            {
-              label: 'Legacy',
-              value: 'legacy',
-              render: () => h('div', { 'data-cy': 'legacy-fn' }, 'LegacyFn'),
-            },
-          ],
-        },
-      })
-      cy.get('[data-cy="legacy-fn"]').should('contain.text', 'LegacyFn')
-    })
-
-    it('object-form render maps one-to-one to slots', () => {
-      cy.mount(Combobox, {
-        props: {
-          open: true,
-          options: [
-            {
-              label: 'Legacy',
-              value: 'legacy',
-              render: {
-                prefix: () => h('span', { 'data-cy': 'legacy-prefix' }, 'LP'),
-              },
-            },
-          ],
-        },
-      })
-      cy.get('[data-cy="legacy-prefix"]').should('contain.text', 'LP')
-    })
-  })
-
-  describe('namespaced and legacy slot dispatch', () => {
-    it('supports namespaced item slots and legacy direct slots', () => {
+  describe('namespaced slot dispatch', () => {
+    it('dispatches `option.slot` to the matching `#item-<slot>` template slot', () => {
       cy.mount(Combobox, {
         props: {
           open: true,
@@ -357,7 +711,7 @@ describe('Combobox', () => {
               type: 'custom',
               key: 'create',
               label: 'Create new',
-              slotName: 'legacy-create',
+              slot: 'create',
               onClick: () => null,
             },
           ],
@@ -365,13 +719,13 @@ describe('Combobox', () => {
         slots: {
           'item-person': ({ item }: any) =>
             h('div', { 'data-cy': 'person-slot' }, item.label),
-          'legacy-create': ({ searchTerm }: any) =>
-            h('div', { 'data-cy': 'legacy-slot' }, `Legacy ${searchTerm}`),
+          'item-create': ({ item }: any) =>
+            h('div', { 'data-cy': 'create-slot' }, item.label),
         },
       })
 
       cy.get('[data-cy="person-slot"]').should('contain.text', 'Jane Doe')
-      cy.get('[data-cy="legacy-slot"]').should('contain.text', 'Legacy')
+      cy.get('[data-cy="create-slot"]').should('contain.text', 'Create new')
     })
   })
 
@@ -520,33 +874,46 @@ describe('Combobox', () => {
       cy.get('[data-cy="footer"]').click()
       cy.get('[data-slot="content"]').should('not.exist')
     })
-  })
 
-  describe('positioning', () => {
-    it('maps deprecated `placement` to `align` when `align` is not set', () => {
-      cy.mount(Combobox, {
-        props: { open: true, options: fruits, placement: 'end' },
-      })
-      cy.get('[data-slot="content"]').should('have.attr', 'data-align', 'end')
-    })
-
-    it('`align` wins over `placement` and warns in dev', () => {
-      const warn = cy.stub(console, 'warn')
+    it('control slot props expose `clear` (not `clearSelection`)', () => {
       cy.mount(Combobox, {
         props: {
           open: true,
           options: fruits,
-          placement: 'end',
-          align: 'center',
+          modelValue: 'Apple',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
-      }).then(() => {
-        expect(warn).to.have.been.calledWithMatch(/placement.*deprecated/i)
+        slots: {
+          footer: (props: any) =>
+            h(
+              'button',
+              {
+                'data-cy': 'clear',
+                'data-legacy': String('clearSelection' in props),
+                onClick: () => props.clear(),
+              },
+              'CLEAR',
+            ),
+        },
       })
-      cy.get('[data-slot="content"]').should(
-        'have.attr',
-        'data-align',
-        'center',
-      )
+
+      cy.get('[data-cy="clear"]').should('have.attr', 'data-legacy', 'false')
+      cy.get('[data-cy="clear"]').click()
+      cy.get('@onUpdate').should('have.been.calledWith', null)
+    })
+  })
+
+  describe('positioning', () => {
+    it('defaults to align="start" and forwards `align`', () => {
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits },
+      })
+      cy.get('[data-slot="content"]').should('have.attr', 'data-align', 'start')
+
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits, align: 'end' },
+      })
+      cy.get('[data-slot="content"]').should('have.attr', 'data-align', 'end')
     })
 
     it('forwards `side` to the popover', () => {
@@ -577,8 +944,8 @@ describe('Combobox', () => {
       })
 
       cy.get('[data-cy="custom-btn"]').should('contain.text', 'Pick a fruit')
-      cy.get('[data-slot="content-search"]').should('exist')
-      cy.get('[data-slot="content-search"] [role="combobox"]').should('exist')
+      cy.get('[data-slot="search"]').should('exist')
+      cy.get('[data-slot="search"] [role="combobox"]').should('exist')
     })
 
     it('focuses the popover search input on open and filters from there', () => {
@@ -591,7 +958,7 @@ describe('Combobox', () => {
       })
 
       cy.get('[data-cy="btn"]').click()
-      cy.get('[data-slot="content-search"] [role="combobox"]')
+      cy.get('[data-slot="search"] [role="combobox"]')
         .should('be.focused')
         .type('ma')
 
@@ -636,12 +1003,91 @@ describe('Combobox', () => {
         .should('be.focused')
         .type('{enter}')
 
-      cy.get('[data-slot="content-search"]').should('exist')
+      cy.get('[data-slot="search"]').should('exist')
+    })
+  })
+
+  describe('search row (button mode)', () => {
+    it('renders #search-prefix and #search-suffix around the input', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, trigger: 'button', open: true },
+        slots: {
+          'search-prefix': () => h('span', { 'data-cy': 'sp' }, 'P'),
+          'search-suffix': () => h('span', { 'data-cy': 'ss' }, 'S'),
+        },
+      })
+
+      cy.get('[data-slot="search"] [data-cy="sp"]').should('exist')
+      cy.get('[data-slot="search"] [data-cy="ss"]').should('exist')
+    })
+
+    it('search slot props expose { query, setQuery, disabled, focus }', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          trigger: 'button',
+          open: true,
+          'onUpdate:query': cy.spy().as('onUpdateQuery'),
+        },
+        slots: {
+          'search-suffix': (props: any) =>
+            h(
+              'button',
+              {
+                type: 'button',
+                'data-cy': 'set-query',
+                'data-query': props.query,
+                'data-disabled': String(props.disabled),
+                onClick: () => props.setQuery('ma'),
+              },
+              'set',
+            ),
+        },
+      })
+
+      cy.get('[data-cy="set-query"]').should('have.attr', 'data-query', '')
+      cy.get('[data-cy="set-query"]').should(
+        'have.attr',
+        'data-disabled',
+        'false',
+      )
+
+      cy.get('[data-cy="set-query"]').click()
+      cy.get('@onUpdateQuery').should('have.been.calledWith', 'ma')
+      cy.get('[role="option"]')
+        .should('have.length', 1)
+        .and('contain.text', 'Mango')
+      cy.get('[data-cy="set-query"]').should('have.attr', 'data-query', 'ma')
+    })
+
+    it('`hideSearch` removes the search row and its slots', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          trigger: 'button',
+          open: true,
+          hideSearch: true,
+        },
+        slots: {
+          'search-prefix': () => h('span', { 'data-cy': 'sp' }, 'P'),
+        },
+      })
+
+      cy.get('[data-slot="search"]').should('not.exist')
+      cy.get('[data-cy="sp"]').should('not.exist')
+      cy.get('[role="option"]').should('have.length', 3)
+    })
+
+    it('`hideSearch` is a no-op in input mode', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, hideSearch: true, open: true },
+      })
+      cy.get('[data-slot="trigger"] [role="combobox"]').should('exist')
     })
   })
 
   describe('imperative API', () => {
-    it('exposes `reset()` which clears query and selection', () => {
+    it('exposes `clear()`, which clears the selection and nothing else', () => {
       cy.mount(Combobox, {
         props: {
           modelValue: 'Apple',
@@ -653,12 +1099,38 @@ describe('Combobox', () => {
       }).then((mounted: any) => {
         // cypress-vue returns { wrapper, component }; `component` is the VM.
         const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
-        vm?.reset?.()
+        expect(vm.reset).to.be.undefined
+        vm?.clear?.()
       })
 
       cy.get('@onUpdate').should('have.been.calledWith', null)
       cy.get('@onSelectedOption').should('have.been.calledWith', null)
-      cy.get('@onUpdateQuery').should('have.been.calledWith', '')
+      // `clear()` never writes the query itself. The only `update:query` here
+      // is the mount-time display sync ("Apple"); the model is controlled by a
+      // spy that never accepts the change, so nothing drives the query down.
+      cy.get('@onUpdateQuery').should('not.have.been.calledWith', '')
+    })
+
+    it('exposes `focus()` which focuses the input (input mode)', () => {
+      cy.mount(Combobox, { props: { options: fruits } }).then(
+        (mounted: any) => {
+          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+          vm?.focus?.()
+        },
+      )
+
+      cy.get('[role="combobox"]').should('be.focused')
+    })
+
+    it('`focus()` targets the trigger in button mode while closed', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, trigger: 'button' },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('[data-slot="trigger"]').should('be.focused')
     })
   })
 
@@ -741,7 +1213,7 @@ describe('Combobox', () => {
       cy.get('[role=dialog]').should('exist')
       cy.get('[data-slot="trigger"]').click()
 
-      cy.get('[data-slot="content-search"] [role="combobox"]')
+      cy.get('[data-slot="search"] [role="combobox"]')
         .should('be.focused')
         .type('ma')
 
@@ -830,6 +1302,35 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]')
         .should('have.attr', 'aria-invalid', 'true')
         .and('have.attr', 'data-invalid', 'true')
+    })
+  })
+
+  // The selection family publishes these as public styling hooks. They are
+  // frozen at 1.0.0 — see src/components/shared/selection/types.ts.
+  describe('styling hooks', () => {
+    it('marks the panel shell with data-slot="content-body"', () => {
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"] [data-slot="content-body"]').should('exist')
+    })
+
+    it('marks the content element with data-selection', () => {
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"]')
+        .should('have.attr', 'data-selection')
+        .and('eq', '')
+    })
+
+    it('sets data-loading on the content element only while loading', () => {
+      cy.mount(Combobox, {
+        props: { open: true, options: fruits, loading: true },
+      })
+      // Present-but-empty while loading — match on presence, not a value.
+      cy.get('[data-slot="content"]')
+        .should('have.attr', 'data-loading')
+        .and('eq', '')
+
+      cy.mount(Combobox, { props: { open: true, options: fruits } })
+      cy.get('[data-slot="content"]').should('not.have.attr', 'data-loading')
     })
   })
 })
