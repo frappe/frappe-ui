@@ -16,6 +16,7 @@ export type SuggestionExtensionOptions<TItem = any> = {
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
   component?: Component
   floatingOptions?: SuggestionFloatingOptions
+  allowSpaces?: boolean
   command: (props: { editor: Editor; item: TItem; range: SuggestionRange }) => void
 }
 
@@ -26,6 +27,7 @@ function buildSuggestionExtension<TItem = any>(options: SuggestionExtensionOptio
       return {
         suggestion: {
           char: options.trigger,
+          allowSpaces: options.allowSpaces,
           pluginKey: new PluginKey(options.name),
           items: ({ query }: { query: string }) =>
             typeof options.items === 'function' ? options.items(query) : options.items,

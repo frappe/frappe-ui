@@ -131,6 +131,21 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(typeof options.suggestion.render).toBe('function')
   })
 
+  it('forwards allowSpaces from SuggestionExtension options to the suggestion plugin', async () => {
+    const { SuggestionExtension } = await import('./index')
+
+    const extension = SuggestionExtension.configure({
+      name: 'fields',
+      trigger: '{{',
+      items: [],
+      allowSpaces: true,
+      command: vi.fn(),
+    })
+
+    const options = (extension as any).addOptions()
+    expect(options.suggestion.allowSpaces).toBe(true)
+  })
+
   it('creates and destroys a shallow editor ref', async () => {
     const { useEditor } = await import('./index')
     let editorRef: ReturnType<typeof useEditor> | undefined
