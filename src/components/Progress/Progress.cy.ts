@@ -11,9 +11,10 @@ describe('Progress', () => {
 
     cy.get('span').should('have.text', 'label')
 
+    // a full-width fill slid 80% left leaves 20% of it visible
     cy.get('[role=progressbar] div')
       .should('have.attr', 'style')
-      .and('include', 'transform: scaleX(0.2)')
+      .and('include', 'transform: translateX(-80%)')
   })
 
   it('exposes the value to assistive tech', () => {
@@ -28,18 +29,16 @@ describe('Progress', () => {
       .and('have.attr', 'data-state', 'loading')
   })
 
-  it('clamps the fill scale to 0..1', () => {
-    // a scale above 1 is clipped by the container and a negative one flips the
-    // fill across its origin, so out-of-range values are pinned to the ends.
-    for (const [value, scale] of [
-      [150, 1],
-      [-20, 0],
+  it('clamps the fill to the ends of the track', () => {
+    for (const [value, offset] of [
+      [150, 0],
+      [-20, -100],
     ] as const) {
       cy.mount(Progress, { props: { label: 'label', value } })
 
       cy.get('[role=progressbar] div')
         .should('have.attr', 'style')
-        .and('include', `transform: scaleX(${scale})`)
+        .and('include', `transform: translateX(${offset}%)`)
     }
   })
 
@@ -91,14 +90,18 @@ describe('Progress', () => {
       },
     })
 
-    // the continuous fill animates its transform, with the default duration.
-    // the curve is linear on purpose: callers update `value` on a timer, and
-    // a decelerating curve visibly stutters each time it is retargeted.
+    // the continuous fill animates its transform, easing in and out of each new
+    // value instead of running at a constant speed. duration and curve match
+    // Radix UI's progress demo.
     cy.get('[role=progressbar] div')
       .should('have.class', 'motion-reduce:transition-none')
       .and('have.css', 'transition-property', 'transform')
-      .and('have.css', 'transition-duration', '0.3s')
-      .and('have.css', 'transition-timing-function', 'linear')
+      .and('have.css', 'transition-duration', '0.66s')
+      .and(
+        'have.css',
+        'transition-timing-function',
+        'cubic-bezier(0.65, 0, 0.35, 1)',
+      )
   })
 
   it('interval bar has no transform transition', () => {

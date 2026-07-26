@@ -19,21 +19,24 @@
       </span>
     </div>
 
+    <!-- `transform-gpu` puts the track on its own layer. Without it Safari fails
+         to clip the animating fill to the rounded corners.
+         https://gist.github.com/domske/b66047671c780a238b51c51ffde8d3a0 -->
     <ProgressRoot
       :model-value="clampedValue"
       :max="MAX_VALUE"
       :get-value-label="() => valueLabel"
-      class="overflow-hidden rounded-xl"
+      class="transform-gpu overflow-hidden rounded-xl"
       :class="indicatorContainerClasses"
     >
       <!-- Continuous Progress Bar -->
-      <!-- Scaled rather than resized: `transform` is composited, where animating
-           `width` reflows the bar on every frame. The fill carries no radius of
-           its own — the container clips it — so scaling distorts nothing. -->
+      <!-- The fill is full width and slid left so only `value`% of it shows.
+           `transform` is composited, where animating `width` reflows the bar on
+           every frame. -->
       <ProgressIndicator
         v-if="!props.intervals"
-        class="h-full w-full origin-left bg-surface-gray-10 transition-transform duration-300 ease-linear motion-reduce:transition-none"
-        :style="`transform: scaleX(${fillScale})`"
+        class="h-full w-full bg-surface-gray-10 transition-transform duration-[660ms] ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
+        :style="`transform: translateX(${fillOffset}%)`"
       />
 
       <!-- Interval Progress Bar -->
@@ -81,17 +84,16 @@ const indicatorContainerClasses = computed(() => {
 })
 
 /**
- * Clamped because a fill scale above 1 would be silently clipped by the
- * container and a negative one would flip the fill across its origin. It also
- * keeps `ProgressRoot` quiet — it treats an out-of-range value as invalid,
+ * Clamped so the fill can only ever be pulled fully off or fully into view. It
+ * also keeps `ProgressRoot` quiet — it treats an out-of-range value as invalid,
  * logs an error and falls back to indeterminate.
  */
 const clampedValue = computed(() =>
   Math.min(Math.max(Number(props.value), MIN_VALUE), MAX_VALUE),
 )
 
-/** Fraction the continuous fill is scaled to. */
-const fillScale = computed(() => clampedValue.value / MAX_VALUE)
+/** Percentage the full-width fill is slid left by: 0 when full, -100 when empty. */
+const fillOffset = computed(() => clampedValue.value - MAX_VALUE)
 
 /**
  * A bare percentage (reka-ui's default) says how far along the bar is but not

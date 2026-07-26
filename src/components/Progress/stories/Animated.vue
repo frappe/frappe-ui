@@ -14,7 +14,7 @@ const { pause, resume, isActive } = useIntervalFn(
     value.value += 10
     if (value.value >= 100) pause()
   },
-  300,
+  660,
   { immediate: false },
 )
 
