@@ -72,7 +72,7 @@ describe('Progress', () => {
     cy.get('[role=progressbar] div')
       .should('have.class', 'motion-reduce:transition-none')
       .and('have.css', 'transition-property', 'width')
-      .and('have.css', 'transition-duration', '0.7s')
+      .and('have.css', 'transition-duration', '0.3s')
       .and('have.css', 'transition-timing-function', 'linear')
   })
 
