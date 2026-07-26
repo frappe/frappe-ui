@@ -17,7 +17,6 @@ import type {
   ComboboxSize,
 } from './types'
 import {
-  CREATE_OPTION_VALUE,
   EMPTY_SELECTABLE_VALUE_PREFIX,
   isCustomOption,
   isSelectableOption,
@@ -42,7 +41,6 @@ const props = withDefaults(
     model: ComboboxOptionValue | null
     loading: boolean
     emptyText: string
-    showCreateOption: boolean
     showEmpty: boolean
     /** Parent's `useSlots()` result — forwarded so nested templates can dispatch. */
     slotFns: SlotFns
@@ -54,7 +52,6 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   selectCustom: [item: NormalizedCustomOption, event: Event]
-  selectCreate: [event: Event]
 }>()
 
 const ItemSlotRender = createItemSlotRender('ComboboxItemSlotRender')
@@ -120,25 +117,8 @@ function handleSelect(item: NormalizedItem, event: Event) {
     </div>
 
     <template v-else>
-      <ComboboxItem
-        v-if="showCreateOption"
-        :value="CREATE_OPTION_VALUE"
-        data-slot="item"
-        data-create="true"
-        :data-size="size"
-        :class="[itemClasses, itemRootSizeClasses(size)]"
-        text-value="Create value"
-        @select="emit('selectCreate', $event)"
-      >
-        <ItemListRow :size="toItemListSize(size)">
-          <template #label>
-            <div class="min-w-0 truncate">Create &quot;{{ query }}&quot;</div>
-          </template>
-        </ItemListRow>
-      </ComboboxItem>
-
       <div
-        v-else-if="showEmpty"
+        v-if="showEmpty"
         data-slot="empty"
         class="px-2 py-1.5 text-base text-ink-gray-5"
       >

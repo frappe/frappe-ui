@@ -1,6 +1,6 @@
 # Combobox
 
-Lets users pick one option from a searchable list. Set `allowCustomValue` when the typed text should be accepted as its own value.
+Lets users pick one option from a searchable list. To accept text that is not in the list, add a `type: 'custom'` row that sets the value — see [Create New](#create-new).
 
 ## Playground
 
@@ -35,18 +35,15 @@ Options split into named groups. `#item-prefix` renders a colored swatch per row
 
 <ComponentPreview name="Combobox-Grouped" />
 
-## Custom Value
-Free-form acceptance via `allowCustomValue`: the typed query becomes the model value when nothing matches, and unknown external values are preserved. The component renders a built-in "Create X" row as a click affordance. Use this when you want a "text input with autocomplete" feel. For richer create-new UX (custom label, icon, persistence callback), see [Create New](#create-new) below.
-
-<ComponentPreview name="Combobox-CustomValue" />
-
 ## Clearable
 Uses the `#trigger` slot to compose a custom trigger with an inline clear button. The X clears `v-model` via `@click.stop` so the popover doesn't toggle, and `@pointerdown.stop` keeps the anchor from intercepting the press.
 
 <ComponentPreview name="Combobox-Clearable" />
 
 ## Create New
-"Create new" is just a `type: 'custom'` option. `condition` hides the row when the query is empty or already matches an existing item, and `onClick` receives the typed `query` so you can persist the new value.
+"Create new" is just a `type: 'custom'` option — there is no prop for it, because what "create" means varies. `condition` hides the row when the query is empty or already matches an existing item, and `onClick` receives the typed `query` so you can persist the new value and set the model. Enter picks the row when it is the highlighted one, so typing and hitting Enter commits.
+
+A value that matches no option is kept as-is: the trigger falls back to showing the raw string. That makes this the way to build a free-form "text input with autocomplete" too — the row commits the query, and the value survives.
 
 <ComponentPreview name="Combobox-CreateNew" />
 

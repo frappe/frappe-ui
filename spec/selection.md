@@ -278,7 +278,7 @@ labelling it would freeze it into this contract.)
 | `hideSearch` | — | button mode only | yes |
 | `#summary` | no | no | yes |
 | Selected-option emit | — | `update:selectedOption` | `update:selectedOptions` |
-| Extra props | — | `trigger`, `openOnFocus`, `openOnClick`, `allowCustomValue` | — |
+| Extra props | — | `trigger`, `openOnFocus`, `openOnClick` | — |
 | Extra slot props | — | `displayValue` | `selectAll` in `#footer` |
 
 Grouping `Select` later would be additive and would use the same
@@ -344,19 +344,22 @@ The button's prefix resolves in order: `#item-prefix` with the selected option
 when there is one, then that option's `icon`, then `#prefix` when nothing is
 selected.
 
-Typing only ever changes the query. The value changes when a row is chosen, or
-when `allowCustomValue` accepts what was typed.
+Typing only ever changes the query. The value changes when a row is chosen.
 
-`allowCustomValue` is free-form acceptance. With it on, a query that matches
-nothing can become the value: a "Create …" row appears, Enter or a click
-commits the raw string, and an unknown `modelValue` set from outside is kept
-rather than dropped. It is suspended while `loading`.
-
-Custom rows are the richer version of the same idea, and the two compose. A
-row is `{ type: 'custom', key, label, onClick }`. Choosing one calls
+A row is `{ type: 'custom', key, label, onClick }`. Choosing one calls
 `onClick({ query })` and closes the popover unless `keepOpen` is set. It never
-sets the value, never shows a checkmark, and never comes back as
+sets the value itself, never shows a checkmark, and never comes back as
 `selectedOption`.
+
+Free-form acceptance is built from that, not from a prop. A custom row whose
+`onClick` writes the query to the model accepts what was typed; `condition`
+decides when the row shows. Enter commits it because the row is the highlighted
+one. A `modelValue` matching no option is kept either way — the trigger falls
+back to the raw string — so the value survives.
+
+There is no `allowCustomValue`. It existed and was removed before `1.0.0`: it
+did nothing a custom row cannot, and it hardcoded the row's copy, giving
+consumers no way to change the label, add an icon, or decide when it appears.
 
 `condition` decides when a custom row shows, and it outranks filtering. It runs
 before the user has typed anything, and it keeps running under

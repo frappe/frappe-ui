@@ -24,9 +24,8 @@ export {
 
 export { triggerBaseClassesFocusWithin as triggerBaseClasses } from '../shared/selection/utils'
 
-/** Sentinel values used internally — never exposed to consumers. */
+/** Sentinel value used internally — never exposed to consumers. */
 export const EMPTY_SELECTABLE_VALUE_PREFIX = '__frappe_ui_combobox_empty__:'
-export const CREATE_OPTION_VALUE = '__frappe_ui_combobox_create__'
 
 export type ResolvedItemSlots = ComboboxItemSlots<ComboboxItemSlotProps>
 

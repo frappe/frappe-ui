@@ -111,13 +111,6 @@
     default: '"body"'
   },
   {
-    name: 'allowCustomValue',
-    description: 'Free-form acceptance: the typed query is accepted as the model value\nwhen nothing matches, and external `modelValue` updates with unknown\nstrings are preserved. The combobox also renders a built-in "Create X"\nrow as a click affordance.\n\nFor richer create-new UX (custom label / icon / persistence callback),\nprefer a `type: \'custom\'` option with `condition` instead — see the\nCreate New story. The two are independent and can be combined.',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
     name: 'loading',
     description: 'Replaces the results with a loading state.',
     required: false,

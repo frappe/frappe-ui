@@ -120,6 +120,7 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | `render` on options                                                 | `slots`                                    |
 | `placement`, `ComboboxPlacement`                                    | `side` + `align`                           |
 | `createOption`                                                      | `type: 'custom'` option + `condition`      |
+| `allowCustomValue`                                                  | `type: 'custom'` option + `condition`      |
 | `reset()` on a template ref                                         | `clear()`                                  |
 | `SimpleOption`, `GroupedOption`, `SelectableOption`, `CustomOption` | the `Combobox`-prefixed names              |
 
@@ -203,6 +204,50 @@ Two renames land on the same option object:
 The slot the row lands in is renamed with it. `#create-new` becomes
 `#item-create-new`, and it receives `{ item, query, selected }` instead of
 `{ option, searchTerm }`. `onClick` and `condition` keep their names.
+
+### If you used `allowCustomValue`
+
+`Combobox` had a prop that accepted the typed text as the value and drew a
+built-in `Create "…"` row. It is gone. It could not do anything a custom row
+cannot, and it hardcoded the row — no way to change the label, add an icon, or
+say when it appears.
+
+Build the row instead. It commits on click and on Enter, because Enter picks
+the highlighted row:
+
+```vue
+<script setup>
+const value = ref('')
+const people = ref(['John Doe', 'Jane Doe'])
+
+const options = computed(() => [
+  ...people.value.map((p) => ({ label: p, value: p })),
+  {
+    type: 'custom',
+    key: 'create',
+    label: 'Create',
+    slot: 'create',
+    condition: ({ query }) =>
+      Boolean(query.trim()) && !people.value.includes(query.trim()),
+    onClick: ({ query }) => {
+      value.value = query.trim()
+    },
+  },
+])
+</script>
+
+<template>
+  <Combobox v-model="value" :options="options">
+    <template #item-create="{ query }">Create "{{ query }}"</template>
+  </Combobox>
+</template>
+```
+
+A `modelValue` that matches no option is kept regardless — the trigger falls
+back to the raw string — so nothing else changes.
+
+`dialog.prompt`'s `allowCreate` field option is unaffected; it now builds this
+row internally.
 
 ### If you filter on the server
 

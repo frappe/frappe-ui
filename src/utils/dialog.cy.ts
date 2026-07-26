@@ -20,6 +20,16 @@ beforeEach(() => {
   dialogs.value = []
 })
 
+// A popover measuring itself inside a dialog makes the browser emit
+// "ResizeObserver loop completed with undelivered notifications". It is a
+// notification that the next frame will settle it, not an error — nothing is
+// thrown into app code and the layout lands correctly. Cypress fails the test
+// on any uncaught exception, so this narrow match lets combobox fields be
+// tested at all. Anything else still fails.
+Cypress.on('uncaught:exception', (err) =>
+  err.message.includes('ResizeObserver loop') ? false : undefined,
+)
+
 describe('dialog.ts — imperative API', () => {
   // ---- namespace ----------------------------------------------------------
 
@@ -99,14 +109,11 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Confirm').click()
     cy.get('[role=dialog]').contains('Network down').should('exist')
     cy.get('[role=dialog]').should('exist')
-    cy.contains('button', 'Confirm')
-      .find('[role="status"]')
-      .should('not.exist')
+    cy.contains('button', 'Confirm').find('[role="status"]').should('not.exist')
   })
 
   it('extracts frappe-style messages[] from a rejection payload', () => {
-    const onConfirm = () =>
-      Promise.reject({ messages: ['Server says no'] })
+    const onConfirm = () => Promise.reject({ messages: ['Server says no'] })
     cy.mount(DialogManager)
     cy.then(() => {
       confirm({ title: 't', onConfirm })
@@ -158,9 +165,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Confirm').click()
     cy.then(() => capturedSetError?.('Bad password'))
     cy.get('[role=dialog]').contains('Bad password').should('exist')
-    cy.contains('button', 'Confirm')
-      .find('[role="status"]')
-      .should('not.exist')
+    cy.contains('button', 'Confirm').find('[role="status"]').should('not.exist')
     cy.then(() => capturedSetError?.(null))
     cy.get('[role=dialog]').contains('Bad password').should('not.exist')
   })
@@ -225,10 +230,7 @@ describe('dialog.ts — imperative API', () => {
       confirm({ title: 'Danger', theme: 'red' })
     })
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
-    cy.contains('button', 'Confirm').should(
-      'have.class',
-      'bg-surface-red-7',
-    )
+    cy.contains('button', 'Confirm').should('have.class', 'bg-surface-red-7')
   })
 
   it('a string icon overrides the theme default', () => {
@@ -322,9 +324,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Save').click()
     cy.get('[role=dialog]').contains('Save failed').should('exist')
     cy.get('[role=dialog]').should('exist')
-    cy.contains('button', 'Save')
-      .find('[role="status"]')
-      .should('not.exist')
+    cy.contains('button', 'Save').find('[role="status"]').should('not.exist')
   })
 
   // ---- danger -------------------------------------------------------------
@@ -392,6 +392,78 @@ describe('dialog.ts — imperative API', () => {
     cy.get('[role=dialog]').should('not.exist')
   })
 
+  it('prompt renders a combobox field and filters its options', () => {
+    cy.mount(DialogManager)
+    cy.then(() => {
+      prompt({
+        title: 'Pick a label',
+        fields: [
+          {
+            name: 'label',
+            label: 'Label',
+            type: 'combobox',
+            options: [{ label: 'Bug', value: 'bug' }],
+          },
+        ],
+        onConfirm: () => {},
+      })
+    })
+    cy.get('[role=dialog] [role=combobox]').click().type('Bug')
+    cy.contains('[role=option]', 'Bug').should('exist')
+  })
+
+  it('prompt combobox with allowCreate submits the typed query', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+    cy.mount(DialogManager)
+    cy.then(() => {
+      prompt({
+        title: 'Pick a label',
+        fields: [
+          {
+            name: 'label',
+            label: 'Label',
+            type: 'combobox',
+            options: [
+              { label: 'Bug', value: 'bug' },
+              { label: 'Docs', value: 'docs' },
+            ],
+            allowCreate: true,
+          },
+        ],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] [role=combobox]').click().type('chore')
+    cy.contains('[role=option]', 'Create "chore"').click()
+    cy.contains('button', 'Submit').click()
+    cy.get('@onConfirm').then((spy: any) => {
+      expect(spy.firstCall.args[0].values).to.deep.equal({ label: 'chore' })
+    })
+  })
+
+  it('prompt combobox with allowCreate hides the row for an existing option', () => {
+    cy.mount(DialogManager)
+    cy.then(() => {
+      prompt({
+        title: 'Pick a label',
+        fields: [
+          {
+            name: 'label',
+            label: 'Label',
+            type: 'combobox',
+            options: [{ label: 'Bug', value: 'bug' }],
+            allowCreate: true,
+          },
+        ],
+        onConfirm: () => {},
+      })
+    })
+
+    cy.get('[role=dialog] [role=combobox]').click().type('Bug')
+    cy.contains('[role=option]', 'Create').should('not.exist')
+  })
+
   it('prompt seeds defaultValue and submits it untouched', () => {
     const onConfirm = cy.spy().as('onConfirm')
     cy.mount(DialogManager)
@@ -440,8 +512,7 @@ describe('dialog.ts — imperative API', () => {
             name: 'email',
             label: 'Email',
             defaultValue: 'bad',
-            validate: (v: string) =>
-              v === 'bad' ? 'Invalid email' : null,
+            validate: (v: string) => (v === 'bad' ? 'Invalid email' : null),
           },
         ],
         onConfirm,
@@ -450,9 +521,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Submit').click()
     cy.get('[role=dialog]').contains('Invalid email').should('exist')
     cy.get('@onConfirm').should('not.have.been.called')
-    cy.contains('button', 'Submit')
-      .find('[role="status"]')
-      .should('not.exist')
+    cy.contains('button', 'Submit').find('[role="status"]').should('not.exist')
   })
 
   it('prompt clears a stale field error as soon as the user edits it', () => {

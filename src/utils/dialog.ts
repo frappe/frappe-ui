@@ -16,7 +16,10 @@ import type {
   DialogTheme,
 } from '../components/Dialog/types'
 import type { ButtonProps } from '../components/Button'
-import type { ComboboxOption } from '../components/Combobox/types'
+import type {
+  ComboboxCustomOption,
+  ComboboxOption,
+} from '../components/Combobox/types'
 
 // -- Public types --------------------------------------------------------
 
@@ -141,8 +144,8 @@ export type PromptField =
        */
       options: ComboboxOption[]
       /**
-       * Allow the typed query through as the value when no option matches.
-       * Maps to the underlying `Combobox`'s `allowCustomValue` prop.
+       * Adds a "Create …" row that commits the typed query as the value when
+       * no option matches.
        */
       allowCreate?: boolean
     })
@@ -445,6 +448,43 @@ function initialFieldValue(field: PromptField): any {
   return field.type === 'checkbox' ? false : ''
 }
 
+// Labels a query could already match, flattened across grouped and flat
+// options. Custom rows are skipped — they are affordances, not values.
+function selectableLabels(options: ComboboxOption[] = []): string[] {
+  return options.flatMap((option) => {
+    if (typeof option === 'string') return [option]
+    if (!option || typeof option !== 'object') return []
+    if ('group' in option) return selectableLabels(option.options)
+    if ((option as any).type === 'custom') return []
+    return [String((option as any).label ?? (option as any).value ?? '')]
+  })
+}
+
+// `allowCreate` is a create-new custom row, the same shape any consumer would
+// write by hand. `condition` hides it once the query matches an existing
+// option, and `onClick` commits the typed text as the field's value.
+function createNewOption(
+  options: ComboboxOption[],
+  commit: (value: string) => void,
+): ComboboxCustomOption {
+  const existing = selectableLabels(options).map((label) => label.toLowerCase())
+
+  return {
+    type: 'custom',
+    key: '__create__',
+    label: 'Create',
+    slot: 'create',
+    condition: ({ query }) => {
+      const trimmed = query.trim()
+      return Boolean(trimmed) && !existing.includes(trimmed.toLowerCase())
+    },
+    onClick: ({ query }) => {
+      const trimmed = query.trim()
+      if (trimmed) commit(trimmed)
+    },
+  }
+}
+
 export function prompt(args: PromptArgs): DialogHandle {
   const state = reactive<LifecycleState>({
     open: true,
@@ -545,24 +585,41 @@ export function prompt(args: PromptArgs): DialogHandle {
     // Combobox-only knobs are forwarded as fallthrough attrs; FormControl
     // re-emits them onto the underlying <Combobox> via `controlAttrs`.
     const comboboxAttrs =
-      field.type === 'combobox'
-        ? { openOnClick: true, allowCustomValue: field.allowCreate }
-        : null
+      field.type === 'combobox' ? { openOnClick: true } : null
+
+    const allowCreate = field.type === 'combobox' && field.allowCreate
+
+    const options = allowCreate
+      ? [...field.options, createNewOption(field.options, onUpdate)]
+      : (field as any).options
 
     const modelValue =
-      field.type === 'combobox' ? values[field.name] || null : values[field.name]
+      field.type === 'combobox'
+        ? values[field.name] || null
+        : values[field.name]
 
-    const fieldNode = h(FormControl, {
-      label: field.label,
-      description: field.description,
-      type: (field.type as any) || 'text',
-      required: field.required,
-      placeholder: field.placeholder,
-      options: (field as any).options,
-      modelValue,
-      'onUpdate:modelValue': onUpdate,
-      ...comboboxAttrs,
-    })
+    const fieldNode = h(
+      FormControl,
+      {
+        label: field.label,
+        description: field.description,
+        type: (field.type as any) || 'text',
+        required: field.required,
+        placeholder: field.placeholder,
+        options,
+        modelValue,
+        'onUpdate:modelValue': onUpdate,
+        ...comboboxAttrs,
+      },
+      // FormControl forwards every slot to the control, so this reaches the
+      // create row and lets it echo what the user typed.
+      allowCreate
+        ? {
+            'item-create': ({ query }: { query: string }) =>
+              h('span', { class: 'truncate' }, `Create "${query}"`),
+          }
+        : undefined,
+    )
 
     return h('div', { key: field.name, class: 'space-y-1' }, [
       fieldNode,

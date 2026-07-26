@@ -135,18 +135,6 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Teleport target for the popover content. */
   portalTo?: string | HTMLElement
 
-  /**
-   * Free-form acceptance: the typed query is accepted as the model value
-   * when nothing matches, and external `modelValue` updates with unknown
-   * strings are preserved. The combobox also renders a built-in "Create X"
-   * row as a click affordance.
-   *
-   * For richer create-new UX (custom label / icon / persistence callback),
-   * prefer a `type: 'custom'` option with `condition` instead — see the
-   * Create New story. The two are independent and can be combined.
-   */
-  allowCustomValue?: boolean
-
   /** Replaces the results with a loading state. */
   loading?: boolean
 

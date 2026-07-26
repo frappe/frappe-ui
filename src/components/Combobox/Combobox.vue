@@ -78,7 +78,6 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   align: 'start',
   offset: 4,
   portalTo: 'body',
-  allowCustomValue: false,
   loading: false,
   emptyText: 'No results',
   hideSearch: false,
@@ -231,18 +230,7 @@ const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
 
-const showCreateOption = computed(
-  () =>
-    props.allowCustomValue &&
-    !props.loading &&
-    hasTypedSinceOpen.value &&
-    query.value.length > 0 &&
-    !hasVisibleItems.value,
-)
-
-const showEmpty = computed(
-  () => !props.loading && !showCreateOption.value && !hasVisibleItems.value,
-)
+const showEmpty = computed(() => !props.loading && !hasVisibleItems.value)
 
 // Clears the selection, and nothing else — same meaning as `clear()` on Select
 // and MultiSelect. The query is left alone: in input mode the display-sync
@@ -301,16 +289,6 @@ function commitSelectableOption(value: ComboboxOptionValue) {
   hasTypedSinceOpen.value = false
 }
 
-function commitCustomValue(value: string) {
-  if (!value) return
-
-  model.value = value
-  emit('update:selectedOption', null)
-  query.value = value
-  hasTypedSinceOpen.value = false
-  open.value = false
-}
-
 function handleRootModelValueChange(
   value: ComboboxOptionValue | null | undefined,
 ) {
@@ -326,11 +304,6 @@ function handleRootModelValueChange(
 
   if (selectableOption) {
     commitSelectableOption(selectableOption.value)
-    return
-  }
-
-  if (props.allowCustomValue && !props.loading) {
-    commitCustomValue(String(externalValue))
   }
 }
 
@@ -353,12 +326,6 @@ function handleInputChange(event: Event) {
   nextTick(() => rootRef.value?.highlightFirstItem?.())
 }
 
-function handleInputEnter(event: KeyboardEvent) {
-  if (!showCreateOption.value) return
-  event.preventDefault()
-  commitCustomValue(query.value)
-}
-
 function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
   event.preventDefault()
   if (item.disabled) return
@@ -366,11 +333,6 @@ function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
   item.onClick(buildCustomOptionContext(typedQuery.value))
 
   if (!item.keepOpen) open.value = false
-}
-
-function handleCreateOptionSelect(event: Event) {
-  event.preventDefault()
-  commitCustomValue(query.value)
 }
 
 function handleFocusScopeMountAutoFocus(event: Event) {
@@ -670,7 +632,6 @@ defineSlots<ComboboxSlots>()
               @input="handleInputChange"
               @focus="emit('focus', $event)"
               @blur="emit('blur', $event)"
-              @keydown.enter="handleInputEnter"
             />
 
             <slot name="suffix" v-bind="controlSlotProps">
@@ -758,7 +719,6 @@ defineSlots<ComboboxSlots>()
                     @input="handleInputChange"
                     @focus="emit('focus', $event)"
                     @blur="emit('blur', $event)"
-                    @keydown.enter="handleInputEnter"
                   />
                   <slot
                     v-if="$slots['search-suffix']"
@@ -774,12 +734,10 @@ defineSlots<ComboboxSlots>()
                   :model="model ?? null"
                   :loading="loading"
                   :empty-text="emptyText"
-                  :show-create-option="showCreateOption"
                   :show-empty="showEmpty"
                   :slot-fns="slots"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
-                  @select-create="handleCreateOptionSelect"
                 />
 
                 <div v-if="$slots.footer" data-slot="footer">

@@ -555,37 +555,50 @@ describe('Combobox', () => {
     })
   })
 
-  describe('allowCustomValue', () => {
-    it('shows the built-in create row and commits raw query as value', () => {
-      cy.mount(Combobox, {
-        props: {
-          options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+  // Free-form values are a `type: 'custom'` row whose `onClick` sets the
+  // model — there is no dedicated prop. These guard that path, since it is
+  // now the only way to accept text that is not already an option.
+  describe('create-new via a custom row', () => {
+    const withCreateRow = (onCreate: any) => ({
+      options: [
+        ...fruits,
+        {
+          type: 'custom' as const,
+          key: 'create',
+          label: 'Create',
+          slot: 'create',
+          condition: ({ query }: { query: string }) => Boolean(query.trim()),
+          onClick: ({ query }: { query: string }) => onCreate(query.trim()),
         },
+      ],
+      openOnFocus: true,
+    })
+
+    it('clicking the row commits the typed query', () => {
+      cy.mount(Combobox, {
+        props: withCreateRow(cy.spy().as('onCreate')),
+        slots: { 'item-create': ({ query }: any) => `Create "${query}"` },
       })
 
       cy.get('[role="combobox"]').focus().type('dragonfruit')
-      cy.get('[role="option"]').should('have.length', 1)
-      cy.get('[role="option"]')
-        .first()
-        .should('contain.text', 'Create "dragonfruit"')
-      cy.get('[role="option"]').first().click()
-      cy.get('@onUpdate').should('have.been.calledWith', 'dragonfruit')
+      cy.contains('[role="option"]', 'Create "dragonfruit"').click()
+      cy.get('@onCreate').should('have.been.calledWith', 'dragonfruit')
     })
 
-    it('pressing Enter commits the custom value', () => {
+    it('pressing Enter commits the typed query', () => {
       cy.mount(Combobox, {
-        props: {
-          options: fruits,
-          allowCustomValue: true,
-          openOnFocus: true,
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        },
+        props: withCreateRow(cy.spy().as('onCreate')),
       })
+
       cy.get('[role="combobox"]').focus().type('papaya{enter}')
-      cy.get('@onUpdate').should('have.been.calledWith', 'papaya')
+      cy.get('@onCreate').should('have.been.calledWith', 'papaya')
+    })
+
+    it('keeps an external value that matches no option', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, modelValue: 'papaya' },
+      })
+      cy.get('[role="combobox"]').should('have.value', 'papaya')
     })
   })
 
