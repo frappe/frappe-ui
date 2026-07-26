@@ -285,7 +285,7 @@ export default defineComponent({
         ...rootProps,
         ...restAttrs,
         class: [attrClass, buttonClasses.value],
-        'aria-label': props.label,
+        'aria-label': props.label ?? restAttrs['aria-label'],
         'aria-busy': props.loading || undefined,
         ref: rootRef,
       }
