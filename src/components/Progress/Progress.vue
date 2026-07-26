@@ -19,20 +19,25 @@
       </span>
     </div>
 
-    <div
-      class="overflow-hidden rounded-xl"
+    <!-- `transform-gpu` puts the track on its own layer. Without it Safari fails
+         to clip the animating fill to the rounded corners.
+         https://gist.github.com/domske/b66047671c780a238b51c51ffde8d3a0 -->
+    <ProgressRoot
+      :model-value="clampedValue"
+      :max="MAX_VALUE"
+      :get-value-label="() => valueLabel"
+      class="transform-gpu overflow-hidden rounded-xl"
       :class="indicatorContainerClasses"
-      :aria-valuemax="MAX_VALUE"
-      :aria-valuemin="MIN_VALUE"
-      :aria-valuenow="props.value"
-      role="progressbar"
     >
       <!-- Continuous Progress Bar -->
-      <div
+      <!-- The fill is full width and slid left so only `value`% of it shows.
+           `transform` is composited, where animating `width` reflows the bar on
+           every frame. -->
+      <ProgressIndicator
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-10"
-        :style="`width: ${props.value}%`"
-      ></div>
+        class="h-full w-full bg-surface-gray-10 transition-transform duration-[660ms] ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
+        :style="`transform: translateX(${fillOffset}%)`"
+      />
 
       <!-- Interval Progress Bar -->
       <div
@@ -45,12 +50,13 @@
             : 'bg-surface-gray-2'
         "
       ></div>
-    </div>
+    </ProgressRoot>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { ProgressIndicator, ProgressRoot } from 'reka-ui'
 import type { ProgressProps } from './types'
 
 const MIN_VALUE = 0
@@ -72,23 +78,37 @@ const indicatorContainerClasses = computed(() => {
     xl: 'h-3',
   }[props.size]
 
-  const layoutClasses = props.intervals
-    ? 'flex space-x-1'
-    : 'relative bg-surface-gray-2'
+  const layoutClasses = props.intervals ? 'flex space-x-1' : 'bg-surface-gray-2'
 
   return [heightClass, layoutClasses]
 })
 
-const filledIntervalCount = computed(() => {
-  if (props.value > MAX_VALUE) {
-    return props.intervalCount
-  }
+/**
+ * Clamped so the fill can only ever be pulled fully off or fully into view. It
+ * also keeps `ProgressRoot` quiet — it treats an out-of-range value as invalid,
+ * logs an error and falls back to indeterminate.
+ */
+const clampedValue = computed(() =>
+  Math.min(Math.max(Number(props.value), MIN_VALUE), MAX_VALUE),
+)
 
-  return Math.round((props.value / MAX_VALUE) * props.intervalCount)
-})
+/** Percentage the full-width fill is slid left by: 0 when full, -100 when empty. */
+const fillOffset = computed(() => clampedValue.value - MAX_VALUE)
+
+/**
+ * A bare percentage (reka-ui's default) says how far along the bar is but not
+ * what it measures, so prefer the visible label when there is one.
+ */
+const valueLabel = computed(
+  () => props.label || `${Math.round(clampedValue.value)}%`,
+)
+
+const filledIntervalCount = computed(() =>
+  Math.round((clampedValue.value / MAX_VALUE) * props.intervalCount),
+)
 
 defineSlots<{
-  /** Custom content for the hint area (usually displays the progress value). 
+  /** Custom content for the hint area (usually displays the progress value).
    * If not provided, defaults to showing `props.value` followed by `%`.
    */
   hint?: () => any
