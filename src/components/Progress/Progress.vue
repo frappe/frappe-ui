@@ -28,10 +28,13 @@
       role="progressbar"
     >
       <!-- Continuous Progress Bar -->
+      <!-- Scaled rather than resized: `transform` is composited, where animating
+           `width` reflows the bar on every frame. The fill carries no radius of
+           its own — the container clips it — so scaling distorts nothing. -->
       <div
         v-if="!props.intervals"
-        class="h-full bg-surface-gray-10 transition-[width] duration-300 ease-linear motion-reduce:transition-none"
-        :style="`width: ${props.value}%`"
+        class="h-full w-full origin-left bg-surface-gray-10 transition-transform duration-300 ease-linear motion-reduce:transition-none"
+        :style="`transform: scaleX(${fillScale})`"
       ></div>
 
       <!-- Interval Progress Bar -->
@@ -79,6 +82,16 @@ const indicatorContainerClasses = computed(() => {
   return [heightClass, layoutClasses]
 })
 
+/**
+ * Fraction the continuous fill is scaled to. Clamped because a scale above 1
+ * would be silently clipped by the container and a negative one would flip the
+ * fill across its origin, where the old `width: N%` simply resolved to nothing.
+ */
+const fillScale = computed(() => {
+  const clamped = Math.min(Math.max(props.value, MIN_VALUE), MAX_VALUE)
+  return clamped / MAX_VALUE
+})
+
 const filledIntervalCount = computed(() => {
   if (props.value > MAX_VALUE) {
     return props.intervalCount
@@ -88,7 +101,7 @@ const filledIntervalCount = computed(() => {
 })
 
 defineSlots<{
-  /** Custom content for the hint area (usually displays the progress value). 
+  /** Custom content for the hint area (usually displays the progress value).
    * If not provided, defaults to showing `props.value` followed by `%`.
    */
   hint?: () => any

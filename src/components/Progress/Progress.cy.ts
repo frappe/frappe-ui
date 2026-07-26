@@ -15,7 +15,22 @@ describe('Progress', () => {
 
     cy.get('[role=progressbar] div')
       .should('have.attr', 'style')
-      .and('include', `width: ${val}%`)
+      .and('include', 'transform: scaleX(0.2)')
+  })
+
+  it('clamps the fill scale to 0..1', () => {
+    // a scale above 1 is clipped by the container and a negative one flips the
+    // fill across its origin, so out-of-range values are pinned to the ends.
+    for (const [value, scale] of [
+      [150, 1],
+      [-20, 0],
+    ] as const) {
+      cy.mount(Progress, { props: { label: 'label', value } })
+
+      cy.get('[role=progressbar] div')
+        .should('have.attr', 'style')
+        .and('include', `transform: scaleX(${scale})`)
+    }
   })
 
   it('hint prop & slot', () => {
@@ -66,17 +81,17 @@ describe('Progress', () => {
       },
     })
 
-    // the continuous fill animates its width, with the default duration.
+    // the continuous fill animates its transform, with the default duration.
     // the curve is linear on purpose: callers update `value` on a timer, and
     // a decelerating curve visibly stutters each time it is retargeted.
     cy.get('[role=progressbar] div')
       .should('have.class', 'motion-reduce:transition-none')
-      .and('have.css', 'transition-property', 'width')
+      .and('have.css', 'transition-property', 'transform')
       .and('have.css', 'transition-duration', '0.3s')
       .and('have.css', 'transition-timing-function', 'linear')
   })
 
-  it('interval bar has no width transition', () => {
+  it('interval bar has no transform transition', () => {
     cy.mount(Progress, {
       props: {
         label: 'label',
@@ -86,7 +101,7 @@ describe('Progress', () => {
     })
 
     cy.get('[role=progressbar] div').each((x) => {
-      cy.wrap(x).should('not.have.css', 'transition-property', 'width')
+      cy.wrap(x).should('not.have.css', 'transition-property', 'transform')
     })
   })
 
