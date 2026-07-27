@@ -82,34 +82,34 @@ export default defineComponent({
     const buttonClasses = computed(() => {
       const solidClasses = {
         gray: 'text-ink-base bg-surface-gray-10 hover:bg-surface-gray-9 active:bg-surface-gray-8',
-        blue: 'text-ink-base bg-blue-500 hover:bg-surface-blue-3 active:bg-blue-700',
+        blue: 'text-ink-base bg-surface-blue-6 hover:bg-surface-blue-7 active:bg-surface-blue-8',
         green:
-          'text-ink-base bg-surface-green-3 hover:bg-green-700 active:bg-green-800',
+          'text-ink-base bg-surface-green-7 hover:bg-surface-green-8 active:bg-surface-green-9',
         red: 'text-ink-base bg-surface-red-7 hover:bg-surface-red-8 active:bg-surface-red-9',
       }[props.theme]
 
       const subtleClasses = {
         gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-surface-blue-2 hover:bg-blue-200 active:bg-blue-300',
+        blue: 'text-ink-blue-6 bg-surface-blue-2 hover:bg-surface-blue-3 active:bg-surface-blue-4',
         green:
-          'text-green-800 bg-surface-green-2 hover:bg-green-200 active:bg-green-300',
-        red: 'text-red-700 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
+          'text-ink-green-9 bg-surface-green-2 hover:bg-surface-green-3 active:bg-surface-green-4',
+        red: 'text-ink-red-8 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
       }[props.theme]
 
       const outlineClasses = {
-        gray: 'text-ink-gray-8 bg-surface-base bg-surface-base border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-surface-base border border-outline-blue-1 hover:border-blue-400 active:border-blue-400 active:bg-blue-300',
+        gray: 'text-ink-gray-8 bg-surface-base border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
+        blue: 'text-ink-blue-6 bg-surface-base border border-outline-blue-1 hover:border-outline-blue-4 active:border-outline-blue-4 active:bg-surface-blue-4',
         green:
-          'text-green-800 bg-surface-base border border-outline-green-3 hover:border-green-500 active:border-green-500 active:bg-green-300',
-        red: 'text-red-700 bg-surface-base border border-outline-red-1 hover:border-outline-red-3 active:border-outline-red-3 active:bg-surface-red-3',
+          'text-ink-green-9 bg-surface-base border border-outline-green-3 hover:border-outline-green-5 active:border-outline-green-5 active:bg-surface-green-4',
+        red: 'text-ink-red-8 bg-surface-base border border-outline-red-1 hover:border-outline-red-3 active:border-outline-red-3 active:bg-surface-red-3',
       }[props.theme]
 
       const ghostClasses = {
         gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-transparent hover:bg-blue-200 active:bg-blue-300',
+        blue: 'text-ink-blue-6 bg-transparent hover:bg-surface-blue-3 active:bg-surface-blue-4',
         green:
-          'text-green-800 bg-transparent hover:bg-green-200 active:bg-green-300',
-        red: 'text-red-700 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
+          'text-ink-green-9 bg-transparent hover:bg-surface-green-3 active:bg-surface-green-4',
+        red: 'text-ink-red-8 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
       }[props.theme]
 
       const focusClasses = {
@@ -135,7 +135,7 @@ export default defineComponent({
           'bg-surface-gray-2 text-ink-gray-4 border border-outline-gray-2',
         'gray-ghost': 'text-ink-gray-4',
 
-        'blue-solid': 'bg-blue-300 text-ink-base',
+        'blue-solid': 'bg-surface-blue-4 text-ink-base',
         'blue-subtle': 'bg-surface-blue-2 text-ink-blue-link',
         'blue-outline':
           'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',

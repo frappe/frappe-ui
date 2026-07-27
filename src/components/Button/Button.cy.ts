@@ -32,7 +32,7 @@ describe('<Button />', () => {
       },
     })
 
-    cy.get('button').should('have.class', 'bg-blue-500')
+    cy.get('button').should('have.class', 'bg-surface-blue-6')
     cy.get('button').should('contain.text', 'Submit')
   })
 
