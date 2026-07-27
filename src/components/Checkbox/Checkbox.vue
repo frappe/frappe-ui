@@ -52,14 +52,13 @@ import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
-import type { CheckboxEmits, CheckboxProps } from './types'
+import type { CheckboxBaseProps } from './types'
 
-const props = withDefaults(defineProps<CheckboxProps>(), {
+const props = withDefaults(defineProps<CheckboxBaseProps>(), {
   size: 'sm',
   padding: false,
 })
 
-const emit = defineEmits<CheckboxEmits>()
 const model = defineModel<boolean | 1 | 0>()
 const attrs = useAttrs()
 
@@ -72,9 +71,7 @@ watchEffect(() => {
 const checked = computed(() => Boolean(model.value))
 
 function onChange(e: Event) {
-  const next = (e.target as HTMLInputElement).checked
-  model.value = next
-  emit('update:modelValue', next)
+  model.value = (e.target as HTMLInputElement).checked
 }
 
 defineSlots<{

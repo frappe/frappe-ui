@@ -249,7 +249,9 @@ the model itself is documented at the component file via the
   `defineModel<boolean | 1 | 0>()` and coerce internally to `boolean` for
   the rendered control state. Document `boolean` as the canonical type;
   narrow in a future major.
-- Type emits via a `CheckboxEmits` interface.
+- Let `defineModel` own the `modelValue` prop and `update:modelValue` emit;
+  redeclaring either in the component produces duplicate model updates. Keep
+  `modelValue` on the exported public prop type for consumer compatibility.
 - Apply shared labeling props (inline-row layout).
 - Switch to `defineModel`.
 - Deprecate the `padding` prop (warn via `warnDeprecated`); keep functional
