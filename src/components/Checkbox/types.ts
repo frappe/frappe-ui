@@ -1,7 +1,7 @@
 import type { ToggleSize } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
-export interface CheckboxProps extends InputLabelingProps {
+export interface CheckboxBaseProps extends InputLabelingProps {
   /** Controls the size of the checkbox */
   size?: ToggleSize
 
@@ -14,9 +14,6 @@ export interface CheckboxProps extends InputLabelingProps {
    */
   padding?: boolean
 
-  /** Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility. */
-  modelValue?: boolean | 1 | 0
-
   /**
    * Renders the mixed "—" state (e.g. a select-all that's partially selected).
    * Purely visual — the native `indeterminate` DOM property is not reflected as
@@ -25,7 +22,8 @@ export interface CheckboxProps extends InputLabelingProps {
   indeterminate?: boolean
 }
 
-export interface CheckboxEmits {
-  /** Fired when the checkbox value changes. */
-  'update:modelValue': [value: boolean]
+/** Public prop shape; the component itself declares this model through `defineModel`. */
+export type CheckboxProps = CheckboxBaseProps & {
+  /** Checked state. `boolean` is canonical; `1`/`0` remain supported throughout v1. */
+  modelValue?: boolean | 1 | 0
 }
