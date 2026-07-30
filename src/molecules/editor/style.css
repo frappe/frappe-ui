@@ -208,6 +208,13 @@ img.ProseMirror-selectednode {
   overflow-x: auto;
   /* Positioning context for the single-box multi-cell selection overlay. */
   position: relative;
+  /* Keep the selection z-indexes below (`.selectedCell::after`,
+     `.table-selection-box`) local to the table. `position: relative` with
+     `z-index: auto` does NOT open a stacking context, so without this those
+     values compete with whatever the host app stacks around the editor — e.g.
+     Gameplan's sticky comment header (`z-[1]`), which the selection box then
+     painted straight over. */
+  isolation: isolate;
 }
 
 .prose-v3.ProseMirror[contenteditable='false']
