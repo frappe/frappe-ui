@@ -228,6 +228,12 @@
     description: '',
     required: false,
     type: 'boolean'
+  },
+  {
+    name: 'collapsed',
+    description: 'v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.',
+    required: false,
+    type: 'boolean'
   }
 ]
 
@@ -236,6 +242,14 @@
     name: 'sidebar-item',
     description: '',
     type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
+  }
+]
+
+  const sidebarSectionEmits = [
+  {
+    name: 'update:collapsed',
+    description: 'Fired when the section is collapsed or expanded.',
+    type: '[value: boolean]'
   }
 ]
 </script>
@@ -272,3 +286,5 @@
 <PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/>
 
 <SlotsTable :data="sidebarSectionSlots"/>
+
+<EmitsTable :data="sidebarSectionEmits"/>
