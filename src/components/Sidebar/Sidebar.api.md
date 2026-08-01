@@ -244,6 +244,14 @@
     type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
   }
 ]
+
+  const sidebarSectionEmits = [
+  {
+    name: 'update:collapsed',
+    description: 'Fired when the section is collapsed or expanded.',
+    type: '[value: boolean]'
+  }
+]
 </script>
 ## API Reference
 
@@ -278,3 +286,5 @@
 <PropsTable folder="Sidebar" name="SidebarSection" :data="sidebarSectionProps"/>
 
 <SlotsTable :data="sidebarSectionSlots"/>
+
+<EmitsTable :data="sidebarSectionEmits"/>
