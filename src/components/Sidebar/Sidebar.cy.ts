@@ -3,6 +3,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 import SidebarItem from './SidebarItem.vue'
 import SidebarLabel from './SidebarLabel.vue'
+import SidebarSection from './SidebarSection.vue'
 
 function createTestRouter() {
   return createRouter({
@@ -96,6 +97,39 @@ describe('<Sidebar /> legacy config API (compat layer)', () => {
 
     cy.get('[data-test=legacy-logo]').should('contain.text', 'L')
     cy.get('[data-test=legacy-footer]').should('contain.text', 'Invite')
+  })
+})
+
+describe('<SidebarSection />', () => {
+  const items = [{ label: 'Junk' }, { label: 'Trash' }]
+
+  it('collapsible: toggles its own state when `collapsed` is unbound', () => {
+    cy.mount(SidebarSection, {
+      props: { label: 'More', collapsible: true, items },
+    })
+    cy.get("[aria-label='Junk']").should('exist')
+    cy.contains('More').click()
+    cy.get("[aria-label='Junk']").should('not.exist')
+    cy.contains('More').click()
+    cy.get("[aria-label='Junk']").should('exist')
+  })
+
+  it('collapsible: bound `collapsed` model lets the app own the state', () => {
+    const onUpdate = cy.stub().as('update')
+    cy.mount(SidebarSection, {
+      props: {
+        label: 'More',
+        collapsible: true,
+        items,
+        collapsed: true,
+        'onUpdate:collapsed': onUpdate,
+      },
+    })
+    // Starts collapsed because the bound model says so — the app can default a
+    // section closed, which the internal-state version could not.
+    cy.get("[aria-label='Junk']").should('not.exist')
+    cy.contains('More').click()
+    cy.get('@update').should('have.been.calledWith', false)
   })
 })
 

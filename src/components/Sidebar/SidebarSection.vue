@@ -1,7 +1,9 @@
 <template>
   <!--
-    Legacy adapter for `Sidebar`'s deprecated `sections` config prop. New code
-    composes `SidebarLabel` + `SidebarItem` directly instead of this component.
+    Adapter for `Sidebar`'s deprecated `sections` config prop, and the direct
+    building block for collapsible groups: bind `v-model:collapsed` to own a
+    section's state. Plain (non-collapsible) groups compose `SidebarLabel` +
+    `SidebarItem` directly instead of this component.
   -->
   <div class="mt-2 flex flex-col">
     <div
@@ -68,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, toValue } from 'vue'
+import { computed, inject, toValue } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 import { SidebarSectionProps, sidebarCollapsedKey } from './types'
 
@@ -79,8 +81,10 @@ const isSidebarCollapsed = inject(
   computed(() => false),
 )
 // Per-section open/closed state for `collapsible` sections — distinct from the
-// whole-sidebar collapse above.
-const isSectionCollapsed = ref(false)
+// whole-sidebar collapse above. A model so apps can own it (start a section
+// collapsed, persist the choice); left unbound it behaves as before — local
+// state starting expanded.
+const isSectionCollapsed = defineModel<boolean>('collapsed', { default: false })
 
 const visibleItems = computed(() =>
   props.items.filter((item) => toValue(item.condition) !== false),

@@ -228,6 +228,12 @@
     description: '',
     required: false,
     type: 'boolean'
+  },
+  {
+    name: 'collapsed',
+    description: 'v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.',
+    required: false,
+    type: 'boolean'
   }
 ]
 
