@@ -94,9 +94,10 @@ describe('openSuggestionMenu', () => {
   })
 
   it('leaves a USER-typed trigger alone', () => {
-    const editor = makeEditor('hello ')
-    caretTo(editor, 7)
-    editor.commands.insertContent(CHAR)
+    const editor = makeEditor('hello')
+    caretTo(editor, 6)
+    // A trailing space in the initial HTML is dropped on parse, so type it.
+    editor.commands.insertContent(` ${CHAR}`)
     expect(isOpen(editor)).toBe(true)
 
     dismiss(editor)
