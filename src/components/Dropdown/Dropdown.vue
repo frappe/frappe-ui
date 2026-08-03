@@ -1,6 +1,6 @@
 <template>
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
-    <DropdownMenuTrigger as-child>
+    <DropdownMenuTrigger as-child @pointerdown="openOnPointerDown">
       <slot
         v-if="$slots.trigger"
         name="trigger"
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, useSlots } from 'vue'
+import { computed, onScopeDispose, useAttrs, useSlots } from 'vue'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -101,6 +101,50 @@ const triggerDisabled = computed(() => {
     props.button?.disabled === true ||
     (attrs.disabled !== undefined && attrs.disabled !== false)
   )
+})
+
+/**
+ * Workaround for reka-ui 2.9.9: `DropdownMenuTrigger` binds only `click`, so
+ * the menu opens on pointer *release* — the whole length of a press (~80-120ms)
+ * of dead time that `SelectTrigger` avoids by opening on `pointerdown`. Radix,
+ * which reka ports, also opens on pointerdown.
+ *
+ * So we open on pointerdown ourselves and swallow the click that ends the same
+ * press, which would otherwise reach reka's trigger and toggle the menu shut.
+ * The swallow is scoped to clicks landing on the trigger: press-drag-release
+ * onto a menu item still activates the item, macOS-style.
+ *
+ * Remove once reka opens on pointerdown; the trailing click is theirs to
+ * suppress at that point.
+ */
+let pendingTrigger: HTMLElement | null = null
+
+function openOnPointerDown(event: PointerEvent) {
+  // Touch keeps reka's click path — opening on press there fights scrolling.
+  if (event.pointerType === 'touch') return
+  if (event.button !== 0 || event.ctrlKey) return
+  // An open menu closes on the trigger's click, which reka already handles.
+  if (triggerDisabled.value || openModel.value) return
+
+  openModel.value = true
+  pendingTrigger = event.currentTarget as HTMLElement
+  window.addEventListener('click', swallowOpeningClick, {
+    capture: true,
+    once: true,
+  })
+}
+
+function swallowOpeningClick(event: MouseEvent) {
+  const trigger = pendingTrigger
+  pendingTrigger = null
+  if (!trigger || !(event.target instanceof Node)) return
+  // Capture phase on window, so this stops the click before it ever reaches
+  // reka's handler on the trigger.
+  if (trigger.contains(event.target)) event.stopPropagation()
+}
+
+onScopeDispose(() => {
+  window.removeEventListener('click', swallowOpeningClick, { capture: true })
 })
 
 defineSlots<DropdownSlots>()

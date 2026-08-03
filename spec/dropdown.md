@@ -300,6 +300,11 @@ nothing. Other strings still route to `FeatherIcon` for back-compat.
 - else render the generated `Button` from `button`
 - trigger disabled state is derived from `button.disabled` or a forwarded
   `disabled` attribute
+- a mouse press opens the menu on `pointerdown`, not on release, matching
+  `Select`. The click that ends that same press is swallowed so it cannot
+  toggle the menu shut; a later, separate click still closes it
+- touch keeps the release path — opening on press would fight scrolling
+- press-drag-release onto an item activates that item
 
 ### Item behavior
 

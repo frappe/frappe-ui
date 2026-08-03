@@ -132,6 +132,36 @@ describe('Dropdown', () => {
     cy.get('[data-cy="component-item"]').should('have.attr', 'role', 'menuitem')
   })
 
+  it('opens on pointer press, not on release', () => {
+    cy.mount(Dropdown, { props: { options } })
+
+    cy.get('[aria-haspopup=menu]').trigger('pointerdown', {
+      button: 0,
+      pointerType: 'mouse',
+    })
+    cy.get('[role=menu]').should('exist')
+
+    // The click that ends the same press must not toggle the menu back shut.
+    // `force` because the open modal menu puts `pointer-events: none` on body.
+    cy.get('[aria-haspopup=menu]')
+      .trigger('pointerup', { button: 0, force: true })
+      .click({ force: true })
+    cy.get('[role=menu]').should('exist')
+  })
+
+  it('leaves touch presses to the click path', () => {
+    cy.mount(Dropdown, { props: { options } })
+
+    cy.get('[aria-haspopup=menu]').trigger('pointerdown', {
+      button: 0,
+      pointerType: 'touch',
+    })
+    cy.get('[role=menu]').should('not.exist')
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[role=menu]').should('exist')
+  })
+
   it('Custom Trigger', () => {
     cy.mount(Dropdown, {
       props: { options },
