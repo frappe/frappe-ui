@@ -39,7 +39,7 @@ component (`Popover`, `Select`, `Combobox`, `DatePicker`, `TimePicker`).
   ring-black ring-opacity-5`
 - `data-slot="content"`
 - the motion-target wiring: `data-state="open|closed"` and
-  `data-motion="animated|instant"` on the animated content-body
+  `data-motion="animated|instant"` on the content-body
 
 `PopoverPanel` does **not** own:
 
@@ -50,18 +50,17 @@ component (`Popover`, `Select`, `Combobox`, `DatePicker`, `TimePicker`).
 
 ### Motion rhythm prop
 
-`PopoverPanel` supports two motion rhythms so the same shell can serve the
-selection family and `Popover`:
+`PopoverPanel` takes a `motion` prop with two rhythms:
 
-- `rhythm="popover"` (default): scale-from-trigger, `180ms` enter / `140ms`
-  exit — the shared selection rhythm (see [Motion](#motion)).
-- `rhythm="instant"`: the shorter scale-only rhythm.
+- `motion="instant"` (default): `80ms` opacity fade on open, nothing on close
+  (see [Motion](#motion)). Everything you click open uses this.
+- `motion="animated"`: scale-from-trigger, `180ms` enter / `140ms` exit. Only
+  for surfaces that are not click-driven — `HoverCard` is the one case today.
 
 Decision on `Dropdown`: `Dropdown` is **left as-is** and does **not** fold into
-`PopoverPanel`. Its motion CSS is gated on `[data-selection]` specifically so it
-does not leak to `Dropdown`, whose rhythm is intentionally shorter and
-scale-only. Re-homing it is not clean enough to justify in this rebuild; it
-keeps its current shell.
+`PopoverPanel`. It keeps its own menu shell and its own copy of the instant
+fade; the two rhythms match, but re-homing the shell is not clean enough to
+justify in this rebuild.
 
 ## Exact public API for v1
 
@@ -252,8 +251,8 @@ Stable hooks instead:
   deprecated `PopoverAnchor`)
 - `data-slot="content"` — on the `PopoverPanel` shell
 - `data-state="open" | "closed"` — driven by the reka popover primitive
-- `data-motion="animated" | "instant"` — on the animated content-body, set by
-  `usePopoverMotion`
+- `data-motion="animated" | "instant"` — on the content-body; `Popover` is
+  always `instant`
 
 The shell visual is owned by `PopoverPanel`: `rounded-lg
 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`. (This is a
@@ -264,26 +263,19 @@ Gameplan rule still applies in apps: gray shades only, never color shades.
 
 ## Motion
 
-`Popover` uses the same popover motion as the rest of the family, via the
-existing `usePopoverMotion` composable + shared popover motion CSS:
+`Popover` uses the same motion as `Select` and `Dropdown`: the panel appears
+instantly, with only a short fade to smooth the paint.
 
-- content scales in from the trigger via
-  `transform-origin: var(--reka-popover-content-transform-origin)` on the
-  animated element (the inner content-body, not the outer positioned wrapper)
-- enter `180ms` / exit `140ms` with `cubic-bezier(0.23, 1, 0.32, 1)`, from
-  `scale(0.97)` + `translateY(2px)` + `opacity: 0`
-- keyboard-driven opens skip the animation entirely (resolve to
-  `data-motion="instant"`)
-- pointer-driven opens (click / tap) play the full animation
-  (`data-motion="animated"`)
-- classification is pointer-recency based: an open transition counts as
-  pointer-driven only if a `pointerdown` fired on the trigger within ~300ms
-  before it; everything else defaults to keyboard
+- open: `80ms` linear fade from `opacity: 0`. No scale, no translate
+- close: no animation
+- the rhythm is the same for pointer and keyboard opens; the content-body
+  always carries `data-motion="instant"`
 - `prefers-reduced-motion: reduce` disables the content animation
 - `transition="default"` is a deprecated no-op (motion is on by default)
 
-Bind `usePopoverMotion(open).onPointerDown` to the trigger's `@pointerdown`
-exactly as `Select` does.
+A panel that appears at a fixed spot has nothing to scale from, so an entrance
+animation only adds latency. `HoverCard` is the exception — it opens on hover
+after a delay, so it keeps `motion="animated"`.
 
 ## Accessibility and semantics
 
@@ -445,12 +437,12 @@ New: target the stable hook instead of injecting a class.
 - **Shared `PopoverPanel` shell** owns the floating-panel visual + `data-slot` /
   `data-state` / `data-motion` hooks; restyled to `shadow-2xl` + `ring` (no
   `border`).
-- **Motion on by default** via `usePopoverMotion` + shared popover motion CSS;
-  `transition="default"` is a no-op.
+- **Motion on by default** via the shared popover motion CSS — an `80ms` fade,
+  no scale; `transition="default"` is a no-op.
 - **No class-injection props.** `popoverClass` is a no-op + warn; use the
   `data-slot` hooks.
 - **`HoverCard` split out** onto reka `HoverCard` primitives; legacy hand-rolled
   timers deleted. `trigger="hover"` on `Popover` warns and points at
   `HoverCard`.
-- **`Dropdown` intentionally not folded into `PopoverPanel`** — its shorter,
-  scale-only motion rhythm stays gated away from the selection rhythm.
+- **`Dropdown` intentionally not folded into `PopoverPanel`** — it keeps its own
+  menu shell and its own copy of the instant fade.

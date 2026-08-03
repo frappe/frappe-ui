@@ -208,12 +208,14 @@ whichever of the three you left out falls back to the defaults above.
 
 ## Motion
 
-The popover scales in from the trigger, not from the middle of the screen.
-Pointer opens play it; keyboard opens skip it, because a picker opened from the
-keyboard is on the critical path between one keystroke and the next. The
-component works out which happened and publishes the answer as
-`data-motion="animated"` or `"instant"` on the content element, and the CSS
-reads that. `prefers-reduced-motion: reduce` turns the animation off.
+The popover just appears. There is no entrance animation — only an `80ms`
+opacity fade to smooth the paint on open, and nothing on close. A picker that
+opens at a fixed spot has nothing to scale from, so an entrance would only put
+motion between the click and the list.
+
+The rhythm is the same for pointer and keyboard opens; the content element
+always carries `data-motion="instant"`, and the CSS reads that.
+`prefers-reduced-motion: reduce` turns the fade off.
 
 ## Styling hooks
 
