@@ -230,6 +230,16 @@ const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
 
 const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
 
+// Keep the first item highlighted while the user is typing. The per-keystroke
+// highlight in handleInputChange only covers the client-filtered list — options
+// that arrive asynchronously (a debounced server search resolving) land after
+// that pass and would leave nothing highlighted. Gated to the typing path so
+// merely opening the list still lets reka highlight the committed selection.
+watch(filteredGroups, () => {
+  if (!open.value || !hasTypedSinceOpen.value) return
+  nextTick(() => rootRef.value?.highlightFirstItem?.())
+})
+
 const showEmpty = computed(() => !props.loading && !hasVisibleItems.value)
 
 // Clears the selection, and nothing else — same meaning as `clear()` on Select
