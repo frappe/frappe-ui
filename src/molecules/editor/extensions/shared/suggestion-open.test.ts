@@ -119,6 +119,36 @@ describe('openSuggestionMenu', () => {
     expect(body(editor)).toBe('hello WORLD')
   })
 
+  it('takes back the padding space when the command inserts nothing inline', () => {
+    const editor = makeEditor('hello')
+    caretTo(editor, 6)
+    openSuggestionMenu(editor, 'testSuggester')
+
+    // A block command (Bullet list, Heading): it consumes the trigger range and
+    // changes the block, leaving nothing where the padding space now dangles.
+    const { range } = suggestionKey.getState(editor.state) as {
+      range: { from: number; to: number }
+    }
+    editor.commands.deleteRange(range)
+
+    expect(body(editor)).toBe('hello')
+  })
+
+  it('keeps the padding space when it still separates two words', () => {
+    const editor = makeEditor('hello world')
+    caretTo(editor, 6)
+    openSuggestionMenu(editor, 'testSuggester')
+
+    const { range } = suggestionKey.getState(editor.state) as {
+      range: { from: number; to: number }
+    }
+    editor.chain().deleteRange(range).insertContent('X').run()
+
+    // The space is doing the job a user-typed one would: without it the
+    // insertion would glue onto "hello".
+    expect(body(editor)).toBe('hello X world')
+  })
+
   it('cleans up when the caret moves out of the trigger range', () => {
     const editor = makeEditor('hello world')
     caretTo(editor, 6)

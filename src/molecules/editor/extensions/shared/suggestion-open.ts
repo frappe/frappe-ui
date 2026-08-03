@@ -5,19 +5,21 @@
  * `@tiptap/suggestion` has no imperative "open" — `active` is derived purely
  * from `findSuggestionMatch` scanning the text before the caret. So a button
  * that opens the menu has to type the trigger char into the document for real,
- * and then own it: picking an item consumes it (every command starts with
- * `deleteRange(range)`), but dismissing the menu (Escape, click-away, typing a
- * query that matches nothing) does not, because the plugin's exit is a
- * meta-only transaction that never edits the doc.
+ * and then own it: dismissing the menu (Escape, click-away, typing a query that
+ * matches nothing) leaves it behind, because the plugin's exit is a meta-only
+ * transaction that never edits the doc — and even picking an item only consumes
+ * the trigger and the query (`deleteRange(range)`), never the space the opener
+ * had to prepend for the trigger to match after a word.
  *
  * `openSuggestionMenu` therefore stamps a marker on the insert transaction, and
  * `autoOpenCleanupPlugin` — registered next to every suggester by
- * `createSuggestionExtension` — removes the injected run if the menu closes
- * with it still sitting in the document. A trigger char the *user* typed
- * carries no marker and is never touched.
+ * `createSuggestionExtension` — removes whatever the opener injected and the
+ * close left over. A trigger char the *user* typed carries no marker and is
+ * never touched.
  */
 
 import { escapeForRegEx, type Editor } from '@tiptap/core'
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import { Plugin, PluginKey, type EditorState } from '@tiptap/pm/state'
 import type { SuggestionOptions } from '@tiptap/suggestion'
 import { getSuggestionOptions } from './suggestion-helpers'
@@ -34,16 +36,39 @@ const AUTO_OPEN_META = 'suggestionAutoOpen'
 interface AutoOpenMeta {
   char: string
   from: number
+  padded: boolean
 }
 
 /** Adopted marker: the start of the text the opener injected (padding included). */
 interface AutoOpenMarker {
   from: number
+  /** Whether that injected text starts with a padding space. */
+  padded: boolean
 }
 
 interface SuggestionPluginState {
   active: boolean
   range: { from: number; to: number }
+}
+
+/**
+ * True when the padding space at `pos` has nothing left to keep apart: its text
+ * block ends there, or the next character is whitespace anyway.
+ *
+ * Picking an item consumes the trigger and the query (`deleteRange(range)`) but
+ * not the space the opener prepended in front of them, so a block command such
+ * as "Bullet list" leaves a blank the user never typed. A command that inserted
+ * inline content instead — a mention chip, an emoji — lands right after that
+ * space, and there it is doing the job a user-typed space would have done:
+ * removing it would glue the insertion onto the preceding word, a worse edit
+ * than the blank we are trying to take back.
+ */
+function isStrandedPadding(doc: ProseMirrorNode, pos: number): boolean {
+  if (pos + 1 > doc.content.size) return false
+  const padding = doc.resolve(pos).nodeAfter
+  if (!padding?.isText || !padding.text?.startsWith(' ')) return false
+  const next = doc.resolve(pos + 1).nodeAfter
+  return !next || (next.isText && /^\s/.test(next.text ?? ''))
 }
 
 /**
@@ -76,7 +101,11 @@ export function openSuggestionMenu(
       const text = before && !/\s/.test(before) ? ` ${char}` : char
 
       tr.insertText(text, from, to)
-      tr.setMeta(AUTO_OPEN_META, { char, from } satisfies AutoOpenMeta)
+      tr.setMeta(AUTO_OPEN_META, {
+        char,
+        from,
+        padded: text.length > 1,
+      } satisfies AutoOpenMeta)
       return true
     })
     .run()
@@ -113,9 +142,9 @@ export function autoOpenCleanupPlugin(options: {
           | null
           | undefined
         if (meta === null) return null
-        if (meta?.char === char) return { from: meta.from }
+        if (meta?.char === char) return { from: meta.from, padded: meta.padded }
         if (!marker) return null
-        return { from: tr.mapping.map(marker.from, -1) }
+        return { ...marker, from: tr.mapping.map(marker.from, -1) }
       },
     },
 
@@ -141,7 +170,12 @@ export function autoOpenCleanupPlugin(options: {
       const from = Math.min(marker.from, limit)
       to = Math.min(Math.max(to, from), limit)
       if (from < to && injectedRun.test(newState.doc.textBetween(from, to))) {
+        // Dismissed: the whole injected run is still sitting in the document.
         clear.delete(from, to)
+      } else if (marker.padded && isStrandedPadding(newState.doc, from)) {
+        // Used: the command took the trigger and the query with it, but not the
+        // space we put in front of them to make the trigger match.
+        clear.delete(from, from + 1)
       }
       return clear
     },
