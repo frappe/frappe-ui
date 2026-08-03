@@ -20,7 +20,6 @@ import {
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -101,9 +100,6 @@ const searchInputRef = useTemplateRef('searchInputRef')
 const triggerButtonRef = useTemplateRef('triggerButtonRef')
 const anchorRef = useTemplateRef('anchorRef')
 const hasTypedSinceOpen = ref(false)
-
-const { motion: contentMotion, onPointerDown: markPointerDown } =
-  usePopoverMotion(open)
 
 const {
   inputId,
@@ -483,19 +479,14 @@ defineSlots<ComboboxSlots>()
         (positioning only, no tabindex meddling) with a real <button>
         as the child, and wire the open toggle ourselves.
 
-        Click + pointerdown are attached on the anchor so they forward
-        to the child via `as-child` — this makes consumer-supplied
-        `#trigger` elements "just work" without wiring handlers.
+        Click is attached on the anchor so it forwards to the child via
+        `as-child` — this makes consumer-supplied `#trigger` elements
+        "just work" without wiring handlers.
 
         `anchorRef` is the `focus()` fallback for a consumer-supplied
         `#trigger`, which we have no direct ref to.
       -->
-          <ComboboxAnchor
-            ref="anchorRef"
-            as-child
-            @click="handleTriggerClick"
-            @pointerdown="markPointerDown"
-          >
+          <ComboboxAnchor ref="anchorRef" as-child @click="handleTriggerClick">
             <slot
               v-if="$slots.trigger"
               name="trigger"
@@ -599,7 +590,6 @@ defineSlots<ComboboxSlots>()
               hasLabeling ? null : (attrs.class as any),
             ]"
             :style="hasLabeling ? null : (attrs.style as any)"
-            @pointerdown="markPointerDown"
           >
             <!--
           Prefix precedence matches button mode: selected option's
@@ -688,10 +678,7 @@ defineSlots<ComboboxSlots>()
               @mount-auto-focus="handleFocusScopeMountAutoFocus"
               @unmount-auto-focus.prevent
             >
-              <PopoverPanel
-                :motion="contentMotion"
-                class="origin-[var(--reka-combobox-content-transform-origin)]"
-              >
+              <PopoverPanel motion="instant">
                 <!--
                   The in-popover search row exists only in button mode, and
                   `hideSearch` removes it entirely — the `#search-prefix` /

@@ -20,8 +20,8 @@
  *      ring-1 ring-black ring-opacity-5` — matching what the selection family
  *      renders today, plus the `data-slot="content-body"` hook, and
  *   2. the open/close motion wiring (`data-motion` + the co-located
- *      `popoverPanel.css`, supporting both the `animated` scale-from-trigger
- *      rhythm and the `instant` keyboard/Dropdown rhythm).
+ *      `popoverPanel.css`, supporting the default `instant` rhythm and the
+ *      `animated` scale-from-trigger rhythm HoverCard still uses).
  *
  * It owns NO behavior and NO reka root: render it INSIDE a reka
  * `PopoverContent` / `SelectContent` / `ComboboxContent` / `DropdownMenuContent`
@@ -30,8 +30,9 @@
  * default slot.
  *
  * It is a thin pass-through: Vue auto-merges any `class`/`style`/attrs onto the
- * single root, so consumers add layout (flex/grid/divide/min-w) and the
- * per-primitive `transform-origin` without losing the shell classes.
+ * single root, so consumers add layout (flex/grid/divide/min-w) without losing
+ * the shell classes. Only `animated` consumers need to add a
+ * `transform-origin` — `instant` has no transform to anchor.
  */
 import './popoverPanel.css'
 
@@ -39,9 +40,11 @@ withDefaults(
   defineProps<{
     /**
      * Open/close rhythm:
-     *   - `'animated'` (default): pointer opens → scale-from-trigger entrance.
-     *   - `'instant'`: keyboard / programmatic opens → ~80ms opacity fade only.
-     * Drive this from `usePopoverMotion(open).motion`.
+     *   - `'instant'` (default): ~80ms opacity fade on open, nothing on close.
+     *     Every surface you click open uses this.
+     *   - `'animated'`: scale-from-trigger entrance. Only for surfaces that
+     *     are not click-driven, where the entrance is not felt as latency —
+     *     `HoverCard` is the one case today.
      */
     motion?: 'animated' | 'instant'
     /**
@@ -53,7 +56,7 @@ withDefaults(
     state?: 'open' | 'closed'
   }>(),
   {
-    motion: 'animated',
+    motion: 'instant',
   },
 )
 

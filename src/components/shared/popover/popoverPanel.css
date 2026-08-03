@@ -17,17 +17,18 @@
  *      selection stylesheet worked).
  * `data-motion` always lives on the panel element.
  *
- * `transform-origin` is intentionally NOT set here — each consumer owns it
- * (Popover uses `--reka-popover-content-transform-origin`, Select the
- * `--reka-select-*` var, Combobox the `--reka-combobox-*` var) by passing it
- * through `class`/`style` on the panel.
+ * `transform-origin` is intentionally NOT set here — it only matters for the
+ * `animated` rhythm, and the consumer owns it (HoverCard passes the
+ * `--reka-hover-card-content-transform-origin` var through `class`).
  *
  * Two rhythms, selected by `data-motion`:
- *   - `animated` — scale-from-trigger entrance (pointer opens), 180ms enter /
- *     140ms exit.
- *   - `instant` — keyboard / programmatic opens skip the scale + translate; a
- *     ~80ms opacity fade still runs on open to mask reka's 1-frame
- *     position-settle after mount, and no animation on close.
+ *   - `instant` (the default) — no scale, no translate. A ~80ms opacity fade
+ *     runs on open to mask reka's 1-frame position-settle after mount, and
+ *     nothing on close. Anything you click open uses this: a panel that
+ *     appears at a fixed spot has nothing to scale from, so an entrance is
+ *     pure latency.
+ *   - `animated` — scale-from-trigger entrance, 180ms enter / 140ms exit. For
+ *     surfaces that are not click-driven; `HoverCard` is the only one today.
  */
 
 [data-slot='content-body'][data-panel] {

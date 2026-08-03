@@ -2,16 +2,15 @@
   <PopoverRoot v-model:open="isOpen">
     <!--
       New API: #trigger is rendered through reka's PopoverTrigger as-child, so
-      click / keyboard / aria are auto-wired and pointerdown feeds the motion
-      classifier. The legacy #target slot keeps using PopoverAnchor with manual
-      wiring (and hover timers) so existing callers do not double-toggle.
+      click / keyboard / aria are auto-wired. The legacy #target slot keeps
+      using PopoverAnchor with manual wiring (and hover timers) so existing
+      callers do not double-toggle.
     -->
     <PopoverTrigger
       v-if="useNewTrigger"
       ref="triggerRef"
       as-child
       data-slot="trigger"
-      @pointerdown="markPointerDown"
     >
       <slot name="trigger" v-bind="newSlotProps" />
     </PopoverTrigger>
@@ -20,7 +19,6 @@
         ref="anchorRef"
         v-bind="$attrs"
         class="flex"
-        @pointerdown="markPointerDown"
         @mouseover="onMouseover"
         @mouseleave="onMouseleave"
       >
@@ -31,7 +29,7 @@
     <PopoverPortal :to="portalTo">
       <PopoverContent
         data-slot="content"
-        class="z-[100] origin-[var(--reka-popover-content-transform-origin)]"
+        class="z-[100]"
         :side="resolvedSide"
         :align="resolvedAlign"
         :side-offset="offset"
@@ -52,7 +50,7 @@
         -->
         <slot v-if="hasBareBody" name="body" v-bind="legacySlotProps" />
         <slot v-else-if="hasNewContent && bare" v-bind="newSlotProps" />
-        <PopoverPanel v-else :motion="contentMotion">
+        <PopoverPanel v-else motion="instant">
           <slot v-if="hasNewContent" v-bind="newSlotProps" />
           <slot v-else name="body-main" v-bind="legacySlotProps" />
         </PopoverPanel>
@@ -77,7 +75,6 @@ import {
   PopoverTrigger,
 } from 'reka-ui'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import type {
   PopoverEmits,
@@ -246,13 +243,6 @@ const isOpen = computed<boolean>({
     else emit('close')
   },
 })
-
-const { motion: contentMotion, onPointerDown: markPointerDown } =
-  usePopoverMotion(
-    computed(() =>
-      showControlled.value ? Boolean(readDeprecatedOpen()) : _isOpen.value,
-    ),
-  )
 
 function open() {
   if (isOpen.value) return

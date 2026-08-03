@@ -11,7 +11,6 @@ import {
 import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -107,9 +106,6 @@ const hasLabeling = computed(() => {
     slots.description,
   )
 })
-
-const { motion: contentMotion, onPointerDown: markPointerDown } =
-  usePopoverMotion(open)
 
 const normalizedGroups = computed(() =>
   normalizeMultiSelectOptions(props.options),
@@ -361,11 +357,7 @@ defineSlots<MultiSelectSlots>()
       @update:modelValue="handleRootModelValueChange"
       @update:open="handleRootOpenChange"
     >
-      <ComboboxAnchor
-        as-child
-        @click="handleTriggerClick"
-        @pointerdown="markPointerDown"
-      >
+      <ComboboxAnchor as-child @click="handleTriggerClick">
         <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
 
         <!--
@@ -492,7 +484,7 @@ defineSlots<MultiSelectSlots>()
           <FocusScope as-child @unmount-auto-focus.prevent>
             <div
               data-slot="content-body"
-              :data-motion="contentMotion"
+              data-motion="instant"
               class="overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5"
             >
               <div
@@ -603,11 +595,5 @@ defineSlots<MultiSelectSlots>()
   overflow: hidden;
   white-space: pre;
   visibility: hidden;
-}
-
-/* Component-specific transform-origin; the rest of the motion lives in
-   shared/selection/popoverMotion.css. */
-[data-slot='content-body'][data-motion='animated'] {
-  transform-origin: var(--reka-combobox-content-transform-origin);
 }
 </style>

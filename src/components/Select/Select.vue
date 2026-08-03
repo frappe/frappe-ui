@@ -416,10 +416,7 @@ defineExpose(exposed)
           trigger, so a scale/translate entrance reads as a glitch. The ~80ms
           opacity fade `instant` keeps masks reka's 1-frame position-settle.
         -->
-          <PopoverPanel
-            motion="instant"
-            class="flex flex-col origin-[var(--reka-select-content-transform-origin)]"
-          >
+          <PopoverPanel motion="instant" class="flex flex-col">
             <SelectViewport class="flex min-h-0 flex-col p-1">
               <div
                 v-if="!selectOptions.length"
