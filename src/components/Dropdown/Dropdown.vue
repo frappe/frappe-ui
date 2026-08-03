@@ -1,6 +1,6 @@
 <template>
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
-    <DropdownMenuTrigger as-child @pointerdown="markPointerDown">
+    <DropdownMenuTrigger as-child>
       <slot
         v-if="$slots.trigger"
         name="trigger"
@@ -18,15 +18,8 @@
     <DropdownMenuPortal :to="portalTo">
       <DropdownMenuContent
         data-slot="content"
-        :data-motion="contentMotion"
-        :class="[
-          menuClasses.content,
-          {
-            'origin-top-left': align === 'start',
-            'origin-top-right': align === 'end',
-            'origin-top': align === 'center',
-          },
-        ]"
+        data-motion="instant"
+        :class="menuClasses.content"
         :side="side"
         :align="align"
         :side-offset="offset"
@@ -63,7 +56,6 @@ import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 
 defineOptions({
   inheritAttrs: false,
@@ -72,9 +64,6 @@ defineOptions({
 const openModel = defineModel<boolean>('open', { default: false })
 const attrs = useAttrs()
 const slots = useSlots()
-
-const { motion: contentMotion, onPointerDown: markPointerDown } =
-  usePopoverMotion(openModel)
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
@@ -119,14 +108,14 @@ defineSlots<DropdownSlots>()
 
 <style scoped>
 /*
- * Dropdown is the only menu with a keyboard-open path, so the `instant`
- * motion lives here. Keyboard opens skip the scale entrance, but a tiny
- * opacity fade still runs — it masks the 1-frame position-settle reka
- * performs after mount. ~80ms is below the perception threshold for motion
- * but long enough to hide the jump.
+ * Dropdown opens the same way Select does: no scale entrance, just a ~80ms
+ * opacity fade. It reads as instant, and still masks the 1-frame
+ * position-settle reka performs after mount. Same rhythm for pointer and
+ * keyboard opens — a menu that appears at a fixed spot has nothing to scale
+ * from, so the entrance only added latency.
  *
- * The shared `animated` keyframes + `prefers-reduced-motion` reset live in
- * Menu.vue (rendered by both Dropdown and ContextMenu).
+ * The `animated` keyframes (used by ContextMenu) + the
+ * `prefers-reduced-motion` reset live in Menu.vue, rendered by both menus.
  */
 :global(.menu-content[data-motion='instant'][data-state='open']) {
   animation: dropdown-instant-fade 80ms linear;
