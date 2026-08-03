@@ -143,10 +143,14 @@ describe('Dropdown', () => {
 
     // The click that ends the same press must not toggle the menu back shut.
     // Sent bare, with no fresh pointerdown: a real press releases into exactly
-    // one click, while `.click()` would synthesize a whole new press.
+    // one click, while `.click()` would synthesize a whole new press. Pointer
+    // clicks carry `detail: 1` (0 marks keyboard/script clicks).
     // `force` because the open modal menu puts `pointer-events: none` on body.
-    cy.get('[aria-haspopup=menu]').trigger('pointerup', { button: 0, force: true })
-    cy.get('[aria-haspopup=menu]').trigger('click', { force: true })
+    cy.get('[aria-haspopup=menu]').trigger('pointerup', {
+      button: 0,
+      force: true,
+    })
+    cy.get('[aria-haspopup=menu]').trigger('click', { detail: 1, force: true })
     cy.get('[role=menu]').should('exist')
   })
 
@@ -166,6 +170,33 @@ describe('Dropdown', () => {
     // `force` because the open modal menu puts `pointer-events: none` on body.
     cy.get('[aria-haspopup=menu]').click({ force: true })
     cy.get('[role=menu]').should('not.exist')
+  })
+
+  it('lets a pointerless click through after a canceled press', () => {
+    cy.mount(Dropdown, { props: { options } })
+
+    // The press opens the menu and arms the trailing-click swallow…
+    cy.get('[aria-haspopup=menu]').trigger('pointerdown', {
+      button: 0,
+      pointerType: 'mouse',
+    })
+    cy.get('[role=menu]').should('exist')
+
+    // …but the press ends without a click, and Escape dismisses the menu.
+    // Keydown sent bare: `.type()` would click the menu to focus it first,
+    // and that pointerdown would (correctly) disarm the swallow.
+    cy.get('[role=menu]').trigger('keydown', { key: 'Escape', force: true })
+    cy.get('[role=menu]').should('not.exist')
+
+    // A keyboard or assistive-tech activation emits a bare click
+    // (`detail: 0`) with no pointerdown: it must reach reka's trigger.
+    // Dispatched by hand — cy.trigger() ignores a custom `detail`.
+    cy.get('[aria-haspopup=menu]').then(($trigger) => {
+      $trigger[0].dispatchEvent(
+        new MouseEvent('click', { bubbles: true, detail: 0 }),
+      )
+    })
+    cy.get('[role=menu]').should('exist')
   })
 
   it('leaves touch presses to the click path', () => {

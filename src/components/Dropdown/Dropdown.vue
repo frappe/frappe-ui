@@ -120,9 +120,10 @@ const triggerDisabled = computed(() => {
  *
  * The swallow lives only as long as its press: a press that ends without a
  * click (released outside the window, canceled) must not leave it armed, or
- * the next independent click on the trigger would be eaten. Such a click is
- * always preceded by a fresh pointerdown, which disarms it — the opening
- * press's own trailing click never has one.
+ * the next independent activation would be eaten. One that starts with a
+ * pointerdown disarms it — the opening press's own trailing click never has
+ * one — and one without (keyboard, script, assistive tech) reports
+ * `detail: 0`, which the swallow passes through.
  *
  * Remove once reka opens on pointerdown; the trailing click is theirs to
  * suppress at that point.
@@ -152,6 +153,9 @@ function swallowOpeningClick(event: MouseEvent) {
   const trigger = pendingTrigger
   disarmSwallow()
   if (!trigger || !(event.target instanceof Node)) return
+  // A `detail` of 0 means the click came from a keyboard or script, not a
+  // pointer press — it is never the trailing click this swallow exists for.
+  if (event.detail === 0) return
   // Capture phase on window, so this stops the click before it ever reaches
   // reka's handler on the trigger.
   if (trigger.contains(event.target)) event.stopPropagation()
