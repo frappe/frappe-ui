@@ -142,11 +142,30 @@ describe('Dropdown', () => {
     cy.get('[role=menu]').should('exist')
 
     // The click that ends the same press must not toggle the menu back shut.
+    // Sent bare, with no fresh pointerdown: a real press releases into exactly
+    // one click, while `.click()` would synthesize a whole new press.
     // `force` because the open modal menu puts `pointer-events: none` on body.
-    cy.get('[aria-haspopup=menu]')
-      .trigger('pointerup', { button: 0, force: true })
-      .click({ force: true })
+    cy.get('[aria-haspopup=menu]').trigger('pointerup', { button: 0, force: true })
+    cy.get('[aria-haspopup=menu]').trigger('click', { force: true })
     cy.get('[role=menu]').should('exist')
+  })
+
+  it('stops swallowing clicks once the opening press ends without one', () => {
+    cy.mount(Dropdown, { props: { options } })
+
+    // The press opens the menu and arms the trailing-click swallow…
+    cy.get('[aria-haspopup=menu]').trigger('pointerdown', {
+      button: 0,
+      pointerType: 'mouse',
+    })
+    cy.get('[role=menu]').should('exist')
+
+    // …but this press ends without a click (released outside the window,
+    // canceled). A fresh press+click is an independent gesture and must
+    // toggle normally, closing the open menu.
+    // `force` because the open modal menu puts `pointer-events: none` on body.
+    cy.get('[aria-haspopup=menu]').click({ force: true })
+    cy.get('[role=menu]').should('not.exist')
   })
 
   it('leaves touch presses to the click path', () => {

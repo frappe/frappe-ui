@@ -118,6 +118,12 @@ const triggerDisabled = computed(() => {
  * The swallow is scoped to clicks landing on the trigger: press-drag-release
  * onto a menu item still activates the item, macOS-style.
  *
+ * The swallow lives only as long as its press: a press that ends without a
+ * click (released outside the window, canceled) must not leave it armed, or
+ * the next independent click on the trigger would be eaten. Such a click is
+ * always preceded by a fresh pointerdown, which disarms it — the opening
+ * press's own trailing click never has one.
+ *
  * Remove once reka opens on pointerdown; the trailing click is theirs to
  * suppress at that point.
  */
@@ -136,20 +142,28 @@ function openOnPointerDown(event: PointerEvent) {
     capture: true,
     once: true,
   })
+  window.addEventListener('pointerdown', disarmSwallow, {
+    capture: true,
+    once: true,
+  })
 }
 
 function swallowOpeningClick(event: MouseEvent) {
   const trigger = pendingTrigger
-  pendingTrigger = null
+  disarmSwallow()
   if (!trigger || !(event.target instanceof Node)) return
   // Capture phase on window, so this stops the click before it ever reaches
   // reka's handler on the trigger.
   if (trigger.contains(event.target)) event.stopPropagation()
 }
 
-onScopeDispose(() => {
+function disarmSwallow() {
+  pendingTrigger = null
   window.removeEventListener('click', swallowOpeningClick, { capture: true })
-})
+  window.removeEventListener('pointerdown', disarmSwallow, { capture: true })
+}
+
+onScopeDispose(disarmSwallow)
 
 defineSlots<DropdownSlots>()
 </script>
