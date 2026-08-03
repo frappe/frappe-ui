@@ -22,6 +22,8 @@ const sourceRoots = [
   path.resolve(repoRoot, 'src/molecules'),
   path.resolve(repoRoot, 'frappe'),
   path.resolve(repoRoot, 'experimental'),
+  // `src` itself, for families that sit directly under it (src/charts).
+  path.resolve(repoRoot, 'src'),
 ]
 
 // frappe-ui's information architecture. The shared Sidebar is data-driven —
@@ -59,6 +61,7 @@ function buildSidebar(): SidebarSection[] {
       items: [
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
+        { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Radius', link: '/docs/foundations/radius' },
         { text: 'Elevation', link: '/docs/foundations/elevation' },
@@ -67,6 +70,21 @@ function buildSidebar(): SidebarSection[] {
     },
     { text: 'Components', items: componentItems },
     ...frappeSection,
+    {
+      text: 'Charts',
+      items: [
+        { text: 'Overview', link: '/docs/charts/overview' },
+        { text: 'BarChart', link: '/docs/charts/bar-chart' },
+        { text: 'LineChart', link: '/docs/charts/line-chart' },
+        { text: 'AreaChart', link: '/docs/charts/area-chart' },
+        { text: 'DonutChart', link: '/docs/charts/donut-chart' },
+        { text: 'FunnelChart', link: '/docs/charts/funnel-chart' },
+        { text: 'HeatmapChart', link: '/docs/charts/heatmap-chart' },
+        { text: 'NumberCard', link: '/docs/charts/number-card' },
+        { text: 'States', link: '/docs/charts/states' },
+        { text: 'Dashboard', link: '/docs/charts/dashboard' },
+      ],
+    },
     {
       text: 'Molecules',
       items: [
