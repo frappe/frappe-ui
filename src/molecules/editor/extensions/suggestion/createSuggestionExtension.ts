@@ -8,6 +8,7 @@ import {
   type SuggestionFloatingOptions,
 } from '#molecules/editor/extensions/shared/suggestion-renderer'
 import { isInCode } from '#molecules/editor/extensions/shared/suggestion-helpers'
+import { autoOpenCleanupPlugin } from '#molecules/editor/extensions/shared/suggestion-open'
 
 // Re-export for back-compat: several extensions still import the base item type
 // from this module path. The canonical home is `suggestion-types`.
@@ -77,11 +78,16 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
     },
 
     addProseMirrorPlugins() {
+      const char = this.options.suggestion.char ?? options.char
+      const pluginKey = this.options.suggestion.pluginKey ?? options.pluginKey
       return [
         Suggestion<TItem>({
           editor: this.editor,
           ...this.options.suggestion,
         }),
+        // Order matters: this reads the suggester's own state, so it has to be
+        // applied after it. Cleans up after `openSuggestionMenu`.
+        autoOpenCleanupPlugin({ char, pluginKey }),
       ]
     },
   })
