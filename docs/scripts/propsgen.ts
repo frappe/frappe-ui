@@ -24,6 +24,8 @@ const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
   path.join(__dirname, '../../src/molecules'),
   path.join(__dirname, '../../frappe'),
+  // `src` itself, for families that sit directly under it (src/charts).
+  path.join(__dirname, '../../src'),
 ]
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
 const AUTO_STORIES_END = '<!-- AUTO-GENERATED STORIES END -->'
@@ -79,7 +81,8 @@ function getDeclaredEmitTypes(vuePath: string) {
   for (const aliasName of [MODEL_EMIT_TYPE, DECLARED_EMIT_TYPE]) {
     const declaration = sourceFile.statements.find(
       (statement): statement is ts.TypeAliasDeclaration =>
-        ts.isTypeAliasDeclaration(statement) && statement.name.text === aliasName,
+        ts.isTypeAliasDeclaration(statement) &&
+        statement.name.text === aliasName,
     )
     if (!declaration) continue
 
@@ -160,11 +163,11 @@ ${indent}]`
 
     return `{
 ${entries
-      .map(
-        ([key, itemValue]) =>
-          `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
-      )
-      .join(',\n')}
+  .map(
+    ([key, itemValue]) =>
+      `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
+  )
+  .join(',\n')}
 ${indent}}`
   }
 
@@ -391,9 +394,13 @@ function getAvailableComponents(rootDir: string) {
       // opt into generated docs via a colocated <folder>.md — this keeps
       // folders with hand-written docs pages (editor) out of --all runs.
       if (name !== pascalCase(name)) {
+        if (!fs.existsSync(path.join(rootDir, name, `${name}.md`))) return false
+        // The family's public SFCs are either one named after the folder
+        // (src/molecules/list → List.vue) or a set re-exported from its
+        // index (src/charts → BarChart.vue, LineChart.vue, …).
         return (
-          fs.existsSync(path.join(rootDir, name, `${pascalCase(name)}.vue`)) &&
-          fs.existsSync(path.join(rootDir, name, `${name}.md`))
+          fs.existsSync(path.join(rootDir, name, `${pascalCase(name)}.vue`)) ||
+          getPublicComponentsFromIndex(rootDir, name).length > 0
         )
       }
       return fs.existsSync(path.join(rootDir, name, `${name}.vue`))
@@ -404,7 +411,10 @@ function getAvailableComponents(rootDir: string) {
 // A folder's `index.ts` may re-export additional public sub-components
 // alongside the primary one (e.g. DatePicker also exports DateRangePicker
 // and DateTimePicker). Each public sub-component gets its own meta file.
-function getPublicComponentsFromIndex(rootDir: string, folder: string): string[] {
+function getPublicComponentsFromIndex(
+  rootDir: string,
+  folder: string,
+): string[] {
   const indexPath = path.join(rootDir, folder, 'index.ts')
   if (!fs.existsSync(indexPath)) return []
 
@@ -590,9 +600,29 @@ selectedFolders.forEach((folder) => {
       return extractTableData(d.name, meta, d.vuePath)
     })
 
-    const metaFilePath = path.join(rootDir, folder, `${folder}.api.md`)
-    const str = genFolderMetaTable(folder, components)
-    fs.writeFileSync(metaFilePath, str)
+    // A family that splits its docs one page per component (`<folder>/docs/
+    // <Name>.md`, as src/charts does) gets a `<Name>.api.md` beside each page,
+    // so the tables land under the component they belong to. Components
+    // without a page of their own stay in the single `<folder>.api.md` that
+    // one-page families include.
+    const pagesDir = path.join(rootDir, folder, 'docs')
+    const hasOwnPage = (name: string) =>
+      fs.existsSync(path.join(pagesDir, `${name}.md`))
+
+    for (const component of components.filter((c) => hasOwnPage(c.name))) {
+      fs.writeFileSync(
+        path.join(pagesDir, `${component.name}.api.md`),
+        genFolderMetaTable(folder, [component]),
+      )
+    }
+
+    const shared = components.filter((c) => !hasOwnPage(c.name))
+    if (shared.length) {
+      fs.writeFileSync(
+        path.join(rootDir, folder, `${folder}.api.md`),
+        genFolderMetaTable(folder, shared),
+      )
+    }
     console.log(`Generated ${folder} meta`)
 
     syncComponentDocsStories(rootDir, folder)
