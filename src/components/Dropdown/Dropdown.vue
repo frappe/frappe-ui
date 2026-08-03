@@ -10,7 +10,11 @@
         v-else-if="$slots.default"
         v-bind="{ ...attrs, open, close, disabled: triggerDisabled }"
       />
-      <Button v-else :active="false" v-bind="{ ...button, ...attrs }">
+      <!--
+        No active/open prop: reka stamps `data-state="open"` on the trigger and
+        Button holds the pressed look off that.
+      -->
+      <Button v-else v-bind="{ ...button, ...attrs }">
         {{ button?.label || 'Options' }}
       </Button>
     </DropdownMenuTrigger>

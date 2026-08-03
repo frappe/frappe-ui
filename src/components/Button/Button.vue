@@ -79,6 +79,18 @@ export default defineComponent({
         })[props.size],
     )
 
+    /**
+     * The pressed look is driven by `data-state`, not a prop. A menu primitive
+     * using this Button as its `as-child` trigger already stamps
+     * `data-state="open"` on it, so a Dropdown/Popover/Select trigger holds the
+     * pressed look for free; a standalone toggle sets `data-state="active"`
+     * itself.
+     */
+    const isActive = computed(() => {
+      const state = attrs['data-state']
+      return state === 'open' || state === 'active'
+    })
+
     const buttonClasses = computed(() => {
       const solidClasses = {
         gray: 'text-ink-base bg-surface-gray-10 hover:bg-surface-gray-9 active:bg-surface-gray-8',
@@ -155,6 +167,43 @@ export default defineComponent({
       }
       const disabledClasses = disabledClassesMap[themeVariant]
 
+      // The pressed look, held. Same tokens the `active:` pseudo-class uses,
+      // minus a hover state — an open menu shouldn't lighten under the cursor.
+      const activeClassesMap: Record<ThemeVariant, string> = {
+        'gray-solid': 'text-ink-base bg-surface-gray-8',
+        'gray-subtle': 'text-ink-gray-8 bg-surface-gray-4',
+        'gray-outline':
+          'text-ink-gray-8 bg-surface-gray-4 border border-outline-gray-3',
+        'gray-ghost': 'text-ink-gray-8 bg-surface-gray-4',
+
+        'blue-solid': 'text-ink-base bg-surface-blue-8',
+        'blue-subtle': 'text-ink-blue-6 bg-surface-blue-4',
+        'blue-outline':
+          'text-ink-blue-6 bg-surface-blue-4 border border-outline-blue-4',
+        'blue-ghost': 'text-ink-blue-6 bg-surface-blue-4',
+
+        'green-solid': 'text-ink-base bg-surface-green-9',
+        'green-subtle': 'text-ink-green-9 bg-surface-green-4',
+        'green-outline':
+          'text-ink-green-9 bg-surface-green-4 border border-outline-green-5',
+        'green-ghost': 'text-ink-green-9 bg-surface-green-4',
+
+        'red-solid': 'text-ink-base bg-surface-red-9',
+        'red-subtle': 'text-ink-red-8 bg-surface-red-4',
+        'red-outline':
+          'text-ink-red-8 bg-surface-red-3 border border-outline-red-3',
+        'red-ghost': 'text-ink-red-8 bg-surface-red-4',
+      }
+      const activeClasses = activeClassesMap[themeVariant]
+
+      // One of the three replaces the others outright rather than layering, so
+      // conflicting `bg-*` utilities never race on stylesheet order.
+      const stateClasses = props.disabled
+        ? disabledClasses
+        : isActive.value
+          ? activeClasses
+          : variantClasses
+
       const sizeClasses = isIconButton.value
         ? {
             xs: 'h-6 w-6 rounded-3',
@@ -175,7 +224,7 @@ export default defineComponent({
         // its normal look (it's still non-interactive via the native `disabled`
         // attr below); `pointer-events-none` suppresses hover/active visuals so
         // it doesn't appear clickable while busy.
-        props.disabled ? disabledClasses : variantClasses,
+        stateClasses,
         props.loading && !props.disabled ? 'pointer-events-none' : '',
         focusClasses,
         sizeClasses,
