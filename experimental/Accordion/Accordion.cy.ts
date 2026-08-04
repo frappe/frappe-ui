@@ -121,6 +121,53 @@ describe('Accordion', () => {
     cy.contains('[data-cy=slot]', 'slot:one').should('be.visible')
   })
 
+  it('keeps the open panel with its item when items are reordered', () => {
+    // Item identity is `value`, never position — so prepending an item must
+    // leave the same panel open rather than shifting it to a neighbour.
+    const Harness = defineComponent({
+      setup() {
+        const list = ref([...items])
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'prepend',
+                onClick: () => {
+                  list.value = [
+                    {
+                      value: 'zero',
+                      title: 'Zeroth',
+                      content: 'Zeroth content',
+                    },
+                    ...list.value,
+                  ]
+                },
+              },
+              'prepend',
+            ),
+            h(Accordion, { items: list.value, defaultValue: 'two' }),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.contains('Second content').should('be.visible')
+    cy.get('[data-cy=prepend]').click()
+
+    // 'two' is now at index 2; it stays open, and the item that took its old
+    // index stays closed.
+    cy.get('[data-slot=trigger]').should('have.length', 4)
+    cy.get('[data-slot=trigger]')
+      .eq(2)
+      .should('have.attr', 'aria-expanded', 'true')
+    cy.get('[data-slot=trigger]')
+      .eq(1)
+      .should('have.attr', 'aria-expanded', 'false')
+    cy.contains('Second content').should('be.visible')
+  })
+
   it('supports a controlled v-model round-trip', () => {
     const Harness = defineComponent({
       setup() {

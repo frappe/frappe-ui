@@ -34,10 +34,6 @@ const collapsible = computed(() =>
   props.type === 'single' ? props.collapsible : undefined,
 )
 
-function itemValue(item: AccordionItemType, index: number) {
-  return item.value ?? String(index)
-}
-
 defineSlots<{
   /** Custom renderer for an item's trigger label. Receives `{ item, index }`. */
   'item-label'?: (props: { item: AccordionItemType; index: number }) => any
@@ -67,8 +63,8 @@ defineSlots<{
   >
     <AccordionItem
       v-for="(item, index) in props.items"
-      :key="itemValue(item, index)"
-      :value="itemValue(item, index)"
+      :key="item.value"
+      :value="item.value"
       :disabled="item.disabled"
       data-slot="item"
     >

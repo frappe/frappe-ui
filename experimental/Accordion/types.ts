@@ -2,11 +2,12 @@ import type { Component } from 'vue'
 
 export interface AccordionItem {
   /**
-   * Unique value identifying the item. Used as the open/closed key for
-   * `modelValue` / `defaultValue`. Falls back to the item's index when
-   * omitted.
+   * Unique value identifying the item, and the open/closed key for
+   * `modelValue` / `defaultValue`. Must be stable across renders: it is the
+   * item's identity, so deriving it from position would move the open state
+   * to a different panel whenever `items` is reordered or filtered.
    */
-  value?: string
+  value: string
 
   /** Text shown in the trigger header. */
   title: string

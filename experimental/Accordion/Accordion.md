@@ -13,6 +13,10 @@ import { Accordion } from 'frappe-ui/experimental'
 import type { AccordionItem, AccordionProps } from 'frappe-ui/experimental'
 ```
 
+Each item needs a `value` — it is the item's identity and the key `modelValue` /
+`defaultValue` refer to, so it must stay stable as `items` is reordered or
+filtered.
+
 ## Default
 
 <ComponentPreview name="Accordion-Default" />
