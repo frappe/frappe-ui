@@ -26,7 +26,7 @@ to each option with its `#item-prefix` slot.
 
 ## Settings list
 
-In the `default` variant a `description` stacks below the label, indented under
+Without `padded`, a `description` stacks below the label, indented under
 the control. Useful for settings where some options need extra explanation.
 
 <ComponentPreview name="Checkbox-SettingsList" />

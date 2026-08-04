@@ -77,7 +77,7 @@ import type { SwitchProps } from './types'
 
 const props = withDefaults(defineProps<SwitchProps>(), {
   size: 'sm',
-  variant: 'default',
+  padded: false,
   disabled: false,
   labelClasses: '',
 })
@@ -133,8 +133,8 @@ const switchClasses = computed(() => {
   return [
     'relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-transparent transition-colors duration-100 ease-in-out items-center',
     // The focus ring is applied globally via :focus-visible. In the padded
-    // variant it is shown on the row instead, so suppress it on the control.
-    props.variant === 'padded' ? 'focus:outline-none focus:ring-0' : '',
+    // padded rows it is shown on the row instead, so suppress it on the control.
+    props.padded ? 'focus:outline-none focus:ring-0' : '',
     'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
     model.value
       ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
@@ -208,7 +208,7 @@ const switchGroupClasses = computed(() => {
       ? 'flex-row-reverse justify-end gap-x-2.5'
       : 'justify-between gap-x-3',
   ]
-  if (props.variant !== 'padded') {
+  if (!props.padded) {
     classes.push('py-1.5 cursor-pointer rounded')
     if (props.disabled) classes.push('cursor-not-allowed')
   }
@@ -236,14 +236,14 @@ const errorSpacingClass = computed(() => {
   const hasDescription = props.description || slots.description
   // A description sits tight under the label; error-only rows keep a small gap.
   if (hasDescription) return 'mt-0.5'
-  return props.variant !== 'padded' ? '-mt-0.5' : 'mt-1'
+  return !props.padded ? '-mt-0.5' : 'mt-1'
 })
 
-// In the padded variant the whole row is a clickable surface — padding,
+// When padded, the whole row is a clickable surface — padding,
 // hover/active/focus states and the click target wrap the label, control and
 // description together.
 const containerClasses = computed(() => {
-  if (props.variant !== 'padded') return undefined
+  if (!props.padded) return undefined
   // `group` lives on the outer surface so hovering anywhere in the padded
   // area — including the corners — drives the control's hover state too.
   // A description or error makes the surface multi-line, so it grows with
@@ -265,9 +265,7 @@ const containerClasses = computed(() => {
   if (!hasDetail) classes.push('justify-center')
   // With the switch at the start the row hugs its content; at the end it spans
   // the full width so `justify-between` can push the switch to the right edge.
-  const hasDescription = props.description || slots.description
-  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
-  classes.push(position === 'start' ? 'w-fit' : 'w-full')
+  classes.push(switchPosition.value === 'start' ? 'w-fit' : 'w-full')
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'
@@ -277,7 +275,7 @@ const containerClasses = computed(() => {
 })
 
 const onContainerClick = (event: MouseEvent) => {
-  if (props.variant !== 'padded' || props.disabled) return
+  if (!props.padded || props.disabled) return
   const target = event.target as HTMLElement
   // The control toggles itself via reka-ui; ignore to avoid double toggling.
   if (target.closest('[data-slot="control"]')) return

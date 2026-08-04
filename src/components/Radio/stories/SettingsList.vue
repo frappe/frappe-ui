@@ -6,7 +6,7 @@ const notify = ref('all')
 </script>
 
 <template>
-  <RadioGroup v-model="notify" variant="padded" class="w-96">
+  <RadioGroup v-model="notify" padded class="w-96">
     <Radio value="all" label="All new emails" />
     <Radio
       value="important"

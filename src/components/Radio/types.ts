@@ -5,9 +5,6 @@ import type { InputLabelingProps } from '../../composables/useInputLabeling'
 /** The value a radio represents within its group. */
 export type RadioValue = string | number | boolean
 
-/** Visual style shared by the group and its options. */
-export type RadioVariant = 'default' | 'padded'
-
 export interface RadioGroupProps extends InputLabelingProps {
   /** The selected value of the group. */
   modelValue?: RadioValue
@@ -15,8 +12,8 @@ export interface RadioGroupProps extends InputLabelingProps {
   /** Size of every radio in the group. */
   size?: ToggleSize
 
-  /** Visual style of the rows. `padded` wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items. */
-  variant?: RadioVariant
+  /** Wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items. */
+  padded?: boolean
 
   /** Disables every radio in the group. */
   disabled?: boolean
@@ -40,7 +37,7 @@ export interface RadioGroupEmits {
 // a group, so the asterisk and the error message belong on the group, not on
 // each option. Set them on `<RadioGroup>` instead.
 //
-// `size` and `variant` are likewise group-level — mixing sizes within one group
+// `size` and `padded` are likewise group-level — mixing sizes within one group
 // has no design meaning, so they are inherited rather than per-option.
 export interface RadioProps extends Omit<
   InputLabelingProps,
@@ -56,8 +53,7 @@ export interface RadioProps extends Omit<
 /** Group-level state that each `Radio` reads instead of taking as its own prop. */
 export interface RadioGroupContext {
   size: ComputedRef<ToggleSize>
-  variant: ComputedRef<RadioVariant>
-  hasError: ComputedRef<boolean>
+  padded: ComputedRef<boolean>
   disabled: ComputedRef<boolean>
 }
 

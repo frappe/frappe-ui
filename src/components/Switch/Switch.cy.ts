@@ -122,12 +122,12 @@ describe('Switch', () => {
     })
   })
 
-  describe('padded variant', () => {
+  describe('padded', () => {
     it('clicking the padding area toggles the switch', () => {
       cy.mount(Switch, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -141,7 +141,7 @@ describe('Switch', () => {
       cy.mount(Switch, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -154,7 +154,7 @@ describe('Switch', () => {
       cy.mount(Switch, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           disabled: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
@@ -164,8 +164,27 @@ describe('Switch', () => {
       cy.get('@onUpdate').should('not.have.been.called')
     })
 
+    it('pushes the switch to the trailing edge of a label-only row', () => {
+      // The row must span its container for `justify-between` to have any
+      // width to work with — `w-fit` would silently collapse it to the label.
+      cy.mount(Switch, { props: { label: 'abc', padded: true } })
+      cy.get('[data-slot="control"]').then(($switch) => {
+        cy.get('[data-slot="control"]')
+          .parent()
+          .parent()
+          .then(($row) => {
+            const row = $row[0].getBoundingClientRect()
+            const control = $switch[0].getBoundingClientRect()
+            // Only the row's own inline padding separates them.
+            expect(row.right - control.right).to.be.lessThan(16)
+            // And the row is genuinely wider than label + switch alone.
+            expect(row.width - control.width).to.be.greaterThan(100)
+          })
+      })
+    })
+
     it('keeps a fixed compact height for a label-only row', () => {
-      cy.mount(Switch, { props: { label: 'abc', variant: 'padded' } })
+      cy.mount(Switch, { props: { label: 'abc', padded: true } })
       cy.get('[data-slot="control"]')
         .parent()
         .parent()
@@ -174,7 +193,7 @@ describe('Switch', () => {
 
     it('grows the surface when a description is present', () => {
       cy.mount(Switch, {
-        props: { label: 'abc', description: 'helper', variant: 'padded' },
+        props: { label: 'abc', description: 'helper', padded: true },
       })
       cy.get('[data-slot="control"]')
         .parent()

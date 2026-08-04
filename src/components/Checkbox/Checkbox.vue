@@ -1,10 +1,7 @@
 <template>
   <div
     class="flex-col"
-    :class="[
-      props.variant === 'padded' ? 'flex' : 'inline-flex',
-      containerClasses,
-    ]"
+    :class="[props.padded ? 'flex' : 'inline-flex', containerClasses]"
     @click="onContainerClick"
   >
     <div
@@ -69,7 +66,7 @@ import type { CheckboxBaseProps } from './types'
 
 const props = withDefaults(defineProps<CheckboxBaseProps>(), {
   size: 'sm',
-  variant: 'default',
+  padded: false,
   padding: false,
   indeterminate: false,
 })
@@ -79,7 +76,7 @@ const attrs = useAttrs()
 
 watchEffect(() => {
   if (props.padding) {
-    warnDeprecated('Checkbox.padding', 'variant="padded"')
+    warnDeprecated('Checkbox.padding', 'padded')
   }
 })
 
@@ -141,11 +138,11 @@ const rowClasses = computed(() => {
   }
 })
 
-// In the padded variant the whole row is a clickable surface. Mirrors the
-// Switch padded variant: fixed-height compact rows (24/28/32px) with hover,
+// When padded, the whole row is a clickable surface. Mirrors Switch's padded
+// rows: fixed-height compact rows (24/28/32px) with hover,
 // active and keyboard-only focus states wrapping the control and label.
 const containerClasses = computed(() => {
-  if (props.variant !== 'padded') return undefined
+  if (!props.padded) return undefined
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
   const hasDetail = showDescription.value || hasError.value
@@ -169,7 +166,7 @@ const containerClasses = computed(() => {
 })
 
 const onContainerClick = (event: MouseEvent) => {
-  if (props.variant !== 'padded' || props.disabled) return
+  if (!props.padded || props.disabled) return
   const target = event.target as HTMLElement
   // The input toggles itself; the label toggles it via `for`. Ignore both to
   // avoid double toggling and only handle clicks on the surrounding padding.
@@ -203,8 +200,8 @@ const inputClasses = computed(() => {
     ]
   }
 
-  // In the padded variant the row drives hover; otherwise the control does.
-  const padded = props.padding || props.variant === 'padded'
+  // When padded the row drives hover; otherwise the control does.
+  const padded = props.padding || props.padded
   return [
     sizeClasses,
     'cursor-pointer transition focus:ring-0 focus:ring-offset-0',

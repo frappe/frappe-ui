@@ -13,11 +13,11 @@
     default: '"sm"'
   },
   {
-    name: 'variant',
-    description: 'Visual style of the switch row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items.',
+    name: 'padded',
+    description: 'Wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items.',
     required: false,
-    type: '"default" | "padded"',
-    default: '"default"'
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'switchPosition',
@@ -106,11 +106,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Switch" :data="propsData"/> 
+<PropsTable name="Switch" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

@@ -66,7 +66,7 @@ describe('Radio', () => {
   it('draws the selected ring on the checked option only', () => {
     // `data-state` lives on the RadioGroupItem button, so the circle styles it
     // through `group-data-[state=checked]:`. Assert the painted result, not the
-    // class, or a wrong variant would still read as passing.
+    // class, or a wrong selector would still read as passing.
     mountGroup({ modelValue: 'a' })
 
     cy.get('[role="radio"]')
@@ -198,7 +198,7 @@ describe('Radio', () => {
     })
   })
 
-  describe('size and variant', () => {
+  describe('size and padding', () => {
     it('passes the group size down to every option', () => {
       mountGroup({ size: 'xs' })
 
@@ -219,13 +219,13 @@ describe('Radio', () => {
     })
 
     it('keeps a fixed compact height for padded label-only rows', () => {
-      mountGroup({ variant: 'padded' })
+      mountGroup({ padded: true })
 
       cy.get('[role="radio"]').first().invoke('outerHeight').should('eq', 28)
     })
 
     it('grows a padded row that carries a description', () => {
-      mountGroup({ variant: 'padded' }, [
+      mountGroup({ padded: true }, [
         { value: 'a', label: 'Option A', description: 'Some longer detail.' },
       ])
 

@@ -8,7 +8,6 @@
     :class="rowClasses"
     data-slot="control"
     :data-size="size"
-    :data-variant="variant"
   >
     <span :class="circleClasses" aria-hidden="true" />
     <span class="flex flex-col items-start gap-0.5 text-start">
@@ -62,7 +61,7 @@ if (!group) {
 }
 
 const size = computed(() => group.size.value)
-const variant = computed(() => group.variant.value)
+const padded = computed(() => group.padded.value)
 // A disabled group disables every option; an option can also disable itself.
 const isDisabled = computed(() => group.disabled.value || props.disabled)
 
@@ -76,15 +75,14 @@ const hasDescription = computed(() =>
 
 // The whole row is the control: reka-ui renders it as a `role="radio"` button,
 // so hover, focus and the click target cover the label and description without
-// any click forwarding. The padded variant just adds the surface.
+// any click forwarding. Padding just adds the surface.
 const rowClasses = computed(() => {
-  const padded = variant.value === 'padded'
   const classes = [
     'group flex items-start gap-2 rounded text-start transition-colors',
     'focus:outline-none focus-visible:focus-ring',
     isDisabled.value ? 'cursor-not-allowed' : 'cursor-pointer',
   ]
-  if (!padded) return classes
+  if (!padded.value) return classes
 
   // Rows with a description grow with vertical padding; label-only rows keep a
   // fixed compact height (24 / 28 / 32px) so lists stay evenly spaced.
@@ -137,7 +135,7 @@ const circleClasses = computed(() => {
 
   const classes = [
     'box-border shrink-0 rounded-full border bg-surface-base transition-colors',
-    hasDescription.value || variant.value !== 'padded' ? offset : '',
+    hasDescription.value || !padded.value ? offset : '',
     control,
   ]
 

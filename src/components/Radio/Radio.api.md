@@ -66,11 +66,11 @@
     default: '"sm"'
   },
   {
-    name: 'variant',
-    description: 'Visual style of the rows. `padded` wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items.',
+    name: 'padded',
+    description: 'Wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items.',
     required: false,
-    type: 'RadioVariant',
-    default: '"default"'
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'disabled',
@@ -157,19 +157,19 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Radio
 
-<PropsTable name="Radio" :data="radioProps"/> 
+<PropsTable name="Radio" :data="radioProps"/>
 
-<SlotsTable :data="radioSlots"/> 
+<SlotsTable :data="radioSlots"/>
 
 ### RadioGroup
 
-<PropsTable folder="Radio" name="RadioGroup" :data="radioGroupProps"/> 
+<PropsTable folder="Radio" name="RadioGroup" :data="radioGroupProps"/>
 
-<SlotsTable :data="radioGroupSlots"/> 
+<SlotsTable :data="radioGroupSlots"/>
 
-<EmitsTable :data="radioGroupEmits"/> 
-
+<EmitsTable :data="radioGroupEmits"/>

@@ -6,8 +6,8 @@ export interface SwitchProps extends InputLabelingProps {
   /** Size of the switch control */
   size?: ToggleSize
 
-  /** Visual style of the switch row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items. */
-  variant?: 'default' | 'padded'
+  /** Wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items. */
+  padded?: boolean
 
   /** Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label. */
   switchPosition?: 'start' | 'end'
@@ -24,4 +24,3 @@ export interface SwitchProps extends InputLabelingProps {
    */
   labelClasses?: string
 }
-

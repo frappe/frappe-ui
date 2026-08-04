@@ -18,15 +18,7 @@ const knobs: Knob[] = [
       { label: 'md', value: 'md' },
     ],
   },
-  {
-    name: 'variant',
-    type: 'tabs',
-    default: 'default',
-    options: [
-      { label: 'default', value: 'default' },
-      { label: 'padded', value: 'padded' },
-    ],
-  },
+  { name: 'padded', type: 'switch', default: false },
   { name: 'indeterminate', type: 'switch', default: false },
   { name: 'required', type: 'switch', default: false },
   { name: 'error', type: 'switch', default: false },
@@ -40,7 +32,7 @@ function buildCode(v: Record<string, any>) {
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
-  if (v.variant !== 'default') attrs.push(`variant="${v.variant}"`)
+  if (v.padded) attrs.push('padded')
   if (v.indeterminate) attrs.push('indeterminate')
   if (v.required) attrs.push('required')
   if (v.error) attrs.push(`error="${ERROR_MESSAGE}"`)
@@ -58,7 +50,7 @@ function buildCode(v: Record<string, any>) {
         :label="values.label || undefined"
         :description="values.description || undefined"
         :size="values.size"
-        :variant="values.variant"
+        :padded="values.padded"
         :indeterminate="values.indeterminate"
         :required="values.required"
         :error="values.error ? ERROR_MESSAGE : undefined"

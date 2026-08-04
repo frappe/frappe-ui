@@ -5,5 +5,4 @@ export type {
   RadioGroupProps,
   RadioGroupEmits,
   RadioValue,
-  RadioVariant,
 } from './types'

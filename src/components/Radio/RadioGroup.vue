@@ -60,7 +60,7 @@ import type { RadioGroupProps, RadioValue } from './types'
 
 const props = withDefaults(defineProps<RadioGroupProps>(), {
   size: 'sm',
-  variant: 'default',
+  padded: false,
   disabled: false,
   orientation: 'vertical',
   loop: true,
@@ -102,8 +102,7 @@ const {
 // a small gap.
 const rootClasses = computed(() => {
   const stacked = props.orientation === 'vertical'
-  const gap =
-    props.variant === 'padded' ? '' : stacked ? 'gap-y-1.5' : 'gap-x-4'
+  const gap = props.padded ? '' : stacked ? 'gap-y-1.5' : 'gap-x-4'
   return [
     'flex',
     stacked ? 'flex-col' : 'flex-row flex-wrap items-center',
@@ -114,8 +113,7 @@ const rootClasses = computed(() => {
 
 provide(RadioGroupContextKey, {
   size: computed(() => props.size),
-  variant: computed(() => props.variant),
-  hasError,
+  padded: computed(() => props.padded),
   // reka-ui already merges this into the item's *behaviour*, but its styling
   // reads the context — without this a disabled group would look enabled.
   disabled: computed(() => props.disabled),

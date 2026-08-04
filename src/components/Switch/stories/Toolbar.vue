@@ -7,12 +7,7 @@ const showActivity = ref(true)
 
 <template>
   <div class="flex items-center gap-2">
-    <Switch
-      v-model="showActivity"
-      variant="padded"
-
-      label="Show activity"
-    />
+    <Switch v-model="showActivity" padded label="Show activity" />
     <Button variant="subtle" icon-left="lucide-settings-2" label="Customize" />
     <Button variant="solid" icon-right="lucide-chevron-down" label="New" />
   </div>

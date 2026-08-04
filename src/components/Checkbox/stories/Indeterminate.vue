@@ -34,7 +34,7 @@ function onItemChange() {
       :indeterminate="indeterminate"
       :model-value="allChecked"
       label="Select all"
-      variant="padded"
+      padded
       @update:model-value="onSelectAll"
     />
     <div class="pl-4 flex flex-col gap-1">
@@ -43,7 +43,7 @@ function onItemChange() {
         :key="item.label"
         v-model="item.checked"
         :label="item.label"
-        variant="padded"
+        padded
         @update:model-value="onItemChange"
       />
     </div>

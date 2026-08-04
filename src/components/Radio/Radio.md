@@ -32,8 +32,8 @@ choice within a group, so marking every option would be wrong. Set `required` on
 
 ## Settings list
 
-Use `variant="padded"` for mutually exclusive settings. A `description` stacks
-below the label, and the whole row is the click target.
+Use `padded` for mutually exclusive settings. A `description` stacks below the
+label, and the whole row is the click target.
 
 <ComponentPreview name="Radio-SettingsList" />
 

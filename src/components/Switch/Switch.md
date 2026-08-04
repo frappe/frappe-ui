@@ -19,7 +19,7 @@ Tailwind utility. Component values are rendered with `<component :is>`.
 
 ## In a toolbar
 
-The `padded` variant gives the switch a clickable surface and hover state that
+The `padded` prop gives the switch a clickable surface and hover state that
 matches the buttons beside it, so it sits comfortably in a toolbar. Clicking
 anywhere on the row toggles the switch.
 

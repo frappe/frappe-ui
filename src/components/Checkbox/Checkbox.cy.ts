@@ -112,12 +112,12 @@ describe('Checkbox', () => {
     })
   })
 
-  describe('padded variant', () => {
+  describe('padded', () => {
     it('clicking the padding area toggles the checkbox', () => {
       cy.mount(Checkbox, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -131,7 +131,7 @@ describe('Checkbox', () => {
       cy.mount(Checkbox, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
       })
@@ -144,7 +144,7 @@ describe('Checkbox', () => {
       cy.mount(Checkbox, {
         props: {
           label: 'abc',
-          variant: 'padded',
+          padded: true,
           disabled: true,
           'onUpdate:modelValue': cy.spy().as('onUpdate'),
         },
@@ -155,7 +155,7 @@ describe('Checkbox', () => {
     })
 
     it('keeps a fixed compact height for a label-only row', () => {
-      cy.mount(Checkbox, { props: { label: 'abc', variant: 'padded' } })
+      cy.mount(Checkbox, { props: { label: 'abc', padded: true } })
       cy.get('[data-slot="control"]')
         .parent()
         .parent()
@@ -164,7 +164,7 @@ describe('Checkbox', () => {
 
     it('grows the surface when a description is present', () => {
       cy.mount(Checkbox, {
-        props: { label: 'abc', description: 'helper', variant: 'padded' },
+        props: { label: 'abc', description: 'helper', padded: true },
       })
       cy.get('[data-slot="control"]')
         .parent()
