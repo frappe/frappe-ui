@@ -113,6 +113,22 @@ describe('ContextMenu', () => {
     cy.get('[role=menu]').should('exist')
   })
 
+  it('opens without an enter/exit animation (instant motion)', () => {
+    // The menu appears at the cursor with no transform-origin tying it there,
+    // so a scale entrance grew it from its own middle and only added latency.
+    cy.mount(ContextMenu, {
+      props: { options: simpleOptions },
+      slots: { default: trigger },
+    })
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[data-slot="content"]').should(
+      'have.attr',
+      'data-motion',
+      'instant',
+    )
+  })
+
   it('closes when clicking outside the menu', () => {
     cy.mount(ContextMenu, {
       props: { options: simpleOptions },

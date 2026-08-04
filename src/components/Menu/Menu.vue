@@ -199,40 +199,32 @@ async function handleItemSelect(item: MenuOption, event: Event) {
 
 <style scoped>
 /*
- * Shared menu entrance/exit. Both Dropdown and ContextMenu render this
- * component inside their `.menu-content` wrapper, so keeping the animated
- * keyframes + reduced-motion reset here guarantees they ship whenever either
- * menu is used (the package ships source and is tree-shaken per component).
- * Dropdown's keyboard-only `instant` motion stays in Dropdown.vue.
+ * Shared menu motion. Both Dropdown and ContextMenu render this component
+ * inside their `.menu-content` wrapper, so keeping the rule here guarantees it
+ * ships whenever either menu is used (the package ships source and is
+ * tree-shaken per component).
+ *
+ * Neither menu scales in. A menu appears at a fixed spot — under the trigger,
+ * or at the cursor — with no transform-origin tying it to that point, so the
+ * entrance grew it from its own middle and only added latency between the
+ * press and the content. The ~80ms fade that remains masks the 1-frame
+ * position-settle reka performs after mount.
  */
-@keyframes menu-in {
+:global(.menu-content[data-motion='instant'][data-state='open']) {
+  animation: menu-instant-fade 80ms linear;
+}
+
+:global(.menu-content[data-motion='instant'][data-state='closed']) {
+  animation: none;
+}
+
+@keyframes menu-instant-fade {
   from {
     opacity: 0;
-    transform: scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
-}
-
-@keyframes menu-out {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-}
-
-:global(.menu-content[data-motion='animated'][data-state='open']) {
-  animation: menu-in 100ms ease-out;
-}
-
-:global(.menu-content[data-motion='animated'][data-state='closed']) {
-  animation: menu-out 75ms ease-in;
 }
 
 @media (prefers-reduced-motion: reduce) {

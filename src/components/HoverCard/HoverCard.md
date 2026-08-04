@@ -38,8 +38,8 @@ class-injection props.
 
 ## Motion
 
-A hover open always uses the animated scale-from-trigger entrance (180ms in /
-140ms out), and `prefers-reduced-motion` is respected. No configuration is
+The card appears instantly. An 80ms fade smooths the paint on open, and there is
+no exit animation. `prefers-reduced-motion` is respected. No configuration is
 required.
 
 ## Notes

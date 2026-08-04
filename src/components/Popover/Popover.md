@@ -73,8 +73,8 @@ hooks instead:
 | `[data-slot="content"]`      | the portaled content (reka `PopoverContent`) |
 | `[data-slot="content-body"]` | the panel shell that owns the visuals        |
 
-Open / closed and motion phase are reflected as `data-state="open" \| "closed"`
-and `data-motion="animated" \| "instant"` for state-driven styling.
+Open / closed and motion rhythm are reflected as `data-state="open" \| "closed"`
+and `data-motion="instant"` for state-driven styling.
 
 ```css
 :where([data-slot='content-body']) {
@@ -84,9 +84,10 @@ and `data-motion="animated" \| "instant"` for state-driven styling.
 
 ## Motion
 
-The panel animates by default — a scale-from-trigger entrance (180ms in / 140ms
-out). Opening via the keyboard skips the animation (`data-motion="instant"`),
-and `prefers-reduced-motion` is respected. No configuration is required.
+The panel appears instantly. An 80ms fade smooths the paint on open, and there
+is no exit animation — a panel that appears at a fixed spot has nothing to scale
+from, so an entrance would only add latency. Same for pointer and keyboard
+opens, and `prefers-reduced-motion` is respected. No configuration is required.
 
 ## Notes
 

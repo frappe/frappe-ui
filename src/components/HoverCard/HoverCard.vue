@@ -69,15 +69,10 @@ defineSlots<{
         v-bind="$attrs"
       >
         <!--
-          Hover opens always want the scale-from-trigger entrance, so motion is
-          fixed to 'animated' rather than driven by usePopoverMotion (which keys
-          on pointerdown and would classify a hover open as 'instant'). The
-          panel relies on the ancestor HoverCardContent's data-state for motion.
+          The panel relies on the ancestor HoverCardContent's data-state for
+          motion.
         -->
-        <PopoverPanel
-          motion="animated"
-          class="origin-[var(--reka-hover-card-content-transform-origin)]"
-        >
+        <PopoverPanel>
           <slot />
         </PopoverPanel>
         <HoverCardArrow

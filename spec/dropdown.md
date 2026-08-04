@@ -300,6 +300,11 @@ nothing. Other strings still route to `FeatherIcon` for back-compat.
 - else render the generated `Button` from `button`
 - trigger disabled state is derived from `button.disabled` or a forwarded
   `disabled` attribute
+- a mouse press opens the menu on `pointerdown`, not on release, matching
+  `Select`. The click that ends that same press is swallowed so it cannot
+  toggle the menu shut; a later, separate click still closes it
+- touch keeps the release path — opening on press would fight scrolling
+- press-drag-release onto an item activates that item
 
 ### Item behavior
 
@@ -396,22 +401,13 @@ State hooks should include, where relevant:
 
 ## Motion
 
-`Dropdown` uses the same popover motion as the selection pickers:
+`Dropdown` uses the same motion as `Select`: the menu appears instantly, with
+only a short fade to smooth the paint.
 
-- content scales in from the trigger via
-  `transform-origin: var(--reka-dropdown-menu-content-transform-origin)` on
-  the animated element (the inner content-body, not the outer positioned
-  wrapper)
-- enter `180ms` / exit `140ms` with `cubic-bezier(0.23, 1, 0.32, 1)`, from
-  `scale(0.97)` + `translateY(2px)` + `opacity: 0`
-- keyboard-driven opens (Enter, Space, ArrowUp, ArrowDown on the trigger)
-  skip the animation entirely
-- pointer-driven opens (click / tap) play the full animation
-- classification is pointer-recency based: an open transition counts as
-  pointer-driven only if a `pointerdown` fired on the trigger within
-  ~300ms before it; everything else defaults to keyboard. The resolved
-  mode is exposed as `data-motion="animated" | "instant"` on the
-  content-body
+- open: `80ms` linear fade from `opacity: 0`. No scale, no translate
+- close: no animation
+- the rhythm is the same for pointer and keyboard opens; the menu content
+  always carries `data-motion="instant"`
 - `prefers-reduced-motion: reduce` disables the content animation
 
 ## Accessibility and semantics

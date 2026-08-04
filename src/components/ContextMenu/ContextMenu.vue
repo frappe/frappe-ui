@@ -8,7 +8,7 @@
     <ContextMenuPortal>
       <ContextMenuContent
         data-slot="content"
-        data-motion="animated"
+        data-motion="instant"
         :class="menuClasses.content"
       >
         <Menu

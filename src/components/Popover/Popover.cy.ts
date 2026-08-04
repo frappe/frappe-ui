@@ -216,21 +216,22 @@ describe('Popover', () => {
         .and('include', 'min-width')
     })
 
-    it('uses animated motion for pointer opens', () => {
+    it('opens without an enter/exit animation (instant motion)', () => {
+      // A panel that appears at a fixed spot has nothing to scale from, so the
+      // entrance would only add latency. Opacity-only fade, no scale.
       cy.mount(Popover, { slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
       cy.get('[data-slot="content-body"]').should(
         'have.attr',
         'data-motion',
-        'animated',
+        'instant',
       )
     })
 
-    it('uses instant motion for keyboard opens', () => {
+    it('uses the same instant motion for keyboard opens', () => {
       cy.mount(Popover, { slots: NewSlots })
 
-      // Keyboard activation opens without a preceding pointerdown -> instant.
       cy.get('[data-cy="trigger"]').focus().type('{enter}')
       cy.get('[data-slot="content-body"]').should(
         'have.attr',
