@@ -30,7 +30,7 @@ const knobs: Knob[] = [
   {
     name: 'switchPosition',
     type: 'tabs',
-    default: 'start',
+    default: 'end',
     options: [
       { label: 'start', value: 'start' },
       { label: 'end', value: 'end' },
@@ -49,7 +49,7 @@ function buildCode(v: Record<string, any>) {
   if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'default') attrs.push(`variant="${v.variant}"`)
-  if (v.switchPosition !== 'start')
+  if (v.switchPosition !== 'end')
     attrs.push(`switch-position="${v.switchPosition}"`)
   if (v.required) attrs.push('required')
   if (v.error) attrs.push(`error="${ERROR_MESSAGE}"`)

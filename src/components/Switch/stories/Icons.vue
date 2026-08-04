@@ -4,12 +4,7 @@ import { Switch } from 'frappe-ui'
 
 <template>
   <div class="flex flex-col gap-3 w-80">
-    <Switch
-      icon="lucide-bell"
-      switch-position="end"
-      label="Notifications"
-      class="w-full"
-    />
+    <Switch icon="lucide-bell" label="Notifications" class="w-full" />
     <Switch
       icon="lucide-mail"
       label="Email digest"

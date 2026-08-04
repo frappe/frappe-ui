@@ -9,7 +9,7 @@ export interface SwitchProps extends InputLabelingProps {
   /** Visual style of the switch row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items. */
   variant?: 'default' | 'padded'
 
-  /** Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to automatic — `start` for label-only rows and `end` when a `description` is present. Pass `start` or `end` to override. */
+  /** Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label. */
   switchPosition?: 'start' | 'end'
 
   /** Disables the switch and prevents interaction */

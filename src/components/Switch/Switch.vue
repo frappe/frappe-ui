@@ -178,17 +178,19 @@ const switchLabelClasses = computed(() => {
   ]
 })
 
+// The switch trails the label in every row, which is how Switch has always
+// rendered — a leading switch is opt-in via `switch-position="start"`. Kept in
+// one place because the error indent below has to agree with it.
+const switchPosition = computed(() => props.switchPosition ?? 'end')
+
 const switchGroupClasses = computed(() => {
   const hasLabel = props.label || slots.label
   const hasDescription = props.description || slots.description
   if (!hasLabel && !hasDescription) return undefined
 
-  // Auto placement: the switch leads label-only rows and trails rows that
-  // carry a description. An explicit `switchPosition` always wins.
   // `flex-row-reverse` / `justify-*` are inline-axis aware, so this flips
   // correctly under RTL without any physical left/right values.
-  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
-  const switchStart = position === 'start'
+  const switchStart = switchPosition.value === 'start'
 
   if (hasDescription) {
     // Settings style: label + description on one side, switch on the other.
@@ -217,9 +219,7 @@ const switchGroupClasses = computed(() => {
 // Only needed when the switch leads the row (position = start); settings-style
 // rows (switch at end) have the label on the leading side already.
 const errorIndentClasses = computed(() => {
-  const hasDescription = props.description || slots.description
-  const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
-  if (position !== 'start') return undefined
+  if (switchPosition.value !== 'start') return undefined
   // switch width + gap-x-2.5 (10 px)
   return props.size === 'md'
     ? 'ps-[42px]'

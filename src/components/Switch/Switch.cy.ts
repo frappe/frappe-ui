@@ -192,26 +192,33 @@ describe('Switch', () => {
   })
 
   describe('switchPosition', () => {
-    it('leads with the switch by default (start)', () => {
-      cy.mount(Switch, { props: { label: 'abc' } })
+    /** Asserts the control sits after (or before) the label on the inline axis. */
+    function expectSwitchAfterLabel(after: boolean) {
       cy.get('[data-slot="control"]').then(($switch) => {
         cy.get('[data-slot="label"]').then(($label) => {
-          expect($switch[0].getBoundingClientRect().left).to.be.lessThan(
-            $label[0].getBoundingClientRect().left,
-          )
+          const switchLeft = $switch[0].getBoundingClientRect().left
+          const labelLeft = $label[0].getBoundingClientRect().left
+          if (after) expect(switchLeft).to.be.greaterThan(labelLeft)
+          else expect(switchLeft).to.be.lessThan(labelLeft)
         })
       })
+    }
+
+    // The default must not move: existing callers render label-first, and a
+    // silent flip would restyle every `<Switch label="…" />` in the wild.
+    it('trails the label by default on a label-only row', () => {
+      cy.mount(Switch, { props: { label: 'abc' } })
+      expectSwitchAfterLabel(true)
     })
 
-    it('trails the label when switch-position is end', () => {
-      cy.mount(Switch, { props: { label: 'abc', switchPosition: 'end' } })
-      cy.get('[data-slot="control"]').then(($switch) => {
-        cy.get('[data-slot="label"]').then(($label) => {
-          expect($switch[0].getBoundingClientRect().left).to.be.greaterThan(
-            $label[0].getBoundingClientRect().left,
-          )
-        })
-      })
+    it('trails the label by default when a description is present', () => {
+      cy.mount(Switch, { props: { label: 'abc', description: 'helper' } })
+      expectSwitchAfterLabel(true)
+    })
+
+    it('leads the label when switch-position is start', () => {
+      cy.mount(Switch, { props: { label: 'abc', switchPosition: 'start' } })
+      expectSwitchAfterLabel(false)
     })
   })
 })
