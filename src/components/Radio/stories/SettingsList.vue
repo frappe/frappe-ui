@@ -8,9 +8,7 @@ const notify = ref('all')
 <template>
   <div class="flex w-96 flex-col gap-6">
     <div class="flex flex-col gap-2">
-      <p class="text-base font-medium text-ink-gray-8">
-        Notification preferences
-      </p>
+      <p class="text-base-medium text-ink-gray-8">Notification preferences</p>
       <Radio
         v-model="notify"
         name="notify-pref"

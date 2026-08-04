@@ -29,6 +29,7 @@
         :id="labelId"
         :for-id="inputId"
         :label="props.label"
+        color="gray-7"
         :class="labelClasses"
       >
         <template v-if="$slots.label" #default>
@@ -102,16 +103,8 @@ const {
 
 const labelClasses = computed(() => {
   return [
-    props.size === 'md'
-      ? 'text-lg'
-      : props.size === 'sm'
-        ? 'text-base'
-        : 'text-sm',
-    'font-medium leading-tight',
-    props.disabled
-      ? 'text-ink-gray-4 cursor-not-allowed'
-      : 'text-ink-gray-8 cursor-pointer',
     'select-none',
+    props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
   ]
 })
 

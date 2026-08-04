@@ -7,7 +7,7 @@ const plan = ref('')
 
 <template>
   <div class="inline-flex flex-col gap-2">
-    <p class="text-base font-medium text-ink-gray-8">
+    <p class="text-base-medium text-ink-gray-8">
       Choose a plan
       <span class="text-ink-red-3 select-none" aria-hidden="true">*</span>
       <span class="sr-only">(required)</span>

@@ -1,5 +1,9 @@
 <template>
-  <div class="flex flex-col" :class="containerClasses" @click="onContainerClick">
+  <div
+    class="flex flex-col"
+    :class="containerClasses"
+    @click="onContainerClick"
+  >
     <div :class="switchGroupClasses">
       <div class="flex flex-col gap-1">
         <div class="flex items-center">
@@ -19,6 +23,7 @@
             :for-id="inputId"
             :label="props.label"
             :required="props.required"
+            color="gray-7"
             :class="switchLabelClasses"
           >
             <template v-if="$slots.label" #default="slotProps">
