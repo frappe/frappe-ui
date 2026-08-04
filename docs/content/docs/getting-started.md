@@ -5,6 +5,8 @@ an existing Frappe project.
 
 ## Quick start
 
+Requires **Node `>=20.19.0`**.
+
 You can quickly setup `frappe-ui` using
 [`frappe-ui-starter`](https://github.com/netchampfaris/frappe-ui-starter). If
 you already have a Frappe app for which you want to build a frontend you can
