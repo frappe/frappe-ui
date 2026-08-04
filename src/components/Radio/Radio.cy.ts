@@ -1,179 +1,286 @@
+import { h } from 'vue'
 import Radio from './Radio.vue'
+import RadioGroup from './RadioGroup.vue'
+
+/** Mounts a RadioGroup with the given options, forwarding group props. */
+function mountGroup(
+  groupProps: Record<string, any> = {},
+  options: Array<Record<string, any>> = [
+    { value: 'a', label: 'Option A' },
+    { value: 'b', label: 'Option B' },
+  ],
+) {
+  return cy.mount(RadioGroup, {
+    props: groupProps,
+    slots: {
+      default: () => options.map((o) => h(Radio, o)),
+    },
+  })
+}
 
 describe('Radio', () => {
-  it('renders', () => {
-    cy.mount(Radio, { props: { label: 'Option A', value: 'a' } })
+  it('renders one radio per option', () => {
+    mountGroup()
 
-    cy.get('input[type="radio"]').should('exist')
-    cy.get('label').should('contain.text', 'Option A')
+    cy.get('[role="radiogroup"]').should('exist')
+    cy.get('[role="radio"]').should('have.length', 2)
+    cy.get('[role="radio"]').first().should('contain.text', 'Option A')
   })
 
-  it('disabled', () => {
-    cy.mount(Radio, {
-      props: { label: 'Option A', value: 'a', disabled: true },
-    })
-
-    cy.get('input[type="radio"]').should('be.disabled')
-    cy.get('label').should('have.class', 'cursor-not-allowed')
-  })
-
-  it('v-model — selecting fires update:modelValue with the radio value', () => {
-    cy.mount(Radio, {
-      props: {
-        value: 'a',
-        modelValue: '',
-        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+  it('throws when used outside a RadioGroup', () => {
+    // The guard throws from setup(), so catch it in a parent's errorCaptured
+    // rather than letting it escape and fail the test run. Asserting the throw
+    // is the point: a group-less option would silently never select.
+    const onError = cy.spy().as('onError')
+    cy.mount({
+      errorCaptured(error: Error) {
+        onError(error.message)
+        return false
       },
+      render: () => h(Radio, { value: 'a', label: 'Option A' }),
+    })
+    cy.get('@onError').should(
+      'have.been.calledWithMatch',
+      /must be used inside a <RadioGroup>/,
+    )
+  })
+
+  it('v-model — selecting fires update:modelValue with the option value', () => {
+    mountGroup({
+      modelValue: '',
+      'onUpdate:modelValue': cy.spy().as('onUpdate'),
     })
 
     cy.get('@onUpdate').should('not.have.been.called')
-    cy.get('input[type="radio"]').click()
+    cy.get('[role="radio"]').first().click()
     cy.get('@onUpdate').should('have.been.calledWith', 'a')
   })
 
-  it('reflects checked state when modelValue matches value', () => {
-    cy.mount(Radio, {
-      props: { value: 'a', modelValue: 'a' },
-    })
+  it('reflects the checked state of the matching option', () => {
+    mountGroup({ modelValue: 'b' })
 
-    cy.get('input[type="radio"]').should('be.checked')
+    cy.get('[role="radio"]').eq(0).should('have.attr', 'aria-checked', 'false')
+    cy.get('[role="radio"]').eq(1).should('have.attr', 'aria-checked', 'true')
   })
 
-  it('does not fire when disabled', () => {
-    cy.mount(Radio, {
-      props: {
-        value: 'a',
+  it('draws the selected ring on the checked option only', () => {
+    // `data-state` lives on the RadioGroupItem button, so the circle styles it
+    // through `group-data-[state=checked]:`. Assert the painted result, not the
+    // class, or a wrong variant would still read as passing.
+    mountGroup({ modelValue: 'a' })
+
+    cy.get('[role="radio"]')
+      .eq(0)
+      .find('span')
+      .first()
+      .should('have.css', 'border-top-width', '4px')
+    cy.get('[role="radio"]')
+      .eq(1)
+      .find('span')
+      .first()
+      .should('have.css', 'border-top-width', '1px')
+  })
+
+  it('selects only one option at a time', () => {
+    mountGroup({ modelValue: 'a' })
+
+    cy.get('[role="radio"]').eq(1).click()
+    cy.get('[role="radio"][aria-checked="true"]').should('have.length', 1)
+    cy.get('[role="radio"]').eq(1).should('have.attr', 'aria-checked', 'true')
+  })
+
+  describe('disabled', () => {
+    it('disables every option when the group is disabled', () => {
+      mountGroup({
         modelValue: '',
         disabled: true,
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
-      },
-    })
-
-    cy.get('input[type="radio"]').click({ force: true })
-    cy.get('@onUpdate').should('not.have.been.called')
-  })
-
-  describe('shared labeling contract', () => {
-    it('wires aria-describedby', () => {
-      cy.mount(Radio, {
-        props: {
-          label: 'Option A',
-          value: 'a',
-          description: 'Billed annually.',
-        },
-      })
-      cy.get('input').then(($el) => {
-        const id = $el.attr('id')!
-        expect($el.attr('aria-describedby')).to.equal(`${id}-description`)
-      })
-    })
-
-    it('renders error state', () => {
-      cy.mount(Radio, {
-        props: { label: 'Option A', value: 'a', error: 'Select one.' },
-      })
-      cy.get('input').should('have.attr', 'aria-invalid', 'true')
-      cy.contains('Select one.').should('exist')
-    })
-
-    it('renders the canonical data-* hooks on the control', () => {
-      cy.mount(Radio, {
-        props: { label: 'Option A', value: 'a', modelValue: 'a', size: 'md' },
-      })
-      cy.get('input').should('have.attr', 'data-slot', 'control')
-      cy.get('input').should('have.attr', 'data-size', 'md')
-      cy.get('input').should('have.attr', 'data-state', 'checked')
-    })
-
-    it('exposes data-disabled when disabled', () => {
-      cy.mount(Radio, {
-        props: { label: 'Option A', value: 'a', disabled: true },
-      })
-      cy.get('input').should('have.attr', 'data-disabled', 'true')
-    })
-  })
-
-  describe('padded variant', () => {
-    it('clicking the padding area selects the radio', () => {
-      cy.mount(Radio, {
-        props: {
-          label: 'Option A',
-          value: 'a',
-          variant: 'padded',
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        },
       })
 
-      // Click the outer container — not the control or label directly.
-      cy.get('[data-slot="control"]').parent().click('left')
-      cy.get('@onUpdate').should('have.been.calledWith', 'a')
-    })
-
-    it('does not double-select when the label is clicked', () => {
-      cy.mount(Radio, {
-        props: {
-          label: 'Option A',
-          value: 'a',
-          variant: 'padded',
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        },
-      })
-
-      cy.get('[data-slot="label"]').click()
-      cy.get('@onUpdate').should('have.been.calledOnce')
-    })
-
-    it('does not select when disabled', () => {
-      cy.mount(Radio, {
-        props: {
-          label: 'Option A',
-          value: 'a',
-          variant: 'padded',
-          disabled: true,
-          'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        },
-      })
-
-      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('[role="radio"]').first().click({ force: true })
       cy.get('@onUpdate').should('not.have.been.called')
     })
 
-    it('keeps a fixed compact height for a label-only row', () => {
-      cy.mount(Radio, {
-        props: { label: 'Option A', value: 'a', variant: 'padded' },
-      })
-      cy.get('[data-slot="control"]')
-        .parent()
-        .parent()
-        .should('have.class', 'h-7')
+    it('looks disabled, not just behaves disabled, when the group is', () => {
+      // reka-ui merges the group's `disabled` into the item's behaviour on its
+      // own, so a styling-only regression here is invisible to click tests.
+      mountGroup({ modelValue: 'a', disabled: true })
+
+      cy.get('[role="radio"]')
+        .first()
+        .find('[data-slot="label"]')
+        .should('have.css', 'color')
+        .then((disabledColor) => {
+          mountGroup({ modelValue: 'a' })
+          cy.get('[role="radio"]')
+            .first()
+            .find('[data-slot="label"]')
+            .should('not.have.css', 'color', disabledColor as unknown as string)
+        })
     })
 
-    it('grows the surface when a description is present', () => {
-      cy.mount(Radio, {
-        props: {
-          label: 'Option A',
-          value: 'a',
-          description: 'Billed annually.',
-          variant: 'padded',
-        },
-      })
-      cy.get('[data-slot="control"]')
-        .parent()
-        .parent()
-        .should('not.have.class', 'h-7')
-        .and('have.class', 'py-1.5')
+    it('disables a single option without disabling the group', () => {
+      mountGroup({ modelValue: '' }, [
+        { value: 'a', label: 'Option A', disabled: true },
+        { value: 'b', label: 'Option B' },
+      ])
+
+      cy.get('[role="radio"]').eq(0).should('be.disabled')
+      cy.get('[role="radio"]').eq(1).should('not.be.disabled')
     })
   })
 
-  describe('size', () => {
-    it('exposes data-size for xs', () => {
-      cy.mount(Radio, { props: { label: 'Option A', value: 'a', size: 'xs' } })
-      cy.get('input').should('have.attr', 'data-size', 'xs')
+  describe('keyboard', () => {
+    it('moves selection with arrow keys', () => {
+      mountGroup({ modelValue: 'a' })
+
+      cy.get('[role="radio"]').first().focus()
+      cy.focused().trigger('keydown', { key: 'ArrowDown' })
+      cy.get('[role="radio"]').eq(1).should('have.attr', 'aria-checked', 'true')
+    })
+
+    it('loops from the last option back to the first', () => {
+      mountGroup({ modelValue: 'b' })
+
+      cy.get('[role="radio"]').eq(1).focus()
+      cy.focused().trigger('keydown', { key: 'ArrowDown' })
+      cy.get('[role="radio"]').eq(0).should('have.attr', 'aria-checked', 'true')
+    })
+  })
+
+  describe('group labeling', () => {
+    it('names the group from its label', () => {
+      mountGroup({ label: 'Choose a plan' })
+
+      cy.get('[role="radiogroup"]')
+        .should('have.attr', 'aria-labelledby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'Choose a plan')
+        })
+    })
+
+    it('marks the group required, not each option', () => {
+      mountGroup({ label: 'Choose a plan', required: true })
+
+      cy.get('label').should('contain.text', '*')
+      cy.get('[role="radio"]').should('not.contain.text', '*')
+    })
+
+    it('renders the group error and wires aria-errormessage', () => {
+      mountGroup({ label: 'Choose a plan', error: 'Select one.' })
+
+      cy.get('[role="radiogroup"]')
+        .should('have.attr', 'aria-invalid', 'true')
+        .and('have.attr', 'aria-errormessage')
+      cy.contains('Select one.').should('be.visible')
+    })
+
+    it('wires aria-describedby from the group description', () => {
+      mountGroup({ label: 'Choose a plan', description: 'Pick one option.' })
+
+      cy.get('[role="radiogroup"]')
+        .should('have.attr', 'aria-describedby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'Pick one option.')
+        })
+    })
+
+    it('describes an option from its own description', () => {
+      mountGroup({}, [
+        { value: 'a', label: 'Option A', description: 'The first one.' },
+      ])
+
+      cy.get('[role="radio"]')
+        .should('have.attr', 'aria-describedby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'The first one.')
+        })
+    })
+  })
+
+  describe('size and variant', () => {
+    it('passes the group size down to every option', () => {
+      mountGroup({ size: 'xs' })
+
+      cy.get('[role="radio"]').each(($el) => {
+        cy.wrap($el).should('have.attr', 'data-size', 'xs')
+      })
     })
 
     it('renders the xs control at 13px', () => {
-      cy.mount(Radio, { props: { label: 'Option A', value: 'a', size: 'xs' } })
-      cy.get('input').invoke('outerWidth').should('be.closeTo', 13, 1)
+      mountGroup({ size: 'xs' })
+
+      cy.get('[role="radio"]')
+        .first()
+        .find('span')
+        .first()
+        .invoke('outerWidth')
+        .should('be.closeTo', 13, 1)
+    })
+
+    it('keeps a fixed compact height for padded label-only rows', () => {
+      mountGroup({ variant: 'padded' })
+
+      cy.get('[role="radio"]').first().invoke('outerHeight').should('eq', 28)
+    })
+
+    it('grows a padded row that carries a description', () => {
+      mountGroup({ variant: 'padded' }, [
+        { value: 'a', label: 'Option A', description: 'Some longer detail.' },
+      ])
+
+      cy.get('[role="radio"]')
+        .first()
+        .invoke('outerHeight')
+        .should('be.greaterThan', 28)
+    })
+  })
+
+  describe('alignment', () => {
+    /** Asserts the circle's centre sits on the label's first-line centre. */
+    function expectCentredOnFirstLine() {
+      cy.get('[role="radio"]')
+        .first()
+        .then(($row) => {
+          const circle = $row.find('span')[0].getBoundingClientRect()
+          const label = $row.find('[data-slot="label"]')[0]
+          const lineHeight = parseFloat(getComputedStyle(label).lineHeight)
+          const labelRect = label.getBoundingClientRect()
+          expect(circle.top + circle.height / 2).to.be.closeTo(
+            labelRect.top + lineHeight / 2,
+            0.5,
+          )
+        })
+    }
+
+    for (const size of ['xs', 'sm', 'md'] as const) {
+      it(`centres the ${size} control on the label`, () => {
+        mountGroup({ size })
+        expectCentredOnFirstLine()
+      })
+    }
+
+    it('keeps the control on the first line when a description follows', () => {
+      mountGroup({}, [
+        {
+          value: 'a',
+          label: 'Option A',
+          description: 'A description long enough to matter.',
+        },
+      ])
+      expectCentredOnFirstLine()
+    })
+  })
+
+  describe('orientation', () => {
+    it('lays options out in a row when horizontal', () => {
+      mountGroup({ orientation: 'horizontal' })
+
+      cy.get('[role="radiogroup"]').should(
+        'have.attr',
+        'data-orientation',
+        'horizontal',
+      )
     })
   })
 })

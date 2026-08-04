@@ -1,2 +1,9 @@
 export { default as Radio } from './Radio.vue'
-export type { RadioProps, RadioValue } from './types'
+export { default as RadioGroup } from './RadioGroup.vue'
+export type {
+  RadioProps,
+  RadioGroupProps,
+  RadioGroupEmits,
+  RadioValue,
+  RadioVariant,
+} from './types'

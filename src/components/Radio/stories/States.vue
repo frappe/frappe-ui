@@ -1,24 +1,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Radio } from 'frappe-ui'
+import { Radio, RadioGroup } from 'frappe-ui'
 
-const a = ref('')
-const b = ref('on')
-const c = ref('')
-const d = ref('on')
+// Each state needs its own group — within one group only a single option can
+// be selected, which is the whole point of a radio.
+const unselected = ref('')
+const selected = ref('on')
+const disabled = ref('')
+const disabledSelected = ref('on')
 </script>
 
 <template>
   <div class="flex flex-col gap-3 items-start">
-    <Radio v-model="a" name="state-a" value="on" label="Unselected" />
-    <Radio v-model="b" name="state-b" value="on" label="Selected" />
-    <Radio v-model="c" name="state-c" value="on" label="Disabled" disabled />
-    <Radio
-      v-model="d"
-      name="state-d"
-      value="on"
-      label="Disabled selected"
-      disabled
-    />
+    <RadioGroup v-model="unselected">
+      <Radio value="on" label="Unselected" />
+    </RadioGroup>
+    <RadioGroup v-model="selected">
+      <Radio value="on" label="Selected" />
+    </RadioGroup>
+    <RadioGroup v-model="disabled" disabled>
+      <Radio value="on" label="Disabled" />
+    </RadioGroup>
+    <RadioGroup v-model="disabledSelected" disabled>
+      <Radio value="on" label="Disabled selected" />
+    </RadioGroup>
   </div>
 </template>

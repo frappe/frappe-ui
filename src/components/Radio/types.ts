@@ -1,35 +1,65 @@
+import type { ComputedRef, InjectionKey } from 'vue'
 import type { ToggleSize } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 /** The value a radio represents within its group. */
 export type RadioValue = string | number | boolean
 
-// `required` is intentionally omitted: a radio is one option within a group, so
-// an asterisk belongs on the group's heading, not on each option's label. Mark
-// a required group in your own markup (see the "Required" docs example). A
-// native `required` attribute still passes through to the input if you need
-// browser-level form validation.
-export interface RadioProps extends Omit<InputLabelingProps, 'required'> {
-  /** Controls the size of the radio */
+/** Visual style shared by the group and its options. */
+export type RadioVariant = 'default' | 'padded'
+
+export interface RadioGroupProps extends InputLabelingProps {
+  /** The selected value of the group. */
+  modelValue?: RadioValue
+
+  /** Size of every radio in the group. */
   size?: ToggleSize
 
-  /** Visual style of the radio row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side. */
-  variant?: 'default' | 'padded'
+  /** Visual style of the rows. `padded` wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items. */
+  variant?: RadioVariant
 
-  /** The value this radio represents within its group. */
-  value?: RadioValue
-
-  /** Native `name` shared by radios in the same group. Radios that share a `name` behave as one group for keyboard arrow-key navigation. */
-  name?: string
-
-  /** Disables the radio and prevents interaction */
+  /** Disables every radio in the group. */
   disabled?: boolean
 
-  /** The selected value of the group. A radio is checked when it equals `value`. */
-  modelValue?: RadioValue
+  /** Layout of the options. Also decides which arrow keys move the selection: up/down when vertical, left/right when horizontal. */
+  orientation?: 'vertical' | 'horizontal'
+
+  /** When `true`, arrow-key navigation wraps from the last option back to the first. */
+  loop?: boolean
+
+  /** Native `name` for the hidden form input, so the group submits with a form. Auto-generated when omitted. */
+  name?: string
 }
 
-export interface RadioEmits {
-  /** Fired when this radio is selected. */
+export interface RadioGroupEmits {
+  /** Fired when the selected value changes. */
   'update:modelValue': [value: RadioValue]
 }
+
+// `required` and `error` are intentionally omitted: a radio is one option within
+// a group, so the asterisk and the error message belong on the group, not on
+// each option. Set them on `<RadioGroup>` instead.
+//
+// `size` and `variant` are likewise group-level — mixing sizes within one group
+// has no design meaning, so they are inherited rather than per-option.
+export interface RadioProps extends Omit<
+  InputLabelingProps,
+  'required' | 'error'
+> {
+  /** The value this option represents within its group. */
+  value: RadioValue
+
+  /** Disables this option only. The group's `disabled` still wins when set. */
+  disabled?: boolean
+}
+
+/** Group-level state that each `Radio` reads instead of taking as its own prop. */
+export interface RadioGroupContext {
+  size: ComputedRef<ToggleSize>
+  variant: ComputedRef<RadioVariant>
+  hasError: ComputedRef<boolean>
+  disabled: ComputedRef<boolean>
+}
+
+export const RadioGroupContextKey: InjectionKey<RadioGroupContext> =
+  Symbol('RadioGroupContext')

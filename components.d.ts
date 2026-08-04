@@ -153,6 +153,7 @@ declare module 'vue' {
     'Progress.playground': typeof import('./src/components/Progress/Progress.playground.vue')['default']
     Radio: typeof import('./src/components/Radio/Radio.vue')['default']
     'Radio.playground': typeof import('./src/components/Radio/Radio.playground.vue')['default']
+    RadioGroup: typeof import('./src/components/Radio/RadioGroup.vue')['default']
     Rail: typeof import('./src/components/Rail/Rail.vue')['default']
     RailItem: typeof import('./src/components/Rail/RailItem.vue')['default']
     RailItemBadge: typeof import('./src/components/Rail/RailItemBadge.vue')['default']

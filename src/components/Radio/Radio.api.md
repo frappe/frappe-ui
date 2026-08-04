@@ -4,45 +4,100 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const radioProps = [
+  {
+    name: 'value',
+    description: 'The value this option represents within its group.',
+    required: true,
+    type: 'RadioValue'
+  },
+  {
+    name: 'disabled',
+    description: 'Disables this option only. The group\'s `disabled` still wins when set.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'id',
+    description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const radioSlots = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content.',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
+  const radioGroupProps = [
+  {
+    name: 'modelValue',
+    description: 'The selected value of the group.',
+    required: false,
+    type: 'RadioValue'
+  },
   {
     name: 'size',
-    description: 'Controls the size of the radio',
+    description: 'Size of every radio in the group.',
     required: false,
     type: 'ToggleSize',
     default: '"sm"'
   },
   {
     name: 'variant',
-    description: 'Visual style of the radio row. `padded` wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
+    description: 'Visual style of the rows. `padded` wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items.',
     required: false,
-    type: '"default" | "padded"',
+    type: 'RadioVariant',
     default: '"default"'
   },
   {
-    name: 'value',
-    description: 'The value this radio represents within its group.',
-    required: false,
-    type: 'RadioValue'
-  },
-  {
-    name: 'name',
-    description: 'Native `name` shared by radios in the same group. Radios that share a `name` behave as one group for keyboard arrow-key navigation.',
-    required: false,
-    type: 'string'
-  },
-  {
     name: 'disabled',
-    description: 'Disables the radio and prevents interaction',
+    description: 'Disables every radio in the group.',
     required: false,
     type: 'boolean',
     default: 'false'
   },
   {
-    name: 'modelValue',
-    description: 'The selected value of the group. A radio is checked when it equals `value`.',
+    name: 'orientation',
+    description: 'Layout of the options. Also decides which arrow keys move the selection: up/down when vertical, left/right when horizontal.',
     required: false,
-    type: 'RadioValue'
+    type: '"vertical" | "horizontal"',
+    default: '"vertical"'
+  },
+  {
+    name: 'loop',
+    description: 'When `true`, arrow-key navigation wraps from the last option back to the first.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'name',
+    description: 'Native `name` for the hidden form input, so the group submits with a form. Auto-generated when omitted.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'label',
@@ -63,6 +118,12 @@
     type: 'string | FrappeUIError'
   },
   {
+    name: 'required',
+    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'id',
     description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
     required: false,
@@ -70,20 +131,25 @@
   }
 ]
 
-  const slotsData = [
+  const radioGroupSlots = [
   {
-    name: 'label',
-    description: 'Overrides the rendered label content.',
+    name: 'default',
+    description: 'The `<Radio>` options.',
     type: 'any'
   },
   {
+    name: 'label',
+    description: 'Overrides the rendered group heading. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
     name: 'description',
-    description: 'Overrides the rendered description content.',
+    description: 'Overrides the rendered group description.',
     type: 'any'
   }
 ]
 
-  const emitsData = [
+  const radioGroupEmits = [
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
@@ -93,9 +159,17 @@
 </script>
 ## API Reference
 
-<PropsTable name="Radio" :data="propsData"/> 
+### Radio
 
-<SlotsTable :data="slotsData"/> 
+<PropsTable name="Radio" :data="radioProps"/> 
 
-<EmitsTable :data="emitsData"/> 
+<SlotsTable :data="radioSlots"/> 
+
+### RadioGroup
+
+<PropsTable folder="Radio" name="RadioGroup" :data="radioGroupProps"/> 
+
+<SlotsTable :data="radioGroupSlots"/> 
+
+<EmitsTable :data="radioGroupEmits"/> 
 

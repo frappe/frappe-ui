@@ -1,7 +1,18 @@
 # Radio
 
-Lets users pick a single option from a set. Radios that share a `v-model` (and
-`name`) form a group — selecting one clears the rest.
+Lets users pick a single option from a set. `RadioGroup` owns the selected
+value; each `Radio` inside it declares the value it represents.
+
+```vue
+<RadioGroup v-model="plan" label="Choose a plan">
+  <Radio value="free" label="Free" />
+  <Radio value="pro" label="Pro" />
+</RadioGroup>
+```
+
+`Radio` must be used inside a `RadioGroup` — it throws otherwise. The group
+handles arrow-key navigation, roving focus and form submission, so options only
+need a `value`.
 
 ## Playground
 
@@ -9,10 +20,9 @@ Lets users pick a single option from a set. Radios that share a `v-model` (and
 
 ## Required
 
-A radio is a single option within a group, so the asterisk belongs on the
-group's heading — not on each option. Mark the heading yourself; if you also
-need browser form validation, a native `required` attribute passes through to
-the underlying input.
+The asterisk belongs on the group heading, not on each option — a radio is one
+choice within a group, so marking every option would be wrong. Set `required` on
+`RadioGroup` and it renders on the heading.
 
 <ComponentPreview name="Radio-Required" />
 
@@ -22,8 +32,8 @@ the underlying input.
 
 ## Settings list
 
-Group radios under a heading for mutually exclusive settings. A `description`
-stacks below the label, indented under the control.
+Use `variant="padded"` for mutually exclusive settings. A `description` stacks
+below the label, and the whole row is the click target.
 
 <ComponentPreview name="Radio-SettingsList" />
 
