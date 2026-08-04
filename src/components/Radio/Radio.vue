@@ -1,7 +1,10 @@
 <template>
   <div
     class="flex-col"
-    :class="[props.variant === 'padded' ? 'flex' : 'inline-flex', containerClasses]"
+    :class="[
+      props.variant === 'padded' ? 'flex' : 'inline-flex',
+      containerClasses,
+    ]"
     @click="onContainerClick"
   >
     <div class="inline-flex gap-2 rounded transition">
@@ -99,9 +102,15 @@ const {
 
 const labelClasses = computed(() => {
   return [
-    props.size === 'md' ? 'text-lg' : props.size === 'sm' ? 'text-base' : 'text-sm',
+    props.size === 'md'
+      ? 'text-lg'
+      : props.size === 'sm'
+        ? 'text-base'
+        : 'text-sm',
     'font-medium leading-tight',
-    props.disabled ? 'text-ink-gray-4 cursor-not-allowed' : 'text-ink-gray-8 cursor-pointer',
+    props.disabled
+      ? 'text-ink-gray-4 cursor-not-allowed'
+      : 'text-ink-gray-8 cursor-pointer',
     'select-none',
   ]
 })
@@ -121,7 +130,11 @@ const labelClasses = computed(() => {
 //     is overridden back to a surface-base centre + currentColor ring.
 const inputClasses = computed(() => {
   const sizeClass =
-    props.size === 'md' ? 'size-4' : props.size === 'sm' ? 'size-3.5' : 'size-[13px]'
+    props.size === 'md'
+      ? 'size-4'
+      : props.size === 'sm'
+        ? 'size-3.5'
+        : 'size-[13px]'
   // Selected ring thickness (per Espresso) — the surface-base centre is
   // what's left inside it.
   const ringWidth =
@@ -178,7 +191,8 @@ const containerClasses = computed(() => {
   // area — including the corners — drives the control's hover state too.
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
-  const hasDetail = showDescription.value || hasError.value || !!slots.description
+  const hasDetail =
+    showDescription.value || hasError.value || !!slots.description
   const sizeClass = hasDetail
     ? props.size === 'md'
       ? 'px-3 py-2'

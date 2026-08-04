@@ -143,7 +143,11 @@ const switchClasses = computed(() => {
 const switchCircleClasses = computed(() => {
   return [
     'pointer-events-none inline-block transform rounded-full bg-surface-base shadow ring-0 transition duration-100 ease-in-out',
-    props.size === 'md' ? 'h-3.5 w-3.5' : props.size === 'sm' ? 'h-3 w-3' : 'h-2.5 w-2.5',
+    props.size === 'md'
+      ? 'h-3.5 w-3.5'
+      : props.size === 'sm'
+        ? 'h-3 w-3'
+        : 'h-2.5 w-2.5',
     props.size === 'md'
       ? model.value
         ? 'translate-x-3 rtl:-translate-x-3'
@@ -196,9 +200,7 @@ const switchGroupClasses = computed(() => {
       : 'justify-between gap-x-3',
   ]
   if (props.variant !== 'padded') {
-    classes.push(
-      'py-1.5 cursor-pointer rounded',
-    )
+    classes.push('py-1.5 cursor-pointer rounded')
     if (props.disabled) classes.push('cursor-not-allowed')
   }
   return classes
@@ -212,7 +214,11 @@ const errorIndentClasses = computed(() => {
   const position = props.switchPosition ?? (hasDescription ? 'end' : 'start')
   if (position !== 'start') return undefined
   // switch width + gap-x-2.5 (10 px)
-  return props.size === 'md' ? 'ps-[42px]' : props.size === 'sm' ? 'ps-9' : 'ps-8'
+  return props.size === 'md'
+    ? 'ps-[42px]'
+    : props.size === 'sm'
+      ? 'ps-9'
+      : 'ps-8'
 })
 
 // Label-only non-padded rows include py-1.5 on the switch group, which
@@ -235,7 +241,8 @@ const containerClasses = computed(() => {
   // area — including the corners — drives the control's hover state too.
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
-  const hasDetail = showDescription.value || hasError.value || !!slots.description
+  const hasDetail =
+    showDescription.value || hasError.value || !!slots.description
   const sizeClass = hasDetail
     ? props.size === 'md'
       ? 'px-3 py-2'

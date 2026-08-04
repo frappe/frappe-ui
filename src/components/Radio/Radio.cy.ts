@@ -56,7 +56,11 @@ describe('Radio', () => {
   describe('shared labeling contract', () => {
     it('wires aria-describedby', () => {
       cy.mount(Radio, {
-        props: { label: 'Option A', value: 'a', description: 'Billed annually.' },
+        props: {
+          label: 'Option A',
+          value: 'a',
+          description: 'Billed annually.',
+        },
       })
       cy.get('input').then(($el) => {
         const id = $el.attr('id')!
@@ -138,7 +142,10 @@ describe('Radio', () => {
       cy.mount(Radio, {
         props: { label: 'Option A', value: 'a', variant: 'padded' },
       })
-      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('have.class', 'h-7')
     })
 
     it('grows the surface when a description is present', () => {

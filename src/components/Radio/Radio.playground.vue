@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Radio } from 'frappe-ui'
-import ComponentPlayground, { type Knob } from './ComponentPlayground.vue'
+import type { Knob } from 'frappe-ui/vitepress'
 
 // A radio is one option within a group; the playground shows a single selected
 // option so the knobs can demonstrate its states.
@@ -49,7 +49,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <ComponentPlayground :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
     <template #preview="{ values }">
       <Radio
         v-model="model"
@@ -62,5 +62,5 @@ function buildCode(v: Record<string, any>) {
         :disabled="values.disabled"
       />
     </template>
-  </ComponentPlayground>
+  </PlaygroundFrame>
 </template>

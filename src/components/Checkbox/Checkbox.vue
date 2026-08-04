@@ -131,7 +131,11 @@ const {
   size: () => props.size,
   disabled: () => props.disabled,
   state: () =>
-    props.indeterminate ? 'indeterminate' : checked.value ? 'checked' : 'unchecked',
+    props.indeterminate
+      ? 'indeterminate'
+      : checked.value
+        ? 'checked'
+        : 'unchecked',
 })
 
 const labelClasses = computed(() => {

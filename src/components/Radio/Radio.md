@@ -5,7 +5,7 @@ Lets users pick a single option from a set. Radios that share a `v-model` (and
 
 ## Playground
 
-<ClientOnly><RadioBuilder /></ClientOnly>
+<ComponentPlayground name="Radio" />
 
 ## Required
 
