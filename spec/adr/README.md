@@ -15,3 +15,4 @@ Specs describe the current contract. ADRs explain why decisions were made. Super
 | [0007 — Named typography style utilities](./0007-typography-style-utilities.md) | Accepted | `text-{size}-medium` utilities for Figma's medium-weight tracking. |
 | [0008 — No deprecated members in `1.0.0`](./0008-no-deprecated-members-in-1-0-0.md) | Accepted | Everything `@deprecated` is deleted before the stable tag. |
 | [0009 — Client filtering is opt-out](./0009-client-filtering-is-opt-out.md) | Accepted | `filterable` exists so server-driven options aren't filtered twice. |
+| [0010 — Subpath export rule](./0010-subpath-export-rule.md) | Accepted | Root is the default; a subpath is earned by cost isolation, an extensible registry, or a name collision — not part count or organization. |

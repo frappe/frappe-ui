@@ -462,4 +462,34 @@ const isDismissible = computed(() => {
 1. Exposed through a single curated barrel (`experimental.ts`) behind the `./experimental` export **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
 2. The barrel header restates the no-promise contract at the point of use.
 3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
+
+---
+
+## Package structure
+
+### P15. Root is the default; a subpath is earned, not organized into
+
+**Rule:** Every export lives at the package root unless it clears one of three bars:
+
+1. **Cost isolation** — it statically pulls a third-party dependency, or ships a CSS side effect, that root must not impose on every consumer. A dependency reached only through `await import()` is already isolated and doesn't count.
+2. **Extensible registry** — consumers can add a *new kind* of member the library never defined (a custom TipTap extension, a custom menu item), with no library change. A component with props and slots isn't this, however complex internally; neither is assembling a fixed set of named parts into a layout, however many parts.
+3. **Name collision** — its export names collide with root's, or would as root grows.
+
+Part count, file count, and "it would read better organized" are explicitly **not** reasons. Grouping by domain is the docs' job, not the module graph's — and a subpath is a one-way door: exported at `1.0.0`, it freezes under P13 until `2.0.0`, while adding a subpath later is always additive. When in doubt, default to root; the cost of being wrong is much lower in that direction.
+
+**Why:** A subpath makes a permanent promise about where something lives and what it costs to import. Without a written bar, every new family invents its own answer and the split reads as historical accident. The three bars above are the only things that have held up against every existing family, tested one by one — see ADR-0010 for the full audit and the size/collision-only alternatives it rejected along the way.
+
+```
+// Good — cost isolation: TipTap only loads if you import it
+import { Editor } from 'frappe-ui/editor'
+
+// Good — a fixed set of named parts, however many: root
+import { SettingsDialog, SettingsSidebar, SettingsPanel } from 'frappe-ui'
+
+// Bad — minting a subpath because a family "feels big enough"
+import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
+// dependency, no CSS side effect, and no colliding name — it stays at root.
+```
+
+**Consequence:** because root is the permanent home for everything that doesn't clear a bar, its compound families — `SettingsDialog`, `PageHeader`, `Sidebar`, list views — freeze there too. A subpath can't be used later to fix a name that shipped wrong; getting those names right is the cost of keeping them at root.
 4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.
