@@ -70,6 +70,42 @@ describe('Textarea', () => {
       .and('have.been.calledWith', 'Delayed update')
   })
 
+  describe('sizes', () => {
+    const sizes = [
+      { size: 'sm', fontClass: 'text-base', px: 14 },
+      { size: 'md', fontClass: 'text-lg', px: 16 },
+      { size: 'lg', fontClass: 'text-2xl', px: 18 },
+      { size: 'xl', fontClass: 'text-3xl', px: 20 },
+    ] as const
+
+    sizes.forEach(({ size, fontClass, px }) => {
+      it(`size="${size}" applies ${fontClass} and renders at ${px}px`, () => {
+        cy.mount(Textarea, { props: { size } })
+
+        cy.get('textarea')
+          .should('have.class', fontClass)
+          .and('have.css', 'font-size', `${px}px`)
+      })
+    })
+
+    it('increases font size monotonically across sizes', () => {
+      const rendered: number[] = []
+
+      sizes.forEach(({ size }) => {
+        cy.mount(Textarea, { props: { size } })
+        cy.get('textarea').then(($el) => {
+          rendered.push(parseFloat(getComputedStyle($el[0]).fontSize))
+        })
+      })
+
+      cy.then(() => {
+        rendered.slice(1).forEach((px, i) => {
+          expect(px).to.be.greaterThan(rendered[i])
+        })
+      })
+    })
+  })
+
   describe('shared labeling contract', () => {
     it('wires aria-describedby to the description region', () => {
       cy.mount(Textarea, {
