@@ -411,12 +411,12 @@ defineExpose(exposed)
           :side-offset="offset"
         >
           <!--
-          `instant` (no scale-from-trigger enter, no exit) rather than the
-          animated rhythm: the menu is anchored item-aligned *over* the
-          trigger, so a scale/translate entrance reads as a glitch. The ~80ms
-          opacity fade `instant` keeps masks reka's 1-frame position-settle.
+          The panel never scales in. That matters most here: the menu is
+          anchored item-aligned *over* the trigger, so a scale/translate
+          entrance reads as a glitch. The ~80ms opacity fade that remains
+          masks reka's 1-frame position-settle.
         -->
-          <PopoverPanel motion="instant" class="flex flex-col">
+          <PopoverPanel class="flex flex-col">
             <SelectViewport class="flex min-h-0 flex-col p-1">
               <div
                 v-if="!selectOptions.length"

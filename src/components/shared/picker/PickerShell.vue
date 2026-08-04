@@ -50,11 +50,7 @@
         @open-auto-focus.prevent
         @interact-outside="onInteractOutside"
       >
-        <PopoverPanel
-          ref="popoverPanelRef"
-          motion="instant"
-          :class="contentClass"
-        >
+        <PopoverPanel ref="popoverPanelRef" :class="contentClass">
           <slot :close="closePopover" />
         </PopoverPanel>
       </PopoverContent>

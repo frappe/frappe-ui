@@ -69,15 +69,10 @@ defineSlots<{
         v-bind="$attrs"
       >
         <!--
-          The only surface that keeps the scale-from-trigger entrance. It opens
-          on hover after a delay, not on a click, so the entrance is never felt
-          as latency the way it was on menus and pickers. The panel relies on
-          the ancestor HoverCardContent's data-state for motion.
+          The panel relies on the ancestor HoverCardContent's data-state for
+          motion.
         -->
-        <PopoverPanel
-          motion="animated"
-          class="origin-[var(--reka-hover-card-content-transform-origin)]"
-        >
+        <PopoverPanel>
           <slot />
         </PopoverPanel>
         <HoverCardArrow

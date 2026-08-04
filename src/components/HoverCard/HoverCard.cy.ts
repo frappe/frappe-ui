@@ -88,7 +88,7 @@ describe('HoverCard', () => {
     cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
   })
 
-  it('always uses animated motion for hover opens', () => {
+  it('opens without an enter/exit animation (instant motion)', () => {
     cy.clock()
     cy.mount(HoverCard, { slots: Slots, props: { hoverDelay: 0 } })
 
@@ -97,7 +97,7 @@ describe('HoverCard', () => {
     cy.get('[data-slot="content-body"]').should(
       'have.attr',
       'data-motion',
-      'animated',
+      'instant',
     )
   })
 })

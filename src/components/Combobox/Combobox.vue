@@ -678,7 +678,7 @@ defineSlots<ComboboxSlots>()
               @mount-auto-focus="handleFocusScopeMountAutoFocus"
               @unmount-auto-focus.prevent
             >
-              <PopoverPanel motion="instant">
+              <PopoverPanel>
                 <!--
                   The in-popover search row exists only in button mode, and
                   `hideSearch` removes it entirely — the `#search-prefix` /

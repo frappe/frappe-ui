@@ -50,7 +50,7 @@
         -->
         <slot v-if="hasBareBody" name="body" v-bind="legacySlotProps" />
         <slot v-else-if="hasNewContent && bare" v-bind="newSlotProps" />
-        <PopoverPanel v-else motion="instant">
+        <PopoverPanel v-else>
           <slot v-if="hasNewContent" v-bind="newSlotProps" />
           <slot v-else name="body-main" v-bind="legacySlotProps" />
         </PopoverPanel>

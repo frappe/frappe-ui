@@ -39,7 +39,7 @@ component (`Popover`, `Select`, `Combobox`, `DatePicker`, `TimePicker`).
   ring-black ring-opacity-5`
 - `data-slot="content"`
 - the motion-target wiring: `data-state="open|closed"` and
-  `data-motion="animated|instant"` on the content-body
+  `data-motion="instant"` on the content-body
 
 `PopoverPanel` does **not** own:
 
@@ -48,19 +48,16 @@ component (`Popover`, `Select`, `Combobox`, `DatePicker`, `TimePicker`).
 - positioning props, dismissal, keyboard, or a11y
 - selection / query / menu behavior
 
-### Motion rhythm prop
+### Motion rhythm
 
-`PopoverPanel` takes a `motion` prop with two rhythms:
-
-- `motion="instant"` (default): `80ms` opacity fade on open, nothing on close
-  (see [Motion](#motion)). Everything you click open uses this.
-- `motion="animated"`: scale-from-trigger, `180ms` enter / `140ms` exit. Only
-  for surfaces that are not click-driven — `HoverCard` is the one case today.
+There is one rhythm and no prop to pick it: an `80ms` opacity fade on open,
+nothing on close (see [Motion](#motion)). Every surface uses it, `HoverCard`
+included. Nothing in the library scales in.
 
 Decision on `Dropdown`: `Dropdown` is **left as-is** and does **not** fold into
-`PopoverPanel`. It keeps its own menu shell and its own copy of the instant
-fade; the two rhythms match, but re-homing the shell is not clean enough to
-justify in this rebuild.
+`PopoverPanel`. It keeps its own menu shell, and shares the fade with
+`ContextMenu` through `Menu.vue`. The rhythms match, but re-homing the shell is
+not clean enough to justify in this rebuild.
 
 ## Exact public API for v1
 
@@ -251,8 +248,7 @@ Stable hooks instead:
   deprecated `PopoverAnchor`)
 - `data-slot="content"` — on the `PopoverPanel` shell
 - `data-state="open" | "closed"` — driven by the reka popover primitive
-- `data-motion="animated" | "instant"` — on the content-body; `Popover` is
-  always `instant`
+- `data-motion="instant"` — on the content-body
 
 The shell visual is owned by `PopoverPanel`: `rounded-lg
 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`. (This is a
@@ -274,8 +270,8 @@ instantly, with only a short fade to smooth the paint.
 - `transition="default"` is a deprecated no-op (motion is on by default)
 
 A panel that appears at a fixed spot has nothing to scale from, so an entrance
-animation only adds latency. `HoverCard` is the exception — it opens on hover
-after a delay, so it keeps `motion="animated"`.
+animation only adds latency. Every surface in the library uses this rhythm,
+`HoverCard` and `ContextMenu` included.
 
 ## Accessibility and semantics
 
