@@ -462,6 +462,7 @@ const isDismissible = computed(() => {
 1. Exposed through a single curated barrel (`experimental.ts`) behind the `./experimental` export **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
 2. The barrel header restates the no-promise contract at the point of use.
 3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
+4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.
 
 ---
 
@@ -492,4 +493,3 @@ import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
 ```
 
 **Consequence:** because root is the permanent home for everything that doesn't clear a bar, its compound families — `SettingsDialog`, `PageHeader`, `Sidebar`, list views — freeze there too. A subpath can't be used later to fix a name that shipped wrong; getting those names right is the cost of keeping them at root.
-4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.
