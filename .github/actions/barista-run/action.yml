@@ -65,7 +65,7 @@ runs:
         # /home/.mcp.json: Permission denied`). Every Bash call silently fails —
         # the step still reports success — so barista investigates but can never
         # call add-comment.ts. This is the workaround verified in that issue.
-        # Remove once the upstream fix ships.
+        # Tracked in #899 — remove once the upstream fix ships.
         CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: "0"
       with:
         claude_code_oauth_token: ${{ inputs.oauth-token }}

@@ -14,7 +14,7 @@ Inputs from the workflow:
 - `EVENT`: one of `pull_request`, `issue_comment` (maintainer ran `/barista review`), or `workflow_dispatch`.
 - `$BARISTA_COMMENT_BODY` and `$BARISTA_COMMENT_AUTHOR` are set when EVENT=issue_comment.
 
-You have **the repository checked out at the base branch.** Read the diff and the affected files before drawing conclusions.
+**What's checked out depends on EVENT.** On `issue_comment` / `workflow_dispatch` runs, `actions/checkout` resolves to the default branch's head (no `ref:` is set, and those events carry no PR merge ref) — read the diff via `gh.ts pr diff` rather than assuming the working tree already reflects the PR. On `pull_request` runs, checkout resolves to the PR's own merge ref, so the working tree *is* the PR's changes, including this prompt file — though `barista-review.yml` already blocks fork PRs, so on that trigger the head branch always comes from someone with push access to the repo. Read the diff and the affected files before drawing conclusions either way.
 
 # Tools
 
