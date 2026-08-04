@@ -59,6 +59,14 @@ runs:
         BARISTA_COMMENT_AUTHOR: ${{ inputs.comment-author }}
         BARISTA_BRANCH: ${{ inputs.branch }}
         BARISTA_BASE: ${{ inputs.base }}
+        # TEMPORARY — anthropics/claude-code-action#1547: allowed_non_write_users
+        # turns on a bubblewrap sandbox for every Bash call, and that sandbox has
+        # been broken since Claude Code CLI 2.1.216 (`bwrap: Can't create file at
+        # /home/.mcp.json: Permission denied`). Every Bash call silently fails —
+        # the step still reports success — so barista investigates but can never
+        # call add-comment.ts. This is the workaround verified in that issue.
+        # Remove once the upstream fix ships.
+        CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: "0"
       with:
         claude_code_oauth_token: ${{ inputs.oauth-token }}
         github_token: ${{ inputs.app-token }}

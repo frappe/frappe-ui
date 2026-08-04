@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(jq:*),Bash(wc:*),Read,Glob,Grep
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(wc:*),Read,Glob,Grep
 description: Review a frappe-ui pull request and post one concise comment with findings.
 ---
 
@@ -28,7 +28,6 @@ You have **the repository checked out at the base branch.** Read the diff and th
 - `./.github/barista/scripts/gh.ts release list --limit 5` / `release view <tag>` — recent releases. Useful for "is this a breaking change since the last published version?".
 - `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)`, `Bash(git diff:*)` — inspect history near changed files.
 - `Bash(git merge-base:*)`, `Bash(git rev-parse:*)`, `Bash(git ls-files:*)` — locate the base commit, resolve refs, enumerate files (e.g. `git ls-files 'src/components/Toast/**'`).
-- `Bash(jq:*)` — parse JSON output from `gh.ts ... --json …` when grepping prose is awkward.
 - `./.github/barista/scripts/gh.ts search issues "<query>"` — find related open issues (no `repo:`/`org:`/`user:` qualifiers).
 
 **Write (one call, at the end):**
