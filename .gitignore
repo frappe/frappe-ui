@@ -38,6 +38,7 @@ docs/css/shiki.css
 # Keep legacy.md (the only hand-written file in this dir).
 docs/content/docs/components/*.md
 !docs/content/docs/components/legacy.md
+docs/content/docs/experimental/*.md
 
 coverage
 .nyc_output

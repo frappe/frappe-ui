@@ -7,7 +7,11 @@ import {
   type SidebarSection,
 } from 'frappe-ui/vitepress'
 import { meta } from './meta'
-import { getComponentItems, getFrappeItems } from './utils'
+import {
+  getComponentItems,
+  getExperimentalItems,
+  getFrappeItems,
+} from './utils'
 
 const configDir = path.dirname(fileURLToPath(import.meta.url))
 // rootDir is the docs dir (defineDocsConfig sets srcDir: 'content' under it).
@@ -44,6 +48,14 @@ function buildSidebar(): SidebarSection[] {
   const frappeSection: SidebarSection[] = frappeItems.length
     ? [{ text: 'Frappe Controls', items: frappeItems }]
     : []
+
+  const experimentalItems = [
+    { text: 'Overview', link: '/docs/experimental' },
+    ...getExperimentalItems().map((name) => ({
+      text: name,
+      link: `/docs/experimental/${name.toLowerCase()}`,
+    })),
+  ]
 
   return [
     {
@@ -85,13 +97,13 @@ function buildSidebar(): SidebarSection[] {
         },
       ],
     },
+    { text: 'Experimental', items: experimentalItems },
     {
       text: 'Other',
       items: [
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
         { text: 'Directives', link: '/docs/other/directives' },
-        { text: 'Experimental', link: '/docs/experimental' },
       ],
     },
   ]
@@ -126,6 +138,12 @@ const colocatedRoots = [
   {
     sourceDir: path.resolve(repoRoot, 'frappe'),
     proxyDir: path.resolve(rootDir, 'content/docs/frappe'),
+  },
+  // Experimental exports with a colocated page get one under /docs/experimental,
+  // next to the hand-written overview page.
+  {
+    sourceDir: path.resolve(repoRoot, 'experimental'),
+    proxyDir: path.resolve(rootDir, 'content/docs/experimental'),
   },
 ]
 

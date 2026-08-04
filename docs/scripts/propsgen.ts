@@ -20,10 +20,13 @@ const tsconfigChecker = createChecker(
   checkerOptions,
 )
 
+const EXPERIMENTAL_ROOT = path.join(__dirname, '../../experimental')
+
 const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
   path.join(__dirname, '../../src/molecules'),
   path.join(__dirname, '../../frappe'),
+  EXPERIMENTAL_ROOT,
 ]
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
 const AUTO_STORIES_END = '<!-- AUTO-GENERATED STORIES END -->'
@@ -396,7 +399,14 @@ function getAvailableComponents(rootDir: string) {
           fs.existsSync(path.join(rootDir, name, `${name}.md`))
         )
       }
-      return fs.existsSync(path.join(rootDir, name, `${name}.vue`))
+      if (!fs.existsSync(path.join(rootDir, name, `${name}.vue`))) return false
+      // Experimental exports opt in the same way: most of them are documented
+      // in prose on the Experimental overview page and have no page of their
+      // own to render the generated tables into.
+      if (rootDir === EXPERIMENTAL_ROOT) {
+        return fs.existsSync(path.join(rootDir, name, `${name}.md`))
+      }
+      return true
     })
     .sort((a, b) => a.localeCompare(b))
 }
