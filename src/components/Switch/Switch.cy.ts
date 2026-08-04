@@ -29,6 +29,19 @@ describe('Switch', () => {
     cy.get('[role="switch"]').should('have.attr', 'disabled')
   })
 
+  it('dims the label and description when disabled', () => {
+    cy.mount(Switch, {
+      props: { label: 'abc', description: 'Helper text.', disabled: true },
+    })
+
+    cy.get('label')
+      .should('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-7')
+    cy.get('[data-slot="description"]')
+      .should('have.class', 'text-ink-gray-3')
+      .and('not.have.class', 'text-ink-gray-5')
+  })
+
   it('v-model', () => {
     cy.mount(Switch, {
       props: {
@@ -153,7 +166,10 @@ describe('Switch', () => {
 
     it('keeps a fixed compact height for a label-only row', () => {
       cy.mount(Switch, { props: { label: 'abc', variant: 'padded' } })
-      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('have.class', 'h-7')
     })
 
     it('grows the surface when a description is present', () => {

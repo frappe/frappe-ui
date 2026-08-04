@@ -6,6 +6,7 @@
       :label="props.label"
       :required="props.required"
       color="gray-7"
+      :disabled="props.disabled"
       class="select-none"
     >
       <template v-if="$slots.label" #default="slotProps">
@@ -34,6 +35,7 @@
         v-if="showDescription || $slots.description"
         :id="descriptionId"
         :description="props.description"
+        :disabled="props.disabled"
       >
         <slot v-if="$slots.description" name="description" />
       </InputDescription>

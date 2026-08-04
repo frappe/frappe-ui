@@ -19,9 +19,20 @@ describe('Checkbox', () => {
     })
 
     cy.get('input[type="checkbox"]').should('be.disabled')
+    // A disabled control dims its label — `disabled` outranks `color="gray-7"`.
     cy.get('label')
       .should('have.class', 'text-base')
-      .and('have.class', 'text-ink-gray-7')
+      .and('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-7')
+  })
+
+  it('dims the description when disabled', () => {
+    cy.mount(Checkbox, {
+      props: { label: 'abc', description: 'Helper text.', disabled: true },
+    })
+
+    cy.get('[data-slot="description"]')
+      .should('have.class', 'text-ink-gray-3')
       .and('not.have.class', 'text-ink-gray-5')
   })
 
@@ -145,7 +156,10 @@ describe('Checkbox', () => {
 
     it('keeps a fixed compact height for a label-only row', () => {
       cy.mount(Checkbox, { props: { label: 'abc', variant: 'padded' } })
-      cy.get('[data-slot="control"]').parent().parent().should('have.class', 'h-7')
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('have.class', 'h-7')
     })
 
     it('grows the surface when a description is present', () => {
