@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Accordion, Button } from 'frappe-ui'
+import { Button } from 'frappe-ui'
+import { Accordion } from '..'
 
 // "Controlled" means the parent owns the open state via v-model — the
 // Accordion reflects `open`, and external controls can drive it too.

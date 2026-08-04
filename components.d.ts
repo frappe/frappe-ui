@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Accordion: typeof import('./src/components/Accordion/Accordion.vue')['default']
     Alert: typeof import('./src/components/Alert/Alert.vue')['default']
     'Alert.playground': typeof import('./src/components/Alert/Alert.playground.vue')['default']
     Autocomplete: typeof import('./src/components/Autocomplete/Autocomplete.vue')['default']

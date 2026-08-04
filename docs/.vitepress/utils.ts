@@ -3,6 +3,7 @@ import path from 'node:path'
 
 const components_path = path.resolve(__dirname, '../../src/components/')
 const frappe_path = path.resolve(__dirname, '../../frappe/')
+const experimental_path = path.resolve(__dirname, '../../experimental/')
 
 function listWithStories(rootPath: string): string[] {
   const entries = fs.readdirSync(rootPath, { withFileTypes: true })
@@ -26,3 +27,7 @@ function listWithStories(rootPath: string): string[] {
 export const getComponentItems = () => listWithStories(components_path)
 
 export const getFrappeItems = () => listWithStories(frappe_path)
+
+// Experimental exports that ship a colocated page of their own; the rest are
+// documented inline on the Experimental overview page.
+export const getExperimentalItems = () => listWithStories(experimental_path)

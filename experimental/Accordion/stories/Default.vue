@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Accordion } from 'frappe-ui'
+import { Accordion } from '..'
 
 const items = [
   {

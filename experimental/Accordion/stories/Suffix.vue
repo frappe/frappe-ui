@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Accordion, Badge } from 'frappe-ui'
+import { Badge } from 'frappe-ui'
+import { Accordion } from '..'
 
 const items = [
   { value: 'inbox', title: 'Inbox', content: 'Messages waiting for a reply.' },

@@ -3,6 +3,16 @@
 Stacks sections of content behind labelled headers that expand and collapse.
 Useful for FAQs, settings groups, and anywhere vertical space is at a premium.
 
+> **Experimental** — `Accordion` ships from
+> [`frappe-ui/experimental`](/docs/experimental) while its API settles, so it is
+> exempt from the usual deprecation policy and can change shape or disappear in
+> any release.
+
+```ts
+import { Accordion } from 'frappe-ui/experimental'
+import type { AccordionItem, AccordionProps } from 'frappe-ui/experimental'
+```
+
 ## Default
 
 <ComponentPreview name="Accordion-Default" />

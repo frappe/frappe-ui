@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Accordion } from 'frappe-ui'
+import { Accordion } from '..'
 
 const open = ref<string[]>(['general', 'billing'])
 
