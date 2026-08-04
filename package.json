@@ -88,6 +88,9 @@
     "./vite": {
       "import": "./vite/index.js"
     },
+    "./vite/lucideIconsPlugin": {
+      "import": "./vite/lucideIconsPlugin.js"
+    },
     "./vitepress": {
       "types": "./vitepress/index.d.ts",
       "node": "./vitepress/index.node.ts",

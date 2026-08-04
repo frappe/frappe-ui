@@ -106,6 +106,22 @@ standardized stroke-width of 1.5.
 import LucideArrowRight from '~icons/lucide/arrow-right'
 ```
 
+**Resolver only** — a build that imports every icon explicitly gets no value
+from auto-import, and paying for `unplugin-auto-import` and
+`unplugin-vue-components` to have it is waste. Import the resolver on its own:
+
+```javascript
+import { lucideIconsPlugin } from 'frappe-ui/vite/lucideIconsPlugin'
+
+export default defineConfig({
+  plugins: [lucideIconsPlugin(), vue()],
+})
+```
+
+`~icons/lucide/<name>` still resolves; `<LucideArrowRight />` without an import
+does not. `frappe-ui/vite` re-exports the same plugin for callers already
+importing from there.
+
 ### Frappe Types
 
 Auto-generates TypeScript interfaces from Frappe DocType JSON files. Interfaces
