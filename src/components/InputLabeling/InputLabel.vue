@@ -24,6 +24,8 @@ const props = withDefaults(
     label?: string
     required?: boolean
     color?: 'gray-5' | 'gray-7'
+    /** Dims the label to match a disabled control. Overrides `color`. */
+    disabled?: boolean
   }>(),
   {
     color: 'gray-5',
@@ -31,9 +33,15 @@ const props = withDefaults(
 )
 
 const labelClasses = computed(() => {
+  // Disabled wins over `color` — a dimmed label is a state, not a choice, so
+  // callers shouldn't have to remember to swap the colour themselves.
   return [
     'block text-base',
-    props.color === 'gray-7' ? 'text-ink-gray-7' : 'text-ink-gray-5',
+    props.disabled
+      ? 'text-ink-gray-4'
+      : props.color === 'gray-7'
+        ? 'text-ink-gray-7'
+        : 'text-ink-gray-5',
   ]
 })
 </script>

@@ -13,6 +13,19 @@
     default: '"sm"'
   },
   {
+    name: 'padded',
+    description: 'Wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'controlPosition',
+    description: 'Position of the control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label.',
+    required: false,
+    type: '"start" | "end"'
+  },
+  {
     name: 'disabled',
     description: 'Disables the switch and prevents interaction',
     required: false,
@@ -21,7 +34,7 @@
   },
   {
     name: 'icon',
-    description: 'Optional icon rendered alongside the label.\nStrings starting with `lucide-` are rendered via the shared Lucide\nTailwind utility; component values are rendered with `<component :is>`.',
+    description: 'Optional icon rendered alongside the label. Strings starting with `lucide-` are rendered via the shared Lucide Tailwind utility; component values are rendered with `<component :is>`.',
     required: false,
     type: 'string | Component'
   },
@@ -93,11 +106,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Switch" :data="propsData"/> 
+<PropsTable name="Switch" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

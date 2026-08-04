@@ -19,9 +19,20 @@ describe('Checkbox', () => {
     })
 
     cy.get('input[type="checkbox"]').should('be.disabled')
+    // A disabled control dims its label — `disabled` outranks `color="gray-7"`.
     cy.get('label')
       .should('have.class', 'text-base')
-      .and('have.class', 'text-ink-gray-7')
+      .and('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-7')
+  })
+
+  it('dims the description when disabled', () => {
+    cy.mount(Checkbox, {
+      props: { label: 'abc', description: 'Helper text.', disabled: true },
+    })
+
+    cy.get('[data-slot="description"]')
+      .should('have.class', 'text-ink-gray-3')
       .and('not.have.class', 'text-ink-gray-5')
   })
 
@@ -98,6 +109,92 @@ describe('Checkbox', () => {
         'have.been.calledWithMatch',
         /Checkbox\.padding is deprecated/,
       )
+    })
+  })
+
+  describe('padded', () => {
+    it('clicking the padding area toggles the checkbox', () => {
+      cy.mount(Checkbox, {
+        props: {
+          label: 'abc',
+          padded: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      // Click the outer container — not the control or label directly.
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('have.been.calledWith', true)
+    })
+
+    it('does not double-toggle when the label is clicked', () => {
+      cy.mount(Checkbox, {
+        props: {
+          label: 'abc',
+          padded: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="label"]').click()
+      cy.get('@onUpdate').should('have.been.calledOnce')
+    })
+
+    it('does not toggle when disabled', () => {
+      cy.mount(Checkbox, {
+        props: {
+          label: 'abc',
+          padded: true,
+          disabled: true,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[data-slot="control"]').parent().click('left')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('keeps a fixed compact height for a label-only row', () => {
+      cy.mount(Checkbox, { props: { label: 'abc', padded: true } })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('have.class', 'h-7')
+    })
+
+    it('grows the surface when a description is present', () => {
+      cy.mount(Checkbox, {
+        props: { label: 'abc', description: 'helper', padded: true },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
+  })
+
+  describe('size', () => {
+    it('exposes data-size for xs', () => {
+      cy.mount(Checkbox, { props: { label: 'abc', size: 'xs' } })
+      cy.get('input').should('have.attr', 'data-size', 'xs')
+    })
+
+    it('renders the xs control at 13px', () => {
+      cy.mount(Checkbox, { props: { label: 'abc', size: 'xs' } })
+      cy.get('input').invoke('outerWidth').should('be.closeTo', 13, 1)
+    })
+  })
+
+  describe('indeterminate', () => {
+    it('sets the DOM indeterminate property and data-state', () => {
+      cy.mount(Checkbox, {
+        props: { label: 'abc', indeterminate: true, modelValue: false },
+      })
+      cy.get('input').should('have.attr', 'data-state', 'indeterminate')
+      cy.get('input').then(($el) => {
+        expect(($el[0] as HTMLInputElement).indeterminate).to.eq(true)
+      })
     })
   })
 })
