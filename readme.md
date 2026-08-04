@@ -32,7 +32,7 @@ In 2019, I began building [Frappe Books](https://github.com/frappe/books) which 
 
 - [Documentation](https://ui.frappe.io)
 - [Vite Plugins](vite/README.md)
-- [Frappe UI Starter Boilerplate](https://github.com/netchampfaris/frappe-ui-starter)
+- [Create a Frappe UI app](https://ui.frappe.io/docs/getting-started)
 - [Community](https://github.com/frappe/frappe-ui/discussions)
 
 ## Usage

@@ -5,10 +5,9 @@ an existing Frappe project.
 
 ## Quick start
 
-You can quickly setup `frappe-ui` using
-[`frappe-ui-starter`](https://github.com/netchampfaris/frappe-ui-starter). If
-you already have a Frappe app for which you want to build a frontend you can
-start with **Step 2**.
+You can quickly set up `frappe-ui` with `npm create frappe-ui`. If you already
+have a Frappe app for which you want to build a frontend, start with **Step 2**.
+The initializer requires Node.js 20.19 or newer, or Node.js 22.12 or newer.
 
 ###  Create your Frappe app
 
@@ -22,11 +21,13 @@ bench new-app todo
 cd apps/todo
 # this will setup a vue project with frappe-ui set up
 # inside the frontend directory
-npx degit netchampfaris/frappe-ui-starter frontend
+npm create frappe-ui@latest frontend
 ```
 
-Refer [frappe-ui-starter](https://github.com/netchampfaris/frappe-ui-starter)
-for more details.
+Choose **yes** when prompted to configure the project with a Frappe backend. The
+starter will ask for the frontend base route and configure Vite, Vue Router, and
+the Frappe proxy/build plugin for that route. Frappe-backed projects must be
+created inside `apps/<appname>/<folder>`.
 
 ### Ignore_csrf config
 
@@ -42,8 +43,8 @@ index.html for you.
 
 ```sh
 cd frontend
-yarn
-yarn dev
+npm install
+npm run dev
 ```
 
 The Vite dev server will start on the port `8080`. This can be changed from
