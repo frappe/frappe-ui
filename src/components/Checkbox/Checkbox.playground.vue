@@ -27,15 +27,6 @@ const knobs: Knob[] = [
       { label: 'padded', value: 'padded' },
     ],
   },
-  {
-    name: 'orientation',
-    type: 'tabs',
-    default: 'horizontal',
-    options: [
-      { label: 'horizontal', value: 'horizontal' },
-      { label: 'vertical', value: 'vertical' },
-    ],
-  },
   { name: 'indeterminate', type: 'switch', default: false },
   { name: 'required', type: 'switch', default: false },
   { name: 'error', type: 'switch', default: false },
@@ -50,8 +41,6 @@ function buildCode(v: Record<string, any>) {
   if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'default') attrs.push(`variant="${v.variant}"`)
-  if (v.orientation !== 'horizontal')
-    attrs.push(`orientation="${v.orientation}"`)
   if (v.indeterminate) attrs.push('indeterminate')
   if (v.required) attrs.push('required')
   if (v.error) attrs.push(`error="${ERROR_MESSAGE}"`)
@@ -70,7 +59,6 @@ function buildCode(v: Record<string, any>) {
         :description="values.description || undefined"
         :size="values.size"
         :variant="values.variant"
-        :orientation="values.orientation"
         :indeterminate="values.indeterminate"
         :required="values.required"
         :error="values.error ? ERROR_MESSAGE : undefined"

@@ -87,15 +87,15 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'unknown[]'
+    type: '[value: RadioValue | undefined]'
   }
 ]
 </script>
-
 ## API Reference
 
-<PropsTable name="Radio" :data="propsData"/>
+<PropsTable name="Radio" :data="propsData"/> 
 
-<SlotsTable :data="slotsData"/>
+<SlotsTable :data="slotsData"/> 
 
-<EmitsTable :data="emitsData"/>
+<EmitsTable :data="emitsData"/> 
+

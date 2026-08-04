@@ -172,20 +172,6 @@ describe('Checkbox', () => {
     })
   })
 
-  describe('orientation', () => {
-    it('stacks the label below the control when vertical', () => {
-      cy.mount(Checkbox, { props: { label: 'abc', orientation: 'vertical' } })
-      cy.get('input').parent().should('have.class', 'flex-col')
-    })
-
-    it('stays horizontal in the padded variant', () => {
-      cy.mount(Checkbox, {
-        props: { label: 'abc', orientation: 'vertical', variant: 'padded' },
-      })
-      cy.get('input').parent().should('not.have.class', 'flex-col')
-    })
-  })
-
   describe('indeterminate', () => {
     it('sets the DOM indeterminate property and data-state', () => {
       cy.mount(Checkbox, {

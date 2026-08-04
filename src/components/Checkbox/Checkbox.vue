@@ -8,13 +8,8 @@
     @click="onContainerClick"
   >
     <div
-      class="rounded transition"
-      :class="[
-        vertical
-          ? 'inline-flex flex-col items-center gap-1 text-center'
-          : 'inline-flex items-center gap-2',
-        rowClasses,
-      ]"
+      class="inline-flex items-center gap-2 rounded transition"
+      :class="rowClasses"
     >
       <input
         ref="inputRef"
@@ -48,10 +43,7 @@
         </template>
       </InputLabel>
     </div>
-    <div
-      v-if="showDescription || hasError"
-      :class="vertical ? 'mt-1 text-center' : 'ps-[1.35rem] mt-1'"
-    >
+    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -76,7 +68,6 @@ import type { CheckboxBaseProps } from './types'
 const props = withDefaults(defineProps<CheckboxBaseProps>(), {
   size: 'sm',
   variant: 'default',
-  orientation: 'horizontal',
   padding: false,
   indeterminate: false,
 })
@@ -91,12 +82,6 @@ watchEffect(() => {
 })
 
 const checked = computed(() => Boolean(model.value))
-
-// Vertical orientation (centered label below the control) is only supported in
-// the default variant; the padded surface always lays the row out horizontally.
-const vertical = computed(
-  () => props.variant !== 'padded' && props.orientation === 'vertical',
-)
 
 // The `indeterminate` state can only be set via the DOM property, not HTML attribute.
 const inputRef = ref<HTMLInputElement | null>(null)
