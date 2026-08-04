@@ -1,6 +1,13 @@
 #!/usr/bin/env bun
 // Reads the claude-code-action execution file and appends a one-line
-// stats footer to barista's most recent comment on the issue.
+// stats footer to the comment THIS run posted, per the marker file
+// add-comment.ts writes when it posts (path from $BARISTA_COMMENT_ID_FILE,
+// default /tmp/barista-comment-id).
+//
+// If no marker file exists, this run didn't post a comment (e.g. triage
+// deciding there's nothing worth saying, or a bug that stopped it before
+// posting) — skip rather than guessing at "the most recent barista
+// comment", which could be a stale comment from an earlier run.
 //
 // Expected env:
 //   EXECUTION_FILE  — path to action's JSON output
@@ -71,23 +78,17 @@ const cacheReadFmt = fmtK(cacheRead);
 const durationFmt = durationMs > 0 ? `${Math.floor(durationMs / 1000)}s` : "?";
 const costFmt = typeof totalCost === "number" ? `$${totalCost.toFixed(3)}` : "—";
 
-const commentsJson = await $`gh api repos/${repo}/issues/${issueNumber}/comments --paginate`.text();
-const comments = JSON.parse(commentsJson) as Array<{
-  id: number;
-  created_at: string;
-  user?: { type?: string; login?: string };
-}>;
-const last = comments
-  .filter(c => c.user?.type === "Bot" && c.user.login?.startsWith("barista"))
-  .sort((a, b) => a.created_at.localeCompare(b.created_at))
-  .at(-1);
-
-if (!last) {
-  console.log(`No barista comment found on #${issueNumber} — nothing to append stats to.`);
+const markerFile = process.env.BARISTA_COMMENT_ID_FILE || "/tmp/barista-comment-id";
+const markerFileHandle = Bun.file(markerFile);
+if (!(await markerFileHandle.exists())) {
+  console.log(`No comment posted this run (no ${markerFile}) — skipping stats footer.`);
   process.exit(0);
 }
-
-const commentId = last.id;
+const commentId = (await markerFileHandle.text()).trim();
+if (!/^\d+$/.test(commentId)) {
+  console.error(`Invalid comment id in ${markerFile}: ${commentId}`);
+  process.exit(1);
+}
 const currentBody = await $`gh api repos/${repo}/issues/comments/${commentId} --jq .body`.text();
 
 const MARKER = "<!-- barista-stats -->";
