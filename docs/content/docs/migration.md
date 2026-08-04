@@ -17,10 +17,8 @@ or visual regressions.
 
 ## Requirements
 
-v1 requires **Node `>=20.19.0`** (declared in `package.json` `engines`). This
-is a breaking floor bump from the 0.1.x line, which ran on Node 18. The floor
-comes from the current dependency tree (`unplugin-vue-components@^32`,
-`@tiptap/markdown` → `marked@17`, and related packages).
+v1 requires **Node `>=20.19.0`** (`package.json` `engines`); this is a breaking
+bump from the 0.1.x line (Node 18).
 
 ## Dialog
 
