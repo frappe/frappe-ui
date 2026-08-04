@@ -37,6 +37,8 @@ In 2019, I began building [Frappe Books](https://github.com/frappe/books) which 
 
 ## Usage
 
+Requires **Node `>=20.19.0`**.
+
 ```sh
 npm install frappe-ui
 # or
