@@ -40,7 +40,7 @@
         </slot>
       </div>
     </PopoverAnchor>
-    <PopoverPortal>
+    <PopoverPortal :to="portalTarget">
       <PopoverContent
         data-slot="content"
         class="z-[100]"
@@ -69,6 +69,7 @@ import {
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
+import { usePortalTarget } from '../../../composables/usePortalTarget'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
 
@@ -113,6 +114,8 @@ const props = withDefaults(defineProps<Props>(), {
   displayLabel: '',
   contentClass: '',
 })
+
+const portalTarget = usePortalTarget()
 
 const emit = defineEmits<{
   (e: 'focus'): void

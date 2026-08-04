@@ -132,7 +132,7 @@ export interface ComboboxProps extends InputLabelingProps {
   /** Gap between trigger and content. */
   offset?: number
 
-  /** Teleport target for the popover content. */
+  /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 
   /** Replaces the results with a loading state. */

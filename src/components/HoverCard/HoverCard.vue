@@ -8,6 +8,7 @@ import {
 } from 'reka-ui'
 import { computed } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import type {
   HoverCardExposed,
   HoverCardProps,
@@ -22,12 +23,13 @@ const props = withDefaults(defineProps<HoverCardProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
   collisionPadding: 10,
   hoverDelay: 0.3,
   leaveDelay: 0.3,
   arrow: false,
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -62,7 +64,7 @@ defineSlots<{
     <HoverCardTrigger as-child>
       <slot name="trigger" :open="open" />
     </HoverCardTrigger>
-    <HoverCardPortal :to="portalTo">
+    <HoverCardPortal :to="portalTarget">
       <HoverCardContent
         data-slot="content"
         class="z-[100]"
