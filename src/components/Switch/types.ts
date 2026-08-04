@@ -9,8 +9,8 @@ export interface SwitchProps extends InputLabelingProps {
   /** Wraps the control and label in a clickable surface with hover, active and focus states — useful for settings rows and menu items. */
   padded?: boolean
 
-  /** Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label. */
-  switchPosition?: 'start' | 'end'
+  /** Position of the control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label. */
+  controlPosition?: 'start' | 'end'
 
   /** Disables the switch and prevents interaction */
   disabled?: boolean

@@ -179,9 +179,9 @@ const switchLabelClasses = computed(() => {
 })
 
 // The switch trails the label in every row, which is how Switch has always
-// rendered — a leading switch is opt-in via `switch-position="start"`. Kept in
+// rendered — a leading switch is opt-in via `control-position="start"`. Kept in
 // one place because the error indent below has to agree with it.
-const switchPosition = computed(() => props.switchPosition ?? 'end')
+const controlPosition = computed(() => props.controlPosition ?? 'end')
 
 const switchGroupClasses = computed(() => {
   const hasLabel = props.label || slots.label
@@ -190,7 +190,7 @@ const switchGroupClasses = computed(() => {
 
   // `flex-row-reverse` / `justify-*` are inline-axis aware, so this flips
   // correctly under RTL without any physical left/right values.
-  const switchStart = switchPosition.value === 'start'
+  const switchStart = controlPosition.value === 'start'
 
   if (hasDescription) {
     // Settings style: label + description on one side, switch on the other.
@@ -219,7 +219,7 @@ const switchGroupClasses = computed(() => {
 // Only needed when the switch leads the row (position = start); settings-style
 // rows (switch at end) have the label on the leading side already.
 const errorIndentClasses = computed(() => {
-  if (switchPosition.value !== 'start') return undefined
+  if (controlPosition.value !== 'start') return undefined
   // switch width + gap-x-2.5 (10 px)
   return props.size === 'md'
     ? 'ps-[42px]'
@@ -265,7 +265,7 @@ const containerClasses = computed(() => {
   if (!hasDetail) classes.push('justify-center')
   // With the switch at the start the row hugs its content; at the end it spans
   // the full width so `justify-between` can push the switch to the right edge.
-  classes.push(switchPosition.value === 'start' ? 'w-fit' : 'w-full')
+  classes.push(controlPosition.value === 'start' ? 'w-fit' : 'w-full')
   classes.push(
     props.disabled
       ? 'cursor-not-allowed'

@@ -20,8 +20,8 @@
     default: 'false'
   },
   {
-    name: 'switchPosition',
-    description: 'Position of the switch control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label.',
+    name: 'controlPosition',
+    description: 'Position of the control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label.',
     required: false,
     type: '"start" | "end"'
   },

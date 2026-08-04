@@ -210,7 +210,7 @@ describe('Switch', () => {
     })
   })
 
-  describe('switchPosition', () => {
+  describe('controlPosition', () => {
     /** Asserts the control sits after (or before) the label on the inline axis. */
     function expectSwitchAfterLabel(after: boolean) {
       cy.get('[data-slot="control"]').then(($switch) => {
@@ -235,8 +235,8 @@ describe('Switch', () => {
       expectSwitchAfterLabel(true)
     })
 
-    it('leads the label when switch-position is start', () => {
-      cy.mount(Switch, { props: { label: 'abc', switchPosition: 'start' } })
+    it('leads the label when control-position is start', () => {
+      cy.mount(Switch, { props: { label: 'abc', controlPosition: 'start' } })
       expectSwitchAfterLabel(false)
     })
   })

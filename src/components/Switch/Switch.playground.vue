@@ -20,7 +20,7 @@ const knobs: Knob[] = [
   },
   { name: 'padded', type: 'switch', default: false },
   {
-    name: 'switchPosition',
+    name: 'controlPosition',
     type: 'tabs',
     default: 'end',
     options: [
@@ -41,8 +41,8 @@ function buildCode(v: Record<string, any>) {
   if (v.description) attrs.push(`description="${v.description}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.padded) attrs.push('padded')
-  if (v.switchPosition !== 'end')
-    attrs.push(`switch-position="${v.switchPosition}"`)
+  if (v.controlPosition !== 'end')
+    attrs.push(`control-position="${v.controlPosition}"`)
   if (v.required) attrs.push('required')
   if (v.error) attrs.push(`error="${ERROR_MESSAGE}"`)
   if (v.disabled) attrs.push('disabled')
@@ -56,7 +56,7 @@ function buildCode(v: Record<string, any>) {
     <template #preview="{ values }">
       <div
         :class="
-          values.switchPosition === 'start'
+          values.controlPosition === 'start'
             ? 'flex w-full justify-center'
             : 'w-full max-w-sm mx-auto'
         "
@@ -67,7 +67,7 @@ function buildCode(v: Record<string, any>) {
           :description="values.description || undefined"
           :size="values.size"
           :padded="values.padded"
-          :switch-position="values.switchPosition"
+          :control-position="values.controlPosition"
           :required="values.required"
           :error="values.error ? ERROR_MESSAGE : undefined"
           :disabled="values.disabled"
