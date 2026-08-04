@@ -171,32 +171,3 @@ onScopeDispose(disarmSwallow)
 
 defineSlots<DropdownSlots>()
 </script>
-
-<style scoped>
-/*
- * Dropdown opens the same way Select does: no scale entrance, just a ~80ms
- * opacity fade. It reads as instant, and still masks the 1-frame
- * position-settle reka performs after mount. Same rhythm for pointer and
- * keyboard opens — a menu that appears at a fixed spot has nothing to scale
- * from, so the entrance only added latency.
- *
- * The `animated` keyframes (used by ContextMenu) + the
- * `prefers-reduced-motion` reset live in Menu.vue, rendered by both menus.
- */
-:global(.menu-content[data-motion='instant'][data-state='open']) {
-  animation: dropdown-instant-fade 80ms linear;
-}
-
-:global(.menu-content[data-motion='instant'][data-state='closed']) {
-  animation: none;
-}
-
-@keyframes dropdown-instant-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-</style>

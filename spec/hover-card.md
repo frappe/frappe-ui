@@ -171,10 +171,11 @@ Mirrors `Popover`'s exposed surface.
 ## Motion
 
 `HoverCard` reuses the shared popover motion machinery rather than a bespoke
-animation. It is the **only** surface that keeps the scale-from-trigger entrance
-— every popover you click open (`Popover`, `Select`, `Combobox`, `Dropdown`, the
-pickers) now appears instantly, because there the entrance reads as latency. A
-hover card opens on hover after a delay, so it never does.
+animation. It is the **only** surface in the library that still animates its
+entrance. Every popup you press open — `Popover`, `Select`, `Combobox`,
+`Dropdown`, `ContextMenu`, the pickers — now appears instantly, because there
+the entrance reads as latency. A hover card opens on hover after a delay, so it
+never does.
 
 - Content renders inside `PopoverPanel` with `motion="animated"` hardcoded. The
   panel carries `data-slot="content-body"` and `data-motion="animated"`.
