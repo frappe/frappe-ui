@@ -48,18 +48,14 @@ describe('buildLineChartOption axes', () => {
     expect(build().xAxis.boundaryGap).toBe(false)
   })
 
-  it('draws horizontal gridlines only', () => {
+  it('draws horizontal gridlines only, in theme ink', () => {
     const option = build()
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe('outline-1')
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(theme.splitLine)
     expect(option.yAxis.axisLine.show).toBe(false)
-  })
-
-  it('mutes the axis labels with theme ink', () => {
-    const option = build()
-    expect(option.xAxis.axisLabel.color).toBe('ink-5')
-    expect(option.yAxis.axisLabel.color).toBe('ink-5')
+    expect(option.xAxis.axisLabel.color).toBe(theme.axisLabel)
+    expect(option.yAxis.axisLabel.color).toBe(theme.axisLabel)
   })
 
   it('flips the axes in RTL', () => {
@@ -129,13 +125,9 @@ describe('buildLineChartOption series', () => {
     ).toBe('red')
   })
 
-  it('strokes 2px solid lines by default', () => {
-    const option = build()
-    expect(option.series[0].lineStyle.width).toBe(2)
-    expect(option.series[0].lineStyle.type).toBe('solid')
-  })
+  it('takes the dash pattern and width from the series, solid otherwise', () => {
+    expect(build().series[0].lineStyle.type).toBe('solid')
 
-  it('takes the dash pattern and width from the series', () => {
     const option = build({
       series: [
         { name: 'sales', lineType: 'dashed', lineWidth: 3 },

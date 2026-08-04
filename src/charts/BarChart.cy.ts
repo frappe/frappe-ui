@@ -1,0 +1,196 @@
+import { defineComponent, h, ref } from 'vue'
+import BarChart from './BarChart.vue'
+import './style.css'
+
+const data = [
+  { month: 'Jan', sales: 10, refunds: 4 },
+  { month: 'Feb', sales: 20, refunds: 6 },
+  { month: 'Mar', sales: 15, refunds: 2 },
+]
+
+/**
+ * Charts fill their container, so every case needs one with a size. Animation
+ * is off: a bar grows from the baseline, and until it has arrived it is a
+ * zero-height path nothing can be clicked on.
+ */
+function mountChart(props: Record<string, any> = {}) {
+  return cy.mount(
+    defineComponent({
+      setup() {
+        return () =>
+          h('div', { style: 'width: 480px; height: 300px' }, [
+            h(BarChart, {
+              data,
+              x: 'month',
+              y: ['sales', 'refunds'],
+              echartOptions: { animation: false },
+              ...props,
+            }),
+          ])
+      },
+    }),
+  )
+}
+
+/** The bars, in series order. Gridlines are paths too, but unfilled. */
+const bars = () => cy.get('[data-slot="chart-plot"] svg path[fill^="#"]')
+
+describe('BarChart', () => {
+  it('paints a bar per datapoint, and labels the categories', () => {
+    mountChart()
+    bars().should('have.length', data.length * 2)
+    cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Jan')
+  })
+
+  it('names the plot for a screen reader', () => {
+    mountChart({ title: 'Revenue', subtitle: 'By month' })
+    cy.get('[role="img"]').should('have.attr', 'aria-label')
+    cy.get('[data-slot="chart-header"]').should('contain.text', 'Revenue')
+  })
+
+  describe('interaction', () => {
+    it('emits datapointClick with the row behind the bar', () => {
+      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      bars().first().click()
+      cy.get('@onClick').should('have.been.calledWithMatch', {
+        seriesName: 'sales',
+        dataIndex: 0,
+        value: 10,
+        row: { month: 'Jan', sales: 10 },
+      })
+    })
+
+    it('opens the tooltip on hover, with every series at that category', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('exist')
+        .and('contain.text', 'Jan')
+        .and('contain.text', 'Sales')
+        .and('contain.text', '10')
+    })
+  })
+
+  describe('legend', () => {
+    it('lists one entry per series, named as the chrome names them', () => {
+      mountChart()
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[aria-label="Hide Sales"]').should(
+        'have.attr',
+        'aria-pressed',
+        'true',
+      )
+    })
+
+    it('hides a series when its entry is pressed, and brings it back', () => {
+      mountChart()
+      cy.get('[aria-label="Hide Sales"]').click()
+      cy.get('[aria-label="Show Sales"]').should(
+        'have.attr',
+        'aria-pressed',
+        'false',
+      )
+      bars().should('have.length', data.length)
+
+      cy.get('[aria-label="Show Sales"]').click()
+      bars().should('have.length', data.length * 2)
+    })
+
+    it('round-trips v-model:hiddenSeries', () => {
+      const hidden = ref<string[]>([])
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 480px; height: 300px' }, [
+                h(BarChart, {
+                  data,
+                  x: 'month',
+                  y: ['sales', 'refunds'],
+                  echartOptions: { animation: false },
+                  hiddenSeries: hidden.value,
+                  'onUpdate:hiddenSeries': (v: string[]) => (hidden.value = v),
+                }),
+              ])
+          },
+        }),
+      )
+
+      cy.get('[aria-label="Hide Refunds"]')
+        .click()
+        .then(() => expect(hidden.value).to.deep.equal(['refunds']))
+      bars().should('have.length', data.length)
+    })
+
+    it('keeps the legend out of a single-series chart', () => {
+      mountChart({ y: 'sales' })
+      cy.get('[data-slot="chart-legend"]').should('not.exist')
+    })
+  })
+
+  describe('states', () => {
+    it('spins while loading and keeps the plot mounted', () => {
+      mountChart({ loading: true })
+      cy.contains('Loading chart…').should('be.visible')
+      // Unmounting the plot would dispose the echarts instance behind it.
+      cy.get('[data-slot="chart-plot"]').should('exist')
+    })
+
+    it('reports an error over the plot', () => {
+      mountChart({ error: 'Query timed out' })
+      cy.contains('Could not render this chart').should('be.visible')
+      cy.contains('Query timed out').should('be.visible')
+    })
+
+    it('says so when there is nothing to plot', () => {
+      mountChart({ data: [] })
+      cy.contains('No data to show').should('be.visible')
+      bars().should('not.exist')
+    })
+  })
+
+  describe('layout', () => {
+    it('redraws at the width of its container', () => {
+      cy.mount(
+        defineComponent({
+          setup() {
+            const width = ref(480)
+            return () =>
+              h('div', [
+                h(
+                  'button',
+                  { id: 'shrink', onClick: () => (width.value = 300) },
+                  'shrink',
+                ),
+                h('div', { style: `width: ${width.value}px; height: 300px` }, [
+                  h(BarChart, {
+                    data,
+                    x: 'month',
+                    y: 'sales',
+                    echartOptions: { animation: false },
+                  }),
+                ]),
+              ])
+          },
+        }),
+      )
+
+      cy.get('[data-slot="chart-plot"] svg')
+        .invoke('attr', 'width')
+        .then((before) => {
+          cy.get('#shrink').click()
+          cy.get('[data-slot="chart-plot"] svg')
+            .invoke('attr', 'width')
+            .should('not.equal', before)
+        })
+    })
+
+    it('mirrors the card in RTL', () => {
+      mountChart({ dir: 'rtl', title: 'Revenue' })
+      cy.get('[data-slot="chart-card"]').should('have.attr', 'dir', 'rtl')
+      // The plot stays LTR: echarts mirrors the axes through the option.
+      cy.get('[role="img"]').should('have.attr', 'dir', 'ltr')
+    })
+  })
+})

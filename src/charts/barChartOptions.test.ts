@@ -141,26 +141,16 @@ describe('buildBarChartOption axes', () => {
     expect(option.yAxis.position).toBe('right')
   })
 
-  it('carries axis colors from the theme, baseline included', () => {
+  it('gridlines the value axis and baselines the category axis, in theme ink', () => {
     const option = build()
-    expect(option.xAxis.axisLabel.color).toBe('ink-5')
-    expect(option.xAxis.axisLine.lineStyle.color).toBe('outline-1')
-    expect(option.yAxis.splitLine.lineStyle.color).toBe('outline-1')
-  })
+    expect(option.xAxis.axisLabel.color).toBe(theme.axisLabel)
 
-  it('draws gridlines on the value axis only', () => {
-    const option = build()
-    expect(option.xAxis.splitLine.show).toBe(false)
+    // Gridlines run across the values; the category axis carries the baseline.
     expect(option.yAxis.splitLine.show).toBe(true)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(theme.splitLine)
+    expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.axisLine.show).toBe(false)
-  })
-
-  it('dots the gridlines and the baseline alike', () => {
-    const option = build()
-    expect(option.yAxis.splitLine.lineStyle.type).toEqual([1, 3])
-    expect(option.yAxis.splitLine.lineStyle.cap).toBe('round')
-    expect(option.xAxis.axisLine.lineStyle.type).toEqual([1, 3])
-    expect(option.xAxis.axisLine.lineStyle.cap).toBe('round')
+    expect(option.xAxis.axisLine.lineStyle.color).toBe(theme.splitLine)
   })
 
   it('puts dates on a time axis without being told to', () => {

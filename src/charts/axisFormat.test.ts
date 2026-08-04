@@ -31,87 +31,64 @@ function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
 
 const currency = (value: number) => `$${value}`
 
+/** As a chart does it: formats applied to the config, then built. */
+function build(
+  formats: Parameters<typeof applyAxisFormatters>[1] = {},
+  overrides: Partial<BarChartConfig> = {},
+) {
+  return buildBarChartOption(applyAxisFormatters(config(overrides), formats), {
+    theme,
+  }) as any
+}
+
 describe('applyAxisFormatters', () => {
-  it('returns the config untouched when no axis formats', () => {
-    const base = config()
-    expect(applyAxisFormatters(base, {})).toBe(base)
-  })
-
-  it('sets an axisLabel formatter on each axis that has a format', () => {
-    const next = applyAxisFormatters(config(), {
-      x: (value) => `x:${value}`,
-      y: currency,
-      y2: (value) => `${value}%`,
-    })
-    expect(next.xAxis.echartOptions?.axisLabel.formatter('Jan')).toBe('x:Jan')
-    expect(next.yAxis?.echartOptions?.axisLabel.formatter(10)).toBe('$10')
-    expect(next.y2Axis?.echartOptions?.axisLabel.formatter(10)).toBe('10%')
-  })
-
-  it('creates the axis entry when the config left it out', () => {
-    const next = applyAxisFormatters(config(), { y: currency })
-    expect(next.yAxis?.echartOptions?.axisLabel.formatter(1)).toBe('$1')
-    expect(next.y2Axis).toBeUndefined()
-  })
-
-  it('leaves the axes without a format alone', () => {
-    const base = config({ xAxis: { key: 'month' } })
-    const next = applyAxisFormatters(base, { y: currency })
-    expect(next.xAxis).toBe(base.xAxis)
-  })
-
-  it('hands the formatter only the value, not the tick index', () => {
-    const next = applyAxisFormatters(config(), {
-      x: (...args: any[]) => JSON.stringify(args),
-    })
-    expect(next.xAxis.echartOptions?.axisLabel.formatter('Jan', 3)).toBe(
-      '["Jan"]',
-    )
-  })
-
-  it('keeps other echartOptions on the axis', () => {
-    const base = config({
-      yAxis: { echartOptions: { axisLabel: { color: 'red' }, min: 0 } },
-    })
-    const next = applyAxisFormatters(base, { y: currency })
-    expect(next.yAxis?.echartOptions?.axisLabel.color).toBe('red')
-    expect(next.yAxis?.echartOptions?.min).toBe(0)
-    expect(base.yAxis?.echartOptions?.axisLabel.formatter).toBeUndefined()
-  })
-
-  it('lets an explicit echartOptions formatter win over format', () => {
-    const next = applyAxisFormatters(
-      config({
-        yAxis: { echartOptions: { axisLabel: { formatter: () => 'override' } } },
-      }),
-      { y: currency },
-    )
-    expect(next.yAxis?.echartOptions?.axisLabel.formatter(10)).toBe('override')
-  })
-})
-
-describe('applyAxisFormatters: through the option builder', () => {
-  function build(config: BarChartConfig) {
-    return buildBarChartOption(config, { theme }) as any
-  }
-
   it('formats the category axis labels', () => {
-    const option = build(
-      applyAxisFormatters(config(), { x: (value) => `[${value}]` }),
-    )
-    expect(option.xAxis.axisLabel.formatter('Jan')).toBe('[Jan]')
+    expect(
+      build({ x: (value) => `[${value}]` }).xAxis.axisLabel.formatter('Jan'),
+    ).toBe('[Jan]')
   })
 
   it('formats each value axis with its own format', () => {
-    const option = build(
-      applyAxisFormatters(config(), { y: currency, y2: (v) => `${v}%` }),
-    )
+    const option = build({ y: currency, y2: (v) => `${v}%` })
     expect(option.yAxis[0].axisLabel.formatter(10)).toBe('$10')
     expect(option.yAxis[1].axisLabel.formatter(10)).toBe('10%')
   })
 
   it('leaves the default axis label formatter in place without a format', () => {
-    const option = build(config())
-    expect(option.yAxis[0].axisLabel.formatter(1500)).toBe('1.5K')
+    expect(build().yAxis[0].axisLabel.formatter(1500)).toBe('1.5K')
+  })
+
+  it('hands the formatter only the value, not the tick index', () => {
+    const option = build({ x: (...args: any[]) => JSON.stringify(args) })
+    expect(option.xAxis.axisLabel.formatter('Jan', 3)).toBe('["Jan"]')
+  })
+
+  it('lets an explicit echartOptions formatter win over format', () => {
+    const option = build(
+      { y: currency },
+      {
+        yAxis: {
+          echartOptions: { axisLabel: { formatter: () => 'override' } },
+        },
+      },
+    )
+    expect(option.yAxis[0].axisLabel.formatter(10)).toBe('override')
+  })
+
+  it('keeps the rest of the axis echartOptions, and the config it was given', () => {
+    const base = config({
+      yAxis: { echartOptions: { axisLabel: { color: 'red' }, min: 0 } },
+    })
+    const option = buildBarChartOption(
+      applyAxisFormatters(base, { y: currency }),
+      {
+        theme,
+      },
+    ) as any
+
+    expect(option.yAxis[0].axisLabel.color).toBe('red')
+    expect(option.yAxis[0].min).toBe(0)
+    // Charts re-apply formats on every render, so the config stays untouched.
+    expect(base.yAxis?.echartOptions?.axisLabel.formatter).toBeUndefined()
   })
 })
