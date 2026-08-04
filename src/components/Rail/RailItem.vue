@@ -130,7 +130,7 @@ const ariaLabel = computed(() =>
 // The dot badge hides the number, so spell it out in the tooltip instead — unless the
 // caller supplied its own second line, which is the more specific thing to say.
 const tooltipDescription = computed(() => {
-  if (props.description) return props.description
+  if (props.description !== undefined) return props.description
   if (props.badgeStyle === 'dot' && props.badge > 0)
     return `${props.badge} unread`
   return null
