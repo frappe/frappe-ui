@@ -6,6 +6,12 @@ export interface RailItemProps {
   label: string
 
   /**
+   * Second line in the tooltip, under the label — e.g. "12 members". Overrides the
+   * unread count a `dot` badge would otherwise spell out there.
+   */
+  description?: string
+
+  /**
    * Icon CSS class, e.g. `lucide-search`, or a component. Rendered centered in the cell.
    * Ignored when the default slot is used (for an image, avatar, or initials).
    */

@@ -81,8 +81,8 @@
     <template #content>
       <div class="leading-relaxed">
         <div>{{ label }}</div>
-        <div v-if="showTooltipCount" class="text-p-sm text-ink-gray-5">
-          {{ badge }} unread
+        <div v-if="tooltipDescription" class="text-p-sm text-ink-gray-5">
+          {{ tooltipDescription }}
         </div>
       </div>
     </template>
@@ -127,8 +127,12 @@ const ariaLabel = computed(() =>
   props.badge > 0 ? `${props.label}, ${props.badge} unread` : props.label,
 )
 
-// The dot badge hides the number, so surface it in the tooltip instead.
-const showTooltipCount = computed(
-  () => props.badgeStyle === 'dot' && props.badge > 0,
-)
+// The dot badge hides the number, so spell it out in the tooltip instead — unless the
+// caller supplied its own second line, which is the more specific thing to say.
+const tooltipDescription = computed(() => {
+  if (props.description !== undefined) return props.description
+  if (props.badgeStyle === 'dot' && props.badge > 0)
+    return `${props.badge} unread`
+  return null
+})
 </script>

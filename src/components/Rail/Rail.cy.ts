@@ -75,6 +75,30 @@ describe('<RailItem />', () => {
     cy.get('body').should('contain.text', '99+')
   })
 
+  it('lets `description` replace the unread line under the tooltip label', () => {
+    cy.mount(RailItem, {
+      props: { label: 'Notifications', icon: 'lucide-bell', badge: 3, badgeStyle: 'dot' },
+    })
+    cy.get('[data-slot=rail-item]').trigger('pointerenter').trigger('pointermove')
+    // The tooltip teleports to <body>.
+    cy.get('body').should('contain.text', '3 unread')
+
+    cy.mount(RailItem, {
+      props: {
+        label: 'People',
+        icon: 'lucide-users-2',
+        badge: 3,
+        badgeStyle: 'dot',
+        description: '12 members',
+      },
+    })
+    cy.get('[data-slot=rail-item]').trigger('pointerenter').trigger('pointermove')
+    cy.get('body')
+      .should('contain.text', '12 members')
+      // Only meaningful because the line above already waited for the tooltip to open.
+      .and('not.contain.text', '3 unread')
+  })
+
   it('folds the unread count into the accessible label', () => {
     cy.mount(RailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3 },
