@@ -61,6 +61,8 @@ const TestSuggester = Extension.create({
  * and throws `document is not defined` out of a test that has already passed.
  */
 const openEditors: Editor[] = []
+/** Host elements for the attached editors, removed with them. */
+const openElements: HTMLElement[] = []
 
 function makeEditor(content = '') {
   const editor = new Editor({
@@ -78,7 +80,12 @@ function makeEditor(content = '') {
  */
 function makeRealEditor(content = '') {
   const key = new PluginKey('realSuggestion')
+  // Attached to the document: `isFocused` is `document.activeElement === view.dom`,
+  // which can never be true for a detached element.
+  const element = document.createElement('div')
+  document.body.appendChild(element)
   const editor = new Editor({
+    element,
     extensions: [
       Document,
       Paragraph,
@@ -96,6 +103,7 @@ function makeRealEditor(content = '') {
     content: content ? `<p>${content}</p>` : '<p></p>',
   })
   openEditors.push(editor)
+  openElements.push(element)
   return { editor, key }
 }
 
@@ -126,6 +134,7 @@ describe('openSuggestionMenu', () => {
 
   afterEach(() => {
     while (openEditors.length) openEditors.pop()?.destroy()
+    while (openElements.length) openElements.pop()?.remove()
   })
 
   it('inserts a bare trigger in an empty paragraph and takes it back on dismiss', () => {
@@ -261,6 +270,7 @@ describe('openSuggestionMenu', () => {
 describe('the openSuggestionMenu command', () => {
   afterEach(() => {
     while (openEditors.length) openEditors.pop()?.destroy()
+    while (openElements.length) openElements.pop()?.remove()
   })
 
   it('opens the named suggester', () => {
@@ -269,7 +279,9 @@ describe('the openSuggestionMenu command', () => {
     const { editor, key } = makeRealEditor()
 
     expect(editor.commands.openSuggestionMenu('realSuggester')).toBe(true)
-    expect((key.getState(editor.state) as { active: boolean }).active).toBe(true)
+    expect((key.getState(editor.state) as { active: boolean }).active).toBe(
+      true,
+    )
     expect(editor.state.doc.textContent).toBe('@')
   })
 
@@ -283,6 +295,36 @@ describe('the openSuggestionMenu command', () => {
     const { editor } = makeRealEditor()
     expect(editor.commands.openSuggestionMenu('paragraph')).toBe(false)
     expect(editor.state.doc.textContent).toBe('')
+  })
+
+  it('focuses the editor, so the menu gets the next keystroke', async () => {
+    // A toolbar button has taken focus by the time this runs.
+    const { editor } = makeRealEditor()
+    editor.commands.blur()
+    expect(editor.isFocused).toBe(false)
+
+    editor.commands.openSuggestionMenu('realSuggester')
+    // tiptap's focus() defers the DOM call to the next frame.
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+
+    expect(editor.isFocused).toBe(true)
+  })
+
+  it('reads the caret against the pending doc, not the stale one', () => {
+    // Chained after a command that already grew the doc: resolving the new
+    // position against the old doc runs past its end and throws.
+    const { editor, key } = makeRealEditor()
+
+    expect(() =>
+      editor
+        .chain()
+        .insertContent('a much longer line than the doc started with')
+        .openSuggestionMenu('realSuggester')
+        .run(),
+    ).not.toThrow()
+    expect((key.getState(editor.state) as { active: boolean }).active).toBe(
+      true,
+    )
   })
 
   it('refuses inside code without touching the document', () => {
