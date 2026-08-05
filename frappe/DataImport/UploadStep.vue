@@ -200,7 +200,7 @@ const uploadFile = (e: Event) => {
     const file = extractFile(e)
     if (!file) return;
 
-    if (file.type !== 'text/csv') {
+    if (file.type !== 'text/csv' && file.type !== 'application/vnd.ms-excel') {
         toast.error('Please upload a valid CSV file.')
         console.error('Please upload a valid CSV file.')
         return;
