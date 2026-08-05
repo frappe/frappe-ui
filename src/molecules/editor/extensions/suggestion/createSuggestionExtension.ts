@@ -7,8 +7,27 @@ import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
 } from '#molecules/editor/extensions/shared/suggestion-renderer'
-import { isInCode } from '#molecules/editor/extensions/shared/suggestion-helpers'
-import { autoOpenCleanupPlugin } from '#molecules/editor/extensions/shared/suggestion-open'
+import {
+  isInCode,
+  getSuggestionOptions,
+} from '#molecules/editor/extensions/shared/suggestion-helpers'
+import {
+  autoOpenCleanupPlugin,
+  insertSuggestionTrigger,
+} from '#molecules/editor/extensions/shared/suggestion-open'
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    suggestion: {
+      /**
+       * Open a suggester's menu at the caret, as if its trigger char had been
+       * typed — for a toolbar button, since `@tiptap/suggestion` has no
+       * imperative open. Names the suggester to open, e.g. `'slashCommands'`.
+       */
+      openSuggestionMenu: (extensionName: string) => ReturnType
+    }
+  }
+}
 
 // Re-export for back-compat: several extensions still import the base item type
 // from this module path. The canonical home is `suggestion-types`.
@@ -74,6 +93,33 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
               options.floatingOptions,
             ),
         } as Omit<SuggestionOptions<TItem>, 'editor'>,
+      }
+    },
+
+    // Every suggester registers the same generic command. Tiptap keeps the last
+    // registration of a name, and these are identical — the command takes the
+    // suggester to open as an argument rather than belonging to any one of
+    // them, so whichever instance wins behaves the same.
+    addCommands() {
+      return {
+        openSuggestionMenu:
+          (extensionName: string) =>
+          ({ editor, tr, dispatch }) => {
+            const target = getSuggestionOptions<{
+              suggestion?: { char?: string }
+            }>(editor, extensionName)
+            const char = target?.suggestion?.char
+            if (!char) return false
+            // Same test as the `allow` above. Checking it before inserting
+            // rather than cleaning up after means the document is never
+            // touched when no menu can open, and the caller gets a `false`
+            // it can act on.
+            if (isInCode(editor.state, tr.selection.from)) return false
+            if (!dispatch) return true
+
+            insertSuggestionTrigger(tr, char)
+            return true
+          },
       }
     },
 

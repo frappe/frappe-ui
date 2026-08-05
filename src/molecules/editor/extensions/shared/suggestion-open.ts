@@ -2,6 +2,10 @@
  * Programmatically opening a suggestion menu (a toolbar "+"/"@" button) without
  * leaving the trigger character behind.
  *
+ * Internal to the package: `createSuggestionExtension` exposes this as
+ * `editor.commands.openSuggestionMenu(extensionName)`, which is how callers
+ * should reach it. Nothing here is exported from `frappe-ui/editor`.
+ *
  * `@tiptap/suggestion` has no imperative "open" — `active` is derived purely
  * from `findSuggestionMatch` scanning the text before the caret. So a button
  * that opens the menu has to type the trigger char into the document for real,
@@ -11,18 +15,21 @@
  * the trigger and the query (`deleteRange(range)`), never the space the opener
  * had to prepend for the trigger to match after a word.
  *
- * `openSuggestionMenu` therefore stamps a marker on the insert transaction, and
- * `autoOpenCleanupPlugin` — registered next to every suggester by
- * `createSuggestionExtension` — removes whatever the opener injected and the
+ * `insertSuggestionTrigger` therefore stamps a marker on the insert
+ * transaction, and `autoOpenCleanupPlugin` — registered next to every suggester
+ * by `createSuggestionExtension` — removes whatever the opener injected and the
  * close left over. A trigger char the *user* typed carries no marker and is
  * never touched.
  */
 
-import { escapeForRegEx, type Editor } from '@tiptap/core'
+import { escapeForRegEx } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import { Plugin, PluginKey, type EditorState } from '@tiptap/pm/state'
-import type { SuggestionOptions } from '@tiptap/suggestion'
-import { getSuggestionOptions } from './suggestion-helpers'
+import {
+  Plugin,
+  PluginKey,
+  type EditorState,
+  type Transaction,
+} from '@tiptap/pm/state'
 
 /**
  * Transaction meta identifying an auto-opened trigger. Shared by every
@@ -75,62 +82,31 @@ function isStrandedPadding(doc: ProseMirrorNode, pos: number): boolean {
 }
 
 /**
- * Open the suggestion menu of `extensionName` at the caret, as if the user had
- * typed its trigger char.
+ * Type `char` into `tr` at the caret so the suggester matches it, and mark the
+ * insertion so `autoOpenCleanupPlugin` can take it back out again.
  *
- * Returns `false` when the extension is absent, has no suggestion configured,
- * or refuses to open at the caret — every suggester built by
- * `createSuggestionExtension` carries `allow: !isInCode(...)`, so a toolbar
- * button pressed inside a code block opens nothing. In that last case the
- * trigger char is taken back out again by `autoOpenCleanupPlugin`, so a `false`
- * return also means the document is untouched.
+ * Writes to the caller's transaction rather than dispatching its own: the
+ * `openSuggestionMenu` command runs mid-dispatch, and a nested `editor.chain()`
+ * there throws `Applying a mismatched transaction`.
  */
-export function openSuggestionMenu(
-  editor: Editor,
-  extensionName: string,
-): boolean {
-  const options = getSuggestionOptions<{
-    suggestion?: Omit<SuggestionOptions, 'editor'>
-  }>(editor, extensionName)
-  const char = options?.suggestion?.char
-  const pluginKey = options?.suggestion?.pluginKey
-  if (!char || !pluginKey) return false
+export function insertSuggestionTrigger(tr: Transaction, char: string): void {
+  const { from, to } = tr.selection
+  // `allowedPrefixes` defaults to [' '], so a trigger glued to the end of a
+  // word never matches — but an unconditional space would leave a stray blank
+  // in an empty paragraph. Pad only when the caret follows text.
+  const $from = tr.doc.resolve(from)
+  const before = from > $from.start() ? tr.doc.textBetween(from - 1, from) : ''
+  const text = before && !/\s/.test(before) ? ` ${char}` : char
 
-  const inserted = editor
-    .chain()
-    .focus()
-    .command(({ tr, dispatch }) => {
-      if (!dispatch) return true
-      const { from, to } = tr.selection
-      // `allowedPrefixes` defaults to [' '], so a trigger glued to the end of a
-      // word never matches — but an unconditional space would leave a stray
-      // blank in an empty paragraph. Pad only when the caret follows text.
-      const $from = tr.doc.resolve(from)
-      const before =
-        from > $from.start() ? tr.doc.textBetween(from - 1, from) : ''
-      const text = before && !/\s/.test(before) ? ` ${char}` : char
-
-      tr.insertText(text, from, to)
-      tr.setMeta(AUTO_OPEN_META, {
-        char,
-        from,
-        to: from + text.length,
-        // Not `text.length > 1`: a multi-char trigger is unpadded but longer
-        // than one, and the "used" path would then eat a real character.
-        padded: text !== char,
-      } satisfies AutoOpenMeta)
-      return true
-    })
-    .run()
-  if (!inserted) return false
-
-  // `allow` is evaluated while the insert dispatches, and `active` is derived
-  // from the doc on every transaction — so if the menu is not open now, this
-  // insertion will never open it.
-  const state = pluginKey.getState(editor.state) as
-    | SuggestionPluginState
-    | undefined
-  return state?.active ?? false
+  tr.insertText(text, from, to)
+  tr.setMeta(AUTO_OPEN_META, {
+    char,
+    from,
+    to: from + text.length,
+    // Not `text.length > 1`: a multi-char trigger is unpadded but longer than
+    // one, and the "used" path would then eat a real character.
+    padded: text !== char,
+  } satisfies AutoOpenMeta)
 }
 
 /**
