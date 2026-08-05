@@ -133,4 +133,41 @@ describe('color style', () => {
     // a red-ish hex close to #dc2626
     expect(extractTextColorFromStyle('color: #dd2525')).toBe('red')
   })
+
+  // Regression: nearest-neighbour in RGB space always returns something, so
+  // legacy body ink used to snap to the closest saturated anchor — every
+  // near-black below resolved to `green`, and white to `purple`.
+  it('treats neutral ink as no color instead of the nearest hue', () => {
+    for (const value of [
+      '#1F272E', // legacy frappe/gameplan body ink
+      '#1f272e', // same, lowercased by the source HTML
+      '#000000',
+      '#111827', // tailwind gray-900
+      '#0f172a', // tailwind slate-900
+      '#171717',
+      '#212121',
+      '#333333',
+      '#ffffff',
+      'rgb(0, 0, 0)',
+      'rgb(31, 39, 46)',
+    ]) {
+      expect(extractTextColorFromStyle(`color: ${value}`)).toBeNull()
+    }
+    expect(extractHighlightColorFromStyle('background-color: #f3f4f6')).toBeNull()
+  })
+
+  it('still resolves real palette colors and their shades', () => {
+    expect(extractTextColorFromStyle('color: #16a34a')).toBe('green')
+    expect(extractTextColorFromStyle('color: #1579D0')).toBe('blue')
+    // Saturated shades keep matching *some* hue — the neutral guard must not
+    // swallow them just because they are lighter/darker than the anchor.
+    expect(extractTextColorFromStyle('color: #f87171')).not.toBeNull() // red-400
+    expect(extractTextColorFromStyle('color: #065f46')).not.toBeNull() // emerald-800
+    expect(extractHighlightColorFromStyle('background-color: #fef08a')).toBe(
+      'yellow',
+    )
+    expect(extractHighlightColorFromStyle('background-color: #dbd5ff')).toBe(
+      'indigo',
+    )
+  })
 })
