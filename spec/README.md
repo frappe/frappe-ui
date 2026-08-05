@@ -30,6 +30,9 @@ If these disagree, update the lower-authority document or mark it historical.
 
 ## Freeze work
 
+- [`at-bar.md`](./at-bar.md) — what "at bar for `1.0.0`" means. The one checklist
+  every sweep ticket on the [road to `1.0.0`](https://github.com/frappe/frappe-ui/issues/864)
+  applies, per public export. **Accepted.**
 - [`imperative-api.md`](./imperative-api.md) — library-wide audit of what
   components hand back through a template ref (`defineExpose` — 28 sites, 4
   typed). Proposes five verbs, a policy for when and how a component may hand
