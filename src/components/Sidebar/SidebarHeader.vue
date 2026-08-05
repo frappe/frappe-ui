@@ -3,10 +3,7 @@
        (min-h-12). The trigger sits 40px tall, centered in that region, and owns
        the sidebar gutter (px-2) itself — so consumers drop it straight into
        <Sidebar> without a wrapping padding div. -->
-  <div
-    class="flex h-12 shrink-0 items-center"
-    :class="isCollapsed ? 'justify-center' : 'px-1'"
-  >
+  <div class="flex h-12 shrink-0 items-center px-1">
     <Dropdown :options="props.menuItems" match-trigger-width>
       <template v-slot="{ open }">
         <button
