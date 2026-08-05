@@ -23,7 +23,10 @@ export function buildConfig(options = {}) {
   const defaultOptions = {
     outDir,
     emptyOutDir: true,
-    sourcemap: true,
+    // Sourcemaps are the single largest build cost: generating them makes
+    // builds 18-25% slower and uses 7-31% more memory. Apps that need them
+    // can pass `sourcemap: true` to buildConfig(). See #909.
+    sourcemap: false,
     indexHtmlPath: indexHtmlPath || null,
     baseUrl: options.baseUrl || getBaseUrl(outDir),
   }
