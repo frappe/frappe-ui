@@ -307,13 +307,6 @@ export const Tag = TagComposite
 
 export const Emoji = EmojiExtension
 export { SlashCommands }
-
-/**
- * Opens a suggester's menu from a toolbar button. Exported because there is no
- * imperative way to do it otherwise — see `suggestion-open` for why the trigger
- * char has to be typed into the document, and how it is cleaned up again.
- */
-export { openSuggestionMenu } from './extensions/shared/suggestion-open'
 export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension
