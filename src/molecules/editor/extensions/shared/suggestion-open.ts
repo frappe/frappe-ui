@@ -36,12 +36,15 @@ const AUTO_OPEN_META = 'suggestionAutoOpen'
 interface AutoOpenMeta {
   char: string
   from: number
+  to: number
   padded: boolean
 }
 
-/** Adopted marker: the start of the text the opener injected (padding included). */
+/** Adopted marker: the span of text the opener injected (padding included). */
 interface AutoOpenMarker {
   from: number
+  /** End of that span, so the never-opened path can take back exactly it. */
+  to: number
   /** Whether that injected text starts with a padding space. */
   padded: boolean
 }
@@ -73,8 +76,14 @@ function isStrandedPadding(doc: ProseMirrorNode, pos: number): boolean {
 
 /**
  * Open the suggestion menu of `extensionName` at the caret, as if the user had
- * typed its trigger char. Returns `false` when the extension is absent or has
- * no suggestion configured.
+ * typed its trigger char.
+ *
+ * Returns `false` when the extension is absent, has no suggestion configured,
+ * or refuses to open at the caret — every suggester built by
+ * `createSuggestionExtension` carries `allow: !isInCode(...)`, so a toolbar
+ * button pressed inside a code block opens nothing. In that last case the
+ * trigger char is taken back out again by `autoOpenCleanupPlugin`, so a `false`
+ * return also means the document is untouched.
  */
 export function openSuggestionMenu(
   editor: Editor,
@@ -84,9 +93,10 @@ export function openSuggestionMenu(
     suggestion?: Omit<SuggestionOptions, 'editor'>
   }>(editor, extensionName)
   const char = options?.suggestion?.char
-  if (!char) return false
+  const pluginKey = options?.suggestion?.pluginKey
+  if (!char || !pluginKey) return false
 
-  return editor
+  const inserted = editor
     .chain()
     .focus()
     .command(({ tr, dispatch }) => {
@@ -104,11 +114,23 @@ export function openSuggestionMenu(
       tr.setMeta(AUTO_OPEN_META, {
         char,
         from,
-        padded: text.length > 1,
+        to: from + text.length,
+        // Not `text.length > 1`: a multi-char trigger is unpadded but longer
+        // than one, and the "used" path would then eat a real character.
+        padded: text !== char,
       } satisfies AutoOpenMeta)
       return true
     })
     .run()
+  if (!inserted) return false
+
+  // `allow` is evaluated while the insert dispatches, and `active` is derived
+  // from the doc on every transaction — so if the menu is not open now, this
+  // insertion will never open it.
+  const state = pluginKey.getState(editor.state) as
+    | SuggestionPluginState
+    | undefined
+  return state?.active ?? false
 }
 
 /**
@@ -142,9 +164,15 @@ export function autoOpenCleanupPlugin(options: {
           | null
           | undefined
         if (meta === null) return null
-        if (meta?.char === char) return { from: meta.from, padded: meta.padded }
+        if (meta?.char === char) {
+          return { from: meta.from, to: meta.to, padded: meta.padded }
+        }
         if (!marker) return null
-        return { ...marker, from: tr.mapping.map(marker.from, -1) }
+        return {
+          ...marker,
+          from: tr.mapping.map(marker.from, -1),
+          to: tr.mapping.map(marker.to, -1),
+        }
       },
     },
 
@@ -155,10 +183,23 @@ export function autoOpenCleanupPlugin(options: {
       if (suggestionState(newState)?.active) return null
 
       const clear = newState.tr.setMeta(AUTO_OPEN_META, null)
+      const limit = newState.doc.content.size
       const previous = suggestionState(oldState)
-      // Never opened (e.g. `allow` rejected it inside a code block). Drop the
-      // marker so it cannot fire against an unrelated menu later.
-      if (!previous?.active) return clear
+
+      // Never opened (e.g. `allow` rejected it inside a code block). The
+      // trigger we typed to open a menu has no menu to open, so take it back
+      // out — leaving it would be the same stray char this plugin exists to
+      // prevent, just on a path the user cannot see coming. Appending to this
+      // transaction rather than dispatching a second one keeps the insert and
+      // its removal a single undo step.
+      if (!previous?.active) {
+        const from = Math.min(marker.from, limit)
+        const to = Math.min(Math.max(marker.to, from), limit)
+        if (from < to && injectedRun.test(newState.doc.textBetween(from, to))) {
+          clear.delete(from, to)
+        }
+        return clear
+      }
 
       // Map the trigger range's end forward with a left bias: a command that
       // replaced the range collapses it onto the marker, which is exactly how
@@ -166,7 +207,6 @@ export function autoOpenCleanupPlugin(options: {
       let to = previous.range.to
       for (const tr of transactions) to = tr.mapping.map(to, -1)
 
-      const limit = newState.doc.content.size
       const from = Math.min(marker.from, limit)
       to = Math.min(Math.max(to, from), limit)
       if (from < to && injectedRun.test(newState.doc.textBetween(from, to))) {

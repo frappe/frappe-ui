@@ -5,7 +5,7 @@
  * to be typed into the document for the suggester to match, so dismissing the
  * menu must take it back out again — while a trigger the USER typed stays put.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { Editor, Extension } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
@@ -16,6 +16,13 @@ import { autoOpenCleanupPlugin, openSuggestionMenu } from './suggestion-open'
 
 const CHAR = '/'
 const suggestionKey = new PluginKey('testSuggestion')
+
+/**
+ * Stands in for the real `allow: ({state, range}) => !isInCode(...)` that
+ * `createSuggestionExtension` gives every suggester. Flipped per test rather
+ * than pulling a CodeBlock node into this state-machine fixture.
+ */
+let allowOpen = true
 
 /**
  * A bare suggester: the real `createSuggestionExtension` wiring minus the Vue
@@ -31,6 +38,7 @@ const TestSuggester = Extension.create({
         items: () => [],
         command: () => null,
         render: () => ({}),
+        allow: () => allowOpen,
       },
     }
   },
@@ -59,6 +67,10 @@ const caretTo = (editor: Editor, pos: number) =>
   editor.commands.setTextSelection(pos)
 
 describe('openSuggestionMenu', () => {
+  beforeEach(() => {
+    allowOpen = true
+  })
+
   it('inserts a bare trigger in an empty paragraph and takes it back on dismiss', () => {
     const editor = makeEditor()
     openSuggestionMenu(editor, 'testSuggester')
@@ -165,6 +177,28 @@ describe('openSuggestionMenu', () => {
     openSuggestionMenu(editor, 'testSuggester')
     editor.commands.insertContent(' x')
     expect(body(editor)).toBe('hello x')
+  })
+
+  it('leaves nothing behind when the suggester refuses to open here', () => {
+    // What `allow: !isInCode(...)` does for every real suggester: the caret is
+    // in a code block, so the menu never opens and the trigger we typed to open
+    // it has no job left to do.
+    allowOpen = false
+    const editor = makeEditor('hello')
+    caretTo(editor, 6)
+
+    expect(openSuggestionMenu(editor, 'testSuggester')).toBe(false)
+    expect(isOpen(editor)).toBe(false)
+    expect(body(editor)).toBe('hello')
+  })
+
+  it('leaves nothing behind when it refuses to open in an empty paragraph', () => {
+    // Same path, unpadded: only the trigger char goes in, only it comes out.
+    allowOpen = false
+    const editor = makeEditor()
+
+    expect(openSuggestionMenu(editor, 'testSuggester')).toBe(false)
+    expect(body(editor)).toBe('')
   })
 
   it('returns false for an extension without a suggestion', () => {
