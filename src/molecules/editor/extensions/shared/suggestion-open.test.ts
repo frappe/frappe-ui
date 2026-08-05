@@ -5,7 +5,7 @@
  * to be typed into the document for the suggester to match, so dismissing the
  * menu must take it back out again — while a trigger the USER typed stays put.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Editor, Extension } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
@@ -50,11 +50,20 @@ const TestSuggester = Extension.create({
   },
 })
 
+/**
+ * Editors made by a test, torn down after it. `EditorView` leaves a pending
+ * `DOMObserver.flush` timeout behind; left running, it fires once jsdom is gone
+ * and throws `document is not defined` out of a test that has already passed.
+ */
+const openEditors: Editor[] = []
+
 function makeEditor(content = '') {
-  return new Editor({
+  const editor = new Editor({
     extensions: [Document, Paragraph, Text, TestSuggester],
     content: content ? `<p>${content}</p>` : '<p></p>',
   })
+  openEditors.push(editor)
+  return editor
 }
 
 const body = (editor: Editor) => editor.state.doc.textContent
@@ -69,6 +78,10 @@ const caretTo = (editor: Editor, pos: number) =>
 describe('openSuggestionMenu', () => {
   beforeEach(() => {
     allowOpen = true
+  })
+
+  afterEach(() => {
+    while (openEditors.length) openEditors.pop()?.destroy()
   })
 
   it('inserts a bare trigger in an empty paragraph and takes it back on dismiss', () => {
