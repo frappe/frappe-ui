@@ -67,6 +67,8 @@ declare module 'vue' {
     ECharts: typeof import('./src/components/Charts/ECharts.vue')['default']
     EmojiList: typeof import('./src/components/TextEditor/extensions/emoji/EmojiList.vue')['default']
     ErrorMessage: typeof import('./src/components/ErrorMessage/ErrorMessage.vue')['default']
+    'ErrorMessage.playground': typeof import('./src/components/ErrorMessage/ErrorMessage.playground.vue')['default']
+    EventModalContent: typeof import('./src/components/Calendar/EventModalContent.vue')['default']
     FeatherIcon: typeof import('./src/components/FeatherIcon.vue')['default']
     FileUploader: typeof import('./src/components/FileUploader/FileUploader.vue')['default']
     FilterIcon: typeof import('./src/components/ListFilter/FilterIcon.vue')['default']
