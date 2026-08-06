@@ -36,6 +36,34 @@ jobs:
           path: coverage/vitest
           if-no-files-found: ignore
 
+  docs-tables:
+    runs-on: ubuntu-latest
+    name: API Tables
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Regenerate the API tables
+        run: yarn docs:gen
+
+      - name: Check the API tables match the source
+        run: |
+          # --intent-to-add puts newly generated files into the diff as well, so
+          # a new component's table cannot slip through as an untracked file.
+          git add --intent-to-add .
+          if ! git diff --exit-code; then
+            echo "::error::The generated API tables are out of date. Run 'yarn docs:gen' and commit the result."
+            exit 1
+          fi
+
   component-test:
     runs-on: ubuntu-latest
     name: Component Tests (Cypress) - ${{ matrix.containers }}
