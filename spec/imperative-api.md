@@ -1,6 +1,9 @@
 # What components hand back through a template ref
 
-Status: **proposed**. Not yet accepted. Written against `1.0.0-beta.25`.
+Status: **accepted** —
+[ADR-0012](./adr/0012-template-ref-surface.md), issue
+[#916](https://github.com/frappe/frappe-ui/issues/916). First written against
+`1.0.0-beta.25`; counts re-verified at sign-off.
 
 Every component has four public surfaces: props, slots, emits, and whatever it
 hands back when you grab it with a template ref. The first three have been
@@ -8,7 +11,7 @@ reviewed component by component before the v1 freeze. The fourth never has.
 
 This document covers that fourth one. In code it's the `defineExpose` call.
 
-There are 28 of them across `src/`. Four have types. The rest were written one
+There are 31 of them across `src/`. Four have types. The rest were written one
 component at a time with no shared rule, and it shows.
 
 ## Not covered here
@@ -34,7 +37,7 @@ This document applies the same thinking to the rest of the library.
 ### 1.1 `open` means two different things
 
 Sometimes `open` is an action — you call it to open something:
-`Popover.vue:278`, `HoverCard.vue:35-42`, `PickerShell.vue:265-267`, and all
+`Popover.vue:268`, `HoverCard.vue:35-42`, `PickerShell.vue:251-255`, and all
 three date pickers (`DatePicker.vue:201`, `DateRangePicker.vue:194`,
 `DateTimePicker.vue:179`).
 
@@ -47,7 +50,7 @@ The same split runs through slot props: `Dropdown.vue:2,7` and
 it as a function and adds a separate `isOpen` for the boolean.
 
 If you write `ref.value.open`, you cannot tell whether to call it or read it.
-The types don't help, because almost none of this is typed (§1.4).
+The types don't help, because almost none of this is typed (§1.5).
 
 ### 1.2 Four names for "give me the underlying HTML element"
 
@@ -62,21 +65,28 @@ The types don't help, because almost none of this is typed (§1.4).
 (`FileUploader.vue:89-91`), so `uploader.value.inputRef.focus()` fails quietly
 while `uploader.value.inputRef().focus()` works.
 
-**`el` is the single most-used thing this library hands back.** 27 call sites
-across five apps:
+**`el` is the single most-used thing this library hands back.** 39 call sites
+across four apps, counted at sign-off against freshly fetched `upstream/develop`
+(`upstream/main` for helpdesk), git-tracked sources only:
 
 | App | Sites |
 | --- | --- |
-| crm | 19 (one inside its own vendored `Autocomplete` fork) |
-| builder | 4 |
-| insights | 2 |
-| gameplan | 1 |
-| gameplan-settings-exploration | 1 |
+| crm | 21 (two inside its own vendored `Autocomplete` fork) |
+| helpdesk | 14 (four inside two vendored `Autocomplete` forks) |
+| gameplan | 2 |
+| builder | 2 |
+| insights | 0 |
+| raven | 0 |
 
-What they do with it: **23 call `focus()`**, 2 call `select()`
-(`crm/.../DurationInput.vue:55`, `crm/.../FormattedInput.vue`), 2 call `blur()`
-(`crm/.../DurationInput.vue:74`, `crm/.../WhatsAppBox.vue`). One asks for focus
-without scrolling (`builder/.../PagePersonaSurvey.vue:198`).
+What they do with it: **31 call `focus()`**, 2 call `select()`
+(`crm/.../DurationInput.vue:55`, `crm/.../FormattedInput.vue:34`), 3 call
+`blur()` (`crm/.../DurationInput.vue:74,78`, `crm/.../WhatsAppBox.vue:118`), and
+3 read `el._value` to get at the input's current text
+(`crm/.../frappe-ui/Autocomplete.vue:128`, and both of helpdesk's
+`Autocomplete` copies) — reaching into Vue's ref internals through a surface we
+published. **Five ask for focus without scrolling** (helpdesk 4, builder 1), so
+`focus(options?)` is answering a need that already exists rather than
+anticipating one.
 
 It's used internally for the same reason — `PickerShell.vue:197,259`,
 `TimePicker.vue:286,644`, `Duration.vue:56,79,82,113`, `LinkPopup.vue:100`,
@@ -85,6 +95,13 @@ almost all of them focusing.
 
 So `el` exists mostly because `TextInput` has no `focus()`. Grabbing the raw
 element was the only way.
+
+Two entries in the original count were not ours and have been dropped:
+helpdesk's `NestedPopover` `.el` is headlessui's, and builder's
+`useCanvasMarqueeSelection` `.el` is builder's own data structure.
+`gameplan-settings-exploration` is not a git repository, so it falls outside the
+map's counting rule. insights going from 2 to 0 matches
+[#868](https://github.com/frappe/frappe-ui/issues/868) — it has fully migrated.
 
 `viewportElement` is the opposite case — a genuine need. `DesktopShell.vue:64`
 watches it and registers the real scrolling element with the app shell, and
@@ -96,53 +113,63 @@ keeping the styled scrollbar. No function replaces either of those.
 | Component | How it focuses |
 | --- | --- |
 | `Duration.vue:113` | reaches through `TextInput`'s `el` |
-| `TimePicker.vue:643-645` | same |
-| `Combobox.vue:377-383` | looks the element up by ID — already banned by the selection spec |
-| `MultiSelect.vue:222-227` | looks it up by ID, and isn't handed back at all |
+| `TimePicker.vue:636-645` | same |
+| `Select`, `Combobox`, `MultiSelect` | template ref, taking `FocusOptions` — **already fixed** by [`selection.md`](./selection.md) |
 
-None of them accept options, so you can't ask for focus without scrolling —
+The first two accept no options, so you can't ask for focus without scrolling —
 even though both the library (`IframeInsertDialog.vue:104`) and userland
-(`builder/.../PagePersonaSurvey.vue:198`) need exactly that.
+(`builder/.../PagePersonaSurvey.vue:198`) need exactly that. The selection trio
+is the shape to copy: `MultiSelect.vue:242-250` resolves the element through a
+template ref specifically so the internal id stays internal.
 
 Things you'd expect to be able to focus, but can't: `TextInput`, `Textarea`,
-`Password`, `Select`, `MultiSelect`, `FileUploader`, `Checkbox`, `Switch`,
-`Slider`, `Rating`, all three date pickers, `Tree`, `TabButtons`. The first two
-are the most-used inputs in the library.
+`Password`, `FileUploader`, `Checkbox`, `Switch`, `Slider`, `Rating`, all three
+date pickers, `Tree`, `TabButtons`. The first two are the most-used inputs in
+the library.
 
 ### 1.4 Opening and closing is inconsistent
 
 `Popover` and `HoverCard` hand back both `open` and `close`. The three date
-pickers hand back `open` only. `Dialog.vue:309` hands back `close` only.
+pickers hand back `open` only. `Dialog.vue:324` hands back `close` only.
 `Autocomplete.vue:410` hands back `togglePopover` — the only toggle in the
 library, and the only name with a component type stuck on the end.
 
-### 1.5 Only 4 of 28 are typed, in two ways that behave differently
+### 1.5 Only 4 of 31 are typed, in three ways that behave differently
 
-Typed: `Combobox.vue:421`, `Duration.vue:113`, and `Dialog.vue:309`.
+Typed: `Combobox.vue:435` and `MultiSelect.vue:330` (both `SelectionExposed`),
+`Duration.vue:113`, and `Dialog.vue:324`.
 
-The first two write `defineExpose<SomeType>(...)`. Dialog writes
+The first three write `defineExpose<SomeType>(...)`. Dialog writes
 `defineExpose(obj satisfies SomeType)`. These are **not the same thing**. The
 first publishes exactly the declared type. The second publishes whatever the
 object happens to contain and just checks it against the type — so adding a
 stray member to Dialog's object would silently grow the public surface with no
 error. For an API we're about to freeze, that matters.
 
-**Two types that promise something the code never delivers:**
+`Select.vue:277-278` is a third shape — `const exposed: SelectionExposed = {...}`
+then `defineExpose(exposed)`. It behaves correctly, because the annotated const
+is what gets published, but it is a third way to write one thing.
 
-- `DropdownExposed { close: () => void }` (`Dropdown/types.ts:80-83`) is
-  exported all the way out to consumers — but **`Dropdown.vue` never calls
-  `defineExpose`**. `close()` exists (`Dropdown.vue:86-88`) but only as a slot
-  prop. So writing `ref<DropdownExposed>()` and calling `.close()` compiles
-  cleanly and crashes at runtime.
-- `SelectExposed {}` (`Select/types.ts:146`) is an exported empty type with no
-  implementation behind it.
+**One type that promises something the code never delivers:**
+
+- `DropdownExposed { close: () => void }` (`Dropdown/types.ts:80-83`) reaches
+  consumers through `Dropdown/index.ts`'s `export * from './types'` — but
+  **`Dropdown.vue` never calls `defineExpose`**. `close()` exists
+  (`Dropdown.vue:86-88`) but only as a slot prop. So writing
+  `ref<DropdownExposed>()` and calling `.close()` compiles cleanly and crashes
+  at runtime.
+
+The second one is already fixed: `SelectExposed {}` was an exported empty type,
+and [`selection.md`](./selection.md) has since replaced it with the shared
+`SelectionExposed { clear, focus }`, implemented on all three of `Select`,
+`Combobox` and `MultiSelect`.
 
 Naming forks too: everything ends in `Exposed` except `SuggestionListExpose`
 (`molecules/editor/extensions/suggestion/suggestion-types.ts:37`).
 
 ### 1.6 Nothing marks the internal ones as internal
 
-`CalendarPanel.vue:436`, `PickerShell.vue:264`, and six editor list components
+`CalendarPanel.vue:436`, `PickerShell.vue:251`, and six editor list components
 exist purely so sibling components can talk to each other. Nothing says so. The
 only hint is that those components aren't exported, which you can't see from the
 file.
@@ -153,23 +180,61 @@ shared type to import. One contract, three copies, free to drift apart.
 
 ---
 
-## 2. The proposal
+## 2. The contract
+
+### 2.0 What earns a place here
+
+Vue offers three ways out of a component already. Slot props reach code inside
+the slot. `v-model` and emits reach state. **A template ref exists for what
+neither can do: driving the component from the parent's `<script>`.**
+
+So a member goes on this surface only when a parent's script needs it and no
+other surface reaches. If a slot prop already covers it, that's the answer.
+
+This is a real filter, not a formality. It is why `FileUploader` ends up handing
+back nothing (§2.7) even though it clearly *does* something you'd want to
+trigger — `openFileSelector` has been a slot prop all along, used in 28 files
+across five apps, and every one of them puts the trigger inside the slot.
+
+The rule cuts hardest against **additions**, which is the opposite of where it
+looks like it should. An added method freezes until `2.0.0` exactly like a
+renamed one, and the costs are lopsided: adding a verb later is a minor release,
+removing one is not. So a method with no demonstrated need is the expensive
+choice and an omitted one is cheap to fix.
 
 ### 2.1 Five verbs, and that's it
 
 | Verb | What it does | Use it when |
 | --- | --- | --- |
 | `focus(options?)` | Moves keyboard focus to the main control. | **Always**, for anything you can type in or tab to. |
-| `clear()` | Empties the value. Doesn't open, close, or focus. | The component holds a value that can be empty. |
-| `open()` | Opens the overlay. Safe to call twice. | The component owns an overlay. |
+| `clear()` | Empties the value. Doesn't open, close, or focus. | Selection components only — see below. |
+| `open()` | Opens the overlay. Safe to call twice. | The component owns an overlay **and its trigger**. |
 | `close()` | Closes the overlay. Safe to call twice. | Paired with `open()`. |
 | `reload()` | Fetches the data again. | The component owns a fetch you can't otherwise re-trigger. |
+
+**`open` and `close` are for overlays that own their trigger.** `Popover`,
+`HoverCard`, `Dropdown` and the pickers all render the trigger inside themselves
+through a `trigger` slot, so code outside that slot has no handle on it and a ref
+is the only way in. Apps do exactly this: builder's `ColorPicker` calls both from
+a function in its `<script>`, and helpdesk opens a date picker from a menu
+item's `onClick` in three places.
+
+`Dialog` has no trigger slot. The parent decides when it appears and already
+holds that state in `v-model`, so a ref reaches nothing the parent lacks — which
+is why it hands back nothing (§2.8).
+
+**`clear()` stays where it already is.** `Select`, `Combobox` and `MultiSelect`
+have it via [`selection.md`](./selection.md), and it goes nowhere new. For a
+text input, `v-model` already empties the value; across the whole bench there is
+one site that clears a component through a ref, and it is a `Combobox`.
 
 **No `toggle()`.** It's one line of caller code over `open` and `close`.
 `spec/popover.md:211-212` already decided this for `Popover`; it becomes the
 rule.
 
-**No `reset()`.** `Combobox.reset` becomes `clear` (already agreed).
+**No `reset()`.** `Combobox.reset` became `clear` in
+[`selection.md`](./selection.md) and has already shipped. One live site migrates
+(`builder/.../MoreStylesPanel.vue:179`).
 
 **`open` is always a verb here.** The boolean lives on `v-model:open` and on
 slot props as `isOpen`. Nothing handed back through a ref is ever a boolean
@@ -177,7 +242,14 @@ named `open`. This fixes §1.1 and costs nothing — no component does that toda
 
 `focus(options?)` takes the standard `FocusOptions`, so
 `focus({ preventScroll: true })` works. Both the library and userland already
-need it.
+need it — five app sites pass exactly that option today, reaching through `el`
+to do it (helpdesk 4, builder 1).
+
+`focus()` is the one verb that goes on everything you can type in or tab to,
+rather than only where it is already asked for. It clears §2.0's bar by a wide
+margin: 31 sites reach through `el` purely to call it, seven more fall back to
+`querySelector` or `getElementById` (builder 5, helpdesk 2), and §1.3's gap is
+that the library's two most-used inputs cannot be focused at all.
 
 Adding a verb later is a minor release. Adding a sixth verb to this list needs
 an ADR.
@@ -266,15 +338,21 @@ keeps this from turning back into four names for one idea.
 | `TextInput.el` | `TextInput.inputElement` (`HTMLInputElement \| null`) |
 | `Textarea.el` | `Textarea.inputElement` (`HTMLTextAreaElement \| null`) |
 | `Password` — nothing | `Password.inputElement` |
-| `FileUploader.inputRef` | removed; `open()` replaces it |
+| `FileUploader.inputRef` | removed, with nothing in its place — the `openFileSelector` slot prop already covers it (§2.7) |
 | `Autocomplete.rootRef`, `TextEditor.rootRef` | removed with the components |
 | `ScrollArea.viewportElement` | unchanged, now typed |
 | `SettingsBody.viewportElement` | unchanged, sharing ScrollArea's type |
 
-The `el` → `inputElement` rename touches 27 known sites (§1.2) — but 23 of them
+The `el` → `inputElement` rename touches 39 known sites (§1.2) — but 31 of them
 are calling `focus()`, and `focus()` is being added. Those migrate to the verb,
-not to the new name. The rename's real blast radius is the four `select()` /
-`blur()` sites, all in crm.
+not to the new name. The rename's real blast radius is two much smaller groups:
+
+- **5 sites take the new name** — the `select()` / `blur()` calls, all in crm.
+- **3 sites have no direct replacement** — the `el._value` reads in crm's and
+  helpdesk's vendored `Autocomplete` forks. Those were reading the input's
+  current text out of Vue's ref internals; they rewrite against the model value.
+
+Every one of them fails as a type error at build time, not as a runtime crash.
 
 ### 2.4 Third-party objects: one exception, and it's written down
 
@@ -294,16 +372,21 @@ that stops "just expose the reka instance" from spreading.
 
 - **Where:** the component's `types.ts`, next to its Props / Emits / Slots.
 - **How:** always `defineExpose<XExposed>({ ... })`. **Never `satisfies`** — it
-  lets the surface grow silently (§1.5).
+  lets the surface grow silently (§1.5) — and not the annotated-const form
+  either, which behaves correctly but is a third way to write one thing.
 - **Export:** from the component's `index.ts` explicit export list, not
   `export *`.
 - **Name:** always `Exposed`, never `Expose`.
 - **Shared shapes share a type:** `Select` + `Combobox` + `MultiSelect` share
-  one; `ScrollArea` + `SettingsBody` share one; the three date pickers share
-  one; `TextInput` + `Textarea` + `Password` share one.
-- **Fix the two lying types now.** `DropdownExposed` gets implemented or
-  deleted. `SelectExposed` gets `{ clear, focus }`. Shipping a type with nothing
-  behind it past `1.0.0` isn't an option.
+  one (`SelectionExposed`, already shipped); `ScrollArea` + `SettingsBody` share
+  one; the three date pickers and `TimePicker` share one; `TextInput` +
+  `Textarea` + `Password` share one.
+- **Delete `DropdownExposed`.** It promises a `close()` that `Dropdown.vue`
+  never defines, and it reaches consumers through `export * from './types'`.
+  Implementing it was rejected: that would add an unproven pair of methods
+  (§2.0) to make true a type nobody should have relied on. Shipping a type with
+  nothing behind it past `1.0.0` isn't an option either. `SelectExposed` was the
+  other one and is already fixed (§1.5).
 
 ### 2.6 Internal ones must say so
 
@@ -326,78 +409,121 @@ Applied:
 
 | Component | Today | After | Breaking |
 | --- | --- | --- | --- |
-| `Select` | nothing | `{ clear, focus }` | No |
-| `MultiSelect` | nothing | `{ clear, focus }` | No |
-| `Combobox` | `{ reset, focus }` | `{ clear, focus }` | Yes — already agreed |
-| `TextInput` | `{ el }` | `{ focus, clear, inputElement }` | **Yes — rename, needs sign-off** |
-| `Textarea` | `{ el }` | `{ focus, clear, inputElement }` | **Yes — rename, needs sign-off** |
-| `Password` | nothing | `{ focus, clear, inputElement }` | No |
-| `Duration` | `{ focus }` | `{ focus, clear }` | No |
-| `FileUploader` | `{ inputRef }` | `{ open, clear }` | **Yes — needs sign-off** |
-| `Dialog` | `{ close }` | **nothing** — see §2.8 | **Yes — needs sign-off** |
+| `Select` | `{ clear, focus }` | unchanged | No — already shipped |
+| `MultiSelect` | `{ clear, focus }` | unchanged | No — already shipped |
+| `Combobox` | `{ clear, focus }` | unchanged | No — `reset` → `clear` already shipped |
+| `TextInput` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** |
+| `Textarea` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** |
+| `Password` | nothing | `{ focus, inputElement }` | No |
+| `Duration` | `{ focus }` | unchanged | No |
+| `FileUploader` | `{ inputRef }` | **nothing** — see below | **Yes — signed off** |
+| `Dialog` | `{ close }` | **nothing** — see §2.8 | **Yes — signed off** |
 | `Popover` | `{ open, close }` | unchanged — the model to copy | No |
 | `HoverCard` | `{ open, close }` | same, plus a type | No |
-| `Dropdown` | nothing (but promises `close`) | `{ open, close }` | No — makes the promise true |
-| `DatePicker` | `{ open }` | `{ open, close, clear, focus }` | No |
-| `DateRangePicker` | `{ open }` | `{ open, close, clear, focus }` | No |
-| `DateTimePicker` | `{ open }` | `{ open, close, clear, focus }` | No |
-| `TimePicker` | `{ focus }` | `{ open, close, clear, focus }` | No |
+| `Dropdown` | nothing (but promises `close`) | nothing; `DropdownExposed` deleted | Yes — loud, removes a type nobody could use |
+| `DatePicker` | `{ open }` | `{ open, close, focus }` | No |
+| `DateRangePicker` | `{ open }` | `{ open, close, focus }` | No |
+| `DateTimePicker` | `{ open }` | `{ open, close, focus }` | No |
+| `TimePicker` | `{ focus }` | `{ open, close, focus }` | No |
 | `ScrollArea` | `{ viewportElement }` | same, plus a type | No |
 | `SettingsBody` | `{ viewportElement }` | same, sharing ScrollArea's type | No |
 | `Editor` | `{ editor, isEmpty }` | same, plus a type | No |
 | `Autocomplete`, `TextEditor` | various | deleted with the component | Policy |
 | `CalendarPanel`, `PickerShell`, editor lists | various | internal, shared types | No |
+| everything else you can type in or tab to | nothing | `{ focus }` | No |
+
+The last row is §1.3's list: `Checkbox`, `Switch`, `Slider`, `Rating`, `Tree`,
+`TabButtons`. Each one gets `focus()` inside its own family's sweep.
+
+**`FileUploader` hands back nothing.** `inputRef` is removed with nothing in its
+place. The spec originally proposed `{ open, clear }` here; both fail §2.0.
+`open()` would be a second public name for an action already called
+`openFileSelector` as a slot prop in 28 files across five apps, and that slot
+prop reaches every real use — all 28 put the trigger button inside the slot.
+Renaming the slot prop to match was rejected as a quiet break in 28 files bought
+for nothing. `clear()` has no site in the bench and no workaround in the bench
+either — nobody remounts a `FileUploader` with `:key` to reset it.
 
 ### 2.8 `Dialog` hands back nothing
 
-I searched every app in the bench for `.close()` called on a template ref.
-There are exactly two, and both are on `Popover`
+`Dialog` has no trigger slot. The parent decides when it appears and already
+holds that state in `v-model`, so §2.1's trigger-ownership rule says a ref
+reaches nothing the parent lacks.
+
+The usage evidence agrees. Searching every app in the bench for `.close()` on a
+template ref finds exactly two, both on `Popover`
 (`insights/frontend/src/components/UseTooltip.vue:22`,
 `builder/frontend/src/components/Controls/ColorPicker.vue:74`). **Nobody calls
 Dialog's `close()` through a ref.**
 
-That makes sense: you open a Dialog with `v-model`, so you close it the same
-way. The `close` that people *do* use is the slot prop
-(`Dialog.vue:32,73,95,113`) and the one passed to action callbacks
-(`Dialog.vue:406-419`) — both stay, and neither is affected. So `defineExpose`
-comes out of `Dialog` entirely and `DialogExposed` is deleted.
+But the rule is what decides it, not the count. Zero usage is evidence nobody
+hit the need, not that the need is absent — and counting alone would have argued
+just as well for stripping `HoverCard`, which nobody drives by ref either.
+Trigger ownership is a property of the component, so it predicts instead of
+observing, and it keeps `Popover` and `HoverCard` for the same reason it drops
+`Dialog`.
+
+The `close` that people *do* use is the slot prop (`Dialog.vue:32,73,95,113`)
+and the one passed to action callbacks (`Dialog.vue:406-419`) — both stay, and
+neither is affected. So `defineExpose` comes out of `Dialog` entirely and
+`DialogExposed` is deleted.
 
 ---
 
-## 3. Needs sign-off
+## 3. Signed off
 
-Breaking changes to things that are **not** currently deprecated, riskiest
-first:
+Resolved on [#916](https://github.com/frappe/frappe-ui/issues/916); rationale in
+[ADR-0012](./adr/0012-template-ref-surface.md). Breaking changes to things that
+are **not** currently deprecated, riskiest first:
 
-1. **`el` → `inputElement` on `TextInput` and `Textarea`.** 27 known sites.
-   Most move to `focus()` instead; ~4 need the new name. It's a rename with a
-   mechanical fix, and it surfaces as a type error rather than a runtime crash,
-   but it is the widest-reaching change in this document.
-2. **`Dialog` hands back nothing.** Verified unused in the bench (§2.8), but
-   `DialogExposed` is currently exported, so removing it is still breaking.
-3. **`FileUploader.inputRef` removed.** Its broken shape (§1.2) makes real usage
-   unlikely.
-4. **`Combobox.reset` → `clear`.** Already agreed; listed for completeness.
+1. **`el` → `inputElement` on `TextInput` and `Textarea`** — **renamed.** 39
+   known sites; 31 move to `focus()`, 5 take the new name, 3 rewrite against the
+   model value. It surfaces as a type error rather than a runtime crash, but it
+   is the widest-reaching change in this document. Keeping `el` alongside the
+   new name was never available: ADR-0008 bans deprecated members in `1.0.0`.
+2. **`Dialog` hands back nothing** — **removed**, on §2.1's trigger-ownership
+   rule. `DialogExposed` is exported, so removing it is a loud break. Growing it
+   to `{ open, close }` for symmetry with `Popover` was rejected: symmetry isn't
+   the rule, trigger ownership is.
+3. **`FileUploader.inputRef` removed**, with nothing in its place (§2.7). Zero
+   sites in the bench, and the proposed `open()` failed §2.0 — `openFileSelector`
+   already covers it as a slot prop.
+4. **`Combobox.reset` → `clear`** — already shipped via
+   [`selection.md`](./selection.md). One live migration site.
 
-Additive, no sign-off needed: every `focus` / `clear` / `open` / `close`
-addition, `Password.inputElement`, every new type, and `Dropdown` finally
-implementing what it already promises.
+**The additive half is bounded, not exempt** (§2.0). An added method freezes
+until `2.0.0` exactly like a renamed one, so:
+
+- `focus(options?)` goes on everything you can type in or tab to.
+- `open` / `close` go on trigger-owning overlays only — `Popover` and
+  `HoverCard` keep theirs, the three date pickers and `TimePicker` gain both.
+- `clear()` stays on `Select`, `Combobox` and `MultiSelect` and goes nowhere new.
+- `DropdownExposed` is **deleted**, not implemented.
+
+Everything else waits for a real request and arrives in a minor release. A sixth
+verb, or a third element role, still needs an ADR.
+
+**Where the work happens.** This document is the contract; the `defineExpose`
+edits happen inside the sweep that owns each component, as
+[at-bar](./at-bar.md) item 8.
 
 ## Task list
 
+Each item is done by the sweep that owns the component, as
+[at-bar](./at-bar.md) item 8 — not as one pass.
+
 **Types**
 - [ ] Add a `<Component>Exposed` type wherever something is handed back
-- [ ] Change `Dialog.vue:309` off `satisfies` — or delete it entirely per §2.8
-- [ ] Implement `DropdownExposed` as `{ open, close }`, or delete the type
-- [ ] Fill in `SelectExposed`
+- [ ] Delete `DialogExposed` and its `satisfies` call (`Dialog.vue:324`)
+- [ ] Delete `DropdownExposed` (`Dropdown/types.ts:80-83`)
+- [ ] Move `Select.vue:277-278` to `defineExpose<SelectionExposed>(...)`
 - [ ] Rename `SuggestionListExpose` → `SuggestionListExposed`; stop exporting it
-- [ ] Add the shared input type and the shared scroll-viewport type
+- [ ] Add the shared input type, the shared scroll-viewport type, and the shared
+      picker type
 
 **Verbs**
-- [ ] Add `focus(options?)` to every input listed in §1.3
-- [ ] Add `clear()` per the table in §2.7
-- [ ] Add `close()` to the three date pickers and `TimePicker`
-- [ ] Implement `{ open, close }` on `Dropdown`
+- [ ] Add `focus(options?)` to every input and focusable control in §1.3
+- [ ] Add `open()` / `close()` to the three date pickers and `TimePicker`
 - [ ] Replace every look-up-by-ID focus with a template ref
 
 **Elements**
@@ -406,10 +532,20 @@ implementing what it already promises.
 - [ ] Add `inputElement` to `Password`
 - [ ] Type `ScrollArea` / `SettingsBody`'s `viewportElement`
 
-**Removals (after sign-off)**
-- [ ] Remove `FileUploader.inputRef`; add `open()`
-- [ ] Remove `defineExpose` from `Dialog`; delete `DialogExposed`
+**Removals**
+- [ ] Remove `FileUploader.inputRef`, with nothing in its place
+- [ ] Remove `defineExpose` from `Dialog`
 
 **Internal**
 - [ ] Mark `CalendarPanel`, `PickerShell`, and the six editor lists `@internal`
 - [ ] Add a shared `CalendarPanelExposed`; delete the three hand-written copies
+
+**Migration guide** — silent breaks needing a before/after under
+[ADR-0011](./adr/0011-at-bar-checklist.md)'s test:
+- [ ] `el._value` → the model value (crm 1, helpdesk 2, all vendored
+      `Autocomplete` forks)
+- [ ] `Combobox.reset()` → `clear()` (builder 1)
+- [ ] `el.select()` / `el.blur()` → `inputElement.select()` / `.blur()` (crm 5)
+
+Loud breaks needing only a changelog line: `DialogExposed`, `DropdownExposed`,
+`FileUploader.inputRef`.
