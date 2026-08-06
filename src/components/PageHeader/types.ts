@@ -11,7 +11,10 @@ export interface PageHeaderMobileTitleProps {
 }
 
 export interface PageHeaderBackButtonProps {
-  /** Where to navigate on tap. Omit to fall back to browser history. */
+  /**
+   * Fallback destination, used only when there is no in-app history to go back to
+   * (a cold load onto a deep link). Taps otherwise go back through history.
+   */
   to?: RouteLocationRaw
 
   /** Accessible label for the button. */
