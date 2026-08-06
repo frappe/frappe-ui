@@ -17,6 +17,7 @@ import type { Editor } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import MediaNodeView from '#molecules/editor/components/MediaNodeView.vue'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
+import { captionAttribute } from '#molecules/editor/extensions/shared/media-attributes'
 import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
 import { openImageGroupUploadDialog } from '#molecules/editor/extensions/image-group/imageGroupDialogController'
 import {
@@ -43,7 +44,10 @@ export interface ImageExtensionOptions {
 
 export interface SetImageOptions {
   src: string
+  /** Screen-reader description. Not shown on screen. */
   alt?: string
+  /** Visible caption rendered under the image. */
+  caption?: string
   title?: string
   width?: string | number | null
   height?: string | number | null
@@ -86,7 +90,15 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   addAttributes() {
     return {
       src: { default: null },
+      /** Screen-reader description. Never rendered as visible text. */
       alt: { default: null },
+      caption: captionAttribute,
+      /**
+       * Native `title` tooltip. Filled by the markdown input rule
+       * (`![alt](src "title")`) and round-tripped, but it has no UI of its own:
+       * a tooltip is not an accessible name, so the alt-text field writes to
+       * `alt` instead.
+       */
       title: { default: null },
       width: { default: null },
       height: { default: null },
@@ -137,23 +149,10 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
     }
   },
 
+  // Every attribute is read by its own `parseHTML` (TipTap injects those into
+  // the rule and they take precedence), so the rule itself only has to match.
   parseHTML() {
-    return [
-      {
-        tag: 'img[src]',
-        getAttrs: (node) => {
-          if (typeof node === 'string') return {}
-          const element = node as HTMLElement
-          return {
-            src: element.getAttribute('src'),
-            alt: element.getAttribute('alt'),
-            title: element.getAttribute('title'),
-            width: element.getAttribute('width'),
-            height: element.getAttribute('height'),
-          }
-        },
-      },
-    ]
+    return [{ tag: 'img[src]' }]
   },
 
   renderHTML({ HTMLAttributes }) {
