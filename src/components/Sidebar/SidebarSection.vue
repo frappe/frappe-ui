@@ -80,10 +80,12 @@ const isSidebarCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),
 )
-// Per-section open/closed state for `collapsible` sections — distinct from the
-// whole-sidebar collapse above. A model so apps can own it (start a section
-// collapsed, persist the choice); left unbound it behaves as before — local
-// state starting expanded.
+/**
+ * Whether the section is collapsed. Per-section open/closed state for
+ * `collapsible` sections — distinct from the whole-sidebar collapse above.
+ * Bind it to own the state (start a section collapsed, persist the choice);
+ * left unbound the section manages it internally, starting expanded.
+ */
 const isSectionCollapsed = defineModel<boolean>('collapsed', { default: false })
 
 const visibleItems = computed(() =>
