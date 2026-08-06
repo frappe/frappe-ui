@@ -1,23 +1,24 @@
 <template>
-  <Autocomplete
+  <Combobox
+    v-model="model"
+    trigger="button"
     placeholder="Select an option"
     :options="options"
-    :value="selection"
-    @update:query="onUpdateQuery"
-    @change="onChange"
+    :loading="r.loading"
+    :filterable="false"
+    @update:query="(query) => onUpdateQuery(query as string)"
   />
 </template>
 
 <script setup lang="ts">
-import { Autocomplete, createListResource } from '../../index'
-import { computed, ref, watch } from 'vue'
-import type { Option } from '../Autocomplete/types'
+import { Combobox, createListResource } from '../../index'
+import { computed, watch } from 'vue'
+import type { ComboboxSelectableOption } from '../Combobox/types'
 
 type SearchResult = Record<string, any>
 
 const props = withDefaults(
   defineProps<{
-    value?: string
     doctype: string
     searchField?: string
     labelField?: string
@@ -25,13 +26,14 @@ const props = withDefaults(
     pageLength?: number
   }>(),
   {
-    value: '',
     searchField: 'name',
     labelField: 'name',
     valueField: 'name',
     pageLength: 10,
   },
 )
+
+const model = defineModel<string | null>({ default: null })
 
 watch(
   () => props.doctype,
@@ -47,25 +49,25 @@ const r = createListResource({
   cache: ['link_doctype', props.doctype],
   auto: true,
   fields: [props.labelField, props.searchField, props.valueField],
-  onSuccess: () => {
-    selection.value = props.value
-      ? (options.value.find((o) => o.value === props.value) ?? null)
-      : null
-  },
 })
-const options = computed<Option[]>(
+
+const options = computed<ComboboxSelectableOption[]>(
   () =>
     r.data?.map((result: SearchResult) => ({
       label: result[props.labelField],
       value: result[props.valueField],
     })) || [],
 )
-const selection = ref<Option | null>(null)
 
-function onChange(value: Option) {
-  selection.value = value
-}
-
+// The server already decided what matches the query, so client filtering is
+// off (`filterable="false"`) — a second literal substring pass here would drop
+// anything the backend matched fuzzily or by id.
+//
+// The `as string` at the call site is not decoration: Combobox declares
+// `update:query` twice, once through `defineModel('query')` and once in
+// `ComboboxEmits`, and vue-tsc resolves the pair to the untyped
+// `(...args: unknown[]) => any`. Same for `update:modelValue` and
+// `update:open`; `update:selectedOption` types correctly.
 function onUpdateQuery(query: string) {
   r.update({
     filters: {
