@@ -152,9 +152,6 @@ export {
   useShellScrolled,
 } from './composables/useShellScrolled'
 
-// Browser and responsive composables
-export * from './composables/useScreenSize'
-
 // Directives
 export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'
