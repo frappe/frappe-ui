@@ -33,6 +33,13 @@ function makeStale(name: string) {
   ).lastFetched.set(`${DOCTYPE}/${name}`, Date.now() - 10 * 60 * 1000)
 }
 
+/** Whether the store holds a slot for this key at all. */
+function hasSlot(name: string) {
+  return (docStore as unknown as { docs: Map<string, unknown> }).docs.has(
+    `${DOCTYPE}/${name}`,
+  )
+}
+
 /**
  * Mirror useDoc's `doc` computed: it calls getDoc and dereferences the returned
  * ref *without* optional chaining, so a getDoc that returns undefined throws.
@@ -82,11 +89,7 @@ describe('docStore', () => {
     const record = { doctype: DOCTYPE, name }
     await docStore.setDoc({ ...record })
 
-    // Force the entry past the cache timeout, as a long-lived useDoc would be.
-    const key = `${DOCTYPE}/${name}`
-    ;(
-      docStore as unknown as { lastFetched: Map<string, number> }
-    ).lastFetched.set(key, Date.now() - 10 * 60 * 1000)
+    makeStale(name)
 
     const ref = docStore.getDoc(DOCTYPE, name, { staleOnError: true })
     expect(ref).toBeDefined()
@@ -166,5 +169,51 @@ describe('docStore', () => {
     // too, a non-idempotent transform would compound across the two publishes,
     // so the cached and fresh copies would carry different values.
     expect(ref.value).toStrictEqual(cached)
+  })
+
+  it('a read in flight when the doc is deleted does not bring it back', async () => {
+    const name = 'user7'
+    const record = { doctype: DOCTYPE, name }
+    await idbStore.set(idbKey(name), record)
+
+    const cachedRead = defer<unknown>()
+    vi.spyOn(idbStore, 'get').mockReturnValue(cachedRead.promise)
+
+    const ref = docStore.getDoc(DOCTYPE, name)
+    await docStore.removeDoc(DOCTYPE, name)
+
+    // The read was issued before the delete, so it still answers with the row.
+    cachedRead.resolve(record)
+    await flush()
+
+    expect(ref.value).toBe(null)
+    // Publishing would re-create the slot the delete removed.
+    expect(hasSlot(name)).toBe(false)
+  })
+
+  it('a read in flight when the doc is deleted does not land in a later slot', async () => {
+    const name = 'user8'
+    const deleted = { doctype: DOCTYPE, name, bio: 'from before the delete' }
+
+    const beforeDelete = defer<unknown>()
+    const afterDelete = defer<unknown>()
+    vi.spyOn(idbStore, 'get')
+      .mockReturnValueOnce(beforeDelete.promise)
+      .mockReturnValueOnce(afterDelete.promise)
+
+    docStore.getDoc(DOCTYPE, name)
+    await docStore.removeDoc(DOCTYPE, name)
+
+    // Someone asks for the same key again, which opens a fresh slot. The read
+    // from before the delete must not be able to write into it, so the revision
+    // counter cannot restart when a key is cleaned up.
+    const ref = docStore.getDoc(DOCTYPE, name)
+    beforeDelete.resolve(deleted)
+    await flush()
+
+    expect(ref.value).toBe(null)
+
+    afterDelete.resolve(null)
+    await flush()
   })
 })

@@ -14,6 +14,10 @@ class DocStore {
   private lastFetched: Map<DocKey, number>
   private revisions: Map<DocKey, number>
   private inflight: Map<DocKey, Promise<void>>
+  // Store-wide and only ever incremented. A per-key counter that restarts at 0
+  // would let a snapshot taken before a key was cleaned up match the value a
+  // later slot starts from, which is how a deleted doc comes back to life.
+  private revisionCounter = 0
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
 
@@ -28,7 +32,7 @@ class DocStore {
    * The single place a doc is assigned into its ref.
    *
    * A key is published twice by design — once from the IndexedDB cache, once
-   * from the server (stale-while-revalidate). Each publish bumps a per-key
+   * from the server (stale-while-revalidate). Each publish takes the next
    * revision so a slow cached read can tell it has been overtaken and skip its
    * write. The invariant: `docRef.value` never moves backwards in time.
    */
@@ -41,7 +45,7 @@ class DocStore {
     // getDoc again — if the entry still looked stale at that point it would kick
     // off a needless reload that evicts the IDB copy we just wrote.
     this.lastFetched.set(key, Date.now())
-    this.revisions.set(key, (this.revisions.get(key) ?? 0) + 1)
+    this.revisions.set(key, ++this.revisionCounter)
     this.docs.get(key)!.value = doc
   }
 
@@ -104,6 +108,12 @@ class DocStore {
     // Every computed reading this doc calls getDoc, so several readers can ask
     // for the same key in one tick. Without this, each starts its own read and
     // each is free to assign.
+    //
+    // Keyed on the document alone, so the first caller's `staleOnError` decides
+    // whether the IDB copy survives this round. Two useDocs on one document with
+    // different values for it is not a case worth splitting the read for: they
+    // share the ref either way, and the loser only sees the cached copy kept or
+    // dropped one cycle earlier than it asked for.
     const existing = this.inflight.get(key)
     if (existing) return existing
 
@@ -129,8 +139,10 @@ class DocStore {
     options: { staleOnError?: boolean } = {},
   ) {
     // Snapshot before awaiting. Anything published while this read is in flight
-    // is newer than what the read is about to return.
-    const revisionAtStart = this.revisions.get(key) ?? 0
+    // is newer than what the read is about to return. `undefined` is a value in
+    // its own right here: it means nothing has ever been published for this key,
+    // and cleanup() replaces it with a number rather than clearing it.
+    const revisionAtStart = this.revisions.get(key)
 
     if (!isFirstLoad && this.isStale(key)) {
       this.lastFetched.delete(key)
@@ -143,7 +155,11 @@ class DocStore {
 
     const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
     if (!idbDoc) return
-    if ((this.revisions.get(key) ?? 0) !== revisionAtStart) return
+    // A read only ever writes into a slot that still exists. The read was issued
+    // before any delete that has since happened, so it still answers with the
+    // deleted row — publishing it would re-create the entry.
+    if (!this.docs.has(key)) return
+    if (this.revisions.get(key) !== revisionAtStart) return
 
     this.publish(key, idbDoc)
   }
@@ -183,8 +199,11 @@ class DocStore {
   private async cleanup(key: DocKey) {
     this.docs.delete(key)
     this.lastFetched.delete(key)
-    this.revisions.delete(key)
     this.inflight.delete(key)
+    // Bumped, not deleted. A delete is an event reads in flight have to notice,
+    // and clearing the entry would hand the next slot a revision an older read
+    // still matches.
+    this.revisions.set(key, ++this.revisionCounter)
     await idbStore.delete(this.storePrefix + key)
   }
 
