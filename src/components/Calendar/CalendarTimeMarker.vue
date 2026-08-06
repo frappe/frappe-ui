@@ -2,9 +2,9 @@
   <div
     class="absolute top-20 w-full px-px"
     :style="setCurrentTime"
-    v-if="new Date(date).toDateString() === new Date().toDateString()"
+    v-if="isSameDay(date, now)"
   >
-    <Tooltip :text="dayjs().format('ddd, MMM D, YYYY h:mm a')">
+    <Tooltip :text="dayjs(now).format('ddd, MMM D, YYYY h:mm a')">
       <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
     </Tooltip>
   </div>
@@ -14,6 +14,7 @@ import Tooltip from '../Tooltip/Tooltip.vue'
 import { dayjs } from '../../utils/dayjs'
 import { computed, inject } from 'vue'
 import { CALENDAR_CONFIG_KEY } from './types'
+import { isSameDay, useNow } from './composables/useNow'
 
 const props = defineProps<{
   date: string | Date
@@ -26,10 +27,11 @@ if (!config) {
 const hourHeight = config.hourHeight
 const minuteHeight = hourHeight / 60
 
+const now = useNow()
+
 const setCurrentTime = computed(() => {
-  let d = new Date()
-  let hour = d.getHours()
-  let minutes = d.getMinutes()
+  let hour = now.value.getHours()
+  let minutes = now.value.getMinutes()
   let top = (hour * 60 + minutes) * minuteHeight + 'px'
   return { top }
 })
