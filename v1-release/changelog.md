@@ -248,7 +248,7 @@ options.
 internal `TabButtons` detail.
 
 `ThemeSwitcher` remains exported for v1 compatibility, but is deprecated. For
-new theme switchers, compose `Select` with the `useTheme` composable.
+new theme switchers, compose `Select` with the `useColorScheme` composable.
 
 ### Dropdown — group field standardized on `options`
 
@@ -328,6 +328,87 @@ when there is nothing to label.
 `action.handler` is deprecated. Warning emits via the shared
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
+
+### Root composables and directives — renamed and shrunk
+
+Every change below is a **loud break**: the import line fails, so the build,
+the type-check or the dev server says so. No silent behavior changes, and
+nothing here needs a migration-guide before/after.
+
+**`useTheme` is now `useColorScheme`.** `theme` means color tone everywhere
+else in the library (`theme="blue"` on a Button, ~300 sites), so the light/dark
+composable stops competing for the word.
+
+```ts
+// before
+import { useTheme, type Theme } from 'frappe-ui'
+const { currentTheme, setTheme, toggleTheme } = useTheme()
+
+// after
+import { useColorScheme, type ColorScheme } from 'frappe-ui'
+const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
+```
+
+- `colorScheme` is **read-only**. Assigning to the old `currentTheme` ref moved
+  the ref without setting `data-theme` or `localStorage`, so the app silently
+  desynced. Go through `setColorScheme`.
+- `initializeTheme` and `getSystemTheme` are gone. `useColorScheme()` already
+  restores the saved preference and follows the OS on its first call.
+- **The `data-theme` attribute and the `theme` `localStorage` key are
+  unchanged.** App CSS targeting `[data-theme='dark']` and users' saved
+  preferences keep working.
+
+**Nine scroll members become two.**
+
+```ts
+// before
+import { activeScrollContainer, useScrollContainer, scrollToTop } from 'frappe-ui'
+const { isScrolled } = useScrollContainer({ threshold: 12 })
+
+// after
+import { shellScrollContainer, useShellScrolled } from 'frappe-ui'
+const scrolled = useShellScrolled({ threshold: 12 })
+shellScrollContainer.value?.scrollTo({ top: 0, behavior: 'smooth' })
+```
+
+| Removed                        | Use instead                                     |
+| ------------------------------ | ----------------------------------------------- |
+| `activeScrollContainer`        | `shellScrollContainer`                          |
+| `useScrollContainer().isScrolled` | `useShellScrolled()`                         |
+| `useScrollContainer().el`      | `shellScrollContainer`                          |
+| `getScrollContainer()`         | `shellScrollContainer.value` (works outside `setup()` too) |
+| `scrollTo(o)`                  | `shellScrollContainer.value?.scrollTo(o)`       |
+| `scrollToTop()`                | `shellScrollContainer.value?.scrollTo({ top: 0, behavior: 'smooth' })` |
+| `registerScrollContainer` / `unregisterScrollContainer` | internal to `DesktopShell` / `MobileShell` |
+| `UseScrollContainer`, `UseScrollContainerOptions` | no replacement needed          |
+
+The `shell` prefix is deliberate: both resolve only while a `DesktopShell` or
+`MobileShell` is mounted. `useShellScrolled` now warns once in development when
+no shell is registered, instead of silently reporting `false` forever.
+
+**Directives are `vFocus` and `vOnOutsideClick`.** `<script setup>`
+auto-registers a directive only when the binding is named `vFoo`, so the old
+names forced a manual alias at every call site.
+
+```vue
+<!-- before -->
+<script setup>
+import { onOutsideClickDirective as vOnOutsideClick } from 'frappe-ui'
+</script>
+
+<!-- after -->
+<script setup>
+import { vOnOutsideClick } from 'frappe-ui'
+</script>
+```
+
+`visibilityDirective` is removed with no replacement (0 call sites). Use an
+`IntersectionObserver` directly, or `@vueuse/core`'s `useIntersectionObserver`.
+
+**`useScreenSize`, `useIsMobile` and `ScreenSize` are no longer exported.** They
+were a thin wrapper over a `resize` listener that the library never used itself.
+Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
+`useMediaQuery`.
 
 ## Deprecation log
 
