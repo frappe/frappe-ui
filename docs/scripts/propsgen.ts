@@ -343,7 +343,7 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
 
   scriptLines.push('</script>')
 
-  let markupStr = `${scriptLines.join('\n')}\n`
+  let markupStr = ''
 
   const hasAnyAcross = components.some(
     (c) => c.props.length || c.slots.length || c.emits.length,
@@ -366,17 +366,24 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     const folderAttr = folder !== c.name ? ` folder="${folder}"` : ''
 
     if (c.props.length > 0) {
-      markupStr += `<PropsTable${folderAttr} name="${c.name}" :data="${names.props}"/> \n\n`
+      markupStr += `<PropsTable${folderAttr} name="${c.name}" :data="${names.props}"/>\n\n`
     }
     if (c.slots.length > 0) {
-      markupStr += `<SlotsTable :data="${names.slots}"/> \n\n`
+      markupStr += `<SlotsTable :data="${names.slots}"/>\n\n`
     }
     if (c.emits.length > 0) {
-      markupStr += `<EmitsTable :data="${names.emits}"/> \n\n`
+      markupStr += `<EmitsTable :data="${names.emits}"/>\n\n`
     }
   }
 
-  return markupStr
+  // The output has to match what Prettier would write. `lint-staged` runs
+  // `prettier --write` over `*.md`, so a trailing space or a missing blank
+  // line here gets rewritten by the next commit that touches the file, and
+  // the staleness check in CI would then fail on formatting instead of on a
+  // real API change.
+  const scriptStr = scriptLines.join('\n')
+  const bodyStr = markupStr.trimEnd()
+  return bodyStr ? `${scriptStr}\n\n${bodyStr}\n` : `${scriptStr}\n`
 }
 
 function pascalCase(name: string) {
