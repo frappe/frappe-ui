@@ -13,7 +13,6 @@ export * from './resources/index.ts'
 export { default as call } from './utils/call'
 export { frappeRequest } from './utils/frappeRequest'
 export { request } from './utils/request'
-export { default as initSocket } from './utils/socketio'
 
 // Base components
 export * from './components/Alert'

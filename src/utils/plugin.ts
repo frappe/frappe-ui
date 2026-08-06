@@ -1,23 +1,19 @@
 import type { App } from 'vue'
 import resourcesPlugin from '../resources/plugin'
 import call from './call'
-import initSocket from './socketio'
 import { setConfig, type FrappeUIConfig } from './config'
 
 export interface FrappeUIPluginOptions {
   resources?: boolean | Record<string, any>
   call?: boolean | typeof call
-  socketio?: boolean | Parameters<typeof initSocket>[0]
   config?: Partial<FrappeUIConfig>
 }
 
-let defaultOptions: Required<
-  Pick<FrappeUIPluginOptions, 'resources' | 'call' | 'socketio'>
-> = {
-  resources: true,
-  call: true,
-  socketio: true,
-}
+let defaultOptions: Required<Pick<FrappeUIPluginOptions, 'resources' | 'call'>> =
+  {
+    resources: true,
+    call: true,
+  }
 
 export default {
   install(app: App, options: FrappeUIPluginOptions = {}) {
@@ -48,11 +44,6 @@ export default {
       let callFunction =
         typeof options.call === 'function' ? options.call : call
       app.config.globalProperties.$call = callFunction
-    }
-    if (options.socketio) {
-      app.config.globalProperties.$socket = initSocket(
-        typeof options.socketio === 'object' ? options.socketio : {},
-      )
     }
   },
 }
