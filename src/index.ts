@@ -147,10 +147,13 @@ export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
 // Composables
 export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
+export {
+  shellScrollContainer,
+  useShellScrolled,
+} from './composables/useShellScrolled'
 
 // Browser and responsive composables
 export * from './composables/useScreenSize'
-export * from './composables/useScrollContainer'
 
 // Directives
 export { vFocus } from './directives/focus'
