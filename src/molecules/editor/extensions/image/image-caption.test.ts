@@ -16,13 +16,20 @@ beforeEach(async () => {
   ;({ CommentKit } = await import('../../kits'))
 })
 
-function imageAttrs(editor: Editor): Record<string, any> | null {
+function nodeAttrs(
+  editor: Editor,
+  typeName: string,
+): Record<string, any> | null {
   let attrs: Record<string, any> | null = null
   editor.state.doc.descendants((node) => {
-    if (node.type.name === 'image' && !attrs) attrs = node.attrs
+    if (node.type.name === typeName && !attrs) attrs = node.attrs
     return true
   })
   return attrs
+}
+
+function imageAttrs(editor: Editor): Record<string, any> | null {
+  return nodeAttrs(editor, 'image')
 }
 
 function withEditor(html: string, run: (editor: Editor) => void): void {
@@ -149,11 +156,7 @@ describe('video caption attribute', () => {
     withEditor(
       '<p><video src="/files/clip.mp4" alt="A short clip" data-caption="Release demo"></video></p>',
       (editor) => {
-        let attrs: Record<string, any> | null = null
-        editor.state.doc.descendants((node) => {
-          if (node.type.name === 'video' && !attrs) attrs = node.attrs
-          return true
-        })
+        const attrs = nodeAttrs(editor, 'video')
         expect(attrs?.caption).toBe('Release demo')
         expect(attrs?.alt).toBe('A short clip')
         expect(editor.getHTML()).toContain('data-caption="Release demo"')
