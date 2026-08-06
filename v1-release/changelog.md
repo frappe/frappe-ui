@@ -329,7 +329,7 @@ when there is nothing to label.
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
 
-### PageHeaderBackButton: `to` is now a fallback (breaking)
+### PageHeaderBackButton — `to` is now a fallback (breaking)
 
 `to` used to be the destination. Setting it made every tap push that
 route. It is now used only when there is no in-app history to go back
@@ -344,7 +344,7 @@ Migration: nothing to do if `to` already named the page users came from.
 It now applies only on a cold load. If you need an unconditional push,
 use a plain `Button` with your own `router.push`.
 
-### Editor: media captions moved off `alt` (breaking)
+### Editor — media captions moved off `alt` (breaking)
 
 Text in an image's or video's `alt` no longer renders as a caption.
 Captions live in a separate `caption` attribute, serialised as
