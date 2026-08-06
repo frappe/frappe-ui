@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  *
- * The caption / alt-text fields rendered by the media node view.
+ * The caption field rendered by the media node view.
  *
  * Two bugs are pinned here: the caption input was unusable because the node
  * view is an inline draggable leaf (the browser drags the image instead of

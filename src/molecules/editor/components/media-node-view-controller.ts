@@ -80,13 +80,9 @@ export interface CaptionKeydownActions {
   onCursorAfter: () => void
   /** Move the cursor just before the node. */
   onCursorBefore: () => void
-  /**
-   * Toggle the field off (Backspace on an empty field). Omit it and Backspace
-   * is left to the browser — the alt-text field has no "off" state worth
-   * reaching by keyboard, because hiding it must not delete the description.
-   */
-  onToggleCaption?: () => void
-  /** Current field text, used to decide the Backspace branch. */
+  /** Toggle the caption off (Backspace on an empty caption). */
+  onToggleCaption: () => void
+  /** Current caption text, used to decide the Backspace branch. */
   getCaption: () => string
 }
 
@@ -109,7 +105,6 @@ export function handleCaptionKeydown(
     event.preventDefault()
     actions.onCursorBefore()
   } else if (event.key === 'Backspace' && actions.getCaption() === '') {
-    if (!actions.onToggleCaption) return
     event.preventDefault()
     actions.onToggleCaption()
   }

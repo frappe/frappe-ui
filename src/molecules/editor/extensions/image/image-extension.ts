@@ -90,14 +90,15 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
   addAttributes() {
     return {
       src: { default: null },
-      /** Screen-reader description. Never rendered as visible text. */
+      /**
+       * Screen-reader description. Never rendered as visible text, and never
+       * touched by the caption UI, so an existing `alt` round-trips as it is.
+       */
       alt: { default: null },
       caption: captionAttribute,
       /**
        * Native `title` tooltip. Filled by the markdown input rule
-       * (`![alt](src "title")`) and round-tripped, but it has no UI of its own:
-       * a tooltip is not an accessible name, so the alt-text field writes to
-       * `alt` instead.
+       * (`![alt](src "title")`) and round-tripped, but it has no UI of its own.
        */
       title: { default: null },
       width: { default: null },

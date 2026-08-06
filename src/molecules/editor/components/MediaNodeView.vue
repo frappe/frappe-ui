@@ -82,29 +82,23 @@ const nodeKey = computed(() =>
 const isFreshInsert = ref(Boolean(props.node.attrs.uploadId))
 
 const caption = ref<string>(props.node.attrs.caption || '')
-const altText = ref<string>(props.node.attrs.alt || '')
 
 /** User's explicit caption toggle. `null` means "not decided, use the default". */
 const captionToggle = ref<boolean | null>(null)
-const altToggle = ref(false)
 
 const showCaption = computed(() => {
   if (captionToggle.value !== null) return captionToggle.value
   if (props.node.attrs.caption) return true
   return isEditable.value && isFreshInsert.value
 })
-const showAltText = computed(() => isEditable.value && altToggle.value)
 const showCaptionText = computed(() =>
   Boolean(!isEditable.value && props.node.attrs.caption && !hasError.value),
 )
-const showTextFields = computed(
-  () =>
-    isEditable.value &&
-    !hasError.value &&
-    (showCaption.value || showAltText.value),
+const showCaptionField = computed(
+  () => isEditable.value && !hasError.value && showCaption.value,
 )
 
-// Re-sync the inputs when the source attrs change elsewhere (collab, undo, a
+// Re-sync the input when the caption attr changes elsewhere (collab, undo, a
 // reused node view) without clobbering local typing — commit is on blur/Enter,
 // so the attr never moves while the user is mid-word.
 watch(
@@ -114,21 +108,12 @@ watch(
     if (next !== caption.value) caption.value = next
   },
 )
-watch(
-  () => props.node.attrs.alt,
-  (value) => {
-    const next = value || ''
-    if (next !== altText.value) altText.value = next
-  },
-)
 
-// A reused node view starts over: local text AND the open/closed toggles, which
-// have no attribute to watch and would otherwise leak to the next image.
+// A reused node view starts over: local text AND the open/closed toggle, which
+// has no attribute to watch and would otherwise leak to the next image.
 watch(nodeKey, () => {
   caption.value = props.node.attrs.caption || ''
-  altText.value = props.node.attrs.alt || ''
   captionToggle.value = null
-  altToggle.value = false
   isFreshInsert.value = Boolean(props.node.attrs.uploadId)
 })
 
@@ -207,11 +192,6 @@ function commitCaption() {
   props.updateAttributes({ caption: caption.value || null })
 }
 
-function commitAltText() {
-  if ((props.node.attrs.alt || '') === altText.value) return
-  props.updateAttributes({ alt: altText.value || null })
-}
-
 function toggleCaptions() {
   const next = !showCaption.value
   captionToggle.value = next
@@ -222,36 +202,15 @@ function toggleCaptions() {
   }
 }
 
-/**
- * Closing the alt-text field only hides it. Alt text is invisible by design, so
- * wiping it on close would silently drop a description the author cannot see.
- */
-function toggleAltText() {
-  altToggle.value = !altToggle.value
-}
-
-function mediaKeydownActions(getValue: () => string) {
-  return {
+function onCaptionKeydown(event: KeyboardEvent) {
+  handleCaptionKeydown(event, {
     onParagraphAfter: () =>
       createParagraphAfterMedia(editor, () => props.getPos()),
     onCursorAfter: () => setCursorAfterMedia(editor, () => props.getPos()),
     onCursorBefore: () => setCursorBeforeMedia(editor, () => props.getPos()),
-    getCaption: getValue,
-  }
-}
-
-function onCaptionKeydown(event: KeyboardEvent) {
-  handleCaptionKeydown(event, {
-    ...mediaKeydownActions(() => caption.value),
     onToggleCaption: toggleCaptions,
+    getCaption: () => caption.value,
   })
-}
-
-function onAltTextKeydown(event: KeyboardEvent) {
-  handleCaptionKeydown(
-    event,
-    mediaKeydownActions(() => altText.value),
-  )
 }
 
 function onSetAlign(align: MediaAlign) {
@@ -368,10 +327,7 @@ function setVideoOptions(options: {
           :is-editable="isEditable"
           :selected="selected"
           :show-caption="showCaption"
-          :show-alt-text="showAltText"
-          :has-alt-text="Boolean(node.attrs.alt)"
           @toggle-caption="toggleCaptions"
-          @toggle-alt-text="toggleAltText"
           @set-align="onSetAlign"
           @replace="replaceMedia"
           @set-video-options="setVideoOptions"
@@ -451,13 +407,13 @@ function setVideoOptions(options: {
         {{ node.attrs.caption }}
       </div>
 
-      <!-- The fields sit inside an inline, draggable, contenteditable=false
+      <!-- The field sits inside an inline, draggable, contenteditable=false
            node view. Without `draggable="false"` the browser starts dragging
            the image on pointerdown instead of focusing the field, and without
            stopping drag/clipboard events here ProseMirror handles them against
            the document rather than the input. -->
       <div
-        v-else-if="showTextFields"
+        v-else-if="showCaptionField"
         data-media-text-field
         draggable="false"
         class="w-full"
@@ -469,7 +425,6 @@ function setVideoOptions(options: {
         @paste.stop
       >
         <input
-          v-if="showCaption"
           v-model="caption"
           draggable="false"
           class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
@@ -478,20 +433,6 @@ function setVideoOptions(options: {
           @blur="commitCaption"
           @keydown="onCaptionKeydown"
         />
-        <label
-          v-if="showAltText"
-          class="flex items-center gap-2 px-1 pb-1 text-p-xs text-ink-gray-5"
-        >
-          <span class="shrink-0">Alt text</span>
-          <input
-            v-model="altText"
-            draggable="false"
-            class="w-full bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
-            placeholder="Describe this image for screen readers"
-            @blur="commitAltText"
-            @keydown="onAltTextKeydown"
-          />
-        </label>
       </div>
     </div>
   </NodeViewWrapper>

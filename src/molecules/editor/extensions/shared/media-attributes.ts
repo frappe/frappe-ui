@@ -19,8 +19,7 @@ import type { Attribute } from '@tiptap/core'
  * (`Screenshot 2020-05-09 11.04.00`, `:slight_smile:`), and a real caption
  * cannot be told apart from those automatically. Rendering them all as
  * captions is worse than rendering none: the legacy text is not lost, it stays
- * in `alt` and is shown in the alt-text field, so anyone can promote a genuine
- * description to a caption in one step.
+ * in `alt` and round-trips untouched.
  */
 export const captionAttribute: Partial<Attribute> = {
   default: null,
