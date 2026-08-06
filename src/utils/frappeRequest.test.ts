@@ -77,3 +77,53 @@ describe('frappeRequest configurable base url and auth headers', () => {
     expect(opts.headers.Authorization).toBe('token dynamic:value')
   })
 })
+
+describe('frappeRequest error handling', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('reports a failed response to onError exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: false,
+            status: 417,
+            text: async () =>
+              JSON.stringify({
+                exc_type: 'ValidationError',
+                _server_messages: JSON.stringify(['Name is required']),
+              }),
+          }) as unknown as Response,
+      ),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow()
+
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onError.mock.calls[0]![0]).toMatchObject({
+      exc_type: 'ValidationError',
+      status: 417,
+      messages: ['Name is required'],
+    })
+  })
+
+  it('reports a transport failure to onError exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow(
+      'Failed to fetch',
+    )
+
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+})

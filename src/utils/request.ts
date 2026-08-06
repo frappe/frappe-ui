@@ -57,8 +57,13 @@ export function request<TResponse = unknown>(
     body,
     signal: options.signal,
     ...(options.credentials ? { credentials: options.credentials } : {}),
-  })
-    .then((response) => {
+  }).then(
+    // Two-argument `then` rather than a trailing `.catch`: the rejection
+    // handler must see transport failures only. A trailing `.catch` also
+    // catches whatever `transformResponse` throws, which ran `transformError`
+    // — and so any caller's `onError` — a second time for every failed HTTP
+    // response.
+    (response) => {
       if (options.transformResponse) {
         return options.transformResponse(response, options)
       }
@@ -72,11 +77,12 @@ export function request<TResponse = unknown>(
         error.response = response
         throw error
       }
-    })
-    .catch((error) => {
+    },
+    (error) => {
       if (options.transformError) {
         return options.transformError(error)
       }
       throw error
-    })
+    },
+  )
 }
