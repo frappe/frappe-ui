@@ -2,7 +2,7 @@
 
 A labeled control for choosing between **light**, **dark**, and **system**
 appearance. Each option is a preview card depicting that mode, and selecting one
-drives the global `<html data-theme>` through [`useTheme`](#usetheme), so a bare
+drives the global `<html data-theme>` through [`useColorScheme`](#usecolorscheme), so a bare
 `<ThemeSwitcher />` switches the whole app with no wiring.
 
 <ComponentPreview name="ThemeSwitcher-Default" layout="stacked" />
@@ -18,7 +18,7 @@ inside the theme panel previews. The `label` and `description` props set the hea
 
 In a header or sidebar you rarely want the full card preview. You want a single
 labelled button that flips the state. Build one from the same
-[`useTheme`](#usetheme) composable: because both controls share the one
+[`useColorScheme`](#usecolorscheme) composable: because both controls share the one
 `<html data-theme>`, they stay in sync, and the button drops straight into a
 sidebar or menu.
 
@@ -28,43 +28,51 @@ sidebar or menu.
 
 A user menu is the most common home for theme switching. Nest the three options
 as a hover submenu inside a [`Dropdown`](/docs/components/dropdown), drive them through the same
-[`useTheme`](#usetheme) singleton, and mark the active one with `selected` so the menu
+[`useColorScheme`](#usecolorscheme) singleton, and mark the active one with `selected` so the menu
 always reflects the shared `<html data-theme>`.
 
 <ComponentPreview name="ThemeSwitcher-Menu" layout="stacked" />
 
-## useTheme
+## useColorScheme
 
-The component is backed by the `useTheme` composable, exported from the library.
-Its state is a shared singleton, so every consumer (the switcher, a sidebar
-toggle, a user-menu entry) stays in sync with the single `<html data-theme>`
-source of truth.
+The component is backed by the `useColorScheme` composable, exported from the
+library. Its state is a shared singleton, so every consumer (the switcher, a
+sidebar toggle, a user-menu entry) stays in sync with the single
+`<html data-theme>` source of truth.
 
-There is nothing to set up. The first `useTheme()` call restores the saved theme
-(falling back to `system`) and starts following the OS preference. Calling it
-near your app root simply makes that happen as early as possible.
+There is nothing to set up. The first `useColorScheme()` call restores the saved
+preference (falling back to `system`) and starts following the OS setting.
+Calling it near your app root simply makes that happen as early as possible.
 
 ```ts
-import { useTheme } from 'frappe-ui'
+import { useColorScheme } from 'frappe-ui'
 
-const { currentTheme, setTheme, toggleTheme } = useTheme()
+const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
 ```
 
 The selection persists to `localStorage` under the `theme` key and is reapplied
 on the next load.
 
-| Member            | Type                        | Description                                                        |
-| ----------------- | --------------------------- | ----------------------------------------------------------------- |
-| `currentTheme`    | `Ref<Theme>`                | The selected theme: `'light' \| 'dark' \| 'system'`.              |
-| `setTheme`        | `(theme: Theme) => void`    | Sets the theme, applies `data-theme`, and persists to storage.    |
-| `toggleTheme`     | `() => void`                | Flips between light and dark.                                      |
-| `initializeTheme` | `() => void`                | Restores the saved theme (or `system`). Run once automatically.   |
-| `getSystemTheme`  | `() => 'light' \| 'dark'`   | Resolves the current OS preference.                               |
+| Member              | Type                            | Description                                                              |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------ |
+| `colorScheme`       | `Readonly<Ref<ColorScheme>>`    | The selection: `'light' \| 'dark' \| 'system'`. Read-only.               |
+| `setColorScheme`    | `(scheme: ColorScheme) => void` | Selects a scheme, applies `data-theme`, and persists it.                 |
+| `toggleColorScheme` | `() => void`                    | Flips between light and dark.                                            |
 
-> **Avoid the flash.** The theme is applied from JavaScript once the app loads,
-> so a page that ships without a `data-theme` briefly shows the default theme
-> before switching. Set an initial `data-theme` on your `<html>`, or inline a
-> small script that reads `localStorage.theme`, to render the right theme from
-> the first paint.
+`colorScheme` is read-only because the ref is only half the state — the other
+half is the `data-theme` attribute and the stored value. Assigning to it would
+move the ref and leave the document and `localStorage` behind. Go through
+`setColorScheme`.
+
+> **`colorScheme`, not `theme`.** Everywhere else in the library `theme` means a
+> color tone (`theme="blue"` on a Button). The `data-theme` attribute and the
+> `theme` storage key keep the older name so app CSS and saved preferences
+> keep working.
+
+> **Avoid the flash.** The scheme is applied from JavaScript once the app loads,
+> so a page that ships without a `data-theme` briefly shows the default before
+> switching. Set an initial `data-theme` on your `<html>`, or inline a small
+> script that reads `localStorage.theme`, to render the right one from the first
+> paint.
 
 <!-- @include: ./ThemeSwitcher.api.md -->

@@ -1,9 +1,9 @@
 import type { Component } from 'vue'
-import type { Theme } from '../../utils/theme'
+import type { ColorScheme } from '../../composables/useColorScheme'
 
 export interface ThemeSwitcherProps {
-  /** Selected theme. Falls back to the shared `useTheme` state when unbound. */
-  modelValue?: Theme
+  /** Selected theme. Falls back to the shared `useColorScheme` state when unbound. */
+  modelValue?: ColorScheme
 
   /**
    * Heading rendered above the options.
@@ -31,5 +31,5 @@ export interface ThemeSwitcherProps {
    * `#item-label` slot, which takes precedence over this prop.
    * @default { light: "Light", dark: "Dark", system: "System" }
    */
-  themeLabels?: Partial<Record<Theme, string>>
+  themeLabels?: Partial<Record<ColorScheme, string>>
 }

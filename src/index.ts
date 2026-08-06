@@ -145,6 +145,9 @@ export { default as useAxisChartOptions } from './components/Charts/axisChartOpt
 // Grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
+// Composables
+export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
+
 // Browser and responsive composables
 export * from './composables/useScreenSize'
 export * from './composables/useScrollContainer'
@@ -159,5 +162,4 @@ export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export * from './utils/fileSize'
-export * from './utils/theme'
 export * from './utils/useFileUpload'
