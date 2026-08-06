@@ -24,7 +24,10 @@ function setCursorAt(editor: Editor, pos: number): void {
 /**
  * Insert a paragraph immediately after the media node (Enter inside caption).
  */
-export function createParagraphAfterMedia(editor: Editor, getPos: GetPos): void {
+export function createParagraphAfterMedia(
+  editor: Editor,
+  getPos: GetPos,
+): void {
   const pos = safeGetPos(getPos)
   if (pos === null) return
   editor.commands.focus()
@@ -77,9 +80,13 @@ export interface CaptionKeydownActions {
   onCursorAfter: () => void
   /** Move the cursor just before the node. */
   onCursorBefore: () => void
-  /** Toggle the caption off (Backspace on an empty caption). */
-  onToggleCaption: () => void
-  /** Current caption text, used to decide the Backspace branch. */
+  /**
+   * Toggle the field off (Backspace on an empty field). Omit it and Backspace
+   * is left to the browser — the alt-text field has no "off" state worth
+   * reaching by keyboard, because hiding it must not delete the description.
+   */
+  onToggleCaption?: () => void
+  /** Current field text, used to decide the Backspace branch. */
   getCaption: () => string
 }
 
@@ -102,6 +109,7 @@ export function handleCaptionKeydown(
     event.preventDefault()
     actions.onCursorBefore()
   } else if (event.key === 'Backspace' && actions.getCaption() === '') {
+    if (!actions.onToggleCaption) return
     event.preventDefault()
     actions.onToggleCaption()
   }

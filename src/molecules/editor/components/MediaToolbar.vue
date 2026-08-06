@@ -4,16 +4,24 @@ import type { Node } from '@tiptap/pm/model'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
 import type { MediaAlign } from './media-node-view-utils'
 
-const props = defineProps<{
-  node: Node
-  mediaType: 'image' | 'video' | 'embed'
-  isEditable: boolean
-  selected: boolean
-  showCaption: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    node: Node
+    mediaType: 'image' | 'video' | 'embed'
+    isEditable: boolean
+    selected: boolean
+    showCaption: boolean
+    /** Whether the alt-text field is open. Images only. */
+    showAltText?: boolean
+    /** Whether the node already carries a screen-reader description. */
+    hasAltText?: boolean
+  }>(),
+  { showAltText: false, hasAltText: false },
+)
 
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
+  (e: 'toggle-alt-text'): void
   (e: 'set-align', align: MediaAlign): void
   (e: 'replace'): void
   (
@@ -48,6 +56,19 @@ const replaceLabel = computed(
     })[props.mediaType],
 )
 
+const captionLabel = computed(() =>
+  props.showCaption ? 'Remove caption' : 'Add a caption below the media',
+)
+
+/** Alt text describes an image for screen readers. Video and embeds have none. */
+const showAltTextButton = computed(() => props.mediaType === 'image')
+
+const altTextLabel = computed(() =>
+  props.showAltText
+    ? 'Hide alt text'
+    : 'Alt text: describe this image for screen readers',
+)
+
 function toggleVideoOptions(event: MouseEvent) {
   event.stopPropagation()
   showVideoOptions.value = !showVideoOptions.value
@@ -75,20 +96,35 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="absolute top-2 right-2 z-20 items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
+    class="absolute top-2 right-2 z-20 max-w-[calc(100%-1rem)] flex-wrap justify-end items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
     :class="isVisible ? 'flex' : 'hidden'"
   >
-    <Tooltip text="Toggle caption" class="h-5">
+    <!-- The caption toggle carries a visible word, not just an icon: it is the
+         only way to discover that images can be captioned at all. -->
+    <Tooltip :text="captionLabel" class="h-5">
       <button
         type="button"
-        aria-label="Toggle caption"
+        class="flex items-center gap-1 text-p-xs hover:text-white"
+        :class="showCaption ? 'text-white' : 'text-white/60'"
+        :aria-label="captionLabel"
         :aria-pressed="showCaption"
         @click.stop="emit('toggle-caption')"
       >
-        <span
-          class="lucide-captions size-4"
-          :class="[showCaption ? 'text-white' : 'text-white/60']"
-        />
+        <span class="lucide-captions size-4" aria-hidden="true" />
+        <span>Caption</span>
+      </button>
+    </Tooltip>
+
+    <Tooltip v-if="showAltTextButton" :text="altTextLabel" class="h-5">
+      <button
+        type="button"
+        class="hover:text-white"
+        :class="showAltText || hasAltText ? 'text-white' : 'text-white/60'"
+        :aria-label="altTextLabel"
+        :aria-pressed="showAltText"
+        @click.stop="emit('toggle-alt-text')"
+      >
+        <span class="lucide-accessibility size-4" aria-hidden="true" />
       </button>
     </Tooltip>
 
