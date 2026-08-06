@@ -237,13 +237,12 @@ Static-content slots (`#footer`, `#empty` with no dynamic context, `#prefix` on 
 
 ```vue
 <!-- Bad -->
-<Autocomplete :fetch-options="fetchUsers" multi searchable creatable />
+<Picker :fetch-options="fetchUsers" multi searchable creatable />
 
 <!-- Good -->
 <Select />          <!-- single, fixed options -->
 <MultiSelect />     <!-- multi, fixed options -->
-<Combobox />        <!-- single, searchable -->
-<Autocomplete />    <!-- async-fetched, optionally creatable -->
+<Combobox />        <!-- single, searchable; :filterable="false" to search server-side -->
 ```
 
 ---

@@ -33,7 +33,7 @@ const name = ref('')
 Each rule states what to do and what to avoid — one canonical place, no separate anti-pattern list.
 
 1. **Pick the component, don't build one.** Consult `COMPONENTS.md`; only fall back to raw HTML for layout (grids, flex). Never hand-roll `<button class="bg-blue-500 …">`.
-2. **Use the modern families.** App frame → `DesktopShell`/`MobileShell`; lists → `frappe-ui/list` (`List`/`ListRow`/…); rich text → `Editor` from `frappe-ui/editor`; scroll regions → `ScrollArea`. `ListView`, `ItemListRow`, `TextEditor`, and `Autocomplete` are legacy — never in new code.
+2. **Use the modern families.** App frame → `DesktopShell`/`MobileShell`; lists → `frappe-ui/list` (`List`/`ListRow`/…); rich text → `Editor` from `frappe-ui/editor`; scroll regions → `ScrollArea`. `ListView`, `ItemListRow`, and `TextEditor` are legacy — never in new code. `Autocomplete` is gone: use `Combobox` for one value, `MultiSelect` for several.
 3. **Semantic tokens, not raw colors.** `bg-surface-*`, `text-ink-*`, `border-outline-*` — never `bg-gray-100`, `text-gray-900`, `border-gray-300`. See `TOKENS.md`.
 4. **Color = `variant` + `theme`.** `variant` (`solid | outline | subtle | ghost`) + `theme` (`gray | blue | green | red | orange`). Never invent `intent` / `kind` / `severity` / `appearance`.
 5. **Two-way state via `v-model`.** Inputs `v-model`; overlays `v-model:open`; comboboxes `v-model` + `v-model:query`. Never `:value` + `@change`, never bare `v-model` on `<Dialog>`. Writes: `immediate: false` + `submit(params)`.
