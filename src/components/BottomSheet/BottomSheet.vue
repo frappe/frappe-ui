@@ -5,16 +5,29 @@
         class="fixed inset-0 z-50 bg-black-overlay-200 dark:bg-black-overlay-700 bottom-sheet-overlay outline-none"
         @after-leave="emit('after-leave')"
       />
+      <!--
+        The 90dvh cap belongs on the sheet, not on the scroll region inside it.
+        With it on the region, the grab bar and the title stacked on top of the
+        cap, so the sheet itself had no limit at all and a long list pushed it
+        towards the top of the screen. The sheet stays content-sized below the
+        cap, so a short sheet still hugs its content, and `dvh` keeps the cap
+        honest when a mobile URL bar collapses.
+      -->
       <DialogContent
-        class="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-2xl rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
+        class="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
         :aria-label="title || 'Bottom sheet'"
         @escape-key-down="onDismissAttempt"
         @interact-outside="onDismissAttempt"
         @open-auto-focus="(e: Event) => e.preventDefault()"
       >
+        <!--
+          `shrink-0` so the grab bar and the title keep their full height once
+          the sheet is at the cap. Everything that has to give is the scroll
+          region below.
+        -->
         <div
           ref="handleRef"
-          class="cursor-grab touch-none select-none active:cursor-grabbing"
+          class="shrink-0 cursor-grab touch-none select-none active:cursor-grabbing"
         >
           <div class="flex justify-center pb-2 pt-3">
             <div class="h-1.5 w-10 rounded-full bg-surface-gray-3" />
@@ -27,16 +40,14 @@
           </DialogTitle>
         </div>
         <!--
-          `pan-y` lets the body scroll natively; the drag gesture reclaims it on
-          the first move when the body is already at its top. `overscroll-contain`
-          stops a scroll that runs out of content from chaining to the page
-          behind the sheet. `dvh` so the height does not change when a mobile
-          URL bar collapses, and `max-h` so a short sheet is not padded out with
-          blank space.
+          `min-h-0` is what lets this region shrink under the sheet's cap rather
+          than pushing the sheet past it. `pan-y` lets the body scroll natively;
+          the drag gesture reclaims it on the first move when the body is already
+          at its top, which is also what keeps a swipe on a scrolled list a
+          scroll rather than a dismiss. `overscroll-contain` stops a scroll that
+          runs out of content from chaining to the page behind the sheet.
         -->
-        <div
-          class="max-h-[70dvh] touch-pan-y overflow-y-auto overscroll-contain"
-        >
+        <div class="min-h-0 touch-pan-y overflow-y-auto overscroll-contain">
           <slot />
         </div>
       </DialogContent>
