@@ -377,6 +377,80 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
 
+### `IconPicker` values carry the `lucide-` prefix
+
+`IconPicker` used to hand back a bare Lucide name. It now hands back the same
+`lucide-*` string every icon prop in the library takes. Nothing fails to
+build, so watch for this one: a stored bare name still loads, the picker just
+no longer recognises it, and anything you saved before this release keeps its
+old shape.
+
+```js
+// Before — what the picker emitted, and what your rows hold today
+view.icon = 'star'
+
+// After — what the picker emits now
+view.icon = 'lucide-star'
+```
+
+Two ways to close the gap. Add the prefix when you read a stored value:
+
+```js
+const icon = computed(() => {
+  const stored = view.icon
+  if (!stored || stored.startsWith('lucide-')) return stored
+  return `lucide-${stored}`
+})
+```
+
+Or migrate the column once, and read it straight after that.
+
+### `spritePlugin` is gone, and so is anything drawn against the sprite
+
+Drop the import and the `app.use(spritePlugin)` call. Your build will tell
+you about those. It will not tell you about markup that pointed into the
+sprite — `<use href="#star">` now points at an element nobody adds, so those
+icons quietly disappear.
+
+```vue
+<!-- Before — worked only because spritePlugin filled the sprite -->
+<svg viewBox="0 0 24 24" stroke="currentColor">
+  <use :href="`#${icon.replace(/^lucide-/, '')}`" />
+</svg>
+```
+
+What replaces it depends on where the name comes from.
+
+**The name is one of a set you know.** Write each one out and use the class
+form. This is the cheapest answer by a wide margin and covers most cases:
+
+```vue
+<Icon :name="isOpen ? 'lucide-chevron-down' : 'lucide-chevron-right'" />
+```
+
+**The name comes from data — a saved view, a user's pick, an API.** The
+`lucide-*` class cannot help you: Tailwind only emits CSS for class names it
+can read as literal strings in your source. Two ways out.
+
+Safelist the icons in your `tailwind.config.js`. Name them if you can:
+
+```js
+safelist: ['lucide-star', 'lucide-flag', 'lucide-inbox'],
+```
+
+`{ pattern: /^lucide-/ }` covers every icon in one line, but it emits all
+~1900 of them — about 3.5 MB of CSS. Reach for it only if you have to.
+
+Or draw the SVG yourself. `lucide-static` ships every icon as a string; add
+it to your app and load it when you first need it, so it lands in its own
+chunk rather than your entry bundle. This is what `IconPicker` does:
+
+```js
+const icons = await import('lucide-static')
+// each export is a full <svg>…</svg>, and its class attribute carries the
+// kebab-case name: `lucide lucide-star`
+```
+
 ## Tokens
 
 Run the v2 token codemod from the app you are migrating:
