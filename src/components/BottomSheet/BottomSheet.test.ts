@@ -3,7 +3,16 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createApp, h, nextTick, type App } from 'vue'
+import {
+  createApp,
+  createBlock,
+  createElementVNode,
+  nextTick,
+  openBlock,
+  ref,
+  withCtx,
+  type App,
+} from 'vue'
 import BottomSheet from './BottomSheet.vue'
 
 /**
@@ -97,46 +106,81 @@ interface Harness {
   /** A node inside the scroll region: the realistic place a gesture starts. */
   content: HTMLElement
   openUpdates: boolean[]
+  /** Drive the open state from outside, the way a consumer does. */
+  setOpen: (value: boolean) => Promise<Harness>
 }
 
 async function openSheet(
   props: Record<string, unknown> = {},
+  /**
+   * Mount the sheet closed and open it afterwards. This is how every real
+   * consumer uses it, and it is a different code path: the sheet's content is
+   * not in the DOM at mount time.
+   */
+  { startClosed = false } = {},
 ): Promise<Harness> {
   const openUpdates: boolean[] = []
   const host = document.createElement('div')
   document.body.appendChild(host)
+  const open = ref(!startClosed)
 
+  /*
+   * Mounted the way the template compiler emits it - a block vnode with a patch
+   * flag and a stable slot - rather than with a plain `h()`. An unoptimized
+   * vnode makes Vue re-patch the whole reka-ui subtree on every parent update,
+   * which re-runs refs that a real, compiled consumer runs only once. The drag
+   * binding lives or dies on that difference, so the harness has to match what
+   * a real app produces.
+   */
   const app = createApp({
-    render: () =>
-      h(
+    render: () => (
+      openBlock(),
+      createBlock(
         BottomSheet,
         {
-          open: true,
+          open: open.value,
           title: 'Sheet',
           'onUpdate:open': (value: boolean) => openUpdates.push(value),
           ...props,
         },
         {
-          default: () => [
-            h('div', { id: 'content' }, 'body'),
-            h('div', { id: 'nested' }, 'nested scroller'),
-          ],
+          default: withCtx(() => [
+            createElementVNode('div', { id: 'content' }, 'body'),
+            createElementVNode('div', { id: 'nested' }, 'nested scroller'),
+          ]),
+          _: 1 /* STABLE */,
         },
-      ),
+        8 /* PROPS */,
+        ['open'],
+      )
+    ),
   })
   app.mount(host)
   await nextTick()
   await nextTick()
 
-  const sheet = document.querySelector('.bottom-sheet-content') as HTMLElement
-  const handle = sheet.firstElementChild as HTMLElement
-  const scroller = sheet.lastElementChild as HTMLElement
-  const content = sheet.querySelector('#content') as HTMLElement
+  async function setOpen(value: boolean): Promise<Harness> {
+    open.value = value
+    await nextTick()
+    await nextTick()
+    return collect()
+  }
 
-  measure(sheet, { offsetHeight: SHEET_HEIGHT })
-  makeScrollable(scroller)
+  function collect(): Harness {
+    const sheet = document.querySelector('.bottom-sheet-content') as HTMLElement
+    const handle = sheet?.firstElementChild as HTMLElement
+    const scroller = sheet?.lastElementChild as HTMLElement
+    const content = sheet?.querySelector('#content') as HTMLElement
 
-  return { app, sheet, handle, scroller, content, openUpdates }
+    if (sheet) {
+      measure(sheet, { offsetHeight: SHEET_HEIGHT })
+      makeScrollable(scroller)
+    }
+
+    return { app, sheet, handle, scroller, content, openUpdates, setOpen }
+  }
+
+  return startClosed ? setOpen(true) : collect()
 }
 
 /** Whether the sheet claimed the gesture and is moving with the finger. */
@@ -448,6 +492,44 @@ describe('BottomSheet drag to dismiss', () => {
 
     expect(move.defaultPrevented).toBe(false)
     expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
+  it('drags a sheet that was mounted closed and opened afterwards', async () => {
+    const { sheet, content, openUpdates, app } = await openSheet(
+      {},
+      { startClosed: true },
+    )
+
+    touch('touchstart', content, 0, 300)
+    const move = touch('touchmove', content, 0, 300 + CLOSE_DISTANCE + 20)
+    advance(400)
+    touch('touchend', content)
+
+    expect(move.defaultPrevented).toBe(true)
+    expect(isDragging(sheet)).toBe(true)
+    expect(sheet.style.transform).toBe('translateY(100%)')
+
+    advance(300)
+    expect(openUpdates).toEqual([false])
+    app.unmount()
+  })
+
+  it('drags again after the sheet is closed and reopened', async () => {
+    const first = await openSheet({}, { startClosed: true })
+    await first.setOpen(false)
+    const { sheet, content, openUpdates, app } = await first.setOpen(true)
+
+    touch('touchstart', content, 0, 300)
+    const move = touch('touchmove', content, 0, 300 + CLOSE_DISTANCE + 20)
+    advance(400)
+    touch('touchend', content)
+
+    expect(move.defaultPrevented).toBe(true)
+    expect(sheet.style.transform).toBe('translateY(100%)')
+
+    advance(300)
+    expect(openUpdates).toEqual([false])
     app.unmount()
   })
 

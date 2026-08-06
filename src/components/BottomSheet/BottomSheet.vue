@@ -6,7 +6,6 @@
         @after-leave="emit('after-leave')"
       />
       <DialogContent
-        :ref="setSheetEl"
         class="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-2xl rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
         :aria-label="title || 'Bottom sheet'"
         @escape-key-down="onDismissAttempt"
@@ -78,13 +77,20 @@ function onDismissAttempt(event: Event) {
 // the decision of whether a given gesture belongs to the sheet or to a scroller
 // inside it, and writes the sheet's transform directly rather than through a
 // reactive binding, so a drag does not re-render the component on every frame.
-const sheetEl = ref<HTMLElement | null>(null)
 const handleRef = ref<HTMLElement | null>(null)
 
-function setSheetEl(instance: unknown) {
-  const el = (instance as { $el?: unknown } | null)?.$el
-  sheetEl.value = el instanceof HTMLElement ? el : null
-}
+/*
+ * Found from the handle rather than from a ref on `DialogContent`. That
+ * component's `$el` only becomes the sheet once the content is present, and
+ * reka mounts it while the sheet is still closed, when `$el` is the placeholder
+ * comment. A compiled consumer never patches that vnode again, so a ref on it
+ * fires exactly once, with the comment, and the gesture is bound to nothing.
+ * `handleRef` is a plain element ref, which Vue re-runs every time the content
+ * mounts and unmounts, so this re-resolves on every open.
+ */
+const sheetEl = computed(
+  () => handleRef.value?.closest<HTMLElement>('.bottom-sheet-content') ?? null,
+)
 
 useSheetDrag({
   target: sheetEl,
