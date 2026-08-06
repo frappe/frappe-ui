@@ -23,8 +23,12 @@ const tickIfVisible = () => {
 }
 
 function start() {
-  if (timer || typeof document === 'undefined') return
+  if (timer) return
+  // Refresh before the environment check, not after: with no document there is
+  // no interval to keep this current, so a server renderer would otherwise hand
+  // every request the date its process happened to boot on.
   tick()
+  if (typeof document === 'undefined') return
   // 30s keeps the minute-resolution marker within half a minute of the truth
   // without waking the page every second.
   timer = setInterval(tick, 30_000)
