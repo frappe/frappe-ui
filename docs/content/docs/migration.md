@@ -314,6 +314,37 @@ The legacy `Input` component is deprecated. Use
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## Data fetching (useDoctype / useList)
+
+The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
+`runDocMethod`, `runMethod`) and on `useList` (`insert`, `setValue`, `delete`)
+used to share one request between all their submits. Each one now sends its own
+request, so the shared-request members are gone.
+
+Nothing fails to build, so grep for these by hand. The app keeps rendering and
+then throws the first time the removed member is read — usually the first time
+someone deletes a row.
+
+| Before                                              | After                        |
+| --------------------------------------------------- | ---------------------------- |
+| `delete.loading && delete.params.name === row.name` | `delete.isLoading(row.name)` |
+| `setValue.params.name`                              | `setValue.isLoading(name)`   |
+| `delete.execute()` / `.fetch()` / `.reload()`       | `delete.submit({ name })`    |
+| `insert.reset()` / `.abort()`                       | removed, no replacement      |
+| `runMethod.isFetching` / `.isFinished`              | `runMethod.loading`          |
+| `setValue.promise`                                  | `await setValue.submit(...)` |
+| `delete.url`                                        | removed, no replacement      |
+
+What stays: `submit()`, `data`, `error` and `loading`.
+
+Two more changes you will not see at build time:
+
+- `submit()` now resolves with its own response. Code that fired two submits
+  and read the result of the first was receiving the second one's data, or
+  `null`. If you queued submits to work around that, you can drop the queue.
+- `useList`'s `insert` now sends to the `baseUrl` you passed to `useList`. It
+  used to ignore it and post to the current origin.
+
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful

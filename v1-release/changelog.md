@@ -329,6 +329,33 @@ when there is nothing to label.
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
 
+### Data fetching (v2) — one request per submit
+
+`useDoctype`'s `insert`, `delete`, `setValue`, `runDocMethod` and `runMethod`,
+and `useList`'s `insert`, `setValue` and `delete`, each held a single shared
+request. Two submits at once aborted one another, and every submit resolved
+from the same `data`, so a caller could receive another caller's answer or
+`null`. Each submit now sends its own request and resolves with its own
+response.
+
+- **Breaking:** these eight members no longer carry the `useCall` surface.
+  Removed: `params`, `promise`, `url`, `reset`, `abort`, `execute`, `fetch`,
+  `reload`, `isFetching`, `isFinished`, `canAbort`, `aborted`. Each of them
+  described one shared request, which no longer exists.
+- What is left: `submit()`, `data`, `error`, `loading`, and `isLoading()`.
+  `loading` is true while any submit is in flight.
+- New: `delete.isLoading(name)` and `setValue.isLoading(name)` on both
+  `useDoctype` and `useList`. This replaces the
+  `delete.loading && delete.params.name === row.name` idiom, which showed the
+  same spinner on every row once two deletes overlapped.
+- `runDocMethod.isLoading(name, method)` and `runMethod.isLoading(method)` keep
+  their signatures and now answer correctly with several submits in flight.
+  They previously compared the shared URL, so only the newest submit read as
+  loading.
+- `error` is cleared when a submit starts and set from the submit that settles
+  last. A failed `validate` no longer shadows a later network error.
+- `useList`'s `insert` now sends to `baseUrl`, which it silently dropped.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
