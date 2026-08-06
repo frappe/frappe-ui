@@ -16,3 +16,5 @@ Specs describe the current contract. ADRs explain why decisions were made. Super
 | [0008 — No deprecated members in `1.0.0`](./0008-no-deprecated-members-in-1-0-0.md) | Accepted | Everything `@deprecated` is deleted before the stable tag. |
 | [0009 — Client filtering is opt-out](./0009-client-filtering-is-opt-out.md) | Accepted | `filterable` exists so server-driven options aren't filtered twice. |
 | [0010 — Subpath export rule](./0010-subpath-export-rule.md) | Accepted | Root is the default; a subpath is earned by cost isolation, an extensible registry, or a name collision — not part count or organization. |
+| [0011 — The at-bar checklist](./0011-at-bar-checklist.md) | Accepted | Defines "at bar for `1.0.0`" — one tier, per public export. Checklist in [`at-bar.md`](../at-bar.md). |
+| [0012 — The template-ref surface](./0012-template-ref-surface.md) | Accepted | A member earns its place only when parent script needs it and no other surface reaches; `open`/`close` are for overlays that own their trigger. Contract in [`imperative-api.md`](../imperative-api.md). |
