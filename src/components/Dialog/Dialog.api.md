@@ -172,6 +172,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Dialog" :data="propsData"/>

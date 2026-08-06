@@ -135,12 +135,12 @@
     type: '[content: string]'
   },
   {
-    name: 'focus',
+    name: 'blur',
     description: '',
     type: '[event: FocusEvent]'
   },
   {
-    name: 'blur',
+    name: 'focus',
     description: '',
     type: '[event: FocusEvent]'
   },
@@ -151,11 +151,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TextEditor" :data="propsData"/> 
+<PropsTable name="TextEditor" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

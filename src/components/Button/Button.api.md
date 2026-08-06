@@ -125,9 +125,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Button" :data="propsData"/> 
+<PropsTable name="Button" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

@@ -203,6 +203,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Popover" :data="propsData"/>

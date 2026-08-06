@@ -27,7 +27,7 @@
   },
   {
     name: 'logo',
-    description: 'Brand logo shown inside each preview. A string is treated as an image source; a component value is rendered with `<component :is>`.',
+    description: 'Brand logo shown inside each preview. A string is treated as an image\nsource; a component value is rendered with `<component :is>`.',
     required: false,
     type: 'string | Component'
   },
@@ -40,7 +40,7 @@
   },
   {
     name: 'themeLabels',
-    description: 'Overrides the per-option labels. For richer per-item content, use the `#item-label` slot, which takes precedence over this prop.',
+    description: 'Overrides the per-option labels. For richer per-item content, use the\n`#item-label` slot, which takes precedence over this prop.',
     required: false,
     type: 'Partial<Record<Theme, string>>'
   }
@@ -59,7 +59,7 @@
   },
   {
     name: 'item-label',
-    description: 'Overrides a single option\'s label. Receives the option\'s `value`. Falls back to the `themeLabels` prop, then the built-in label.',
+    description: 'Overrides a single option\'s label. Receives the option\'s `value`.\nFalls back to the `themeLabels` prop, then the built-in label.',
     type: '{ value: Theme; }'
   }
 ]
@@ -72,11 +72,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ThemeSwitcher" :data="propsData"/> 
+<PropsTable name="ThemeSwitcher" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

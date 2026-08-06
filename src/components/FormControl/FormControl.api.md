@@ -85,6 +85,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="FormControl" :data="propsData"/>

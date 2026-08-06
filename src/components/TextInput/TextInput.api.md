@@ -113,11 +113,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TextInput" :data="propsData"/> 
+<PropsTable name="TextInput" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

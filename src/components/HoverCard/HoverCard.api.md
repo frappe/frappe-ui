@@ -91,6 +91,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="HoverCard" :data="propsData"/>

@@ -48,6 +48,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="FileUploader" :data="propsData"/>

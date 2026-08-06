@@ -126,8 +126,7 @@
     name: 'format',
     description: 'Dayjs format string used for display. Default: `HH:mm`.',
     required: false,
-    type: 'string',
-    default: '"HH:mm"'
+    type: 'string'
   },
   {
     name: 'disabled',
@@ -246,14 +245,19 @@
 
   const emitsData = [
   {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  },
+  {
+    name: 'open',
+    description: 'Fired when the component opens.',
+    type: '[]'
   },
   {
     name: 'update:open',
@@ -261,9 +265,9 @@
     type: '[value: boolean]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   },
   {
     name: 'input-invalid',
@@ -274,18 +278,14 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
-  },
-  {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TimePicker" :data="propsData"/> 
+<PropsTable name="TimePicker" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
+<EmitsTable :data="emitsData"/>

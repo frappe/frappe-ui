@@ -56,7 +56,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="CircularProgressBar" :data="propsData"/> 
-
+<PropsTable name="CircularProgressBar" :data="propsData"/>

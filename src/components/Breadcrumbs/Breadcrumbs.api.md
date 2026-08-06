@@ -26,9 +26,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Breadcrumbs" :data="propsData"/> 
+<PropsTable name="Breadcrumbs" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

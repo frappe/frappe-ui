@@ -30,6 +30,11 @@
 
   const emitsData = [
   {
+    name: 'select',
+    description: '',
+    type: 'any[]'
+  },
+  {
     name: 'update:show',
     description: 'Fired when the show changes.',
     type: 'any[]'
@@ -38,17 +43,12 @@
     name: 'update:searchQuery',
     description: 'Fired when the search query changes.',
     type: 'any[]'
-  },
-  {
-    name: 'select',
-    description: '',
-    type: 'any[]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="CommandPalette" :data="propsData"/> 
+<PropsTable name="CommandPalette" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

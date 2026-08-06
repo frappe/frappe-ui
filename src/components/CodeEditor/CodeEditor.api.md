@@ -124,6 +124,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### CodeEditor

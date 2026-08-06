@@ -61,7 +61,7 @@
     name: 'variant',
     description: 'Visual treatment.\n- `tile` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
     required: false,
-    type: '"tile" | "ghost"',
+    type: '"ghost" | "tile"',
     default: '"tile"'
   }
 ]
@@ -82,17 +82,17 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Rail
 
-<SlotsTable :data="railSlots"/> 
+<SlotsTable :data="railSlots"/>
 
 ### RailItem
 
-<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/> 
+<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/>
 
-<SlotsTable :data="railItemSlots"/> 
+<SlotsTable :data="railItemSlots"/>
 
-<EmitsTable :data="railItemEmits"/> 
-
+<EmitsTable :data="railItemEmits"/>

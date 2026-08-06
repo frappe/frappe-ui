@@ -80,6 +80,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Calendar" :data="propsData"/>

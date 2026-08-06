@@ -60,6 +60,11 @@
     type: '{}'
   },
   {
+    name: 'sidebar-item',
+    description: '',
+    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
+  },
+  {
     name: 'footer-items',
     description: '',
     type: '{}'
@@ -109,13 +114,15 @@
     name: 'active',
     description: 'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `to` against the current route.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'undefined'
   },
   {
     name: 'isActive',
     description: '',
     required: false,
     type: 'boolean',
+    default: 'undefined',
     deprecated: 'Use `active`. Alias kept for the config-object path.'
   },
   {
@@ -231,9 +238,10 @@
   },
   {
     name: 'collapsed',
-    description: 'v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.',
+    description: 'Whether the section is collapsed. Per-section open/closed state for\n`collapsible` sections — distinct from the whole-sidebar collapse above.\nBind it to own the state (start a section collapsed, persist the choice);\nleft unbound the section manages it internally, starting expanded.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
@@ -248,11 +256,12 @@
   const sidebarSectionEmits = [
   {
     name: 'update:collapsed',
-    description: 'Fired when the section is collapsed or expanded.',
+    description: 'Fired when the collapsed changes.',
     type: '[value: boolean]'
   }
 ]
 </script>
+
 ## API Reference
 
 ### Sidebar

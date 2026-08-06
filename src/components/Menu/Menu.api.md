@@ -39,7 +39,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Menu" :data="propsData"/> 
-
+<PropsTable name="Menu" :data="propsData"/>

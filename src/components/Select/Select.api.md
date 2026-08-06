@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"sm" | "md" | "lg" | "xl"',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
@@ -187,11 +187,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Select" :data="propsData"/> 
+<PropsTable name="Select" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

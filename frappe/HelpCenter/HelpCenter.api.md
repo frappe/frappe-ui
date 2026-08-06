@@ -6,18 +6,17 @@
 
   const propsData = [
   {
+    name: 'docsLink',
+    description: '',
+    required: false,
+    type: 'string',
+    default: '\'https://docs.frappe.io/crm\''
+  },
+  {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'FiltersDict',
-    default: '{}'
-  },
-  {
-    name: 'docfields',
-    description: '',
-    required: false,
-    type: 'DocField[]',
-    default: '[]'
+    type: 'any'
   }
 ]
 
@@ -25,13 +24,13 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: FiltersDict]'
+    type: '[value: any]'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable name="ListFilter" :data="propsData"/>
+<PropsTable name="HelpCenter" :data="propsData"/>
 
 <EmitsTable :data="emitsData"/>
