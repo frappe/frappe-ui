@@ -97,6 +97,37 @@ function advance(ms: number) {
   vi.advanceTimersByTime(ms)
 }
 
+/**
+ * jsdom implements neither capture method, so they are stubbed for every spec
+ * here. Real browsers have them, and whether they are called is the whole
+ * subject of the capture specs below.
+ */
+const captures: HTMLElement[] = []
+const releases: HTMLElement[] = []
+
+function installPointerCapture() {
+  captures.length = 0
+  releases.length = 0
+  HTMLElement.prototype.setPointerCapture = function (this: HTMLElement) {
+    captures.push(this)
+  }
+  HTMLElement.prototype.releasePointerCapture = function (this: HTMLElement) {
+    releases.push(this)
+  }
+  HTMLElement.prototype.hasPointerCapture = function (this: HTMLElement) {
+    return captures.includes(this) && !releases.includes(this)
+  }
+}
+
+function removePointerCapture() {
+  // @ts-expect-error restoring jsdom's own (missing) implementation
+  delete HTMLElement.prototype.setPointerCapture
+  // @ts-expect-error restoring jsdom's own (missing) implementation
+  delete HTMLElement.prototype.releasePointerCapture
+  // @ts-expect-error restoring jsdom's own (missing) implementation
+  delete HTMLElement.prototype.hasPointerCapture
+}
+
 interface Harness {
   app: App
   sheet: HTMLElement
@@ -200,11 +231,13 @@ describe('BottomSheet drag to dismiss', () => {
       ],
     })
     vi.spyOn(performance, 'now').mockImplementation(() => clock)
+    installPointerCapture()
   })
 
   afterEach(() => {
     vi.useRealTimers()
     vi.restoreAllMocks()
+    removePointerCapture()
     document.body.innerHTML = ''
   })
 
@@ -541,6 +574,74 @@ describe('BottomSheet drag to dismiss', () => {
 
     expect(move.defaultPrevented).toBe(false)
     expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
+  /*
+   * Pointer capture retargets the legacy mouse events too, so a captured sheet
+   * receives the `click` that belongs to a button inside it. Capturing on
+   * pointerdown therefore swallows clicks on every interactive child. These
+   * specs pin down when capture is taken, which is the mechanism behind that.
+   * jsdom dispatches no compatibility mouse events, so the retargeting itself
+   * cannot be asserted here; the browser check covers that.
+   */
+  it('does not capture the pointer for a click that never becomes a drag', async () => {
+    const { sheet, content, app } = await openSheet()
+    const button = document.createElement('button')
+    content.appendChild(button)
+
+    pointer('pointerdown', button, 0, 300)
+    pointer('pointerup', button, 0, 300)
+
+    expect(captures).toEqual([])
+    app.unmount()
+  })
+
+  it('captures the sheet only once the drag is committed', async () => {
+    const { sheet, content, app } = await openSheet()
+
+    pointer('pointerdown', content, 0, 300)
+    // Under the slop: still undecided, so still no capture.
+    pointer('pointermove', content, 0, 303)
+    expect(captures).toEqual([])
+
+    pointer('pointermove', content, 0, 320)
+    expect(captures).toEqual([sheet])
+
+    // A move that keeps dragging must not capture again.
+    pointer('pointermove', content, 0, 340)
+    expect(captures).toEqual([sheet])
+
+    pointer('pointerup', content, 0, 340)
+    expect(releases).toEqual([sheet])
+    app.unmount()
+  })
+
+  it('releases nothing when a gesture ends without ever capturing', async () => {
+    const { content, app } = await openSheet()
+
+    pointer('pointerdown', content, 0, 300)
+    pointer('pointerup', content, 0, 300)
+
+    expect(releases).toEqual([])
+    app.unmount()
+  })
+
+  it('is not wedged by an undecided gesture whose pointerup lands elsewhere', async () => {
+    const { sheet, content, app } = await openSheet()
+
+    // No capture yet, so a cursor that leaves the sheet takes its pointerup
+    // with it and the sheet never hears the gesture end.
+    pointer('pointerdown', content, 0, 300)
+    pointer('pointerup', document.body, 0, 300)
+
+    // Started well above the abandoned gesture, so a leftover start point would
+    // read this as an upward drag and reject it.
+    pointer('pointerdown', content, 0, 100)
+    pointer('pointermove', content, 0, 120)
+
+    expect(isDragging(sheet)).toBe(true)
+    expect(captures).toEqual([sheet])
     app.unmount()
   })
 })

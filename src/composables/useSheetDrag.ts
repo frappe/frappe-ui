@@ -123,6 +123,10 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
   let frame: number | null = null
   let closeTimer: number | null = null
   let settleTimer: number | null = null
+  /** Pointer id of the in-flight mouse/pen gesture, if any. */
+  let pointerId: number | null = null
+  /** True only while the surface holds pointer capture for `pointerId`. */
+  let captured = false
 
   function clearTimers() {
     if (frame !== null) {
@@ -137,6 +141,40 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
       clearTimeout(settleTimer)
       settleTimer = null
     }
+  }
+
+  /**
+   * Hold the pointer stream on the surface so the drag survives the cursor
+   * leaving it. Captured on the surface, not on `e.target`: the deepest node
+   * under the cursor may be unmounted by an animating child part-way through
+   * the drag, which silently drops the rest of the stream.
+   *
+   * Deliberately not called on pointerdown. Capture retargets the legacy mouse
+   * events too, so a plain click on a button inside the surface would have its
+   * `click` delivered to the surface instead of the button.
+   */
+  function capturePointer() {
+    const el = toValue(target)
+    if (captured || pointerId === null || !el?.setPointerCapture) return
+    try {
+      el.setPointerCapture(pointerId)
+      captured = true
+    } catch {
+      // A pointer that ended between the event and this call.
+    }
+  }
+
+  function releasePointer() {
+    const el = toValue(target)
+    if (captured && el?.releasePointerCapture) {
+      try {
+        el.releasePointerCapture(pointerId as number)
+      } catch {
+        // Already released, by pointerup or by the element going away.
+      }
+    }
+    captured = false
+    pointerId = null
   }
 
   /** Downward speed (px/ms) over the last `VELOCITY_WINDOW`; positive = down. */
@@ -204,6 +242,7 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
       }
       phase = 'dragging'
       dragging.value = true
+      capturePointer()
       const el = toValue(target)
       if (el) {
         // Take the surface out of any transition or entry keyframe before the
@@ -240,6 +279,7 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
     const wasDragging = phase === 'dragging'
     phase = 'idle'
     dragging.value = false
+    releasePointer()
     if (frame !== null) {
       cancelAnimationFrame(frame)
       frame = null
@@ -301,19 +341,15 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
   function onPointerDown(e: PointerEvent) {
     // Touch runs on the touch listeners, which can actually stop a native
     // scroll; letting it through here would decide the gesture twice.
-    if (e.pointerType === 'touch' || e.button !== 0 || phase !== 'idle') return
+    if (e.pointerType === 'touch' || e.button !== 0) return
+    // An uncaptured gesture can end outside the surface, so its pointerup goes
+    // elsewhere and the phase is never cleared. A fresh press supersedes that
+    // leftover. A live drag is captured, so it always gets its own pointerup
+    // and is never superseded here.
+    if (phase !== 'idle' && !dragging.value) phase = 'idle'
+    if (phase !== 'idle') return
     if (!begin(e.clientX, e.clientY, e.target)) return
-    // Capture on the surface, not on `e.target`: the deepest node under the
-    // finger may be unmounted by an animating child part-way through the drag,
-    // which silently drops the rest of the pointer stream.
-    const el = toValue(target)
-    if (el?.setPointerCapture) {
-      try {
-        el.setPointerCapture(e.pointerId)
-      } catch {
-        // A pointer that ended between the event and this call.
-      }
-    }
+    pointerId = e.pointerId
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -359,6 +395,8 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
       phase = 'idle'
       closing = false
       dragging.value = false
+      captured = false
+      pointerId = null
       offset = 0
       if (el) bind(el)
     },
