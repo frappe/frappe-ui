@@ -253,3 +253,89 @@ describe('useList', () => {
     ])
   })
 })
+
+describe('useList concurrency', () => {
+  interface User {
+    name: string
+    email: string
+  }
+
+  const list = () =>
+    useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      limit: 2,
+    })
+
+  it('deletes two rows at once and gives each its own response', async () => {
+    const users = list()
+
+    const [slow, quick] = await Promise.all([
+      users.delete.submit({ name: 'slow-user' }),
+      users.delete.submit({ name: 'quick-user' }),
+    ])
+
+    expect(slow).toBe('deleted slow-user')
+    expect(quick).toBe('deleted quick-user')
+    expect(users.delete.error).toBe(null)
+    expect(users.delete.loading).toBe(false)
+  })
+
+  it('reports delete isLoading per row', async () => {
+    const users = list()
+
+    const slow = users.delete.submit({ name: 'slow-user' })
+    const quick = users.delete.submit({ name: 'quick-user' })
+
+    expect(users.delete.isLoading('slow-user')).toBe(true)
+    expect(users.delete.isLoading('quick-user')).toBe(true)
+
+    await quick
+    expect(users.delete.isLoading('quick-user')).toBe(false)
+    expect(users.delete.isLoading('slow-user')).toBe(true)
+
+    await slow
+    expect(users.delete.loading).toBe(false)
+  })
+
+  it('saves two rows at once without crossing responses', async () => {
+    const users = list()
+
+    const [slow, quick] = await Promise.all([
+      users.setValue.submit({ name: 'slow-user', email: 'slow@example.com' }),
+      users.setValue.submit({ name: 'quick-user', email: 'quick@example.com' }),
+    ])
+
+    expect(slow).toMatchObject({
+      name: 'slow-user',
+      email: 'slow@example.com',
+    })
+    expect(quick).toMatchObject({
+      name: 'quick-user',
+      email: 'quick@example.com',
+    })
+    expect(users.setValue.error).toBe(null)
+  })
+
+  it('inserts two rows at once and honours baseUrl', async () => {
+    const users = list()
+    const fetchSpy = vi.spyOn(global, 'fetch')
+
+    const [slow, quick] = await Promise.all([
+      users.insert.submit({ name: 'slow-user', email: 'slow@example.com' }),
+      users.insert.submit({ name: 'quick-user', email: 'quick@example.com' }),
+    ])
+
+    expect(slow).toMatchObject({ name: 'slow-user' })
+    expect(quick).toMatchObject({ name: 'quick-user' })
+    expect(fetchSpy).toHaveBeenCalledWith(
+      `${baseUrl}/api/v2/document/User`,
+      expect.objectContaining({ method: 'POST' }),
+    )
+
+    fetchSpy.mockRestore()
+  })
+})
