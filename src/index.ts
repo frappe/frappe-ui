@@ -10,9 +10,11 @@ export { usePageMeta } from './utils/pageMeta'
 export * from './data-fetching'
 // Legacy resource API. Keep public until official apps finish the v3 migration.
 export * from './resources/index.ts'
+// One HTTP transport. `request` stays internal — it is the bare fetch wrapper
+// `frappeRequest` and the v1 resources are built on, with none of the Frappe
+// response handling a consumer wants.
 export { default as call } from './utils/call'
-export { frappeRequest } from './utils/frappeRequest'
-export { request } from './utils/request'
+export { frappeRequest, type FrappeRequestError } from './utils/frappeRequest'
 
 // Base components
 export * from './components/Alert'
