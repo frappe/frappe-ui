@@ -108,7 +108,7 @@ watches it and registers the real scrolling element with the app shell, and
 `SettingsBody.vue:19-21` forwards it so a panel body can be virtualized while
 keeping the styled scrollbar. No function replaces either of those.
 
-### 1.3 Three ways to focus something, and most things can't be focused at all
+### 1.3 Focusing is inconsistent, and most things can't be focused at all
 
 | Component | How it focuses |
 | --- | --- |
