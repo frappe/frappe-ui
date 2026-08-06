@@ -33,9 +33,11 @@ export {
 
 export type {
   AreaChartProps,
+  AreaChartSeriesStyle,
   AreaSeriesStyle,
   AxisChartProps,
   BarChartProps,
+  BarChartSeriesStyle,
   BarSeriesStyle,
   ChartBaseProps,
   ChartCategoryFormatter,
@@ -46,6 +48,7 @@ export type {
   FunnelChartProps,
   HeatmapChartProps,
   LineChartProps,
+  LineChartSeriesStyle,
   LineSeriesStyle,
   NumberCardProps,
   SeriesStyle,
@@ -54,6 +57,7 @@ export type {
 // Only what the props, emits, slots and template refs above reach for; the
 // config shapes the option builders read stay internal.
 export type {
+  AxisSeriesType,
   ChartDatapointEvent,
   ChartDir,
   ChartExposed,

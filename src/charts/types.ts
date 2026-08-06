@@ -42,12 +42,20 @@ export type ChartYAxisConfig = {
   echartOptions?: EchartOptionsOverride
 }
 
+/** The shape a series is drawn as. Mixing shapes in one chart is a combo chart. */
+export type AxisSeriesType = 'bar' | 'line' | 'area'
+
 export type AxisChartSeriesConfig = {
   /** Key in each data row that holds this series' value, and its identity. */
   name: string
   /** Display name. Falls back to the formatted `name`. */
   label?: string
   color?: string
+  /**
+   * Shape this series is drawn as. Unset draws it as the chart's own shape, so
+   * a `LineChart` series is a line until it says otherwise.
+   */
+  type?: AxisSeriesType
   /**
    * Which value axis this series is measured against. `'y2'` gives a series in
    * a different unit or magnitude its own scale, opposite the primary. Ignored
@@ -89,12 +97,6 @@ export type BarSeriesConfig = AxisChartSeriesConfig & {
   stackName?: string
 }
 
-export type BarChartConfig = AxisChartBaseConfig<BarSeriesConfig> & {
-  stacked?: boolean
-  /** Bars run left-to-right; the category axis moves to Y. */
-  horizontal?: boolean
-}
-
 export type LineSeriesConfig = AxisChartSeriesConfig & {
   /** Dash pattern of the line itself. Defaults to a solid stroke. */
   lineType?: 'solid' | 'dashed' | 'dotted'
@@ -109,14 +111,6 @@ export type LineSeriesConfig = AxisChartSeriesConfig & {
   smooth?: boolean
 }
 
-export type LineChartConfig = AxisChartBaseConfig<LineSeriesConfig> & {
-  /**
-   * Bridges gaps left by null or non-numeric values. Off by default: a break in
-   * the line is how missing data should read.
-   */
-  connectNulls?: boolean
-}
-
 export type AreaSeriesConfig = LineSeriesConfig & {
   /** Groups series into separate stacks. Only read when `stacked` is on. */
   stackName?: string
@@ -124,12 +118,33 @@ export type AreaSeriesConfig = LineSeriesConfig & {
   fillOpacity?: number
 }
 
-export type AreaChartConfig = AxisChartBaseConfig<AreaSeriesConfig> & {
-  connectNulls?: boolean
-  /** Areas sum on top of each other, drawn as opaque bands. */
-  stacked?: boolean
+/**
+ * One series as the option builder reads it. Every shape's style keys are here
+ * together because any cartesian chart may draw any of them — the keys that
+ * apply are the ones belonging to the series' own `type`.
+ */
+export type AxisSeriesConfig = BarSeriesConfig & AreaSeriesConfig
+
+/**
+ * The config behind every cartesian chart. Bar, line and area differ only in
+ * the shape their series default to, so one config covers all three — and a
+ * combo chart, which is a config whose series do not agree on a shape.
+ */
+export type AxisChartConfig = AxisChartBaseConfig<AxisSeriesConfig> & {
   /**
-   * Alpha of the fill under each line. Defaults to a faint wash that fades out
+   * Series of the same shape sum on top of each other: bars into columns,
+   * areas into bands. Lines never stack — a stacked line reads as an area.
+   */
+  stacked?: boolean
+  /** Bars run left-to-right; the category axis moves to Y. */
+  horizontal?: boolean
+  /**
+   * Bridges gaps left by null or non-numeric values. Off by default: a break in
+   * the line is how missing data should read.
+   */
+  connectNulls?: boolean
+  /**
+   * Alpha of the fill under each area. Defaults to a faint wash that fades out
    * towards the axis; stacked areas default to a solid band instead.
    */
   fillOpacity?: number

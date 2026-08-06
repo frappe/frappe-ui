@@ -1,5 +1,6 @@
 import type { TimeGrain } from './format'
 import type {
+  AxisSeriesType,
   ChartDir,
   ChartPalette,
   DonutVariant,
@@ -71,6 +72,33 @@ export type AreaSeriesStyle = LineSeriesStyle & {
   fillOpacity?: number
 }
 
+/**
+ * One `seriesConfig` entry of a `BarChart`: bar keys, or another shape's keys
+ * once `type` names that shape. A chart whose series disagree about `type` is a
+ * combo chart — bars against a line, say — and the tag names the shape the rest
+ * of the series take.
+ */
+export type BarChartSeriesStyle =
+  | (BarSeriesStyle & { type?: 'bar' })
+  | (LineSeriesStyle & { type: 'line' })
+  | (AreaSeriesStyle & { type: 'area' })
+
+/** One `seriesConfig` entry of a `LineChart`. Line keys unless `type` says otherwise. */
+export type LineChartSeriesStyle =
+  | (LineSeriesStyle & { type?: 'line' })
+  | (BarSeriesStyle & { type: 'bar' })
+  | (AreaSeriesStyle & { type: 'area' })
+
+/** One `seriesConfig` entry of an `AreaChart`. Area keys unless `type` says otherwise. */
+export type AreaChartSeriesStyle =
+  | (AreaSeriesStyle & { type?: 'area' })
+  | (BarSeriesStyle & { type: 'bar' })
+  | (LineSeriesStyle & { type: 'line' })
+
+/** Every style key any shape understands, as the normalizer reads one. */
+export type AxisSeriesStyle = BarSeriesStyle &
+  AreaSeriesStyle & { type?: AxisSeriesType }
+
 export type AxisChartProps<Style extends SeriesStyle = SeriesStyle> =
   ChartBaseProps & {
     data: Record<string, any>[]
@@ -82,7 +110,11 @@ export type AxisChartProps<Style extends SeriesStyle = SeriesStyle> =
     y2?: string | string[]
     /** Grouping column, i.e. long data. Use with a single `y`. */
     series?: string
-    /** Keyed by series identity: a `y` column, or a value of the `series` column. */
+    /**
+     * Keyed by series identity: a `y` column, or a value of the `series`
+     * column. Carries the per-series look, and the `type` that draws a series
+     * as a shape other than the chart's own.
+     */
     seriesConfig?: Record<string, Style>
     xAxis?: ChartXAxisOptions
     yAxis?: ChartValueAxisOptions
@@ -92,17 +124,18 @@ export type AxisChartProps<Style extends SeriesStyle = SeriesStyle> =
     echartOptions?: EchartOptionsOverride
   }
 
-export type BarChartProps = AxisChartProps<BarSeriesStyle> & {
+export type BarChartProps = AxisChartProps<BarChartSeriesStyle> & {
+  /** Series of the same shape sum on top of each other. Lines never stack. */
   stacked?: boolean
   /** Bars run left-to-right; the category axis moves to Y. */
   horizontal?: boolean
 }
 
-export type LineChartProps = AxisChartProps<LineSeriesStyle> & {
+export type LineChartProps = AxisChartProps<LineChartSeriesStyle> & {
   connectNulls?: boolean
 }
 
-export type AreaChartProps = AxisChartProps<AreaSeriesStyle> & {
+export type AreaChartProps = AxisChartProps<AreaChartSeriesStyle> & {
   stacked?: boolean
   connectNulls?: boolean
   /** Chart-level default; `seriesConfig` overrides it per series. */
