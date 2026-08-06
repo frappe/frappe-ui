@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { buildLineChartOption } from './lineChartOptions'
+import { buildLineChartOption } from './axisChartOptions'
 import type { ChartTheme } from './theme'
-import type { LineChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -16,7 +16,7 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<LineChartConfig> = {}): LineChartConfig {
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
@@ -29,7 +29,7 @@ function config(overrides: Partial<LineChartConfig> = {}): LineChartConfig {
 }
 
 function build(
-  overrides: Partial<LineChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
   return buildLineChartOption(config(overrides), { theme, hiddenSeries }) as any
@@ -240,7 +240,7 @@ describe('buildLineChartOption chrome', () => {
 })
 
 describe('buildLineChartOption second value axis', () => {
-  function dual(overrides: Partial<LineChartConfig> = {}) {
+  function dual(overrides: Partial<AxisChartConfig> = {}) {
     return build({
       y2Axis: { title: 'rate' },
       series: [{ name: 'sales' }, { name: 'refunds', axis: 'y2' }],

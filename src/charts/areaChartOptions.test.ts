@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { buildAreaChartOption } from './axisChartOptions'
 import {
-  buildAreaChartOption,
   DEFAULT_FILL_OPACITY,
   DEFAULT_STACKED_FILL_OPACITY,
 } from './areaChartOptions'
 import type { ChartTheme } from './theme'
-import type { AreaChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -20,7 +20,7 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<AreaChartConfig> = {}): AreaChartConfig {
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
@@ -33,7 +33,7 @@ function config(overrides: Partial<AreaChartConfig> = {}): AreaChartConfig {
 }
 
 function build(
-  overrides: Partial<AreaChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
   return buildAreaChartOption(config(overrides), { theme, hiddenSeries }) as any
@@ -117,10 +117,12 @@ describe('buildAreaChartOption', () => {
     ])
   })
 
+  // The shape prefixes every stack name so that a combo chart stacking both
+  // bands and columns never sums one on top of the other.
   it('stacks series under one stack, or under named ones', () => {
     expect(build({ stacked: true }).series.map((s: any) => s.stack)).toEqual([
-      'stack',
-      'stack',
+      'area:stack',
+      'area:stack',
     ])
     expect(build().series[0].stack).toBeUndefined()
     expect(
@@ -131,7 +133,7 @@ describe('buildAreaChartOption', () => {
           { name: 'refunds', stackName: 'right' },
         ],
       }).series.map((s: any) => s.stack),
-    ).toEqual(['left', 'right'])
+    ).toEqual(['area:left', 'area:right'])
   })
 
   it('takes fillOpacity from the series, then the chart', () => {

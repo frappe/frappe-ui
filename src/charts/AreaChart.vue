@@ -46,27 +46,34 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-// An area is a line series with a fill, so it needs no module of its own.
-import { LineChart as LineSeries } from 'echarts/charts'
+// An area is a line series with a fill, so it needs no module of its own. The
+// bar module comes along because `seriesConfig` may recast any series as a bar.
+import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
-import { buildAreaChartOption } from './areaChartOptions'
+import { buildAreaChartOption } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { AreaChartProps, AreaSeriesStyle } from './props'
+import type { AreaChartProps, AreaChartSeriesStyle } from './props'
 import type {
-  AreaChartConfig,
+  AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,
   ChartTooltipItem,
 } from './types'
 
-registerChartModules([LineSeries, GridComponent, TooltipComponent, LabelLayout])
+registerChartModules([
+  LineSeries,
+  BarSeries,
+  GridComponent,
+  TooltipComponent,
+  LabelLayout,
+])
 
 const props = defineProps<AreaChartProps>()
 
@@ -84,9 +91,9 @@ defineSlots<{
 }>()
 
 const normalized = computed(() =>
-  normalizeAxisChartProps<AreaSeriesStyle>(props),
+  normalizeAxisChartProps<AreaChartSeriesStyle>(props),
 )
-const config = computed<AreaChartConfig>(() => ({
+const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
   stacked: props.stacked,
   connectNulls: props.connectNulls,

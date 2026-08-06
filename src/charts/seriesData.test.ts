@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
 import type { AxisChartProps, BarSeriesStyle, LineSeriesStyle } from './props'
-import type { BarChartConfig, LineChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },
@@ -72,14 +72,14 @@ describe('normalizeAxisChartProps', () => {
   // What wave-2 components do: spread the normalized config, add the chart's own
   // props. Typechecked, so a drift from the internal config types fails the build.
   it('produces a config the chart-specific configs accept', () => {
-    const bar: BarChartConfig = {
+    const bar: AxisChartConfig = {
       ...normalize<BarSeriesStyle>({
         seriesConfig: { sales: { stackName: 'a' } },
       }).config,
       stacked: true,
       horizontal: true,
     }
-    const line: LineChartConfig = {
+    const line: AxisChartConfig = {
       ...normalize<LineSeriesStyle>({
         seriesConfig: { sales: { smooth: true } },
       }).config,

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildBarChartOption, resolveSeriesColors } from './barChartOptions'
-import { AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
+import { buildBarChartOption } from './axisChartOptions'
+import { resolveSeriesColors, AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
 import { estimateTextWidth } from './format'
 import type { ChartTheme } from './theme'
-import type { BarChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -19,7 +19,7 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
@@ -32,7 +32,7 @@ function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
 }
 
 function build(
-  overrides: Partial<BarChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
   width?: number,
 ) {
@@ -43,7 +43,7 @@ function build(
   }) as any
 }
 
-function colorsFor(overrides: Partial<BarChartConfig> = {}) {
+function colorsFor(overrides: Partial<AxisChartConfig> = {}) {
   return resolveSeriesColors(config(overrides), theme)
 }
 
@@ -327,7 +327,12 @@ describe('buildBarChartOption series', () => {
 
   it('stacks series and rounds only the outermost bar', () => {
     const option = build({ stacked: true })
-    expect(option.series.map((s: any) => s.stack)).toEqual(['stack', 'stack'])
+    // The shape prefixes every stack name so that a combo chart stacking both
+    // columns and bands never sums one on top of the other.
+    expect(option.series.map((s: any) => s.stack)).toEqual([
+      'bar:stack',
+      'bar:stack',
+    ])
     expect(radiiOf(option.series[0])).toEqual([0, 0])
     expect(radiiOf(option.series[1])).toEqual([
       [4, 4, 0, 0],
