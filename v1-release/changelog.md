@@ -329,6 +329,40 @@ when there is nothing to label.
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
 
+### PageHeaderBackButton: `to` is now a fallback (breaking)
+
+`to` used to be the destination. Setting it made every tap push that
+route. It is now used only when there is no in-app history to go back
+to, such as a cold load onto a deep link. Every other tap goes back
+through history.
+
+A back button that always lands on one fixed route is not a back button.
+It drops the user wherever the page author guessed they came from, which
+is wrong for every other way into the page.
+
+Migration: nothing to do if `to` already named the page users came from.
+It now applies only on a cold load. If you need an unconditional push,
+use a plain `Button` with your own `router.push`.
+
+### Editor: media captions moved off `alt` (breaking)
+
+Text in an image's or video's `alt` no longer renders as a caption.
+Captions live in a separate `caption` attribute, serialised as
+`data-caption`. `alt` goes back to being the screen reader description
+only.
+
+Existing `alt` values still parse and still round-trip untouched. They
+just do not display as a caption any more.
+
+There is deliberately no fallback from `caption` to `alt`. Stored `alt`
+values are mostly upload filenames and emoji shortcodes, and a real
+caption cannot be told apart from those automatically. Showing all of
+them is worse than showing none.
+
+Migration: to keep a caption visible, copy the text into `caption`. A
+one-off content migration can do that where you know the old `alt`
+values were captions.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
