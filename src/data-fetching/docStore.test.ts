@@ -2,15 +2,35 @@
  * @vitest-environment node
  */
 import { computed, watchSyncEffect } from 'vue'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { docStore } from './docStore'
 import { idbStore } from './idbStore'
 
 const DOCTYPE = 'User'
-const identity = <T>(d: T): T => d
 
 function idbKey(name: string) {
   return `doc:${DOCTYPE}/${name}`
+}
+
+/** A promise whose settlement the test controls, to hold an IDB call open. */
+function defer<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((r) => {
+    resolve = r
+  })
+  return { promise, resolve }
+}
+
+/** Let every pending microtask chain inside docStore run to completion. */
+function flush() {
+  return new Promise((r) => setTimeout(r, 0))
+}
+
+/** Push an entry past the cache timeout, as a long-lived useDoc would be. */
+function makeStale(name: string) {
+  ;(
+    docStore as unknown as { lastFetched: Map<string, number> }
+  ).lastFetched.set(`${DOCTYPE}/${name}`, Date.now() - 10 * 60 * 1000)
 }
 
 /**
@@ -20,7 +40,7 @@ function idbKey(name: string) {
  * this computed the instant setDoc assigns the ref — the trigger for the crash.
  */
 function subscribeLikeUseDoc(name: string) {
-  const doc = computed(() => docStore.getDoc(DOCTYPE, name, identity).value)
+  const doc = computed(() => docStore.getDoc(DOCTYPE, name).value)
   const seen: unknown[] = []
   const stop = watchSyncEffect(() => {
     seen.push(doc.value)
@@ -33,6 +53,9 @@ describe('docStore', () => {
     await docStore.clearAll()
   })
   afterEach(async () => {
+    // Restore first: a spy left in place by a failing assertion would hang the
+    // next test on an idbStore call that never settles.
+    vi.restoreAllMocks()
     await docStore.clearAll()
   })
 
@@ -65,10 +88,83 @@ describe('docStore', () => {
       docStore as unknown as { lastFetched: Map<string, number> }
     ).lastFetched.set(key, Date.now() - 10 * 60 * 1000)
 
-    const ref = docStore.getDoc(DOCTYPE, name, identity, { staleOnError: true })
+    const ref = docStore.getDoc(DOCTYPE, name, { staleOnError: true })
     expect(ref).toBeDefined()
     expect(() => ref.value).not.toThrow()
     expect(ref.value).toMatchObject(record)
     expect(await idbStore.get(idbKey(name))).toMatchObject(record)
+  })
+
+  it('a slow cached read never overwrites a newer publish', async () => {
+    const name = 'user3'
+    const stale = { doctype: DOCTYPE, name, bio: 'stale' }
+    const fresh = { doctype: DOCTYPE, name, bio: 'fresh' }
+    await idbStore.set(idbKey(name), stale)
+
+    // Hold the cached read open so the fresh copy lands first.
+    const cachedRead = defer<unknown>()
+    const getSpy = vi.spyOn(idbStore, 'get').mockReturnValue(cachedRead.promise)
+
+    const { doc, seen, stop } = subscribeLikeUseDoc(name)
+    expect(doc.value).toBe(null)
+
+    await docStore.setDoc({ ...fresh })
+    expect(doc.value).toMatchObject(fresh)
+
+    cachedRead.resolve(stale)
+    await flush()
+
+    // docRef.value must never move backwards in time.
+    expect(doc.value).toMatchObject(fresh)
+    expect(seen).not.toContainEqual(expect.objectContaining({ bio: 'stale' }))
+
+    getSpy.mockRestore()
+    stop()
+  })
+
+  it('concurrent reads of one stale key hit IDB once', async () => {
+    const name = 'user4'
+    await docStore.setDoc({ doctype: DOCTYPE, name })
+    makeStale(name)
+
+    const getSpy = vi.spyOn(idbStore, 'get')
+    for (let i = 0; i < 5; i++) {
+      docStore.getDoc(DOCTYPE, name, { staleOnError: true })
+    }
+    await flush()
+
+    expect(getSpy).toHaveBeenCalledTimes(1)
+    getSpy.mockRestore()
+  })
+
+  it('setDoc publishes before the IDB write settles', async () => {
+    const name = 'user5'
+    const record = { doctype: DOCTYPE, name, bio: 'written' }
+
+    const write = defer<void>()
+    const setSpy = vi.spyOn(idbStore, 'set').mockReturnValue(write.promise)
+
+    const pending = docStore.setDoc({ ...record })
+    // Readers see the new value even while the write is in flight — and even if
+    // it never lands. Matches setDocs, which already assigns before writing.
+    expect(docStore.getDoc(DOCTYPE, name).value).toMatchObject(record)
+
+    write.resolve()
+    await pending
+    setSpy.mockRestore()
+  })
+
+  it('publishes the cached doc raw: the store applies no transform', async () => {
+    const name = 'user6'
+    const cached = { doctype: DOCTYPE, name, count: 0 }
+    await idbStore.set(idbKey(name), cached)
+
+    const ref = docStore.getDoc(DOCTYPE, name)
+    await flush()
+
+    // Callers apply transform on read (useDoc does). If the store transformed
+    // too, a non-idempotent transform would compound across the two publishes,
+    // so the cached and fresh copies would carry different values.
+    expect(ref.value).toStrictEqual(cached)
   })
 })

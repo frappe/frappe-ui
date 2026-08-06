@@ -12,12 +12,37 @@ type DocKey = `${string}/${string}`
 class DocStore {
   private docs: Map<DocKey, Ref<Doc | null>>
   private lastFetched: Map<DocKey, number>
+  private revisions: Map<DocKey, number>
+  private inflight: Map<DocKey, Promise<void>>
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
 
   constructor() {
     this.docs = new Map<DocKey, Ref<Doc | null>>()
     this.lastFetched = new Map()
+    this.revisions = new Map()
+    this.inflight = new Map()
+  }
+
+  /**
+   * The single place a doc is assigned into its ref.
+   *
+   * A key is published twice by design — once from the IndexedDB cache, once
+   * from the server (stale-while-revalidate). Each publish bumps a per-key
+   * revision so a slow cached read can tell it has been overtaken and skip its
+   * write. The invariant: `docRef.value` never moves backwards in time.
+   */
+  private publish(key: DocKey, doc: Doc) {
+    if (!this.docs.has(key)) {
+      this.docs.set(key, ref(null))
+    }
+    // Mark fresh BEFORE assigning the ref. Assigning docRef.value synchronously
+    // re-runs any computed reading this doc (e.g. useDoc's `doc`), which calls
+    // getDoc again — if the entry still looked stale at that point it would kick
+    // off a needless reload that evicts the IDB copy we just wrote.
+    this.lastFetched.set(key, Date.now())
+    this.revisions.set(key, (this.revisions.get(key) ?? 0) + 1)
+    this.docs.get(key)!.value = doc
   }
 
   setCacheTimeout(minutes: number) {
@@ -33,30 +58,26 @@ class DocStore {
     }
     doc.name = doc.name.toString()
     const key = this.getKey(doc.doctype, doc.name)
+    // Publish before persisting, the way setDocs already does. Awaiting the
+    // write first would leave readers on stale data for the length of an IDB
+    // round trip, and widen the window a cached read can land in.
+    this.publish(key, doc)
     try {
       await idbStore.set(this.storePrefix + key, doc)
-      if (!this.docs.has(key)) {
-        this.docs.set(key, ref(null))
-      }
-      // Mark fresh BEFORE assigning the ref. Assigning docRef.value synchronously
-      // re-runs any computed reading this doc (e.g. useDoc's `doc`), which calls
-      // getDoc again — if the entry still looked stale at that point it would kick
-      // off a needless reload that evicts the IDB copy we just wrote.
-      this.lastFetched.set(key, Date.now())
-      const docRef = this.docs.get(key)
-      if (docRef) {
-        docRef.value = doc
-      }
     } catch (error) {
       console.error('Failed to set doc in IDB:', error)
       throw error
     }
   }
 
+  /**
+   * The store holds docs exactly as the server sent them. Callers that need a
+   * `transform` apply it when they read (see useDoc), so a non-idempotent
+   * transform cannot compound across the cached and fresh publishes.
+   */
   getDoc(
     doctype: string,
     name: MaybeRefOrGetter<string>,
-    transform?: (doc: Doc) => Doc,
     options: { staleOnError?: boolean } = {},
   ): Ref<Doc | null> {
     const nameStr = toValue(name)?.trim()
@@ -67,46 +88,64 @@ class DocStore {
 
     if (!this.docs.has(key)) {
       this.docs.set(key, ref(null))
-      this.loadDoc(key, true, transform, options)
+      this.loadDoc(key, true, options)
     } else if (this.isStale(key)) {
-      this.loadDoc(key, false, transform, options)
+      this.loadDoc(key, false, options)
     }
 
     return this.docs.get(key)!
   }
 
-  private async loadDoc(
+  private loadDoc(
     key: DocKey,
     isFirstLoad: boolean,
-    transform?: (doc: Doc) => Doc,
+    options: { staleOnError?: boolean } = {},
+  ): Promise<void> {
+    // Every computed reading this doc calls getDoc, so several readers can ask
+    // for the same key in one tick. Without this, each starts its own read and
+    // each is free to assign.
+    const existing = this.inflight.get(key)
+    if (existing) return existing
+
+    const load = this.readFromCache(key, isFirstLoad, options)
+      .catch((error) => {
+        // Nothing awaits this — getDoc fires it and returns the ref straight
+        // away — so re-throwing would surface as an unhandled rejection.
+        console.error('Failed to load doc from IDB:', error)
+      })
+      .finally(() => {
+        if (this.inflight.get(key) === load) {
+          this.inflight.delete(key)
+        }
+      })
+
+    this.inflight.set(key, load)
+    return load
+  }
+
+  private async readFromCache(
+    key: DocKey,
+    isFirstLoad: boolean,
     options: { staleOnError?: boolean } = {},
   ) {
-    try {
-      if (!isFirstLoad && this.isStale(key)) {
-        this.lastFetched.delete(key)
-        if (!options.staleOnError) {
-          // Keep the IDB copy only when callers explicitly opt into stale
-          // read-only fallback, such as offline-capable routes.
-          await idbStore.delete(this.storePrefix + key)
-        }
-      }
+    // Snapshot before awaiting. Anything published while this read is in flight
+    // is newer than what the read is about to return.
+    const revisionAtStart = this.revisions.get(key) ?? 0
 
-      const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
-      if (idbDoc) {
-        const docRef = this.docs.get(key)
-        if (docRef) {
-          if (transform) {
-            docRef.value = transform(idbDoc)
-          } else {
-            docRef.value = idbDoc
-          }
-        }
-        this.lastFetched.set(key, Date.now())
+    if (!isFirstLoad && this.isStale(key)) {
+      this.lastFetched.delete(key)
+      if (!options.staleOnError) {
+        // Keep the IDB copy only when callers explicitly opt into stale
+        // read-only fallback, such as offline-capable routes.
+        await idbStore.delete(this.storePrefix + key)
       }
-    } catch (error) {
-      console.error('Failed to load doc from IDB:', error)
-      throw error
     }
+
+    const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
+    if (!idbDoc) return
+    if ((this.revisions.get(key) ?? 0) !== revisionAtStart) return
+
+    this.publish(key, idbDoc)
   }
 
   async setDocs(docs: Doc[]) {
@@ -115,14 +154,7 @@ class DocStore {
       if (!doc?.doctype || !doc?.name) continue
       doc.name = doc.name.toString()
       const key = this.getKey(doc.doctype, doc.name)
-      if (!this.docs.has(key)) {
-        this.docs.set(key, ref(null))
-      }
-      const docRef = this.docs.get(key)
-      if (docRef) {
-        docRef.value = doc
-      }
-      this.lastFetched.set(key, Date.now())
+      this.publish(key, doc)
       docMap[this.storePrefix + key] = doc
     }
     await idbStore.setMany(docMap)
@@ -151,6 +183,8 @@ class DocStore {
   private async cleanup(key: DocKey) {
     this.docs.delete(key)
     this.lastFetched.delete(key)
+    this.revisions.delete(key)
+    this.inflight.delete(key)
     await idbStore.delete(this.storePrefix + key)
   }
 
@@ -163,6 +197,8 @@ class DocStore {
       await Promise.all(docKeys.map((key: string) => idbStore.delete(key)))
       this.docs.clear()
       this.lastFetched.clear()
+      this.revisions.clear()
+      this.inflight.clear()
     } catch (error) {
       console.error('Failed to clear all docs:', error)
       throw error

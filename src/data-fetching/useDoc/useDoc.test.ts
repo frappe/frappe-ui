@@ -171,7 +171,7 @@ describe('useDoc', () => {
   })
 
   it('throws when getDoc is called with a whitespace-only name', () => {
-    expect(() => docStore.getDoc('User', '   ', (d) => d)).toThrow(
+    expect(() => docStore.getDoc('User', '   ')).toThrow(
       'doctype and name are required',
     )
   })
