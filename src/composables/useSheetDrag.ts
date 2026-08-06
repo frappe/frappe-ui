@@ -37,12 +37,12 @@ export interface UseSheetDragOptions {
    * The surface that moves. Every listener binds here, which is what lets a
    * gesture anywhere inside the surface drag it.
    */
-  target: Ref<HTMLElement | null | undefined>
+  target: MaybeRefOrGetter<HTMLElement | null | undefined>
   /**
    * Optional grab handle inside `target`. A gesture starting here always
    * drags: it skips the scroll-position and direction checks.
    */
-  handle?: Ref<HTMLElement | null | undefined>
+  handle?: MaybeRefOrGetter<HTMLElement | null | undefined>
   /** When false the surface never drags. Default `true`. */
   enabled?: MaybeRefOrGetter<boolean>
   /** Called once the dismiss fling has finished. Unmount the surface here. */
@@ -386,7 +386,9 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
   }
 
   watch(
-    target,
+    // Wrapped rather than passed straight through: `target` may be a getter or
+    // a plain element, neither of which `watch` accepts as a source.
+    () => toValue(target),
     (el, previous) => {
       if (previous) unbind(previous)
       // A new element means a fresh surface, so no gesture is in flight and
