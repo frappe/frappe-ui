@@ -262,11 +262,13 @@ new theme switchers, compose `Select` with the `useTheme` composable.
 - **Breaking, silent:** the `v-model` payload inverts. `Autocomplete` modelled
   the whole option object; both replacements model the value only. Listen to
   `@update:selectedOption` where the whole option is needed.
-- **Breaking, silent:** a `#target` slot renamed to `#trigger` keeps compiling,
-  but `Combobox` and `MultiSelect` attach the open toggle to the trigger
-  element themselves — a surviving `@click="togglePopover()"` toggles twice and
-  the popover never opens. `open` is also a boolean on `#trigger`, where it was
-  a function on `#target`.
+- **Breaking, silent:** `#target`'s `open` slot prop was the *function* that
+  opened the popover; `#trigger`'s `open` is the open *state*. Anything reading
+  it as a value (`v-if="open"`) was always truthy and now is not.
+- `#target` → `#trigger` otherwise: `Combobox` and `MultiSelect` attach the
+  open toggle to the trigger element themselves, so drop the click handler. A
+  `togglePopover()` carried through the rename throws on click — the popover
+  still opens, so it reads as working while logging an error.
 - Grouped options use `{ group, options }`, not `{ group, items }`. Both
   normalizers now throw naming the group and the rename, rather than dying
   inside a `map` call.

@@ -505,8 +505,8 @@ single, [`MultiSelect`](./components/multiselect) for multiple.
 
 The import fails, so your build tells you where every call site is. Three
 things inside those call sites change quietly instead, and each has a
-before/after below: the **v-model payload**, the **group key**, and
-**`#target` → `#trigger`**.
+before/after below: the **v-model payload**, the **group key**, and the
+**`open` slot prop**, which was a function and is now a boolean.
 
 Sweep your codebase:
 
@@ -527,7 +527,7 @@ grep -rn 'items:' src --include='*.vue'             # grouped options — see be
 | `:showFooter`                     | `#footer` slot (MultiSelect has built-in) |
 | `:bodyClasses`                    | `data-slot` CSS                           |
 | `:maxOptions`                     | no equivalent                             |
-| `#target="{ togglePopover }"`     | `#trigger`, with no click handler         |
+| `#target="{ togglePopover }"`     | `#trigger`, with no click handler (`open` is now a boolean) |
 | `#prefix` / `#suffix` / `#item-*` | same (`#suffix` now replaces chevron)     |
 
 ### The v-model payload inverts
@@ -577,9 +577,11 @@ build time.
 
 The slot is renamed, and the wiring inside it changes. `Autocomplete` handed
 `#target` a `togglePopover` function you had to call yourself. `Combobox` and
-`MultiSelect` attach the open toggle to the `#trigger` element for you, so a
-handler that survives the rename **toggles twice and the popover never opens**.
-Nothing fails to compile.
+`MultiSelect` attach the open toggle to the `#trigger` element for you, so the
+handler is not just unnecessary — a `togglePopover()` carried through the
+rename throws `togglePopover is not a function` on every click. The popover
+still opens, because the component's own handler already ran, so this reads as
+"works, but noisy" until someone looks at the console.
 
 ```vue
 <!-- Before -->
@@ -597,11 +599,16 @@ Nothing fails to compile.
 </Combobox>
 ```
 
-The slot props changed shape too, if you read them: `open` was a **function**
-on `#target` and is a **boolean** on `#trigger`. `#trigger` receives
-`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }` —
-use `setOpen` for a trigger that has to open the popover from somewhere other
-than its own click.
+**`open` changed from a function to a boolean, and that part is silent.** On
+`#target` it was the function that opened the popover, so anything reading it
+as a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading a
+function object and was **always truthy**. On `#trigger` it is the real open
+state, so those expressions start doing what they always looked like they did.
+
+`#trigger` receives
+`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`. Use
+`setOpen` for a trigger that has to open the popover from somewhere other than
+its own click.
 
 ### The default trigger is `trigger="button"`
 

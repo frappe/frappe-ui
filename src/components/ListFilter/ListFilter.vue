@@ -96,8 +96,9 @@
             >
               <!--
                 Combobox forwards the open toggle onto the #trigger element
-                itself, so this Button needs no @click of its own — wiring one
-                would toggle the popover twice and leave it shut.
+                itself, so this Button needs no @click of its own. Autocomplete's
+                #target handed out a togglePopover to call by hand; carrying
+                that through the rename throws on click.
               -->
               <template #trigger>
                 <Button
