@@ -644,4 +644,47 @@ describe('BottomSheet drag to dismiss', () => {
     expect(captures).toEqual([sheet])
     app.unmount()
   })
+
+  it('is not wedged by a committed drag whose capture was refused', async () => {
+    const { sheet, content, app } = await openSheet()
+    // A browser that refuses the capture. The drag still commits, so it looks
+    // live, but it holds nothing and its pointerup can land anywhere.
+    HTMLElement.prototype.setPointerCapture = function () {
+      throw new Error('capture refused')
+    }
+
+    pointer('pointerdown', content, 0, 300)
+    pointer('pointermove', content, 0, 320)
+    expect(isDragging(sheet)).toBe(true)
+    expect(captures).toEqual([])
+
+    pointer('pointerup', document.body, 0, 400)
+
+    installPointerCapture()
+    pointer('pointerdown', content, 0, 100)
+    pointer('pointermove', content, 0, 120)
+    advance(20)
+
+    // The fresh press superseded the stranded drag, so this one starts from
+    // y=100 rather than continuing the old one from y=300.
+    expect(captures).toEqual([sheet])
+    expect(sheet.style.transform).toBe('translateY(20px)')
+    app.unmount()
+  })
+
+  it('keeps a live touch drag when a stray mouse press arrives', async () => {
+    const { sheet, content, app } = await openSheet()
+
+    touch('touchstart', content, 0, 300)
+    touch('touchmove', content, 0, 320)
+    // Touch never captures, so it is excluded from the recovery above by name.
+    // A touchscreen laptop can deliver this while the finger is still down.
+    pointer('pointerdown', content, 0, 100)
+    const later = touch('touchmove', content, 0, 360)
+    advance(20)
+
+    expect(later.defaultPrevented).toBe(true)
+    expect(sheet.style.transform).toBe('translateY(60px)')
+    app.unmount()
+  })
 })

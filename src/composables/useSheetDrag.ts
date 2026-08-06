@@ -127,6 +127,11 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
   let pointerId: number | null = null
   /** True only while the surface holds pointer capture for `pointerId`. */
   let captured = false
+  /**
+   * True while a touch gesture owns the surface. Touch never captures, so it
+   * has to be told apart from an uncaptured mouse gesture. See `onPointerDown`.
+   */
+  let touchGesture = false
 
   function clearTimers() {
     if (frame !== null) {
@@ -279,6 +284,7 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
     const wasDragging = phase === 'dragging'
     phase = 'idle'
     dragging.value = false
+    touchGesture = false
     releasePointer()
     if (frame !== null) {
       cancelAnimationFrame(frame)
@@ -319,7 +325,9 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
 
   function onTouchStart(e: TouchEvent) {
     if (phase !== 'idle' || e.touches.length !== 1) return
-    begin(e.touches[0].clientX, e.touches[0].clientY, e.target)
+    if (begin(e.touches[0].clientX, e.touches[0].clientY, e.target)) {
+      touchGesture = true
+    }
   }
 
   function onTouchMove(e: TouchEvent) {
@@ -344,9 +352,15 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
     if (e.pointerType === 'touch' || e.button !== 0) return
     // An uncaptured gesture can end outside the surface, so its pointerup goes
     // elsewhere and the phase is never cleared. A fresh press supersedes that
-    // leftover. A live drag is captured, so it always gets its own pointerup
-    // and is never superseded here.
-    if (phase !== 'idle' && !dragging.value) phase = 'idle'
+    // leftover. Capture is the test, not `dragging`: `capturePointer()` bails
+    // when the browser has no `setPointerCapture` or the pointer has already
+    // ended, which leaves a committed drag holding nothing. Keying on
+    // `dragging` would refuse to supersede that drag and wedge the surface for
+    // good.
+    // Touch is excluded because it never captures, yet its touchend always
+    // reaches the surface, so it needs no recovery. On a device with both
+    // inputs a stray mouse press must not cancel a live finger drag.
+    if (phase !== 'idle' && !captured && !touchGesture) phase = 'idle'
     if (phase !== 'idle') return
     if (!begin(e.clientX, e.clientY, e.target)) return
     pointerId = e.pointerId
@@ -398,6 +412,7 @@ export function useSheetDrag(options: UseSheetDragOptions): UseSheetDrag {
       closing = false
       dragging.value = false
       captured = false
+      touchGesture = false
       pointerId = null
       offset = 0
       if (el) bind(el)
