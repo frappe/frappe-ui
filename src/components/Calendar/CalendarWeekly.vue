@@ -176,7 +176,7 @@ import {
 
 import { Button } from '../Button'
 import useCalendarData from './composables/useCalendarData'
-import { isSameDay, useNow } from './composables/useNow'
+import { useNow } from './composables/useNow'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
   CALENDAR_ACTIONS_KEY,
@@ -215,7 +215,7 @@ const fullDayEvents = computed(
 
 const now = useNow()
 
-const isToday = (date: Date) => isSameDay(date, now.value)
+const isToday = (date: Date) => parseDate(date) === parseDate(now.value)
 
 const currentTime = computed(() => {
   let hour = now.value.getHours()

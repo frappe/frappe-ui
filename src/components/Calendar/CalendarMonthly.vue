@@ -114,7 +114,7 @@
 import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
 import useCalendarData from './composables/useCalendarData'
-import { isSameDay, useNow } from './composables/useNow'
+import { useNow } from './composables/useNow'
 import { computed } from 'vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
@@ -146,7 +146,7 @@ const maxEventsInCell = computed(() =>
 const now = useNow()
 
 function isToday(date: Date) {
-  return isSameDay(date, now.value)
+  return parseDate(date) === parseDate(now.value)
 }
 
 function isCurrentMonth(date: Date) {
