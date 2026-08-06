@@ -252,6 +252,10 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
   rendering a blank box, and hands it back unchanged if nothing new is picked.
 - `IconPicker` options are keyboard-operable: arrow keys move through the
   grid, Enter picks, and each option carries an accessible name.
+- **Removed:** `IconPicker`'s `reset()` template-ref method. `v-model` already
+  empties the value, which is the bar a template-ref member has to clear
+  ([`imperative-api.md`](../spec/imperative-api.md) §2.0), and the spec's five
+  verbs do not include `reset`. No call site anywhere reached it.
 
 ### Legacy components — dev-mode warnings
 

@@ -149,12 +149,6 @@ const handleBlur = (event: FocusEvent) => {
   emit('blur', event)
 }
 
-const reset = () => {
-  searchTerm.value = ''
-  internalModelValue.value = null
-  emit('update:modelValue', null)
-}
-
 const variantClasses = computed(() => {
   const borderCss =
     'border focus-within:border-outline-gray-4 focus-within:ring-2 focus-within:ring-outline-gray-3'
@@ -164,10 +158,6 @@ const variantClasses = computed(() => {
     outline: `${borderCss} border-outline-gray-2`,
     ghost: '',
   }[props.variant]
-})
-
-defineExpose({
-  reset,
 })
 </script>
 
