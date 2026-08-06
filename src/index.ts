@@ -10,7 +10,7 @@ export { usePageMeta } from './utils/pageMeta'
 export * from './data-fetching'
 // Legacy resource API. Keep public until official apps finish the v3 migration.
 export * from './resources/index.ts'
-export { default as call, createCall } from './utils/call'
+export { default as call } from './utils/call'
 export { frappeRequest } from './utils/frappeRequest'
 export { request } from './utils/request'
 export { default as initSocket } from './utils/socketio'

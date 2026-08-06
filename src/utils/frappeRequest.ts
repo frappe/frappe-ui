@@ -36,9 +36,12 @@ type FrappeResponseBody = {
 
 export function frappeRequest<TResponse = unknown>(
   options: FrappeRequestOptions<TResponse>,
-) {
+): Promise<TResponse> {
   const originalOptions = options
-  return request({
+  // Both the explicit return type and the explicit type argument matter: with
+  // neither, inference widened the result to `Promise<unknown>` and the
+  // `TResponse` a caller passed had no effect on what it awaited.
+  return request<TResponse>({
     ...options,
     transformRequest: (options) => {
       if (!options.url) {
