@@ -23,7 +23,6 @@ export interface FormControlProps {
     | 'textarea'
     | 'select'
     | 'checkbox'
-    | 'autocomplete'
     | 'combobox'
     | 'multiselect'
     | 'date'

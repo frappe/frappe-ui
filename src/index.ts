@@ -101,8 +101,6 @@ export * from './components/KeyboardShortcutsModal'
 export * from './composables/useShortcut'
 
 // Deprecated component compatibility
-/** @deprecated Use `Combobox` for one value, `MultiSelect` for several. */
-export * from './components/Autocomplete'
 /** @deprecated Use layout markup or domain-specific components instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as Card } from './components/Card.vue'
