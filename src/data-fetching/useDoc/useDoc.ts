@@ -166,7 +166,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const doc = computed<TDoc | null>(() => {
     const nameStr = toValue(name)?.trim()
     if (!nameStr) return null
-    const storeRef = docStore.getDoc(doctype, nameStr, transform as any, {
+    const storeRef = docStore.getDoc(doctype, nameStr, {
       staleOnError,
     }) as Ref<TDoc | null>
     let value = storeRef.value
