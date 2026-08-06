@@ -60,7 +60,7 @@ jobs:
           # a new component's table cannot slip through as an untracked file.
           git add --intent-to-add .
           if ! git diff --exit-code; then
-            echo "::error::The generated API tables are out of date. Run 'yarn docs:gen' and commit the result."
+            echo "::error::The generated API tables are out of date. Run 'yarn docs:gen' with no arguments and commit the result."
             exit 1
           fi
 

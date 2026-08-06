@@ -591,6 +591,18 @@ for (const d of documentables) {
 
 console.log(`Generating docs meta for: ${selectedFolders.join(', ')}`)
 
+// TypeScript orders the members of a union by the order it resolved them, which
+// depends on how much of the program the checker has loaded. A run over one
+// folder therefore prints some unions in a different order than a full run, even
+// though nothing in the source changed. The committed tables are the full run's
+// output — CI regenerates everything and fails on any diff — so a partial run is
+// for iterating, not for committing.
+if (selectedFolders.length !== folderOrder.length) {
+  console.warn(
+    'Note: this is a partial run. Run `yarn docs:gen` with no arguments before committing.',
+  )
+}
+
 selectedFolders.forEach((folder) => {
   try {
     const docs = docsByFolder.get(folder) ?? []
