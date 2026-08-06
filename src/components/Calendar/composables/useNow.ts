@@ -56,8 +56,3 @@ export function useNow() {
 
   return readonly(now)
 }
-
-/** True when `date` falls on the same calendar day as `reference`. */
-export function isSameDay(date: string | Date, reference: Date) {
-  return new Date(date).toDateString() === reference.toDateString()
-}
