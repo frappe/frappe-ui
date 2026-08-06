@@ -150,9 +150,8 @@ export * from './composables/useScreenSize'
 export * from './composables/useScrollContainer'
 
 // Directives
-export { default as focusDirective } from './directives/focus'
-export { default as onOutsideClickDirective } from './directives/onOutsideClick'
-export { default as visibilityDirective } from './directives/visibility'
+export { vFocus } from './directives/focus'
+export { vOnOutsideClick } from './directives/onOutsideClick'
 
 // Utilities
 export { dayjs, dayjsLocal } from './utils/dayjs'
