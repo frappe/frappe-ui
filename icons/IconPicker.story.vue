@@ -3,8 +3,9 @@ import { ref, reactive } from 'vue'
 import IconPicker from './IconPicker.vue'
 
 const basicValue = ref(null)
-const preselectedValue = ref('star')
+const preselectedValue = ref('lucide-star')
 const disabledValue = ref('')
+const emojiValue = ref('🚀')
 
 const state = reactive({
   disabled: false,
@@ -93,17 +94,29 @@ const state = reactive({
       </div>
     </Variant>
 
+    <Variant title="Non-lucide Value">
+      <div class="p-4">
+        <label class="block text-sm font-medium mb-2">
+          Value the picker cannot offer
+        </label>
+        <IconPicker v-model="emojiValue" :placeholder="state.placeholder" />
+        <div class="mt-2 text-sm text-ink-gray-6">
+          Selected: {{ emojiValue || 'None' }}
+        </div>
+      </div>
+    </Variant>
+
     <Variant title="Disabled State">
       <div class="p-4">
-        <label class="block text-sm font-medium mb-2">Disabled Icon Picker</label>
+        <label class="block text-sm font-medium mb-2"
+          >Disabled Icon Picker</label
+        >
         <IconPicker
           v-model="disabledValue"
           placeholder="This is disabled"
           :disabled="true"
         />
-        <div class="mt-2 text-sm text-ink-gray-6">
-          Icon picker is disabled
-        </div>
+        <div class="mt-2 text-sm text-ink-gray-6">Icon picker is disabled</div>
       </div>
     </Variant>
 
@@ -118,7 +131,7 @@ const state = reactive({
         :options="[
           { value: 'start', label: 'Start' },
           { value: 'center', label: 'Center' },
-          { value: 'end', label: 'End' }
+          { value: 'end', label: 'End' },
         ]"
       />
     </template>

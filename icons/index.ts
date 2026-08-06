@@ -11,4 +11,3 @@ export { default as StepsIcon } from './StepsIcon.vue'
 
 // Lucide Icons
 export { default as IconPicker } from './IconPicker.vue'
-export { default as spritePlugin } from './spritePlugin'
