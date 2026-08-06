@@ -329,6 +329,60 @@ when there is nothing to label.
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
 
+### HTTP transport — four paths collapse to one (breaking)
+
+`frappeRequest` is the single transport. Removed from the root export:
+
+- **`request`** — the bare `fetch` wrapper under `frappeRequest`, now
+  internal. Use `frappeRequest`.
+- **`createCall`** — no consumers in any app.
+- **`initSocket`** — no consumers in any app; every one defines its own.
+  `socket.io-client` remains a dependency (`resources/realtime.ts` exports
+  functions typed against its `Socket`).
+
+All three are build failures at the import.
+
+**`call` now honours `setConfig` (silent).** It kept its
+`(method, args, options)` signature, the value it resolves to, and the
+`{ response, status, error }` shape it hands `onError`, but it delegates to
+`frappeRequest` instead of building its own `fetch`. It had never imported
+`getConfig`, so `requestBaseUrl` and `requestHeaders` were ignored on every
+`call()` while `frappeRequest` respected them. Two consequences in apps that
+set either: `call` now goes to the configured base URL with
+`credentials: 'include'`, and `_server_messages` from a `call` now reach
+`serverMessagesHandler`.
+
+**`FrappeRequestError` is now exported.** `frappeRequest` threw it but
+nothing exported it, so a consumer could not type a `catch`.
+
+### `frappeRequest` — `onError` fired twice per failure (fix)
+
+`request()` attached `transformError` with a trailing `.catch`, which also
+caught what `transformResponse` threw. Every failed HTTP response therefore
+ran `onError` twice. It now runs once. `frappeRequest` also gained an
+explicit return type and passes its type argument through, so
+`frappeRequest<Foo>()` resolves to `Foo` rather than `unknown`.
+
+### `FrappeUI` plugin — one option left (breaking)
+
+`app.use(FrappeUI)` accepts `resources` and nothing else, and no longer
+installs it by default.
+
+- **`socketio` removed.** It defaulted to `true`, so apps that also built
+  their own socket opened two live socket.io connections per page load.
+- **`call` removed.** It installed a `$call` global with no consumers.
+- **`config` removed (silent).** `setConfig` is the entry point. One app
+  passed it.
+- **`resources` no longer defaults to `true` (silent).** The v1 resources
+  Options API mixin — `this.$resources`, `$getResource`, `$getDoc`,
+  `$getListResource`, `$refetchResource` — installs only on
+  `app.use(FrappeUI, { resources: true })`. Composition API resources are
+  unaffected. `resourcesPlugin` stays exported for direct installation.
+
+Because a removed option is silently ignored rather than rejected, the plugin
+now logs a dev-mode warning naming any option it does not accept and what to
+use instead.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
