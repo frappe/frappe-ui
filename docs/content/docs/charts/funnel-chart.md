@@ -1,3 +1,2 @@
-<!-- Hand-written proxy: colocatedComponentDocs maps one source dir to one proxy
-     dir, and src/charts sits beside src/molecules rather than inside it. -->
+<!-- Hand-written proxy: src/charts is not one of the colocatedRoots dirs. -->
 <!-- @include: ../../../../src/charts/docs/FunnelChart.md -->
