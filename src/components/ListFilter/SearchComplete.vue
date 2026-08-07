@@ -5,7 +5,7 @@
     trigger="button"
     placeholder="Select an option"
     :options="options"
-    :loading="r.loading"
+    :loading="r.loading || searching"
     :filterable="false"
     @update:open="(open) => onUpdateOpen(open as boolean)"
     @update:selected-option="rememberSelection"
@@ -112,6 +112,14 @@ watch(
 // each time the popover opens, which is what an unbound query would have done.
 const query = ref('')
 
+// `r.loading` cannot be trusted across an abort. The cancelled request runs its
+// own `loading = false` on the way out, and that lands *after* its replacement
+// has already set the shared flag true — so the popover would drop its loading
+// state and sit on the previous results while the new search is still out.
+// Track our own searches and take whichever flag is up.
+const searching = ref(false)
+let searchId = 0
+
 watch(query, (value) => {
   // `createResource.fetch` opens a fresh AbortController per call and never
   // touches the previous one, so two searches in flight both write to `r.data`
@@ -128,7 +136,13 @@ watch(query, (value) => {
     },
   })
 
-  r.reload()
+  const id = ++searchId
+  searching.value = true
+  r.reload().finally(() => {
+    // Only the newest search may put the flag down; an older one settling late
+    // would otherwise clear it under its own replacement.
+    if (id === searchId) searching.value = false
+  })
 })
 
 // The `as boolean` at the call site is not decoration: Combobox declares

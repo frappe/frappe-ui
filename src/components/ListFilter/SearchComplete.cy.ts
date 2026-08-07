@@ -124,6 +124,19 @@ describe('SearchComplete', () => {
     cy.get('[role=option]').should('contain.text', 'Beta')
   })
 
+  // Aborting the previous request makes it run its own `loading = false` after
+  // the replacement has set the shared flag true, so the popover would drop its
+  // loading state while the new search is still out.
+  it('stays in the loading state while a replacement search is out', () => {
+    stubDeferredServer()
+    cy.mount(SearchComplete, { props: { doctype: uniqueDoctype() } })
+
+    trigger().click()
+    search().type('Beta')
+
+    cy.get('[data-slot="content"]').should('have.attr', 'data-loading')
+  })
+
   it('resolves a label for a value supplied by the parent', () => {
     cy.mount(SearchComplete, {
       props: { doctype: uniqueDoctype(), modelValue: 'Gamma' },
