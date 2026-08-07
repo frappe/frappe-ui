@@ -124,7 +124,7 @@
   },
   {
     name: 'format',
-    description: 'Dayjs format string used for display. Default: `HH:mm`.',
+    description: 'Dayjs format string used for display. Unset, the display format is `HH:mm`, or `h:mm A` when the deprecated `use12Hour` is on.',
     required: false,
     type: 'string'
   },
