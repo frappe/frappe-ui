@@ -230,13 +230,13 @@
 
   const datePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
@@ -478,13 +478,13 @@
 
   const dateRangePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: DateRangeValue]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: DateRangeValue]'
   },
   {
@@ -741,13 +741,13 @@
 
   const dateTimePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {

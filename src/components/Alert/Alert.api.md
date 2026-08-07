@@ -66,14 +66,14 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'dismiss',
     description: 'Fired when the component is dismissed.',
     type: 'any[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>

@@ -59,24 +59,24 @@
 
   const emitsData = [
   {
-    name: 'delete',
-    description: '',
-    type: '[eventID: number | string | undefined]'
-  },
-  {
     name: 'create',
     description: '',
     type: '[event: CalendarEvent]'
   },
   {
-    name: 'update',
+    name: 'delete',
     description: '',
-    type: '[event: CalendarEvent]'
+    type: '[eventID: number | string | undefined]'
   },
   {
     name: 'rangeChange',
     description: '',
     type: '[payload: { view: CalendarMode; startDate: string; endDate: string; }]'
+  },
+  {
+    name: 'update',
+    description: '',
+    type: '[event: CalendarEvent]'
   }
 ]
 </script>

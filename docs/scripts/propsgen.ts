@@ -186,7 +186,7 @@ function isReorderableUnionMember(member: string) {
 
 // Compare by code point rather than locale so the output does not depend on
 // the machine's ICU data.
-function compareUnionMembers(a: string, b: string) {
+function compareCodePoints(a: string, b: string) {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
@@ -220,7 +220,7 @@ function sortUnionInPart(part: string): string {
 
   const leading = members[0].match(/^\s*/)![0]
   const trailing = members[members.length - 1].match(/\s*$/)![0]
-  const sorted = members.map((m) => m.trim()).sort(compareUnionMembers)
+  const sorted = members.map((m) => m.trim()).sort(compareCodePoints)
   return `${label}${leading}${sorted.join(' | ')}${trailing}`
 }
 
@@ -517,6 +517,12 @@ function extractTableData(name: string, data: any, vuePath: string) {
       }),
     )
 
+  // Sorted for the same reason unions are: TypeScript lists a component's
+  // emits in the order its checker resolved them, which shifts with how much
+  // of the program is loaded. `DatePicker` declares `update:open` before
+  // `change` and gets them back the other way round on a full run. Sorting is
+  // applied to the finished rows, so it holds whichever way the component
+  // declares its emits and whichever path supplied the payload type.
   const emits = data.events
     .filter((x: any) => !x.global)
     .map((x: any) =>
@@ -533,6 +539,9 @@ function extractTableData(name: string, data: any, vuePath: string) {
         ),
         deprecated: getDeprecation(x.tags),
       }),
+    )
+    .sort((a: { name: string }, b: { name: string }) =>
+      compareCodePoints(a.name, b.name),
     )
 
   return { name, props, slots, emits }

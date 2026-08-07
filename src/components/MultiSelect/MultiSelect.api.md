@@ -234,14 +234,14 @@
     type: '[value: (number | string)[]]'
   },
   {
-    name: 'update:query',
-    description: 'Fired when the search query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the search query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:selectedOptions',

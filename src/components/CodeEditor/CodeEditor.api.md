@@ -93,11 +93,6 @@
 
   const codeEditorEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Live document text on every change — mirrors the textarea field contract.',
-    type: '[value: string]'
-  },
-  {
     name: 'change',
     description: 'Commit (blur). The field wrapper normalizes (e.g. JSON pretty-print) here.',
     type: '[value: string]'
@@ -106,6 +101,11 @@
     name: 'overflow',
     description: 'Whether the content currently overflows the height cap (only transitions are\nemitted). The cap is set in CSS via the `--cm-max-height` custom property on\nthe root (there\'s no `maxHeight` prop — styling lives in CSS per P10); this\nemit reports the crossing because a consumer can\'t measure it from CSS.',
     type: '[overflowing: boolean]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Live document text on every change — mirrors the textarea field contract.',
+    type: '[value: string]'
   }
 ]
 

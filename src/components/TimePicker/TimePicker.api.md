@@ -245,24 +245,9 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'change',
     description: 'Fired after the value is committed.',
     type: '[value: string]'
-  },
-  {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
   },
   {
     name: 'close',
@@ -278,6 +263,21 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
+  },
+  {
+    name: 'open',
+    description: 'Fired when the component opens.',
+    type: '[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>

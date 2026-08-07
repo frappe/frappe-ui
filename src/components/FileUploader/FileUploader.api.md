@@ -35,14 +35,14 @@
 
   const emitsData = [
   {
-    name: 'success',
-    description: '',
-    type: '[data: any]'
-  },
-  {
     name: 'failure',
     description: '',
     type: '[error: any]'
+  },
+  {
+    name: 'success',
+    description: '',
+    type: '[data: any]'
   }
 ]
 </script>

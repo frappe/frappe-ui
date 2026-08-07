@@ -44,13 +44,13 @@
 
   const listViewEmits = [
   {
-    name: 'update:selections',
-    description: 'Fired when the selections changes.',
+    name: 'update:active-row',
+    description: 'Fired when the active row changes.',
     type: 'any[]'
   },
   {
-    name: 'update:active-row',
-    description: 'Fired when the active row changes.',
+    name: 'update:selections',
+    description: 'Fired when the selections changes.',
     type: 'any[]'
   }
 ]
@@ -100,13 +100,13 @@
 
   const listFooterEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'loadMore',
+    description: '',
     type: 'any[]'
   },
   {
-    name: 'loadMore',
-    description: '',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: 'any[]'
   }
 ]

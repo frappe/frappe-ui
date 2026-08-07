@@ -99,6 +99,11 @@
 
   const emitsData = [
   {
+    name: 'create',
+    description: '',
+    type: '[query: string]'
+  },
+  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: null | string]'
@@ -107,11 +112,6 @@
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
-  },
-  {
-    name: 'create',
-    description: '',
-    type: '[query: string]'
   }
 ]
 </script>

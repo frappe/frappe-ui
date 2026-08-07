@@ -84,9 +84,9 @@
 
   const emitsData = [
   {
-    name: 'update:expanded',
-    description: 'Fired when the expanded changes.',
-    type: '[value: boolean]'
+    name: 'drag-end',
+    description: '',
+    type: '[info: DropInfo | null]'
   },
   {
     name: 'drag-start',
@@ -94,9 +94,9 @@
     type: '[node: TreeNode]'
   },
   {
-    name: 'drag-end',
-    description: '',
-    type: '[info: DropInfo | null]'
+    name: 'update:expanded',
+    description: 'Fired when the expanded changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>

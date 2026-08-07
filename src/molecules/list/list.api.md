@@ -54,14 +54,14 @@
 
   const listEmits = [
   {
-    name: 'update:selection',
-    description: 'Fired when the selection changes.',
-    type: '[value: string[]]'
-  },
-  {
     name: 'update:active',
     description: 'Fired when the active changes.',
     type: '[value: string | undefined]'
+  },
+  {
+    name: 'update:selection',
+    description: 'Fired when the selection changes.',
+    type: '[value: string[]]'
   }
 ]
 

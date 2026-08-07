@@ -51,14 +51,14 @@
 
   const emitsData = [
   {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'action',
     description: '',
     type: '[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>
