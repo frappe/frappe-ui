@@ -72,7 +72,7 @@
   const pageHeaderBackButtonProps = [
   {
     name: 'to',
-    description: 'Where to navigate on tap. Omit to fall back to browser history.',
+    description: 'Fallback destination, used only when there is no in-app history to go back to\n(a cold load onto a deep link). Taps otherwise go back through history.',
     required: false,
     type: 'string | kt | Tt'
   },
@@ -85,6 +85,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### PageHeader
