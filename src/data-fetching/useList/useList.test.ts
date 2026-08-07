@@ -351,6 +351,29 @@ describe('useList concurrency', () => {
     expect(users.insert.isLoading()).toBe(false)
   })
 
+  it('rejects a failed delete and leaves the row in the list', async () => {
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      limit: 2,
+    })
+    await users.fetch()
+
+    await expect(users.delete.submit({ name: 'User1' })).resolves.toBe(
+      'deleted User1',
+    )
+    expect(users.data).toHaveLength(1)
+
+    await expect(users.delete.submit({ name: 'quick-fail' })).rejects.toThrow(
+      'delete quick-fail failed',
+    )
+    expect(users.delete.error?.message).toContain('delete quick-fail failed')
+    expect(users.data).toHaveLength(1)
+  })
+
   it('keeps the newest response in setValue data when an older submit answers last', async () => {
     const users = list()
 

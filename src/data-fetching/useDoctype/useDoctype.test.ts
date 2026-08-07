@@ -228,6 +228,48 @@ describe('useDoctype concurrency', () => {
   })
 })
 
+// `submit()` either resolves with the response or rejects with the error.
+// There is no second failure channel, so `null` is free to mean a `null`
+// response.
+describe('useDoctype submit outcome', () => {
+  it('rejects a runMethod submit whose request fails, and sets error', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await expect(
+      user.runMethod.submit({ method: 'quick_fail' }),
+    ).rejects.toThrow('quick_fail failed')
+
+    expect(user.runMethod.error?.message).toContain('quick_fail failed')
+  })
+
+  it('resolves with null when the server answers with a null response', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    // The same value a failed request used to hand back. It now means one thing
+    // only: the server answered `null`, and the submit succeeded.
+    await expect(user.runMethod.submit({ method: 'quick_null' })).resolves.toBe(
+      null,
+    )
+
+    expect(user.runMethod.error).toBe(null)
+    expect(user.runMethod.data).toBe(null)
+  })
+
+  it('rejects a failed delete and leaves the document in the store', async () => {
+    await docStore.setDoc({ doctype: 'User', name: 'quick-fail' })
+
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await expect(user.delete.submit({ name: 'quick-fail' })).rejects.toThrow(
+      'delete quick-fail failed',
+    )
+
+    expect(docStore.getDoc('User', 'quick-fail').value).toMatchObject({
+      name: 'quick-fail',
+    })
+  })
+})
+
 // `data` and `error` belong to the submit that started last, not the one that
 // settled last. In every test below the slow submit starts first and answers
 // second, so an implementation that writes on settle gets it backwards.
@@ -259,15 +301,17 @@ describe('useDoctype overlapping submits', () => {
   it('does not let an older failure overwrite the newest submit success', async () => {
     let user = useDoctype<User>('User', { baseUrl })
 
-    let [stale, newest] = await Promise.all([
-      user.runMethod.submit({ method: 'slow_fail' }),
-      user.runMethod.submit({ method: 'quick_count', params: { page: 2 } }),
-    ])
+    let stale = user.runMethod.submit({ method: 'slow_fail' })
+    let newest = user.runMethod.submit({
+      method: 'quick_count',
+      params: { page: 2 },
+    })
 
     // The failed submit still reports the failure to its own caller.
-    expect(stale).toBe(null)
-    expect(newest).toEqual({ method: 'quick_count', page: 2 })
+    await expect(stale).rejects.toThrow('slow_fail failed')
+    await expect(newest).resolves.toEqual({ method: 'quick_count', page: 2 })
 
+    // ...and writes nothing shared, because it is no longer the newest.
     expect(user.runMethod.error).toBe(null)
     expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 2 })
   })
@@ -275,14 +319,15 @@ describe('useDoctype overlapping submits', () => {
   it('does not let an older success clear the newest submit error', async () => {
     let user = useDoctype<User>('User', { baseUrl })
 
-    let [stale, newest] = await Promise.all([
-      user.runMethod.submit({ method: 'slow_count', params: { page: 1 } }),
-      user.runMethod.submit({ method: 'quick_fail' }),
-    ])
+    let stale = user.runMethod.submit({
+      method: 'slow_count',
+      params: { page: 1 },
+    })
+    let newest = user.runMethod.submit({ method: 'quick_fail' })
 
+    await expect(newest).rejects.toThrow('quick_fail failed')
     // The successful submit still hands its own response to its own caller.
-    expect(stale).toEqual({ method: 'slow_count', page: 1 })
-    expect(newest).toBe(null)
+    await expect(stale).resolves.toEqual({ method: 'slow_count', page: 1 })
 
     expect(user.runMethod.error?.message).toContain('quick_fail failed')
     expect(user.runMethod.data).toBe(null)
@@ -291,7 +336,9 @@ describe('useDoctype overlapping submits', () => {
   it('clears the error when the newest submit succeeds', async () => {
     let user = useDoctype<User>('User', { baseUrl })
 
-    await user.runMethod.submit({ method: 'quick_fail' })
+    await expect(
+      user.runMethod.submit({ method: 'quick_fail' }),
+    ).rejects.toThrow('quick_fail failed')
     expect(user.runMethod.error).toBeInstanceOf(Error)
 
     await user.runMethod.submit({ method: 'quick_count', params: { page: 3 } })
@@ -304,7 +351,9 @@ describe('useDoctype overlapping submits', () => {
     let user = useDoctype<User>('User', { baseUrl })
 
     await user.runMethod.submit({ method: 'quick_count', params: { page: 1 } })
-    await user.runMethod.submit({ method: 'quick_fail' })
+    await expect(
+      user.runMethod.submit({ method: 'quick_fail' }),
+    ).rejects.toThrow('quick_fail failed')
 
     expect(user.runMethod.error?.message).toContain('quick_fail failed')
     expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 1 })
@@ -313,7 +362,9 @@ describe('useDoctype overlapping submits', () => {
   it('holds the error until the next submit settles, instead of clearing it at the start', async () => {
     let user = useDoctype<User>('User', { baseUrl })
 
-    await user.runMethod.submit({ method: 'quick_fail' })
+    await expect(
+      user.runMethod.submit({ method: 'quick_fail' }),
+    ).rejects.toThrow('quick_fail failed')
     expect(user.runMethod.error).toBeInstanceOf(Error)
 
     let retry = user.runMethod.submit({ method: 'slow_count' })

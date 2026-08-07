@@ -101,8 +101,9 @@ export const handlers = [
 
   // The handlers below echo the request back, and answer slowly whenever a doc
   // name or method name starts with `slow`. That lets a test start two submits
-  // at once and decide which one answers first. A method name ending in `fail`
-  // answers with an error, so a test can also decide which one fails.
+  // at once and decide which one answers first. A doc or method name ending in
+  // `fail` answers with an error, so a test can also decide which one fails.
+  // A method name ending in `null` answers 200 with a literal `null` payload.
   http.post(url('/api/v2/document/User'), async ({ request }) => {
     let body = await readBody(request)
     await delayIfSlow(body.name)
@@ -114,6 +115,9 @@ export const handlers = [
     await delayIfSlow(params.method)
     if (String(params.method).endsWith('fail')) {
       return methodError(String(params.method))
+    }
+    if (String(params.method).endsWith('null')) {
+      return HttpResponse.json({ data: null })
     }
     return HttpResponse.json({
       data: { method: params.method, ...body },
@@ -141,6 +145,9 @@ export const handlers = [
 
   http.delete(url('/api/v2/document/User/:name'), async ({ params }) => {
     await delayIfSlow(params.name)
+    if (String(params.name).endsWith('fail')) {
+      return methodError(`delete ${params.name}`)
+    }
     return HttpResponse.json({ data: `deleted ${params.name}` })
   }),
 ]
