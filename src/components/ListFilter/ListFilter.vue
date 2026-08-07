@@ -1,5 +1,11 @@
 <template>
-  <Popover>
+  <!--
+    `bare` because the filter row is wider than the standard panel, and the
+    panel clips (`overflow-hidden`) so the remove button would be unreachable.
+    This is the documented mapping for the old `#body` slot: content that
+    brings its own surface.
+  -->
+  <Popover bare>
     <template #trigger>
       <Button label="Filter">
         <template #prefix><FilterIcon class="h-4" /></template>
@@ -13,7 +19,17 @@
       </Button>
     </template>
     <template #default="{ close }">
-      <div class="min-w-[400px] p-2">
+      <!--
+        A filter row does not shrink below ~550px, which is wider than a phone
+        and wider than the panel gets on a short viewport. Capping at reka's
+        available width and scrolling inside keeps the remove button reachable
+        instead of parking it off-screen — the panel is portaled and fixed, so
+        the page cannot scroll to it.
+      -->
+      <div
+        class="my-2 max-w-[var(--reka-popover-content-available-width)] overflow-x-auto rounded-lg border border-outline-gray-1 bg-surface-base shadow-xl"
+      >
+        <div class="min-w-[400px] p-2">
           <div
             v-if="filters.length"
             v-for="(filter, i) in filters"
@@ -117,6 +133,7 @@
               @click="filters = []"
             />
           </div>
+        </div>
       </div>
     </template>
   </Popover>
