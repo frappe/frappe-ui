@@ -36,7 +36,7 @@ export interface UseActionOptions<TResponse, TParams> {
  * last. Every submit takes a sequence number, and only the submit holding the
  * highest number may write them. An older submit that comes back late is
  * dropped whole: it writes no `data`, writes no `error` and clears nothing. It
- * still resolves to its own caller with its own response.
+ * still answers its own caller with its own outcome.
  *
  * The winning submit writes both refs together, so they never disagree: on
  * success `data` is the response and `error` is null, on failure `error` is set
