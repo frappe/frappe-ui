@@ -30,7 +30,7 @@ type Ramp = {
 const RAMPS: Ramp[] = [
   {
     label: 'Categorical',
-    prefix: '--chart-',
+    prefix: '--chart-categorical-',
     length: 10,
     discrete: true,
     description:

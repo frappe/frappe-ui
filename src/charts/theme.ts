@@ -213,7 +213,7 @@ export function resolveChartTheme(el?: HTMLElement | null): ChartTheme {
     return ramp
   }
 
-  const palette = readRamp('--chart-', CHART_PALETTE_LENGTH)
+  const palette = readRamp('--chart-categorical-', CHART_PALETTE_LENGTH)
   const sequential = readRamp('--chart-sequential-', CHART_SEQUENTIAL_LENGTH)
   const diverging = readRamp('--chart-diverging-', CHART_DIVERGING_LENGTH)
 

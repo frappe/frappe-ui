@@ -1,8 +1,9 @@
 /**
  * Chart color tokens.
  *
- * `--chart-1` … `--chart-10` is the categorical ramp: series pick from it in
- * order, cycling past the tenth. `--chart-sequential-*` runs dark to light for
+ * `--chart-categorical-1` … `--chart-categorical-10` is the categorical ramp:
+ * series pick from it in order, cycling past the tenth. Every ramp is named the
+ * same way, `--chart-<ramp>-<stop>`. `--chart-sequential-*` runs dark to light for
  * one-directional magnitude, `--chart-diverging-*` runs cool to warm around a
  * neutral middle stop. Redefine any of them in your own CSS to rebrand every
  * chart at once; per-chart overrides go through the `palette` prop instead.
@@ -20,16 +21,16 @@
      The hues sit at jewel-tone depth rather than at their safe positions, so the
      dark members run a step below the anchor's lightness; chroma is capped at
      0.19 so the violet and the crimson cannot out-shout the blue. */
-  --chart-1: #2283c3;
-  --chart-2: #84c5f9;
-  --chart-3: #289e60;
-  --chart-4: #84d4a1;
-  --chart-5: #753cbb;
-  --chart-6: #bb9df1;
-  --chart-7: #c98c28;
-  --chart-8: #f5ca8e;
-  --chart-9: #ba205a;
-  --chart-10: #f98da7;
+  --chart-categorical-1: #2283c3;
+  --chart-categorical-2: #84c5f9;
+  --chart-categorical-3: #289e60;
+  --chart-categorical-4: #84d4a1;
+  --chart-categorical-5: #753cbb;
+  --chart-categorical-6: #bb9df1;
+  --chart-categorical-7: #c98c28;
+  --chart-categorical-8: #f5ca8e;
+  --chart-categorical-9: #ba205a;
+  --chart-categorical-10: #f98da7;
 
   --chart-sequential-1: #095895;
   --chart-sequential-2: #2283c3;
@@ -82,16 +83,16 @@
   /* Derived from the light stops, never drawn by hand: same hue, lightness
      dropped 0.03, chroma held. Deriving dark mechanically is what keeps a
      series recognisably itself across a theme flip. */
-  --chart-1: #137ab9;
-  --chart-2: #7bbbef;
-  --chart-3: #189557;
-  --chart-4: #7aca98;
-  --chart-5: #6d32b1;
-  --chart-6: #b294e7;
-  --chart-7: #bf8319;
-  --chart-8: #ebc085;
-  --chart-9: #af0f52;
-  --chart-10: #ef849e;
+  --chart-categorical-1: #137ab9;
+  --chart-categorical-2: #7bbbef;
+  --chart-categorical-3: #189557;
+  --chart-categorical-4: #7aca98;
+  --chart-categorical-5: #6d32b1;
+  --chart-categorical-6: #b294e7;
+  --chart-categorical-7: #bf8319;
+  --chart-categorical-8: #ebc085;
+  --chart-categorical-9: #af0f52;
+  --chart-categorical-10: #ef849e;
 
   --chart-sequential-1: #074677;
   --chart-sequential-2: #1b699c;
