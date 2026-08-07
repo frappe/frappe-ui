@@ -135,10 +135,11 @@ export function buildAxisChartOption(
     // A bar has a width for the pointer to shade; a line has none, so a chart
     // without bars points its axis with a rule instead.
     ...axisChartBase(theme, hasBars ? 'shadow' : 'line'),
-    grid: buildAxisGrid(config, {
+    grid: buildAxisGrid({
       horizontal,
       isRTL,
       labelGutter: dataLabelGutter(plotted),
+      xAxisTitle: config.xAxis.title,
     }),
     xAxis: horizontal ? valueAxis : categoryAxis,
     yAxis: horizontal ? categoryAxis : valueAxis,

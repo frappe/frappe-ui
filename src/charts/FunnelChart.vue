@@ -155,7 +155,7 @@
 import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
-import { paletteColors, pickSeriesColor, useChartTheme } from './theme'
+import { chartColors, useChartTheme } from './theme'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -224,23 +224,14 @@ const { theme } = useChartTheme(root)
 
 const FUNNEL_PALETTE: ChartPaletteName = 'sequential'
 
-/**
- * Palest first, deepest last, so the color darkens as the population narrows.
- * Only the sequential ramp is flipped for it: a categorical set has no order to
- * reverse, and a diverging ramp's direction is its meaning.
- */
-const colors = computed(() => {
-  const count = stages.value.length
-  const explicit = Array.isArray(props.palette) ? props.palette : undefined
-  if (explicit?.length) {
-    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
-  }
-
-  const name =
-    typeof props.palette === 'string' ? props.palette : FUNNEL_PALETTE
-  const ramp = paletteColors(name, theme.value, count)
-  return name === 'sequential' ? ramp.slice().reverse() : ramp
-})
+/** Palest first, deepest last, so the color darkens as the population narrows. */
+const colors = computed(() =>
+  chartColors(props.palette, theme.value, {
+    fallback: FUNNEL_PALETTE,
+    count: stages.value.length,
+    deepEnd: 'last',
+  }),
+)
 
 const hovered = ref<number | null>(null)
 const hoveredStage = computed(() =>

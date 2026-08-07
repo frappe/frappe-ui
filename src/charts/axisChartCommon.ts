@@ -10,12 +10,13 @@ import {
   type TimeGrain,
 } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
+import { chartColors, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
   ChartPaletteName,
+  ChartYAxisConfig,
 } from './types'
 
 export type AxisChartOptionContext = {
@@ -77,25 +78,15 @@ export function resolveSeriesColors(
   config: AxisChartBaseConfig,
   theme: ChartTheme,
 ): Record<string, string> {
-  const assigned = seriesPaletteColors(config, theme)
+  const assigned = chartColors(config.palette, theme, {
+    fallback: DEFAULT_PALETTE,
+    count: config.series.length,
+  })
   const colors: Record<string, string> = {}
   config.series.forEach((series, index) => {
     colors[series.name] = series.color || assigned[index]
   })
   return colors
-}
-
-function seriesPaletteColors(config: AxisChartBaseConfig, theme: ChartTheme) {
-  const count = config.series.length
-  const explicit = Array.isArray(config.palette) ? config.palette : undefined
-
-  if (explicit?.length) {
-    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
-  }
-
-  const name =
-    typeof config.palette === 'string' ? config.palette : DEFAULT_PALETTE
-  return paletteColors(name, theme, count)
 }
 
 export type ResolvedXAxis = {
@@ -164,20 +155,21 @@ export function axisChartBase(
 // cases — this covers that, nothing more.
 const EDGE_PAD = 2
 
-export function buildAxisGrid(
-  config: AxisChartBaseConfig,
-  opts: { horizontal: boolean; isRTL: boolean; labelGutter: number },
-) {
-  const { horizontal, isRTL, labelGutter } = opts
+export function buildAxisGrid(opts: {
+  horizontal: boolean
+  isRTL: boolean
+  labelGutter: number
+  /** Title on the category axis, which only a horizontal chart draws inline. */
+  xAxisTitle?: string
+}) {
+  const { horizontal, isRTL, labelGutter, xAxisTitle } = opts
   const endGutter = horizontal ? labelGutter : 0
 
   return {
     top: 8 + (horizontal ? 0 : labelGutter),
     bottom: 0,
     left: EDGE_PAD + (isRTL ? endGutter : 0),
-    right:
-      (config.xAxis.title && horizontal ? 24 : EDGE_PAD) +
-      (isRTL ? 0 : endGutter),
+    right: (xAxisTitle && horizontal ? 24 : EDGE_PAD) + (isRTL ? 0 : endGutter),
     containLabel: true,
   }
 }
@@ -437,19 +429,31 @@ export function buildValueAxes(
   theme: ChartTheme,
   opts: { horizontal: boolean; isRTL: boolean },
 ) {
-  const primary = buildValueAxis(config, theme, opts)
+  const primary = buildValueAxis(config.yAxis, theme, opts)
   if (!hasSecondaryValueAxis(config, opts.horizontal)) return primary
-  return [primary, buildValueAxis(config, theme, { ...opts, axis: 'y2' })]
+  return [
+    primary,
+    buildValueAxis(config.y2Axis, theme, { ...opts, secondary: true }),
+  ]
 }
 
+/**
+ * One value axis, from the axis config that describes it. It takes that config
+ * rather than the chart's, so a plot with two value scales and no category axis
+ * — the scatter — builds each of them the same way an axis chart builds its y.
+ */
 export function buildValueAxis(
-  config: AxisChartBaseConfig,
+  axisConfig: ChartYAxisConfig | undefined,
   theme: ChartTheme,
-  opts: { horizontal: boolean; isRTL: boolean; axis?: 'y' | 'y2' },
+  opts: {
+    horizontal: boolean
+    isRTL: boolean
+    /** Drawn opposite the primary, and aligned to its ticks. */
+    secondary?: boolean
+  },
 ) {
   const { horizontal, isRTL } = opts
-  const secondary = opts.axis === 'y2'
-  const axisConfig = secondary ? config.y2Axis : config.yAxis
+  const secondary = Boolean(opts.secondary)
 
   const axis = {
     type: 'value',

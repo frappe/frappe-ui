@@ -1,5 +1,5 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
-import type { ChartPaletteName } from './types'
+import type { ChartPalette, ChartPaletteName } from './types'
 
 /**
  * Plot-area colors as concrete strings. echarts parses colors itself, so
@@ -277,6 +277,11 @@ function rampStops(ramp: string[], count: number, lastIndex: number): string[] {
   )
 }
 
+/** The sequential ramp without the stops that vanish against a card. */
+function usableSequential(ramp: string[]) {
+  return ramp.slice(0, Math.max(1, ramp.length - SEQUENTIAL_TAIL_TRIM))
+}
+
 /**
  * One color per series from a named ramp. Categorical is a set of unrelated
  * hues, so it is cycled in order; the continuous ramps are sampled instead,
@@ -304,10 +309,76 @@ export function paletteColors(
 
   // A diverging ramp is read by its extremes, so it always spans end to end.
   const lastIndex =
-    name === 'diverging'
-      ? ramp.length - 1
-      : Math.max(0, ramp.length - 1 - SEQUENTIAL_TAIL_TRIM)
+    name === 'diverging' ? ramp.length - 1 : usableSequential(ramp).length - 1
   return rampStops(ramp, count, lastIndex)
+}
+
+/**
+ * A named ramp as a ramp: every stop it holds, in the order it was authored.
+ * What a plot that interpolates between the stops reads, where the sampled
+ * `paletteColors` would hand it a set of slots instead.
+ */
+function namedRamp(name: ChartPaletteName, theme: ChartTheme): string[] {
+  if (name === 'categorical') return theme.palette
+  const ramp =
+    name === 'diverging' ? theme.diverging : usableSequential(theme.sequential)
+  return ramp.length ? ramp : theme.palette
+}
+
+/**
+ * How a chart spends the palette: one color per thing it draws, or `'ramp'` for
+ * the stops themselves, which a plot with a continuous scale interpolates
+ * between rather than handing out.
+ */
+export type ChartColorCount = number | 'ramp'
+
+/**
+ * Which end of a sequential ramp leads. It is authored deep to pale, which is
+ * how a list of series reads — the first one is the heaviest. `'last'` flips it
+ * for a plot whose color runs with the value instead: a funnel that darkens as
+ * it narrows, a heatmap where the heavier number is the heavier color.
+ *
+ * Only the sequential ramp has a deep end to place. A categorical set has no
+ * order to reverse, a diverging ramp's direction is its meaning, and a caller's
+ * own colors are drawn in the order they were written.
+ */
+export type SequentialDeepEnd = 'first' | 'last'
+
+export type ChartColorsOptions = {
+  /** Ramp to read when the caller named none. Each chart family picks its own. */
+  fallback: ChartPaletteName
+  count: ChartColorCount
+  deepEnd?: SequentialDeepEnd
+}
+
+/**
+ * The colors a chart draws in, its `palette` and the theme taken together.
+ * Every chart resolves its palette through this one call, so the precedence —
+ * the caller's own colors, then the ramp they named, then the family default —
+ * is stated once and reads the same whatever is being painted.
+ */
+export function chartColors(
+  palette: ChartPalette | undefined,
+  theme: ChartTheme,
+  { fallback, count, deepEnd = 'first' }: ChartColorsOptions,
+): string[] {
+  // A caller's colors are a list, not a ramp: handed out in the order written,
+  // and cycled once they run out.
+  const explicit = Array.isArray(palette) ? palette : undefined
+  if (explicit?.length) {
+    if (count === 'ramp') return [...explicit]
+    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
+  }
+
+  const name = typeof palette === 'string' ? palette : fallback
+  const colors =
+    count === 'ramp'
+      ? namedRamp(name, theme)
+      : paletteColors(name, theme, count)
+
+  return name === 'sequential' && deepEnd === 'last'
+    ? colors.slice().reverse()
+    : colors
 }
 
 /**

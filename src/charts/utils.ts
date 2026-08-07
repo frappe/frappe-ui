@@ -1,3 +1,14 @@
+/**
+ * Identity of the bucket a cap collapses its tail into, shared by `maxSeries`
+ * and `maxSlices`. Reserved, so a group genuinely named "Others" in the data
+ * cannot collide with it, and stable, so a caller can style the bucket through
+ * `seriesConfig[OTHERS_KEY]`.
+ */
+export const OTHERS_KEY = '__others__'
+
+/** Default display name for the collapsed bucket. `label` overrides it. */
+export const OTHERS_LABEL = 'Others'
+
 function isPlainObject(value: any): value is Record<string, any> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }

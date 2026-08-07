@@ -2,7 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
+import { chartColors, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type { ChartValueFormatter } from './props'
 import type {
@@ -91,7 +91,10 @@ export function buildSankeyGraph(
     unpainted.push({ source, target, value, row })
   }
 
-  const colors = nodeColors(config, theme, names.length)
+  const colors = chartColors(config.palette, theme, {
+    fallback: SANKEY_PALETTE,
+    count: names.length,
+  })
   const colorOf = new Map(names.map((name, index) => [name, colors[index]]))
 
   return {
@@ -145,21 +148,6 @@ function throughput(
     if (link.source === name) leaving += link.value
   }
   return Math.max(incoming, leaving)
-}
-
-function nodeColors(
-  config: SankeyChartConfig,
-  theme: ChartTheme,
-  count: number,
-) {
-  const explicit = Array.isArray(config.palette) ? config.palette : undefined
-  if (explicit?.length) {
-    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
-  }
-
-  const name =
-    typeof config.palette === 'string' ? config.palette : SANKEY_PALETTE
-  return paletteColors(name, theme, count)
 }
 
 function nodeLabel(value: any) {

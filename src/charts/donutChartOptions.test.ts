@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  buildDonutChartOption,
-  buildDonutSlices,
-  OTHERS_SLICE_NAME,
-} from './donutChartOptions'
+import { buildDonutChartOption, buildDonutSlices } from './donutChartOptions'
+import { OTHERS_KEY } from './utils'
 import type { ChartTheme } from './theme'
 import type { DonutChartConfig } from './types'
 
@@ -139,7 +136,7 @@ describe('buildDonutSlices', () => {
       expect(built).toHaveLength(9)
 
       const others = built[8]
-      expect(others.name).toBe(OTHERS_SLICE_NAME)
+      expect(others.name).toBe(OTHERS_KEY)
       expect(others.label).toBe('Others')
       expect(others.isOthers).toBe(true)
       // The four smallest of `100 - i` for i in 0..11.

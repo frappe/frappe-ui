@@ -7,10 +7,15 @@ import {
 import { hexToOklch, interpolateRamp, oklchToHex } from './colorMath'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { insideLabelColor, type ChartTheme } from './theme'
+import { chartColors, insideLabelColor, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type { ChartValueFormatter } from './props'
-import type { HeatmapCell, HeatmapChartConfig, HeatmapMatrix } from './types'
+import type {
+  ChartPaletteName,
+  HeatmapCell,
+  HeatmapChartConfig,
+  HeatmapMatrix,
+} from './types'
 
 // Plot, tooltip and the ramp scale in the chrome all read the same
 // `HeatmapMatrix`, so the scale in the corner can't disagree with the fills.
@@ -29,12 +34,7 @@ export type HeatmapOptionContext = {
  */
 export const HEATMAP_RAMP_SAMPLES = 32
 
-/**
- * The two palest sequential stops vanish against a card, and on a heatmap they
- * would take the low end of the scale with them — a cell that exists has to
- * read as a cell. Same trim as the series palette makes (see `theme.ts`).
- */
-const SEQUENTIAL_TAIL_TRIM = 2
+const HEATMAP_PALETTE: ChartPaletteName = 'sequential'
 
 /** Gap between two cells, in px. Split either side of the shared edge. */
 const CELL_BORDER_WIDTH = 2
@@ -167,19 +167,20 @@ function resolveScale(
 }
 
 /**
- * The ramp the scale runs along, low end first. The sequential ramp is authored
- * dark to light and has to be reversed: on a heatmap the heavier number is the
- * heavier color. Diverging already runs cool to warm, i.e. negative to positive.
+ * The ramp the scale runs along, low end first. Asked for as a ramp rather than
+ * as one color per cell: a heatmap interpolates between the stops. The deep end
+ * goes last, because the heavier number is the heavier color; diverging already
+ * runs cool to warm, i.e. negative to positive.
  */
 export function heatmapRampStops(
   config: HeatmapChartConfig,
   theme: ChartTheme,
 ): string[] {
-  if (Array.isArray(config.palette)) return config.palette
-  if (config.palette === 'diverging') return theme.diverging
-  return theme.sequential
-    .slice(0, Math.max(1, theme.sequential.length - SEQUENTIAL_TAIL_TRIM))
-    .reverse()
+  return chartColors(config.palette, theme, {
+    fallback: HEATMAP_PALETTE,
+    count: 'ramp',
+    deepEnd: 'last',
+  })
 }
 
 /**

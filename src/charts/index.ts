@@ -31,6 +31,10 @@ export {
   type ColorScheme,
 } from './theme'
 
+// Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
+// so a caller can style it without hardcoding the reserved key.
+export { OTHERS_KEY, OTHERS_LABEL } from './utils'
+
 export {
   formatAxisValue,
   formatDate,

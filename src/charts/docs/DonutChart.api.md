@@ -55,7 +55,7 @@
   },
   {
     name: 'maxSlices',
-    description: 'Slices past this many are summed into a single "Others" slice.',
+    description: 'Slices past this many are summed into a single "Others" slice, named\n`OTHERS_KEY`.',
     required: false,
     type: 'number'
   },

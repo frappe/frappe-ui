@@ -97,8 +97,9 @@ export type AxisChartProps = ChartBaseProps & {
   series?: string
   /**
    * Caps how many series the `series` column produces. The rest are summed
-   * into a single "Others" series. Uncapped by default, and ignored when `y`
-   * names the columns: those the caller chose one by one.
+   * into a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can
+   * style it. Uncapped by default, and ignored when `y` names the columns:
+   * those the caller chose one by one.
    */
   maxSeries?: number
   /** Keyed by series identity: a `y` column, or a value of the `series` column. */
@@ -143,7 +144,10 @@ export type DonutChartProps = ChartBaseProps & {
   category: string
   /** Row key holding the slice size. */
   value: string
-  /** Slices past this many are summed into a single "Others" slice. */
+  /**
+   * Slices past this many are summed into a single "Others" slice, named
+   * `OTHERS_KEY`.
+   */
   maxSlices?: number
   showInlineLabels?: boolean
   /** Caption under the total in the middle. Defaults to the `value` key. */

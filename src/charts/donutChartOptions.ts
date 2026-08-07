@@ -2,8 +2,8 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatPercent } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
-import { mergeDeep } from './utils'
+import { chartColors, type ChartTheme } from './theme'
+import { mergeDeep, OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type { ChartPaletteName, DonutChartConfig, DonutSlice } from './types'
 
 // Plot, legend, tooltip and center readout all read the same `DonutSlice[]`, so
@@ -14,13 +14,6 @@ export type DonutChartOptionContext = {
   /** Slice names the legend has switched off. Dropped from the ring. */
   hiddenSlices?: string[]
 }
-
-/**
- * Identity of the grouped slice. A reserved key rather than the string
- * `'Others'`, so a category actually named "Others" can't collide with it.
- */
-export const OTHERS_SLICE_NAME = '__others__'
-export const OTHERS_SLICE_LABEL = 'Others'
 
 export const DEFAULT_MAX_SLICES = 9
 /** Below two there is nothing left to group into. */
@@ -60,7 +53,10 @@ export function buildDonutSlices(
   { theme, hiddenSlices = [] }: DonutChartOptionContext,
 ): DonutSlice[] {
   const grouped = groupRows(config)
-  const colors = sliceColors(config, theme, grouped.length)
+  const colors = chartColors(config.palette, theme, {
+    fallback: DONUT_PALETTE,
+    count: grouped.length,
+  })
 
   const visibleTotal = grouped.reduce(
     (sum, slice) =>
@@ -117,8 +113,8 @@ function groupRows(config: DonutChartConfig): UnsizedSlice[] {
   return [
     ...slices,
     {
-      name: OTHERS_SLICE_NAME,
-      label: OTHERS_SLICE_LABEL,
+      name: OTHERS_KEY,
+      label: OTHERS_LABEL,
       value: overflow.reduce((sum, entry) => sum + entry.value, 0),
       rows: overflow.map((entry) => entry.row),
       isOthers: true,
@@ -143,21 +139,6 @@ function uniqueName(label: string, seen: Set<string>) {
   while (seen.has(name)) name = `${label} (${suffix++})`
   seen.add(name)
   return name
-}
-
-function sliceColors(
-  config: DonutChartConfig,
-  theme: ChartTheme,
-  count: number,
-) {
-  const explicit = Array.isArray(config.palette) ? config.palette : undefined
-  if (explicit?.length) {
-    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
-  }
-
-  const name =
-    typeof config.palette === 'string' ? config.palette : DONUT_PALETTE
-  return paletteColors(name, theme, count)
 }
 
 export function buildDonutChartOption(

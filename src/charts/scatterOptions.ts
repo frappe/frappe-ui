@@ -9,11 +9,10 @@ import {
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
 import { buildReferenceLineSeries } from './referenceLines'
-import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
+import { chartColors, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type { ChartValueFormatter } from './props'
 import type {
-  AxisChartBaseConfig,
   ChartPaletteName,
   ChartYAxisConfig,
   ScatterChartConfig,
@@ -95,7 +94,10 @@ export function buildScatterSeries(
   if (dropped) warnDropped(dropped, config)
 
   const scale = symbolSizeScale(sizes, Boolean(config.sizeColumn))
-  const colors = seriesColors(config, theme, names.length)
+  const colors = chartColors(config.palette, theme, {
+    fallback: SCATTER_PALETTE,
+    count: names.length,
+  })
 
   return names.map((name, index) => ({
     name,
@@ -155,21 +157,6 @@ function magnitudeScale(sizes: number[]) {
   return (size: number) => MIN_SYMBOL_SIZE + ((size - min) / (max - min)) * span
 }
 
-function seriesColors(
-  config: ScatterChartConfig,
-  theme: ChartTheme,
-  count: number,
-) {
-  const explicit = Array.isArray(config.palette) ? config.palette : undefined
-  if (explicit?.length) {
-    return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
-  }
-
-  const name =
-    typeof config.palette === 'string' ? config.palette : SCATTER_PALETTE
-  return paletteColors(name, theme, count)
-}
-
 function warnDropped(dropped: number, config: ScatterChartConfig) {
   if (!import.meta.env.DEV) return
   console.warn(
@@ -194,7 +181,7 @@ export function buildScatterOption(
     // No `tooltip` key and no TooltipComponent: a point is read on its own
     // rather than through an axis pointer, and the visible tooltip is a Vue
     // component (ChartTooltip).
-    grid: buildAxisGrid(axisChartShim(), {
+    grid: buildAxisGrid({
       horizontal: false,
       isRTL,
       // Nothing is printed past the end of a mark: a point is the mark.
@@ -275,12 +262,11 @@ function buildSeries(entry: ScatterSeries) {
 }
 
 /**
- * One of the two value axes. `buildValueAxis` reads its options off the `yAxis`
- * of an axis-chart config and moves the scale to the bottom edge when the chart
- * is horizontal, so each axis here is built by handing it the config it should
- * read and the orientation that lands it on the right edge. Reusing it is what
- * keeps a scatter's gridlines, labels and min/max identical to the rest of the
- * family.
+ * One of the two value axes. `buildValueAxis` moves the scale to the bottom
+ * edge when the chart is horizontal, so each axis here is built by handing it
+ * the axis config it should read and the orientation that lands it on the right
+ * edge. Reusing it is what keeps a scatter's gridlines, labels and min/max
+ * identical to the rest of the family.
  */
 function valueAxis(
   axis: ChartYAxisConfig | undefined,
@@ -322,18 +308,8 @@ function valueAxis(
     axis?.echartOptions,
   )
 
-  return buildValueAxis(axisChartShim({ ...axis, echartOptions }), theme, {
+  return buildValueAxis({ ...axis, echartOptions }, theme, {
     horizontal,
     isRTL,
   })
-}
-
-/**
- * The axis-chart shape `buildAxisGrid` and `buildValueAxis` are typed against.
- * Between them they read two fields — the x axis title, which only a horizontal
- * chart has, and the value axis whose options are being built — so the rest
- * stands in for a config a scatter does not have.
- */
-function axisChartShim(valueAxis?: ChartYAxisConfig): AxisChartBaseConfig {
-  return { data: [], xAxis: { key: '' }, series: [], yAxis: valueAxis }
 }

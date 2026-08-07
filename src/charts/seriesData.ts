@@ -5,20 +5,12 @@ import type {
   ChartValueAxisOptions,
 } from './props'
 import { toNumber } from './axisChartCommon'
+import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
   ChartYAxisConfig,
 } from './types'
-
-/**
- * Identity of the collapsed tail, mirroring the donut's "Others" slice. A
- * reserved key rather than the string `'Others'`, so a grouping column that
- * actually holds "Others" cannot collide with it — and so the collapsed series
- * still has one `seriesConfig` key to be styled and renamed through.
- */
-export const OTHERS_SERIES_NAME = '__others__'
-export const OTHERS_SERIES_LABEL = 'Others'
 
 /** Below two there is nothing left to collapse into. */
 const MIN_MAX_SERIES = 2
@@ -111,7 +103,7 @@ function buildSeries(
     // The collapsed tail has no column behind it, so its label comes from here
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.
-    ...(name === OTHERS_SERIES_NAME ? { label: OTHERS_SERIES_LABEL } : {}),
+    ...(name === OTHERS_KEY ? { label: OTHERS_LABEL } : {}),
     ...style,
     name,
     ...(secondary.has(name) ? { axis: 'y2' as const } : {}),
@@ -199,12 +191,12 @@ function capSeries(pivoted: Pivoted, maxSeries?: number): Pivoted {
       delete row[name]
     }
     // An x where every collapsed series was missing stays missing, not zero.
-    row[OTHERS_SERIES_NAME] = total
+    row[OTHERS_KEY] = total
   }
 
   return {
     data,
-    names: [...names.filter((name) => kept.has(name)), OTHERS_SERIES_NAME],
+    names: [...names.filter((name) => kept.has(name)), OTHERS_KEY],
   }
 }
 

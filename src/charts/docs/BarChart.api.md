@@ -67,7 +67,7 @@
   },
   {
     name: 'maxSeries',
-    description: 'Caps how many series the `series` column produces. The rest are summed\ninto a single "Others" series. Uncapped by default, and ignored when `y`\nnames the columns: those the caller chose one by one.',
+    description: 'Caps how many series the `series` column produces. The rest are summed\ninto a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can\nstyle it. Uncapped by default, and ignored when `y` names the columns:\nthose the caller chose one by one.',
     required: false,
     type: 'number'
   },
