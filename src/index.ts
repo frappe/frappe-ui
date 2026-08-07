@@ -148,6 +148,7 @@ export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 // Browser and responsive composables
 export * from './composables/useScreenSize'
 export * from './composables/useScrollContainer'
+export * from './composables/useSheetDrag'
 
 // Directives
 export { default as focusDirective } from './directives/focus'
