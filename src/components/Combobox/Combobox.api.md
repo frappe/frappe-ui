@@ -23,7 +23,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"button" | "input"',
+    type: '"input" | "button"',
     default: '"input"'
   },
   {

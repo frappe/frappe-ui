@@ -23,7 +23,7 @@
     name: 'editorClass',
     description: 'Custom classes applied to the editor root',
     required: false,
-    type: 'string | object | string[]',
+    type: 'string | string[] | object',
     default: '"prose-sm"'
   },
   {

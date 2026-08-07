@@ -19,14 +19,14 @@
     default: 'false'
   },
   {
-    name: 'description',
-    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    name: 'label',
+    description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
     type: 'string'
   },
   {
-    name: 'label',
-    description: 'Label rendered above (or beside, for binary controls) the input.',
+    name: 'description',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
     required: false,
     type: 'string'
   },

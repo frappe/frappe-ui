@@ -61,7 +61,7 @@
     name: 'variant',
     description: 'Visual treatment.\n- `tile` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
     required: false,
-    type: '"ghost" | "tile"',
+    type: '"tile" | "ghost"',
     default: '"tile"'
   }
 ]

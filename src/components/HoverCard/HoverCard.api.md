@@ -9,7 +9,7 @@
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"left" | "right" | "bottom" | "top"',
+    type: '"top" | "right" | "bottom" | "left"',
     default: '"bottom"'
   },
   {

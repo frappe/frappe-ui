@@ -28,7 +28,7 @@
     name: 'type',
     description: 'Whether one (`single`) or several (`multiple`) items can be open at the\nsame time. Determines the shape of `modelValue` / `defaultValue`:\na `string` for `single`, a `string[]` for `multiple`.',
     required: false,
-    type: '"multiple" | "single"',
+    type: '"single" | "multiple"',
     default: '"single"'
   },
   {

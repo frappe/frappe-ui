@@ -185,7 +185,7 @@
     name: 'scrollMode',
     description: 'Scroll behavior when opening the list.',
     required: false,
-    type: '"start" | "center" | "nearest"',
+    type: '"center" | "start" | "nearest"',
     deprecated: 'Scrolling is always centered now.'
   },
   {
