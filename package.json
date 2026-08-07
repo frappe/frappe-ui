@@ -180,7 +180,7 @@
     "@tiptap/starter-kit": "^3.26.0",
     "@tiptap/suggestion": "^3.26.0",
     "@tiptap/vue-3": "^3.26.0",
-    "@vueuse/core": "^10.4.1",
+    "@vueuse/core": "^14.1.0",
     "codemirror": "^6.0.1",
     "dayjs": "^1.11.13",
     "dompurify": "^3.4.0",
