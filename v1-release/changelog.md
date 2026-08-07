@@ -395,8 +395,9 @@ response.
   loading.
 - `data` and `error` belong to the submit that started last, not the one that
   answered last. A slow submit that comes back after a newer one is dropped: it
-  writes no `data`, writes no `error` and clears nothing. It still resolves to
-  its own caller with its own response.
+  writes no `data`, writes no `error` and clears nothing. It still answers its
+  own caller with its own outcome — resolving with its response, or rejecting
+  with its error.
 - The winning submit writes `data` and `error` together. Success sets `data`
   and clears `error`. Failure sets `error` and leaves `data` alone.
 - **`data` is no longer reset on failure.** The old shared `useCall` set `data`
@@ -406,9 +407,10 @@ response.
 - `error` is no longer cleared when a submit starts. Clearing it there erased
   the error of a sibling submit that was still in flight. An error stands until
   the newest submit settles.
-- Failures still arrive down two channels, unchanged: a failed `validate`
-  rejects the promise from `submit()`, a failed request resolves it with
-  `null`. Both set `error`.
+- **`submit()` now rejects on any failure.** It resolves with the response or
+  rejects with the error — one channel, not two. A failed `validate` already
+  rejected; a failed request used to resolve with `null`. Both reject now, and
+  a server that answers with `null` resolves with `null`.
 - `useList`'s `insert` now sends to `baseUrl`, which it silently dropped.
 
 ## Deprecation log

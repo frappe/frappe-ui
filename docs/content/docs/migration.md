@@ -358,8 +358,8 @@ More changes you will not see at build time:
   `null`. If you queued submits to work around that, you can drop the queue.
 - `data` and `error` belong to the submit that started last, not the one that
   answered last. A slow submit that comes back after a newer one writes
-  nothing and clears nothing. It still resolves to its own caller with its own
-  response.
+  nothing and clears nothing. It still answers its own caller with its own
+  outcome — resolving with its response, or rejecting with its error.
 - **`data` is no longer reset to `null` when a submit fails.** It used to be,
   because the shared request cleared it on any not-ok response. It now keeps
   the last successful response.
@@ -380,9 +380,28 @@ More changes you will not see at build time:
   erased the error of a sibling submit still in flight. It now stands until
   the newest submit settles. To blank an error banner while a retry runs, hide
   it on `loading` yourself.
-- A failed `validate` rejects the promise from `submit()`. A failed request
-  resolves it with `null`. This is unchanged, and it means a `submit()` that
-  can fail validation needs a `catch` as well as a `null` check.
+- **`submit()` rejects on any failure.** It resolves with the response, or
+  rejects with the error. A failed `validate` already rejected; a failed
+  request used to resolve with `null`. Both reject now.
+
+  ```js
+  // Before
+  const doc = await todos.insert.submit({ title: 'Buy milk' })
+  if (!doc) return showError(todos.insert.error)
+
+  // After
+  try {
+    const doc = await todos.insert.submit({ title: 'Buy milk' })
+  } catch (e) {
+    showError(e)
+  }
+  ```
+
+  `null` no longer means "it failed". A server that answers with `null`
+  resolves with `null`, like any other response. Every `if (!result)` check
+  after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
+  unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
+  rejection.
 - `useList`'s `insert` now sends to the `baseUrl` you passed to `useList`. It
   used to ignore it and post to the current origin.
 
