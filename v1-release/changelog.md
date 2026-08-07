@@ -484,6 +484,20 @@ crash somewhere else. So:
 resource when no socket is set. That has always been its behaviour and this
 does not change it.
 
+### Data fetching — `useFrappeFetch` off the root export (breaking)
+
+**`useFrappeFetch` removed.** It is the raw `createFetch` instance `useCall`,
+`useDoc` and `useList` are built on — headers, response parsing and error
+shaping, and nothing above that: no URL building, no params, no caching, no
+typed return. No app imports it. It is a build failure at the import; use
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for a
+query.
+
+**`FrappeResponseError` is now exported.** The composables raise it on a Frappe
+error response and put it on `.error`, but nothing exported the class, so a
+consumer could not narrow the error. Same gap `FrappeRequestError` closed for
+`frappeRequest`.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |

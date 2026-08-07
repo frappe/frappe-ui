@@ -744,6 +744,49 @@ returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
 
+## Data fetching composables
+
+`useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
+`useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
+parses the response, and leaves the URL, the params and the caching to you.
+Pick the composable that matches what you are fetching.
+
+| Before                                   | After                       |
+| ---------------------------------------- | --------------------------- |
+| `useFrappeFetch('/api/v2/method/…')`     | `useCall({ url })`          |
+| `useFrappeFetch('/api/v2/document/…')`   | `useDoc({ doctype, name })` |
+| `useFrappeFetch('/api/v2/document/…?…')` | `useList({ doctype, … })`   |
+
+This is a build failure at the import, so nothing changes silently.
+
+```js
+// Before
+import { useFrappeFetch } from 'frappe-ui'
+const { data } = useFrappeFetch('/api/v2/method/ping').get()
+
+// After
+import { useCall } from 'frappe-ui'
+const ping = useCall({ url: '/api/v2/method/ping' })
+```
+
+`FrappeResponseError` is exported now. `useCall`, `useDoc` and `useList` raise
+it on a Frappe error response and put it on `.error`, but nothing exported the
+class, so you could not tell it apart from a network or parse failure. Narrow
+it with `instanceof` and you get `title`, `type`, `indicator` and `exception`:
+
+```ts
+import { useCall, FrappeResponseError } from 'frappe-ui'
+
+const call = useCall({
+  url: '/api/v2/method/my_app.api.do_thing',
+  onError(error) {
+    if (error instanceof FrappeResponseError) {
+      console.log(error.title, error.type, error.exception)
+    }
+  },
+})
+```
+
 ## FAQ
 
 **Will my CSS break?** Where structure changed, components expose `data-*` hooks
