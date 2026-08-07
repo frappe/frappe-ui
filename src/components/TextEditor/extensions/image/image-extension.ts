@@ -30,6 +30,13 @@ export interface ImageExtensionOptions {
 export interface SetImageOptions {
   src: string
   alt?: string
+  /**
+   * Visible caption. Only the modern `#molecules/editor` image node renders it;
+   * this legacy extension ignores it. The field is declared here because both
+   * extensions augment `Commands['image']`, and TypeScript requires the two
+   * declarations to be identical.
+   */
+  caption?: string
   title?: string
   width?: string | number | null
   height?: string | number | null

@@ -48,6 +48,10 @@ const replaceLabel = computed(
     })[props.mediaType],
 )
 
+const captionLabel = computed(() =>
+  props.showCaption ? 'Remove caption' : 'Add a caption below the media',
+)
+
 function toggleVideoOptions(event: MouseEvent) {
   event.stopPropagation()
   showVideoOptions.value = !showVideoOptions.value
@@ -75,20 +79,22 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="absolute top-2 right-2 z-20 items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
+    class="absolute top-2 right-2 z-20 max-w-[calc(100%-1rem)] flex-wrap justify-end items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
     :class="isVisible ? 'flex' : 'hidden'"
   >
-    <Tooltip text="Toggle caption" class="h-5">
+    <!-- The caption toggle carries a visible word, not just an icon: it is the
+         only way to discover that images can be captioned at all. -->
+    <Tooltip :text="captionLabel" class="h-5">
       <button
         type="button"
-        aria-label="Toggle caption"
+        class="flex items-center gap-1 text-p-xs hover:text-white"
+        :class="showCaption ? 'text-white' : 'text-white/60'"
+        :aria-label="captionLabel"
         :aria-pressed="showCaption"
         @click.stop="emit('toggle-caption')"
       >
-        <span
-          class="lucide-captions size-4"
-          :class="[showCaption ? 'text-white' : 'text-white/60']"
-        />
+        <span class="lucide-captions size-4" aria-hidden="true" />
+        <span>Caption</span>
       </button>
     </Tooltip>
 
