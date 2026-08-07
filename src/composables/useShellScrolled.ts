@@ -92,17 +92,31 @@ export function useShellScrolled(
     { immediate: true },
   )
 
+  // A routed page renders into the shell's `<slot />`, so it is a child
+  // component: its `mounted` runs *before* the shell's, which is where the
+  // shells register their scroll element. `MobileShell` registers in its own
+  // `mounted`, `DesktopShell` from a watcher on a template ref that resolves
+  // later still. Checking at our own `mounted` would warn at every legitimate
+  // call site, and no fixed number of ticks is a fact about either shell. A
+  // timeout is: mounting settles in microtasks, and all of them have run by the
+  // time a macrotask does.
+  let warnTimer: ReturnType<typeof setTimeout> | null = null
+
   onMounted(() => {
     if (import.meta.env.PROD || warnedNoShell) return
-    if (shellScrollContainer.value) return
-    warnedNoShell = true
-    console.warn(
-      '[frappe-ui] useShellScrolled() found no app shell, so it will stay false. ' +
-        'It reads the scroll region of a mounted <DesktopShell> or <MobileShell>.',
-    )
+    warnTimer = setTimeout(() => {
+      warnTimer = null
+      if (shellScrollContainer.value || warnedNoShell) return
+      warnedNoShell = true
+      console.warn(
+        '[frappe-ui] useShellScrolled() found no app shell, so it will stay false. ' +
+          'It reads the scroll region of a mounted <DesktopShell> or <MobileShell>.',
+      )
+    })
   })
 
   onBeforeUnmount(() => {
+    if (warnTimer !== null) clearTimeout(warnTimer)
     shellScrollContainer.value?.removeEventListener('scroll', onScroll)
   })
 
