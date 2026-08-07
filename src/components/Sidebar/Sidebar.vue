@@ -15,8 +15,13 @@
     -->
     <template v-else>
       <div class="flex h-full flex-col p-2">
+        <!-- -mx-2 cancels the wrapper's horizontal padding: SidebarHeader owns
+             the sidebar gutter itself, so letting p-2 stack on top of it would
+             push the collapsed logo to 32px, 8px past the 3rem rail's centre.
+             Undoing it here makes this path render exactly like composition. -->
         <SidebarHeader
           v-if="header"
+          class="-mx-2"
           :title="header.title"
           :subtitle="header.subtitle"
           :logo="header.logo"

@@ -24,8 +24,7 @@
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
-      :class="isCollapsed ? 'justify-center' : 'pl-2'"
+      class="flex h-full min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
       @click="handleClick"
     >
       <Tooltip
@@ -33,12 +32,10 @@
         placement="right"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
-             so it reads as a centered rail button, not a left-hugged glyph. -->
-        <span
-          class="grid shrink-0 place-items-center"
-          :class="isCollapsed && 'size-7'"
-        >
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+             and the glyph its natural size, so the icon holds one position
+             through the width animation. The whole row is the hit target. -->
+        <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
@@ -65,8 +62,7 @@
       type="button"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
-      class="flex h-full text-left min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
-      :class="isCollapsed ? 'justify-center' : 'pl-2'"
+      class="flex h-full text-left min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
       @click="handleClick"
     >
       <Tooltip
@@ -74,12 +70,10 @@
         placement="right"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
-             so it reads as a centered rail button, not a left-hugged glyph. -->
-        <span
-          class="grid shrink-0 place-items-center"
-          :class="isCollapsed && 'size-7'"
-        >
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+             and the glyph its natural size, so the icon holds one position
+             through the width animation. The whole row is the hit target. -->
+        <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
