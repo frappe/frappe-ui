@@ -18,7 +18,7 @@
         :aria-label="title || 'Bottom sheet'"
         @escape-key-down="onDismissAttempt"
         @interact-outside="onDismissAttempt"
-        @open-auto-focus="(e: Event) => e.preventDefault()"
+        @open-auto-focus="onOpenAutoFocus"
       >
         <!--
           `shrink-0` so the grab bar and the title keep their full height once
@@ -102,6 +102,22 @@ const handleRef = ref<HTMLElement | null>(null)
 const sheetEl = computed(
   () => handleRef.value?.closest<HTMLElement>('.bottom-sheet-content') ?? null,
 )
+
+/*
+ * Focus the sheet itself on open, rather than letting the browser autofocus the
+ * first field inside it — on a phone that pops the keyboard for a sheet the user
+ * has not typed into yet.
+ *
+ * The sheet still has to *take* focus, though. reka only pulls escaping focus
+ * back to the last element focused inside the sheet, so leaving focus on the
+ * trigger behind the overlay leaves it with nothing to pull back to, and Tab
+ * walks the page behind an open modal. The sheet carries `tabindex="-1"`, and
+ * focusing a container does not open the keyboard.
+ */
+function onOpenAutoFocus(event: Event) {
+  event.preventDefault()
+  sheetEl.value?.focus()
+}
 
 useSheetDrag({
   target: sheetEl,
