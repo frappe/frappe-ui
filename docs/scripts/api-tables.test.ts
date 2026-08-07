@@ -6,7 +6,7 @@ import {
   parseApiTables,
   summarizeDifference,
 } from './api-tables'
-import { normalizeUnionOrder } from './type-unions'
+import { normalizeUnionOrder, splitUnionMembers } from './type-unions'
 
 // Mirrors what propsgen writes: a `<script setup>` block of row arrays, then
 // the markup that renders them.
@@ -404,5 +404,28 @@ describe('normalizeUnionOrder', () => {
   it('leaves a truncated type unchanged rather than throwing', () => {
     const truncated = '{ editor: { contentComponent: { uid: number; type: Fun'
     expect(() => normalizeUnionOrder(truncated)).not.toThrow()
+  })
+})
+
+describe('splitUnionMembers', () => {
+  it('splits a flat union', () => {
+    expect(splitUnionMembers('"top" | "right" | "bottom"')).toEqual([
+      '"top"',
+      '"right"',
+      '"bottom"',
+    ])
+  })
+
+  it('ignores a pipe nested in brackets or a string literal', () => {
+    expect(splitUnionMembers('Record<string, "a" | "b"> | "c|d"')).toEqual([
+      'Record<string, "a" | "b">',
+      '"c|d"',
+    ])
+  })
+
+  it('returns one member for a type that is not a union', () => {
+    expect(splitUnionMembers('(item: T) => string')).toEqual([
+      '(item: T) => string',
+    ])
   })
 })

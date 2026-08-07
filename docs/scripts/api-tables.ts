@@ -9,9 +9,11 @@ import { normalizeUnionOrder } from './type-unions'
  * `propsgen --check` uses this instead of diffing bytes. `vue-component-meta`
  * lists props, emits and union members in the order the TypeScript checker
  * happened to resolve them, and that order shifts with how much of the program
- * is loaded — a run over one folder and a full run can produce the same API in
- * a different order. The tables are documentation and are ordered for reading,
- * so the check has to ignore order and look at the rows themselves.
+ * is loaded. `source-order` puts props and union members back, but an emit
+ * `defineModel()` declares can still move, so a run over one folder and a full
+ * run can produce the same API in a different order. The tables are
+ * documentation and are ordered for reading, so the check has to ignore order
+ * and look at the rows themselves.
  */
 
 export type ApiTableKind = 'prop' | 'slot' | 'emit'
@@ -177,8 +179,9 @@ function indexTables(tables: ApiTable[]) {
   return byKey
 }
 
-// `type` is the one field whose text can differ while the meaning does not: the
-// checker prints a union's members in whatever order it resolved them.
+// `type` is the one field whose text can differ while the meaning does not: a
+// union nested inside a type is still printed in whatever order the checker
+// resolved it.
 function isSameField(
   field: string,
   before: string | undefined,

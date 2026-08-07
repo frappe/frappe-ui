@@ -8,8 +8,8 @@
  * `"error" | "info" | "success"`. The type is the same either way, so the
  * freshness check has to ignore it.
  *
- * This is used only to compare. The generated tables keep the order TypeScript
- * printed, which reads better than alphabetical: `top | right | bottom | left`
+ * This is used only to compare. The generated tables carry the order the source
+ * declares, which reads better than alphabetical: `top | right | bottom | left`
  * rather than `bottom | left | right | top`.
  */
 
@@ -169,6 +169,14 @@ function compareCodePoints(a: string, b: string) {
 // An object member, tuple element or named parameter keeps its label where it
 // is; only the type after the label is a union.
 const MEMBER_LABEL = /^\s*(?:readonly\s+)?[A-Za-z_$][\w$]*\??\s*:\s*/
+
+/**
+ * The top-level members of a printed union, trimmed. A type that is not a union
+ * comes back as a single member.
+ */
+export function splitUnionMembers(type: string): string[] {
+  return splitTopLevel(type, '|').parts.map((part) => part.trim())
+}
 
 export function normalizeUnionOrder(type: string): string {
   const { parts, seps } = splitTopLevel(type, ',;')
