@@ -1,9 +1,5 @@
-import type { EChartsCoreOption } from 'echarts/core'
-import { BLUR_OPACITY, type AxisChartOptionContext } from './axisChartCommon'
-import { buildLineLikeOption } from './lineChartOptions'
-import type { AreaChartConfig, AreaSeriesConfig } from './types'
-
-export type AreaChartOptionContext = AxisChartOptionContext
+import { BLUR_OPACITY } from './axisChartCommon'
+import type { AxisChartConfig, AxisSeriesConfig } from './types'
 
 /** A wash that shows the trend without swallowing the gridlines behind it. */
 export const DEFAULT_FILL_OPACITY = 0.16
@@ -12,33 +8,38 @@ export const DEFAULT_STACKED_FILL_OPACITY = 0.75
 /** Where the gradient lands by the time it reaches the axis. */
 const GRADIENT_FADE = 0.1
 
-export function buildAreaChartOption(
-  config: AreaChartConfig,
-  context: AreaChartOptionContext,
-): EChartsCoreOption {
-  return buildLineLikeOption(config, context, (series, color) => ({
-    stack: stackNameOf(series, config),
-    areaStyle: fillStyle(series, config, color),
-    blur: { areaStyle: { opacity: blurOpacity(series, config) } },
-  }))
+/** The keys that turn a line series into an area: the fill, and how it blurs. */
+export function areaSeriesExtra(
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
+  color: string,
+  opts: { horizontal: boolean; isRTL: boolean; stacked: boolean },
+) {
+  return {
+    areaStyle: fillStyle(series, config, color, opts),
+    blur: { areaStyle: { opacity: blurOpacity(series, config, opts.stacked) } },
+  }
 }
 
-function stackNameOf(series: AreaSeriesConfig, config: AreaChartConfig) {
-  if (!config.stacked) return undefined
-  return series.stackName || 'stack'
-}
-
-function fillOpacityOf(series: AreaSeriesConfig, config: AreaChartConfig) {
+function fillOpacityOf(
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
+  stacked: boolean,
+) {
   return (
     series.fillOpacity ??
     config.fillOpacity ??
-    (config.stacked ? DEFAULT_STACKED_FILL_OPACITY : DEFAULT_FILL_OPACITY)
+    (stacked ? DEFAULT_STACKED_FILL_OPACITY : DEFAULT_FILL_OPACITY)
   )
 }
 
 /** The blur state has to dim the fill relative to its own opacity, not to 1. */
-function blurOpacity(series: AreaSeriesConfig, config: AreaChartConfig) {
-  return fillOpacityOf(series, config) * BLUR_OPACITY
+function blurOpacity(
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
+  stacked: boolean,
+) {
+  return fillOpacityOf(series, config, stacked) * BLUR_OPACITY
 }
 
 /**
@@ -47,32 +48,46 @@ function blurOpacity(series: AreaSeriesConfig, config: AreaChartConfig) {
  * block each, so they take a flat fill instead.
  */
 function fillStyle(
-  series: AreaSeriesConfig,
-  config: AreaChartConfig,
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
   color: string,
+  opts: { horizontal: boolean; isRTL: boolean; stacked: boolean },
 ) {
-  const opacity = fillOpacityOf(series, config)
-  if (config.stacked) return { color, opacity }
+  const opacity = fillOpacityOf(series, config, opts.stacked)
+  if (opts.stacked) return { color, opacity }
 
-  const top = withAlpha(color, opacity)
-  const bottom = withAlpha(color, opacity * GRADIENT_FADE)
-  if (!top || !bottom) return { color, opacity }
+  const near = withAlpha(color, opacity)
+  const far = withAlpha(color, opacity * GRADIENT_FADE)
+  if (!near || !far) return { color, opacity }
 
   return {
     color: {
       type: 'linear',
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 1,
+      ...gradientAxis(opts),
       colorStops: [
-        { offset: 0, color: top },
-        { offset: 1, color: bottom },
+        { offset: 0, color: near },
+        { offset: 1, color: far },
       ],
     },
     // The stops carry the alpha; a second multiplier here would double-dip.
     opacity: 1,
   }
+}
+
+/**
+ * Which way the wash fades: from the line towards the axis it is measured from.
+ * That is downwards on a column chart, and along X once the category axis has
+ * moved to Y — the other way again in RTL, where the value axis is inverted.
+ */
+function gradientAxis({
+  horizontal,
+  isRTL,
+}: {
+  horizontal: boolean
+  isRTL: boolean
+}) {
+  if (!horizontal) return { x: 0, y: 0, x2: 0, y2: 1 }
+  return isRTL ? { x: 0, y: 0, x2: 1, y2: 0 } : { x: 1, y: 0, x2: 0, y2: 0 }
 }
 
 /**

@@ -47,26 +47,34 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { BarChart as BarSeries } from 'echarts/charts'
+import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
-import { buildBarChartOption } from './barChartOptions'
+import { buildBarChartOption } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { BarChartProps, BarSeriesStyle } from './props'
+import type { BarChartProps, BarChartSeriesStyle } from './props'
 import type {
-  BarChartConfig,
+  AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,
   ChartTooltipItem,
 } from './types'
 
-registerChartModules([BarSeries, GridComponent, TooltipComponent, LabelLayout])
+// The line module comes along because `seriesConfig` may recast any series as a
+// line or an area, which is the same echarts module.
+registerChartModules([
+  BarSeries,
+  LineSeries,
+  GridComponent,
+  TooltipComponent,
+  LabelLayout,
+])
 
 const props = defineProps<BarChartProps>()
 
@@ -84,9 +92,9 @@ defineSlots<{
 }>()
 
 const normalized = computed(() =>
-  normalizeAxisChartProps<BarSeriesStyle>(props),
+  normalizeAxisChartProps<BarChartSeriesStyle>(props),
 )
-const config = computed<BarChartConfig>(() => ({
+const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
   stacked: props.stacked,
   horizontal: props.horizontal,

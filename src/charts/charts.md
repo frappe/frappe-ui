@@ -15,8 +15,16 @@ The stylesheet carries the `--chart-*` color tokens. See
 rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 `diverging` — or takes an explicit list of colors.
 
-Each component registers only the echarts modules it draws, so a page with one
-BarChart pays for bars and nothing else.
+Each component registers only the echarts modules it can draw. The three axis
+charts share bars and lines, because `seriesConfig` can recast any of their
+series into another shape; a page with only a DonutChart pays for none of it.
+
+## Mixing shapes
+
+`BarChart`, `LineChart` and `AreaChart` differ in one thing: the shape their
+series take by default. A `seriesConfig` entry can name a `type` of its own,
+which is how one chart draws bars against a line — see
+[combo charts](/docs/charts/bar-chart#mixing-shapes-combo-charts).
 
 ## Data shapes
 

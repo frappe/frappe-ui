@@ -13,7 +13,10 @@ import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
+  AxisChartConfig,
   AxisChartSeriesConfig,
+  AxisSeriesConfig,
+  AxisSeriesType,
   ChartPaletteName,
 } from './types'
 
@@ -27,6 +30,14 @@ export type AxisChartOptionContext = {
 
 export const AXIS_LABEL_FONT_SIZE = 11
 export const DATA_LABEL_FONT_SIZE = 11
+
+/**
+ * Bars and bands share one plane, and a line is drawn over them: in a combo
+ * chart the line is read against the columns, so declaration order must not
+ * decide whether a column hides it. echarts' own default for a series is 2.
+ */
+export const MARK_Z = 2
+export const LINE_Z = 3
 /** How far the other series drop back while one is hovered in the legend. */
 export const BLUR_OPACITY = 0.75
 
@@ -96,6 +107,21 @@ export function visibleSeries<T extends AxisChartSeriesConfig>(
   hiddenSeries: string[],
 ): T[] {
   return series.filter((s) => !hiddenSeries.includes(s.name))
+}
+
+/**
+ * The echarts stack a series joins, namespaced by the shape it is drawn as:
+ * bars stack with bars and areas with areas, so a combo chart that stacks both
+ * never sums a band on top of a column. A line never stacks — a stacked line is
+ * an area, and drawing one as a line hides that the values are cumulative.
+ */
+export function stackNameOf(
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
+  type: AxisSeriesType,
+): string | undefined {
+  if (!config.stacked || type === 'line') return undefined
+  return `${type}:${series.stackName || 'stack'}`
 }
 
 /** Option keys that hold for any cartesian chart, whatever it draws. */

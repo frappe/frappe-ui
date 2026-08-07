@@ -19,6 +19,25 @@ category.
 
 <ComponentPreview name="Charts-BarStackedLong" csr="true" self-layout />
 
+## Mixing shapes: combo charts
+
+A series is drawn as its chart's own shape until `seriesConfig` gives it a
+`type` of its own. That is what a combo chart is — bars for the amounts, a line
+for the rate they imply — and the recast series takes the style keys of the
+shape it names, `lineType` and `showDataPoints` here rather than `stackName`.
+
+Two units belong on two axes, so `y2` puts the rate on the second value axis
+with a format of its own. Combo and `y2` are the same chart: the rate is the
+reason the second axis exists.
+
+<ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
+
+The tag names the shape the rest of the series take, so the same chart can be
+written from any of the three: `<LineChart>` with `revenue` and `expenses`
+recast to `type: 'bar'` draws exactly this plot. Lines are drawn over bars and
+bands whatever order the series were declared in, and `stacked` sums each shape
+into a stack of its own — a line never joins one.
+
 ## Horizontal bars
 
 `horizontal` moves the category axis to Y, which is how long labels stay

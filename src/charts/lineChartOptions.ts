@@ -1,89 +1,19 @@
-import type { EChartsCoreOption } from 'echarts/core'
 import { formatValue } from './format'
 import type { ChartTheme } from './theme'
 import {
-  axisChartBase,
-  buildAxisGrid,
-  buildCategoryAxis,
-  buildValueAxes,
-  hasSecondaryValueAxis,
-  resolveSeriesColors,
   toNumber,
-  valueAxisIndex,
-  visibleSeries,
   BLUR_OPACITY,
   DATA_LABEL_FONT_SIZE,
-  type AxisChartOptionContext,
+  LINE_Z,
 } from './axisChartCommon'
 import { mergeDeep } from './utils'
-import type { LineChartConfig, LineSeriesConfig } from './types'
-
-export type LineChartOptionContext = AxisChartOptionContext
+import type { AxisChartConfig, AxisSeriesConfig } from './types'
 
 const DEFAULT_LINE_WIDTH = 2
 /** Big enough to hit with a pointer, small enough not to read as a scatter plot. */
 const SYMBOL_SIZE = 6
 /** Room for a data label sitting above a point. */
-const DATA_LABEL_GUTTER = 24
-
-export function buildLineChartOption(
-  config: LineChartConfig,
-  context: LineChartOptionContext,
-): EChartsCoreOption {
-  return buildLineLikeOption(config, context)
-}
-
-/**
- * The line option, with a hook for the keys an area series adds on top. Area is
- * a line with a fill, so it shares the axes, the grid and the series entirely.
- */
-export function buildLineLikeOption<C extends LineChartConfig>(
-  config: C,
-  { theme, hiddenSeries = [] }: LineChartOptionContext,
-  seriesExtra?: (
-    series: C['series'][number],
-    color: string,
-  ) => Record<string, any>,
-): EChartsCoreOption {
-  const isRTL = config.dir === 'rtl'
-  const rows = config.data ?? []
-  const colors = resolveSeriesColors(config, theme)
-  const visible = visibleSeries(config.series, hiddenSeries)
-  const categories = rows.map((row) => row[config.xAxis.key])
-
-  const option = {
-    // A line has no width of its own to anchor the pointer to, so the crosshair
-    // is a rule rather than the band a bar chart shades.
-    ...axisChartBase(theme, 'line'),
-    grid: buildAxisGrid(config, {
-      horizontal: false,
-      isRTL,
-      labelGutter: config.series.some((s) => s.showDataLabels)
-        ? DATA_LABEL_GUTTER
-        : 0,
-    }),
-    // A line starts at the plot edge; the half-slot inset bars need would leave
-    // it floating away from the axis.
-    xAxis: buildCategoryAxis(config, theme, {
-      categories,
-      horizontal: false,
-      isRTL,
-      boundaryGap: false,
-    }),
-    yAxis: buildValueAxes(config, theme, { horizontal: false, isRTL }),
-    series: visible.map((series) =>
-      buildLineSeries(series, config, {
-        theme,
-        rows,
-        color: colors[series.name],
-        yAxisIndex: valueAxisIndex(series, hasSecondaryValueAxis(config)),
-        extra: seriesExtra?.(series, colors[series.name]),
-      }),
-    ),
-  }
-
-  return mergeDeep(option, config.echartOptions)
-}
+export const LINE_DATA_LABEL_GUTTER = 24
 
 export type LineSeriesContext = {
   theme: ChartTheme
@@ -91,27 +21,50 @@ export type LineSeriesContext = {
   color: string
   /** Entry of the value-axis array this series is measured against. */
   yAxisIndex?: number
+  /** True when the category axis is the Y axis, as on a horizontal bar chart. */
+  horizontal?: boolean
+  isRTL?: boolean
+  /** The echarts stack this series joins. Only an area ever gets one. */
+  stack?: string
+  /** Drawing plane. A line sits above the marks it is read against. */
+  z?: number
   /** Extra option keys layered on before the per-series escape hatch. */
   extra?: Record<string, any>
 }
 
 export function buildLineSeries(
-  series: LineSeriesConfig,
-  config: LineChartConfig,
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
   ctx: LineSeriesContext,
 ) {
-  const { rows, color, theme, extra, yAxisIndex = 0 } = ctx
+  const {
+    rows,
+    color,
+    theme,
+    extra,
+    yAxisIndex = 0,
+    horizontal = false,
+    isRTL = false,
+    z = LINE_Z,
+  } = ctx
 
-  const data = rows.map((row) => [
-    row[config.xAxis.key],
-    toNumber(row[series.name]),
-  ])
+  const data = rows.map((row) => {
+    const category = row[config.xAxis.key]
+    const value = toNumber(row[series.name])
+    return horizontal ? [value, category] : [category, value]
+  })
+
+  // On a horizontal chart the value runs along X, so the label clears the end
+  // of the line rather than sitting above it.
+  const position = horizontal ? (isRTL ? 'left' : 'right') : 'top'
 
   const base = {
     type: 'line',
     name: series.name,
     data,
     yAxisIndex,
+    stack: ctx.stack,
+    z,
     // Nulls read as gaps: bridging them invents data that was never measured.
     connectNulls: Boolean(config.connectNulls),
     smooth: Boolean(series.smooth),
@@ -134,10 +87,11 @@ export function buildLineSeries(
     },
     label: {
       show: Boolean(series.showDataLabels),
-      position: 'top',
+      position,
       color: theme.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
-      formatter: (params: any) => formatValue(params.value?.[1], 1, true),
+      formatter: (params: any) =>
+        formatValue(params.value?.[horizontal ? 0 : 1], 1, true),
     },
     labelLayout: { hideOverlap: true },
   }

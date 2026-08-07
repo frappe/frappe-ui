@@ -1,110 +1,56 @@
-import type { EChartsCoreOption } from 'echarts/core'
 import { formatValue } from './format'
 import { insideLabelColor, type ChartTheme } from './theme'
-import {
-  axisChartBase,
-  buildAxisGrid,
-  buildCategoryAxis,
-  buildValueAxes,
-  hasSecondaryValueAxis,
-  resolveSeriesColors,
-  toNumber,
-  valueAxisIndex,
-  visibleSeries,
-  DATA_LABEL_FONT_SIZE,
-  BLUR_OPACITY,
-  type AxisChartOptionContext,
-} from './axisChartCommon'
+import { toNumber, BLUR_OPACITY, DATA_LABEL_FONT_SIZE } from './axisChartCommon'
 import { mergeDeep } from './utils'
-import type { BarChartConfig, BarSeriesConfig } from './types'
-
-export type BarChartOptionContext = AxisChartOptionContext
-
-export { resolveSeriesColors }
+import type {
+  AxisChartConfig,
+  AxisSeriesConfig,
+  BarSeriesConfig,
+} from './types'
 
 const BAR_MAX_WIDTH = 32
 /** Slim bars with an airy gap between categories. */
 const BAR_CATEGORY_GAP = '38%'
 /** Room for a data label sitting past the end of a bar. */
-const DATA_LABEL_GUTTER = 40
+export const BAR_DATA_LABEL_GUTTER = 40
 const BAR_RADIUS = 4
 
-export function buildBarChartOption(
-  config: BarChartConfig,
-  { theme, hiddenSeries = [], width }: BarChartOptionContext,
-): EChartsCoreOption {
-  const isRTL = config.dir === 'rtl'
-  const horizontal = Boolean(config.horizontal)
-  const rows = config.data ?? []
-  const colors = resolveSeriesColors(config, theme)
-
-  const visible = visibleSeries(config.series, hiddenSeries)
-  const categories = rows.map((row) => row[config.xAxis.key])
-
-  const categoryAxis = buildCategoryAxis(config, theme, {
-    categories,
-    horizontal,
-    isRTL,
-    boundaryGap: true,
-    width,
-  })
-  const valueAxis = buildValueAxes(config, theme, { horizontal, isRTL })
-  const hasSecondary = hasSecondaryValueAxis(config, horizontal)
-
-  const option = {
-    ...axisChartBase(theme, 'shadow'),
-    grid: buildAxisGrid(config, {
-      horizontal,
-      isRTL,
-      labelGutter: dataLabelGutter(config),
-    }),
-    xAxis: horizontal ? valueAxis : categoryAxis,
-    yAxis: horizontal ? categoryAxis : valueAxis,
-    series: visible.map((series) =>
-      buildSeries(series, config, {
-        theme,
-        rows,
-        horizontal,
-        isRTL,
-        color: colors[series.name],
-        yAxisIndex: valueAxisIndex(series, hasSecondary),
-        carriesTip: tipResolver(visible, config, rows),
-      }),
-    ),
-  }
-
-  return mergeDeep(option, config.echartOptions)
-}
-
-/** Stacked labels sit inside the fill, so they need no gutter. */
-function dataLabelGutter(config: BarChartConfig) {
-  return !config.stacked && config.series.some((s) => s.showDataLabels)
-    ? DATA_LABEL_GUTTER
-    : 0
-}
+/** Whether a bar ends its column, in the direction that row runs. */
+export type BarTipResolver = (
+  series: BarSeriesConfig,
+  rowIndex: number,
+  value: number,
+) => boolean
 
 /**
  * Whether a bar carries its column's rounded tip, asked per row rather than per
  * series: a stack runs away from the baseline in both directions at once, so
  * which segment ends the column depends on the sign of the number in that row.
  * Only that end is rounded — rounding the segments underneath carves notches
- * out of the middle of the column.
+ * out of the middle of the column. Reads the bar series alone: a line crossing
+ * the chart is drawn over the columns, not stacked into them.
  */
-function tipResolver(
-  visible: BarSeriesConfig[],
-  config: BarChartConfig,
+export function barTipResolver(
+  visibleBars: AxisSeriesConfig[],
+  config: AxisChartConfig,
   rows: Record<string, any>[],
-) {
+): BarTipResolver {
   if (!config.stacked) return () => true
 
   return (series: BarSeriesConfig, rowIndex: number, value: number) => {
-    const stack = stackNameOf(series, config)
-    const outermost = visible
-      .filter((s) => stackNameOf(s, config) === stack)
+    const stack = stackKeyOf(series, config)
+    const outermost = visibleBars
+      .filter((s) => stackKeyOf(s, config) === stack)
       .filter((s) => sameDirection(toNumber(rows[rowIndex]?.[s.name]), value))
       .at(-1)
     return outermost?.name === series.name
   }
+}
+
+/** Which stack a bar belongs to, before the shape namespace is applied. */
+function stackKeyOf(series: BarSeriesConfig, config: AxisChartConfig) {
+  if (!config.stacked) return undefined
+  return series.stackName || 'stack'
 }
 
 function sameDirection(a: number | null, b: number) {
@@ -131,40 +77,34 @@ function borderRadius(value: number, horizontal: boolean, isRTL: boolean) {
     : [BAR_RADIUS, 0, 0, BAR_RADIUS]
 }
 
-function stackNameOf(series: BarSeriesConfig, config: BarChartConfig) {
-  if (!config.stacked) return undefined
-  return series.stackName || 'stack'
-}
-
 /** Every segment of a stack labels itself in place; only a free bar labels outside. */
 function dataLabelPosition(
-  config: BarChartConfig,
+  stacked: boolean,
   horizontal: boolean,
   isRTL: boolean,
 ) {
-  if (config.stacked) return 'inside'
+  if (stacked) return 'inside'
   if (horizontal) return isRTL ? 'left' : 'right'
   return 'top'
 }
 
-function buildSeries(
-  series: BarSeriesConfig,
-  config: BarChartConfig,
-  ctx: {
-    theme: ChartTheme
-    rows: Record<string, any>[]
-    horizontal: boolean
-    isRTL: boolean
-    color: string
-    /** Entry of the value-axis array this series is measured against. */
-    yAxisIndex: number
-    /** Whether this bar ends its column, in the direction that row runs. */
-    carriesTip: (
-      series: BarSeriesConfig,
-      rowIndex: number,
-      value: number,
-    ) => boolean
-  },
+export type BarSeriesContext = {
+  theme: ChartTheme
+  rows: Record<string, any>[]
+  horizontal: boolean
+  isRTL: boolean
+  color: string
+  /** Entry of the value-axis array this series is measured against. */
+  yAxisIndex: number
+  /** The echarts stack this bar joins, or undefined when it stands alone. */
+  stack?: string
+  carriesTip: BarTipResolver
+}
+
+export function buildBarSeries(
+  series: AxisSeriesConfig,
+  config: AxisChartConfig,
+  ctx: BarSeriesContext,
 ) {
   const { rows, horizontal, isRTL, color, theme, carriesTip, yAxisIndex } = ctx
 
@@ -181,14 +121,14 @@ function buildSeries(
     return { value: point, itemStyle: { borderRadius: rounded } }
   })
 
-  const position = dataLabelPosition(config, horizontal, isRTL)
+  const position = dataLabelPosition(Boolean(ctx.stack), horizontal, isRTL)
 
   const base = {
     type: 'bar',
     name: series.name,
     data,
     yAxisIndex,
-    stack: stackNameOf(series, config),
+    stack: ctx.stack,
     barMaxWidth: BAR_MAX_WIDTH,
     barCategoryGap: BAR_CATEGORY_GAP,
     itemStyle: { color },

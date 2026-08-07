@@ -32,8 +32,15 @@ function mountChart(props: Record<string, any> = {}) {
   )
 }
 
-/** The bars, in series order. Gridlines are paths too, but unfilled. */
-const bars = () => cy.get('[data-slot="chart-plot"] svg path[fill^="#"]')
+/**
+ * The bars, in series order. Gridlines are paths too, but unfilled, and a line
+ * series brings a filled clip rect along with it.
+ */
+const bars = () =>
+  cy.get('[data-slot="chart-plot"] svg path[fill^="#"]:not(clipPath > path)')
+
+/** The series strokes. Gridlines are stroked too, but in a theme oklch. */
+const lines = () => cy.get('[data-slot="chart-plot"] svg path[stroke^="#"]')
 
 describe('BarChart', () => {
   it('paints a bar per datapoint, and labels the categories', () => {
@@ -126,6 +133,50 @@ describe('BarChart', () => {
     it('keeps the legend out of a single-series chart', () => {
       mountChart({ y: 'sales' })
       cy.get('[data-slot="chart-legend"]').should('not.exist')
+    })
+  })
+
+  describe('combo series', () => {
+    /** Value against rate: the chart combo and the second axis both exist for. */
+    function mountCombo(props: Record<string, any> = {}) {
+      return mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        y2Axis: { title: 'Rate (%)' },
+        seriesConfig: { refunds: { type: 'line' } },
+        ...props,
+      })
+    }
+
+    it('draws the recast series as a line and the rest as bars', () => {
+      mountCombo()
+      bars().should('have.length', data.length)
+      lines().should('have.length', 1)
+    })
+
+    it('measures the line against the second axis', () => {
+      mountCombo()
+      // The second axis titles itself in the chrome above the plot, and only
+      // once a series is actually measured against it.
+      cy.get('[data-slot="chart-card"]').should('contain.text', 'Rate (%)')
+    })
+
+    it('reads both shapes out of one tooltip and one legend', () => {
+      mountCombo()
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('contain.text', 'Sales')
+        .and('contain.text', 'Refunds')
+    })
+
+    it('drops the line from the plot when its legend entry is pressed', () => {
+      mountCombo()
+      lines().should('have.length', 1)
+      cy.get('[aria-label="Hide Refunds"]').click()
+      lines().should('not.exist')
+      bars().should('have.length', data.length)
     })
   })
 

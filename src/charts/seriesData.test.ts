@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
-import type { AxisChartProps, BarSeriesStyle, LineSeriesStyle } from './props'
-import type { BarChartConfig, LineChartConfig } from './types'
+import type {
+  AxisChartProps,
+  BarChartSeriesStyle,
+  BarSeriesStyle,
+  LineSeriesStyle,
+} from './props'
+import type { AxisChartConfig } from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },
@@ -72,14 +77,14 @@ describe('normalizeAxisChartProps', () => {
   // What wave-2 components do: spread the normalized config, add the chart's own
   // props. Typechecked, so a drift from the internal config types fails the build.
   it('produces a config the chart-specific configs accept', () => {
-    const bar: BarChartConfig = {
+    const bar: AxisChartConfig = {
       ...normalize<BarSeriesStyle>({
         seriesConfig: { sales: { stackName: 'a' } },
       }).config,
       stacked: true,
       horizontal: true,
     }
-    const line: LineChartConfig = {
+    const line: AxisChartConfig = {
       ...normalize<LineSeriesStyle>({
         seriesConfig: { sales: { smooth: true } },
       }).config,
@@ -151,6 +156,43 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
       seriesConfig: { sales: { label: 'Net sales' } },
     })
     expect(config.series[0].name).toBe('sales')
+  })
+
+  // The shape travels with the rest of the per-series look, so a saved combo
+  // config is one object spread into one tag.
+  it('carries the shape a series is recast to, and its style keys', () => {
+    const { config } = normalize<BarChartSeriesStyle>({
+      seriesConfig: {
+        refunds: { type: 'line', lineType: 'dashed', label: 'Refund rate' },
+      },
+    })
+    expect(config.series).toEqual([
+      { name: 'sales' },
+      {
+        name: 'refunds',
+        type: 'line',
+        lineType: 'dashed',
+        label: 'Refund rate',
+      },
+    ])
+  })
+
+  it('leaves the shape unset when nothing recasts the series', () => {
+    const { config } = normalize({ y: 'sales' })
+    expect(config.series[0].type).toBeUndefined()
+  })
+
+  it('recasts a series that sits on the second axis', () => {
+    const { config } = normalize<BarChartSeriesStyle>({
+      y: 'sales',
+      y2: 'refunds',
+      seriesConfig: { refunds: { type: 'line' } },
+    })
+    expect(config.series[1]).toEqual({
+      name: 'refunds',
+      type: 'line',
+      axis: 'y2',
+    })
   })
 })
 

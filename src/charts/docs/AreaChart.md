@@ -16,4 +16,11 @@ chart-level alpha; a `seriesConfig` entry overrides it per series.
 
 <ComponentPreview name="Charts-AreaLatency" csr="true" self-layout />
 
+## Mixing shapes
+
+A `seriesConfig` entry can name a `type` of its own, drawing that series as a
+bar or a plain line instead of a band. Each shape stacks into a stack of its
+own, so `stacked` never sums a band on top of a column. See
+[combo charts](/docs/charts/bar-chart#mixing-shapes-combo-charts).
+
 <!-- @include: ./AreaChart.api.md -->

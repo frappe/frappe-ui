@@ -67,9 +67,9 @@
   },
   {
     name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
+    description: 'Keyed by series identity: a `y` column, or a value of the `series`\ncolumn. Carries the per-series look, and the `type` that draws a series\nas a shape other than the chart\'s own.',
     required: false,
-    type: 'Record<string, LineSeriesStyle>'
+    type: 'Record<string, LineChartSeriesStyle>'
   },
   {
     name: 'xAxis',

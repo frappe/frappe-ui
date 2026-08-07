@@ -18,6 +18,10 @@ trend.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
 
+A `seriesConfig` entry can also name a `type` of its own, which draws that
+series as a bar or an area instead — the amount as columns under the rate it
+implies. See [combo charts](/docs/charts/bar-chart#mixing-shapes-combo-charts).
+
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.

@@ -67,9 +67,9 @@
   },
   {
     name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
+    description: 'Keyed by series identity: a `y` column, or a value of the `series`\ncolumn. Carries the per-series look, and the `type` that draws a series\nas a shape other than the chart\'s own.',
     required: false,
-    type: 'Record<string, BarSeriesStyle>'
+    type: 'Record<string, BarChartSeriesStyle>'
   },
   {
     name: 'xAxis',
@@ -103,7 +103,7 @@
   },
   {
     name: 'stacked',
-    description: '',
+    description: 'Series of the same shape sum on top of each other. Lines never stack.',
     required: false,
     type: 'boolean'
   },

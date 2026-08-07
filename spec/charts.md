@@ -1,8 +1,8 @@
 # Charts v2 public API
 
-**Status:** implemented as of 2026-08-03. The charts in `src/charts` take the
-flat props below, and the barrel exports the surface listed here. This is the
-API reference.
+**Status:** implemented as of 2026-08-03, combo series added 2026-08-07. The
+charts in `src/charts` take the flat props below, and the barrel exports the
+surface listed here. This is the API reference.
 
 Alternatives considered and rejected: composition (one child component per
 series, Recharts-style), grammar-of-graphics channel bindings (Plot,
@@ -29,6 +29,9 @@ from a saved object — which is the evidence.dev flavor.
   `series` column — to `{ label, color, ... }`, after shadcn's `ChartConfig`.
   It replaces the v1 `series[]` array and ends the name-doubles-as-key flaw:
   the map key is the identity, `label` is the display name.
+- A series is drawn as its chart's own shape unless its `seriesConfig` entry
+  names a `type`. `BarChart`, `LineChart` and `AreaChart` differ only in that
+  default, so a combo chart is one tag whose series disagree — see below.
 - Formatting is a function, not a format code: axis objects and part-to-whole
   charts take `format: (value: number) => string`.
 - `palette` is the only color input: `'sequential' | 'categorical' |
@@ -73,6 +76,20 @@ Long data — one row per point, a column splits rows into series:
 <LineChart :data="tidyRows" x="month" y="amount" series="region" />
 ```
 
+Combo — bars for the amounts, a line for the rate they imply, on the second
+axis because the units differ:
+
+```vue
+<BarChart
+  :data="rows"
+  x="month"
+  :y="['revenue', 'expenses']"
+  y2="margin"
+  :series-config="{ margin: { type: 'line', label: 'Gross margin' } }"
+  :y2-axis="{ title: 'Margin', format: (v) => `${v}%` }"
+/>
+```
+
 | Prop | Type | Charts | Notes |
 | --- | --- | --- | --- |
 | `data` | `Record<string, any>[]` | all | |
@@ -91,10 +108,32 @@ Long data — one row per point, a column splits rows into series:
 
 `SeriesStyle` (all values optional — every series renders with defaults):
 
-- Base: `{ label, color, showDataLabels, echartOptions }`
+- Base: `{ type, label, color, showDataLabels, echartOptions }`
 - Bar adds `stackName`
 - Line adds `lineType`, `lineWidth`, `showDataPoints`, `smooth`
 - Area adds `stackName`, `fillOpacity`
+
+`type` is `'bar' | 'line' | 'area'` and decides which of those key sets the
+entry carries, defaulting to the chart's own shape. The three per-chart unions
+(`BarChartSeriesStyle`, `LineChartSeriesStyle`, `AreaChartSeriesStyle`) are what
+the props take; the shape-specific styles above are their branches, and both
+are exported.
+
+What the mix decides, it decides over every series rather than the visible
+ones, so a legend click never reflows the plot:
+
+- any bar in the chart → the axis pointer is a shaded band and the category
+  axis takes the half-slot inset; otherwise a rule, running edge to edge
+- the data-label gutter is the widest any labelled series needs
+- `stacked` sums each shape into a stack of its own — a band never lands on top
+  of a column — and a line never stacks, since a stacked line reads as an area
+- a line is drawn over the bars and bands it is read against, whatever order
+  the series were declared in
+
+Chart-level props stay on the chart that owns them: `stacked` and `horizontal`
+on `BarChart`, `connectNulls` on the line family, `fillOpacity` on `AreaChart`.
+A recast series reads the host chart's value and overrides it through its own
+style keys or `echartOptions`.
 
 Model, emits, slots:
 
@@ -189,9 +228,9 @@ Exposes nothing.
 
 - Components: `BarChart`, `LineChart`, `AreaChart`, `DonutChart`,
   `FunnelChart`, `HeatmapChart`, `NumberCard`
-- Props and event types: `*ChartProps`, `NumberCardProps`, `SeriesStyle`,
-  axis option types,
-  `ChartDatapointEvent`, `DonutSliceEvent`, `FunnelStageEvent`,
+- Props and event types: `*ChartProps`, `NumberCardProps`, `SeriesStyle` and
+  the per-shape and per-chart series styles, `AxisSeriesType`, axis option
+  types, `ChartDatapointEvent`, `DonutSliceEvent`, `FunnelStageEvent`,
   `HeatmapCellEvent`, `ChartPalette`
 - Composables: `useChart`, `registerChartModules`
 - Theme: `useChartTheme`, `resolveChartTheme`, `paletteColors`,
@@ -225,3 +264,25 @@ Settled 2026-08-03:
    warning that names the colliding cell.
 6. **Emit naming.** Per-shape names stay: `datapointClick`, `sliceClick`,
    `stageClick`, `cellClick`. The payloads differ for good reason.
+
+Settled 2026-08-07 ([#941](https://github.com/frappe/frappe-ui/issues/941)):
+
+7. **Combo lives in `seriesConfig`, not in a new component or prop.** `type`
+   travels with the rest of a series' look, so a saved combo config is still
+   one object spread into one tag — which is what a dashboard builder stores.
+   A fourth `ComboChart` component would have had to re-declare every axis
+   prop, and a parallel `seriesTypes` prop would have split one series'
+   settings across two props keyed the same way.
+8. **The tag keeps naming the chart.** Recasting is per series, so the
+   component names the shape the rest of the series take rather than becoming
+   a neutral `AxisChart` — v1's shape, rejected when v2 was designed. Any of
+   the three can host the same combo; converting a saved v1 config picks the
+   tag from the majority series and recasts the rest.
+9. **Bars and lines are registered by all three axis charts.** A component can
+   no longer register only what its own name draws, since `seriesConfig`
+   decides that at runtime. The area shape adds nothing — it is the line
+   module with a fill.
+10. **Horizontal combo draws, `y2` still does not.** A recast line or band on a
+    horizontal bar chart runs along the value axis and labels past its end.
+    The second value axis stays out, unchanged: two value axes along the top
+    and bottom of a plot are unreadable, whatever shape is drawn between them.
