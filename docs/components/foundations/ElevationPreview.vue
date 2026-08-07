@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { TabButtons } from 'frappe-ui'
-import { useTheme, setTheme } from '../../composables/useTheme'
+import { TabButtons, useTheme } from 'frappe-ui'
 import effects from '../../../tailwind/generated/effects.json'
 
 // The six shadow steps, all sat on one elevated surface so the scale reads as
@@ -19,9 +18,9 @@ const rows = STEPS.map((step) => ({
 // The switcher drives the global theme, so the page and these cards swap
 // together, with no detached preview, and `bg-surface-*` resolves straight from
 // the document's `data-theme`.
-const globalTheme = useTheme()
+const { currentTheme, setTheme } = useTheme()
 const previewTheme = computed({
-  get: () => globalTheme.value,
+  get: () => currentTheme.value,
   set: (next) => setTheme(next),
 })
 
