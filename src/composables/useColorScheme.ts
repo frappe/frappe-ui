@@ -63,7 +63,16 @@ export function resolvedColorScheme(): ResolvedColorScheme {
 function applyColorScheme(scheme: ColorScheme): void {
   if (!isBrowser) return
   const resolved = scheme === 'system' ? resolveSystemScheme() : scheme
+
+  document.documentElement.classList.add('no-transition')
   document.documentElement.setAttribute(DOM_ATTRIBUTE, resolved)
+
+  // Double rAF: wait for the no-transition css to paint before re-enabling transitions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('no-transition')
+    })
+  })
 }
 
 function setColorScheme(scheme: ColorScheme): void {
