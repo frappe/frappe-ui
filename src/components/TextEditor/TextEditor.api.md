@@ -9,21 +9,21 @@
     name: 'content',
     description: 'Initial editor content (HTML/string). `null` renders an empty editor',
     required: false,
-    type: 'string | null',
+    type: 'null | string',
     default: 'null'
   },
   {
     name: 'placeholder',
     description: 'Placeholder text or dynamic placeholder resolver',
     required: false,
-    type: 'string | (() => string)',
+    type: '(() => string) | string',
     default: '""'
   },
   {
     name: 'editorClass',
     description: 'Custom classes applied to the editor root',
     required: false,
-    type: 'string | object | string[]',
+    type: 'object | string | string[]',
     default: '"prose-sm"'
   },
   {
@@ -44,7 +44,7 @@
     name: 'bubbleMenu',
     description: 'Enables bubble menu or provides custom bubble menu items',
     required: false,
-    type: 'boolean | any[]',
+    type: 'any[] | boolean',
     default: 'false'
   },
   {
@@ -58,14 +58,14 @@
     name: 'fixedMenu',
     description: 'Enables fixed menu or provides custom fixed menu items',
     required: false,
-    type: 'boolean | any[]',
+    type: 'any[] | boolean',
     default: 'false'
   },
   {
     name: 'floatingMenu',
     description: 'Enables floating menu or provides custom floating menu items',
     required: false,
-    type: 'boolean | any[]',
+    type: 'any[] | boolean',
     default: 'false'
   },
   {
@@ -114,17 +114,17 @@
   {
     name: 'top',
     description: '',
-    type: '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    type: '{ editor: { contentComponent: null | { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { ['
   },
   {
     name: 'editor',
     description: '',
-    type: '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    type: '{ editor: { contentComponent: null | { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { ['
   },
   {
     name: 'bottom',
     description: '',
-    type: '{ editor: { contentComponent: { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { [x: stri'
+    type: '{ editor: { contentComponent: null | { uid: number; type: FunctionalComponent<{}, {}, any, {}> | { ['
   }
 ]
 

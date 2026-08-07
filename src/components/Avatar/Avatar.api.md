@@ -21,7 +21,7 @@
     name: 'size',
     description: 'Controls the overall size of the avatar',
     required: false,
-    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl"',
+    type: '"2xl" | "3xl" | "lg" | "md" | "sm" | "xl" | "xs"',
     default: '"md"'
   },
   {

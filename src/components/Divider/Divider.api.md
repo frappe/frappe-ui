@@ -9,14 +9,14 @@
     name: 'orientation',
     description: '',
     required: false,
-    type: '"vertical" | "horizontal"',
+    type: '"horizontal" | "vertical"',
     default: '"horizontal"'
   },
   {
     name: 'position',
     description: '',
     required: false,
-    type: '"start" | "center" | "end"',
+    type: '"center" | "end" | "start"',
     default: '"center"'
   },
   {

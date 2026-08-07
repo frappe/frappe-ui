@@ -96,7 +96,7 @@
     name: 'icon',
     description: 'Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.\nIgnored when the `#prefix` slot is used.',
     required: false,
-    type: 'string | Component'
+    type: 'Component | string'
   },
   {
     name: 'suffix',
@@ -108,7 +108,7 @@
     name: 'to',
     description: 'Navigation target. When set the row\'s main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'Tt | kt | string'
   },
   {
     name: 'active',
@@ -192,7 +192,7 @@
     name: 'logo',
     description: '',
     required: false,
-    type: 'string | Component'
+    type: 'Component | string'
   },
   {
     name: 'showLogo',
@@ -205,7 +205,7 @@
     name: 'menuItems',
     description: '',
     required: false,
-    type: '{ label: string; icon?: string | Component; onClick?: (() => void) | undefined; }[] | undefined'
+    type: 'undefined | { label: string; icon?: Component | string; onClick?: (() => void) | undefined; }[]'
   }
 ]
 

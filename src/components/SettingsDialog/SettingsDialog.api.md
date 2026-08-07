@@ -37,7 +37,7 @@
     name: 'tab',
     description: 'The selected tab — pairs with SettingsNavItem `:value` and SettingsPanel\n`:value`. Optional: leave unbound to let reka-ui manage selection internally,\nor bind `v-model:tab` to drive it (e.g. from the route).',
     required: false,
-    type: 'string | number'
+    type: 'number | string'
   }
 ]
 
@@ -68,7 +68,7 @@
   {
     name: 'update:tab',
     description: 'Fired when the tab changes.',
-    type: '[value: string | number | undefined]'
+    type: '[value: number | string | undefined]'
   }
 ]
 
@@ -107,7 +107,7 @@
     name: 'value',
     description: 'Unique tab id — must match the SettingsPanel `value` it controls.',
     required: true,
-    type: 'string | number'
+    type: 'number | string'
   }
 ]
 
@@ -142,7 +142,7 @@
     name: 'value',
     description: 'Unique tab id — must match the SettingsNavItem `value` that controls it.',
     required: true,
-    type: 'string | number'
+    type: 'number | string'
   }
 ]
 

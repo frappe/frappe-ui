@@ -22,7 +22,7 @@
     name: 'step',
     description: 'Granularity of the rating value. `1` for whole stars, `0.5` for half stars.\nDefaults to `1`.',
     required: false,
-    type: '1 | 0.5',
+    type: '0.5 | 1',
     default: '1'
   },
   {
@@ -50,7 +50,7 @@
     name: 'icon',
     description: 'Icon to render for each star. Accepts a Vue component (e.g. an auto-imported\nlucide icon: `import Heart from \'~icons/lucide/heart\'`).\nThe component receives `fill="currentColor"` so closed-path SVGs render filled.\nDefaults to a filled lucide-star.',
     required: false,
-    type: 'string | Component',
+    type: 'Component | string',
     default: 'LucideStar'
   },
   {
@@ -76,7 +76,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',

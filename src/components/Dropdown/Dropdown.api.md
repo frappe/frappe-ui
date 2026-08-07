@@ -62,7 +62,7 @@
     name: 'portalTo',
     description: 'Teleport target for dropdown portal content.',
     required: false,
-    type: 'string | HTMLElement',
+    type: 'HTMLElement | string',
     default: '"body"'
   }
 ]

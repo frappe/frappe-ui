@@ -9,7 +9,7 @@
     name: 'orientation',
     description: 'Which scrollbars to render.',
     required: false,
-    type: '"vertical" | "horizontal" | "both"',
+    type: '"both" | "horizontal" | "vertical"',
     default: '"vertical"'
   },
   {
@@ -40,7 +40,7 @@
     name: 'orientation',
     description: '',
     required: false,
-    type: '"vertical" | "horizontal"',
+    type: '"horizontal" | "vertical"',
     default: '"vertical"'
   }
 ]

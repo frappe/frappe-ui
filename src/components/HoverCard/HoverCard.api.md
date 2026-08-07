@@ -9,14 +9,14 @@
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"left" | "right" | "bottom" | "top"',
+    type: '"bottom" | "left" | "right" | "top"',
     default: '"bottom"'
   },
   {
     name: 'align',
     description: 'Alignment of the card relative to the trigger.',
     required: false,
-    type: '"start" | "center" | "end"',
+    type: '"center" | "end" | "start"',
     default: '"start"'
   },
   {
@@ -30,7 +30,7 @@
     name: 'portalTo',
     description: 'Where the card is teleported to in the DOM.',
     required: false,
-    type: 'string | HTMLElement',
+    type: 'HTMLElement | string',
     default: '"body"'
   },
   {

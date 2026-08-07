@@ -29,13 +29,13 @@
     name: 'icon',
     description: 'Icon CSS class, e.g. `lucide-search`, or a component. Rendered centered in the cell.\nIgnored when the default slot is used (for an image, avatar, or initials).',
     required: false,
-    type: 'string | Component'
+    type: 'Component | string'
   },
   {
     name: 'to',
     description: 'Navigation target. When set, the item renders as a router link; otherwise\nit renders as a button. A `click` event fires in both cases.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'Tt | kt | string'
   },
   {
     name: 'active',

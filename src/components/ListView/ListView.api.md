@@ -250,7 +250,7 @@
     name: 'item',
     description: '',
     required: false,
-    type: 'string | number | Record<string, any>',
+    type: 'Record<string, any> | number | string',
     default: '\'\''
   },
   {

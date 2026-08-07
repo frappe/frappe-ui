@@ -91,7 +91,7 @@
     name: 'to',
     description: 'Where to navigate on tap. Omit to fall back to browser history.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'Tt | kt | string'
   },
   {
     name: 'label',

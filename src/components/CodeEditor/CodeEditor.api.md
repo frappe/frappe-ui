@@ -15,7 +15,7 @@
     name: 'language',
     description: 'CodeMirror language key; falls through to plain text when unset/unknown.\nTyped as `CodeLanguage | (string & {})` so the known keys autocomplete\nwhile an arbitrary string still type-checks.',
     required: false,
-    type: 'CodeLanguage | (string & {})',
+    type: '(string & {}) | CodeLanguage',
     default: '"plain"'
   },
   {
@@ -36,7 +36,7 @@
     name: 'variant',
     description: 'Surface style; derived from the shared `InputVariant` union so the code\nfield can\'t drift from the TextInput/Textarea fields it sits next to.\n`subtle` is the filled default, `outline` is a bordered-on-white box.\n`ghost` (borderless) is excluded — a borderless code surface reads as plain\ntext and loses the affordance that it\'s an editable field. Defaults to\n`subtle`.',
     required: false,
-    type: '"subtle" | "outline"',
+    type: '"outline" | "subtle"',
     default: '"subtle"'
   },
   {
@@ -62,7 +62,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',
@@ -120,7 +120,7 @@
     name: 'language',
     description: 'Only `markdown` / `html` render a preview; anything else renders nothing.',
     required: false,
-    type: 'CodeLanguage | (string & {})'
+    type: '(string & {}) | CodeLanguage'
   }
 ]
 </script>

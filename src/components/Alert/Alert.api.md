@@ -21,7 +21,7 @@
     name: 'variant',
     description: 'Visual style of the alert container',
     required: false,
-    type: '"subtle" | "outline"',
+    type: '"outline" | "subtle"',
     default: '"subtle"'
   },
   {

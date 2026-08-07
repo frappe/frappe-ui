@@ -27,13 +27,13 @@
     name: 'modelValue',
     description: 'Currently selected tab value.',
     required: false,
-    type: 'string | number'
+    type: 'number | string'
   },
   {
     name: 'dir',
     description: 'Forces layout direction; defaults to `document.documentElement.dir`.',
     required: false,
-    type: '"rtl" | "ltr"'
+    type: '"ltr" | "rtl"'
   }
 ]
 
@@ -41,12 +41,12 @@
   {
     name: 'tab-item',
     description: 'Custom renderer for a tab trigger (icon + label / router-link).',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: Component | string | undefined; route?: string | undefined; }; }'
   },
   {
     name: 'tab-panel',
     description: 'Content rendered for each tab panel.',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    type: '{ tab: { label: string; icon?: Component | string | undefined; route?: string | undefined; }; }'
   }
 ]
 
@@ -54,7 +54,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: string | number]'
+    type: '[value: number | string]'
   }
 ]
 </script>

@@ -35,7 +35,7 @@
     name: 'icon',
     description: 'Icon shown next to the title in the auto-header.',
     required: false,
-    type: 'string | DialogIcon'
+    type: 'DialogIcon | string'
   },
   {
     name: 'size',
@@ -55,7 +55,7 @@
     name: 'paddingTop',
     description: 'Overrides the position-based top padding (escape hatch).',
     required: false,
-    type: 'string | number'
+    type: 'number | string'
   },
   {
     name: 'actions',

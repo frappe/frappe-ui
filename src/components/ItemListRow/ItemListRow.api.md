@@ -9,7 +9,7 @@
     name: 'as',
     description: 'Element tag or component used for the row wrapper.',
     required: false,
-    type: 'string | Component',
+    type: 'Component | string',
     default: '"div"'
   },
   {

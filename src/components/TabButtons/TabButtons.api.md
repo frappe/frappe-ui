@@ -58,12 +58,12 @@
   {
     name: 'prefix',
     description: '',
-    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
+    type: '{ button: { key: string; label: number | string | undefined; icon: TabButtonIcon | undefined; iconLe'
   },
   {
     name: 'suffix',
     description: '',
-    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
+    type: '{ button: { key: string; label: number | string | undefined; icon: TabButtonIcon | undefined; iconLe'
   }
 ]
 

@@ -9,7 +9,7 @@
     name: 'name',
     description: 'Icon source. Supported forms:\n- `lucide-*` string  → rendered via the Tailwind mask plugin.\n- emoji / symbol string → rendered as plain text.\n- Legacy feather name → rendered via `<FeatherIcon>`.\n- Vue component → rendered via `<component :is>`.\nFalsy values render nothing.',
     required: false,
-    type: 'string | Component | null'
+    type: 'Component | null | string'
   }
 ]
 </script>

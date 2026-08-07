@@ -164,7 +164,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'string | string[] | Record<string, boolean>',
+    type: 'Record<string, boolean> | string | string[]',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -183,7 +183,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',
@@ -412,7 +412,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'string | string[] | Record<string, boolean>',
+    type: 'Record<string, boolean> | string | string[]',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -431,7 +431,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',
@@ -675,7 +675,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'string | string[] | Record<string, boolean>',
+    type: 'Record<string, boolean> | string | string[]',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -694,7 +694,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',

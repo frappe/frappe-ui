@@ -38,6 +38,232 @@ function parseTypeStr(type: string) {
   return type
 }
 
+const BRACKET_PAIRS: Record<string, string> = {
+  '(': ')',
+  '[': ']',
+  '{': '}',
+  '<': '>',
+}
+
+// Walks a printed type from `start` (an opening bracket) to its matching
+// closing bracket, skipping brackets inside string literals and the `>` of an
+// arrow. Returns -1 if the brackets are unbalanced.
+function findMatchingBracket(type: string, start: number) {
+  const stack: string[] = []
+  let quote: string | null = null
+
+  for (let i = start; i < type.length; i++) {
+    const char = type[i]
+
+    if (quote) {
+      if (char === '\\') i++
+      else if (char === quote) quote = null
+      continue
+    }
+    if (char === '"' || char === "'" || char === '`') {
+      quote = char
+      continue
+    }
+    if (char === '=' && type[i + 1] === '>') {
+      i++
+      continue
+    }
+    if (BRACKET_PAIRS[char]) {
+      stack.push(BRACKET_PAIRS[char])
+      continue
+    }
+    if (stack.length > 0 && char === stack[stack.length - 1]) {
+      stack.pop()
+      if (stack.length === 0) return i
+    }
+  }
+
+  return -1
+}
+
+// Splits a printed type on the given separators, ignoring the ones nested in
+// brackets or string literals. Parts keep their surrounding whitespace, and
+// the separators are returned alongside so the caller can put them back.
+function splitTopLevel(type: string, separators: string) {
+  const parts: string[] = []
+  const seps: string[] = []
+  const stack: string[] = []
+  let quote: string | null = null
+  let current = ''
+
+  for (let i = 0; i < type.length; i++) {
+    const char = type[i]
+
+    if (quote) {
+      current += char
+      if (char === '\\') current += type[++i] ?? ''
+      else if (char === quote) quote = null
+      continue
+    }
+    if (char === '"' || char === "'" || char === '`') {
+      quote = char
+      current += char
+      continue
+    }
+    if (char === '=' && type[i + 1] === '>') {
+      current += '=>'
+      i++
+      continue
+    }
+    if (BRACKET_PAIRS[char]) {
+      stack.push(BRACKET_PAIRS[char])
+      current += char
+      continue
+    }
+    if (stack.length > 0 && char === stack[stack.length - 1]) {
+      stack.pop()
+      current += char
+      continue
+    }
+    if (stack.length === 0 && separators.includes(char)) {
+      parts.push(current)
+      seps.push(char)
+      current = ''
+      continue
+    }
+
+    current += char
+  }
+
+  parts.push(current)
+  return { parts, seps }
+}
+
+// Drops every balanced bracket group so a member can be checked on its own
+// syntax: `Record<string, number>` collapses to `Record`, which has nothing
+// position-dependent left in it.
+function stripBracketGroups(member: string) {
+  let result = ''
+  let quote: string | null = null
+
+  for (let i = 0; i < member.length; i++) {
+    const char = member[i]
+
+    if (quote) {
+      if (char === '\\') i++
+      else if (char === quote) quote = null
+      continue
+    }
+    if (char === '"' || char === "'" || char === '`') {
+      quote = char
+      continue
+    }
+    if (char === '=' && member[i + 1] === '>') {
+      result += '=>'
+      i++
+      continue
+    }
+    if (BRACKET_PAIRS[char]) {
+      const end = findMatchingBracket(member, i)
+      if (end === -1) {
+        result += char
+        continue
+      }
+      i = end
+      continue
+    }
+
+    result += char
+  }
+
+  return result
+}
+
+// Only plain type references and literals get reordered. Anything with a
+// parameter list, an object member or an arrow left after the bracket groups
+// are stripped is a member whose position may carry meaning, so leave it.
+function isReorderableUnionMember(member: string) {
+  const trimmed = member.trim()
+  return (
+    trimmed.length > 0 && !/[:;,(){}<>=?]/.test(stripBracketGroups(trimmed))
+  )
+}
+
+// Compare by code point rather than locale so the output does not depend on
+// the machine's ICU data.
+function compareUnionMembers(a: string, b: string) {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
+// An object member, tuple element or named parameter keeps its label where it
+// is; only the type after the label is a union.
+const MEMBER_LABEL = /^\s*(?:readonly\s+)?[A-Za-z_$][\w$]*\??\s*:\s*/
+
+/**
+ * Sorts the members of every union in a printed type.
+ *
+ * TypeScript prints union members in the order its checker happened to resolve
+ * them, which shifts with how much of the program is loaded. Without this an
+ * unrelated new component folder can reorder `Tooltip`'s `side` union and fail
+ * the CI staleness check for a change that touched nothing.
+ */
+function sortUnions(type: string): string {
+  const { parts, seps } = splitTopLevel(type, ',;')
+  return parts
+    .map(sortUnionInPart)
+    .reduce((acc, part, i) => acc + seps[i - 1] + part)
+}
+
+function sortUnionInPart(part: string): string {
+  const label = part.match(MEMBER_LABEL)?.[0] ?? ''
+  const rest = part.slice(label.length)
+
+  const members = splitTopLevel(rest, '|').parts.map(sortUnionsInsideBrackets)
+  if (members.length < 2 || !members.every(isReorderableUnionMember)) {
+    return label + members.join('|')
+  }
+
+  const leading = members[0].match(/^\s*/)![0]
+  const trailing = members[members.length - 1].match(/\s*$/)![0]
+  const sorted = members.map((m) => m.trim()).sort(compareUnionMembers)
+  return `${label}${leading}${sorted.join(' | ')}${trailing}`
+}
+
+function sortUnionsInsideBrackets(member: string) {
+  let result = ''
+  let quote: string | null = null
+
+  for (let i = 0; i < member.length; i++) {
+    const char = member[i]
+
+    if (quote) {
+      result += char
+      if (char === '\\') result += member[++i] ?? ''
+      else if (char === quote) quote = null
+      continue
+    }
+    if (char === '"' || char === "'" || char === '`') {
+      quote = char
+      result += char
+      continue
+    }
+    if (char === '=' && member[i + 1] === '>') {
+      result += '=>'
+      i++
+      continue
+    }
+    if (BRACKET_PAIRS[char]) {
+      const end = findMatchingBracket(member, i)
+      if (end === -1) {
+        result += char
+        continue
+      }
+      result += char + sortUnions(member.slice(i + 1, end)) + member[end]
+      i = end
+      continue
+    }
+
+    result += char
+  }
+
+  return result
+}
+
 // Names Vue's language tooling gives the emit types it generates for an SFC:
 // `__VLS_ModelEmit` holds one entry per `defineModel()`, `__VLS_Emit` holds the
 // `defineEmits<T>()` type argument.
@@ -82,7 +308,8 @@ function getDeclaredEmitTypes(vuePath: string) {
   for (const aliasName of [MODEL_EMIT_TYPE, DECLARED_EMIT_TYPE]) {
     const declaration = sourceFile.statements.find(
       (statement): statement is ts.TypeAliasDeclaration =>
-        ts.isTypeAliasDeclaration(statement) && statement.name.text === aliasName,
+        ts.isTypeAliasDeclaration(statement) &&
+        statement.name.text === aliasName,
     )
     if (!declaration) continue
 
@@ -163,11 +390,11 @@ ${indent}]`
 
     return `{
 ${entries
-      .map(
-        ([key, itemValue]) =>
-          `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
-      )
-      .join(',\n')}
+  .map(
+    ([key, itemValue]) =>
+      `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
+  )
+  .join(',\n')}
 ${indent}}`
   }
 
@@ -265,7 +492,7 @@ function extractTableData(name: string, data: any, vuePath: string) {
         name: x.name,
         description: x.description,
         required: x.required,
-        type: parseTypeStr(x.type),
+        type: sortUnions(parseTypeStr(x.type)),
         default: x.default,
         deprecated: getDeprecation(x.tags),
       }),
@@ -277,7 +504,7 @@ function extractTableData(name: string, data: any, vuePath: string) {
       withOptional({
         name: x.name,
         description: x.description,
-        type: x.type.slice(0, 100),
+        type: sortUnions(x.type).slice(0, 100),
         deprecated: getDeprecation(x.tags),
       }),
     )
@@ -288,10 +515,11 @@ function extractTableData(name: string, data: any, vuePath: string) {
       withOptional({
         name: x.name,
         description: getEventDescription(x.name, x.description),
-        type:
+        type: sortUnions(
           x.type === 'unknown[]'
             ? (declaredEmitTypes.get(x.name) ?? x.type)
             : x.type,
+        ),
         deprecated: getDeprecation(x.tags),
       }),
     )
@@ -421,7 +649,10 @@ function getAvailableComponents(rootDir: string) {
 // A folder's `index.ts` may re-export additional public sub-components
 // alongside the primary one (e.g. DatePicker also exports DateRangePicker
 // and DateTimePicker). Each public sub-component gets its own meta file.
-function getPublicComponentsFromIndex(rootDir: string, folder: string): string[] {
+function getPublicComponentsFromIndex(
+  rootDir: string,
+  folder: string,
+): string[] {
   const indexPath = path.join(rootDir, folder, 'index.ts')
   if (!fs.existsSync(indexPath)) return []
 

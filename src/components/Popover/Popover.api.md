@@ -37,7 +37,7 @@
     name: 'portalTo',
     description: 'Where to portal the content.',
     required: false,
-    type: 'string | HTMLElement',
+    type: 'HTMLElement | string',
     default: '"body"'
   },
   {
@@ -119,7 +119,7 @@
     name: 'popoverClass',
     description: '',
     required: false,
-    type: 'string | object | (string | object)[]',
+    type: '(object | string)[] | object | string',
     default: 'undefined',
     deprecated: 'Use the `data-slot` CSS hooks (no-op).'
   },

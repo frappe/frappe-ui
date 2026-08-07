@@ -21,7 +21,7 @@
     name: 'type',
     description: 'Visual tone of the toast',
     required: false,
-    type: '"error" | "success" | "info" | "warning"'
+    type: '"error" | "info" | "success" | "warning"'
   },
   {
     name: 'duration',

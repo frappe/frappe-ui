@@ -35,7 +35,7 @@
     name: 'guides',
     description: 'Visual style of the indentation guides.',
     required: false,
-    type: '"none" | "connectors" | "lines"',
+    type: '"connectors" | "lines" | "none"',
     default: '"connectors"'
   },
   {

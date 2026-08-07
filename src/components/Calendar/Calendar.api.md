@@ -48,7 +48,7 @@
   {
     name: 'event-popover-content',
     description: '',
-    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
+    type: '{ calendarEvent: { [x: string]: unknown; id?: number | string | undefined; name?: number | string | '
   },
   {
     name: 'daily-header',
@@ -61,7 +61,7 @@
   {
     name: 'delete',
     description: '',
-    type: '[eventID: string | number | undefined]'
+    type: '[eventID: number | string | undefined]'
   },
   {
     name: 'create',

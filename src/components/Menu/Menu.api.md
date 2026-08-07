@@ -28,7 +28,7 @@
     name: 'portalTo',
     description: 'Portal target for submenu content.',
     required: false,
-    type: 'string | HTMLElement',
+    type: 'HTMLElement | string',
     default: '"body"'
   },
   {

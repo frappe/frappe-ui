@@ -30,7 +30,7 @@
     name: 'options',
     description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
-    type: '{ value: string; label?: string; }[] | undefined',
+    type: 'undefined | { value: string; label?: string; }[]',
     default: '[]'
   },
   {
@@ -185,7 +185,7 @@
     name: 'scrollMode',
     description: 'Scroll behavior when opening the list.',
     required: false,
-    type: '"start" | "center" | "nearest"',
+    type: '"center" | "nearest" | "start"',
     deprecated: 'Scrolling is always centered now.'
   },
   {
@@ -204,7 +204,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',

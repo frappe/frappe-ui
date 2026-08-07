@@ -70,7 +70,7 @@
     name: 'to',
     description: 'Renders the row as a RouterLink. Without `to`, a row with a click\nlistener renders as a button; otherwise a plain div.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'Tt | kt | string'
   },
   {
     name: 'value',
@@ -139,7 +139,7 @@
     name: 'align',
     description: 'Horizontal alignment of the header content. `\'end\'` right-aligns the cell\n(for numeric/right-aligned columns) *and* moves the sort glyph to the\nleading side, so the label stays flush with the column\'s right edge and\nlines up with the values below. Defaults to `\'start\'`.',
     required: false,
-    type: '"start" | "end"'
+    type: '"end" | "start"'
   }
 ]
 
@@ -152,12 +152,12 @@
   {
     name: 'prefix',
     description: 'Leading adornment, rendered before the label.',
-    type: '{ direction: "desc" | "asc" | null; }'
+    type: '{ direction: "asc" | "desc" | null; }'
   },
   {
     name: 'suffix',
     description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
-    type: '{ direction: "desc" | "asc" | null; }'
+    type: '{ direction: "asc" | "desc" | null; }'
   }
 ]
 
@@ -180,13 +180,13 @@
     name: 'rowKey',
     description: 'How to derive a row\'s identity. A string reads that property off the item;\na function computes it. Drives the render `:key`, the header select-all\nuniverse, and the scoped `value` slot prop. Defaults to the item\'s `name`,\nthen `id`, then the index.',
     required: false,
-    type: 'string | ((item: T, index: number) => PropertyKey)'
+    type: '((item: T, index: number) => PropertyKey) | string'
   },
   {
     name: 'virtual',
     description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
     required: false,
-    type: 'boolean | ListVirtualOptions'
+    type: 'ListVirtualOptions | boolean'
   }
 ]
 

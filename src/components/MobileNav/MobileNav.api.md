@@ -23,13 +23,13 @@
     name: 'icon',
     description: 'Icon CSS class, e.g. `lucide-home`, or a component. Ignored when the\ndefault slot is used (for a custom glyph or an avatar).',
     required: false,
-    type: 'string | Component'
+    type: 'Component | string'
   },
   {
     name: 'to',
     description: 'Navigation target. Renders a router link. Tapping the item while it is\nalready the current route scrolls the shell to the top instead of\nre-navigating.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'Tt | kt | string'
   },
   {
     name: 'active',

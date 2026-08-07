@@ -15,7 +15,7 @@
     name: 'size',
     description: 'Size of the progress bar: "sm" | "md" | "lg" | "xl"',
     required: false,
-    type: '"md" | "sm" | "lg" | "xl"',
+    type: '"lg" | "md" | "sm" | "xl"',
     default: '"sm"'
   },
   {

@@ -9,7 +9,7 @@
     name: 'modelValue',
     description: 'The duration value in seconds (two-way via `v-model`).',
     required: false,
-    type: 'number | null',
+    type: 'null | number',
     default: 'null'
   },
   {
@@ -60,7 +60,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'FrappeUIError | string'
   },
   {
     name: 'required',
@@ -80,7 +80,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: number | null]'
+    type: '[value: null | number]'
   }
 ]
 </script>
