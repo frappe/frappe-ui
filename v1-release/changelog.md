@@ -418,15 +418,34 @@ installs it by default.
 - **`call` removed.** It installed a `$call` global with no consumers.
 - **`config` removed (silent).** `setConfig` is the entry point. One app
   passed it.
-- **`resources` no longer defaults to `true` (silent).** The v1 resources
-  Options API mixin — `this.$resources`, `$getResource`, `$getDoc`,
-  `$getListResource`, `$refetchResource` — installs only on
+- **`resources` no longer defaults to `true`.** The v1 resources Options API
+  mixin — `this.$resources`, `$getResource`, `$getDoc`, `$getListResource`,
+  `$refetchResource` — installs only on
   `app.use(FrappeUI, { resources: true })`. Composition API resources are
   unaffected. `resourcesPlugin` stays exported for direct installation.
 
-Because a removed option is silently ignored rather than rejected, the plugin
-now logs a dev-mode warning naming any option it does not accept and what to
-use instead.
+Because a removed *option* is ignored rather than rejected, the plugin logs a
+dev-mode warning naming any option it does not accept and what to use instead.
+
+**Removed features fail loudly, in production too.** A dropped option that
+evaporates is an annoyance; a dropped feature that evaporates is a mystery
+crash somewhere else. So:
+
+- A component declaring a `resources` option without
+  `app.use(FrappeUI, { resources: true })` throws on creation, naming itself
+  and the fix.
+- Reading `this.$resources` with the option off throws the same advice. Both
+  guards exist because Vue routes what a lifecycle hook throws through its own
+  error handling, which only logs in production — a read throws straight into
+  app code in every build.
+- Reading `this.$socket` or `this.$call`, the two globals the plugin stopped
+  installing, throws a message naming the replacement instead of returning
+  `undefined`. Assigning your own — `app.config.globalProperties.$socket = io(…)`
+  — replaces the guard, before or after `app.use(FrappeUI)`.
+
+`realtime: true` on a v1 resource still degrades quietly to a non-realtime
+resource when no socket is set. That has always been its behaviour and this
+does not change it.
 
 ## Deprecation log
 

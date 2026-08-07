@@ -623,6 +623,11 @@ Nothing changes for Composition API code — `createResource`,
 You need the option only if you declare a `resources: { … }` block in a
 component's options.
 
+You will not have to work this out from a blank screen. A component that
+declares `resources` without the option throws on creation, naming itself and
+the fix, and reading `this.$resources` throws too. Both throw in production
+builds as well as dev — this is a break that has no quiet failure mode.
+
 ### `initSocket` is gone
 
 It was a nine-line `io()` wrapper, and the plugin created one by default — which
@@ -643,6 +648,11 @@ app.config.globalProperties.$socket = io(
   { withCredentials: true },
 )
 ```
+
+Until you do, reading `this.$socket` throws with that instruction rather than
+returning `undefined` and crashing in whatever realtime handler reads it next.
+Assigning your own replaces the guard. The same applies to `$call`, the other
+global the plugin used to install — import `call` from `frappe-ui` instead.
 
 ## FAQ
 

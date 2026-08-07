@@ -32,16 +32,107 @@ describe('FrappeUI plugin', () => {
     vi.restoreAllMocks()
   })
 
-  it('installs nothing by default', () => {
-    const app = mountWith(undefined, OptionsApiConsumer)
+  it('installs no resources helpers by default', () => {
+    const app = mountWith(undefined, Blank)
 
-    // The silent break: `$resources` used to be there without asking. `$call`
-    // and `$socket` were globals the plugin also used to set.
     const proxy = (app._instance as any).proxy
-    expect(proxy.$resources).toBeUndefined()
     expect(proxy.$getResource).toBeUndefined()
-    expect(app.config.globalProperties.$call).toBeUndefined()
-    expect(app.config.globalProperties.$socket).toBeUndefined()
+  })
+
+  // The mixin below throws inside a lifecycle hook, which Vue rethrows in dev
+  // but only logs in production. Guarding the read as well means the failure
+  // reaches app code in every build.
+  it('throws when $resources is read and the option is off', () => {
+    const app = mountWith(undefined, Blank)
+    const proxy = (app._instance as any).proxy
+
+    expect(() => proxy.$resources).toThrow(
+      /this\.\$resources is not set.*resources: true/s,
+    )
+  })
+
+  it('leaves $resources alone when the option is on', () => {
+    const app = mountWith({ resources: true }, OptionsApiConsumer)
+    const proxy = (app._instance as any).proxy
+
+    expect(() => proxy.$resources).not.toThrow()
+  })
+
+  // `resources` off used to be silent: the component option did nothing, no
+  // request was made, and `this.$resources` was undefined until something
+  // downstream crashed on it. Refuse to create the component instead — in
+  // production as well as dev, which rules out a dev-only console.warn.
+  it('throws for a component declaring resources when the option is off', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    expect(() => mountWith(undefined, OptionsApiConsumer)).toThrow(
+      /app\.use\(FrappeUI, \{ resources: true \}\)/,
+    )
+
+    error.mockRestore()
+  })
+
+  it('names the offending component in the error', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Named = defineComponent({
+      name: 'TodoList',
+      resources: { todos: () => ({ url: 'x', auto: false }) },
+      render: () => h('div'),
+    } as any)
+
+    expect(() => mountWith(undefined, Named)).toThrow(/TodoList/)
+
+    error.mockRestore()
+  })
+
+  it('leaves components without a resources option alone', () => {
+    expect(() => mountWith(undefined, Blank)).not.toThrow()
+  })
+
+  // Reading a global the plugin stopped installing used to yield `undefined`
+  // and crash somewhere else — builder's realtimeHandler does `$socket.on(…)`.
+  it.each(['$socket', '$call'])(
+    'throws a message naming the fix when %s is read',
+    (key) => {
+      const app = mountWith({ resources: true })
+
+      expect(() => (app.config.globalProperties as any)[key]).toThrow(
+        new RegExp(`this\\.\\${key} is not set`),
+      )
+    },
+  )
+
+  it('mentions socket.io and the assignment when $socket is read', () => {
+    const app = mountWith()
+
+    expect(() => app.config.globalProperties.$socket).toThrow(
+      /globalProperties\.\$socket = io\(/,
+    )
+  })
+
+  it('reports the guarded global through the component instance too', () => {
+    const app = mountWith(undefined, Blank)
+    const proxy = (app._instance as any).proxy
+
+    expect(() => proxy.$socket).toThrow(/this\.\$socket is not set/)
+  })
+
+  it('lets an app assign its own $socket over the guard', () => {
+    const app = mountWith()
+    const socket = { on() {} }
+
+    app.config.globalProperties.$socket = socket
+
+    expect(app.config.globalProperties.$socket).toBe(socket)
+  })
+
+  it('does not clobber a $socket assigned before install', () => {
+    const socket = { on() {} }
+    const app = createApp(Blank)
+    app.config.globalProperties.$socket = socket
+    app.use(FrappeUI)
+
+    expect(app.config.globalProperties.$socket).toBe(socket)
   })
 
   it('installs the resources plugin when asked', () => {
