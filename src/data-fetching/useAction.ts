@@ -43,9 +43,10 @@ export interface UseActionOptions<TResponse, TParams> {
  * and `data` keeps the last successful response. `data` is never reset to null
  * by a failure — read `error` to tell a failed submit from a successful one.
  *
- * Failures reach the caller down two different channels. A failed `validate`
- * rejects the returned promise. A failed request resolves it with `null`. Both
- * set `error`.
+ * `submit()` has one outcome channel: it resolves with the response, or rejects
+ * with the error. A failed `validate` and a failed request both reject. `null`
+ * is a response like any other — a server that answers with `null` resolves.
+ * A stale submit rejects its own caller too, but writes no `error`.
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
   options: UseActionOptions<TResponse, TParams>,
@@ -101,7 +102,7 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
         let validationError = new Error(message)
         // `validate` is synchronous, so this submit is still the newest one.
         error.value = validationError
-        return Promise.reject(validationError)
+        throw validationError
       }
     }
 
@@ -136,18 +137,19 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
       // stale. It goes to its own caller and nowhere else — writing it now, or
       // clearing the newer submit's error, would undo a fresher answer.
       if (!isNewest()) {
-        return callError ? null : (response as TResponse)
+        if (callError) throw callError
+        return response as TResponse | null
       }
 
       if (callError) {
         // `data` keeps the last successful response. `error` is what tells a
         // failed submit apart from a successful one.
         error.value = callError
-        return null
+        throw callError
       }
-      data.value = response as TResponse
+      data.value = response as TResponse | null
       error.value = null
-      return response as TResponse
+      return response as TResponse | null
     } finally {
       finishPending(target)
       scope.stop()
