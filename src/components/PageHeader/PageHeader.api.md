@@ -20,6 +20,23 @@
   }
 ]
 
+  const pageHeaderTitleProps = [
+  {
+    name: 'title',
+    description: 'Title text. Overridden by the default slot.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const pageHeaderTitleSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
+
   const pageHeaderMobileProps = [
   {
     name: 'title',
@@ -95,6 +112,12 @@
 ### PageHeaderBase
 
 <SlotsTable :data="pageHeaderBaseSlots"/>
+
+### PageHeaderTitle
+
+<PropsTable folder="PageHeader" name="PageHeaderTitle" :data="pageHeaderTitleProps"/>
+
+<SlotsTable :data="pageHeaderTitleSlots"/>
 
 ### PageHeaderMobile
 

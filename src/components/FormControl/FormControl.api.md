@@ -27,14 +27,14 @@
     name: 'type',
     description: 'Type of input to render. FormControl is a thin dispatcher — it forwards\n`label`/`description`/`error`/`required`/`size`/`variant` plus all\nremaining attrs/listeners to the resolved child component. Type-specific\nprops (e.g. `options` for select/combobox, `min`/`max`/`formatter` for\ndate pickers, `:options` for multiselect) and the `v-model` value shape\nfollow the underlying component — see that component\'s docs/types for\nthe full surface. Slots are forwarded by name; only slot names declared\non FormControl get IDE typing, others pass through at runtime.',
     required: false,
-    type: '"select" | "textarea" | TextInputTypes | "checkbox" | "combobox" | "multiselect" | "daterange" | "datetime"',
+    type: 'TextInputTypes | "textarea" | "select" | "checkbox" | "combobox" | "multiselect" | "daterange" | "datetime"',
     default: '"text"'
   },
   {
     name: 'size',
     description: 'Size of the input',
     required: false,
-    type: '"md" | "sm"',
+    type: '"sm" | "md"',
     default: '"sm"'
   },
   {
@@ -85,6 +85,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="FormControl" :data="propsData"/>

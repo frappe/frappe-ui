@@ -33,6 +33,12 @@
     default: 'false'
   },
   {
+    name: 'placeholder',
+    description: '',
+    required: false,
+    type: 'string'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -83,6 +89,11 @@
     name: 'suffix',
     description: '',
     type: '{ open: boolean; disabled: boolean; query: string; selectedOption: ComboboxSelectableOption | null; '
+  },
+  {
+    name: 'item-create',
+    description: '',
+    type: '{ item: ComboboxSelectableOption | ComboboxCustomOption; query: string; selected: boolean; }'
   }
 ]
 
@@ -90,12 +101,12 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: 'unknown[]'
+    type: '[value: string | null]'
   },
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
-    type: 'unknown[]'
+    type: '[value: boolean]'
   },
   {
     name: 'create',
@@ -104,11 +115,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Link" :data="propsData"/> 
+<PropsTable name="Link" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

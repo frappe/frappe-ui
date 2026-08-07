@@ -6,7 +6,21 @@ import ts from 'typescript'
 import type { MetaCheckerOptions } from 'vue-component-meta'
 import { createChecker } from 'vue-component-meta'
 
+import {
+  diffApiTables,
+  formatDifferences,
+  parseApiTables,
+  summarizeDifference,
+} from './api-tables'
+import { createSourceOrder } from './source-order'
+
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
+const REPO_ROOT = path.join(__dirname, '../..')
+
+// `--check` compares the committed tables against a fresh run instead of
+// rewriting them. It reports an entry that was added, removed or whose type,
+// default or description changed, and ignores the order of the rows.
+const isCheck = process.argv.slice(2).includes('--check')
 
 const checkerOptions: MetaCheckerOptions = {
   forceUseTs: true,
@@ -56,8 +70,8 @@ function printType(typeChecker: ts.TypeChecker, type: ts.Type) {
 }
 
 /**
- * Payload types for a component's emits, read off the emit types Vue generates
- * for the SFC rather than off `$emit`.
+ * Payload types and descriptions for a component's emits, read off the emit
+ * types Vue generates for the SFC rather than off `$emit`.
  *
  * vue-component-meta derives each emit's payload from the call signatures of
  * `$emit`, which Vue builds from `__VLS_ModelEmit & __VLS_Emit`. An event
@@ -65,24 +79,25 @@ function printType(typeChecker: ts.TypeChecker, type: ts.Type) {
  * argument therefore ends up with an intersection of two tuples as its payload,
  * and TypeScript cannot infer named rest args back out of a tuple intersection
  * — the signature collapses to `(event, ...args: unknown[])` and the docs lose
- * the real type. The declared types survive intact in the generated file, so
- * read them straight from there.
+ * the real type. It reports no description for an emit at all. Both survive
+ * intact in the generated file, so read them straight from there.
  *
  * `defineEmits<T>()` is applied last: when both declare an event, the
  * hand-written interface is the documented contract.
  */
-function getDeclaredEmitTypes(vuePath: string) {
-  const types = new Map<string, string>()
+function getDeclaredEmits(vuePath: string) {
+  const emits = new Map<string, { type: string; description: string }>()
   const program = tsconfigChecker.getProgram()
   const sourceFile = program?.getSourceFile(vuePath)
-  if (!program || !sourceFile) return types
+  if (!program || !sourceFile) return emits
 
   const typeChecker = program.getTypeChecker()
 
   for (const aliasName of [MODEL_EMIT_TYPE, DECLARED_EMIT_TYPE]) {
     const declaration = sourceFile.statements.find(
       (statement): statement is ts.TypeAliasDeclaration =>
-        ts.isTypeAliasDeclaration(statement) && statement.name.text === aliasName,
+        ts.isTypeAliasDeclaration(statement) &&
+        statement.name.text === aliasName,
     )
     if (!declaration) continue
 
@@ -93,11 +108,16 @@ function getDeclaredEmitTypes(vuePath: string) {
 
     for (const emit of emitsType.getProperties()) {
       const payload = typeChecker.getTypeOfSymbolAtLocation(emit, declaration)
-      types.set(emit.getName(), printType(typeChecker, payload))
+      emits.set(emit.getName(), {
+        type: printType(typeChecker, payload),
+        description: ts
+          .displayPartsToString(emit.getDocumentationComment(typeChecker))
+          .trim(),
+      })
     }
   }
 
-  return types
+  return emits
 }
 
 // Return the `@deprecated` message, `true` if the tag is present without
@@ -163,11 +183,11 @@ ${indent}]`
 
     return `{
 ${entries
-      .map(
-        ([key, itemValue]) =>
-          `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
-      )
-      .join(',\n')}
+  .map(
+    ([key, itemValue]) =>
+      `${nextIndent}${formatObjectKey(key)}: ${toVueExpression(itemValue, indentLevel + 1)}`,
+  )
+  .join(',\n')}
 ${indent}}`
   }
 
@@ -254,25 +274,31 @@ function camelCase(name: string) {
 }
 
 function extractTableData(name: string, data: any, vuePath: string) {
-  // Only consulted for emits vue-component-meta could not resolve, so
-  // components it already types correctly keep their existing output.
-  const declaredEmitTypes = getDeclaredEmitTypes(vuePath)
+  // The payload is only consulted for emits vue-component-meta could not
+  // resolve, so components it already types correctly keep their existing
+  // output. The description always comes from here — it reports none.
+  const declaredEmits = getDeclaredEmits(vuePath)
+  const sourceOrder = createSourceOrder(tsconfigChecker.getProgram()!)
 
-  const props = data.props
-    .filter((x: any) => !x.global)
+  const props = sourceOrder
+    .sortByDeclaration(data.props.filter((x: any) => !x.global))
     .map((x: any) =>
       withOptional({
         name: x.name,
         description: x.description,
         required: x.required,
-        type: parseTypeStr(x.type),
-        default: x.default,
+        // Only a prop's type is ever a union at the top level; a slot's is an
+        // object and an emit's is a tuple.
+        type: sourceOrder.orderUnion(parseTypeStr(x.type), x),
+        // An explicit `= undefined` is not a default — the docs table renders
+        // the string as a literal "undefined" in the Default column.
+        default: x.default === 'undefined' ? undefined : x.default,
         deprecated: getDeprecation(x.tags),
       }),
     )
 
-  const slots = data.slots
-    .filter((x: any) => !x.global)
+  const slots = sourceOrder
+    .sortByDeclaration(data.slots.filter((x: any) => !x.global))
     .map((x: any) =>
       withOptional({
         name: x.name,
@@ -282,15 +308,18 @@ function extractTableData(name: string, data: any, vuePath: string) {
       }),
     )
 
-  const emits = data.events
-    .filter((x: any) => !x.global)
+  const emits = sourceOrder
+    .sortByDeclaration(data.events.filter((x: any) => !x.global))
     .map((x: any) =>
       withOptional({
         name: x.name,
-        description: getEventDescription(x.name, x.description),
+        description: getEventDescription(
+          x.name,
+          x.description || declaredEmits.get(x.name)?.description,
+        ),
         type:
           x.type === 'unknown[]'
-            ? (declaredEmitTypes.get(x.name) ?? x.type)
+            ? (declaredEmits.get(x.name)?.type ?? x.type)
             : x.type,
         deprecated: getDeprecation(x.tags),
       }),
@@ -343,7 +372,7 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
 
   scriptLines.push('</script>')
 
-  let markupStr = `${scriptLines.join('\n')}\n`
+  let markupStr = ''
 
   const hasAnyAcross = components.some(
     (c) => c.props.length || c.slots.length || c.emits.length,
@@ -366,17 +395,23 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     const folderAttr = folder !== c.name ? ` folder="${folder}"` : ''
 
     if (c.props.length > 0) {
-      markupStr += `<PropsTable${folderAttr} name="${c.name}" :data="${names.props}"/> \n\n`
+      markupStr += `<PropsTable${folderAttr} name="${c.name}" :data="${names.props}"/>\n\n`
     }
     if (c.slots.length > 0) {
-      markupStr += `<SlotsTable :data="${names.slots}"/> \n\n`
+      markupStr += `<SlotsTable :data="${names.slots}"/>\n\n`
     }
     if (c.emits.length > 0) {
-      markupStr += `<EmitsTable :data="${names.emits}"/> \n\n`
+      markupStr += `<EmitsTable :data="${names.emits}"/>\n\n`
     }
   }
 
-  return markupStr
+  // The output has to match what Prettier would write. `lint-staged` runs
+  // `prettier --write` over `*.md`, so a trailing space or a missing blank
+  // line here gets rewritten by the next commit that touches the file, and
+  // the generated files and the generator drift apart with nothing to say so.
+  const scriptStr = scriptLines.join('\n')
+  const bodyStr = markupStr.trimEnd()
+  return bodyStr ? `${scriptStr}\n\n${bodyStr}\n` : `${scriptStr}\n`
 }
 
 function pascalCase(name: string) {
@@ -414,7 +449,10 @@ function getAvailableComponents(rootDir: string) {
 // A folder's `index.ts` may re-export additional public sub-components
 // alongside the primary one (e.g. DatePicker also exports DateRangePicker
 // and DateTimePicker). Each public sub-component gets its own meta file.
-function getPublicComponentsFromIndex(rootDir: string, folder: string): string[] {
+function getPublicComponentsFromIndex(
+  rootDir: string,
+  folder: string,
+): string[] {
   const indexPath = path.join(rootDir, folder, 'index.ts')
   if (!fs.existsSync(indexPath)) return []
 
@@ -500,11 +538,14 @@ function replaceAutoGeneratedSection(content: string, replacement: string) {
   return `${before}${replacement}${after}`
 }
 
-function syncComponentDocsStories(rootDir: string, componentName: string) {
+// The story list comes straight off the filesystem, so it is the same on every
+// run — unlike the emit rows, which the TypeScript checker orders. `null` means
+// the page is already up to date, or has no auto-generated section at all.
+function getDocsStoriesUpdate(rootDir: string, componentName: string) {
   const docsPath = path.join(rootDir, componentName, `${componentName}.md`)
 
   if (!fs.existsSync(docsPath)) {
-    return
+    return null
   }
 
   const content = fs.readFileSync(docsPath, 'utf8')
@@ -512,17 +553,15 @@ function syncComponentDocsStories(rootDir: string, componentName: string) {
     !content.includes(AUTO_STORIES_START) ||
     !content.includes(AUTO_STORIES_END)
   ) {
-    return
+    return null
   }
 
   const storiesMarkup = getStoryPreviewMarkup(rootDir, componentName)
   const replacement = `${AUTO_STORIES_START}\n${storiesMarkup}\n${AUTO_STORIES_END}`
   const nextContent = replaceAutoGeneratedSection(content, replacement)
 
-  if (nextContent !== content) {
-    fs.writeFileSync(docsPath, nextContent)
-    console.log(`Synced ${componentName} docs stories`)
-  }
+  if (nextContent === content) return null
+  return { docsPath, nextContent }
 }
 
 function parseRequestedFolders(
@@ -582,7 +621,75 @@ for (const d of documentables) {
   docsByFolder.set(d.folder, list)
 }
 
-console.log(`Generating docs meta for: ${selectedFolders.join(', ')}`)
+// Props and union members are put back into source order (see `source-order`),
+// so they no longer move between runs. Emits still can: an event declared by
+// `defineModel()` is declared in Vue's own types, and where that lands relative
+// to the ones from `defineEmits<T>()` is the checker's call. The committed
+// tables are the full run's output, so a partial run is for iterating, not for
+// committing. CI compares the rows themselves and ignores their order
+// (`--check`), so a committed partial run does not fail the build.
+if (!isCheck && selectedFolders.length !== folderOrder.length) {
+  console.warn(
+    'Note: this is a partial run. Run `yarn docs:gen` with no arguments before committing.',
+  )
+}
+
+console.log(
+  `${isCheck ? 'Checking' : 'Generating'} docs meta for: ${selectedFolders.join(', ')}`,
+)
+
+const staleFiles: string[] = []
+
+function reportStale(relativePath: string, report: string) {
+  staleFiles.push(relativePath)
+  console.error(`\n${relativePath}\n${report}`)
+}
+
+function annotate(relativePath: string, message: string) {
+  if (!process.env.GITHUB_ACTIONS) return
+  // A workflow command is one line: the runner reads `%25`, `%0D` and `%0A`
+  // back as `%`, CR and LF.
+  const escaped = message
+    .replace(/%/g, '%25')
+    .replace(/\r/g, '%0D')
+    .replace(/\n/g, '%0A')
+  console.error(`::error file=${relativePath}::${escaped}`)
+}
+
+function checkFolder(
+  folder: string,
+  rootDir: string,
+  metaFilePath: string,
+  generated: string,
+) {
+  const relativePath = path.relative(REPO_ROOT, metaFilePath)
+
+  if (!fs.existsSync(metaFilePath)) {
+    reportStale(relativePath, '  the table has never been generated')
+    annotate(relativePath, 'the API table has never been generated')
+    return
+  }
+
+  const committed = fs.readFileSync(metaFilePath, 'utf8')
+  const differences = diffApiTables(
+    parseApiTables(committed, folder),
+    parseApiTables(generated, folder),
+  )
+
+  if (differences.length > 0) {
+    reportStale(relativePath, formatDifferences(differences))
+    for (const difference of differences) {
+      annotate(relativePath, summarizeDifference(difference))
+    }
+  }
+
+  const storiesUpdate = getDocsStoriesUpdate(rootDir, folder)
+  if (storiesUpdate) {
+    const storiesPath = path.relative(REPO_ROOT, storiesUpdate.docsPath)
+    reportStale(storiesPath, '  the story list does not match the story files')
+    annotate(storiesPath, 'the story list does not match the story files')
+  }
+}
 
 selectedFolders.forEach((folder) => {
   try {
@@ -602,12 +709,33 @@ selectedFolders.forEach((folder) => {
 
     const metaFilePath = path.join(rootDir, folder, `${folder}.api.md`)
     const str = genFolderMetaTable(folder, components)
+
+    if (isCheck) {
+      checkFolder(folder, rootDir, metaFilePath, str)
+      return
+    }
+
     fs.writeFileSync(metaFilePath, str)
     console.log(`Generated ${folder} meta`)
 
-    syncComponentDocsStories(rootDir, folder)
+    const storiesUpdate = getDocsStoriesUpdate(rootDir, folder)
+    if (storiesUpdate) {
+      fs.writeFileSync(storiesUpdate.docsPath, storiesUpdate.nextContent)
+      console.log(`Synced ${folder} docs stories`)
+    }
   } catch (error) {
     console.error('-----------------------------\n', folder, ':', error)
     process.exitCode = 1
   }
 })
+
+if (isCheck) {
+  if (staleFiles.length > 0) {
+    console.error(
+      `\n${staleFiles.length} file(s) are out of date. Run \`yarn docs:gen\` with no arguments and commit the result.`,
+    )
+    process.exitCode = 1
+  } else {
+    console.log('\nThe committed API tables match the source.')
+  }
+}

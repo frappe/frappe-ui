@@ -124,10 +124,9 @@
   },
   {
     name: 'format',
-    description: 'Dayjs format string used for display. Default: `HH:mm`.',
+    description: 'Dayjs format string used for display. Unset, the display format is `HH:mm`, or `h:mm A` when the deprecated `use12Hour` is on.',
     required: false,
-    type: 'string',
-    default: '"HH:mm"'
+    type: 'string'
   },
   {
     name: 'disabled',
@@ -186,7 +185,7 @@
     name: 'scrollMode',
     description: 'Scroll behavior when opening the list.',
     required: false,
-    type: '"start" | "center" | "nearest"',
+    type: '"center" | "start" | "nearest"',
     deprecated: 'Scrolling is always centered now.'
   },
   {
@@ -246,14 +245,14 @@
 
   const emitsData = [
   {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
+  },
+  {
+    name: 'open',
+    description: 'Fired when the component opens.',
+    type: '[]'
   },
   {
     name: 'update:open',
@@ -266,6 +265,11 @@
     type: '[value: string]'
   },
   {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
+  },
+  {
     name: 'input-invalid',
     description: '',
     type: '[input: string]'
@@ -274,18 +278,14 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
-  },
-  {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TimePicker" :data="propsData"/> 
+<PropsTable name="TimePicker" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
+<EmitsTable :data="emitsData"/>

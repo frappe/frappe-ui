@@ -53,16 +53,16 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selected tab changes.',
     type: '[value: string | number]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Tabs" :data="propsData"/> 
+<PropsTable name="Tabs" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

@@ -9,15 +9,13 @@
     name: 'open',
     description: 'Controls whether the dialog is open (v-model:open). Canonical.',
     required: false,
-    type: 'boolean',
-    default: 'undefined'
+    type: 'boolean'
   },
   {
     name: 'modelValue',
     description: 'Controls whether the dialog is open (v-model). Also supported.',
     required: false,
-    type: 'boolean',
-    default: 'undefined'
+    type: 'boolean'
   },
   {
     name: 'title',
@@ -41,15 +39,13 @@
     name: 'size',
     description: 'Max-width size of the dialog. Default `\'lg\'`.',
     required: false,
-    type: 'DialogSize',
-    default: 'undefined'
+    type: 'DialogSize'
   },
   {
     name: 'position',
     description: 'Vertical placement. Default `\'center\'`.',
     required: false,
-    type: 'DialogPosition',
-    default: 'undefined'
+    type: 'DialogPosition'
   },
   {
     name: 'paddingTop',
@@ -89,7 +85,6 @@
     description: '',
     required: false,
     type: 'boolean',
-    default: 'undefined',
     deprecated: 'Use `dismissible` (inverted) instead.'
   },
   {
@@ -152,26 +147,27 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the dialog open state changes via `v-model`.',
     type: '[value: boolean]'
   },
   {
     name: 'update:open',
-    description: 'Fired when the open state changes.',
+    description: 'Fired when the dialog open state changes via `v-model:open`.',
     type: '[value: boolean]'
   },
   {
     name: 'after-leave',
-    description: '',
+    description: 'Fired after the close animation finishes.',
     type: '[]'
   },
   {
     name: 'close',
-    description: 'Fired when the component closes.',
+    description: 'Fired when the dialog transitions to closed.',
     type: '[]'
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Dialog" :data="propsData"/>

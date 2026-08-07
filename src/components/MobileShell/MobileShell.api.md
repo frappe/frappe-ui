@@ -17,7 +17,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

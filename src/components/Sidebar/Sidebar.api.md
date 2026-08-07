@@ -60,6 +60,11 @@
     type: '{}'
   },
   {
+    name: 'sidebar-item',
+    description: '',
+    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
+  },
+  {
     name: 'footer-items',
     description: '',
     type: '{}'
@@ -233,7 +238,8 @@
     name: 'collapsed',
     description: 'v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
@@ -253,6 +259,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Sidebar

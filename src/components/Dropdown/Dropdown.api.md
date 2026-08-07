@@ -88,6 +88,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Dropdown" :data="propsData"/>

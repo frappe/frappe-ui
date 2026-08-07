@@ -84,9 +84,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Duration" :data="propsData"/> 
+<PropsTable name="Duration" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

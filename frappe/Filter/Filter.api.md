@@ -6,18 +6,16 @@
 
   const propsData = [
   {
+    name: 'doctype',
+    description: '',
+    required: true,
+    type: 'string'
+  },
+  {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'FiltersDict',
-    default: '{}'
-  },
-  {
-    name: 'docfields',
-    description: '',
-    required: false,
-    type: 'DocField[]',
-    default: '[]'
+    type: 'any[]'
   }
 ]
 
@@ -25,13 +23,13 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: FiltersDict]'
+    type: '[value: any[] | undefined]'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable name="ListFilter" :data="propsData"/>
+<PropsTable name="Filter" :data="propsData"/>
 
 <EmitsTable :data="emitsData"/>

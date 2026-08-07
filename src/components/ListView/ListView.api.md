@@ -6,13 +6,6 @@
 
   const listViewProps = [
   {
-    name: 'options',
-    description: '',
-    required: false,
-    type: 'Record<string, any>',
-    default: '{\n    getRowRoute: null,\n    onRowClick: null,\n    showTooltip: true,\n    selectable: true,\n    resizeColumn: false,\n    rowHeight: 40,\n    emptyState: {\n        title: \'No Data\',\n        description: \'No data available\',\n    },\n}'
-  },
-  {
     name: 'columns',
     description: '',
     required: false,
@@ -31,6 +24,13 @@
     description: '',
     required: true,
     type: 'string'
+  },
+  {
+    name: 'options',
+    description: '',
+    required: false,
+    type: 'Record<string, any>',
+    default: '{\n    getRowRoute: null,\n    onRowClick: null,\n    showTooltip: true,\n    selectable: true,\n    resizeColumn: false,\n    rowHeight: 40,\n    emptyState: {\n        title: \'No Data\',\n        description: \'No data available\',\n    },\n}'
   }
 ]
 
@@ -176,17 +176,17 @@
 
   const listHeaderItemProps = [
   {
+    name: 'item',
+    description: '',
+    required: true,
+    type: 'Record<string, any>'
+  },
+  {
     name: 'debounce',
     description: '',
     required: false,
     type: 'number',
     default: '1000'
-  },
-  {
-    name: 'item',
-    description: '',
-    required: true,
-    type: 'Record<string, any>'
   }
 ]
 
@@ -240,18 +240,11 @@
 
   const listRowItemProps = [
   {
-    name: 'align',
+    name: 'column',
     description: '',
     required: false,
-    type: 'string',
-    default: '\'left\''
-  },
-  {
-    name: 'item',
-    description: '',
-    required: false,
-    type: 'string | number | Record<string, any>',
-    default: '\'\''
+    type: 'Record<string, any>',
+    default: '{}'
   },
   {
     name: 'row',
@@ -261,11 +254,18 @@
     default: '{}'
   },
   {
-    name: 'column',
+    name: 'item',
     description: '',
     required: false,
-    type: 'Record<string, any>',
-    default: '{}'
+    type: 'string | number | Record<string, any>',
+    default: '\'\''
+  },
+  {
+    name: 'align',
+    description: '',
+    required: false,
+    type: 'string',
+    default: '\'left\''
   }
 ]
 
@@ -308,6 +308,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### ListView

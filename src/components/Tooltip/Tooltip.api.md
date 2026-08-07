@@ -133,23 +133,23 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Tooltip
 
-<PropsTable name="Tooltip" :data="tooltipProps"/> 
+<PropsTable name="Tooltip" :data="tooltipProps"/>
 
-<SlotsTable :data="tooltipSlots"/> 
+<SlotsTable :data="tooltipSlots"/>
 
 ### TooltipBubble
 
-<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/> 
+<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/>
 
-<SlotsTable :data="tooltipBubbleSlots"/> 
+<SlotsTable :data="tooltipBubbleSlots"/>
 
 ### TooltipProvider
 
-<PropsTable folder="Tooltip" name="TooltipProvider" :data="tooltipProviderProps"/> 
+<PropsTable folder="Tooltip" name="TooltipProvider" :data="tooltipProviderProps"/>
 
-<SlotsTable :data="tooltipProviderSlots"/> 
-
+<SlotsTable :data="tooltipProviderSlots"/>

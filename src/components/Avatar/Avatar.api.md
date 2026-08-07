@@ -21,7 +21,7 @@
     name: 'size',
     description: 'Controls the overall size of the avatar',
     required: false,
-    type: '"md" | "xs" | "sm" | "lg" | "xl" | "2xl" | "3xl"',
+    type: '"xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl"',
     default: '"md"'
   },
   {
@@ -35,7 +35,7 @@
     name: 'theme',
     description: 'Visual color theme used for the fallback avatar',
     required: false,
-    type: '"gray" | "blue" | "green" | "amber" | "red" | "violet"',
+    type: 'AvatarTheme',
     default: '"gray"'
   }
 ]
@@ -53,8 +53,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Avatar" :data="propsData"/> 
+<PropsTable name="Avatar" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>

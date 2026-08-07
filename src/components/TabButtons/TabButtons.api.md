@@ -75,11 +75,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TabButtons" :data="propsData"/> 
+<PropsTable name="TabButtons" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

@@ -26,7 +26,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Spinner" :data="propsData"/> 
-
+<PropsTable name="Spinner" :data="propsData"/>
