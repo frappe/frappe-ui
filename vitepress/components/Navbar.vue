@@ -6,10 +6,10 @@
 // or replace search via `#search` — or override the whole `#navbar` slot.
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useData, withBase } from 'vitepress'
-import { Button } from 'frappe-ui'
+import { Button, Select, useTheme } from 'frappe-ui'
+import type { Theme } from 'frappe-ui'
 
 import Search from './Docs/Search.vue'
-import { setTheme, useTheme } from '../composables/useTheme'
 
 // `isDocs` is true on prose pages — it drops the "Docs" link.
 defineProps<{ isDocs?: boolean }>()
@@ -32,9 +32,17 @@ onMounted(() => {
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
-const currentTheme = useTheme()
-const toggleTheme = () =>
-  setTheme(currentTheme.value === 'dark' ? 'light' : 'dark')
+const { currentTheme, setTheme } = useTheme()
+
+const themeOptions = [
+  { label: 'Light', value: 'light', icon: 'lucide-sun' },
+  { label: 'Dark', value: 'dark', icon: 'lucide-moon-star' },
+  { label: 'System', value: 'system', icon: 'lucide-monitor' },
+]
+
+const themeIcon = computed(
+  () => themeOptions.find((option) => option.value === currentTheme.value)?.icon ?? 'lucide-monitor',
+)
 </script>
 
 <template>
@@ -99,14 +107,20 @@ const toggleTheme = () =>
         </template>
       </Button>
 
-      <Button variant="ghost" aria-label="Toggle theme" @click="toggleTheme">
-        <template #icon>
-          <span
-            :class="currentTheme === 'dark' ? 'lucide-sun' : 'lucide-moon-star'"
-            class="size-4"
-          />
+      <Select
+        :model-value="currentTheme"
+        :options="themeOptions"
+        size="sm"
+        aria-label="Theme"
+        side="bottom"
+        align="end"
+        class="!h-7 !w-7 !min-h-7 !px-0 !rounded-4 justify-center"
+        @update:model-value="(value) => value && setTheme(value as Theme)"
+      >
+        <template #trigger>
+          <span :class="themeIcon" class="size-4" aria-hidden="true" />
         </template>
-      </Button>
+      </Select>
     </nav>
   </header>
 </template>

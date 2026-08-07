@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { TabButtons, Tooltip } from 'frappe-ui'
-import { useTheme, setTheme } from '../../composables/useTheme'
+import { TabButtons, Tooltip, useColorScheme } from 'frappe-ui'
 import colors from '../../../tailwind/colors.json'
 
 type Mode = 'light' | 'dark'
 
 // The switcher drives the global theme so the whole page matches the example.
-const globalTheme = useTheme()
+const { colorScheme, setColorScheme } = useColorScheme()
 const mode = computed<Mode>({
-  get: () => globalTheme.value,
-  set: (next) => setTheme(next),
+  get: () => (colorScheme.value === 'dark' ? 'dark' : 'light'),
+  set: (next) => setColorScheme(next),
 })
 
 const modeButtons = [
