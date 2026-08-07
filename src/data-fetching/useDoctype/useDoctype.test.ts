@@ -227,3 +227,99 @@ describe('useDoctype concurrency', () => {
     expect(user.insert.isLoading()).toBe(false)
   })
 })
+
+// `data` and `error` belong to the submit that started last, not the one that
+// settled last. In every test below the slow submit starts first and answers
+// second, so an implementation that writes on settle gets it backwards.
+describe('useDoctype overlapping submits', () => {
+  it('keeps the newest response in data when an older submit answers last', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await Promise.all([
+      user.runMethod.submit({ method: 'slow_count', params: { page: 1 } }),
+      user.runMethod.submit({ method: 'quick_count', params: { page: 2 } }),
+    ])
+
+    expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 2 })
+    expect(user.runMethod.error).toBe(null)
+  })
+
+  it('keeps the newest response in data across two keyed setValue submits', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await Promise.all([
+      user.setValue.submit({ name: 'slow-user', email: 'slow@example.com' }),
+      user.setValue.submit({ name: 'quick-user', email: 'quick@example.com' }),
+    ])
+
+    expect(user.setValue.data).toMatchObject({ name: 'quick-user' })
+    expect(user.setValue.error).toBe(null)
+  })
+
+  it('does not let an older failure overwrite the newest submit success', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    let [stale, newest] = await Promise.all([
+      user.runMethod.submit({ method: 'slow_fail' }),
+      user.runMethod.submit({ method: 'quick_count', params: { page: 2 } }),
+    ])
+
+    // The failed submit still reports the failure to its own caller.
+    expect(stale).toBe(null)
+    expect(newest).toEqual({ method: 'quick_count', page: 2 })
+
+    expect(user.runMethod.error).toBe(null)
+    expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 2 })
+  })
+
+  it('does not let an older success clear the newest submit error', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    let [stale, newest] = await Promise.all([
+      user.runMethod.submit({ method: 'slow_count', params: { page: 1 } }),
+      user.runMethod.submit({ method: 'quick_fail' }),
+    ])
+
+    // The successful submit still hands its own response to its own caller.
+    expect(stale).toEqual({ method: 'slow_count', page: 1 })
+    expect(newest).toBe(null)
+
+    expect(user.runMethod.error?.message).toContain('quick_fail failed')
+    expect(user.runMethod.data).toBe(null)
+  })
+
+  it('clears the error when the newest submit succeeds', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await user.runMethod.submit({ method: 'quick_fail' })
+    expect(user.runMethod.error).toBeInstanceOf(Error)
+
+    await user.runMethod.submit({ method: 'quick_count', params: { page: 3 } })
+
+    expect(user.runMethod.error).toBe(null)
+    expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 3 })
+  })
+
+  it('keeps the last successful data after a failure', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await user.runMethod.submit({ method: 'quick_count', params: { page: 1 } })
+    await user.runMethod.submit({ method: 'quick_fail' })
+
+    expect(user.runMethod.error?.message).toContain('quick_fail failed')
+    expect(user.runMethod.data).toEqual({ method: 'quick_count', page: 1 })
+  })
+
+  it('holds the error until the next submit settles, instead of clearing it at the start', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    await user.runMethod.submit({ method: 'quick_fail' })
+    expect(user.runMethod.error).toBeInstanceOf(Error)
+
+    let retry = user.runMethod.submit({ method: 'slow_count' })
+    expect(user.runMethod.error).toBeInstanceOf(Error)
+
+    await retry
+    expect(user.runMethod.error).toBe(null)
+  })
+})

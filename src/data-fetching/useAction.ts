@@ -29,9 +29,23 @@ export interface UseActionOptions<TResponse, TParams> {
  * caller silently receives the second one's answer (or `null`).
  *
  * The state left behind is aggregate on purpose. `loading` is true while any
- * submit is in flight, `error` and `data` come from the submit that settled
- * last, and `isLoading(key)` answers for one target so a list can show a
- * spinner on the row it belongs to.
+ * submit is in flight, and `isLoading(key)` answers for one target so a list
+ * can show a spinner on the row it belongs to.
+ *
+ * `data` and `error` belong to the newest submit, not the one that settled
+ * last. Every submit takes a sequence number, and only the submit holding the
+ * highest number may write them. An older submit that comes back late is
+ * dropped whole: it writes no `data`, writes no `error` and clears nothing. It
+ * still resolves to its own caller with its own response.
+ *
+ * The winning submit writes both refs together, so they never disagree: on
+ * success `data` is the response and `error` is null, on failure `error` is set
+ * and `data` keeps the last successful response. `data` is never reset to null
+ * by a failure — read `error` to tell a failed submit from a successful one.
+ *
+ * Failures reach the caller down two different channels. A failed `validate`
+ * rejects the returned promise. A failed request resolves it with `null`. Both
+ * set `error`.
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
   options: UseActionOptions<TResponse, TParams>,
@@ -45,6 +59,10 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
   const pendingKeys = ref(new Map<string, number>())
 
   const loading = computed(() => pending.value > 0)
+
+  // The sequence number of the submit that started most recently. Only that
+  // submit may write `data` and `error`.
+  let lastStarted = 0
 
   function isLoading(target: string) {
     return (pendingKeys.value.get(target) ?? 0) > 0
@@ -72,17 +90,22 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
   }
 
   async function submit(params: TParams): Promise<TResponse | null> {
+    // Take a number. Holding the highest one is what earns the right to write
+    // `data` and `error`, checked again when this submit settles.
+    let sequence = (lastStarted += 1)
+    let isNewest = () => sequence === lastStarted
+
     if (validate) {
       let message = validate(params)
       if (message) {
         let validationError = new Error(message)
+        // `validate` is synchronous, so this submit is still the newest one.
         error.value = validationError
         return Promise.reject(validationError)
       }
     }
 
     let target = key ? key(params) : undefined
-    error.value = null
     startPending(target)
 
     // Detached so the per-submit call is not tied to whichever component
@@ -108,11 +131,22 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
 
       let response = await call.submit(body ? body(params) : params)
       let callError = (call.error ?? null) as Error | null
+
+      // A newer submit started while this one was in flight, so this answer is
+      // stale. It goes to its own caller and nowhere else — writing it now, or
+      // clearing the newer submit's error, would undo a fresher answer.
+      if (!isNewest()) {
+        return callError ? null : (response as TResponse)
+      }
+
       if (callError) {
+        // `data` keeps the last successful response. `error` is what tells a
+        // failed submit apart from a successful one.
         error.value = callError
         return null
       }
       data.value = response as TResponse
+      error.value = null
       return response as TResponse
     } finally {
       finishPending(target)
