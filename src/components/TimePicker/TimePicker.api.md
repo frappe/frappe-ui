@@ -250,11 +250,6 @@
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
@@ -263,6 +258,11 @@
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   },
   {
     name: 'close',

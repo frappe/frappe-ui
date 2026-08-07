@@ -250,11 +250,6 @@
     type: '[value: ComboboxOptionValue | null]'
   },
   {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -268,6 +263,11 @@
     name: 'focus',
     description: 'Fired when the input receives focus.',
     type: '[event: FocusEvent]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:selectedOption',

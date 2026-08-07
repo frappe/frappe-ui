@@ -235,14 +235,14 @@
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   }
 ]
 
@@ -483,14 +483,14 @@
     type: '[value: DateRangeValue]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: DateRangeValue]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: DateRangeValue]'
   }
 ]
 
@@ -746,14 +746,14 @@
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   }
 ]
 </script>
