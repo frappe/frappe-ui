@@ -20,7 +20,7 @@ This is the rulebook that governs API design across `frappe-ui`. Every principle
 
 ### P1. Name behaviors, not interactions
 
-**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
+**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. The same holds for every name an export hands back — composable return members, `defineExpose` members, utility and plugin export names. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
 
 Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), don't rename it. The principle applies when the component layers its own state or intent above the raw event.
 
