@@ -172,4 +172,75 @@ describe('frappeRequest error handling', () => {
 
     expect(onError).toHaveBeenCalledTimes(1)
   })
+
+  // The failure only `transformError` sees. Frappe answers an expired session
+  // with 200 and its login page, so the response is ok and `response.json()`
+  // throws. Fixing the double-report by narrowing what the rejection handler
+  // could see would have dropped this one entirely.
+  it('reports an ok response that fails to parse, exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            json: async () => {
+              throw new SyntaxError('Unexpected token < in JSON at position 0')
+            },
+          }) as unknown as Response,
+      ),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow(
+      SyntaxError,
+    )
+
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('frappeRequest method-to-url mapping', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  function mockFetchOk() {
+    const fetchMock = vi.fn(
+      async () => ({ ok: true, json: async () => ({ message: 'ok' }) }) as Response,
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  it('leaves an absolute url alone', async () => {
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'https://other.test/api/method/ping' })
+
+    expect(getFetchCall(fetchMock).url).toBe(
+      'https://other.test/api/method/ping',
+    )
+  })
+
+  // `startsWith('http')` matched the four letters, not a scheme, so a dotted
+  // method in an app whose name begins with them skipped the prefix and was
+  // fetched as a relative path.
+  it('prefixes a dotted method whose app name starts with http', async () => {
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'http_utils.api.run' })
+
+    expect(getFetchCall(fetchMock).url).toBe('/api/method/http_utils.api.run')
+  })
+
+  it('applies requestBaseUrl to that method too', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test')
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'http_utils.api.run' })
+
+    expect(getFetchCall(fetchMock).url).toBe(
+      'https://remote.frappe.test/api/method/http_utils.api.run',
+    )
+  })
 })

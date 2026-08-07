@@ -397,7 +397,18 @@ nothing exported it, so a consumer could not type a `catch`.
 
 `request()` attached `transformError` with a trailing `.catch`, which also
 caught what `transformResponse` threw. Every failed HTTP response therefore
-ran `onError` twice. It now runs once. `frappeRequest` also gained an
+ran `onError` twice. It now runs once, because `frappeRequest` marks an error
+it has already reported rather than because the rejection handler sees less.
+That distinction matters: an *ok* response whose body will not parse — Frappe
+answers an expired session with 200 and its login page, so `response.json()`
+throws — is a failure only that handler sees, and it still reaches `onError`.
+
+**A method name starting with `http` skipped the `/api/method/` prefix (fix).**
+The absolute-URL check was `url.startsWith('http')`, which matches the four
+letters rather than a scheme, so `http_utils.api.run` was fetched as a relative
+path. It now matches `https?://`.
+
+`frappeRequest` also gained an
 explicit return type and passes its type argument through, so
 `frappeRequest<Foo>()` resolves to `Foo` rather than `unknown`.
 

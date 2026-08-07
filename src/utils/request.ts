@@ -57,13 +57,8 @@ export function request<TResponse = unknown>(
     body,
     signal: options.signal,
     ...(options.credentials ? { credentials: options.credentials } : {}),
-  }).then(
-    // Two-argument `then` rather than a trailing `.catch`: the rejection
-    // handler must see transport failures only. A trailing `.catch` also
-    // catches whatever `transformResponse` throws, which ran `transformError`
-    // — and so any caller's `onError` — a second time for every failed HTTP
-    // response.
-    (response) => {
+  })
+    .then((response) => {
       if (options.transformResponse) {
         return options.transformResponse(response, options)
       }
@@ -77,12 +72,22 @@ export function request<TResponse = unknown>(
         error.response = response
         throw error
       }
-    },
-    (error) => {
+    })
+    // A trailing `.catch`, so `transformError` sees everything that can fail:
+    // transport errors, and whatever `transformResponse` throws. The latter
+    // matters for an *ok* response that still fails to parse — a 200 carrying
+    // Frappe's login HTML after the session expired makes `response.json()`
+    // throw, and that must reach the caller's error handler.
+    //
+    // Reporting it twice is the failure mode this shape has to avoid, since
+    // `transformResponse` is also where `frappeRequest` builds and throws its
+    // own error for a non-ok response. That is handled where the reporting
+    // lives, by marking an error as already reported — not here by narrowing
+    // what `transformError` can see.
+    .catch((error) => {
       if (options.transformError) {
         return options.transformError(error)
       }
       throw error
-    },
-  )
+    })
 }
