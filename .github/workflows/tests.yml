@@ -51,18 +51,12 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Regenerate the API tables
-        run: yarn docs:gen
-
+      # Compares the committed tables against a fresh run row by row, keyed by
+      # name. Row order is not compared: vue-component-meta returns props, emits
+      # and union members in checker-resolution order, which shifts with how
+      # much of the program is loaded.
       - name: Check the API tables match the source
-        run: |
-          # --intent-to-add puts newly generated files into the diff as well, so
-          # a new component's table cannot slip through as an untracked file.
-          git add --intent-to-add .
-          if ! git diff --exit-code; then
-            echo "::error::The generated API tables are out of date. Run 'yarn docs:gen' with no arguments and commit the result."
-            exit 1
-          fi
+        run: yarn docs:check
 
   component-test:
     runs-on: ubuntu-latest
