@@ -12,6 +12,4 @@ export { theme } from './theme'
 // Shared components (Layout, CommandPalette, Search, Sidebar, …) plus the
 // `isActiveLink` / `getSidebarList` helpers and Sidebar* types.
 export * from './components'
-// Theme composables (useTheme / setTheme).
-export * from './composables'
 export { state } from './state'
