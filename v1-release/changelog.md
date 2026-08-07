@@ -354,6 +354,10 @@ only.
 Existing `alt` values still parse and still round-trip untouched. They
 just do not display as a caption any more.
 
+The editor no longer edits `alt` at all. The caption field used to write
+it; it now writes `caption`, and no other control took over `alt`. Set it
+from your own content pipeline until an alt field lands.
+
 There is deliberately no fallback from `caption` to `alt`. Stored `alt`
 values are mostly upload filenames and emoji shortcodes, and a real
 caption cannot be told apart from those automatically. Showing all of
