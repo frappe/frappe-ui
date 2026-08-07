@@ -164,6 +164,11 @@ export {
   shellScrollContainer,
   useShellScrolled,
 } from './composables/useShellScrolled'
+export {
+  useSheetDrag,
+  type UseSheetDrag,
+  type UseSheetDragOptions,
+} from './composables/useSheetDrag'
 
 // Directives
 export { vFocus } from './directives/focus'

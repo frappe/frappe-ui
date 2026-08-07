@@ -24,7 +24,10 @@ function setCursorAt(editor: Editor, pos: number): void {
 /**
  * Insert a paragraph immediately after the media node (Enter inside caption).
  */
-export function createParagraphAfterMedia(editor: Editor, getPos: GetPos): void {
+export function createParagraphAfterMedia(
+  editor: Editor,
+  getPos: GetPos,
+): void {
   const pos = safeGetPos(getPos)
   if (pos === null) return
   editor.commands.focus()

@@ -27,6 +27,7 @@ import {
   type UploadFunction,
 } from '#molecules/editor/extensions/shared/media-upload-engine'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
+import { captionAttribute } from '#molecules/editor/extensions/shared/media-attributes'
 import { findNodeByUploadId } from '#molecules/editor/extensions/shared/node-view'
 import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
 import { videoConfig, videoEngine } from './video-config'
@@ -95,7 +96,9 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   addAttributes() {
     return {
       src: { default: null },
+      /** Screen-reader description. Never rendered as visible text. */
       alt: { default: null },
+      caption: captionAttribute,
       title: { default: null },
       width: { default: null },
       height: { default: null },
