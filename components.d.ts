@@ -127,7 +127,6 @@ declare module 'vue' {
     MultiSelect: typeof import('./src/components/MultiSelect/MultiSelect.vue')['default']
     'MultiSelect.playground': typeof import('./src/components/MultiSelect/MultiSelect.playground.vue')['default']
     MultiSelectResults: typeof import('./src/components/MultiSelect/MultiSelectResults.vue')['default']
-    NestedPopover: typeof import('./src/components/ListFilter/NestedPopover.vue')['default']
     NewEventModal: typeof import('./src/components/Calendar/NewEventModal.vue')['default']
     NotificationsPanel: typeof import('./src/components/SettingsDialog/stories/panels/NotificationsPanel.vue')['default']
     NumberChart: typeof import('./src/components/Charts/NumberChart.vue')['default']
