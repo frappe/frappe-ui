@@ -52,6 +52,7 @@ function searchMembersApi(query: string): Promise<Member[]> {
 }
 
 const value = ref<string[]>([])
+const query = ref('')
 const results = ref<Member[]>([])
 const loading = ref(false)
 const knownById = ref(new Map<string, Member>())
@@ -86,13 +87,19 @@ const options = computed<Member[]>(() => {
 })
 
 function onOpen(isOpen: boolean) {
-  if (isOpen && results.value.length === 0) fetchMembers('')
+  if (!isOpen) return
+  // Listening for `@update:query` hands ownership of the query over, so the
+  // open-time reset MultiSelect does for an unbound query is ours to do.
+  // Without it the last search text stays in the box.
+  query.value = ''
+  if (results.value.length === 0) fetchMembers('')
 }
 </script>
 
 <template>
   <MultiSelect
     v-model="value"
+    v-model:query="query"
     :options="options"
     :loading="loading"
     :filterable="false"

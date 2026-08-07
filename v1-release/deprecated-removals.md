@@ -10,13 +10,10 @@ pulls a component in with it. Member-level removals (individual props, slots,
 and emits on components that survive) go in the published migration guide,
 [`docs/content/docs/migration.md`](../docs/content/docs/migration.md).
 
-`Autocomplete` is the largest item and has its own doc:
-[`autocomplete-removal.md`](./autocomplete-removal.md).
-
 ## The list
 
 Verified against `src/index.ts` on 2026-07-26. Every row below is **still
-exported today**.
+exported today**, except the two marked done.
 
 | Export                            | Lives in                                                             | Replaced by                                                    | Warns at runtime                                                                                                  |
 | --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -31,23 +28,22 @@ exported today**.
 | `ThemeSwitcher` (whole barrel)    | `src/components/ThemeSwitcher/`                                      | `Select` plus the `useColorScheme` composable                        | yes                                                                                                               |
 | TextEditor root exports           | `src/components/TextEditor/index.ts`                                 | the `frappe-ui/editor` subpath                                 | no                                                                                                                |
 | TextEditor extension barrels      | `src/components/TextEditor/extensions/{image,suggestion}`            | extensions from `frappe-ui/editor`                             | no                                                                                                                |
-| `FormControl type="autocomplete"` | `src/components/FormControl/` (`types.ts` union + `FormControl.vue`) | `Combobox`                                                     | yes                                                                                                               |
-| `Autocomplete` (whole barrel)     | `src/components/Autocomplete/`                                       | `Combobox` (single) / `MultiSelect` (multiple)                 | yes                                                                                                               |
+| ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
+| ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
 
 Twelve of the thirteen rows come from the one
 `// Deprecated component compatibility` block in `src/index.ts` (lines 103–132).
 Two rows sit outside it and are the easy ones to miss:
 
 - **`FormControl type="autocomplete"`** is a value in a prop union, not an
-  export, so it does not appear in that block. It goes at the same time as
-  `Autocomplete` — removing it narrows `FormControl`'s `type` union (a second
-  breaking change) and lets `Autocomplete/deprecationKey.ts` and the `provide()`
+  export, so it does not appear in that block. It went at the same time as
+  `Autocomplete` — removing it narrowed `FormControl`'s `type` union (a second
+  breaking change) and let `Autocomplete/deprecationKey.ts` and the `provide()`
   in `FormControl.vue` disappear with it.
 - **`Autocomplete`** used to sit among the ordinary form controls in
-  `src/index.ts` with no `@deprecated` JSDoc, even though it warns on mount and
-  has its own removal doc — so ADR-0008's mechanical rule missed the largest
-  removal on the list. It now carries the marker and sits in the deprecated
-  block with everything else.
+  `src/index.ts` with no `@deprecated` JSDoc, even though it warned on mount —
+  so ADR-0008's mechanical rule missed the largest removal on the list. It
+  carried the marker into the deprecated block before being deleted.
 
 The TextEditor rows are one deletion each in `src/index.ts`, but seven
 `@deprecated` names behind them (`default`, `TextEditor`,
@@ -85,5 +81,5 @@ Each row needs the same three things, per ADR-0008:
 - a changelog entry in [`changelog.md`](./changelog.md)
 - a before/after example in the migration guide where the shape changed
   meaningfully
-- no remaining internal call sites in `src/` (the reason `Autocomplete` is
-  blocked)
+- no remaining internal call sites in `src/` — migrate them first, since that
+  migration is also the proof the replacement is sufficient

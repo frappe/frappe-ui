@@ -262,8 +262,8 @@ second time and drops fuzzy, ranked, or id-based matches. Pass
 `:filterable="false"` to turn it off. Apps that forked the component for this
 reason can move back.
 
-For the deprecated `Autocomplete`, see
-[Autocomplete (deprecated)](#autocomplete-deprecated).
+For the removed `Autocomplete`, see
+[Autocomplete (removed)](#autocomplete-removed).
 
 ## Popover / HoverCard
 
@@ -497,31 +497,45 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
   `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
-## Autocomplete (deprecated)
+## Autocomplete (removed)
 
-`Autocomplete` still ships (with a one-time dev `console.warn`) but will be
-removed in a future major release. It merged single- and multi-select via the
+`Autocomplete` is gone in v1. It merged single- and multi-select via the
 `multiple` boolean; v1 splits them: [`Combobox`](./components/combobox) for
 single, [`MultiSelect`](./components/multiselect) for multiple.
 
-The model value changes shape. `Autocomplete` took and emitted the full option
-object; the new components model the value only. `Combobox` is `string | null`
-and `MultiSelect` is `string[]`. To read the full option, listen to `Combobox`'s
-`@update:selected-option`.
+The import fails, so your build tells you where every call site is. Three
+things inside those call sites change quietly instead, and each has a
+before/after below: the **v-model payload**, the **group key**, and the
+**`open` slot prop**, which was a function and is now a boolean.
+
+Sweep your codebase:
+
+```bash
+grep -rln '<Autocomplete\b' src --include='*.vue'   # find usages
+grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
+grep -rn 'items:' src --include='*.vue'             # grouped options — see below
+```
 
 | Before (`Autocomplete`)           | After                                     |
 | --------------------------------- | ----------------------------------------- |
 | `:multiple="false"` (default)     | use `Combobox`                            |
 | `:multiple="true"`                | use `MultiSelect`                         |
 | `v-model` (option or value)       | `v-model` (value / value array)           |
-| `@change`                         | `@update:modelValue`                      |
+| `@change`                         | `@update:modelValue` (`@update:selectedOption` for the option) |
 | grouped `{ group, items }`        | grouped `{ group, options }`              |
 | `placement` (string)              | `side` + `align`                          |
 | `:showFooter`                     | `#footer` slot (MultiSelect has built-in) |
 | `:bodyClasses`                    | `data-slot` CSS                           |
 | `:maxOptions`                     | no equivalent                             |
-| `#target`                         | `#trigger`                                |
+| `#target="{ togglePopover }"`     | `#trigger`, with no click handler (`open` is now a boolean) |
 | `#prefix` / `#suffix` / `#item-*` | same (`#suffix` now replaces chevron)     |
+
+### The v-model payload inverts
+
+`Autocomplete` took and emitted the **whole option object**; both replacements
+model the **value only** — `Combobox` is `string | number | null`, `MultiSelect`
+is `(string | number)[]`. Code that reads `country.value` off the model gets
+`undefined` rather than a type error, since the model was loosely typed.
 
 ```vue
 <!-- Before -->
@@ -529,24 +543,206 @@ and `MultiSelect` is `string[]`. To read the full option, listen to `Combobox`'s
 <!-- country === { label: 'India', value: 'in' } -->
 
 <!-- After -->
-<Combobox
-  v-model="country"
-  :options="countries"
-  @update:model-value="onChange"
-/>
+<Combobox v-model="country" :options="countries" @update:model-value="onChange" />
 <!-- country === 'in' -->
 ```
 
-Sweep your codebase:
+Still need the whole option — for its `description`, an id field, anything
+beyond the value? Listen to `@update:selectedOption`, which carries it:
 
-```bash
-grep -rln '<Autocomplete\b' src --include='*.vue'   # find usages
-grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
+```vue
+<Combobox
+  v-model="country"
+  :options="countries"
+  @update:selected-option="(option) => (label = option?.label ?? '')"
+/>
 ```
 
-`FormControl` itself is not deprecated, but its `type="autocomplete"` value is.
-Switch to `type="combobox"`, or use the standalone
-[`Combobox`](./components/combobox).
+### Grouped options: `items` → `options`
+
+The key holding a group's children is now `options`, matching the top-level
+prop. Both components throw and name the group if they find the old key, so
+this one is caught the first time the picker opens — but only then, not at
+build time.
+
+```vue
+<!-- Before -->
+<Autocomplete :options="[{ group: 'Asia', items: [india, japan] }]" />
+
+<!-- After -->
+<Combobox :options="[{ group: 'Asia', options: [india, japan] }]" />
+```
+
+### `#target` → `#trigger`, and drop the click handler
+
+The slot is renamed, and the wiring inside it changes. `Autocomplete` handed
+`#target` a `togglePopover` function you had to call yourself. `Combobox` and
+`MultiSelect` attach the open toggle to the `#trigger` element for you, so the
+handler is not just unnecessary — a `togglePopover()` carried through the
+rename throws `togglePopover is not a function` on every click. The popover
+still opens, because the component's own handler already ran, so this reads as
+"works, but noisy" until someone looks at the console.
+
+```vue
+<!-- Before -->
+<Autocomplete :options="fields">
+  <template #target="{ togglePopover }">
+    <Button label="Add filter" @click="togglePopover()" />
+  </template>
+</Autocomplete>
+
+<!-- After -->
+<Combobox :options="fields">
+  <template #trigger>
+    <Button label="Add filter" />
+  </template>
+</Combobox>
+```
+
+**`open` changed from a function to a boolean, and that part is silent.** On
+`#target` it was the function that opened the popover, so anything reading it
+as a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading a
+function object and was **always truthy**. On `#trigger` it is the real open
+state, so those expressions start doing what they always looked like they did.
+
+`#trigger` receives
+`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`. Use
+`setOpen` for a trigger that has to open the popover from somewhere other than
+its own click.
+
+### The default trigger is `trigger="button"`
+
+`Autocomplete` rendered a button showing the selection, with the search box
+inside the popover. `Combobox` defaults to `trigger="input"` — the trigger
+_is_ the search field. Pass `trigger="button"` to keep the old shape.
+
+## FormControl `type="autocomplete"` (removed)
+
+**This one is silent.** `FormControl` is a dispatcher: with the `autocomplete`
+case gone, the type falls through to `TextInput` and is still forwarded as an
+html input type. The result is `<input type="autocomplete">`, which every
+browser renders as a plain text box. No build error, no runtime error — just a
+picker that turned into a text field. A dev-only `console.error` names it.
+
+```vue
+<!-- Before -->
+<FormControl type="autocomplete" :options="countries" v-model="country" />
+<!-- country === { label: 'India', value: 'in' } -->
+
+<!-- After -->
+<FormControl type="combobox" :options="countries" v-model="country" />
+<!-- country === 'in' -->
+```
+
+The v-model payload inverts here too, for the same reason as above. Or use the
+standalone [`Combobox`](./components/combobox), which exposes the full set of
+props and slots without the wrapper.
+
+## HTTP transport and the `FrappeUI` plugin
+
+v1 has one HTTP path. `frappeRequest` is it; `call` is a thin wrapper over it
+for the common "POST to a whitelisted method" case. `request`, `createCall` and
+`initSocket` are gone, and `app.use(FrappeUI)` is down to a single option.
+
+| Before                          | After                                        |
+| ------------------------------- | -------------------------------------------- |
+| `import { request }`            | `import { frappeRequest }`                   |
+| `createCall(options)`           | wrap `call` yourself, or use `frappeRequest` |
+| `import initSocket`             | your own `io(...)` connection                |
+| `app.use(FrappeUI, { config })` | `setConfig(key, value)` per entry            |
+| `app.use(FrappeUI, { call })`   | `import { call }` where you need it          |
+| `this.$resources` (implicit)    | `app.use(FrappeUI, { resources: true })`     |
+
+The first three are build failures — your bundler or type-check names them. The
+rest are the silent ones.
+
+### `call` now honours `setConfig`
+
+`call` built its own `fetch` and never read the config, so `requestBaseUrl` and
+`requestHeaders` were quietly ignored on every `call()` while `frappeRequest`
+respected them. That inconsistency is fixed, which means a `call` in an app that
+sets either one now behaves differently — usually the way you assumed it already
+did. Two knock-on effects worth checking:
+
+- If you set `requestBaseUrl` for local dev against a remote site, `call` now
+  goes to the remote site too, with `credentials: 'include'`.
+- If you set `serverMessagesHandler`, `_server_messages` returned by a `call`
+  now reach it. Previously only `frappeRequest` and the resources fed it, so
+  expect toasts from paths that used to be silent.
+
+`call`'s signature, the value it resolves to, and the
+`{ response, status, error }` object passed to `onError` are all unchanged.
+
+### The plugin's `config` option is gone
+
+```js
+// Before
+app.use(FrappeUI, {
+  config: {
+    resourceFetcher: frappeRequest,
+    defaultListUrl: 'gameplan.extends.client.get_list',
+    systemTimezone: window.system_timezone || null,
+  },
+})
+
+// After
+setConfig('resourceFetcher', frappeRequest)
+setConfig('defaultListUrl', 'gameplan.extends.client.get_list')
+setConfig('systemTimezone', window.system_timezone || null)
+app.use(FrappeUI)
+```
+
+Passing a removed option is not a type error if your `main.js` is plain JS, so
+the plugin logs a dev-mode warning naming the option it ignored. Note that
+`setConfig` only accepts keys of `FrappeUIConfig` — if you were passing a key
+that isn't one, it was never read and can be deleted.
+
+### `$resources` is opt-in
+
+The plugin used to install the v1 resources Options API mixin by default, so
+`this.$resources`, `$getResource`, `$getDoc`, `$getListResource` and
+`$refetchResource` existed in any app that called `app.use(FrappeUI)`. It now
+installs only when asked:
+
+```js
+app.use(FrappeUI, { resources: true })
+```
+
+Nothing changes for Composition API code — `createResource`,
+`createListResource` and `createDocumentResource` never went through the plugin.
+You need the option only if you declare a `resources: { … }` block in a
+component's options.
+
+You will not have to work this out from a blank screen. A component that
+declares `resources` without the option throws on creation, naming itself and
+the fix, and reading `this.$resources` throws too. Both throw in production
+builds as well as dev — this is a break that has no quiet failure mode.
+
+### `initSocket` is gone
+
+It was a nine-line `io()` wrapper, and the plugin created one by default — which
+meant apps that also built their own socket held two live connections per page
+load. If you relied on the `$socket` global the plugin set, create the
+connection yourself:
+
+```js
+import { io } from 'socket.io-client'
+
+const host = window.location.hostname
+const port = window.location.port ? ':9000' : ''
+const protocol = port ? 'http' : 'https'
+const siteName = import.meta.env.DEV ? host : window.site_name
+
+app.config.globalProperties.$socket = io(
+  `${protocol}://${host}${port}/${siteName}`,
+  { withCredentials: true },
+)
+```
+
+Until you do, reading `this.$socket` throws with that instruction rather than
+returning `undefined` and crashing in whatever realtime handler reads it next.
+Assigning your own replaces the guard. The same applies to `$call`, the other
+global the plugin used to install — import `call` from `frappe-ui` instead.
 
 ## FAQ
 

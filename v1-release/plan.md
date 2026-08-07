@@ -339,8 +339,8 @@ See [`../spec/selection.md`](../spec/selection.md) and
 
 Key items:
 
-- remove `Autocomplete` in favor of `Combobox` / `MultiSelect` — see
-  [`autocomplete-removal.md`](./autocomplete-removal.md)
+- ~~remove `Autocomplete` in favor of `Combobox` / `MultiSelect`~~ — done, see
+  [#926](https://github.com/frappe/frappe-ui/issues/926)
 - finalize `ItemListRow` as the shared row primitive
 - finalize `Select`, `Combobox`, `Dropdown`, `MultiSelect`, `FormControl`, and `Switch`
 - align the family on `v-model`, `v-model:open`, shared trigger/item slot vocabulary, and `@update:query`

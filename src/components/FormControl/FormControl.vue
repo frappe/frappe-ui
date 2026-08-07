@@ -13,19 +13,16 @@
   </component>
 </template>
 <script setup lang="ts">
-import { useAttrs, computed, provide, watchEffect } from 'vue'
+import { useAttrs, computed, watchEffect } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
 import { Select } from '../Select'
 import { Textarea } from '../Textarea'
 import { Checkbox } from '../Checkbox'
-import { Autocomplete } from '../Autocomplete'
-import { autocompleteDeprecationSuppressed } from '../Autocomplete/deprecationKey'
 import { Combobox } from '../Combobox'
 import { MultiSelect } from '../MultiSelect'
 import { DatePicker, DateRangePicker, DateTimePicker } from '../DatePicker'
 import { TimePicker } from '../TimePicker'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { FormControlProps } from './types'
 
 defineOptions({
@@ -39,13 +36,23 @@ const props = withDefaults(defineProps<FormControlProps>(), {
   variant: 'subtle',
 })
 
-provide(autocompleteDeprecationSuppressed, true)
-
-watchEffect(() => {
-  if (props.type === 'autocomplete') {
-    warnDeprecated('FormControl type="autocomplete"', 'Combobox')
-  }
-})
+// `type="autocomplete"` is gone, and its removal is the one silent break in
+// the set: with the case dropped, `resolvedComponent` falls through to
+// `TextInput` and `forwardedAttrs` still forwards `type="autocomplete"`, so
+// the browser renders a plain text box and nothing complains. Say so.
+//
+// This is a removal signpost, not a working deprecated member, so it does not
+// re-open ADR-0008.
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    if ((props.type as string) === 'autocomplete') {
+      console.error(
+        '[FormControl] type="autocomplete" was removed in 1.0.0. ' +
+          'Use type="combobox".',
+      )
+    }
+  })
+}
 
 const attrs = useAttrs()
 
@@ -59,7 +66,6 @@ const fillWidth = computed(() =>
     'select',
     'combobox',
     'multiselect',
-    'autocomplete',
     'date',
     'daterange',
     'datetime',
@@ -75,8 +81,6 @@ const resolvedComponent = computed(() => {
       return Combobox
     case 'multiselect':
       return MultiSelect
-    case 'autocomplete':
-      return Autocomplete
     case 'textarea':
       return Textarea
     case 'checkbox':
@@ -110,13 +114,12 @@ const forwardedAttrs = computed(() => {
   if (props.required !== undefined) out.required = props.required
 
   // TextInput needs the html input `type`; the dispatcher consumes the
-  // composite types (select/combobox/multiselect/textarea/checkbox/autocomplete)
+  // composite types (select/combobox/multiselect/textarea/checkbox)
   // and lets the rest fall through to <TextInput :type="...">.
   const composite = new Set([
     'select',
     'combobox',
     'multiselect',
-    'autocomplete',
     'textarea',
     'checkbox',
     'date',
@@ -140,7 +143,7 @@ defineSlots<{
   description?: () => any
   /** Custom label slot (replaces label prop). Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
-  /** Custom slot for autocomplete items prefix (if using Autocomplete type) */
+  /** Per-item prefix content, forwarded to the combobox/multiselect rows */
   'item-prefix'?: (props: { item: any }) => any
   /** Default slot override for full input rendering */
   default?: () => any
