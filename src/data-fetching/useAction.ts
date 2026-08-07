@@ -46,7 +46,7 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
 
   const loading = computed(() => pending.value > 0)
 
-  function isKeyLoading(target: string) {
+  function isLoading(target: string) {
     return (pendingKeys.value.get(target) ?? 0) > 0
   }
 
@@ -120,5 +120,5 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
     }
   }
 
-  return { data, error, loading, isKeyLoading, submit }
+  return { data, error, loading, isLoading, submit }
 }

@@ -199,7 +199,7 @@ export function useList<T extends { name: string }>(
     error: setValueAction.error,
     loading: setValueAction.loading,
     /** True while a save for this row is in flight. */
-    isLoading: (name: string) => setValueAction.isKeyLoading(name),
+    isLoading: (name: string) => setValueAction.isLoading(name),
     submit: setValueAction.submit,
   })
 
@@ -223,7 +223,7 @@ export function useList<T extends { name: string }>(
     error: deleteAction.error,
     loading: deleteAction.loading,
     /** True while a delete for this row is in flight. */
-    isLoading: (name: string) => deleteAction.isKeyLoading(name),
+    isLoading: (name: string) => deleteAction.isLoading(name),
     submit: deleteAction.submit,
   })
 

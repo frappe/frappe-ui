@@ -66,7 +66,7 @@ function useDelete(doctype: string, options: UseDoctypeOptions = {}) {
     error: action.error,
     loading: action.loading,
     /** True while a delete for this document name is in flight. */
-    isLoading: (name: string) => action.isKeyLoading(name),
+    isLoading: (name: string) => action.isLoading(name),
     submit: action.submit,
   })
 }
@@ -97,7 +97,7 @@ function useRunDocMethod(doctype: string, options: UseDoctypeOptions = {}) {
     loading: action.loading,
     /** True while this method is running on this document. */
     isLoading: (name: string, method: string) =>
-      action.isKeyLoading(`${name}/${method}`),
+      action.isLoading(`${name}/${method}`),
     submit: action.submit,
   })
 }
@@ -125,7 +125,7 @@ function useRunMethod(doctype: string, options: UseDoctypeOptions = {}) {
     error: action.error,
     loading: action.loading,
     /** True while this method is running. */
-    isLoading: (method: string) => action.isKeyLoading(method),
+    isLoading: (method: string) => action.isLoading(method),
     submit: action.submit,
   })
 }
@@ -155,7 +155,7 @@ function useSetValue<T extends Record<string, any>>(
     error: action.error,
     loading: action.loading,
     /** True while a save for this document name is in flight. */
-    isLoading: (name: string) => action.isKeyLoading(name),
+    isLoading: (name: string) => action.isLoading(name),
     submit: action.submit,
   })
 }
