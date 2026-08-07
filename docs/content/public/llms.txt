@@ -37,7 +37,7 @@ Two cross-cutting conventions to know before reading anything else:
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
 - [ErrorMessage](https://ui.frappe.io/docs/components/errormessage): inline error display.
 - [FileUploader](https://ui.frappe.io/docs/components/fileuploader): Frappe-native file upload with progress.
-- [FormControl](https://ui.frappe.io/docs/components/formcontrol): the default labeled-field wrapper; pick `type` to render text/textarea/select/checkbox/autocomplete with the shared `label`/`description`/`error`/`required` contract.
+- [FormControl](https://ui.frappe.io/docs/components/formcontrol): the default labeled-field wrapper; pick `type` to render text/textarea/select/checkbox/combobox with the shared `label`/`description`/`error`/`required` contract.
 - [ItemListRow](https://ui.frappe.io/docs/components/itemlistrow): single-row list item primitive.
 - [ListView](https://ui.frappe.io/docs/components/listview): table/grid list with selection, sorting, virtualization.
 - [MonthPicker](https://ui.frappe.io/docs/components/monthpicker): month input.
