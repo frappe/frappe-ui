@@ -67,7 +67,6 @@ export { default as Dialogs } from './components/Dialogs.vue'
 export * from './components/Dropdown'
 export * from './components/HoverCard'
 export * from './components/Popover'
-export type { PopoverAlign, PopoverSide } from './components/Popover/types'
 export {
   dialog,
   type ConfirmArgs,
@@ -83,7 +82,6 @@ export * from './components/ItemListRow'
 // Legacy ListView family. Do not deprecate until `frappe-ui/list` reaches parity.
 export * from './components/ListView'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
-export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export * from './components/Calendar'
 export * from './components/Tree'
 

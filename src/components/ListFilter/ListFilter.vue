@@ -1,6 +1,6 @@
 <template>
-  <NestedPopover>
-    <template #target>
+  <Popover>
+    <template #trigger>
       <Button label="Filter">
         <template #prefix><FilterIcon class="h-4" /></template>
         <template v-if="filters.length" #suffix>
@@ -12,11 +12,8 @@
         </template>
       </Button>
     </template>
-    <template #body="{ close }">
-      <div
-        class="my-2 rounded-lg border border-gray-100 bg-surface-base shadow-xl"
-      >
-        <div class="min-w-[400px] p-2">
+    <template #default="{ close }">
+      <div class="min-w-[400px] p-2">
           <div
             v-if="filters.length"
             v-for="(filter, i) in filters"
@@ -120,17 +117,16 @@
               @click="filters = []"
             />
           </div>
-        </div>
       </div>
     </template>
-  </NestedPopover>
+  </Popover>
 </template>
 
 <script setup lang="ts">
 import { Combobox, FormControl } from '../../index'
 import { computed, h, ref } from 'vue'
 import FilterIcon from './FilterIcon.vue'
-import NestedPopover from './NestedPopover.vue'
+import Popover from '../Popover/Popover.vue'
 import SearchComplete from './SearchComplete.vue'
 import type {
   ComboboxCustomOption,
