@@ -78,6 +78,52 @@ describe('frappeRequest configurable base url and auth headers', () => {
   })
 })
 
+// `login` is the one endpoint that resolves to the whole body rather than
+// `data.message`. The check used to compare the whole URL against
+// `/api/method/login`, which stopped matching the moment `requestBaseUrl` made
+// the URL absolute — `login` then quietly returned just `data.message`.
+describe('frappeRequest login special case', () => {
+  const body = { message: 'Logged In', full_name: 'Ada', home_page: '/app' }
+
+  beforeEach(() => {
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  function mockLogin() {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => body }) as Response),
+    )
+  }
+
+  it('returns the whole payload for a relative login url', async () => {
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'login' })).resolves.toEqual(body)
+  })
+
+  it('returns the whole payload when requestBaseUrl makes the url absolute', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test/')
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'login' })).resolves.toEqual(body)
+  })
+
+  it('does not treat a method merely ending in login as the login endpoint', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test/')
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'myapp.auth.login' })).resolves.toBe(
+      'Logged In',
+    )
+  })
+})
+
 describe('frappeRequest error handling', () => {
   afterEach(() => {
     vi.unstubAllGlobals()

@@ -401,6 +401,13 @@ ran `onError` twice. It now runs once. `frappeRequest` also gained an
 explicit return type and passes its type argument through, so
 `frappeRequest<Foo>()` resolves to `Foo` rather than `unknown`.
 
+**`login` returned only `message` when `requestBaseUrl` was set (fix).**
+`login` is the one endpoint that resolves to the whole body, so a caller can
+read `full_name` and `home_page`. The check compared the whole URL against
+`/api/method/login`, and `requestBaseUrl` makes that URL absolute, so it
+stopped matching and `login` quietly resolved to `data.message`. It now
+matches on the path.
+
 ### `FrappeUI` plugin — one option left (breaking)
 
 `app.use(FrappeUI)` accepts `resources` and nothing else, and no longer

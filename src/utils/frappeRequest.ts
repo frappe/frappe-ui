@@ -25,6 +25,24 @@ export interface FrappeRequestError extends Error {
   messages: string[]
 }
 
+/**
+ * `login` is the one endpoint whose whole body the caller needs — it carries
+ * `full_name` and `home_page` alongside `message`, and returning `data.message`
+ * would throw those away.
+ *
+ * Matched on the path, not on the whole URL. `transformRequest` prepends
+ * `requestBaseUrl` before this runs, so with that config set the URL is
+ * absolute (`https://site/api/method/login`) and an equality check against
+ * `/api/method/login` silently stops matching. A dotted method that merely ends
+ * in `login` (`myapp.auth.login`) becomes `/api/method/myapp.auth.login` and is
+ * correctly not matched.
+ */
+function isLoginUrl(url: string | undefined): boolean {
+  if (!url) return false
+  const path = url.split(/[?#]/)[0]!.replace(/\/+$/, '')
+  return path === '/api/method/login' || path.endsWith('/api/method/login')
+}
+
 type FrappeResponseBody = {
   docs?: unknown
   exc?: string
@@ -92,7 +110,7 @@ export function frappeRequest<TResponse = unknown>(
       let url = options.url
       if (response.ok) {
         const data = (await response.json()) as FrappeResponseBody
-        if (data.docs || url === '/api/method/login') {
+        if (data.docs || isLoginUrl(url)) {
           return data as TResponse
         }
         if (data.exc) {
