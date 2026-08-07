@@ -246,7 +246,7 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the committed value changes.',
     type: '[value: ComboboxOptionValue | null]'
   },
   {
@@ -261,17 +261,17 @@
   },
   {
     name: 'blur',
-    description: '',
+    description: 'Fired when the input loses focus.',
     type: '[event: FocusEvent]'
   },
   {
     name: 'focus',
-    description: '',
+    description: 'Fired when the input receives focus.',
     type: '[event: FocusEvent]'
   },
   {
     name: 'update:selectedOption',
-    description: 'Fired when the selected option changes.',
+    description: 'Fired when the resolved selected option changes.',
     type: '[option: ComboboxCustomOption | ComboboxSelectableOption | null]'
   }
 ]

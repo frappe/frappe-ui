@@ -53,7 +53,7 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selected tab changes.',
     type: '[value: number | string]'
   }
 ]

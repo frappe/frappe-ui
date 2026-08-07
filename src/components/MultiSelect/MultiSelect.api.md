@@ -230,12 +230,12 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selection changes.',
     type: '[value: (number | string)[]]'
   },
   {
     name: 'update:query',
-    description: 'Fired when the query changes.',
+    description: 'Fired when the search query changes.',
     type: '[value: string]'
   },
   {
@@ -245,7 +245,7 @@
   },
   {
     name: 'update:selectedOptions',
-    description: 'Fired when the selected options changes.',
+    description: 'Fired alongside `update:modelValue` with the original option objects\nresolved out of `options`, so custom fields on an option survive.',
     type: '[value: MultiSelectOption[]]'
   }
 ]

@@ -67,7 +67,7 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selected theme changes.',
     type: '[theme: Theme]'
   }
 ]

@@ -236,7 +236,7 @@
   },
   {
     name: 'collapsed',
-    description: 'Whether the section is collapsed. Per-section open/closed state for\n`collapsible` sections — distinct from the whole-sidebar collapse above.\nBind it to own the state (start a section collapsed, persist the choice);\nleft unbound the section manages it internally, starting expanded.',
+    description: 'v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -254,7 +254,7 @@
   const sidebarSectionEmits = [
   {
     name: 'update:collapsed',
-    description: 'Fired when the collapsed changes.',
+    description: 'Fired when the section is collapsed or expanded.',
     type: '[value: boolean]'
   }
 ]

@@ -282,8 +282,8 @@ function printType(typeChecker: ts.TypeChecker, type: ts.Type) {
 }
 
 /**
- * Payload types for a component's emits, read off the emit types Vue generates
- * for the SFC rather than off `$emit`.
+ * Payload types and descriptions for a component's emits, read off the emit
+ * types Vue generates for the SFC rather than off `$emit`.
  *
  * vue-component-meta derives each emit's payload from the call signatures of
  * `$emit`, which Vue builds from `__VLS_ModelEmit & __VLS_Emit`. An event
@@ -291,17 +291,17 @@ function printType(typeChecker: ts.TypeChecker, type: ts.Type) {
  * argument therefore ends up with an intersection of two tuples as its payload,
  * and TypeScript cannot infer named rest args back out of a tuple intersection
  * — the signature collapses to `(event, ...args: unknown[])` and the docs lose
- * the real type. The declared types survive intact in the generated file, so
- * read them straight from there.
+ * the real type. It reports no description for an emit at all. Both survive
+ * intact in the generated file, so read them straight from there.
  *
  * `defineEmits<T>()` is applied last: when both declare an event, the
  * hand-written interface is the documented contract.
  */
-function getDeclaredEmitTypes(vuePath: string) {
-  const types = new Map<string, string>()
+function getDeclaredEmits(vuePath: string) {
+  const emits = new Map<string, { type: string; description: string }>()
   const program = tsconfigChecker.getProgram()
   const sourceFile = program?.getSourceFile(vuePath)
-  if (!program || !sourceFile) return types
+  if (!program || !sourceFile) return emits
 
   const typeChecker = program.getTypeChecker()
 
@@ -320,11 +320,16 @@ function getDeclaredEmitTypes(vuePath: string) {
 
     for (const emit of emitsType.getProperties()) {
       const payload = typeChecker.getTypeOfSymbolAtLocation(emit, declaration)
-      types.set(emit.getName(), printType(typeChecker, payload))
+      emits.set(emit.getName(), {
+        type: printType(typeChecker, payload),
+        description: ts
+          .displayPartsToString(emit.getDocumentationComment(typeChecker))
+          .trim(),
+      })
     }
   }
 
-  return types
+  return emits
 }
 
 // Return the `@deprecated` message, `true` if the tag is present without
@@ -481,9 +486,10 @@ function camelCase(name: string) {
 }
 
 function extractTableData(name: string, data: any, vuePath: string) {
-  // Only consulted for emits vue-component-meta could not resolve, so
-  // components it already types correctly keep their existing output.
-  const declaredEmitTypes = getDeclaredEmitTypes(vuePath)
+  // The payload is only consulted for emits vue-component-meta could not
+  // resolve, so components it already types correctly keep their existing
+  // output. The description always comes from here — it reports none.
+  const declaredEmits = getDeclaredEmits(vuePath)
 
   const props = data.props
     .filter((x: any) => !x.global)
@@ -516,10 +522,13 @@ function extractTableData(name: string, data: any, vuePath: string) {
     .map((x: any) =>
       withOptional({
         name: x.name,
-        description: getEventDescription(x.name, x.description),
+        description: getEventDescription(
+          x.name,
+          x.description || declaredEmits.get(x.name)?.description,
+        ),
         type: sortUnions(
           x.type === 'unknown[]'
-            ? (declaredEmitTypes.get(x.name) ?? x.type)
+            ? (declaredEmits.get(x.name)?.type ?? x.type)
             : x.type,
         ),
         deprecated: getDeprecation(x.tags),

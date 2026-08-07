@@ -98,7 +98,7 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the textarea value changes.',
     type: '[value: string]'
   }
 ]

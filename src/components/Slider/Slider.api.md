@@ -99,7 +99,7 @@
   },
   {
     name: 'value-commit',
-    description: 'Fired once when the user finishes committing the value.',
+    description: 'Fired once when the user finishes dragging the slider.',
     type: '[value: SliderValue]'
   }
 ]

@@ -37,12 +37,12 @@
   const emitsData = [
   {
     name: 'update:open',
-    description: 'Fired when the open state changes.',
+    description: 'Fired when the open state changes via `v-model:open`.',
     type: '[value: boolean]'
   },
   {
     name: 'after-leave',
-    description: '',
+    description: 'Fired after the close animation finishes.',
     type: '[]'
   }
 ]
