@@ -349,6 +349,68 @@ The default required indicator is not rendered when `#label` is used
 (slot receives `{ required }`). The labeling wrapper is dropped entirely
 when there is nothing to label.
 
+### Popover — v0 API removed (breaking)
+
+Every member marked `@deprecated` is deleted, per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
+aliased and nothing warns.
+
+- **Breaking, silent:** the `#target`, `#body` and `#body-main` slots are gone.
+  Vue drops an unknown slot without an error, so a missed call site renders a
+  popover with no trigger, or an empty one. Use `#trigger` and `#default`.
+- **Breaking, silent:** `#trigger` wires the click itself through reka's
+  `PopoverTrigger`. A click handler carried over from `#target` toggles the
+  popover a second time, so it opens and shuts on one click.
+- **Breaking, silent:** the `togglePopover` and `updatePosition` slot props are
+  gone. `toggle` replaces the first; reka repositions on its own, so the second
+  has no replacement.
+- **Breaking, silent:** `placement`, `show`, `hideOnBlur`, `matchTargetWidth`,
+  `trigger`, `hoverDelay`, `leaveDelay`, `popoverClass` and `transition` are
+  removed, and the `update:show` emit no longer fires. An unknown prop is
+  ignored, so the popover renders in its default position and state.
+- **Breaking, silent:** attributes on `<Popover>` are no longer inherited.
+  They used to land on a wrapper the legacy `#target` rendered; `#trigger` is
+  as-child and renders no wrapper. Move `class` and `style` onto the element
+  inside `#trigger`.
+- **Breaking:** the `PopoverPlacement` and `PopoverLegacySlotProps` types are
+  removed. Use `PopoverSide` + `PopoverAlign` and `PopoverSlotProps`. The
+  import fails, so the build names every call site.
+- Fixed: `CalendarWeekDayEvent` passed `placement="center"` in month view,
+  which is not a side and reached reka as one. It is `side="bottom"` +
+  `align="center"` now.
+- Fixed: `MonthPicker` styled its panel through `popoverClass`, which had
+  already become a no-op, so the panel rendered with no surface at all. It
+  uses the standard panel shell now.
+
+Before/after for each silent break is in the
+[migration guide](../docs/content/docs/migration.md#popover-hovercard-tooltip).
+
+### NestedPopover — removed (breaking)
+
+- **Breaking:** `NestedPopover` is deleted. Use `Popover`. It never nested
+  anything, and it was the library's last `@headlessui/vue` + `@popperjs/core`
+  popover — `@popperjs/core` leaves `dependencies` with it. The import fails,
+  so the build names every call site.
+
+### Tooltip — vocabulary aligned with Popover and HoverCard (breaking)
+
+- **Breaking, silent:** `placement` is renamed to `side`, matching `Popover`
+  and `HoverCard`. An unknown prop is ignored, so the tooltip keeps working and
+  points at its default side.
+- **Breaking, silent:** `arrowClass` is removed (P10 — no class-injection
+  props). Style the arrow through `[data-slot="arrow"]`. It was documented as
+  the arrow's fill but was mostly used to nudge the bubble's position, which
+  the new `offset` prop does directly.
+- Added: `offset` sets the gap in px between trigger and bubble, matching
+  `Popover` and `HoverCard`. The bubble is no longer pinned at 4px.
+- Added: `[data-slot="content"]`, `[data-slot="bubble"]` and
+  `[data-slot="arrow"]` styling hooks.
+- `TooltipBubble` is no longer exported. It is the internal bubble shared by
+  `Tooltip` and `Button`, with no call sites outside the library.
+
+Before/after is in the
+[migration guide](../docs/content/docs/migration.md#tooltip).
+
 ### Divider — `action.onClick` preferred
 
 `action.handler` is deprecated. Warning emits via the shared
