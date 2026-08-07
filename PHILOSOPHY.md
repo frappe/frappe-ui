@@ -38,6 +38,11 @@ Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), do
 <TextInput @submit="..." />
 ```
 
+Accepted v1 carve-outs:
+- The v1 resource surface (`createResource`, `createListResource`, `createDocumentResource`) and the v2 data-fetching composables (`useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`) keep every member name they ship today — including three names for one fetch (v1 `fetch` / `reload` / `submit`, v2 `execute` / `fetch` / `reload`) and two for one loading ref (v2 `loading` / `isFetching`). These names don't meet the rule; renaming them costs every consumer a migration and buys a tidier surface, and that trade is worse than the violation.
+
+P13 freezes them at the v1 tag and ADR-0008 leaves no room for a compatible rename, so they ship as-is until `2.0.0`.
+
 ---
 
 ## Prop design
