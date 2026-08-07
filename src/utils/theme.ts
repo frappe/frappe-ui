@@ -19,7 +19,16 @@ function getSystemTheme(): 'light' | 'dark' {
 function applyTheme(theme: Theme): void {
   if (!isBrowser) return
   const resolved = theme === 'system' ? getSystemTheme() : theme
+
+  document.documentElement.classList.add('no-transition')
   document.documentElement.setAttribute('data-theme', resolved)
+
+  // Double rAF: wait for the no-transition css to paint before re-enabling transitions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('no-transition')
+    })
+  })
 }
 
 function setTheme(theme: Theme): void {
