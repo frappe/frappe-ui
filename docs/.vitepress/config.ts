@@ -86,15 +86,15 @@ function buildSidebar(): SidebarSection[] {
       text: 'Charts',
       items: [
         { text: 'Overview', link: '/docs/charts/overview' },
-        { text: 'BarChart', link: '/docs/charts/bar-chart' },
-        { text: 'LineChart', link: '/docs/charts/line-chart' },
-        { text: 'AreaChart', link: '/docs/charts/area-chart' },
-        { text: 'DonutChart', link: '/docs/charts/donut-chart' },
-        { text: 'FunnelChart', link: '/docs/charts/funnel-chart' },
-        { text: 'HeatmapChart', link: '/docs/charts/heatmap-chart' },
-        { text: 'ScatterChart', link: '/docs/charts/scatter-chart' },
-        { text: 'SankeyChart', link: '/docs/charts/sankey-chart' },
-        { text: 'NumberCard', link: '/docs/charts/number-card' },
+        { text: 'BarChart', link: '/docs/charts/barchart' },
+        { text: 'LineChart', link: '/docs/charts/linechart' },
+        { text: 'AreaChart', link: '/docs/charts/areachart' },
+        { text: 'DonutChart', link: '/docs/charts/donutchart' },
+        { text: 'FunnelChart', link: '/docs/charts/funnelchart' },
+        { text: 'HeatmapChart', link: '/docs/charts/heatmapchart' },
+        { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
+        { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
+        { text: 'NumberCard', link: '/docs/charts/numbercard' },
         { text: 'States', link: '/docs/charts/states' },
         { text: 'Dashboard', link: '/docs/charts/dashboard' },
       ],
@@ -164,6 +164,11 @@ const colocatedRoots = [
   {
     sourceDir: path.resolve(repoRoot, 'experimental'),
     proxyDir: path.resolve(rootDir, 'content/docs/experimental'),
+  },
+  // Charts keep one page per component under `src/charts/docs`.
+  {
+    sourceDir: path.resolve(repoRoot, 'src/charts'),
+    proxyDir: path.resolve(rootDir, 'content/docs/charts'),
   },
 ]
 

@@ -35,15 +35,15 @@ chart is, and it is also how one line of a `LineChart` gets a fill.
 
 ## The charts
 
-- [BarChart](/docs/charts/bar-chart) — grouped, stacked and horizontal bars
-- [LineChart](/docs/charts/line-chart) — trends, a second value axis, gaps
-- [AreaChart](/docs/charts/area-chart) — the line family with a fill
-- [DonutChart](/docs/charts/donut-chart) — share of a total
-- [FunnelChart](/docs/charts/funnel-chart) — stage-to-stage drop-off
-- [HeatmapChart](/docs/charts/heatmap-chart) — magnitude across two dimensions
-- [ScatterChart](/docs/charts/scatter-chart) — two measures against each other
-- [SankeyChart](/docs/charts/sankey-chart) — flow from a source to a target
-- [NumberCard](/docs/charts/number-card) — one reading, with its change
+- [BarChart](/docs/charts/barchart) — grouped, stacked and horizontal bars
+- [LineChart](/docs/charts/linechart) — trends, a second value axis, gaps
+- [AreaChart](/docs/charts/areachart) — the line family with a fill
+- [DonutChart](/docs/charts/donutchart) — share of a total
+- [FunnelChart](/docs/charts/funnelchart) — stage-to-stage drop-off
+- [HeatmapChart](/docs/charts/heatmapchart) — magnitude across two dimensions
+- [ScatterChart](/docs/charts/scatterchart) — two measures against each other
+- [SankeyChart](/docs/charts/sankeychart) — flow from a source to a target
+- [NumberCard](/docs/charts/numbercard) — one reading, with its change
 
 Every chart shares the same
 [loading, error and empty states](/docs/charts/states), and they compose into a

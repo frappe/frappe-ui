@@ -1,3 +1,8 @@
+---
+# The preview on this page is `wide`, which needs the OnThisPage aside gone.
+outline: false
+---
+
 # Dashboard
 
 Charts are card-shaped: each draws its own title, subtitle, legend and states,

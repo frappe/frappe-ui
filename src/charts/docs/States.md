@@ -1,3 +1,8 @@
+---
+# The preview on this page is `wide`, which needs the OnThisPage aside gone.
+outline: false
+---
+
 # States
 
 Every chart draws the same three states, and you get them for free. Set
