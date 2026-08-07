@@ -314,6 +314,144 @@ The legacy `Input` component is deprecated. Use
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## Data fetching (useDoctype / useList)
+
+The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
+`runDocMethod`, `runMethod`) and on `useList` (`insert`, `setValue`, `delete`)
+used to share one request between all their submits. Each one now sends its own
+request, so the shared-request members are gone.
+
+Nothing fails to build, so grep for these by hand. The app keeps rendering and
+then throws the first time the removed member is read — usually the first time
+someone deletes a row.
+
+| Before                                              | After                        |
+| --------------------------------------------------- | ---------------------------- |
+| `delete.loading && delete.params.name === row.name` | `delete.isLoading(row.name)` |
+| `setValue.params.name`                              | `setValue.isLoading(name)`   |
+| `delete.execute()` / `.fetch()` / `.reload()`       | `delete.submit({ name })`    |
+| `insert.reset()` / `.abort()`                       | removed, no replacement      |
+| `runMethod.isFetching` / `.isFinished`              | `runMethod.loading`          |
+| `setValue.promise`                                  | `await setValue.submit(...)` |
+| `delete.url`                                        | removed, no replacement      |
+
+All eight now have the same five members: `submit()`, `data`, `error`,
+`loading` and `isLoading()`.
+
+`isLoading()` takes whatever identifies one submit:
+
+```js
+todos.delete.isLoading(row.name)
+todos.setValue.isLoading(row.name)
+todos.runDocMethod.isLoading(row.name, 'archive')
+todos.runMethod.isLoading('sync_all')
+todos.insert.isLoading() // no argument: a new row has no name yet
+```
+
+`insert.isLoading()` gives the same answer as `insert.loading`. It is there so
+every write method reads the same way.
+
+More changes you will not see at build time:
+
+- `submit()` now resolves with its own response. Code that fired two submits
+  and read the result of the first was receiving the second one's data, or
+  `null`. If you queued submits to work around that, you can drop the queue.
+- `data` and `error` belong to the submit that started last, not the one that
+  answered last. A slow submit that comes back after a newer one writes
+  nothing and clears nothing. It still answers its own caller with its own
+  outcome — resolving with its response, or rejecting with its error.
+- **`data` is no longer reset to `null` when a submit fails.** It used to be,
+  because the shared request cleared it on any not-ok response. It now keeps
+  the last successful response.
+
+  ```js
+  await todos.setValue.submit({ name: 'TODO-1', status: 'Done' })
+  await todos.setValue.submit({ name: 'TODO-2', status: 'Done' }) // fails
+
+  todos.setValue.data // still the TODO-1 response
+  todos.setValue.error // the failure
+  ```
+
+  Test `error`, not `data`, to tell a failed submit from a successful one.
+  `if (!todos.setValue.data)` used to mean "the last save failed" and no
+  longer does.
+
+- `error` is no longer cleared when a submit starts. It used to be, which
+  erased the error of a sibling submit still in flight. It now stands until
+  the newest submit settles. To blank an error banner while a retry runs, hide
+  it on `loading` yourself.
+- **`submit()` rejects on any failure.** It resolves with the response, or
+  rejects with the error. A failed `validate` already rejected; a failed
+  request used to resolve with `null`. Both reject now.
+
+  ```js
+  // Before
+  const doc = await todos.insert.submit({ title: 'Buy milk' })
+  if (!doc) return showError(todos.insert.error)
+
+  // After
+  try {
+    const doc = await todos.insert.submit({ title: 'Buy milk' })
+  } catch (e) {
+    showError(e)
+  }
+  ```
+
+  `null` no longer means "it failed". A server that answers with `null`
+  resolves with `null`, like any other response. Every `if (!result)` check
+  after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
+  unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
+  rejection.
+- `useList`'s `insert` and `delete` now send to the `baseUrl` you passed to
+  `useList`. They used to ignore it and hit the current origin. `setValue`
+  already honoured it, so all three write methods now agree. `useDoctype` was
+  never affected.
+
+## Data fetching (exports)
+
+`useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
+`useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
+parses the response, and leaves the URL, the params and the caching to you.
+Pick the composable that matches what you are fetching.
+
+| Before                                   | After                       |
+| ---------------------------------------- | --------------------------- |
+| `useFrappeFetch('/api/v2/method/…')`     | `useCall({ url })`          |
+| `useFrappeFetch('/api/v2/document/…')`   | `useDoc({ doctype, name })` |
+| `useFrappeFetch('/api/v2/document/…?…')` | `useList({ doctype, … })`   |
+
+This is a build failure at the import, so nothing changes silently.
+
+```js
+// Before
+import { useFrappeFetch } from 'frappe-ui'
+const { data } = useFrappeFetch('/api/v2/method/ping').get()
+
+// After
+import { useCall } from 'frappe-ui'
+const ping = useCall({ url: '/api/v2/method/ping' })
+```
+
+`FrappeResponseError` is exported now. A Frappe error response raises it — it
+lands on `.error`, and the write methods above reject with it. The class was
+never exported, so you could not tell it apart from a network or parse failure.
+Narrow it with `instanceof` and you get `title`, `type`, `indicator` and
+`exception`:
+
+```ts
+import { FrappeResponseError } from 'frappe-ui'
+
+try {
+  await todos.insert.submit({ title: 'Buy milk' })
+} catch (e) {
+  if (e instanceof FrappeResponseError) {
+    showError(e.title, e.type)
+  } else {
+    throw e
+  }
+}
+```
+
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful
@@ -743,49 +881,6 @@ Until you do, reading `this.$socket` throws with that instruction rather than
 returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
-
-## Data fetching composables
-
-`useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
-`useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
-parses the response, and leaves the URL, the params and the caching to you.
-Pick the composable that matches what you are fetching.
-
-| Before                                   | After                       |
-| ---------------------------------------- | --------------------------- |
-| `useFrappeFetch('/api/v2/method/…')`     | `useCall({ url })`          |
-| `useFrappeFetch('/api/v2/document/…')`   | `useDoc({ doctype, name })` |
-| `useFrappeFetch('/api/v2/document/…?…')` | `useList({ doctype, … })`   |
-
-This is a build failure at the import, so nothing changes silently.
-
-```js
-// Before
-import { useFrappeFetch } from 'frappe-ui'
-const { data } = useFrappeFetch('/api/v2/method/ping').get()
-
-// After
-import { useCall } from 'frappe-ui'
-const ping = useCall({ url: '/api/v2/method/ping' })
-```
-
-`FrappeResponseError` is exported now. `useCall`, `useDoc` and `useList` raise
-it on a Frappe error response and put it on `.error`, but nothing exported the
-class, so you could not tell it apart from a network or parse failure. Narrow
-it with `instanceof` and you get `title`, `type`, `indicator` and `exception`:
-
-```ts
-import { useCall, FrappeResponseError } from 'frappe-ui'
-
-const call = useCall({
-  url: '/api/v2/method/my_app.api.do_thing',
-  onError(error) {
-    if (error instanceof FrappeResponseError) {
-      console.log(error.title, error.type, error.exception)
-    }
-  },
-})
-```
 
 ## FAQ
 

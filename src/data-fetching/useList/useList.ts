@@ -13,7 +13,7 @@ import {
   UseFetchOptions,
 } from '@vueuse/core'
 import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
-import { useCall } from '../useCall/useCall'
+import { useAction } from '../useAction'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
 import { idbStore } from '../idbStore'
@@ -166,29 +166,33 @@ export function useList<T extends { name: string }>(
     }
   }
 
-  const insert = useCall<T, Partial<T>>({
-    url: `/api/v2/document/${doctype}`,
+  const insertAction = useAction<T, Partial<T>>({
+    url: () => `/api/v2/document/${doctype}`,
     method: 'POST',
-    immediate: false,
-    refetch: false,
+    baseUrl,
     onSuccess() {
       if (refetch) execute()
     },
   })
 
-  const setValueUrl = ref(`/api/v2/document/${doctype}/<name>`)
+  const insert = reactive({
+    data: insertAction.data,
+    error: insertAction.error,
+    loading: insertAction.loading,
+    /**
+     * True while an insert is in flight. Takes no target: the row has no name
+     * until the server gives it one, so there is nothing to key on. Same answer
+     * as `loading`, kept so every write method has `isLoading`.
+     */
+    isLoading: () => insertAction.loading.value,
+    submit: insertAction.submit,
+  })
 
-  const setValue = useCall<T, Partial<T>>({
-    url: setValueUrl,
+  const setValueAction = useAction<T, Partial<T> & { name: string }>({
+    url: ({ name }) => `/api/v2/document/${doctype}/${name}`,
     method: 'PUT',
     baseUrl,
-    immediate: false,
-    refetch: false,
-    beforeSubmit(params) {
-      if (params?.name) {
-        setValueUrl.value = `/api/v2/document/${doctype}/${params.name}`
-      }
-    },
+    key: ({ name }) => name,
     onSuccess(data) {
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)
@@ -196,29 +200,37 @@ export function useList<T extends { name: string }>(
     },
   })
 
-  let deleteUrl = ref(`/api/v2/document/${doctype}/<name>`)
+  const setValue = reactive({
+    data: setValueAction.data,
+    error: setValueAction.error,
+    loading: setValueAction.loading,
+    /** True while a save for this row is in flight. */
+    isLoading: (name: string) => setValueAction.isLoading(name),
+    submit: setValueAction.submit,
+  })
+
   type DeleteResponse = 'ok'
   type DeleteParams = { name: string }
-  const delete_ = useCall<DeleteResponse, DeleteParams>({
-    url: deleteUrl,
+
+  const deleteAction = useAction<DeleteResponse, DeleteParams>({
+    url: ({ name }) => `/api/v2/document/${doctype}/${name}`,
     method: 'DELETE',
-    immediate: false,
-    refetch: false,
-    beforeSubmit(params) {
-      if (params?.name) {
-        deleteUrl.value = `/api/v2/document/${doctype}/${params.name}`
-      }
+    baseUrl,
+    key: ({ name }) => name,
+    onSuccess(_data, { name }) {
+      if (refetch) execute()
+      docStore.removeDoc(doctype, name)
+      listStore.removeRow(doctype, name)
     },
-    onSuccess() {
-      if (refetch) {
-        execute()
-      }
-      if (delete_.params.name) {
-        let { name } = delete_.params
-        docStore.removeDoc(doctype, name)
-        listStore.removeRow(doctype, name)
-      }
-    },
+  })
+
+  const delete_ = reactive({
+    data: deleteAction.data,
+    error: deleteAction.error,
+    loading: deleteAction.loading,
+    /** True while a delete for this row is in flight. */
+    isLoading: (name: string) => deleteAction.isLoading(name),
+    submit: deleteAction.submit,
   })
 
   let out = reactive({
