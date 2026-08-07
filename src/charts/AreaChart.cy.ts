@@ -50,6 +50,18 @@ describe('AreaChart', () => {
     fills().should('have.length.at.least', 2)
   })
 
+  it('takes the stacked bands to a flat top, scaled to 100', () => {
+    mountChart({ stacked: 'normalized' })
+    fills().should('have.length.at.least', 2)
+    cy.get('[data-slot="chart-plot"] svg linearGradient').should('not.exist')
+    cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '100')
+    // The bands read as shares; the tooltip still carries what was measured.
+    cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+    cy.get('[data-slot="chart-tooltip"]')
+      .should('contain.text', '10')
+      .and('contain.text', '71%')
+  })
+
   it('draws a series set to bar as bars beside the bands', () => {
     mountChart({ seriesConfig: { refunds: { type: 'bar' } } })
     lines().should('have.length', 1)

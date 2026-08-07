@@ -30,14 +30,30 @@ plot, or bind `v-model:hiddenSeries` to own that list yourself.
 
 <ComponentPreview name="Charts-ScatterMarkets" csr="true" self-layout />
 
-## Quadrants
+## Quadrants and other reference lines
 
-A scatter is often read in quadrants: a vertical and a horizontal line dividing
-the plot into four, with each corner meaning something to the business. There is
-no `quadrants` prop and there will not be one: a quadrant divider is a reference
-line, the axis charts already spell that `referenceLines`, and one concept gets
-one spelling. `ScatterChart` takes the same prop. Until it does, draw a divider
-through the `echartOptions` escape hatch.
+`referenceLines` draws a rule over the plot at a fixed position — a target, a
+threshold, or a median. Each line takes a `value`, an optional `label`, `color`
+and `dashed`. They are annotations, not series: no legend entry, no tooltip
+entry, and no way to switch one off, so a rule stays put while a legend toggle
+takes a group out of the plot.
+
+`axis` says which scale `value` is read against. Both are measured here — this
+is the one chart in the family with no category axis — so `'x'` and `'y'` are
+the same kind of thing: a number. `'y'` (the default) draws a rule across the
+plot, `'x'` draws one down it. A scatter has no second value axis, so `'y2'`
+reads as `'y'` with a dev-mode warning.
+
+A scatter is often read in quadrants, with each corner meaning something to the
+business. That is one line per axis. There is no `quadrants` prop and there will
+not be one: a quadrant divider is a reference line, the axis charts already
+spell that `referenceLines`, and one concept gets one spelling.
+
+<ComponentPreview name="Charts-ScatterQuadrants" csr="true" self-layout />
+
+A line outside the range the plot covers is not drawn — each scale follows the
+data, not the annotation — so pin `xAxis.min` / `max` or `yAxis.min` / `max` to
+bring a distant one into frame.
 
 ## Formatting
 

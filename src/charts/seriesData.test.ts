@@ -241,3 +241,180 @@ describe('normalizeAxisChartProps: long data', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 })
+
+describe('normalizeAxisChartProps: maxSeries', () => {
+  // One row, so a series' weight is plain to read off the data.
+  const regions = [
+    { month: 'Jan', region: 'East', amount: 50 },
+    { month: 'Jan', region: 'West', amount: 30 },
+    { month: 'Jan', region: 'North', amount: 15 },
+    { month: 'Jan', region: 'South', amount: 5 },
+  ]
+
+  const grouped = (props: Partial<AxisChartProps> = {}) =>
+    normalize({ data: regions, y: 'amount', series: 'region', ...props })
+
+  it('leaves the series alone when nothing is capped', () => {
+    expect(namesOf(grouped().config)).toEqual([
+      'East',
+      'West',
+      'North',
+      'South',
+    ])
+    expect(namesOf(grouped({ maxSeries: 4 }).config)).toEqual([
+      'East',
+      'West',
+      'North',
+      'South',
+    ])
+  })
+
+  it('sums the tail into one "Others" series', () => {
+    const { config } = grouped({ maxSeries: 3 })
+    expect(namesOf(config)).toEqual(['East', 'West', '__others__'])
+    expect(config.data).toEqual([
+      { month: 'Jan', East: 50, West: 30, __others__: 20 },
+    ])
+  })
+
+  it('labels the collapsed series “Others”', () => {
+    const { config } = grouped({ maxSeries: 3 })
+    expect(config.series.at(-1)).toEqual({
+      name: '__others__',
+      label: 'Others',
+    })
+  })
+
+  it('lets a seriesConfig entry rename and color the collapsed series', () => {
+    const { config } = grouped({
+      maxSeries: 3,
+      seriesConfig: { __others__: { label: 'Everywhere else', color: 'red' } },
+    })
+    expect(config.series.at(-1)).toEqual({
+      name: '__others__',
+      label: 'Everywhere else',
+      color: 'red',
+    })
+  })
+
+  // A grouping value that reads "Others" is a series like any other; the
+  // reserved identity is what keeps the two apart.
+  it('does not collide with a group actually called Others', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'Others', amount: 50 },
+        { month: 'Jan', region: 'West', amount: 30 },
+        { month: 'Jan', region: 'North', amount: 5 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 2,
+    })
+    expect(namesOf(config)).toEqual(['Others', '__others__'])
+    expect(config.data).toEqual([{ month: 'Jan', Others: 50, __others__: 35 }])
+  })
+
+  it('keeps the largest series and collapses the smallest', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'Tiny', amount: 1 },
+        { month: 'Jan', region: 'Huge', amount: 100 },
+        { month: 'Jan', region: 'Mid', amount: 40 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 2,
+    })
+    expect(namesOf(config)).toEqual(['Huge', '__others__'])
+  })
+
+  it('weighs a series by its total across every x, not by one row', () => {
+    const { config } = normalize({
+      data: [
+        // Steady never tops the chart at any one x, but carries more of it.
+        { month: 'Jan', region: 'Spike', amount: 70 },
+        { month: 'Jan', region: 'Steady', amount: 40 },
+        { month: 'Feb', region: 'Spike', amount: 0 },
+        { month: 'Feb', region: 'Steady', amount: 40 },
+        { month: 'Feb', region: 'Small', amount: 1 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 2,
+    })
+    expect(namesOf(config)).toEqual(['Steady', '__others__'])
+  })
+
+  // Magnitude, not signed total: a series that runs large and negative carries
+  // the chart as much as one that runs large.
+  it('weighs a series that runs negative by how far it runs', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'Refunds', amount: -80 },
+        { month: 'Jan', region: 'Sales', amount: 90 },
+        { month: 'Jan', region: 'Fees', amount: 3 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 2,
+    })
+    expect(namesOf(config)).toEqual(['Sales', '__others__'])
+  })
+
+  // The cap picks by size; the survivors keep the order the data put them in,
+  // so the caller's sort survives it the way it survives the pivot.
+  it('keeps the survivors in data order, with "Others" last', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'Small', amount: 1 },
+        { month: 'Jan', region: 'Big', amount: 90 },
+        { month: 'Jan', region: 'Tiny', amount: 2 },
+        { month: 'Jan', region: 'Mid', amount: 50 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 3,
+    })
+    expect(namesOf(config)).toEqual(['Big', 'Mid', '__others__'])
+  })
+
+  it('leaves an x where every collapsed series was missing missing', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'East', amount: 50 },
+        { month: 'Jan', region: 'West', amount: 30 },
+        { month: 'Jan', region: 'North', amount: 15 },
+        { month: 'Feb', region: 'East', amount: 20 },
+      ],
+      y: 'amount',
+      series: 'region',
+      maxSeries: 2,
+    })
+    expect(config.data).toEqual([
+      { month: 'Jan', East: 50, __others__: 45 },
+      { month: 'Feb', East: 20, __others__: null },
+    ])
+  })
+
+  it('leaves at least one series beside "Others" whatever the cap says', () => {
+    for (const maxSeries of [1, 0.5, -3]) {
+      const { config } = grouped({ maxSeries })
+      expect(namesOf(config)).toEqual(['East', '__others__'])
+    }
+  })
+
+  it('warns and caps nothing when y names the columns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { config } = normalize({ maxSeries: 1 })
+    expect(namesOf(config)).toEqual(['sales', 'refunds'])
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0][0]).toContain('[frappe-ui]')
+    expect(warn.mock.calls[0][0]).toContain('maxSeries')
+  })
+
+  it('says nothing when maxSeries is left out', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    normalize()
+    expect(warn).not.toHaveBeenCalled()
+  })
+})

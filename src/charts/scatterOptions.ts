@@ -8,6 +8,7 @@ import {
 } from './axisChartCommon'
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
+import { buildReferenceLineSeries } from './referenceLines'
 import { paletteColors, pickSeriesColor, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
 import type { ChartValueFormatter } from './props'
@@ -213,10 +214,46 @@ export function buildScatterOption(
       isRTL,
       format: format?.y,
     }),
-    series: visible.map(buildSeries),
+    series: [
+      ...visible.map(buildSeries),
+      // Appended after the points, and read from `config.referenceLines` rather
+      // than from the built series: the legend, `hiddenSeries` and the tooltip
+      // all walk `buildScatterSeries`, which knows nothing of these, so a host
+      // series cannot reach any of them.
+      ...buildReferenceLineSeries(referenceLines(config), {
+        theme,
+        // Both scales are value scales here, so neither carries categories and
+        // there is no second one to fall back from.
+        horizontal: false,
+        hasSecondaryValueAxis: false,
+        hasCategoryAxis: false,
+        // The one mark a scatter registers with echarts. A `'line'` host would
+        // be dropped along with its lines.
+        hostSeriesType: 'scatter',
+      }),
+    ],
   }
 
   return mergeDeep(option, config.echartOptions)
+}
+
+/**
+ * The lines as the scatter reads them. `'y2'` is the one axis name that means
+ * nothing on a plot with a single pair of value axes; it is left to fall back
+ * to `'y'`, the way it does on a single-axis bar chart, and said out loud.
+ */
+function referenceLines(config: ScatterChartConfig) {
+  const lines = config.referenceLines
+  const onY2 = lines?.filter((line) => line.axis === 'y2').length ?? 0
+  if (onY2) warnSecondAxis(onY2)
+  return lines
+}
+
+function warnSecondAxis(count: number) {
+  if (!import.meta.env.DEV) return
+  console.warn(
+    `[frappe-ui] ${count === 1 ? 'A reference line' : `${count} reference lines`} of the scatter chart asked for axis: 'y2'. A scatter draws one pair of value axes, so the ${count === 1 ? 'line reads' : 'lines read'} against the vertical one. Use axis: 'y' for a horizontal rule or axis: 'x' for a vertical one.`,
+  )
 }
 
 function buildSeries(entry: ScatterSeries) {

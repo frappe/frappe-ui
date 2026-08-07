@@ -19,6 +19,35 @@ category.
 
 <ComponentPreview name="Charts-BarStackedLong" csr="true" self-layout />
 
+## Shares instead of totals
+
+`stacked="normalized"` is the 100% stacked reading: each value is drawn as its
+share of the column it sits in, and that value axis is pinned to 0-100 so every
+column fills the plot. `maxSeries` caps how many series the grouping column
+produces — the tail is summed into a single "Others" series, the way `maxSlices`
+groups the tail of a donut. The cap keeps the series that carry the chart,
+measured over every x, and the survivors stay in the order the data put them in.
+
+<ComponentPreview name="Charts-BarShares" csr="true" self-layout />
+
+The rows are never rewritten, so the plot shows the share and the tooltip shows
+both it and the number that was measured. A `yAxis.format` prints that number in
+the tooltip; the ticks read as percentages whatever it says.
+
+The share is taken per stack, so two stacks under different `stackName`s each
+reach 100 on their own, and a bar stack and an area stack are two wholes. A
+series that stacks with nothing — a line always, a lone bar or band otherwise —
+keeps its own numbers, with a dev-mode warning if the axis under it is pinned;
+put it on `axis: "y2"` to give it its own scale. A `min` or `max` set on a
+pinned axis is overruled, also with a warning: a column that stops short of the
+top no longer reads as a whole.
+
+`maxSeries` applies to the `series` column only. A `y` list names its columns
+one by one, so nothing there is dropped; asking for a cap warns instead. The
+collapsed series has the reserved identity `__others__`, so a group whose name
+really is "Others" cannot collide with it, and a `seriesConfig.__others__` entry
+renames or recolors it like any other series.
+
 ## Horizontal bars
 
 `horizontal` moves the category axis to Y, which is how long labels stay
@@ -26,6 +55,24 @@ readable. Per-series looks live in `seriesConfig`, keyed by series identity —
 here to print the value on each bar.
 
 <ComponentPreview name="Charts-BarHorizontal" csr="true" self-layout />
+
+## Labels that do not fit
+
+The category axis measures its own labels against the room the chart was drawn
+at, and shows as much of each one as that room allows. While every label fits
+its slot nothing happens. Once one does not, the axis takes whichever layout
+carries more text: flat and middle-truncated to the slot, or tilted to 45°,
+which trades the slot for the depth below the axis. Wide slots stay flat —
+reading across beats reading up a diagonal — and crowded ones tilt, where a flat
+label would be down to a syllable. The whole axis takes one layout, because
+labels leaning two ways read as two axes.
+
+There is no angle prop, and no truncation length. An angle is a number the
+caller would have to guess again at every width, on every dashboard; the chart
+knows the width and has measured the text. `horizontal` never tilts: those
+labels are already stacked one per line down the side, so they are shortened to
+their column instead. A time axis never tilts either — it picks its own ticks,
+and drops to a coarser interval rather than crowd them.
 
 ## A line among the bars
 

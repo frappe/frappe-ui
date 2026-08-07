@@ -14,6 +14,14 @@ never hides the marks behind it.
 
 <ComponentPreview name="Charts-AreaStacked" csr="true" self-layout />
 
+`stacked="normalized"` draws each band as its share of the total at that x
+instead of its own magnitude, which flattens the top edge and pins the value
+axis to 0-100. The rows are untouched, so the tooltip still carries the number
+that was measured alongside the share. `maxSeries` caps how many series a
+`series` column produces and sums the tail into one "Others" band; the cap runs
+before the shares are taken, so they still add up. Both are described under
+[BarChart](/docs/charts/bar-chart).
+
 ## A single series
 
 Unstacked, the fill fades out towards the axis. `fillOpacity` sets the

@@ -4,11 +4,24 @@ import type {
   ChartValueFormatter,
   ChartValueAxisOptions,
 } from './props'
+import { toNumber } from './axisChartCommon'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
   ChartYAxisConfig,
 } from './types'
+
+/**
+ * Identity of the collapsed tail, mirroring the donut's "Others" slice. A
+ * reserved key rather than the string `'Others'`, so a grouping column that
+ * actually holds "Others" cannot collide with it — and so the collapsed series
+ * still has one `seriesConfig` key to be styled and renamed through.
+ */
+export const OTHERS_SERIES_NAME = '__others__'
+export const OTHERS_SERIES_LABEL = 'Others'
+
+/** Below two there is nothing left to collapse into. */
+const MIN_MAX_SERIES = 2
 
 /**
  * Formatters travel beside the config rather than inside it: the option builders
@@ -43,8 +56,17 @@ export function normalizeAxisChartProps(
     )
   }
 
+  if (import.meta.env.DEV && props.maxSeries !== undefined && !props.series) {
+    console.warn(
+      `[frappe-ui] \`maxSeries\` caps the series a \`series\` column produces. \`y\` names its columns one by one, so nothing is capped.`,
+    )
+  }
+
   const { data, names } = props.series
-    ? pivot(rows, props.x, yColumns[0], props.series)
+    ? capSeries(
+        pivot(rows, props.x, yColumns[0], props.series),
+        props.maxSeries,
+      )
     : { data: rows, names: mergeColumns(yColumns, y2Columns) }
 
   const secondary = new Set(props.series ? [] : y2Columns)
@@ -86,6 +108,10 @@ function buildSeries(
   // column that is no longer selected is expected, not an error.
   const style = props.seriesConfig?.[name]
   return {
+    // The collapsed tail has no column behind it, so its label comes from here
+    // rather than from the data. Ahead of the style: a `seriesConfig` entry for
+    // the reserved key renames and colors it like any other series.
+    ...(name === OTHERS_SERIES_NAME ? { label: OTHERS_SERIES_LABEL } : {}),
     ...style,
     name,
     ...(secondary.has(name) ? { axis: 'y2' as const } : {}),
@@ -140,6 +166,62 @@ function pivot(
   }
 
   return { data, names }
+}
+
+type Pivoted = { data: Record<string, any>[]; names: string[] }
+
+/**
+ * Series past the cap are summed into one "Others" series, the way slices past
+ * `maxSlices` are summed into one arc. The rows are the pivot's own, so the
+ * collapse rewrites them in place.
+ */
+function capSeries(pivoted: Pivoted, maxSeries?: number): Pivoted {
+  const { data, names } = pivoted
+  if (!maxSeries) return pivoted
+
+  const max = Math.max(MIN_MAX_SERIES, maxSeries)
+  if (names.length <= max) return pivoted
+
+  const weights = seriesWeights(data, names)
+  const ranked = [...names].sort((a, b) => weights[b] - weights[a])
+  // One of the slots goes to "Others" itself.
+  const kept = new Set(ranked.slice(0, max - 1))
+
+  // The cap picks by size, but the survivors keep the order the data put them
+  // in — the same order the uncapped chart draws, minus the tail. "Others" ends
+  // the list, which is where a remainder reads in a stack and in the legend.
+  const collapsed = names.filter((name) => !kept.has(name))
+  for (const row of data) {
+    let total: number | null = null
+    for (const name of collapsed) {
+      const value = toNumber(row[name])
+      if (value !== null) total = (total ?? 0) + value
+      delete row[name]
+    }
+    // An x where every collapsed series was missing stays missing, not zero.
+    row[OTHERS_SERIES_NAME] = total
+  }
+
+  return {
+    data,
+    names: [...names.filter((name) => kept.has(name)), OTHERS_SERIES_NAME],
+  }
+}
+
+/**
+ * What each series is worth across the whole chart, which is what decides who
+ * survives the cap. Magnitude rather than signed total: a series that runs
+ * large and negative carries the chart as much as one that runs large.
+ */
+function seriesWeights(rows: Record<string, any>[], names: string[]) {
+  const weights: Record<string, number> = {}
+  for (const name of names) weights[name] = 0
+  for (const row of rows) {
+    for (const name of names) {
+      weights[name] += Math.abs(toNumber(row[name]) ?? 0)
+    }
+  }
+  return weights
 }
 
 function toValueAxis(

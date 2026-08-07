@@ -1,4 +1,5 @@
 import {
+  estimateTextWidth,
   formatAxisValue,
   formatLabel,
   formatTimeAxisLabel,
@@ -45,6 +46,29 @@ export const DOTTED_LINE = { type: [1, 3], cap: 'round', width: 1 }
 const CATEGORY_LABEL_WIDTH_RATIO = 0.32
 /** Below this the column says nothing at all, so a narrow chart overruns the ratio. */
 const MIN_CATEGORY_LABEL_WIDTH = 56
+
+/** The angle a category axis turns to when its labels stop fitting flat. */
+const TILT_ANGLE = 45
+const TILT_SIN = Math.sin((TILT_ANGLE * Math.PI) / 180)
+/** Clear air either side of a flat label, under which two of them read as one. */
+const CATEGORY_LABEL_GAP = 8
+/**
+ * How far past its tick a tilted label may reach. It is one number for two
+ * budgets, because at 45° a label reaches exactly as far below its tick as it
+ * does to the side: the plot keeps its height (the grid reserves this much for
+ * the labels) and the leading label stays inside the canvas.
+ */
+const TILTED_LABEL_EXTENT = 72
+/** A label's own line box, which turns into reach of its own once rotated. */
+const LABEL_LINE_HEIGHT = 13
+/**
+ * What one value axis takes out of the chart before the categories divide up
+ * what is left: a compact tick — `1.2M`, `450` — and its `axisLabel.margin`.
+ * The ticks are echarts' to pick, so this is an estimate, and it rounds up:
+ * reading the plot wider than it is would leave labels flat that do not fit,
+ * which is the failure the measuring is here to prevent.
+ */
+const VALUE_AXIS_RESERVE = 44
 
 const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 
@@ -127,6 +151,11 @@ export function axisChartBase(
  * the grid only reserves room for its own axis labels. `containLabel` covers
  * those but not data labels, which sit past the end of a mark and would
  * otherwise be clipped by the plot edge — hence `labelGutter`.
+ *
+ * `containLabel` measures a label as the box its rotation gives it, so a tilted
+ * category axis (see `categoryLabelFit`) takes its own height out of the plot
+ * without the grid saying anything. What keeps that from eating the plot is the
+ * cap on the label, not a number here.
  */
 // `containLabel` reserves against a DOM measurement of the same text in the
 // same font the plot renders it in (see measureText.ts), so the reservation is
@@ -162,18 +191,13 @@ export function buildCategoryAxis(
     isRTL: boolean
     /** Bars need a half-slot inset at each end; a line runs edge to edge. */
     boundaryGap: boolean
-    /** Plot width in pixels, when known. Caps the label column of a row chart. */
+    /** Plot width in pixels, when known. Decides how the labels are laid out. */
     width?: number
   },
 ) {
   const { categories, horizontal, isRTL, boundaryGap } = opts
   const { type, timeGrain } = resolveXAxis(config)
-  // Only a row chart's labels stand in the way of the marks. A column chart's
-  // sit under the plot, where echarts already rotates and thins them out.
-  const labelWidth =
-    horizontal && type === 'category'
-      ? categoryLabelWidth(opts.width)
-      : undefined
+  const { rotate, labelWidth } = categoryLabelFit(config, { ...opts, type })
 
   const axis = {
     type,
@@ -211,6 +235,9 @@ export function buildCategoryAxis(
       // but the cap still has to be declared: it is what `containLabel`
       // reserves against, and it catches a label the estimate underread.
       ...(labelWidth ? { width: labelWidth, overflow: 'truncate' } : {}),
+      // Left out entirely when the labels fit, so a flat axis carries no
+      // rotation key at all.
+      ...(rotate ? { rotate } : {}),
       ...(type === 'time'
         ? {
             // echarts hands a time axis' formatter the tick's level, which is
@@ -238,6 +265,136 @@ export function buildCategoryAxis(
   }
 
   return mergeDeep(axis, config.xAxis.echartOptions)
+}
+
+type CategoryLabelFit = {
+  /** Degrees the labels are turned by. 0 leaves them flat. */
+  rotate: number
+  /** What a label is shortened to, when anything caps it. */
+  labelWidth?: number
+}
+
+/**
+ * How the category labels are laid out. Legibility is the library's job, so
+ * there is no angle prop: the labels are measured against the room they have
+ * and the axis decides for itself.
+ *
+ * One rule decides it — show as much of a label as the space allows. Labels
+ * that fit their slot are left alone. Once one does not, the axis takes
+ * whichever layout carries more text: flat and shortened to the slot, or
+ * tilted, which trades the slot for the depth below the axis. Wide slots keep
+ * flat labels, because reading across beats reading up a diagonal; crowded ones
+ * tilt, where a flat label would be down to a syllable. Whatever still collides
+ * after that is thinned out by `hideOverlap`, as it always was.
+ *
+ * The whole axis takes one layout. Labels leaning two ways read as two axes.
+ */
+function categoryLabelFit(
+  config: AxisChartBaseConfig,
+  opts: {
+    categories: any[]
+    horizontal: boolean
+    isRTL: boolean
+    boundaryGap: boolean
+    width?: number
+    type: 'category' | 'time'
+  },
+): CategoryLabelFit {
+  const { type, horizontal, isRTL, width } = opts
+
+  // A time axis picks its own ticks — it drops to a coarser interval rather
+  // than crowd them — and its levelled labels, a bold year heading a run of
+  // months, only read as a heading while they sit flat.
+  if (type !== 'category') return { rotate: 0 }
+
+  // A row chart's categories are already stacked one per line down the side,
+  // so there is nothing for a tilt to buy. They stand in the way of the marks
+  // instead, which is what the column cap is for.
+  if (horizontal) return { rotate: 0, labelWidth: categoryLabelWidth(width) }
+
+  const slot = categorySlotWidth(config, opts)
+  if (!slot || fitsFlat(opts.categories, drawnLabel(config, type), slot))
+    return { rotate: 0 }
+
+  const flat = Math.floor(slot - CATEGORY_LABEL_GAP)
+  const tilted = tiltedLabelWidth(slot)
+  if (flat >= tilted) return { rotate: 0, labelWidth: flat }
+
+  return {
+    // The tilt leans towards the value axis. Its column of ticks is width the
+    // grid holds open, and nothing occupies it below the plot — which is
+    // exactly where a tilted label reaches. RTL puts that column on the other
+    // side, so the labels lean the other way.
+    rotate: isRTL ? -TILT_ANGLE : TILT_ANGLE,
+    labelWidth: tilted,
+  }
+}
+
+/**
+ * The room one category gets along the axis, or undefined where there is
+ * nothing to decide from: a chart that has not been measured, one measured at
+ * nothing, or a line with a single point, which has no neighbour to collide
+ * with.
+ */
+function categorySlotWidth(
+  config: AxisChartBaseConfig,
+  opts: { categories: any[]; boundaryGap: boolean; width?: number },
+) {
+  if (!opts.width) return undefined
+
+  const valueAxes = hasSecondaryValueAxis(config) ? 2 : 1
+  const plot = opts.width - 2 * EDGE_PAD - valueAxes * VALUE_AXIS_RESERVE
+  // `boundaryGap` gives every category a slot of its own to sit in the middle
+  // of; without it they sit on the dividers, so what has to hold a label is
+  // the distance between two ticks.
+  const slots = opts.boundaryGap
+    ? opts.categories.length
+    : opts.categories.length - 1
+
+  if (plot <= 0 || slots < 1) return undefined
+  return plot / slots
+}
+
+/**
+ * The text a tick actually draws. An axis `format` reaches echarts as an
+ * `axisLabel.formatter` (see `applyAxisFormatters`) and wins over the one built
+ * here, so it is what decides the width: measuring the raw value instead would
+ * tilt an axis whose labels the caller had already shortened.
+ */
+function drawnLabel(config: AxisChartBaseConfig, type: 'category') {
+  const formatter = config.xAxis.echartOptions?.axisLabel?.formatter
+  if (typeof formatter !== 'function') {
+    return (value: any) => formatAxisValue(value, type)
+  }
+  return (value: any, index: number) => String(formatter(value, index) ?? '')
+}
+
+/** Whether every label draws inside its own slot with clear air either side. */
+function fitsFlat(
+  categories: any[],
+  label: (value: any, index: number) => string,
+  slot: number,
+) {
+  return categories.every(
+    (value, index) =>
+      estimateTextWidth(label(value, index), AXIS_LABEL_FONT_SIZE) +
+        CATEGORY_LABEL_GAP <=
+      slot,
+  )
+}
+
+/**
+ * How much text a tilted label may carry: whichever is smaller of the standing
+ * budget and the room beside the leading tick, which is its half slot plus the
+ * column the value axis holds open. Both bound the same diagonal, so one
+ * division converts either of them into a width.
+ */
+function tiltedLabelWidth(slot: number) {
+  const reach = Math.min(
+    TILTED_LABEL_EXTENT,
+    EDGE_PAD + VALUE_AXIS_RESERVE + slot / 2,
+  )
+  return Math.floor((reach - LABEL_LINE_HEIGHT * TILT_SIN) / TILT_SIN)
 }
 
 function categoryLabelWidth(width?: number) {

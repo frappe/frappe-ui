@@ -18,6 +18,20 @@ export type ReferenceLineContext = {
   horizontal: boolean
   /** Whether the chart actually draws a second value axis. */
   hasSecondaryValueAxis: boolean
+  /**
+   * Whether one of the two axes carries categories. Defaults to true. A scatter
+   * sets it false: both of its axes are value axes, so `'x'` names a numeric
+   * scale rather than the categories, and a line on it is read as a number.
+   */
+  hasCategoryAxis?: boolean
+  /**
+   * The mark the empty host draws as. Defaults to `'line'`. echarts drops a
+   * series whose type the chart never registered — and takes its `markLine`
+   * with it, silently — so the host has to be a mark the chart already carries.
+   * Which is also why it is not simply always `'scatter'`: an axis chart has no
+   * scatter series either.
+   */
+  hostSeriesType?: 'line' | 'scatter'
 }
 
 /**
@@ -30,9 +44,10 @@ export type ReferenceLineContext = {
  * ever sees: the legend and `hiddenSeries` are built from `config.series`, which
  * these are not part of.
  *
- * `type: 'line'` matters as much as the emptiness — a `'bar'` host would be
+ * The host's own mark matters as much as the emptiness — a `'bar'` host would be
  * counted when echarts divides a category slot between the bars in it, and every
- * real bar would narrow to make room for one that draws nothing.
+ * real bar would narrow to make room for one that draws nothing. See
+ * `hostSeriesType` for the rest of that choice.
  */
 export function buildReferenceLineSeries(
   lines: ReferenceLine[] | undefined,
@@ -52,7 +67,7 @@ export function buildReferenceLineSeries(
 
     if (!data.length) continue
     hosts.push({
-      type: 'line',
+      type: ctx.hostSeriesType ?? 'line',
       name: `${HOST_SERIES_NAME}-${axisIndex}`,
       data: [],
       silent: true,
@@ -77,18 +92,20 @@ function hostIndex(line: ReferenceLine, ctx: ReferenceLineContext) {
 
 function markLineEntry(
   line: ReferenceLine,
-  { theme, horizontal }: ReferenceLineContext,
+  { theme, horizontal, hasCategoryAxis = true }: ReferenceLineContext,
 ): Record<string, any> | null {
-  const onCategoryAxis = line.axis === 'x'
+  const onXAxis = line.axis === 'x'
   // A value-axis line is read as a number; a category one carries whatever the
-  // category column holds, which may be a string or a date.
+  // category column holds, which may be a string or a date. On a chart with no
+  // category axis, `'x'` is a value axis like any other and reads as a number.
+  const onCategoryAxis = onXAxis && hasCategoryAxis
   const at = onCategoryAxis ? line.value : toNumber(line.value)
   if (at === null || at === undefined || at === '') return null
 
   // A line pinned to an x value draws as a vertical rule and one pinned to a y
   // value as a horizontal rule. `horizontal` swaps which axis carries the
   // categories, so it swaps the key each kind of line needs.
-  const axisKey = onCategoryAxis !== horizontal ? 'xAxis' : 'yAxis'
+  const axisKey = onXAxis !== horizontal ? 'xAxis' : 'yAxis'
   // The ink data labels are printed in: a reference line annotates the plot, so
   // it should not read as another measure drawn in a palette color.
   const color = line.color || theme.dataLabel

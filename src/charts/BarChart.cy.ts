@@ -169,6 +169,89 @@ describe('BarChart', () => {
     })
   })
 
+  describe('normalized stacking', () => {
+    it('fills every column to the top and scales the axis to 100', () => {
+      mountChart({ stacked: 'normalized' })
+      bars().should('have.length', data.length * 2)
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '100')
+    })
+
+    it('prints the share on the bars', () => {
+      mountChart({
+        stacked: 'normalized',
+        seriesConfig: {
+          sales: { showDataLabels: true },
+          refunds: { showDataLabels: true },
+        },
+      })
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '%')
+    })
+
+    // The plot draws the share; the tooltip is where the measured number lives.
+    it('keeps the real number in the tooltip and prints the share beside it', () => {
+      mountChart({ stacked: 'normalized' })
+      bars().should('have.length', data.length * 2)
+      cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('exist')
+        .and('contain.text', '10')
+        .and('contain.text', '71%')
+    })
+  })
+
+  describe('maxSeries', () => {
+    const byRegion = [
+      { month: 'Jan', region: 'East', amount: 50 },
+      { month: 'Jan', region: 'West', amount: 30 },
+      { month: 'Jan', region: 'North', amount: 15 },
+      { month: 'Jan', region: 'South', amount: 5 },
+    ]
+
+    it('collapses the tail into one "Others" series', () => {
+      mountChart({
+        data: byRegion,
+        y: 'amount',
+        series: 'region',
+        maxSeries: 3,
+      })
+      cy.get('[data-slot="chart-legend"] button')
+        .should('have.length', 3)
+        .last()
+        .should('contain.text', 'Others')
+      bars().should('have.length', 3)
+    })
+
+    it('lets seriesConfig rename the collapsed series', () => {
+      mountChart({
+        data: byRegion,
+        y: 'amount',
+        series: 'region',
+        maxSeries: 2,
+        seriesConfig: { __others__: { label: 'Everywhere else' } },
+      })
+      cy.get('[data-slot="chart-legend"]').should(
+        'contain.text',
+        'Everywhere else',
+      )
+    })
+
+    it('takes the shares after the collapse, so the column still fills', () => {
+      mountChart({
+        data: byRegion,
+        y: 'amount',
+        series: 'region',
+        maxSeries: 3,
+        stacked: 'normalized',
+      })
+      bars().should('have.length', 3)
+      cy.get('[data-slot="chart-plot"]').trigger('mousemove', 240, 150)
+      // 20 of the 100 at that month, the two smallest regions summed.
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('contain.text', 'Others')
+        .and('contain.text', '20%')
+    })
+  })
+
   describe('reference lines', () => {
     it('draws a labelled rule over the plot with no legend entry of its own', () => {
       mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
@@ -213,6 +296,84 @@ describe('BarChart', () => {
         .should('contain.text', 'Target')
         .and('contain.text', 'Launch')
       bars().should('have.length', data.length * 2)
+    })
+  })
+
+  describe('category labels', () => {
+    const regions = [
+      'Marketplace Listings',
+      'Referral Partners',
+      'Outbound Calling',
+      'Paid Search Brand',
+      'Organic Search',
+      'Field Events',
+      'Partner Resellers',
+      'Lifecycle Email',
+    ]
+
+    /** Long category names in a box too narrow to lay them out flat. */
+    function mountLongLabels(props: Record<string, any> = {}) {
+      return cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 420px; height: 300px' }, [
+                h(BarChart, {
+                  data: regions.map((region, i) => ({
+                    region,
+                    sales: i + 1,
+                  })),
+                  x: 'region',
+                  y: 'sales',
+                  echartOptions: { animation: false },
+                  ...props,
+                }),
+              ])
+          },
+        }),
+      )
+    }
+
+    /** zrender writes a rotation out as a matrix; a flat label gets neither. */
+    const tilted = () =>
+      cy.get('[data-slot="chart-plot"] svg text[transform*="matrix"]')
+
+    it('leaves labels that fit flat', () => {
+      mountChart()
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Jan')
+      tilted().should('not.exist')
+    })
+
+    it('tilts them rather than dropping them once they crowd', () => {
+      mountLongLabels()
+      // One label per category: flat they would collide, and echarts would
+      // thin most of them away instead.
+      tilted().should('have.length', regions.length)
+      // Shortened to the room a tilted label has, both ends kept.
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '…')
+    })
+
+    it('keeps the plot clear of its own labels', () => {
+      mountLongLabels()
+      // `containLabel` reserves the height the tilt costs, so the bars end
+      // above the labels rather than behind them.
+      tilted().then(($labels) => {
+        const top = Math.min(
+          ...[...$labels].map((el) => el.getBoundingClientRect().top),
+        )
+        bars().each(($bar) => {
+          expect($bar[0].getBoundingClientRect().bottom).to.be.at.most(top + 1)
+        })
+      })
+    })
+
+    it('stacks a row chart’s labels down the side, never tilted', () => {
+      mountLongLabels({ horizontal: true })
+      tilted().should('not.exist')
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Listings',
+      )
     })
   })
 

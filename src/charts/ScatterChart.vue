@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { ScatterChart as ScatterSeries } from 'echarts/charts'
-import { GridComponent } from 'echarts/components'
+import { GridComponent, MarkLineComponent } from 'echarts/components'
 import { registerChartModules, useChart } from './core/useChart'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
@@ -65,9 +65,10 @@ import type {
   ScatterPointEvent,
 } from './types'
 
-// The grid carries both value axes; there is no tooltip component, because the
-// visible tooltip is a Vue one (see buildScatterOption).
-registerChartModules([ScatterSeries, GridComponent])
+// The grid carries both value axes and MarkLineComponent draws the reference
+// lines — without it they are dropped without a word. There is no tooltip
+// component, because the visible tooltip is a Vue one (see buildScatterOption).
+registerChartModules([ScatterSeries, GridComponent, MarkLineComponent])
 
 const props = defineProps<ScatterChartProps>()
 
@@ -102,6 +103,7 @@ const config = computed<ScatterChartConfig>(() => ({
   labelColumn: props.label,
   xAxis: toValueAxis(props.xAxis),
   yAxis: toValueAxis(props.yAxis),
+  referenceLines: props.referenceLines,
   palette: props.palette,
   dir: dir.value,
   echartOptions: props.echartOptions,

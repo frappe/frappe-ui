@@ -1,5 +1,5 @@
 import type { EChartsCoreOption } from 'echarts/core'
-import { formatValue } from './format'
+import { formatPercent, formatValue } from './format'
 import { insideLabelColor, type ChartTheme } from './theme'
 import {
   axisChartBase,
@@ -16,7 +16,12 @@ import {
 } from './axisChartCommon'
 import { buildReferenceLineSeries } from './referenceLines'
 import { mergeDeep } from './utils'
-import type { AxisChartConfig, AxisChartSeriesConfig, ChartMark } from './types'
+import type {
+  AxisChartConfig,
+  AxisChartSeriesConfig,
+  ChartMark,
+  ChartYAxisConfig,
+} from './types'
 
 const BAR_MAX_WIDTH = 32
 /** Slim bars with an airy gap between categories. */
@@ -39,6 +44,10 @@ export const DEFAULT_STACKED_FILL_OPACITY = 0.75
 const GRADIENT_FADE = 0.1
 
 const MARKS: ChartMark[] = ['bar', 'line', 'area']
+
+/** The scale a 100% stack is read against, whatever the numbers behind it. */
+const NORMALIZED_MIN = 0
+const NORMALIZED_MAX = 100
 
 /**
  * Marks paint in this order whatever order the series arrive in: a bar hides a
@@ -67,7 +76,20 @@ type SeriesContext = {
   carriesTip: (entry: PlottedSeries, rowIndex: number, value: number) => boolean
   /** Whether this area stacks onto another, i.e. reads as a band. */
   banded: boolean
+  /**
+   * This series' share of its stack, row by row, on a normalized chart. Set
+   * means the plot draws the share and prints it as a percentage; unset means
+   * the series draws the numbers the data holds.
+   */
+  share: (number | null)[] | null
 }
+
+/**
+ * Each series' share of its stack, row by row, keyed by series name. Empty for
+ * a chart that is not normalized, and missing an entry for a series that has no
+ * stack to take a share of.
+ */
+export type StackShares = Map<string, (number | null)[]>
 
 /**
  * The one option path every cartesian chart takes. `config.type` is the mark a
@@ -100,8 +122,13 @@ export function buildAxisChartOption(
     boundaryGap: hasBars,
     width,
   })
-  const valueAxis = buildValueAxes(config, theme, { horizontal, isRTL })
   const hasSecondary = hasSecondaryValueAxis(config, horizontal)
+  const shares = stackShares(config, visible, rows)
+  const valueAxis = buildValueAxes(
+    pinNormalizedAxes(config, visible, shares, hasSecondary),
+    theme,
+    { horizontal, isRTL },
+  )
   const carriesTip = tipResolver(visible, config, rows)
 
   const option = {
@@ -126,6 +153,7 @@ export function buildAxisChartOption(
           yAxisIndex: valueAxisIndex(entry.series, hasSecondary),
           carriesTip,
           banded: isBanded(entry, plotted),
+          share: shares.get(entry.series.name) ?? null,
         }),
       ),
       // Appended after the plotted series, and read from `config.referenceLines`
@@ -143,9 +171,14 @@ export function buildAxisChartOption(
   return mergeDeep(option, config.echartOptions)
 }
 
-function plotSeries(config: AxisChartConfig): PlottedSeries[] {
+/**
+ * `quiet` for a second read of the same config: a series asking for a mark the
+ * library cannot draw is reported by the option build, once, rather than again
+ * by everything else that resolves the same marks.
+ */
+function plotSeries(config: AxisChartConfig, quiet = false): PlottedSeries[] {
   return config.series.map((series) => {
-    const mark = resolveMark(series, config)
+    const mark = resolveMark(series, config, quiet)
     return { series, mark, stack: stackKey(series, config, mark) }
   })
 }
@@ -153,20 +186,23 @@ function plotSeries(config: AxisChartConfig): PlottedSeries[] {
 function resolveMark(
   series: AxisChartSeriesConfig,
   config: AxisChartConfig,
+  quiet = false,
 ): ChartMark {
   // A saved config outlives the code that wrote it, so an unreadable mark is a
   // value to recover from rather than a reason to draw nothing.
   const asked = series.type ?? config.type
   if (!MARKS.includes(asked)) {
-    warn(
-      `Series "${series.name}" asks for type "${asked}", which is not one of ${MARKS.join(', ')}. Drawing it as ${article(config.type)}.`,
-    )
+    if (!quiet)
+      warn(
+        `Series "${series.name}" asks for type "${asked}", which is not one of ${MARKS.join(', ')}. Drawing it as ${article(config.type)}.`,
+      )
     return config.type
   }
   if (config.horizontal && asked !== 'bar') {
-    warn(
-      `\`horizontal\` runs the value axis across the plot, which only bars are drawn against. Series "${series.name}" asked for ${article(asked)} and is drawn as a bar.`,
-    )
+    if (!quiet)
+      warn(
+        `\`horizontal\` runs the value axis across the plot, which only bars are drawn against. Series "${series.name}" asked for ${article(asked)} and is drawn as a bar.`,
+      )
     return 'bar'
   }
   return asked
@@ -189,6 +225,135 @@ function stackKey(
 function isBanded(entry: PlottedSeries, plotted: PlottedSeries[]) {
   if (entry.mark !== 'area' || !entry.stack) return false
   return plotted.some((other) => other !== entry && other.stack === entry.stack)
+}
+
+/**
+ * The 100% stacked reading: every value as its share of the column it sits in.
+ * The share is taken here rather than written back into the rows, so the
+ * tooltip, the click event and the legend keep reading the numbers the caller
+ * passed — the plot shows the share, the tooltip shows both.
+ */
+export function buildStackShares(
+  config: AxisChartConfig,
+  hiddenSeries: string[] = [],
+): StackShares {
+  if (config.stacked !== 'normalized') return new Map()
+  const plotted = plotSeries(config, true)
+  const visible = plotted.filter(
+    (entry) => !hiddenSeries.includes(entry.series.name),
+  )
+  return stackShares(config, visible, config.data ?? [])
+}
+
+function stackShares(
+  config: AxisChartConfig,
+  visible: PlottedSeries[],
+  rows: Record<string, any>[],
+): StackShares {
+  const shares: StackShares = new Map()
+  if (config.stacked !== 'normalized') return shares
+
+  // Per stack rather than across the whole x slot: two stacks standing side by
+  // side are two wholes, and a share of their combined total would leave
+  // neither column reaching the top, which is the one thing a 100% stack is
+  // read for. With the single stack every normalized chart actually has, the
+  // two readings are the same.
+  const groups = new Map<string, PlottedSeries[]>()
+  for (const entry of visible) {
+    if (!entry.stack) continue
+    groups.set(entry.stack, [...(groups.get(entry.stack) ?? []), entry])
+  }
+
+  for (const group of groups.values()) {
+    // A series alone in its stack is its own whole: every row would read 100%,
+    // which says nothing about the data. It keeps its own numbers instead.
+    if (group.length < 2) continue
+
+    // Magnitudes, so a column that mixes signs still spans exactly 100 from its
+    // lowest segment to its highest, and a total near zero cannot blow the
+    // shares up. All-positive data — what a part-to-whole reading is for —
+    // makes this the plain sum.
+    const totals = rows.map((row) =>
+      group.reduce(
+        (sum, entry) => sum + Math.abs(toNumber(row[entry.series.name]) ?? 0),
+        0,
+      ),
+    )
+
+    for (const entry of group) {
+      shares.set(
+        entry.series.name,
+        rows.map((row, index) => {
+          const value = toNumber(row[entry.series.name])
+          if (value === null || !totals[index]) return null
+          return (value / totals[index]) * NORMALIZED_MAX
+        }),
+      )
+    }
+  }
+
+  return shares
+}
+
+/**
+ * A 100% stack is only legible when the axis *is* the share: a column that
+ * stops short of the top stops reading as a whole. So the pinned 0-100 wins
+ * over a `min` or `max` the caller set, and says so. Only the axes that
+ * actually carry a share are pinned.
+ */
+function pinNormalizedAxes(
+  config: AxisChartConfig,
+  visible: PlottedSeries[],
+  shares: StackShares,
+  hasSecondary: boolean,
+): AxisChartConfig {
+  if (!shares.size) return config
+
+  const pinned = new Set<number>()
+  for (const entry of visible) {
+    if (shares.has(entry.series.name)) {
+      pinned.add(valueAxisIndex(entry.series, hasSecondary))
+    }
+  }
+
+  for (const entry of visible) {
+    if (shares.has(entry.series.name)) continue
+    if (!pinned.has(valueAxisIndex(entry.series, hasSecondary))) continue
+    warn(
+      `\`stacked: "normalized"\` pins that value axis to 0-100, but series "${entry.series.name}" stacks with nothing — a line never stacks, and a mark alone in its stack has no whole to be part of — so it draws its own numbers against that scale. Give it \`axis: "y2"\`, or stack it with the rest.`,
+    )
+  }
+
+  return {
+    ...config,
+    ...(pinned.has(0) ? { yAxis: pinValueAxis(config.yAxis, 'yAxis') } : {}),
+    ...(pinned.has(1) ? { y2Axis: pinValueAxis(config.y2Axis, 'y2Axis') } : {}),
+  }
+}
+
+function pinValueAxis(
+  axis: ChartYAxisConfig | undefined,
+  name: string,
+): ChartYAxisConfig {
+  const overridden =
+    (axis?.min !== undefined && axis.min !== NORMALIZED_MIN) ||
+    (axis?.max !== undefined && axis.max !== NORMALIZED_MAX)
+  if (overridden) {
+    warn(
+      `\`stacked: "normalized"\` reads every value as its share of its stack, so \`${name}\` is pinned to 0-100 and the \`min\`/\`max\` set on it is ignored.`,
+    )
+  }
+  return {
+    ...axis,
+    min: NORMALIZED_MIN,
+    max: NORMALIZED_MAX,
+    // The ticks read shares, so a `format` written for the measure would print
+    // a currency symbol on a percentage. No warning: that `format` still does
+    // its real job in the tooltip, which is where the measure survives.
+    echartOptions: mergeDeep(axis?.echartOptions ?? {}, {
+      axisLabel: { formatter: (value: number) => formatPercent(value) },
+    }),
+  }
 }
 
 /** Chart-wide room for the labels, i.e. whatever the hungriest mark needs. */
@@ -289,7 +454,7 @@ function buildBarSeries(
 
   const data = rows.map((row, index) => {
     const category = row[config.xAxis.key]
-    const value = toNumber(row[series.name])
+    const value = ctx.share ? ctx.share[index] : toNumber(row[series.name])
     const point = horizontal ? [value, category] : [category, value]
     const rounded =
       value !== null && carriesTip(entry, index, value)
@@ -329,10 +494,11 @@ function buildBarSeries(
           ? insideLabelColor(color, theme.insideLabel)
           : theme.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
-      formatter: (params: any) => {
-        const value = horizontal ? params.value?.[0] : params.value?.[1]
-        return formatValue(value, 1, true)
-      },
+      formatter: (params: any) =>
+        plottedLabel(
+          horizontal ? params.value?.[0] : params.value?.[1],
+          Boolean(ctx.share),
+        ),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -347,9 +513,9 @@ function buildLineSeries(
   const { series, mark } = entry
   const { rows, color, theme, yAxisIndex, banded } = ctx
 
-  const data = rows.map((row) => [
+  const data = rows.map((row, index) => [
     row[config.xAxis.key],
-    toNumber(row[series.name]),
+    ctx.share ? ctx.share[index] : toNumber(row[series.name]),
   ])
 
   const base = {
@@ -384,7 +550,8 @@ function buildLineSeries(
       position: 'top',
       color: theme.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
-      formatter: (params: any) => formatValue(params.value?.[1], 1, true),
+      formatter: (params: any) =>
+        plottedLabel(params.value?.[1], Boolean(ctx.share)),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -402,6 +569,15 @@ function buildLineSeries(
       },
     },
   }
+}
+
+/**
+ * What a data label prints. A normalized series plots a share, so printing it
+ * as a number would read as a count of something.
+ */
+function plottedLabel(value: any, normalized: boolean) {
+  if (value === null || value === undefined || isNaN(value)) return ''
+  return normalized ? formatPercent(value) : formatValue(value, 1, true)
 }
 
 function fillOpacityOf(

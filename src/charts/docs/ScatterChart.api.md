@@ -90,6 +90,12 @@
     type: 'ChartPalette'
   },
   {
+    name: 'referenceLines',
+    description: 'Targets, thresholds and quadrant dividers drawn over the plot. They are\nannotations, not series: no legend entry, and no way to switch one off.\nBoth axes are measured here, so `axis: \'x\'` takes a number too — a pair of\nlines, one per axis, is what divides a scatter into quadrants.',
+    required: false,
+    type: 'ReferenceLine[]'
+  },
+  {
     name: 'format',
     description: 'Prints every number the chart shows. `xAxis.format` and `yAxis.format`\noverride it for their own axis; the size measure has no axis, so this is\nwhat prints it.',
     required: false,

@@ -66,6 +66,12 @@
     type: 'string'
   },
   {
+    name: 'maxSeries',
+    description: 'Caps how many series the `series` column produces. The rest are summed\ninto a single "Others" series. Uncapped by default, and ignored when `y`\nnames the columns: those the caller chose one by one.',
+    required: false,
+    type: 'number'
+  },
+  {
     name: 'seriesConfig',
     description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
     required: false,
@@ -97,9 +103,9 @@
   },
   {
     name: 'stacked',
-    description: 'Series sum on top of each other. Bar and area series; a line never stacks.',
+    description: 'Series sum on top of each other. Bar and area series; a line never stacks.\n`\'normalized\'` reads each value as its share of the stack it sits in\ninstead of its own magnitude, and pins that value axis to 0-100.',
     required: false,
-    type: 'boolean'
+    type: 'boolean | "normalized"'
   },
   {
     name: 'connectNulls',

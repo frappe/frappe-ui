@@ -123,6 +123,65 @@ describe('ScatterChart', () => {
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Spend')
   })
 
+  describe('reference lines', () => {
+    it('draws a labelled rule across the plot with no legend entry of its own', () => {
+      mountChart({
+        series: 'region',
+        referenceLines: [{ value: 1000, label: 'Target' }],
+      })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+      // An annotation, not a series: the legend still lists the two groups.
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      points().should('have.length', data.length)
+    })
+
+    it('divides the plot into quadrants with one line per measured axis', () => {
+      mountChart({
+        referenceLines: [
+          { value: 500, axis: 'x', label: 'Median spend', dashed: true },
+          { value: 1000, axis: 'y', label: 'Median revenue', dashed: true },
+        ],
+      })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Median spend')
+        .and('contain.text', 'Median revenue')
+      points().should('have.length', data.length)
+    })
+
+    it('keeps the rule while a legend toggle hides a group', () => {
+      mountChart({
+        series: 'region',
+        referenceLines: [{ value: 1000, label: 'Target' }],
+      })
+      cy.get('[data-slot="chart-legend"] button').first().click()
+      points().should('have.length', 2)
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+    })
+
+    it('leaves the rule out of hiddenSeries', () => {
+      // The host series is not something the caller can name, so binding the
+      // model and hiding every group must not surface it.
+      const hidden: string[][] = []
+      mountChart({
+        series: 'region',
+        referenceLines: [{ value: 1000, label: 'Target' }],
+        'onUpdate:hiddenSeries': (next: string[]) => hidden.push(next),
+      })
+      cy.get('[data-slot="chart-legend"] button')
+        .first()
+        .click()
+        .then(() => {
+          expect(hidden).to.deep.equal([['EU']])
+        })
+    })
+  })
+
   it('has nothing to draw without rows', () => {
     mountChart({ data: [] })
     cy.get('[data-slot="chart-plot"]').should('contain.text', 'No data to show')

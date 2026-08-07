@@ -57,7 +57,7 @@ import {
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
-import { buildAxisChartOption } from './axisChartOptions'
+import { buildAxisChartOption, buildStackShares } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
@@ -120,6 +120,7 @@ const {
   config: () => config.value,
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
+  stackShares: () => buildStackShares(config.value, hiddenSeries.value),
   hiddenSeries,
   onDatapointClick: (event) => emit('datapointClick', event),
 })

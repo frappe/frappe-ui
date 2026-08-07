@@ -34,6 +34,12 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * the caller the source of truth; left out, the legend manages it here.
    */
   hiddenSeries?: Ref<string[]>
+  /**
+   * Each series' share of its stack, row by row — what a normalized chart
+   * plots. The tooltip keeps reading the real number and prints the share
+   * beside it, so the reader gets both.
+   */
+  stackShares?: () => Map<string, (number | null)[]>
   onDatapointClick?: (event: ChartDatapointEvent) => void
 }
 
@@ -51,6 +57,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const config = computed(args.config)
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
+  const stackShares = computed(() => args.stackShares?.())
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
   // read the axis the way it is actually drawn.
@@ -249,6 +256,9 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
         color: seriesColors.value[series.name],
         value: Number(row[series.name]),
         formattedValue: formatSeriesValue(series, Number(row[series.name])),
+        // A normalized plot draws the share, so the tooltip is the only place
+        // the measured number survives — it carries both.
+        percent: stackShares.value?.get(series.name)?.[index] ?? undefined,
       }))
       // A series that silently drops out of the tooltip reads as a bug, so a
       // zero stays. Only a blank cell is dropped. Biggest contributor first.

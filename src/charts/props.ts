@@ -95,6 +95,12 @@ export type AxisChartProps = ChartBaseProps & {
   y2?: string | string[]
   /** Grouping column, i.e. long data. Use with a single `y`. */
   series?: string
+  /**
+   * Caps how many series the `series` column produces. The rest are summed
+   * into a single "Others" series. Uncapped by default, and ignored when `y`
+   * names the columns: those the caller chose one by one.
+   */
+  maxSeries?: number
   /** Keyed by series identity: a `y` column, or a value of the `series` column. */
   seriesConfig?: Record<string, SeriesStyle>
   xAxis?: ChartXAxisOptions
@@ -102,8 +108,12 @@ export type AxisChartProps = ChartBaseProps & {
   y2Axis?: ChartValueAxisOptions
   /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
   palette?: ChartPalette
-  /** Series sum on top of each other. Bar and area series; a line never stacks. */
-  stacked?: boolean
+  /**
+   * Series sum on top of each other. Bar and area series; a line never stacks.
+   * `'normalized'` reads each value as its share of the stack it sits in
+   * instead of its own magnitude, and pins that value axis to 0-100.
+   */
+  stacked?: boolean | 'normalized'
   /** Bridges gaps left by nulls. Line and area series. */
   connectNulls?: boolean
   /** Chart-level fill alpha; `seriesConfig` overrides it per series. Area series. */
@@ -212,6 +222,13 @@ export type ScatterChartProps = ChartBaseProps & {
   yAxis?: ChartValueAxisOptions
   /** Defaults to `'categorical'`: the groups are unrelated categories. */
   palette?: ChartPalette
+  /**
+   * Targets, thresholds and quadrant dividers drawn over the plot. They are
+   * annotations, not series: no legend entry, and no way to switch one off.
+   * Both axes are measured here, so `axis: 'x'` takes a number too — a pair of
+   * lines, one per axis, is what divides a scatter into quadrants.
+   */
+  referenceLines?: ReferenceLine[]
   /**
    * Prints every number the chart shows. `xAxis.format` and `yAxis.format`
    * override it for their own axis; the size measure has no axis, so this is

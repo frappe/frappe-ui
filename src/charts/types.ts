@@ -102,6 +102,10 @@ export type ReferenceLine = {
    * rule across the plot at a measured value; `'x'` draws one down it at a
    * category. `'y2'` reads against the primary axis on a chart that draws only
    * one, exactly as a series does.
+   *
+   * On a scatter both axes are value axes, so `'x'` is a number on the
+   * horizontal scale rather than a category, and `'y2'` names an axis a scatter
+   * does not have — it reads as `'y'`, with a dev-mode warning.
    */
   axis?: 'y' | 'y2' | 'x'
   /** Printed at the far end of the line. Left out, the rule carries no text. */
@@ -149,8 +153,10 @@ export type AxisChartConfig = AxisChartBaseConfig & {
   /**
    * Series sum on top of each other rather than standing side by side. Read by
    * the marks that stack, i.e. bars and areas; a line never stacks.
+   * `'normalized'` plots each value as its share of its stack — the 100%
+   * stacked reading — and pins the value axis that carries it to 0-100.
    */
-  stacked?: boolean
+  stacked?: boolean | 'normalized'
   /** Bars run left-to-right; the category axis moves to Y. Bars only. */
   horizontal?: boolean
   /**
@@ -464,6 +470,11 @@ export type ScatterChartConfig = {
   /** Both axes are value axes: a scatter reads one measure against another. */
   xAxis?: ChartYAxisConfig
   yAxis?: ChartYAxisConfig
+  /**
+   * Rules drawn over the plot at fixed positions, quadrant dividers among them.
+   * Not series: see `ReferenceLine`.
+   */
+  referenceLines?: ReferenceLine[]
   /**
    * Ramp series colors are drawn from. Defaults to `'categorical'`: the groups
    * of a scatter are unrelated categories, not steps of one magnitude.

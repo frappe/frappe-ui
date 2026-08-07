@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
+import { DOTTED_LINE } from './axisChartCommon'
+import { pruneHiddenSeries } from './hiddenSeries'
 import { paletteColors, type ChartTheme } from './theme'
 import type { ScatterChartConfig } from './types'
 
@@ -384,5 +386,201 @@ describe('buildScatterOption', () => {
 
     expect(option.animation).toBe(false)
     expect(option.series[0].type).toBe('scatter')
+  })
+})
+
+/** The series echarts is handed that actually carry reference lines. */
+const hostsOf = (option: any) =>
+  option.series.filter((entry: any) => entry.markLine)
+
+/** Every reference line drawn, across whichever hosts carry them. */
+const entriesOf = (option: any) =>
+  hostsOf(option).flatMap((entry: any) => entry.markLine.data)
+
+describe('reference lines on a scatter', () => {
+  it('draws a horizontal rule at a value on the vertical scale', () => {
+    const option = build({ referenceLines: [{ value: 1500 }] })
+
+    expect(entriesOf(option)).toEqual([
+      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+    ])
+  })
+
+  it('draws a vertical rule at a value on the horizontal scale', () => {
+    // Both axes measure, so `'x'` is a number on the horizontal scale — not a
+    // category the way it is on an axis chart.
+    const option = build({ referenceLines: [{ value: 500, axis: 'x' }] })
+
+    expect(entriesOf(option)).toEqual([
+      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
+    ])
+  })
+
+  it('reads a numeric string on either axis and drops what is not a number', () => {
+    const option = build({
+      referenceLines: [
+        { value: '500', axis: 'x' },
+        { value: '1500' },
+        // A category name has nowhere to sit on a measured axis.
+        { value: 'Acme', axis: 'x' },
+        { value: '', axis: 'x' },
+        { value: null as any },
+      ],
+    })
+
+    expect(entriesOf(option)).toEqual([
+      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+    ])
+  })
+
+  it('divides the plot into quadrants with one line per axis', () => {
+    // The reason there is no `quadrants` prop: a divider is a reference line.
+    const option = build({
+      referenceLines: [
+        { value: 500, axis: 'x', label: 'Median spend', dashed: true },
+        { value: 1000, axis: 'y', label: 'Median revenue', dashed: true },
+      ],
+    })
+
+    // One host: a scatter has a single pair of value axes to hang them on.
+    expect(hostsOf(option)).toHaveLength(1)
+    expect(
+      entriesOf(option).map((entry: any) => [entry.xAxis, entry.yAxis]),
+    ).toEqual([
+      [500, undefined],
+      [undefined, 1000],
+    ])
+    expect(
+      entriesOf(option).map((entry: any) => entry.label.formatter()),
+    ).toEqual(['Median spend', 'Median revenue'])
+  })
+
+  it('carries several lines on the one host', () => {
+    const option = build({
+      referenceLines: [{ value: 500 }, { value: 1000 }, { value: 1500 }],
+    })
+
+    expect(hostsOf(option)).toHaveLength(1)
+    expect(entriesOf(option).map((entry: any) => entry.yAxis)).toEqual([
+      500, 1000, 1500,
+    ])
+  })
+
+  it('prints a label at the far end of the line, in the line’s color', () => {
+    const option = build({
+      referenceLines: [{ value: 1500, label: 'Target', color: '#ff0000' }],
+    })
+    const { label, lineStyle } = entriesOf(option)[0]
+
+    expect(label.show).toBe(true)
+    expect(label.position).toBe('insideEndTop')
+    expect(label.color).toBe('#ff0000')
+    expect(lineStyle.color).toBe('#ff0000')
+    // A function, so braces in a label are not read as an echarts template.
+    expect(label.formatter()).toBe('Target')
+  })
+
+  it('takes its default ink from the theme and breaks a dashed rule up', () => {
+    const option = build({
+      referenceLines: [{ value: 1500, dashed: true }, { value: 500 }],
+    })
+    const [dashed, solid] = entriesOf(option)
+
+    expect(dashed.lineStyle.color).toBe(theme.dataLabel)
+    expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
+    expect(solid.lineStyle.type).toBeUndefined()
+  })
+
+  it('adds nothing at all without usable reference lines', () => {
+    expect(hostsOf(build())).toEqual([])
+    expect(hostsOf(build({ referenceLines: [] }))).toEqual([])
+    expect(hostsOf(build({ referenceLines: [{ value: 'nonsense' }] }))).toEqual(
+      [],
+    )
+  })
+
+  it('reads a y2 line against the vertical scale, and says so', () => {
+    let option: any
+    const warnings = captureWarnings(() => {
+      option = build({
+        referenceLines: [{ value: 1500, axis: 'y2' }, { value: 500 }],
+      })
+    })
+
+    expect(entriesOf(option).map((entry: any) => entry.yAxis)).toEqual([
+      1500, 500,
+    ])
+    expect(hostsOf(option)).toHaveLength(1)
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]).toContain('[frappe-ui]')
+    expect(warnings[0]).toContain("axis: 'y2'")
+  })
+
+  it('says nothing about y2 when no line asks for it', () => {
+    expect(
+      captureWarnings(() =>
+        build({ referenceLines: [{ value: 1500 }, { value: 500, axis: 'x' }] }),
+      ),
+    ).toEqual([])
+  })
+})
+
+describe('reference lines against the rest of the scatter', () => {
+  /** What the legend, the tooltip and `hiddenSeries` walk. Not `option.series`. */
+  const groupNames = (overrides: Partial<ScatterChartConfig>) =>
+    buildScatterSeries(config(overrides), { theme }).map((entry) => entry.name)
+
+  it('keeps its host out of the legend and out of hiddenSeries', () => {
+    const overrides = {
+      seriesColumn: 'region',
+      referenceLines: [{ value: 1500 }],
+    }
+    const option = build(overrides)
+    const names = groupNames(overrides)
+
+    expect(names).toEqual(['EU', 'US'])
+    expect(option.series).toHaveLength(3)
+    // The host is in the echarts option and nowhere the caller can reach it.
+    expect(hostsOf(option)).toHaveLength(1)
+    expect(names).not.toContain(hostsOf(option)[0].name)
+    // And a hidden list built from the drawn groups never picks it up.
+    expect(pruneHiddenSeries([hostsOf(option)[0].name], names)).toEqual([])
+  })
+
+  it('draws its lines while every group is hidden', () => {
+    const option = buildScatterOption(
+      config({ seriesColumn: 'region', referenceLines: [{ value: 1500 }] }),
+      { theme, hiddenSeries: ['EU', 'US'] },
+    ) as any
+
+    expect(option.series.filter((entry: any) => !entry.markLine)).toEqual([])
+    expect(entriesOf(option)).toHaveLength(1)
+  })
+
+  it('hosts on the one mark a scatter registers, carrying no points', () => {
+    // echarts drops a series whose type was never registered — and the markLine
+    // with it — so a 'line' host would leave the plot silently unannotated.
+    const [host] = hostsOf(build({ referenceLines: [{ value: 1500 }] }))
+
+    expect(host.type).toBe('scatter')
+    expect(host.data).toEqual([])
+    expect(host.silent).toBe(true)
+    expect(host.markLine.silent).toBe(true)
+    expect(host.markLine.symbol).toBe('none')
+  })
+
+  it('leaves the points and the scales exactly as they were', () => {
+    const bare = build({ seriesColumn: 'region' })
+    const annotated = build({
+      seriesColumn: 'region',
+      // A target far outside the data does not stretch the scale: it would
+      // flatten the cloud it is meant to be read against.
+      referenceLines: [{ value: 100000 }],
+    })
+
+    expect(annotated.series.slice(0, 2)).toEqual(bare.series)
+    expect(annotated.yAxis.max).toBeUndefined()
+    expect(annotated.xAxis.max).toBeUndefined()
   })
 })
