@@ -21,13 +21,13 @@
     name: 'error',
     description: 'Error message shown below the input. Sets aria-invalid on the control.',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'type',
     description: 'Type of input to render. FormControl is a thin dispatcher — it forwards\n`label`/`description`/`error`/`required`/`size`/`variant` plus all\nremaining attrs/listeners to the resolved child component. Type-specific\nprops (e.g. `options` for select/combobox, `min`/`max`/`formatter` for\ndate pickers, `:options` for multiselect) and the `v-model` value shape\nfollow the underlying component — see that component\'s docs/types for\nthe full surface. Slots are forwarded by name; only slot names declared\non FormControl get IDE typing, others pass through at runtime.',
     required: false,
-    type: '"autocomplete" | "checkbox" | "combobox" | "daterange" | "datetime" | "multiselect" | "select" | "textarea" | TextInputTypes',
+    type: '"select" | "textarea" | TextInputTypes | "checkbox" | "autocomplete" | "combobox" | "multiselect" | "daterange" | "datetime"',
     default: '"text"'
   },
   {
@@ -41,7 +41,7 @@
     name: 'variant',
     description: 'Visual variant of the input',
     required: false,
-    type: '"outline" | "subtle"',
+    type: '"subtle" | "outline"',
     default: '"subtle"'
   },
   {

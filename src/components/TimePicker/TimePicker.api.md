@@ -30,7 +30,7 @@
     name: 'options',
     description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
-    type: 'undefined | { value: string; label?: string; }[]',
+    type: '{ value: string; label?: string; }[] | undefined',
     default: '[]'
   },
   {
@@ -185,7 +185,7 @@
     name: 'scrollMode',
     description: 'Scroll behavior when opening the list.',
     required: false,
-    type: '"center" | "nearest" | "start"',
+    type: '"start" | "center" | "nearest"',
     deprecated: 'Scrolling is always centered now.'
   },
   {
@@ -204,7 +204,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -245,9 +245,24 @@
 
   const emitsData = [
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'change',
     description: 'Fired after the value is committed.',
     type: '[value: string]'
+  },
+  {
+    name: 'open',
+    description: 'Fired when the component opens.',
+    type: '[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'close',
@@ -263,21 +278,6 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
-  },
-  {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
   }
 ]
 </script>

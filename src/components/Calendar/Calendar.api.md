@@ -48,7 +48,7 @@
   {
     name: 'event-popover-content',
     description: '',
-    type: '{ calendarEvent: { [x: string]: unknown; id?: number | string | undefined; name?: number | string | '
+    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
   },
   {
     name: 'daily-header',
@@ -59,24 +59,24 @@
 
   const emitsData = [
   {
+    name: 'delete',
+    description: '',
+    type: '[eventID: string | number | undefined]'
+  },
+  {
     name: 'create',
     description: '',
     type: '[event: CalendarEvent]'
   },
   {
-    name: 'delete',
+    name: 'update',
     description: '',
-    type: '[eventID: number | string | undefined]'
+    type: '[event: CalendarEvent]'
   },
   {
     name: 'rangeChange',
     description: '',
     type: '[payload: { view: CalendarMode; startDate: string; endDate: string; }]'
-  },
-  {
-    name: 'update',
-    description: '',
-    type: '[event: CalendarEvent]'
   }
 ]
 </script>

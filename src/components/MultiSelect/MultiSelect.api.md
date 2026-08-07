@@ -9,7 +9,7 @@
     name: 'modelValue',
     description: 'Array of selected option values.',
     required: false,
-    type: '(number | string)[]',
+    type: '(string | number)[]',
     default: '[]'
   },
   {
@@ -114,7 +114,7 @@
     name: 'portalTo',
     description: 'Teleport target for the popover content.',
     required: false,
-    type: 'HTMLElement | string',
+    type: 'string | HTMLElement',
     default: '"body"'
   },
   {
@@ -133,7 +133,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -231,17 +231,17 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the selection changes.',
-    type: '[value: (number | string)[]]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
+    type: '[value: (string | number)[]]'
   },
   {
     name: 'update:query',
     description: 'Fired when the search query changes.',
     type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'update:selectedOptions',

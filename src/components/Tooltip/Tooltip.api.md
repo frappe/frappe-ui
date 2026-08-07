@@ -23,7 +23,7 @@
     name: 'placement',
     description: 'Position of the tooltip relative to the trigger.',
     required: false,
-    type: '"bottom" | "left" | "right" | "top"',
+    type: '"left" | "right" | "bottom" | "top"',
     default: '"top"'
   },
   {
@@ -65,7 +65,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: '"bottom" | "left" | "right" | "top"',
+    type: '"left" | "right" | "bottom" | "top"',
     default: '"top"'
   },
   {

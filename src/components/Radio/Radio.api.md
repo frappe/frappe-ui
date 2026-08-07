@@ -83,7 +83,7 @@
     name: 'orientation',
     description: 'Layout of the options. Also decides which arrow keys move the selection: up/down when vertical, left/right when horizontal.',
     required: false,
-    type: '"horizontal" | "vertical"',
+    type: '"vertical" | "horizontal"',
     default: '"vertical"'
   },
   {
@@ -115,7 +115,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',

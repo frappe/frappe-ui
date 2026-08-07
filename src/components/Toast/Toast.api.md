@@ -21,7 +21,7 @@
     name: 'type',
     description: 'Visual tone of the toast',
     required: false,
-    type: '"error" | "info" | "success" | "warning"'
+    type: '"error" | "success" | "info" | "warning"'
   },
   {
     name: 'duration',
@@ -51,14 +51,14 @@
 
   const emitsData = [
   {
-    name: 'action',
-    description: '',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'action',
+    description: '',
+    type: '[]'
   }
 ]
 </script>

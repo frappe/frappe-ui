@@ -36,14 +36,14 @@
 
   const emitsData = [
   {
-    name: 'after-leave',
-    description: 'Fired after the close animation finishes.',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes via `v-model:open`.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'after-leave',
+    description: 'Fired after the close animation finishes.',
+    type: '[]'
   }
 ]
 </script>

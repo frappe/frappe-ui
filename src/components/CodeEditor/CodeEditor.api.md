@@ -15,7 +15,7 @@
     name: 'language',
     description: 'CodeMirror language key; falls through to plain text when unset/unknown.\nTyped as `CodeLanguage | (string & {})` so the known keys autocomplete\nwhile an arbitrary string still type-checks.',
     required: false,
-    type: '(string & {}) | CodeLanguage',
+    type: 'CodeLanguage | (string & {})',
     default: '"plain"'
   },
   {
@@ -36,7 +36,7 @@
     name: 'variant',
     description: 'Surface style; derived from the shared `InputVariant` union so the code\nfield can\'t drift from the TextInput/Textarea fields it sits next to.\n`subtle` is the filled default, `outline` is a bordered-on-white box.\n`ghost` (borderless) is excluded — a borderless code surface reads as plain\ntext and loses the affordance that it\'s an editable field. Defaults to\n`subtle`.',
     required: false,
-    type: '"outline" | "subtle"',
+    type: '"subtle" | "outline"',
     default: '"subtle"'
   },
   {
@@ -62,7 +62,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -93,6 +93,11 @@
 
   const codeEditorEmits = [
   {
+    name: 'update:modelValue',
+    description: 'Live document text on every change — mirrors the textarea field contract.',
+    type: '[value: string]'
+  },
+  {
     name: 'change',
     description: 'Commit (blur). The field wrapper normalizes (e.g. JSON pretty-print) here.',
     type: '[value: string]'
@@ -101,11 +106,6 @@
     name: 'overflow',
     description: 'Whether the content currently overflows the height cap (only transitions are\nemitted). The cap is set in CSS via the `--cm-max-height` custom property on\nthe root (there\'s no `maxHeight` prop — styling lives in CSS per P10); this\nemit reports the crossing because a consumer can\'t measure it from CSS.',
     type: '[overflowing: boolean]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Live document text on every change — mirrors the textarea field contract.',
-    type: '[value: string]'
   }
 ]
 
@@ -120,7 +120,7 @@
     name: 'language',
     description: 'Only `markdown` / `html` render a preview; anything else renders nothing.',
     required: false,
-    type: '(string & {}) | CodeLanguage'
+    type: 'CodeLanguage | (string & {})'
   }
 ]
 </script>

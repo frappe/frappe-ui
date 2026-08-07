@@ -9,14 +9,14 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"lg" | "md" | "sm" | "xl"',
+    type: '"md" | "sm" | "lg" | "xl"',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Visual style of the select input.',
     required: false,
-    type: '"ghost" | "outline" | "subtle"',
+    type: '"subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
@@ -81,7 +81,7 @@
     name: 'portalTo',
     description: 'Teleport target for the popover content.',
     required: false,
-    type: 'HTMLElement | string',
+    type: 'string | HTMLElement',
     default: '"body"'
   },
   {
@@ -100,7 +100,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',

@@ -164,7 +164,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'Record<string, boolean> | string | string[]',
+    type: 'string | string[] | Record<string, boolean>',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -183,7 +183,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -230,13 +230,13 @@
 
   const datePickerEmits = [
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: string]'
   },
   {
@@ -412,7 +412,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'Record<string, boolean> | string | string[]',
+    type: 'string | string[] | Record<string, boolean>',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -431,7 +431,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -478,13 +478,13 @@
 
   const dateRangePickerEmits = [
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: DateRangeValue]'
   },
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: DateRangeValue]'
   },
   {
@@ -675,7 +675,7 @@
     name: 'inputClass',
     description: 'Additional classes applied to the trigger input.',
     required: false,
-    type: 'Record<string, boolean> | string | string[]',
+    type: 'string | string[] | Record<string, boolean>',
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
@@ -694,7 +694,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -741,13 +741,13 @@
 
   const dateTimePickerEmits = [
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'change',
+    description: 'Fired after the value is committed.',
     type: '[value: string]'
   },
   {

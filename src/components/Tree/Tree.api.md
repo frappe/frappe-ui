@@ -35,7 +35,7 @@
     name: 'guides',
     description: 'Visual style of the indentation guides.',
     required: false,
-    type: '"connectors" | "lines" | "none"',
+    type: '"none" | "connectors" | "lines"',
     default: '"connectors"'
   },
   {
@@ -84,9 +84,9 @@
 
   const emitsData = [
   {
-    name: 'drag-end',
-    description: '',
-    type: '[info: DropInfo | null]'
+    name: 'update:expanded',
+    description: 'Fired when the expanded changes.',
+    type: '[value: boolean]'
   },
   {
     name: 'drag-start',
@@ -94,9 +94,9 @@
     type: '[node: TreeNode]'
   },
   {
-    name: 'update:expanded',
-    description: 'Fired when the expanded changes.',
-    type: '[value: boolean]'
+    name: 'drag-end',
+    description: '',
+    type: '[info: DropInfo | null]'
   }
 ]
 </script>

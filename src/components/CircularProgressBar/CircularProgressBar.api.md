@@ -37,14 +37,14 @@
     name: 'theme',
     description: 'Theme used for the progress bar (predefined or custom colors)',
     required: false,
-    type: '"black" | "blue" | "green" | "orange" | "red" | { primary: string; secondary: string; }',
+    type: '"blue" | "red" | "green" | "orange" | "black" | { primary: string; secondary: string; }',
     default: '"black"'
   },
   {
     name: 'size',
     description: 'Size of the progress bar',
     required: false,
-    type: '"lg" | "md" | "sm" | "xl" | "xs"',
+    type: '"md" | "xs" | "sm" | "lg" | "xl"',
     default: '"md"'
   },
   {

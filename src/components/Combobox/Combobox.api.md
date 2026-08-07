@@ -107,7 +107,7 @@
     name: 'portalTo',
     description: 'Teleport target for the popover content.',
     required: false,
-    type: 'HTMLElement | string',
+    type: 'string | HTMLElement',
     default: '"body"'
   },
   {
@@ -154,7 +154,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -245,6 +245,21 @@
 
   const emitsData = [
   {
+    name: 'update:modelValue',
+    description: 'Fired when the committed value changes.',
+    type: '[value: ComboboxOptionValue | null]'
+  },
+  {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
+  {
     name: 'blur',
     description: 'Fired when the input loses focus.',
     type: '[event: FocusEvent]'
@@ -255,24 +270,9 @@
     type: '[event: FocusEvent]'
   },
   {
-    name: 'update:modelValue',
-    description: 'Fired when the committed value changes.',
-    type: '[value: ComboboxOptionValue | null]'
-  },
-  {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
-  },
-  {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:selectedOption',
     description: 'Fired when the resolved selected option changes.',
-    type: '[option: ComboboxCustomOption | ComboboxSelectableOption | null]'
+    type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   }
 ]
 </script>

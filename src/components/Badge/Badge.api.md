@@ -9,28 +9,28 @@
     name: 'theme',
     description: 'Visual color theme of the badge',
     required: false,
-    type: '"amber" | "blue" | "gray" | "green" | "orange" | "red" | "violet"',
+    type: '"blue" | "red" | "green" | "gray" | "amber" | "violet" | "orange"',
     default: '"gray"'
   },
   {
     name: 'size',
     description: 'Controls the size of the badge',
     required: false,
-    type: '"lg" | "md" | "sm"',
+    type: '"md" | "sm" | "lg"',
     default: '"md"'
   },
   {
     name: 'variant',
     description: 'Visual style of the badge',
     required: false,
-    type: '"ghost" | "outline" | "solid" | "subtle"',
+    type: '"subtle" | "outline" | "solid" | "ghost"',
     default: '"subtle"'
   },
   {
     name: 'label',
     description: 'Content displayed inside the badge',
     required: false,
-    type: 'Label | number | string'
+    type: 'string | number | Label'
   }
 ]
 

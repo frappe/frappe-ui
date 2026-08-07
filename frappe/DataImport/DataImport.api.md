@@ -21,13 +21,13 @@
     name: 'doctype',
     description: '',
     required: false,
-    type: 'null | string'
+    type: 'string | null'
   },
   {
     name: 'importName',
     description: '',
     required: false,
-    type: 'null | string'
+    type: 'string | null'
   },
   {
     name: 'doctypeMap',

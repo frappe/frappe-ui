@@ -23,7 +23,7 @@
     name: 'type',
     description: 'Native button type',
     required: false,
-    type: '"button" | "reset" | "submit"',
+    type: '"button" | "submit" | "reset"',
     default: '\'button\''
   },
   {
@@ -50,19 +50,19 @@
     name: 'icon',
     description: 'Icon shown when no left or right icon is specified',
     required: false,
-    type: 'Component | string'
+    type: 'string | Component'
   },
   {
     name: 'iconLeft',
     description: 'Icon shown before the label',
     required: false,
-    type: 'Component | string'
+    type: 'string | Component'
   },
   {
     name: 'iconRight',
     description: 'Icon shown after the label',
     required: false,
-    type: 'Component | string'
+    type: 'string | Component'
   },
   {
     name: 'tooltip',
@@ -87,7 +87,7 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'Tt | kt | string'
+    type: 'string | kt | Tt'
   },
   {
     name: 'link',

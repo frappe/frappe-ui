@@ -29,7 +29,7 @@
     name: 'logo',
     description: 'Brand logo shown inside each preview. A string is treated as an image\nsource; a component value is rendered with `<component :is>`.',
     required: false,
-    type: 'Component | string'
+    type: 'string | Component'
   },
   {
     name: 'name',

@@ -23,7 +23,7 @@
     name: 'controlPosition',
     description: 'Position of the control relative to the label, along the inline axis (RTL-aware). `start` is the leading side, `end` the trailing side. Defaults to `end`, so the switch trails the label.',
     required: false,
-    type: '"end" | "start"'
+    type: '"start" | "end"'
   },
   {
     name: 'disabled',
@@ -36,7 +36,7 @@
     name: 'icon',
     description: 'Optional icon rendered alongside the label. Strings starting with `lucide-` are rendered via the shared Lucide Tailwind utility; component values are rendered with `<component :is>`.',
     required: false,
-    type: 'Component | string'
+    type: 'string | Component'
   },
   {
     name: 'labelClasses',
@@ -62,7 +62,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',

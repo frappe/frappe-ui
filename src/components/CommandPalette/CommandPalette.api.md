@@ -35,13 +35,13 @@
     type: 'any[]'
   },
   {
-    name: 'update:searchQuery',
-    description: 'Fired when the search query changes.',
+    name: 'update:show',
+    description: 'Fired when the show changes.',
     type: 'any[]'
   },
   {
-    name: 'update:show',
-    description: 'Fired when the show changes.',
+    name: 'update:searchQuery',
+    description: 'Fired when the search query changes.',
     type: 'any[]'
   }
 ]

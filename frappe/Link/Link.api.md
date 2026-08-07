@@ -54,7 +54,7 @@
     name: 'error',
     description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
     required: false,
-    type: 'FrappeUIError | string'
+    type: 'string | FrappeUIError'
   },
   {
     name: 'required',
@@ -72,7 +72,7 @@
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'null | string',
+    type: 'string | null',
     default: 'null'
   },
   {
@@ -93,25 +93,25 @@
   {
     name: 'item-create',
     description: '',
-    type: '{ item: ComboboxCustomOption | ComboboxSelectableOption; query: string; selected: boolean; }'
+    type: '{ item: ComboboxSelectableOption | ComboboxCustomOption; query: string; selected: boolean; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'create',
-    description: '',
-    type: '[query: string]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: null | string]'
+    type: '[value: string | null]'
   },
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'create',
+    description: '',
+    type: '[query: string]'
   }
 ]
 </script>

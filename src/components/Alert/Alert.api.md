@@ -21,7 +21,7 @@
     name: 'variant',
     description: 'Visual style of the alert container',
     required: false,
-    type: '"outline" | "subtle"',
+    type: '"subtle" | "outline"',
     default: '"subtle"'
   },
   {
@@ -66,14 +66,14 @@
 
   const emitsData = [
   {
-    name: 'dismiss',
-    description: 'Fired when the component is dismissed.',
-    type: 'any[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'dismiss',
+    description: 'Fired when the component is dismissed.',
+    type: 'any[]'
   }
 ]
 </script>
