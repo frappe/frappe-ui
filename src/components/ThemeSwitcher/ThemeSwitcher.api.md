@@ -7,9 +7,9 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'Selected theme. Falls back to the shared `useTheme` state when unbound.',
+    description: 'Selected theme. Falls back to the shared `useColorScheme` state when unbound.',
     required: false,
-    type: 'Theme'
+    type: 'ColorScheme'
   },
   {
     name: 'label',
@@ -42,7 +42,7 @@
     name: 'themeLabels',
     description: 'Overrides the per-option labels. For richer per-item content, use the\n`#item-label` slot, which takes precedence over this prop.',
     required: false,
-    type: 'Partial<Record<Theme, string>>'
+    type: 'Partial<Record<ColorScheme, string>>'
   }
 ]
 
@@ -60,7 +60,7 @@
   {
     name: 'item-label',
     description: 'Overrides a single option\'s label. Receives the option\'s `value`.\nFalls back to the `themeLabels` prop, then the built-in label.',
-    type: '{ value: Theme; }'
+    type: '{ value: ColorScheme; }'
   }
 ]
 
@@ -68,7 +68,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the selected theme changes.',
-    type: '[theme: Theme]'
+    type: '[theme: ColorScheme]'
   }
 ]
 </script>

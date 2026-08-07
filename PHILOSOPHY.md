@@ -492,3 +492,26 @@ import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
 ```
 
 **Consequence:** because root is the permanent home for everything that doesn't clear a bar, its compound families — `SettingsDialog`, `PageHeader`, `Sidebar`, list views — freeze there too. A subpath can't be used later to fix a name that shipped wrong; getting those names right is the cost of keeping them at root.
+
+**`export *` only from a curated barrel.** An entry point may `export *` from an `index.ts` whose export list was reviewed — a component family's barrel, `data-fetching/`, `experimental.ts`. It may never `export *` from an implementation module. The two look identical in a diff and behave completely differently: a barrel's export list is the reviewed decision, while an implementation module exports whatever it happens to need exported next, and a helper added months later joins the public API with no review, no docs, and — after `1.0.0` — a freeze until `2.0.0`.
+
+This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. `tailwind/tokens.js` reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)).
+
+The rule is a one-line grep, and the fix is mechanical — spell the members out:
+
+```ts
+// Bad — src/index.ts
+export * from './composables/useScrollContainer'  // implementation module:
+// today 9 members, tomorrow whatever the next commit adds
+
+// Good
+export {
+  shellScrollContainer,
+  useShellScrolled,
+} from './composables/useShellScrolled'
+
+// Good — a curated barrel, whose own list is the reviewed decision
+export * from './components/Button'
+```
+
+Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.

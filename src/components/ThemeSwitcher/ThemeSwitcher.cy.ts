@@ -15,7 +15,7 @@ describe('<ThemeSwitcher />', () => {
     cy.mount(ThemeSwitcher)
     cy.get('@consoleWarn').should(
       'have.been.calledWithMatch',
-      /ThemeSwitcher is deprecated.*Select.*useTheme/,
+      /ThemeSwitcher is deprecated.*Select.*useColorScheme/,
     )
   })
 

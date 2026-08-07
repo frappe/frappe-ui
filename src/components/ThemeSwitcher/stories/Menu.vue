@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Avatar, Dropdown, useTheme, type DropdownOptions } from 'frappe-ui'
+import {
+  Avatar,
+  Dropdown,
+  useColorScheme,
+  type DropdownOptions,
+} from 'frappe-ui'
 
-const { currentTheme, setTheme } = useTheme()
+const { colorScheme, setColorScheme } = useColorScheme()
 
 const themes = [
   { label: 'Light', icon: 'lucide-sun', value: 'light' },
@@ -18,8 +23,8 @@ const menuOptions = computed<DropdownOptions>(() => [
     submenu: themes.map((theme) => ({
       label: theme.label,
       icon: theme.icon,
-      selected: currentTheme.value === theme.value,
-      onClick: () => setTheme(theme.value),
+      selected: colorScheme.value === theme.value,
+      onClick: () => setColorScheme(theme.value),
     })),
   },
   { icon: 'lucide-log-out', label: 'Log out', onClick: () => {} },

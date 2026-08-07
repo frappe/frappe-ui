@@ -16,11 +16,18 @@ to the target the shell pins above the scroll region.
 ## Scroll container
 
 The shell registers its scroll region into a small module registry, so
-[`useScrollContainer()`](/docs/other/utilities) and the plain
-`getScrollContainer()` resolve it with no wiring — a page can scroll-to-top or a
-router `scrollBehavior` can read the scroll offset without the app owning a
-global. Because the registry is a stack, swapping `DesktopShell` for
-`MobileShell` on a viewport change hands the active container over cleanly.
+`shellScrollContainer` and `useShellScrolled()` resolve it with no wiring — a
+page can scroll to the top, or a router `scrollBehavior` can read the scroll
+offset, without the app owning a global. Because the registry is a stack,
+swapping `DesktopShell` for `MobileShell` on a viewport change hands the active
+container over cleanly.
+
+```ts
+import { shellScrollContainer, useShellScrolled } from 'frappe-ui'
+
+const scrolled = useShellScrolled({ threshold: 12 })
+shellScrollContainer.value?.scrollTo({ top: 0, behavior: 'smooth' })
+```
 
 ## Theming the content region
 

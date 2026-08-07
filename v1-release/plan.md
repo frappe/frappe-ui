@@ -103,7 +103,7 @@ v1 must make an explicit keep / refine / remove decision on each — tracked in 
 
 - **Pill** — used only inside `TabButtons` in practice. Decision: stop exporting from the public package surface.
 - **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
-- **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useTheme` composable for app-specific theme switching.
+- **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useColorScheme` composable for app-specific theme switching.
 - **CodeEditor** — currently **not exported**. Decision: promote to public v1 API (then API-audit) or keep internal and out of scope.
 
 `MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
@@ -164,7 +164,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | **Sidebar** | Refactor to **molecule-style composable sub-components, no slots**: expose `SidebarHeader` / `SidebarSection` / `SidebarItem` for composition instead of `header`/`sections` config blobs (P3) + generic slots (P10). | refactor | conflicts with #770 (adds a slot — redirect/close) | L | yes |
 | **Switch + Checkbox** | Add the `padded` variant. | land PR | #751 (also adds a new **Radio** — decide if Radio enters v1 scope) | S | yes |
 | **Tabs + TabButtons** | Unify the two overlapping public components — nest TabButtons' segmented rendering inside `Tabs`, or merge into one `Tabs` with a style axis (P8: a purely-visual variant → one component). Resolve before freeze. | refactor | branches: refactor-tabs, tabs-rewrite, improved-tab-buttons | M | yes |
-| **ThemeSwitcher** | Keep exported for v1 compatibility, mark deprecated, and recommend `Select` + `useTheme` for new theme switchers. The composable remains the stable primitive. | decision (deprecate) | — | S | yes |
+| **ThemeSwitcher** | Keep exported for v1 compatibility, mark deprecated, and recommend `Select` + `useColorScheme` for new theme switchers. The composable remains the stable primitive. | decision (deprecate) | — | S | yes |
 | **Tree** | Land the rework PR (adds the WAI-ARIA tree pattern + keyboard nav, P12; resolves the `options` config-blob, P3). | land PR | #783 (draft) | track PR | yes |
 
 ### Decisions to make first (they shrink scope)
@@ -172,7 +172,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 - **MonthPicker → remove / deprecate** rather than rebuild.
 - **Pill → un-export** (internal-only).
 - **CodeEditor → keep internal** unless there is demand to promote it.
-- **ThemeSwitcher → deprecated compatibility export**; `useTheme` stays available as the stable primitive.
+- **ThemeSwitcher → deprecated compatibility export**; `useColorScheme` stays available as the stable primitive.
 - **Radio (from #751) → confirm** whether a new component enters v1 scope or lands post-v1.
 
 Resolving these five as "remove / keep-internal / defer" turns five potential
