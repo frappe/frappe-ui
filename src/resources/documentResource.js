@@ -6,7 +6,8 @@ import {
   revertRowInListResource,
 } from './listResource'
 import { getLocal, saveLocal, deleteLocal } from './local'
-import { onDocUpdate, readSocket } from './realtime'
+import { onDocUpdate } from './realtime'
+import { readSocket } from './socketAccess'
 import { getConfig } from '../utils/config'
 
 let documentCache = reactive({})

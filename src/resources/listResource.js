@@ -1,7 +1,8 @@
 import { reactive } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import { saveLocal, getLocal } from './local'
-import { onDocUpdate, readSocket } from './realtime'
+import { onDocUpdate } from './realtime'
+import { readSocket } from './socketAccess'
 import { getConfig } from '../utils/config'
 
 let listCache = reactive({})
