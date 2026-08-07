@@ -1,12 +1,26 @@
 <template>
+  <!--
+    Controlled rather than trigger-driven: a single click opens the popover only
+    after a 200ms wait, so a double click can edit the event instead, and a
+    mousedown can start a reposition drag. Reka's trigger toggles on click with
+    no such delay, so `update:open` is honoured only on the way down — Escape
+    and outside-click still close it.
+  -->
   <Popover
-    :placement="popoverPlacement"
-    transition="default"
-    :style="containerStyle"
+    :open="isPopoverOpen"
+    :side="popoverSide"
+    align="center"
+    @update:open="(value) => !value && (isPopoverOpen = false)"
     @open="registerDeleteShortcut"
     @close="unregisterDeleteShortcut"
   >
-    <template #target="{ togglePopover, isOpen, close }">
+    <!--
+      The positioning wrapper is explicit now. It used to arrive as an attr on
+      <Popover>, which the legacy anchor put on a wrapper it rendered itself;
+      #trigger is as-child and renders no wrapper of its own.
+    -->
+    <template #trigger>
+      <div class="flex" :style="containerStyle">
       <div
         ref="eventRef"
         class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
@@ -14,9 +28,17 @@
           active: activeEvent == (props.event?.id || props.event?.name),
         }"
         :style="innerStyle"
-        @click.prevent="handleEventClick($event, togglePopover)"
+        @click.prevent="
+          handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
+        "
         @dblclick.prevent="handleEventEdit($event)"
-        @mousedown="handleRepositionMouseDown($event, isOpen, close)"
+        @mousedown="
+          handleRepositionMouseDown(
+            $event,
+            isPopoverOpen,
+            () => (isPopoverOpen = false),
+          )
+        "
       >
         <div class="flex gap-1.5 h-full p-[5px]">
           <div
@@ -60,9 +82,10 @@
           @mousedown="handleResizeMouseDown"
         />
       </div>
+      </div>
     </template>
 
-    <template #body-main="{ close }">
+    <template #default="{ close }">
       <slot
         name="event-popover-content"
         :calendarEvent
@@ -98,10 +121,11 @@
 <script setup lang="ts">
 import './style.css'
 
-import { ref, inject, computed, reactive } from 'vue'
+import { ref, inject, computed, reactive, type CSSProperties } from 'vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
+import type { PopoverSide } from '../Popover/types'
 import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,
@@ -116,6 +140,8 @@ const props = defineProps<{
   event: CalendarEvent
   date: Date
 }>()
+
+const isPopoverOpen = ref(false)
 
 const {
   activeEvent,
@@ -146,8 +172,11 @@ const height15Min = minuteHeight * 15
 const heightThreshold = 40
 const minimumHeight = 32.5
 
-const popoverPlacement = computed(
-  () => (activeView.value === 'Week' ? 'left' : 'center') as any,
+// Week view puts the card beside the event; the other views centre it below.
+// `align` is always 'center' — the old `placement="center"` was never a valid
+// side and reached reka as one.
+const popoverSide = computed<PopoverSide>(() =>
+  activeView.value === 'Week' ? 'left' : 'bottom',
 )
 const eventIcon = computed(() =>
   props.event.type ? eventIcons[props.event.type] : null,
@@ -168,7 +197,7 @@ const state = reactive({ xAxis: 0, yAxis: 0 })
 
 // ── Position styles ───────────────────────────────────────────────────────
 
-const containerStyle = computed(() => {
+const containerStyle = computed<CSSProperties>(() => {
   if (props.event.isFullDay) {
     return {
       transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,

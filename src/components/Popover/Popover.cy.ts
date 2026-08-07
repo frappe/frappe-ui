@@ -1,7 +1,6 @@
 import { defineComponent, h, ref } from 'vue'
 import Popover from './Popover.vue'
 import Button from '../Button/Button.vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 // New-contract slots: #trigger is rendered via reka PopoverTrigger as-child, so
 // click/keyboard/aria wiring is automatic — the trigger must NOT bind onClick.
@@ -10,27 +9,11 @@ const NewSlots = {
   default: () => h('div', { 'data-cy': 'content' }, 'Popover content'),
 }
 
-// Legacy-contract slots: #target uses reka PopoverAnchor with MANUAL wiring, so
-// the caller is responsible for calling togglePopover on click.
-const LegacySlots = {
-  target: ({ togglePopover }: { togglePopover: () => void }) =>
-    h(
-      Button,
-      { 'data-cy': 'trigger', onClick: togglePopover },
-      () => 'Click me',
-    ),
-  'body-main': () => h('div', { 'data-cy': 'content' }, 'Popover content'),
-}
-
 describe('Popover', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   // ---------------------------------------------------------------------------
   // New contract
   // ---------------------------------------------------------------------------
-  describe('new contract', () => {
+  describe('contract', () => {
     it('auto-wires #trigger to open on click (no manual onClick)', () => {
       cy.mount(Popover, { slots: NewSlots })
 
@@ -285,163 +268,6 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('exist')
       cy.then(() => popoverRef.value.close())
       cy.get('[data-slot="content"]').should('not.exist')
-    })
-  })
-
-  // ---------------------------------------------------------------------------
-  // Deprecated contract (kept working through v1.x)
-  // ---------------------------------------------------------------------------
-  describe('deprecated contract', () => {
-    it('#target manual wiring opens once and does NOT double-toggle', () => {
-      cy.mount(Popover, { slots: LegacySlots })
-
-      cy.get('[data-slot="content"]').should('not.exist')
-      // A single click must end with the popover OPEN. If reka also toggled,
-      // the popover would flicker closed again (double-toggle regression).
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').should('exist')
-      cy.get('[data-cy="content"]').should('have.text', 'Popover content')
-    })
-
-    it('#body-main renders inside the default container', () => {
-      cy.mount(Popover, { slots: LegacySlots })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content-body"]')
-        .find('[data-cy="content"]')
-        .should('exist')
-    })
-
-    it('#body overrides the default chrome', () => {
-      cy.mount(Popover, {
-        slots: {
-          target: ({ togglePopover }: { togglePopover: () => void }) =>
-            h(
-              Button,
-              { 'data-cy': 'trigger', onClick: togglePopover },
-              () => 'T',
-            ),
-          body: () => h('div', { 'data-cy': 'full-body' }, 'override'),
-          'body-main': () => h('div', { 'data-cy': 'inner' }, 'inner'),
-        },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-cy="full-body"]').should('exist')
-      cy.get('[data-cy="inner"]').should('not.exist')
-      // #body is bare: it must NOT be wrapped in the PopoverPanel shell, so a
-      // consumer bringing its own surface doesn't get a panel-in-a-panel.
-      cy.get('[data-slot="content-body"]').should('not.exist')
-    })
-
-    it('maps show / v-model:show -> open', () => {
-      const Harness = defineComponent({
-        setup() {
-          const show = ref(false)
-          return () =>
-            h('div', [
-              h(
-                Button,
-                { 'data-cy': 'external', onClick: () => (show.value = true) },
-                () => 'Open',
-              ),
-              h(
-                Popover,
-                {
-                  show: show.value,
-                  'onUpdate:show': (value: boolean) => (show.value = value),
-                },
-                LegacySlots,
-              ),
-            ])
-        },
-      })
-
-      cy.mount(Harness)
-      cy.get('[data-slot="content"]').should('not.exist')
-      cy.get('[data-cy="external"]').click()
-      cy.get('[data-slot="content"]').should('exist')
-    })
-
-    it('still emits update:show alongside update:open', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: {
-          'onUpdate:show': cy.spy().as('onUpdateShow'),
-          'onUpdate:open': cy.spy().as('onUpdateOpen'),
-        },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('@onUpdateShow').should('have.been.calledWith', true)
-      cy.get('@onUpdateOpen').should('have.been.calledWith', true)
-    })
-
-    it('maps placement="bottom-end" -> side="bottom" + align="end"', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: { placement: 'bottom-end' },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]')
-        .should('have.attr', 'data-side', 'bottom')
-        .and('have.attr', 'data-align', 'end')
-    })
-
-    it('maps bare placement="bottom" -> align="center"', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: { placement: 'bottom' },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]')
-        .should('have.attr', 'data-side', 'bottom')
-        .and('have.attr', 'data-align', 'center')
-    })
-
-    it('maps hideOnBlur=false -> dismissible=false (stays open on outside click)', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: { hideOnBlur: false },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').should('exist')
-      cy.get('body').click(0, 0)
-      cy.get('[data-slot="content"]').should('exist')
-    })
-
-    it('maps matchTargetWidth -> matchTriggerWidth', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: { matchTargetWidth: true },
-      })
-
-      cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]')
-        .should('have.attr', 'style')
-        .and('include', 'min-width')
-    })
-
-    it('trigger="hover" still opens on mouseover', () => {
-      cy.mount(Popover, {
-        slots: LegacySlots,
-        props: { trigger: 'hover', hoverDelay: 0 },
-      })
-
-      cy.get('[data-slot="content"]').should('not.exist')
-      cy.get('[data-cy="trigger"]').trigger('mouseover')
-      cy.get('[data-slot="content"]').should('exist')
-    })
-
-    it('warns once when deprecated slots are used', () => {
-      cy.window().then((win) => {
-        cy.spy(win.console, 'warn').as('consoleWarn')
-      })
-      cy.mount(Popover, { slots: LegacySlots })
-      cy.get('@consoleWarn').should('have.been.calledWithMatch', /#target/)
     })
   })
 })

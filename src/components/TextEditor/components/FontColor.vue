@@ -1,11 +1,16 @@
 <template>
-  <Popover transition="default">
-    <template #target="{ togglePopover, isOpen }">
-      <slot
-        v-bind="{ onClick: () => togglePopover(), isActive: isOpen }"
-      ></slot>
+  <!--
+    Controlled rather than trigger-driven: the menu passes `onClick` down to the
+    button it renders, and reka's PopoverTrigger merges its own handler onto the
+    same element, so both fire on one click. Opening stays ours — `update:open`
+    is only honoured on the way down, which keeps Escape and outside-click
+    working.
+  -->
+  <Popover :open="isOpen" @update:open="(value) => !value && (isOpen = false)">
+    <template #trigger>
+      <slot v-bind="{ onClick: () => (isOpen = !isOpen), isActive: isOpen }" />
     </template>
-    <template #body-main>
+    <template #default>
       <div class="p-2">
         <div class="text-sm text-ink-gray-7">Text Color</div>
         <div class="mt-1 grid grid-cols-6 gap-1">
@@ -55,6 +60,9 @@ export default {
   name: 'FontColor',
   props: ['editor'],
   components: { Popover, Tooltip },
+  data() {
+    return { isOpen: false }
+  },
   methods: {
     setBackgroundColor(color) {
       if (color.name != 'Default') {

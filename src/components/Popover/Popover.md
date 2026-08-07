@@ -49,7 +49,7 @@ Handy for select-style menus where the panel should line up under a wide button.
 
 Set `bare` to drop the panel shell (background, border, shadow, rounding) so
 `#default` content can bring its own surface — useful for pickers and cards that
-are already styled. This replaces the deprecated `#body` slot.
+are already styled.
 
 <ComponentPreview name="Popover-Bare" />
 
@@ -97,11 +97,14 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
   panel — clicking the trigger already toggles it.
 - For a panel that opens on hover (profile previews, link previews), use the
   dedicated [`HoverCard`](./hovercard) component instead of a popover.
+- Attributes on `<Popover>` are not inherited — the component renders no element
+  of its own. Put classes and styles on the element inside `#trigger`.
 
 ## Migrating from v0
 
-The v0 API still works through v1.x — old props are mapped silently, and binding
-both the old and new prop logs a one-time dev warning. See the full mapping table
-in [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard).
+The v0 API is gone in `1.0.0`. `#target` becomes `#trigger`, `#body` and
+`#body-main` become `#default`, and `placement` splits into `side` + `align`.
+See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard)
+for the full table.
 
 <!-- @include: ./Popover.api.md -->
