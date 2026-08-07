@@ -15,9 +15,9 @@ defineOptions({
 
 const props = withDefaults(defineProps<TooltipProps>(), {
   text: '',
-  placement: 'top',
+  side: 'top',
+  offset: 4,
   hoverDelay: 0.5,
-  arrowClass: 'fill-surface-gray-10',
   disabled: false,
 })
 
@@ -64,9 +64,9 @@ defineSlots<{
       </TooltipTrigger>
       <TooltipBubble
         v-if="props.text || $slots.body || $slots.content"
-        :side="props.placement"
+        :side="props.side"
+        :offset="props.offset"
         :text="props.text"
-        :arrow-class="props.arrowClass"
       >
         <template v-if="$slots.body" #body>
           <slot name="body" />

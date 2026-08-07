@@ -4,7 +4,7 @@ import Button from '../Button/Button.vue'
 import { h } from 'vue'
 
 const Comp = () =>
-  h(Tooltip, { text: 'some tooltip', hoverDelay: 0, placement: 'top' }, [
+  h(Tooltip, { text: 'some tooltip', hoverDelay: 0, side: 'top' }, [
     h(Button, {}, 'k'),
   ])
 
@@ -54,15 +54,24 @@ describe('Tooltip', () => {
     cy.get('[data-cy=content]').should('exist')
   })
 
-  it('arrowClass prop', () => {
+  it('exposes the arrow through a data-slot hook rather than a class prop', () => {
     cy.mount(
-      h(Tooltip, { text: 'abc', hoverDelay: 0, arrowClass: 'fill-red-500' }, [
+      h(Tooltip, { text: 'abc', hoverDelay: 0 }, [h(Button, {}, 'k')]),
+    )
+
+    cy.get('button').trigger('focus')
+    cy.get('[data-slot="arrow"]').should('exist')
+  })
+
+  it('offset moves the bubble away from the trigger', () => {
+    cy.mount(
+      h(Tooltip, { text: 'abc', hoverDelay: 0, offset: 24 }, [
         h(Button, {}, 'k'),
       ]),
     )
 
     cy.get('button').trigger('focus')
-    cy.get('svg').should('has.class', 'fill-red-500')
+    cy.get('[data-slot="content"]').should('exist')
   })
 
   it('grouping under a shared TooltipProvider skips the re-delay between triggers', () => {

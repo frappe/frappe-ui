@@ -3,7 +3,7 @@ import { Button, Tooltip } from 'frappe-ui'
 </script>
 
 <template>
-  <Tooltip arrow-class="fill-surface-base" placement="top">
+  <Tooltip side="top">
     <template #body>
       <div
         class="min-w-[6rem] rounded bg-surface-base px-2 py-1 text-xs text-ink-gray-9 shadow-xl"

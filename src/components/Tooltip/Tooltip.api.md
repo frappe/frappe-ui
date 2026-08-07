@@ -20,22 +20,22 @@
     default: '0.5'
   },
   {
-    name: 'placement',
-    description: 'Position of the tooltip relative to the trigger.',
+    name: 'side',
+    description: 'Side of the trigger the tooltip is placed on.',
     required: false,
-    type: '"top" | "right" | "bottom" | "left"',
+    type: 'TooltipSide',
     default: '"top"'
   },
   {
-    name: 'arrowClass',
-    description: 'Custom classes applied to the tooltip arrow.',
+    name: 'offset',
+    description: 'Distance in px between the trigger and the tooltip.',
     required: false,
-    type: 'any',
-    default: '"fill-surface-gray-10"'
+    type: 'number',
+    default: '4'
   },
   {
     name: 'disabled',
-    description: 'Disables the tooltip entirely.',
+    description: 'Disables the tooltip entirely. The trigger still renders.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -56,47 +56,6 @@
   {
     name: 'content',
     description: 'Slot for tooltip content text.\nUsed inside the default tooltip body.',
-    type: 'any'
-  }
-]
-
-  const tooltipBubbleProps = [
-  {
-    name: 'side',
-    description: 'Preferred popover side relative to the trigger.',
-    required: false,
-    type: '"top" | "right" | "bottom" | "left"',
-    default: '"top"'
-  },
-  {
-    name: 'text',
-    description: 'Text content when neither `#content` nor `#body` is provided.',
-    required: false,
-    type: 'string'
-  },
-  {
-    name: 'arrowClass',
-    description: 'Fill class for the arrow — defaults to match the bubble shell.',
-    required: false,
-    type: 'string',
-    default: '"fill-surface-gray-10"'
-  }
-]
-
-  const tooltipBubbleSlots = [
-  {
-    name: 'default',
-    description: 'Replaces just the text inside the standard bubble.',
-    type: 'any'
-  },
-  {
-    name: 'content',
-    description: 'Replaces just the text inside the standard bubble.',
-    type: 'any'
-  },
-  {
-    name: 'body',
-    description: 'Replaces the entire bubble (including its shell) — arrow still renders.',
     type: 'any'
   }
 ]
@@ -141,12 +100,6 @@
 <PropsTable name="Tooltip" :data="tooltipProps"/>
 
 <SlotsTable :data="tooltipSlots"/>
-
-### TooltipBubble
-
-<PropsTable folder="Tooltip" name="TooltipBubble" :data="tooltipBubbleProps"/>
-
-<SlotsTable :data="tooltipBubbleSlots"/>
 
 ### TooltipProvider
 

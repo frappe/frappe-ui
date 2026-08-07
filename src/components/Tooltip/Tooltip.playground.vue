@@ -5,7 +5,7 @@ import type { Knob } from 'frappe-ui/vitepress'
 const knobs: Knob[] = [
   { name: 'text', type: 'text', default: 'Save changes', width: '16rem' },
   {
-    name: 'placement',
+    name: 'side',
     type: 'tabs',
     default: 'top',
     options: [
@@ -21,7 +21,7 @@ const knobs: Knob[] = [
 
 function buildCode(v: Record<string, any>) {
   const attrs: string[] = [`text="${v.text}"`]
-  if (v.placement !== 'top') attrs.push(`placement="${v.placement}"`)
+  if (v.side !== 'top') attrs.push(`side="${v.side}"`)
   const hd = Number(v.hoverDelay)
   if (!Number.isNaN(hd) && hd !== 0.5) attrs.push(`:hover-delay="${hd}"`)
   if (v.disabled) attrs.push('disabled')
@@ -40,7 +40,7 @@ function buildCode(v: Record<string, any>) {
     <template #preview="{ values }">
       <Tooltip
         :text="values.text"
-        :placement="values.placement"
+        :side="values.side"
         :hover-delay="Number(values.hoverDelay) || 0"
         :disabled="values.disabled"
       >
