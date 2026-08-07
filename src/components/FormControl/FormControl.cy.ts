@@ -69,31 +69,38 @@ describe('FormControl', () => {
       })
   })
 
-  it('warns when type="autocomplete" is used', () => {
+  // `type="autocomplete"` was removed in 1.0.0. It is the one silent break in
+  // that removal: the dispatcher falls through to TextInput and still forwards
+  // the type, so the browser renders a plain text box with no error. The
+  // dev-only console.error is the only thing that names it.
+  it('errors when the removed type="autocomplete" is used', () => {
     cy.window().then((win) => {
-      cy.spy(win.console, 'warn').as('consoleWarn')
+      cy.spy(win.console, 'error').as('consoleError')
     })
     cy.mount(FormControl, {
       props: {
-        type: 'autocomplete',
+        type: 'autocomplete' as any,
         options: [
           { label: 'One', value: 1 },
           { label: 'Two', value: 2 },
         ],
       },
     })
-    cy.get('@consoleWarn').should(
+    cy.get('@consoleError').should(
       'have.been.calledWithMatch',
-      /FormControl type="autocomplete" is deprecated.*Combobox/,
+      /type="autocomplete" was removed in 1\.0\.0.*type="combobox"/,
     )
   })
 
-  it('does not warn for non-autocomplete types', () => {
+  it('does not error for supported types', () => {
     cy.window().then((win) => {
-      cy.spy(win.console, 'warn').as('consoleWarn')
+      cy.spy(win.console, 'error').as('consoleError')
     })
     cy.mount(FormControl, { props: { label: 'Title' } })
-    cy.get('@consoleWarn').should('not.have.been.calledWithMatch', /FormControl/)
+    cy.get('@consoleError').should(
+      'not.have.been.calledWithMatch',
+      /FormControl/,
+    )
   })
 
   describe('dispatcher delegation', () => {

@@ -237,9 +237,7 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
 
 ### Legacy components — dev-mode warnings
 
-`Input.vue`, `Autocomplete`, and `FormControl type='autocomplete'` warn
-once on mount/use. Migrate to `TextInput`, `Combobox` / `MultiSelect`, and
-`Combobox` standalone respectively.
+`Input.vue` warns once on mount. Migrate to `TextInput`.
 
 `MonthPicker` is deprecated. For simple month picking, use `Select` with month
 options.
@@ -249,6 +247,34 @@ internal `TabButtons` detail.
 
 `ThemeSwitcher` remains exported for v1 compatibility, but is deprecated. For
 new theme switchers, compose `Select` with the `useTheme` composable.
+
+### Autocomplete — removed (breaking)
+
+- **Breaking:** `Autocomplete` and its `AutocompleteProps` type are deleted.
+  Use `Combobox` for one value and `MultiSelect` for several. The import
+  fails, so the build names every call site. `trigger="button"` on either
+  replacement is the shape `Autocomplete`'s default target had: a button
+  showing the selection, with the search box inside the popover.
+- **Breaking, silent:** `FormControl type="autocomplete"` is removed. The
+  dispatcher falls through to `TextInput` and still forwards the type, so the
+  result is `<input type="autocomplete">` — a plain text box, with no build or
+  runtime error. A dev-only `console.error` names the removal.
+- **Breaking, silent:** the `v-model` payload inverts. `Autocomplete` modelled
+  the whole option object; both replacements model the value only. Listen to
+  `@update:selectedOption` where the whole option is needed.
+- **Breaking, silent:** `#target`'s `open` slot prop was the *function* that
+  opened the popover; `#trigger`'s `open` is the open *state*. Anything reading
+  it as a value (`v-if="open"`) was always truthy and now is not.
+- `#target` → `#trigger` otherwise: `Combobox` and `MultiSelect` attach the
+  open toggle to the trigger element themselves, so drop the click handler. A
+  `togglePopover()` carried through the rename throws on click — the popover
+  still opens, so it reads as working while logging an error.
+- Grouped options use `{ group, options }`, not `{ group, items }`. Both
+  normalizers now throw naming the group and the rename, rather than dying
+  inside a `map` call.
+
+Before/after for each silent break is in the
+[migration guide](../docs/content/docs/migration.md#autocomplete-removed).
 
 ### Dropdown — group field standardized on `options`
 
@@ -380,8 +406,8 @@ values were captions.
 | `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
 | Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
 | `Input.vue`                        | `TextInput`                          | Warns on mount                         |
-| `Autocomplete`                     | `Combobox` or `MultiSelect`          | Warns on mount                         |
-| `FormControl type='autocomplete'`  | `Combobox` standalone                | Warns when type is set                 |
+| `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
+| `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
 | DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
 | DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |

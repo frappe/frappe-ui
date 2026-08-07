@@ -13,7 +13,7 @@ const state = reactive({
 
 const inputValue = ref("");
 const selectValue = ref(null);
-const autocompleteValue = ref(null);
+const comboboxValue = ref(null);
 const checkboxValue = ref(false);
 const dateValue = ref("");
 const dateRangeValue = ref("");
@@ -62,7 +62,7 @@ const inputTypes = [
           ]
         '
         v-bind="state"
-        v-model="autocompleteValue"
+        v-model="comboboxValue"
       />
     </Story>
 
