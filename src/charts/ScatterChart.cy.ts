@@ -35,9 +35,11 @@ describe('ScatterChart', () => {
   it('draws a point per row, on two measured axes', () => {
     mountChart()
     points().should('have.length', data.length)
+    // Both axes are scales rather than lists of the values plotted, so they
+    // read as round ticks: spend up the hundreds, revenue past 2K.
     cy.get('[data-slot="chart-plot"] svg text')
       .should('contain.text', '400')
-      .and('contain.text', '2.4K')
+      .and('contain.text', '2.5K')
   })
 
   it('keeps one series and no legend when nothing groups the rows', () => {
@@ -71,10 +73,12 @@ describe('ScatterChart', () => {
 
   it('sizes the points by the size column', () => {
     mountChart({ size: 'seats' })
-    // Four distinct seat counts, so four distinct symbol geometries.
+    // Four distinct seat counts, so four distinct symbol sizes. Measured
+    // rather than read off the path: echarts draws every symbol from the same
+    // unit outline and scales it, so `d` is the same on all four.
     points().then((els) => {
-      const shapes = [...els].map((el) => el.getAttribute('d'))
-      expect(new Set(shapes).size).to.eq(data.length)
+      const widths = [...els].map((el) => el.getBoundingClientRect().width)
+      expect(new Set(widths).size).to.eq(data.length)
     })
   })
 

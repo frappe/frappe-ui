@@ -27,10 +27,21 @@ function mountChart(props: Record<string, any> = {}) {
   )
 }
 
-const lines = () => cy.get('[data-slot="chart-plot"] svg path[stroke^="#"]')
+/**
+ * Where the marks are drawn. `<defs>` is left out on purpose: echarts clips a
+ * line series with a `<clipPath>` whose path carries a solid fill of its own,
+ * and a definition is not something on the plot.
+ */
+const MARKS = '[data-slot="chart-plot"] svg > g'
+
+/**
+ * The series strokes: a palette stroke with a path to trace. Gridlines are
+ * stroked too, but in a theme oklch, and the empty series a reference line
+ * rides is stroked over an empty path, having never been given anything to draw.
+ */
+const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 /** The bands under the lines: filled, and the overlapping ones by a gradient. */
-const fills = () =>
-  cy.get('[data-slot="chart-plot"] svg path[fill]:not([fill="none"])')
+const fills = () => cy.get(`${MARKS} path[fill]:not([fill="none"])`)
 
 describe('AreaChart', () => {
   it('draws a line per series with a band under it', () => {
@@ -65,10 +76,7 @@ describe('AreaChart', () => {
   it('draws a series set to bar as bars beside the bands', () => {
     mountChart({ seriesConfig: { refunds: { type: 'bar' } } })
     lines().should('have.length', 1)
-    cy.get('[data-slot="chart-plot"] svg path[fill^="#"]').should(
-      'have.length',
-      data.length,
-    )
+    cy.get(`${MARKS} path[fill^="#"]`).should('have.length', data.length)
   })
 
   it('washes a band that stacks onto nothing, so the bars stay visible', () => {

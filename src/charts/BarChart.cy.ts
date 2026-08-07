@@ -32,11 +32,22 @@ function mountChart(props: Record<string, any> = {}) {
   )
 }
 
-/** The bars, in series order. Gridlines are paths too, but unfilled. */
-const bars = () => cy.get('[data-slot="chart-plot"] svg path[fill^="#"]')
+/**
+ * Where the marks are drawn. `<defs>` is left out on purpose: echarts clips a
+ * line series with a `<clipPath>` whose path carries a solid fill of its own,
+ * and a definition is not something on the plot.
+ */
+const MARKS = '[data-slot="chart-plot"] svg > g'
 
-/** The series strokes. Gridlines are stroked too, but in a theme oklch. */
-const lines = () => cy.get('[data-slot="chart-plot"] svg path[stroke^="#"]')
+/** The bars, in series order. Gridlines are paths too, but unfilled. */
+const bars = () => cy.get(`${MARKS} path[fill^="#"]`)
+
+/**
+ * The series strokes: a palette stroke with a path to trace. Gridlines are
+ * stroked too, but in a theme oklch, and the empty series a reference line
+ * rides is stroked over an empty path, having never been given anything to draw.
+ */
+const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
 describe('BarChart', () => {
   it('paints a bar per datapoint, and labels the categories', () => {
@@ -265,7 +276,10 @@ describe('BarChart', () => {
     })
 
     it('keeps the rule while a legend toggle hides a series', () => {
-      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      // Inside refunds' own range, so the rule is still on the scale once the
+      // taller series goes: a line off the end of the axis is not drawn, which
+      // would pass this test for the wrong reason.
+      mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       bars().should('have.length', data.length)
       cy.get('[data-slot="chart-plot"] svg text').should(

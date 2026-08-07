@@ -28,8 +28,19 @@ function mountChart(props: Record<string, any> = {}) {
   )
 }
 
-/** The series strokes. Gridlines are paths too, but stroked in a theme oklch. */
-const lines = () => cy.get('[data-slot="chart-plot"] svg path[stroke^="#"]')
+/**
+ * Where the marks are drawn. `<defs>` is left out on purpose: echarts clips a
+ * line series with a `<clipPath>` whose path carries a solid fill of its own,
+ * and a definition is not something on the plot.
+ */
+const MARKS = '[data-slot="chart-plot"] svg > g'
+
+/**
+ * The series strokes: a palette stroke with a path to trace. Gridlines are
+ * stroked too, but in a theme oklch, and the empty series a reference line
+ * rides is stroked over an empty path, having never been given anything to draw.
+ */
+const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
 describe('LineChart', () => {
   it('draws one line per series, through every category', () => {
@@ -56,7 +67,7 @@ describe('LineChart', () => {
       onDatapointClick: cy.spy().as('onClick'),
     })
     // The stroke is a thin target; the symbols are what a reader aims at.
-    cy.get('[data-slot="chart-plot"] svg path[fill^="#"]').first().click()
+    cy.get(`${MARKS} path[fill^="#"]`).first().click()
     cy.get('@onClick').should('have.been.calledWithMatch', {
       seriesName: 'sales',
       row: { month: 'Jan', sales: 10 },
@@ -102,8 +113,7 @@ describe('LineChart', () => {
 
   describe('combo series', () => {
     /** A filled band: every path with a fill that is not the "none" of a stroke. */
-    const fills = () =>
-      cy.get('[data-slot="chart-plot"] svg path[fill]:not([fill="none"])')
+    const fills = () => cy.get(`${MARKS} path[fill]:not([fill="none"])`)
 
     it('fills one series on type: area and leaves the other bare', () => {
       mountChart({ seriesConfig: { sales: { type: 'area' } } })
@@ -116,10 +126,7 @@ describe('LineChart', () => {
     it('draws a series set to bar as bars', () => {
       mountChart({ seriesConfig: { refunds: { type: 'bar' } } })
       lines().should('have.length', 1)
-      cy.get('[data-slot="chart-plot"] svg path[fill^="#"]').should(
-        'have.length',
-        data.length,
-      )
+      cy.get(`${MARKS} path[fill^="#"]`).should('have.length', data.length)
     })
   })
 
@@ -151,9 +158,13 @@ describe('LineChart', () => {
     })
 
     it('leaves the rule in place while every series is switched off', () => {
-      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      // Inside refunds' own range, so the rule stays on the scale the plot
+      // settles at: a line off the end of the axis is not drawn, which would
+      // pass this test for the wrong reason.
+      mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
-      lines().should('have.length', 1)
+      cy.get('[aria-label="Hide Refunds"]').click()
+      lines().should('not.exist')
       cy.get('[data-slot="chart-plot"] svg text').should(
         'contain.text',
         'Target',

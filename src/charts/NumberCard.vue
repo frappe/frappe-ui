@@ -170,7 +170,10 @@ import type { NumberCardProps } from './props'
 // No echarts, sparkline included: a page full of these should cost nothing but
 // HTML.
 
-const props = defineProps<NumberCardProps>()
+// `card` carries its default here as well as on ChartCard because Vue casts an
+// absent boolean prop to `false` rather than leaving it undefined: without it
+// NumberCard forwards a definite `false` and the surface never draws.
+const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
 const slots = defineSlots<{
   actions?: () => unknown
