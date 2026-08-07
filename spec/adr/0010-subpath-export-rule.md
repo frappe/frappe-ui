@@ -1,6 +1,26 @@
 # What earns a subpath export vs. the root export
 
-**Status**: accepted
+**Status**: accepted (amended — see [Amendment](#amendment-2026-08-07-frappe-uiicons-no-longer-clears-a-limb))
+
+## Amendment (2026-08-07): `frappe-ui/icons` no longer clears a limb
+
+The icon cleanup this rule identified has landed (#904). `spritePlugin` is deleted, the
+duplicate `icons/Icon.vue` is deleted, and `IconPicker` reaches `lucide-static` through
+`await import()` instead of reading an injected sprite out of the DOM.
+
+That removes the subpath's only static third-party dependency, and this rule already says
+what follows: a dependency reached only through `await import()` is isolated at the call
+site and earns no subpath. `frappe-ui/icons` therefore clears none of the three limbs
+today. It survives on inertia, not on the rule.
+
+Whether it folds into root before the tag is a separate decision, deferred — the fold
+costs a changed import path in every downstream app, and root's own icon surface (the
+root `Icon`, the four unused `*Icon` exports the cleanup left behind) needs a verdict at
+the same time. That is a follow-up ticket, not this ADR's call and not #904's.
+
+The rule itself is unchanged. A subpath's justification expiring, and the subpath going
+back on the table when it does, is the rule working. The table row and the #887 hand-off
+below are rewritten to record what happened rather than to describe it as pending.
 
 ## Context
 
@@ -56,7 +76,7 @@ separate category, decided on their own terms.
 | --- | --- | --- |
 | `frappe-ui/editor` | a + b + c | Static TipTap; open extension/menu registry (ADR-0004); `ListItem` and others already collide with root names. |
 | `frappe-ui/list` | c | `List`, `ListHeader`, `ListRow`, `ListRows` collide with the legacy `ListView` family, which stays at root undeprecated until it reaches parity. This is sufficient for `1.0.0` on its own; it does not need a second reason. If `ListView` is ever removed, whether `list` still earns a subpath is a fresh decision for that moment, not one to pre-answer now. |
-| `frappe-ui/icons` | a | `spritePlugin` statically imports the full `lucide-static` sprite; `IconPicker` reads the injected sprite DOM. Holds only while `spritePlugin` ships — a smaller cleanup (rewire `IconPicker` to the tailwind plugin's build-time icon list, delete `spritePlugin` and the duplicate `Icon.vue`) would remove the only static dependency in the subpath and fold it into root. |
+| `frappe-ui/icons` | none (was: a) | Held on `spritePlugin`'s static `lucide-static` sprite import. #904 removed it: `spritePlugin` and the duplicate `Icon.vue` are gone and `IconPicker` loads `lucide-static` through `await import()`, which this rule does not count. The subpath now clears no limb. Folding it into root is deferred to its own ticket (see [Amendment](#amendment-2026-08-07-frappe-uiicons-no-longer-clears-a-limb)). |
 | `frappe-ui/charts` (in flight, #890) | a | Statically imports `echarts/core`. Rule-compliant as designed. |
 | `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. Now also home to `CodeEditor` and `CodePreview` (see below). |
 | `frappe-ui/code-editor` | none | Removed. `CodeEditor`'s only dependency (CodeMirror) is entirely behind `await import()` — nothing static. It is a form-field sibling of `Textarea`/`TextInput` (its own prop types are derived from the shared `InputVariant`/`InputSize` union), not a family with a composition model. `CodePreview` statically imports `marked`, which would otherwise re-enter root's dependency graph the moment ADR-0008 deletes the deprecated `TextEditor` re-export (`marked`'s only other path to root). Rather than fold `CodeEditor` into root and leave `CodePreview` behind on a single-purpose subpath, both move to `frappe-ui/experimental` together — P14 carries no stability promise, so the pair can grow into a fuller code-editing parts family later, against real usage, without needing a `2.0.0`. |
@@ -98,12 +118,15 @@ separate category, decided on their own terms.
   limbs and flags the concrete collision (`ListItem`, among others) for the deprecated
   `TextEditor` removal to close out.
 - **#887** (build-time subpaths): `code-editor`'s disposition is decided here (moves to
-  `experimental`, not a build-time subpath). The icon cleanup this rule identified —
-  remove `spritePlugin`, rewire `IconPicker` off the sprite DOM to the tailwind
-  plugin's build-time name list, delete the duplicate `icons/Icon.vue` — is filed
-  separately (see below) rather than folded into this ticket's build-tooling scope,
-  since it's a component/API question that happens to touch a build plugin, not
-  build-tooling itself.
+  `experimental`, not a build-time subpath). The icon cleanup this rule identified was
+  filed separately as **#904** rather than folded into this ticket's build-tooling
+  scope, since it's a component/API question that happens to touch a build plugin, not
+  build-tooling itself. #904 has landed — `spritePlugin`, the `Icon` export from
+  `frappe-ui/icons`, and `IconPicker.reset()` are removed, and `IconPicker` loads
+  `lucide-static` lazily. It reached the icon list through `await import()` rather than
+  the tailwind plugin's build-time name list, because Tailwind only emits CSS for class
+  names it can read as literal strings and a picker builds its grid from data. Nothing
+  is outstanding here; what the cleanup opened up is in the Amendment above.
 
 ## Considered alternatives
 
@@ -139,8 +162,9 @@ separate category, decided on their own terms.
   `frappe-ui/code-editor` today (checked against freshly fetched `upstream` refs for
   crm, helpdesk, insights, builder, gameplan, raven), so this is a zero-call-site
   move, not a break.
-- `frappe-ui/list`, `frappe-ui/icons`, and the in-flight `frappe-ui/charts` all stand
-  on this rule without needing a carve-out.
+- `frappe-ui/list`, `frappe-ui/icons`, and the in-flight `frappe-ui/charts` all stood
+  on this rule without needing a carve-out. `frappe-ui/icons` stopped standing on it
+  when #904 landed — see the Amendment.
 - Root keeps `SettingsDialog`, `PageHeader`, `Sidebar`, and the legacy `ListView`
   family. Their naming now carries the full weight of being permanent — each
   family's own sweep ticket (#878, #879, #882, and a `SettingsDialog` naming pass not
