@@ -102,22 +102,21 @@ around it, in Vue and semantic tokens: the card surface, the title and subtitle 
 `actions` slot, the y axis title labels, the legend with its hover cue and hidden-series
 toggling, the HTML tooltip, and the loading, error, and empty states.
 
-The chrome lives in `components/ChartContainer.vue`, `components/ChartLegend.vue`, and
-`components/ChartTooltip.vue`. `index.ts` exports none of them, so convention 6 does not
-hold in practice yet. Two decisions above depend on it.
+The chrome lives in `components/ChartCard.vue`, `components/ChartContainer.vue`,
+`components/ChartLegend.vue`, and `components/ChartTooltip.vue`. All four are exported.
 
-- An app-owned plot on `useChart` gets sizing, colors, and resize handling, then hand-rolls
-  a card, a title, a legend, a tooltip, and three states. It will not match a v2 bar chart
+Two problems made convention 6 fail in practice, and both are fixed.
+
+- An app-owned plot on `useChart` got sizing, colors, and resize handling, then hand-rolled
+  a card, a title, a legend, a tooltip, and three states. It did not match a v2 bar chart
   on the same dashboard. That mismatch is the pressure that pushes app features back into
   the library.
-- The card surface has no single owner. `ChartContainer` draws none, so every axis, donut,
-  funnel, and heatmap chart takes its card from the caller. `NumberCard` draws its own. One
-  chart owning a surface six others delegate is convention 4 failing. It also means three
-  `NumberCard`s inside an app's own card nest a bordered box in a bordered box.
+- The card surface had no single owner. `ChartContainer` draws none, so every axis, donut,
+  funnel, and heatmap chart takes its card from the caller. `NumberCard` drew its own. One
+  chart owning a surface six others delegate is convention 4 failing. It also meant three
+  `NumberCard`s inside an app's own card nested a bordered box in a bordered box.
 
-Two changes fix both.
-
-1. Export the chrome. The app owns the plot and the library owns the look.
+1. The chrome is exported. The app owns the plot and the library owns the look.
 
    ```vue
    <ChartContainer title="Revenue by region" :loading="loading" :error="error">
@@ -126,34 +125,43 @@ Two changes fix both.
    </ChartContainer>
    ```
 
-2. Give the surface one owner: a `ChartCard` piece that holds the card classes, and a single
-   `card` prop that turns it off. The caller keeps supplying the card for plots, which is
-   the established pattern. `NumberCard` keeps drawing one by default, because a reading
-   with no plot is a card, but `:card="false"` lets an app lay out several readings inside
-   its own card.
+2. The surface has one owner: `ChartCard` holds the card classes, and a single `card` prop
+   turns it off. The caller still supplies the card for plots, which is the established
+   pattern. `NumberCard` still draws one by default, because a reading with no plot is a
+   card, but `:card="false"` lets an app lay out several readings inside its own card.
 
-An app then lays out its own number grid, drops bare `NumberCard`s into it, and keeps v2
+An app lays out its own number grid, drops bare `NumberCard`s into it, and keeps v2
 formatting, `compact`, `precision`, delta rendering, the sparkline, and the states.
 
-## Order of work
+## What shipped
 
-Demand and dependency set this order. The rule above already settled what is on the list.
+Every item the rule admitted is implemented, in this order.
 
-1. Chrome export and the shared card surface. Convention 6 fails until this lands, and both
-   app-owned paths depend on it.
-2. Combo series through `seriesConfig[key].type`.
-3. Reference lines.
+1. Chrome export and the `ChartCard` surface.
+2. Combo series through `seriesConfig[key].type`, which also collapsed the three axis option
+   builders into one and made per-series area fill fall out of the same mechanism.
+3. Reference lines, on the axis charts and on `ScatterChart`.
 4. `stacked: 'normalized'` and `maxSeries`.
 5. `ScatterChart`.
-6. Automatic x axis label fitting.
+6. Automatic category label fitting.
 7. `SankeyChart`.
+
+Two decisions worth carrying forward, because they answer questions this document raised:
+
+- **A reference line does not stretch the value axis.** A target far outside the data would
+  flatten the data it is read against, so a line beyond the range is clipped. `yAxis.min`
+  and `max` bring one into frame.
+- **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices` defaults. An
+  axis chart with 20 series is legible enough that a default would silently redraw every
+  existing long-data chart.
 
 ## Undecided
 
 **`show_scrollbar`** — a `dataZoom` slider. Insights reflows the grid and the legend to make
 room, and the orientation follows the Row chart. Panning a wide series is a reading of the
 data, so convention 1 admits it. Convention 2 is the open question: the reflow moves chrome
-the library owns. Revisit after combo series and reference lines land.
+the library owns. Combo series and reference lines have landed, so this is the next call to
+make.
 
 ## Adapter layer, not a gap
 
