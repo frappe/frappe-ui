@@ -52,7 +52,7 @@ describe('HeatmapChart', () => {
 
   it('stands the scale in for a legend, ends labelled', () => {
     mountChart()
-    cy.get('[data-slot="chart-card"]')
+    cy.get('[data-slot="chart-container"]')
       .should('contain.text', '2')
       .and('contain.text', '8')
     cy.get('[data-slot="chart-legend"] button').should('not.exist')
@@ -60,7 +60,7 @@ describe('HeatmapChart', () => {
 
   it('takes the ends of the scale from the props', () => {
     mountChart({ min: 0, max: 10 })
-    cy.get('[data-slot="chart-card"]')
+    cy.get('[data-slot="chart-container"]')
       .should('contain.text', '0')
       .and('contain.text', '10')
   })

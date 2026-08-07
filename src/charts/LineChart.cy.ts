@@ -123,6 +123,44 @@ describe('LineChart', () => {
     })
   })
 
+  describe('reference lines', () => {
+    it('draws a rule that is neither a series nor a legend entry', () => {
+      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+      // The rule takes its ink from the theme, not from the palette, so the
+      // hex-stroked paths are still the two series.
+      lines().should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+    })
+
+    it('reads a y2 line against the second axis', () => {
+      mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        referenceLines: [
+          { value: 15, label: 'Sales target' },
+          { value: 5, axis: 'y2', label: 'Refund cap' },
+        ],
+      })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Sales target')
+        .and('contain.text', 'Refund cap')
+    })
+
+    it('leaves the rule in place while every series is switched off', () => {
+      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      cy.get('[aria-label="Hide Sales"]').click()
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+    })
+  })
+
   it('measures a y2 series against a second axis, drawn opposite', () => {
     mountChart({ y: 'sales', y2: 'refunds' })
     lines().should('have.length', 2)
@@ -137,7 +175,7 @@ describe('LineChart', () => {
       yAxis: { title: 'Sales' },
       y2Axis: { title: 'Refunds' },
     })
-    cy.get('[data-slot="chart-card"]')
+    cy.get('[data-slot="chart-container"]')
       .should('contain.text', 'Sales')
       .and('contain.text', 'Refunds')
   })

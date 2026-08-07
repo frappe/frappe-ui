@@ -1,6 +1,6 @@
 <template>
   <div
-    data-slot="chart-card"
+    data-slot="chart-container"
     class="flex h-full w-full min-w-0 flex-col gap-1.5"
     :dir="dir"
   >

@@ -40,6 +40,21 @@ Marks stack among their own: bars stack with bars and areas with areas, and a
 line never stacks. `horizontal` draws bars only — a series that asks for another
 mark there is drawn as a bar, with a dev-mode warning.
 
+## Targets and thresholds
+
+`referenceLines` draws a rule over the plot at a fixed position — a quota, a
+break-even point, the date something shipped. Each line takes a `value`, an
+optional `label`, `color` and `dashed`. They are annotations, not series: no
+legend entry, and no way to switch one off.
+
+<ComponentPreview name="Charts-BarTarget" csr="true" self-layout />
+
+`axis` says what `value` is read against: `'y'` (the default) or `'y2'` for a
+rule across the plot at a measured value, `'x'` for one down it at a category or
+a date. `horizontal` swaps the two axes and the lines follow. A line outside the
+range the plot covers is not drawn — the scale follows the data, not the
+annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
+
 ## Clicking a bar
 
 `datapointClick` reports the series, the value and the row behind the bar, so a

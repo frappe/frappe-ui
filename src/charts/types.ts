@@ -85,6 +85,33 @@ export type AxisChartSeriesConfig = {
   echartOptions?: EchartOptionsOverride
 }
 
+/**
+ * A rule drawn across the plot at a fixed position: a target, a threshold, a
+ * budget, or the date something changed. An annotation rather than a series —
+ * it has no legend entry, cannot be switched off, and is never in the tooltip.
+ */
+export type ReferenceLine = {
+  /**
+   * Where the line sits: a number on a value axis, or whatever the category
+   * column holds on the category axis. A value outside the range the plot
+   * covers is not drawn; the scale follows the data, not the annotation.
+   */
+  value: number | string | Date
+  /**
+   * Which axis `value` is read against. `'y'` (the default) and `'y2'` draw a
+   * rule across the plot at a measured value; `'x'` draws one down it at a
+   * category. `'y2'` reads against the primary axis on a chart that draws only
+   * one, exactly as a series does.
+   */
+  axis?: 'y' | 'y2' | 'x'
+  /** Printed at the far end of the line. Left out, the rule carries no text. */
+  label?: string
+  /** Defaults to the ink data labels are printed in, so it reads as an annotation. */
+  color?: string
+  /** Breaks the rule up, for a line that should not read as a hard boundary. */
+  dashed?: boolean
+}
+
 /** Everything a cartesian chart config carries whatever it draws. */
 export type AxisChartBaseConfig = {
   data: Record<string, any>[]
@@ -97,6 +124,8 @@ export type AxisChartBaseConfig = {
    */
   y2Axis?: ChartYAxisConfig
   series: AxisChartSeriesConfig[]
+  /** Rules drawn over the plot at fixed positions. Not series: see `ReferenceLine`. */
+  referenceLines?: ReferenceLine[]
   title?: string
   subtitle?: string
   /**
@@ -414,6 +443,66 @@ export type SankeyLinkEvent = {
   source: string
   target: string
   value: number
+  row: Record<string, any>
+}
+
+export type ScatterChartConfig = {
+  /** One row per point. A row missing either coordinate draws nothing. */
+  data: Record<string, any>[]
+  /** Row key holding the horizontal measure. */
+  xColumn: string
+  /** Row key holding the vertical measure. */
+  yColumn: string
+  /** Row key holding the magnitude each point is sized by. */
+  sizeColumn?: string
+  /** Grouping column: one series per distinct value. */
+  seriesColumn?: string
+  /** Row key holding the point's own name, which heads its tooltip. */
+  labelColumn?: string
+  title?: string
+  subtitle?: string
+  /** Both axes are value axes: a scatter reads one measure against another. */
+  xAxis?: ChartYAxisConfig
+  yAxis?: ChartYAxisConfig
+  /**
+   * Ramp series colors are drawn from. Defaults to `'categorical'`: the groups
+   * of a scatter are unrelated categories, not steps of one magnitude.
+   */
+  palette?: ChartPalette
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: ChartDir
+  echartOptions?: EchartOptionsOverride
+}
+
+/** One drawn point, after coercion and size scaling. */
+export type ScatterPoint = {
+  x: number
+  y: number
+  /** The magnitude behind the symbol. Null when the chart has no size column. */
+  size: number | null
+  /** Symbol diameter in px: the magnitude mapped into the readable range. */
+  symbolSize: number
+  /** The point's own name, when the config names a label column. */
+  label?: string
+  row: Record<string, any>
+}
+
+/** One group of points, i.e. one value of the grouping column. */
+export type ScatterSeries = {
+  /** The grouping value as it reads, or the y column when nothing groups. Unique. */
+  name: string
+  label: string
+  color: string
+  points: ScatterPoint[]
+}
+
+export type ScatterPointEvent = {
+  seriesName: string
+  x: number
+  y: number
+  /** Null when the chart has no size column. */
+  size: number | null
+  label?: string
   row: Record<string, any>
 }
 

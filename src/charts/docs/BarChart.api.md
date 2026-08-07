@@ -114,6 +114,12 @@
     type: 'number'
   },
   {
+    name: 'referenceLines',
+    description: 'Targets, thresholds and other fixed marks drawn over the plot. They are\nannotations, not series: no legend entry, and no way to switch one off.',
+    required: false,
+    type: 'ReferenceLine[]'
+  },
+  {
     name: 'echartOptions',
     description: '',
     required: false,

@@ -10,6 +10,7 @@ import type {
   HeatmapPalette,
   NumberCardSparkline,
   PlotLabelPlacement,
+  ReferenceLine,
   SankeyNodeAlign,
   SankeyOrient,
 } from './types'
@@ -107,6 +108,11 @@ export type AxisChartProps = ChartBaseProps & {
   connectNulls?: boolean
   /** Chart-level fill alpha; `seriesConfig` overrides it per series. Area series. */
   fillOpacity?: number
+  /**
+   * Targets, thresholds and other fixed marks drawn over the plot. They are
+   * annotations, not series: no legend entry, and no way to switch one off.
+   */
+  referenceLines?: ReferenceLine[]
   echartOptions?: EchartOptionsOverride
 }
 
@@ -184,6 +190,34 @@ export type SankeyChartProps = ChartBaseProps & {
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: nodes are unrelated categories. */
   palette?: ChartPalette
+  echartOptions?: EchartOptionsOverride
+}
+
+export type ScatterChartProps = ChartBaseProps & {
+  /** One row per point. */
+  data: Record<string, any>[]
+  /** Row key holding the horizontal measure. */
+  x: string
+  /** Row key holding the vertical measure. */
+  y: string
+  /** Row key holding the magnitude each point is sized by. */
+  size?: string
+  /** Grouping column: one series per distinct value. */
+  series?: string
+  /** Row key holding the point's own name, which heads its tooltip. */
+  label?: string
+  /** The horizontal scale. Both axes are value axes: a scatter has no categories. */
+  xAxis?: ChartValueAxisOptions
+  /** The vertical scale. */
+  yAxis?: ChartValueAxisOptions
+  /** Defaults to `'categorical'`: the groups are unrelated categories. */
+  palette?: ChartPalette
+  /**
+   * Prints every number the chart shows. `xAxis.format` and `yAxis.format`
+   * override it for their own axis; the size measure has no axis, so this is
+   * what prints it.
+   */
+  format?: ChartValueFormatter
   echartOptions?: EchartOptionsOverride
 }
 

@@ -1,6 +1,6 @@
 # Charts
 
-Seven chart components under the `frappe-ui/charts` subpath, drawn with
+Nine chart components under the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
 your data — `x`, `y`, `series`, `category`, `value` — so a saved or serialized
 chart is one typed object spread with `v-bind="savedChart"`.
@@ -41,6 +41,7 @@ chart is, and it is also how one line of a `LineChart` gets a fill.
 - [DonutChart](/docs/charts/donut-chart) — share of a total
 - [FunnelChart](/docs/charts/funnel-chart) — stage-to-stage drop-off
 - [HeatmapChart](/docs/charts/heatmap-chart) — magnitude across two dimensions
+- [ScatterChart](/docs/charts/scatter-chart) — two measures against each other
 - [SankeyChart](/docs/charts/sankey-chart) — flow from a source to a target
 - [NumberCard](/docs/charts/number-card) — one reading, with its change
 

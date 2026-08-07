@@ -14,6 +14,7 @@ import {
   DATA_LABEL_FONT_SIZE,
   type AxisChartOptionContext,
 } from './axisChartCommon'
+import { buildReferenceLineSeries } from './referenceLines'
 import { mergeDeep } from './utils'
 import type { AxisChartConfig, AxisChartSeriesConfig, ChartMark } from './types'
 
@@ -114,18 +115,29 @@ export function buildAxisChartOption(
     }),
     xAxis: horizontal ? valueAxis : categoryAxis,
     yAxis: horizontal ? categoryAxis : valueAxis,
-    series: visible.map((entry) =>
-      buildSeries(entry, config, {
+    series: [
+      ...visible.map((entry) =>
+        buildSeries(entry, config, {
+          theme,
+          rows,
+          horizontal,
+          isRTL,
+          color: colors[entry.series.name],
+          yAxisIndex: valueAxisIndex(entry.series, hasSecondary),
+          carriesTip,
+          banded: isBanded(entry, plotted),
+        }),
+      ),
+      // Appended after the plotted series, and read from `config.referenceLines`
+      // rather than `config.series`: everything that lists the series — the
+      // legend, `hiddenSeries`, the tooltip, the bar count above — walks the
+      // latter, so a host series cannot reach any of them.
+      ...buildReferenceLineSeries(config.referenceLines, {
         theme,
-        rows,
         horizontal,
-        isRTL,
-        color: colors[entry.series.name],
-        yAxisIndex: valueAxisIndex(entry.series, hasSecondary),
-        carriesTip,
-        banded: isBanded(entry, plotted),
+        hasSecondaryValueAxis: hasSecondary,
       }),
-    ),
+    ],
   }
 
   return mergeDeep(option, config.echartOptions)

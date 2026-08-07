@@ -127,9 +127,11 @@
    HTML chrome only: zrender measures plot labels on a canvas, which cannot see
    CSS font features, so tabular figures in the SVG would render wider than
    they were measured and clip at the plot edge. */
-[data-slot='chart-card'] {
+[data-slot='chart-card'],
+[data-slot='chart-container'] {
   font-variant-numeric: tabular-nums;
 }
-[data-slot='chart-card'] svg {
+[data-slot='chart-card'] svg,
+[data-slot='chart-container'] svg {
   font-variant-numeric: normal;
 }

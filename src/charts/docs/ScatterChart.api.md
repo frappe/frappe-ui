@@ -37,87 +37,63 @@
   },
   {
     name: 'data',
-    description: '',
+    description: 'One row per point.',
     required: true,
     type: 'Record<string, any>[]'
   },
   {
     name: 'x',
-    description: 'Column holding the category or time each point sits at.',
+    description: 'Row key holding the horizontal measure.',
     required: true,
     type: 'string'
   },
   {
     name: 'y',
-    description: 'Value column(s). A list reads wide data: one series per column.',
+    description: 'Row key holding the vertical measure.',
     required: true,
-    type: 'string | string[]'
+    type: 'string'
   },
   {
-    name: 'y2',
-    description: 'Column(s) measured against the second value axis. Ignored when `horizontal`.',
-    required: false,
-    type: 'string | string[]'
-  },
-  {
-    name: 'series',
-    description: 'Grouping column, i.e. long data. Use with a single `y`.',
+    name: 'size',
+    description: 'Row key holding the magnitude each point is sized by.',
     required: false,
     type: 'string'
   },
   {
-    name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
+    name: 'series',
+    description: 'Grouping column: one series per distinct value.',
     required: false,
-    type: 'Record<string, SeriesStyle>'
+    type: 'string'
+  },
+  {
+    name: 'label',
+    description: 'Row key holding the point\'s own name, which heads its tooltip.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'xAxis',
-    description: '',
-    required: false,
-    type: 'ChartXAxisOptions'
-  },
-  {
-    name: 'yAxis',
-    description: '',
+    description: 'The horizontal scale. Both axes are value axes: a scatter has no categories.',
     required: false,
     type: 'ChartValueAxisOptions'
   },
   {
-    name: 'y2Axis',
-    description: '',
+    name: 'yAxis',
+    description: 'The vertical scale.',
     required: false,
     type: 'ChartValueAxisOptions'
   },
   {
     name: 'palette',
-    description: 'Ramp series colors are drawn from. Defaults to `\'sequential\'`.',
+    description: 'Defaults to `\'categorical\'`: the groups are unrelated categories.',
     required: false,
     type: 'ChartPalette'
   },
   {
-    name: 'stacked',
-    description: 'Series sum on top of each other. Bar and area series; a line never stacks.',
+    name: 'format',
+    description: 'Prints every number the chart shows. `xAxis.format` and `yAxis.format`\noverride it for their own axis; the size measure has no axis, so this is\nwhat prints it.',
     required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'connectNulls',
-    description: 'Bridges gaps left by nulls. Line and area series.',
-    required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'fillOpacity',
-    description: 'Chart-level fill alpha; `seriesConfig` overrides it per series. Area series.',
-    required: false,
-    type: 'number'
-  },
-  {
-    name: 'referenceLines',
-    description: 'Targets, thresholds and other fixed marks drawn over the plot. They are\nannotations, not series: no legend entry, and no way to switch one off.',
-    required: false,
-    type: 'ReferenceLine[]'
+    type: 'ChartValueFormatter'
   },
   {
     name: 'echartOptions',
@@ -154,15 +130,15 @@
     type: '[value: string[]]'
   },
   {
-    name: 'datapointClick',
+    name: 'pointClick',
     description: '',
-    type: '[event: ChartDatapointEvent]'
+    type: '[event: ScatterPointEvent]'
   }
 ]
 </script>
 ## API Reference
 
-<PropsTable folder="charts" name="AreaChart" :data="propsData"/> 
+<PropsTable folder="charts" name="ScatterChart" :data="propsData"/> 
 
 <SlotsTable :data="slotsData"/> 
 

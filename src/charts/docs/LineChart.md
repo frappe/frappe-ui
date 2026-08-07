@@ -28,6 +28,21 @@ combo chart.
 
 <ComponentPreview name="Charts-LineFilledSeries" csr="true" self-layout />
 
+## Targets and thresholds
+
+`referenceLines` draws a rule over the plot at a fixed position. `axis` says what
+`value` is read against: `'y'` (the default) or `'y2'` for a rule across the plot
+at a measured value, `'x'` for one down it at a category or a date. Each line
+also takes an optional `label`, `color` and `dashed`.
+
+<ComponentPreview name="Charts-LineThresholds" csr="true" self-layout />
+
+A reference line is an annotation, not a series: it has no legend entry, it is
+never in the tooltip, and it cannot be switched off — which is what a threshold
+has to be to stay comparable. A line outside the range the plot covers is not
+drawn, because stretching the scale to fit a distant target would flatten the
+data it is meant to be read against; pin `yAxis.min` / `max` instead.
+
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.

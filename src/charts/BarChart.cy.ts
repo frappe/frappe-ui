@@ -169,6 +169,53 @@ describe('BarChart', () => {
     })
   })
 
+  describe('reference lines', () => {
+    it('draws a labelled rule over the plot with no legend entry of its own', () => {
+      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+      // An annotation, not a series: the legend still lists the two columns.
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      bars().should('have.length', data.length * 2)
+    })
+
+    it('keeps the rule while a legend toggle hides a series', () => {
+      mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
+      cy.get('[aria-label="Hide Sales"]').click()
+      bars().should('have.length', data.length)
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Target',
+      )
+    })
+
+    it('draws a rule down the plot at a category', () => {
+      mountChart({
+        referenceLines: [{ value: 'Feb', axis: 'x', label: 'Launch' }],
+      })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Launch',
+      )
+    })
+
+    it('follows the axes round on a horizontal chart', () => {
+      mountChart({
+        horizontal: true,
+        referenceLines: [
+          { value: 12, label: 'Target' },
+          { value: 'Feb', axis: 'x', label: 'Launch' },
+        ],
+      })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Target')
+        .and('contain.text', 'Launch')
+      bars().should('have.length', data.length * 2)
+    })
+  })
+
   describe('states', () => {
     it('spins while loading and keeps the plot mounted', () => {
       mountChart({ loading: true })
@@ -228,7 +275,7 @@ describe('BarChart', () => {
 
     it('mirrors the card in RTL', () => {
       mountChart({ dir: 'rtl', title: 'Revenue' })
-      cy.get('[data-slot="chart-card"]').should('have.attr', 'dir', 'rtl')
+      cy.get('[data-slot="chart-container"]').should('have.attr', 'dir', 'rtl')
       // The plot stays LTR: echarts mirrors the axes through the option.
       cy.get('[role="img"]').should('have.attr', 'dir', 'ltr')
     })

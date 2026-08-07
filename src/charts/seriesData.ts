@@ -62,6 +62,7 @@ export function normalizeAxisChartProps(
       yAxis: toValueAxis(props.yAxis),
       y2Axis: toValueAxis(props.y2Axis),
       series: names.map((name) => buildSeries(name, props, secondary)),
+      referenceLines: props.referenceLines,
       title: props.title,
       subtitle: props.subtitle,
       palette: props.palette,

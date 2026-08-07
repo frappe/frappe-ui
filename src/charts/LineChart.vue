@@ -49,7 +49,11 @@ import { computed } from 'vue'
 // Both series types: any axis chart draws any mark, so a line chart with one
 // `type: 'bar'` series needs the bar module registered too.
 import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
-import { GridComponent, TooltipComponent } from 'echarts/components'
+import {
+  GridComponent,
+  MarkLineComponent,
+  TooltipComponent,
+} from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
@@ -71,6 +75,7 @@ registerChartModules([
   BarSeries,
   LineSeries,
   GridComponent,
+  MarkLineComponent,
   TooltipComponent,
   LabelLayout,
 ])

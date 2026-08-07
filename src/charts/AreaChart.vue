@@ -49,7 +49,11 @@ import { computed } from 'vue'
 // An area is a line series with a fill, so it needs no module of its own. The
 // bar module is registered all the same: any axis chart draws any mark.
 import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
-import { GridComponent, TooltipComponent } from 'echarts/components'
+import {
+  GridComponent,
+  MarkLineComponent,
+  TooltipComponent,
+} from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
@@ -71,6 +75,7 @@ registerChartModules([
   BarSeries,
   LineSeries,
   GridComponent,
+  MarkLineComponent,
   TooltipComponent,
   LabelLayout,
 ])

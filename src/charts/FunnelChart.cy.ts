@@ -27,13 +27,13 @@ function mountChart(props: Record<string, any> = {}) {
 }
 
 /** One hit area per stage; the columns behind them are aria-hidden. */
-const hitAreas = () => cy.get('[data-slot="chart-card"] button')
-const columns = () => cy.get('[data-slot="chart-card"] svg path')
+const hitAreas = () => cy.get('[data-slot="chart-container"] button')
+const columns = () => cy.get('[data-slot="chart-container"] svg path')
 
 describe('FunnelChart', () => {
   it('heads each stage with its name and count, in process order', () => {
     mountChart()
-    cy.get('[data-slot="chart-card"]')
+    cy.get('[data-slot="chart-container"]')
       .invoke('text')
       .should('match', /Visited\s*50.*Demoed\s*30.*Won\s*20/s)
   })
@@ -45,7 +45,7 @@ describe('FunnelChart', () => {
 
   it('prints each stage against the first, and nothing against the first', () => {
     mountChart()
-    cy.get('[data-slot="chart-card"]')
+    cy.get('[data-slot="chart-container"]')
       .should('contain.text', '60%')
       .and('contain.text', '40%')
       .and('not.contain.text', '100%')
@@ -53,7 +53,7 @@ describe('FunnelChart', () => {
 
   it('drops the percentages on request', () => {
     mountChart({ showPercentages: false })
-    cy.get('[data-slot="chart-card"]').should('not.contain.text', '60%')
+    cy.get('[data-slot="chart-container"]').should('not.contain.text', '60%')
   })
 
   it('gives every stage a hit area that names it', () => {
