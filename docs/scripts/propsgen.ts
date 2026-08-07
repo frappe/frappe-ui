@@ -643,7 +643,13 @@ function reportStale(relativePath: string, report: string) {
 
 function annotate(relativePath: string, message: string) {
   if (!process.env.GITHUB_ACTIONS) return
-  console.error(`::error file=${relativePath}::${message}`)
+  // A workflow command is one line: the runner reads `%25`, `%0D` and `%0A`
+  // back as `%`, CR and LF.
+  const escaped = message
+    .replace(/%/g, '%25')
+    .replace(/\r/g, '%0D')
+    .replace(/\n/g, '%0A')
+  console.error(`::error file=${relativePath}::${escaped}`)
 }
 
 function checkFolder(
