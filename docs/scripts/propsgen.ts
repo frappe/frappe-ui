@@ -404,8 +404,7 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
   // The output has to match what Prettier would write. `lint-staged` runs
   // `prettier --write` over `*.md`, so a trailing space or a missing blank
   // line here gets rewritten by the next commit that touches the file, and
-  // the staleness check in CI would then fail on formatting instead of on a
-  // real API change.
+  // the generated files and the generator drift apart with nothing to say so.
   const scriptStr = scriptLines.join('\n')
   const bodyStr = markupStr.trimEnd()
   return bodyStr ? `${scriptStr}\n\n${bodyStr}\n` : `${scriptStr}\n`
