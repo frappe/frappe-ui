@@ -10,8 +10,10 @@
 ADR-0004 gave one reason after the fact ("isolated heavy dependency and/or large
 colliding export surface"), but it doesn't hold today: `frappe-ui/list` has no heavy
 dependency, and root already carries heavy ones (`echarts` via the chart components,
-`socket.io-client` via `initSocket`, all of TipTap via the deprecated `TextEditor`
-re-export). Without a generative rule, every new family invents its own answer and
+`socket.io-client` via the v1 resources' realtime helpers — `initSocket` was the
+example when this was written, and #927 has since removed it — all of TipTap via the
+deprecated `TextEditor` re-export). Without a generative rule, every new family
+invents its own answer and
 the split reads as accident rather than design — a problem that gets worse, not
 better, once `1.0.0` freezes whatever exists.
 
@@ -65,9 +67,13 @@ separate category, decided on their own terms.
 
 ### What this hands to other tickets
 
-- **#870** (root-surface audit): `initSocket` (→ `socket.io-client`) and `dayjs`/
-  `dayjsLocal` (→ `dayjs/esm` + 3 plugins) are static dependencies that trip limb (a)
-  and cannot stay at root as-is. `frappe-ui/utils` is not the fix — sorting the
+- **#870** (root-surface audit): `dayjs`/`dayjsLocal` (→ `dayjs/esm` + 3 plugins) is a
+  static dependency that trips limb (a) and cannot stay at root as-is. `initSocket`
+  (→ `socket.io-client`) was the other one; #927 resolved it by deleting the export
+  outright rather than re-homing it, so limb (a) has nothing left to answer for there.
+  `socket.io-client` still appears in `resources/realtime.ts`, which exports functions
+  typed against its `Socket`, but only in type position — it is erased at build and is
+  not a static dependency under this rule. `frappe-ui/utils` is not the fix — sorting the
   non-component root exports found only two genuinely generic, dependency-free
   functions (`debounce`, `fileToBase64`); everything else is either a component's own
   API misplaced at the top level, or belongs to the data-fetching subsystem. Each

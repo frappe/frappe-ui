@@ -638,6 +638,112 @@ The v-model payload inverts here too, for the same reason as above. Or use the
 standalone [`Combobox`](./components/combobox), which exposes the full set of
 props and slots without the wrapper.
 
+## HTTP transport and the `FrappeUI` plugin
+
+v1 has one HTTP path. `frappeRequest` is it; `call` is a thin wrapper over it
+for the common "POST to a whitelisted method" case. `request`, `createCall` and
+`initSocket` are gone, and `app.use(FrappeUI)` is down to a single option.
+
+| Before                          | After                                        |
+| ------------------------------- | -------------------------------------------- |
+| `import { request }`            | `import { frappeRequest }`                   |
+| `createCall(options)`           | wrap `call` yourself, or use `frappeRequest` |
+| `import initSocket`             | your own `io(...)` connection                |
+| `app.use(FrappeUI, { config })` | `setConfig(key, value)` per entry            |
+| `app.use(FrappeUI, { call })`   | `import { call }` where you need it          |
+| `this.$resources` (implicit)    | `app.use(FrappeUI, { resources: true })`     |
+
+The first three are build failures — your bundler or type-check names them. The
+rest are the silent ones.
+
+### `call` now honours `setConfig`
+
+`call` built its own `fetch` and never read the config, so `requestBaseUrl` and
+`requestHeaders` were quietly ignored on every `call()` while `frappeRequest`
+respected them. That inconsistency is fixed, which means a `call` in an app that
+sets either one now behaves differently — usually the way you assumed it already
+did. Two knock-on effects worth checking:
+
+- If you set `requestBaseUrl` for local dev against a remote site, `call` now
+  goes to the remote site too, with `credentials: 'include'`.
+- If you set `serverMessagesHandler`, `_server_messages` returned by a `call`
+  now reach it. Previously only `frappeRequest` and the resources fed it, so
+  expect toasts from paths that used to be silent.
+
+`call`'s signature, the value it resolves to, and the
+`{ response, status, error }` object passed to `onError` are all unchanged.
+
+### The plugin's `config` option is gone
+
+```js
+// Before
+app.use(FrappeUI, {
+  config: {
+    resourceFetcher: frappeRequest,
+    defaultListUrl: 'gameplan.extends.client.get_list',
+    systemTimezone: window.system_timezone || null,
+  },
+})
+
+// After
+setConfig('resourceFetcher', frappeRequest)
+setConfig('defaultListUrl', 'gameplan.extends.client.get_list')
+setConfig('systemTimezone', window.system_timezone || null)
+app.use(FrappeUI)
+```
+
+Passing a removed option is not a type error if your `main.js` is plain JS, so
+the plugin logs a dev-mode warning naming the option it ignored. Note that
+`setConfig` only accepts keys of `FrappeUIConfig` — if you were passing a key
+that isn't one, it was never read and can be deleted.
+
+### `$resources` is opt-in
+
+The plugin used to install the v1 resources Options API mixin by default, so
+`this.$resources`, `$getResource`, `$getDoc`, `$getListResource` and
+`$refetchResource` existed in any app that called `app.use(FrappeUI)`. It now
+installs only when asked:
+
+```js
+app.use(FrappeUI, { resources: true })
+```
+
+Nothing changes for Composition API code — `createResource`,
+`createListResource` and `createDocumentResource` never went through the plugin.
+You need the option only if you declare a `resources: { … }` block in a
+component's options.
+
+You will not have to work this out from a blank screen. A component that
+declares `resources` without the option throws on creation, naming itself and
+the fix, and reading `this.$resources` throws too. Both throw in production
+builds as well as dev — this is a break that has no quiet failure mode.
+
+### `initSocket` is gone
+
+It was a nine-line `io()` wrapper, and the plugin created one by default — which
+meant apps that also built their own socket held two live connections per page
+load. If you relied on the `$socket` global the plugin set, create the
+connection yourself:
+
+```js
+import { io } from 'socket.io-client'
+
+const host = window.location.hostname
+const port = window.location.port ? ':9000' : ''
+const protocol = port ? 'http' : 'https'
+const siteName = import.meta.env.DEV ? host : window.site_name
+
+app.config.globalProperties.$socket = io(
+  `${protocol}://${host}${port}/${siteName}`,
+  { withCredentials: true },
+)
+```
+
+Until you do, reading `this.$socket` throws with that instruction rather than
+returning `undefined` and crashing in whatever realtime handler reads it next.
+Assigning your own replaces the guard. The same applies to `$call`, the other
+global the plugin used to install — import `call` from `frappe-ui` instead.
+
 ## FAQ
 
 **Will my CSS break?** Where structure changed, components expose `data-*` hooks

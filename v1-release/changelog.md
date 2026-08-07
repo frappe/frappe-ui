@@ -393,6 +393,97 @@ Migration: to keep a caption visible, copy the text into `caption`. A
 one-off content migration can do that where you know the old `alt`
 values were captions.
 
+### HTTP transport — four paths collapse to one (breaking)
+
+`frappeRequest` is the single transport. Removed from the root export:
+
+- **`request`** — the bare `fetch` wrapper under `frappeRequest`, now
+  internal. Use `frappeRequest`.
+- **`createCall`** — no consumers in any app.
+- **`initSocket`** — no consumers in any app; every one defines its own.
+  `socket.io-client` remains a dependency (`resources/realtime.ts` exports
+  functions typed against its `Socket`).
+
+All three are build failures at the import.
+
+**`call` now honours `setConfig` (silent).** It kept its
+`(method, args, options)` signature, the value it resolves to, and the
+`{ response, status, error }` shape it hands `onError`, but it delegates to
+`frappeRequest` instead of building its own `fetch`. It had never imported
+`getConfig`, so `requestBaseUrl` and `requestHeaders` were ignored on every
+`call()` while `frappeRequest` respected them. Two consequences in apps that
+set either: `call` now goes to the configured base URL with
+`credentials: 'include'`, and `_server_messages` from a `call` now reach
+`serverMessagesHandler`.
+
+**`FrappeRequestError` is now exported.** `frappeRequest` threw it but
+nothing exported it, so a consumer could not type a `catch`.
+
+### `frappeRequest` — `onError` fired twice per failure (fix)
+
+`request()` attached `transformError` with a trailing `.catch`, which also
+caught what `transformResponse` threw. Every failed HTTP response therefore
+ran `onError` twice. It now runs once, because `frappeRequest` marks an error
+it has already reported rather than because the rejection handler sees less.
+That distinction matters: an *ok* response whose body will not parse — Frappe
+answers an expired session with 200 and its login page, so `response.json()`
+throws — is a failure only that handler sees, and it still reaches `onError`.
+
+**A method name starting with `http` skipped the `/api/method/` prefix (fix).**
+The absolute-URL check was `url.startsWith('http')`, which matches the four
+letters rather than a scheme, so `http_utils.api.run` was fetched as a relative
+path. It now matches `https?://`.
+
+`frappeRequest` also gained an
+explicit return type and passes its type argument through, so
+`frappeRequest<Foo>()` resolves to `Foo` rather than `unknown`.
+
+**`login` returned only `message` when `requestBaseUrl` was set (fix).**
+`login` is the one endpoint that resolves to the whole body, so a caller can
+read `full_name` and `home_page`. The check compared the whole URL against
+`/api/method/login`, and `requestBaseUrl` makes that URL absolute, so it
+stopped matching and `login` quietly resolved to `data.message`. It now
+matches on the path.
+
+### `FrappeUI` plugin — one option left (breaking)
+
+`app.use(FrappeUI)` accepts `resources` and nothing else, and no longer
+installs it by default.
+
+- **`socketio` removed.** It defaulted to `true`, so apps that also built
+  their own socket opened two live socket.io connections per page load.
+- **`call` removed.** It installed a `$call` global with no consumers.
+- **`config` removed (silent).** `setConfig` is the entry point. One app
+  passed it.
+- **`resources` no longer defaults to `true`.** The v1 resources Options API
+  mixin — `this.$resources`, `$getResource`, `$getDoc`, `$getListResource`,
+  `$refetchResource` — installs only on
+  `app.use(FrappeUI, { resources: true })`. Composition API resources are
+  unaffected. `resourcesPlugin` stays exported for direct installation.
+
+Because a removed *option* is ignored rather than rejected, the plugin logs a
+dev-mode warning naming any option it does not accept and what to use instead.
+
+**Removed features fail loudly, in production too.** A dropped option that
+evaporates is an annoyance; a dropped feature that evaporates is a mystery
+crash somewhere else. So:
+
+- A component declaring a `resources` option without
+  `app.use(FrappeUI, { resources: true })` throws on creation, naming itself
+  and the fix.
+- Reading `this.$resources` with the option off throws the same advice. Both
+  guards exist because Vue routes what a lifecycle hook throws through its own
+  error handling, which only logs in production — a read throws straight into
+  app code in every build.
+- Reading `this.$socket` or `this.$call`, the two globals the plugin stopped
+  installing, throws a message naming the replacement instead of returning
+  `undefined`. Assigning your own — `app.config.globalProperties.$socket = io(…)`
+  — replaces the guard, before or after `app.use(FrappeUI)`.
+
+`realtime: true` on a v1 resource still degrades quietly to a non-realtime
+resource when no socket is set. That has always been its behaviour and this
+does not change it.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
