@@ -214,4 +214,16 @@ describe('useDoctype concurrency', () => {
 
     fetchSpy.mockRestore()
   })
+
+  it('reports insert isLoading while an insert is in flight', async () => {
+    let user = useDoctype<User>('User', { baseUrl })
+
+    expect(user.insert.isLoading()).toBe(false)
+
+    let done = user.insert.submit({ name: 'slow-user' })
+    expect(user.insert.isLoading()).toBe(true)
+
+    await done
+    expect(user.insert.isLoading()).toBe(false)
+  })
 })

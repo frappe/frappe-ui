@@ -179,6 +179,12 @@ export function useList<T extends { name: string }>(
     data: insertAction.data,
     error: insertAction.error,
     loading: insertAction.loading,
+    /**
+     * True while an insert is in flight. Takes no target: the row has no name
+     * until the server gives it one, so there is nothing to key on. Same answer
+     * as `loading`, kept so every write method has `isLoading`.
+     */
+    isLoading: () => insertAction.loading.value,
     submit: insertAction.submit,
   })
 

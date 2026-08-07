@@ -41,6 +41,12 @@ function useInsert<T extends Record<string, any>>(
     data: action.data,
     error: action.error,
     loading: action.loading,
+    /**
+     * True while an insert is in flight. Takes no target: the document has no
+     * name until the server gives it one, so there is nothing to key on. Same
+     * answer as `loading`, kept so every write method has `isLoading`.
+     */
+    isLoading: () => action.loading.value,
     submit: action.submit,
   })
 }
