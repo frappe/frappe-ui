@@ -114,8 +114,8 @@ export default {
           this.$options.name || this.$.type?.__name || 'An anonymous component'
         throw new Error(
           `[frappe-ui] ${name} declares a "resources" component option, but the ` +
-            'FrappeUI plugin was installed without it, so the option does nothing ' +
-            `and this.$resources is undefined. ${RESOURCES_OFF_ADVICE}`,
+            'FrappeUI plugin was installed without it, so nothing reads that ' +
+            `option and this.$resources does not exist. ${RESOURCES_OFF_ADVICE}`,
         )
       },
     })
