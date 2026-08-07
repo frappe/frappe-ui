@@ -1,19 +1,24 @@
 <template>
   <Combobox
     v-model="model"
+    v-model:query="query"
     trigger="button"
     placeholder="Select an option"
     :options="options"
     :loading="r.loading"
     :filterable="false"
-    @update:query="(query) => onUpdateQuery(query as string)"
+    @update:open="(open) => onUpdateOpen(open as boolean)"
+    @update:selected-option="rememberSelection"
   />
 </template>
 
 <script setup lang="ts">
 import { Combobox, createListResource } from '../../index'
-import { computed, watch } from 'vue'
-import type { ComboboxSelectableOption } from '../Combobox/types'
+import { computed, ref, watch } from 'vue'
+import type {
+  ComboboxCustomOption,
+  ComboboxSelectableOption,
+} from '../Combobox/types'
 
 type SearchResult = Record<string, any>
 
@@ -51,7 +56,7 @@ const r = createListResource({
   fields: [props.labelField, props.searchField, props.valueField],
 })
 
-const options = computed<ComboboxSelectableOption[]>(
+const results = computed<ComboboxSelectableOption[]>(
   () =>
     r.data?.map((result: SearchResult) => ({
       label: result[props.labelField],
@@ -59,22 +64,73 @@ const options = computed<ComboboxSelectableOption[]>(
     })) || [],
 )
 
-// The server already decided what matches the query, so client filtering is
-// off (`filterable="false"`) — a second literal substring pass here would drop
-// anything the backend matched fuzzily or by id.
-//
-// The `as string` at the call site is not decoration: Combobox declares
-// `update:query` twice, once through `defineModel('query')` and once in
-// `ComboboxEmits`, and vue-tsc resolves the pair to the untyped
-// `(...args: unknown[]) => any`. Same for `update:modelValue` and
-// `update:open`; `update:selectedOption` types correctly.
-function onUpdateQuery(query: string) {
+// Combobox resolves its button label out of the options it was handed, and
+// here those options are one page of server results. Type a query the selected
+// row no longer matches and it leaves the list, so the label would drop back to
+// the placeholder. Hold on to the option that was selected and merge it back
+// in — the pattern `Combobox.md` prescribes for server-backed pickers.
+const selectedOption = ref<ComboboxSelectableOption | null>(null)
+
+const options = computed<ComboboxSelectableOption[]>(() => {
+  const remembered = selectedOption.value
+  if (!remembered) return results.value
+  if (results.value.some((option) => option.value === remembered.value)) {
+    return results.value
+  }
+  return [remembered, ...results.value]
+})
+
+function rememberSelection(
+  option: ComboboxSelectableOption | ComboboxCustomOption | null,
+) {
+  // This picker declares no custom rows, so anything but a selectable option
+  // means the selection was cleared.
+  selectedOption.value = option && option.type !== 'custom' ? option : null
+}
+
+// A value handed in by the parent was never picked through the popover, so
+// there is nothing to remember until the results carry it. Resolving it here
+// covers that case without disturbing a selection already made: once the
+// remembered option matches the model, later result sets are ignored.
+watch(
+  [results, model],
+  ([list, value]) => {
+    if (value === null || value === undefined || value === '') {
+      selectedOption.value = null
+      return
+    }
+    if (selectedOption.value?.value === value) return
+    selectedOption.value = list.find((option) => option.value === value) ?? null
+  },
+  { immediate: true },
+)
+
+// Combobox treats a listened-to `update:query` as a bound query and hands
+// ownership over, so this component has to own it for real: listening alone
+// left the search box holding the committed label ("Alpha"), and the next
+// keystroke appended to it ("AlphaBeta"). Owning it means resetting the filter
+// each time the popover opens, which is what an unbound query would have done.
+const query = ref('')
+
+watch(query, (value) => {
+  // The server already decided what matches, so client filtering stays off
+  // (`filterable="false"`) — a second literal substring pass would drop
+  // anything the backend matched fuzzily or by id.
   r.update({
     filters: {
-      [props.searchField]: ['like', `%${query}%`],
+      [props.searchField]: ['like', `%${value}%`],
     },
   })
 
   r.reload()
+})
+
+// The `as boolean` at the call site is not decoration: Combobox declares
+// `update:open` twice, once through `defineModel('open')` and once in
+// `ComboboxEmits`, and vue-tsc resolves the pair to the untyped
+// `(...args: unknown[]) => any`. Same for `update:query` and
+// `update:modelValue`; `update:selectedOption` types correctly.
+function onUpdateOpen(open: boolean) {
+  if (open) query.value = ''
 }
 </script>
