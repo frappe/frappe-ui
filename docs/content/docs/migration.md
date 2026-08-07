@@ -402,8 +402,10 @@ More changes you will not see at build time:
   after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
   unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
   rejection.
-- `useList`'s `insert` now sends to the `baseUrl` you passed to `useList`. It
-  used to ignore it and post to the current origin.
+- `useList`'s `insert` and `delete` now send to the `baseUrl` you passed to
+  `useList`. They used to ignore it and hit the current origin. `setValue`
+  already honoured it, so all three write methods now agree. `useDoctype` was
+  never affected.
 
 ## Tree
 

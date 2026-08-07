@@ -411,7 +411,10 @@ response.
   rejects with the error — one channel, not two. A failed `validate` already
   rejected; a failed request used to resolve with `null`. Both reject now, and
   a server that answers with `null` resolves with `null`.
-- `useList`'s `insert` now sends to `baseUrl`, which it silently dropped.
+- `useList`'s `insert` and `delete` now send to `baseUrl`, which they silently
+  dropped. `setValue` already used it, so all three write methods now agree.
+  `useDoctype` was never affected — every one of its methods already passed
+  `baseUrl`.
 
 ## Deprecation log
 
