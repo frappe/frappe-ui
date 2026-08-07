@@ -113,6 +113,12 @@ watch(
 const query = ref('')
 
 watch(query, (value) => {
+  // `createResource.fetch` opens a fresh AbortController per call and never
+  // touches the previous one, so two searches in flight both write to `r.data`
+  // and the slower loses only by luck. Cancel the one already running — an
+  // aborted fetch is swallowed on purpose, so nothing surfaces as an error.
+  r.list.abort()
+
   // The server already decided what matches, so client filtering stays off
   // (`filterable="false"`) — a second literal substring pass would drop
   // anything the backend matched fuzzily or by id.

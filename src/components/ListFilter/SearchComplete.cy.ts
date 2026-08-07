@@ -11,17 +11,43 @@ function uniqueDoctype() {
   return `SearchCompleteDoc${++counter}-${Date.now()}`
 }
 
+function matches(options: any) {
+  const pattern = options.params?.filters?.name?.[1] ?? '%%'
+  const query = String(pattern).replaceAll('%', '').toLowerCase()
+  return DOCS.filter((doc) => doc.name.toLowerCase().includes(query))
+}
+
 // Stands in for frappe.client.get_list. It honours the `like` filter the picker
 // sends, so typing a query really does drop rows from the result set — which is
 // the whole point of these tests.
 function stubServer() {
+  setConfig('resourceFetcher', (options: any) =>
+    Promise.resolve(matches(options)),
+  )
+}
+
+// Same server, but no request answers until the test says so, and an aborted
+// one rejects the way `fetch` does. Returns a `release` that answers everything
+// still outstanding, newest request first — the order that lets a stale
+// response land last and win.
+function stubDeferredServer() {
+  const pending: Array<() => void> = []
+
   setConfig('resourceFetcher', (options: any) => {
-    const pattern = options.params?.filters?.name?.[1] ?? '%%'
-    const query = String(pattern).replaceAll('%', '').toLowerCase()
-    return Promise.resolve(
-      DOCS.filter((doc) => doc.name.toLowerCase().includes(query)),
-    )
+    return new Promise((resolve, reject) => {
+      options.signal?.addEventListener('abort', () => {
+        const error = new Error('Aborted')
+        error.name = 'AbortError'
+        reject(error)
+      })
+      pending.push(() => resolve(matches(options)))
+    })
   })
+
+  return function release() {
+    pending.reverse().forEach((answer) => answer())
+    pending.length = 0
+  }
 }
 
 function trigger() {
@@ -79,6 +105,23 @@ describe('SearchComplete', () => {
 
     trigger().click()
     search().should('have.value', '')
+  })
+
+  // `createResource.fetch` opens a new AbortController per call and leaves the
+  // old request running, so two searches in flight both write to `r.data` and
+  // the slower one wins. Here the first request answers last and would put all
+  // three rows back under a search box reading "Beta".
+  it('drops a stale search response', () => {
+    const release = stubDeferredServer()
+    cy.mount(SearchComplete, { props: { doctype: uniqueDoctype() } })
+
+    trigger().click()
+    search().type('Beta')
+
+    cy.then(release)
+
+    cy.get('[role=option]').should('have.length', 1)
+    cy.get('[role=option]').should('contain.text', 'Beta')
   })
 
   it('resolves a label for a value supplied by the parent', () => {
