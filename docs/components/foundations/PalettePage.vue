@@ -6,9 +6,9 @@ import colors from '../../../tailwind/colors.json'
 type Mode = 'lightMode' | 'darkMode'
 
 // The switcher drives the global theme so the whole page matches the example.
-const { currentTheme, setTheme } = useTheme()
+const { currentTheme, setTheme, getSystemTheme } = useTheme()
 const mode = computed<Mode>({
-  get: () => (currentTheme.value === 'dark' ? 'darkMode' : 'lightMode'),
+  get: () => ((currentTheme.value === 'system' ? getSystemTheme() : currentTheme.value) === 'dark' ? 'darkMode' : 'lightMode'),
   set: (next) => setTheme(next === 'darkMode' ? 'dark' : 'light'),
 })
 
