@@ -411,6 +411,19 @@ Before/after for each silent break is in the
 Before/after is in the
 [migration guide](../docs/content/docs/migration.md#tooltip).
 
+### HoverCard — `open()` and `close()` on the template ref
+
+- Added: `open()` and `close()` on the component instance, matching `Popover`.
+- The trigger slot's props are now typed (`HoverCardSlotProps`) instead of
+  `any`.
+
+### BottomSheet — focus stays inside an open sheet
+
+The sheet opts out of autofocusing its first field, so it does not pop the
+keyboard on a phone. That also left focus on the trigger behind the overlay,
+with nothing holding it — `Tab` walked the page behind an open modal. The sheet
+now takes focus itself on open. The keyboard still stays down.
+
 ### Divider — `action.onClick` preferred
 
 `action.handler` is deprecated. Warning emits via the shared
