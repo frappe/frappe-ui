@@ -90,6 +90,35 @@ describe('NumberCard', () => {
     })
   })
 
+  describe('card surface', () => {
+    it('draws the surface by default', () => {
+      mountCard()
+      card()
+        .should('have.class', 'border')
+        .and('have.class', 'bg-surface-elevation-2')
+        .and('have.class', 'rounded-7')
+        .and('have.class', 'px-4')
+    })
+
+    it('renders bare for a card the app draws itself', () => {
+      mountCard({ card: false })
+      card()
+        .should('contain.text', 'Revenue')
+        .and('not.have.class', 'border')
+        .and('not.have.class', 'bg-surface-elevation-2')
+        .and('not.have.class', 'rounded-7')
+        .and('not.have.class', 'px-4')
+    })
+
+    it('keeps the sparkline anchored and clipped without the surface', () => {
+      mountCard({ card: false, sparkline: { data: [1, 5, 3, 8] } })
+      card()
+        .should('have.class', 'relative')
+        .and('have.class', 'overflow-hidden')
+      cy.get('[data-slot="chart-card"] svg path').should('have.length', 2)
+    })
+  })
+
   describe('states', () => {
     it('holds the line open with a skeleton while loading', () => {
       mountCard({ loading: true })

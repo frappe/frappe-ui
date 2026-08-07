@@ -46,27 +46,34 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-// An area is a line series with a fill, so it needs no module of its own.
-import { LineChart as LineSeries } from 'echarts/charts'
+// An area is a line series with a fill, so it needs no module of its own. The
+// bar module is registered all the same: any axis chart draws any mark.
+import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
-import { buildAreaChartOption } from './areaChartOptions'
+import { buildAxisChartOption } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { AreaChartProps, AreaSeriesStyle } from './props'
+import type { AreaChartProps } from './props'
 import type {
-  AreaChartConfig,
+  AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,
   ChartTooltipItem,
 } from './types'
 
-registerChartModules([LineSeries, GridComponent, TooltipComponent, LabelLayout])
+registerChartModules([
+  BarSeries,
+  LineSeries,
+  GridComponent,
+  TooltipComponent,
+  LabelLayout,
+])
 
 const props = defineProps<AreaChartProps>()
 
@@ -83,11 +90,10 @@ defineSlots<{
   tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
 }>()
 
-const normalized = computed(() =>
-  normalizeAxisChartProps<AreaSeriesStyle>(props),
-)
-const config = computed<AreaChartConfig>(() => ({
+const normalized = computed(() => normalizeAxisChartProps(props))
+const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
+  type: 'area',
   stacked: props.stacked,
   connectNulls: props.connectNulls,
   fillOpacity: props.fillOpacity,
@@ -108,7 +114,7 @@ const {
 } = useAxisChart({
   config: () => config.value,
   format: () => normalized.value.format,
-  buildOption: buildAreaChartOption,
+  buildOption: buildAxisChartOption,
   hiddenSeries,
   onDatapointClick: (event) => emit('datapointClick', event),
 })

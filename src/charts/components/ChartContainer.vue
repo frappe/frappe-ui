@@ -97,23 +97,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Spinner from '#components/Spinner/Spinner.vue'
-import type { ChartDir, PlotLabelPlacement } from '../types'
+import type { ChartContainerProps } from '../props'
 
-const props = defineProps<{
-  title?: string
-  subtitle?: string
-  /** Value-axis title, drawn above the plot instead of inside it. */
-  plotLabel?: string
-  /** Title of the second value axis, drawn over the edge that axis sits on. */
-  plotLabelSecondary?: string
-  /** Edge of the plot the value-axis titles head. Defaults to the top. */
-  plotLabelPlacement?: PlotLabelPlacement
-  loading?: boolean
-  /** Non-empty switches the container into its error state. */
-  error?: string | null
-  empty?: boolean
-  dir?: ChartDir
-}>()
+const props = defineProps<ChartContainerProps>()
 
 const state = computed(() => {
   if (props.error) return 'error'

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { applyAxisFormatters } from './axisFormat'
-import { buildBarChartOption } from './barChartOptions'
+import { buildAxisChartOption } from './axisChartOptions'
 import type { ChartTheme } from './theme'
-import type { BarChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -17,8 +17,9 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
+    type: 'bar',
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
       { month: 'Feb', sales: 20, refunds: 4 },
@@ -34,9 +35,9 @@ const currency = (value: number) => `$${value}`
 /** As a chart does it: formats applied to the config, then built. */
 function build(
   formats: Parameters<typeof applyAxisFormatters>[1] = {},
-  overrides: Partial<BarChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
 ) {
-  return buildBarChartOption(applyAxisFormatters(config(overrides), formats), {
+  return buildAxisChartOption(applyAxisFormatters(config(overrides), formats), {
     theme,
   }) as any
 }
@@ -79,7 +80,7 @@ describe('applyAxisFormatters', () => {
     const base = config({
       yAxis: { echartOptions: { axisLabel: { color: 'red' }, min: 0 } },
     })
-    const option = buildBarChartOption(
+    const option = buildAxisChartOption(
       applyAxisFormatters(base, { y: currency }),
       {
         theme,

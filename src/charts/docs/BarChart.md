@@ -27,6 +27,19 @@ here to print the value on each bar.
 
 <ComponentPreview name="Charts-BarHorizontal" csr="true" self-layout />
 
+## A line among the bars
+
+`seriesConfig[key].type` sets the mark a single series draws as: `'bar'`,
+`'line'` or `'area'`. The chart component sets the default for the rest, so a
+`BarChart` with one `'line'` series is a combo chart. A rate belongs on its own
+scale, which `y2` gives it.
+
+<ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
+
+Marks stack among their own: bars stack with bars and areas with areas, and a
+line never stacks. `horizontal` draws bars only — a series that asks for another
+mark there is drawn as a bar, with a dev-mode warning.
+
 ## Clicking a bar
 
 `datapointClick` reports the series, the value and the row behind the bar, so a

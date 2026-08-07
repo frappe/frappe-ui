@@ -40,9 +40,10 @@
 
 <script setup lang="ts">
 import Button from '#components/Button/Button.vue'
+import type { ChartLegendProps } from '../props'
 import type { ChartLegendItem } from '../types'
 
-defineProps<{ items: ChartLegendItem[] }>()
+defineProps<ChartLegendProps>()
 
 const emit = defineEmits<{
   toggle: [name: string]

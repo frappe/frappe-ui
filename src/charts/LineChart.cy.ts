@@ -100,6 +100,29 @@ describe('LineChart', () => {
     })
   })
 
+  describe('combo series', () => {
+    /** A filled band: every path with a fill that is not the "none" of a stroke. */
+    const fills = () =>
+      cy.get('[data-slot="chart-plot"] svg path[fill]:not([fill="none"])')
+
+    it('fills one series on type: area and leaves the other bare', () => {
+      mountChart({ seriesConfig: { sales: { type: 'area' } } })
+      lines().should('have.length', 2)
+      fills().should('have.length', 1)
+      // The wash of an unstacked area fades towards the axis.
+      cy.get('[data-slot="chart-plot"] svg linearGradient').should('exist')
+    })
+
+    it('draws a series set to bar as bars', () => {
+      mountChart({ seriesConfig: { refunds: { type: 'bar' } } })
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg path[fill^="#"]').should(
+        'have.length',
+        data.length,
+      )
+    })
+  })
+
   it('measures a y2 series against a second axis, drawn opposite', () => {
     mountChart({ y: 'sales', y2: 'refunds' })
     lines().should('have.length', 2)

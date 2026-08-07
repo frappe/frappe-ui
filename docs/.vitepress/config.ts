@@ -92,6 +92,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'DonutChart', link: '/docs/charts/donut-chart' },
         { text: 'FunnelChart', link: '/docs/charts/funnel-chart' },
         { text: 'HeatmapChart', link: '/docs/charts/heatmap-chart' },
+        { text: 'SankeyChart', link: '/docs/charts/sankey-chart' },
         { text: 'NumberCard', link: '/docs/charts/number-card' },
         { text: 'States', link: '/docs/charts/states' },
         { text: 'Dashboard', link: '/docs/charts/dashboard' },

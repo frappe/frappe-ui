@@ -8,7 +8,7 @@ import { mergeDeep } from './utils'
  * that path rather than a builder argument keeps the precedence honest: an
  * explicit `echartOptions.axisLabel.formatter` still wins over `format`.
  */
-export function applyAxisFormatters<C extends AxisChartBaseConfig<any>>(
+export function applyAxisFormatters<C extends AxisChartBaseConfig>(
   config: C,
   format: AxisChartFormatters,
 ): C {

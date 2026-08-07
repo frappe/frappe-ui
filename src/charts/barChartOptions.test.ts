@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildBarChartOption, resolveSeriesColors } from './barChartOptions'
-import { AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
+import { buildAxisChartOption } from './axisChartOptions'
+import { AXIS_LABEL_FONT_SIZE, resolveSeriesColors } from './axisChartCommon'
 import { estimateTextWidth } from './format'
 import type { ChartTheme } from './theme'
-import type { BarChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -19,8 +19,10 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
+/** What `BarChart` hands the builder: the shared config, marked `'bar'`. */
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
+    type: 'bar',
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
       { month: 'Feb', sales: 20, refunds: 4 },
@@ -32,18 +34,18 @@ function config(overrides: Partial<BarChartConfig> = {}): BarChartConfig {
 }
 
 function build(
-  overrides: Partial<BarChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
   width?: number,
 ) {
-  return buildBarChartOption(config(overrides), {
+  return buildAxisChartOption(config(overrides), {
     theme,
     hiddenSeries,
     width,
   }) as any
 }
 
-function colorsFor(overrides: Partial<BarChartConfig> = {}) {
+function colorsFor(overrides: Partial<AxisChartConfig> = {}) {
   return resolveSeriesColors(config(overrides), theme)
 }
 
@@ -111,7 +113,7 @@ describe('resolveSeriesColors', () => {
   })
 })
 
-describe('buildBarChartOption axes', () => {
+describe('bar chart option axes', () => {
   it('puts categories on the x axis and values on the y axis', () => {
     const option = build()
     expect(option.xAxis.type).toBe('category')
@@ -284,7 +286,7 @@ describe('buildBarChartOption axes', () => {
   })
 })
 
-describe('buildBarChartOption series', () => {
+describe('bar chart option series', () => {
   it('emits one bar series per config entry as [category, value] pairs', () => {
     const option = build()
     expect(option.series).toHaveLength(2)
@@ -327,7 +329,11 @@ describe('buildBarChartOption series', () => {
 
   it('stacks series and rounds only the outermost bar', () => {
     const option = build({ stacked: true })
-    expect(option.series.map((s: any) => s.stack)).toEqual(['stack', 'stack'])
+    // The stack key carries the mark: bars stack with bars, never onto a band.
+    expect(option.series.map((s: any) => s.stack)).toEqual([
+      'bar:stack',
+      'bar:stack',
+    ])
     expect(radiiOf(option.series[0])).toEqual([0, 0])
     expect(radiiOf(option.series[1])).toEqual([
       [4, 4, 0, 0],
@@ -511,7 +517,7 @@ describe('buildBarChartOption series', () => {
   })
 })
 
-describe('buildBarChartOption second value axis', () => {
+describe('bar chart option second value axis', () => {
   const dualSeries = [
     { name: 'sales' },
     { name: 'refunds', axis: 'y2' as const },
@@ -538,7 +544,7 @@ describe('buildBarChartOption second value axis', () => {
   })
 })
 
-describe('buildBarChartOption hidden series', () => {
+describe('bar chart option hidden series', () => {
   it('drops hidden series from the option', () => {
     const option = build({}, ['sales'])
     expect(option.series.map((s: any) => s.name)).toEqual(['refunds'])
@@ -555,7 +561,7 @@ describe('buildBarChartOption hidden series', () => {
   })
 })
 
-describe('buildBarChartOption chrome', () => {
+describe('bar chart option chrome', () => {
   it('leaves the title and legend to the HTML chrome', () => {
     const option = build({ title: 'Sales', subtitle: 'By month' })
     expect(option.title).toBeUndefined()
@@ -576,7 +582,7 @@ describe('buildBarChartOption chrome', () => {
   })
 })
 
-describe('buildBarChartOption escape hatches', () => {
+describe('bar chart option escape hatches', () => {
   it('deep merges echartOptions over the generated option', () => {
     const option = build({
       echartOptions: { grid: { left: 40 }, animation: false },
@@ -608,7 +614,7 @@ describe('buildBarChartOption escape hatches', () => {
   })
 })
 
-describe('buildBarChartOption edge cases', () => {
+describe('bar chart option edge cases', () => {
   it('produces an empty series list for empty data', () => {
     const option = build({ data: [] })
     expect(option.xAxis.data).toEqual([])

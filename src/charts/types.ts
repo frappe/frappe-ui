@@ -42,12 +42,21 @@ export type ChartYAxisConfig = {
   echartOptions?: EchartOptionsOverride
 }
 
+/**
+ * What a series draws as. Every cartesian chart can hold every mark, so a bar
+ * chart with one line series and an area chart are the same option with a
+ * different default.
+ */
+export type ChartMark = 'bar' | 'line' | 'area'
+
 export type AxisChartSeriesConfig = {
   /** Key in each data row that holds this series' value, and its identity. */
   name: string
   /** Display name. Falls back to the formatted `name`. */
   label?: string
   color?: string
+  /** Mark this series draws as. Defaults to the chart's own mark. */
+  type?: ChartMark
   /**
    * Which value axis this series is measured against. `'y2'` gives a series in
    * a different unit or magnitude its own scale, opposite the primary. Ignored
@@ -55,13 +64,29 @@ export type AxisChartSeriesConfig = {
    */
   axis?: 'y' | 'y2'
   showDataLabels?: boolean
+  /**
+   * Groups series into separate stacks. Only read when `stacked` is on, and
+   * only by the marks that stack — a line never does.
+   */
+  stackName?: string
+  /** Dash pattern of the line itself. Defaults to a solid stroke. */
+  lineType?: 'solid' | 'dashed' | 'dotted'
+  /** Stroke width in px. Defaults to 2. */
+  lineWidth?: number
+  /**
+   * Marks every datapoint with a dot. Off by default — a clean line reads
+   * better, and the dot for the hovered point appears anyway.
+   */
+  showDataPoints?: boolean
+  /** Rounds the corners of the line instead of drawing straight segments. */
+  smooth?: boolean
+  /** Overrides the chart-level `fillOpacity`. Read by an area series. */
+  fillOpacity?: number
   echartOptions?: EchartOptionsOverride
 }
 
 /** Everything a cartesian chart config carries whatever it draws. */
-export type AxisChartBaseConfig<
-  S extends AxisChartSeriesConfig = AxisChartSeriesConfig,
-> = {
+export type AxisChartBaseConfig = {
   data: Record<string, any>[]
   xAxis: ChartXAxisConfig
   yAxis?: ChartYAxisConfig
@@ -71,7 +96,7 @@ export type AxisChartBaseConfig<
    * along the top and bottom of the plot are unreadable.
    */
   y2Axis?: ChartYAxisConfig
-  series: S[]
+  series: AxisChartSeriesConfig[]
   title?: string
   subtitle?: string
   /**
@@ -84,53 +109,29 @@ export type AxisChartBaseConfig<
   echartOptions?: EchartOptionsOverride
 }
 
-export type BarSeriesConfig = AxisChartSeriesConfig & {
-  /** Groups series into separate stacks. Only read when `stacked` is on. */
-  stackName?: string
-}
-
-export type BarChartConfig = AxisChartBaseConfig<BarSeriesConfig> & {
-  stacked?: boolean
-  /** Bars run left-to-right; the category axis moves to Y. */
-  horizontal?: boolean
-}
-
-export type LineSeriesConfig = AxisChartSeriesConfig & {
-  /** Dash pattern of the line itself. Defaults to a solid stroke. */
-  lineType?: 'solid' | 'dashed' | 'dotted'
-  /** Stroke width in px. Defaults to 2. */
-  lineWidth?: number
+/**
+ * What every cartesian chart hands its option builder. Bar, line and area
+ * differ in one value — the mark their unmarked series draw as — so a combo
+ * chart is not a fourth shape, it is this one with a mixed series list.
+ */
+export type AxisChartConfig = AxisChartBaseConfig & {
+  /** Mark for series that name none: the chart component the caller picked. */
+  type: ChartMark
   /**
-   * Marks every datapoint with a dot. Off by default — a clean line reads
-   * better, and the dot for the hovered point appears anyway.
+   * Series sum on top of each other rather than standing side by side. Read by
+   * the marks that stack, i.e. bars and areas; a line never stacks.
    */
-  showDataPoints?: boolean
-  /** Rounds the corners of the line instead of drawing straight segments. */
-  smooth?: boolean
-}
-
-export type LineChartConfig = AxisChartBaseConfig<LineSeriesConfig> & {
+  stacked?: boolean
+  /** Bars run left-to-right; the category axis moves to Y. Bars only. */
+  horizontal?: boolean
   /**
    * Bridges gaps left by null or non-numeric values. Off by default: a break in
-   * the line is how missing data should read.
+   * the line is how missing data should read. Line and area series only.
    */
   connectNulls?: boolean
-}
-
-export type AreaSeriesConfig = LineSeriesConfig & {
-  /** Groups series into separate stacks. Only read when `stacked` is on. */
-  stackName?: string
-  /** Overrides the chart-level `fillOpacity` for this series. */
-  fillOpacity?: number
-}
-
-export type AreaChartConfig = AxisChartBaseConfig<AreaSeriesConfig> & {
-  connectNulls?: boolean
-  /** Areas sum on top of each other, drawn as opaque bands. */
-  stacked?: boolean
   /**
-   * Alpha of the fill under each line. Defaults to a faint wash that fades out
-   * towards the axis; stacked areas default to a solid band instead.
+   * Alpha of the fill under an area series. Defaults to a faint wash that fades
+   * out towards the axis; areas that stack into a band default to solid.
    */
   fillOpacity?: number
 }
@@ -348,6 +349,73 @@ export type NumberCardSparkline = {
 }
 
 export type NumberCardSparklineType = 'line' | 'bar'
+
+/** Which way the flow runs: columns of nodes left to right, or rows top to bottom. */
+export type SankeyOrient = 'horizontal' | 'vertical'
+
+/**
+ * Where a node sits along the flow. `'justify'` pushes a node with no outgoing
+ * flow to the far end, `'left'` and `'right'` pin every node to the end it is
+ * named after.
+ */
+export type SankeyNodeAlign = 'left' | 'right' | 'justify'
+
+export type SankeyChartConfig = {
+  /** One row per flow. Rows with no numeric value draw no band. */
+  data: Record<string, any>[]
+  /** Row key holding the node a flow leaves. */
+  sourceColumn: string
+  /** Row key holding the node a flow arrives at. */
+  targetColumn: string
+  /** Row key holding how much flows along the link. */
+  valueColumn: string
+  title?: string
+  subtitle?: string
+  orient?: SankeyOrient
+  nodeAlign?: SankeyNodeAlign
+  /**
+   * Ramp node colors are drawn from. Defaults to `'categorical'`: the nodes of
+   * a flow are unrelated categories, not steps of one magnitude.
+   */
+  palette?: ChartPalette
+  echartOptions?: EchartOptionsOverride
+}
+
+/** One node of the flow, after de-duplication and color assignment. */
+export type SankeyNode = {
+  /** The source or target value as it reads. Unique within the graph. */
+  name: string
+  /**
+   * What passes through the node: the larger of what arrives and what leaves,
+   * which is the side that decides how tall echarts draws it.
+   */
+  value: number
+  color: string
+}
+
+/** One drawn link, i.e. one row of the data. */
+export type SankeyLink = {
+  source: string
+  target: string
+  value: number
+  /** The source node's color, which is what the band is painted in. */
+  color: string
+  row: Record<string, any>
+}
+
+/** The flow as the plot, the labels and the tooltip all read it. */
+export type SankeyGraph = {
+  /** Nodes in the order the rows first mention them, source before target. */
+  nodes: SankeyNode[]
+  links: SankeyLink[]
+}
+
+export type SankeyLinkEvent = {
+  source: string
+  target: string
+  value: number
+  row: Record<string, any>
+}
 
 /**
  * Which edge of the plot the value-axis title heads, i.e. the edge that axis is

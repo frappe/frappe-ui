@@ -69,7 +69,7 @@
     name: 'seriesConfig',
     description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
     required: false,
-    type: 'Record<string, BarSeriesStyle>'
+    type: 'Record<string, SeriesStyle>'
   },
   {
     name: 'xAxis',
@@ -96,20 +96,32 @@
     type: 'ChartPalette'
   },
   {
+    name: 'stacked',
+    description: 'Series sum on top of each other. Bar and area series; a line never stacks.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'connectNulls',
+    description: 'Bridges gaps left by nulls. Line and area series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'fillOpacity',
+    description: 'Chart-level fill alpha; `seriesConfig` overrides it per series. Area series.',
+    required: false,
+    type: 'number'
+  },
+  {
     name: 'echartOptions',
     description: '',
     required: false,
     type: 'EchartOptionsOverride'
   },
   {
-    name: 'stacked',
-    description: '',
-    required: false,
-    type: 'boolean'
-  },
-  {
     name: 'horizontal',
-    description: 'Bars run left-to-right; the category axis moves to Y.',
+    description: 'Bars run left-to-right; the category axis moves to Y. Bars only.',
     required: false,
     type: 'boolean'
   },

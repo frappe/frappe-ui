@@ -46,26 +46,34 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { LineChart as LineSeries } from 'echarts/charts'
+// Both series types: any axis chart draws any mark, so a line chart with one
+// `type: 'bar'` series needs the bar module registered too.
+import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules } from './core/useChart'
 import { useAxisChart } from './core/useAxisChart'
-import { buildLineChartOption } from './lineChartOptions'
+import { buildAxisChartOption } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { LineChartProps, LineSeriesStyle } from './props'
+import type { LineChartProps } from './props'
 import type {
+  AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,
   ChartTooltipItem,
-  LineChartConfig,
 } from './types'
 
-registerChartModules([LineSeries, GridComponent, TooltipComponent, LabelLayout])
+registerChartModules([
+  BarSeries,
+  LineSeries,
+  GridComponent,
+  TooltipComponent,
+  LabelLayout,
+])
 
 const props = defineProps<LineChartProps>()
 
@@ -82,12 +90,13 @@ defineSlots<{
   tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
 }>()
 
-const normalized = computed(() =>
-  normalizeAxisChartProps<LineSeriesStyle>(props),
-)
-const config = computed<LineChartConfig>(() => ({
+const normalized = computed(() => normalizeAxisChartProps(props))
+const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
+  type: 'line',
+  stacked: props.stacked,
   connectNulls: props.connectNulls,
+  fillOpacity: props.fillOpacity,
 }))
 
 const {
@@ -105,7 +114,7 @@ const {
 } = useAxisChart({
   config: () => config.value,
   format: () => normalized.value.format,
-  buildOption: buildLineChartOption,
+  buildOption: buildAxisChartOption,
   hiddenSeries,
   onDatapointClick: (event) => emit('datapointClick', event),
 })

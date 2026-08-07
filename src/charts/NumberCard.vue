@@ -1,10 +1,5 @@
 <template>
-  <div
-    ref="root"
-    data-slot="chart-card"
-    :dir="dir"
-    class="relative w-full min-w-0 overflow-hidden rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3"
-  >
+  <ChartCard :card="card" :dir="dir">
     <!-- Drawn before the content so the content paints over it without either
          needing a z-index. Both shapes bleed off the bottom edge of the card. -->
     <div
@@ -63,6 +58,7 @@
          below the number, it never moves the number. The padding holds the
          space the sparkline band takes out of flow. -->
     <div
+      ref="root"
       class="relative flex min-w-0 flex-col gap-1.5"
       :class="{ 'pb-10': showSparkline }"
     >
@@ -147,7 +143,7 @@
         </div>
       </template>
     </div>
-  </div>
+  </ChartCard>
 </template>
 
 <script setup lang="ts">
@@ -168,6 +164,7 @@ import {
 import { paletteColors, useChartTheme } from './theme'
 import { documentDir } from './utils'
 import { useId } from '#utils/useId'
+import ChartCard from './components/ChartCard.vue'
 import type { NumberCardProps } from './props'
 
 // No echarts, sparkline included: a page full of these should cost nothing but

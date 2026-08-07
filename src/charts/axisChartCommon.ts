@@ -91,13 +91,6 @@ export function resolveXAxis(config: AxisChartBaseConfig): ResolvedXAxis {
   return { type, timeGrain: config.xAxis.timeGrain ?? inferTimeGrain(values) }
 }
 
-export function visibleSeries<T extends AxisChartSeriesConfig>(
-  series: T[],
-  hiddenSeries: string[],
-): T[] {
-  return series.filter((s) => !hiddenSeries.includes(s.name))
-}
-
 /** Option keys that hold for any cartesian chart, whatever it draws. */
 export function axisChartBase(
   theme: ChartTheme,

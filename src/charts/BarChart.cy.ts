@@ -35,6 +35,9 @@ function mountChart(props: Record<string, any> = {}) {
 /** The bars, in series order. Gridlines are paths too, but unfilled. */
 const bars = () => cy.get('[data-slot="chart-plot"] svg path[fill^="#"]')
 
+/** The series strokes. Gridlines are stroked too, but in a theme oklch. */
+const lines = () => cy.get('[data-slot="chart-plot"] svg path[stroke^="#"]')
+
 describe('BarChart', () => {
   it('paints a bar per datapoint, and labels the categories', () => {
     mountChart()
@@ -126,6 +129,43 @@ describe('BarChart', () => {
     it('keeps the legend out of a single-series chart', () => {
       mountChart({ y: 'sales' })
       cy.get('[data-slot="chart-legend"]').should('not.exist')
+    })
+  })
+
+  describe('combo series', () => {
+    it('draws a series set to line as a line, over the bars', () => {
+      mountChart({ seriesConfig: { refunds: { type: 'line' } } })
+      bars().should('have.length', data.length)
+      lines().should('have.length', 1)
+    })
+
+    it('keeps a line series in the legend, and hides it like any other', () => {
+      mountChart({ seriesConfig: { refunds: { type: 'line' } } })
+      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[aria-label="Hide Refunds"]').click()
+      lines().should('not.exist')
+      bars().should('have.length', data.length)
+    })
+
+    it('measures a line series against a second axis', () => {
+      mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { type: 'line' } },
+      })
+      bars().should('have.length', data.length)
+      lines().should('have.length', 1)
+      // Two scales, so the axis labels no longer share one set of values.
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '6')
+    })
+
+    it('draws bars as bars when horizontal overrules the mark', () => {
+      mountChart({
+        horizontal: true,
+        seriesConfig: { refunds: { type: 'line' } },
+      })
+      bars().should('have.length', data.length * 2)
+      lines().should('not.exist')
     })
   })
 

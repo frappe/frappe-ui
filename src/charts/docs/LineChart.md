@@ -18,6 +18,16 @@ trend.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
 
+## Filling one series
+
+`seriesConfig[key].type` sets the mark a single series draws as, so one line of
+a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There is
+no separate fill flag: an area *is* a filled line. `fillOpacity` sets the alpha,
+chart-wide or per series. The same key takes `'bar'`, which is what makes a
+combo chart.
+
+<ComponentPreview name="Charts-LineFilledSeries" csr="true" self-layout />
+
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.

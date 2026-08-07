@@ -3,17 +3,12 @@ import type {
   ChartCategoryFormatter,
   ChartValueFormatter,
   ChartValueAxisOptions,
-  SeriesStyle,
 } from './props'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
   ChartYAxisConfig,
 } from './types'
-
-/** An internal series config carrying whatever style keys its chart understands. */
-export type NormalizedSeries<Style extends SeriesStyle> =
-  AxisChartSeriesConfig & Style
 
 /**
  * Formatters travel beside the config rather than inside it: the option builders
@@ -25,8 +20,8 @@ export type AxisChartFormatters = {
   y2?: ChartValueFormatter
 }
 
-export type NormalizedAxisChart<Style extends SeriesStyle> = {
-  config: AxisChartBaseConfig<NormalizedSeries<Style>>
+export type NormalizedAxisChart = {
+  config: AxisChartBaseConfig
   format: AxisChartFormatters
 }
 
@@ -35,9 +30,9 @@ export type NormalizedAxisChart<Style extends SeriesStyle> = {
  * data for them to index into. Long data (`series` naming a grouping column) is
  * pivoted here, which is what keeps the builders unaware of the two layouts.
  */
-export function normalizeAxisChartProps<Style extends SeriesStyle>(
-  props: AxisChartProps<Style>,
-): NormalizedAxisChart<Style> {
+export function normalizeAxisChartProps(
+  props: AxisChartProps,
+): NormalizedAxisChart {
   const rows = props.data ?? []
   const yColumns = toColumns(props.y)
   const y2Columns = toColumns(props.y2)
@@ -81,16 +76,16 @@ export function normalizeAxisChartProps<Style extends SeriesStyle>(
   }
 }
 
-function buildSeries<Style extends SeriesStyle>(
+function buildSeries(
   name: string,
-  props: AxisChartProps<Style>,
+  props: AxisChartProps,
   secondary: Set<string>,
-): NormalizedSeries<Style> {
+): AxisChartSeriesConfig {
   // A saved config outlives the query behind it, so a `seriesConfig` entry for a
   // column that is no longer selected is expected, not an error.
   const style = props.seriesConfig?.[name]
   return {
-    ...(style as Style),
+    ...style,
     name,
     ...(secondary.has(name) ? { axis: 'y2' as const } : {}),
   }

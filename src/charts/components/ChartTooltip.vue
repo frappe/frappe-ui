@@ -47,17 +47,10 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
 import { formatPercent } from '../format'
-import type { ChartDir, ChartTooltipItem } from '../types'
+import type { ChartTooltipProps } from '../props'
+import type { ChartTooltipItem } from '../types'
 
-const props = defineProps<{
-  open: boolean
-  /** Viewport coordinates of the pointer. */
-  x: number
-  y: number
-  label?: string
-  items: ChartTooltipItem[]
-  dir?: ChartDir
-}>()
+const props = defineProps<ChartTooltipProps>()
 
 defineSlots<{
   default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown

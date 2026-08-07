@@ -50,6 +50,20 @@ describe('AreaChart', () => {
     fills().should('have.length.at.least', 2)
   })
 
+  it('draws a series set to bar as bars beside the bands', () => {
+    mountChart({ seriesConfig: { refunds: { type: 'bar' } } })
+    lines().should('have.length', 1)
+    cy.get('[data-slot="chart-plot"] svg path[fill^="#"]').should(
+      'have.length',
+      data.length,
+    )
+  })
+
+  it('washes a band that stacks onto nothing, so the bars stay visible', () => {
+    mountChart({ stacked: true, seriesConfig: { refunds: { type: 'bar' } } })
+    cy.get('[data-slot="chart-plot"] svg linearGradient').should('exist')
+  })
+
   it('hides a series and its band together', () => {
     mountChart()
     cy.get('[aria-label="Hide Sales"]').click()

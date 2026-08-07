@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
-import type { AxisChartProps, BarSeriesStyle, LineSeriesStyle } from './props'
-import type { BarChartConfig, LineChartConfig } from './types'
+import type { AxisChartProps } from './props'
+import type { AxisChartConfig } from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },
@@ -14,15 +14,13 @@ const longRows = [
   { month: 'Feb', region: 'East', amount: 12 },
 ]
 
-function normalize<Style extends BarSeriesStyle | LineSeriesStyle>(
-  props: Partial<AxisChartProps<Style>> = {},
-) {
+function normalize(props: Partial<AxisChartProps> = {}) {
   return normalizeAxisChartProps({
     data: wideRows,
     x: 'month',
     y: ['sales', 'refunds'],
     ...props,
-  } as AxisChartProps<Style>)
+  } as AxisChartProps)
 }
 
 const namesOf = (config: { series: { name: string }[] }) =>
@@ -69,20 +67,19 @@ describe('normalizeAxisChartProps', () => {
     })
   })
 
-  // What wave-2 components do: spread the normalized config, add the chart's own
-  // props. Typechecked, so a drift from the internal config types fails the build.
-  it('produces a config the chart-specific configs accept', () => {
-    const bar: BarChartConfig = {
-      ...normalize<BarSeriesStyle>({
-        seriesConfig: { sales: { stackName: 'a' } },
-      }).config,
+  // What the components do: spread the normalized config, add the mark they
+  // default to and their own props. Typechecked, so a drift from the internal
+  // config type fails the build.
+  it('produces a config the option builder accepts', () => {
+    const bar: AxisChartConfig = {
+      ...normalize({ seriesConfig: { sales: { stackName: 'a' } } }).config,
+      type: 'bar',
       stacked: true,
       horizontal: true,
     }
-    const line: LineChartConfig = {
-      ...normalize<LineSeriesStyle>({
-        seriesConfig: { sales: { smooth: true } },
-      }).config,
+    const line: AxisChartConfig = {
+      ...normalize({ seriesConfig: { sales: { smooth: true } } }).config,
+      type: 'line',
       connectNulls: true,
     }
     expect([bar.series.length, line.series.length]).toEqual([2, 2])
@@ -103,7 +100,7 @@ describe('normalizeAxisChartProps', () => {
 
 describe('normalizeAxisChartProps: seriesConfig', () => {
   it('applies label, color and per-chart style keys to the matching series', () => {
-    const { config } = normalize<BarSeriesStyle>({
+    const { config } = normalize({
       seriesConfig: {
         refunds: {
           label: 'Operating costs',
@@ -132,7 +129,7 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
   })
 
   it('styles a long-data series by its grouping value', () => {
-    const { config } = normalize<LineSeriesStyle>({
+    const { config } = normalize({
       data: longRows,
       y: 'amount',
       series: 'region',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { buildLineChartOption } from './lineChartOptions'
+import { buildAxisChartOption } from './axisChartOptions'
 import type { ChartTheme } from './theme'
-import type { LineChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -16,8 +16,10 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<LineChartConfig> = {}): LineChartConfig {
+/** What `LineChart` hands the builder: the shared config, marked `'line'`. */
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
+    type: 'line',
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
       { month: 'Feb', sales: 20, refunds: 4 },
@@ -29,13 +31,13 @@ function config(overrides: Partial<LineChartConfig> = {}): LineChartConfig {
 }
 
 function build(
-  overrides: Partial<LineChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildLineChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
 }
 
-describe('buildLineChartOption axes', () => {
+describe('line chart option axes', () => {
   it('puts categories on the x axis and values on the y axis', () => {
     const option = build()
     expect(option.xAxis.type).toBe('category')
@@ -95,7 +97,7 @@ describe('buildLineChartOption axes', () => {
   })
 })
 
-describe('buildLineChartOption series', () => {
+describe('line chart option series', () => {
   it('emits one line series per config entry as [category, value] pairs', () => {
     const option = build()
     expect(option.series).toHaveLength(2)
@@ -200,7 +202,7 @@ describe('buildLineChartOption series', () => {
   })
 })
 
-describe('buildLineChartOption hidden series', () => {
+describe('line chart option hidden series', () => {
   it('drops hidden series but keeps the rest on their own colors', () => {
     const option = build({}, ['sales'])
     expect(option.series.map((s: any) => s.name)).toEqual(['refunds'])
@@ -208,7 +210,7 @@ describe('buildLineChartOption hidden series', () => {
   })
 })
 
-describe('buildLineChartOption chrome', () => {
+describe('line chart option chrome', () => {
   it('leaves the title and legend to the HTML chrome', () => {
     const option = build({ title: 'Sales', subtitle: 'By month' })
     expect(option.title).toBeUndefined()
@@ -239,8 +241,8 @@ describe('buildLineChartOption chrome', () => {
   })
 })
 
-describe('buildLineChartOption second value axis', () => {
-  function dual(overrides: Partial<LineChartConfig> = {}) {
+describe('line chart option second value axis', () => {
+  function dual(overrides: Partial<AxisChartConfig> = {}) {
     return build({
       y2Axis: { title: 'rate' },
       series: [{ name: 'sales' }, { name: 'refunds', axis: 'y2' }],
@@ -305,7 +307,7 @@ describe('buildLineChartOption second value axis', () => {
   })
 
   it('keeps the second axis while its only series is hidden', () => {
-    const option = buildLineChartOption(
+    const option = buildAxisChartOption(
       config({
         y2Axis: { title: 'rate' },
         series: [{ name: 'sales' }, { name: 'refunds', axis: 'y2' }],
@@ -317,7 +319,7 @@ describe('buildLineChartOption second value axis', () => {
   })
 })
 
-describe('buildLineChartOption escape hatches', () => {
+describe('line chart option escape hatches', () => {
   it('deep merges chart, axis and series echartOptions', () => {
     const option = build({
       echartOptions: { grid: { left: 40 }, animation: false },
@@ -339,7 +341,7 @@ describe('buildLineChartOption escape hatches', () => {
   })
 })
 
-describe('buildLineChartOption edge cases', () => {
+describe('line chart option edge cases', () => {
   it('produces empty series data for empty data', () => {
     const option = build({ data: [] })
     expect(option.xAxis.data).toEqual([])

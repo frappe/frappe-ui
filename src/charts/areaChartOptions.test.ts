@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
-  buildAreaChartOption,
+  buildAxisChartOption,
   DEFAULT_FILL_OPACITY,
   DEFAULT_STACKED_FILL_OPACITY,
-} from './areaChartOptions'
+} from './axisChartOptions'
 import type { ChartTheme } from './theme'
-import type { AreaChartConfig } from './types'
+import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],
@@ -20,8 +20,10 @@ const theme: ChartTheme = {
   cellGap: '#ffffff',
 }
 
-function config(overrides: Partial<AreaChartConfig> = {}): AreaChartConfig {
+/** What `AreaChart` hands the builder: the shared config, marked `'area'`. */
+function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
   return {
+    type: 'area',
     data: [
       { month: 'Jan', sales: 10, refunds: 2 },
       { month: 'Feb', sales: 20, refunds: 4 },
@@ -33,17 +35,17 @@ function config(overrides: Partial<AreaChartConfig> = {}): AreaChartConfig {
 }
 
 function build(
-  overrides: Partial<AreaChartConfig> = {},
+  overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAreaChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
 }
 
 function alphaOf(rgba: string) {
   return Number(rgba.slice(rgba.lastIndexOf(',') + 1, -1))
 }
 
-describe('buildAreaChartOption', () => {
+describe('area chart option', () => {
   it('is a line chart with a fill', () => {
     const option = build()
     expect(option.series[0].type).toBe('line')
@@ -118,9 +120,10 @@ describe('buildAreaChartOption', () => {
   })
 
   it('stacks series under one stack, or under named ones', () => {
+    // The stack key carries the mark: areas stack with areas, never onto bars.
     expect(build({ stacked: true }).series.map((s: any) => s.stack)).toEqual([
-      'stack',
-      'stack',
+      'area:stack',
+      'area:stack',
     ])
     expect(build().series[0].stack).toBeUndefined()
     expect(
@@ -131,7 +134,31 @@ describe('buildAreaChartOption', () => {
           { name: 'refunds', stackName: 'right' },
         ],
       }).series.map((s: any) => s.stack),
-    ).toEqual(['left', 'right'])
+    ).toEqual(['area:left', 'area:right'])
+  })
+
+  it('washes an area that has nothing to stack onto, whatever stacked says', () => {
+    // Named apart, the two bands never meet, so neither reads as a solid block.
+    const option = build({
+      stacked: true,
+      series: [
+        { name: 'sales', stackName: 'left' },
+        { name: 'refunds', stackName: 'right' },
+      ],
+    })
+    expect(option.series[0].areaStyle.color.type).toBe('linear')
+    expect(
+      build({ stacked: true, series: [{ name: 'sales' }] }).series[0].areaStyle
+        .color.type,
+    ).toBe('linear')
+  })
+
+  it('keeps a band solid while its partner is hidden in the legend', () => {
+    const option = build({ stacked: true }, ['sales'])
+    expect(option.series[0].areaStyle).toEqual({
+      color: '#000033',
+      opacity: DEFAULT_STACKED_FILL_OPACITY,
+    })
   })
 
   it('takes fillOpacity from the series, then the chart', () => {

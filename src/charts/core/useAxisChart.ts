@@ -250,9 +250,9 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
         value: Number(row[series.name]),
         formattedValue: formatSeriesValue(series, Number(row[series.name])),
       }))
-      // Zeros and blanks are noise in a multi-series tooltip; the biggest
-      // contributor should be the first thing read.
-      .filter((item) => Boolean(item.value) && !isNaN(item.value))
+      // A series that silently drops out of the tooltip reads as a bug, so a
+      // zero stays. Only a blank cell is dropped. Biggest contributor first.
+      .filter((item) => !isNaN(item.value))
       .sort((a, b) => b.value - a.value)
 
     if (!items.length) {
