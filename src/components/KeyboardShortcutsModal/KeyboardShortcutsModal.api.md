@@ -43,6 +43,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="KeyboardShortcutsModal" :data="propsData"/>

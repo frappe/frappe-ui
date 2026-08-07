@@ -30,21 +30,21 @@
     name: 'variant',
     description: 'Visual style of the progress bar',
     required: false,
-    type: '"outline" | "solid"',
+    type: '"solid" | "outline"',
     default: '"solid"'
   },
   {
     name: 'theme',
     description: 'Theme used for the progress bar (predefined or custom colors)',
     required: false,
-    type: '"blue" | "red" | "green" | "orange" | "black" | { primary: string; secondary: string; }',
+    type: '"black" | "red" | "green" | "blue" | "orange" | { primary: string; secondary: string; }',
     default: '"black"'
   },
   {
     name: 'size',
     description: 'Size of the progress bar',
     required: false,
-    type: '"md" | "xs" | "sm" | "lg" | "xl"',
+    type: '"xs" | "sm" | "md" | "lg" | "xl"',
     default: '"md"'
   },
   {
@@ -56,7 +56,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="CircularProgressBar" :data="propsData"/> 
-
+<PropsTable name="CircularProgressBar" :data="propsData"/>

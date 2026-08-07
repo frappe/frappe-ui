@@ -484,6 +484,55 @@ crash somewhere else. So:
 resource when no socket is set. That has always been its behaviour and this
 does not change it.
 
+### Data fetching (v2) — one request per submit
+
+`useDoctype`'s `insert`, `delete`, `setValue`, `runDocMethod` and `runMethod`,
+and `useList`'s `insert`, `setValue` and `delete`, each held a single shared
+request. Two submits at once aborted one another, and every submit resolved
+from the same `data`, so a caller could receive another caller's answer or
+`null`. Each submit now sends its own request and resolves with its own
+response.
+
+- **Breaking:** these eight members no longer carry the `useCall` surface.
+  Removed: `params`, `promise`, `url`, `reset`, `abort`, `execute`, `fetch`,
+  `reload`, `isFetching`, `isFinished`, `canAbort`, `aborted`. Each of them
+  described one shared request, which no longer exists.
+- What is left, on all eight: `submit()`, `data`, `error`, `loading` and
+  `isLoading()`. `loading` is true while any submit is in flight.
+- New: `delete.isLoading(name)` and `setValue.isLoading(name)` on both
+  `useDoctype` and `useList`. This replaces the
+  `delete.loading && delete.params.name === row.name` idiom, which showed the
+  same spinner on every row once two deletes overlapped.
+- New: `insert.isLoading()` on both, taking no argument. A new document has no
+  name to key on, so it answers for the whole method — the same value as
+  `insert.loading`. It exists so all eight methods read the same way.
+- `runDocMethod.isLoading(name, method)` and `runMethod.isLoading(method)` keep
+  their signatures and now answer correctly with several submits in flight.
+  They previously compared the shared URL, so only the newest submit read as
+  loading.
+- `data` and `error` belong to the submit that started last, not the one that
+  answered last. A slow submit that comes back after a newer one is dropped: it
+  writes no `data`, writes no `error` and clears nothing. It still answers its
+  own caller with its own outcome — resolving with its response, or rejecting
+  with its error.
+- The winning submit writes `data` and `error` together. Success sets `data`
+  and clears `error`. Failure sets `error` and leaves `data` alone.
+- **`data` is no longer reset on failure.** The old shared `useCall` set `data`
+  back to `null` whenever a response came back not-ok. It now keeps the last
+  successful response. Read `error`, not `data`, to tell a failed submit from a
+  successful one.
+- `error` is no longer cleared when a submit starts. Clearing it there erased
+  the error of a sibling submit that was still in flight. An error stands until
+  the newest submit settles.
+- **`submit()` now rejects on any failure.** It resolves with the response or
+  rejects with the error — one channel, not two. A failed `validate` already
+  rejected; a failed request used to resolve with `null`. Both reject now, and
+  a server that answers with `null` resolves with `null`.
+- `useList`'s `insert` and `delete` now send to `baseUrl`, which they silently
+  dropped. `setValue` already used it, so all three write methods now agree.
+  `useDoctype` was never affected — every one of its methods already passed
+  `baseUrl`.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,

@@ -6,34 +6,38 @@
 
   const propsData = [
   {
-    name: 'orientation',
+    name: 'label',
     description: '',
     required: false,
-    type: '"horizontal" | "vertical"',
-    default: '"horizontal"'
+    type: 'string'
   },
   {
-    name: 'position',
+    name: 'description',
     description: '',
     required: false,
-    type: '"start" | "center" | "end"',
-    default: '"center"'
+    type: 'string'
   },
   {
-    name: 'flexItem',
+    name: 'doctype',
     description: '',
     required: false,
-    type: 'boolean'
+    type: 'string | null'
   },
   {
-    name: 'action',
+    name: 'importName',
     description: '',
     required: false,
-    type: 'DividerAction'
+    type: 'string | null'
+  },
+  {
+    name: 'doctypeMap',
+    description: '',
+    required: false,
+    type: 'Record<string, { title: string; listRoute?: string; pageRoute?: string | undefined; }> | undefined'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable name="Divider" :data="propsData"/>
+<PropsTable name="DataImport" :data="propsData"/>

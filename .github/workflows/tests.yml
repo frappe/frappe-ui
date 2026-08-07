@@ -36,6 +36,28 @@ jobs:
           path: coverage/vitest
           if-no-files-found: ignore
 
+  docs-tables:
+    runs-on: ubuntu-latest
+    name: API Tables
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Compares the committed tables against a fresh run row by row, keyed by
+      # name. Row order is not compared: vue-component-meta returns props, emits
+      # and union members in checker-resolution order, which shifts with how
+      # much of the program is loaded.
+      - name: Check the API tables match the source
+        run: yarn docs:check
+
   component-test:
     runs-on: ubuntu-latest
     name: Component Tests (Cypress) - ${{ matrix.containers }}

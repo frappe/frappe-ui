@@ -67,16 +67,16 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selected theme changes.',
     type: '[theme: ColorScheme]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ThemeSwitcher" :data="propsData"/> 
+<PropsTable name="ThemeSwitcher" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

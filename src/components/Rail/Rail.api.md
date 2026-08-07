@@ -82,17 +82,17 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### Rail
 
-<SlotsTable :data="railSlots"/> 
+<SlotsTable :data="railSlots"/>
 
 ### RailItem
 
-<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/> 
+<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/>
 
-<SlotsTable :data="railItemSlots"/> 
+<SlotsTable :data="railItemSlots"/>
 
-<EmitsTable :data="railItemEmits"/> 
-
+<EmitsTable :data="railItemEmits"/>

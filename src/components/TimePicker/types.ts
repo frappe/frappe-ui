@@ -96,7 +96,7 @@ export interface TimePickerProps extends InputLabelingProps {
    */
   use12Hour?: boolean
 
-  /** Dayjs format string used for display. Default: `HH:mm`. */
+  /** Dayjs format string used for display. Unset, the display format is `HH:mm`, or `h:mm A` when the deprecated `use12Hour` is on. */
   format?: string
 
   /** Disable the time picker. */

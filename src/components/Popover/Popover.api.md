@@ -9,8 +9,7 @@
     name: 'open',
     description: 'Controls visibility (v-model:open).',
     required: false,
-    type: 'boolean',
-    default: 'undefined'
+    type: 'boolean'
   },
   {
     name: 'side',
@@ -80,7 +79,6 @@
     description: '',
     required: false,
     type: 'boolean',
-    default: 'undefined',
     deprecated: 'Use `open` / `v-model:open`.'
   },
   {
@@ -112,7 +110,6 @@
     description: '',
     required: false,
     type: 'PopoverPlacement',
-    default: 'undefined',
     deprecated: 'Use `side` + `align`.'
   },
   {
@@ -120,7 +117,6 @@
     description: '',
     required: false,
     type: 'string | object | (string | object)[]',
-    default: 'undefined',
     deprecated: 'Use the `data-slot` CSS hooks (no-op).'
   },
   {
@@ -128,7 +124,6 @@
     description: '',
     required: false,
     type: '"default" | null',
-    default: 'undefined',
     deprecated: 'Motion is now built in (no-op).'
   },
   {
@@ -136,7 +131,6 @@
     description: '',
     required: false,
     type: 'boolean',
-    default: 'undefined',
     deprecated: 'Use `dismissible`.'
   },
   {
@@ -144,7 +138,6 @@
     description: '',
     required: false,
     type: 'boolean',
-    default: 'undefined',
     deprecated: 'Use `matchTriggerWidth`.'
   }
 ]
@@ -203,6 +196,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Popover" :data="propsData"/>

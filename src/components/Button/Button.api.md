@@ -13,6 +13,13 @@
     default: '\'gray\''
   },
   {
+    name: 'size',
+    description: 'Controls the button size',
+    required: false,
+    type: 'Size',
+    default: '\'sm\''
+  },
+  {
     name: 'variant',
     description: 'Visual style of the button',
     required: false,
@@ -20,32 +27,10 @@
     default: '\'subtle\''
   },
   {
-    name: 'type',
-    description: 'Native button type',
-    required: false,
-    type: '"button" | "submit" | "reset"',
-    default: '\'button\''
-  },
-  {
     name: 'label',
     description: 'Text label displayed inside the button',
     required: false,
-    type: 'string',
-    default: 'undefined'
-  },
-  {
-    name: 'loading',
-    description: 'Shows a loading state and disables interaction',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
-    name: 'size',
-    description: 'Controls the button size',
-    required: false,
-    type: 'Size',
-    default: '\'sm\''
+    type: 'string'
   },
   {
     name: 'icon',
@@ -69,15 +54,20 @@
     name: 'tooltip',
     description: 'Tooltip text shown on hover',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
+  },
+  {
+    name: 'loading',
+    description: 'Shows a loading state and disables interaction',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'loadingText',
     description: 'Text shown while the button is loading',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
   },
   {
     name: 'disabled',
@@ -90,15 +80,20 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'string | kt | Tt',
-    default: 'undefined'
+    type: 'string | kt | Tt'
   },
   {
     name: 'link',
     description: 'External link URL',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
+  },
+  {
+    name: 'type',
+    description: 'Native button type',
+    required: false,
+    type: '"button" | "submit" | "reset"',
+    default: '\'button\''
   }
 ]
 
@@ -125,9 +120,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Button" :data="propsData"/> 
+<PropsTable name="Button" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>
