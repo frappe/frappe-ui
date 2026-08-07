@@ -28,8 +28,7 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`dropdown.md`](./dropdown.md) — the action menu
 - [`item-list-row.md`](./item-list-row.md) — the row shell both families use
 - [`charts.md`](./charts.md) — the chart family (`frappe-ui/charts`); what belongs
-  in the library in [`charts-scope.md`](./charts-scope.md); gaps vs the old charts
-  in [`charts-parity.md`](./charts-parity.md)
+  in the library in [`charts-scope.md`](./charts-scope.md)
 
 ## Freeze work
 

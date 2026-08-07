@@ -11,9 +11,8 @@ gap list from the Insights audit of 2026-08-05, which compared `src/charts` agai
 Insights is the first large consumer of v2. It is not the specification. The audit supplies
 the cases. The rule below decides them.
 
-This document replaces the v1 frame in [charts-parity.md](charts-parity.md). Insights never
-imported v1 charts, and v1 does not meet these requirements either. Delete v1 on its own
-schedule.
+The rule governs v2 only. v2 is additive: the v1 chart exports stay at the package root and
+keep working through the betas, and nothing here schedules their removal.
 
 ## The conventions v2 is built on
 
