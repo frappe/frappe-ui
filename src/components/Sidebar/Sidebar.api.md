@@ -114,15 +114,13 @@
     name: 'active',
     description: 'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `to` against the current route.',
     required: false,
-    type: 'boolean',
-    default: 'undefined'
+    type: 'boolean'
   },
   {
     name: 'isActive',
     description: '',
     required: false,
     type: 'boolean',
-    default: 'undefined',
     deprecated: 'Use `active`. Alias kept for the config-object path.'
   },
   {

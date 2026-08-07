@@ -493,7 +493,9 @@ function extractTableData(name: string, data: any, vuePath: string) {
         description: x.description,
         required: x.required,
         type: sortUnions(parseTypeStr(x.type)),
-        default: x.default,
+        // An explicit `= undefined` is not a default — the docs table renders
+        // the string as a literal "undefined" in the Default column.
+        default: x.default === 'undefined' ? undefined : x.default,
         deprecated: getDeprecation(x.tags),
       }),
     )

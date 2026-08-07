@@ -30,8 +30,7 @@
     name: 'label',
     description: 'Text label displayed inside the button',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
   },
   {
     name: 'loading',
@@ -69,15 +68,13 @@
     name: 'tooltip',
     description: 'Tooltip text shown on hover',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
   },
   {
     name: 'loadingText',
     description: 'Text shown while the button is loading',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
   },
   {
     name: 'disabled',
@@ -90,15 +87,13 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'Tt | kt | string',
-    default: 'undefined'
+    type: 'Tt | kt | string'
   },
   {
     name: 'link',
     description: 'External link URL',
     required: false,
-    type: 'string',
-    default: 'undefined'
+    type: 'string'
   }
 ]
 
