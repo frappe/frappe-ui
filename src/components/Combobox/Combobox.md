@@ -24,7 +24,7 @@ In `trigger="button"` mode the search input moves into the popover header. That 
 `hideSearch` removes the row entirely for short static lists. The `#search-*` slots live inside the row, so they disappear with it. In the default `trigger="input"` mode there is no in-popover row at all and `hideSearch` has no effect — the trigger *is* the search input.
 
 ## Server Search
-Fetch options from a server as the user types. Listen to `@update:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Three things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, and merge the selected item into the options array so the trigger stays resolvable after the query narrows the list.
+Fetch options from a server as the user types. Bind `v-model:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Four things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, merge the selected item into the options array so the trigger stays resolvable after the query narrows the list, and clear the query yourself when the popover opens — see the note below on who owns it.
 
 <ComponentPreview name="Combobox-ServerSearch" layout="stacked" />
 
@@ -96,9 +96,13 @@ function reset() {
 
 ## Notes
 
-- `v-model:query` is optional. `#search-prefix`, `#search-suffix`, and
-  `#footer` all hand out the current query, and `@update:query` alone is enough
-  just to observe typing.
+- `v-model:query` is optional, but **listening for `@update:query` already
+  makes the query yours.** There is no observe-only mode: an `@update:query`
+  handler counts as binding it, so the combobox stops resetting the search box
+  and the committed label stays in it — the next keystroke appends. If you
+  listen, bind `v-model:query` too and clear it on `@update:open`. To read the
+  query without owning it, use `#search-prefix`, `#search-suffix`, or
+  `#footer`, which all hand it out.
 - In `trigger="input"` mode the input is the value display, so an unbound query
   keeps following the committed option's label — that is model sync, not a
   reset.

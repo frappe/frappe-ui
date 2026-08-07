@@ -10,10 +10,11 @@ export { usePageMeta } from './utils/pageMeta'
 export * from './data-fetching'
 // Legacy resource API. Keep public until official apps finish the v3 migration.
 export * from './resources/index.ts'
-export { default as call, createCall } from './utils/call'
-export { frappeRequest } from './utils/frappeRequest'
-export { request } from './utils/request'
-export { default as initSocket } from './utils/socketio'
+// One HTTP transport. `request` stays internal — it is the bare fetch wrapper
+// `frappeRequest` and the v1 resources are built on, with none of the Frappe
+// response handling a consumer wants.
+export { default as call } from './utils/call'
+export { frappeRequest, type FrappeRequestError } from './utils/frappeRequest'
 
 // Base components
 export * from './components/Alert'
@@ -101,8 +102,6 @@ export * from './components/KeyboardShortcutsModal'
 export * from './composables/useShortcut'
 
 // Deprecated component compatibility
-/** @deprecated Use `Combobox` for one value, `MultiSelect` for several. */
-export * from './components/Autocomplete'
 /** @deprecated Use layout markup or domain-specific components instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as Card } from './components/Card.vue'

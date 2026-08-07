@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { getCacheKey, createResource } from './resources'
 import { saveLocal, getLocal } from './local'
 import { onDocUpdate } from './realtime'
+import { readSocket } from './socketAccess'
 import { getConfig } from '../utils/config'
 
 let listCache = reactive({})
@@ -259,8 +260,9 @@ export function createListResource(options, vm) {
     return out.dataMap[key]
   }
 
-  if (options.realtime && vm?.$socket) {
-    onDocUpdate(vm.$socket, out.doctype, (name) => {
+  let socket = options.realtime ? readSocket(vm) : undefined
+  if (socket) {
+    onDocUpdate(socket, out.doctype, (name) => {
       if (out.originalData?.find((d) => d.name === name)) {
         out.fetchOne.submit(name)
       }

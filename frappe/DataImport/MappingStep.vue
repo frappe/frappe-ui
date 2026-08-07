@@ -33,11 +33,18 @@
             <div class="grid grid-cols-2 py-2 px-4 gap-y-8">
                 <template v-for="i in columnsFromFile.length" :key="i">
                     <div class="text-ink-gray-7">{{ columnsFromFile[i - 1] }}</div>
-                    <Autocomplete
+                    <!--
+                        Left on Combobox's default input trigger on purpose: the
+                        model here holds a column *label*, not a fieldname, so no
+                        option matches it. Input mode falls back to showing the
+                        raw string; button mode would show the placeholder and
+                        the current mapping would look empty.
+                    -->
+                    <Combobox
                         :model-value="columnMappings[columnsFromFile[i - 1]]"
                         :options="columnsFromSystem"
                         placeholder="Select field"
-                        @update:model-value="(val: any) => updateColumnMappings(i, val)"
+                        @update:selected-option="(option: any) => updateColumnMappings(i, option)"
                     />
                 </template>
             </div>
@@ -49,7 +56,7 @@ import type { DataImport, DataImports } from './types';
 import { fieldsToIgnore, getBadgeColor, getPreviewData } from './dataImport'
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { toast } from "../../src/components/Toast/toast"
-import Autocomplete from '../../src/components/Autocomplete/Autocomplete.vue';
+import Combobox from '../../src/components/Combobox/Combobox.vue';
 import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 

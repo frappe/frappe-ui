@@ -29,7 +29,7 @@ A create-account form using every control type.
 
 > **Breaking change in v1:** `type="date"` and `type="time"` used to render native HTML inputs through `TextInput`. They now resolve to `DatePicker` and `TimePicker`. Use `TextInput` directly (or `type="datetime-local"`) if you need the native input.
 
-> `type="autocomplete"` is deprecated. See [Legacy components](./legacy#formcontrol-with-type-autocomplete).
+> **Breaking change in v1:** `type="autocomplete"` was removed — use `type="combobox"`. This one is silent: the removed type falls through to a plain text input instead of failing. See the [migration guide](../migration#formcontrol-type-autocomplete-removed).
 
 ## Labeling and errors
 

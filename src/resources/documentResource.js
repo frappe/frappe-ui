@@ -7,6 +7,7 @@ import {
 } from './listResource'
 import { getLocal, saveLocal, deleteLocal } from './local'
 import { onDocUpdate } from './realtime'
+import { readSocket } from './socketAccess'
 import { getConfig } from '../utils/config'
 
 let documentCache = reactive({})
@@ -266,8 +267,9 @@ export function createDocumentResource(options, vm) {
     return doc
   }
 
-  if (options.realtime && vm.$socket) {
-    onDocUpdate(vm.$socket, out.doctype, (name) => {
+  let socket = options.realtime ? readSocket(vm) : undefined
+  if (socket) {
+    onDocUpdate(socket, out.doctype, (name) => {
       if (name == out.name) {
         out.get.fetch()
       }
