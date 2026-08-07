@@ -14,9 +14,11 @@ site and earns no subpath. `frappe-ui/icons` therefore clears none of the three 
 today. It survives on inertia, not on the rule.
 
 Whether it folds into root before the tag is a separate decision, deferred — the fold
-costs a changed import path in every downstream app, and root's own icon surface (the
-root `Icon`, the four unused `*Icon` exports the cleanup left behind) needs a verdict at
-the same time. That is a follow-up ticket, not this ADR's call and not #904's.
+costs a changed import path in every downstream app, and the rest of the subpath needs a
+verdict at the same time — `LightningIcon`, `MaximizeIcon`, `MinimizeIcon` and
+`StepsIcon` are exported and imported by nobody, inside the library or out (`frappe/`
+reaches those four components by relative path, not through the export). That is a
+follow-up ticket, not this ADR's call and not #904's.
 
 The rule itself is unchanged. A subpath's justification expiring, and the subpath going
 back on the table when it does, is the rule working. The table row and the #887 hand-off
