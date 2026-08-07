@@ -40,8 +40,7 @@
 
 <script setup lang="ts">
 import Button from '#components/Button/Button.vue'
-import type { ChartLegendProps } from '../props'
-import type { ChartLegendItem } from '../types'
+import type { ChartLegendItem, ChartLegendProps } from '../types'
 
 defineProps<ChartLegendProps>()
 

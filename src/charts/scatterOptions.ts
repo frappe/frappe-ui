@@ -11,9 +11,9 @@ import { CHART_FONT_FAMILY } from './measureText'
 import { buildReferenceLineSeries } from './referenceLines'
 import { chartColors, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
-import type { ChartValueFormatter } from './props'
 import type {
   ChartPaletteName,
+  ChartValueFormatter,
   ChartYAxisConfig,
   ScatterChartConfig,
   ScatterPoint,

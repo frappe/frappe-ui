@@ -63,8 +63,8 @@ import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { AreaChartProps } from './props'
 import type {
+  AreaChartProps,
   AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,

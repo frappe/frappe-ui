@@ -33,7 +33,8 @@
     name: 'card',
     description: 'Draws the card surface: border, background, corner radius and padding. On\nby default. Set it to `false` for a chart the app has already placed inside\na card of its own, so a bordered box does not nest in a bordered box.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'true'
   },
   {
     name: 'value',

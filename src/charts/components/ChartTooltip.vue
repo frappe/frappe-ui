@@ -47,8 +47,7 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
 import { formatPercent } from '../format'
-import type { ChartTooltipProps } from '../props'
-import type { ChartTooltipItem } from '../types'
+import type { ChartTooltipItem, ChartTooltipProps } from '../types'
 
 const props = defineProps<ChartTooltipProps>()
 

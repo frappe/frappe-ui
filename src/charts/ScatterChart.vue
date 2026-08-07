@@ -56,12 +56,12 @@ import { chartAriaLabel, documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { ScatterChartProps } from './props'
 import type {
   ChartExposed,
   ChartLegendItem,
   ChartTooltipItem,
   ScatterChartConfig,
+  ScatterChartProps,
   ScatterPointEvent,
 } from './types'
 

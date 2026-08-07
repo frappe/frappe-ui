@@ -44,11 +44,11 @@ import { useChartTheme } from './theme'
 import { chartAriaLabel, documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { SankeyChartProps } from './props'
 import type {
   ChartExposed,
   ChartTooltipItem,
   SankeyChartConfig,
+  SankeyChartProps,
   SankeyLinkEvent,
 } from './types'
 

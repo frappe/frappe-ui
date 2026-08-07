@@ -9,9 +9,9 @@ import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
 import { chartColors, insideLabelColor, type ChartTheme } from './theme'
 import { mergeDeep } from './utils'
-import type { ChartValueFormatter } from './props'
 import type {
   ChartPaletteName,
+  ChartValueFormatter,
   HeatmapCell,
   HeatmapChartConfig,
   HeatmapMatrix,

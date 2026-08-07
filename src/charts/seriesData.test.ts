@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
-import type { AxisChartProps } from './props'
-import type { AxisChartConfig } from './types'
+import type {
+  AxisChartConfig,
+  AxisChartProps,
+} from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },

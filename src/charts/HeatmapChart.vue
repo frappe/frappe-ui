@@ -67,12 +67,12 @@ import { useChartTheme } from './theme'
 import { chartAriaLabel, documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { HeatmapChartProps } from './props'
 import type {
   ChartExposed,
   ChartTooltipItem,
   HeatmapCellEvent,
   HeatmapChartConfig,
+  HeatmapChartProps,
 } from './types'
 
 // The continuous visual map only: a heatmap has no piecewise scale to draw, and

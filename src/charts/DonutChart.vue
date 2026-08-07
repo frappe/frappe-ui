@@ -96,12 +96,12 @@ import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { DonutChartProps } from './props'
 import type {
   ChartExposed,
   ChartLegendItem,
   ChartTooltipItem,
   DonutChartConfig,
+  DonutChartProps,
   DonutSliceEvent,
 } from './types'
 

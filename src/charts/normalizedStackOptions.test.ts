@@ -5,9 +5,11 @@ import {
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
-import type { AxisChartProps } from './props'
+import type {
+  AxisChartConfig,
+  AxisChartProps,
+} from './types'
 import type { ChartTheme } from './theme'
-import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
   palette: ['#111111', '#222222', '#333333'],

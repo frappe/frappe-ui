@@ -63,12 +63,12 @@ import { chartAriaLabel } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { LineChartProps } from './props'
 import type {
   AxisChartConfig,
   ChartDatapointEvent,
   ChartExposed,
   ChartTooltipItem,
+  LineChartProps,
 } from './types'
 
 registerChartModules([

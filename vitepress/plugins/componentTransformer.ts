@@ -204,13 +204,7 @@ function transformPropsTable(
   // DateTimePicker, which lives inside the DatePicker folder) point at
   // the correct `types.ts`. When omitted, the folder matches `name`.
   const componentFolder = tag.attrs.folder || name
-  // A folder that separates its public props from its internal types
-  // (src/charts) documents the table with `props.ts`; everything else keeps
-  // one `types.ts`.
-  const propsPath = resolveSourcePath(roots, `${componentFolder}/props.ts`)
-  const typesPath = existsSync(propsPath)
-    ? propsPath
-    : resolveSourcePath(roots, `${componentFolder}/types.ts`)
+  const typesPath = resolveSourcePath(roots, `${componentFolder}/types.ts`)
 
   state.tokens[tokenIdx].content =
     `<PropsTable name="${name}" :data="${dataExpr}"><template #code>`

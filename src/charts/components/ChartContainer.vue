@@ -97,7 +97,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Spinner from '#components/Spinner/Spinner.vue'
-import type { ChartContainerProps } from '../props'
+import type { ChartContainerProps } from '../types'
 
 const props = defineProps<ChartContainerProps>()
 

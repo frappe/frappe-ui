@@ -159,11 +159,11 @@ import { chartColors, useChartTheme } from './theme'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
-import type { FunnelChartProps } from './props'
 import type {
   ChartPaletteName,
   ChartTooltipItem,
   FunnelChartConfig,
+  FunnelChartProps,
   FunnelStage,
   FunnelStageEvent,
 } from './types'

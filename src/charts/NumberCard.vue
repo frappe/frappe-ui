@@ -165,7 +165,7 @@ import { paletteColors, useChartTheme } from './theme'
 import { documentDir } from './utils'
 import { useId } from '#utils/useId'
 import ChartCard from './components/ChartCard.vue'
-import type { NumberCardProps } from './props'
+import type { NumberCardProps } from './types'
 
 // No echarts, sparkline included: a page full of these should cost nothing but
 // HTML.

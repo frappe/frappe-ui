@@ -1,16 +1,14 @@
 import type {
-  AxisChartProps,
-  ChartCategoryFormatter,
-  ChartValueFormatter,
-  ChartValueAxisOptions,
-} from './props'
-import { toNumber } from './axisChartCommon'
-import { OTHERS_KEY, OTHERS_LABEL } from './utils'
-import type {
   AxisChartBaseConfig,
+  AxisChartProps,
   AxisChartSeriesConfig,
+  ChartCategoryFormatter,
+  ChartValueAxisOptions,
+  ChartValueFormatter,
   ChartYAxisConfig,
 } from './types'
+import { toNumber } from './axisChartCommon'
+import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 
 /** Below two there is nothing left to collapse into. */
 const MIN_MAX_SERIES = 2

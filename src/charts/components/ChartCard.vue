@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ChartCardProps } from '../props'
+import type { ChartCardProps } from '../types'
 
 const SURFACE =
   'rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3'
