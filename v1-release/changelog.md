@@ -9,6 +9,12 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Node.js requirement
+
+- **Breaking:** Node floor is now `>=20.19.0` (was Node 18 on 0.1.x). Declared
+  via `package.json` `engines` so installers and CI surface the requirement
+  instead of opaque transitive-dep engine errors.
+
 ### Dialog — v1 spec
 
 - Flat top-level props (`title`, `message`, `icon`, `size`, `position`,

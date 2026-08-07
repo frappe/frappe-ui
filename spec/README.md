@@ -32,11 +32,15 @@ If these disagree, update the lower-authority document or mark it historical.
 
 ## Freeze work
 
-- [`imperative-api.md`](./imperative-api.md) — library-wide audit of what
-  components hand back through a template ref (`defineExpose` — 28 sites, 4
-  typed). Proposes five verbs, a policy for when and how a component may hand
-  back a DOM element, and a required `*Exposed` type. Excludes `frappe/`,
-  `ListView`, and `Calendar`. **Proposed.**
+- [`at-bar.md`](./at-bar.md) — what "at bar for `1.0.0`" means. The one checklist
+  every sweep ticket on the [road to `1.0.0`](https://github.com/frappe/frappe-ui/issues/864)
+  applies, per public export. **Accepted.**
+- [`imperative-api.md`](./imperative-api.md) — the contract for what components
+  hand back through a template ref (`defineExpose` — 31 sites, 4 typed). Five
+  verbs, a policy for when and how a component may hand back a DOM element, and
+  a required `*Exposed` type. A member earns its place only when parent script
+  needs it and no other surface reaches. Excludes `frappe/`, `ListView`, and
+  `Calendar`. **Accepted** — [ADR-0012](./adr/0012-template-ref-surface.md).
 
 ## ADRs
 

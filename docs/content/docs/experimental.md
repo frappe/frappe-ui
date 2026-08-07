@@ -13,6 +13,19 @@ time, some of them get promoted to the public API and others get removed.
 > **not** import this subpath from product apps or third-party code — pin to a
 > public entry point instead.
 
+## Accordion
+
+Stacks sections of content behind labelled headers that expand and collapse.
+Built on reka-ui's `Accordion`, so the WAI-ARIA keyboard grammar and the
+single/multiple open models come for free.
+
+```ts
+import { Accordion } from 'frappe-ui/experimental'
+```
+
+See the [Accordion page](/docs/experimental/accordion) for examples and the full
+API reference.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a

@@ -65,7 +65,16 @@ function resolveColorValue(
   const hexLiteral = /#[0-9a-f]{3,8}/i.exec(rawValue)?.[0]
   if (hexLiteral) {
     const legacy = matchLegacyHex(hexLiteral, variant)
-    if (legacy && (!allowed || allowed.includes(legacy))) return legacy
+    // A known legacy hex for an excluded name is fully resolved: it means "no
+    // color". Falling through would hand it to the distance matcher, which has
+    // no notion of "deliberately dropped" and would coerce it to a palette hue.
+    if (legacy.status === 'excluded') return null
+    if (
+      legacy.status === 'matched' &&
+      (!allowed || allowed.includes(legacy.name))
+    ) {
+      return legacy.name
+    }
   }
 
   // 3. Distance match against the palette anchors.

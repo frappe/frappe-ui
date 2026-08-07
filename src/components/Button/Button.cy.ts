@@ -220,4 +220,40 @@ describe('<Button />', () => {
     cy.get('button').should('be.disabled').and('contain.text', 'Loading docs')
     cy.get('a').should('not.exist')
   })
+
+  it('holds the pressed look while data-state is open or active', () => {
+    cy.mount(Button, {
+      props: { label: 'Bold' },
+      attrs: { 'data-state': 'active' },
+    })
+    cy.get('button').should('have.class', 'bg-surface-gray-4')
+
+    cy.mount(Button, {
+      props: { label: 'Bold' },
+      attrs: { 'data-state': 'open' },
+    })
+    cy.get('button').should('have.class', 'bg-surface-gray-4')
+
+    cy.mount(Button, {
+      props: { label: 'Bold' },
+      attrs: { 'data-state': 'closed' },
+    })
+    cy.get('button').should('have.class', 'bg-surface-gray-2')
+  })
+
+  it('does not read the tooltip’s own state as active', () => {
+    cy.mount(Button, { props: { label: 'Hi', tooltip: 'Tip' } })
+    cy.get('button').should('have.class', 'bg-surface-gray-2')
+    cy.get('button').trigger('mouseenter')
+    cy.get('button').should('have.class', 'bg-surface-gray-2')
+  })
+
+  it('disabled outranks active', () => {
+    cy.mount(Button, {
+      props: { label: 'Bold', disabled: true },
+      attrs: { 'data-state': 'active' },
+    })
+    cy.get('button').should('have.class', 'text-ink-gray-4')
+    cy.get('button').should('not.have.class', 'bg-surface-gray-4')
+  })
 })

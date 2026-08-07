@@ -19,7 +19,6 @@
               :placeholder="placeholder"
               :disabled="disabled"
               :readonly="readonly"
-              @pointerdown="onPointerDown"
               @focus="onFocus"
               @click="onClick"
               @blur="onBlur"
@@ -51,12 +50,7 @@
         @open-auto-focus.prevent
         @interact-outside="onInteractOutside"
       >
-        <PopoverPanel
-          ref="popoverPanelRef"
-          :motion="motion"
-          :class="contentClass"
-          class="origin-[var(--reka-popover-content-transform-origin)]"
-        >
+        <PopoverPanel ref="popoverPanelRef" :class="contentClass">
           <slot :close="closePopover" />
         </PopoverPanel>
       </PopoverContent>
@@ -75,7 +69,6 @@ import {
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
-import { usePopoverMotion } from '../../../composables/usePopoverMotion'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
 
@@ -172,12 +165,6 @@ const anchorEl = computed(() => {
   if (slots.trigger || slots.target) return undefined
   return textInputRef.value?.el ?? undefined
 })
-
-const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(open)
-
-function onPointerDown() {
-  recordPointerDown()
-}
 
 function togglePopover() {
   open.value = !open.value

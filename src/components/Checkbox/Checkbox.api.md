@@ -13,6 +13,13 @@
     default: '"sm"'
   },
   {
+    name: 'padded',
+    description: 'Wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'disabled',
     description: 'Disables the checkbox interaction',
     required: false,
@@ -24,19 +31,14 @@
     required: false,
     type: 'boolean',
     default: 'false',
-    deprecated: 'Use `data-*` styling hooks instead.'
-  },
-  {
-    name: 'modelValue',
-    description: 'Checked state of the checkbox. `boolean` is canonical; `1`/`0` are kept for v1 backwards compatibility.',
-    required: false,
-    type: 'boolean | 0 | 1'
+    deprecated: 'Use `padded` instead.'
   },
   {
     name: 'indeterminate',
     description: 'Renders the mixed "—" state (e.g. a select-all that\'s partially selected).\nPurely visual — the native `indeterminate` DOM property is not reflected as\nan attribute, so it must be set via this prop, not markup.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'label',
@@ -67,6 +69,12 @@
     description: 'HTML id of the underlying control. Auto-generated via `useId()` if omitted.',
     required: false,
     type: 'string'
+  },
+  {
+    name: 'modelValue',
+    description: '',
+    required: false,
+    type: 'boolean | 0 | 1'
   }
 ]
 
@@ -87,15 +95,15 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
+    type: '[value: boolean | 0 | 1 | undefined]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Checkbox" :data="propsData"/> 
+<PropsTable name="Checkbox" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

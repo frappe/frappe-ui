@@ -17,7 +17,6 @@
           :placeholder="placeholder"
           :disabled="disabled"
           :readonly="isReadonly"
-          @pointerdown="recordPointerDown"
           @focus="onFocus"
           @click="onClickInput"
           @blur="onBlur"
@@ -65,9 +64,8 @@
         <div
           ref="panelRef"
           data-slot="content-body"
-          :data-motion="motion"
+          data-motion="instant"
           class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-elevation-2 p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
-          style="transform-origin: var(--reka-popover-content-transform-origin)"
           role="listbox"
           :aria-activedescendant="activeDescendantId"
         >
@@ -108,7 +106,6 @@ import {
   PopoverRoot,
 } from 'reka-ui'
 import { TextInput } from '../TextInput'
-import { usePopoverMotion } from '../../composables/usePopoverMotion'
 import '../shared/selection/popoverMotion.css'
 import {
   findNearestIndex,
@@ -291,7 +288,6 @@ function onInteractOutside(event: Event) {
 const uid = Math.random().toString(36).slice(2, 9)
 
 const isOpen = ref(false)
-const { motion, onPointerDown: recordPointerDown } = usePopoverMotion(isOpen)
 
 // Canonical 24-hour value (`HH:mm` or `HH:mm:ss`) — the source of truth.
 const canonicalValue = ref<string>(

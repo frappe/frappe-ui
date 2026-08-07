@@ -517,6 +517,42 @@ describe('Combobox', () => {
     })
   })
 
+  describe('highlighting', () => {
+    it('re-highlights the first item when options are replaced after typing', () => {
+      // A server-driven picker: a row is already visible while typing (e.g. a
+      // "create" custom row or stale results), then the debounced search
+      // resolves and replaces the list — after the keystroke's own highlight
+      // pass, so the fresh first item must be re-highlighted.
+      const AsyncSearch = defineComponent({
+        setup() {
+          const options = ref<string[]>(['Stale result'])
+          return { options }
+        },
+        render() {
+          return h(Combobox, { options: this.options, filterable: false })
+        },
+      })
+
+      cy.mount(AsyncSearch).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        cy.wrap(vm).as('vm')
+      })
+
+      cy.get('[role="combobox"]').type('ma')
+      cy.get('[role="option"]').should('have.length', 1)
+
+      cy.get('@vm').then((vm: any) => {
+        vm.options = fruits
+      })
+
+      cy.get('[role="option"]').should('have.length', 3)
+      cy.get('[role="option"]').first().should('have.attr', 'data-highlighted')
+      cy.get('[role="option"]')
+        .eq(1)
+        .should('not.have.attr', 'data-highlighted')
+    })
+  })
+
   describe('numeric option values', () => {
     const numeric = [
       { label: 'One', value: 1 },

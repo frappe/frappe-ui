@@ -9,7 +9,7 @@ the deprecated `Popover` `trigger="hover"` mode (issue #773, P8).
 
 `HoverCard` is built directly on reka-ui's `HoverCard*` primitives and shares
 the floating-panel shell + motion machinery with `Popover` via the shared
-`PopoverPanel` shell and the `[data-selection]`-gated popover motion stylesheet.
+`PopoverPanel` shell and its co-located motion stylesheet.
 
 ## Role
 
@@ -56,7 +56,7 @@ See the `Popover` spec ("Deprecations") for the full Popover back-compat table.
 | Visibility model | `v-model:open` (canonical) |
 | Positioning | `side` / `align` / `offset` / `collisionPadding` / `portalTo`, same vocabulary and defaults as `Popover` |
 | Shell | Shared `PopoverPanel` — owns `data-slot="content"` + rounded/elevated/ring visuals only, no behavior |
-| Motion | Shared popover motion (`[data-selection]` stylesheet + `usePopoverMotion`). Hover opens are pointer-driven → `animated` |
+| Motion | Shared `PopoverPanel` motion. One rhythm across the library — an `80ms` fade on open, nothing on close |
 | Styling | No class-injection props. Stable `data-slot` / `data-state` / `data-motion` hooks only |
 | Trigger slot | `#trigger` via reka `HoverCardTrigger as-child` — aria + hover/focus wiring is automatic |
 
@@ -171,27 +171,25 @@ Mirrors `Popover`'s exposed surface.
 ## Motion
 
 `HoverCard` reuses the shared popover motion machinery rather than a bespoke
-animation:
+animation. It uses the one rhythm every popup in the library uses: the card
+appears instantly, with only a short fade to smooth the paint.
 
-- Content renders inside `PopoverPanel`, which carries `data-slot="content"` +
-  `data-selection` and the inner `data-slot="content-body"` with
-  `:data-motion="motion"` from `usePopoverMotion`.
-- Hover/focus opens are pointer-recency driven and therefore classify as
-  `animated`: enter `180ms` / exit `140ms` with `cubic-bezier(0.23, 1, 0.32, 1)`,
-  scaling in from the trigger via
-  `transform-origin: var(--reka-hover-card-content-transform-origin)` on the
-  content-body. (HoverCard owns its own transform-origin var, the same way
-  Popover uses `--reka-popover-...` and Select uses `--reka-select-...`.)
-- The `instant` (~80ms opacity fade, no scale/translate) path still exists for
-  any non-pointer open (e.g. a programmatic `v-model:open` flip), inherited from
-  the shared stylesheet — no extra wiring.
+- open: `80ms` linear fade from `opacity: 0`. No scale, no translate
+- close: no animation
+- Content renders inside `PopoverPanel`, which carries
+  `data-slot="content-body"` and `data-motion="instant"`
 - `prefers-reduced-motion: reduce` disables the content animation (shared
-  stylesheet forces `animation-duration: 0`).
+  stylesheet forces `animation-duration: 0`)
+
+Nothing in the library scales in. A panel appears at a fixed spot, so an
+entrance only puts motion between the press and the content. `HoverCard` was the
+last holdout, on the argument that a hover open is not on a latency path. That
+is true, but it is not worth being the only surface with its own rhythm.
 
 `PopoverPanel` owns the **shell only** (rounded-lg, `bg-surface-elevation-2`,
 shadow, ring + the `data-slot`/`data-state`/`data-motion` wiring). `HoverCard`
-renders its own `HoverCardContent` and its own contents inside `PopoverPanel`;
-it does not delegate behavior to the panel. This is the same DRY split applied
+renders its own `HoverCardContent` and its own contents inside `PopoverPanel`.
+It does not delegate behavior to the panel. This is the same DRY split applied
 to `Popover` / `Select` / `Combobox` / pickers.
 
 ## Styling hooks
@@ -201,9 +199,9 @@ component). Stable hooks only:
 
 - `data-slot="trigger"` on the trigger element
 - `data-slot="content"` on the positioned content (from `PopoverPanel`)
-- `data-slot="content-body"` on the animated inner shell
+- `data-slot="content-body"` on the inner shell
 - `data-state="open" | "closed"` (supplied by reka `HoverCardContent`)
-- `data-motion="animated" | "instant"` on the content-body
+- `data-motion="instant"` on the content-body
 
 ## Examples
 

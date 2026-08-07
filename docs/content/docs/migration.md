@@ -15,6 +15,11 @@ After each pass, `grep` for the old prop or slot name to catch anything missed,
 then test the flows you touched. Type-checking won't catch focus, slot renames,
 or visual regressions.
 
+## Requirements
+
+v1 requires **Node `>=20.19.0`** (`package.json` `engines`); this is a breaking
+bump from the 0.1.x line (Node 18).
+
 ## Dialog
 
 The `options` blob is flattened into top-level props. See the

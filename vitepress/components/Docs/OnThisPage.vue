@@ -18,7 +18,10 @@ let observer: IntersectionObserver | undefined
 const visible = new Set<string>()
 
 const setHeadings = () => {
-  const elements = Array.from(document.querySelectorAll('h2, h3'))
+  // Only real doc headings carry an `id` (VitePress adds it for the anchor).
+  // Headings rendered by components in a preview — e.g. Accordion triggers —
+  // have none, so this keeps them out of the page outline.
+  const elements = Array.from(document.querySelectorAll('h2[id], h3[id]'))
 
   h2Exists.value = elements.some((el) => el.tagName == 'H2')
 

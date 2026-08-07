@@ -25,7 +25,11 @@ permissions:
   issues: write
 
 concurrency:
-  group: barista-review-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
+  # Split by trigger source: every PR comment queues an `issue_comment` run
+  # (most then skip the job filter), and it must not cancel an in-flight
+  # review started by the PR itself — a bot's review comment did exactly that.
+  # Manual `/barista review` requests still supersede one another.
+  group: barista-review-${{ github.event_name == 'pull_request' && 'auto' || 'manual' }}-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr_number }}
   # Cancel in-flight: reviews are stateless (one comment posted at the end), so
   # the latest `/barista review` request should win. No partial state to lose.
   cancel-in-progress: true

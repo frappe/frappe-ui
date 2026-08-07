@@ -30,7 +30,7 @@
     name: 'size',
     description: 'Visual size of the slider.',
     required: false,
-    type: 'ToggleSize',
+    type: 'RangeSize',
     default: '"sm"'
   },
   {

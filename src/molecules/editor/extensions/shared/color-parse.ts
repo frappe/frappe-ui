@@ -3,7 +3,9 @@
  *
  * `getClosestNamedColor` is the single matcher used when normalizing pasted
  * inline colors back to a palette name. It honours `EXCLUDE_FROM_PASTE`
- * (e.g. `gray`) so that `set` and `paste` agree on which colors are dropped.
+ * (e.g. `gray`) so that `set` and `paste` agree on which colors are dropped,
+ * and rejects neutral (near-black / near-white) tones outright so legacy body
+ * ink is not coerced into the nearest saturated hue.
  */
 
 import {
@@ -77,11 +79,30 @@ export function parseRgbToRgb(rgb: string): Rgb | null {
   return { r, g, b }
 }
 
+/** Chroma of an RGB color: the spread between its strongest and weakest channel. */
+function chroma(rgb: Rgb): number {
+  return Math.max(rgb.r, rgb.g, rgb.b) - Math.min(rgb.r, rgb.g, rgb.b)
+}
+
+/**
+ * Below this fraction of the matched anchor's chroma, the input is treated as a
+ * neutral (ink/paper) tone rather than a washed-out version of that anchor.
+ *
+ * Nearest-neighbour in RGB space always returns *something*, so without this
+ * guard every near-black ink snaps to the closest saturated anchor — `#000000`,
+ * `#111827` and the legacy `#1F272E` body ink all land on green, and `#ffffff`
+ * lands on purple. A third of the anchor's chroma sits comfortably between real
+ * pale shades (tailwind's 300-level tints keep ~half the anchor's chroma) and
+ * neutral inks (which keep well under a fifth).
+ */
+const NEUTRAL_CHROMA_RATIO = 1 / 3
+
 /**
  * Map an RGB color to the nearest palette name by Euclidean distance in RGB
  * space. Names in `EXCLUDE_FROM_PASTE` are never returned (so pasted gray text
- * is dropped to the default ink color). Returns `null` when `colorMap` yields
- * no candidate or the closest match is excluded.
+ * is dropped to the default ink color), and neutral tones are rejected outright
+ * (see `NEUTRAL_CHROMA_RATIO`). Returns `null` when `colorMap` yields no
+ * candidate, the closest match is excluded, or the input is neutral.
  *
  * @param rgb       The parsed color to classify.
  * @param colorMap  name → 6-digit hex anchor map (text or highlight).
@@ -94,6 +115,7 @@ export function getClosestNamedColor(
   allowed?: readonly string[],
 ): string | null {
   let closest: string | null = null
+  let closestAnchor: Rgb | null = null
   let minDistance = Infinity
 
   const candidates = allowed ?? Object.keys(colorMap)
@@ -111,27 +133,43 @@ export function getClosestNamedColor(
     if (distance < minDistance) {
       minDistance = distance
       closest = name
+      closestAnchor = anchor
     }
   }
 
-  if (closest !== null && EXCLUDE_FROM_PASTE.includes(closest)) {
-    return null
-  }
+  if (closest === null || closestAnchor === null) return null
+  if (EXCLUDE_FROM_PASTE.includes(closest)) return null
+  if (chroma(rgb) < chroma(closestAnchor) * NEUTRAL_CHROMA_RATIO) return null
   return closest
 }
 
 /**
+ * Outcome of a legacy exact-hex lookup. `excluded` is distinct from `unknown`
+ * on purpose: a hex that is a *known* legacy value for an excluded name (e.g.
+ * the legacy body ink `#1F272E` → `gray`) has been fully resolved and must stop
+ * the lookup, not fall through to distance matching.
+ */
+export type LegacyHexMatch =
+  | { status: 'matched'; name: string }
+  | { status: 'excluded' }
+  | { status: 'unknown' }
+
+/**
  * Fast exact-hex → name lookup for historical content that stored raw hex
- * values. Returns `null` when the hex is not a known legacy value.
+ * values. Matching is case-insensitive, since legacy HTML normalizes hex casing
+ * inconsistently.
  *
  * @param variant `'text'` or `'highlight'` selects the legacy map.
  */
 export function matchLegacyHex(
   hex: string,
   variant: 'text' | 'highlight',
-): string | null {
+): LegacyHexMatch {
   const map = variant === 'text' ? legacyTextColorMap : legacyHighlightColorMap
-  const direct = map[hex]
-  if (direct) return EXCLUDE_FROM_PASTE.includes(direct) ? null : direct
-  return null
+  const needle = hex.trim().toLowerCase()
+  const key = Object.keys(map).find((k) => k.toLowerCase() === needle)
+  if (!key) return { status: 'unknown' }
+  const name = map[key]
+  if (EXCLUDE_FROM_PASTE.includes(name)) return { status: 'excluded' }
+  return { status: 'matched', name }
 }
