@@ -41,6 +41,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:gen": "tsx docs/scripts/propsgen.ts",
     "docs:gen:all": "yarn docs:gen --all",
+    "docs:check": "tsx docs/scripts/propsgen.ts --check",
     "sync-tokens": "node tailwind/figma-tokens-to-theme.js"
   },
   "exports": {
