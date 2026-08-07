@@ -338,4 +338,28 @@ describe('useList concurrency', () => {
 
     fetchSpy.mockRestore()
   })
+
+  it('reports insert isLoading while an insert is in flight', async () => {
+    const users = list()
+
+    expect(users.insert.isLoading()).toBe(false)
+
+    const done = users.insert.submit({ name: 'slow-user' })
+    expect(users.insert.isLoading()).toBe(true)
+
+    await done
+    expect(users.insert.isLoading()).toBe(false)
+  })
+
+  it('keeps the newest response in setValue data when an older submit answers last', async () => {
+    const users = list()
+
+    await Promise.all([
+      users.setValue.submit({ name: 'slow-user', email: 'slow@example.com' }),
+      users.setValue.submit({ name: 'quick-user', email: 'quick@example.com' }),
+    ])
+
+    expect(users.setValue.data).toMatchObject({ name: 'quick-user' })
+    expect(users.setValue.error).toBe(null)
+  })
 })
