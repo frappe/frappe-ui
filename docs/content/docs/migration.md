@@ -314,6 +314,99 @@ The legacy `Input` component is deprecated. Use
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## Data fetching (useDoctype / useList)
+
+The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
+`runDocMethod`, `runMethod`) and on `useList` (`insert`, `setValue`, `delete`)
+used to share one request between all their submits. Each one now sends its own
+request, so the shared-request members are gone.
+
+Nothing fails to build, so grep for these by hand. The app keeps rendering and
+then throws the first time the removed member is read — usually the first time
+someone deletes a row.
+
+| Before                                              | After                        |
+| --------------------------------------------------- | ---------------------------- |
+| `delete.loading && delete.params.name === row.name` | `delete.isLoading(row.name)` |
+| `setValue.params.name`                              | `setValue.isLoading(name)`   |
+| `delete.execute()` / `.fetch()` / `.reload()`       | `delete.submit({ name })`    |
+| `insert.reset()` / `.abort()`                       | removed, no replacement      |
+| `runMethod.isFetching` / `.isFinished`              | `runMethod.loading`          |
+| `setValue.promise`                                  | `await setValue.submit(...)` |
+| `delete.url`                                        | removed, no replacement      |
+
+All eight now have the same five members: `submit()`, `data`, `error`,
+`loading` and `isLoading()`.
+
+`isLoading()` takes whatever identifies one submit:
+
+```js
+todos.delete.isLoading(row.name)
+todos.setValue.isLoading(row.name)
+todos.runDocMethod.isLoading(row.name, 'archive')
+todos.runMethod.isLoading('sync_all')
+todos.insert.isLoading() // no argument: a new row has no name yet
+```
+
+`insert.isLoading()` gives the same answer as `insert.loading`. It is there so
+every write method reads the same way.
+
+More changes you will not see at build time:
+
+- `submit()` now resolves with its own response. Code that fired two submits
+  and read the result of the first was receiving the second one's data, or
+  `null`. If you queued submits to work around that, you can drop the queue.
+- `data` and `error` belong to the submit that started last, not the one that
+  answered last. A slow submit that comes back after a newer one writes
+  nothing and clears nothing. It still answers its own caller with its own
+  outcome — resolving with its response, or rejecting with its error.
+- **`data` is no longer reset to `null` when a submit fails.** It used to be,
+  because the shared request cleared it on any not-ok response. It now keeps
+  the last successful response.
+
+  ```js
+  await todos.setValue.submit({ name: 'TODO-1', status: 'Done' })
+  await todos.setValue.submit({ name: 'TODO-2', status: 'Done' }) // fails
+
+  todos.setValue.data // still the TODO-1 response
+  todos.setValue.error // the failure
+  ```
+
+  Test `error`, not `data`, to tell a failed submit from a successful one.
+  `if (!todos.setValue.data)` used to mean "the last save failed" and no
+  longer does.
+
+- `error` is no longer cleared when a submit starts. It used to be, which
+  erased the error of a sibling submit still in flight. It now stands until
+  the newest submit settles. To blank an error banner while a retry runs, hide
+  it on `loading` yourself.
+- **`submit()` rejects on any failure.** It resolves with the response, or
+  rejects with the error. A failed `validate` already rejected; a failed
+  request used to resolve with `null`. Both reject now.
+
+  ```js
+  // Before
+  const doc = await todos.insert.submit({ title: 'Buy milk' })
+  if (!doc) return showError(todos.insert.error)
+
+  // After
+  try {
+    const doc = await todos.insert.submit({ title: 'Buy milk' })
+  } catch (e) {
+    showError(e)
+  }
+  ```
+
+  `null` no longer means "it failed". A server that answers with `null`
+  resolves with `null`, like any other response. Every `if (!result)` check
+  after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
+  unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
+  rejection.
+- `useList`'s `insert` and `delete` now send to the `baseUrl` you passed to
+  `useList`. They used to ignore it and hit the current origin. `setValue`
+  already honoured it, so all three write methods now agree. `useDoctype` was
+  never affected.
+
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful
