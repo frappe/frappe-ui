@@ -1,4 +1,8 @@
-import { Socket } from 'socket.io-client'
+// `import type`, not a value import used only in type position: this is the
+// last mention of `socket.io-client` at root, and ADR-0010 leans on it being
+// erased. Elision by the bundler is an implementation detail; this is a
+// guarantee.
+import type { Socket } from 'socket.io-client'
 
 export function onDocUpdate(
   socket: Socket,

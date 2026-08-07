@@ -13,8 +13,13 @@
       >
         <slot name="left" />
       </div>
+      <!-- One line, ellipsised. A wrapped title changes the header's height as the
+           user navigates, which shifts the page under it. min-w-0 is what lets this
+           flex child shrink below its content width so truncate has something to do.
+           truncate here covers a plain-text title; a PageHeaderMobileTitle caps
+           itself at this width and ellipsises its own text, so the two never race. -->
       <h1
-        class="mx-[var(--mobile-header-title-inset)] min-w-0 flex-1 overflow-hidden text-center text-xl-semibold leading-tight text-ink-gray-9 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+        class="mx-[var(--mobile-header-title-inset)] min-w-0 flex-1 truncate text-center text-xl-semibold leading-tight text-ink-gray-9"
       >
         <slot>{{ title }}</slot>
       </h1>

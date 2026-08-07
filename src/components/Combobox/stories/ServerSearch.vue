@@ -127,7 +127,13 @@ const options = computed<Member[]>(() => {
 })
 
 function onOpen(isOpen: boolean) {
-  if (isOpen && results.value.length === 0) fetchMembers('')
+  if (!isOpen) return
+  // Binding `query` — or merely listening for `@update:query` — hands
+  // ownership over, so the open-time reset the combobox does for an unbound
+  // query is ours to do. Without it the committed label stays in the search
+  // box and the next keystroke appends to it.
+  query.value = ''
+  if (results.value.length === 0) fetchMembers('')
 }
 </script>
 

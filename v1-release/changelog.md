@@ -237,9 +237,7 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
 
 ### Legacy components — dev-mode warnings
 
-`Input.vue`, `Autocomplete`, and `FormControl type='autocomplete'` warn
-once on mount/use. Migrate to `TextInput`, `Combobox` / `MultiSelect`, and
-`Combobox` standalone respectively.
+`Input.vue` warns once on mount. Migrate to `TextInput`.
 
 `MonthPicker` is deprecated. For simple month picking, use `Select` with month
 options.
@@ -249,6 +247,34 @@ internal `TabButtons` detail.
 
 `ThemeSwitcher` remains exported for v1 compatibility, but is deprecated. For
 new theme switchers, compose `Select` with the `useTheme` composable.
+
+### Autocomplete — removed (breaking)
+
+- **Breaking:** `Autocomplete` and its `AutocompleteProps` type are deleted.
+  Use `Combobox` for one value and `MultiSelect` for several. The import
+  fails, so the build names every call site. `trigger="button"` on either
+  replacement is the shape `Autocomplete`'s default target had: a button
+  showing the selection, with the search box inside the popover.
+- **Breaking, silent:** `FormControl type="autocomplete"` is removed. The
+  dispatcher falls through to `TextInput` and still forwards the type, so the
+  result is `<input type="autocomplete">` — a plain text box, with no build or
+  runtime error. A dev-only `console.error` names the removal.
+- **Breaking, silent:** the `v-model` payload inverts. `Autocomplete` modelled
+  the whole option object; both replacements model the value only. Listen to
+  `@update:selectedOption` where the whole option is needed.
+- **Breaking, silent:** `#target`'s `open` slot prop was the *function* that
+  opened the popover; `#trigger`'s `open` is the open *state*. Anything reading
+  it as a value (`v-if="open"`) was always truthy and now is not.
+- `#target` → `#trigger` otherwise: `Combobox` and `MultiSelect` attach the
+  open toggle to the trigger element themselves, so drop the click handler. A
+  `togglePopover()` carried through the rename throws on click — the popover
+  still opens, so it reads as working while logging an error.
+- Grouped options use `{ group, options }`, not `{ group, items }`. Both
+  normalizers now throw naming the group and the rename, rather than dying
+  inside a `map` call.
+
+Before/after for each silent break is in the
+[migration guide](../docs/content/docs/migration.md#autocomplete-removed).
 
 ### Dropdown — group field standardized on `options`
 
@@ -329,6 +355,135 @@ when there is nothing to label.
 `warnDeprecated` utility. Action mode preserves separator semantics for
 assistive technologies.
 
+### PageHeaderBackButton — `to` is now a fallback (breaking)
+
+`to` used to be the destination. Setting it made every tap push that
+route. It is now used only when there is no in-app history to go back
+to, such as a cold load onto a deep link. Every other tap goes back
+through history.
+
+A back button that always lands on one fixed route is not a back button.
+It drops the user wherever the page author guessed they came from, which
+is wrong for every other way into the page.
+
+Migration: nothing to do if `to` already named the page users came from.
+It now applies only on a cold load. If you need an unconditional push,
+use a plain `Button` with your own `router.push`.
+
+### Editor — media captions moved off `alt` (breaking)
+
+Text in an image's or video's `alt` no longer renders as a caption.
+Captions live in a separate `caption` attribute, serialised as
+`data-caption`. `alt` goes back to being the screen reader description
+only.
+
+Existing `alt` values still parse and still round-trip untouched. They
+just do not display as a caption any more.
+
+The editor no longer edits `alt` at all. The caption field used to write
+it; it now writes `caption`, and no other control took over `alt`. Set it
+from your own content pipeline until an alt field lands.
+
+There is deliberately no fallback from `caption` to `alt`. Stored `alt`
+values are mostly upload filenames and emoji shortcodes, and a real
+caption cannot be told apart from those automatically. Showing all of
+them is worse than showing none.
+
+Migration: to keep a caption visible, copy the text into `caption`. A
+one-off content migration can do that where you know the old `alt`
+values were captions.
+
+### HTTP transport — four paths collapse to one (breaking)
+
+`frappeRequest` is the single transport. Removed from the root export:
+
+- **`request`** — the bare `fetch` wrapper under `frappeRequest`, now
+  internal. Use `frappeRequest`.
+- **`createCall`** — no consumers in any app.
+- **`initSocket`** — no consumers in any app; every one defines its own.
+  `socket.io-client` remains a dependency (`resources/realtime.ts` exports
+  functions typed against its `Socket`).
+
+All three are build failures at the import.
+
+**`call` now honours `setConfig` (silent).** It kept its
+`(method, args, options)` signature, the value it resolves to, and the
+`{ response, status, error }` shape it hands `onError`, but it delegates to
+`frappeRequest` instead of building its own `fetch`. It had never imported
+`getConfig`, so `requestBaseUrl` and `requestHeaders` were ignored on every
+`call()` while `frappeRequest` respected them. Two consequences in apps that
+set either: `call` now goes to the configured base URL with
+`credentials: 'include'`, and `_server_messages` from a `call` now reach
+`serverMessagesHandler`.
+
+**`FrappeRequestError` is now exported.** `frappeRequest` threw it but
+nothing exported it, so a consumer could not type a `catch`.
+
+### `frappeRequest` — `onError` fired twice per failure (fix)
+
+`request()` attached `transformError` with a trailing `.catch`, which also
+caught what `transformResponse` threw. Every failed HTTP response therefore
+ran `onError` twice. It now runs once, because `frappeRequest` marks an error
+it has already reported rather than because the rejection handler sees less.
+That distinction matters: an *ok* response whose body will not parse — Frappe
+answers an expired session with 200 and its login page, so `response.json()`
+throws — is a failure only that handler sees, and it still reaches `onError`.
+
+**A method name starting with `http` skipped the `/api/method/` prefix (fix).**
+The absolute-URL check was `url.startsWith('http')`, which matches the four
+letters rather than a scheme, so `http_utils.api.run` was fetched as a relative
+path. It now matches `https?://`.
+
+`frappeRequest` also gained an
+explicit return type and passes its type argument through, so
+`frappeRequest<Foo>()` resolves to `Foo` rather than `unknown`.
+
+**`login` returned only `message` when `requestBaseUrl` was set (fix).**
+`login` is the one endpoint that resolves to the whole body, so a caller can
+read `full_name` and `home_page`. The check compared the whole URL against
+`/api/method/login`, and `requestBaseUrl` makes that URL absolute, so it
+stopped matching and `login` quietly resolved to `data.message`. It now
+matches on the path.
+
+### `FrappeUI` plugin — one option left (breaking)
+
+`app.use(FrappeUI)` accepts `resources` and nothing else, and no longer
+installs it by default.
+
+- **`socketio` removed.** It defaulted to `true`, so apps that also built
+  their own socket opened two live socket.io connections per page load.
+- **`call` removed.** It installed a `$call` global with no consumers.
+- **`config` removed (silent).** `setConfig` is the entry point. One app
+  passed it.
+- **`resources` no longer defaults to `true`.** The v1 resources Options API
+  mixin — `this.$resources`, `$getResource`, `$getDoc`, `$getListResource`,
+  `$refetchResource` — installs only on
+  `app.use(FrappeUI, { resources: true })`. Composition API resources are
+  unaffected. `resourcesPlugin` stays exported for direct installation.
+
+Because a removed *option* is ignored rather than rejected, the plugin logs a
+dev-mode warning naming any option it does not accept and what to use instead.
+
+**Removed features fail loudly, in production too.** A dropped option that
+evaporates is an annoyance; a dropped feature that evaporates is a mystery
+crash somewhere else. So:
+
+- A component declaring a `resources` option without
+  `app.use(FrappeUI, { resources: true })` throws on creation, naming itself
+  and the fix.
+- Reading `this.$resources` with the option off throws the same advice. Both
+  guards exist because Vue routes what a lifecycle hook throws through its own
+  error handling, which only logs in production — a read throws straight into
+  app code in every build.
+- Reading `this.$socket` or `this.$call`, the two globals the plugin stopped
+  installing, throws a message naming the replacement instead of returning
+  `undefined`. Assigning your own — `app.config.globalProperties.$socket = io(…)`
+  — replaces the guard, before or after `app.use(FrappeUI)`.
+
+`realtime: true` on a v1 resource still degrades quietly to a non-realtime
+resource when no socket is set. That has always been its behaviour and this
+does not change it.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
@@ -342,8 +497,8 @@ assistive technologies.
 | `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
 | Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
 | `Input.vue`                        | `TextInput`                          | Warns on mount                         |
-| `Autocomplete`                     | `Combobox` or `MultiSelect`          | Warns on mount                         |
-| `FormControl type='autocomplete'`  | `Combobox` standalone                | Warns when type is set                 |
+| `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
+| `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
 | DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
 | DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |

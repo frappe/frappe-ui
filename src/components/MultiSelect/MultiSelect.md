@@ -37,7 +37,7 @@ Use `#search-prefix` and `#search-suffix` to add content around the popover's se
 <ComponentPreview name="MultiSelect-SearchSlots" />
 
 ## Server Search
-Fetch options from a server as the user types. Listen to `@update:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Three things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, and merge currently-selected items into the options array so chips stay resolvable after the query narrows the list.
+Fetch options from a server as the user types. Bind `v-model:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Four things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, merge currently-selected items into the options array so chips stay resolvable after the query narrows the list, and clear the query yourself when the popover opens — see the note below on who owns it.
 
 <ComponentPreview name="MultiSelect-AsyncOptions" />
 
@@ -94,9 +94,12 @@ function reset() {
 
 ## Notes
 
-- `v-model:query` is optional. `#search-prefix`, `#search-suffix`, and
-  `#footer` all hand out the current query, and `@update:query` alone is enough
-  just to observe typing.
+- `v-model:query` is optional, but **listening for `@update:query` already
+  makes the query yours.** There is no observe-only mode: an `@update:query`
+  handler counts as binding it, so the component stops resetting the search box
+  and the last committed text stays in it. If you listen, bind `v-model:query`
+  too and clear it on `@update:open`. To read the query without owning it, use
+  `#search-prefix`, `#search-suffix`, or `#footer`, which all hand it out.
 - Use `#item-prefix`, `#item-label`, and `#item-suffix` to customize the
   standard option row; reach for `#item` only when you need to replace the row
   shell too.

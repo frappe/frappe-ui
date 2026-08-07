@@ -172,7 +172,7 @@ import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 import call from '../../src/utils/call';
 import FeatherIcon from '../../src/components/FeatherIcon.vue'
-import initSocket from "../../src/utils/socketio";
+import { io } from 'socket.io-client'
 import Popover from "../../src/components/Popover/Popover.vue"
 import TabButtons from '../../src/components/TabButtons/TabButtons.vue';
 
@@ -189,8 +189,27 @@ const props = defineProps<{
     doctypeMap: Record<string, { title: string; listRoute?: string; pageRoute?: string }>
 }>()
 
+declare global {
+    interface Window {
+        site_name?: string
+    }
+}
+
+// Was `initSocket()` from src/utils/socketio, which is gone — it was a public
+// export nothing imported, and every app has long since written its own. This
+// is that helper inlined at its one remaining call site.
+function connectSocket() {
+    let host = window.location.hostname
+    let siteName = import.meta.env.DEV ? host : window.site_name
+    let port = window.location.port ? ':9000' : ''
+    let protocol = port ? 'http' : 'https'
+    return io(`${protocol}://${host}${port}/${siteName}`, {
+        withCredentials: true,
+    })
+}
+
 onMounted(async () => {
-    let socket = initSocket();
+    let socket = connectSocket();
     socket.on("data_import_refresh", (data: { data_import: string }) => {
         reloadPreviewData(data.data_import);
     })

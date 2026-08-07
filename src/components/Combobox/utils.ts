@@ -1,5 +1,6 @@
 import {
   matchesByLabelOrValue,
+  readGroupOptions,
   resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
@@ -125,7 +126,7 @@ export function normalizeComboboxOptions(
     if (isGroupedOption(option)) {
       flushUngrouped()
 
-      const normalizedOptions = option.options
+      const normalizedOptions = readGroupOptions(option, 'Combobox')
         .map(normalizeSimpleOption)
         .filter((item): item is NormalizedItem => Boolean(item))
 
