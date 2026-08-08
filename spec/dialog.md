@@ -398,7 +398,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 | `#body` slot | `#default` + `bare` prop |
 | `action.onClick(callableContext)` shim | `action.onClick({ close })` |
 | `confirmDialog()` helper | `dialog.confirm()` |
-| `ConfirmDialog.vue` component | mounted internally by `dialog.confirm()`; not part of v1 public surface |
+| `ConfirmDialog.vue` component | deleted — `dialog.confirm()` renders its own internal dialog, not this component |
 
 `<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe (the second mount has no extra effect, but the imperative dialog stack lives in a shared module-level ref so the same stack drives both).
 
@@ -414,7 +414,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 <Dialog v-model:open="show" title="X" size="xl" />
 ```
 
-The flat props win over `options` keys, so partial migration (changing some keys to flat while leaving others in `options`) is safe but will continue to warn.
+The `options` prop is removed. Migrate every key to its matching flat prop — any value left behind in an `options` object is silently ignored.
 
 ### From `#body` to `#default` + `bare`
 
