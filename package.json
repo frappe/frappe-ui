@@ -83,6 +83,7 @@
       "default": "./tailwind/index.js"
     },
     "./vite": {
+      "types": "./vite/index.d.ts",
       "import": "./vite/index.js"
     },
     "./vite/lucideIconsPlugin": {
