@@ -1,11 +1,7 @@
+import { h } from 'vue'
 import Checkbox from './Checkbox.vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Checkbox', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   it('renders', () => {
     cy.mount(Checkbox, { props: { label: 'abc' } })
 
@@ -34,6 +30,31 @@ describe('Checkbox', () => {
     cy.get('[data-slot="description"]')
       .should('have.class', 'text-ink-gray-3')
       .and('not.have.class', 'text-ink-gray-5')
+  })
+
+  it('toggles with the space key', () => {
+    cy.mount(Checkbox, {
+      props: {
+        label: 'Accept',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('input[type="checkbox"]').focus().type(' ')
+    cy.get('@onUpdate').should('have.been.calledWith', true)
+  })
+
+  it('renders the label and description slots', () => {
+    cy.mount(Checkbox, {
+      props: { label: 'prop label', description: 'prop description' },
+      slots: {
+        label: () => h('span', 'slot label'),
+        description: () => h('span', 'slot description'),
+      },
+    })
+
+    cy.contains('slot label').should('exist')
+    cy.contains('slot description').should('exist')
   })
 
   it('test v-model', () => {
@@ -98,17 +119,6 @@ describe('Checkbox', () => {
         props: { label: 'Accept', disabled: true },
       })
       cy.get('input').should('have.attr', 'data-disabled', 'true')
-    })
-
-    it('warns once when the deprecated `padding` prop is used', () => {
-      cy.window().then((win) => {
-        cy.spy(win.console, 'warn').as('consoleWarn')
-      })
-      cy.mount(Checkbox, { props: { label: 'abc', padding: true } })
-      cy.get('@consoleWarn').should(
-        'have.been.calledWithMatch',
-        /Checkbox\.padding is deprecated/,
-      )
     })
   })
 

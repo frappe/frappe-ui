@@ -20,7 +20,7 @@ This is the rulebook that governs API design across `frappe-ui`. Every principle
 
 ### P1. Name behaviors, not interactions
 
-**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
+**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. The same holds for every name an export hands back — composable return members, `defineExpose` members, utility and plugin export names. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
 
 Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), don't rename it. The principle applies when the component layers its own state or intent above the raw event.
 
@@ -37,6 +37,11 @@ Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), do
 <Dialog @dismiss="..." />
 <TextInput @submit="..." />
 ```
+
+Accepted v1 carve-outs:
+- The v1 resource surface (`createResource`, `createListResource`, `createDocumentResource`) and the v2 data-fetching composables (`useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`) keep every member name they ship today — including three names for one fetch (v1 `fetch` / `reload` / `submit`, v2 `execute` / `fetch` / `reload`) and two for one loading ref (v2 `loading` / `isFetching`). These names don't meet the rule; renaming them costs every consumer a migration and buys a tidier surface, and that trade is worse than the violation.
+
+P13 freezes them at the v1 tag and ADR-0008 leaves no room for a compatible rename, so they ship as-is until `2.0.0`.
 
 ---
 
@@ -348,6 +353,8 @@ The exact data-slot / data-state taxonomy is per component family; each family's
 - The generic **`#prefix` / `#suffix` slots** (P6) are the full-control override — not a parallel `#icon` slot competing with the prop.
 
 **The Button exception:** Button has a singular `#icon` slot (and `icon` prop with no left/right pair) because square icon-only buttons are a standard, common component.
+
+**The Rating exception:** Rating pairs its `icon` prop with an `#icon` slot. The star glyph *is* the component's content — `#prefix`/`#suffix` don't exist on it — and the slot receives per-star fill state (`state`, `previewValue`, …) that a prop cannot carry, which P7 requires for state-driven rendering (e.g. per-position emoji scales).
 
 **Forbidden:**
 - Structured icon-config objects (`icon: { name, theme, … }`). Identity is one value; theme/size are component-level concerns, not fields packed inside the icon prop.

@@ -39,14 +39,6 @@
     type: 'string | Component'
   },
   {
-    name: 'labelClasses',
-    description: 'Custom classes applied to the label element.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `data-*` styling hooks instead.'
-  },
-  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,

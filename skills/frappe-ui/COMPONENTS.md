@@ -102,10 +102,10 @@ Inline banner. `<Alert :title variant theme>` + slot for body.
 
 ### `Tooltip` — see Overlays.
 
-### `Progress` / `CircularProgressBar` / `Spinner` / `LoadingIndicator` / `LoadingText`
+### `Progress` / `Spinner` / `LoadingIndicator` / `LoadingText`
 - `Spinner` / `LoadingIndicator` for inline loading.
 - `LoadingText` for skeleton-style text placeholder.
-- `Progress` linear; `CircularProgressBar` radial.
+- `Progress` linear; `intervals` turns it into a step indicator. (No radial variant — `CircularProgressBar` was removed before 1.0.0.)
 
 ### `Divider`
 Horizontal/vertical rule. Prefer over `<hr class="..." />`.

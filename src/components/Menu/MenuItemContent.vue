@@ -192,10 +192,9 @@ function handleSwitchChange(value: boolean) {
       <Switch
         v-else-if="trailing === 'switch'"
         class="ml-auto"
-        label-classes="cursor-pointer font-normal"
         :disabled="item.disabled"
         :model-value="item.switchValue || false"
-        @change="handleSwitchChange"
+        @update:model-value="handleSwitchChange"
       />
       <span
         v-else-if="trailing === 'submenu'"

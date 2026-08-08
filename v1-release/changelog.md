@@ -9,6 +9,29 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Toggles and ranged inputs — deprecated members removed
+
+Per ADR-0008, the family's deprecated aliases are **removed**, not shipped
+frozen. All five had zero call sites across the consumer apps. These are
+silent breaks — old code compiles and runs, but the name is ignored (see the
+migration guide's Inputs table):
+
+- `Rating.rating_from` → `max`; `Rating.readonly` → `disabled`.
+- `Switch.change` emit → `v-model` / `@update:modelValue`; `Switch.labelClasses`
+  → `data-*` styling hooks.
+- `Checkbox.padding` → `padded`.
+
+`Slider` now exports its types (`SliderProps`, `SliderEmits`, `SliderValue`),
+and `Rating` exports `RatingEmits`.
+
+### CircularProgressBar — removed
+
+- **Breaking:** `CircularProgressBar` is no longer exported (loud — the import
+  fails). It was a second component for `Progress`'s concept (P8), with
+  hardcoded light-mode colors and a structured `theme` object prop (P3/P4).
+  One call site existed across all consumer apps. Use `Progress`, or copy the
+  old SFC into your app if you need the radial form.
+
 ### Node.js requirement
 
 - **Breaking:** Node floor is now `>=20.19.0` (was Node 18 on 0.1.x). Declared
@@ -226,7 +249,8 @@ CSS can target inputs without class-injection props:
 
 ### Rating — `max` replaces `rating_from`
 
-Default `5`. Old name still works as a deprecated alias. `Rating` no
+Default `5`. (The old name was kept as a deprecated alias during the betas
+and is now removed — see "Toggles and ranged inputs" above.) `Rating` no
 longer imports `FeatherIcon`; default star comes from `lucide-star` via
 the shared Tailwind plugin. Filled stars now render visibly for non-zero
 values.
@@ -248,11 +272,12 @@ values.
 
 No longer imports `FeatherIcon`. `icon` is now `string | Component`;
 `lucide-*` strings route through the shared Tailwind plugin. `labelClasses`
-and the `change` emit are deprecated. Row hover/active background removed.
+and the `change` emit were deprecated during the betas and are now removed
+(see "Toggles and ranged inputs" above). Row hover/active background removed.
 
 ### Checkbox — `padding` deprecated
 
-In favor of `data-*` styling hooks.
+In favor of `padded`. (Now removed — see "Toggles and ranged inputs" above.)
 
 ### Textarea — `ghost` variant; `required` prop
 
@@ -775,10 +800,11 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | ---------------------------------- | ------------------------------------ | -------------------------------------- |
 | `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
 | `Password.value` prop              | `v-model` / `modelValue`             | Warns when set                         |
-| `Rating.rating_from` prop          | `max`                                | Silent alias; warns when set           |
-| `Switch.change` emit               | `update:modelValue` / `v-model`      | Warns when bound                       |
-| `Switch.labelClasses` prop         | `data-*` styling hooks               | Warns when set                         |
-| `Checkbox.padding` prop            | `data-*` styling hooks               | Warns when set                         |
+| `Rating.rating_from` prop          | `max`                                | **Removed** — silent; prop ignored     |
+| `Rating.readonly` prop             | `disabled`                           | **Removed** — silent; prop ignored     |
+| `Switch.change` emit               | `update:modelValue` / `v-model`      | **Removed** — silent; listener never fires |
+| `Switch.labelClasses` prop         | `data-*` styling hooks               | **Removed** — silent; prop ignored     |
+| `Checkbox.padding` prop            | `padded` / `data-*` styling hooks    | **Removed** — silent; prop ignored     |
 | `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
 | Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
 | `Input.vue`                        | `TextInput`                          | Warns on mount                         |

@@ -145,7 +145,6 @@ export * from './components/TextEditor/extensions/suggestion'
 
 // Charts
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
-export * from './components/CircularProgressBar'
 export { default as DonutChart } from './components/Charts/DonutChart.vue'
 export { default as ECharts } from './components/Charts/ECharts.vue'
 export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
