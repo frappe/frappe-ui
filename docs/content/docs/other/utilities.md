@@ -160,7 +160,76 @@ option the plugin doesn't accept logs a warning in development.
 
 ## useFileUpload / FileUploadHandler
 
-Covered on the [`FileUploader`](../components/fileuploader) page — `useFileUpload()` is
-the composable entry point for a custom upload UI; `FileUploadHandler` is the
-event-emitter class the component itself is built on, for callers that want
-`.on('progress' | 'start' | 'finish' | 'error', …)` instead of reactive state.
+Two lower-level primitives for posting a file to Frappe's upload endpoint
+without the [`FileUploader`](../components/fileuploader) component — reach
+for them for a custom trigger, multi-file upload, or a fully headless flow.
+`FileUploader` is the ready-made UI built on top of `FileUploadHandler`.
+
+Uploads default to **private** — an upload with no stated `private` /
+`is_private` resolves to `is_private=1`. Pass `private: false` only for
+intentionally public files.
+
+### useFileUpload
+
+A composable with reactive upload state.
+
+```vue
+<script setup>
+import { useFileUpload } from 'frappe-ui'
+
+const { upload, state, isUploading, progress, error, result, reset } =
+  useFileUpload()
+
+async function onFile(file) {
+  await upload(file, { doctype: 'ToDo', docname: 'TODO-0001' })
+  // result.value (same as state.result) now holds the uploaded file
+}
+</script>
+```
+
+`upload(file, options)` resets state, uploads the file, and resolves to the
+uploaded file's record (or rejects with an `Error`). `state` — and the
+`isUploading` / `progress` / `error` / `result` computed refs read from it —
+update as the request runs. `reset()` clears `state` back to its initial
+values without uploading anything.
+
+`options` (`UploadOptions`):
+
+| Option                       | Type                                       | Notes                                                |
+| ----------------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| `private`                     | `boolean`                                    | Defaults to `true`. Pass `false` for public files.     |
+| `is_private`                  | `boolean \| 0 \| 1 \| '0' \| '1'`             | Alternate spelling; `private` wins if both are set.    |
+| `folder`                      | `string`                                     | Defaults to `Home`.                                    |
+| `doctype` / `docname` / `fieldname` | `string`                               | Attaches the upload to a document field.               |
+| `file_url`                    | `string`                                     | Replaces the file at an existing URL.                  |
+| `method`                      | `string`                                     | A whitelisted method to call instead of the default upload handler. |
+| `type`                        | `string`                                     | Passed through to the upload endpoint as-is.           |
+| `upload_endpoint`             | `string`                                     | Defaults to `/api/method/upload_file`.                 |
+| `optimize`                    | `boolean`                                    | Resize the image server-side.                          |
+| `max_width` / `max_height`    | `number`                                     | Applied when `optimize` is set.                        |
+| `params`                      | `object`                                     | Extra form fields, appended as-is.                      |
+| `signal`                      | `AbortSignal`                                 | Cancels the upload.                                     |
+| `onProgress`                  | `(p: { loaded, total, percent }) => void`     | Called on every progress tick.                          |
+
+### FileUploadHandler
+
+An event-emitter class, for callers that want `.on(…)` instead of reactive
+state — this is what `FileUploader` itself uses internally.
+
+```ts
+import { FileUploadHandler } from 'frappe-ui'
+
+const handler = new FileUploadHandler()
+handler.on('start', () => {})
+handler.on('progress', ({ uploaded, total }) => {})
+handler.on('error', (error) => {})
+handler.on('finish', () => {})
+
+const result = await handler.upload(file, { doctype: 'ToDo' })
+```
+
+`upload(file, options)` takes the same `UploadOptions` as `useFileUpload` and
+resolves to the uploaded file's record, rejecting on failure. The events fire
+alongside the promise, for callers that want to hook progress without
+awaiting: `start` (request began), `progress` (`{ uploaded, total }`), `error`
+(the raw server error, if any), `finish` (upload succeeded).
