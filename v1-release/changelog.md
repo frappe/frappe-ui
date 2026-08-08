@@ -815,6 +815,23 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### `tsconfig.base.json` — cleaned up (breaking for extenders)
+
+- **Breaking:** `tsconfig.base.json` no longer sets `types`
+  (`vitest/globals`, `unplugin-icons/types/vue`, `node`) or the `noEmit` /
+  `declaration` / `emitDeclarationOnly` trio. If your app extends this file
+  and relies on any of these, add them to your own `tsconfig.json`. Without
+  the `types` fix, `tsc` fails with a missing-global error (e.g. `Cannot
+  find name 'vi'`) the first time a global that used to come from
+  `vitest/globals` or `unplugin-icons/types/vue` is referenced.
+
+### `./hljs-theme.css` export removed
+
+- **Breaking:** `frappe-ui/hljs-theme.css` is no longer exported. It had zero
+  importers. The underlying file
+  (`src/components/TextEditor/hljs-github.css`) ships until the deprecated
+  `TextEditor` is removed.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
