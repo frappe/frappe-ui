@@ -82,10 +82,6 @@
       "import": "./tailwind/index.js",
       "default": "./tailwind/index.js"
     },
-    "./tailwind/tokens.js": {
-      "import": "./tailwind/tokens.js",
-      "default": "./tailwind/tokens.js"
-    },
     "./vite": {
       "types": "./vite/index.d.ts",
       "import": "./vite/index.js"
@@ -109,7 +105,6 @@
   "files": [
     "frappe",
     "src",
-    "scripts",
     "vite",
     "icons",
     "tailwind",

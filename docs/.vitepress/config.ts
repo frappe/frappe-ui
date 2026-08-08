@@ -69,6 +69,7 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
+        { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
         { text: 'Typography', link: '/docs/foundations/typography' },

@@ -9,6 +9,29 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — `content` export added
+
+`frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
+directories that emit Tailwind classes. Spread it into your app's
+`tailwind.config.js` `content` array instead of hand-maintaining the paths —
+see the new [Tailwind Setup](/docs/foundations/tailwind) docs page. Tailwind
+v3 doesn't merge a preset's `content`, so this was previously unavoidable
+hand-maintenance, and it had already drifted: some apps on
+`frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every
+class the editor and list molecules emit.
+
+### Tailwind preset — `tokens.js` export removed (breaking)
+
+The `./tailwind/tokens.js` export is removed outright, with no deprecation
+window. It had zero importers anywhere and re-exported `colorPalette.js` via
+`export *`, the implementation-module re-export pattern disallowed by P15.
+Use the preset (`frappe-ui/tailwind`) directly.
+
+This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
+the freeze that requires a deprecation window starts at the tag, not before
+it. Zero call sites is also why it's a same-release removal rather than a
+carried-forward deprecation: there is no consumer for a warning to reach.
+
 ### `frappe-ui/vite` — types and docs
 
 `frappe-ui/vite` now ships hand-written types (`vite/index.d.ts`, wired via
@@ -18,6 +41,7 @@ the `types` export condition), so `frappeui(...)` and its options
 `// @ts-expect-error` workaround. Also added a
 [docs page](../docs/content/docs/other/vite.md) covering every sub-plugin,
 including `barrelImports` — previously undocumented on the docs site.
+
 ### list-style.css and editor-style.css exports — removed
 
 - **Breaking:** the manual `frappe-ui/list-style.css` and
