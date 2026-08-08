@@ -21,3 +21,8 @@ each.
   standalone [`Combobox`](./combobox), which exposes the full set of slots
   and props without the wrapper layer. Removing this one is **silent**:
   the type falls through to a plain text input rather than failing.
+- **`TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`** — use
+  [`Editor`](../molecules/editor) and its building blocks from the
+  `frappe-ui/editor` subpath. See the [Editor migration
+  section](../migration#editor) for the full before/after.

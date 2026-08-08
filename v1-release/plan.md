@@ -356,14 +356,24 @@ Key items:
 ### 4. TextEditor stabilization
 
 **v1 carve-out:** TextEditor's public API is **not** frozen for 1.0. The
-component ships in 1.0 as-is. A full refactor (internals + public API
-redesign + the open behavioral fixes) lands in **1.1** with a documented
-migration path. Until then, the existing TextEditor surface is supported
-unchanged.
+component ships in 1.0 as-is — no changes to `TextEditor.vue`'s own props,
+slots, or emits. A full refactor (internals + public API redesign + the open
+behavioral fixes) lands in **1.1** with a documented migration path.
+
+This carve-out is about the *component's own API*, not its export surface.
+ADR-0008 still reaches the deprecated root exports (`TextEditor`,
+`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`, and the `extensions/image` /
+`extensions/suggestion` barrels) — those are removed from `frappe-ui` at 1.0
+(#884), same as every other `@deprecated` export. The component files stay in
+the package, unmodified, as `frappe-ui/editor`'s migration safety net; they're
+just no longer reachable from any public import path until the 1.1 redesign
+gives them one.
 
 Required for 1.0:
 
-- no changes to `TextEditor.vue` public API
+- no changes to `TextEditor.vue` public API (the component's own props/slots/emits)
+- the deprecated root exports removed per ADR-0008 (#884)
 - release notes explicitly state the carve-out
 
 Deferred to 1.1 (bundled into a single refactor effort):
