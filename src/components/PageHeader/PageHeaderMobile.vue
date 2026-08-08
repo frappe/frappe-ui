@@ -42,6 +42,15 @@ import type { PageHeaderMobileProps } from './types'
 
 defineProps<PageHeaderMobileProps>()
 
+defineSlots<{
+  /** A control left of the centered title — usually a `PageHeaderBackButton`. */
+  left?: () => any
+  /** The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`. */
+  default?: () => any
+  /** A control right of the centered title — usually an action button. */
+  right?: () => any
+}>()
+
 const slots = useSlots()
 const hasLeftSlot = computed(() => Boolean(slots.left))
 const hasRightSlot = computed(() => Boolean(slots.right))

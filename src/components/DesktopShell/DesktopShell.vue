@@ -54,6 +54,15 @@ withDefaults(
   { scroll: true },
 )
 
+defineSlots<{
+  /** The icon column — usually a `Rail`. Omit it on shells that don't use one. */
+  rail?: () => any
+  /** The navigation panel — usually a `Sidebar`. Render it conditionally to hide it on routes that don't need it. */
+  sidebar?: () => any
+  /** The routed page content, placed in the scroll region (or the fixed-height pane when `scroll` is `false`). */
+  default?: () => any
+}>()
+
 const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null)
 
 // Register the real scrolling viewport once ScrollArea exposes it, and follow it
