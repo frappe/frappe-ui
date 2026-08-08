@@ -6,7 +6,7 @@
     <div class="flex flex-col gap-1">
       <slot>
         <div class="inline-flex gap-2 items-center font-medium">
-          <FeatherIcon class="h-4" name="info" />
+          <span class="lucide-info h-4" aria-hidden="true" />
           Loved the demo?
         </div>
         <div class="text-ink-gray-7 text-p-sm">

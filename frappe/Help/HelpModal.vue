@@ -20,7 +20,7 @@
           />
         </Button>
         <Button variant="ghost" @click="show = false">
-          <FeatherIcon name="x" class="h-3.5" />
+          <span class="lucide-x h-3.5" aria-hidden="true" />
         </Button>
       </div>
     </div>
@@ -65,7 +65,6 @@ import { useOnboarding } from '../Onboarding/onboarding'
 import { showHelpCenter } from '../HelpCenter/helpCenter'
 import { minimize } from '../Help/help'
 import { onMounted, computed } from 'vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 
 const props = defineProps({
   appName: {

@@ -28,8 +28,8 @@ export * from './components/Breadcrumbs'
 export * from './components/Button'
 export * from './components/Divider'
 export * from './components/Icon'
-export { default as LoadingIndicator } from './components/LoadingIndicator.vue'
-export { default as LoadingText } from './components/LoadingText.vue'
+export * from './components/LoadingIndicator'
+export * from './components/LoadingText'
 export * from './components/Progress'
 export * from './components/Rating'
 export * from './components/Skeleton'
@@ -116,19 +116,8 @@ export {
 } from './composables/useShortcut'
 
 // Deprecated component compatibility
-/** @deprecated Use layout markup or domain-specific components instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as Card } from './components/Card.vue'
-/** @deprecated Use lucide icon names or the `Icon` component instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as FeatherIcon } from './components/FeatherIcon.vue'
-/** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as ListItem } from './components/ListItem.vue'
 /** @deprecated Use `Select` for month picking instead. */
 export * from './components/MonthPicker'
-/** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
-export { default as Toast } from './components/Toast/Toast.vue'
 /** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
 /** @deprecated Use the `frappe-ui/editor` subpath instead. */

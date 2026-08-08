@@ -25,9 +25,9 @@
             {{ 'You are all set' }}
           </div>
         </div>
-        <FeatherIcon
-          name="x"
-          class="h-4 cursor-pointer"
+        <span
+          class="lucide-x h-4 cursor-pointer"
+          aria-hidden="true"
           @click="
             () => {
               showHelpCenter = true
@@ -47,7 +47,7 @@
       @click="openOnboarding"
     >
       <template #prefix>
-        <FeatherIcon name="chevrons-right" class="size-4" />
+        <span class="lucide-chevrons-right size-4" aria-hidden="true" />
       </template>
     </Button>
   </div>
@@ -58,7 +58,6 @@
 <script setup>
 import StepsIcon from '../../icons/StepsIcon.vue'
 import Button from '../../src/components/Button/Button.vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import { useOnboarding } from './onboarding'
 import { showHelpCenter } from '../HelpCenter/helpCenter'
 import { showHelpModal, minimize } from '../Help/help'
