@@ -14,7 +14,7 @@
           'h-8 text-base': size === 'md' || !size,
           'h-10 text-lg': size === 'lg',
           'h-10 text-2xl': size === 'xl',
-          'opacity-50 pointer-events-none': disabled || loading
+          'opacity-50 pointer-events-none': disabled || isLoading
         }
       ]"
     >
@@ -23,7 +23,7 @@
           <button
             type="button"
             class="flex items-center gap-1.5 pl-2.5 pr-1 focus:outline-none select-none shrink-0 cursor-pointer text-ink-gray-8 hover:text-ink-gray-9 h-full"
-            :disabled="disabled || loading"
+            :disabled="disabled || isLoading"
             @click="togglePopover"
           >
             <img
@@ -90,7 +90,7 @@
         :value="phoneNumber"
         type="tel"
         :placeholder="placeholder || 'Enter phone number'"
-        :disabled="disabled || loading"
+        :disabled="disabled || isLoading"
         :minlength="minlength"
         :maxlength="maxlength"
         :required="required"
@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import TextInput from '../TextInput/TextInput.vue'
 import Popover from '../Popover/Popover.vue'
 import FeatherIcon from '../FeatherIcon.vue'
@@ -148,7 +148,9 @@ const containerClasses = computed(() => {
 })
 
 const countriesList = ref<CountryCode[]>(defaultCountries)
-const loading = ref(false)
+const fetchingCountries = ref(false)
+const isLoading = computed(() => Boolean(props.loading || fetchingCountries.value))
+
 const searchQuery = ref('')
 const currentCountry = ref<CountryCode | null>(null)
 const phoneNumber = ref('')
@@ -164,21 +166,7 @@ const filteredCountries = computed(() => {
   )
 })
 
-onMounted(async () => {
-  if (props.countries?.length) {
-    countriesList.value = props.countries
-  } else if (props.fetchCountries) {
-    loading.value = true
-    try {
-      const res = await props.fetchCountries()
-      if (res?.length) {
-        countriesList.value = res
-      }
-    } finally {
-      loading.value = false
-    }
-  }
-
+function setDefaultCountry() {
   const targetCountry = props.default_country || 'in'
   currentCountry.value =
     countriesList.value.find(
@@ -186,12 +174,93 @@ onMounted(async () => {
         c.code.toLowerCase() === targetCountry.toLowerCase() ||
         c.name.toLowerCase() === targetCountry.toLowerCase()
     ) || countriesList.value[0] || null
+}
+
+function parseAndSetModelValue(val?: string) {
+  if (!val) {
+    phoneNumber.value = ''
+    if (!currentCountry.value) {
+      setDefaultCountry()
+    }
+    return
+  }
+
+  let dial = ''
+  let num = val
+
+  if (val.includes('-')) {
+    const parts = val.split('-')
+    dial = parts[0].trim()
+    num = parts.slice(1).join('-').trim()
+  } else if (val.startsWith('+')) {
+    const sorted = [...countriesList.value].sort((a, b) => b.dialCode.length - a.dialCode.length)
+    const matched = sorted.find((c) => val.startsWith(c.dialCode))
+    if (matched) {
+      dial = matched.dialCode
+      num = val.slice(matched.dialCode.length).trim()
+    }
+  }
+
+  if (dial) {
+    const found = countriesList.value.find(
+      (c) => c.dialCode.toLowerCase() === dial.toLowerCase() || c.code.toLowerCase() === dial.toLowerCase()
+    )
+    if (found) {
+      currentCountry.value = found
+    }
+  }
+
+  phoneNumber.value = num.replace(/[^0-9\s-]/g, '')
+}
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    const currentFullValue = `${currentCountry.value?.dialCode || ''}-${phoneNumber.value}`
+    if (newVal !== currentFullValue) {
+      parseAndSetModelValue(newVal)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.countries,
+  (newCountries) => {
+    if (newCountries?.length) {
+      countriesList.value = newCountries
+      setDefaultCountry()
+      parseAndSetModelValue(props.modelValue)
+    }
+  }
+)
+
+onMounted(async () => {
+  if (props.countries?.length) {
+    countriesList.value = props.countries
+  } else if (props.fetchCountries) {
+    fetchingCountries.value = true
+    try {
+      const res = await props.fetchCountries()
+      if (res?.length) {
+        countriesList.value = res
+      }
+    } finally {
+      fetchingCountries.value = false
+    }
+  }
+
+  if (!currentCountry.value) {
+    setDefaultCountry()
+  }
+  parseAndSetModelValue(props.modelValue)
 })
 
-function selectCountry(country: CountryCode, closePopover: () => void) {
+function selectCountry(country: CountryCode, closePopover?: () => void) {
   currentCountry.value = country
   emit('country-change', country)
   emitValue()
+  closePopover?.()
 }
 
 function handleInput(e: Event) {
