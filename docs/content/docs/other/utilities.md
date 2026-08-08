@@ -158,17 +158,9 @@ APIs, and every Composition API data helper work without installing anything —
 wrap your app in [`FrappeUIProvider`](../getting-started) instead. Passing an
 option the plugin doesn't accept logs a warning in development.
 
-## fileToBase64
+## useFileUpload / FileUploadHandler
 
-This function will return the base64 string of a
-[File object](https://developer.mozilla.org/en-US/docs/Web/API/File_API).
-
-```vue
-<script setup>
-import { fileToBase64 } from 'frappe-ui'
-
-async function onFile(file) {
-  const base64 = await fileToBase64(file) // file must be an instance of File
-}
-</script>
-```
+Covered on the [`FileUploader`](../components/fileuploader) page — `useFileUpload()` is
+the composable entry point for a custom upload UI; `FileUploadHandler` is the
+event-emitter class the component itself is built on, for callers that want
+`.on('progress' | 'start' | 'finish' | 'error', …)` instead of reactive state.
