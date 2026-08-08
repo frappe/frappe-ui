@@ -15,7 +15,8 @@
     "frappe/**/*.tsx",
     "frappe/**/*.vue",
     "frappe/index.js",
-    "frappe/index.d.ts"
+    "frappe/index.d.ts",
+    "vite/index.d.ts"
   ],
   "exclude": [
     "src/**/*.cy.ts",
