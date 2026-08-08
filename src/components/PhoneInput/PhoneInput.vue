@@ -154,6 +154,7 @@ const isLoading = computed(() => Boolean(props.loading || fetchingCountries.valu
 const searchQuery = ref('')
 const currentCountry = ref<CountryCode | null>(null)
 const phoneNumber = ref('')
+const isReady = ref(false)
 
 const filteredCountries = computed(() => {
   if (!searchQuery.value) return countriesList.value
@@ -216,6 +217,7 @@ function parseAndSetModelValue(val?: string) {
 watch(
   () => props.modelValue,
   (newVal) => {
+    if (!isReady.value) return
     const currentFullValue = `${currentCountry.value?.dialCode || ''}-${phoneNumber.value}`
     if (newVal && newVal !== currentFullValue) {
       parseAndSetModelValue(newVal)
@@ -258,6 +260,7 @@ onMounted(async () => {
   }
 
   parseAndSetModelValue(props.modelValue)
+  isReady.value = true
 })
 
 function selectCountry(country: CountryCode, closePopover?: () => void) {
