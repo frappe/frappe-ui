@@ -15,11 +15,13 @@ describe('LoadingIndicator', () => {
     })
   })
 
-  it('scale=50 applies a 50% inline scale style', () => {
+  it('scale=50 applies a scale style', () => {
     cy.mount(LoadingIndicator, { props: { scale: 50 } })
 
     cy.get('[role="status"]').should(($el) => {
-      expect($el[0].style.scale).to.equal('50%')
+      // The browser normalizes the CSS `scale` property's percentage
+      // value to a unitless number when it reflects `style.scale`.
+      expect($el[0].style.scale).to.equal('0.5')
     })
   })
 })
