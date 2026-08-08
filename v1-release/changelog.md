@@ -9,6 +9,40 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### CommandPalette — `show` renamed to `open` (breaking, silent)
+
+`show` → `open`, matching the rest of the library's overlay vocabulary
+(`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
+error, so the palette just never opens — grep for `CommandPalette` and
+`v-model:show` after upgrading. `Mod+K` now opens the palette on its own
+(registered internally via `useShortcut`); delete any app-level keydown
+listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
+gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
+`string | Component` (lucide class strings, emoji, or a component) instead of
+components only.
+
+### KeyboardShortcut — deprecated `shortcut` and unused modifier props removed (breaking)
+
+Per ADR-0008, the deprecated `shortcut` prop (superseded by `combo`) is
+removed rather than shipped frozen — it had zero call sites. The `meta` /
+`ctrl` / `shift` / `alt` boolean props are also removed (Rule 9: zero real
+usage, superseded by `combo`). Both are **loud** breaks (removed props on a
+typed component). Also moved from a bare `KeyboardShortcut.vue` into its own
+directory with a `types.ts`, a docs page, and a Cypress test.
+
+### KeyboardShortcutsModal / useShortcut — brought to bar
+
+`KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously
+only unit-tested). `useShortcut` gained a short entry on the
+[composables page](../docs/content/docs/other/composables.md); its API was
+already stable and is unchanged.
+
+### SettingsDialog — `SettingsBody`'s exposed type
+
+`SettingsBody`'s `viewportElement` expose now has a typed
+`SettingsBodyExposed` type (ADR-0012), exported from `frappe-ui`. No
+behavior change.
+
 ### Tailwind preset — `content` export added
 
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
