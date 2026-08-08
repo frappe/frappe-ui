@@ -22,10 +22,10 @@ Per ADR-0008, the deprecated v0 editor exports are removed from top-level
 
 Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
 blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
-[Editor section](../docs/content/docs/migration.md#editor). `frappe-ui`
-confirms `CONTEXT.md`'s rule: the editor family is the only subsystem that
-exports from a subpath rather than root, and there are nothing editor-related
-left exported from root.
+[Editor section](../docs/content/docs/migration.md#editor). This confirms
+`CONTEXT.md`'s rule: the editor family is the only subsystem that exports
+from a subpath rather than root, and nothing editor-related is exported from
+root anymore.
 
 The underlying v0 component files (`src/components/TextEditor/`) still ship,
 unmodified, as `frappe-ui/editor`'s migration safety net — only the public
