@@ -4,8 +4,7 @@
 `tailwind.config.js`:
 
 ```js
-import preset from 'frappe-ui/tailwind'
-import { content } from 'frappe-ui/tailwind'
+import preset, { content } from 'frappe-ui/tailwind'
 
 export default {
   presets: [preset],
@@ -31,6 +30,8 @@ folders emit Tailwind classes and list them itself. Left hand-maintained, that
 list drifts: two apps on `frappe-ui@1.0.0-beta` only glob
 `src/components/**`, missing `src/molecules/` entirely — every utility class
 the editor and list molecules emit never gets compiled into those apps' CSS.
+The exported list mirrors this repo's own `tailwind.config.js` `content`
+array, so the two can't drift apart from each other either.
 
 ## The `content` export
 
@@ -43,9 +44,8 @@ import { content } from 'frappe-ui/tailwind'
 
 console.log(content)
 // [
-//   '.../frappe-ui/src/components/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/src/molecules/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/src/composables/**/*.{vue,js,ts,jsx,tsx}',
+//   '.../frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
+//   '.../frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/icons/**/*.{vue,js,ts,jsx,tsx}',
 // ]
 ```
