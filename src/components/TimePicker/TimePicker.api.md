@@ -13,13 +13,6 @@
     default: '""'
   },
   {
-    name: 'value',
-    description: 'Uncontrolled initial value.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
-  },
-  {
     name: 'interval',
     description: 'Minute interval between generated options.',
     required: false,
@@ -52,13 +45,6 @@
     type: 'number'
   },
   {
-    name: 'placement',
-    description: 'Combined side+align placement.',
-    required: false,
-    type: 'Placement',
-    deprecated: 'Use `side` and `align` instead.'
-  },
-  {
     name: 'placeholder',
     description: 'Placeholder text when no value is selected.',
     required: false,
@@ -86,45 +72,14 @@
     default: 'true'
   },
   {
-    name: 'readonly',
-    description: 'Prevents manual typing while keeping the picker interactive.',
-    required: false,
-    type: 'boolean',
-    default: 'false',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
-    name: 'allowCustom',
-    description: 'Allows users to type custom time values.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
     name: 'keepOpen',
     description: 'Keeps the popover open after a time is selected.',
     required: false,
     type: 'boolean'
   },
   {
-    name: 'autoClose',
-    description: 'Closes the popover after a value is picked.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `keepOpen` (inverse semantics).'
-  },
-  {
-    name: 'use12Hour',
-    description: 'Use 12-hour (am/pm) format for display.',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `format` instead.'
-  },
-  {
     name: 'format',
-    description: 'Dayjs format string used for display. Unset, the display format is `HH:mm`, or `h:mm A` when the deprecated `use12Hour` is on.',
+    description: 'Dayjs format string used for display. Default: `HH:mm`.',
     required: false,
     type: 'string'
   },
@@ -166,27 +121,6 @@
     description: 'Maximum selectable time as `HH:mm[:ss]`.',
     required: false,
     type: 'string'
-  },
-  {
-    name: 'minTime',
-    description: 'Minimum selectable time as `HH:mm[:ss]`.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `min` instead.'
-  },
-  {
-    name: 'maxTime',
-    description: 'Maximum selectable time as `HH:mm[:ss]`.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `max` instead.'
-  },
-  {
-    name: 'scrollMode',
-    description: 'Scroll behavior when opening the list.',
-    required: false,
-    type: '"center" | "start" | "nearest"',
-    deprecated: 'Scrolling is always centered now.'
   },
   {
     name: 'label',

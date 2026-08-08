@@ -96,7 +96,7 @@ const discussions = [
 <template>
   <MobileShell>
     <PageHeaderMobile title="Home">
-      <template #left>
+      <template #prefix>
         <Button
           variant="ghost"
           icon="lucide-panel-left"
@@ -104,7 +104,7 @@ const discussions = [
           @click="showSpaces = true"
         />
       </template>
-      <template #right>
+      <template #suffix>
         <Button
           variant="ghost"
           icon="lucide-square-pen"

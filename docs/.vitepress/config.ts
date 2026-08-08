@@ -90,6 +90,16 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Data Fetching',
       items: [
+        { text: 'useCall', link: '/docs/data-fetching/use-call' },
+        { text: 'useDoc', link: '/docs/data-fetching/use-doc' },
+        { text: 'useList', link: '/docs/data-fetching/use-list' },
+        { text: 'useDoctype', link: '/docs/data-fetching/use-doctype' },
+        { text: 'useNewDoc', link: '/docs/data-fetching/use-new-doc' },
+      ],
+    },
+    {
+      text: 'Resources',
+      items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },
         { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
         {

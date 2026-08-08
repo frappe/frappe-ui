@@ -1,5 +1,5 @@
 import { toast, ToastProvider } from '../../index'
-import FrappeUIProvider from '../Provider/FrappeUIProvider.vue'
+import FrappeUIProvider from '../FrappeUIProvider/FrappeUIProvider.vue'
 
 describe('Toast v1 — vue-sonner integration', () => {
   // ---- public exports -------------------------------------------------------

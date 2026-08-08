@@ -156,7 +156,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | **CodeEditor** | Exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: keep internal under P14 unless there is demand to promote it. | decided | #939 | — | no |
 | **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
 | **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (closed unmerged), #673 (CSV MIME) | L | yes |
-| **ListView** | Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1. | decision (deprecate) | — | S | no |
+| **ListView** | ~~Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1.~~ **Superseded** (sweep #882): parity isn't reached and can't close passively — `frappe-ui/list` is deliberately composition-based (P3) and has no equivalent for ListView's config-driven columns (resizable widths, per-column `getLabel`/`prefix` functions, tooltips, disabled-row exclusion, the select banner). Decision: ListView ships **frozen, not deprecated**, for v1. Bringing its 12-export barrel (all plain JS, no types, no `.cy.ts`) to the full at-bar checklist is its own follow-up ticket — this was mis-scoped as **S** effort; it's realistically **L**. | decision (keep, frozen) | split into follow-up ticket | L | yes — needs the follow-up ticket filed |
 | **MonthPicker** | **Remove for v1** (recommended): deprecate the export with a warning + migration note and drop from the core set — it never moved onto the shared picker architecture. Alternative: rebuild on the DatePicker family arch. | decision (remove) | — | S→L | yes |
 | **Pill** | **Stop exporting** — confirmed used only inside `TabButtons`. Deprecate the public export (P13), keep it internal; retain `PillSize` for internal use. | decision (un-expose) | — | S | yes |
 | **Popover** | Refactor to the v1 floating vocab: `v-model:open`, `side`/`align`/`offset` (deprecate `placement`), `data-slot` hooks (drop `popoverClass`, P10), canonical slots, a11y. The last floating outlier. | refactor | — | M | yes |
@@ -349,14 +349,24 @@ Key items:
 ### 4. TextEditor stabilization
 
 **v1 carve-out:** TextEditor's public API is **not** frozen for 1.0. The
-component ships in 1.0 as-is. A full refactor (internals + public API
-redesign + the open behavioral fixes) lands in **1.1** with a documented
-migration path. Until then, the existing TextEditor surface is supported
-unchanged.
+component ships in 1.0 as-is — no changes to `TextEditor.vue`'s own props,
+slots, or emits. A full refactor (internals + public API redesign + the open
+behavioral fixes) lands in **1.1** with a documented migration path.
+
+This carve-out is about the *component's own API*, not its export surface.
+ADR-0008 still reaches the deprecated root exports (`TextEditor`,
+`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`, and the `extensions/image` /
+`extensions/suggestion` barrels) — those are removed from `frappe-ui` at 1.0
+(#884), same as every other `@deprecated` export. The component files stay in
+the package, unmodified, as `frappe-ui/editor`'s migration safety net; they're
+just no longer reachable from any public import path until the 1.1 redesign
+gives them one.
 
 Required for 1.0:
 
-- no changes to `TextEditor.vue` public API
+- no changes to `TextEditor.vue` public API (the component's own props/slots/emits)
+- the deprecated root exports removed per ADR-0008 (#884)
 - release notes explicitly state the carve-out
 
 Deferred to 1.1 (bundled into a single refactor effort):
@@ -421,7 +431,7 @@ Fetching" docs section — they are not deprecated either.
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView is deprecated in favor of `frappe-ui/list`)
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView ships frozen, not deprecated — see [ListView row](#v1-component-refinement-pass))
 - the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1

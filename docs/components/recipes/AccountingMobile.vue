@@ -151,14 +151,14 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
 <template>
   <MobileShell>
     <PageHeaderMobile :title="title">
-      <template #left>
+      <template #prefix>
         <div
           class="flex size-8 items-center justify-center rounded bg-surface-gray-7 text-ink-white"
         >
           <span class="lucide-landmark size-4" aria-hidden="true" />
         </div>
       </template>
-      <template #right>
+      <template #suffix>
         <Button
           v-if="section === 'payroll'"
           variant="ghost"
