@@ -30,9 +30,19 @@ export function isMenuGroupOption(item: MenuItem): item is MenuGroupOption {
   return 'group' in item && ('options' in item || 'items' in item)
 }
 
+// These fire from computeds on every recompute; warn once per message, not
+// once per offending row per render.
+const warned = new Set<string>()
+
+export function warnRemoved(message: string) {
+  if (!import.meta.env.DEV || warned.has(message)) return
+  warned.add(message)
+  console.warn(message)
+}
+
 function resolveGroupChildren(group: MenuGroupOption): MenuOption[] {
-  if (import.meta.env.DEV && !group.options && (group as any).items) {
-    console.warn(
+  if (!group.options && (group as any).items) {
+    warnRemoved(
       '[Menu] `{ group, items }` is not supported; this group will not render. Rename `items` to `options`.',
     )
   }
@@ -49,8 +59,8 @@ export function isMenuSubmenuOption(item: MenuOption) {
 }
 
 function shouldRenderOption(option: MenuOption) {
-  if (import.meta.env.DEV && 'component' in option && option.component) {
-    console.warn(
+  if ('component' in option && option.component) {
+    warnRemoved(
       '[Menu] `component:` rows are not supported; the row renders as a plain action. Use `slots: { item: fn }` for a full-row replacement.',
     )
   }

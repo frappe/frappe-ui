@@ -63,7 +63,7 @@ import {
 import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
-import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
+import { menuClasses, normalizeMenuOptions, warnRemoved } from '../Menu/utils'
 
 defineOptions({
   inheritAttrs: false,
@@ -105,6 +105,12 @@ const triggerDisabled = computed(() => {
     (attrs.disabled !== undefined && attrs.disabled !== false)
   )
 })
+
+if (import.meta.env.DEV && 'placement' in attrs) {
+  warnRemoved(
+    '[Dropdown] `placement` is removed and ignored; use `align` (`placement="right"` → `align="end"`, `placement="center"` → `align="center"`).',
+  )
+}
 
 /**
  * Workaround for reka-ui 2.9.9: `DropdownMenuTrigger` binds only `click`, so

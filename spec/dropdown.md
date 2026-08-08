@@ -68,7 +68,10 @@ up along that side, `offset` the gap in px, and `portalTo` where the content is
 teleported. `start` and `end` are direction-aware and flip under `dir="rtl"`.
 These are the same four props and the same defaults the selection pickers use.
 `matchTriggerWidth` sizes the menu to the trigger element, for menus acting as
-a select-like control under a wide custom trigger.
+a select-like control under a wide custom trigger. Note the deliberate
+difference from Popover's prop of the same name: Dropdown sets an exact
+`width` (a menu should match its trigger precisely), while Popover sets
+`minWidth` (a panel may need to grow beyond it).
 
 There is no `placement` prop. It was removed before `1.0.0` per
 [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md); `align` covers it
