@@ -8,8 +8,6 @@ export { default as FrappeUI } from './utils/plugin'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export { getConfig, setConfig } from './utils/config'
 export type { FrappeUIConfig } from './utils/config'
-export { default as pageMetaPlugin } from './utils/pageMeta.js'
-export { usePageMeta } from './utils/pageMeta'
 
 // Data fetching
 export * from './data-fetching'
@@ -149,6 +147,7 @@ export { default as NumberChart } from './components/Charts/NumberChart.vue'
 export { default as useAxisChartOptions } from './components/Charts/axisChartOptions'
 
 // Composables
+export { usePageMeta, type PageMeta } from './utils/pageMeta'
 export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
 export {
   shellScrollContainer,
