@@ -16,7 +16,8 @@ This document defines the v1 API direction for the input-family components:
 `FileUploader` is intentionally out of scope for this spec; it will be
 covered separately.
 
-It also covers the v1 stance on the deprecated `Input.vue`.
+It also covers the v1 stance on `Input.vue`, which this document originally
+treated as a warn-and-keep deprecation (see the superseded note below).
 
 > **Superseded on the `Autocomplete` question.**
 > [#869](https://github.com/frappe/frappe-ui/issues/869) decided `Autocomplete`
@@ -25,6 +26,15 @@ It also covers the v1 stance on the deprecated `Input.vue`.
 > about warning-and-keeping the two is history, kept for the audit data behind
 > it. What shipped is in
 > [`migration.md`](../docs/content/docs/migration.md#autocomplete-removed).
+>
+> **Superseded on `Input.vue` and the ref surface, too.**
+> [#874](https://github.com/frappe/frappe-ui/issues/874) applied the same
+> ADR-0008 logic to `Input.vue` and to `Password.value`: both are **removed**
+> rather than warned, since a census found no live call sites for either. The
+> same PR implements ADR-0012 — `TextInput`/`Textarea`/`Password`'s `.el` ref
+> becomes `.inputElement` (typed, read-only) plus a `focus(options?)` method.
+> What shipped is in
+> [`migration.md`](../docs/content/docs/migration.md#inputs).
 
 It is a sibling of [`selection.md`](./selection.md), which covers the pickers
 these controls sit next to.
