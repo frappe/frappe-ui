@@ -57,6 +57,7 @@ export * from './components/Switch'
 export * from './components/Textarea'
 export * from './components/TextInput'
 export * from './components/TimePicker'
+export * from './components/PhoneInput'
 
 // Dialogs, menus, and feedback
 export * from './components/ContextMenu'
