@@ -10,6 +10,4 @@ export { default as MinimizeIcon } from './MinimizeIcon.vue'
 export { default as StepsIcon } from './StepsIcon.vue'
 
 // Lucide Icons
-export { default as Icon } from './Icon.vue'
 export { default as IconPicker } from './IconPicker.vue'
-export { default as spritePlugin } from './spritePlugin'

@@ -15,11 +15,15 @@
     "frappe/**/*.tsx",
     "frappe/**/*.vue",
     "frappe/index.js",
-    "frappe/index.d.ts"
+    "frappe/index.d.ts",
+    "icons/**/*.ts",
+    "icons/**/*.d.ts",
+    "icons/**/*.vue"
   ],
   "exclude": [
     "src/**/*.cy.ts",
     "src/**/*.story.vue",
+    "icons/**/*.story.vue",
     "src/**/stories/**/*",
     "src/components/TextEditor/**/*",
     "experimental/**/*.cy.ts",

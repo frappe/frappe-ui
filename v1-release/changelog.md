@@ -235,6 +235,28 @@ but now warn.
 Hardcoded internal `FeatherIcon` usages across core components were
 migrated to `lucide-*` in this release. No consumer-visible behavior change.
 
+### `frappe-ui/icons` — sprite removed; `IconPicker` values are now `lucide-*`
+
+- **Removed:** `spritePlugin`. It injected the whole Lucide sprite — 468 KB
+  of SVG — into `<body>` at app startup so `IconPicker` could read icon names
+  back out of the DOM. Drop the import and the `app.use(spritePlugin)` call.
+  `IconPicker` now loads Lucide itself, on demand, and needs no setup.
+- **Removed:** `Icon` from `frappe-ui/icons`. It rendered
+  `<use href="#name">` against that sprite and collided by name with the root
+  `Icon`. Import `Icon` from `frappe-ui` instead and pass a `lucide-*` string.
+- **Breaking:** `IconPicker` emits and accepts `lucide-<name>` where it used
+  to emit and accept a bare `<name>`. The new form is what every icon prop in
+  the library already takes, so a picked value now drops straight into
+  `<Icon :name>`, `icon-left`, `Dropdown` option icons and so on.
+- `IconPicker` shows a value it cannot offer — an emoji, say — instead of
+  rendering a blank box, and hands it back unchanged if nothing new is picked.
+- `IconPicker` options are keyboard-operable: arrow keys move through the
+  grid, Enter picks, and each option carries an accessible name.
+- **Removed:** `IconPicker`'s `reset()` template-ref method. `v-model` already
+  empties the value, which is the bar a template-ref member has to clear
+  ([`imperative-api.md`](../spec/imperative-api.md) §2.0), and the spec's five
+  verbs do not include `reset`. No call site anywhere reached it.
+
 ### Legacy components — dev-mode warnings
 
 `Input.vue` warns once on mount. Migrate to `TextInput`.
