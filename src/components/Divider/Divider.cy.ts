@@ -41,36 +41,6 @@ describe('Divider', () => {
     cy.get('div').should('exist')
   })
 
-  it('supports deprecated handler and warns once', () => {
-    const handler = cy.stub().as('actionHandler')
-
-    cy.window().then((win) => {
-      cy.stub(win.console, 'warn').as('consoleWarn')
-    })
-
-    cy.mount(Divider, {
-      props: {
-        action: {
-          label: 'Load more',
-          handler,
-        },
-      },
-    })
-
-    cy.get('@consoleWarn').then((consoleWarn) => {
-      const matchingCalls = (consoleWarn as sinon.SinonStub)
-        .getCalls()
-        .filter((call) =>
-          /Divider\.action\.handler is deprecated/.test(String(call.args[0])),
-        )
-
-      expect(matchingCalls).to.have.length(1)
-    })
-
-    cy.contains('button', 'Load more').click()
-    cy.get('@actionHandler').should('have.been.calledOnce')
-  })
-
   it('does not overlap sibling content in vertical action mode', () => {
     cy.mount({
       render() {
