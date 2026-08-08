@@ -20,6 +20,13 @@ hand-maintenance, and it had already drifted: some apps on
 `frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every
 class the editor and list molecules emit.
 
+### Tailwind preset — `tokens.js` export removed (breaking)
+
+The `./tailwind/tokens.js` export is removed. It had zero importers anywhere
+and re-exported `colorPalette.js` via `export *`, the implementation-module
+re-export pattern disallowed by P15. Use the preset (`frappe-ui/tailwind`)
+directly.
+
 ### Toggles and ranged inputs — deprecated members removed
 
 Per ADR-0008, the family's deprecated aliases are **removed**, not shipped
