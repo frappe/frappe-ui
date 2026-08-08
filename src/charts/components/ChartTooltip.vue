@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <div
       v-if="open && items.length"
       ref="tooltipEl"
@@ -46,10 +46,13 @@
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { formatPercent } from '../format'
 import type { ChartTooltipItem, ChartTooltipProps } from '../types'
 
 const props = defineProps<ChartTooltipProps>()
+
+const portalTarget = usePortalTarget()
 
 defineSlots<{
   default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
