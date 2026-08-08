@@ -23,13 +23,13 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Component count | One `<Dialog>` only — no `<AlertDialog>` |
 | ARIA role | `role="dialog"` always |
 | Visibility model | `v-model:open` (canonical) **and** `v-model` (also supported) |
-| Prop surface | Flat top-level props; `options` blob retained as deprecated alias |
+| Prop surface | Flat top-level props only; the `options` blob was removed (ADR-0008) |
 | Dismiss control | `dismissible: boolean` (default `true`); replaces `disableOutsideClickToClose` |
 | Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
 | Close button | `showCloseButton: boolean` (default `true`); independent of header |
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
 | Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
-| Slots | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding. |
+| Slots | Canonical only: `#default`, `#title`, `#actions`. Legacy slots were removed (ADR-0008). |
 | Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
 | Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
 
@@ -95,10 +95,6 @@ interface DialogProps {
   dismissible?: boolean             // default true
   showCloseButton?: boolean         // default true
   bare?: boolean                    // default false
-
-  // Deprecated (still supported, warn once).
-  disableOutsideClickToClose?: boolean
-  options?: DialogOptions
 }
 ```
 
@@ -401,7 +397,7 @@ socket.once('upload:done', () => handle.close())
 
 ## Deprecations
 
-Each deprecated surface keeps working in v1, emits a one-time dev-mode console warning (per instance / per session), and includes the canonical replacement in the message.
+Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md). The table documents the old → new mapping for migration.
 
 | Deprecated | Replacement |
 |---|---|
