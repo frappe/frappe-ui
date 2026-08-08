@@ -564,24 +564,38 @@ In favor of `padded`. (Now removed — see "Toggles and ranged inputs" above.)
 input `#fff` — a white pill in dark mode. `ghost` now sets `bg-transparent`,
 matching Combobox's own ghost search input. Closes #851.
 
-### FeatherIcon — deprecated; `lucide-*` recommended
+### FeatherIcon — removed (breaking)
 
-`FeatherIcon` remains exported. Feather-name strings passed to
-`Button.icon` / `iconLeft` / `iconRight`, `Dialog.options.icon`, `Dropdown`
-item icons, and `TabButtons` icons continue to render via `FeatherIcon`
-but now warn.
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), the
+deprecated `FeatherIcon` component is deleted, along with the
+`feather-icons` dependency. `lucide-*` strings (or a `Component`) are the
+only supported icon forms now.
+
+- **Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
+  `<FeatherIcon>` fail at the import.
+- **Breaking, silent:** every icon-name prop across the library
+  (`Button.icon` / `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown` /
+  `ContextMenu` item `icon`, `TabButtons` options `icon` / `iconLeft` /
+  `iconRight`, `Icon.name`) used to fall back to `FeatherIcon` for a bare
+  feather-style name (e.g. `"edit"`). That fallback is gone: an
+  unrecognized string now renders nothing, with a dev-mode console warning
+  once per (component, prop). Prefix the name with `lucide-`.
 
 ```vue
-<!-- preferred -->
-<Button icon="lucide-plus" />
-<span class="lucide-search size-4" aria-hidden="true" />
-
-<!-- still works, warns -->
+<!-- before -->
+<FeatherIcon name="plus" class="size-4" />
 <Button icon="plus" />
+
+<!-- after -->
+<span class="lucide-plus size-4" aria-hidden="true" />
+<Button icon="lucide-plus" />
 ```
 
 Hardcoded internal `FeatherIcon` usages across core components were
-migrated to `lucide-*` in this release. No consumer-visible behavior change.
+migrated to `lucide-*` in this release.
+
+Before/after for the silent break is in the
+[migration guide](../docs/content/docs/migration.md#icons).
 
 ### Input — removed (breaking)
 
@@ -593,12 +607,54 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
   text-like modes, or `Textarea` / `Select` / `Checkbox` for the other type
   modes `Input` accepted.
 
+### Card, ListItem, standalone Toast — removed (breaking)
+
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), three
+unmaintained wrappers that shipped `@deprecated` in code are deleted, not
+carried forward. All three had zero call sites across the census of
+downstream apps.
+
+- **Breaking:** `Card` and its `.vue` file are removed. No drop-in
+  replacement — rebuild the title/subtitle/actions/loading layout with
+  plain markup, using `LoadingText` or `Skeleton` for the loading state.
+- **Breaking:** `ListItem` and its `.vue` file are removed. No drop-in
+  replacement — rebuild the title/subtitle/actions row with plain markup.
+- **Breaking:** the standalone `Toast` SFC (`import { Toast } from
+  'frappe-ui'`) is removed. This only affects direct usage of the raw
+  `ToastRoot`-based component; the imperative API (`toast()` /
+  `toast.success()` / `toast.error()` / `toast.info()`) and
+  `<ToastProvider>` are unaffected and unchanged.
+
+All three fail loudly at the import. Before/after examples are in the
+[migration guide](../docs/content/docs/migration.md#card-listitem-standalone-toast-removed).
+
 ### FormLabel — moved to a component directory (non-breaking)
 
 `FormLabel` now lives at `src/components/FormLabel/FormLabel.vue` instead of
 a bare `src/components/FormLabel.vue`, matching the rest of the input
 family. It gains `types.ts`, tests, stories, and a docs page. The import
 path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
+
+### LoadingIndicator / LoadingText — moved to component directories (non-breaking)
+
+Same move as `FormLabel`, for the same reason: both now live at
+`src/components/LoadingIndicator/` and `src/components/LoadingText/`
+instead of bare `.vue` files directly under `src/components/`. Each gains
+`types.ts` (`LoadingIndicatorProps`, `LoadingTextProps`), stories, a docs
+page, and cypress tests. The import path for consumers
+(`import { LoadingIndicator, LoadingText } from 'frappe-ui'`) is
+unchanged.
+
+Kept as distinct components from `Spinner` and `Skeleton` (P8) — usage
+data across the consumer census shows real, separate demand:
+`LoadingIndicator` (~60 files) and `LoadingText` (~11 files) are both
+load-bearing, not redundant overlap.
+
+### Icon — docs page and stories added
+
+`Icon` had no `stories/` folder, so it did not appear in the docs site
+despite being a public export. It now has a docs page and two stories
+(lucide string form, and the `Component` escape hatch).
 
 ### MonthPicker — removed (breaking)
 
@@ -836,11 +892,14 @@ keyboard on a phone. That also left focus on the trigger behind the overlay,
 with nothing holding it — `Tab` walked the page behind an open modal. The sheet
 now takes focus itself on open. The keyboard still stays down.
 
-### Divider — `action.onClick` preferred
+### Divider — `action.handler` removed (breaking)
 
-`action.handler` is deprecated. Warning emits via the shared
-`warnDeprecated` utility. Action mode preserves separator semantics for
-assistive technologies.
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md),
+`action.handler` is deleted, not carried forward as a warning. Use
+`action.onClick`. Zero call sites across the census. Silent break — a
+leftover `handler` is dropped as an unknown key, so the action button
+renders but does nothing on click. Action mode preserves separator
+semantics for assistive technologies.
 
 ### PageHeaderBackButton — `to` is now a fallback (breaking)
 
@@ -1230,7 +1289,7 @@ names.
 
 | API                                | Replacement                          | Notes                                  |
 | ---------------------------------- | ------------------------------------ | -------------------------------------- |
-| `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
+| `Divider.action.handler`           | `Divider.action.onClick`             | **Removed** — silent; key dropped, click does nothing |
 | `Password.value` prop              | `v-model` / `modelValue`             | **Removed in 1.0.0** (ADR-0008)        |
 | `Rating.rating_from` prop          | `max`                                | **Removed** — silent; prop ignored     |
 | `Rating.readonly` prop             | `disabled`                           | **Removed** — silent; prop ignored     |
@@ -1262,7 +1321,10 @@ names.
 | `useDatePicker` composable         | use picker components directly       | **Removed** — loud; import fails       |
 | `getDate` / `getDatesAfter` / etc. | use picker components directly       | **Removed** — loud; import fails       |
 | `MonthPicker`                      | `Select`                             | **Removed** — loud; import fails       |
-| `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
+| `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | **Removed** — import fails; feather-name props render nothing, dev-warns once |
+| `Card`                             | layout markup                        | **Removed in 1.0.0** (ADR-0008), import fails |
+| `ListItem`                         | layout markup                        | **Removed in 1.0.0** (ADR-0008), import fails |
+| `Toast` (SFC)                      | imperative `toast(...)` API          | **Removed in 1.0.0** (ADR-0008), import fails |
 | Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
 | Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |
 | Dialog `#body*` slots               | `#default` / `#title` / `#actions`  | **Removed** — silent; renders nothing  |

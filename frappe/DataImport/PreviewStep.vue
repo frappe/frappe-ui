@@ -32,7 +32,7 @@
                         {{ map[0] }}
                     </div>
                     <div class="flex justify-end">
-                        <FeatherIcon name="arrow-right" class="inline size-4 text-ink-gray-5" />
+                        <span class="lucide-arrow-right inline size-4 text-ink-gray-5" aria-hidden="true" />
                     </div>
                     <div>
                         {{ map[1] }}
@@ -47,7 +47,7 @@
             </div>
             <div class="rounded-md bg-surface-amber-2 p-2 space-y-2 text-xs">
                 <div v-for="warning in warnings" class="flex items-center space-x-2">
-                    <FeatherIcon name="alert-circle" class="size-3 text-ink-amber-6" />
+                    <span class="lucide-alert-circle size-3 text-ink-amber-6" aria-hidden="true" />
                     <div v-html="warning.message" class="text-ink-amber-6"></div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                             <td class="px-3 py-2 text-ink-gray-5 float-right invisible group-hover:visible">
                                 <Popover v-if="row.exception" trigger="hover" placement="left-start">
                                     <template #target>
-                                        <FeatherIcon name="info" class="size-4" />
+                                        <span class="lucide-info size-4" aria-hidden="true" />
                                     </template>
                                     <template #body-main>
                                         <div class="w-[500px] p-2 text-xs leading-5 font-mono">
@@ -171,7 +171,6 @@ import type { DataImport, DataImports } from './types';
 import Badge from '../../src/components/Badge/Badge.vue';
 import Button from '../../src/components/Button/Button.vue';
 import call from '../../src/utils/call';
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import { io } from 'socket.io-client'
 import Popover from "../../src/components/Popover/Popover.vue"
 import TabButtons from '../../src/components/TabButtons/TabButtons.vue';

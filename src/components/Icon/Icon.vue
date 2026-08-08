@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
-import FeatherIcon from '../FeatherIcon.vue'
+import { watchEffect } from 'vue'
 import {
   isEmojiIconString,
   isLucideIconString,
+  warnUnsupportedIconString,
 } from '../../utils/iconString'
+import type { IconProps } from './types'
 
 defineOptions({ inheritAttrs: false })
 
-defineProps<{
-  /**
-   * Icon source. Supported forms:
-   * - `lucide-*` string  → rendered via the Tailwind mask plugin.
-   * - emoji / symbol string → rendered as plain text.
-   * - Legacy feather name → rendered via `<FeatherIcon>`.
-   * - Vue component → rendered via `<component :is>`.
-   * Falsy values render nothing.
-   */
-  name?: string | Component | null
-}>()
+const props = defineProps<IconProps>()
+
+watchEffect(() => {
+  warnUnsupportedIconString('Icon', 'name', props.name)
+})
 </script>
 
 <template>
@@ -35,12 +30,6 @@ defineProps<{
     aria-hidden="true"
     >{{ name }}</span
   >
-  <FeatherIcon
-    v-else-if="typeof name === 'string' && name"
-    :name="name"
-    v-bind="$attrs"
-    aria-hidden="true"
-  />
   <component
     v-else-if="name && typeof name !== 'string'"
     :is="name"

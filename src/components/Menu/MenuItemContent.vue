@@ -4,9 +4,8 @@ import { hasRenderableContent } from '../../utils/vnode'
 import {
   isEmojiIconString,
   isLucideIconString,
-  warnFeatherIconUsage,
+  warnUnsupportedIconString,
 } from '../../utils/iconString'
-import FeatherIcon from '../FeatherIcon.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
 import Switch from '../Switch/Switch.vue'
 import MenuRenderContent from './MenuRenderContent.vue'
@@ -36,7 +35,7 @@ const isSelected = computed(() => {
 })
 
 watchEffect(() => {
-  warnFeatherIconUsage('Dropdown', 'item.icon', props.item.icon)
+  warnUnsupportedIconString('Dropdown', 'item.icon', props.item.icon)
 })
 
 const userPrefixContent = computed(() => {
@@ -146,15 +145,9 @@ function handleSwitchChange(value: boolean) {
         aria-hidden="true"
         >{{ item.icon }}</span
       >
-      <FeatherIcon
-        v-else-if="item.icon && typeof item.icon === 'string'"
-        :name="item.icon"
-        :class="[menuClasses.itemIcon, getMenuIconColor(item)]"
-        aria-hidden="true"
-      />
       <component
         :is="item.icon"
-        v-else-if="item.icon"
+        v-else-if="item.icon && typeof item.icon !== 'string'"
         :class="[menuClasses.itemIcon, getMenuIconColor(item)]"
       />
       <div

@@ -1015,8 +1015,37 @@ cancelled.
 
 ## Icons
 
-Replace `FeatherIcon` and Feather-name strings with `lucide-*` strings or a
-`Component`:
+The single recommended way to pass an icon anywhere in the library is a
+`lucide-*` string (rendered via the Tailwind mask plugin) or a `Component`
+escape hatch (P11). `FeatherIcon` is removed per
+ADR-0008 — it
+shipped `@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
+
+**Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
+`<FeatherIcon>` fail at the import. Replace a direct usage with the
+`lucide-*` class form:
+
+```vue
+<!-- Before -->
+<FeatherIcon name="plus" class="size-4" />
+<!-- After -->
+<span class="lucide-plus size-4" aria-hidden="true" />
+```
+
+Feather and lucide share most icon names, so `<FeatherIcon name="x">` →
+`<span class="lucide-x">` is usually a direct rename — check each name
+individually against [lucide.dev](https://lucide.dev/icons) since a few
+differ or were renamed.
+
+**Breaking, silent:** every icon-name prop across the library (`Button.icon`
+/ `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
+`icon`, `TabButtons` options `icon` / `iconLeft` / `iconRight`, the `Icon`
+component's `name` prop) used to render a bare feather-style name (e.g.
+`"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
+unrecognized string now renders nothing. No build or type error — the icon
+silently disappears. A dev-mode console warning names the component, the
+prop, and the offending value once per (component, prop). Prefix the name
+with `lucide-`:
 
 ```vue
 <!-- Before -->
@@ -1034,6 +1063,75 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 // After
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
+
+## Card, ListItem, standalone `<Toast>` (removed)
+
+Three unmaintained wrappers are gone in v1, per
+ADR-0008 — each
+shipped `@deprecated` in code and had zero call sites left across our
+census of downstream apps.
+
+**`Card`** wrapped a title/subtitle/actions layout with a manual loading
+state. There's no drop-in replacement; rebuild the layout with plain
+markup, using [`LoadingText`](./components/loadingtext) or
+[`Skeleton`](./components/skeleton) for the loading state:
+
+```vue
+<!-- Before -->
+<Card title="Title" subtitle="Subtitle" :loading="loading">
+  <template #actions><Button label="Edit" /></template>
+  Content
+</Card>
+
+<!-- After -->
+<div class="flex flex-col rounded-lg border px-6 py-5">
+  <div class="flex items-baseline justify-between">
+    <h2 class="text-lg font-semibold">Title</h2>
+    <Button label="Edit" />
+  </div>
+  <p class="mt-1.5 text-ink-gray-6">Subtitle</p>
+  <LoadingText v-if="loading" class="mt-4" />
+  <div v-else class="mt-4">Content</div>
+</div>
+```
+
+**`ListItem`** rendered a title/subtitle/actions row. Same story — no
+drop-in replacement, rebuild with plain markup:
+
+```vue
+<!-- Before -->
+<ListItem title="Title" subtitle="Subtitle">
+  <template #actions><Button label="Edit" /></template>
+</ListItem>
+
+<!-- After -->
+<div class="flex items-center justify-between py-3">
+  <div>
+    <h3 class="font-medium">Title</h3>
+    <p class="text-ink-gray-6">Subtitle</p>
+  </div>
+  <Button label="Edit" />
+</div>
+```
+
+**Standalone `<Toast>`** — `import { Toast } from 'frappe-ui'` and
+`<Toast>` fail at the import. This only removes the raw `ToastRoot`-based
+component; the imperative API is unaffected and is what you almost
+certainly want:
+
+```vue
+<!-- Before -->
+<Toast v-model:open="open" message="Saved" type="success" />
+
+<!-- After -->
+<script setup>
+import { toast } from 'frappe-ui'
+toast.success('Saved')
+</script>
+```
+
+`<ToastProvider>` (mount once near your app root) and `toast.success()` /
+`toast.error()` / `toast.info()` / plain `toast()` are unchanged.
 
 ## Tokens
 

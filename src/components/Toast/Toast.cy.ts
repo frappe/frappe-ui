@@ -1,4 +1,4 @@
-import { toast, Toast, ToastProvider } from '../../index'
+import { toast, ToastProvider } from '../../index'
 import FrappeUIProvider from '../FrappeUIProvider/FrappeUIProvider.vue'
 
 describe('Toast v1 — vue-sonner integration', () => {
@@ -18,10 +18,6 @@ describe('Toast v1 — vue-sonner integration', () => {
 
   it('ToastProvider is exported as the styled <Toaster> escape hatch', () => {
     expect(ToastProvider).to.not.be.undefined
-  })
-
-  it('Toast back-compat export still resolves', () => {
-    expect(Toast).to.not.be.undefined
   })
 
   it('legacy APIs (toast.create / toast.remove / toast.removeAll) are kept as deprecated shims', () => {
