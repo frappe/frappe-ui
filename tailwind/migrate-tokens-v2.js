@@ -24,6 +24,11 @@
  * As a guard, the script detects already-migrated codebases and runs only the
  * typography correction (`text-lg` → `text-md`, `text-xl` → `text-lg`, ...).
  * Pass --force to run the full migration anyway.
+ *
+ * `tiny` and `13xl`-`16xl` were dropped as unused vocabulary in a pre-1.0
+ * audit (#940) — no utility ships for them anymore. A class that would have
+ * shifted onto one of them is left untouched and reported under "needs
+ * manual attention" instead of being rewritten to a dead class.
  */
 
 import fs from 'fs'
@@ -98,7 +103,15 @@ const OUTLINE_ALPHA_RENAMES = {
 // Caveat: these names (`text-lg` … `text-9xl`) coincide with stock Tailwind
 // font-size utilities, so only point this at code using the espresso scale, and
 // run exactly once (see header).
-const UNMIGRATED_TEXT_SIZE_SHIFT = [
+
+// `tiny` and `13xl`-`16xl` were removed as unused vocabulary in #940 — no
+// utility ships for them anymore. Must stay in sync with `DROPPED_SIZES` in
+// `figma-tokens-to-theme.js`. Filtered out of the shift tables below so the
+// codemod can never *rename a class onto one of these dead sizes*; see the
+// "no destination" handling further down for reporting pre-existing usage.
+const DEAD_SIZES = ['tiny', '13xl', '14xl', '15xl', '16xl']
+
+const UNMIGRATED_TEXT_SIZE_SHIFT_ALL = [
   ['xl', '2xl'],
   ['2xl', '3xl'],
   ['3xl', '4xl'],
@@ -115,11 +128,17 @@ const UNMIGRATED_TEXT_SIZE_SHIFT = [
   ['14xl', '15xl'],
   ['15xl', '16xl'],
 ]
+// Old-scale `12xl`-`15xl` would have shifted onto a size dropped in #940 —
+// capped here so they're left untouched (and flagged, see below) instead of
+// renamed to a class that no longer emits CSS.
+const UNMIGRATED_TEXT_SIZE_SHIFT = UNMIGRATED_TEXT_SIZE_SHIFT_ALL.filter(
+  ([, to]) => !DEAD_SIZES.includes(to),
+)
 
 // Apps that already ran the original v2 codemod use the temporary typography
 // names where `text-lg` was 15px and `text-xl` was 16px. Shift those one step
 // down into the corrected names without touching color tokens.
-const MIGRATED_TEXT_SIZE_SHIFT = [
+const MIGRATED_TEXT_SIZE_SHIFT_ALL = [
   ['lg', 'md'],
   ['xl', 'lg'],
   ['2xl', 'xl'],
@@ -139,6 +158,11 @@ const MIGRATED_TEXT_SIZE_SHIFT = [
   ['16xl', '15xl'],
   ['17xl', '16xl'],
 ]
+// Temp-scale `14xl`-`17xl` would have corrected onto a size dropped in #940 —
+// capped for the same reason as above.
+const MIGRATED_TEXT_SIZE_SHIFT = MIGRATED_TEXT_SIZE_SHIFT_ALL.filter(
+  ([, to]) => !DEAD_SIZES.includes(to),
+)
 
 // Each size surfaces as a bare size utility, a paragraph variant, and weighted
 // component classes. All forms shift together.
@@ -177,11 +201,31 @@ export const TOKEN_RENAMES = {
   ...UNMIGRATED_TEXT_SIZE_RENAMES,
 }
 
+// A dead size surfaces as a bare size utility and weighted component classes
+// (no `text-p-*` form — paragraph styles only ever went up to `4xl` and never
+// had a `tiny`, so those combinations never existed).
+const deadSizeTokens = (sizes) => sizes.flatMap((s) => [
+  `text-${s}`, `text-${s}-medium`, `text-${s}-semibold`, `text-${s}-bold`, `text-${s}-black`,
+])
+
 // Tokens dropped in v2 with no replacement — usage is reported, never rewritten.
 export const REMOVED_TOKENS = [
   ...[1, 2, 3, 4, 5, 6, 7].map((n) => `surface-alpha-red-${n}`),
   ...[2, 3, 4].map((n) => `outline-alpha-red-${n}`),
+  // #940: dead in every mode — either the v2 name directly, or (for `tiny`,
+  // which never shifted) the only name it ever had.
+  ...deadSizeTokens(DEAD_SIZES),
 ]
+
+// Old-scale `12xl` is only dead in *unmigrated* content: there it's the size
+// that used to shift onto the now-dead v2 `13xl` (see the capped shift table
+// above). In already-migrated content, literal `text-12xl` is the healthy,
+// current v2 name and must not be flagged.
+const UNMIGRATED_REMOVED_TOKENS = [...REMOVED_TOKENS, ...deadSizeTokens(['12xl'])]
+// The migrated-temp-scale `17xl` never shipped as a real token in any mode —
+// it only ever existed as the pre-correction name that used to correct onto
+// the now-dead v2 `16xl`.
+const MIGRATED_REMOVED_TOKENS = [...REMOVED_TOKENS, ...deadSizeTokens(['17xl'])]
 
 // Legacy names with no v2 mapping decided yet — reported for manual review.
 export const WATCH_TOKENS = []
@@ -208,10 +252,15 @@ const renameRegexFor = (renames) => new RegExp(
   `(?<![a-zA-Z0-9])(${Object.keys(renames).sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`,
   'g',
 )
-const FLAG_REGEX = new RegExp(
-  `(?<![a-zA-Z0-9])(${[...REMOVED_TOKENS, ...WATCH_TOKENS].sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`,
+const buildFlagRegex = (tokens) => new RegExp(
+  `(?<![a-zA-Z0-9])(${[...tokens, ...WATCH_TOKENS].sort(byLengthDesc).join('|')})(?![a-zA-Z0-9-])`,
   'g',
 )
+// Which "no replacement" tokens to flag depends on mode — see the `12xl` /
+// `17xl` note above.
+const FULL_FLAG_REGEX = buildFlagRegex(UNMIGRATED_REMOVED_TOKENS)
+const MIGRATED_FLAG_REGEX = buildFlagRegex(MIGRATED_REMOVED_TOKENS)
+const flagRegexFor = (mode) => (mode === 'migrated-typography' ? MIGRATED_FLAG_REGEX : FULL_FLAG_REGEX)
 
 // ---------- WEIGHT-CLASS MERGE ----------
 
@@ -332,7 +381,7 @@ export function migrateTokens(content, { mode = 'full' } = {}) {
   }
 
   const flagged = []
-  for (const m of content.matchAll(FLAG_REGEX)) {
+  for (const m of content.matchAll(flagRegexFor(mode))) {
     flagged.push({ token: m[0], line: lineAt(content, m.index) })
   }
 

@@ -1158,6 +1158,28 @@ already ran it will only get the typography correction (`text-lg` → `text-md`,
 `--force`, but review the output carefully because color tokens may
 double-shift.
 
+### Unused tokens and utilities removed
+
+A pre-`1.0.0` audit (#940) removed the token names below — all had zero call
+sites across frappe-ui and every consumer app. Each is a **silent** break:
+the class or `--*` variable just stops applying, with no build or type
+error.
+
+```
+text-tiny
+text-13xl / text-14xl / text-15xl / text-16xl (and their -medium/-semibold/-bold/-black variants)
+shadow-status
+--elevation-status
+surface-alert-button-default / -info / -success / -warning / -error
+ink-alert-button-default / -info / -success / -warning / -error
+surface-alpha-gray-2-overlay
+```
+
+If your build used any of these, replace them with the nearest step on the
+regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` →
+`shadow-sm`, `surface-alert-button-error` → `surface-red-2` (or whichever
+`variant`+`theme` pairing the design calls for).
+
 ## Editor
 
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the

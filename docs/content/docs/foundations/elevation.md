@@ -12,8 +12,7 @@ Shadow tokens for depth and hierarchy.
 
 ## Elevation scale
 
-Six steps from a subtle lift to a floating overlay, plus `shadow-status` for
-status dots.
+Six steps from a subtle lift to a floating overlay.
 
 <ElevationPreview />
 

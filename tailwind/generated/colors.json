@@ -503,12 +503,7 @@
         "pink-7": "lightMode/pink/600",
         "pink-8": "lightMode/pink/700",
         "pink-9": "lightMode/pink/800",
-        "pink-10": "lightMode/pink/900",
-        "alert-button-default": "neutral/white",
-        "alert-button-info": "neutral/white",
-        "alert-button-success": "neutral/white",
-        "alert-button-warning": "neutral/white",
-        "alert-button-error": "neutral/white"
+        "pink-10": "lightMode/pink/900"
       },
       "surface-alpha": {
         "base": "neutral/white",
@@ -525,8 +520,7 @@
         "sidebar": "lightMode/gray/50",
         "elevation-1": "neutral/white",
         "elevation-2": "neutral/white",
-        "elevation-3": "neutral/white",
-        "gray-2-overlay": "overlay/black/50"
+        "elevation-3": "neutral/white"
       },
       "ink": {
         "base": "neutral/white",
@@ -649,11 +643,6 @@
         "pink-8": "lightMode/pink/700",
         "pink-9": "lightMode/pink/800",
         "pink-10": "lightMode/pink/900",
-        "alert-button-default": "lightMode/gray/900",
-        "alert-button-info": "lightMode/gray/900",
-        "alert-button-success": "lightMode/gray/900",
-        "alert-button-warning": "lightMode/gray/900",
-        "alert-button-error": "lightMode/gray/900",
         "blue-link": "lightMode/blue/500"
       },
       "outline": {
@@ -921,12 +910,7 @@
         "pink-7": "darkMode/pink/400",
         "pink-8": "darkMode/pink/300",
         "pink-9": "darkMode/pink/200",
-        "pink-10": "darkMode/pink/100",
-        "alert-button-default": "darkMode/gray/500",
-        "alert-button-info": "darkMode/blue/700",
-        "alert-button-success": "darkMode/green/700",
-        "alert-button-warning": "darkMode/amber/700",
-        "alert-button-error": "darkMode/red/700"
+        "pink-10": "darkMode/pink/100"
       },
       "surface-alpha": {
         "base": "darkMode/gray-alpha/950",
@@ -943,8 +927,7 @@
         "sidebar": "darkMode/gray-alpha/950",
         "elevation-1": "darkMode/gray-alpha/900",
         "elevation-2": "darkMode/gray-alpha/800",
-        "elevation-3": "darkMode/gray-alpha/600",
-        "gray-2-overlay": "overlay/white/50"
+        "elevation-3": "darkMode/gray-alpha/600"
       },
       "ink": {
         "base": "darkMode/gray/950",
@@ -1067,11 +1050,6 @@
         "pink-8": "darkMode/pink/200",
         "pink-9": "darkMode/pink/100",
         "pink-10": "darkMode/pink/50",
-        "alert-button-default": "darkMode/gray/50",
-        "alert-button-info": "darkMode/blue/200",
-        "alert-button-success": "darkMode/green/200",
-        "alert-button-warning": "darkMode/amber/200",
-        "alert-button-error": "darkMode/red/200",
         "blue-link": "darkMode/blue/500"
       },
       "outline": {
