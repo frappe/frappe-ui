@@ -473,7 +473,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Checkbox.padding`                         | `padded`               |
 | `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
 
-The first four rows are **removed**, not aliased. The old names are silently
+The first five rows are **removed**, not aliased. The old names are silently
 ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
 Rating becomes interactive, a `Switch` `@change` handler never fires, and
 `labelClasses` / `Checkbox.padding` stop styling anything. Nothing breaks at
