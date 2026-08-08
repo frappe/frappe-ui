@@ -2,6 +2,9 @@ import { defineComponent, h } from 'vue'
 import PageHeader from './PageHeader.vue'
 import PageHeaderBase from './PageHeaderBase.vue'
 import PageHeaderTarget from './PageHeaderTarget.vue'
+import PageHeaderMobile from './PageHeaderMobile.vue'
+import PageHeaderMobileTitle from './PageHeaderMobileTitle.vue'
+import PageHeaderTitle from './PageHeaderTitle.vue'
 
 // Mimics an app layout: a target at the top, the "page" (slot content) in a
 // scroll container below it, the way routed pages are slotted into a shell.
@@ -64,5 +67,45 @@ describe('PageHeader', () => {
     cy.get('[data-testid=page]').should(($el) => {
       expect($el[0].scrollTop).to.equal(0)
     })
+  })
+})
+
+describe('PageHeaderTitle', () => {
+  it('renders `title`, overridden by the default slot', () => {
+    cy.mount(PageHeaderTitle, { props: { title: 'From prop' } })
+    cy.get('span').should('contain.text', 'From prop')
+
+    cy.mount(PageHeaderTitle, {
+      props: { title: 'From prop' },
+      slots: { default: () => 'From slot' },
+    })
+    cy.get('span').should('contain.text', 'From slot')
+    cy.get('span').should('not.contain.text', 'From prop')
+  })
+})
+
+describe('PageHeaderMobile', () => {
+  it('renders the #prefix, default, and #suffix slots', () => {
+    cy.mount(PageHeaderMobile, {
+      slots: {
+        prefix: () => h('button', { 'data-test': 'prefix' }, 'Back'),
+        default: () => h(PageHeaderMobileTitle, { title: 'Discussion' }),
+        suffix: () => h('button', { 'data-test': 'suffix' }, 'More'),
+      },
+    })
+    cy.get('[data-test=prefix]').should('contain.text', 'Back')
+    cy.get('h1').should('contain.text', 'Discussion')
+    cy.get('[data-test=suffix]').should('contain.text', 'More')
+  })
+})
+
+describe('PageHeaderMobileTitle', () => {
+  it('renders the #prefix slot next to the title', () => {
+    cy.mount(PageHeaderMobileTitle, {
+      props: { title: 'Announcements' },
+      slots: { prefix: () => h('span', { 'data-test': 'prefix' }, '#') },
+    })
+    cy.get('[data-test=prefix]').should('contain.text', '#')
+    cy.get('span').should('contain.text', 'Announcements')
   })
 })

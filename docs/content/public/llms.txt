@@ -67,15 +67,17 @@ Two cross-cutting conventions to know before reading anything else:
 
 ## Data fetching
 
-Recommended (v3 composables, in the `frappe-ui` exports):
+Recommended layer for new code, in the `frappe-ui` exports:
 
-- `useCall` — Vue composable for any whitelisted Frappe method. Options: `url`, `method`, `params` (object or function for reactivity), `immediate`, `refetch`, `cacheKey` (IndexedDB persistence), `transform`, `beforeSubmit`, `onSuccess`, `onError`. Returns a reactive object with `data`, `error`, `loading`, `isFinished`, `promise`, `execute`/`fetch`/`reload`, `submit(params)`, `reset`, `abort`. Use `immediate: false` + `submit()` for writes. Source: https://github.com/frappe/frappe-ui/blob/main/src/data-fetching/useCall/useCall.ts.
-- `useList` — paginated list composable on top of `useCall`. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useList.
-- `useDoc` — single doctype document composable. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useDoc.
-- `useDoctype` — doctype metadata composable. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useDoctype.
-- `useNewDoc` — scaffolding for new-doc forms. Source: https://github.com/frappe/frappe-ui/tree/main/src/data-fetching/useNewDoc.
+- [useCall](https://ui.frappe.io/docs/data-fetching/use-call): Vue composable for any whitelisted Frappe method. Options: `url`, `method`, `params` (object or function for reactivity), `immediate`, `refetch`, `cacheKey` (IndexedDB persistence), `transform`, `beforeSubmit`, `onSuccess`, `onError`. Returns a reactive object with `data`, `error`, `loading`, `isFinished`, `promise`, `execute`/`fetch`/`reload`, `submit(params)`, `reset`, `abort`. Use `immediate: false` + `submit()` for writes.
+- [useDoc](https://ui.frappe.io/docs/data-fetching/use-doc): fetches and keeps one document reactive, shared with `useList` for the same `doctype`/`name`.
+- [useList](https://ui.frappe.io/docs/data-fetching/use-list): paginated, filterable list for a doctype, with `insert`/`setValue`/`delete` write helpers.
+- [useDoctype](https://ui.frappe.io/docs/data-fetching/use-doctype): write-only helpers for a doctype — `insert`, `delete`, `setValue`, `runDocMethod`, `runMethod` — with no read/fetch of its own.
+- [useNewDoc](https://ui.frappe.io/docs/data-fetching/use-new-doc): a reactive draft for a new document, submitted as an insert.
 
-Legacy (still exported for migration, not recommended for new code):
+## Resources
+
+Fully supported through `1.x`; use Data Fetching above for new code.
 
 - [Resource](https://ui.frappe.io/docs/data-fetching/resource): `createResource` — base data fetcher.
 - [List resource](https://ui.frappe.io/docs/data-fetching/list-resource): `createListResource` — paginated list.

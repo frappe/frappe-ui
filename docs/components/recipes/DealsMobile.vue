@@ -80,7 +80,7 @@ const columns = ref([
 <template>
   <MobileShell>
     <PageHeaderMobile title="Deals">
-      <template #right>
+      <template #suffix>
         <Button variant="ghost" icon="lucide-plus" label="New deal" />
       </template>
     </PageHeaderMobile>

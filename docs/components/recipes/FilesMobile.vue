@@ -540,8 +540,8 @@ function goHome() {
 <template>
   <MobileShell>
     <PageHeaderMobile :title="screenTitle">
-      <template #left>
-        <!-- One level deep, the left slot is a back button; at the root it opens
+      <template #prefix>
+        <!-- One level deep, the prefix slot is a back button; at the root it opens
              the nav sheet (the desktop sidebar). -->
         <Button
           v-if="currentFolder"
@@ -558,7 +558,7 @@ function goHome() {
           @click="showNav = true"
         />
       </template>
-      <template #right>
+      <template #suffix>
         <Dropdown :options="newActions" align="end">
           <Button variant="ghost" icon="lucide-plus" label="New" />
         </Dropdown>

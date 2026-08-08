@@ -903,10 +903,11 @@ double-shift.
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 `frappe-ui/editor` family: a headless `<Editor>` you compose with **kits**
 (bundled, configurable extension sets) and **building-block** menus. Everything
-moves to the `frappe-ui/editor` subpath; nothing editor-related is exported from
-top-level `frappe-ui` except the deprecated v0 alias, so the two coexist during
-the migration window. See the [Editor](./molecules/editor) page for the full API
-and recipes.
+moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
+(`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`) are removed from top-level
+`frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
+[Editor](./molecules/editor) page for the full API and recipes.
 
 ```ts
 // Before
@@ -1292,6 +1293,45 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 
 `usePageMeta` works the same everywhere — see the
 [composables page](./other/composables#usepagemeta).
+
+## PageHeaderMobile family — slot names
+
+`PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
+are renamed to the shared `#prefix`/`#suffix` vocabulary (see
+[PHILOSOPHY.md P6](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md)).
+This is a **silent break**: Vue drops content passed to an unknown slot name
+with no error or warning — the back button, title icon, or trailing action
+just stops rendering.
+
+| Before                                | After                             |
+| -------------------------------------- | ---------------------------------- |
+| `PageHeaderMobile` `#left`             | `#prefix`                          |
+| `PageHeaderMobile` `#right`            | `#suffix`                          |
+| `PageHeaderMobileTitle` `#icon`        | `#prefix`                          |
+
+```vue
+<!-- Before -->
+<PageHeaderMobile title="Space">
+  <template #left><BackButton /></template>
+  <template #right><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #icon><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+
+<!-- After -->
+<PageHeaderMobile title="Space">
+  <template #prefix><BackButton /></template>
+  <template #suffix><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #prefix><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+```
+
+Grep for `#left`, `#right`, and `#icon` on these two components specifically —
+other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
+`#right` slots that are unaffected.
 
 ## FAQ
 

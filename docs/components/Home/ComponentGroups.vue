@@ -36,7 +36,6 @@ const componentGroups = {
       "Password",
       "FileUploader",
       "Rating",
-      "TextEditor",
     ],
   },
   "DateTime": {

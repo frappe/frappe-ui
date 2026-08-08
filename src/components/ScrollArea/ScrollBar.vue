@@ -1,9 +1,11 @@
 <template>
   <ScrollAreaScrollbar
+    data-slot="scroll-area-scrollbar"
     class="pointer-events-none z-20 flex touch-none select-none bg-transparent p-0.5 transition-colors duration-150 ease-out data-[orientation=horizontal]:h-2.5 data-[orientation=horizontal]:flex-col data-[orientation=vertical]:w-2.5"
     :orientation="orientation"
   >
     <ScrollAreaThumb
+      data-slot="scroll-area-thumb"
       class="relative flex-1 rounded-lg bg-gray-400 transition-opacity duration-150 ease-out before:absolute before:left-1/2 before:top-1/2 before:h-full before:w-full before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] dark:bg-gray-700"
       :class="[
         isThumbVisible
@@ -27,13 +29,9 @@ import {
   ScrollAreaScrollbar,
   ScrollAreaThumb,
 } from 'reka-ui'
+import type { ScrollBarProps } from './types'
 
-withDefaults(
-  defineProps<{
-    orientation?: 'vertical' | 'horizontal'
-  }>(),
-  { orientation: 'vertical' },
-)
+withDefaults(defineProps<ScrollBarProps>(), { orientation: 'vertical' })
 
 // Overlay scrollbar that fades in on pointer/scroll activity and hides after an
 // idle delay — keeps content flush to the edges (no reserved gutter) while still

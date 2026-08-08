@@ -1,5 +1,9 @@
 # Resource
 
+Resources are fully supported through `1.x`. For new code, see
+[Data Fetching](./use-call.md) — `useCall`, `useDoc`, `useList`, `useDoctype`
+and `useNewDoc` are the recommended layer.
+
 Resource is a feature to manage async data fetching and mutations in your Vue
 frontend. It will fetch, cache and keep data up-to-date from the server.
 

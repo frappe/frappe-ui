@@ -9,6 +9,62 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### ListView — stays, not deprecated
+
+`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
+primitive for new code, but it's a narrower, composition-based family by
+design — it has no equivalent for `ListView`'s config-driven columns
+(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
+disabled-row exclusion, the built-in select banner). If you're on `ListView`
+today, there's no forced migration for `1.0.0`.
+
+### `TextEditor` and its v0 exports — removed from root (breaking)
+
+Per ADR-0008, the deprecated v0 editor exports are removed from top-level
+`frappe-ui` — loud breaks, the import fails to resolve:
+
+- `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`
+- `ImageExtension`, `SetImageOptions`, `createSuggestionExtension`,
+  `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
+  `TextEditor/extensions/*` barrels also re-exported from root)
+
+Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
+[Editor section](../docs/content/docs/migration.md#editor). This confirms
+`CONTEXT.md`'s rule: the editor family is the only subsystem that exports
+from a subpath rather than root, and nothing editor-related is exported from
+root anymore.
+
+The underlying v0 component files (`src/components/TextEditor/`) still ship,
+unmodified, as `frappe-ui/editor`'s migration safety net — only the public
+export and its docs page are gone. Removing the files is a separate,
+human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
+`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
+out to `1.1`.
+
+### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
+
+`.ProseMirror ul[data-type='taskList'] input[type='checkbox']` used a
+Tailwind-v3-only `theme('colors.gray.900')` call in both
+`frappe-ui/editor`'s and the v0 `TextEditor`'s stylesheet, which broke
+Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
+same `var(--ink-gray-9)` token the rest of both files already use.
+
+### v1 resources — at-bar exception documented; `listResource` gets test coverage
+
+v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
+`getCachedResource`, `getCachedListResource`, `getCachedDocumentResource`,
+`resourcesPlugin`, `saveLocal`, `getLocal`, `deleteLocal`, `onDocUpdate`) ship
+un-deprecated and frozen at `1.0.0`, per #886.
+[ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md) records the
+one exception: the implementation stays hand-written JavaScript rather than
+TypeScript, permanently — 344 production call sites make a rewrite riskier
+than the freeze. `createListResource`, the second-most-used export at 57 call
+sites, gets test coverage for the first time (`listResource.test.ts`):
+pagination, `insert`/`setValue` refreshing the list, caching, and `reload()`'s
+pagination-state restore.
+
 ### Tailwind preset — `content` export added
 
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
@@ -860,6 +916,19 @@ error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
 `FrappeRequestError` closed for `frappeRequest`.
 
+### Data fetching (v2) — docs, and the sidebar splits from Resources
+
+`useCall`, `useDoc`, `useList`, `useDoctype` and `useNewDoc` each get a docs
+page for the first time, under a new **Data Fetching** sidebar section —
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for
+a query, `useDoctype` for write-only access to a DocType, `useNewDoc` for a
+draft-and-insert form.
+
+The old **Data Fetching** section is renamed **Resources** and keeps its
+three pages (Resource, List Resource, Document Resource) unchanged. Both
+sections link to each other: Resources stays fully supported through `1.x`;
+the new composables are the recommended layer for new code.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,
@@ -1007,6 +1076,37 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
     nothing.
   - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
     so it ignored dark mode.
+
+### App shell family — brought to bar
+
+`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
+`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
+names.
+
+- Every slot across the family now has a documented description, and each
+  component has a docs page, a story, and cypress tests (several had none).
+- **Breaking, silent:** `PageHeaderMobile`'s `#left`/`#right` slots and
+  `PageHeaderMobileTitle`'s `#icon` slot are renamed to the shared
+  `#prefix`/`#suffix` vocabulary (PHILOSOPHY.md P6 forbids type-specific
+  slots like `#icon` outside `Button`, and `#left`/`#right` were never in
+  the vocabulary). Vue drops content passed to an unknown slot name with no
+  error, so the old names don't warn — they just stop rendering. See the
+  [migration guide](../docs/content/docs/migration.md#pageheadermobile-family-slot-names).
+- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
+  `ScrollAreaExposed`) and `data-slot="scroll-area"` /
+  `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`
+  styling hooks — it had none. `viewportElement` on the template ref is now
+  typed via `ScrollAreaExposed`. (`SettingsDialog`'s `SettingsBody` exposes
+  the same shape today but isn't wired to this type yet — that's tracked
+  under SettingsDialog's own sweep.)
+- `FrappeUIProvider`'s source directory moved from `src/components/Provider`
+  to `src/components/FrappeUIProvider` to match its file name. Purely
+  internal — `import { FrappeUIProvider } from 'frappe-ui'` is unaffected.
+- **Breaking:** `FrappeUIProviderProps` is no longer exported. The component
+  has no props, so the type was empty and never wired to `defineProps` —
+  freezing it now would lock in nothing. Zero known consumers.
+  The mismatched directory name had made the whole component invisible to
+  the docs generator, so it previously had no docs page.
 
 ## Deprecation log
 
