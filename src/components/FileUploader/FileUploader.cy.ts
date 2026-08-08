@@ -79,6 +79,23 @@ describe('FileUploader', () => {
     cy.get('@upload.all').should('have.length', 0)
   })
 
+  it('emits failure when validateFile rejects the file', () => {
+    cy.intercept('POST', '/api/method/upload_file').as('upload')
+
+    cy.mount(FileUploader, {
+      props: {
+        validateFile: () => 'Only PDFs are allowed',
+        onFailure: cy.spy().as('onFailure'),
+      },
+    })
+
+    cy.get('input[type=file]').selectFile(testFile, { force: true })
+    cy.get('@upload.all').should('have.length', 0)
+    cy.get('@onFailure')
+      .should('have.been.calledOnce')
+      .and('have.been.calledWith', 'Only PDFs are allowed')
+  })
+
   it('renders the error via the custom slot when provided', () => {
     cy.mount(FileUploader, {
       props: {

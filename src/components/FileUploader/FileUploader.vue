@@ -120,6 +120,7 @@ async function onFileAdd(event: Event) {
       validationError instanceof Error
         ? validationError.message
         : validationError
+    emit('failure', validationError)
     return
   }
 
