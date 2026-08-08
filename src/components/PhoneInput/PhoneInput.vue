@@ -217,7 +217,7 @@ watch(
   () => props.modelValue,
   (newVal) => {
     const currentFullValue = `${currentCountry.value?.dialCode || ''}-${phoneNumber.value}`
-    if (newVal !== currentFullValue) {
+    if (newVal && newVal !== currentFullValue) {
       parseAndSetModelValue(newVal)
     }
   },
@@ -236,23 +236,27 @@ watch(
 )
 
 onMounted(async () => {
+
+  if (!currentCountry.value) {
+    setDefaultCountry()
+  }
+
   if (props.countries?.length) {
     countriesList.value = props.countries
+    setDefaultCountry()
   } else if (props.fetchCountries) {
     fetchingCountries.value = true
     try {
       const res = await props.fetchCountries()
       if (res?.length) {
         countriesList.value = res
+        setDefaultCountry()
       }
     } finally {
       fetchingCountries.value = false
     }
   }
 
-  if (!currentCountry.value) {
-    setDefaultCountry()
-  }
   parseAndSetModelValue(props.modelValue)
 })
 
