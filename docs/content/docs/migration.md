@@ -31,9 +31,13 @@ The `options` blob is flattened into top-level props. See the
 | `:options="{ title, size, actions }"` | `title` / `size` / `:actions`    |
 | `disableOutsideClickToClose`          | `:dismissible="false"`           |
 | `<template #body-content>`            | default slot                     |
+| `<template #body-main>`               | default slot                     |
 | `<template #body-title>`              | `<template #title>`              |
+| `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
+| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'yellow' }"`    |
+| `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
 ```vue
@@ -60,6 +64,40 @@ For reactive `:options` objects, spread them: `<Dialog v-bind="opts || {}" />`.
 For the imperative API, use `dialog.confirm` / `dialog.danger` / `dialog.prompt`
 from `frappe-ui` (callback-based: `onConfirm` resolves to close, throws to stay
 open) and wrap your app root in `<FrappeUIProvider>`.
+
+### `icon.appearance` → `icon.theme`
+
+```vue
+<!-- Before -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
+
+<!-- After -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" ... />
+```
+
+`appearance` is dropped silently — Vue accepts the unknown key with no error,
+so the icon renders with no tone. Map `warning → yellow`, `info → blue`,
+`danger → red`, `success → green`.
+
+### A template ref no longer exposes `close()`
+
+```vue
+<!-- Before -->
+<Dialog ref="dialogRef" v-model="show" />
+<script setup>
+dialogRef.value.close()
+</script>
+
+<!-- After -->
+<Dialog v-model:open="show" />
+<script setup>
+show.value = false
+</script>
+```
+
+`Dialog` exposes nothing on its template ref (ADR-0012); calling `.close()`
+now throws. Drive `open` through `v-model:open`, or use the `close` slot prop
+from inside `#default` / `#actions`.
 
 ## DatePicker / TimePicker family
 
@@ -136,6 +174,64 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | `compareFn` prop         | nothing — an option is selected when its `value` is in `modelValue` |
 | `displayValue` slot prop | `summary` on `#summary`, or `selectedOptions`                       |
 | `toggleOpen` slot prop   | `setOpen(boolean)`                                                  |
+
+### Dropdown and ContextMenu
+
+| Before                                     | After                            |
+| ------------------------------------------ | -------------------------------- |
+| `placement` prop, `DropdownPlacement` type | `align`                          |
+| `{ group, items }`                         | `{ group, options }`             |
+| `component:` option rows                   | `slots: { item: fn }`            |
+| `DropdownExposed` type                     | nothing — it described a template ref surface that never existed; use `v-model:open` or the `close` slot prop |
+
+All three behavioral removals are silent in plain-JS apps — the old code still
+runs and renders wrong instead of failing — so check each one. TypeScript
+callers get errors instead: the removed keys stay in the types as `never`. A
+dev-mode console warning also fires when `items` or `component` reaches the
+menu at runtime.
+
+**`placement` is ignored now.** The menu falls back to `align="start"`, so a
+right-aligned menu quietly moves left:
+
+```vue
+<!-- Before -->
+<Dropdown :options="options" placement="right" />
+<Dropdown :options="options" placement="center" />
+
+<!-- After -->
+<Dropdown :options="options" align="end" />
+<Dropdown :options="options" align="center" />
+```
+
+**A `{ group, items }` entry renders an empty menu** — the group resolves to
+zero options:
+
+```ts
+// Before
+const actions = [{ group: 'Edit', items: [{ label: 'Rename', onClick: rename }] }]
+
+// After
+const actions = [{ group: 'Edit', options: [{ label: 'Rename', onClick: rename }] }]
+```
+
+**A `component:` row renders as a plain action row** using its `label`, which
+for most of these rows is empty:
+
+```ts
+// Before
+{ component: h(Button, { theme: 'red' }, () => 'Delete') }
+
+// After
+{
+  label: 'Delete',
+  slots: {
+    item: () => h(Button, { theme: 'red' }, () => 'Delete'),
+  },
+}
+```
+
+These apply identically to `ContextMenu`, which shares the option shape
+(`ContextMenuComponentOption` is removed with `DropdownComponentOption`).
 
 ### Custom rows
 
@@ -466,13 +562,16 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 
 | Before                                     | After                  |
 | ------------------------------------------ | ---------------------- |
+| `<Input>` (removed)                        | `<TextInput>` or `FormControl` |
 | `Rating` `:rating_from`                    | `:max`                 |
 | `Rating` `:readonly`                       | `:disabled`            |
 | `Switch` `@change`                         | `@update:modelValue`   |
-| `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks |
-| `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
+| `Switch.labelClasses`                      | `data-*` styling hooks |
+| `Checkbox.padding`                         | `padded`               |
+| `Password` `:value` prop (removed)         | `v-model`              |
+| `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
-The first four rows are **removed**, not aliased. The old names are silently
+The first five rows are **removed**, not aliased. The old names are silently
 ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
 Rating becomes interactive, a `Switch` `@change` handler never fires, and
 `labelClasses` / `Checkbox.padding` stop styling anything. Nothing breaks at
@@ -481,9 +580,55 @@ build time, so grep for these names when upgrading.
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 
-The legacy `Input` component is deprecated. Use
-[`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
-`Select` / `Checkbox` for the other type modes it accepted.
+### Password — `value` prop removed
+
+`value` was a deprecated alternate way to set the password, seeding
+`v-model` on mount. It's gone. `:value` now falls through as a plain HTML
+attribute on the native `<input>` instead of seeding the model — the field
+still renders, so nothing throws or warns.
+
+```vue
+<!-- Before -->
+<Password v-model="password" :value="initialValue" />
+
+<!-- After -->
+<Password v-model="password" />
+<script setup>
+password.value = initialValue
+</script>
+```
+
+### `TextInput`, `Textarea`, `Password` — ref surface
+
+`TextInput` and `Textarea` handed back `{ el }`, a raw ref on the native
+element. It's now `{ focus, inputElement }`: call `focus(options?)` to move
+keyboard focus, and read `inputElement` for the native element itself (a
+computed, so it can't be reassigned). `Password` gains the same pair — it
+previously exposed nothing.
+
+This is silent for plain JS: `ref.value.el` becomes `undefined` at runtime
+instead of throwing. A typed ref catches it as a build-time error instead.
+
+```vue
+<!-- Before -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.el.focus({ preventScroll: true })
+}
+</script>
+
+<!-- After -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.focus({ preventScroll: true })
+}
+</script>
+```
+
+`Duration` already exposed `focus()`; it now takes the same `options?`
+parameter as the rest of the family.
 
 ## Divider
 

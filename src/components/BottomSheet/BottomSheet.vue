@@ -1,6 +1,6 @@
 <template>
   <DialogRoot v-model:open="isOpen">
-    <DialogPortal>
+    <DialogPortal :to="portalTarget">
       <DialogOverlay
         class="fixed inset-0 z-50 bg-black-overlay-200 dark:bg-black-overlay-700 bottom-sheet-overlay outline-none"
         @after-leave="emit('after-leave')"
@@ -66,11 +66,14 @@ import {
 } from 'reka-ui'
 import { useSheetDrag } from '../../composables/useSheetDrag'
 import type { BottomSheetProps, BottomSheetEmits } from './types'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 
 const props = withDefaults(defineProps<BottomSheetProps>(), {
   dismissible: true,
 })
 const emit = defineEmits<BottomSheetEmits>()
+
+const portalTarget = usePortalTarget()
 
 const isOpen = computed({
   get: () => props.open || false,

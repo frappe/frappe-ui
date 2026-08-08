@@ -16,7 +16,8 @@ This document defines the v1 API direction for the input-family components:
 `FileUploader` is intentionally out of scope for this spec; it will be
 covered separately.
 
-It also covers the v1 stance on the deprecated `Input.vue`.
+It also covers the v1 stance on `Input.vue`, which this document originally
+treated as a warn-and-keep deprecation (see the superseded note below).
 
 > **Superseded on the `Autocomplete` question.**
 > [#869](https://github.com/frappe/frappe-ui/issues/869) decided `Autocomplete`
@@ -25,6 +26,15 @@ It also covers the v1 stance on the deprecated `Input.vue`.
 > about warning-and-keeping the two is history, kept for the audit data behind
 > it. What shipped is in
 > [`migration.md`](../docs/content/docs/migration.md#autocomplete-removed).
+>
+> **Superseded on `Input.vue` and the ref surface, too.**
+> [#874](https://github.com/frappe/frappe-ui/issues/874) applied the same
+> ADR-0008 logic to `Input.vue` and to `Password.value`: both are **removed**
+> rather than warned, since a census found no live call sites for either. The
+> same PR implements ADR-0012 — `TextInput`/`Textarea`/`Password`'s `.el` ref
+> becomes `.inputElement` (typed, read-only) plus a `focus(options?)` method.
+> What shipped is in
+> [`migration.md`](../docs/content/docs/migration.md#inputs).
 
 It is a sibling of [`selection.md`](./selection.md), which covers the pickers
 these controls sit next to.
@@ -373,10 +383,10 @@ Rules:
 
 | Component / API                     | Warning name                       | Replacement                  |
 | ----------------------------------- | ---------------------------------- | ---------------------------- |
-| `Input.vue`                         | `Input`                            | `TextInput`                  |
+| ~~`Input.vue`~~                     | removed, no warning left           | `TextInput`                  |
 | ~~`Autocomplete`~~                  | removed, no warning left           | `Combobox` or `MultiSelect`  |
 | ~~`FormControl type='autocomplete'`~~ | removed; dev-only `console.error` | `type="combobox"`           |
-| `Password.value` prop               | `Password.value`                   | `v-model` / `modelValue`     |
+| ~~`Password.value` prop~~           | removed; silent — falls through as a DOM attribute | `v-model` / `modelValue` |
 | `Rating.rating_from` prop           | `Rating.rating_from`               | `max`                        |
 | `Switch.change` emit                | `Switch.change`                    | `update:modelValue` / `v-model` |
 | `Switch.labelClasses` prop          | `Switch.labelClasses`              | `data-*` styling hooks       |
@@ -580,18 +590,20 @@ contract.
 `warnDeprecated(...)` is wired in the following files (matching the
 Deprecations table):
 
-- `src/components/Input.vue` — warn on mount: `Input` → `TextInput`
-- `src/components/Password/Password.vue` — `value` prop
+- ~~`src/components/Input.vue` — warn on mount: `Input` → `TextInput`~~ —
+  reversed like `Autocomplete`: `Input.vue` is deleted outright, no warning
+  wired
+- ~~`src/components/Password/Password.vue` — `value` prop~~ — reversed: the
+  prop is deleted outright, no warning wired
 - `src/components/Rating/Rating.vue` — `rating_from` prop
 - `src/components/Switch/Switch.vue` — `change` emit, `labelClasses` prop
 - `src/components/Checkbox/Checkbox.vue` — `padding` prop
 - `src/components/Divider/Divider.vue` — `Divider.action.handler` (replaces
   the prior ad-hoc deprecation log)
 
-`Input` moves out of standard component docs onto the single
-legacy-components docs page; the v1 migration guide points at the new API.
-`Autocomplete` and `FormControl type='autocomplete'` are listed there as
-removed rather than legacy.
+`Input` is removed rather than moved to the legacy-components docs page; the
+v1 migration guide points at the new API. `Autocomplete` and
+`FormControl type='autocomplete'` are listed there as removed too.
 
 ### `data-*` styling hooks
 

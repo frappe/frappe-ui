@@ -49,4 +49,30 @@ describe('ItemListRow', () => {
 
     cy.get('[data-slot="item-list-row"]').should('have.attr', 'data-disabled')
   })
+
+  it('renders #prefix and #suffix content, and #label over the default slot', () => {
+    cy.mount(ItemListRow, {
+      slots: {
+        default: 'Default label',
+        label: 'Named label',
+        prefix: 'P',
+        suffix: 'S',
+      },
+    })
+
+    cy.get('[data-slot="item-prefix"]').should('contain.text', 'P')
+    cy.get('[data-slot="item-suffix"]').should('contain.text', 'S')
+    cy.get('[data-slot="item-label"]')
+      .should('contain.text', 'Named label')
+      .and('not.contain.text', 'Default label')
+  })
+
+  it('reflects size via data-size', () => {
+    cy.mount(ItemListRow, {
+      props: { size: 'lg' },
+      slots: { default: 'Row' },
+    })
+
+    cy.get('[data-slot="item-list-row"]').should('have.attr', 'data-size', 'lg')
+  })
 })

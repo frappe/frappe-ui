@@ -38,18 +38,28 @@ and `Rating` exports `RatingEmits`.
   via `package.json` `engines` so installers and CI surface the requirement
   instead of opaque transitive-dep engine errors.
 
+### Portal target for embedded apps
+
+- `portalTo` on `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+  `MultiSelect` no longer declares a `'body'` prop default. An unembedded app
+  still gets `'body'`, now as a fallback. No existing call behaves differently.
+- New `usePortalTarget` / `providePortalTarget` / `portalTargetKey` exports let
+  an embedding host redirect every overlay at once. See
+  [`spec/portal-target.md`](../spec/portal-target.md).
+
 ### Dialog — v1 spec
 
 - Flat top-level props (`title`, `message`, `icon`, `size`, `position`,
-  `paddingTop`, `actions`) are canonical; legacy `options` blob warns.
+  `paddingTop`, `actions`) are canonical. The legacy `options` blob is
+  removed — see below.
 - `v-model:open` is canonical; `v-model` (modelValue) still works silently.
 - New props: `dismissible` (default `true`, replaces
   `disableOutsideClickToClose`), `bare`, `showCloseButton` (default `true`,
   independent of the auto-header).
 - Canonical slots `#default`, `#title`, `#actions` (scoped with
-  `{ close, actions }`). Legacy `#body*` slots warn.
-- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`;
-  legacy value auto-mapped.
+  `{ close, actions }`). The legacy `#body*` slots are removed — see below.
+- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`,
+  which is removed — see below.
 - Auto-header no longer renders an "Untitled" fallback.
 
 ### Dialog — imperative `dialog.*` API
@@ -63,7 +73,49 @@ and `Rating` exports `RatingEmits`.
 - `<FrappeUIProvider>` now renders `<Dialogs />` next to `<Toasts />`, so
   apps wrapped with the provider get the imperative stack for free.
   `<Dialogs />` is still exported for callers that don't use the provider.
-- Legacy `confirmDialog()` warns; use `dialog.confirm()`.
+- `ConfirmDialog` and `confirmDialog()` are removed — see below; use
+  `dialog.confirm()` / `dialog.danger()`.
+- New root exports: `DangerArgs`, `DialogControl`, `PromptControl`,
+  `DialogHandle`, `PromptFieldValidator`. `DialogSlotProps` is exported from
+  the `Dialog` barrel.
+
+### Dialog — deprecated surface removed (breaking)
+
+Every member marked `@deprecated` is deleted, per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
+aliased and nothing warns.
+
+- **Breaking, silent:** the `options` blob prop and `DialogOptions` type are
+  gone. It bundled `title`/`size`/`icon`/`actions` into one object. An
+  `:options="{...}"` call site still compiles — Vue drops the unknown prop as
+  an inert attr — but the dialog silently loses its title, size and actions.
+  Use the flat top-level props.
+- **Breaking, silent:** `disableOutsideClickToClose` is gone. It still lands
+  as an inert attr, and `dismissible` (the inverse) defaults to `true`, so the
+  dialog silently becomes dismissible. Use `dismissible`.
+- **Breaking, silent:** `icon.appearance` and `DialogIconAppearance` are gone;
+  only `icon.theme` remains. An `appearance` key is dropped, so the icon
+  renders with no tone. Map `warning → yellow`, `info → blue`, `danger → red`,
+  `success → green`.
+- **Breaking, silent:** the legacy `#body`, `#body-content`, `#body-main`,
+  `#body-title` and `#body-header` slots are gone. Vue drops an unknown named
+  slot with no error, so a missed call site renders nothing where that slot's
+  content used to be. Use `#default`, `#title` and `#actions`; `#body` maps to
+  `bare` + `#default`.
+- **Breaking:** the callable-context shim on action `onClick` is gone. The
+  context used to be callable as well as a plain object (`ctx()` closed the
+  dialog); it is `{ close }` only now, so calling it as a function throws
+  `TypeError: ctx is not a function`.
+- **Breaking:** `defineExpose({ close })` and the `DialogExposed` type are
+  gone — Dialog exposes nothing on its template ref (ADR-0012). A template-ref
+  `.close()` call throws a `TypeError`. Use `v-model:open = false`, or the
+  `close` slot prop. Zero known call sites.
+- **Breaking:** `ConfirmDialog` and `confirmDialog()` are deleted. The import
+  fails, so the build names every call site. Use `dialog.confirm()` /
+  `dialog.danger()`.
+
+Before/after for the silent breaks is in the
+[migration guide](../docs/content/docs/migration.md#dialog).
 
 ### DatePicker family — v1 spec
 
@@ -202,7 +254,27 @@ CSS can target inputs without class-injection props:
 `Password` now uses `defineModel<string>()`, fixing the existing bug where
 `<Password v-model>` did not update from typing. Explicit `size`, `variant`,
 `disabled`, `placeholder`, `id`, `required` props replace `$attrs` routing.
-`value` prop is deprecated.
+
+### Password — `value` prop removed (breaking)
+
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+deprecated member ships in `1.0.0`. `value` warned and seeded `v-model` since
+it was deprecated earlier in this cycle; a census of every downstream app
+found zero call sites still passing it. Use `v-model` / `modelValue`.
+
+### TextInput / Textarea / Password / Duration — `focus()` and `inputElement` on the ref
+
+Implements [ADR-0012](../spec/adr/0012-template-ref-surface.md).
+
+- **Breaking:** `TextInput.el` and `Textarea.el` are renamed to
+  `inputElement` — a computed, typed `HTMLInputElement | null` /
+  `HTMLTextAreaElement | null`, never a raw ref.
+- All three, plus `Duration`, now expose `focus(options?: FocusOptions)`.
+  `Password` previously exposed nothing.
+- `TextInput`, `Textarea`, and `Password` share one exported type,
+  `TextInputExposed`, from `TextInput`'s `types.ts`.
+- `DurationExposed.focus` gained the same `options?` parameter; its member
+  set is unchanged.
 
 ### Rating — `max` replaces `rating_from`
 
@@ -241,6 +313,12 @@ In favor of `padded`. (Now removed — see "Toggles and ranged inputs" above.)
 `Textarea` now accepts the `'ghost'` variant (matching `TextInput` and
 `Password`) and the shared `required` prop.
 
+### TextInput / Textarea — `ghost` variant paints transparent (fix)
+
+`ghost` set no `bg-*` class, so `@tailwindcss/forms` preflight painted the
+input `#fff` — a white pill in dark mode. `ghost` now sets `bg-transparent`,
+matching Combobox's own ghost search input. Closes #851.
+
 ### FeatherIcon — deprecated; `lucide-*` recommended
 
 `FeatherIcon` remains exported. Feather-name strings passed to
@@ -260,9 +338,24 @@ but now warn.
 Hardcoded internal `FeatherIcon` usages across core components were
 migrated to `lucide-*` in this release. No consumer-visible behavior change.
 
-### Legacy components — dev-mode warnings
+### Input — removed (breaking)
 
-`Input.vue` warns once on mount. Migrate to `TextInput`.
+- **Breaking:** `Input` and its `Input.cy.ts` tests are deleted. Per
+  [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+  deprecated member ships in `1.0.0`; a census of downstream apps found no
+  live call sites left that render `<Input>` (five registrations were dead
+  global component registrations, never rendered). Use `TextInput` for
+  text-like modes, or `Textarea` / `Select` / `Checkbox` for the other type
+  modes `Input` accepted.
+
+### FormLabel — moved to a component directory (non-breaking)
+
+`FormLabel` now lives at `src/components/FormLabel/FormLabel.vue` instead of
+a bare `src/components/FormLabel.vue`, matching the rest of the input
+family. It gains `types.ts`, tests, stories, and a docs page. The import
+path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
+
+### Legacy components — dev-mode warnings
 
 `MonthPicker` is deprecated. For simple month picking, use `Select` with month
 options.
@@ -301,27 +394,48 @@ new theme switchers, compose `Select` with the `useColorScheme` composable.
 Before/after for each silent break is in the
 [migration guide](../docs/content/docs/migration.md#autocomplete-removed).
 
-### Dropdown — group field standardized on `options`
+### Dropdown / ContextMenu — deprecated members removed (ADR-0008)
 
-Matches `Combobox`, `MultiSelect`, `Select`. Old `{ group, items }` shape
-is a deprecated alias; warns if both are provided on the same entry.
+Three surfaces that shipped as deprecated aliases in the betas are deleted,
+not aliased. All three are **silent breaks** in plain-JS apps — before/afters
+in the
+[migration guide](../docs/content/docs/migration.md#dropdown-and-contextmenu);
+TypeScript callers get compile errors (the removed keys stay typed as
+`never`), and a dev-mode console warning fires when the old shape reaches the
+menu at runtime.
 
-```ts
-// before
-{ group: 'Edit', items: [{ label: 'Rename', onClick: rename }] }
-// after
-{ group: 'Edit', options: [{ label: 'Rename', onClick: rename }] }
-```
+- **`placement` prop and `DropdownPlacement` type removed.** Use `align`
+  (`left`→`start`, `center`→`center`, `right`→`end`). A leftover `placement`
+  is ignored and the menu falls back to `align="start"`.
+- **`{ group, items }` removed.** Use `{ group, options }`, matching
+  `Combobox` / `MultiSelect` / `Select`. A leftover `items` group renders as
+  an empty menu.
+- **`component:` option rows removed** (`DropdownComponentOption`,
+  `ContextMenuComponentOption`). Use `slots: { item: fn }`. A leftover
+  `component:` row renders as a plain action row off its `label`.
+
+Also removed: the **`DropdownExposed` type** — it described a `close()`
+template-ref member that `Dropdown` never implemented ([ADR-0012] keeps
+`Dropdown`'s template-ref surface empty; `v-model:open` and the `close` slot
+prop cover it). Type-only, so the break is loud.
+
+### Dropdown — disabled state reaches the menu primitive
+
+The trigger now forwards its disabled state (from `button.disabled` or a
+`disabled` fallthrough attribute) to the underlying menu primitive.
+Previously only the generated `Button` was natively disabled; a custom
+trigger slot with a `disabled` attribute could still open the menu via
+keyboard or synthetic clicks.
 
 ### Select — `#item-*` slot prop renamed to `item`
 
-`#item-prefix`, `#item-label`, and `#item-suffix` on `Select` now expose
+`#item-prefix`, `#item-label`, and `#item-suffix` on `Select` expose
 `item` as the canonical scoped binding, matching `Combobox` and
-`MultiSelect`. The previous `option` key is retained as a silent alias
-through v1.x; no runtime warning fires (slot-prop destructuring isn't
-detectable at runtime). The `@deprecated` tag lives on the TS interface
-so editors hint at the rename. The legacy `#option` slot still passes
-`{ option }` unchanged.
+`MultiSelect`. The previous `option` key is removed with the rest of the
+deprecated surface (ADR-0008) — destructuring `{ option }` yields
+`undefined`, silently. No runtime warning is possible (slot-prop
+destructuring isn't detectable), so grep for `#item-` slots destructuring
+`option`.
 
 ```vue
 <!-- before -->
@@ -756,15 +870,18 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | API                                | Replacement                          | Notes                                  |
 | ---------------------------------- | ------------------------------------ | -------------------------------------- |
 | `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
-| `Password.value` prop              | `v-model` / `modelValue`             | Warns when set                         |
+| `Password.value` prop              | `v-model` / `modelValue`             | **Removed in 1.0.0** (ADR-0008)        |
 | `Rating.rating_from` prop          | `max`                                | **Removed** — silent; prop ignored     |
 | `Rating.readonly` prop             | `disabled`                           | **Removed** — silent; prop ignored     |
 | `Switch.change` emit               | `update:modelValue` / `v-model`      | **Removed** — silent; listener never fires |
 | `Switch.labelClasses` prop         | `data-*` styling hooks               | **Removed** — silent; prop ignored     |
 | `Checkbox.padding` prop            | `padded` / `data-*` styling hooks    | **Removed** — silent; prop ignored     |
-| `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
-| Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
-| `Input.vue`                        | `TextInput`                          | Warns on mount                         |
+| `Dropdown` `{ group, items }`      | `{ group, options }`                 | **Removed** — silent; renders empty, dev-only warning |
+| `Dropdown.placement` prop          | `align`                              | **Removed** — silent; falls back to `align="start"` |
+| `Dropdown`/`ContextMenu` `component:` rows | `slots: { item: fn }`        | **Removed** — silent; renders label-only row, dev-only warning |
+| `DropdownExposed` type             | `v-model:open` / `close` slot prop   | **Removed** — loud; described an expose that never existed |
+| Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
+| `Input.vue`                        | `TextInput`                          | **Removed in 1.0.0** (ADR-0008)        |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
@@ -783,7 +900,11 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | `useDatePicker` composable         | use picker components directly       | Warns on call                          |
 | `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
 | `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
-| Dialog legacy `options` blob       | flat top-level props                 | Warns once per instance                |
-| Dialog `#body*` slots              | `#default` / `#title` / `#actions`   | Warns when used                        |
-| Dialog `icon.appearance`           | `icon.theme`                         | Auto-mapped; warns                     |
-| `confirmDialog()`                  | `dialog.confirm()`                   | Warns on call                          |
+| Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
+| Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |
+| Dialog `#body*` slots               | `#default` / `#title` / `#actions`  | **Removed** — silent; renders nothing  |
+| Dialog `icon.appearance`           | `icon.theme`                         | **Removed** — silent; icon loses tone  |
+| Dialog action `onClick` callable context | `{ close }` object             | **Removed** — throws on call           |
+| Dialog template-ref `close()`      | `v-model:open` / `close` slot prop   | **Removed** — throws on call           |
+| `ConfirmDialog` component          | `dialog.confirm()` / `dialog.danger()` | **Removed** — import fails           |
+| `confirmDialog()`                  | `dialog.confirm()`                   | **Removed** — import fails             |

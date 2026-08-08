@@ -42,6 +42,9 @@ If these disagree, update the lower-authority document or mark it historical.
   a required `*Exposed` type. A member earns its place only when parent script
   needs it and no other surface reaches. Excludes `frappe/`, `ListView`, and
   `Calendar`. **Accepted** — [ADR-0012](./adr/0012-template-ref-surface.md).
+- [`portal-target.md`](./portal-target.md) — where an overlay teleports, and how
+  an embedding host redirects every overlay at once. Concerns embedded builds
+  only. A test enforces the component-side rule. **Accepted.**
 
 ## ADRs
 

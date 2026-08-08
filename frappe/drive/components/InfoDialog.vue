@@ -1,11 +1,11 @@
 <template>
   <Dialog v-model="open" @close="dialogType = ''">
-    <template #body-title>
+    <template #title>
       <h3 class="text-xl font-semibold leading-6 text-ink-gray-9 cursor-pointer pr-2" @click="emitter.emit('rename')">
         {{ entity.title }}
       </h3>
     </template>
-    <template #body-content>
+    <template #default>
       <ul class="space-y-3 text-sm mb-4 text-ink-gray-8">
         <span class="text-base font-semibold">Information</span>
         <li>

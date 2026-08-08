@@ -62,8 +62,14 @@ describe('Switch', () => {
       },
     })
 
+    // Enter is handled by reka's own keydown listener.
     cy.get('[role="switch"]').focus().trigger('keydown', { key: 'Enter' })
     cy.get('@onUpdate').should('have.been.calledWith', true)
+
+    // Space activation is native button behavior, which synthetic events
+    // can't drive — assert the control is a real <button> so the browser
+    // guarantees it.
+    cy.get('[role="switch"]').should('match', 'button')
   })
 
   it('renders the label and description slots', () => {

@@ -17,7 +17,7 @@ export interface HoverCardProps {
   offset?: number
 
   /**
-   * Where the card is teleported to in the DOM.
+   * Where the card is teleported to in the DOM. Unset, an embedding host's target is used, else `body`.
    */
   portalTo?: HoverCardPortalProps['to']
 

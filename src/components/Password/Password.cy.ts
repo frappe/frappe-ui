@@ -1,12 +1,7 @@
 import Password from './Password.vue'
-import { h } from 'vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
+import { defineComponent, h, ref } from 'vue'
 
 describe('Password', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   it('Renders & password toggle ', () => {
     cy.mount(Password)
     cy.get('input[type=password]').should('exist')
@@ -39,19 +34,6 @@ describe('Password', () => {
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
   })
 
-  it('warns once when the deprecated `value` prop is used', () => {
-    cy.window().then((win) => {
-      cy.spy(win.console, 'warn').as('consoleWarn')
-    })
-    cy.mount(Password, {
-      props: { value: 'abc' },
-    })
-    cy.get('@consoleWarn').should(
-      'have.been.calledWithMatch',
-      /Password\.value is deprecated/,
-    )
-  })
-
   it('shared labeling contract', () => {
     cy.mount(Password, {
       props: { label: 'Password', description: 'min 8 chars', required: true },
@@ -64,6 +46,50 @@ describe('Password', () => {
     })
   })
 
+  it('disables the input', () => {
+    cy.mount(Password, { props: { disabled: true } })
+    cy.get('input')
+      .should('be.disabled')
+      .and('have.attr', 'data-disabled', 'true')
+  })
+
+  it('exposes focus() and inputElement', () => {
+    const Harness = defineComponent({
+      setup() {
+        const passwordRef = ref<InstanceType<typeof Password> | null>(null)
+
+        return () =>
+          h('div', [
+            h(Password, { ref: passwordRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () =>
+                  passwordRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+            h(
+              'span',
+              { 'data-cy': 'is-input-element' },
+              String(
+                passwordRef.value?.inputElement instanceof HTMLInputElement,
+              ),
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[data-cy="is-input-element"]').should('have.text', 'true')
+    cy.get('input').should('not.have.attr', 'tabindex')
+    cy.get('input').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('input').should('have.focus')
+  })
+
   it('Prefix slot', () => {
     cy.mount(Password, {
       slots: {
@@ -72,5 +98,28 @@ describe('Password', () => {
     })
 
     cy.get("[data-cy='prefix-icon']").should('exist')
+  })
+
+  it('renders #label and #description slots', () => {
+    cy.mount(Password, {
+      slots: {
+        label: '<span class="custom-label">Custom label</span>',
+        description: '<span class="custom-description">Custom help</span>',
+      },
+    })
+    cy.get('.custom-label').should('have.text', 'Custom label')
+    cy.get('.custom-description').should('have.text', 'Custom help')
+  })
+
+  it('toggles visibility with Ctrl+I', () => {
+    cy.mount(Password)
+    cy.get('input[type=password]').should('exist')
+
+    cy.get('input').type('{ctrl}i')
+    cy.get('input[type=text]').should('exist')
+    cy.get('input[type=password]').should('not.exist')
+
+    cy.get('input').type('{ctrl}i')
+    cy.get('input[type=password]').should('exist')
   })
 })

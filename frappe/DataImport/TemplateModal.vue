@@ -1,9 +1,6 @@
 <template>
-    <Dialog v-model="show" :options="{
-        title: 'Export Data',
-        size: '2xl',
-    }">
-        <template #body-content>
+    <Dialog v-model="show" title="Export Data" size="2xl">
+        <template #default>
             <div class="text-base space-y-5">
                 <div class="grid grid-cols-2 gap-5">
                     <FormControl

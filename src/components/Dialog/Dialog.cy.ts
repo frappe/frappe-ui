@@ -5,6 +5,17 @@ import Button from '../Button/Button.vue'
 describe('Dialog', () => {
   // ---- Canonical v1 surface --------------------------------------------------
 
+  it('renders with default props', () => {
+    cy.mount(Dialog, { props: { open: true } })
+
+    cy.get('[role=dialog]').should('exist')
+    // Defaults: size 'lg', position 'center', no title/message/actions.
+    cy.get('[role=dialog]').should('have.class', 'max-w-lg')
+    cy.get('[data-position=center]').should('exist')
+    cy.get('[role=dialog] h3').should('not.exist')
+    cy.get('[role=dialog] [aria-label=Close]').should('exist')
+  })
+
   it('renders title, message and action; ctx.close() closes the dialog', () => {
     const onClose = cy.spy().as('onClose')
     const onActionClick = cy.spy().as('onActionClick')
@@ -82,6 +93,28 @@ describe('Dialog', () => {
     cy.mount(Wrapper)
     cy.contains('button', 'Show').click()
     cy.get('[role=dialog]').contains('h3', 'Legacy v-model').should('exist')
+  })
+
+  it('`open` wins over `modelValue` when both are bound', () => {
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        modelValue: false,
+        title: 'Open wins',
+      },
+    })
+
+    cy.get('[role=dialog]').contains('h3', 'Open wins').should('exist')
+
+    cy.mount(Dialog, {
+      props: {
+        open: false,
+        modelValue: true,
+        title: 'Still closed',
+      },
+    })
+
+    cy.get('[role=dialog]').should('not.exist')
   })
 
   // ---- New behavior props ----------------------------------------------------
@@ -266,6 +299,62 @@ describe('Dialog', () => {
     cy.get('[data-cy=actions]').should('have.text', 'Custom actions')
   })
 
+  it('passes `{ close }` to #default and #title, and `{ close, actions }` to #actions', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const open = ref(true)
+        return { open }
+      },
+      render() {
+        return h(
+          Dialog,
+          {
+            open: this.open,
+            'onUpdate:open': (v: boolean) => (this.open = v),
+            actions: [{ label: 'Got it' }],
+          },
+          {
+            title: ({ close }: { close: () => void }) =>
+              h(
+                'button',
+                { 'data-cy': 'title-close', onClick: close },
+                'Custom title',
+              ),
+            default: ({ close }: { close: () => void }) =>
+              h(
+                'button',
+                { 'data-cy': 'default-close', onClick: close },
+                'Custom body',
+              ),
+            actions: ({
+              close,
+              actions,
+            }: {
+              close: () => void
+              actions: Array<{ label: string }>
+            }) => [
+              h(
+                'div',
+                { 'data-cy': 'actions-relayout' },
+                actions.map((a) => a.label).join(', '),
+              ),
+              h('button', { 'data-cy': 'actions-close', onClick: close }),
+            ],
+          },
+        )
+      },
+    })
+
+    cy.mount(Wrapper)
+
+    cy.get('[data-cy=title-close]').should('exist')
+    cy.get('[data-cy=default-close]').should('exist')
+    cy.get('[data-cy=actions-relayout]').should('have.text', 'Got it')
+    cy.get('[data-cy=actions-close]').should('exist')
+    cy.get('[data-cy=default-close]').click()
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
   // ---- Icon theming ----------------------------------------------------------
 
   it('renders an icon by theme color', () => {
@@ -280,88 +369,27 @@ describe('Dialog', () => {
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
   })
 
-  // ---- Back-compat -----------------------------------------------------------
+  // ---- Escape ------------------------------------------------------------
 
-  it('accepts the legacy `options` blob', () => {
-    cy.mount(Dialog, {
-      props: {
-        modelValue: true,
-        options: {
-          title: 'Legacy options',
-          message: 'Still works.',
-          actions: [{ label: 'OK', variant: 'solid' }],
-        },
+  it('Escape closes the dialog when dismissible (the default)', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const open = ref(true)
+        return { open }
+      },
+      render() {
+        return h(Dialog, {
+          open: this.open,
+          'onUpdate:open': (v: boolean) => (this.open = v),
+          title: 'Dismissible',
+        })
       },
     })
 
-    cy.get('[role=dialog]').contains('h3', 'Legacy options').should('exist')
-    cy.get('[role=dialog]').contains('p', 'Still works.').should('exist')
-    cy.get('[role=dialog]').contains('button', 'OK').should('exist')
-  })
-
-  it('accepts legacy #body-header / #body-content slots', () => {
-    cy.mount(Dialog, {
-      props: { modelValue: true },
-      slots: {
-        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
-        'body-content': h(
-          'div',
-          { 'data-cy': 'body-content' },
-          'legacy content',
-        ),
-      },
-    })
-
-    cy.get('[data-cy=body-header]').should('have.text', 'legacy header')
-    cy.get('[data-cy=body-content]').should('have.text', 'legacy content')
-  })
-
-  it('honors `options.size` when the `size` prop is omitted', () => {
-    cy.mount(Dialog, {
-      props: {
-        modelValue: true,
-        options: { title: 'Wide', size: 'xl' },
-      },
-    })
-
-    cy.get('[role=dialog]').should('have.class', 'max-w-xl')
-  })
-
-  it('honors `options.position` when the `position` prop is omitted', () => {
-    cy.mount(Dialog, {
-      props: {
-        modelValue: true,
-        options: { title: 'Top', position: 'top' },
-      },
-    })
-
-    cy.get('[data-position=top]').should('exist')
-  })
-
-  it('does not render the fallback close button when `#body-header` is used', () => {
-    cy.mount(Dialog, {
-      props: { modelValue: true },
-      slots: {
-        'body-header': h('div', { 'data-cy': 'body-header' }, 'legacy header'),
-      },
-    })
-
-    cy.get('[data-cy=body-header]').should('exist')
-    cy.get('[role=dialog] [aria-label=Close]').should('not.exist')
-  })
-
-  it('inverts `disableOutsideClickToClose` into `dismissible`', () => {
-    cy.mount(Dialog, {
-      props: {
-        open: true,
-        title: 'Locked',
-        disableOutsideClickToClose: true,
-      },
-    })
-
+    cy.mount(Wrapper)
     cy.get('[role=dialog]').should('exist')
     cy.get('body').type('{esc}')
-    cy.get('[role=dialog]').should('exist')
+    cy.get('[role=dialog]').should('not.exist')
   })
 
   // ---- Autofocus -------------------------------------------------------------
@@ -463,6 +491,33 @@ describe('Dialog', () => {
       .parent()
       .should('have.class', 'flex')
       .and('have.class', 'justify-end')
+  })
+
+  it('holds an action button in a loading state while its async onClick is pending', () => {
+    let resolveClick: () => void = () => {}
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        title: 'Saving',
+        actions: [
+          {
+            label: 'Save',
+            variant: 'solid',
+            onClick: () =>
+              new Promise<void>((resolve) => {
+                resolveClick = resolve
+              }),
+          },
+        ],
+      },
+    })
+
+    cy.contains('button', 'Save').click()
+    cy.contains('button', 'Save').find('[role="status"]').should('exist')
+    cy.then(() => resolveClick())
+    cy.contains('button', 'Save')
+      .find('[role="status"]')
+      .should('not.exist')
   })
 
   it('falls back to Reka default focus when nothing is marked', () => {

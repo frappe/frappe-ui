@@ -5,11 +5,11 @@ import MenuItemContent from './MenuItemContent.vue'
 import MenuRenderContent from './MenuRenderContent.vue'
 import MenuRenderContentAsChild from './MenuRenderContentAsChild.vue'
 import type { MenuOption, MenuProps } from './types'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import {
   menuClasses,
   getMenuBackgroundColor,
   groupHasIcons,
-  isMenuComponentOption,
   isMenuSubmenuOption,
   isMenuSwitchOption,
   normalizeMenuOptions,
@@ -21,8 +21,9 @@ defineOptions({
 
 const props = withDefaults(defineProps<MenuProps>(), {
   groups: () => [],
-  portalTo: 'body',
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const router = useRouter()
 
@@ -89,7 +90,7 @@ async function handleItemSelect(item: MenuOption, event: Event) {
             />
           </component>
 
-          <component :is="primitives.Portal" :to="portalTo">
+          <component :is="primitives.Portal" :to="portalTarget">
             <component
               :is="primitives.SubContent"
               data-slot="content"
@@ -154,19 +155,6 @@ async function handleItemSelect(item: MenuOption, event: Event) {
               item.slots.item({ item, close, selected: !!item.selected })
             "
           />
-        </component>
-
-        <component
-          :is="primitives.Item"
-          v-else-if="isMenuComponentOption(item)"
-          as-child
-          data-slot="item"
-          :data-disabled="item.disabled ? '' : undefined"
-          :disabled="item.disabled"
-          class="data-[disabled]:cursor-not-allowed"
-          @select="handleItemSelect(item, $event)"
-        >
-          <component :is="item.component" :active="false" />
         </component>
 
         <component

@@ -9,7 +9,6 @@ export type {
   MenuActionOption as DropdownActionOption,
   MenuSwitchOption as DropdownSwitchOption,
   MenuSubmenuOption as DropdownSubmenuOption,
-  MenuComponentOption as DropdownComponentOption,
   MenuGroupOption as DropdownGroupOption,
   MenuOption as DropdownOption,
   MenuItem as DropdownItem,
@@ -19,7 +18,6 @@ export type {
   MenuGroupSlotProps as DropdownGroupSlotProps,
 } from '../Menu/types'
 
-export type DropdownPlacement = 'left' | 'right' | 'center'
 export type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
 export type DropdownAlign = 'start' | 'center' | 'end'
 
@@ -36,12 +34,6 @@ export interface DropdownProps {
   /** Alignment of the dropdown content along the trigger edge. */
   align?: DropdownAlign
 
-  /**
-   * Placement of the dropdown relative to the trigger.
-   * @deprecated use `align` instead; `placement` remains as a back-compat alias through v1.x
-   */
-  placement?: DropdownPlacement
-
   /** Side of the trigger the dropdown appears on. */
   side?: DropdownSide
 
@@ -51,7 +43,7 @@ export interface DropdownProps {
   /** Whether the dropdown width should match the trigger element. */
   matchTriggerWidth?: boolean
 
-  /** Teleport target for dropdown portal content. */
+  /** Teleport target for dropdown portal content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 }
 
@@ -75,9 +67,4 @@ export type DropdownSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
 export interface DropdownEmits {
   /** Fired when the dropdown open state changes. */
   'update:open': [value: boolean]
-}
-
-export interface DropdownExposed {
-  /** Closes the dropdown menu. */
-  close: () => void
 }

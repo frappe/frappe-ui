@@ -17,15 +17,10 @@ export type DialogTheme = 'yellow' | 'blue' | 'red' | 'green'
 
 export type DialogPosition = 'center' | 'top'
 
-/** Legacy icon appearance — replaced by `theme`. */
-export type DialogIconAppearance = 'warning' | 'info' | 'danger' | 'success'
-
 export type DialogIcon = {
   name: string
-  /** Color tone. Replaces deprecated `appearance`. */
+  /** Color tone. */
   theme?: DialogTheme
-  /** @deprecated Use `theme` instead. */
-  appearance?: DialogIconAppearance
 }
 
 export type DialogActionContext = {
@@ -38,17 +33,6 @@ export type DialogAction = ButtonProps & {
 
 /** A `DialogAction` augmented with a reactive `loading` flag, as surfaced to the `#actions` slot. */
 export type DialogReactiveAction = DialogAction & { loading: boolean }
-
-/** Legacy blob — accepted for back-compat, warns once. */
-export type DialogOptions = {
-  title?: string
-  message?: string
-  size?: DialogSize
-  icon?: string | DialogIcon
-  actions?: DialogAction[]
-  position?: DialogPosition
-  paddingTop?: string | number
-}
 
 export interface DialogProps {
   // Visibility — both supported, `open` is canonical.
@@ -91,13 +75,6 @@ export interface DialogProps {
 
   /** Drop the chrome: no padded card, no auto-header, no auto-actions. Default `false`. */
   bare?: boolean
-
-  // Deprecated.
-  /** @deprecated Use `dismissible` (inverted) instead. */
-  disableOutsideClickToClose?: boolean
-
-  /** @deprecated Use flat top-level props instead. */
-  options?: DialogOptions
 }
 
 export interface DialogEmits {
@@ -126,11 +103,6 @@ export interface DialogActionsSlotProps extends DialogSlotProps {
   actions: DialogReactiveAction[]
 }
 
-export interface DialogExposed {
-  /** Closes the dialog. */
-  close: () => void
-}
-
 export interface DialogSlots {
   /** Main content rendered inside the padded card. Exposes `{ close }`. */
   default?: (props: DialogSlotProps) => any
@@ -140,19 +112,4 @@ export interface DialogSlots {
 
   /** Footer override; exposes `{ close, actions }`. */
   actions?: (props: DialogActionsSlotProps) => any
-
-  /** @deprecated Use `#default` + `bare` prop. */
-  body?: () => any
-
-  /** @deprecated Use `#default`. */
-  'body-main'?: () => any
-
-  /** @deprecated Use `#title` for extras (no direct replacement). */
-  'body-header'?: () => any
-
-  /** @deprecated Use `#title`. */
-  'body-title'?: () => any
-
-  /** @deprecated Use `#default`. */
-  'body-content'?: () => any
 }

@@ -1,14 +1,12 @@
 <template>
   <Dialog
     v-model="modelValue"
-    :options="{
-      title: props.mode === 'edit' ? 'Edit Images' : 'Upload Images',
-      size: '3xl',
-    }"
+    :title="props.mode === 'edit' ? 'Edit Images' : 'Upload Images'"
+    size="3xl"
     @close="$emit('close')"
-    :disableOutsideClickToClose="true"
+    :dismissible="false"
   >
-    <template #body-content>
+    <template #default>
       <div ref="dialogBody" class="space-y-3">
         <div class="flex items-center justify-between gap-2">
           <Button size="sm" @click="triggerFileInput">
@@ -124,7 +122,7 @@
       </div>
     </template>
   </Dialog>
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <Transition
       name="fade"
       enter-active-class="transition-opacity duration-200"
@@ -152,6 +150,7 @@ import Dialog from '#components/Dialog/Dialog.vue'
 import Button from '#components/Button/Button.vue'
 import Select from '#components/Select/Select.vue'
 import { ErrorMessage } from '#components/ErrorMessage'
+import { usePortalTarget } from '#composables/usePortalTarget'
 import type { Editor } from '@tiptap/core'
 import { useScopedFileDrop } from '#molecules/editor/composables/useScopedFileDrop'
 import {
@@ -175,6 +174,8 @@ const props = withDefaults(
   }>(),
   { mode: 'new' },
 )
+
+const portalTarget = usePortalTarget()
 
 const emit = defineEmits(['update:modelValue', 'close', 'update:files', 'save'])
 

@@ -65,7 +65,7 @@ export interface SelectProps extends InputLabelingProps {
   /** Gap in px between trigger and content. Defaults to `4`. See `side`. */
   offset?: number
 
-  /** Teleport target for the popover content. */
+  /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 }
 

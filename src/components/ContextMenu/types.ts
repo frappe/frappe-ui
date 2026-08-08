@@ -8,7 +8,6 @@ export type {
   MenuActionOption as ContextMenuActionOption,
   MenuSwitchOption as ContextMenuSwitchOption,
   MenuSubmenuOption as ContextMenuSubmenuOption,
-  MenuComponentOption as ContextMenuComponentOption,
   MenuGroupOption as ContextMenuGroupOption,
   MenuOption as ContextMenuOption,
   MenuItem as ContextMenuItem,

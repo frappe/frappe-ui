@@ -96,22 +96,6 @@ export interface MenuSubmenuOption extends MenuBaseOption {
   component?: never
 }
 
-export interface MenuComponentOption extends MenuBaseOption {
-  /**
-   * Custom component rendered in place of the standard menu row.
-   * @deprecated use `slots.item` for the full-row escape hatch instead
-   */
-  component: any
-
-  /** Optional label used by custom renderers. */
-  label?: string
-
-  route?: never
-  submenu?: never
-  switch?: never
-  switchValue?: never
-}
-
 export interface MenuGroupOption {
   /** Stable key for the group wrapper. */
   key?: string | number
@@ -119,18 +103,12 @@ export interface MenuGroupOption {
   /** Label rendered above the grouped items. */
   group: string
 
-  /**
-   * Items rendered inside the group. Optional in the type so the
-   * deprecated `items` alias still typechecks; provide one of
-   * `options` or `items`.
-   */
-  options?: MenuOption[]
+  /** Items rendered inside the group. */
+  options: MenuOption[]
 
-  /**
-   * @deprecated use `options`. Accepted only as a back-compat alias for
-   * Dropdown's previous `{ group, items }` shape.
-   */
-  items?: MenuOption[]
+  // Removed `{ group, items }` shape. `never` keeps the old key a type
+  // error instead of a silently ignored extra field.
+  items?: never
 
   /** Hides the group heading while preserving grouping. */
   hideLabel?: boolean
@@ -139,11 +117,7 @@ export interface MenuGroupOption {
   theme?: MenuTheme
 }
 
-export type MenuOption =
-  | MenuActionOption
-  | MenuSwitchOption
-  | MenuSubmenuOption
-  | MenuComponentOption
+export type MenuOption = MenuActionOption | MenuSwitchOption | MenuSubmenuOption
 
 export type MenuItem = MenuOption | MenuGroupOption
 export type MenuOptions = Array<MenuItem>
@@ -171,7 +145,7 @@ export interface MenuProps {
   /** Dynamic `item-*` slot implementations resolved by name. */
   slotFns?: Record<string, ((props?: any) => any) | undefined>
 
-  /** Portal target for submenu content. */
+  /** Portal target for submenu content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 
   /** Reka-ui primitives supplied by the wrapping menu component. */

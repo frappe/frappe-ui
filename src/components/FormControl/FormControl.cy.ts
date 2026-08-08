@@ -50,6 +50,27 @@ describe('FormControl', () => {
     cy.contains('Accept terms').should('exist')
   })
 
+  it('round-trips v-model through the default TextInput route', () => {
+    cy.mount(FormControl, {
+      props: {
+        label: 'Title',
+        modelValue: 'Hello',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('input').should('have.value', 'Hello')
+    cy.get('input').type(' world')
+    cy.get('@onUpdate').should('have.been.calledWith', 'Hello world')
+  })
+
+  it('forwards disabled to the default TextInput route', () => {
+    cy.mount(FormControl, {
+      props: { label: 'Title', disabled: true },
+    })
+    cy.get('input').should('be.disabled')
+  })
+
   it('passes prefix and suffix slots through to the text input', () => {
     cy.mount(FormControl, {
       props: {

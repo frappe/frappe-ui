@@ -1,6 +1,6 @@
 <template>
-  <Dialog v-model="open" :options="{ size: 'lg' }" @close="dialogType = ''">
-    <template #body-main>
+  <Dialog v-model="open" size="lg" bare @close="dialogType = ''">
+    <template #default>
       <div class="p-4 sm:px-6">
         <div class="flex w-full justify-between gap-x-15 mb-4">
           <div class="font-semibold text-xl flex text-nowrap overflow-hidden">

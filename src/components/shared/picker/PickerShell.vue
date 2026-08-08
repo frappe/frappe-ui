@@ -40,7 +40,7 @@
         </slot>
       </div>
     </PopoverAnchor>
-    <PopoverPortal>
+    <PopoverPortal :to="portalTarget">
       <PopoverContent
         data-slot="content"
         class="z-[100]"
@@ -69,6 +69,7 @@ import {
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
+import { usePortalTarget } from '../../../composables/usePortalTarget'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
 
@@ -114,6 +115,8 @@ const props = withDefaults(defineProps<Props>(), {
   contentClass: '',
 })
 
+const portalTarget = usePortalTarget()
+
 const emit = defineEmits<{
   (e: 'focus'): void
   (e: 'click', event: MouseEvent): void
@@ -153,7 +156,7 @@ interface TriggerSlotProps {
 
 // Anchor the popover at the input element itself (not the labeling wrapper),
 // so it sits below the input rather than below the description text.
-const textInputRef = ref<{ el: HTMLElement | null } | null>(null)
+const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 
 // PopoverPanel renders a single root <div>, so its `$el` is the panel element
@@ -163,7 +166,7 @@ const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
 const anchorEl = computed(() => {
   if (slots.trigger || slots.target) return undefined
-  return textInputRef.value?.el ?? undefined
+  return textInputRef.value?.inputElement ?? undefined
 })
 
 function togglePopover() {
@@ -181,7 +184,7 @@ function closePopover() {
 // and any suffix like the chevron); those elements have their own logic.
 function onInteractOutside(event: Event) {
   const target = event.target as Node | null
-  const triggerRow = textInputRef.value?.el?.parentElement
+  const triggerRow = textInputRef.value?.inputElement?.parentElement
   if (target && triggerRow?.contains(target)) {
     event.preventDefault()
   }
@@ -243,7 +246,7 @@ watch(open, (val, prev) => {
     const hadFocusInside = panelEl.value?.contains(document.activeElement)
     emit('close')
     if (hadFocusInside) {
-      nextTick(() => textInputRef.value?.el?.focus())
+      nextTick(() => textInputRef.value?.focus())
     }
   }
 })

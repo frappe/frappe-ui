@@ -42,13 +42,13 @@ const emojis = [
   <Button @click="open = true">Open dialog</Button>
 
   <Dialog v-model="open">
-    <template #body-title>
+    <template #title>
       <h3 class="text-3xl-semibold text-ink-gray-9">
         Combobox inside Dialog
       </h3>
     </template>
 
-    <template #body-content>
+    <template #default>
       <div class="space-y-4">
         <div class="flex flex-col gap-1">
           <label class="text-sm text-ink-gray-7">Repository</label>
