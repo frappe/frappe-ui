@@ -233,4 +233,15 @@ describe('Textinput', () => {
       cy.get('input').should('have.attr', 'data-disabled', 'true')
     })
   })
+
+  it('renders #prefix and #suffix slots', () => {
+    cy.mount(TextInput, {
+      slots: {
+        prefix: '<span data-cy="prefix">$</span>',
+        suffix: '<span data-cy="suffix">.00</span>',
+      },
+    })
+    cy.get('[data-cy="prefix"]').should('exist').and('have.text', '$')
+    cy.get('[data-cy="suffix"]').should('exist').and('have.text', '.00')
+  })
 })

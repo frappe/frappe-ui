@@ -206,5 +206,16 @@ describe('Textarea', () => {
       cy.mount(Textarea, { props: { disabled: true } })
       cy.get('textarea').should('have.attr', 'data-disabled', 'true')
     })
+
+    it('renders #label and #description slots', () => {
+      cy.mount(Textarea, {
+        slots: {
+          label: '<span class="custom-label">Custom label</span>',
+          description: '<span class="custom-description">Custom help</span>',
+        },
+      })
+      cy.get('.custom-label').should('have.text', 'Custom label')
+      cy.get('.custom-description').should('have.text', 'Custom help')
+    })
   })
 })
