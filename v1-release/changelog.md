@@ -9,6 +9,15 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `frappe-ui/vite` — types and docs
+
+`frappe-ui/vite` now ships hand-written types (`vite/index.d.ts`, wired via
+the `types` export condition), so `frappeui(...)` and its options
+(`frontendRoute`, `lucideIcons`, `barrelImports`, `frappeProxy`,
+`jinjaBootData`, `buildConfig`, `frappeTypes`) are typed without a
+`// @ts-expect-error` workaround. Also added a
+[docs page](../docs/content/docs/other/vite.md) covering every sub-plugin,
+including `barrelImports` — previously undocumented on the docs site.
 ### list-style.css and editor-style.css exports — removed
 
 - **Breaking:** the manual `frappe-ui/list-style.css` and

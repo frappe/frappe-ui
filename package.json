@@ -87,6 +87,7 @@
       "default": "./tailwind/tokens.js"
     },
     "./vite": {
+      "types": "./vite/index.d.ts",
       "import": "./vite/index.js"
     },
     "./vite/lucideIconsPlugin": {
