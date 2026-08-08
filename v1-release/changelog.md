@@ -977,6 +977,26 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
   - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
     so it ignored dark mode.
 
+### App shell family — brought to bar
+
+`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
+`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
+names — no breaks.
+
+- Every slot across the family now has a documented description, and each
+  component has a docs page, a story, and cypress tests (several had none).
+- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
+  `ScrollAreaExposed`) and `data-slot="scroll-area"` /
+  `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`
+  styling hooks — it had none. `viewportElement` on the template ref is now
+  typed via `ScrollAreaExposed`, the same type `SettingsDialog`'s
+  `SettingsBody` exposes.
+- `FrappeUIProvider`'s source directory moved from `src/components/Provider`
+  to `src/components/FrappeUIProvider` to match its file name. Purely
+  internal — `import { FrappeUIProvider } from 'frappe-ui'` is unaffected.
+  The mismatched directory name had made the whole component invisible to
+  the docs generator, so it previously had no docs page.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |

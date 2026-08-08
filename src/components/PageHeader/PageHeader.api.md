@@ -7,16 +7,16 @@
   const pageHeaderSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The header\'s contents — title, breadcrumbs, actions.',
+    type: 'any'
   }
 ]
 
   const pageHeaderBaseSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The header\'s contents.',
+    type: 'any'
   }
 ]
 
@@ -32,8 +32,8 @@
   const pageHeaderTitleSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'Overrides `title` with custom markup.',
+    type: 'any'
   }
 ]
 
@@ -49,18 +49,18 @@
   const pageHeaderMobileSlots = [
   {
     name: 'left',
-    description: '',
-    type: '{}'
+    description: 'A control left of the centered title — usually a `PageHeaderBackButton`.',
+    type: 'any'
   },
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`.',
+    type: 'any'
   },
   {
     name: 'right',
-    description: '',
-    type: '{}'
+    description: 'A control right of the centered title — usually an action button.',
+    type: 'any'
   }
 ]
 
@@ -76,13 +76,13 @@
   const pageHeaderMobileTitleSlots = [
   {
     name: 'icon',
-    description: '',
-    type: '{}'
+    description: 'A leading glyph next to the title text — keeps its natural size while the text truncates.',
+    type: 'any'
   },
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'Overrides `title` with custom markup.',
+    type: 'any'
   }
 ]
 

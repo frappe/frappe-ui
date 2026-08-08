@@ -30,15 +30,15 @@
   const scrollAreaSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The scrolling content.',
+    type: 'any'
   }
 ]
 
   const scrollBarProps = [
   {
     name: 'orientation',
-    description: '',
+    description: 'Which axis this bar scrolls.',
     required: false,
     type: '"vertical" | "horizontal"',
     default: '"vertical"'

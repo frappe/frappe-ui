@@ -7,12 +7,7 @@
   const slotsData = [
   {
     name: 'default',
-    description: 'The routed page content, placed in the native-scrolling content area.',
-    type: 'any'
-  },
-  {
-    name: 'nav',
-    description: 'The bottom navigation — usually a `MobileNav`.',
+    description: 'The app. Rendered as-is; the provider adds no wrapper element of its own.',
     type: 'any'
   }
 ]

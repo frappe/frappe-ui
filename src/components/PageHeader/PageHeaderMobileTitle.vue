@@ -20,4 +20,11 @@
 import type { PageHeaderMobileTitleProps } from './types'
 
 defineProps<PageHeaderMobileTitleProps>()
+
+defineSlots<{
+  /** A leading glyph next to the title text — keeps its natural size while the text truncates. */
+  icon?: () => any
+  /** Overrides `title` with custom markup. */
+  default?: () => any
+}>()
 </script>
