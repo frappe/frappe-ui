@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import KeyboardShortcut from '../KeyboardShortcut.vue'
+import KeyboardShortcut from '../KeyboardShortcut/KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import type { PasswordProps } from './types'
