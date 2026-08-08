@@ -124,9 +124,6 @@ export { default as Card } from './components/Card.vue'
 /** @deprecated Use lucide icon names or the `Icon` component instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as FeatherIcon } from './components/FeatherIcon.vue'
-/** @deprecated Use `TextInput` or `FormControl` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as Input } from './components/Input.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'

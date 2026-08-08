@@ -239,7 +239,7 @@ const options = computed(() =>
 
 ### Other components
 
-`Input`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
+`TextInput`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
 components either accept the same `icon` / `iconLeft` / `iconRight` props
 or expose a slot where you can drop a `<span class="lucide-..." />`
 directly. Check each component's reference page for the exact prop

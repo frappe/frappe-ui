@@ -562,6 +562,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 
 | Before                                     | After                  |
 | ------------------------------------------ | ---------------------- |
+| `<Input>` (removed)                        | `<TextInput>` or `FormControl` |
 | `Rating` `:rating_from`                    | `:max`                 |
 | `Rating` `:readonly`                       | `:disabled`            |
 | `Switch` `@change`                         | `@update:modelValue`   |
@@ -578,10 +579,6 @@ build time, so grep for these names when upgrading.
 
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
-
-The legacy `Input` component is deprecated. Use
-[`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
-`Select` / `Checkbox` for the other type modes it accepted.
 
 ### Password — `value` prop removed
 

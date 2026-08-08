@@ -329,9 +329,17 @@ but now warn.
 Hardcoded internal `FeatherIcon` usages across core components were
 migrated to `lucide-*` in this release. No consumer-visible behavior change.
 
-### Legacy components — dev-mode warnings
+### Input — removed (breaking)
 
-`Input.vue` warns once on mount. Migrate to `TextInput`.
+- **Breaking:** `Input` and its `Input.cy.ts` tests are deleted. Per
+  [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+  deprecated member ships in `1.0.0`; a census of downstream apps found no
+  live call sites left that render `<Input>` (five registrations were dead
+  global component registrations, never rendered). Use `TextInput` for
+  text-like modes, or `Textarea` / `Select` / `Checkbox` for the other type
+  modes `Input` accepted.
+
+### Legacy components — dev-mode warnings
 
 `MonthPicker` is deprecated. For simple month picking, use `Select` with month
 options.
@@ -857,7 +865,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | `Dropdown`/`ContextMenu` `component:` rows | `slots: { item: fn }`        | **Removed** — silent; renders label-only row, dev-only warning |
 | `DropdownExposed` type             | `v-model:open` / `close` slot prop   | **Removed** — loud; described an expose that never existed |
 | Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
-| `Input.vue`                        | `TextInput`                          | Warns on mount                         |
+| `Input.vue`                        | `TextInput`                          | **Removed in 1.0.0** (ADR-0008)        |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
