@@ -39,14 +39,26 @@ Set `to` to render a router link; omit it for a button. `active` drives
 `data-state`; when omitted it's inferred by matching `to` against the current
 route. A click invokes `onClick` (bound from `@click`) in both cases.
 
-## Legacy config API
+## SidebarHeader
 
-::: warning Deprecated
-The config-object API (`:header` and `:sections="[{ items }]"`) still works for
-one release, reimplemented on top of the new sub-components. Prefer the
-composition API above for new code.
-:::
+The app-switcher / workspace-identity row. A fixed 48px region that lines up
+with `PageHeader`, rendered as a dropdown trigger. `title` and `subtitle` are
+plain strings; `#prefix` overrides the default logo/initial box (falls back to
+the `logo` prop, or the title's first letter); `showLogo: false` drops the box
+entirely for a flush-left title. `menuItems` renders inside the trigger's
+dropdown — the same structured-options shape `Dropdown` itself takes.
 
-<ComponentPreview name="Sidebar-Legacy" />
+## SidebarSection
+
+A collapsible group. It owns only the label row and the collapse chrome —
+compose `SidebarItem` (or anything else) as children in the default slot.
+Non-collapsible groups don't need this component at all: compose `SidebarLabel`
++ `SidebarItem` directly instead.
+
+<ComponentPreview name="Sidebar-Section" />
+
+Bind `v-model:collapsed` to own a section's state (start a section collapsed,
+persist the choice); left unbound the section manages it internally, starting
+expanded.
 
 <!-- @include: ./Sidebar.api.md -->
