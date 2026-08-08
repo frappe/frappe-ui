@@ -44,3 +44,4 @@ describe('PhoneInput', () => {
     cy.contains('button', '+1').should('exist')
   })
 })
+
