@@ -848,6 +848,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
 | `Input.vue`                        | `TextInput`                          | Warns on mount                         |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
+| `GridLayout`                       | depend on `grid-layout-plus` directly | **Removed** — loud; import fails      |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
 | DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |

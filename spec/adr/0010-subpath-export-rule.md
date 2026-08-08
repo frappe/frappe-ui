@@ -84,7 +84,7 @@ separate category, decided on their own terms.
   `echarts` and `grid-layout-plus` respectively — limb (a) says they cannot stay at
   root as-is. `frappe-ui/charts` (#890) already ships the v2 replacement correctly
   isolated; the old family and `GridLayout` need the same treatment (lazy-load,
-  subpath, or un-export) once #890 lands.
+  subpath, or un-export) once #890 lands (GridLayout since removed, #943).
 - **#886** (data API export posture): `idb-keyval` is imported only by
   `src/data-fetching/`, nowhere else in the library — the data layer already trips
   limb (a) on its own, independent of any stylistic argument for a `frappe-ui/data`
