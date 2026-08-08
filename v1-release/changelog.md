@@ -9,6 +9,15 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### ListView — stays, not deprecated
+
+`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
+primitive for new code, but it's a narrower, composition-based family by
+design — it has no equivalent for `ListView`'s config-driven columns
+(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
+disabled-row exclusion, the built-in select banner). If you're on `ListView`
+today, there's no forced migration for `1.0.0`.
+
 ### `TextEditor` and its v0 exports — removed from root (breaking)
 
 Per ADR-0008, the deprecated v0 editor exports are removed from top-level
