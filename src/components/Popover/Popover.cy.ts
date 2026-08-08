@@ -36,15 +36,15 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('not.exist')
     })
 
-    it('exposes reactive isOpen to the #trigger slot', () => {
+    it('exposes reactive open state to the #trigger slot', () => {
       // The #trigger click is auto-wired by reka, so the slot must NOT bind its
-      // own onClick (that would double-toggle). It can still read isOpen to
+      // own onClick (that would double-toggle). It can still read `open` to
       // reflect state — e.g. flip a label or a chevron.
       cy.mount(Popover, {
         slots: {
-          trigger: ({ isOpen }: { isOpen: boolean }) =>
+          trigger: ({ open }: { open: boolean }) =>
             h(Button, { 'data-cy': 'trigger' }, () =>
-              isOpen ? 'Close' : 'Open',
+              open ? 'Close' : 'Open',
             ),
           default: () => h('div', { 'data-cy': 'content' }, 'content'),
         },
@@ -242,6 +242,27 @@ describe('Popover', () => {
         cy.get('[data-cy="trigger"]').click()
         cy.get('[data-slot="content"]').should('exist')
         cy.get('body').click(0, 0)
+        cy.get('[data-slot="content"]').should('exist')
+      })
+
+      it('closes on Escape when dismissible (default)', () => {
+        cy.mount(Popover, { slots: NewSlots })
+
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('exist')
+        cy.get('[data-slot="content"]').trigger('keydown', { key: 'Escape' })
+        cy.get('[data-slot="content"]').should('not.exist')
+      })
+
+      it('stays open on Escape when dismissible=false', () => {
+        cy.mount(Popover, {
+          slots: NewSlots,
+          props: { dismissible: false },
+        })
+
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('exist')
+        cy.get('[data-slot="content"]').trigger('keydown', { key: 'Escape' })
         cy.get('[data-slot="content"]').should('exist')
       })
     })

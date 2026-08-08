@@ -23,6 +23,7 @@
             : undefined,
         }"
         @interact-outside="onInteractOutside"
+        @escape-key-down="onEscapeKeyDown"
       >
         <slot v-if="bare" v-bind="slotProps" />
         <PopoverPanel v-else>
@@ -106,12 +107,22 @@ function toggle(flag?: boolean | Event) {
 
 defineExpose({ open, close })
 
+// `open` is the state, not a method — the same word the rest of the family's
+// trigger slots use (Dropdown, Select, MultiSelect, HoverCard, Sidebar). The
+// trigger opens itself through reka's `as-child` wiring, so a slot-level
+// `open()` had no callers; `toggle` covers the cases that need it by hand.
 const slotProps = computed<PopoverSlotProps>(() => ({
-  open,
+  open: isOpen.value,
   close,
   toggle,
-  isOpen: isOpen.value,
 }))
+
+// `dismissible` covers both user-initiated dismiss channels, per CONTEXT.md —
+// outside click and Escape. Wiring only the first left `:dismissible="false"`
+// closing on Escape anyway.
+function onEscapeKeyDown(event: Event) {
+  if (!props.dismissible) event.preventDefault()
+}
 
 function onInteractOutside(event: Event) {
   if (!props.dismissible) {

@@ -32,9 +32,9 @@ template ref, and emits `open` / `close` events.
 
 ## Non-dismissible
 
-By default the popover closes on an outside click or focus. Set
-`:dismissible="false"` to keep it open until you close it explicitly — useful
-for panels with their own confirm / cancel actions.
+By default the popover closes on an outside click or on `Escape`. Set
+`:dismissible="false"` to turn off both and keep it open until you close it
+explicitly — useful for panels with their own confirm / cancel actions.
 
 <ComponentPreview name="Popover-Dismissible" />
 

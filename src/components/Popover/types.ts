@@ -50,14 +50,12 @@ export interface PopoverEmits {
 
 /** Slot props passed to the `#trigger` and `#default` slots. */
 export interface PopoverSlotProps {
-  /** Opens the popover. No-op when it is already open. */
-  open: () => void
+  /** Whether the popover is currently open. */
+  open: boolean
   /** Closes the popover. No-op when it is already closed. */
   close: () => void
   /** Flips the open state, or sets it when passed a boolean. */
   toggle: (flag?: boolean | Event) => void
-  /** Whether the popover is currently open. */
-  isOpen: boolean
 }
 
 /** Methods available on a `<Popover>` template ref. */
