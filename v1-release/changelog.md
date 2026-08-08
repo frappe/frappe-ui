@@ -9,6 +9,89 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### FileUploader — uploads default to private (security fix, breaking)
+
+- **Silent break:** `isPrivateUpload()` — the single resolver used by
+  `useFileUpload` and `FileUploadHandler` — now defaults an upload with no
+  stated `private` / `is_private` to **private**, not public. Previously
+  `FileUploader` patched this default at the component level while
+  `useFileUpload().upload(file, {})` and `new FileUploadHandler().upload(file,
+  {})` resolved the same missing intent to public. The two disagreeing was
+  [#922](https://github.com/frappe/frappe-ui/issues/922); `FileUploader`
+  itself already uploaded private (since `v1.0.0-beta.21`) and is unaffected.
+  A caller of `useFileUpload` or `FileUploadHandler` with no explicit privacy
+  option now gets a private file where it previously got a public one. See
+  the [migration guide](../docs/content/docs/migration.md#fileuploader).
+- Fixed: the standalone `upload(file, options)` export (re-exported from
+  `frappe-ui` alongside `useFileUpload`) crashed at runtime — it required
+  internal `state`/`reset` arguments the public signature never exposed a way
+  to pass. It's now a real standalone function; `useFileUpload()` wraps it
+  with reactive state.
+
+### FileUploader — flat props replace the `uploadArgs` blob (breaking, P3)
+
+- **Silent break:** `uploadArgs` is removed. Its fields that are actually used
+  in the wild are now flat props: `private`, `folder`, `doctype`, `docname`,
+  `fieldname`, `uploadEndpoint`, `optimize`. Old code keeps compiling —
+  `uploadArgs` becomes an inert attribute on the root element — so an app
+  that relied on it (`folder`, `doctype`, custom `private`, …) silently stops
+  applying those options. Advanced options with no flat prop (`file_url`,
+  `method`, `type`, `params`, `maxWidth`/`maxHeight`, upload cancellation) had
+  zero measured use on the component (rule 9); reach for `useFileUpload()`
+  directly for those. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
+
+### FileUploader — `success` / `failure` emits declared stable
+
+- Both emits lost their `@deprecated` tag (ADR-0008 forbids shipping
+  `@deprecated` members at `1.0.0`) and gained real types: `success: [data:
+  UploadedFile]`, `failure: [error: unknown]` (previously untyped `any`).
+  Both are load-bearing at real call sites and keep their names — they
+  already read as behaviors (P1), not interactions.
+- Fixed: `failure` didn't fire when `validateFile` rejected a file — only on
+  an actual upload error. `error` was set on the slot props either way, but a
+  listener on `@failure` never heard about a validation rejection. It now
+  emits `failure` with the validation error (string or `Error`) in both
+  cases, matching what the type already promised.
+
+### FileUploader — slot prop `error` is now always a string
+
+- **Silent break:** `FileUploaderSlotProps.error` changed from `unknown` to
+  `string | null`. Upload failures were already normalized to a message
+  string; validation failures (`validateFile` returning an `Error`) were not
+  — a custom slot could receive either a string or an `Error` object. Both
+  paths now normalize to a message string before reaching the slot. A slot
+  that did `{{ error.message }}` expecting the validation-`Error` case
+  (uncommon, but not impossible) silently renders nothing now that `error` is
+  always a string. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
+
+### FileUploader — `inputRef` removed, nothing in its place
+
+- **Breaking, loud:** per [ADR-0012](../spec/adr/0012-template-ref-surface.md),
+  `FileUploader` hands back nothing through a template ref. `inputRef` was a
+  function disguised as a ref (`uploader.value.inputRef().focus()`), and the
+  `openFileSelector` slot prop already covers what it was used for. Zero
+  known call sites.
+
+### FileUploader — structural bar: TypeScript, `types.ts`, tests, docs
+
+- `FileUploader` is now fully typed (`FileUploaderProps`, `FileUploaderEmits`,
+  `FileUploaderSlotProps` in `types.ts`), has `*.cy.ts` component tests
+  covering the five at-bar behaviors, and a `data-slot="root"` /
+  `data-state="idle" | "uploading" | "success" | "error"` pair for CSS hooks
+  (P10). The default fallback trigger now renders validation/upload errors
+  via `<ErrorMessage>` (`role="alert"`) — previously invisible unless the
+  caller used a custom slot.
+
+### `fileToBase64` and the `fileSize` helpers — unexported from root
+
+- **Breaking, loud:** `fileToBase64`, `formatBytes`, `getMaxFileSize`, and
+  `fileSizeLimitMessage` are no longer exported from `frappe-ui`. Zero
+  external call sites at the v1 sweep (rule 9) — all four stay as internal
+  helpers shared by `useFileUpload`, `FileUploadHandler`, and the editor's
+  media upload engine.
+
 ### Sidebar — deprecated config API removed (breaking)
 
 Per ADR-0008, every member marked `@deprecated` is deleted. `Sidebar` is now a
@@ -1188,3 +1271,8 @@ names.
 | Dialog template-ref `close()`      | `v-model:open` / `close` slot prop   | **Removed** — throws on call           |
 | `ConfirmDialog` component          | `dialog.confirm()` / `dialog.danger()` | **Removed** — import fails           |
 | `confirmDialog()`                  | `dialog.confirm()`                   | **Removed** — import fails             |
+| `FileUploader.uploadArgs`          | flat props (`private`, `folder`, `doctype`, `docname`, `fieldname`, `uploadEndpoint`, `optimize`) | **Removed** — silent; inert attr |
+| `FileUploader` template-ref `inputRef` | `openFileSelector` slot prop      | **Removed** — throws on call           |
+| `FileUploader` slot prop `error`   | always `string \| null`, was `unknown` | **Changed** — silent; `.message` access renders nothing |
+| `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
+| `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |

@@ -174,13 +174,12 @@ export { vOnOutsideClick } from './directives/onOutsideClick'
 // Utilities
 export { dayjs, dayjsLocal } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
-export { default as fileToBase64 } from './utils/file-to-base64'
+// FileUploadHandler is the class FileUploader is built on; useFileUpload is
+// the recommended composable entry point for headless/custom-UI uploads.
+// fileToBase64 and the fileSize helpers (formatBytes, getMaxFileSize,
+// fileSizeLimitMessage) had zero external consumers at the v1 sweep — they
+// stay internal to the upload paths that use them.
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
-export {
-  fileSizeLimitMessage,
-  formatBytes,
-  getMaxFileSize,
-} from './utils/fileSize'
 export {
   isPrivateUpload,
   upload,
