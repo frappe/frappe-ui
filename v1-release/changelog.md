@@ -533,6 +533,20 @@ response.
   `useDoctype` was never affected — every one of its methods already passed
   `baseUrl`.
 
+### Data fetching (v2) — `useFrappeFetch` off the root export (breaking)
+
+**`useFrappeFetch` removed.** It is the raw `createFetch` instance `useCall`,
+`useDoc` and `useList` are built on — headers, response parsing and error
+shaping, and nothing above that: no URL building, no params, no caching, no
+typed return. No app imports it. It is a build failure at the import; use
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for a
+query.
+
+**`FrappeResponseError` is now exported.** The composables raise it on a Frappe
+error response and put it on `.error`, and `submit()` rejects with it, but
+nothing exported the class, so a consumer could not narrow the error. Same gap
+`FrappeRequestError` closed for `frappeRequest`.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,

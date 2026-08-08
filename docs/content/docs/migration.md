@@ -407,6 +407,51 @@ More changes you will not see at build time:
   already honoured it, so all three write methods now agree. `useDoctype` was
   never affected.
 
+## Data fetching (exports)
+
+`useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
+`useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
+parses the response, and leaves the URL, the params and the caching to you.
+Pick the composable that matches what you are fetching.
+
+| Before                                   | After                       |
+| ---------------------------------------- | --------------------------- |
+| `useFrappeFetch('/api/v2/method/…')`     | `useCall({ url })`          |
+| `useFrappeFetch('/api/v2/document/…')`   | `useDoc({ doctype, name })` |
+| `useFrappeFetch('/api/v2/document/…?…')` | `useList({ doctype, … })`   |
+
+This is a build failure at the import, so nothing changes silently.
+
+```js
+// Before
+import { useFrappeFetch } from 'frappe-ui'
+const { data } = useFrappeFetch('/api/v2/method/ping').get()
+
+// After
+import { useCall } from 'frappe-ui'
+const ping = useCall({ url: '/api/v2/method/ping' })
+```
+
+`FrappeResponseError` is exported now. A Frappe error response raises it — it
+lands on `.error`, and the write methods above reject with it. The class was
+never exported, so you could not tell it apart from a network or parse failure.
+Narrow it with `instanceof` and you get `title`, `type`, `indicator` and
+`exception`:
+
+```ts
+import { FrappeResponseError } from 'frappe-ui'
+
+try {
+  await todos.insert.submit({ title: 'Buy milk' })
+} catch (e) {
+  if (e instanceof FrappeResponseError) {
+    showError(e.title, e.type)
+  } else {
+    throw e
+  }
+}
+```
+
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful
