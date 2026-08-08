@@ -9,6 +9,39 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `TextEditor` and its v0 exports — removed from root (breaking)
+
+Per ADR-0008, the deprecated v0 editor exports are removed from top-level
+`frappe-ui` — loud breaks, the import fails to resolve:
+
+- `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`
+- `ImageExtension`, `SetImageOptions`, `createSuggestionExtension`,
+  `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
+  `TextEditor/extensions/*` barrels also re-exported from root)
+
+Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
+[Editor section](../docs/content/docs/migration.md#editor). `frappe-ui`
+confirms `CONTEXT.md`'s rule: the editor family is the only subsystem that
+exports from a subpath rather than root, and there are nothing editor-related
+left exported from root.
+
+The underlying v0 component files (`src/components/TextEditor/`) still ship,
+unmodified, as `frappe-ui/editor`'s migration safety net — only the public
+export and its docs page are gone. Removing the files is a separate,
+human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
+`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
+out to `1.1`.
+
+### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
+
+`.ProseMirror ul[data-type='taskList'] input[type='checkbox']` used a
+Tailwind-v3-only `theme('colors.gray.900')` call in both
+`frappe-ui/editor`'s and the v0 `TextEditor`'s stylesheet, which broke
+Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
+same `var(--ink-gray-9)` token the rest of both files already use.
+
 ### Tailwind preset — `content` export added
 
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
