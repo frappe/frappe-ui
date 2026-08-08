@@ -125,7 +125,7 @@ export function useFileUpload() {
 
   return {
     upload: (file: File, options: UploadOptions = {}) =>
-      upload(file, options, state, reset),
+      uploadWithState(file, options, state, reset),
     reset,
     state,
     isUploading,
@@ -137,11 +137,20 @@ export function useFileUpload() {
 
 /**
  * Uploads a file to Frappe's upload endpoint. Standalone — no reactive state
- * required. `useFileUpload()` wraps this with a `state` object for components
- * that want reactive progress/error tracking; call this directly when you
- * only need the promise (e.g. `onProgress` in `options` covers progress).
+ * required; call this directly when you only need the promise (e.g.
+ * `onProgress` in `options` covers progress). `useFileUpload()` wraps the
+ * same request with a reactive `state` object for components that want
+ * progress/error tracking without threading a promise through their own
+ * refs.
  */
-async function upload(
+export function upload(
+  file: File | null,
+  options: UploadOptions = {},
+): Promise<UploadedFile> {
+  return uploadWithState(file, options)
+}
+
+async function uploadWithState(
   file: File | null,
   options: UploadOptions = {},
   state: UploadState = createUploadState(),
@@ -310,5 +319,3 @@ declare global {
     csrf_token?: string
   }
 }
-
-export { upload }
