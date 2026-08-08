@@ -2,11 +2,10 @@ import {
   watch,
   getCurrentInstance,
   onBeforeUnmount,
-  type App,
   type WatchStopHandle,
 } from 'vue'
 
-interface PageMeta {
+export interface PageMeta {
   title?: string
   emoji?: string
   icon?: string
@@ -77,38 +76,4 @@ export function usePageMeta(fn: PageMetaFunction): StopWatcherFunction {
   }
 
   return stopWatcher
-}
-
-interface PageMetaPlugin {
-  install(app: App): void
-}
-
-export default {
-  install(app: App): void {
-    app.mixin(createMixin())
-  },
-} as PageMetaPlugin
-
-interface ComponentWithPageMeta {
-  $options: {
-    pageMeta?: PageMetaFunction
-  }
-  _pageMetaStopWatcher?: StopWatcherFunction
-}
-
-function createMixin() {
-  return {
-    mounted(this: ComponentWithPageMeta): void {
-      if (this.$options.pageMeta) {
-        const fn = this.$options.pageMeta.bind(this)
-        this._pageMetaStopWatcher = usePageMeta(fn)
-      }
-    },
-    beforeUnmount(this: ComponentWithPageMeta): void {
-      if (this._pageMetaStopWatcher) {
-        this._pageMetaStopWatcher()
-        this._pageMetaStopWatcher = undefined
-      }
-    },
-  }
 }
