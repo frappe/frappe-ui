@@ -26,6 +26,19 @@ import { Accordion } from 'frappe-ui/experimental'
 See the [Accordion page](/docs/experimental/accordion) for examples and the full
 API reference.
 
+## CodeEditor
+
+A CodeMirror 6 code field with syntax highlighting and an optional sanitized
+preview (`CodePreview`). CodeMirror is lazy-loaded, so importing the barrel
+pulls in no editor code until a field actually mounts.
+
+```ts
+import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+```
+
+See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
+variants, and the labeling contract.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a
