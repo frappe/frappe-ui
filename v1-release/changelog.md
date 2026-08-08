@@ -32,6 +32,49 @@ the freeze that requires a deprecation window starts at the tag, not before
 it. Zero call sites is also why it's a same-release removal rather than a
 carried-forward deprecation: there is no consumer for a warning to reach.
 
+### Tailwind preset — unused token vocabulary and utilities removed (breaking)
+
+Design-token audit before the additive-only freeze (#940): every family in
+`tailwind/generated/*.json` and every utility/`--*` variable `plugin.js`
+emits was checked against frappe-ui's own source, docs, and stories, plus a
+fresh census of all consumer apps (crm, helpdesk, gameplan, insights,
+builder, suite, central, frappe_calendar, frappe-ui-starter, and frappe's
+`ui/` package). The primitive and semantic color ramps (all twelve hues, in
+`surface-*`/`ink-*`/`outline-*`), and every typography weight (including
+`bold`/`black`) and size through `text-12xl`, turned out to be real,
+in-use vocabulary — none of that is touched. What had zero call sites
+everywhere is removed:
+
+- **`text-tiny` / `text-p-tiny`** and its uppercase text-transform. Not even
+  shown in the docs' own type-scale page.
+- **`text-13xl` through `text-16xl`** (and their `-medium`/`-semibold`/
+  `-bold`/`-black` variants). The docs' own "display sizes" showcase stops
+  at `text-12xl` — these four sizes were past what even the type-scale demo
+  used.
+- **`shadow-status`** and its backing `--elevation-status` variable. Named
+  once in prose on the elevation docs page but never rendered there or
+  anywhere else.
+- **`surface-alert-button-*` / `ink-alert-button-*`** (`default`, `info`,
+  `success`, `warning`, `error`). `Alert`'s buttons color via the shared
+  `variant`+`theme` axes (P4); this Figma spec never got wired to code.
+- **`surface-alpha-gray-2-overlay`**. Resolved to the black/white overlay
+  ramp rather than the gray-alpha ramp its name implies, breaking the
+  `{family}-{step}` pattern every other `surface-alpha` entry follows.
+
+All five are silent breaks — a missing Tailwind class or `--*` var just
+stops applying, no build or type error. See the migration guide.
+
+The token generator (`tailwind/figma-tokens-to-theme.js`) now filters these
+out at the source, so they stay gone on the next `yarn sync-tokens` run
+rather than reappearing. `ALPHA_FAMILIES` also dropped a dead `'red-alpha'`
+entry that never matched anything in the Figma export — no emitted token
+changed.
+
+**Also removed:** `tailwind/colors.js`, a 642-line legacy color module
+superseded by `colors.json` + `colorPalette.js`. It had zero importers and
+wasn't reachable through any `frappe-ui` package export (no `./tailwind/*`
+wildcard) — deleting it doesn't change anything for consumers.
+
 ### `frappe-ui/vite` — types and docs
 
 `frappe-ui/vite` now ships hand-written types (`vite/index.d.ts`, wired via
