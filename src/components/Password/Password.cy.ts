@@ -1,12 +1,7 @@
 import Password from './Password.vue'
 import { defineComponent, h, ref } from 'vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Password', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   it('Renders & password toggle ', () => {
     cy.mount(Password)
     cy.get('input[type=password]').should('exist')
@@ -39,19 +34,6 @@ describe('Password', () => {
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
   })
 
-  it('warns once when the deprecated `value` prop is used', () => {
-    cy.window().then((win) => {
-      cy.spy(win.console, 'warn').as('consoleWarn')
-    })
-    cy.mount(Password, {
-      props: { value: 'abc' },
-    })
-    cy.get('@consoleWarn').should(
-      'have.been.calledWithMatch',
-      /Password\.value is deprecated/,
-    )
-  })
-
   it('shared labeling contract', () => {
     cy.mount(Password, {
       props: { label: 'Password', description: 'min 8 chars', required: true },
@@ -62,6 +44,13 @@ describe('Password', () => {
       expect($input.attr('aria-describedby')).to.equal(`${id}-description`)
       expect($input.attr('aria-required')).to.equal('true')
     })
+  })
+
+  it('disables the input', () => {
+    cy.mount(Password, { props: { disabled: true } })
+    cy.get('input')
+      .should('be.disabled')
+      .and('have.attr', 'data-disabled', 'true')
   })
 
   it('exposes focus() and inputElement', () => {

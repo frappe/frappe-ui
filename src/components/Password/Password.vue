@@ -53,12 +53,11 @@
 import KeyboardShortcut from '../KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { PasswordProps } from './types'
 import type { TextInputExposed } from '../TextInput/types'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 
-const props = withDefaults(defineProps<PasswordProps>(), {
+withDefaults(defineProps<PasswordProps>(), {
   size: 'sm',
   variant: 'subtle',
 })
@@ -66,20 +65,8 @@ const props = withDefaults(defineProps<PasswordProps>(), {
 /** The current password value (controlled). */
 const model = defineModel<string>()
 
-watchEffect(() => {
-  if (props.value != null) {
-    warnDeprecated('Password.value', 'v-model / modelValue')
-    if (model.value == null || model.value === '') {
-      model.value = props.value ?? ''
-    }
-  }
-})
-
 const show = ref(false)
-const showEye = computed(() => {
-  let v = model.value || props.value
-  return !v?.includes('*')
-})
+const showEye = computed(() => !model.value?.includes('*'))
 
 defineSlots<{
   /** Content shown before the input field (left icon / custom content) */

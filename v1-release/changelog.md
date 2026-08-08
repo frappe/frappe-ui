@@ -245,7 +245,13 @@ CSS can target inputs without class-injection props:
 `Password` now uses `defineModel<string>()`, fixing the existing bug where
 `<Password v-model>` did not update from typing. Explicit `size`, `variant`,
 `disabled`, `placeholder`, `id`, `required` props replace `$attrs` routing.
-`value` prop is deprecated.
+
+### Password — `value` prop removed (breaking)
+
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+deprecated member ships in `1.0.0`. `value` warned and seeded `v-model` since
+it was deprecated earlier in this cycle; a census of every downstream app
+found zero call sites still passing it. Use `v-model` / `modelValue`.
 
 ### TextInput / Textarea / Password / Duration — `focus()` and `inputElement` on the ref
 
@@ -840,7 +846,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | API                                | Replacement                          | Notes                                  |
 | ---------------------------------- | ------------------------------------ | -------------------------------------- |
 | `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
-| `Password.value` prop              | `v-model` / `modelValue`             | Warns when set                         |
+| `Password.value` prop              | `v-model` / `modelValue`             | **Removed in 1.0.0** (ADR-0008)        |
 | `Rating.rating_from` prop          | `max`                                | **Removed** — silent; prop ignored     |
 | `Rating.readonly` prop             | `disabled`                           | **Removed** — silent; prop ignored     |
 | `Switch.change` emit               | `update:modelValue` / `v-model`      | **Removed** — silent; listener never fires |

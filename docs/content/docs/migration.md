@@ -567,7 +567,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Switch` `@change`                         | `@update:modelValue`   |
 | `Switch.labelClasses`                      | `data-*` styling hooks |
 | `Checkbox.padding`                         | `padded`               |
-| `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
+| `Password` `:value` prop (removed)         | `v-model`              |
 | `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
 The first five rows are **removed**, not aliased. The old names are silently
@@ -582,6 +582,24 @@ the control is announced correctly.
 The legacy `Input` component is deprecated. Use
 [`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
 `Select` / `Checkbox` for the other type modes it accepted.
+
+### Password — `value` prop removed
+
+`value` was a deprecated alternate way to set the password, seeding
+`v-model` on mount. It's gone. `:value` now falls through as a plain HTML
+attribute on the native `<input>` instead of seeding the model — the field
+still renders, so nothing throws or warns.
+
+```vue
+<!-- Before -->
+<Password v-model="password" :value="initialValue" />
+
+<!-- After -->
+<Password v-model="password" />
+<script setup>
+password.value = initialValue
+</script>
+```
 
 ### `TextInput`, `Textarea`, `Password` — ref surface
 
