@@ -45,7 +45,7 @@ builder, suite, central, frappe_calendar, frappe-ui-starter, and frappe's
 in-use vocabulary — none of that is touched. What had zero call sites
 everywhere is removed:
 
-- **`text-tiny` / `text-p-tiny`** and its uppercase text-transform. Not even
+- **`text-tiny`** and its uppercase text-transform. Not even
   shown in the docs' own type-scale page.
 - **`text-13xl` through `text-16xl`** (and their `-medium`/`-semibold`/
   `-bold`/`-black` variants). The docs' own "display sizes" showcase stops

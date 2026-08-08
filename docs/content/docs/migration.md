@@ -870,7 +870,7 @@ the class or `--*` variable just stops applying, with no build or type
 error.
 
 ```
-text-tiny / text-p-tiny
+text-tiny
 text-13xl / text-14xl / text-15xl / text-16xl (and their -medium/-semibold/-bold/-black variants)
 shadow-status
 --elevation-status
