@@ -1,0 +1,753 @@
+import{_ as j}from"./chunks/PropsTable.Dy-I9A3j.js";import{_ as y}from"./chunks/SlotsTable.CEFOqQHt.js";import{_ as S}from"./chunks/EmitsTable.Cmve1u0M.js";import{Z as v,a0 as z,a1 as u,aP as A,aQ as B,aE as O,a9 as C,x}from"./chunks/theme.-1Fwdb9l.js";import{I as k,ad as d,r as h,D as l,aE as p,bf as e,o as s,B as a,aj as b,F as P,am as q,q as I,au as L,a0 as $,ao as E,A as R}from"./chunks/framework.nEVVyQQB.js";const M={class:"flex h-[360px] w-fit overflow-hidden rounded-md border"},U={class:"flex-1 overflow-y-auto px-2 pt-2"},H=k({__name:"Section",setup(f){const i=b("leads"),r=b(!1);return(w,c)=>(d(),h("div",M,[l(p(v),{"disable-collapse":"",width:"14rem"},{default:e(()=>[s("div",U,[l(p(z),null,{default:e(()=>[...c[5]||(c[5]=[a("Pipeline",-1)])]),_:1}),l(p(u),{label:"Leads",icon:"lucide-user-plus",active:i.value==="leads",onClick:c[0]||(c[0]=t=>i.value="leads")},null,8,["active"]),l(p(u),{label:"Deals",icon:"lucide-handshake",active:i.value==="deals",onClick:c[1]||(c[1]=t=>i.value="deals")},null,8,["active"]),l(p(A),{label:"Views",collapsible:"",collapsed:r.value,"onUpdate:collapsed":c[4]||(c[4]=t=>r.value=t)},{default:e(()=>[l(p(u),{label:"My Open Deals",icon:"lucide-flame",active:i.value==="my-open-deals",onClick:c[2]||(c[2]=t=>i.value="my-open-deals")},null,8,["active"]),l(p(u),{label:"Unassigned",icon:"lucide-circle-dashed",active:i.value==="unassigned",onClick:c[3]||(c[3]=t=>i.value="unassigned")},null,8,["active"])]),_:1},8,["collapsed"])])]),_:1})]))}}),N={class:"flex h-[360px] w-fit overflow-hidden rounded-md border"},F={class:"flex-1 overflow-y-auto px-2 pt-2"},V={class:"mt-auto px-2 pb-2"},G=k({__name:"Collapsed",setup(f){const i=b(!0),r=b("inbox"),w=[{id:"inbox",label:"Inbox",icon:"lucide-inbox"},{id:"starred",label:"Starred",icon:"lucide-star"},{id:"sent",label:"Sent",icon:"lucide-send"}];return(c,t)=>(d(),h("div",N,[l(p(v),{collapsed:i.value,"onUpdate:collapsed":t[0]||(t[0]=_=>i.value=_)},{default:e(()=>[s("div",F,[l(p(z),{divider:""},{default:e(()=>[...t[1]||(t[1]=[a("Mail",-1)])]),_:1}),(d(),h(P,null,q(w,_=>l(p(u),{key:_.id,icon:_.icon,label:_.label,active:r.value===_.id,onClick:o=>r.value=_.id},null,8,["icon","label","active","onClick"])),64))]),s("div",V,[l(p(B))])]),_:1},8,["collapsed"])]))}}),J={class:"flex h-[560px] w-fit overflow-hidden rounded-md border"},Q={class:"flex h-7 items-center justify-between"},Z={class:"flex items-center"},X={class:"mt-0.5 space-y-0.5"},Y={class:"flex-1 inline-flex items-center gap-1 truncate text-sm"},ss={key:0,class:"lucide-lock size-3 shrink-0 text-ink-gray-5"},as={class:"relative mr-1 flex size-7 shrink-0 items-center justify-end"},ns={key:0,class:"absolute right-1 text-xs text-ink-gray-5 transition-opacity group-hover/sidebar-item:opacity-0 group-focus-within/sidebar-item:opacity-0"},ls=k({__name:"Default",setup(f){const i=b("product"),r=b("Recent activity"),w=[{id:"product",title:"Product",icon:"lucide-rocket",unread:0,private:!1},{id:"design",title:"Design",icon:"lucide-palette",unread:3,private:!1},{id:"engineering",title:"Engineering",icon:"lucide-code",unread:12,private:!1},{id:"marketing",title:"Marketing",icon:"lucide-megaphone",unread:0,private:!1},{id:"sales",title:"Sales",icon:"lucide-trending-up",unread:1,private:!1},{id:"support",title:"Customer Support",icon:"lucide-headphones",unread:0,private:!1},{id:"people",title:"People & Culture",icon:"lucide-users",unread:0,private:!1},{id:"finance",title:"Finance",icon:"lucide-wallet",unread:0,private:!0},{id:"leadership",title:"Leadership",icon:"lucide-crown",unread:2,private:!0},{id:"design-system",title:"Design System",icon:"lucide-component",unread:0,private:!1},{id:"research",title:"User Research",icon:"lucide-microscope",unread:5,private:!1},{id:"ops",title:"Operations",icon:"lucide-settings-2",unread:0,private:!1},{id:"events",title:"Events",icon:"lucide-party-popper",unread:0,private:!1},{id:"data",title:"Data & Analytics",icon:"lucide-database",unread:8,private:!1},{id:"brand",title:"Brand",icon:"lucide-sparkles",unread:0,private:!1},{id:"partnerships",title:"Partnerships",icon:"lucide-handshake",unread:0,private:!1},{id:"security",title:"Security",icon:"lucide-shield",unread:0,private:!0},{id:"onboarding",title:"Onboarding",icon:"lucide-graduation-cap",unread:0,private:!1},{id:"random",title:"Random",icon:"lucide-shuffle",unread:0,private:!1}],c=[{group:"Sort by",options:["Recent activity","Alphabetical"].map(t=>({label:t,icon:r.value===t?"lucide-check":null,onClick:()=>r.value=t}))}];return(t,_)=>(d(),h("div",J,[l(p(v),{"disable-collapse":"",width:"14rem"},{default:e(()=>[_[1]||(_[1]=s("div",{class:"flex shrink-0 items-center p-2"},[s("button",{class:"flex h-8 w-full items-center gap-2 rounded px-1 transition hover:bg-surface-gray-2"},[s("div",{class:"grid size-6 shrink-0 place-items-center rounded bg-surface-gray-7 text-xs font-medium text-ink-white"}," F "),s("span",{class:"flex-1 truncate text-left text-base text-ink-gray-8"},"Frappe"),s("span",{class:"lucide-chevrons-up-down size-4 shrink-0 text-ink-gray-5"})])],-1)),l(p(O),{class:"min-h-0 flex-1","viewport-class":"px-2 pt-0.5 pb-10"},{default:e(()=>[s("div",Q,[l(p(z),null,{default:e(()=>[..._[0]||(_[0]=[a("Spaces",-1)])]),_:1}),s("div",Z,[l(p(C),{options:c,align:"end"},{trigger:e(({open:o})=>[l(p(x),{variant:"ghost",size:"sm",icon:"lucide-arrow-up-down text-ink-gray-5",label:"Sort spaces",tooltip:"Sort spaces",active:o},null,8,["active"])]),_:1}),l(p(x),{variant:"ghost",size:"sm",icon:"lucide-plus text-ink-gray-5",label:"New space"})])]),s("nav",X,[(d(),h(P,null,q(w,o=>l(p(u),{key:o.id,icon:o.icon,active:i.value===o.id,onClick:m=>i.value=o.id},{suffix:e(()=>[s("div",as,[o.unread>0?(d(),h("span",ns,L(o.unread),1)):I("",!0),l(p(C),{options:[{label:"Mark all as read"},{label:"Leave space"}],align:"start",side:"right"},{default:e(({open:m})=>[l(p(x),{variant:m?"subtle":"ghost",size:"xs",icon:"lucide-more-horizontal text-ink-gray-5",label:`${o.title} options`,class:$(["absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100",m?"opacity-100":""])},null,8,["variant","label","class"])]),_:2},1024)])]),default:e(()=>[s("span",Y,[o.private?(d(),h("span",ss)):I("",!0),a(" "+L(o.title),1)])]),_:2},1032,["icon","active","onClick"])),64))])]),_:1})]),_:1})]))}}),rs=JSON.parse('{"title":"Sidebar","description":"","frontmatter":{},"headers":[],"relativePath":"docs/components/sidebar.md","filePath":"docs/components/sidebar.md","lastUpdated":1779053387000}'),es={name:"docs/components/sidebar.md"},ds=Object.assign(es,{setup(f){const i=[{name:"disableCollapse",description:"Disables collapsing entirely (fixed width, no built-in toggle).",required:!1,type:"boolean"},{name:"width",description:"Expanded width as a CSS length. Applied inline so apps can override it.",required:!1,type:"string",default:'"15rem"'},{name:"collapsedWidth",description:"Collapsed width as a CSS length.",required:!1,type:"string",default:'"3rem"'},{name:"collapsed",description:"v-model. Whether the sidebar is collapsed. Left unset, it collapses automatically below the `sm` breakpoint.",required:!1,type:"boolean | null",default:"null"}],r=[{name:"default",description:"The sidebar body — header, scroll region, footer, all composed by the app.",type:"any"}],w=[{name:"update:collapsed",description:"Fired when the sidebar is collapsed or expanded.",type:"[value: boolean | null]"}],c=[{name:"label",description:"Row label. Used as the accessible name and the default slot fallback.",required:!1,type:"string"},{name:"accessKey",description:"`accesskey` attribute for a keyboard shortcut.",required:!1,type:"string"},{name:"icon",description:"Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.\nIgnored when the `#prefix` slot is used.",required:!1,type:"string | Component"},{name:"suffix",description:"Trailing text. Ignored when the `#suffix` slot is used.",required:!1,type:"string"},{name:"to",description:"Navigation target. When set the row's main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.",required:!1,type:"string | kt | Tt"},{name:"active",description:'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `to` against the current route.',required:!1,type:"boolean"},{name:"onClick",description:"Click handler. Bound from `@click`.",required:!1,type:"((event: MouseEvent) => void)"}],t=[{name:"prefix",description:"Leading icon or avatar. Overrides the `icon` prop.",type:"any"},{name:"default",description:"The label region. Overrides the `label` prop; put inline adornments here.",type:"any"},{name:"suffix",description:"The trailing zone — a sibling of the link/button, not nested inside it. Overrides the `suffix` prop.",type:"any"}],_=[{name:"divider",description:"When true, collapses to a horizontal divider while the sidebar is collapsed\n(matches the previous `SidebarSection` label behavior).",required:!1,type:"boolean"}],o=[{name:"default",description:"The label text.",type:"any"}],m=[{name:"title",description:"Workspace or app title.",required:!0,type:"string"},{name:"subtitle",description:"Secondary line under the title, e.g. a domain or workspace slug.",required:!1,type:"string"},{name:"logo",description:"Leading logo: an image URL, or a component. Overridden by the `#prefix` slot.",required:!1,type:"string | Component"},{name:"showLogo",description:"Whether to render the leading logo/avatar box. Defaults to `true`. Set to\n`false` when workspace identity is already shown elsewhere (e.g. a left\nrail) to avoid a duplicate avatar; the title then sits flush-left. Best\npaired with a non-collapsing sidebar, since a collapsed header with no logo\nhas nothing to show.",required:!1,type:"boolean",default:"true"},{name:"menuItems",description:"Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes.",required:!1,type:"{ label: string; icon?: string | Component; onClick?: (() => void) | undefined; }[] | undefined"}],T=[{name:"prefix",description:"Fills the default logo/initial box (a `size-7 overflow-hidden` frame — wide content clips). Falls back to the `logo` prop, then the title's first letter.",type:"any"}],W=[{name:"label",description:"Section label. Renders nothing when omitted (a label-less group).",required:!1,type:"string"},{name:"collapsible",description:"Whether clicking the label toggles the group's visibility.",required:!1,type:"boolean"},{name:"collapsed",description:"v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.",required:!1,type:"boolean",default:"false"}],D=[{name:"default",description:"The group's rows — compose `SidebarItem` (or anything else) here.",type:"any"}],K=[{name:"update:collapsed",description:"Fired when the section is collapsed or expanded.",type:"[value: boolean]"}];return(ps,n)=>{const g=E("ComponentPreview");return d(),h("div",null,[n[8]||(n[8]=s("h1",{id:"sidebar",tabindex:"-1"},[a("Sidebar "),s("a",{class:"header-anchor",href:"#sidebar","aria-label":"Permalink to “Sidebar”"},"​")],-1)),n[9]||(n[9]=s("p",null,[a("The wide navigation panel of an app shell. "),s("code",null,"Sidebar"),a(" is a bare frame — a fixed-width column with the collapse machinery and a single slot — and you compose the body from "),s("code",null,"SidebarItem"),a(", "),s("code",null,"SidebarLabel"),a(", and your own markup. The app owns its header, scroll region, and empty state; lay them out with plain flex utilities.")],-1)),l(g,{name:"Sidebar-Default"},{code:e(()=>[...n[0]||(n[0]=[s("div",{class:"language-vue"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"vue"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1i4ay4"}," setup"),s("span",{class:"s_1i4ay4"}," lang"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"ts"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"ref"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  Sidebar"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  SidebarItem"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  SidebarLabel"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  ScrollArea"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  Button"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  Dropdown"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"frappe-ui"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// A faithful Gameplan sidebar: an app switcher up top, then a scrolling list of")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// spaces with lucide icons, unread counts, private locks, and a hover-reveal")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// options menu. Only <Sidebar>/<SidebarItem>/<SidebarLabel> come from the")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// family — the header, the ScrollArea, and the spaces markup are the app's own.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," active"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"product"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," sort"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"Recent activity"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," spaces"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," [")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"product"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Product"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-rocket"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"design"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Design"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-palette"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 3"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"engineering"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Engineering"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-code"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 12"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"marketing"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Marketing"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-megaphone"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"sales"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Sales"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-trending-up"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 1"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"support"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Customer Support"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-headphones"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"people"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"People & Culture"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-users"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"finance"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Finance"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-wallet"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," true"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"leadership"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Leadership"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-crown"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 2"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," true"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"design-system"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Design System"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-component"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"research"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"User Research"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-microscope"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 5"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"ops"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Operations"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-settings-2"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"events"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Events"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-party-popper"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"data"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Data & Analytics"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-database"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 8"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"brand"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Brand"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-sparkles"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"partnerships"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Partnerships"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-handshake"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"security"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Security"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-shield"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," true"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"onboarding"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Onboarding"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-graduation-cap"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"random"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," title"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Random"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-shuffle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," unread"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," 0"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," private"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_40mev6"}," false"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"]")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," sortOptions"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," [")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_r4oegk"},"    group"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Sort by"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_r4oegk"},"    options"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_13ahmt"}," ["),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"Recent activity"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Alphabetical"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},"]"),s("span",{class:"s_1jjt6x"},"."),s("span",{class:"s_indoxt"},"map"),s("span",{class:"s_13ahmt"},"(("),s("span",{class:"s_fsg3al"},"label"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_13ahmt"}," ({")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_11933w"},"      label"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_r4oegk"},"      icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_22m8k2"}," sort"),s("span",{class:"s_1jjt6x"},"."),s("span",{class:"s_11933w"},"value"),s("span",{class:"s_50ecpt"}," ==="),s("span",{class:"s_11933w"}," label"),s("span",{class:"s_50ecpt"}," ?"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-check"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_50ecpt"}," :"),s("span",{class:"s_40mev6"}," null"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"      onClick"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_22m8k2"},"sort"),s("span",{class:"s_1jjt6x"},"."),s("span",{class:"s_11933w"},"value"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_11933w"}," label"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"    }))"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex h-[560px] w-fit overflow-hidden rounded-md border"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    <"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1i4ay4"}," disable-collapse"),s("span",{class:"s_1i4ay4"}," width"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"14rem"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"      <!-- App switcher — the app owns the header. -->")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex shrink-0 items-center p-2"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_1uuh8p"},"button")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex h-8 w-full items-center gap-2 rounded px-1 transition hover:bg-surface-gray-2"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_1uuh8p"},"div")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"grid size-6 shrink-0 place-items-center rounded bg-surface-gray-7 text-xs font-medium text-ink-white"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_6am9cx"},"            F")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex-1 truncate text-left text-base text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"Frappe"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-chevrons-up-down size-4 shrink-0 text-ink-gray-5"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_28rvie"}," /"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        </"),s("span",{class:"s_1uuh8p"},"button"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"      <!--")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"        The app owns the scroll region. frappe-ui's ScrollArea keeps the thin,")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"        auto-hiding overlay scrollbar; padding the viewport (px-2) gives the")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"        active row's shadow room so overflow-hidden doesn't clip it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"      -->")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      <"),s("span",{class:"s_wac0bt"},"ScrollArea"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-h-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1i4ay4"}," viewport-class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"px-2 pt-0.5 pb-10"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex h-7 items-center justify-between"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"Spaces"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex items-center"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_wac0bt"},"Dropdown"),s("span",{class:"s_1i4ay4"}," :options"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"sortOptions"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_suc1p8"}," align"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"end"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1jjt6x"}," #"),s("span",{class:"s_1i4ay4"},"trigger"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_13ahmt"},"{"),s("span",{class:"s_22m8k2"}," open"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"Button")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  variant"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"ghost"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  size"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"sm"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-arrow-up-down text-ink-gray-5"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Sort spaces"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  tooltip"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Sort spaces"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"open"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_28rvie"},"                /"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              </"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            </"),s("span",{class:"s_wac0bt"},"Dropdown"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"Button")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"              variant"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"ghost"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"              size"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"sm"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"              icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-plus text-ink-gray-5"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"              label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"New space"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_28rvie"},"            /"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_1uuh8p"},"nav"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"mt-0.5 space-y-0.5"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            v-for"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"space in spaces"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            :key"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"space.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            :icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"space.icon"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === space.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = space.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex-1 inline-flex items-center gap-1 truncate text-sm"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"span")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                v-if"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"space.private"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-lock size-3 shrink-0 text-ink-gray-5"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_28rvie"},"              /"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_6am9cx"},"              {{ space.title }}")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            </"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1jjt6x"}," #"),s("span",{class:"s_1i4ay4"},"suffix"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              <!--")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                Count and options menu share one cell: the count fades out on row")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                hover/focus while the "…" menu fades in. The group is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                SidebarItem's root (`group/sidebar-item`).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              -->")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"relative mr-1 flex size-7 shrink-0 items-center justify-end"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"span")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  v-if"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"space.unread > 0"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"absolute right-1 text-xs text-ink-gray-5 transition-opacity group-hover/sidebar-item:opacity-0 group-focus-within/sidebar-item:opacity-0"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_6am9cx"},"                  {{ space.unread }}")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                </"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_wac0bt"},"Dropdown")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  :options"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"[{ label: 'Mark all as read' }, { label: 'Leave space' }]"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_suc1p8"},"                  align"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"start"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  side"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"right"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                  <"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1jjt6x"}," #"),s("span",{class:"s_1i4ay4"},"default"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_13ahmt"},"{"),s("span",{class:"s_22m8k2"}," open"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                    <"),s("span",{class:"s_1uuh8p"},"Button")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      :variant"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"open ? 'subtle' : 'ghost'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      size"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"xs"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-more-horizontal text-ink-gray-5"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      :label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"`${space.title} options`"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                      :class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"open ? 'opacity-100' : ''"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_28rvie"},"                    /"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                  </"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                </"),s("span",{class:"s_wac0bt"},"Dropdown"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            </"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          </"),s("span",{class:"s_wac0bt"},"SidebarItem"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        </"),s("span",{class:"s_1uuh8p"},"nav"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      </"),s("span",{class:"s_wac0bt"},"ScrollArea"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    </"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")])])])],-1)])]),default:e(()=>[l(ls)]),_:1}),n[10]||(n[10]=R("",3)),l(g,{name:"Sidebar-Collapsed"},{code:e(()=>[...n[1]||(n[1]=[s("div",{class:"language-vue"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"vue"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1i4ay4"}," setup"),s("span",{class:"s_1i4ay4"}," lang"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"ts"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"ref"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  Sidebar"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  SidebarItem"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  SidebarLabel"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_4q1z3w"},"  SidebarCollapseToggle"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"frappe-ui"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," collapsed"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_40mev6"},"true"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," active"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"inbox"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," items"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," [")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"inbox"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," label"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Inbox"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-inbox"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"starred"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," label"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Starred"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-star"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  {"),s("span",{class:"s_r4oegk"}," id"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"sent"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," label"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"Sent"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_r4oegk"}," icon"),s("span",{class:"s_1jjt6x"},":"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"lucide-send"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_1jjt6x"},",")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex h-[360px] w-fit overflow-hidden rounded-md border"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"    <!-- v-model:collapsed is app state; SidebarCollapseToggle flips it. -->")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    <"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1i4ay4"}," v-model:collapsed"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"collapsed"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex-1 overflow-y-auto px-2 pt-2"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1i4ay4"}," divider"),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"Mail"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          v-for"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"item in items"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :key"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"item.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"item.icon"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"item.label"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === item.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = item.id"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        />")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"mt-auto px-2 pb-2"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarCollapseToggle"),s("span",{class:"s_1zd9e2"}," />")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    </"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")])])])],-1)])]),default:e(()=>[l(G)]),_:1}),n[11]||(n[11]=R("",9)),l(g,{name:"Sidebar-Section"},{code:e(()=>[...n[2]||(n[2]=[s("div",{class:"language-vue"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"vue"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1i4ay4"}," setup"),s("span",{class:"s_1i4ay4"}," lang"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"ts"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"ref"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Sidebar"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," SidebarSection"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," SidebarItem"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," SidebarLabel"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"frappe-ui"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// Non-collapsible groups skip SidebarSection entirely: SidebarLabel +")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// SidebarItem, composed directly. SidebarSection is only for groups that")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// collapse — `viewsCollapsed` is app state its `v-model:collapsed` writes")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"// back to, so the app can persist the choice.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," active"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"leads"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_252irl"},"const"),s("span",{class:"s_295sjd"}," viewsCollapsed"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_indoxt"}," ref"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_40mev6"},"false"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex h-[360px] w-fit overflow-hidden rounded-md border"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    <"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1i4ay4"}," disable-collapse"),s("span",{class:"s_1i4ay4"}," width"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"14rem"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"flex-1 overflow-y-auto px-2 pt-2"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"Pipeline"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_wac0bt"},"SidebarLabel"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Leads"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-user-plus"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === 'leads'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = 'leads'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        />")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Deals"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-handshake"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === 'deals'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = 'deals'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        />")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        <"),s("span",{class:"s_wac0bt"},"SidebarSection")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Views"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          collapsible")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"          v-model:collapsed"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"viewsCollapsed"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        >")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"My Open Deals"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-flame"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === 'my-open-deals'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = 'my-open-deals'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          />")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"SidebarItem")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            label"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"Unassigned"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            icon"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"lucide-circle-dashed"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            :active"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active === 'unassigned'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"            @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"active = 'unassigned'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          />")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"        </"),s("span",{class:"s_wac0bt"},"SidebarSection"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"      </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"    </"),s("span",{class:"s_wac0bt"},"Sidebar"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")])])])],-1)])]),default:e(()=>[l(H)]),_:1}),n[12]||(n[12]=s("p",null,[a("Bind "),s("code",null,"v-model:collapsed"),a(" to own a section's state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded.")],-1)),n[13]||(n[13]=s("h2",{id:"api-reference",tabindex:"-1"},[a("API Reference "),s("a",{class:"header-anchor",href:"#api-reference","aria-label":"Permalink to “API Reference”"},"​")],-1)),n[14]||(n[14]=s("h3",{id:"sidebar-1",tabindex:"-1"},[a("Sidebar "),s("a",{class:"header-anchor",href:"#sidebar-1","aria-label":"Permalink to “Sidebar”"},"​")],-1)),l(j,{name:"Sidebar",data:i},{code:e(()=>[...n[3]||(n[3]=[s("div",{class:"language-typescript"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"typescript"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Component"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," ComputedRef"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," InjectionKey"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"RouteLocationRaw"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue-router"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Read-only collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarItem` / `SidebarLabel` / `SidebarHeader` to shrink to icon-only.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarCollapsedKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_euu481"},"ComputedRef"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_i592pt"},"boolean"),s("span",{class:"s_1jjt6x"},">>"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarCollapsed"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Toggles the sidebar's collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarCollapseToggle`. Kept separate from "),s("span",{class:"s_1zp9pn"},"{"),s("span",{class:"s_1v9gwm"},"@"),s("span",{class:"s_y1rh3e"},"link"),s("span",{class:"s_1cpno3"}," sidebarCollapsedKey"),s("span",{class:"s_1zp9pn"},"}"),s("span",{class:"s_1th9sy"}," so")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * existing read-only consumers need no change.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarToggleKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_13ahmt"},"()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void"),s("span",{class:"s_1jjt6x"},">"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarToggle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Disables collapsing entirely (fixed width, no built-in toggle). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  disableCollapse"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Expanded width as a CSS length. Applied inline so apps can override it. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  width"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Collapsed width as a CSS length. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsedWidth"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarItemProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Row label. Used as the accessible name and the default slot fallback. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** `accesskey` attribute for a keyboard shortcut. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  accessKey"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Ignored when the `#prefix` slot is used.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Trailing text. Ignored when the `#suffix` slot is used. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  suffix"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Navigation target. When set the row's main area renders as a router link;")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * otherwise it renders as a button. A click still invokes `onClick`.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  to"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_euu481"}," RouteLocationRaw")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'   * Marks the row active (`data-state="active"`). When omitted, active state is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * inferred by matching `to` against the current route.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  active"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Click handler. Bound from `@click`. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_fsg3al"},"event"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," MouseEvent"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarLabelProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * When true, collapses to a horizontal divider while the sidebar is collapsed")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * (matches the previous `SidebarSection` label behavior).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  divider"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarHeaderProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Workspace or app title. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  title"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Secondary line under the title, e.g. a domain or workspace slug. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  subtitle"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  logo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * `false` when workspace identity is already shown elsewhere (e.g. a left")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * paired with a non-collapsing sidebar, since a collapsed header with no logo")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * has nothing to show.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  showLogo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  menuItems"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    label"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"    onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }[]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Building block for a collapsible group of `SidebarItem`s. Compose children")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * in the default slot — `SidebarSection` owns only the label + collapse")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * chrome, not the rows inside it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarSectionProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Section label. Renders nothing when omitted (a label-less group). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Whether clicking the label toggles the group's visibility. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsible"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")])])])],-1)])]),_:1}),l(y,{data:r}),l(S,{data:w}),n[15]||(n[15]=s("h3",{id:"sidebaritem-1",tabindex:"-1"},[a("SidebarItem "),s("a",{class:"header-anchor",href:"#sidebaritem-1","aria-label":"Permalink to “SidebarItem”"},"​")],-1)),l(j,{name:"SidebarItem",data:c},{code:e(()=>[...n[4]||(n[4]=[s("div",{class:"language-typescript"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"typescript"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Component"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," ComputedRef"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," InjectionKey"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"RouteLocationRaw"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue-router"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Read-only collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarItem` / `SidebarLabel` / `SidebarHeader` to shrink to icon-only.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarCollapsedKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_euu481"},"ComputedRef"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_i592pt"},"boolean"),s("span",{class:"s_1jjt6x"},">>"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarCollapsed"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Toggles the sidebar's collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarCollapseToggle`. Kept separate from "),s("span",{class:"s_1zp9pn"},"{"),s("span",{class:"s_1v9gwm"},"@"),s("span",{class:"s_y1rh3e"},"link"),s("span",{class:"s_1cpno3"}," sidebarCollapsedKey"),s("span",{class:"s_1zp9pn"},"}"),s("span",{class:"s_1th9sy"}," so")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * existing read-only consumers need no change.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarToggleKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_13ahmt"},"()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void"),s("span",{class:"s_1jjt6x"},">"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarToggle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Disables collapsing entirely (fixed width, no built-in toggle). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  disableCollapse"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Expanded width as a CSS length. Applied inline so apps can override it. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  width"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Collapsed width as a CSS length. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsedWidth"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarItemProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Row label. Used as the accessible name and the default slot fallback. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** `accesskey` attribute for a keyboard shortcut. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  accessKey"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Ignored when the `#prefix` slot is used.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Trailing text. Ignored when the `#suffix` slot is used. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  suffix"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Navigation target. When set the row's main area renders as a router link;")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * otherwise it renders as a button. A click still invokes `onClick`.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  to"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_euu481"}," RouteLocationRaw")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'   * Marks the row active (`data-state="active"`). When omitted, active state is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * inferred by matching `to` against the current route.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  active"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Click handler. Bound from `@click`. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_fsg3al"},"event"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," MouseEvent"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarLabelProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * When true, collapses to a horizontal divider while the sidebar is collapsed")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * (matches the previous `SidebarSection` label behavior).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  divider"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarHeaderProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Workspace or app title. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  title"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Secondary line under the title, e.g. a domain or workspace slug. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  subtitle"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  logo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * `false` when workspace identity is already shown elsewhere (e.g. a left")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * paired with a non-collapsing sidebar, since a collapsed header with no logo")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * has nothing to show.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  showLogo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  menuItems"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    label"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"    onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }[]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Building block for a collapsible group of `SidebarItem`s. Compose children")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * in the default slot — `SidebarSection` owns only the label + collapse")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * chrome, not the rows inside it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarSectionProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Section label. Renders nothing when omitted (a label-less group). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Whether clicking the label toggles the group's visibility. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsible"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")])])])],-1)])]),_:1}),l(y,{data:t}),n[16]||(n[16]=s("h3",{id:"sidebarlabel",tabindex:"-1"},[a("SidebarLabel "),s("a",{class:"header-anchor",href:"#sidebarlabel","aria-label":"Permalink to “SidebarLabel”"},"​")],-1)),l(j,{name:"SidebarLabel",data:_},{code:e(()=>[...n[5]||(n[5]=[s("div",{class:"language-typescript"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"typescript"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Component"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," ComputedRef"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," InjectionKey"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"RouteLocationRaw"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue-router"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Read-only collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarItem` / `SidebarLabel` / `SidebarHeader` to shrink to icon-only.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarCollapsedKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_euu481"},"ComputedRef"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_i592pt"},"boolean"),s("span",{class:"s_1jjt6x"},">>"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarCollapsed"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Toggles the sidebar's collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarCollapseToggle`. Kept separate from "),s("span",{class:"s_1zp9pn"},"{"),s("span",{class:"s_1v9gwm"},"@"),s("span",{class:"s_y1rh3e"},"link"),s("span",{class:"s_1cpno3"}," sidebarCollapsedKey"),s("span",{class:"s_1zp9pn"},"}"),s("span",{class:"s_1th9sy"}," so")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * existing read-only consumers need no change.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarToggleKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_13ahmt"},"()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void"),s("span",{class:"s_1jjt6x"},">"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarToggle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Disables collapsing entirely (fixed width, no built-in toggle). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  disableCollapse"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Expanded width as a CSS length. Applied inline so apps can override it. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  width"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Collapsed width as a CSS length. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsedWidth"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarItemProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Row label. Used as the accessible name and the default slot fallback. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** `accesskey` attribute for a keyboard shortcut. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  accessKey"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Ignored when the `#prefix` slot is used.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Trailing text. Ignored when the `#suffix` slot is used. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  suffix"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Navigation target. When set the row's main area renders as a router link;")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * otherwise it renders as a button. A click still invokes `onClick`.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  to"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_euu481"}," RouteLocationRaw")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'   * Marks the row active (`data-state="active"`). When omitted, active state is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * inferred by matching `to` against the current route.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  active"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Click handler. Bound from `@click`. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_fsg3al"},"event"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," MouseEvent"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarLabelProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * When true, collapses to a horizontal divider while the sidebar is collapsed")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * (matches the previous `SidebarSection` label behavior).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  divider"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarHeaderProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Workspace or app title. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  title"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Secondary line under the title, e.g. a domain or workspace slug. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  subtitle"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  logo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * `false` when workspace identity is already shown elsewhere (e.g. a left")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * paired with a non-collapsing sidebar, since a collapsed header with no logo")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * has nothing to show.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  showLogo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  menuItems"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    label"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"    onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }[]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Building block for a collapsible group of `SidebarItem`s. Compose children")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * in the default slot — `SidebarSection` owns only the label + collapse")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * chrome, not the rows inside it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarSectionProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Section label. Renders nothing when omitted (a label-less group). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Whether clicking the label toggles the group's visibility. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsible"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")])])])],-1)])]),_:1}),l(y,{data:o}),n[17]||(n[17]=s("h3",{id:"sidebarheader-1",tabindex:"-1"},[a("SidebarHeader "),s("a",{class:"header-anchor",href:"#sidebarheader-1","aria-label":"Permalink to “SidebarHeader”"},"​")],-1)),l(j,{name:"SidebarHeader",data:m},{code:e(()=>[...n[6]||(n[6]=[s("div",{class:"language-typescript"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"typescript"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Component"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," ComputedRef"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," InjectionKey"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"RouteLocationRaw"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue-router"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Read-only collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarItem` / `SidebarLabel` / `SidebarHeader` to shrink to icon-only.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarCollapsedKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_euu481"},"ComputedRef"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_i592pt"},"boolean"),s("span",{class:"s_1jjt6x"},">>"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarCollapsed"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Toggles the sidebar's collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarCollapseToggle`. Kept separate from "),s("span",{class:"s_1zp9pn"},"{"),s("span",{class:"s_1v9gwm"},"@"),s("span",{class:"s_y1rh3e"},"link"),s("span",{class:"s_1cpno3"}," sidebarCollapsedKey"),s("span",{class:"s_1zp9pn"},"}"),s("span",{class:"s_1th9sy"}," so")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * existing read-only consumers need no change.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarToggleKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_13ahmt"},"()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void"),s("span",{class:"s_1jjt6x"},">"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarToggle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Disables collapsing entirely (fixed width, no built-in toggle). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  disableCollapse"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Expanded width as a CSS length. Applied inline so apps can override it. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  width"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Collapsed width as a CSS length. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsedWidth"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarItemProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Row label. Used as the accessible name and the default slot fallback. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** `accesskey` attribute for a keyboard shortcut. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  accessKey"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Ignored when the `#prefix` slot is used.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Trailing text. Ignored when the `#suffix` slot is used. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  suffix"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Navigation target. When set the row's main area renders as a router link;")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * otherwise it renders as a button. A click still invokes `onClick`.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  to"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_euu481"}," RouteLocationRaw")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'   * Marks the row active (`data-state="active"`). When omitted, active state is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * inferred by matching `to` against the current route.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  active"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Click handler. Bound from `@click`. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_fsg3al"},"event"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," MouseEvent"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarLabelProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * When true, collapses to a horizontal divider while the sidebar is collapsed")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * (matches the previous `SidebarSection` label behavior).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  divider"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarHeaderProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Workspace or app title. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  title"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Secondary line under the title, e.g. a domain or workspace slug. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  subtitle"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  logo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * `false` when workspace identity is already shown elsewhere (e.g. a left")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * paired with a non-collapsing sidebar, since a collapsed header with no logo")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * has nothing to show.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  showLogo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  menuItems"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    label"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"    onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }[]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Building block for a collapsible group of `SidebarItem`s. Compose children")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * in the default slot — `SidebarSection` owns only the label + collapse")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * chrome, not the rows inside it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarSectionProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Section label. Renders nothing when omitted (a label-less group). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Whether clicking the label toggles the group's visibility. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsible"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")])])])],-1)])]),_:1}),l(y,{data:T}),n[18]||(n[18]=s("h3",{id:"sidebarsection-1",tabindex:"-1"},[a("SidebarSection "),s("a",{class:"header-anchor",href:"#sidebarsection-1","aria-label":"Permalink to “SidebarSection”"},"​")],-1)),l(j,{name:"SidebarSection",data:W},{code:e(()=>[...n[7]||(n[7]=[s("div",{class:"language-typescript"},[s("button",{title:"Copy Code",class:"copy"}),s("span",{class:"lang"},"typescript"),s("pre",{class:"shiki shiki-themes tokyo-night github-light s_2cy0ei",tabindex:"0",dir:"ltr"},[s("code",null,[s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"Component"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," ComputedRef"),s("span",{class:"s_1jjt6x"},","),s("span",{class:"s_4q1z3w"}," InjectionKey"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"import"),s("span",{class:"s_13ahmt"}," { "),s("span",{class:"s_4q1z3w"},"RouteLocationRaw"),s("span",{class:"s_13ahmt"}," }"),s("span",{class:"s_edvzsf"}," from"),s("span",{class:"s_w1p9wo"}," '"),s("span",{class:"s_2575z4"},"vue-router"),s("span",{class:"s_w1p9wo"},"'")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Read-only collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarItem` / `SidebarLabel` / `SidebarHeader` to shrink to icon-only.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarCollapsedKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_euu481"},"ComputedRef"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_i592pt"},"boolean"),s("span",{class:"s_1jjt6x"},">>"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarCollapsed"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Toggles the sidebar's collapsed state, provided by `Sidebar` and consumed by")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * `SidebarCollapseToggle`. Kept separate from "),s("span",{class:"s_1zp9pn"},"{"),s("span",{class:"s_1v9gwm"},"@"),s("span",{class:"s_y1rh3e"},"link"),s("span",{class:"s_1cpno3"}," sidebarCollapsedKey"),s("span",{class:"s_1zp9pn"},"}"),s("span",{class:"s_1th9sy"}," so")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * existing read-only consumers need no change.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_252irl"}," const"),s("span",{class:"s_295sjd"}," sidebarToggleKey"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," InjectionKey"),s("span",{class:"s_1jjt6x"},"<"),s("span",{class:"s_13ahmt"},"()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void"),s("span",{class:"s_1jjt6x"},">"),s("span",{class:"s_2ekfrt"}," =")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  Symbol"),s("span",{class:"s_13ahmt"},"("),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_2575z4"},"sidebarToggle"),s("span",{class:"s_w1p9wo"},"'"),s("span",{class:"s_13ahmt"},")")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Disables collapsing entirely (fixed width, no built-in toggle). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  disableCollapse"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Expanded width as a CSS length. Applied inline so apps can override it. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  width"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Collapsed width as a CSS length. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsedWidth"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarItemProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Row label. Used as the accessible name and the default slot fallback. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** `accesskey` attribute for a keyboard shortcut. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  accessKey"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Ignored when the `#prefix` slot is used.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Trailing text. Ignored when the `#suffix` slot is used. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  suffix"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Navigation target. When set the row's main area renders as a router link;")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * otherwise it renders as a button. A click still invokes `onClick`.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  to"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_euu481"}," RouteLocationRaw")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'   * Marks the row active (`data-state="active"`). When omitted, active state is')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * inferred by matching `to` against the current route.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  active"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Click handler. Bound from `@click`. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"  onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ("),s("span",{class:"s_fsg3al"},"event"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_euu481"}," MouseEvent"),s("span",{class:"s_13ahmt"},")"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," interface"),s("span",{class:"s_euu481"}," SidebarLabelProps"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * When true, collapses to a horizontal divider while the sidebar is collapsed")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * (matches the previous `SidebarSection` label behavior).")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  divider"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarHeaderProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Workspace or app title. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  title"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Secondary line under the title, e.g. a domain or workspace slug. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  subtitle"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  logo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * Whether to render the leading logo/avatar box. Defaults to `true`. Set to")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * `false` when workspace identity is already shown elsewhere (e.g. a left")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * rail) to avoid a duplicate avatar; the title then sits flush-left. Best")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * paired with a non-collapsing sidebar, since a collapsed header with no logo")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   * has nothing to show.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"   */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  showLogo"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  menuItems"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    label"),s("span",{class:"s_2ekfrt"},":"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"    icon"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string"),s("span",{class:"s_2ekfrt"}," |"),s("span",{class:"s_euu481"}," Component")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_indoxt"},"    onClick"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_13ahmt"}," ()"),s("span",{class:"s_50ecpt"}," =>"),s("span",{class:"s_i592pt"}," void")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"  }[]")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")]),a(`
+`),s("span",{class:"line"}),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"/**")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * Building block for a collapsible group of `SidebarItem`s. Compose children")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * in the default slot — `SidebarSection` owns only the label + collapse")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," * chrome, not the rows inside it.")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"}," */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_edvzsf"},"export"),s("span",{class:"s_50ecpt"}," type"),s("span",{class:"s_euu481"}," SidebarSectionProps"),s("span",{class:"s_2ekfrt"}," ="),s("span",{class:"s_13ahmt"}," {")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Section label. Renders nothing when omitted (a label-less group). */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  label"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," string")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  /** Whether clicking the label toggles the group's visibility. */")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_bsv8nz"},"  collapsible"),s("span",{class:"s_2ekfrt"},"?:"),s("span",{class:"s_i592pt"}," boolean")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_13ahmt"},"}")])])])],-1)])]),_:1}),l(y,{data:D}),l(S,{data:K})])}}});export{rs as __pageData,ds as default};
