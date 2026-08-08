@@ -872,9 +872,11 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 
 ### `experimental` barrel — tidy and `FrappeUIError`
 
-- **Breaking:** `LabelingWrapper` is dropped from `frappe-ui/experimental`. It
-  had zero importers of the barrel export (every internal user imports the
-  `.vue` file directly); this is the only member cut in the barrel tidy.
+- **Breaking:** `LabelingWrapper` is dropped from `frappe-ui/experimental`.
+  It stays exported from its own barrel (`src/components/InputLabeling`) —
+  `Combobox`, `Select`, `MultiSelect`, and `MultiEmailInput` import it from
+  there internally — only the `experimental` re-export had zero external
+  importers, so only that goes. The only member cut in the barrel tidy.
 - `FrappeUIError` is now exported from `frappe-ui/experimental` as a type. A
   consumer previously hand-declared a structural copy of it because it wasn't
   re-exported — that copy can now be dropped in favor of the real type.
