@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import LoadingIndicator from './LoadingIndicator.vue'
+import { LoadingIndicator } from '../LoadingIndicator'
+import type { LoadingTextProps } from './types'
 
-withDefaults(defineProps<{ text?: string }>(), { text: 'Loading...' })
+withDefaults(defineProps<LoadingTextProps>(), { text: 'Loading...' })
 </script>
