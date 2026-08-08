@@ -1,6 +1,6 @@
 import { h } from 'vue'
 import DesktopShell from './DesktopShell.vue'
-import { getScrollContainer } from '../../composables/useScrollContainer'
+import { shellScrollContainer } from '../../composables/useShellScrolled'
 
 describe('<DesktopShell />', () => {
   it('renders the rail, sidebar, and default content slots', () => {
@@ -29,11 +29,11 @@ describe('<DesktopShell />', () => {
       .and('not.have.class', 'rounded-lg')
   })
 
-  it('registers its scroll region so getScrollContainer() resolves', () => {
+  it('registers its scroll region so shellScrollContainer resolves', () => {
     cy.mount(DesktopShell, { slots: { default: () => h('div', 'content') } })
     cy.get('[data-slot=desktop-shell-content]').should('exist')
     cy.then(() => {
-      expect(getScrollContainer()).to.not.be.null
+      expect(shellScrollContainer.value).to.not.be.null
     })
   })
 })

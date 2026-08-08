@@ -1,3 +1,8 @@
+// The package's public surface. `export *` is allowed only from a curated
+// barrel — an `index.ts` whose export list was reviewed — never from an
+// implementation module, where it publishes whatever that file happens to
+// export next. See PHILOSOPHY.md, P15.
+
 // App setup and plugins
 export { default as FrappeUI } from './utils/plugin'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
@@ -99,7 +104,15 @@ export { default as CommandPalette } from './components/CommandPalette/CommandPa
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 export { default as KeyboardShortcut } from './components/KeyboardShortcut.vue'
 export * from './components/KeyboardShortcutsModal'
-export * from './composables/useShortcut'
+export {
+  formatShortcutLabel,
+  getActiveShortcuts,
+  matchesShortcut,
+  useShortcut,
+  type ActiveShortcut,
+  type RegisteredShortcut,
+  type ShortcutConfig,
+} from './composables/useShortcut'
 
 // Deprecated component compatibility
 /** @deprecated Use layout markup or domain-specific components instead. */
@@ -123,7 +136,7 @@ export { default as ListItem } from './components/ListItem.vue'
 export * from './components/MonthPicker'
 /** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
 export { default as Toast } from './components/Toast/Toast.vue'
-/** @deprecated Use `Select` with `useTheme` instead. */
+/** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
 /** @deprecated Use the `frappe-ui/editor` subpath instead. */
 export * from './components/TextEditor'
@@ -144,21 +157,38 @@ export { default as useAxisChartOptions } from './components/Charts/axisChartOpt
 // Grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
-// Browser and responsive composables
-export * from './composables/useScreenSize'
-export * from './composables/useScrollContainer'
-export * from './composables/useSheetDrag'
+// Composables
+export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
+export {
+  shellScrollContainer,
+  useShellScrolled,
+} from './composables/useShellScrolled'
+export {
+  useSheetDrag,
+  type UseSheetDrag,
+  type UseSheetDragOptions,
+} from './composables/useSheetDrag'
 
 // Directives
-export { default as focusDirective } from './directives/focus'
-export { default as onOutsideClickDirective } from './directives/onOutsideClick'
-export { default as visibilityDirective } from './directives/visibility'
+export { vFocus } from './directives/focus'
+export { vOnOutsideClick } from './directives/onOutsideClick'
 
 // Utilities
 export { dayjs, dayjsLocal } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
-export * from './utils/fileSize'
-export * from './utils/theme'
-export * from './utils/useFileUpload'
+export {
+  fileSizeLimitMessage,
+  formatBytes,
+  getMaxFileSize,
+} from './utils/fileSize'
+export {
+  isPrivateUpload,
+  upload,
+  useFileUpload,
+  type UploadedFile,
+  type UploadOptions,
+  type UploadPrivacy,
+  type UploadState,
+} from './utils/useFileUpload'
