@@ -37,7 +37,7 @@
   </ul>
 
   <!-- Floating drag indicator -->
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <div
       v-if="dragLabel"
       class="frappe-tree-drag-label pointer-events-none fixed z-[1000] rounded-md bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-lg"
@@ -58,6 +58,7 @@
 import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
@@ -76,6 +77,8 @@ const props = withDefaults(defineProps<TreeProps>(), {
   guides: 'connectors',
   disabled: false,
 })
+
+const portalTarget = usePortalTarget()
 
 const emit = defineEmits<{
   'drag-start': [node: TreeNode]

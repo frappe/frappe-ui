@@ -5,7 +5,7 @@
       <slot v-else :open="openModel" />
     </ContextMenuTrigger>
 
-    <ContextMenuPortal>
+    <ContextMenuPortal :to="portalTarget">
       <ContextMenuContent
         data-slot="content"
         data-motion="instant"
@@ -38,6 +38,7 @@ import {
 import Menu from '../Menu/Menu.vue'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
 import type { ContextMenuProps, ContextMenuSlots } from './types'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 
 const openModel = defineModel<boolean>('open', { default: false })
 
@@ -48,6 +49,8 @@ const props = withDefaults(defineProps<ContextMenuProps>(), {
 defineSlots<ContextMenuSlots>()
 
 const slots = useSlots()
+
+const portalTarget = usePortalTarget()
 
 const groups = computed(() => normalizeMenuOptions(props.options))
 

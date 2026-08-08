@@ -38,6 +38,15 @@ and `Rating` exports `RatingEmits`.
   via `package.json` `engines` so installers and CI surface the requirement
   instead of opaque transitive-dep engine errors.
 
+### Portal target for embedded apps
+
+- `portalTo` on `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+  `MultiSelect` no longer declares a `'body'` prop default. An unembedded app
+  still gets `'body'`, now as a fallback. No existing call behaves differently.
+- New `usePortalTarget` / `providePortalTarget` / `portalTargetKey` exports let
+  an embedding host redirect every overlay at once. See
+  [`spec/portal-target.md`](../spec/portal-target.md).
+
 ### Dialog — v1 spec
 
 - Flat top-level props (`title`, `message`, `icon`, `size`, `position`,

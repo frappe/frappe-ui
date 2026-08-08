@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { SelectionExposed } from '../shared/selection/types'
 import type {
@@ -57,8 +58,9 @@ const props = withDefaults(defineProps<SelectProps>(), {
   placeholder: 'Select option',
   options: () => [],
   emptyText: 'No options',
-  portalTo: 'body',
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const attrs = useAttrs()
 const slots = useSlots()
@@ -398,7 +400,7 @@ defineExpose(exposed)
         </template>
       </SelectTrigger>
 
-      <SelectPortal :to="portalTo">
+      <SelectPortal :to="portalTarget">
         <SelectContent
           data-slot="content"
           class="z-[100] origin-[var(--reka-select-content-transform-origin)]"

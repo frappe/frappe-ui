@@ -204,7 +204,9 @@ Four props place the popover:
 the trigger so the selected row lands on the value, macOS-style. Setting `side`,
 `align`, or `offset` switches it to ordinary placement below the trigger, and
 whichever of the three you left out falls back to the defaults above.
-`portalTo` applies in both modes.
+`portalTo` applies in both modes. `'body'` is the fallback when neither the
+prop nor an embedding host names a target — see
+[`portal-target.md`](./portal-target.md).
 
 ## Motion
 

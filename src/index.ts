@@ -163,6 +163,14 @@ export {
   type UseSheetDragOptions,
 } from './composables/useSheetDrag'
 
+// Embedding: name one portal target for every overlay under a Vue app
+export {
+  portalTargetKey,
+  providePortalTarget,
+  usePortalTarget,
+} from './composables/usePortalTarget'
+export type { PortalTarget } from './composables/usePortalTarget'
+
 // Directives
 export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'

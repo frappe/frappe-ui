@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <Transition
       enter-active-class="transition-opacity duration-150 ease-in-out"
       leave-active-class="transition-opacity duration-150 ease-in-out"
@@ -163,6 +163,7 @@
 </template>
 
 <script setup lang="ts">
+import { usePortalTarget } from '../../../composables/usePortalTarget'
 import {
   ref,
   onMounted,
@@ -196,6 +197,8 @@ const props = defineProps<{
   images: ImageInfo[]
   initialIndex: number
 }>()
+
+const portalTarget = usePortalTarget()
 
 const emit = defineEmits<{
   'update:show': [value: boolean]
