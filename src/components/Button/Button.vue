@@ -16,10 +16,9 @@ import {
   injectTooltipProviderContext,
 } from 'reka-ui'
 import { RouterLink } from 'vue-router'
-import FeatherIcon from '../FeatherIcon.vue'
 import Spinner from '../Spinner/Spinner.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
-import { warnFeatherIconUsage } from '../../utils/iconString'
+import { warnUnsupportedIconString } from '../../utils/iconString'
 import { buttonProps, type ThemeVariant } from './types'
 
 export default defineComponent({
@@ -38,9 +37,9 @@ export default defineComponent({
   }>,
   setup(props, { attrs, slots, expose }) {
     watchEffect(() => {
-      warnFeatherIconUsage('Button', 'icon', props.icon)
-      warnFeatherIconUsage('Button', 'iconLeft', props.iconLeft)
-      warnFeatherIconUsage('Button', 'iconRight', props.iconRight)
+      warnUnsupportedIconString('Button', 'icon', props.icon)
+      warnUnsupportedIconString('Button', 'iconLeft', props.iconLeft)
+      warnUnsupportedIconString('Button', 'iconRight', props.iconRight)
     })
 
     const isDisabled = computed(() => props.disabled || props.loading)
@@ -260,10 +259,10 @@ export default defineComponent({
       }
     })
 
-    /** Resolve an icon prop to a vnode: lucide class-span, FeatherIcon, or component. */
+    /** Resolve an icon prop to a vnode: lucide class-span or component. */
     function renderIcon(
       icon: string | Component | undefined,
-      featherHidden: boolean,
+      propName: string,
     ): VNode | null {
       if (!icon) return null
       if (typeof icon === 'string') {
@@ -273,11 +272,9 @@ export default defineComponent({
             'aria-hidden': 'true',
           })
         }
-        return h(FeatherIcon, {
-          name: icon,
-          class: slotClasses.value,
-          ...(featherHidden ? { 'aria-hidden': 'true' } : {}),
-        })
+        // Unsupported string (e.g. a bare feather-style name) — warned
+        // above via warnUnsupportedIconString. Nothing to render.
+        return null
       }
       return h(icon, { class: slotClasses.value })
     }
@@ -297,13 +294,13 @@ export default defineComponent({
         })
       }
       if (slots.prefix) return slots.prefix()
-      return renderIcon(props.iconLeft, true)
+      return renderIcon(props.iconLeft, 'iconLeft')
     }
 
     function renderMain() {
       if (props.loading && props.loadingText) return props.loadingText
       if (isIconButton.value && !props.loading) {
-        if (props.icon) return renderIcon(props.icon, false)
+        if (props.icon) return renderIcon(props.icon, 'icon')
         if (slots.icon) return slots.icon()
         if (hasLucideIconInDefaultSlot.value) {
           return h(
@@ -323,7 +320,7 @@ export default defineComponent({
 
     function renderSuffix() {
       if (slots.suffix) return slots.suffix()
-      return renderIcon(props.iconRight, true)
+      return renderIcon(props.iconRight, 'iconRight')
     }
 
     return () => {

@@ -82,7 +82,7 @@ img.ProseMirror-selectednode {
     width: 14px;
     height: 14px;
     border-radius: 4px;
-    color: theme('colors.gray.900');
+    color: var(--ink-gray-9);
   }
 }
 

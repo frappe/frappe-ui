@@ -12,10 +12,47 @@
     type: 'string | string[]'
   },
   {
-    name: 'uploadArgs',
-    description: 'Additional upload options passed to Frappe\'s upload endpoint.\n`private` / `is_private` override the component\'s `isPrivate` default.',
+    name: 'private',
+    description: 'Whether the uploaded file is access-controlled. Defaults to `true` — an\nupload with no stated intent is private, not world-readable. Pass\n`false` only for intentionally public files.',
     required: false,
-    type: 'UploadOptions'
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'folder',
+    description: 'Folder to upload into, on Frappe\'s file manager. Defaults to `Home`.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'doctype',
+    description: 'Doctype to attach the uploaded file to.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'docname',
+    description: 'Name of the document to attach the uploaded file to.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'fieldname',
+    description: 'Fieldname on the document the uploaded file belongs to.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'uploadEndpoint',
+    description: 'Endpoint the file is posted to. Defaults to `/api/method/upload_file`.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'optimize',
+    description: 'Resize the image server-side before storing it.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'validateFile',
@@ -36,13 +73,13 @@
   const emitsData = [
   {
     name: 'success',
-    description: '',
-    type: '[data: any]'
+    description: 'The file finished uploading.',
+    type: '[data: UploadedFile]'
   },
   {
     name: 'failure',
-    description: '',
-    type: '[error: any]'
+    description: 'The upload failed — validation or the request itself.',
+    type: '[error: unknown]'
   }
 ]
 </script>

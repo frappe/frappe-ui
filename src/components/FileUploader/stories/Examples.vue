@@ -14,6 +14,10 @@ const onSuccess = (file: File) => {
   <FileUploader
     :fileTypes="['image/*']"
     :validateFile="validateFileFunction"
+    :private="false"
+    folder="Attachments"
+    doctype="ToDo"
+    docname="TODO-0001"
     @success="onSuccess"
   >
     <template #default="{ uploading, progress, openFileSelector }">

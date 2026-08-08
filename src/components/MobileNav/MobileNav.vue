@@ -12,4 +12,9 @@
 // (auto-cols-fr + grid-flow-col), so the bar adapts to any item count without
 // hardcoding a column class. Bottom padding clears the home indicator in an
 // installed PWA (display-mode: standalone).
+
+defineSlots<{
+  /** One or more `MobileNavItem`s, each becoming an equal-width tab. */
+  default?: () => any
+}>()
 </script>

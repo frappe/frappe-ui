@@ -59,8 +59,8 @@ Mobile:
 ```html
 <MobileShell>  <!-- owns height; no h-screen wrapper -->
   <PageHeaderMobile title>
-    <template #left>…back chevron or menu opener…</template>
-    <template #right>…actions…</template>
+    <template #prefix>…back chevron or menu opener…</template>
+    <template #suffix>…actions…</template>
   </PageHeaderMobile>
   <div>…body…</div>
   <BottomSheet v-model:open="…">…whatever lived in the desktop sidebar…</BottomSheet>

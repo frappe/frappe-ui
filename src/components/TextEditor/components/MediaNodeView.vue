@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import LoadingIndicator from '../../LoadingIndicator.vue'
+import { LoadingIndicator } from '../../LoadingIndicator'
 import Tooltip from '../../Tooltip/Tooltip.vue'
 import { localFileMap } from '../extensions/image/image-extension'
 import { ErrorMessage } from '../../ErrorMessage'

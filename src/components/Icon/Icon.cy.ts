@@ -31,10 +31,10 @@ describe('<Icon />', () => {
     cy.get('span').should('have.text', '✨')
   })
 
-  it('renders a legacy feather name via FeatherIcon (svg)', () => {
+  it('renders nothing for an unsupported (non-lucide, non-emoji) string', () => {
     cy.mount(Icon, { props: { name: 'check' } })
-    cy.get('svg').should('exist')
-    cy.get('svg').should('have.attr', 'aria-hidden', 'true')
+    cy.get('span').should('not.exist')
+    cy.get('svg').should('not.exist')
   })
 
   it('renders a Component value via <component :is>', () => {
