@@ -339,6 +339,13 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
   text-like modes, or `Textarea` / `Select` / `Checkbox` for the other type
   modes `Input` accepted.
 
+### FormLabel — moved to a component directory (non-breaking)
+
+`FormLabel` now lives at `src/components/FormLabel/FormLabel.vue` instead of
+a bare `src/components/FormLabel.vue`, matching the rest of the input
+family. It gains `types.ts`, tests, stories, and a docs page. The import
+path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
+
 ### Legacy components — dev-mode warnings
 
 `MonthPicker` is deprecated. For simple month picking, use `Select` with month
