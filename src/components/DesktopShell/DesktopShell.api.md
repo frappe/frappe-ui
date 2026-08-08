@@ -17,18 +17,18 @@
   const slotsData = [
   {
     name: 'rail',
-    description: '',
-    type: '{}'
+    description: 'The icon column — usually a `Rail`. Omit it on shells that don\'t use one.',
+    type: 'any'
   },
   {
     name: 'sidebar',
-    description: '',
-    type: '{}'
+    description: 'The navigation panel — usually a `Sidebar`. Render it conditionally to hide it on routes that don\'t need it.',
+    type: 'any'
   },
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The routed page content, placed in the scroll region (or the fixed-height pane when `scroll` is `false`).',
+    type: 'any'
   }
 ]
 </script>

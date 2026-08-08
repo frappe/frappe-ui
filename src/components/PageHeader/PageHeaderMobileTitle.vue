@@ -6,9 +6,9 @@
   <span
     class="inline-flex h-6 min-w-0 max-w-full items-center justify-center gap-1.5 align-middle"
   >
-    <!-- Only the text truncates; the icon keeps its natural size. -->
-    <span v-if="$slots.icon" class="flex shrink-0 items-center">
-      <slot name="icon" />
+    <!-- Only the text truncates; the prefix keeps its natural size. -->
+    <span v-if="$slots.prefix" class="flex shrink-0 items-center">
+      <slot name="prefix" />
     </span>
     <span class="min-w-0 truncate leading-6">
       <slot>{{ title }}</slot>
@@ -20,4 +20,11 @@
 import type { PageHeaderMobileTitleProps } from './types'
 
 defineProps<PageHeaderMobileTitleProps>()
+
+defineSlots<{
+  /** A leading glyph next to the title text — keeps its natural size while the text truncates. */
+  prefix?: () => any
+  /** Overrides `title` with custom markup. */
+  default?: () => any
+}>()
 </script>

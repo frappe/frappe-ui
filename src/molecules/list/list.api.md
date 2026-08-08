@@ -31,14 +31,14 @@
   },
   {
     name: 'selection',
-    description: '',
+    description: 'The checkbox-selected row values, when `selectable` reveals the checkbox\ncolumn. Two-way — toggling a row\'s checkbox updates this set.',
     required: false,
     type: 'string[]',
     default: '[]'
   },
   {
     name: 'active',
-    description: '',
+    description: 'The single open/highlighted row, for a master–detail layout. Binding this\nmodel is what opts a list into active-row tracking — an unbound list shows\nno highlight. Independent of `selection`.',
     required: false,
     type: 'string'
   }
@@ -47,8 +47,8 @@
   const listSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The list\'s rows — `<ListRow>` / `<ListRows>`, optionally under `<ListHeader>` / `<ListGroup>`.',
+    type: 'any'
   }
 ]
 
@@ -89,24 +89,24 @@
   const listRowSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The row\'s cells — `<ListCell>` elements, or feed content directly.',
+    type: 'any'
   }
 ]
 
   const listCellSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The cell\'s content.',
+    type: 'any'
   }
 ]
 
   const listHeaderSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The header\'s columns — `<ListHeaderCell>` / `<ListHeaderCellSort>` elements.',
+    type: 'any'
   }
 ]
 
@@ -164,7 +164,7 @@
   const listHeaderCellSortEmits = [
   {
     name: 'click',
-    description: '',
+    description: 'Fired on sort button click — update your sort state here.',
     type: '[event: MouseEvent]'
   }
 ]
@@ -193,7 +193,7 @@
   const listRowsSlots = [
   {
     name: 'default',
-    description: '',
+    description: 'One render per item — `{ item, index, value }`, where `value` is the row\'s resolved identity.',
     type: '{ item: T; index: number; value: string; }'
   }
 ]

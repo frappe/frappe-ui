@@ -42,6 +42,7 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
+  /** One render per item — `{ item, index, value }`, where `value` is the row's resolved identity. */
   default?: (props: { item: T; index: number; value: string }) => unknown
 }>()
 

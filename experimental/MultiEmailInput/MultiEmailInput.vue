@@ -23,7 +23,7 @@ import {
 } from 'reka-ui'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
-import LoadingIndicator from '../../src/components/LoadingIndicator.vue'
+import { LoadingIndicator } from '../../src/components/LoadingIndicator'
 import {
   InputDescription,
   InputError,

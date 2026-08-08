@@ -1,8 +1,6 @@
 interface DividerAction {
   label: string
   onClick?: () => any
-  /** @deprecated Use onClick instead. */
-  handler?: () => any
   loading?: boolean
 }
 

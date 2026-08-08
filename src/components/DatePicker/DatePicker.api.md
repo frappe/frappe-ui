@@ -24,13 +24,6 @@
     type: 'number'
   },
   {
-    name: 'placement',
-    description: 'Preferred popover placement relative to the trigger.',
-    required: false,
-    type: 'DatePickerPlacement',
-    deprecated: 'Use `side` and `align` instead.'
-  },
-  {
     name: 'format',
     description: 'Display format used for the input text.',
     required: false,
@@ -84,14 +77,6 @@
     default: 'true'
   },
   {
-    name: 'readonly',
-    description: 'Prevents manual typing while keeping the picker interactive.',
-    required: false,
-    type: 'boolean',
-    default: 'false',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
     name: 'disabled',
     description: 'Disables the trigger input and calendar interactions.',
     required: false,
@@ -112,14 +97,6 @@
     type: 'boolean'
   },
   {
-    name: 'autoClose',
-    description: 'Closes the popover after a value is picked.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
-  },
-  {
     name: 'min',
     description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
@@ -136,29 +113,6 @@
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
-  },
-  {
-    name: 'allowCustom',
-    description: 'Allows users to type custom date text into the input.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
-    name: 'inputClass',
-    description: 'Additional classes applied to the trigger input.',
-    required: false,
-    type: 'string | string[] | Record<string, boolean>',
-    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
-  },
-  {
-    name: 'value',
-    description: 'Uncontrolled initial value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
   },
   {
     name: 'modelValue',
@@ -204,12 +158,6 @@
     name: 'trigger',
     description: 'Custom trigger renderer for the picker.',
     type: 'DatePickerTriggerSlotProps'
-  },
-  {
-    name: 'target',
-    description: 'Custom trigger renderer for the picker.',
-    type: 'DatePickerTriggerSlotProps',
-    deprecated: 'Use `#trigger` instead. `#target` remains as a back-compat alias through v1.x.'
   },
   {
     name: 'prefix',
@@ -266,13 +214,6 @@
     type: 'number'
   },
   {
-    name: 'placement',
-    description: 'Preferred popover placement relative to the trigger.',
-    required: false,
-    type: 'DatePickerPlacement',
-    deprecated: 'Use `side` and `align` instead.'
-  },
-  {
     name: 'format',
     description: 'Display format used for the input text.',
     required: false,
@@ -326,14 +267,6 @@
     default: 'true'
   },
   {
-    name: 'readonly',
-    description: 'Prevents manual typing while keeping the picker interactive.',
-    required: false,
-    type: 'boolean',
-    default: 'false',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
     name: 'disabled',
     description: 'Disables the trigger input and calendar interactions.',
     required: false,
@@ -354,14 +287,6 @@
     type: 'boolean'
   },
   {
-    name: 'autoClose',
-    description: 'Closes the popover after a value is picked.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
-  },
-  {
     name: 'min',
     description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
@@ -378,28 +303,6 @@
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
-  },
-  {
-    name: 'allowCustom',
-    description: 'Allows users to type custom date text into the input.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
-    name: 'inputClass',
-    description: 'Additional classes applied to the trigger input.',
-    required: false,
-    type: 'string | string[] | Record<string, boolean>',
-    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
-  },
-  {
-    name: 'value',
-    description: 'Uncontrolled initial range value as `[from, to]` in `YYYY-MM-DD` format.',
-    required: false,
-    type: 'string[]',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
   },
   {
     name: 'modelValue',
@@ -452,12 +355,6 @@
     name: 'trigger',
     description: '',
     type: 'DatePickerTriggerSlotProps'
-  },
-  {
-    name: 'target',
-    description: '',
-    type: 'DatePickerTriggerSlotProps',
-    deprecated: 'Use `#trigger` instead.'
   },
   {
     name: 'prefix',
@@ -514,13 +411,6 @@
     type: 'number'
   },
   {
-    name: 'placement',
-    description: 'Preferred popover placement relative to the trigger.',
-    required: false,
-    type: 'DatePickerPlacement',
-    deprecated: 'Use `side` and `align` instead.'
-  },
-  {
     name: 'format',
     description: 'Display format used for the input text.',
     required: false,
@@ -574,14 +464,6 @@
     default: 'true'
   },
   {
-    name: 'readonly',
-    description: 'Prevents manual typing while keeping the picker interactive.',
-    required: false,
-    type: 'boolean',
-    default: 'false',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
     name: 'disabled',
     description: 'Disables the trigger input and calendar interactions.',
     required: false,
@@ -602,14 +484,6 @@
     type: 'boolean'
   },
   {
-    name: 'autoClose',
-    description: 'Closes the popover after a value is picked.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `keepOpen` instead (inverse semantics: `autoClose: false` → `keepOpen: true`).'
-  },
-  {
     name: 'min',
     description: 'Earliest selectable date. Accepts `YYYY-MM-DD` (or, for `DateTimePicker`,\n`YYYY-MM-DD HH:mm:ss` for second-level granularity).',
     required: false,
@@ -628,48 +502,11 @@
     type: '((date: Dayjs) => boolean)'
   },
   {
-    name: 'allowCustom',
-    description: 'Allows users to type custom date text into the input.',
-    required: false,
-    type: 'boolean',
-    default: 'true',
-    deprecated: 'Use `typeable: false` instead.'
-  },
-  {
-    name: 'inputClass',
-    description: 'Additional classes applied to the trigger input.',
-    required: false,
-    type: 'string | string[] | Record<string, boolean>',
-    deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
-  },
-  {
-    name: 'value',
-    description: 'Uncontrolled initial value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
-  },
-  {
     name: 'modelValue',
     description: 'Controlled value for the picker.',
     required: false,
     type: 'string',
     default: '""'
-  },
-  {
-    name: 'minDateTime',
-    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `min` instead.'
-  },
-  {
-    name: 'maxDateTime',
-    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `max` instead.'
   },
   {
     name: 'allowCustomTime',
@@ -715,12 +552,6 @@
     name: 'trigger',
     description: '',
     type: 'DatePickerTriggerSlotProps'
-  },
-  {
-    name: 'target',
-    description: '',
-    type: 'DatePickerTriggerSlotProps',
-    deprecated: 'Use `#trigger` instead.'
   },
   {
     name: 'prefix',

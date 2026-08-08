@@ -1,9 +1,4 @@
-import type {
-  Component,
-  ComputedRef,
-  InjectionKey,
-  MaybeRefOrGetter,
-} from 'vue'
+import type { Component, ComputedRef, InjectionKey } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
 
 /**
@@ -22,18 +17,6 @@ export const sidebarToggleKey: InjectionKey<() => void> =
   Symbol('sidebarToggle')
 
 export type SidebarProps = {
-  /**
-   * @deprecated Config-object header. Prefer composing your own header in the
-   * default slot. Kept for one release for backward compatibility.
-   */
-  header?: SidebarHeaderProps
-
-  /**
-   * @deprecated Config-object sections. Prefer composing `SidebarLabel` +
-   * `SidebarItem` in the default slot. Kept for one release.
-   */
-  sections?: SidebarSectionProps[]
-
   /** Disables collapsing entirely (fixed width, no built-in toggle). */
   disableCollapse?: boolean
 
@@ -72,17 +55,8 @@ export interface SidebarItemProps {
    */
   active?: boolean
 
-  /** @deprecated Use `active`. Alias kept for the config-object path. */
-  isActive?: boolean
-
-  /**
-   * Click handler. Bound from `@click` in composition and from `item.onClick`
-   * in the config-object path — both resolve to this prop.
-   */
+  /** Click handler. Bound from `@click`. */
   onClick?: (event: MouseEvent) => void
-
-  /** @deprecated Config-object visibility flag; filtered by the legacy adapter. */
-  condition?: MaybeRefOrGetter<boolean>
 }
 
 export interface SidebarLabelProps {
@@ -94,8 +68,11 @@ export interface SidebarLabelProps {
 }
 
 export type SidebarHeaderProps = {
+  /** Workspace or app title. */
   title: string
+  /** Secondary line under the title, e.g. a domain or workspace slug. */
   subtitle?: string
+  /** Leading logo: an image URL, or a component. Overridden by the `#prefix` slot. */
   logo?: string | Component
   /**
    * Whether to render the leading logo/avatar box. Defaults to `true`. Set to
@@ -105,6 +82,7 @@ export type SidebarHeaderProps = {
    * has nothing to show.
    */
   showLogo?: boolean
+  /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */
   menuItems?: {
     label: string
     icon?: string | Component
@@ -113,12 +91,13 @@ export type SidebarHeaderProps = {
 }
 
 /**
- * @deprecated Legacy config-object section shape. Rendered by the internal
- * `SidebarSection` adapter for `Sidebar`'s `sections` prop. New code composes
- * `SidebarLabel` + `SidebarItem` directly.
+ * Building block for a collapsible group of `SidebarItem`s. Compose children
+ * in the default slot — `SidebarSection` owns only the label + collapse
+ * chrome, not the rows inside it.
  */
 export type SidebarSectionProps = {
+  /** Section label. Renders nothing when omitted (a label-less group). */
   label?: string
-  items: SidebarItemProps[]
+  /** Whether clicking the label toggles the group's visibility. */
   collapsible?: boolean
 }

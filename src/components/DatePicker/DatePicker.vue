@@ -19,7 +19,6 @@
     :placeholder="props.placeholder"
     :disabled="props.disabled"
     :readonly="inputReadonly"
-    :input-class="dp.inputClass"
     :display-label="displayLabel"
     :content-class="contentClass"
     @blur="commitInput()"
@@ -29,7 +28,6 @@
     @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
     <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
     <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
 
@@ -90,9 +88,7 @@ import {
   useKeepOpen,
   useTypeable,
   useDateCoercion,
-  useDeprecationWarnings,
   makeUnavailableCheck,
-  type LegacyDatePickerProps,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
 import type {
@@ -102,19 +98,14 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
-  value: '',
   modelValue: '',
   variant: 'subtle',
   placeholder: 'Select date',
   typeable: true,
-  readonly: false,
-  allowCustom: true,
   disabled: false,
   clearable: true,
   openOnFocus: false,
   openOnClick: true,
-  // Legacy default kept; see `useKeepOpen` for why.
-  autoClose: true,
 })
 const emit = defineEmits<DatePickerEmits>()
 
@@ -123,9 +114,6 @@ const slots = defineSlots<DatePickerSlots>()
 // Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
 // PopoverPanel inside PickerShell.
 const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
-
-// Cast strips @deprecated markers so internal back-compat reads don't trigger TS6385.
-const dp = props as unknown as LegacyDatePickerProps
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
@@ -201,17 +189,12 @@ defineExpose({
   open: () => shellRef.value?.open(),
 })
 
-// ── Positioning / keepOpen / deprecations ────────────────────────────────────
+// ── Positioning / keepOpen ────────────────────────────────────────────────────
 
-const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
-  props,
-  dp,
-)
-const shouldKeepOpen = useKeepOpen(props, dp)
-const inputReadonly = useTypeable(props, dp)
-useDeprecationWarnings('DatePicker', dp, {
-  hasTargetSlot: computed(() => !!slots.target),
-})
+const { resolvedSide, resolvedAlign, resolvedOffset } =
+  usePopoverPositioning(props)
+const shouldKeepOpen = useKeepOpen(props)
+const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
 
@@ -230,7 +213,7 @@ const {
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 const selected = ref<string>('')
-const initialValue = ref(props.modelValue || props.value || '')
+const initialValue = ref(props.modelValue || '')
 
 const checkUnavailable = makeUnavailableCheck(
   () => props.min,
@@ -263,13 +246,13 @@ function syncFromValue(val?: string): void {
 syncFromValue(initialValue.value)
 
 function initFromValue(): void {
-  syncFromValue(props.modelValue || props.value)
+  syncFromValue(props.modelValue)
 }
 
 watch(
-  () => [props.modelValue, props.value],
-  ([m, v]) => {
-    syncFromValue(m || v)
+  () => props.modelValue,
+  (m) => {
+    syncFromValue(m)
   },
 )
 
