@@ -146,7 +146,7 @@ Cmd-K palette. Compose with `Dialog bare`.
 ## Layout
 
 ### App shell
-`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarGroup`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
+`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
 
 ### `ScrollArea`
 For every app-owned scroll region (sidebar nav, panes; `orientation="horizontal"` for boards). Prefer over `overflow-auto` divs.

@@ -6,20 +6,6 @@
 
   const sidebarProps = [
   {
-    name: 'header',
-    description: '',
-    required: false,
-    type: 'SidebarHeaderProps',
-    deprecated: 'Config-object header. Prefer composing your own header in the\ndefault slot. Kept for one release for backward compatibility.'
-  },
-  {
-    name: 'sections',
-    description: '',
-    required: false,
-    type: 'SidebarSectionProps[]',
-    deprecated: 'Config-object sections. Prefer composing `SidebarLabel` +\n`SidebarItem` in the default slot. Kept for one release.'
-  },
-  {
     name: 'disableCollapse',
     description: 'Disables collapsing entirely (fixed width, no built-in toggle).',
     required: false,
@@ -41,7 +27,7 @@
   },
   {
     name: 'collapsed',
-    description: '',
+    description: 'v-model. Whether the sidebar is collapsed. Left unset, it collapses automatically below the `sm` breakpoint.',
     required: false,
     type: 'boolean | null',
     default: 'null'
@@ -51,30 +37,15 @@
   const sidebarSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
-  },
-  {
-    name: 'header-logo',
-    description: '',
-    type: '{}'
-  },
-  {
-    name: 'sidebar-item',
-    description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
-  },
-  {
-    name: 'footer-items',
-    description: '',
-    type: '{}'
+    description: 'The sidebar body — header, scroll region, footer, all composed by the app.',
+    type: 'any'
   }
 ]
 
   const sidebarEmits = [
   {
     name: 'update:collapsed',
-    description: 'Fired when the collapsed changes.',
+    description: 'Fired when the sidebar is collapsed or expanded.',
     type: '[value: boolean | null]'
   }
 ]
@@ -117,42 +88,28 @@
     type: 'boolean'
   },
   {
-    name: 'isActive',
-    description: '',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `active`. Alias kept for the config-object path.'
-  },
-  {
     name: 'onClick',
-    description: 'Click handler. Bound from `@click` in composition and from `item.onClick`\nin the config-object path — both resolve to this prop.',
+    description: 'Click handler. Bound from `@click`.',
     required: false,
     type: '((event: MouseEvent) => void)'
-  },
-  {
-    name: 'condition',
-    description: '',
-    required: false,
-    type: 'MaybeRefOrGetter<boolean>',
-    deprecated: 'Config-object visibility flag; filtered by the legacy adapter.'
   }
 ]
 
   const sidebarItemSlots = [
   {
     name: 'prefix',
-    description: '',
-    type: '{}'
+    description: 'Leading icon or avatar. Overrides the `icon` prop.',
+    type: 'any'
   },
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The label region. Overrides the `label` prop; put inline adornments here.',
+    type: 'any'
   },
   {
     name: 'suffix',
-    description: '',
-    type: '{}'
+    description: 'The trailing zone — a sibling of the link/button, not nested inside it. Overrides the `suffix` prop.',
+    type: 'any'
   }
 ]
 
@@ -168,27 +125,27 @@
   const sidebarLabelSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The label text.',
+    type: 'any'
   }
 ]
 
   const sidebarHeaderProps = [
   {
     name: 'title',
-    description: '',
+    description: 'Workspace or app title.',
     required: true,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'Secondary line under the title, e.g. a domain or workspace slug.',
     required: false,
     type: 'string'
   },
   {
     name: 'logo',
-    description: '',
+    description: 'Leading logo: an image URL, or a component. Overridden by the `#prefix` slot.',
     required: false,
     type: 'string | Component'
   },
@@ -201,7 +158,7 @@
   },
   {
     name: 'menuItems',
-    description: '',
+    description: 'Options rendered in the trigger\'s dropdown — the same shape `Dropdown` itself takes.',
     required: false,
     type: '{ label: string; icon?: string | Component; onClick?: (() => void) | undefined; }[] | undefined'
   }
@@ -209,28 +166,22 @@
 
   const sidebarHeaderSlots = [
   {
-    name: 'logo',
-    description: '',
-    type: '{}'
+    name: 'prefix',
+    description: 'Overrides the default logo/initial box. Falls back to the `logo` prop, then the title\'s first letter.',
+    type: 'any'
   }
 ]
 
   const sidebarSectionProps = [
   {
     name: 'label',
-    description: '',
+    description: 'Section label. Renders nothing when omitted (a label-less group).',
     required: false,
     type: 'string'
   },
   {
-    name: 'items',
-    description: '',
-    required: true,
-    type: 'SidebarItemProps[]'
-  },
-  {
     name: 'collapsible',
-    description: '',
+    description: 'Whether clicking the label toggles the group\'s visibility.',
     required: false,
     type: 'boolean'
   },
@@ -245,9 +196,9 @@
 
   const sidebarSectionSlots = [
   {
-    name: 'sidebar-item',
-    description: '',
-    type: '{ item: SidebarItemProps; isCollapsed: boolean; }'
+    name: 'default',
+    description: 'The group\'s rows — compose `SidebarItem` (or anything else) here.',
+    type: 'any'
   }
 ]
 

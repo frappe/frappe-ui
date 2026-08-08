@@ -3,10 +3,7 @@
        (min-h-12). The trigger sits 40px tall, centered in that region, and owns
        the sidebar gutter (px-2) itself — so consumers drop it straight into
        <Sidebar> without a wrapping padding div. -->
-  <div
-    class="flex h-12 shrink-0 items-center"
-    :class="isCollapsed ? 'justify-center' : 'px-1'"
-  >
+  <div data-slot="sidebar-header" class="flex h-12 shrink-0 items-center px-1">
     <Dropdown :options="props.menuItems" match-trigger-width>
       <template v-slot="{ open }">
         <button
@@ -23,7 +20,7 @@
             v-if="showLogo"
             class="size-7 shrink-0 rounded-[6px] overflow-hidden"
           >
-            <slot name="logo">
+            <slot name="prefix">
               <img
                 v-if="typeof props.logo === 'string'"
                 :src="props.logo"
@@ -87,6 +84,12 @@ import { SidebarHeaderProps, sidebarCollapsedKey } from './types'
 const props = withDefaults(defineProps<SidebarHeaderProps>(), {
   showLogo: true,
 })
+
+defineSlots<{
+  /** Overrides the default logo/initial box. Falls back to the `logo` prop, then the title's first letter. */
+  prefix?: () => any
+}>()
+
 const isCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),
