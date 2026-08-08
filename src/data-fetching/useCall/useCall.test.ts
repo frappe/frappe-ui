@@ -103,6 +103,65 @@ describe('useCall', () => {
     expect(call.data).toEqual({ value: 'test' })
   })
 
+  it('refetches automatically when a reactive param changes (refetch: true)', async () => {
+    const dynamicValue = ref('first')
+    const call = useCall<{ value: string }, { value: string }>({
+      url: url('/api/v2/method/get'),
+      params: () => ({ value: dynamicValue.value }),
+      refetch: true,
+    })
+
+    await call.promise
+    expect(call.data).toEqual({ value: 'first' })
+
+    // No manual fetch()/reload() call — the param ref changing is what
+    // triggers the next request.
+    dynamicValue.value = 'second'
+    await waitUntilValueChanges(() => call.data)
+
+    expect(call.data).toEqual({ value: 'second' })
+  })
+
+  it('does not refetch on a param change when refetch is false (the default)', async () => {
+    const dynamicValue = ref('first')
+    const call = useCall<{ value: string }, { value: string }>({
+      url: url('/api/v2/method/get'),
+      params: () => ({ value: dynamicValue.value }),
+    })
+
+    await call.promise
+    expect(call.data).toEqual({ value: 'first' })
+
+    dynamicValue.value = 'second'
+    await new Promise((r) => setTimeout(r, 10))
+
+    expect(call.data).toEqual({ value: 'first' })
+  })
+
+  it('runs beforeSubmit before the request is sent, with the submitted params', async () => {
+    const beforeSubmit = vi.fn()
+    const call = useCall<{ success: boolean }, { name: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      immediate: false,
+      beforeSubmit,
+    })
+
+    await call.submit({ name: 'test' })
+
+    expect(beforeSubmit).toHaveBeenCalledWith({ name: 'test' })
+  })
+
+  it('shows initialData before the first response arrives', () => {
+    const call = useCall<{ value: string }>({
+      url: url('/api/v2/method/get'),
+      initialData: { value: 'placeholder' },
+      immediate: false,
+    })
+
+    expect(call.data).toEqual({ value: 'placeholder' })
+  })
+
   it('transforms response data correctly', async () => {
     type Response = { numbers: number[] }
     const call = useCall<Response>({

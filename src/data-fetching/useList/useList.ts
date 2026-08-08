@@ -65,7 +65,14 @@ export function useList<T extends { name: string }>(
     return `${baseUrl}/api/v2/document/${doctype}?${params}`
   })
 
+  // `data` is exposed via the `result` computed below, which reads from
+  // `allData` (populated in `afterFetch`) — not from the underlying fetch's
+  // own `data` ref. Seed `allData` itself, or `initialData` would never
+  // surface until the first response lands.
   const allData: Ref<T[] | null> = ref(null)
+  if (initialData) {
+    allData.value = initialData
+  }
   const hasNextPage = ref(true)
   const hasPreviousPage = computed(() => _start.value > 0)
 

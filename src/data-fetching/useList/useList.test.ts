@@ -43,6 +43,25 @@ describe('useList', () => {
     expect(users.loading).toBe(false)
   })
 
+  it('shows initialData before the first response arrives', () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      initialData: [{ name: 'placeholder', email: 'placeholder@example.com' }],
+      immediate: false,
+    })
+
+    expect(users.data).toEqual([
+      { name: 'placeholder', email: 'placeholder@example.com' },
+    ])
+    expect(users.loading).toBe(false)
+  })
+
   it('handles pagination correctly', async () => {
     const users = useList({
       baseUrl,

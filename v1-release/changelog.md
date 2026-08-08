@@ -1155,6 +1155,26 @@ three pages (Resource, List Resource, Document Resource) unchanged. Both
 sections link to each other: Resources stays fully supported through `1.x`;
 the new composables are the recommended layer for new code.
 
+### Data fetching (v2) — `useNewDoc` lost reactivity after submit (fix)
+
+`useNewDoc` built its return value with `reactive({ ...out, submit, doc })`.
+Spreading a `reactive()` proxy reads every ref and computed once and freezes
+the result, so `data`, `error` and `loading` stopped updating the moment the
+object was built — a template bound to `newDoc.loading` never saw it flip.
+The return value is now built by mutating the underlying object in place, so
+its properties stay live.
+
+### Data fetching (v2) — `initialData` did nothing on `useCall` and `useList` (fix)
+
+Both documented an `initialData` option to show a placeholder before the
+first response. Neither worked. `useCall` passed it straight to the
+underlying fetch, which expects the wrapped `{ data: ... }` shape the API
+actually returns — the unwrapped value was invisible, so `call.data` stayed
+`null` until the first response. `useList`'s `data` is read from a separate
+list built in `afterFetch`, which `initialData` never touched, so
+`list.data` stayed `null` the same way. Both now show the seeded value
+immediately, as documented.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,
