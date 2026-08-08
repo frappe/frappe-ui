@@ -278,7 +278,12 @@ function buildTypography() {
   const text = Object.fromEntries(
     Object.entries(styles.text || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
   )
-  const paragraphStyles = styles.paragraph || {}
+  // Same filter as `text` above — paragraph has no dropped-size entries today
+  // (it tops out at `4xl` and never had a `tiny`), but this keeps it that way
+  // if Figma ever adds one (#940).
+  const paragraphStyles = Object.fromEntries(
+    Object.entries(styles.paragraph || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
+  )
 
   const fontFamily = { text: text.base?.regular?.$value.fontFamily || 'Inter Variable' }
 
