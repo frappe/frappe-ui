@@ -40,6 +40,6 @@ A real workspace + profile menu — nested Apps / Theme submenus, account-group 
 ## Notes
 
 - Prefer `#item-prefix`, `#item-label`, and `#item-suffix` when you want to customize the standard dropdown row.
-- Use `#item` or `item.component` only when you need to replace the entire row. Those escape hatches own the outer menu item element, so they should be reserved for exceptional cases.
+- Use the `#item` slot, or `slots: { item: fn }` on a single option, only when you need to replace the entire row. Those escape hatches own the outer menu item element, so they should be reserved for exceptional cases.
 
 <!-- @include: ./Dropdown.api.md -->

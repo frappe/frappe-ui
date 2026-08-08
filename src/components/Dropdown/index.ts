@@ -1,2 +1,23 @@
 export { default as Dropdown } from './Dropdown.vue'
-export * from './types'
+export type {
+  DropdownActionOption,
+  DropdownAlign,
+  DropdownBaseOption,
+  DropdownEmits,
+  DropdownGroupOption,
+  DropdownGroupSlotProps,
+  DropdownItem,
+  DropdownItemSlotProps,
+  DropdownItemSlots,
+  DropdownOption,
+  DropdownOptions,
+  DropdownProps,
+  DropdownSide,
+  DropdownSlotFn,
+  DropdownSlotProps,
+  DropdownSlots,
+  DropdownSubmenuOption,
+  DropdownSwitchOption,
+  DropdownTheme,
+  DropdownTriggerSlotProps,
+} from './types'

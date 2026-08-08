@@ -1,6 +1,10 @@
 <template>
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
-    <DropdownMenuTrigger as-child @pointerdown="openOnPointerDown">
+    <DropdownMenuTrigger
+      as-child
+      :disabled="triggerDisabled"
+      @pointerdown="openOnPointerDown"
+    >
       <slot
         v-if="$slots.trigger"
         name="trigger"
@@ -72,6 +76,7 @@ const slots = useSlots()
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
   side: 'bottom',
+  align: 'start',
   offset: 4,
   portalTo: 'body',
 })
@@ -93,12 +98,6 @@ const groups = computed(() => {
   return normalizeMenuOptions(props.options)
 })
 
-const align = computed(() => {
-  if (props.align !== undefined) return props.align
-  if (props.placement === 'right') return 'end' as const
-  if (props.placement === 'center') return 'center' as const
-  return 'start' as const
-})
 
 const triggerDisabled = computed(() => {
   return (

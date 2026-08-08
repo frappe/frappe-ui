@@ -7,8 +7,8 @@ import type {
 } from './types'
 
 /**
- * Group object after normalization. `options` is guaranteed to be present
- * (the deprecated `items` alias has been resolved into it).
+ * Group object after normalization: conditions applied, themes and
+ * selection flags resolved, implicit groups materialized.
  */
 export type NormalizedMenuGroup = MenuGroupOption & {
   options: MenuOption[]
@@ -31,13 +31,13 @@ export function isMenuGroupOption(item: MenuItem): item is MenuGroupOption {
 }
 
 function resolveGroupChildren(group: MenuGroupOption): MenuOption[] {
-  if (import.meta.env.DEV && group.options && group.items) {
+  if (import.meta.env.DEV && !group.options && (group as any).items) {
     console.warn(
-      '[Menu] grouped entry has both `options` and `items`. `options` wins; `items` is the deprecated alias.',
+      '[Menu] `{ group, items }` is not supported; this group will not render. Rename `items` to `options`.',
     )
   }
 
-  return group.options ?? group.items ?? []
+  return group.options ?? []
 }
 
 export function isMenuSwitchOption(item: MenuOption) {
@@ -48,11 +48,12 @@ export function isMenuSubmenuOption(item: MenuOption) {
   return Array.isArray(item.submenu)
 }
 
-export function isMenuComponentOption(item: MenuOption) {
-  return 'component' in item && Boolean(item.component)
-}
-
 function shouldRenderOption(option: MenuOption) {
+  if (import.meta.env.DEV && 'component' in option && option.component) {
+    console.warn(
+      '[Menu] `component:` rows are not supported; the row renders as a plain action. Use `slots: { item: fn }` for a full-row replacement.',
+    )
+  }
   return option.condition ? option.condition() : true
 }
 

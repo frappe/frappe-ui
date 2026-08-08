@@ -301,27 +301,48 @@ new theme switchers, compose `Select` with the `useColorScheme` composable.
 Before/after for each silent break is in the
 [migration guide](../docs/content/docs/migration.md#autocomplete-removed).
 
-### Dropdown — group field standardized on `options`
+### Dropdown / ContextMenu — deprecated members removed (ADR-0008)
 
-Matches `Combobox`, `MultiSelect`, `Select`. Old `{ group, items }` shape
-is a deprecated alias; warns if both are provided on the same entry.
+Three surfaces that shipped as deprecated aliases in the betas are deleted,
+not aliased. All three are **silent breaks** in plain-JS apps — before/afters
+in the
+[migration guide](../docs/content/docs/migration.md#dropdown-and-contextmenu);
+TypeScript callers get compile errors (the removed keys stay typed as
+`never`), and a dev-mode console warning fires when the old shape reaches the
+menu at runtime.
 
-```ts
-// before
-{ group: 'Edit', items: [{ label: 'Rename', onClick: rename }] }
-// after
-{ group: 'Edit', options: [{ label: 'Rename', onClick: rename }] }
-```
+- **`placement` prop and `DropdownPlacement` type removed.** Use `align`
+  (`left`→`start`, `center`→`center`, `right`→`end`). A leftover `placement`
+  is ignored and the menu falls back to `align="start"`.
+- **`{ group, items }` removed.** Use `{ group, options }`, matching
+  `Combobox` / `MultiSelect` / `Select`. A leftover `items` group renders as
+  an empty menu.
+- **`component:` option rows removed** (`DropdownComponentOption`,
+  `ContextMenuComponentOption`). Use `slots: { item: fn }`. A leftover
+  `component:` row renders as a plain action row off its `label`.
+
+Also removed: the **`DropdownExposed` type** — it described a `close()`
+template-ref member that `Dropdown` never implemented ([ADR-0012] keeps
+`Dropdown`'s template-ref surface empty; `v-model:open` and the `close` slot
+prop cover it). Type-only, so the break is loud.
+
+### Dropdown — disabled state reaches the menu primitive
+
+The trigger now forwards its disabled state (from `button.disabled` or a
+`disabled` fallthrough attribute) to the underlying menu primitive.
+Previously only the generated `Button` was natively disabled; a custom
+trigger slot with a `disabled` attribute could still open the menu via
+keyboard or synthetic clicks.
 
 ### Select — `#item-*` slot prop renamed to `item`
 
-`#item-prefix`, `#item-label`, and `#item-suffix` on `Select` now expose
+`#item-prefix`, `#item-label`, and `#item-suffix` on `Select` expose
 `item` as the canonical scoped binding, matching `Combobox` and
-`MultiSelect`. The previous `option` key is retained as a silent alias
-through v1.x; no runtime warning fires (slot-prop destructuring isn't
-detectable at runtime). The `@deprecated` tag lives on the TS interface
-so editors hint at the rename. The legacy `#option` slot still passes
-`{ option }` unchanged.
+`MultiSelect`. The previous `option` key is removed with the rest of the
+deprecated surface (ADR-0008) — destructuring `{ option }` yields
+`undefined`, silently. No runtime warning is possible (slot-prop
+destructuring isn't detectable), so grep for `#item-` slots destructuring
+`option`.
 
 ```vue
 <!-- before -->
@@ -762,8 +783,11 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | `Switch.change` emit               | `update:modelValue` / `v-model`      | **Removed** — silent; listener never fires |
 | `Switch.labelClasses` prop         | `data-*` styling hooks               | **Removed** — silent; prop ignored     |
 | `Checkbox.padding` prop            | `padded` / `data-*` styling hooks    | **Removed** — silent; prop ignored     |
-| `Dropdown` `{ group, items }`      | `{ group, options }`                 | Silent alias; warns if both            |
-| Select `#item-*` slot prop `option` | `item`                              | Silent alias; JSDoc only, no runtime warning |
+| `Dropdown` `{ group, items }`      | `{ group, options }`                 | **Removed** — silent; renders empty, dev-only warning |
+| `Dropdown.placement` prop          | `align`                              | **Removed** — silent; falls back to `align="start"` |
+| `Dropdown`/`ContextMenu` `component:` rows | `slots: { item: fn }`        | **Removed** — silent; renders label-only row, dev-only warning |
+| `DropdownExposed` type             | `v-model:open` / `close` slot prop   | **Removed** — loud; described an expose that never existed |
+| Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
 | `Input.vue`                        | `TextInput`                          | Warns on mount                         |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |

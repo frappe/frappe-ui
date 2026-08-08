@@ -1,2 +1,2 @@
 export { default as ItemListRow } from './ItemListRow.vue'
-export * from './types'
+export type { ItemListRowProps, ItemListSize } from './types'
