@@ -820,7 +820,7 @@ cancelled.
 The single recommended way to pass an icon anywhere in the library is a
 `lucide-*` string (rendered via the Tailwind mask plugin) or a `Component`
 escape hatch (P11). `FeatherIcon` is removed per
-[ADR-0008](../../../spec/adr/0008-no-deprecated-members-in-1-0-0.md) — it
+ADR-0008 — it
 shipped `@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
 
 **Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
@@ -869,7 +869,7 @@ const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ## Card, ListItem, standalone `<Toast>` (removed)
 
 Three unmaintained wrappers are gone in v1, per
-[ADR-0008](../../../spec/adr/0008-no-deprecated-members-in-1-0-0.md) — each
+ADR-0008 — each
 shipped `@deprecated` in code and had zero call sites left across our
 census of downstream apps.
 
