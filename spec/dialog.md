@@ -110,7 +110,7 @@ interface DialogProps {
 - When neither `title` prop nor `#title` slot is set, the auto-header **does not render** (no "Untitled" fallback).
 - When `bare`, all auto-chrome (padded card, auto-header, auto-actions container) is suppressed.
 
-**Deprecated slots** (warn once, internally forwarded to the canonical slot):
+**Legacy slots** (removed per ADR-0008 — kept here as the migration mapping):
 
 | Legacy slot | Forwards to | Notes |
 |---|---|---|
