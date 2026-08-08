@@ -829,6 +829,19 @@ error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
 `FrappeRequestError` closed for `frappeRequest`.
 
+### Data fetching (v2) — docs, and the sidebar splits from Resources
+
+`useCall`, `useDoc`, `useList`, `useDoctype` and `useNewDoc` each get a docs
+page for the first time, under a new **Data Fetching** sidebar section —
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for
+a query, `useDoctype` for write-only access to a DocType, `useNewDoc` for a
+draft-and-insert form.
+
+The old **Data Fetching** section is renamed **Resources** and keeps its
+three pages (Resource, List Resource, Document Resource) unchanged. Both
+sections link to each other: Resources stays fully supported through `1.x`;
+the new composables are the recommended layer for new code.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,
