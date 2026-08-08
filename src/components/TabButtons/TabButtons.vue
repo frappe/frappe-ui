@@ -5,7 +5,7 @@ import { RouterLink } from 'vue-router'
 import Pill from './Pill.vue'
 import type { BrowserTabBase } from './pillTypes'
 import { warnDeprecated } from '../../utils/warnDeprecated'
-import { warnFeatherIconUsage } from '../../utils/iconString'
+import { warnUnsupportedIconString } from '../../utils/iconString'
 import type { TabButton, TabButtonsEmits, TabButtonsProps } from './types'
 
 defineOptions({
@@ -32,9 +32,9 @@ const options = computed(() => props.options ?? props.buttons ?? [])
 
 watchEffect(() => {
   for (const option of options.value) {
-    warnFeatherIconUsage('TabButtons', 'options.icon', option.icon)
-    warnFeatherIconUsage('TabButtons', 'options.iconLeft', option.iconLeft)
-    warnFeatherIconUsage('TabButtons', 'options.iconRight', option.iconRight)
+    warnUnsupportedIconString('TabButtons', 'options.icon', option.icon)
+    warnUnsupportedIconString('TabButtons', 'options.iconLeft', option.iconLeft)
+    warnUnsupportedIconString('TabButtons', 'options.iconRight', option.iconRight)
   }
 })
 

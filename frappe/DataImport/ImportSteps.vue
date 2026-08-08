@@ -6,9 +6,9 @@
         }"
         @click="emit('updateStep', 'upload', { ...data })"
         >
-            <FeatherIcon v-if="uploadStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
+            <span v-if="uploadStepCompleted" class="lucide-check size-5 text-sm border rounded-[5px] p-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onUploadStep,
-            }"/>
+            }" aria-hidden="true" />
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onUploadStep,
             }">
@@ -27,9 +27,9 @@
         }"
         @click="moveToMapStep()"
         >
-            <FeatherIcon v-if="mapStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
+            <span v-if="mapStepCompleted" class="lucide-check size-5 text-sm border rounded-[5px] p-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onMapStep,
-            }"/>
+            }" aria-hidden="true" />
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onMapStep,
             }">
@@ -48,9 +48,9 @@
         }"
         @click="moveToPreviewStep()"
         >
-            <FeatherIcon v-if="previewStepCompleted" name="check" class="size-5 text-sm border rounded-[5px] p-0.5" :class="{
+            <span v-if="previewStepCompleted" class="lucide-check size-5 text-sm border rounded-[5px] p-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onPreviewStep,
-            }"/>
+            }" aria-hidden="true" />
             <div v-else class="text-sm border rounded-[5px] px-1.5 py-0.5" :class="{
                 'text-ink-base bg-surface-gray-10': onPreviewStep,
             }">
@@ -67,7 +67,6 @@
 <script setup lang="ts">
 import type { DataImport } from './types'
 import { computed } from 'vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 
 const emit = defineEmits(['updateStep'])
 

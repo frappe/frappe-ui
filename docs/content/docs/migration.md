@@ -817,8 +817,37 @@ cancelled.
 
 ## Icons
 
-Replace `FeatherIcon` and Feather-name strings with `lucide-*` strings or a
-`Component`:
+The single recommended way to pass an icon anywhere in the library is a
+`lucide-*` string (rendered via the Tailwind mask plugin) or a `Component`
+escape hatch (P11). `FeatherIcon` is removed per
+[ADR-0008](../../../spec/adr/0008-no-deprecated-members-in-1-0-0.md) — it
+shipped `@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
+
+**Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
+`<FeatherIcon>` fail at the import. Replace a direct usage with the
+`lucide-*` class form:
+
+```vue
+<!-- Before -->
+<FeatherIcon name="plus" class="size-4" />
+<!-- After -->
+<span class="lucide-plus size-4" aria-hidden="true" />
+```
+
+Feather and lucide share most icon names, so `<FeatherIcon name="x">` →
+`<span class="lucide-x">` is usually a direct rename — check each name
+individually against [lucide.dev](https://lucide.dev/icons) since a few
+differ or were renamed.
+
+**Breaking, silent:** every icon-name prop across the library (`Button.icon`
+/ `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
+`icon`, `TabButtons` options `icon` / `iconLeft` / `iconRight`, the `Icon`
+component's `name` prop) used to render a bare feather-style name (e.g.
+`"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
+unrecognized string now renders nothing. No build or type error — the icon
+silently disappears. A dev-mode console warning names the component, the
+prop, and the offending value once per (component, prop). Prefix the name
+with `lucide-`:
 
 ```vue
 <!-- Before -->
