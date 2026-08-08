@@ -1,14 +1,12 @@
 <template>
   <Dialog
     v-model="modelValue"
-    :options="{
-      title: props.mode === 'edit' ? 'Edit Images' : 'Upload Images',
-      size: '3xl',
-    }"
+    :title="props.mode === 'edit' ? 'Edit Images' : 'Upload Images'"
+    size="3xl"
     @close="$emit('close')"
-    :disableOutsideClickToClose="true"
+    :dismissible="false"
   >
-    <template #body-content>
+    <template #default>
       <div class="space-y-2">
         <div class="flex items-center gap-2">
           <Button @click="triggerFileInput">

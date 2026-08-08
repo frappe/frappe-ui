@@ -3,11 +3,8 @@
     <slot v-bind="{ onClick: openIframeDialog }"></slot>
 
     <!-- Iframe URL Input Dialog -->
-    <Dialog
-      v-model="showDialog"
-      :options="{ title: 'Insert Embed', size: 'md' }"
-    >
-      <template #body-content>
+    <Dialog v-model="showDialog" title="Insert Embed" size="md">
+      <template #default>
         <div class="space-y-4">
           <div>
             <label class="mb-2 block text-base text-ink-gray-5">
