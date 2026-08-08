@@ -37,8 +37,8 @@ _Avoid_: using bare `v-model` for visibility on overlays
 Whether an overlay closes via user-initiated dismiss channels — outside click and
 Escape. Default `true`; when `false`, it closes only programmatically or via an explicit
 control. Ships on `Dialog`, `Popover`, `BottomSheet` and `Alert`. Replaces
-`disableOutsideClickToClose` (deprecated alias, warns).
-_Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick` (in new code)
+`disableOutsideClickToClose`, which is removed (ADR-0008).
+_Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick`
 
 ## Color axes
 
