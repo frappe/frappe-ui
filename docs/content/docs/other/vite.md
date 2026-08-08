@@ -86,8 +86,8 @@ Options:
 | Option        | Description                                                                     | Default                              |
 | ------------- | -------------------------------------------------------------------------------- | ------------------------------------- |
 | `packages`    | Bare specifiers to rewrite. Each must resolve to a pure re-export barrel.        | `['frappe-ui']`                       |
-| `include`     | Extensions whose source may contain rewritable imports.                          | `.vue`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.mjs` |
-| `exclude`     | Files to skip. Installed dependencies, except the target packages' own sources.  | —                                      |
+| `include`     | `RegExp` matching file paths whose source may contain rewritable imports.        | `/\.(vue\|ts\|tsx\|js\|jsx\|mts\|mjs)($\|\?)/` |
+| `exclude`     | `RegExp` of files to skip. Excludes installed `node_modules`, but not the target packages' own sources — those are the bulk of the rewrite when one is symlinked in. | Generated from `packages` |
 | `linkedOnly`  | Only rewrite when a target package resolves to a working copy (source, or a symlink into `node_modules`) rather than an installed dependency — rewriting an installed package is a net loss, since Vite already pre-bundles it as one chunk. | `true` |
 | `apply`       | Vite's `apply`. Dev-only by default: a production build resolves and tree-shakes the barrel anyway, and the rewrite would bake absolute filesystem paths into the graph. Pass `'build'` or `null` to override. | `'serve'` |
 
@@ -138,7 +138,8 @@ frappeui({
 
 Auto-generates TypeScript interfaces from Frappe DocType JSON files.
 Interfaces are regenerated only when the source DocType changes. Off by
-default — passing `true` alone has no effect, since it needs `input` to know
+default, and unlike the other sub-plugins it doesn't accept `true` — pass an
+options object with `input` to turn it on, since it needs that map to know
 which doctypes to generate.
 
 | Option   | Description                                | Default                  |

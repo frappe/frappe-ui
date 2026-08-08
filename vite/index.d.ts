@@ -158,11 +158,14 @@ export interface FrappeuiPluginOptions {
    */
   buildConfig?: boolean | BuildConfigOptions
   /**
-   * Generates TypeScript interfaces from Frappe DocType JSON files. Needs an
-   * `input` map to do anything — passing `true` alone is a no-op.
+   * Generates TypeScript interfaces from Frappe DocType JSON files. Off by
+   * default. Unlike the other sub-plugins, `true` is not accepted here: the
+   * plugin needs an `input` map to do anything, and passing `true` alone
+   * silently bails at runtime ("No type generation input specified"). Pass
+   * an options object to enable it, or `false` (the default) to leave it off.
    * @default false
    */
-  frappeTypes?: boolean | FrappeTypesOptions
+  frappeTypes?: FrappeTypesOptions | false
 }
 
 /**
@@ -173,12 +176,13 @@ export interface FrappeuiPluginOptions {
  * Every sub-plugin except `frappeTypes` is enabled by default — pass `false`
  * to disable one, or an options object to override its defaults.
  */
-export default function frappeuiPlugin(
-  options?: FrappeuiPluginOptions,
-): PluginOption[]
+declare function frappeuiPlugin(options?: FrappeuiPluginOptions): PluginOption[]
+export default frappeuiPlugin
 
+/** The `lucideIcons` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `lucideIcons` option. */
 export declare function lucideIcons(
   options?: LucideIconsOptions,
 ): PluginOption[]
 
+/** The `barrelImports` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `barrelImports` option. */
 export declare function barrelImports(options?: BarrelImportsOptions): Plugin
