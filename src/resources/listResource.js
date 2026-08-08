@@ -221,6 +221,10 @@ export function createListResource(options, vm) {
     return out.list.fetch().finally(() => {
       out.start = _start
       out.pageLength = _pageLength
+      // list.fetch()'s onSuccess computed hasPreviousPage while start was
+      // temporarily 0 for the single-page re-fetch above; recompute now
+      // that start is back to its real value
+      out.hasPreviousPage = !!out.start
     })
   }
 

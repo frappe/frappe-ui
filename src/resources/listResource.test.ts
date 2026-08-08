@@ -67,7 +67,7 @@ describe('createListResource', () => {
 
     await list.list.fetch()
 
-    expect(list.data.map((u: any) => u.name)).toEqual(['USER-1', 'USER-2'])
+    expect(list.data!.map((u: any) => u.name)).toEqual(['USER-1', 'USER-2'])
     expect(list.hasPreviousPage).toBe(false)
     expect(list.hasNextPage).toBe(true)
   })
@@ -97,7 +97,7 @@ describe('createListResource', () => {
     list.next()
     await list.list.promise
     expect(list.start).toBe(2)
-    expect(list.data.map((u: any) => u.name)).toEqual([
+    expect(list.data!.map((u: any) => u.name)).toEqual([
       'USER-1',
       'USER-2',
       'USER-3',
@@ -108,7 +108,7 @@ describe('createListResource', () => {
     list.previous()
     await list.list.promise
     expect(list.start).toBe(0)
-    expect(list.data.map((u: any) => u.name)).toEqual(['USER-1', 'USER-2'])
+    expect(list.data!.map((u: any) => u.name)).toEqual(['USER-1', 'USER-2'])
   })
 
   it('inserting a row refreshes the list', async () => {
@@ -139,7 +139,7 @@ describe('createListResource', () => {
     // no second list.list fetch — the row updates in place
     expect(getListCallCount).toBe(1)
     expect(list.getRow('USER-2').status).toBe('Inactive')
-    expect(list.data.find((u: any) => u.name === 'USER-1').status).toBe(
+    expect(list.data!.find((u: any) => u.name === 'USER-1').status).toBe(
       'Active',
     )
   })
@@ -183,19 +183,15 @@ describe('createListResource', () => {
     expect(list.pageLength).toBe(2)
     // the accumulated 4 rows are still there, freshly re-fetched
     expect(list.data).toHaveLength(4)
-    expect(list.data.map((u: any) => u.name)).toEqual([
+    expect(list.data!.map((u: any) => u.name)).toEqual([
       'USER-1',
       'USER-2',
       'USER-3',
       'USER-4',
     ])
-    expect(list.data[0].status).toBe('Inactive')
-    // documents existing behavior, not desired behavior: reload() computes
-    // hasPreviousPage while start is temporarily reset to 0 for the
-    // single-page re-fetch, and restoring start afterward does not
-    // recompute it — so this stays false even though start is back to 2.
-    // Out of scope to fix here: ADR-0013 keeps this implementation frozen
-    // for this ticket.
-    expect(list.hasPreviousPage).toBe(false)
+    expect(list.data![0].status).toBe('Inactive')
+    // hasPreviousPage reflects the restored start, not the temporary 0 used
+    // for the single-page re-fetch inside reload()
+    expect(list.hasPreviousPage).toBe(true)
   })
 })

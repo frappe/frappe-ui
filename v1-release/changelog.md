@@ -9,6 +9,14 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
+
+`reload()` temporarily resets `start` to `0` to re-fetch the accumulated
+pages as one request, then restores it. `hasPreviousPage` was computed
+while `start` was still `0` and never recomputed after the restore, so it
+stayed `false` even when `start` was back above `0`. `reload()` now
+recomputes `hasPreviousPage` after restoring `start`.
+
 ### CommandPalette — `show` renamed to `open` (breaking, silent)
 
 `show` → `open`, matching the rest of the library's overlay vocabulary
