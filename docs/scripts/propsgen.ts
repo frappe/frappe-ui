@@ -420,6 +420,20 @@ function pascalCase(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1)
 }
 
+// A folder opts into generated docs by carrying its own docs page: either a
+// single colocated `<folder>.md`, or a `docs/` directory of per-component
+// pages (src/charts). Folders documented by hand elsewhere (editor) carry
+// neither, which keeps them out of `--all` runs.
+function hasDocsPages(rootDir: string, folder: string) {
+  if (fs.existsSync(path.join(rootDir, folder, `${folder}.md`))) return true
+
+  const pagesDir = path.join(rootDir, folder, 'docs')
+  if (!fs.existsSync(pagesDir)) return false
+  return fs
+    .readdirSync(pagesDir)
+    .some((file) => file.endsWith('.md') && !file.endsWith('.api.md'))
+}
+
 function getAvailableComponents(rootDir: string) {
   if (!fs.existsSync(rootDir)) return []
   return fs
@@ -427,11 +441,9 @@ function getAvailableComponents(rootDir: string) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => {
-      // Molecule folders are lowercase (src/molecules/list → List.vue) and
-      // opt into generated docs via a colocated <folder>.md — this keeps
-      // folders with hand-written docs pages (editor) out of --all runs.
+      // Molecule folders are lowercase (src/molecules/list → List.vue).
       if (name !== pascalCase(name)) {
-        if (!fs.existsSync(path.join(rootDir, name, `${name}.md`))) return false
+        if (!hasDocsPages(rootDir, name)) return false
         // The family's public SFCs are either one named after the folder
         // (src/molecules/list → List.vue) or a set re-exported from its
         // index (src/charts → BarChart.vue, LineChart.vue, …).
@@ -445,7 +457,7 @@ function getAvailableComponents(rootDir: string) {
       // in prose on the Experimental overview page and have no page of their
       // own to render the generated tables into.
       if (rootDir === EXPERIMENTAL_ROOT) {
-        return fs.existsSync(path.join(rootDir, name, `${name}.md`))
+        return hasDocsPages(rootDir, name)
       }
       return true
     })
