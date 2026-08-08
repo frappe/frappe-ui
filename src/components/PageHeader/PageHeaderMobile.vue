@@ -7,11 +7,11 @@
       :style="titleInsetStyle"
     >
       <div
-        v-if="hasLeftSlot"
-        ref="leftSlotEl"
+        v-if="hasPrefixSlot"
+        ref="prefixSlotEl"
         class="absolute left-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-start"
       >
-        <slot name="left" />
+        <slot name="prefix" />
       </div>
       <!-- One line, ellipsised. A wrapped title changes the header's height as the
            user navigates, which shifts the page under it. min-w-0 is what lets this
@@ -24,11 +24,11 @@
         <slot>{{ title }}</slot>
       </h1>
       <div
-        v-if="hasRightSlot"
-        ref="rightSlotEl"
+        v-if="hasSuffixSlot"
+        ref="suffixSlotEl"
         class="absolute right-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-end"
       >
-        <slot name="right" />
+        <slot name="suffix" />
       </div>
     </div>
   </PageHeaderBase>
@@ -43,32 +43,36 @@ import type { PageHeaderMobileProps } from './types'
 defineProps<PageHeaderMobileProps>()
 
 defineSlots<{
-  /** A control left of the centered title — usually a `PageHeaderBackButton`. */
-  left?: () => any
+  /** A control leading the centered title — usually a `PageHeaderBackButton`. */
+  prefix?: () => any
   /** The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`. */
   default?: () => any
-  /** A control right of the centered title — usually an action button. */
-  right?: () => any
+  /** A control trailing the centered title — usually an action button. */
+  suffix?: () => any
 }>()
 
 const slots = useSlots()
-const hasLeftSlot = computed(() => Boolean(slots.left))
-const hasRightSlot = computed(() => Boolean(slots.right))
+const hasPrefixSlot = computed(() => Boolean(slots.prefix))
+const hasSuffixSlot = computed(() => Boolean(slots.suffix))
 
-// The title stays visually centered regardless of how wide the left/right
+// The title stays visually centered regardless of how wide the prefix/suffix
 // controls are: inset it symmetrically by the widest control.
 const MIN_CONTROL_WIDTH = 40
 const TITLE_CONTROL_GAP = 8
 
-const leftSlotEl = useTemplateRef<HTMLElement>('leftSlotEl')
-const rightSlotEl = useTemplateRef<HTMLElement>('rightSlotEl')
-const { width: leftSlotWidth } = useElementSize(leftSlotEl)
-const { width: rightSlotWidth } = useElementSize(rightSlotEl)
+const prefixSlotEl = useTemplateRef<HTMLElement>('prefixSlotEl')
+const suffixSlotEl = useTemplateRef<HTMLElement>('suffixSlotEl')
+const { width: prefixSlotWidth } = useElementSize(prefixSlotEl)
+const { width: suffixSlotWidth } = useElementSize(suffixSlotEl)
 
 const titleInset = computed(() => {
   const widestSlot = Math.max(
-    hasLeftSlot.value ? Math.max(leftSlotWidth.value, MIN_CONTROL_WIDTH) : 0,
-    hasRightSlot.value ? Math.max(rightSlotWidth.value, MIN_CONTROL_WIDTH) : 0,
+    hasPrefixSlot.value
+      ? Math.max(prefixSlotWidth.value, MIN_CONTROL_WIDTH)
+      : 0,
+    hasSuffixSlot.value
+      ? Math.max(suffixSlotWidth.value, MIN_CONTROL_WIDTH)
+      : 0,
   )
 
   return widestSlot > 0

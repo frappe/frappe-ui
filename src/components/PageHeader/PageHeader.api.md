@@ -48,8 +48,8 @@
 
   const pageHeaderMobileSlots = [
   {
-    name: 'left',
-    description: 'A control left of the centered title — usually a `PageHeaderBackButton`.',
+    name: 'prefix',
+    description: 'A control leading the centered title — usually a `PageHeaderBackButton`.',
     type: 'any'
   },
   {
@@ -58,8 +58,8 @@
     type: 'any'
   },
   {
-    name: 'right',
-    description: 'A control right of the centered title — usually an action button.',
+    name: 'suffix',
+    description: 'A control trailing the centered title — usually an action button.',
     type: 'any'
   }
 ]
@@ -75,7 +75,7 @@
 
   const pageHeaderMobileTitleSlots = [
   {
-    name: 'icon',
+    name: 'prefix',
     description: 'A leading glyph next to the title text — keeps its natural size while the text truncates.',
     type: 'any'
   },

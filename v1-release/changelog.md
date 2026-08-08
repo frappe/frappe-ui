@@ -985,6 +985,13 @@ names.
 
 - Every slot across the family now has a documented description, and each
   component has a docs page, a story, and cypress tests (several had none).
+- **Breaking, silent:** `PageHeaderMobile`'s `#left`/`#right` slots and
+  `PageHeaderMobileTitle`'s `#icon` slot are renamed to the shared
+  `#prefix`/`#suffix` vocabulary (PHILOSOPHY.md P6 forbids type-specific
+  slots like `#icon` outside `Button`, and `#left`/`#right` were never in
+  the vocabulary). Vue drops content passed to an unknown slot name with no
+  error, so the old names don't warn — they just stop rendering. See the
+  [migration guide](../docs/content/docs/migration.md#pageheadermobile-family-slot-names).
 - `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
   `ScrollAreaExposed`) and `data-slot="scroll-area"` /
   `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`

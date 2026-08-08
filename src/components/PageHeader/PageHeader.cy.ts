@@ -85,27 +85,27 @@ describe('PageHeaderTitle', () => {
 })
 
 describe('PageHeaderMobile', () => {
-  it('renders the #left, default, and #right slots', () => {
+  it('renders the #prefix, default, and #suffix slots', () => {
     cy.mount(PageHeaderMobile, {
       slots: {
-        left: () => h('button', { 'data-test': 'left' }, 'Back'),
+        prefix: () => h('button', { 'data-test': 'prefix' }, 'Back'),
         default: () => h(PageHeaderMobileTitle, { title: 'Discussion' }),
-        right: () => h('button', { 'data-test': 'right' }, 'More'),
+        suffix: () => h('button', { 'data-test': 'suffix' }, 'More'),
       },
     })
-    cy.get('[data-test=left]').should('contain.text', 'Back')
+    cy.get('[data-test=prefix]').should('contain.text', 'Back')
     cy.get('h1').should('contain.text', 'Discussion')
-    cy.get('[data-test=right]').should('contain.text', 'More')
+    cy.get('[data-test=suffix]').should('contain.text', 'More')
   })
 })
 
 describe('PageHeaderMobileTitle', () => {
-  it('renders the #icon slot next to the title', () => {
+  it('renders the #prefix slot next to the title', () => {
     cy.mount(PageHeaderMobileTitle, {
       props: { title: 'Announcements' },
-      slots: { icon: () => h('span', { 'data-test': 'icon' }, '#') },
+      slots: { prefix: () => h('span', { 'data-test': 'prefix' }, '#') },
     })
-    cy.get('[data-test=icon]').should('contain.text', '#')
+    cy.get('[data-test=prefix]').should('contain.text', '#')
     cy.get('span').should('contain.text', 'Announcements')
   })
 })
