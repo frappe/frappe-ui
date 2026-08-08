@@ -5,10 +5,7 @@
 
 // App setup and plugins
 export { default as FrappeUI } from './utils/plugin'
-export {
-  FrappeUIProvider,
-  type FrappeUIProviderProps,
-} from './components/FrappeUIProvider'
+export { FrappeUIProvider } from './components/FrappeUIProvider'
 export { getConfig, setConfig } from './utils/config'
 export type { FrappeUIConfig } from './utils/config'
 
