@@ -34,6 +34,13 @@ import {
   unregisterShellScrollContainer,
 } from '../../composables/useShellScrolled'
 
+defineSlots<{
+  /** The routed page content, placed in the native-scrolling content area. */
+  default?: () => any
+  /** The bottom navigation — usually a `MobileNav`. */
+  nav?: () => any
+}>()
+
 const scroll = useTemplateRef<HTMLElement>('scroll')
 
 onMounted(() => scroll.value && registerShellScrollContainer(scroll.value))

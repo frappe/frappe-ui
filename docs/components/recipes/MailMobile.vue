@@ -495,7 +495,7 @@ function goToMail() {
     <!-- Screen 1 (landing): Mail list — category tabs + thread rows. -->
     <template v-if="screen === 'list'">
       <PageHeaderMobile :title="activeMailbox">
-        <template #left>
+        <template #prefix>
           <Button
             variant="ghost"
             icon="lucide-panel-left"
@@ -503,7 +503,7 @@ function goToMail() {
             @click="showMailboxes = true"
           />
         </template>
-        <template #right>
+        <template #suffix>
           <Button variant="ghost" icon="lucide-pen-line" label="Compose" />
         </template>
       </PageHeaderMobile>
@@ -567,7 +567,7 @@ function goToMail() {
     <!-- Screen 2: Mail detail — threaded messages + a pinned reply bar. -->
     <template v-else>
       <PageHeaderMobile :title="readingSubject">
-        <template #left>
+        <template #prefix>
           <Button
             variant="ghost"
             icon="lucide-chevron-left"
@@ -575,7 +575,7 @@ function goToMail() {
             @click="screen = 'list'"
           />
         </template>
-        <template #right>
+        <template #suffix>
           <Dropdown :options="moreActions" align="end">
             <Button variant="ghost" icon="lucide-ellipsis" label="More" />
           </Dropdown>

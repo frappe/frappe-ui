@@ -7,8 +7,8 @@
   const mobileNavSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'One or more `MobileNavItem`s, each becoming an equal-width tab.',
+    type: 'any'
   }
 ]
 
@@ -42,7 +42,7 @@
   const mobileNavItemSlots = [
   {
     name: 'default',
-    description: '',
+    description: 'Custom content in place of the default icon — an avatar, a badge. Receives `{ active }`.',
     type: '{ active: boolean; }'
   }
 ]

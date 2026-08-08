@@ -73,7 +73,7 @@ declare module 'vue' {
     'FormControl.story': typeof import('./src/components/FormControl/FormControl.story.vue')['default']
     FormLabel: typeof import('./src/components/FormLabel/FormLabel.vue')['default']
     'FormLabel.playground': typeof import('./src/components/FormLabel/FormLabel.playground.vue')['default']
-    FrappeUIProvider: typeof import('./src/components/Provider/FrappeUIProvider.vue')['default']
+    FrappeUIProvider: typeof import('./src/components/FrappeUIProvider/FrappeUIProvider.vue')['default']
     FunnelChart: typeof import('./src/components/Charts/FunnelChart.vue')['default']
     HoverCard: typeof import('./src/components/HoverCard/HoverCard.vue')['default']
     Icon: typeof import('./src/components/Icon/Icon.vue')['default']
