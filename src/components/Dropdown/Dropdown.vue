@@ -23,7 +23,7 @@
       </Button>
     </DropdownMenuTrigger>
 
-    <DropdownMenuPortal :to="portalTo">
+    <DropdownMenuPortal :to="portalTarget">
       <DropdownMenuContent
         data-slot="content"
         data-motion="instant"
@@ -64,6 +64,7 @@ import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
 import { menuClasses, normalizeMenuOptions, warnRemoved } from '../Menu/utils'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 
 defineOptions({
   inheritAttrs: false,
@@ -78,8 +79,9 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 function close() {
   openModel.value = false

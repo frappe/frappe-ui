@@ -103,8 +103,10 @@ function buildSidebar(): SidebarSection[] {
       items: [
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
+        { text: 'Composables', link: '/docs/other/composables' },
         { text: 'Directives', link: '/docs/other/directives' },
         { text: 'Vite Plugin', link: '/docs/other/vite' },
+        { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
   ]

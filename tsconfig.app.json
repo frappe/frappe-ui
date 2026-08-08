@@ -31,6 +31,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "ignoreDeprecations": "5.0",
+    "types": ["vitest/globals", "unplugin-icons/types/vue", "node"],
     // Mirrors the package.json `imports` map. The `imports` field drives
     // runtime/bundler resolution (Node, Vite, esbuild); `paths` is what
     // TypeScript uses to resolve the same `#` specifiers during type-check.

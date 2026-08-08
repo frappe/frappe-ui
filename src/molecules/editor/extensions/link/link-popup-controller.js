@@ -1,0 +1,138 @@
+import { useFloatingPopup, } from '#molecules/editor/composables/useFloatingPopup';
+import LinkEditorPopup from './LinkEditorPopup.vue';
+/**
+ * Open the link-editor bubble and resolve with the user's choice:
+ *  - a non-empty string  → set/update the link to that href
+ *  - `''`                → remove the link
+ *  - `null`              → cancelled / dismissed (no document change)
+ *
+ * The promise NEVER rejects. Dismissal (Escape, click-outside,
+ * or programmatic teardown) resolves `null`, so callers can write a single
+ * `if (result === null) return` guard instead of a `.catch`.
+ *
+ * The reference rect is read live from the current window selection on every
+ * reposition, so the popup tracks a collapsed cursor or an expanded range
+ * correctly rather than freezing at open time.
+ */
+export function openLinkPopup(options) {
+    const { href, anchor } = options;
+    // Lock the page's scroll container while the popup is open so the anchored
+    // editor can't scroll away underneath it. The app scrolls an inner
+    // overflow-auto element (not <body>), so we lock the nearest such ancestor.
+    const unlockScroll = lockScroll(getScrollParent(anchor));
+    return new Promise((resolve) => {
+        let settled = false;
+        const settle = (value) => {
+            if (settled)
+                return;
+            settled = true;
+            resolve(value);
+        };
+        const popup = useFloatingPopup({
+            anchor,
+            component: LinkEditorPopup,
+            closeOnAnchorPointerDown: true,
+            // The popup owns Escape: in view mode it closes; in edit mode the first
+            // Escape steps back to view mode and only a second one closes.
+            closeOnEscape: false,
+            virtualReference: options.virtualReference ?? {
+                getBoundingClientRect: () => selectionRect(anchor),
+            },
+            floatingOptions: { placement: 'top' },
+            props: {
+                href: href ?? '',
+                startInEdit: options.startInEdit ?? !href,
+                onClose: () => {
+                    // Cancel via Escape: resolve null, tear down, then hand focus back.
+                    settle(null);
+                    popup.destroy();
+                    options.onEscape?.();
+                },
+                onUpdateHref: (newHref) => {
+                    settle(newHref);
+                    popup.destroy();
+                },
+            },
+        });
+        // Escape / click-outside routes through destroy(). Resolve null if nothing
+        // else settled the promise by the time the popup is gone.
+        const originalDestroy = popup.destroy;
+        popup.destroy = () => {
+            unlockScroll();
+            settle(null);
+            originalDestroy();
+        };
+        if (!popup.floating) {
+            unlockScroll();
+            settle(null);
+        }
+    });
+}
+/**
+ * Lock vertical+horizontal scrolling on `el` and return a function that
+ * restores it.
+ *
+ * Save/restore the `overflow-x`/`overflow-y` *longhands* — never the `overflow`
+ * shorthand. A scroll container's value usually lives in a longhand (e.g.
+ * EditorContent sets `overflow-y: auto` inline); reading `.style.overflow`
+ * returns '' whenever the two axes differ, so locking via the shorthand and
+ * later clearing it would drop the original `overflow-y` and leave the editor
+ * overflowing its box — content then paints over the toolbar (the link-edit
+ * overflow bug). The longhand getters reflect the value regardless of how it
+ * was originally authored, so restoring them reproduces the prior state exactly.
+ *
+ * No-op (returns a no-op restore) when `el` is `null`.
+ */
+export function lockScroll(el) {
+    if (!el)
+        return () => { };
+    const previous = { x: el.style.overflowX, y: el.style.overflowY };
+    el.style.overflowX = 'hidden';
+    el.style.overflowY = 'hidden';
+    return () => {
+        el.style.overflowX = previous.x;
+        el.style.overflowY = previous.y;
+    };
+}
+/**
+ * Nearest scrollable ancestor of `el` (the element that actually scrolls), used
+ * to lock scrolling while editing. The app's scroll container is an inner
+ * `overflow-auto` div, not `document.body`, so locking the body is a no-op —
+ * we must lock this element instead. Returns `null` if nothing scrolls.
+ */
+function getScrollParent(el) {
+    let node = el;
+    while (node && node !== document.body) {
+        const { overflowY } = getComputedStyle(node);
+        if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
+            return node;
+        }
+        node = node.parentElement;
+    }
+    return null;
+}
+/**
+ * Build a live `DOMRect` from the current selection (collapsed → caret rect,
+ * expanded → selection rect). Falls back to the anchor's own rect when there
+ * is no selection.
+ */
+function selectionRect(anchor) {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+        return anchor.getBoundingClientRect();
+    }
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const isCollapsed = range.collapsed;
+    return {
+        width: 0,
+        height: rect.height,
+        top: rect.top,
+        right: isCollapsed ? rect.left : rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        x: rect.left,
+        y: rect.top,
+        toJSON: () => ({}),
+    };
+}

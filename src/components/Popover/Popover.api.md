@@ -34,10 +34,9 @@
   },
   {
     name: 'portalTo',
-    description: 'Where to portal the content.',
+    description: 'Where to portal the content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement',
-    default: '"body"'
+    type: 'string | HTMLElement'
   },
   {
     name: 'collisionPadding',

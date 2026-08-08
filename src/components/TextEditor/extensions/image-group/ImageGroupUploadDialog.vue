@@ -228,7 +228,7 @@
       </div>
     </template>
   </Dialog>
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <Transition
       name="fade"
       enter-active-class="transition-opacity duration-200"
@@ -251,6 +251,7 @@
 </template>
 
 <script setup lang="ts">
+import { usePortalTarget } from '../../../../composables/usePortalTarget'
 import {
   computed,
   ref,
@@ -300,6 +301,8 @@ const props = withDefaults(
     mode: 'new',
   },
 )
+
+const portalTarget = usePortalTarget()
 
 const emit = defineEmits(['update:modelValue', 'close', 'update:files', 'save'])
 

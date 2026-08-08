@@ -1,6 +1,6 @@
 <template>
   <DialogRoot v-model:open="isOpen">
-    <DialogPortal>
+    <DialogPortal :to="portalTarget">
       <DialogOverlay
         class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"
         :data-dialog="props.title"
@@ -170,6 +170,7 @@ import {
 import { computed, reactive, ref, useSlots, watchEffect } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { Button } from '../Button'
 import FeatherIcon from '../FeatherIcon.vue'
 import {
@@ -201,6 +202,8 @@ const props = withDefaults(defineProps<DialogProps>(), {
 const emit = defineEmits<DialogEmits>()
 
 const slots = defineSlots<DialogSlots>()
+
+const portalTarget = usePortalTarget()
 
 const allSlots = useSlots()
 

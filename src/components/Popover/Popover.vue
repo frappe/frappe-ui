@@ -9,7 +9,7 @@
       <slot name="trigger" v-bind="slotProps" />
     </PopoverTrigger>
 
-    <PopoverPortal :to="portalTo">
+    <PopoverPortal :to="portalTarget">
       <PopoverContent
         data-slot="content"
         class="z-[100]"
@@ -49,6 +49,7 @@ import {
   PopoverTrigger,
 } from 'reka-ui'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import type { PopoverEmits, PopoverProps, PopoverSlotProps } from './types'
 
 defineOptions({
@@ -60,13 +61,14 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
   collisionPadding: 10,
   dismissible: true,
   matchTriggerWidth: false,
   bare: false,
   arrow: false,
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<PopoverEmits>()
 

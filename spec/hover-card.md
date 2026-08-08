@@ -98,7 +98,8 @@ Defaults (aligned with `Popover` for positioning, `Tooltip` for delays):
 - `align = 'start'`
 - `offset = 4`
 - `collisionPadding = 10`
-- `portalTo = 'body'`
+- `portalTo = 'body'` — the fallback when neither the prop nor an embedding
+  host names a target. See [`portal-target.md`](./portal-target.md).
 - `hoverDelay = 0.5`
 - `leaveDelay = 0.3`
 

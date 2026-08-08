@@ -14,7 +14,7 @@ export interface PopoverProps {
   /** Distance in px between the trigger and the content. */
   offset?: number
 
-  /** Where to portal the content. */
+  /** Where to portal the content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 
   /** Padding in px kept from the viewport edge during collision handling. */

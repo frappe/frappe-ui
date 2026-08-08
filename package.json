@@ -8,7 +8,8 @@
   "type": "module",
   "sideEffects": [
     "**/*.css",
-    "**/*.vue"
+    "**/*.vue",
+    "src/molecules/*/index.ts"
   ],
   "imports": {
     "#components/*": "./src/components/*",
@@ -89,6 +90,9 @@
       "types": "./vite/index.d.ts",
       "import": "./vite/index.js"
     },
+    "./vite/lucideIconsPlugin": {
+      "import": "./vite/lucideIconsPlugin.js"
+    },
     "./vitepress": {
       "types": "./vitepress/index.d.ts",
       "node": "./vitepress/index.node.ts",
@@ -96,15 +100,6 @@
     },
     "./style.css": {
       "import": "./src/style.css"
-    },
-    "./editor-style.css": {
-      "import": "./src/molecules/editor/style.css"
-    },
-    "./list-style.css": {
-      "import": "./src/molecules/list/style.css"
-    },
-    "./hljs-theme.css": {
-      "import": "./src/components/TextEditor/hljs-github.css"
     },
     "./tsconfig.base.json": {
       "types": "./tsconfig.base.json",
@@ -189,7 +184,6 @@
     "es-module-lexer": "^1.7.0",
     "feather-icons": "^4.28.0",
     "fuzzysort": "^3.1.0",
-    "grid-layout-plus": "^1.1.0",
     "highlight.js": "^11.11.1",
     "idb-keyval": "^6.2.0",
     "lowlight": "^3.3.0",

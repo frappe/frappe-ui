@@ -50,7 +50,7 @@
       </div>
     </PopoverAnchor>
 
-    <PopoverPortal>
+    <PopoverPortal :to="portalTarget">
       <PopoverContent
         data-slot="content"
         data-selection
@@ -106,6 +106,7 @@ import {
   PopoverRoot,
 } from 'reka-ui'
 import { TextInput } from '../TextInput'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import '../shared/selection/popoverMotion.css'
 import {
   findNearestIndex,
@@ -145,6 +146,8 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
 })
 
 const emit = defineEmits<TimePickerEmits>()
+
+const portalTarget = usePortalTarget()
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
