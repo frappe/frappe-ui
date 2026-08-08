@@ -171,7 +171,6 @@ import {
   InputLabel,
   InputDescription,
   InputError,
-  LabelingWrapper,
   useInputLabeling,
 } from 'frappe-ui/experimental'
 
@@ -187,7 +186,7 @@ const {
 </script>
 
 <template>
-  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1.5">
+  <div v-if="hasLabeling" class="space-y-1.5">
     <InputLabel
       v-if="props.label"
       :id="labelId"
@@ -202,7 +201,8 @@ const {
       :description="props.description"
     />
     <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
-  </LabelingWrapper>
+  </div>
+  <slot v-else />
 </template>
 ```
 
@@ -224,13 +224,6 @@ slot content.
 Renders validation messages (`lines`) as a `role="alert"` region
 (`data-slot="error"`), one message per line. Renders nothing when `lines` is
 empty.
-
-### LabelingWrapper
-
-Conditionally wraps its slot content in a `<div>` (with optional `wrapperClass`
-/ `wrapperStyle`) when `enabled` is true, and renders the slot as-is otherwise.
-Lets a control add a labeling wrapper element only when it actually renders a
-label, description, or error.
 
 ## inputFontSizeClasses
 

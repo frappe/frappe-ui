@@ -856,6 +856,29 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### `code-editor` subpath — folded into `experimental` (breaking)
+
+- **Breaking:** `frappe-ui/code-editor` is removed. `CodeEditor`, `CodePreview`,
+  and `loadLanguage` move to `frappe-ui/experimental` (ADR-0010). One downstream
+  file imported the old subpath; the fix is a one-line import change.
+
+  ```ts
+  // before
+  import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+
+  // after
+  import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+  ```
+
+### `experimental` barrel — tidy and `FrappeUIError`
+
+- **Breaking:** `LabelingWrapper` is dropped from `frappe-ui/experimental`. It
+  had zero importers of the barrel export (every internal user imports the
+  `.vue` file directly); this is the only member cut in the barrel tidy.
+- `FrappeUIError` is now exported from `frappe-ui/experimental` as a type. A
+  consumer previously hand-declared a structural copy of it because it wasn't
+  re-exported — that copy can now be dropped in favor of the real type.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
