@@ -815,6 +815,14 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### pageMetaPlugin — removed
+
+- **Silent break:** `pageMetaPlugin` and the global mixin it installed are gone.
+  A leftover `pageMeta()` component option still compiles but is never read, so
+  `document.title` and the favicon quietly stop updating. See the
+  [migration guide](../docs/content/docs/migration.md#pagemetaplugin-removed).
+- `usePageMeta` is unchanged and now exports its `PageMeta` type.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
