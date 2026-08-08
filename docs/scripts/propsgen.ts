@@ -40,6 +40,8 @@ const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
   path.join(__dirname, '../../src/molecules'),
   path.join(__dirname, '../../frappe'),
+  // `src` itself, for families that sit directly under it (src/charts).
+  path.join(__dirname, '../../src'),
   EXPERIMENTAL_ROOT,
 ]
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
@@ -418,6 +420,20 @@ function pascalCase(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1)
 }
 
+// A folder opts into generated docs by carrying its own docs page: either a
+// single colocated `<folder>.md`, or a `docs/` directory of per-component
+// pages (src/charts). Folders documented by hand elsewhere (editor) carry
+// neither, which keeps them out of `--all` runs.
+function hasDocsPages(rootDir: string, folder: string) {
+  if (fs.existsSync(path.join(rootDir, folder, `${folder}.md`))) return true
+
+  const pagesDir = path.join(rootDir, folder, 'docs')
+  if (!fs.existsSync(pagesDir)) return false
+  return fs
+    .readdirSync(pagesDir)
+    .some((file) => file.endsWith('.md') && !file.endsWith('.api.md'))
+}
+
 function getAvailableComponents(rootDir: string) {
   if (!fs.existsSync(rootDir)) return []
   return fs
@@ -425,13 +441,15 @@ function getAvailableComponents(rootDir: string) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => {
-      // Molecule folders are lowercase (src/molecules/list → List.vue) and
-      // opt into generated docs via a colocated <folder>.md — this keeps
-      // folders with hand-written docs pages (editor) out of --all runs.
+      // Molecule folders are lowercase (src/molecules/list → List.vue).
       if (name !== pascalCase(name)) {
+        if (!hasDocsPages(rootDir, name)) return false
+        // The family's public SFCs are either one named after the folder
+        // (src/molecules/list → List.vue) or a set re-exported from its
+        // index (src/charts → BarChart.vue, LineChart.vue, …).
         return (
-          fs.existsSync(path.join(rootDir, name, `${pascalCase(name)}.vue`)) &&
-          fs.existsSync(path.join(rootDir, name, `${name}.md`))
+          fs.existsSync(path.join(rootDir, name, `${pascalCase(name)}.vue`)) ||
+          getPublicComponentsFromIndex(rootDir, name).length > 0
         )
       }
       if (!fs.existsSync(path.join(rootDir, name, `${name}.vue`))) return false
@@ -439,7 +457,7 @@ function getAvailableComponents(rootDir: string) {
       // in prose on the Experimental overview page and have no page of their
       // own to render the generated tables into.
       if (rootDir === EXPERIMENTAL_ROOT) {
-        return fs.existsSync(path.join(rootDir, name, `${name}.md`))
+        return hasDocsPages(rootDir, name)
       }
       return true
     })
@@ -656,9 +674,8 @@ function annotate(relativePath: string, message: string) {
   console.error(`::error file=${relativePath}::${escaped}`)
 }
 
-function checkFolder(
+function checkMetaFile(
   folder: string,
-  rootDir: string,
   metaFilePath: string,
   generated: string,
 ) {
@@ -682,7 +699,9 @@ function checkFolder(
       annotate(relativePath, summarizeDifference(difference))
     }
   }
+}
 
+function checkStories(rootDir: string, folder: string) {
   const storiesUpdate = getDocsStoriesUpdate(rootDir, folder)
   if (storiesUpdate) {
     const storiesPath = path.relative(REPO_ROOT, storiesUpdate.docsPath)
@@ -707,15 +726,41 @@ selectedFolders.forEach((folder) => {
       return extractTableData(d.name, meta, d.vuePath)
     })
 
-    const metaFilePath = path.join(rootDir, folder, `${folder}.api.md`)
-    const str = genFolderMetaTable(folder, components)
+    // A family that splits its docs one page per component (`<folder>/docs/
+    // <Name>.md`, as src/charts does) gets a `<Name>.api.md` beside each page,
+    // so the tables land under the component they belong to. Components
+    // without a page of their own stay in the single `<folder>.api.md` that
+    // one-page families include.
+    const pagesDir = path.join(rootDir, folder, 'docs')
+    const hasOwnPage = (name: string) =>
+      fs.existsSync(path.join(pagesDir, `${name}.md`))
+
+    const metaFiles = components
+      .filter((c) => hasOwnPage(c.name))
+      .map((component) => ({
+        path: path.join(pagesDir, `${component.name}.api.md`),
+        content: genFolderMetaTable(folder, [component]),
+      }))
+
+    const shared = components.filter((c) => !hasOwnPage(c.name))
+    if (shared.length) {
+      metaFiles.push({
+        path: path.join(rootDir, folder, `${folder}.api.md`),
+        content: genFolderMetaTable(folder, shared),
+      })
+    }
 
     if (isCheck) {
-      checkFolder(folder, rootDir, metaFilePath, str)
+      for (const file of metaFiles) {
+        checkMetaFile(folder, file.path, file.content)
+      }
+      checkStories(rootDir, folder)
       return
     }
 
-    fs.writeFileSync(metaFilePath, str)
+    for (const file of metaFiles) {
+      fs.writeFileSync(file.path, file.content)
+    }
     console.log(`Generated ${folder} meta`)
 
     const storiesUpdate = getDocsStoriesUpdate(rootDir, folder)

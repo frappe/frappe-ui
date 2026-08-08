@@ -64,6 +64,10 @@
       "import": "./src/molecules/list/index.ts",
       "types": "./src/molecules/list/index.ts"
     },
+    "./charts": {
+      "import": "./src/charts/index.ts",
+      "types": "./src/charts/index.ts"
+    },
     "./code-editor": {
       "import": "./src/components/CodeEditor/index.ts",
       "types": "./src/components/CodeEditor/index.ts"
@@ -101,6 +105,9 @@
     },
     "./list-style.css": {
       "import": "./src/molecules/list/style.css"
+    },
+    "./charts-style.css": {
+      "import": "./src/charts/style.css"
     },
     "./hljs-theme.css": {
       "import": "./src/components/TextEditor/hljs-github.css"

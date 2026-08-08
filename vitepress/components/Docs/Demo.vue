@@ -4,6 +4,12 @@ import { Button } from 'frappe-ui'
 
 interface ComponentPreviewProps {
   name: string
+  // Break the preview out of the prose column — see the `.preview-wide`
+  // comment below for the rule it comes with.
+  wide?: boolean
+  // The demo lays itself out: the frame keeps a modest inset but drops the
+  // centering. For demos that render their own card chrome (charts).
+  selfLayout?: boolean
 }
 
 const props = defineProps<ComponentPreviewProps>()
@@ -19,14 +25,19 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 </script>
 
 <template>
-  <div>
+  <!-- The article's prose spaces the elements it knows; a bare div is not one
+       of them, so the block would sit against the paragraph under it. -->
+  <div class="my-4" :class="{ 'preview-wide': wide }">
     <div
       class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
         :class="[
           isEditorDemo ? '' : 'not-prose',
-          'bg-surface-base p-4 sm:p-8 overflow-x-auto scrollbar flex flex-wrap gap-3 items-center justify-center min-h-[200px]',
+          'bg-surface-base overflow-x-auto scrollbar min-h-[200px]',
+          selfLayout
+            ? 'p-4'
+            : 'p-4 sm:p-8 flex flex-wrap gap-3 items-center justify-center',
         ]"
       >
         <slot />
@@ -58,3 +69,20 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
     </div>
   </div>
 </template>
+
+<style scoped>
+/* `wide` bleeds a preview symmetrically out of Layout's 740px prose column,
+   up to the width of the page container. It reads that width off the viewport
+   — 220px sidebar + 80px page padding, plus slack for a scrollbar — because
+   CSS gives an element no handle on the space its parent was allotted. That
+   measurement assumes the aside is gone, so a page with a wide preview must
+   set `outline: false`; otherwise the bleed runs under OnThisPage. Below `lg`
+   the sidebar and the prose cap are both gone, so the bleed is zero anyway. */
+@media (min-width: 1024px) {
+  .preview-wide {
+    --preview-bleed: max(0px, min(1000px, 100vw - 320px) - 100%);
+    width: calc(100% + var(--preview-bleed));
+    margin-inline: calc(var(--preview-bleed) / -2);
+  }
+}
+</style>

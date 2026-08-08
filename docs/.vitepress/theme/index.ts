@@ -2,6 +2,9 @@ import type { Theme } from 'vitepress'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { h } from 'vue'
 import { theme as DocsTheme } from 'frappe-ui/vitepress'
+// `--chart-*` tokens. Apps import them as `frappe-ui/charts-style.css`; the
+// docs alias `frappe-ui` straight at src, so they come from the live source.
+import 'frappe-ui/charts/style.css'
 import Layout from './Layout.vue'
 
 // VitePress runs its own routing, but frappe-ui components like Breadcrumbs,
