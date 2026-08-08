@@ -77,3 +77,170 @@ describe('frappeRequest configurable base url and auth headers', () => {
     expect(opts.headers.Authorization).toBe('token dynamic:value')
   })
 })
+
+// `login` is the one endpoint that resolves to the whole body rather than
+// `data.message`. The check used to compare the whole URL against
+// `/api/method/login`, which stopped matching the moment `requestBaseUrl` made
+// the URL absolute — `login` then quietly returned just `data.message`.
+describe('frappeRequest login special case', () => {
+  const body = { message: 'Logged In', full_name: 'Ada', home_page: '/app' }
+
+  beforeEach(() => {
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  function mockLogin() {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => body }) as Response),
+    )
+  }
+
+  it('returns the whole payload for a relative login url', async () => {
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'login' })).resolves.toEqual(body)
+  })
+
+  it('returns the whole payload when requestBaseUrl makes the url absolute', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test/')
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'login' })).resolves.toEqual(body)
+  })
+
+  it('does not treat a method merely ending in login as the login endpoint', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test/')
+    mockLogin()
+
+    await expect(frappeRequest({ url: 'myapp.auth.login' })).resolves.toBe(
+      'Logged In',
+    )
+  })
+})
+
+describe('frappeRequest error handling', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('reports a failed response to onError exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: false,
+            status: 417,
+            text: async () =>
+              JSON.stringify({
+                exc_type: 'ValidationError',
+                _server_messages: JSON.stringify(['Name is required']),
+              }),
+          }) as unknown as Response,
+      ),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow()
+
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onError.mock.calls[0]![0]).toMatchObject({
+      exc_type: 'ValidationError',
+      status: 417,
+      messages: ['Name is required'],
+    })
+  })
+
+  it('reports a transport failure to onError exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow(
+      'Failed to fetch',
+    )
+
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+
+  // The failure only `transformError` sees. Frappe answers an expired session
+  // with 200 and its login page, so the response is ok and `response.json()`
+  // throws. Fixing the double-report by narrowing what the rejection handler
+  // could see would have dropped this one entirely.
+  it('reports an ok response that fails to parse, exactly once', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            json: async () => {
+              throw new SyntaxError('Unexpected token < in JSON at position 0')
+            },
+          }) as unknown as Response,
+      ),
+    )
+    const onError = vi.fn()
+
+    await expect(frappeRequest({ url: 'ping', onError })).rejects.toThrow(
+      SyntaxError,
+    )
+
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('frappeRequest method-to-url mapping', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    setConfig('requestBaseUrl', undefined)
+  })
+
+  function mockFetchOk() {
+    const fetchMock = vi.fn(
+      async () => ({ ok: true, json: async () => ({ message: 'ok' }) }) as Response,
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  it('leaves an absolute url alone', async () => {
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'https://other.test/api/method/ping' })
+
+    expect(getFetchCall(fetchMock).url).toBe(
+      'https://other.test/api/method/ping',
+    )
+  })
+
+  // `startsWith('http')` matched the four letters, not a scheme, so a dotted
+  // method in an app whose name begins with them skipped the prefix and was
+  // fetched as a relative path.
+  it('prefixes a dotted method whose app name starts with http', async () => {
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'http_utils.api.run' })
+
+    expect(getFetchCall(fetchMock).url).toBe('/api/method/http_utils.api.run')
+  })
+
+  it('applies requestBaseUrl to that method too', async () => {
+    setConfig('requestBaseUrl', 'https://remote.frappe.test')
+    const fetchMock = mockFetchOk()
+    await frappeRequest({ url: 'http_utils.api.run' })
+
+    expect(getFetchCall(fetchMock).url).toBe(
+      'https://remote.frappe.test/api/method/http_utils.api.run',
+    )
+  })
+})

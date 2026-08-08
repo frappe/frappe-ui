@@ -1,3 +1,8 @@
+// The package's public surface. `export *` is allowed only from a curated
+// barrel — an `index.ts` whose export list was reviewed — never from an
+// implementation module, where it publishes whatever that file happens to
+// export next. See PHILOSOPHY.md, P15.
+
 // App setup and plugins
 export { default as FrappeUI } from './utils/plugin'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
@@ -10,10 +15,11 @@ export { usePageMeta } from './utils/pageMeta'
 export * from './data-fetching'
 // Legacy resource API. Keep public until official apps finish the v3 migration.
 export * from './resources/index.ts'
-export { default as call, createCall } from './utils/call'
-export { frappeRequest } from './utils/frappeRequest'
-export { request } from './utils/request'
-export { default as initSocket } from './utils/socketio'
+// One HTTP transport. `request` stays internal — it is the bare fetch wrapper
+// `frappeRequest` and the v1 resources are built on, with none of the Frappe
+// response handling a consumer wants.
+export { default as call } from './utils/call'
+export { frappeRequest, type FrappeRequestError } from './utils/frappeRequest'
 
 // Base components
 export * from './components/Alert'
@@ -40,7 +46,7 @@ export * from './components/Duration'
 export * from './components/ErrorMessage'
 export * from './components/FileUploader'
 export * from './components/FormControl'
-export { default as FormLabel } from './components/FormLabel.vue'
+export * from './components/FormLabel'
 export * from './components/MultiSelect'
 export * from './components/Password'
 export * from './components/Radio'
@@ -61,13 +67,17 @@ export { default as Dialogs } from './components/Dialogs.vue'
 export * from './components/Dropdown'
 export * from './components/HoverCard'
 export * from './components/Popover'
-export type { PopoverAlign, PopoverSide } from './components/Popover/types'
 export {
   dialog,
   type ConfirmArgs,
+  type DangerArgs,
+  type DialogControl,
+  type DialogHandle,
   type DialogNamespace,
   type PromptArgs,
+  type PromptControl,
   type PromptField,
+  type PromptFieldValidator,
 } from './utils/dialog'
 export { toast } from './components/Toast/toast'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
@@ -77,7 +87,6 @@ export * from './components/ItemListRow'
 // Legacy ListView family. Do not deprecate until `frappe-ui/list` reaches parity.
 export * from './components/ListView'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
-export { default as NestedPopover } from './components/ListFilter/NestedPopover.vue'
 export * from './components/Calendar'
 export * from './components/Tree'
 
@@ -98,25 +107,23 @@ export { default as CommandPalette } from './components/CommandPalette/CommandPa
 export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
 export { default as KeyboardShortcut } from './components/KeyboardShortcut.vue'
 export * from './components/KeyboardShortcutsModal'
-export * from './composables/useShortcut'
+export {
+  formatShortcutLabel,
+  getActiveShortcuts,
+  matchesShortcut,
+  useShortcut,
+  type ActiveShortcut,
+  type RegisteredShortcut,
+  type ShortcutConfig,
+} from './composables/useShortcut'
 
 // Deprecated component compatibility
-/** @deprecated Use `Combobox` for one value, `MultiSelect` for several. */
-export * from './components/Autocomplete'
 /** @deprecated Use layout markup or domain-specific components instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as Card } from './components/Card.vue'
-/** @deprecated Use `dialog.confirm(...)` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
-/** @deprecated Use `dialog.confirm(...)` instead. */
-export { confirmDialog } from './utils/confirmDialog.js'
 /** @deprecated Use lucide icon names or the `Icon` component instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as FeatherIcon } from './components/FeatherIcon.vue'
-/** @deprecated Use `TextInput` or `FormControl` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as Input } from './components/Input.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'
@@ -124,7 +131,7 @@ export { default as ListItem } from './components/ListItem.vue'
 export * from './components/MonthPicker'
 /** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
 export { default as Toast } from './components/Toast/Toast.vue'
-/** @deprecated Use `Select` with `useTheme` instead. */
+/** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
 /** @deprecated Use the `frappe-ui/editor` subpath instead. */
 export * from './components/TextEditor'
@@ -135,7 +142,6 @@ export * from './components/TextEditor/extensions/suggestion'
 
 // Charts
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
-export * from './components/CircularProgressBar'
 export { default as DonutChart } from './components/Charts/DonutChart.vue'
 export { default as ECharts } from './components/Charts/ECharts.vue'
 export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
@@ -145,20 +151,38 @@ export { default as useAxisChartOptions } from './components/Charts/axisChartOpt
 // Grid layout
 export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
 
-// Browser and responsive composables
-export * from './composables/useScreenSize'
-export * from './composables/useScrollContainer'
+// Composables
+export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
+export {
+  shellScrollContainer,
+  useShellScrolled,
+} from './composables/useShellScrolled'
+export {
+  useSheetDrag,
+  type UseSheetDrag,
+  type UseSheetDragOptions,
+} from './composables/useSheetDrag'
 
 // Directives
-export { default as focusDirective } from './directives/focus'
-export { default as onOutsideClickDirective } from './directives/onOutsideClick'
-export { default as visibilityDirective } from './directives/visibility'
+export { vFocus } from './directives/focus'
+export { vOnOutsideClick } from './directives/onOutsideClick'
 
 // Utilities
 export { dayjs, dayjsLocal } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
 export { default as fileToBase64 } from './utils/file-to-base64'
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
-export * from './utils/fileSize'
-export * from './utils/theme'
-export * from './utils/useFileUpload'
+export {
+  fileSizeLimitMessage,
+  formatBytes,
+  getMaxFileSize,
+} from './utils/fileSize'
+export {
+  isPrivateUpload,
+  upload,
+  useFileUpload,
+  type UploadedFile,
+  type UploadOptions,
+  type UploadPrivacy,
+  type UploadState,
+} from './utils/useFileUpload'

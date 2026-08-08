@@ -16,8 +16,25 @@ This document defines the v1 API direction for the input-family components:
 `FileUploader` is intentionally out of scope for this spec; it will be
 covered separately.
 
-It also covers the v1 stance on the deprecated `Input.vue` and `Autocomplete`,
-and the `FormControl type='autocomplete'` route.
+It also covers the v1 stance on `Input.vue`, which this document originally
+treated as a warn-and-keep deprecation (see the superseded note below).
+
+> **Superseded on the `Autocomplete` question.**
+> [#869](https://github.com/frappe/frappe-ui/issues/869) decided `Autocomplete`
+> and the `FormControl type='autocomplete'` route are **deleted before the tag**
+> rather than warned through `1.x`, on ADR-0008. Everything this document says
+> about warning-and-keeping the two is history, kept for the audit data behind
+> it. What shipped is in
+> [`migration.md`](../docs/content/docs/migration.md#autocomplete-removed).
+>
+> **Superseded on `Input.vue` and the ref surface, too.**
+> [#874](https://github.com/frappe/frappe-ui/issues/874) applied the same
+> ADR-0008 logic to `Input.vue` and to `Password.value`: both are **removed**
+> rather than warned, since a census found no live call sites for either. The
+> same PR implements ADR-0012 — `TextInput`/`Textarea`/`Password`'s `.el` ref
+> becomes `.inputElement` (typed, read-only) plus a `focus(options?)` method.
+> What shipped is in
+> [`migration.md`](../docs/content/docs/migration.md#inputs).
 
 It is a sibling of [`selection.md`](./selection.md), which covers the pickers
 these controls sit next to.
@@ -47,8 +64,9 @@ audit of the input family.
   `*Emits` interfaces only for non-model events
 - `FeatherIcon` is removed from `Switch` and `Rating`; both use Lucide
 - `Rating.rating_from` is renamed to `max`, with a deprecated alias
-- `Input.vue`, `Autocomplete`, and the `FormControl type='autocomplete'`
-  route all gain dev-mode deprecation warnings via a shared utility
+- `Input.vue` gains a dev-mode deprecation warning via a shared utility
+  (`Autocomplete` and the `FormControl type='autocomplete'` route did too, and
+  were then removed outright — see the note above)
 - `FormControl` stays a type-routing component for v1 (185 router-style call
   sites, 0 wrapper-style)
 - `Switch.labelClasses` and `Checkbox.padding` are deprecated (warned, still
@@ -365,10 +383,10 @@ Rules:
 
 | Component / API                     | Warning name                       | Replacement                  |
 | ----------------------------------- | ---------------------------------- | ---------------------------- |
-| `Input.vue`                         | `Input`                            | `TextInput`                  |
-| `Autocomplete`                      | `Autocomplete`                     | `Combobox` or `MultiSelect`  |
-| `FormControl type='autocomplete'`   | `FormControl type="autocomplete"`  | Use `Combobox` standalone    |
-| `Password.value` prop               | `Password.value`                   | `v-model` / `modelValue`     |
+| ~~`Input.vue`~~                     | removed, no warning left           | `TextInput`                  |
+| ~~`Autocomplete`~~                  | removed, no warning left           | `Combobox` or `MultiSelect`  |
+| ~~`FormControl type='autocomplete'`~~ | removed; dev-only `console.error` | `type="combobox"`           |
+| ~~`Password.value` prop~~           | removed; silent — falls through as a DOM attribute | `v-model` / `modelValue` |
 | `Rating.rating_from` prop           | `Rating.rating_from`               | `max`                        |
 | `Switch.change` emit                | `Switch.change`                    | `update:modelValue` / `v-model` |
 | `Switch.labelClasses` prop          | `Switch.labelClasses`              | `data-*` styling hooks       |
@@ -386,9 +404,11 @@ Per the v1 plan:
 - removal is a future-major concern
 - legacy and deprecated components move out of standard docs and onto the
   single legacy-docs page
-- `FormControl type='autocomplete'` route warns but keeps rendering
-  `Autocomplete` (removing the route now would break consumers; removal is
-  a post-v1 step)
+- ~~`FormControl type='autocomplete'` route warns but keeps rendering
+  `Autocomplete`~~ — reversed by
+  [#869](https://github.com/frappe/frappe-ui/issues/869): the route is removed
+  before the tag, because ADR-0008 forbids shipping `@deprecated` members in
+  `1.0.0` and the whole point of `1.0.0` is that the freeze starts there
 
 ## Decisions backed by the usage audit
 
@@ -408,8 +428,9 @@ arrays of `{ label, value }` shape.
 **v1 decision:**
 
 - `FormControl` remains a type-routing component
-- the `type='autocomplete'` route stays functional, with a dev-mode
-  deprecation warning pointing consumers at `Combobox` standalone
+- ~~the `type='autocomplete'` route stays functional, with a dev-mode
+  deprecation warning pointing consumers at `Combobox` standalone~~ — the
+  route is removed; see the note at the top
 - a router-vs-wrapper redesign is not pursued; the data shows no real-world
   consumer leans on a wrapper-style use that would block the router approach
 
@@ -569,21 +590,20 @@ contract.
 `warnDeprecated(...)` is wired in the following files (matching the
 Deprecations table):
 
-- `src/components/Input.vue` — warn on mount: `Input` → `TextInput`
-- `src/components/Autocomplete/Autocomplete.vue` — warn on mount:
-  `Autocomplete` → `Combobox` or `MultiSelect`
-- `src/components/FormControl/FormControl.vue` — warn when
-  `props.type === 'autocomplete'`: → `Combobox` standalone
-- `src/components/Password/Password.vue` — `value` prop
+- ~~`src/components/Input.vue` — warn on mount: `Input` → `TextInput`~~ —
+  reversed like `Autocomplete`: `Input.vue` is deleted outright, no warning
+  wired
+- ~~`src/components/Password/Password.vue` — `value` prop~~ — reversed: the
+  prop is deleted outright, no warning wired
 - `src/components/Rating/Rating.vue` — `rating_from` prop
 - `src/components/Switch/Switch.vue` — `change` emit, `labelClasses` prop
 - `src/components/Checkbox/Checkbox.vue` — `padding` prop
 - `src/components/Divider/Divider.vue` — `Divider.action.handler` (replaces
   the prior ad-hoc deprecation log)
 
-`Input`, `Autocomplete`, and `FormControl type='autocomplete'` move out of
-standard component docs onto the single legacy-components docs page; the
-v1 migration guide points at the new APIs.
+`Input` is removed rather than moved to the legacy-components docs page; the
+v1 migration guide points at the new API. `Autocomplete` and
+`FormControl type='autocomplete'` are listed there as removed too.
 
 ### `data-*` styling hooks
 
@@ -607,8 +627,6 @@ the `data-*` hooks. They are deprecated, not removed in v1.
 ### Out of scope (do not silently expand)
 
 - `FileUploader` (covered in a separate spec)
-- removing the `FormControl type='autocomplete'` route (warn only — gated
-  on post-v1 `FormControl` scope decision)
 - removing `Switch.labelClasses`, `Checkbox.padding`, `Switch.change` emit,
   or any other deprecated API in v1 (warn only — removal is post-v1)
 - narrowing `Checkbox.modelValue` to `boolean` (breaking; deferred to a

@@ -96,6 +96,35 @@ export function matchesByLabelOrValue(
 }
 
 /**
+ * Read a grouped option's children.
+ *
+ * `Autocomplete`, which `Combobox` and `MultiSelect` replaced, spelled this key
+ * `items`. Both normalizers used to reach straight for `option.options.map(…)`,
+ * so an un-migrated group died inside `map` with "cannot read properties of
+ * undefined" and named neither the group nor the rename. Same failure, but it
+ * says what is actually wrong.
+ *
+ * Deliberately not an alias: `items` is not accepted, only diagnosed. Per
+ * ADR-0012 an added member freezes until `2.0.0` exactly like a renamed one,
+ * and #869 settled that nothing is added to these two on `Autocomplete`'s way
+ * out.
+ */
+export function readGroupOptions<TOption>(
+  group: { group: string; options?: TOption[] },
+  componentName: string,
+): TOption[] {
+  if (Array.isArray(group.options)) return group.options
+
+  const complaint = Array.isArray((group as { items?: unknown }).items)
+    ? 'uses `items`. That key was renamed to `options` when `Autocomplete` was removed in 1.0.0 — rename it: `{ group, items }` → `{ group, options }`.'
+    : 'needs an `options` array.'
+
+  throw new TypeError(
+    `[${componentName}] grouped option "${group.group}" ${complaint}`,
+  )
+}
+
+/**
  * Normalize an option's per-item `slots` object into a plain, always-defined
  * slot map.
  *

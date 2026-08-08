@@ -47,6 +47,6 @@ export interface DurationEmits {
 }
 
 export interface DurationExposed {
-  /** Focuses the underlying text input. */
-  focus: () => void
+  /** Moves focus to the underlying text input. */
+  focus: (options?: FocusOptions) => void
 }

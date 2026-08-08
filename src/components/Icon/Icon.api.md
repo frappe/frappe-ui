@@ -13,7 +13,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Icon" :data="propsData"/> 
-
+<PropsTable name="Icon" :data="propsData"/>

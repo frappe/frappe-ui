@@ -15,15 +15,13 @@
     name: 'uploadArgs',
     description: 'Additional upload options passed to Frappe\'s upload endpoint.\n`private` / `is_private` override the component\'s `isPrivate` default.',
     required: false,
-    type: 'UploadOptions',
-    default: 'undefined'
+    type: 'UploadOptions'
   },
   {
     name: 'validateFile',
     description: 'Optional validation hook. Return a message or Error to block upload.',
     required: false,
-    type: '((file: File) => FileUploaderValidationResult | Promise<FileUploaderValidationResult>)',
-    default: 'undefined'
+    type: '((file: File) => FileUploaderValidationResult | Promise<FileUploaderValidationResult>)'
   }
 ]
 
@@ -48,6 +46,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="FileUploader" :data="propsData"/>

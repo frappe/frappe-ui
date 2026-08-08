@@ -3,11 +3,8 @@
     <slot v-bind="{ onClick: openIframeDialog }"></slot>
 
     <!-- Iframe URL Input Dialog -->
-    <Dialog
-      v-model="showDialog"
-      :options="{ title: 'Insert Embed', size: 'md' }"
-    >
-      <template #body-content>
+    <Dialog v-model="showDialog" title="Insert Embed" size="md">
+      <template #default>
         <div class="space-y-4">
           <div>
             <label class="mb-2 block text-base text-ink-gray-5">
@@ -76,7 +73,7 @@ const alignment = ref<'left' | 'center' | 'right'>('center')
 const customWidth = ref<number>(640)
 const customHeight = ref<number>(360)
 
-const urlInput = ref<HTMLInputElement>()
+const urlInput = ref<InstanceType<typeof Textarea>>()
 
 const isValidUrl = computed(() => {
   if (!embedUrl.value) return false
@@ -159,7 +156,7 @@ function openIframeDialog() {
   customHeight.value = 360
 
   nextTick(() => {
-    urlInput.value?.el?.focus()
+    urlInput.value?.focus()
   })
 }
 

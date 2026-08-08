@@ -129,10 +129,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, watchEffect, nextTick } from 'vue'
+import { computed, ref, useAttrs, useSlots, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -151,16 +150,7 @@ const model = defineModel<number>({ default: 0 })
 const slots = useSlots()
 const attrs = useAttrs()
 
-watchEffect(() => {
-  if (props.rating_from != null) {
-    warnDeprecated('Rating.rating_from', 'max')
-  }
-  if (props.readonly === true) {
-    warnDeprecated('Rating.readonly', 'disabled')
-  }
-})
-
-const isDisabled = computed(() => props.disabled || props.readonly === true)
+const isDisabled = computed(() => props.disabled)
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -175,7 +165,7 @@ defineSlots<{
   icon?: (props: RatingIconSlotProps) => any
 }>()
 
-const starCount = computed(() => props.max ?? props.rating_from ?? 5)
+const starCount = computed(() => props.max ?? 5)
 const isSliderMode = computed(() => props.step === 0.5)
 
 const hoveredValue = ref<number | null>(null)

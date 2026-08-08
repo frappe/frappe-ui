@@ -9,28 +9,28 @@
     name: 'theme',
     description: 'Visual color theme of the badge',
     required: false,
-    type: '"blue" | "red" | "green" | "gray" | "amber" | "violet" | "orange"',
+    type: '"gray" | "blue" | "green" | "amber" | "red" | "violet" | "orange"',
     default: '"gray"'
   },
   {
     name: 'size',
     description: 'Controls the size of the badge',
     required: false,
-    type: '"md" | "sm" | "lg"',
+    type: '"sm" | "md" | "lg"',
     default: '"md"'
   },
   {
     name: 'variant',
     description: 'Visual style of the badge',
     required: false,
-    type: '"subtle" | "outline" | "solid" | "ghost"',
+    type: '"solid" | "subtle" | "outline" | "ghost"',
     default: '"subtle"'
   },
   {
     name: 'label',
     description: 'Content displayed inside the badge',
     required: false,
-    type: 'string | number | Label'
+    type: 'Label | string | number'
   }
 ]
 
@@ -52,9 +52,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Badge" :data="propsData"/> 
+<PropsTable name="Badge" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

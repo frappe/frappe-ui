@@ -3,9 +3,9 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import MobileNav from './MobileNav.vue'
 import MobileNavItem from './MobileNavItem.vue'
 import {
-  registerScrollContainer,
-  unregisterScrollContainer,
-} from '../../composables/useScrollContainer'
+  registerShellScrollContainer,
+  unregisterShellScrollContainer,
+} from '../../composables/useShellScrolled'
 
 function routerAt(path: string) {
   const router = createRouter({
@@ -66,7 +66,7 @@ describe('<MobileNavItem />', () => {
     Object.defineProperty(scroller, 'scrollHeight', { value: 2000 })
     const scrollTo = cy.stub().as('scrollTo')
     scroller.scrollTo = scrollTo
-    registerScrollContainer(scroller)
+    registerShellScrollContainer(scroller)
 
     cy.mount(MobileNavItem, {
       props: { label: 'Home', icon: 'lucide-house', to: '/' },
@@ -75,7 +75,7 @@ describe('<MobileNavItem />', () => {
     cy.get('button[data-slot=mobile-nav-item]').click()
     cy.get('@scrollTo')
       .should('have.been.calledOnce')
-      .then(() => unregisterScrollContainer(scroller))
+      .then(() => unregisterShellScrollContainer(scroller))
   })
 
   it('reflects `active` in data-state and exposes it to the default slot', () => {

@@ -269,8 +269,8 @@ if (import.meta.env.DEV) {
 
 // ── State ──
 
-const inputRef = ref<{ el: HTMLElement | null } | null>(null)
-const anchorEl = computed(() => inputRef.value?.el ?? undefined)
+const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
+const anchorEl = computed(() => inputRef.value?.inputElement ?? undefined)
 const panelRef = ref<HTMLElement | null>(null)
 
 // Reka treats anything outside `PopoverContent` as "outside" — including our
@@ -280,7 +280,7 @@ const panelRef = ref<HTMLElement | null>(null)
 // any suffix like the chevron); those elements have their own click logic.
 function onInteractOutside(event: Event) {
   const target = event.target as Node | null
-  const triggerRow = inputRef.value?.el?.parentElement
+  const triggerRow = inputRef.value?.inputElement?.parentElement
   if (target && triggerRow?.contains(target)) {
     event.preventDefault()
   }
@@ -567,7 +567,7 @@ function onEscape(e: KeyboardEvent) {
 
 function selectAll() {
   nextTick(() => {
-    const root = inputRef.value?.el
+    const root = inputRef.value?.inputElement
     if (!root) return
     const input = root.querySelector?.('input') as HTMLInputElement | null
     input?.select?.()
@@ -576,7 +576,7 @@ function selectAll() {
 
 function blurInput() {
   nextTick(() => {
-    const root = inputRef.value?.el
+    const root = inputRef.value?.inputElement
     if (!root) return
     const input = root.querySelector?.('input') as HTMLInputElement | null
     input?.blur?.()
@@ -637,7 +637,7 @@ defineExpose({
   /** Focus the trigger input. Used by DateTimePicker to flow keyboard focus
    *  from the calendar grid into the time picker after a date is picked. */
   focus: () => {
-    inputRef.value?.el?.focus?.()
+    inputRef.value?.focus()
   },
 })
 </script>

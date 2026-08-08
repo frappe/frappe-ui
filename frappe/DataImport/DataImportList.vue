@@ -71,18 +71,16 @@
         </div>
         <Dialog
             v-model="showModal"
-            :options="{
-                title: 'New Data Import',
-                actions: [{
-                    label: 'Continue',
-                    variant: 'solid',
-                    onClick({ close }) {
-                        createDataImport(close)
-                    }
-                }]
-            }"
+            title="New Data Import"
+            :actions="[{
+                label: 'Continue',
+                variant: 'solid',
+                onClick({ close }) {
+                    createDataImport(close)
+                }
+            }]"
         >
-            <template #body-content>
+            <template #default>
                 <div>
                     <Link
                         v-model="doctypeForImport"

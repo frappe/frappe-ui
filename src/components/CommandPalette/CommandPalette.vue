@@ -2,10 +2,12 @@
   <template>
     <Dialog
       v-model="show"
-      :options="{ size: 'xl', position: 'top' }"
+      size="xl"
+      position="top"
+      bare
       @after-leave="searchQuery = ''"
     >
-      <template #body>
+      <template #default>
         <div>
           <Combobox nullable @update:model-value="select">
             <div class="relative">

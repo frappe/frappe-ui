@@ -20,6 +20,23 @@
   }
 ]
 
+  const pageHeaderTitleProps = [
+  {
+    name: 'title',
+    description: 'Title text. Overridden by the default slot.',
+    required: false,
+    type: 'string'
+  }
+]
+
+  const pageHeaderTitleSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: '{}'
+  }
+]
+
   const pageHeaderMobileProps = [
   {
     name: 'title',
@@ -72,7 +89,7 @@
   const pageHeaderBackButtonProps = [
   {
     name: 'to',
-    description: 'Where to navigate on tap. Omit to fall back to browser history.',
+    description: 'Fallback destination, used only when there is no in-app history to go back to\n(a cold load onto a deep link). Taps otherwise go back through history.',
     required: false,
     type: 'string | kt | Tt'
   },
@@ -85,6 +102,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 ### PageHeader
@@ -94,6 +112,12 @@
 ### PageHeaderBase
 
 <SlotsTable :data="pageHeaderBaseSlots"/>
+
+### PageHeaderTitle
+
+<PropsTable folder="PageHeader" name="PageHeaderTitle" :data="pageHeaderTitleProps"/>
+
+<SlotsTable :data="pageHeaderTitleSlots"/>
 
 ### PageHeaderMobile
 

@@ -3,7 +3,7 @@
     <DialogPortal>
       <DialogOverlay
         class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"
-        :data-dialog="resolved.title"
+        :data-dialog="props.title"
         @after-leave="$emit('after-leave')"
       />
       <!--
@@ -25,7 +25,7 @@
           class="flex min-h-screen flex-col items-center px-4 py-4 text-center"
           :class="dialogPositionClasses"
           :style="dialogPositionStyles"
-          :data-position="resolved.position || 'center'"
+          :data-position="props.position"
         >
           <DialogContent
             ref="contentRef"
@@ -44,21 +44,14 @@
             "
           >
             <!-- bare: no chrome, render default slot directly -->
-            <slot v-if="resolved.bare" :close="close" />
-
-            <!-- legacy `#body` slot: full layout override (deprecated) -->
-            <slot v-else-if="$slots.body" name="body" />
+            <slot v-if="props.bare" :close="close" />
 
             <template v-else>
-              <!-- legacy `#body-main`: full middle override (deprecated) -->
-              <slot v-if="$slots['body-main']" name="body-main" />
-              <div v-else class="bg-surface-elevation-1 px-4 pb-6 pt-5 sm:px-6">
+              <div class="bg-surface-elevation-1 px-4 pb-6 pt-5 sm:px-6">
                 <div class="flex">
                   <div class="w-full flex-1">
-                    <!-- legacy `#body-header` (deprecated, warns + renders nothing if used; preserved for back-compat by rendering header) -->
-                    <slot v-if="$slots['body-header']" name="body-header" />
                     <div
-                      v-else-if="showHeader"
+                      v-if="showHeader"
                       class="mb-6 flex items-center justify-between"
                     >
                       <div class="flex items-center space-x-2 flex-1">
@@ -86,18 +79,16 @@
                         </div>
                         <DialogTitle as="header" class="flex-1">
                           <slot name="title" :close="close">
-                            <slot name="body-title">
-                              <h3
-                                v-if="resolved.title"
-                                class="text-2xl-semibold leading-6 text-ink-gray-8"
-                              >
-                                {{ resolved.title }}
-                              </h3>
-                            </slot>
+                            <h3
+                              v-if="props.title"
+                              class="text-2xl-semibold leading-6 text-ink-gray-8"
+                            >
+                              {{ props.title }}
+                            </h3>
                           </slot>
                         </DialogTitle>
                       </div>
-                      <DialogClose v-if="resolved.showCloseButton" as-child>
+                      <DialogClose v-if="props.showCloseButton" as-child>
                         <Button variant="ghost" label="Close">
                           <template #icon>
                             <span class="lucide-x size-4 text-ink-gray-9" />
@@ -106,14 +97,12 @@
                       </DialogClose>
                     </div>
 
-                    <slot name="body-content">
-                      <slot :close="close">
-                        <DialogDescription as-child v-if="resolved.message">
-                          <p class="text-p-base text-ink-gray-7">
-                            {{ resolved.message }}
-                          </p>
-                        </DialogDescription>
-                      </slot>
+                    <slot :close="close">
+                      <DialogDescription as-child v-if="props.message">
+                        <p class="text-p-base text-ink-gray-7">
+                          {{ props.message }}
+                        </p>
+                      </DialogDescription>
                     </slot>
                   </div>
                 </div>
@@ -147,15 +136,8 @@
             </template>
 
             <!-- close button when auto-header is suppressed but caller still wants a close affordance -->
-            <!-- Suppressed for legacy slots that own their own header chrome: `#body` is a full override, `#body-header` replaced the header (incl. close) in v0. -->
             <DialogClose
-              v-if="
-                resolved.showCloseButton &&
-                !showHeader &&
-                !resolved.bare &&
-                !$slots['body'] &&
-                !$slots['body-header']
-              "
+              v-if="props.showCloseButton && !showHeader && !props.bare"
               as-child
             >
               <Button
@@ -194,17 +176,12 @@ import {
   warnFeatherIconUsage,
   isLucideIconString,
 } from '../../utils/iconString'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import type {
   DialogProps,
   DialogEmits,
   DialogSlots,
-  DialogExposed,
   DialogIcon,
-  DialogActionContext,
-  DialogOptions,
   DialogTheme,
-  DialogIconAppearance,
   DialogReactiveAction,
 } from './types'
 
@@ -214,12 +191,8 @@ const props = withDefaults(defineProps<DialogProps>(), {
   // `open` vs `modelValue` precedence below.
   open: undefined,
   modelValue: undefined,
-  disableOutsideClickToClose: undefined,
-  // `size`/`position` intentionally left undefined so legacy `options.size`
-  // and `options.position` still take effect when the top-level prop is omitted.
-  // Defaults are applied inside `resolved`.
-  size: undefined,
-  position: undefined,
+  size: 'lg',
+  position: 'center',
   dismissible: true,
   showCloseButton: true,
   bare: false,
@@ -229,64 +202,11 @@ const emit = defineEmits<DialogEmits>()
 
 const slots = defineSlots<DialogSlots>()
 
-// Deprecation warnings for legacy surfaces.
-watchEffect(() => {
-  if (props.options !== undefined) {
-    warnDeprecated('Dialog `options` prop', 'flat top-level props')
-  }
-  if (props.disableOutsideClickToClose !== undefined) {
-    warnDeprecated(
-      'Dialog `disableOutsideClickToClose` prop',
-      '`dismissible` (inverted)',
-    )
-  }
-})
-
 const allSlots = useSlots()
-watchEffect(() => {
-  if (allSlots['body-content']) {
-    warnDeprecated('Dialog `#body-content` slot', '`#default`')
-  }
-  if (allSlots['body-main']) {
-    warnDeprecated('Dialog `#body-main` slot', '`#default`')
-  }
-  if (allSlots['body-title']) {
-    warnDeprecated('Dialog `#body-title` slot', '`#title`')
-  }
-  if (allSlots['body-header']) {
-    warnDeprecated(
-      'Dialog `#body-header` slot',
-      '`#title` (no direct replacement)',
-    )
-  }
-  if (allSlots['body']) {
-    warnDeprecated('Dialog `#body` slot', '`#default` + `bare` prop')
-  }
-})
 
-// Flatten props: top-level props win over `options` keys.
-const resolved = computed(() => {
-  const o = props.options || ({} as DialogOptions)
-  return {
-    title: props.title ?? o.title,
-    message: props.message ?? o.message,
-    icon: props.icon ?? o.icon,
-    size: props.size ?? o.size ?? 'lg',
-    position: props.position ?? o.position ?? 'center',
-    paddingTop: props.paddingTop ?? o.paddingTop,
-    actions: props.actions ?? o.actions ?? [],
-    showCloseButton: props.showCloseButton,
-    bare: props.bare,
-  }
-})
-
-const isDismissible = computed(() => {
-  if (props.disableOutsideClickToClose) return false
-  return props.dismissible !== false
-})
+const isDismissible = computed(() => props.dismissible !== false)
 
 const sizeClass = computed(() => {
-  const size = resolved.value.size
   const map: Record<string, string> = {
     xs: 'max-w-xs',
     sm: 'max-w-sm',
@@ -300,7 +220,7 @@ const sizeClass = computed(() => {
     '6xl': 'max-w-6xl',
     '7xl': 'max-w-7xl',
   }
-  return map[size] || 'max-w-lg'
+  return map[props.size] || 'max-w-lg'
 })
 
 // Visibility model.
@@ -321,11 +241,9 @@ function close() {
   isOpen.value = false
 }
 
-defineExpose({ close } satisfies DialogExposed)
-
-// Resolved icon — also maps deprecated `appearance` to `theme`.
+// Resolved icon.
 const resolvedIcon = computed<DialogIcon | null>(() => {
-  const raw = resolved.value.icon
+  const raw = props.icon
   if (!raw) return null
   if (typeof raw === 'string') return { name: raw }
   return raw
@@ -333,40 +251,30 @@ const resolvedIcon = computed<DialogIcon | null>(() => {
 
 watchEffect(() => {
   warnFeatherIconUsage('Dialog', 'icon', resolvedIcon.value?.name)
-  if (resolvedIcon.value?.appearance) {
-    warnDeprecated(
-      'Dialog `icon.appearance`',
-      "`icon.theme` ('yellow' | 'blue' | 'red' | 'green')",
-    )
-  }
-  if (props.bare && (props.title || resolvedIcon.value)) {
-    // soft warning — props become no-ops when bare
-    warnDeprecated(
-      'Dialog `title`/`icon` props with `bare: true`',
-      'render the title yourself inside `#default`',
-    )
-  }
-  if (props.bare && (props.actions || props.options?.actions)) {
-    warnDeprecated(
-      'Dialog `actions` prop with `bare: true`',
-      'render actions inside `#default`',
-    )
-  }
 })
 
-const iconTheme = computed<DialogTheme | null>(() => {
-  const icon = resolvedIcon.value
-  if (!icon) return null
-  if (icon.theme) return icon.theme
-  // Back-compat: map `appearance` to `theme`.
-  const map: Record<DialogIconAppearance, DialogTheme> = {
-    warning: 'yellow',
-    info: 'blue',
-    danger: 'red',
-    success: 'green',
-  }
-  return icon.appearance ? map[icon.appearance] : null
-})
+if (import.meta.env.DEV) {
+  let warnedBareTitle = false
+  let warnedBareActions = false
+  watchEffect(() => {
+    if (props.bare && (props.title || resolvedIcon.value) && !warnedBareTitle) {
+      console.warn(
+        '[frappe-ui] Dialog `title`/`icon` have no effect when `bare` is true. Render them yourself inside `#default`.',
+      )
+      warnedBareTitle = true
+    }
+    if (props.bare && props.actions?.length && !warnedBareActions) {
+      console.warn(
+        '[frappe-ui] Dialog `actions` has no effect when `bare` is true. Render actions inside `#default`.',
+      )
+      warnedBareActions = true
+    }
+  })
+}
+
+const iconTheme = computed<DialogTheme | null>(
+  () => resolvedIcon.value?.theme ?? null,
+)
 
 const dialogIconBgClasses = computed(() => {
   const theme = iconTheme.value
@@ -393,25 +301,24 @@ const dialogIconClasses = computed(() => {
 })
 
 const dialogPositionClasses = computed(() => {
-  if (resolved.value.paddingTop) return ''
-  const position = resolved.value.position
+  if (props.paddingTop) return ''
   const map: Record<string, string> = {
     center: 'justify-center',
     top: 'pt-[20vh]',
   }
-  return map[position] || 'justify-center'
+  return map[props.position] || 'justify-center'
 })
 
 const dialogPositionStyles = computed(() => {
-  if (resolved.value.paddingTop) {
-    return { paddingTop: resolved.value.paddingTop }
+  if (props.paddingTop) {
+    return { paddingTop: props.paddingTop }
   }
   return {}
 })
 
 const reactiveActions = computed((): DialogReactiveAction[] => {
-  if (resolved.value.bare) return []
-  const list = resolved.value.actions
+  if (props.bare) return []
+  const list = props.actions
   if (!list?.length) return []
   return list.map((action) => {
     const _action = reactive({
@@ -422,17 +329,7 @@ const reactiveActions = computed((): DialogReactiveAction[] => {
         : async () => {
             _action.loading = true
             try {
-              // Back-compat: callable context shim — `context()` still closes.
-              type LegacyContext = (() => void) & DialogActionContext
-              const ctx = (() => {
-                warnDeprecated(
-                  'Dialog action.onClick(callableContext)',
-                  'action.onClick({ close })',
-                )
-                close()
-              }) as LegacyContext
-              ctx.close = close
-              await action.onClick!(ctx)
+              await action.onClick!({ close })
             } finally {
               _action.loading = false
             }
@@ -445,17 +342,16 @@ const reactiveActions = computed((): DialogReactiveAction[] => {
 const isSingleActionFullWidth = computed(() => {
   const smallSizes = ['xs', 'sm', 'md']
   return (
-    reactiveActions.value.length === 1 &&
-    smallSizes.includes(resolved.value.size)
+    reactiveActions.value.length === 1 && smallSizes.includes(props.size)
   )
 })
 
 // Whether the auto-header should render at all. Per spec, the header
 // is title/slot-driven only — the close button lives independently.
 const showHeader = computed(() => {
-  if (resolved.value.bare) return false
-  if (allSlots.title || allSlots['body-title']) return true
-  if (resolved.value.title) return true
+  if (props.bare) return false
+  if (allSlots.title) return true
+  if (props.title) return true
   return false
 })
 

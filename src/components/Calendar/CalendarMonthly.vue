@@ -114,6 +114,7 @@
 import { daysList, parseDate, isWeekend } from './calendarUtils'
 import { inject } from 'vue'
 import useCalendarData from './composables/useCalendarData'
+import { useNow } from './composables/useNow'
 import { computed } from 'vue'
 import ShowMoreCalendarEvent from './ShowMoreCalendarEvent.vue'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
@@ -142,8 +143,10 @@ const maxEventsInCell = computed(() =>
   props.currentMonthDates.length > 35 ? 1 : 2,
 )
 
+const now = useNow()
+
 function isToday(date: Date) {
-  return date.toDateString() === new Date().toDateString()
+  return parseDate(date) === parseDate(now.value)
 }
 
 function isCurrentMonth(date: Date) {

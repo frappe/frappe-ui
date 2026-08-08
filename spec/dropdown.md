@@ -38,23 +38,18 @@ become the generic replacement for `Select`.
 ### Props
 
 ```ts
-type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-type PopoverAlign = 'start' | 'center' | 'end'
-
-/** @deprecated use `align` with start | center | end */
-type DropdownPlacement = 'left' | 'center' | 'right'
+type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
+type DropdownAlign = 'start' | 'center' | 'end'
 
 interface DropdownProps {
   button?: ButtonProps
   options?: DropdownOptions
   open?: boolean
-  side?: PopoverSide
-  align?: PopoverAlign
+  side?: DropdownSide
+  align?: DropdownAlign
   offset?: number
+  matchTriggerWidth?: boolean
   portalTo?: string | HTMLElement
-  emptyText?: string
-  /** @deprecated alias for `align`; maps left→start, center→center, right→end */
-  placement?: DropdownPlacement
 }
 ```
 
@@ -65,25 +60,27 @@ Defaults:
 - `side = 'bottom'`
 - `align = 'start'`
 - `offset = 4`
+- `matchTriggerWidth = false`
 - `portalTo = 'body'`
-- `emptyText = 'No options'`
 
 `side` picks which side of the trigger the menu opens on, `align` how it lines
 up along that side, `offset` the gap in px, and `portalTo` where the content is
 teleported. `start` and `end` are direction-aware and flip under `dir="rtl"`.
 These are the same four props and the same defaults the selection pickers use.
+`matchTriggerWidth` sizes the menu to the trigger element, for menus acting as
+a select-like control under a wide custom trigger. Note the deliberate
+difference from Popover's prop of the same name: Dropdown sets an exact
+`width` (a menu should match its trigger precisely), while Popover sets
+`minWidth` (a panel may need to grow beyond it).
 
-Compatibility rules for `placement`:
+There is no `placement` prop. It was removed before `1.0.0` per
+[ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md); `align` covers it
+(`left`→`start`, `center`→`center`, `right`→`end`).
 
-- `placement` remains supported through `v1.x`
-- if `placement` is provided without `align`, it is silently mapped:
-  - `'left'` → `align: 'start'`
-  - `'center'` → `align: 'center'`
-  - `'right'` → `align: 'end'`
-- if both `placement` and `align` are provided, `align` wins and a dev warning
-  is emitted
-- docs should show `align` in primary examples; `placement` should only appear
-  in the deprecation table
+There is no `emptyText` prop. The empty state renders fixed copy
+(`"No options"`); `#empty` replaces it entirely. An action menu is rarely
+empty by data — usually every row was `condition()`-ed away — so a copy prop
+was never earned.
 
 State conventions:
 
@@ -221,50 +218,34 @@ interface DropdownSubmenuOption extends DropdownBaseOption {
   component?: never
 }
 
-/** @deprecated use `slots: { item: fn }` */
-interface DropdownComponentOption extends DropdownBaseOption {
-  component: any
-  label?: string
-  route?: never
-  submenu?: never
-  switch?: never
-  switchValue?: never
-}
-
 interface DropdownGroupOption {
   key?: string | number
   group: string
   hideLabel?: boolean
   theme?: DropdownTheme
   options: DropdownOption[]
-  /** @deprecated alias for `options` (Dropdown previously used `items`) */
-  items?: DropdownOption[]
 }
 
 type DropdownOption =
   | DropdownActionOption
   | DropdownSwitchOption
   | DropdownSubmenuOption
-  | DropdownComponentOption
 
 type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
 ```
 
-Compatibility rule for the group field:
-
-- the canonical group entry is `{ group, options }`, matching `Combobox`,
-  `MultiSelect`, and `Select`
-- `{ group, items }` (the previous Dropdown shape) keeps working through
-  `v1.x` as a deprecated alias
-- if both `options` and `items` are provided on the same group entry,
-  `options` wins and a dev warning is emitted
-- if only `items` is provided, it is silently mapped to `options`
+The group entry is `{ group, options }`, matching `Combobox`, `MultiSelect`,
+and `Select`. Dropdown's previous `{ group, items }` shape and the `component:`
+escape-hatch row were removed before `1.0.0` per
+[ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md); each keeps a `never`
+marker in the types so passing the old key is a type error rather than a
+silently ignored extra field, and a DEV-only console warning fires when either
+arrives at runtime.
 
 Notes:
 
 - `label` is required for every standard action, switch, and submenu row
-- `label` is optional only for `component` escape-hatch rows
-- `submenu`, `switch`, and `component` are mutually exclusive item modes
+- `submenu` and `switch` are mutually exclusive item modes
 - app-defined extra fields like `value`, `id`, `image`, `shortcut`, and
   analytics metadata are allowed and must be passed through unchanged to slot
   props
@@ -318,8 +299,6 @@ nothing. Other strings still route to `FeatherIcon` for back-compat.
 - leaf action rows close the dropdown on selection through menu semantics
 - switch rows do not auto-close on toggle
 - submenu rows open nested menu content and do not call `onClick`
-- `component` rows are escape hatches for exceptional content and do not receive
-  shell-owned prefix/label/suffix regions
 
 ### Disabled handling
 
@@ -347,8 +326,6 @@ renderers below are skipped):
 
 1. `#item` slot
 2. `item.slots.item`
-3. `item.component` — kept as a deprecated alias of `item.slots.item`; if
-   both are present, `slots.item` wins and a dev warning fires
 
 Prefix region:
 
@@ -425,130 +402,25 @@ That means:
 - `selected` is visual state only; it does not change the component into a
   single-select control
 
-## Keep supported in v1.x
+## Removed before `1.0.0`
 
-These stay supported:
+Removed under [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md) in the
+selection-and-menus sweep
+([#871](https://github.com/frappe/frappe-ui/issues/871)); before/afters live in
+[`migration.md`](../docs/content/docs/migration.md):
 
-- `button`
-- `options`
-- `placement` (as an alias for `align`)
-- `side`
-- `offset`
-- `portalTo`
-- grouped items, including the legacy `{ group, items }` shape
-- `submenu`
-- `switch`
-- `switchValue`
-- `component`
-- `#item`
-- current default trigger slot behavior
+- `placement` prop and the `DropdownPlacement` type — `align` replaces it
+- `{ group, items }` group entries — `{ group, options }` replaces them
+- `component:` option rows and the `DropdownComponentOption` type —
+  `slots: { item: fn }` replaces them
+- `DropdownExposed` — described a template-ref surface that never existed;
+  per [ADR-0012](./adr/0012-template-ref-surface.md), `Dropdown` exposes
+  nothing (`v-model:open` and the `close` slot prop cover it)
 
-## Deprecate
+## Row customization in JS
 
-Keep working, but deprecate for ordinary row customization:
-
-- `#item` as the default recommendation
-- `item.component` in favor of `item.slots` (use `slots.item` for the
-  full-row escape hatch; use `slots.prefix` / `slots.label` /
-  `slots.suffix` for per-region customization)
-- `placement` prop in favor of `align`
-- `{ group, items }` group entries in favor of `{ group, options }` (for
-  symmetry with `Combobox` / `MultiSelect` / `Select`)
-
-Keep as escape hatches:
-
-- deeply custom rows
-- destructive full-width special rows
-- embedded app selectors or similar exceptional content
-
-Do **not** deprecate:
-
-- `onClick`
-- `condition`
-- `route`
-- `submenu`
-- `switch`
-
-## Migration path
-
-### Old
-
-```vue
-<Dropdown :options="items">
-  <template #item="{ item }">
-    <button class="flex h-7 w-full items-center justify-between rounded px-2 hover:bg-surface-gray-3">
-      <span>{{ item.label }}</span>
-      <LucideCheck v-if="active === item.value" class="size-4" />
-    </button>
-  </template>
-</Dropdown>
-```
-
-### New
-
-```vue
-<Dropdown :options="items">
-  <template #item-suffix="{ item }">
-    <LucideCheck v-if="item.selected" class="size-4" />
-  </template>
-</Dropdown>
-```
-
-### `{ group, items }` → `{ group, options }` rename
-
-Old:
-
-```ts
-const actions = [
-  {
-    group: 'Edit',
-    items: [
-      { label: 'Rename', onClick: rename },
-      { label: 'Duplicate', onClick: duplicate },
-    ],
-  },
-]
-```
-
-New:
-
-```ts
-const actions = [
-  {
-    group: 'Edit',
-    options: [
-      { label: 'Rename', onClick: rename },
-      { label: 'Duplicate', onClick: duplicate },
-    ],
-  },
-]
-```
-
-`{ group, items }` keeps working through `v1.x`; a dev warning fires if
-both `options` and `items` are provided on the same group entry.
-
-### Old: full-row escape hatch via `component`
-
-```ts
-{
-  label: 'Delete',
-  component: h(Button, { variant: 'solid', theme: 'red' }, () => 'Delete'),
-}
-```
-
-### New: full-row escape hatch via `slots.item`
-
-```ts
-{
-  label: 'Delete',
-  slots: {
-    item: () =>
-      h(Button, { variant: 'solid', theme: 'red' }, () => 'Delete'),
-  },
-}
-```
-
-### New: per-region `slots` (preferred when the shell still makes sense)
+For rows authored in JavaScript where no template is in reach, per-region
+`slots` functions are preferred when the shell still makes sense:
 
 ```ts
 import { h } from 'vue'
@@ -568,14 +440,37 @@ const options = users.map((user) => ({
 }))
 ```
 
-### v1.x stance
+`slots.item` takes over the whole row instead — reserve it for deeply custom
+rows, destructive full-width special rows, and similar exceptional content:
 
-`component` is still supported as a deprecated alias for `slots.item`. Use
-`slots.prefix` / `slots.label` / `slots.suffix` for ordinary
-icon/label/check/suffix customization authored in JS; use `slots.item`
-when the whole row needs to be taken over.
+```ts
+{
+  label: 'Delete',
+  slots: {
+    item: () =>
+      h(Button, { variant: 'solid', theme: 'red' }, () => 'Delete'),
+  },
+}
+```
 
 ## Changelog
+
+### 2026-08-08
+
+- **ADR-0008 removals.** `placement`, `{ group, items }`, `component:` rows,
+  and the phantom `DropdownExposed` type are gone (see
+  [Removed before `1.0.0`](#removed-before-100)). The spec previously
+  mandated keeping the first three as deprecated aliases through `v1.x`;
+  ADR-0008 postdates that promise and wins.
+- **`matchTriggerWidth` documented.** The prop shipped in the betas but the
+  spec predated it.
+- **`emptyText` dropped from the spec.** It was never implemented; the empty
+  state is fixed copy plus the `#empty` slot, and an action menu that is
+  empty by data rather than by `condition()` is rare enough that a copy prop
+  never earned its place.
+- **The trigger forwards `disabled` to the menu primitive.** Previously only
+  the generated `Button` was natively disabled; a custom trigger slot with a
+  `disabled` attribute could still be opened by keyboard or synthetic clicks.
 
 ### 2026-04-24
 

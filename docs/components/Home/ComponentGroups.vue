@@ -27,7 +27,7 @@ const componentGroups = {
   "Forms": {
     component: Forms,
     list: [
-      "Input",
+      "TextInput",
       "FormControl",
       "Select",
       "MultiSelect",
@@ -53,7 +53,6 @@ const componentGroups = {
       "Alert",
       "ErrorMessage",
       "Progress",
-      "CircularProgressBar",
     ],
   },
 

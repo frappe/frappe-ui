@@ -1,6 +1,12 @@
 <template>
-  <NestedPopover>
-    <template #target>
+  <!--
+    `bare` because the filter row is wider than the standard panel, and the
+    panel clips (`overflow-hidden`) so the remove button would be unreachable.
+    This is the documented mapping for the old `#body` slot: content that
+    brings its own surface.
+  -->
+  <Popover bare>
+    <template #trigger>
       <Button label="Filter">
         <template #prefix><FilterIcon class="h-4" /></template>
         <template v-if="filters.length" #suffix>
@@ -12,9 +18,16 @@
         </template>
       </Button>
     </template>
-    <template #body="{ close }">
+    <template #default="{ close }">
+      <!--
+        A filter row does not shrink below ~550px, which is wider than a phone
+        and wider than the panel gets on a short viewport. Capping at reka's
+        available width and scrolling inside keeps the remove button reachable
+        instead of parking it off-screen — the panel is portaled and fixed, so
+        the page cannot scroll to it.
+      -->
       <div
-        class="my-2 rounded-lg border border-gray-100 bg-surface-base shadow-xl"
+        class="my-2 max-w-[var(--reka-popover-content-available-width)] overflow-x-auto rounded-lg border border-outline-gray-1 bg-surface-base shadow-xl"
       >
         <div class="min-w-[400px] p-2">
           <div
@@ -31,11 +44,12 @@
                 {{ i == 0 ? 'Where' : 'And' }}
               </div>
               <div id="fieldname" class="!min-w-[140px] flex-1">
-                <Autocomplete
+                <Combobox
+                  trigger="button"
                   placeholder="Filter by..."
                   :options="fields"
-                  :value="filter.fieldname"
-                  @change="selectFilterField(i, $event)"
+                  :model-value="filter.fieldname"
+                  @update:selected-option="selectFilterField(i, $event)"
                 />
               </div>
               <div id="operator" class="!min-w-[140px] flex-shrink-0">
@@ -54,8 +68,8 @@
                     ['=', '!='].includes(filter.operator)
                   "
                   :doctype="filter.field.options || ''"
-                  :value="filter.value"
-                  @change="updateFilterValueFromOption(i, $event)"
+                  :model-value="filter.value"
+                  @update:model-value="updateFilterValue(i, $event)"
                   placeholder="Value"
                 />
                 <component
@@ -87,17 +101,22 @@
             Empty - Choose a field to filter by
           </div>
           <div class="flex items-center justify-between gap-2">
-            <Autocomplete
-              value=""
+            <Combobox
+              v-model="addFilterField"
               :options="fields"
               placeholder="Filter by..."
-              @change="addFilterFromOption"
+              @update:selected-option="addFilterFromOption"
             >
-              <template #target="{ togglePopover }">
+              <!--
+                Combobox forwards the open toggle onto the #trigger element
+                itself, so this Button needs no @click of its own. Autocomplete's
+                #target handed out a togglePopover to call by hand; carrying
+                that through the rename throws on click.
+              -->
+              <template #trigger>
                 <Button
                   class="!text-ink-gray-5"
                   variant="ghost"
-                  @click="togglePopover()"
                   label="Add filter"
                 >
                   <template #prefix>
@@ -105,7 +124,7 @@
                   </template>
                 </Button>
               </template>
-            </Autocomplete>
+            </Combobox>
             <Button
               v-if="filters.length"
               class="!text-ink-gray-5"
@@ -117,16 +136,23 @@
         </div>
       </div>
     </template>
-  </NestedPopover>
+  </Popover>
 </template>
 
 <script setup lang="ts">
-import { Autocomplete, FormControl } from '../../index'
-import { computed, h } from 'vue'
+import { Combobox, FormControl } from '../../index'
+import { computed, h, ref } from 'vue'
 import FilterIcon from './FilterIcon.vue'
-import NestedPopover from './NestedPopover.vue'
+import Popover from '../Popover/Popover.vue'
 import SearchComplete from './SearchComplete.vue'
-import type { AutocompleteOption } from '../Autocomplete/types'
+import type {
+  ComboboxCustomOption,
+  ComboboxOptionValue,
+  ComboboxSelectableOption,
+} from '../Combobox/types'
+
+/** Payload of Combobox's `update:selectedOption`. */
+type SelectedOption = ComboboxSelectableOption | ComboboxCustomOption | null
 
 type FilterFieldtype =
   | 'Check'
@@ -339,9 +365,14 @@ function addFilter(fieldname: string) {
   filters.value = [...filters.value, filter]
 }
 
-function addFilterFromOption(option: AutocompleteOption) {
+// The "Add filter" picker is an action, not a selection — reset it so picking
+// the same field twice in a row still fires.
+const addFilterField = ref<ComboboxOptionValue | null>(null)
+
+function addFilterFromOption(option: SelectedOption) {
   const fieldname = getOptionValue(option)
   if (fieldname) addFilter(String(fieldname))
+  addFilterField.value = null
 }
 
 function updateFilter(
@@ -353,7 +384,7 @@ function updateFilter(
   )
 }
 
-function selectFilterField(index: number, option: AutocompleteOption) {
+function selectFilterField(index: number, option: SelectedOption) {
   const fieldname = getOptionValue(option)
   if (!fieldname) return
 
@@ -375,10 +406,6 @@ function updateFilterOperator(index: number, option: unknown) {
     ...filter,
     operator: operator as FilterOperator,
   }))
-}
-
-function updateFilterValueFromOption(index: number, option: unknown) {
-  updateFilterValue(index, getOptionValue(option))
 }
 
 function updateFilterValue(index: number, value: FilterValue) {

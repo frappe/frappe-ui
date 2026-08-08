@@ -12,7 +12,7 @@
     <!--
       Native momentum scroll (not ScrollArea's custom bar — a mobile surface
       wants the platform's own overscroll + inertia). Registered into the shared
-      scroll-container registry so `useScrollContainer()` resolves it.
+      scroll-container registry so `shellScrollContainer` resolves it.
     -->
     <div
       ref="scroll"
@@ -30,12 +30,14 @@
 import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import PageHeaderTarget from '../PageHeader/PageHeaderTarget.vue'
 import {
-  registerScrollContainer,
-  unregisterScrollContainer,
-} from '../../composables/useScrollContainer'
+  registerShellScrollContainer,
+  unregisterShellScrollContainer,
+} from '../../composables/useShellScrolled'
 
 const scroll = useTemplateRef<HTMLElement>('scroll')
 
-onMounted(() => scroll.value && registerScrollContainer(scroll.value))
-onBeforeUnmount(() => scroll.value && unregisterScrollContainer(scroll.value))
+onMounted(() => scroll.value && registerShellScrollContainer(scroll.value))
+onBeforeUnmount(
+  () => scroll.value && unregisterShellScrollContainer(scroll.value),
+)
 </script>

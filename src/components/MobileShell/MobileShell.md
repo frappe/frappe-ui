@@ -17,8 +17,8 @@ stay fixed to the edges.
 ## Scroll container
 
 Like `DesktopShell`, the content area registers into the scroll-container
-registry, so [`useScrollContainer()`](/docs/other/utilities) and
-`getScrollContainer()` resolve it — a tapped-active tab or a router
-`scrollBehavior` can drive it with no app-owned global.
+registry, so `shellScrollContainer` and `useShellScrolled()` resolve it — a
+tapped-active tab or a router `scrollBehavior` can drive it with no app-owned
+global.
 
 <!-- @include: ./MobileShell.api.md -->

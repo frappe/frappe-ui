@@ -1,6 +1,6 @@
 <template>
-  <Dialog v-model="open" :options="{ size: 'lg' }">
-    <template #body-main>
+  <Dialog v-model="open" size="lg" bare>
+    <template #default>
       <div class="p-4">
         <!-- Header -->
         <div class="flex w-full justify-between gap-x-2 mb-4">

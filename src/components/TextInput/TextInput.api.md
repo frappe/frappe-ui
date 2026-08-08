@@ -108,16 +108,16 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the input value changes.',
     type: '[value: string]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TextInput" :data="propsData"/> 
+<PropsTable name="TextInput" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

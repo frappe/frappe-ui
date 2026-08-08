@@ -15,7 +15,7 @@
     name: 'headingTag',
     description: 'Heading tag each trigger is wrapped in. The WAI-ARIA accordion pattern\nrequires triggers to sit inside a heading so assistive tech can navigate\nby heading; pick the level that fits the surrounding outline.',
     required: false,
-    type: '"h3" | "h1" | "h2" | "h4" | "h5" | "h6"',
+    type: '"h1" | "h2" | "h3" | "h4" | "h5" | "h6"',
     default: '"h3"'
   },
   {

@@ -26,25 +26,11 @@
     default: '1'
   },
   {
-    name: 'rating_from',
-    description: 'Number of stars to render.',
-    required: false,
-    type: 'number',
-    deprecated: 'Use `max` instead.'
-  },
-  {
     name: 'disabled',
     description: 'If true, disables interaction.',
     required: false,
     type: 'boolean',
     default: 'false'
-  },
-  {
-    name: 'readonly',
-    description: 'If true, disables interaction.',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `disabled` instead.'
   },
   {
     name: 'icon',
@@ -118,11 +104,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Rating" :data="propsData"/> 
+<PropsTable name="Rating" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

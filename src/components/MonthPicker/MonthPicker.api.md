@@ -35,9 +35,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="MonthPicker" :data="propsData"/> 
+<PropsTable name="MonthPicker" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

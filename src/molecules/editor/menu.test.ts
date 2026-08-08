@@ -4,6 +4,12 @@
 
 import { describe, it, expect, vi } from 'vitest'
 import { createApp, defineComponent, h } from 'vue'
+// At module scope rather than `await import('./index')` inside each test.
+// `vi.mock` below is hoisted above imports either way, so the stubs still
+// apply — but pulling the whole editor barrel is slow enough under coverage
+// that the first test to do it was blowing the 5s per-test timeout on CI.
+// Collection is where that cost belongs.
+import * as editorMenu from './index'
 
 const menuProps = vi.hoisted(() => ({
   bubble: [] as any[],
@@ -103,7 +109,7 @@ function fakeEditor(
 describe('editor menu primitives and presets', () => {
   it('renders command items, separators, groups, active state, and disabled state in a fixed menu', async () => {
     const { EditorFixedMenu, Bold, Italic, HeadingGroup, Separator } =
-      await import('./index')
+      editorMenu
     const { editor, calls } = fakeEditor()
     editor.canRun = false
 
@@ -128,7 +134,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('command item actions call the editor chain', async () => {
-    const { EditorFixedMenu, Bold } = await import('./index')
+    const { EditorFixedMenu, Bold } = editorMenu
     const { editor, calls } = fakeEditor()
 
     const root = mount(EditorFixedMenu, { editor, items: [Bold] })
@@ -139,8 +145,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('hides items whose mark/node/extension is absent (self-pruning)', async () => {
-    const { EditorFixedMenu, Bold, InsertTable, AlignLeft } =
-      await import('./index')
+    const { EditorFixedMenu, Bold, InsertTable, AlignLeft } = editorMenu
     // A trimmed editor: no table node, no textAlign extension.
     const { editor } = fakeEditor({ nodes: ['paragraph'], extensions: [] })
 
@@ -155,7 +160,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('drops a group whose every item is unavailable', async () => {
-    const { EditorFixedMenu, HeadingGroup } = await import('./index')
+    const { EditorFixedMenu, HeadingGroup } = editorMenu
     const { editor } = fakeEditor({ nodes: ['paragraph'] }) // no heading node
 
     const root = mount(EditorFixedMenu, { editor, items: [HeadingGroup] })
@@ -166,7 +171,7 @@ describe('editor menu primitives and presets', () => {
 
   it('collapses separators orphaned by pruning (no leading, doubled, or trailing dividers)', async () => {
     const { EditorFixedMenu, Bold, Italic, InsertTable, AlignLeft, Separator } =
-      await import('./index')
+      editorMenu
     // A trimmed editor: no table node, no textAlign extension — so the align and
     // table buttons (and the separators bracketing them) should be pruned.
     const { editor } = fakeEditor({
@@ -200,8 +205,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('renders bubble and floating menus with the shared item shape', async () => {
-    const { EditorBubbleMenu, EditorFloatingMenu, Bold } =
-      await import('./index')
+    const { EditorBubbleMenu, EditorFloatingMenu, Bold } = editorMenu
     const { editor, calls } = fakeEditor()
 
     // Items render their icon (not label text), so assert the button by aria-label.
@@ -222,8 +226,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('passes shouldShow as a menu prop instead of nesting it in Floating UI options', async () => {
-    const { EditorBubbleMenu, EditorFloatingMenu, Bold } =
-      await import('./index')
+    const { EditorBubbleMenu, EditorFloatingMenu, Bold } = editorMenu
     const { editor } = fakeEditor()
     const shouldShow = vi.fn(() => false)
 
@@ -245,8 +248,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('wires image, video, and link menu items through editor actions', async () => {
-    const { EditorFixedMenu, InsertImage, InsertVideo, InsertLink } =
-      await import('./index')
+    const { EditorFixedMenu, InsertImage, InsertVideo, InsertLink } = editorMenu
     const { editor, calls } = fakeEditor()
 
     const root = mount(EditorFixedMenu, {
@@ -266,7 +268,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('opens the font color picker from the menu action with the trigger anchor', async () => {
-    const { EditorFixedMenu, FontColor } = await import('./index')
+    const { EditorFixedMenu, FontColor } = editorMenu
     const { editor } = fakeEditor({ extensions: ['namedColor'] })
 
     const root = mount(EditorFixedMenu, { editor, items: [FontColor] })
@@ -282,8 +284,7 @@ describe('editor menu primitives and presets', () => {
   })
 
   it('exports menu presets as plain arrays', async () => {
-    const { commentToolbar, articleToolbar, minimalToolbar } =
-      await import('./index')
+    const { commentToolbar, articleToolbar, minimalToolbar } = editorMenu
 
     expect(Array.isArray(commentToolbar)).toBe(true)
     expect(Array.isArray(articleToolbar)).toBe(true)

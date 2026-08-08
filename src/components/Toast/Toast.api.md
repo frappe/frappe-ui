@@ -21,7 +21,7 @@
     name: 'type',
     description: 'Visual tone of the toast',
     required: false,
-    type: '"error" | "success" | "info" | "warning"'
+    type: '"info" | "success" | "warning" | "error"'
   },
   {
     name: 'duration',
@@ -62,9 +62,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Toast" :data="propsData"/> 
+<PropsTable name="Toast" :data="propsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

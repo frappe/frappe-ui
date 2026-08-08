@@ -1,18 +1,10 @@
 <template>
   <Dialog
     v-model="show"
-    :options="{
-      title: props.event.hasOwnProperty('id') ? 'Edit Event' : 'New Event',
-      actions: [
-        {
-          label: 'Submit',
-          variant: 'solid',
-        },
-      ],
-    }"
+    :title="props.event.hasOwnProperty('id') ? 'Edit Event' : 'New Event'"
     class="z-50"
   >
-    <template #body-content>
+    <template #default>
       <div>
         <div class="grid grid-cols-1 gap-4">
           <FormControl

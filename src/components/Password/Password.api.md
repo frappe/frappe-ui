@@ -32,13 +32,6 @@
     type: 'boolean'
   },
   {
-    name: 'value',
-    description: 'Alternate way to set the password value.',
-    required: false,
-    type: 'string | null',
-    deprecated: 'Use `v-model` / `modelValue` instead.'
-  },
-  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -102,11 +95,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Password" :data="propsData"/> 
+<PropsTable name="Password" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

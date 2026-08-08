@@ -1,5 +1,6 @@
 <template>
   <TextInput
+    ref="textInputRef"
     v-model="model"
     :type="show ? 'text' : 'password'"
     :label="label"
@@ -25,19 +26,15 @@
     </template>
     <template #suffix>
       <Tooltip>
-        <template #body>
-          <div
-            class="rounded bg-surface-gray-10 py-1.5 px-2 text-xs text-ink-base shadow-xl"
-          >
-            <span class="flex items-center gap-1">
-              {{ show ? 'Hide Password' : 'Show Password' }}
-              <KeyboardShortcut
-                bg
-                combo="Mod+I"
-                class="!bg-surface-gray-8 !text-ink-gray-2 px-1"
-              />
-            </span>
-          </div>
+        <template #content>
+          <span class="flex items-center gap-1">
+            {{ show ? 'Hide Password' : 'Show Password' }}
+            <KeyboardShortcut
+              bg
+              combo="Mod+I"
+              class="!bg-surface-gray-8 !text-ink-gray-2 px-1"
+            />
+          </span>
         </template>
         <div>
           <span
@@ -56,11 +53,11 @@
 import KeyboardShortcut from '../KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { PasswordProps } from './types'
-import { computed, ref, watchEffect } from 'vue'
+import type { TextInputExposed } from '../TextInput/types'
+import { computed, ref } from 'vue'
 
-const props = withDefaults(defineProps<PasswordProps>(), {
+withDefaults(defineProps<PasswordProps>(), {
   size: 'sm',
   variant: 'subtle',
 })
@@ -68,20 +65,8 @@ const props = withDefaults(defineProps<PasswordProps>(), {
 /** The current password value (controlled). */
 const model = defineModel<string>()
 
-watchEffect(() => {
-  if (props.value != null) {
-    warnDeprecated('Password.value', 'v-model / modelValue')
-    if (model.value == null || model.value === '') {
-      model.value = props.value ?? ''
-    }
-  }
-})
-
 const show = ref(false)
-const showEye = computed(() => {
-  let v = model.value || props.value
-  return !v?.includes('*')
-})
+const showEye = computed(() => !model.value?.includes('*'))
 
 defineSlots<{
   /** Content shown before the input field (left icon / custom content) */
@@ -91,4 +76,19 @@ defineSlots<{
   /** Overrides the rendered description content. */
   description?: () => any
 }>()
+
+const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
+
+function focus(options?: FocusOptions) {
+  textInputRef.value?.focus(options)
+}
+
+// A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
+// why — a ComputedRef doesn't structurally match the type's plain element.
+defineExpose<TextInputExposed>({
+  focus,
+  get inputElement() {
+    return textInputRef.value?.inputElement ?? null
+  },
+})
 </script>

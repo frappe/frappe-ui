@@ -20,7 +20,7 @@ This is the rulebook that governs API design across `frappe-ui`. Every principle
 
 ### P1. Name behaviors, not interactions
 
-**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
+**Rule:** Event and slot names describe what happened to the component's state, not the physical input that produced it. The same holds for every name an export hands back — composable return members, `defineExpose` members, utility and plugin export names. Prefer `change`, `open`, `select`, `submit`, `dismiss` over `toggle`, `clickOutside`, `keydownEnter`.
 
 Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), don't rename it. The principle applies when the component layers its own state or intent above the raw event.
 
@@ -37,6 +37,11 @@ Exception: when the DOM event *is* the behavior (e.g. `click` on a `Button`), do
 <Dialog @dismiss="..." />
 <TextInput @submit="..." />
 ```
+
+Accepted v1 carve-outs:
+- The v1 resource surface (`createResource`, `createListResource`, `createDocumentResource`) and the v2 data-fetching composables (`useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`) keep every member name they ship today — including three names for one fetch (v1 `fetch` / `reload` / `submit`, v2 `execute` / `fetch` / `reload`) and two for one loading ref (v2 `loading` / `isFetching`). These names don't meet the rule; renaming them costs every consumer a migration and buys a tidier surface, and that trade is worse than the violation.
+
+P13 freezes them at the v1 tag and ADR-0008 leaves no room for a compatible rename, so they ship as-is until `2.0.0`.
 
 ---
 
@@ -153,9 +158,20 @@ Icon-only buttons, action toggles, and other controls that don't carry a value a
 - `#default` — main content
 - `#prefix` / `#suffix` — leading/trailing visual elements (icon, avatar, badge, indicator)
 - `#trigger` — the element that opens an overlay
+- `#content` — an overlay's content when `#default` is already the trigger
 - `#empty` — fallback when a list has no items
 - `#footer` / `#header` — region wrappers
 - `#label` / `#description` — overrides for the labeling contract (P5)
+
+**`#body` is not in the vocabulary.** It said "the content, but bypassing the
+component's own shell", which is a *prop* (`bare`), not a slot — and every call
+site that reached for it then hand-copied the shell classes it had just removed.
+Dialog warns on it, Popover dropped it, Tooltip's became `#content` + `bare`.
+
+**`#default` is the trigger on Tooltip**, the one inversion in the library. Its
+shorthand — `<Tooltip text="Delete"><Button /></Tooltip>` — is what over 200 of
+its call sites use, so `#content` names the other half rather than making every
+one of them wrap a trigger in a named slot for no behavioral gain.
 
 **Scoped slots (inside repeated units)** prefix with the unit name:
 - `#item-prefix` / `#item-suffix` / `#item-label` — per-item in a list / dropdown / select
@@ -237,13 +253,12 @@ Static-content slots (`#footer`, `#empty` with no dynamic context, `#prefix` on 
 
 ```vue
 <!-- Bad -->
-<Autocomplete :fetch-options="fetchUsers" multi searchable creatable />
+<Picker :fetch-options="fetchUsers" multi searchable creatable />
 
 <!-- Good -->
 <Select />          <!-- single, fixed options -->
 <MultiSelect />     <!-- multi, fixed options -->
-<Combobox />        <!-- single, searchable -->
-<Autocomplete />    <!-- async-fetched, optionally creatable -->
+<Combobox />        <!-- single, searchable; :filterable="false" to search server-side -->
 ```
 
 ---
@@ -338,6 +353,8 @@ The exact data-slot / data-state taxonomy is per component family; each family's
 - The generic **`#prefix` / `#suffix` slots** (P6) are the full-control override — not a parallel `#icon` slot competing with the prop.
 
 **The Button exception:** Button has a singular `#icon` slot (and `icon` prop with no left/right pair) because square icon-only buttons are a standard, common component.
+
+**The Rating exception:** Rating pairs its `icon` prop with an `#icon` slot. The star glyph *is* the component's content — `#prefix`/`#suffix` don't exist on it — and the slot receives per-star fill state (`state`, `previewValue`, …) that a prop cannot carry, which P7 requires for state-driven rendering (e.g. per-position emoji scales).
 
 **Forbidden:**
 - Structured icon-config objects (`icon: { name, theme, … }`). Identity is one value; theme/size are component-level concerns, not fields packed inside the icon prop.
@@ -463,3 +480,56 @@ const isDismissible = computed(() => {
 2. The barrel header restates the no-promise contract at the point of use.
 3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
 4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.
+
+---
+
+## Package structure
+
+### P15. Root is the default; a subpath is earned, not organized into
+
+**Rule:** Every export lives at the package root unless it clears one of three bars:
+
+1. **Cost isolation** — it statically pulls a third-party dependency, or ships a CSS side effect, that root must not impose on every consumer. A dependency reached only through `await import()` is already isolated and doesn't count.
+2. **Extensible registry** — consumers can add a *new kind* of member the library never defined (a custom TipTap extension, a custom menu item), with no library change. A component with props and slots isn't this, however complex internally; neither is assembling a fixed set of named parts into a layout, however many parts.
+3. **Name collision** — its export names collide with root's, or would as root grows.
+
+Part count, file count, and "it would read better organized" are explicitly **not** reasons. Grouping by domain is the docs' job, not the module graph's — and a subpath is a one-way door: exported at `1.0.0`, it freezes under P13 until `2.0.0`, while adding a subpath later is always additive. When in doubt, default to root; the cost of being wrong is much lower in that direction.
+
+**Why:** A subpath makes a permanent promise about where something lives and what it costs to import. Without a written bar, every new family invents its own answer and the split reads as historical accident. The three bars above are the only things that have held up against every existing family, tested one by one — see ADR-0010 for the full audit and the size/collision-only alternatives it rejected along the way.
+
+```
+// Good — cost isolation: TipTap only loads if you import it
+import { Editor } from 'frappe-ui/editor'
+
+// Good — a fixed set of named parts, however many: root
+import { SettingsDialog, SettingsSidebar, SettingsPanel } from 'frappe-ui'
+
+// Bad — minting a subpath because a family "feels big enough"
+import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
+// dependency, no CSS side effect, and no colliding name — it stays at root.
+```
+
+**Consequence:** because root is the permanent home for everything that doesn't clear a bar, its compound families — `SettingsDialog`, `PageHeader`, `Sidebar`, list views — freeze there too. A subpath can't be used later to fix a name that shipped wrong; getting those names right is the cost of keeping them at root.
+
+**`export *` only from a curated barrel.** An entry point may `export *` from an `index.ts` whose export list was reviewed — a component family's barrel, `data-fetching/`, `experimental.ts`. It may never `export *` from an implementation module. The two look identical in a diff and behave completely differently: a barrel's export list is the reviewed decision, while an implementation module exports whatever it happens to need exported next, and a helper added months later joins the public API with no review, no docs, and — after `1.0.0` — a freeze until `2.0.0`.
+
+This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. `tailwind/tokens.js` reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)).
+
+The rule is a one-line grep, and the fix is mechanical — spell the members out:
+
+```ts
+// Bad — src/index.ts
+export * from './composables/useScrollContainer'  // implementation module:
+// today 9 members, tomorrow whatever the next commit adds
+
+// Good
+export {
+  shellScrollContainer,
+  useShellScrolled,
+} from './composables/useShellScrolled'
+
+// Good — a curated barrel, whose own list is the reviewed decision
+export * from './components/Button'
+```
+
+Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.

@@ -29,14 +29,8 @@
     name: 'align',
     description: 'Alignment of the dropdown content along the trigger edge.',
     required: false,
-    type: 'DropdownAlign'
-  },
-  {
-    name: 'placement',
-    description: 'Placement of the dropdown relative to the trigger.',
-    required: false,
-    type: 'DropdownPlacement',
-    deprecated: 'use `align` instead; `placement` remains as a back-compat alias through v1.x'
+    type: 'DropdownAlign',
+    default: '"start"'
   },
   {
     name: 'side',
@@ -88,6 +82,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="Dropdown" :data="propsData"/>

@@ -7,9 +7,9 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: 'Selected theme. Falls back to the shared `useTheme` state when unbound.',
+    description: 'Selected theme. Falls back to the shared `useColorScheme` state when unbound.',
     required: false,
-    type: 'Theme'
+    type: 'ColorScheme'
   },
   {
     name: 'label',
@@ -27,7 +27,7 @@
   },
   {
     name: 'logo',
-    description: 'Brand logo shown inside each preview. A string is treated as an image source; a component value is rendered with `<component :is>`.',
+    description: 'Brand logo shown inside each preview. A string is treated as an image\nsource; a component value is rendered with `<component :is>`.',
     required: false,
     type: 'string | Component'
   },
@@ -40,9 +40,9 @@
   },
   {
     name: 'themeLabels',
-    description: 'Overrides the per-option labels. For richer per-item content, use the `#item-label` slot, which takes precedence over this prop.',
+    description: 'Overrides the per-option labels. For richer per-item content, use the\n`#item-label` slot, which takes precedence over this prop.',
     required: false,
-    type: 'Partial<Record<Theme, string>>'
+    type: 'Partial<Record<ColorScheme, string>>'
   }
 ]
 
@@ -59,24 +59,24 @@
   },
   {
     name: 'item-label',
-    description: 'Overrides a single option\'s label. Receives the option\'s `value`. Falls back to the `themeLabels` prop, then the built-in label.',
-    type: '{ value: Theme; }'
+    description: 'Overrides a single option\'s label. Receives the option\'s `value`.\nFalls back to the `themeLabels` prop, then the built-in label.',
+    type: '{ value: ColorScheme; }'
   }
 ]
 
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[theme: Theme]'
+    description: 'Fired when the selected theme changes.',
+    type: '[theme: ColorScheme]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ThemeSwitcher" :data="propsData"/> 
+<PropsTable name="ThemeSwitcher" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>
