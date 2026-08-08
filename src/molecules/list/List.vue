@@ -11,10 +11,24 @@ import type { ListProps } from './types'
 
 const props = defineProps<ListProps>()
 
+defineSlots<{
+  /** The list's rows — `<ListRow>` / `<ListRows>`, optionally under `<ListHeader>` / `<ListGroup>`. */
+  default?: () => unknown
+}>()
+
+/**
+ * The checkbox-selected row values, when `selectable` reveals the checkbox
+ * column. Two-way — toggling a row's checkbox updates this set.
+ */
 const selection = defineModel<string[]>('selection', { default: () => [] })
 // Single active row. Unlike `selection` there's no explicit mode flag: binding
 // v-model:active is the opt-in, detected via the update listener below so a
 // highlight never appears on a list that doesn't track one.
+/**
+ * The single open/highlighted row, for a master–detail layout. Binding this
+ * model is what opts a list into active-row tracking — an unbound list shows
+ * no highlight. Independent of `selection`.
+ */
 const active = defineModel<string | undefined>('active')
 
 const instance = getCurrentInstance()
