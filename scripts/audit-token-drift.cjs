@@ -15,7 +15,7 @@
  *                       Deprecation candidate; we suggest a replacement by
  *                       matching resolved hex against live Figma tokens.
  *
- * Usage:  node tailwind/audit-token-drift.js [baselineRef]
+ * Usage:  node scripts/audit-token-drift.cjs [baselineRef]
  *         baselineRef defaults to v0.1.278
  */
 const { execSync } = require('child_process')

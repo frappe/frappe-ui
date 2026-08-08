@@ -13,6 +13,7 @@ import { verticalScrollParent } from './extensions/table/drag-scroll'
 import MenuItems from './MenuItems.vue'
 import TableContextMenu from './components/TableContextMenu.vue'
 import { tableToolbar } from './menu'
+import { usePortalTarget } from '#composables/usePortalTarget'
 import type { Editor } from './useEditor'
 import { useResolvedEditor } from './editor-context'
 import {
@@ -34,6 +35,8 @@ import {
  * self-prune when the Table extension is absent, so it's inert in a comment
  * editor.
  */
+const portalTarget = usePortalTarget()
+
 const props = defineProps<{
   // Optional inside <Editor> — falls back to the provided editor context.
   editor?: Editor | null
@@ -266,7 +269,7 @@ onBeforeUnmount(closeContextMenu)
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <Transition name="table-menu">
       <div
         v-show="visible && editor"

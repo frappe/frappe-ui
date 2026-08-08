@@ -145,7 +145,7 @@ export interface MenuProps {
   /** Dynamic `item-*` slot implementations resolved by name. */
   slotFns?: Record<string, ((props?: any) => any) | undefined>
 
-  /** Portal target for submenu content. */
+  /** Portal target for submenu content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 
   /** Reka-ui primitives supplied by the wrapping menu component. */

@@ -76,4 +76,5 @@ function frappeuiPlugin(options = {}) {
 
 export default frappeuiPlugin
 export { lucideIcons } from './lucideIcons.js'
+export { lucideIconsPlugin } from './lucideIconsPlugin.js'
 export { barrelImports } from './barrelImports.js'

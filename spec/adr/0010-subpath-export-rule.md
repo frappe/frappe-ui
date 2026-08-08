@@ -63,7 +63,7 @@ separate category, decided on their own terms.
 | `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. Now also home to `CodeEditor` and `CodePreview` (see below). |
 | `frappe-ui/code-editor` | none | Removed. `CodeEditor`'s only dependency (CodeMirror) is entirely behind `await import()` — nothing static. It is a form-field sibling of `Textarea`/`TextInput` (its own prop types are derived from the shared `InputVariant`/`InputSize` union), not a family with a composition model. `CodePreview` statically imports `marked`, which would otherwise re-enter root's dependency graph the moment ADR-0008 deletes the deprecated `TextEditor` re-export (`marked`'s only other path to root). Rather than fold `CodeEditor` into root and leave `CodePreview` behind on a single-purpose subpath, both move to `frappe-ui/experimental` together — P14 carries no stability promise, so the pair can grow into a fuller code-editing parts family later, against real usage, without needing a `2.0.0`. |
 | `frappe-ui/frappe`, `frappe-ui/drive`, `frappe-ui/drive/*` | — | Disposition is #867's decision, not this rule's. |
-| `frappe-ui/tailwind`, `frappe-ui/tailwind/tokens.js`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/tsconfig.base.json`, `frappe-ui/hljs-theme.css` | — | Build-time/tooling category; #887's decision. |
+| `frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/tsconfig.base.json`, `frappe-ui/tailwind/tokens.js`, `frappe-ui/hljs-theme.css` | — | Build-time/tooling category, decided by #887: **a build-time entry freezes additive-only** — options, tokens, utilities, and compiler options may be added in a minor; nothing may be renamed or removed before `2.0.0` (PHILOSOPHY.md P15). Ships: `tailwind` (gains a `content` export), `vite` (gains types), `tsconfig.base.json` (cleaned, #938), and `vitepress` under its own rule (P14 — no stability promise, exempt from the additive-only rule too). Removed: `tailwind/tokens.js` (removed in [#936](https://github.com/frappe/frappe-ui/issues/936); zero importers anywhere, an `export *` leak of `colorPalette.js`) and `hljs-theme.css` (removed in #938; the file goes with the deprecated `TextEditor`). |
 
 ### What this hands to other tickets
 
@@ -84,7 +84,7 @@ separate category, decided on their own terms.
   `echarts` and `grid-layout-plus` respectively — limb (a) says they cannot stay at
   root as-is. `frappe-ui/charts` (#890) already ships the v2 replacement correctly
   isolated; the old family and `GridLayout` need the same treatment (lazy-load,
-  subpath, or un-export) once #890 lands.
+  subpath, or un-export) once #890 lands (GridLayout since removed, #943).
 - **#886** (data API export posture): `idb-keyval` is imported only by
   `src/data-fetching/`, nowhere else in the library — the data layer already trips
   limb (a) on its own, independent of any stylistic argument for a `frappe-ui/data`
@@ -141,10 +141,18 @@ separate category, decided on their own terms.
   archaeology — a new family's authors can apply P15 themselves instead of
   re-litigating the question.
 - `frappe-ui/code-editor` is removed as a subpath; `CodeEditor`, `CodePreview`, and
-  `loadLanguage` move to `frappe-ui/experimental`. No downstream app imports
-  `frappe-ui/code-editor` today (checked against freshly fetched `upstream` refs for
-  crm, helpdesk, insights, builder, gameplan, raven), so this is a zero-call-site
-  move, not a break.
+  `loadLanguage` move to `frappe-ui/experimental`. **Correction (#935):** this was
+  first written up as a zero-call-site move, checked against freshly fetched
+  `upstream` refs for crm, helpdesk, insights, builder, gameplan, and raven — but
+  that count missed frappe's own `ui/` package. `@framework/ui` imports it at
+  `ui/src/components/Fields/CodeEditorField.vue:120`
+  (`import { CodeEditor, CodePreview } from "frappe-ui/code-editor"`), the same
+  gap that made #887 initially read `frappe-ui/experimental` as unused when it
+  has 8 import sites there. The verdict doesn't change — it's a loud break in one
+  file, and that file already imports from `frappe-ui/experimental`, so the fold
+  merges two import lines into one — only the basis does. **Standing rule 5's
+  census must include frappe's `ui/` package from here on, not only the product
+  apps.**
 - `frappe-ui/list`, `frappe-ui/icons`, and the in-flight `frappe-ui/charts` all stand
   on this rule without needing a carve-out.
 - Root keeps `SettingsDialog`, `PageHeader`, `Sidebar`, and the legacy `ListView`

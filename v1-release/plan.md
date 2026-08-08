@@ -91,9 +91,9 @@ Core set:
 
 - Calendar
 - Resource
-- VueGridLayout
 
 These can still exist in the package, but they are not part of the v1 stabilization contract.
+(VueGridLayout was listed here; it's deleted now — see #943.)
 
 ### Exported but not yet classified for v1
 
@@ -455,7 +455,7 @@ These stay in the plan, but should not block `1.0.0`:
 - TextEditor table editing UX improvements
 - downstream migration PRs across all products
 - Calendar stabilization
-- VueGridLayout modernization
+- VueGridLayout modernization (moot — the component is deleted, see #943)
 
 ## Release gates
 

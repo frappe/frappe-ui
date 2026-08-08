@@ -69,6 +69,7 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
+        { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
         { text: 'Typography', link: '/docs/foundations/typography' },
@@ -103,7 +104,10 @@ function buildSidebar(): SidebarSection[] {
       items: [
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
+        { text: 'Composables', link: '/docs/other/composables' },
         { text: 'Directives', link: '/docs/other/directives' },
+        { text: 'Vite Plugin', link: '/docs/other/vite' },
+        { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
   ]

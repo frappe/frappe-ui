@@ -9,6 +9,51 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — `content` export added
+
+`frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
+directories that emit Tailwind classes. Spread it into your app's
+`tailwind.config.js` `content` array instead of hand-maintaining the paths —
+see the new [Tailwind Setup](/docs/foundations/tailwind) docs page. Tailwind
+v3 doesn't merge a preset's `content`, so this was previously unavoidable
+hand-maintenance, and it had already drifted: some apps on
+`frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every
+class the editor and list molecules emit.
+
+### Tailwind preset — `tokens.js` export removed (breaking)
+
+The `./tailwind/tokens.js` export is removed outright, with no deprecation
+window. It had zero importers anywhere and re-exported `colorPalette.js` via
+`export *`, the implementation-module re-export pattern disallowed by P15.
+Use the preset (`frappe-ui/tailwind`) directly.
+
+This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
+the freeze that requires a deprecation window starts at the tag, not before
+it. Zero call sites is also why it's a same-release removal rather than a
+carried-forward deprecation: there is no consumer for a warning to reach.
+
+### `frappe-ui/vite` — types and docs
+
+`frappe-ui/vite` now ships hand-written types (`vite/index.d.ts`, wired via
+the `types` export condition), so `frappeui(...)` and its options
+(`frontendRoute`, `lucideIcons`, `barrelImports`, `frappeProxy`,
+`jinjaBootData`, `buildConfig`, `frappeTypes`) are typed without a
+`// @ts-expect-error` workaround. Also added a
+[docs page](../docs/content/docs/other/vite.md) covering every sub-plugin,
+including `barrelImports` — previously undocumented on the docs site.
+
+### list-style.css and editor-style.css exports — removed
+
+- **Breaking:** the manual `frappe-ui/list-style.css` and
+  `frappe-ui/editor-style.css` exports are gone (loud — the consumer build
+  fails with `Missing "./list-style.css" specifier`). They existed only
+  because bundlers tree-shook the side-effect `import './style.css'` inside
+  the `frappe-ui/list` and `frappe-ui/editor` barrels. The barrels are now
+  listed in `sideEffects`, so each family's CSS ships automatically the
+  moment you import anything from its subpath — delete the manual `@import`
+  lines. The tree-shake was never Rolldown-specific: plain Rollup/Vite
+  production builds dropped the CSS too.
+
 ### Toggles and ranged inputs — deprecated members removed
 
 Per ADR-0008, the family's deprecated aliases are **removed**, not shipped
@@ -37,6 +82,15 @@ and `Rating` exports `RatingEmits`.
 - **Breaking:** Node floor is now `>=20.19.0` (was Node 18 on 0.1.x). Declared
   via `package.json` `engines` so installers and CI surface the requirement
   instead of opaque transitive-dep engine errors.
+
+### Portal target for embedded apps
+
+- `portalTo` on `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+  `MultiSelect` no longer declares a `'body'` prop default. An unembedded app
+  still gets `'body'`, now as a fallback. No existing call behaves differently.
+- New `usePortalTarget` / `providePortalTarget` / `portalTargetKey` exports let
+  an embedding host redirect every overlay at once. See
+  [`spec/portal-target.md`](../spec/portal-target.md).
 
 ### Dialog — v1 spec
 
@@ -881,6 +935,48 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
   consumer previously hand-declared a structural copy of it because it wasn't
   re-exported — that copy can now be dropped in favor of the real type.
 
+### `tsconfig.base.json` — cleaned up (breaking for extenders)
+
+- **Breaking:** `tsconfig.base.json` no longer sets `types`
+  (`vitest/globals`, `unplugin-icons/types/vue`, `node`). If your app extends
+  this file and relies on any of these globals, add `types` to your own
+  `tsconfig.json`. Without it, `tsc` fails with a missing-global error (e.g.
+  `Cannot find name 'vi'`) the first time a global that used to come from
+  `vitest/globals` or `unplugin-icons/types/vue` is referenced. `noEmit`
+  stays — it's needed to keep `allowImportingTsExtensions` legal — but the
+  `declaration` / `emitDeclarationOnly` pair (contradictory alongside
+  `noEmit`, and unused by frappe-ui's own build) is gone.
+
+### `./hljs-theme.css` export removed
+
+- **Breaking:** `frappe-ui/hljs-theme.css` is no longer exported. It had zero
+  importers. The underlying file
+  (`src/components/TextEditor/hljs-github.css`) ships until the deprecated
+  `TextEditor` is removed.
+
+### pageMetaPlugin — removed
+
+- **Silent break:** `pageMetaPlugin` and the global mixin it installed are gone.
+  A leftover `pageMeta()` component option still compiles but is never read, so
+  `document.title` and the favicon quietly stop updating. See the
+  [migration guide](../docs/content/docs/migration.md#pagemetaplugin-removed).
+- `usePageMeta` is unchanged and now exports its `PageMeta` type.
+
+### GridLayout — removed (breaking)
+
+- **Breaking:** `GridLayout` is no longer exported. It was a thin passthrough
+  to `grid-layout-plus` with no docs page and no tests. The import fails, so
+  the build names every call site. Depend on `grid-layout-plus` directly.
+- `grid-layout-plus` is dropped from `dependencies` — it had no other
+  importer left in `src/`.
+- Two bugs in the deleted component, so consumers wiring up
+  `grid-layout-plus` themselves should expect different behavior:
+  - `cols` and `rowHeight` were read once at setup inside a `reactive()`
+    options object, not `computed`, so changing either prop after mount did
+    nothing.
+  - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
+    so it ignored dark mode.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
@@ -899,6 +995,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
 | `Input.vue`                        | `TextInput`                          | **Removed in 1.0.0** (ADR-0008)        |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
+| `GridLayout`                       | depend on `grid-layout-plus` directly | **Removed** — loud; import fails      |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
 | DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
 | DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |

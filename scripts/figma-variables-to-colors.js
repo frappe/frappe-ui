@@ -5,11 +5,14 @@
 
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function main() {
   const variables = getVariables()
   const json = convertToJSON(variables)
-  const outputPath = path.resolve(__dirname, 'colors.json')
+  const outputPath = path.resolve(__dirname, '../tailwind/colors.json')
   fs.writeFileSync(outputPath, JSON.stringify(json, null, 2))
   console.log('colors.json has been written to', outputPath)
 }

@@ -28,10 +28,9 @@
   },
   {
     name: 'portalTo',
-    description: 'Where the card is teleported to in the DOM.',
+    description: 'Where the card is teleported to in the DOM. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement',
-    default: '"body"'
+    type: 'string | HTMLElement'
   },
   {
     name: 'collisionPadding',
