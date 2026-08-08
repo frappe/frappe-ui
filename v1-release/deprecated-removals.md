@@ -68,8 +68,11 @@ in them is marked `@deprecated`:
   comment saying to keep them public until official apps finish the v3
   migration. Removing them is a v3-migration decision, not a `1.0.0` blocker.
 - **v2 data composables** — same situation.
-- **`ListView`** — `src/index.ts:77` explicitly says not to deprecate it until
-  `frappe-ui/list` reaches parity.
+- **`ListView`** — sweep #882 confirmed the parity gap is real and structural
+  (resizable columns, per-column function props, tooltips, disabled-row
+  exclusion, select banner — none of which `frappe-ui/list`'s composition
+  model replicates by design, P3). Decision: ListView ships frozen, not
+  deprecated, for v1. See its row in `plan.md`.
 
 If any of the three gets a `@deprecated` marker before the tag, it joins the
 table above and has to be removed with the rest.
