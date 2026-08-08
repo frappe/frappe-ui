@@ -39,19 +39,14 @@ describe('PhoneInput', () => {
       },
     })
 
-    // Popover is closed initially
     cy.get('[data-slot="content"]').should('not.exist')
 
-    // Open the popover via the country picker button
     cy.get('button[type="button"]').click()
 
-    // Popover content is now visible
     cy.get('[data-slot="content"]').should('exist')
 
-    // Click "United States" in the list
     cy.contains('United States').click()
 
-    // Popover must be closed
     cy.get('[data-slot="content"]').should('not.exist')
   })
 })
