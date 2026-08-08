@@ -348,6 +348,40 @@ open it behind your back:
 </Popover>
 ```
 
+### Slot props
+
+`#trigger` and `#default` receive `{ open, close, toggle }`.
+
+| Before                     | After                                    |
+| -------------------------- | ---------------------------------------- |
+| `isOpen`                   | `open`                                   |
+| `open` (a method to call)  | `toggle`, or nothing — see below         |
+| `togglePopover`            | `toggle`                                 |
+| `updatePosition`           | gone; reka repositions on its own        |
+
+`open` is now the boolean state, which is what it already means on `Dropdown`,
+`Select`, `MultiSelect`, `HoverCard` and `Sidebar`. It used to be a method on
+`Popover` alone.
+
+This one is silent and worth grepping for: a destructured `isOpen` becomes
+`undefined`, so a class bound to it stops applying with no error.
+
+```vue
+<!-- Before -->
+<template #trigger="{ isOpen }">
+  <Button :class="isOpen && 'ring-2'" label="Filter" />
+</template>
+
+<!-- After -->
+<template #trigger="{ open }">
+  <Button :class="open && 'ring-2'" label="Filter" />
+</template>
+```
+
+Most triggers need nothing at all — `#trigger` wires its own click, so the
+`open()` method it used to hand out had no callers. `toggle` is there for the
+cases that drive it by hand.
+
 ### Attributes are not inherited
 
 `<Popover class="…">` and `<Popover :style="…">` used to land on a wrapper the
@@ -361,14 +395,18 @@ component, which keeps `hoverDelay` / `leaveDelay` in seconds.
 
 ### Tooltip
 
-| Before                     | After                                                    |
-| -------------------------- | -------------------------------------------------------- |
-| `placement="right"`        | `side="right"`                                            |
-| `arrowClass`               | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble |
+| Before              | After                                                      |
+| ------------------- | ---------------------------------------------------------- |
+| `placement="right"` | `side="right"`                                             |
+| `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
+| `#body`             | `#content` (add `bare` if the content owns its surface)     |
 
-Both are silent — the tooltip keeps working, it just points the wrong way or
-loses the styling. `arrowClass` was documented as the arrow's fill, but was
-mostly used to nudge the bubble's position; `offset` does that directly.
+All three are silent — the tooltip keeps working, it just points the wrong way,
+loses the styling, or comes up empty. `arrowClass` was documented as the arrow's
+fill, but was mostly used to nudge the bubble's position; `offset` does that
+directly.
+
+`#default` is still the **trigger**. That is deliberate and is not changing.
 
 ```vue
 <!-- Before -->
@@ -379,6 +417,44 @@ mostly used to nudge the bubble's position; `offset` does that directly.
 <!-- After -->
 <Tooltip text="Preview" side="bottom" :offset="12">
   <Button label="Preview" />
+</Tooltip>
+```
+
+`#body` replaced the whole bubble, surface included, so call sites hand-copied
+the bubble's own classes to get them back. `#content` renders inside the bubble,
+so that wrapper goes away:
+
+```vue
+<!-- Before -->
+<Tooltip>
+  <template #body>
+    <div
+      class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
+    >
+      <span>Hide password</span>
+    </div>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+
+<!-- After -->
+<Tooltip>
+  <template #content>
+    <span>Hide password</span>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+```
+
+If the content really does bring its own surface — an image preview, say — keep
+it and add `bare`:
+
+```vue
+<Tooltip bare>
+  <template #content>
+    <img :src="url" class="max-h-40 rounded shadow-xl" />
+  </template>
+  <span class="truncate">{{ filename }}</span>
 </Tooltip>
 ```
 

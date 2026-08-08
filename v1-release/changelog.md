@@ -378,9 +378,17 @@ aliased and nothing warns.
 - Fixed: `CalendarWeekDayEvent` passed `placement="center"` in month view,
   which is not a side and reached reka as one. It is `side="bottom"` +
   `align="center"` now.
+- **Breaking, silent:** the slot props are `{ open, close, toggle }`. `open` is
+  now the boolean state, matching `Dropdown`, `Select`, `MultiSelect`,
+  `HoverCard` and `Sidebar`; the `open()` method it used to be had no callers,
+  since `#trigger` opens itself. `isOpen` is gone — read `open` instead. A
+  destructured `isOpen` becomes `undefined` with no error, so styling that
+  depends on it stops applying silently.
 - Fixed: `MonthPicker` styled its panel through `popoverClass`, which had
   already become a no-op, so the panel rendered with no surface at all. It
   uses the standard panel shell now.
+- Fixed: `:dismissible="false"` still closed on `Escape`. Only the outside-click
+  channel was wired, while `CONTEXT.md` defines `dismissible` as covering both.
 
 Before/after for each silent break is in the
 [migration guide](../docs/content/docs/migration.md#popover-hovercard-tooltip).
@@ -405,8 +413,23 @@ Before/after for each silent break is in the
   `Popover` and `HoverCard`. The bubble is no longer pinned at 4px.
 - Added: `[data-slot="content"]`, `[data-slot="bubble"]` and
   `[data-slot="arrow"]` styling hooks.
+- **Breaking, silent:** the `#body` slot is replaced by `#content`, which
+  renders *inside* the bubble instead of replacing it. `#body` is not in P6's
+  slot vocabulary, and it was the wrong shape: it stripped the bubble's surface,
+  so six of the seven call sites in the apps hand-copied
+  `rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl` to put
+  it back. Moving to `#content` usually means deleting that wrapper. Vue drops
+  an unknown slot without an error, so a missed call site shows an empty
+  tooltip.
+- Added: `bare` renders `#content` without the bubble shell, for content that
+  brings its own surface — an image preview, say. The arrow still renders. This
+  is the honest form of what `#body` was reached for.
 - `TooltipBubble` is no longer exported. It is the internal bubble shared by
   `Tooltip` and `Button`, with no call sites outside the library.
+- `Tooltip` keeps `#default` as the **trigger**, deliberately. It is the one
+  inversion in the library, recorded under P6: over 200 call sites use the
+  `<Tooltip text="…"><Button /></Tooltip>` shorthand, and renaming the slot
+  would move every one of them for no behavioral gain.
 
 Before/after is in the
 [migration guide](../docs/content/docs/migration.md#tooltip).
