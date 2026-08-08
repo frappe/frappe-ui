@@ -151,9 +151,6 @@ export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
 export { default as NumberChart } from './components/Charts/NumberChart.vue'
 export { default as useAxisChartOptions } from './components/Charts/axisChartOptions'
 
-// Grid layout
-export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
-
 // Composables
 export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
 export {
