@@ -176,7 +176,12 @@ describe('Tree', () => {
 
   it('freezes expand/collapse and drag when disabled', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', disabled: true },
+      props: {
+        nodes: makeNodes(),
+        nodeKey: 'id',
+        disabled: true,
+        draggable: true,
+      },
     })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()

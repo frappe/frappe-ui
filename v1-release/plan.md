@@ -423,7 +423,7 @@ stay in the **main** docs — they are not deprecated for 1.0.
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView is deprecated in favor of `frappe-ui/list`)
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView ships frozen, not deprecated — see [ListView row](#v1-component-refinement-pass))
 - the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
