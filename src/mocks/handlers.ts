@@ -75,10 +75,6 @@ export const handlers = [
     return HttpResponse.error()
   }),
 
-  http.post(url('/api/v2/document/InvalidDoctype'), () => {
-    return HttpResponse.error()
-  }),
-
   http.get(url('/api/v2/document/User/user1'), async () => {
     return HttpResponse.json({
       data: {
