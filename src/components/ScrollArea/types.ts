@@ -12,10 +12,6 @@ export interface ScrollBarProps {
   orientation?: 'vertical' | 'horizontal'
 }
 
-/**
- * Shared with `SettingsBody`, which wraps its own `ScrollArea` and forwards
- * the same element.
- */
 export interface ScrollAreaExposed {
   /** The element that actually scrolls. Null until mounted. */
   viewportElement: HTMLElement | null
