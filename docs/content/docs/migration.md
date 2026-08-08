@@ -674,7 +674,6 @@ flat props on the component:
 | `fieldname`                 | `fieldname`                  |
 | `upload_endpoint`           | `uploadEndpoint`             |
 | `optimize`                  | `optimize`                   |
-| `max_width` / `max_height`  | `maxWidth` / `maxHeight`     |
 
 ```vue
 <!-- Before -->
@@ -692,8 +691,9 @@ upload public silently starts uploading private instead. `grep` every
 `<FileUploader>` for `uploadArgs=` / `:upload-args=` and move each field to
 its flat prop.
 
-`file_url`, `method`, `type`, `params`, and upload cancellation (`signal`) have
-no flat-prop equivalent — they had no measured use on the component. Use
+`file_url`, `method`, `type`, `params`, `max_width` / `max_height`, and upload
+cancellation (`signal`) have no flat-prop equivalent — they had no measured
+use on the component. Use
 [`useFileUpload()`](./other/utilities#usefileupload-fileuploadhandler)
 directly for those.
 
@@ -716,6 +716,29 @@ uploader.value.inputRef().click()
   <Button @click="openFileSelector">Upload</Button>
 </FileUploader>
 ```
+
+### Default slot's `error` prop — always a string
+
+The default slot's `error` prop is `string | null`, no longer `unknown`.
+Upload failures were always normalized to a message string; validation
+failures (a `validateFile` prop returning an `Error`) were not, so `error`
+could previously be an `Error` object too. Both paths normalize to a message
+string now.
+
+```vue
+<!-- Before: had to guard against error being a string or an Error -->
+<template #default="{ error }">
+  {{ typeof error === 'string' ? error : error?.message }}
+</template>
+
+<!-- After: error is always a string -->
+<template #default="{ error }">
+  {{ error }}
+</template>
+```
+
+This is silent: a slot that only ever did `error.message` (assuming the
+`Error` shape) now renders `undefined` instead of the validation message.
 
 ### `fileToBase64` and the size-limit helpers — no longer exported
 

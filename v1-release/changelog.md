@@ -32,13 +32,14 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 - **Silent break:** `uploadArgs` is removed. Its fields that are actually used
   in the wild are now flat props: `private`, `folder`, `doctype`, `docname`,
-  `fieldname`, `uploadEndpoint`, `optimize`, `maxWidth`, `maxHeight`. Old code
-  keeps compiling — `uploadArgs` becomes an inert attribute on the root
-  element — so an app that relied on it (`folder`, `doctype`, custom
-  `private`, …) silently stops applying those options. Advanced options with
-  no flat prop (`file_url`, `method`, `type`, `params`, upload cancellation)
-  had zero measured use on the component; reach for `useFileUpload()` directly
-  for those. See the [migration guide](../docs/content/docs/migration.md#fileuploader).
+  `fieldname`, `uploadEndpoint`, `optimize`. Old code keeps compiling —
+  `uploadArgs` becomes an inert attribute on the root element — so an app
+  that relied on it (`folder`, `doctype`, custom `private`, …) silently stops
+  applying those options. Advanced options with no flat prop (`file_url`,
+  `method`, `type`, `params`, `maxWidth`/`maxHeight`, upload cancellation) had
+  zero measured use on the component (rule 9); reach for `useFileUpload()`
+  directly for those. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
 
 ### FileUploader — `success` / `failure` emits declared stable
 
@@ -47,6 +48,23 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
   UploadedFile]`, `failure: [error: unknown]` (previously untyped `any`).
   Both are load-bearing at real call sites and keep their names — they
   already read as behaviors (P1), not interactions.
+- Fixed: `failure` didn't fire when `validateFile` rejected a file — only on
+  an actual upload error. `error` was set on the slot props either way, but a
+  listener on `@failure` never heard about a validation rejection. It now
+  emits `failure` with the validation error (string or `Error`) in both
+  cases, matching what the type already promised.
+
+### FileUploader — slot prop `error` is now always a string
+
+- **Silent break:** `FileUploaderSlotProps.error` changed from `unknown` to
+  `string | null`. Upload failures were already normalized to a message
+  string; validation failures (`validateFile` returning an `Error`) were not
+  — a custom slot could receive either a string or an `Error` object. Both
+  paths now normalize to a message string before reaching the slot. A slot
+  that did `{{ error.message }}` expecting the validation-`Error` case
+  (uncommon, but not impossible) silently renders nothing now that `error` is
+  always a string. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
 
 ### FileUploader — `inputRef` removed, nothing in its place
 
@@ -1086,7 +1104,8 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | Dialog template-ref `close()`      | `v-model:open` / `close` slot prop   | **Removed** — throws on call           |
 | `ConfirmDialog` component          | `dialog.confirm()` / `dialog.danger()` | **Removed** — import fails           |
 | `confirmDialog()`                  | `dialog.confirm()`                   | **Removed** — import fails             |
-| `FileUploader.uploadArgs`          | flat props (`private`, `folder`, `doctype`, `docname`, `fieldname`, `uploadEndpoint`, `optimize`, `maxWidth`, `maxHeight`) | **Removed** — silent; inert attr |
+| `FileUploader.uploadArgs`          | flat props (`private`, `folder`, `doctype`, `docname`, `fieldname`, `uploadEndpoint`, `optimize`) | **Removed** — silent; inert attr |
 | `FileUploader` template-ref `inputRef` | `openFileSelector` slot prop      | **Removed** — throws on call           |
+| `FileUploader` slot prop `error`   | always `string \| null`, was `unknown` | **Changed** — silent; `.message` access renders nothing |
 | `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |

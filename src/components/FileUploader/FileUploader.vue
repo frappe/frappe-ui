@@ -97,8 +97,6 @@ const uploadOptions = computed<UploadOptions>(() => ({
   fieldname: props.fieldname,
   upload_endpoint: props.uploadEndpoint,
   optimize: props.optimize,
-  max_width: props.maxWidth,
-  max_height: props.maxHeight,
 }))
 
 function openFileSelector() {

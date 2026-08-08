@@ -36,12 +36,6 @@ export interface FileUploaderProps {
   /** Resize the image server-side before storing it. */
   optimize?: boolean
 
-  /** Max width in pixels, applied when `optimize` is set. */
-  maxWidth?: number
-
-  /** Max height in pixels, applied when `optimize` is set. */
-  maxHeight?: number
-
   /** Optional validation hook. Return a message or Error to block upload. */
   validateFile?: (
     file: File,

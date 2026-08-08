@@ -55,18 +55,6 @@
     type: 'boolean'
   },
   {
-    name: 'maxWidth',
-    description: 'Max width in pixels, applied when `optimize` is set.',
-    required: false,
-    type: 'number'
-  },
-  {
-    name: 'maxHeight',
-    description: 'Max height in pixels, applied when `optimize` is set.',
-    required: false,
-    type: 'number'
-  },
-  {
     name: 'validateFile',
     description: 'Optional validation hook. Return a message or Error to block upload.',
     required: false,
