@@ -818,12 +818,14 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 ### `tsconfig.base.json` — cleaned up (breaking for extenders)
 
 - **Breaking:** `tsconfig.base.json` no longer sets `types`
-  (`vitest/globals`, `unplugin-icons/types/vue`, `node`) or the `noEmit` /
-  `declaration` / `emitDeclarationOnly` trio. If your app extends this file
-  and relies on any of these, add them to your own `tsconfig.json`. Without
-  the `types` fix, `tsc` fails with a missing-global error (e.g. `Cannot
-  find name 'vi'`) the first time a global that used to come from
-  `vitest/globals` or `unplugin-icons/types/vue` is referenced.
+  (`vitest/globals`, `unplugin-icons/types/vue`, `node`). If your app extends
+  this file and relies on any of these globals, add `types` to your own
+  `tsconfig.json`. Without it, `tsc` fails with a missing-global error (e.g.
+  `Cannot find name 'vi'`) the first time a global that used to come from
+  `vitest/globals` or `unplugin-icons/types/vue` is referenced. `noEmit`
+  stays — it's needed to keep `allowImportingTsExtensions` legal — but the
+  `declaration` / `emitDeclarationOnly` pair (contradictory alongside
+  `noEmit`, and unused by frappe-ui's own build) is gone.
 
 ### `./hljs-theme.css` export removed
 
