@@ -77,31 +77,19 @@ import {
   type ActiveShortcut,
 } from '../../composables/useShortcut'
 import Dialog from '../Dialog/Dialog.vue'
-import KeyboardShortcut from '../KeyboardShortcut.vue'
+import KeyboardShortcut from '../KeyboardShortcut/KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
+import type { KeyboardShortcutsModalProps } from './types'
 
 defineOptions({ name: 'KeyboardShortcutsModal' })
 
 const open = defineModel<boolean>('open', { default: false })
 
-const props = withDefaults(
-  defineProps<{
-    /** Dialog title (default: "Keyboard Shortcuts"). */
-    title?: string
-    /** CSS value for top padding when position is top (default: "5vh"). */
-    paddingTop?: string
-    /**
-     * Minimum number of shortcuts that must be registered before the search
-     * input is shown (default: 20).
-     */
-    searchThreshold?: number
-  }>(),
-  {
-    title: 'Keyboard Shortcuts',
-    paddingTop: '5vh',
-    searchThreshold: 20,
-  },
-)
+const props = withDefaults(defineProps<KeyboardShortcutsModalProps>(), {
+  title: 'Keyboard Shortcuts',
+  paddingTop: '5vh',
+  searchThreshold: 20,
+})
 
 const searchQuery = ref('')
 const activeShortcuts = getActiveShortcuts()
