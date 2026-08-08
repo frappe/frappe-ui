@@ -148,10 +148,10 @@ describe('DatePicker', () => {
     cy.get('[role=dialog]').should('exist')
   })
 
-  it('readonly prop', () => {
-    cy.mount(DatePicker, { props: { readonly: true } })
+  it('typeable: false prevents typing but still opens popover', () => {
+    cy.mount(DatePicker, { props: { typeable: false } })
     cy.get('input').should('have.attr', 'readonly')
-    cy.get('input').click()
+    cy.get('input').dblclick()
     cy.get('[role=dialog]').should('exist')
   })
 
