@@ -1,1 +1,0 @@
-export { createSuggestionExtension, } from './createSuggestionExtension';
