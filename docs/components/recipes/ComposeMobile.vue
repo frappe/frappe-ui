@@ -135,10 +135,10 @@ const { textarea: titleTextarea } = useTextareaAutosize({ input: title })
     >
       <template #default="{ editor }">
         <PageHeaderMobile title="New discussion">
-          <template #left>
+          <template #prefix>
             <Button variant="ghost" icon="lucide-chevron-left" label="Back" />
           </template>
-          <template #right>
+          <template #suffix>
             <Button variant="solid">Publish</Button>
           </template>
         </PageHeaderMobile>

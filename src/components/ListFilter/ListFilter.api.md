@@ -7,14 +7,14 @@
   const propsData = [
   {
     name: 'modelValue',
-    description: '',
+    description: 'The active filters, keyed by fieldname to `[operator, value]`.',
     required: false,
     type: 'FiltersDict',
     default: '{}'
   },
   {
     name: 'docfields',
-    description: '',
+    description: 'Doctype fields the filter picker can filter by.',
     required: false,
     type: 'DocField[]',
     default: '[]'

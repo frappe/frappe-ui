@@ -215,7 +215,9 @@ const emits = defineEmits<{
 
 const props = withDefaults(
   defineProps<{
+    /** The active filters, keyed by fieldname to `[operator, value]`. */
     modelValue?: FiltersDict
+    /** Doctype fields the filter picker can filter by. */
     docfields?: DocField[]
   }>(),
   {

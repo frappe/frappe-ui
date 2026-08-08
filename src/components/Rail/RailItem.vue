@@ -104,6 +104,11 @@ const props = withDefaults(defineProps<RailItemProps>(), {
 
 const emit = defineEmits<{ click: [event: MouseEvent] }>()
 
+defineSlots<{
+  /** Custom content in place of the default icon — an image, avatar, or initials. */
+  default?: () => any
+}>()
+
 // The left indicator bar is the `tile` variant's active affordance; `ghost`
 // items signal active state through their raised background instead.
 const showIndicator = computed(() => props.variant === 'tile' && props.active)

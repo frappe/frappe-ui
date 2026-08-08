@@ -44,6 +44,62 @@ bare composable frame: `SidebarHeader` / `SidebarSection` / `SidebarLabel` /
   `aria-expanded` / `aria-controls`, keyboard-operable (was a `<div>` with a
   click handler and no keyboard path).
 
+### ListView — stays, not deprecated
+
+`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
+primitive for new code, but it's a narrower, composition-based family by
+design — it has no equivalent for `ListView`'s config-driven columns
+(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
+disabled-row exclusion, the built-in select banner). If you're on `ListView`
+today, there's no forced migration for `1.0.0`.
+
+### `TextEditor` and its v0 exports — removed from root (breaking)
+
+Per ADR-0008, the deprecated v0 editor exports are removed from top-level
+`frappe-ui` — loud breaks, the import fails to resolve:
+
+- `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`
+- `ImageExtension`, `SetImageOptions`, `createSuggestionExtension`,
+  `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
+  `TextEditor/extensions/*` barrels also re-exported from root)
+
+Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
+[Editor section](../docs/content/docs/migration.md#editor). This confirms
+`CONTEXT.md`'s rule: the editor family is the only subsystem that exports
+from a subpath rather than root, and nothing editor-related is exported from
+root anymore.
+
+The underlying v0 component files (`src/components/TextEditor/`) still ship,
+unmodified, as `frappe-ui/editor`'s migration safety net — only the public
+export and its docs page are gone. Removing the files is a separate,
+human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
+`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
+out to `1.1`.
+
+### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
+
+`.ProseMirror ul[data-type='taskList'] input[type='checkbox']` used a
+Tailwind-v3-only `theme('colors.gray.900')` call in both
+`frappe-ui/editor`'s and the v0 `TextEditor`'s stylesheet, which broke
+Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
+same `var(--ink-gray-9)` token the rest of both files already use.
+
+### v1 resources — at-bar exception documented; `listResource` gets test coverage
+
+v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
+`getCachedResource`, `getCachedListResource`, `getCachedDocumentResource`,
+`resourcesPlugin`, `saveLocal`, `getLocal`, `deleteLocal`, `onDocUpdate`) ship
+un-deprecated and frozen at `1.0.0`, per #886.
+[ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md) records the
+one exception: the implementation stays hand-written JavaScript rather than
+TypeScript, permanently — 344 production call sites make a rewrite riskier
+than the freeze. `createListResource`, the second-most-used export at 57 call
+sites, gets test coverage for the first time (`listResource.test.ts`):
+pagination, `insert`/`setValue` refreshing the list, caching, and `reload()`'s
+pagination-state restore.
+
 ### Tailwind preset — `content` export added
 
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
@@ -203,22 +259,21 @@ Before/after for the silent breaks is in the
 popover-trigger vocabulary used by `Combobox` / `Dropdown` / `Select`.
 
 - `side` (default `'bottom'`) + `align` (default `'start'`) + `offset`
-  (default `4`) replace `placement` (deprecated alias).
-- `keepOpen` (default `false`) replaces `autoClose` (deprecated, inverse).
+  (default `4`) replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed, inverse).
 - `typeable` (default `true`) replaces picker-level `readonly` and
-  `allowCustom` (both deprecated). `:typeable="false"` blocks typing while
+  `allowCustom` (both removed). `:typeable="false"` blocks typing while
   keeping the popover interactive.
 - Constraints: `min?: string` and `max?: string` (`YYYY-MM-DD`, plus
   `YYYY-MM-DD HH:mm:ss` on `DateTimePicker`), and
   `isDateUnavailable?: (date: Dayjs) => boolean` for arbitrary disabling.
   Min/max and the predicate compose. On `DateTimePicker`,
-  `minDateTime`/`maxDateTime` are deprecated aliases.
+  `minDateTime`/`maxDateTime` are removed in favor of `min`/`max`.
 - `v-model:open` supported on all three pickers via `open` + `update:open`.
 - `openOnFocus` (default `false`) and `openOnClick` (default `true`) let
   consumers opt out of either trigger path. Same defaults applied to
   `Combobox` for parity.
-- `#trigger` is the canonical custom-trigger slot; `#target` is a
-  deprecated alias.
+- `#trigger` is the canonical custom-trigger slot; `#target` is removed.
 - `DateRangePicker.clearable` now defaults to `true`; footer hides when
   there is nothing to clear. Live hover preview while picking the end
   date and a stable trigger width derived from `format` were added in the
@@ -274,15 +329,18 @@ and close from `@update:modelValue`, or render an "Apply" button in
 
 Same vocabulary as the DatePicker family plus a flexible parser.
 
-- `side` / `align` / `offset` replace `placement`.
-- `keepOpen` (default `false`) replaces `autoClose`.
-- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`.
+- `side` / `align` / `offset` replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed).
+- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`
+  (both removed).
 - `v-model:open` via `open` + `update:open`; new `openOnFocus` (default
   `false`) and `openOnClick` (default `true`) props.
 - Flexible typed input: `"3pm"`, `"3.30pm"`, `"1500"`, `"9:30:15 am"`
   parse to canonical `HH:mm[:ss]`.
-- `min` / `max` replace `minTime` / `maxTime` (deprecated aliases).
-- `scrollMode` is deprecated; list is always centered on the selection.
+- `min` / `max` replace `minTime` / `maxTime` (removed).
+- `scrollMode` is removed; list is always centered on the selection.
+- Template ref exposes only `focus()` (ADR-0012). `selectAll()` and
+  `blurInput()`, dead members with no callers, are removed.
 
 ### DatePicker family — keyboard navigation
 
@@ -304,11 +362,35 @@ and leaves the grid as a single unit. Custom `#trigger` slots opt in
 automatically — any open path moves focus into the grid since a
 non-`TextInput` trigger has no typing context.
 
-### DatePicker family — legacy composable deprecated
+### DatePicker family — legacy composable removed
 
 `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
-`getDaysInMonth`, `isLeapYear`) are not used by any picker component and
-are not part of the v1 API. They remain exported through v1.x and warn.
+`getDaysInMonth`, `isLeapYear`) were not used by any picker component and
+were not part of the v1 API. Deleted outright — the import fails, so the
+break is loud.
+
+### DatePicker / TimePicker family — deprecated aliases removed (ADR-0008)
+
+The back-compat aliases these components carried through the betas are
+deleted, not kept as warn-and-map shims — per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+deprecated member ships in `1.0.0`. Before/afters in the
+[migration guide](../docs/content/docs/migration.md#datepicker--timepicker-family).
+
+- **`placement`, `autoClose`, `allowCustom`, picker-level `readonly`,
+  `inputClass`, `value` prop removed.** All silent: a leftover prop lands as
+  an inert extra attribute instead of doing anything.
+- **`#target` slot removed.** Content in a leftover `<template #target>`
+  silently stops rendering. Use `#trigger`.
+- **`DateTimePicker.minDateTime`/`maxDateTime` and
+  `TimePicker.minTime`/`maxTime` removed.** Silent: the constraint just stops
+  being enforced. Use `min`/`max`.
+- **`TimePicker.scrollMode` removed.** Silent; the list is always centered.
+
+`change` stays as a supported second emit alongside `update:modelValue` —
+it was never deprecated on `TimePicker`, and `DateTimePicker` depends on it
+internally, so removing it from the other two pickers would have been an
+inconsistent, unforced break.
 
 ### Input family — shared labeling contract
 
@@ -435,10 +517,15 @@ a bare `src/components/FormLabel.vue`, matching the rest of the input
 family. It gains `types.ts`, tests, stories, and a docs page. The import
 path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
 
-### Legacy components — dev-mode warnings
+### MonthPicker — removed (breaking)
 
-`MonthPicker` is deprecated. For simple month picking, use `Select` with month
-options.
+`MonthPicker` and its whole barrel (`MonthPicker.vue`, types, stories) are
+deleted. It duplicated `Select` for a narrower case. Use `Select` with month
+options — see the
+[migration guide](../docs/content/docs/migration.md#monthpicker). The import
+fails, so the break is loud.
+
+### Legacy components — dev-mode warnings
 
 `Pill` is no longer exported from the package entrypoint. It remains an
 internal `TabButtons` detail.
@@ -864,6 +951,19 @@ error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
 `FrappeRequestError` closed for `frappeRequest`.
 
+### Data fetching (v2) — docs, and the sidebar splits from Resources
+
+`useCall`, `useDoc`, `useList`, `useDoctype` and `useNewDoc` each get a docs
+page for the first time, under a new **Data Fetching** sidebar section —
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for
+a query, `useDoctype` for write-only access to a DocType, `useNewDoc` for a
+draft-and-insert form.
+
+The old **Data Fetching** section is renamed **Resources** and keeps its
+three pages (Resource, List Resource, Document Resource) unchanged. Both
+sections link to each other: Resources stays fully supported through `1.x`;
+the new composables are the recommended layer for new code.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,
@@ -1012,6 +1112,37 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
   - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
     so it ignored dark mode.
 
+### App shell family — brought to bar
+
+`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
+`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
+names.
+
+- Every slot across the family now has a documented description, and each
+  component has a docs page, a story, and cypress tests (several had none).
+- **Breaking, silent:** `PageHeaderMobile`'s `#left`/`#right` slots and
+  `PageHeaderMobileTitle`'s `#icon` slot are renamed to the shared
+  `#prefix`/`#suffix` vocabulary (PHILOSOPHY.md P6 forbids type-specific
+  slots like `#icon` outside `Button`, and `#left`/`#right` were never in
+  the vocabulary). Vue drops content passed to an unknown slot name with no
+  error, so the old names don't warn — they just stop rendering. See the
+  [migration guide](../docs/content/docs/migration.md#pageheadermobile-family-slot-names).
+- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
+  `ScrollAreaExposed`) and `data-slot="scroll-area"` /
+  `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`
+  styling hooks — it had none. `viewportElement` on the template ref is now
+  typed via `ScrollAreaExposed`. (`SettingsDialog`'s `SettingsBody` exposes
+  the same shape today but isn't wired to this type yet — that's tracked
+  under SettingsDialog's own sweep.)
+- `FrappeUIProvider`'s source directory moved from `src/components/Provider`
+  to `src/components/FrappeUIProvider` to match its file name. Purely
+  internal — `import { FrappeUIProvider } from 'frappe-ui'` is unaffected.
+- **Breaking:** `FrappeUIProviderProps` is no longer exported. The component
+  has no props, so the type was empty and never wired to `defineProps` —
+  freezing it now would lock in nothing. Zero known consumers.
+  The mismatched directory name had made the whole component invisible to
+  the docs generator, so it previously had no docs page.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
@@ -1032,21 +1163,22 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
 | `GridLayout`                       | depend on `grid-layout-plus` directly | **Removed** — loud; import fails      |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
-| DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
-| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
-| DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |
-| DatePicker family `readonly`       | `typeable: false`                    | Picker-level only; warns               |
-| DatePicker family `inputClass`     | `class` on the component element     | Warns when set                         |
-| DatePicker family `value` prop     | `v-model` / `modelValue`             | Warns when set                         |
-| DatePicker family `change` emit    | `update:modelValue` / `v-model`      | Warns when bound                       |
-| DatePicker family `#target` slot   | `#trigger`                           | Silent alias; warns                    |
-| `TimePicker.scrollMode`            | none (always centered)               | Warns when set                         |
-| `DateTimePicker.minDateTime`       | `min`                                | Mapped internally; warns               |
-| `DateTimePicker.maxDateTime`       | `max`                                | Mapped internally; warns               |
-| `TimePicker.minTime`               | `min`                                | Mapped internally; warns               |
-| `TimePicker.maxTime`               | `max`                                | Mapped internally; warns               |
-| `useDatePicker` composable         | use picker components directly       | Warns on call                          |
-| `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
+| DatePicker family `placement`      | `side` + `align` + `offset`          | **Removed** — silent; inert extra attribute |
+| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | **Removed** — silent; inert extra attribute |
+| DatePicker family `allowCustom`    | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `readonly`       | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `inputClass`     | `class` on the component element     | **Removed** — silent; inert extra attribute |
+| DatePicker family `value` prop     | `v-model` / `modelValue`             | **Removed** — silent; inert extra attribute |
+| DatePicker family `#target` slot   | `#trigger`                           | **Removed** — silent; slot content stops rendering |
+| `TimePicker.scrollMode`            | none (always centered)               | **Removed** — silent; inert extra attribute |
+| `DateTimePicker.minDateTime`       | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `DateTimePicker.maxDateTime`       | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.minTime`               | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.maxTime`               | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.selectAll()` / `.blurInput()` | none — dead, no callers       | **Removed** — loud; template-ref member gone |
+| `useDatePicker` composable         | use picker components directly       | **Removed** — loud; import fails       |
+| `getDate` / `getDatesAfter` / etc. | use picker components directly       | **Removed** — loud; import fails       |
+| `MonthPicker`                      | `Select`                             | **Removed** — loud; import fails       |
 | `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
 | Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
 | Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |

@@ -57,27 +57,27 @@
   const slotsData = [
   {
     name: 'item',
-    description: '',
+    description: 'Fully replaces a row\'s default rendering — receives `toggle` plus node state.',
     type: 'TreeNodeSlotProps'
   },
   {
     name: 'item-prefix',
-    description: '',
+    description: 'Leading content before the label, inside the default row layout.',
     type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
     name: 'item-label',
-    description: '',
+    description: 'Overrides the row\'s label text, inside the default row layout.',
     type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
     name: 'item-suffix',
-    description: '',
+    description: 'Trailing content after the label, inside the default row layout.',
     type: 'Omit<TreeNodeSlotProps, "toggle">'
   },
   {
     name: 'empty',
-    description: '',
+    description: 'Rendered instead of the tree when `nodes` is empty.',
     type: 'any'
   }
 ]
@@ -90,12 +90,12 @@
   },
   {
     name: 'drag-start',
-    description: '',
+    description: 'Fired when a drag is picked up.',
     type: '[node: TreeNode]'
   },
   {
     name: 'drag-end',
-    description: '',
+    description: 'Fired when a drag ends: the committed move, or `null` if it was cancelled.',
     type: '[info: DropInfo | null]'
   }
 ]

@@ -5,13 +5,14 @@
 
 // App setup and plugins
 export { default as FrappeUI } from './utils/plugin'
-export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
+export { FrappeUIProvider } from './components/FrappeUIProvider'
 export { getConfig, setConfig } from './utils/config'
 export type { FrappeUIConfig } from './utils/config'
 
 // Data fetching
 export * from './data-fetching'
-// Legacy resource API. Keep public until official apps finish the v3 migration.
+// v1 resource API. Supported and frozen through 1.x, un-deprecated — see #886
+// and ADR-0013 (implementation stays JS; no changes to internal code).
 export * from './resources/index.ts'
 // One HTTP transport. `request` stays internal — it is the bare fetch wrapper
 // `frappeRequest` and the v1 resources are built on, with none of the Frappe
@@ -82,7 +83,14 @@ export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
 
 // Lists and collection views
 export * from './components/ItemListRow'
-// Legacy ListView family. Do not deprecate until `frappe-ui/list` reaches parity.
+// Legacy ListView family. Ships frozen (not deprecated) for v1 — see the
+// parity note in v1-release/plan.md's ListView row: `frappe-ui/list` is
+// composition-based by design (P3) and doesn't replicate ListView's
+// config-driven columns (resizable widths, per-column getLabel/prefix
+// functions, tooltips, disabled-row exclusion, the select banner), so this
+// isn't a "not yet" gap that will close on its own. Bringing ListView's own
+// 12-export barrel to the at-bar checklist (TS conversion, types.ts, tests,
+// docs) is tracked as a follow-up, not done in the same pass as this comment.
 export * from './components/ListView'
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export * from './components/Calendar'
@@ -125,18 +133,10 @@ export { default as FeatherIcon } from './components/FeatherIcon.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'
-/** @deprecated Use `Select` for month picking instead. */
-export * from './components/MonthPicker'
 /** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
 export { default as Toast } from './components/Toast/Toast.vue'
 /** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
-/** @deprecated Use the `frappe-ui/editor` subpath instead. */
-export * from './components/TextEditor'
-/** @deprecated Use extensions from `frappe-ui/editor` instead. */
-export * from './components/TextEditor/extensions/image'
-/** @deprecated Use extensions from `frappe-ui/editor` instead. */
-export * from './components/TextEditor/extensions/suggestion'
 
 // Charts
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
