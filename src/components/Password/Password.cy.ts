@@ -1,5 +1,5 @@
 import Password from './Password.vue'
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Password', () => {
@@ -62,6 +62,43 @@ describe('Password', () => {
       expect($input.attr('aria-describedby')).to.equal(`${id}-description`)
       expect($input.attr('aria-required')).to.equal('true')
     })
+  })
+
+  it('exposes focus() and inputElement', () => {
+    const Harness = defineComponent({
+      setup() {
+        const passwordRef = ref<InstanceType<typeof Password> | null>(null)
+
+        return () =>
+          h('div', [
+            h(Password, { ref: passwordRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () =>
+                  passwordRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+            h(
+              'span',
+              { 'data-cy': 'is-input-element' },
+              String(
+                passwordRef.value?.inputElement instanceof HTMLInputElement,
+              ),
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[data-cy="is-input-element"]').should('have.text', 'true')
+    cy.get('input').should('not.have.attr', 'tabindex')
+    cy.get('input').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('input').should('have.focus')
   })
 
   it('Prefix slot', () => {

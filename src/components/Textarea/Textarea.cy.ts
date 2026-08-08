@@ -1,6 +1,44 @@
 import Textarea from './Textarea.vue'
+import { defineComponent, h, ref } from 'vue'
 
 describe('Textarea', () => {
+  it('exposes focus() and inputElement', () => {
+    const Harness = defineComponent({
+      setup() {
+        const textareaRef = ref<InstanceType<typeof Textarea> | null>(null)
+
+        return () =>
+          h('div', [
+            h(Textarea, { ref: textareaRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () =>
+                  textareaRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+            h(
+              'span',
+              { 'data-cy': 'is-textarea-element' },
+              String(
+                textareaRef.value?.inputElement instanceof HTMLTextAreaElement,
+              ),
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[data-cy="is-textarea-element"]').should('have.text', 'true')
+    cy.get('textarea').should('not.have.attr', 'tabindex')
+    cy.get('textarea').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('textarea').should('have.focus')
+  })
+
   it('renders label, placeholder, and rows', () => {
     cy.mount(Textarea, {
       props: {

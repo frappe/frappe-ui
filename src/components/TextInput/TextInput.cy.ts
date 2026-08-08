@@ -1,5 +1,5 @@
 import TextInput from './TextInput.vue'
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 
 const inputTypes = [
   'text',
@@ -95,6 +95,41 @@ describe('Textinput', () => {
     cy.get('@onUpdate').should('not.have.been.called')
     cy.get(`input[type=text]`).type('abc')
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
+  })
+
+  it('exposes focus() and inputElement', () => {
+    const Harness = defineComponent({
+      setup() {
+        const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
+
+        return () =>
+          h('div', [
+            h(TextInput, { ref: inputRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () => inputRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+            h(
+              'span',
+              { 'data-cy': 'is-input-element' },
+              String(inputRef.value?.inputElement instanceof HTMLInputElement),
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[data-cy="is-input-element"]').should('have.text', 'true')
+    // No tabindex override — the native <input> stays in the default Tab order.
+    cy.get('input').should('not.have.attr', 'tabindex')
+    cy.get('input').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('input').should('have.focus')
   })
 
   describe('shared labeling contract', () => {

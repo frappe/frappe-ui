@@ -568,6 +568,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Switch.labelClasses`                      | `data-*` styling hooks |
 | `Checkbox.padding`                         | `padded`               |
 | `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
+| `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
 The first five rows are **removed**, not aliased. The old names are silently
 ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
@@ -581,6 +582,38 @@ the control is announced correctly.
 The legacy `Input` component is deprecated. Use
 [`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
 `Select` / `Checkbox` for the other type modes it accepted.
+
+### `TextInput`, `Textarea`, `Password` — ref surface
+
+`TextInput` and `Textarea` handed back `{ el }`, a raw ref on the native
+element. It's now `{ focus, inputElement }`: call `focus(options?)` to move
+keyboard focus, and read `inputElement` for the native element itself (a
+computed, so it can't be reassigned). `Password` gains the same pair — it
+previously exposed nothing.
+
+This is silent for plain JS: `ref.value.el` becomes `undefined` at runtime
+instead of throwing. A typed ref catches it as a build-time error instead.
+
+```vue
+<!-- Before -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.el.focus({ preventScroll: true })
+}
+</script>
+
+<!-- After -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.focus({ preventScroll: true })
+}
+</script>
+```
+
+`Duration` already exposed `focus()`; it now takes the same `options?`
+parameter as the rest of the family.
 
 ## Divider
 

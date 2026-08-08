@@ -1,5 +1,6 @@
 import Duration from './Duration.vue'
 import { formatDuration, parseDuration } from './duration'
+import { defineComponent, h, ref } from 'vue'
 
 describe('Duration', () => {
   it('renders a text input', () => {
@@ -116,6 +117,34 @@ describe('Duration', () => {
   it('disables the input', () => {
     cy.mount(Duration, { props: { disabled: true } })
     cy.get('input').should('be.disabled')
+  })
+
+  it('exposes focus()', () => {
+    const Harness = defineComponent({
+      setup() {
+        const durationRef = ref<InstanceType<typeof Duration> | null>(null)
+
+        return () =>
+          h('div', [
+            h(Duration, { ref: durationRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () =>
+                  durationRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('input').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('input').should('have.focus')
   })
 })
 

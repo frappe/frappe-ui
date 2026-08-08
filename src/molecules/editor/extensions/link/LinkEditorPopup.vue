@@ -155,7 +155,7 @@ const copyLink = async () => {
 
 const focusInput = async () => {
   await nextTick()
-  const el = input.value?.el
+  const el = input.value?.inputElement
   if (!el) return
   // preventScroll: the popup is teleported to <body> and positioned async by
   // floating-ui, so at focus time the input may still be at the top of the
@@ -189,7 +189,7 @@ const maybePrefillFromClipboard = async () => {
   if (!isValidLinkHref(normalized)) return
   _href.value = normalized
   await nextTick()
-  input.value?.el?.select()
+  input.value?.inputElement?.select()
 }
 
 /**

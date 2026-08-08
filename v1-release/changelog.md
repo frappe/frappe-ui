@@ -247,6 +247,20 @@ CSS can target inputs without class-injection props:
 `disabled`, `placeholder`, `id`, `required` props replace `$attrs` routing.
 `value` prop is deprecated.
 
+### TextInput / Textarea / Password / Duration — `focus()` and `inputElement` on the ref
+
+Implements [ADR-0012](../spec/adr/0012-template-ref-surface.md).
+
+- **Breaking:** `TextInput.el` and `Textarea.el` are renamed to
+  `inputElement` — a computed, typed `HTMLInputElement | null` /
+  `HTMLTextAreaElement | null`, never a raw ref.
+- All three, plus `Duration`, now expose `focus(options?: FocusOptions)`.
+  `Password` previously exposed nothing.
+- `TextInput`, `Textarea`, and `Password` share one exported type,
+  `TextInputExposed`, from `TextInput`'s `types.ts`.
+- `DurationExposed.focus` gained the same `options?` parameter; its member
+  set is unchanged.
+
 ### Rating — `max` replaces `rating_from`
 
 Default `5`. (The old name was kept as a deprecated alias during the betas

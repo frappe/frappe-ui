@@ -55,6 +55,7 @@ import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { TextareaEmits, TextareaProps } from './types'
+import type { TextInputExposed } from '../TextInput/types'
 
 defineOptions({
   inheritAttrs: false,
@@ -161,5 +162,16 @@ let handleChange = (e: Event) => {
   emitChange((e.target as HTMLInputElement).value)
 }
 
-defineExpose({ el: textareaRef })
+function focus(options?: FocusOptions) {
+  textareaRef.value?.focus(options)
+}
+
+// A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
+// why — a ComputedRef doesn't structurally match the type's plain element.
+defineExpose<TextInputExposed<HTMLTextAreaElement>>({
+  focus,
+  get inputElement() {
+    return textareaRef.value
+  },
+})
 </script>

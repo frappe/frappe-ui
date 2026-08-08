@@ -1,5 +1,6 @@
 <template>
   <TextInput
+    ref="textInputRef"
     v-model="model"
     :type="show ? 'text' : 'password'"
     :label="label"
@@ -54,6 +55,7 @@ import TextInput from '../TextInput/TextInput.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { PasswordProps } from './types'
+import type { TextInputExposed } from '../TextInput/types'
 import { computed, ref, watchEffect } from 'vue'
 
 const props = withDefaults(defineProps<PasswordProps>(), {
@@ -87,4 +89,19 @@ defineSlots<{
   /** Overrides the rendered description content. */
   description?: () => any
 }>()
+
+const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
+
+function focus(options?: FocusOptions) {
+  textInputRef.value?.focus(options)
+}
+
+// A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
+// why — a ComputedRef doesn't structurally match the type's plain element.
+defineExpose<TextInputExposed>({
+  focus,
+  get inputElement() {
+    return textInputRef.value?.inputElement ?? null
+  },
+})
 </script>
