@@ -7,4 +7,7 @@ export { default as SettingsPanel } from './SettingsPanel.vue'
 export { default as SettingsHeader } from './SettingsHeader.vue'
 export { default as SettingsBody } from './SettingsBody.vue'
 export { default as SettingsRow } from './SettingsRow.vue'
-export type { SettingsDialogProps } from './types'
+export type {
+  SettingsDialogProps,
+  SettingsBodyExposed,
+} from './types'
