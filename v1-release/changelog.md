@@ -9,6 +9,18 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### list-style.css and editor-style.css exports — removed
+
+- **Breaking:** the manual `frappe-ui/list-style.css` and
+  `frappe-ui/editor-style.css` exports are gone (loud — the consumer build
+  fails with `Missing "./list-style.css" specifier`). They existed only
+  because bundlers tree-shook the side-effect `import './style.css'` inside
+  the `frappe-ui/list` and `frappe-ui/editor` barrels. The barrels are now
+  listed in `sideEffects`, so each family's CSS ships automatically the
+  moment you import anything from its subpath — delete the manual `@import`
+  lines. The tree-shake was never Rolldown-specific: plain Rollup/Vite
+  production builds dropped the CSS too.
+
 ### Toggles and ranged inputs — deprecated members removed
 
 Per ADR-0008, the family's deprecated aliases are **removed**, not shipped

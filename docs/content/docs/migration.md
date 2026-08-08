@@ -957,6 +957,25 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
   `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
+## Family stylesheets (list-style.css / editor-style.css)
+
+The manual `frappe-ui/list-style.css` and `frappe-ui/editor-style.css` exports
+are removed. The `frappe-ui/list` and `frappe-ui/editor` barrels are now marked
+as side-effectful, so each family's CSS lands in your production build
+automatically when you import anything from its subpath.
+
+Delete the manual imports; there is nothing to add back:
+
+```css
+/* Before */
+@import 'frappe-ui/list-style.css';
+@import 'frappe-ui/editor-style.css';
+/* After: nothing — the CSS ships with the subpath import */
+```
+
+The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
+package`) until the lines are gone.
+
 ## Autocomplete (removed)
 
 `Autocomplete` is gone in v1. It merged single- and multi-select via the
