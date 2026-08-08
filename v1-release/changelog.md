@@ -42,6 +42,20 @@ Tailwind-v3-only `theme('colors.gray.900')` call in both
 Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
 same `var(--ink-gray-9)` token the rest of both files already use.
 
+### v1 resources — at-bar exception documented; `listResource` gets test coverage
+
+v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
+`getCachedResource`, `getCachedListResource`, `getCachedDocumentResource`,
+`resourcesPlugin`, `saveLocal`, `getLocal`, `deleteLocal`, `onDocUpdate`) ship
+un-deprecated and frozen at `1.0.0`, per #886.
+[ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md) records the
+one exception: the implementation stays hand-written JavaScript rather than
+TypeScript, permanently — 344 production call sites make a rewrite riskier
+than the freeze. `createListResource`, the second-most-used export at 57 call
+sites, gets test coverage for the first time (`listResource.test.ts`):
+pagination, `insert`/`setValue` refreshing the list, caching, and `reload()`'s
+pagination-state restore.
+
 ### Tailwind preset — `content` export added
 
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
