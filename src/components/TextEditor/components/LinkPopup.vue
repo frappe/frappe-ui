@@ -96,9 +96,9 @@ const copyLink = async () => {
 
 onMounted(async () => {
   await nextTick()
-  if (input.value?.el) {
-    input.value.el.focus()
-    input.value.el.select()
+  if (input.value?.inputElement) {
+    input.value.inputElement.focus()
+    input.value.inputElement.select()
   }
 })
 </script>

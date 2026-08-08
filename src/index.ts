@@ -46,7 +46,7 @@ export * from './components/Duration'
 export * from './components/ErrorMessage'
 export * from './components/FileUploader'
 export * from './components/FormControl'
-export { default as FormLabel } from './components/FormLabel.vue'
+export * from './components/FormLabel'
 export * from './components/MultiSelect'
 export * from './components/Password'
 export * from './components/Radio'
@@ -124,9 +124,6 @@ export { default as Card } from './components/Card.vue'
 /** @deprecated Use lucide icon names or the `Icon` component instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as FeatherIcon } from './components/FeatherIcon.vue'
-/** @deprecated Use `TextInput` or `FormControl` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as Input } from './components/Input.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'

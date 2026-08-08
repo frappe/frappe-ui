@@ -44,6 +44,7 @@ import type { Editor } from '@tiptap/core'
 import Dialog from '#components/Dialog/Dialog.vue'
 import Button from '#components/Button/Button.vue'
 import Textarea from '#components/Textarea/Textarea.vue'
+import type { TextInputExposed } from '#components/TextInput/types'
 import { useIframeDialog } from './useIframeDialog'
 import { platformByName } from './iframe-embed-utils'
 
@@ -89,7 +90,7 @@ const dialog = useIframeDialog(props.editor, {
   getReplacePos: props.getReplacePos,
   initialUrl: props.initialUrl,
 })
-const input = useTemplateRef<{ el?: HTMLTextAreaElement }>('input')
+const input = useTemplateRef<TextInputExposed<HTMLTextAreaElement>>('input')
 
 function submit() {
   if (dialog.insert()) open.value = false
@@ -97,6 +98,6 @@ function submit() {
 
 onMounted(async () => {
   await nextTick()
-  input.value?.el?.focus({ preventScroll: true })
+  input.value?.focus({ preventScroll: true })
 })
 </script>

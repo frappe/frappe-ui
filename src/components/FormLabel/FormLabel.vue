@@ -6,14 +6,8 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import RequiredIndicator from './InputLabeling/RequiredIndicator.vue'
-
-interface FormLabelProps {
-  label: string
-  size?: 'sm' | 'md'
-  id?: string
-  required?: boolean
-}
+import RequiredIndicator from '../InputLabeling/RequiredIndicator.vue'
+import type { FormLabelProps } from './types'
 
 const props = withDefaults(defineProps<FormLabelProps>(), {
   size: 'sm',

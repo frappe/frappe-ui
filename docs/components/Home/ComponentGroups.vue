@@ -27,7 +27,7 @@ const componentGroups = {
   "Forms": {
     component: Forms,
     list: [
-      "Input",
+      "TextInput",
       "FormControl",
       "Select",
       "MultiSelect",

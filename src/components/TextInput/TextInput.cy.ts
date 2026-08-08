@@ -1,5 +1,5 @@
 import TextInput from './TextInput.vue'
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 
 const inputTypes = [
   'text',
@@ -22,9 +22,9 @@ const sizeCLass = {
 }
 
 const variantClasses = {
-  subtle: 'bg-surface-gray-2',
-  outline: 'bg-surface-base',
-  ghost: 'border-0',
+  subtle: ['bg-surface-gray-2'],
+  outline: ['bg-surface-base'],
+  ghost: ['border-0', 'bg-transparent'],
 }
 
 describe('Textinput', () => {
@@ -69,7 +69,9 @@ describe('Textinput', () => {
         props: { variant: variant },
       })
 
-      cy.get(`input[type=text]`).should('have.class', variantClasses[variant])
+      for (const cls of variantClasses[variant]) {
+        cy.get(`input[type=text]`).should('have.class', cls)
+      }
     }
   })
 
@@ -93,6 +95,41 @@ describe('Textinput', () => {
     cy.get('@onUpdate').should('not.have.been.called')
     cy.get(`input[type=text]`).type('abc')
     cy.get('@onUpdate').should('have.been.calledWith', 'abc')
+  })
+
+  it('exposes focus() and inputElement', () => {
+    const Harness = defineComponent({
+      setup() {
+        const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
+
+        return () =>
+          h('div', [
+            h(TextInput, { ref: inputRef }),
+            h(
+              'button',
+              {
+                'data-cy': 'focus',
+                onClick: () => inputRef.value?.focus({ preventScroll: true }),
+              },
+              'Focus',
+            ),
+            h(
+              'span',
+              { 'data-cy': 'is-input-element' },
+              String(inputRef.value?.inputElement instanceof HTMLInputElement),
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[data-cy="is-input-element"]').should('have.text', 'true')
+    // No tabindex override — the native <input> stays in the default Tab order.
+    cy.get('input').should('not.have.attr', 'tabindex')
+    cy.get('input').should('not.have.focus')
+    cy.get('[data-cy="focus"]').click()
+    cy.get('input').should('have.focus')
   })
 
   describe('shared labeling contract', () => {
@@ -195,5 +232,16 @@ describe('Textinput', () => {
       cy.mount(TextInput, { props: { disabled: true } })
       cy.get('input').should('have.attr', 'data-disabled', 'true')
     })
+  })
+
+  it('renders #prefix and #suffix slots', () => {
+    cy.mount(TextInput, {
+      slots: {
+        prefix: '<span data-cy="prefix">$</span>',
+        suffix: '<span data-cy="suffix">.00</span>',
+      },
+    })
+    cy.get('[data-cy="prefix"]').should('exist').and('have.text', '$')
+    cy.get('[data-cy="suffix"]').should('exist').and('have.text', '.00')
   })
 })
