@@ -80,7 +80,7 @@ Single-select with search. `v-model="selected"` + `v-model:query="q"`. For optio
 ### `Checkbox` / `Switch`
 Boolean. `v-model="checked"` + `:label`. `Switch` for settings-style toggles; `Checkbox` for forms / multi-pick rows.
 
-### `DatePicker` / `MonthPicker` / `TimePicker` / `DateRangePicker`
+### `DatePicker` / `TimePicker` / `DateRangePicker` / `DateTimePicker`
 `v-model` holds the value. `DateRangePicker` v-model is `string[]` of length 2.
 
 ### `Slider` / `Rating`
