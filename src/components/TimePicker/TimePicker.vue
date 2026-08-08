@@ -91,14 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  nextTick,
-  ref,
-  watch,
-  watchEffect,
-} from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
@@ -134,15 +127,8 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
   variant: 'subtle' as Variant,
   disabled: false,
   typeable: true,
-  readonly: false,
   openOnFocus: false,
   openOnClick: true,
-  // Legacy defaults: `autoClose: true` and `allowCustom: true` so an omitted
-  // prop (which Vue's Boolean coercion would otherwise read as `false`) stays
-  // distinguishable from an explicit `false` — the only signal that maps to
-  // `keepOpen` / `readonly`.
-  autoClose: true,
-  allowCustom: true,
 })
 
 const emit = defineEmits<TimePickerEmits>()
@@ -165,110 +151,17 @@ defineSlots<{
 
 defineOptions({ inheritAttrs: false })
 
-// ── Prop reconciliation (new wins; legacy aliases preserved with warnings) ──
+// ── Prop reconciliation ──────────────────────────────────────────────────────
 
-const resolvedSide = computed<PopoverSide>(
-  () =>
-    props.side ?? ((props.placement?.split('-')[0] as PopoverSide) ?? 'bottom'),
-)
-const resolvedAlign = computed<PopoverAlign>(() => {
-  if (props.align !== undefined) return props.align
-  return (props.placement?.split('-')[1] as PopoverAlign) ?? 'start'
-})
+const resolvedSide = computed<PopoverSide>(() => props.side ?? 'bottom')
+const resolvedAlign = computed<PopoverAlign>(() => props.align ?? 'start')
 const resolvedOffset = computed(() => props.offset ?? 4)
 
-const shouldKeepOpen = computed(
-  () => props.keepOpen === true || props.autoClose === false,
-)
+const shouldKeepOpen = computed(() => props.keepOpen === true)
 
-const resolvedFormat = computed(
-  () => props.format ?? (props.use12Hour ? 'h:mm A' : 'HH:mm'),
-)
+const resolvedFormat = computed(() => props.format ?? 'HH:mm')
 
-const isReadonly = computed(
-  () =>
-    props.typeable === false ||
-    props.readonly === true ||
-    props.allowCustom === false,
-)
-
-if (import.meta.env.DEV) {
-  const instance = getCurrentInstance()
-  const hasUse12HourProp = () => {
-    const rawProps = instance?.vnode.props
-    return !!(
-      rawProps &&
-      ('use12Hour' in rawProps || 'use-12-hour' in rawProps)
-    )
-  }
-  const warned = {
-    value: false,
-    placement: false,
-    autoClose: false,
-    allowCustom: false,
-    readonly: false,
-    use12Hour: false,
-    scrollMode: false,
-    minTime: false,
-    maxTime: false,
-  }
-  watchEffect(() => {
-    if (props.value && !warned.value) {
-      console.warn(
-        '[TimePicker] `value` is deprecated. Use `v-model` / `modelValue` instead.',
-      )
-      warned.value = true
-    }
-    if (props.placement !== undefined && !warned.placement) {
-      console.warn(
-        '[TimePicker] `placement` is deprecated. Use `side` and `align` instead.',
-      )
-      warned.placement = true
-    }
-    if (props.autoClose === false && !warned.autoClose) {
-      console.warn(
-        '[TimePicker] `autoClose: false` is deprecated. Use `keepOpen: true` instead.',
-      )
-      warned.autoClose = true
-    }
-    if (props.allowCustom === false && !warned.allowCustom) {
-      console.warn(
-        '[TimePicker] `allowCustom: false` is deprecated. Use `typeable: false` instead.',
-      )
-      warned.allowCustom = true
-    }
-    if (props.readonly === true && !warned.readonly) {
-      console.warn(
-        '[TimePicker] picker-level `readonly: true` is deprecated. Use `typeable: false` instead.',
-      )
-      warned.readonly = true
-    }
-    if (hasUse12HourProp() && !warned.use12Hour) {
-      console.warn(
-        '[TimePicker] `use12Hour` is deprecated. Use `format` instead.',
-      )
-      warned.use12Hour = true
-    }
-    if (props.scrollMode !== undefined && !warned.scrollMode) {
-      console.warn(
-        '[TimePicker] `scrollMode` is deprecated. Scrolling is always centered now.',
-      )
-      warned.scrollMode = true
-    }
-    if (props.minTime !== undefined && !warned.minTime) {
-      console.warn(
-        '[TimePicker] `minTime` is deprecated. Use `min` instead.',
-      )
-      warned.minTime = true
-    }
-    if (props.maxTime !== undefined && !warned.maxTime) {
-      console.warn(
-        '[TimePicker] `maxTime` is deprecated. Use `max` instead.',
-      )
-      warned.maxTime = true
-    }
-  })
-}
+const isReadonly = computed(() => props.typeable === false)
 
 // ── State ──
 
@@ -294,7 +187,7 @@ const isOpen = ref(false)
 
 // Canonical 24-hour value (`HH:mm` or `HH:mm:ss`) — the source of truth.
 const canonicalValue = ref<string>(
-  normalize24(props.modelValue || props.value || '', resolvedFormat.value),
+  normalize24(props.modelValue || '', resolvedFormat.value),
 )
 
 // What the user sees / can edit in the trigger input. Synced from
@@ -317,12 +210,8 @@ const activeDescendantId = computed<string | undefined>(() =>
 
 // ── Options ──
 
-const minMinutes = computed(() =>
-  minutesFromHHMM(props.min ?? props.minTime ?? ''),
-)
-const maxMinutes = computed(() =>
-  minutesFromHHMM(props.max ?? props.maxTime ?? ''),
-)
+const minMinutes = computed(() => minutesFromHHMM(props.min ?? ''))
+const maxMinutes = computed(() => minutesFromHHMM(props.max ?? ''))
 
 const displayedOptions = computed<TimeOption[]>(() => {
   if (props.options?.length) {
@@ -384,9 +273,9 @@ function baseCompare(val: string): string {
 // ── Model sync ──
 
 watch(
-  () => [props.modelValue, props.value] as const,
-  ([m, v]) => {
-    const nv = normalize24(m || v || '', resolvedFormat.value)
+  () => props.modelValue,
+  (m) => {
+    const nv = normalize24(m || '', resolvedFormat.value)
     if (nv === canonicalValue.value) return
     canonicalValue.value = nv
     if (!isTyping.value)

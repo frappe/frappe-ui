@@ -13,21 +13,21 @@ and emits on components that survive) go in the published migration guide,
 ## The list
 
 Verified against `src/index.ts` on 2026-07-26. Every row below is **still
-exported today**, except the four marked done.
+exported today**, except the rows marked done.
 
 | Export                            | Lives in                                                             | Replaced by                                                    | Warns at runtime                                                                                                  |
 | --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `Card`                            | `src/components/Card.vue`                                            | layout markup, or a domain-specific component in the app       | no                                                                                                                |
+| ~~`Card`~~                        | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | layout markup, or a domain-specific component in the app       | —                                                                                                                  |
 | ~~`ConfirmDialog`~~               | removed in [#960](https://github.com/frappe/frappe-ui/pull/960)      | `dialog.confirm(...)`                                          | —                                                                                                                  |
 | ~~`confirmDialog`~~               | removed in [#960](https://github.com/frappe/frappe-ui/pull/960)      | `dialog.confirm(...)`                                          | —                                                                                                                  |
-| `FeatherIcon`                     | `src/components/FeatherIcon.vue`                                     | a `lucide-*` string, or the `Icon` component                   | on feather-name icon props, via `warnFeatherIconUsage` in `src/utils/iconString.ts` — not on the component itself |
+| ~~`FeatherIcon`~~                 | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | a `lucide-*` string, or the `Icon` component                   | —                                                                                                                  |
 | `Input`                           | `src/components/Input.vue`                                           | `TextInput` or `FormControl`                                   | yes                                                                                                               |
-| `ListItem`                        | `src/components/ListItem.vue`                                        | list primitives from `frappe-ui/list`, or app-owned row markup | no                                                                                                                |
-| `MonthPicker` (whole barrel)      | `src/components/MonthPicker/`                                        | `Select`                                                       | no                                                                                                                |
-| `Toast` (the SFC)                 | `src/components/Toast/Toast.vue`                                     | the imperative `toast(...)` API                                | yes                                                                                                               |
+| ~~`ListItem`~~                    | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | list primitives from `frappe-ui/list`, or app-owned row markup | —                                                                                                                  |
+| ~~`MonthPicker` (whole barrel)~~  | removed in [#876](https://github.com/frappe/frappe-ui/issues/876)   | `Select`                                                        | —                                                                                                                  |
+| ~~`Toast` (the SFC)~~             | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | the imperative `toast(...)` API                                | —                                                                                                                  |
 | `ThemeSwitcher` (whole barrel)    | `src/components/ThemeSwitcher/`                                      | `Select` plus the `useColorScheme` composable                        | yes                                                                                                               |
-| TextEditor root exports           | `src/components/TextEditor/index.ts`                                 | the `frappe-ui/editor` subpath                                 | no                                                                                                                |
-| TextEditor extension barrels      | `src/components/TextEditor/extensions/{image,suggestion}`            | extensions from `frappe-ui/editor`                             | no                                                                                                                |
+| ~~TextEditor root exports~~       | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | the `frappe-ui/editor` subpath                                 | —                                                                                                                  |
+| ~~TextEditor extension barrels~~  | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | extensions from `frappe-ui/editor`                              | —                                                                                                                  |
 | ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
 | ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
 
@@ -64,12 +64,19 @@ Do not re-add these to the queue:
 Deprecated-sounding surfaces that ADR-0008 does **not** reach, because nothing
 in them is marked `@deprecated`:
 
-- **v1 resource APIs** (`src/resources/index.ts`) — still exported, with a
-  comment saying to keep them public until official apps finish the v3
-  migration. Removing them is a v3-migration decision, not a `1.0.0` blocker.
-- **v2 data composables** — same situation.
-- **`ListView`** — `src/index.ts:77` explicitly says not to deprecate it until
-  `frappe-ui/list` reaches parity.
+- **v1 resource APIs** (`src/resources/index.ts`) — still exported. The keep
+  call is settled: [#886](https://github.com/frappe/frappe-ui/issues/886)
+  found them the larger of the two surviving data layers by call-site count
+  (344 sites across 204 files, five apps) and kept them supported and
+  un-deprecated at the tag; [ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md)
+  records the resulting at-bar exception (implementation stays JS).
+- **v2 data composables** — same #886 resolution: kept, supported, recommended
+  for new code.
+- **`ListView`** — sweep #882 confirmed the parity gap is real and structural
+  (resizable columns, per-column function props, tooltips, disabled-row
+  exclusion, select banner — none of which `frappe-ui/list`'s composition
+  model replicates by design, P3). Decision: ListView ships frozen, not
+  deprecated, for v1. See its row in `plan.md`.
 
 If any of the three gets a `@deprecated` marker before the tag, it joins the
 table above and has to be removed with the rest.

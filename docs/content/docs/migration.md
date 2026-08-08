@@ -102,17 +102,31 @@ from inside `#default` / `#actions`.
 ## DatePicker / TimePicker family
 
 Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
-share the popover-trigger vocabulary.
+share the popover-trigger vocabulary. Removed members are deleted, not
+aliased — a call site that still uses one breaks at the tag rather than
+warning; `grep` for each old name after upgrading.
 
-| Before                                  | After                       |
-| --------------------------------------- | --------------------------- |
-| `:value` prop                           | `v-model`                   |
-| `@change`                               | `@update:modelValue`        |
-| `placement="bottom-start"`              | `side` + `align` + `offset` |
-| `:autoClose`                            | `:keepOpen` (inverted)      |
-| `allowCustom` / `readonly`              | `typeable`                  |
-| `minDate`/`maxDate`/`minTime`/`maxTime` | `min` / `max`               |
-| `#target`                               | `#trigger`                  |
+| Before                                   | After                        |
+| ----------------------------------------- | --------------------------- |
+| `:value` prop                             | `v-model`                    |
+| `placement="bottom-start"`                | `side` + `align` + `offset`  |
+| `:autoClose`                              | `:keepOpen` (inverted)       |
+| `allowCustom` / picker-level `readonly`   | `typeable`                   |
+| `inputClass`                              | `class`                      |
+| `minDate`/`maxDate`/`minTime`/`maxTime`   | `min` / `max`                |
+| `#target`                                 | `#trigger`                   |
+| `TimePicker.scrollMode`                   | nothing — list is always centered |
+| `TimePicker` template ref `.selectAll()` / `.blurInput()` | nothing — dead, no callers |
+
+`@change` still fires alongside `@update:modelValue` — it wasn't deprecated
+and doesn't need replacing.
+
+Most of the table above is a **silent break**: an old prop name that's no
+longer in the component's types lands as an inert extra attribute (or, for
+`min`/`max` aliases, the constraint just stops being enforced) instead of
+throwing. TypeScript callers get a compile error instead. `#target` is the
+one slot case — content in a leftover `<template #target>` silently stops
+rendering.
 
 Behavior changes that apply even if you don't touch your code:
 
@@ -124,6 +138,28 @@ Behavior changes that apply even if you don't touch your code:
   Clear inside `#actions` if you relied on it.
 - `DateRangePicker.clearable` now defaults to `true`. Pass `:clearable="false"`
   to opt out.
+- `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
+  `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
+  the picker components used them; drop the import.
+
+## MonthPicker
+
+`MonthPicker` is deleted — the import fails. Use `Select` with month options:
+
+```vue
+<!-- Before -->
+<MonthPicker v-model="month" />
+
+<!-- After -->
+<Select
+  v-model="month"
+  :options="[
+    { label: 'January', value: '01' },
+    { label: 'February', value: '02' },
+    // ...
+  ]"
+/>
+```
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
 
@@ -630,11 +666,173 @@ function focusIt() {
 `Duration` already exposed `focus()`; it now takes the same `options?`
 parameter as the rest of the family.
 
+## FileUploader
+
+`FileUploader` reached structural bar in `1.0.0`: TypeScript, flat props, and
+a security fix to the default it shares with `useFileUpload` /
+`FileUploadHandler`.
+
+### Uploads default to private
+
+`useFileUpload()` and `FileUploadHandler` now resolve an upload with no
+stated `private` / `is_private` to **private**, not public. `FileUploader`
+itself is unaffected — it has uploaded private by default since
+`v1.0.0-beta.21`; this only changes the two lower-level primitives, called
+directly.
+
+```ts
+// Same call, before and after — the result changes:
+await useFileUpload().upload(file, {})
+await new FileUploadHandler().upload(file, {})
+// Before: is_private=0 (public).  After: is_private=1 (private).
+
+// State the intent explicitly instead of relying on the default:
+await useFileUpload().upload(file, { private: false }) // public
+await useFileUpload().upload(file, { private: true }) // private
+```
+
+If your app serves an uploaded file with no session — an avatar in an email
+digest, an image embedded on a public page — audit every call that omits
+`private` / `is_private` before upgrading. A file that flips to private
+returns `403` to a session-less request instead of the image.
+
+### `uploadArgs` → flat props
+
+The single `uploadArgs` object prop is gone. Its commonly-used fields are now
+flat props on the component:
+
+| Before (`uploadArgs`)      | After                       |
+| --------------------------- | ---------------------------- |
+| `private` / `is_private`    | `private`                    |
+| `folder`                    | `folder`                     |
+| `doctype`                   | `doctype`                    |
+| `docname`                   | `docname`                    |
+| `fieldname`                 | `fieldname`                  |
+| `upload_endpoint`           | `uploadEndpoint`             |
+| `optimize`                  | `optimize`                   |
+
+```vue
+<!-- Before -->
+<FileUploader :uploadArgs="{ private: false, folder: 'Attachments' }" />
+
+<!-- After -->
+<FileUploader :private="false" folder="Attachments" />
+```
+
+This is silent: `uploadArgs` isn't a recognized prop anymore, so Vue passes it
+through as an inert HTML attribute on the root element. Nothing throws — the
+options it carried just stop applying, and (combined with the default flip
+above) a `uploadArgs="{ private: false }"` override that used to make an
+upload public silently starts uploading private instead. `grep` every
+`<FileUploader>` for `uploadArgs=` / `:upload-args=` and move each field to
+its flat prop.
+
+`file_url`, `method`, `type`, `params`, `max_width` / `max_height`, and upload
+cancellation (`signal`) have no flat-prop equivalent — they had no measured
+use on the component. Use
+[`useFileUpload()`](./other/utilities#usefileupload-fileuploadhandler)
+directly for those.
+
+### Template ref — `inputRef` removed
+
+`FileUploader` hands back nothing through a template ref, per
+[ADR-0012](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0012-template-ref-surface.md).
+`inputRef()` (a function, despite the name) is gone with nothing in its
+place — the `openFileSelector` slot prop already covers what it opened.
+
+```vue
+<!-- Before -->
+<FileUploader ref="uploader" />
+<script setup>
+uploader.value.inputRef().click()
+</script>
+
+<!-- After -->
+<FileUploader v-slot="{ openFileSelector }">
+  <Button @click="openFileSelector">Upload</Button>
+</FileUploader>
+```
+
+### Default slot's `error` prop — always a string
+
+The default slot's `error` prop is `string | null`, no longer `unknown`.
+Upload failures were always normalized to a message string; validation
+failures (a `validateFile` prop returning an `Error`) were not, so `error`
+could previously be an `Error` object too. Both paths normalize to a message
+string now.
+
+```vue
+<!-- Before: had to guard against error being a string or an Error -->
+<template #default="{ error }">
+  {{ typeof error === 'string' ? error : error?.message }}
+</template>
+
+<!-- After: error is always a string -->
+<template #default="{ error }">
+  {{ error }}
+</template>
+```
+
+This is silent: a slot that only ever did `error.message` (assuming the
+`Error` shape) now renders `undefined` instead of the validation message.
+
+### `fileToBase64` and the size-limit helpers — no longer exported
+
+`fileToBase64`, `formatBytes`, `getMaxFileSize`, and `fileSizeLimitMessage`
+are no longer exported from `frappe-ui`; the import fails at build time.
+There were no external call sites at the v1 sweep. Computing a file's base64
+representation yourself is a few lines of `FileReader.readAsDataURL`.
+
 ## Divider
 
 | Before           | After            |
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
+
+## Sidebar
+
+`Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /
+`SidebarLabel` / `SidebarItem` in its default slot instead of passing
+config-object props. See the [Sidebar](./components/sidebar) component page
+for the full API.
+
+| Before                                    | After                                             |
+| ------------------------------------------ | -------------------------------------------------- |
+| `:header="{ title, subtitle, menuItems }"` | `<SidebarHeader :title :subtitle :menu-items />` as a child |
+| `:sections="[{ label, items }]"`           | `<SidebarLabel>` + `<SidebarItem>` (or `<SidebarSection>`) as children |
+| `<template #header-logo>`                  | `<SidebarHeader>`'s `#prefix` slot                |
+| `<template #footer-items>`                 | plain markup in the default slot                  |
+| `<SidebarSection :items="rows">`           | `<SidebarSection>` with `<SidebarItem>` children  |
+| `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed |
+| `item.condition`                           | `v-if` on the composed `<SidebarItem>`            |
+| `SidebarItem.isActive`                     | `SidebarItem.active`                              |
+| `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
+
+```vue
+<!-- Before -->
+<Sidebar
+  :header="{ title: 'Frappe CRM', subtitle: 'crm.frappe.io', menuItems }"
+  :sections="[
+    { label: '', items: [{ label: 'Leads', to: '/leads', icon: 'lucide-user-plus' }] },
+    { label: 'Views', collapsible: true, items: viewItems },
+  ]"
+/>
+
+<!-- After -->
+<Sidebar>
+  <SidebarHeader title="Frappe CRM" subtitle="crm.frappe.io" :menu-items="menuItems" />
+  <div class="flex-1 overflow-y-auto px-2">
+    <SidebarItem label="Leads" to="/leads" icon="lucide-user-plus" />
+    <SidebarSection label="Views" collapsible>
+      <SidebarItem v-for="item in viewItems" :key="item.label" v-bind="item" />
+    </SidebarSection>
+  </div>
+</Sidebar>
+```
+
+`Sidebar` no longer wraps the middle list in a scroll container or applies any
+padding — that's app-owned now (see the component page's Collapse section for
+the full composition contract).
 
 ## Data fetching (useDoctype / useList)
 
@@ -817,8 +1015,37 @@ cancelled.
 
 ## Icons
 
-Replace `FeatherIcon` and Feather-name strings with `lucide-*` strings or a
-`Component`:
+The single recommended way to pass an icon anywhere in the library is a
+`lucide-*` string (rendered via the Tailwind mask plugin) or a `Component`
+escape hatch (P11). `FeatherIcon` is removed per
+ADR-0008 — it
+shipped `@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
+
+**Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
+`<FeatherIcon>` fail at the import. Replace a direct usage with the
+`lucide-*` class form:
+
+```vue
+<!-- Before -->
+<FeatherIcon name="plus" class="size-4" />
+<!-- After -->
+<span class="lucide-plus size-4" aria-hidden="true" />
+```
+
+Feather and lucide share most icon names, so `<FeatherIcon name="x">` →
+`<span class="lucide-x">` is usually a direct rename — check each name
+individually against [lucide.dev](https://lucide.dev/icons) since a few
+differ or were renamed.
+
+**Breaking, silent:** every icon-name prop across the library (`Button.icon`
+/ `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
+`icon`, `TabButtons` options `icon` / `iconLeft` / `iconRight`, the `Icon`
+component's `name` prop) used to render a bare feather-style name (e.g.
+`"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
+unrecognized string now renders nothing. No build or type error — the icon
+silently disappears. A dev-mode console warning names the component, the
+prop, and the offending value once per (component, prop). Prefix the name
+with `lucide-`:
 
 ```vue
 <!-- Before -->
@@ -836,6 +1063,75 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 // After
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
+
+## Card, ListItem, standalone `<Toast>` (removed)
+
+Three unmaintained wrappers are gone in v1, per
+ADR-0008 — each
+shipped `@deprecated` in code and had zero call sites left across our
+census of downstream apps.
+
+**`Card`** wrapped a title/subtitle/actions layout with a manual loading
+state. There's no drop-in replacement; rebuild the layout with plain
+markup, using [`LoadingText`](./components/loadingtext) or
+[`Skeleton`](./components/skeleton) for the loading state:
+
+```vue
+<!-- Before -->
+<Card title="Title" subtitle="Subtitle" :loading="loading">
+  <template #actions><Button label="Edit" /></template>
+  Content
+</Card>
+
+<!-- After -->
+<div class="flex flex-col rounded-lg border px-6 py-5">
+  <div class="flex items-baseline justify-between">
+    <h2 class="text-lg font-semibold">Title</h2>
+    <Button label="Edit" />
+  </div>
+  <p class="mt-1.5 text-ink-gray-6">Subtitle</p>
+  <LoadingText v-if="loading" class="mt-4" />
+  <div v-else class="mt-4">Content</div>
+</div>
+```
+
+**`ListItem`** rendered a title/subtitle/actions row. Same story — no
+drop-in replacement, rebuild with plain markup:
+
+```vue
+<!-- Before -->
+<ListItem title="Title" subtitle="Subtitle">
+  <template #actions><Button label="Edit" /></template>
+</ListItem>
+
+<!-- After -->
+<div class="flex items-center justify-between py-3">
+  <div>
+    <h3 class="font-medium">Title</h3>
+    <p class="text-ink-gray-6">Subtitle</p>
+  </div>
+  <Button label="Edit" />
+</div>
+```
+
+**Standalone `<Toast>`** — `import { Toast } from 'frappe-ui'` and
+`<Toast>` fail at the import. This only removes the raw `ToastRoot`-based
+component; the imperative API is unaffected and is what you almost
+certainly want:
+
+```vue
+<!-- Before -->
+<Toast v-model:open="open" message="Saved" type="success" />
+
+<!-- After -->
+<script setup>
+import { toast } from 'frappe-ui'
+toast.success('Saved')
+</script>
+```
+
+`<ToastProvider>` (mount once near your app root) and `toast.success()` /
+`toast.error()` / `toast.info()` / plain `toast()` are unchanged.
 
 ## Tokens
 
@@ -889,10 +1185,11 @@ regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` →
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 `frappe-ui/editor` family: a headless `<Editor>` you compose with **kits**
 (bundled, configurable extension sets) and **building-block** menus. Everything
-moves to the `frappe-ui/editor` subpath; nothing editor-related is exported from
-top-level `frappe-ui` except the deprecated v0 alias, so the two coexist during
-the migration window. See the [Editor](./molecules/editor) page for the full API
-and recipes.
+moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
+(`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`) are removed from top-level
+`frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
+[Editor](./molecules/editor) page for the full API and recipes.
 
 ```ts
 // Before
@@ -1278,6 +1575,76 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 
 `usePageMeta` works the same everywhere — see the
 [composables page](./other/composables#usepagemeta).
+
+## CommandPalette
+
+`show` is renamed to `open`, matching the rest of the library's overlay
+vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
+with no error, so the palette just never opens.
+
+| Before                  | After                    |
+| ------------------------ | ------------------------ |
+| `v-model:show="show"`    | `v-model:open="open"`    |
+
+```vue
+<!-- Before -->
+<CommandPalette v-model:show="show" :groups="groups" @select="onSelect" />
+
+<!-- After -->
+<CommandPalette v-model:open="open" :groups="groups" @select="onSelect" />
+```
+
+`Mod+K` now opens the palette on its own (registered internally via
+`useShortcut`) — delete any app-level keydown listener that toggled it.
+
+## KeyboardShortcut
+
+The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
+`alt` boolean props, are removed. Use `combo` — a string like `"Mod+Shift+K"`.
+
+| Before                                   | After                        |
+| ------------------------------------------ | ----------------------------- |
+| `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
+| `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
+
+## PageHeaderMobile family — slot names
+
+`PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
+are renamed to the shared `#prefix`/`#suffix` vocabulary (see
+[PHILOSOPHY.md P6](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md)).
+This is a **silent break**: Vue drops content passed to an unknown slot name
+with no error or warning — the back button, title icon, or trailing action
+just stops rendering.
+
+| Before                                | After                             |
+| -------------------------------------- | ---------------------------------- |
+| `PageHeaderMobile` `#left`             | `#prefix`                          |
+| `PageHeaderMobile` `#right`            | `#suffix`                          |
+| `PageHeaderMobileTitle` `#icon`        | `#prefix`                          |
+
+```vue
+<!-- Before -->
+<PageHeaderMobile title="Space">
+  <template #left><BackButton /></template>
+  <template #right><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #icon><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+
+<!-- After -->
+<PageHeaderMobile title="Space">
+  <template #prefix><BackButton /></template>
+  <template #suffix><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #prefix><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+```
+
+Grep for `#left`, `#right`, and `#icon` on these two components specifically —
+other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
+`#right` slots that are unaffected.
 
 ## FAQ
 

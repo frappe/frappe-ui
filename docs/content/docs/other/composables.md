@@ -103,3 +103,28 @@ const scrolled = useShellScrolled({ threshold: 12 })
 
 `threshold` defaults to `200`. Without a mounted shell, `scrolled` stays
 `false` and the composable warns once in development.
+
+## useShortcut
+
+Registers a global keyboard shortcut for as long as the calling component is
+mounted — no manual `keydown` listener, no cleanup to remember.
+
+```vue
+<script setup>
+import { useShortcut } from 'frappe-ui'
+
+useShortcut({
+  key: 'k',
+  ctrl: true,
+  description: 'Open command palette',
+  group: 'General',
+  handler: () => open(),
+})
+</script>
+```
+
+Full option reference, plus `getActiveShortcuts` and `formatShortcutLabel`,
+are documented on
+[`KeyboardShortcutsModal`](../components/keyboardshortcutsmodal) — the
+component that renders whatever `useShortcut` has registered as a searchable
+cheat sheet.

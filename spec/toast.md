@@ -42,14 +42,11 @@ import { ToastProvider } from 'frappe-ui'
 // One-stop provider — mounts <ToastProvider> with our defaults next to <Dialogs />.
 import { FrappeUIProvider } from 'frappe-ui'
 
-// Vestigial back-compat export. Not documented; not promoted.
-// Kept so that any code still importing `{ Toast }` keeps compiling.
-import { Toast } from 'frappe-ui'
 ```
 
 That's the entire surface.
 
-**Removed exports:** `Toasts` (apps migrate to `<FrappeUIProvider>` or `<ToastProvider />`), raw `Toaster` (the styled `<ToastProvider>` is the only supported viewport surface).
+**Removed exports:** `Toasts` (apps migrate to `<FrappeUIProvider>` or `<ToastProvider />`), raw `Toaster` (the styled `<ToastProvider>` is the only supported viewport surface), and the standalone `<Toast>` SFC (per [ADR-0008](adr/0008-no-deprecated-members-in-1-0-0.md) — it carried an `@deprecated` JSDoc marker in code, and a census found zero apps importing it directly).
 
 ## Mount
 
@@ -150,11 +147,9 @@ toast.promise(saveDoc(), {
 
 For the full option types (`ExternalToast`, action shapes, position values, etc.), see [vue-sonner's documentation](https://vue-sonner.vercel.app/). We don't redocument them here.
 
-## Standalone `<Toast>` component
+## Standalone `<Toast>` component — removed
 
-`src/components/Toast/Toast.vue` (the existing reka-based SFC) remains in the tree and is still exported from `index.ts` for back-compat. It is **not promoted**, not documented in v1 docs, and not the recommended way to use toasts. The imperative `toast` namespace is the only public API the v1 documentation teaches.
-
-Audit found zero apps importing `Toast` directly. The export is preserved purely to avoid an unnecessary "Module has no exported member 'Toast'" break for any out-of-tree consumer.
+`src/components/Toast/Toast.vue` (the reka-based SFC) shipped `@deprecated` in code and is deleted per ADR-0008 — nothing marked `@deprecated` ships in `1.0.0`. A census across every downstream app (crm, helpdesk, gameplan, insights, builder, suite, central, frappe_calendar, frappe-ui-starter, frappe/frappe's `ui/`) found zero call sites, so this is a clean removal: the import fails at build time, and no app needs a migration path beyond switching to the imperative `toast` namespace.
 
 ## Migration from 0.1.x
 

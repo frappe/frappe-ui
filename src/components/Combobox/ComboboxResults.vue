@@ -7,7 +7,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
-import LoadingIndicator from '../LoadingIndicator.vue'
+import { LoadingIndicator } from '../LoadingIndicator'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'

@@ -7,7 +7,7 @@ import {
 } from 'reka-ui'
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
-import LoadingIndicator from '../LoadingIndicator.vue'
+import { LoadingIndicator } from '../LoadingIndicator'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'

@@ -207,7 +207,7 @@ const visibleTickets = computed(() => {
 <template>
   <MobileShell>
     <PageHeaderMobile title="Tickets">
-      <template #right>
+      <template #suffix>
         <Button
           variant="ghost"
           icon="lucide-list-filter"

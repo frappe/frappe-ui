@@ -56,24 +56,16 @@
                     >
                       <div class="flex items-center space-x-2 flex-1">
                         <div
-                          v-if="resolvedIcon"
+                          v-if="resolvedIcon && isLucide(resolvedIcon.name)"
                           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
                           :class="dialogIconBgClasses"
                         >
                           <span
-                            v-if="isLucide(resolvedIcon.name)"
                             :class="[
                               resolvedIcon.name,
                               'size-4',
                               dialogIconClasses,
                             ]"
-                            aria-hidden="true"
-                          />
-                          <FeatherIcon
-                            v-else
-                            :name="resolvedIcon.name"
-                            class="h-4 w-4"
-                            :class="dialogIconClasses"
                             aria-hidden="true"
                           />
                         </div>
@@ -172,9 +164,8 @@ import type { ComponentPublicInstance } from 'vue'
 import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { Button } from '../Button'
-import FeatherIcon from '../FeatherIcon.vue'
 import {
-  warnFeatherIconUsage,
+  warnUnsupportedIconString,
   isLucideIconString,
 } from '../../utils/iconString'
 import type {
@@ -253,7 +244,7 @@ const resolvedIcon = computed<DialogIcon | null>(() => {
 })
 
 watchEffect(() => {
-  warnFeatherIconUsage('Dialog', 'icon', resolvedIcon.value?.name)
+  warnUnsupportedIconString('Dialog', 'icon', resolvedIcon.value?.name)
 })
 
 if (import.meta.env.DEV) {

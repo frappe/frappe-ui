@@ -19,7 +19,6 @@
     :placeholder="props.placeholder"
     :disabled="props.disabled"
     :readonly="inputReadonly"
-    :input-class="dp.inputClass"
     :display-label="displayLabel"
     :content-class="contentClass"
     @blur="commitInput()"
@@ -29,7 +28,6 @@
     @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
     <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
     <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
 
@@ -107,8 +105,6 @@ import {
   useKeepOpen,
   useTypeable,
   useDateCoercion,
-  useDeprecationWarnings,
-  type LegacyDatePickerProps,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
 import type {
@@ -118,20 +114,15 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<DateTimePickerProps>(), {
-  value: '',
   modelValue: '',
   variant: 'subtle',
   placeholder: 'Select date & time',
   typeable: true,
-  readonly: false,
-  allowCustom: true,
   disabled: false,
   clearable: true,
   allowCustomTime: true,
   openOnFocus: false,
   openOnClick: true,
-  // Legacy default kept; see `useKeepOpen` for why.
-  autoClose: true,
 })
 const emit = defineEmits<DateTimePickerEmits>()
 
@@ -140,8 +131,6 @@ const slots = defineSlots<DateTimePickerSlots>()
 // Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
 // PopoverPanel inside PickerShell.
 const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
-
-const dp = props as unknown as LegacyDatePickerProps
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
@@ -210,17 +199,12 @@ function onPanelNavigate(target: Dayjs) {
   focusOn(target)
 }
 
-// ── Positioning / keepOpen / deprecations ────────────────────────────────────
+// ── Positioning / keepOpen ────────────────────────────────────────────────────
 
-const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
-  props,
-  dp,
-)
-const shouldKeepOpen = useKeepOpen(props, dp)
-const inputReadonly = useTypeable(props, dp)
-useDeprecationWarnings('DateTimePicker', dp, {
-  hasTargetSlot: computed(() => !!slots.target),
-})
+const { resolvedSide, resolvedAlign, resolvedOffset } =
+  usePopoverPositioning(props)
+const shouldKeepOpen = useKeepOpen(props)
+const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
 
@@ -243,7 +227,7 @@ const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 const selectedDate = ref<string>('')
 const timeValue = ref<string>('')
 
-const initialValue = ref(props.modelValue || props.value || '')
+const initialValue = ref(props.modelValue || '')
 
 const coerceToDayjs = useDateCoercion(() => props.format)
 
@@ -252,13 +236,8 @@ const coerceToDayjs = useDateCoercion(() => props.format)
 // `min`/`max` accept either a date (`YYYY-MM-DD`) or a date-time
 // (`YYYY-MM-DD HH:mm:ss`); date-only values parse as midnight, which gives
 // day-level semantics for free under the second-level check below.
-// `minDateTime`/`maxDateTime` are legacy aliases retained for back-compat.
-const resolvedMin = computed<string | undefined>(
-  () => props.min ?? dp.minDateTime,
-)
-const resolvedMax = computed<string | undefined>(
-  () => props.max ?? dp.maxDateTime,
-)
+const resolvedMin = computed<string | undefined>(() => props.min)
+const resolvedMax = computed<string | undefined>(() => props.max)
 
 const minDT = computed<Dayjs | null>(() =>
   resolvedMin.value ? coerceToDayjs(resolvedMin.value) : null,
@@ -303,13 +282,13 @@ function syncFromValue(val?: string): void {
 syncFromValue(initialValue.value)
 
 function initFromValue(): void {
-  syncFromValue(props.modelValue || props.value)
+  syncFromValue(props.modelValue)
 }
 
 watch(
-  () => [props.modelValue, props.value],
-  ([m, v]) => {
-    syncFromValue(m || v)
+  () => props.modelValue,
+  (m) => {
+    syncFromValue(m)
   },
 )
 

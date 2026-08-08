@@ -63,7 +63,12 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
-    initialData,
+    // `data` is read back out as `data.value?.data` below (the raw fetch
+    // response is `{ data: TResponse }`), so the seed value has to be
+    // wrapped the same way — an unwrapped `initialData` would read as
+    // `undefined` on that `.data` lookup and fall through to `null`.
+    initialData:
+      initialData !== undefined ? { data: initialData } : undefined,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data) {
         if (transform) {

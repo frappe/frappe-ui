@@ -310,7 +310,7 @@ function addComment() {
     <!-- Screen 1: task list -->
     <template v-if="!selectedTask">
       <PageHeaderMobile title="My tasks">
-        <template #right>
+        <template #suffix>
           <Button variant="ghost" icon="lucide-plus" label="New task" />
         </template>
       </PageHeaderMobile>
@@ -406,7 +406,7 @@ function addComment() {
     <!-- Screen 2: task detail -->
     <template v-else>
       <PageHeaderMobile :title="`#${selectedTask.id}`">
-        <template #left>
+        <template #prefix>
           <Button
             variant="ghost"
             icon="lucide-chevron-left"

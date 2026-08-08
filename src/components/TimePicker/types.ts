@@ -10,27 +10,11 @@ import type { InputSize } from '../../composables/inputTypes'
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
-export type Placement =
-  | 'bottom-start'
-  | 'top-start'
-  | 'top-end'
-  | 'bottom-end'
-  | 'right-start'
-  | 'right-end'
-  | 'left-start'
-  | 'left-end'
-
 export type Variant = 'outline' | 'subtle'
 
 export interface TimePickerProps extends InputLabelingProps {
   /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
   modelValue?: string
-
-  /**
-   * Uncontrolled initial value.
-   * @deprecated Use `modelValue` with `v-model` instead.
-   */
-  value?: string
 
   /** Minute interval between generated options. */
   interval?: number
@@ -46,12 +30,6 @@ export interface TimePickerProps extends InputLabelingProps {
 
   /** Gap between trigger and popover in pixels. */
   offset?: number
-
-  /**
-   * Combined side+align placement.
-   * @deprecated Use `side` and `align` instead.
-   */
-  placement?: Placement
 
   /** Placeholder text when no value is selected. */
   placeholder?: string
@@ -69,34 +47,10 @@ export interface TimePickerProps extends InputLabelingProps {
    */
   typeable?: boolean
 
-  /**
-   * Prevents manual typing while keeping the picker interactive.
-   * @deprecated Use `typeable: false` instead.
-   */
-  readonly?: boolean
-
-  /**
-   * Allows users to type custom time values.
-   * @deprecated Use `typeable: false` instead.
-   */
-  allowCustom?: boolean
-
   /** Keeps the popover open after a time is selected. */
   keepOpen?: boolean
 
-  /**
-   * Closes the popover after a value is picked.
-   * @deprecated Use `keepOpen` (inverse semantics).
-   */
-  autoClose?: boolean
-
-  /**
-   * Use 12-hour (am/pm) format for display.
-   * @deprecated Use `format` instead.
-   */
-  use12Hour?: boolean
-
-  /** Dayjs format string used for display. Unset, the display format is `HH:mm`, or `h:mm A` when the deprecated `use12Hour` is on. */
+  /** Dayjs format string used for display. Default: `HH:mm`. */
   format?: string
 
   /** Disable the time picker. */
@@ -116,24 +70,6 @@ export interface TimePickerProps extends InputLabelingProps {
 
   /** Maximum selectable time as `HH:mm[:ss]`. */
   max?: string
-
-  /**
-   * Minimum selectable time as `HH:mm[:ss]`.
-   * @deprecated Use `min` instead.
-   */
-  minTime?: string
-
-  /**
-   * Maximum selectable time as `HH:mm[:ss]`.
-   * @deprecated Use `max` instead.
-   */
-  maxTime?: string
-
-  /**
-   * Scroll behavior when opening the list.
-   * @deprecated Scrolling is always centered now.
-   */
-  scrollMode?: 'center' | 'start' | 'nearest'
 }
 
 export type TimePickerEmits = {

@@ -73,15 +73,6 @@ describe('TimePicker', () => {
     cy.get('[role=dialog]').should('not.exist')
   })
 
-  it('back-compat: autoClose=false keeps popover open after selection', () => {
-    cy.mount(TimePicker, {
-      props: { autoClose: false },
-    })
-    cy.get('input').click()
-    cy.get('[role=option]').eq(0).click()
-    cy.get('[role=dialog]').should('exist')
-  })
-
   it('defaults to 24-hour HH:mm display', () => {
     cy.mount(TimePicker, {
       props: { modelValue: '14:30' },
@@ -133,24 +124,6 @@ describe('TimePicker', () => {
     },
   )
 
-  it('back-compat: use12Hour=true maps to 12-hour display when format is omitted', () => {
-    cy.mount(TimePicker, {
-      props: { modelValue: '15:00', use12Hour: true },
-    })
-
-    cy.get('input').should('have.value', '3:00 PM')
-    cy.get('input').click()
-    cy.get('[role=option][data-value="15:00"]').should('have.text', '3:00 PM')
-  })
-
-  it('format prop takes precedence over the deprecated use12Hour alias', () => {
-    cy.mount(TimePicker, {
-      props: { modelValue: '15:00', use12Hour: true, format: 'HH:mm' },
-    })
-
-    cy.get('input').should('have.value', '15:00')
-  })
-
   it(
     'renders seconds in display and option labels when the format includes seconds',
     () => {
@@ -174,16 +147,6 @@ describe('TimePicker', () => {
     cy.get('[role=option]:last').should('have.text', '11:00')
   })
 
-  it('back-compat: minTime/maxTime aliases still work', () => {
-    cy.mount(TimePicker, {
-      props: { minTime: '09:00', maxTime: '11:00' },
-    })
-
-    cy.get('input').click()
-    cy.get('[role=option]:first').should('have.text', '09:00')
-    cy.get('[role=option]:last').should('have.text', '11:00')
-  })
-
   it('disabled', () => {
     cy.mount(TimePicker, {
       props: { disabled: true },
@@ -198,8 +161,8 @@ describe('TimePicker', () => {
     cy.get('[role=dialog]').should('exist')
   })
 
-  it('readonly prop prevents typing but still opens popover', () => {
-    cy.mount(TimePicker, { props: { readonly: true } })
+  it('typeable: false prevents typing but still opens popover', () => {
+    cy.mount(TimePicker, { props: { typeable: false } })
     cy.get('input').should('have.attr', 'readonly')
     cy.get('input').click()
     cy.get('[role=dialog]').should('exist')
@@ -211,21 +174,6 @@ describe('TimePicker', () => {
     cy.get('[role=dialog]')
       .should('exist')
       .should('have.attr', 'data-align', 'end')
-  })
-
-  it('back-compat: placement is accepted in lieu of side+align', () => {
-    cy.mount(TimePicker, { props: { placement: 'bottom-end' } })
-    cy.get('input').click()
-    cy.get('[role=dialog]')
-      .should('exist')
-      .should('have.attr', 'data-align', 'end')
-  })
-
-  it('back-compat: allowCustom=false behaves like readonly', () => {
-    cy.mount(TimePicker, { props: { allowCustom: false } })
-    cy.get('input').should('have.attr', 'readonly')
-    cy.get('input').click()
-    cy.get('[role=dialog]').should('exist')
   })
 
   it('parses flexible time input like "3pm" using the configured format', () => {

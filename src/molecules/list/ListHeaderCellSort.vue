@@ -63,7 +63,7 @@ const props = defineProps<ListHeaderCellSortProps>()
 
 const emit = defineEmits<{
   /** Fired on sort button click — update your sort state here. */
-  (e: 'click', event: MouseEvent): void
+  click: [event: MouseEvent]
 }>()
 
 const isEnd = computed(() => props.align === 'end')

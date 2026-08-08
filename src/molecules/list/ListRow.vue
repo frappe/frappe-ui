@@ -30,6 +30,11 @@ import type { ListRowProps } from './types'
 
 const props = defineProps<ListRowProps>()
 
+defineSlots<{
+  /** The row's cells — `<ListCell>` elements, or feed content directly. */
+  default?: () => unknown
+}>()
+
 const context = useListContext()
 
 // A row is interactive — rendered as a button — when it has a click handler or
