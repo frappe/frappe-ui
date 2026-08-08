@@ -101,9 +101,8 @@ export * from './components/TabButtons'
 export { default as Tabs } from './components/Tabs/Tabs.vue'
 
 // Command and keyboard surfaces
-export { default as CommandPalette } from './components/CommandPalette/CommandPalette.vue'
-export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.vue'
-export { default as KeyboardShortcut } from './components/KeyboardShortcut.vue'
+export * from './components/CommandPalette'
+export * from './components/KeyboardShortcut'
 export * from './components/KeyboardShortcutsModal'
 export {
   formatShortcutLabel,
