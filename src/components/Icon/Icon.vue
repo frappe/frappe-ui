@@ -1,25 +1,15 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
 import { watchEffect } from 'vue'
 import {
   isEmojiIconString,
   isLucideIconString,
   warnUnsupportedIconString,
 } from '../../utils/iconString'
+import type { IconProps } from './types'
 
 defineOptions({ inheritAttrs: false })
 
-const props = defineProps<{
-  /**
-   * Icon source. Supported forms:
-   * - `lucide-*` string  → rendered via the Tailwind mask plugin.
-   * - emoji / symbol string → rendered as plain text.
-   * - Vue component → rendered via `<component :is>`.
-   * Any other string (e.g. a bare feather-style name) is unsupported —
-   * it renders nothing and warns once in dev. Falsy values render nothing.
-   */
-  name?: string | Component | null
-}>()
+const props = defineProps<IconProps>()
 
 watchEffect(() => {
   warnUnsupportedIconString('Icon', 'name', props.name)

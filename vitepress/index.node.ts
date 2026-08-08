@@ -86,7 +86,6 @@ const OPTIMIZE_DEPS_INCLUDE = [
   '@popperjs/core',
   'tippy.js',
   'vue-sonner',
-  'feather-icons',
   'fuzzysort',
   'shiki',
   'marked',
