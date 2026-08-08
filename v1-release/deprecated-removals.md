@@ -64,10 +64,14 @@ Do not re-add these to the queue:
 Deprecated-sounding surfaces that ADR-0008 does **not** reach, because nothing
 in them is marked `@deprecated`:
 
-- **v1 resource APIs** (`src/resources/index.ts`) — still exported, with a
-  comment saying to keep them public until official apps finish the v3
-  migration. Removing them is a v3-migration decision, not a `1.0.0` blocker.
-- **v2 data composables** — same situation.
+- **v1 resource APIs** (`src/resources/index.ts`) — still exported. The keep
+  call is settled: [#886](https://github.com/frappe/frappe-ui/issues/886)
+  found them the larger of the two surviving data layers by call-site count
+  (344 sites across 204 files, five apps) and kept them supported and
+  un-deprecated at the tag; [ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md)
+  records the resulting at-bar exception (implementation stays JS).
+- **v2 data composables** — same #886 resolution: kept, supported, recommended
+  for new code.
 - **`ListView`** — sweep #882 confirmed the parity gap is real and structural
   (resizable columns, per-column function props, tooltips, disabled-row
   exclusion, select banner — none of which `frappe-ui/list`'s composition
