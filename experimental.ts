@@ -8,6 +8,13 @@ export {
   InputLabel,
   InputDescription,
   InputError,
-  LabelingWrapper,
 } from './src/components/InputLabeling'
 export { useInputLabeling } from './src/composables/useInputLabeling'
+export type { FrappeUIError } from './src/composables/useInputLabeling'
+export { CodeEditor, CodePreview, loadLanguage } from './src/components/CodeEditor'
+export type {
+  CodeLanguage,
+  CodeEditorProps,
+  CodeEditorEmits,
+  CodePreviewProps,
+} from './src/components/CodeEditor'

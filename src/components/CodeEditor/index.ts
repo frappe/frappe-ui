@@ -3,9 +3,10 @@
 // lazy-loaded inside `CodeEditor`, so importing this barrel pulls in no editor
 // code until a field actually mounts.
 //
-// Published from frappe-ui under its own `frappe-ui/code-editor` subpath (not the
-// root barrel) so the CodeMirror dependency only loads for apps that opt in —
-// the same isolation pattern as `frappe-ui/editor`.
+// Re-exported from `frappe-ui/experimental` (ADR-0010) rather than the root
+// barrel or its own subpath: CodeMirror is entirely behind `await import()`
+// (nothing static to isolate), and `CodePreview`'s static `marked` dependency
+// would otherwise re-enter root's dependency graph.
 export { default as CodeEditor } from './CodeEditor.vue'
 export { default as CodePreview } from './CodePreview.vue'
 export { loadLanguage } from './languages'

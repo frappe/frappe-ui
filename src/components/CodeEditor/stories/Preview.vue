@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Button } from 'frappe-ui'
-import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+import { CodeEditor, CodePreview } from '..'
 
 const mode = ref<'write' | 'preview'>('write')
 const markdown = ref(

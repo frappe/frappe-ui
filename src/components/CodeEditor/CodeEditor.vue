@@ -38,7 +38,7 @@
 // lives in the sibling `CodePreview`). CodeMirror is lazy-loaded in `onMounted`
 // via dynamic `import()` so the static graph stays editor-free and each language
 // tree-shakes into its own async chunk — apps that never render a code field pay
-// no runtime cost (importing `frappe-ui/code-editor` pulls in no editor code
+// no runtime cost (importing `frappe-ui/experimental` pulls in no editor code
 // until a field actually mounts).
 import {
   computed,

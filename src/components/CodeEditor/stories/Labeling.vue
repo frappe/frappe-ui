@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CodeEditor } from 'frappe-ui/code-editor'
+import { CodeEditor } from '..'
 
 const code = ref(`{\n  "host": "127.0.0.1",\n  "port": "oops"\n}`)
 </script>

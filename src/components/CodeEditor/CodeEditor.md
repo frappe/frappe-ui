@@ -4,11 +4,13 @@ A CodeMirror 6 code field with syntax highlighting, theming that follows the
 app's light/dark scheme, and an optional sanitized preview. CodeMirror is
 lazy-loaded, so apps that never render a code field pay no runtime cost.
 
-CodeEditor ships from its own subpath so the CodeMirror dependency only loads
-for apps that opt in:
+CodeEditor is exported from `frappe-ui/experimental` (unstable, no
+backward-compatibility promise — see [Experimental](/docs/experimental)).
+CodeMirror stays lazy-loaded, so importing the barrel pulls in no editor code
+until a field actually mounts:
 
 ```js
-import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
 ```
 
 ## Playground
