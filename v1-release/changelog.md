@@ -22,10 +22,15 @@ class the editor and list molecules emit.
 
 ### Tailwind preset — `tokens.js` export removed (breaking)
 
-The `./tailwind/tokens.js` export is removed. It had zero importers anywhere
-and re-exported `colorPalette.js` via `export *`, the implementation-module
-re-export pattern disallowed by P15. Use the preset (`frappe-ui/tailwind`)
-directly.
+The `./tailwind/tokens.js` export is removed outright, with no deprecation
+window. It had zero importers anywhere and re-exported `colorPalette.js` via
+`export *`, the implementation-module re-export pattern disallowed by P15.
+Use the preset (`frappe-ui/tailwind`) directly.
+
+This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
+the freeze that requires a deprecation window starts at the tag, not before
+it. Zero call sites is also why it's a same-release removal rather than a
+carried-forward deprecation: there is no consumer for a warning to reach.
 
 ### Toggles and ranged inputs — deprecated members removed
 
