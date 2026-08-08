@@ -57,17 +57,6 @@ type DialogActionContext = { close: () => void }
 interface DialogAction extends ButtonProps {
   onClick?: (context: DialogActionContext) => void | Promise<void>
 }
-
-/** Legacy blob — accepted for back-compat, warns once. */
-interface DialogOptions {
-  title?: string
-  message?: string
-  size?: DialogSize
-  icon?: string | DialogIcon
-  actions?: DialogAction[]
-  position?: DialogPosition
-  paddingTop?: string | number
-}
 ```
 
 ### Props
@@ -105,7 +94,6 @@ interface DialogProps {
 - **`bare`** — when `true`, drops the chrome: no padded card, no auto-header, no auto-actions container. `#default` fills the modal shell directly. `title`/`actions` props become no-ops with a dev warning; `#title`/`#actions` slots are not rendered. Used for command palettes, full-screen settings, etc.
 - **`showCloseButton`** — controls the absolute-positioned top-right close button. Independent of the auto-header. Default `true`.
 - **`paddingTop`** — overrides the position-based top padding (escape hatch; kept for the single in-the-wild use case).
-- **`options`** — accepted for back-compat. Setting it triggers a one-time dev warning per Dialog instance. Flat props **override** any matching key in `options`. Internally flattened before rendering.
 
 ### Slots
 
