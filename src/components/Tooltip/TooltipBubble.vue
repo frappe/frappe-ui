@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TooltipArrow, TooltipContent, TooltipPortal } from 'reka-ui'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import type { TooltipSide } from './types'
 
 /**
@@ -30,6 +31,8 @@ withDefaults(
   { side: 'top', offset: 4, bare: false },
 )
 
+const portalTarget = usePortalTarget()
+
 defineSlots<{
   /** The bubble's content. Takes precedence over `text`. */
   content?: () => any
@@ -37,7 +40,7 @@ defineSlots<{
 </script>
 
 <template>
-  <TooltipPortal>
+  <TooltipPortal :to="portalTarget">
     <TooltipContent
       data-slot="content"
       :side="side"

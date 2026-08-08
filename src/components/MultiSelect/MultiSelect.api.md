@@ -112,10 +112,9 @@
   },
   {
     name: 'portalTo',
-    description: 'Teleport target for the popover content.',
+    description: 'Teleport target for the popover content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement',
-    default: '"body"'
+    type: 'string | HTMLElement'
   },
   {
     name: 'label',

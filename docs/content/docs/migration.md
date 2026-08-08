@@ -957,6 +957,25 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
   `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
+## Family stylesheets (list-style.css / editor-style.css)
+
+The manual `frappe-ui/list-style.css` and `frappe-ui/editor-style.css` exports
+are removed. The `frappe-ui/list` and `frappe-ui/editor` barrels are now marked
+as side-effectful, so each family's CSS lands in your production build
+automatically when you import anything from its subpath.
+
+Delete the manual imports; there is nothing to add back:
+
+```css
+/* Before */
+@import 'frappe-ui/list-style.css';
+@import 'frappe-ui/editor-style.css';
+/* After: nothing — the CSS ships with the subpath import */
+```
+
+The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
+package`) until the lines are gone.
+
 ## Autocomplete (removed)
 
 `Autocomplete` is gone in v1. It merged single- and multi-select via the
@@ -1203,6 +1222,40 @@ Until you do, reading `this.$socket` throws with that instruction rather than
 returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
+
+## pageMetaPlugin — removed
+
+`pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
+component option still compiles — it's a plain, unread object key — but
+nothing calls it anymore, so `document.title` and the favicon stop updating.
+This is a **silent break**: no error, no warning, the page just stops
+retitling itself.
+
+| Before                                    | After                                   |
+| ------------------------------------------ | ---------------------------------------- |
+| `app.use(pageMetaPlugin)`                  | delete — nothing to install              |
+| `pageMeta() { return { title, emoji } }`   | `usePageMeta(() => ({ title, emoji }))` in `setup()` |
+
+```vue
+<!-- Before -->
+<script>
+export default {
+  pageMeta() {
+    return { title: this.pageTitle, emoji: '🌈' }
+  },
+}
+</script>
+
+<!-- After -->
+<script setup>
+import { usePageMeta } from 'frappe-ui'
+
+usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
+</script>
+```
+
+`usePageMeta` works the same everywhere — see the
+[composables page](./other/composables#usepagemeta).
 
 ## FAQ
 

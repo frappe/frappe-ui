@@ -18,7 +18,7 @@
     class="pointer-events-none absolute -right-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-base)] bg-surface-red-6"
   />
 
-  <Teleport to="body">
+  <Teleport :to="portalTarget ?? 'body'">
     <span
       v-if="showCount"
       ref="floatingEl"
@@ -37,6 +37,9 @@
 import { computed, useTemplateRef } from 'vue'
 import { autoUpdate, useFloating } from '@floating-ui/vue'
 import Badge from '../Badge/Badge.vue'
+import { usePortalTarget } from '../../composables/usePortalTarget'
+
+const portalTarget = usePortalTarget()
 
 const props = defineProps<{
   count: number

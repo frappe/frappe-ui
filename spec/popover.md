@@ -111,7 +111,8 @@ Defaults:
 - `side = 'bottom'`
 - `align = 'start'`
 - `offset = 4`
-- `portalTo = 'body'`
+- `portalTo = 'body'` — the fallback when neither the prop nor an embedding
+  host names a target. See [`portal-target.md`](./portal-target.md).
 - `collisionPadding = 10`
 - `dismissible = true`
 - `matchTriggerWidth = false`
