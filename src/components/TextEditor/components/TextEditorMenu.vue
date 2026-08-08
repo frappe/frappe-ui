@@ -14,10 +14,9 @@
           ></div>
           <div class="shrink-0" v-else-if="button && button.map">
             <Popover>
-              <template #target="{ togglePopover }">
+              <template #trigger>
                 <button
                   class="rounded p-1 text-base-medium text-ink-gray-8 transition-colors"
-                  @click="togglePopover"
                   :class="
                     getActiveButton(button)
                       ? 'bg-surface-gray-3'
@@ -34,10 +33,8 @@
                   </span>
                 </button>
               </template>
-              <template #body="{ close }">
-                <ul
-                  class="p-1.5 mt-2 rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
-                >
+              <template #default="{ close }">
+                <ul class="p-1.5 focus:outline-none">
                   <li
                     v-for="option in button"
                     v-show="option.condition ? option.condition(editor) : true"

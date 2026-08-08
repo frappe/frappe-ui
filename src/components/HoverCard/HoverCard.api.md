@@ -74,7 +74,7 @@
   {
     name: 'trigger',
     description: 'Trigger element. Rendered as-child so hover/focus a11y is auto-wired.',
-    type: '{ open: boolean; }'
+    type: 'HoverCardSlotProps'
   },
   {
     name: 'default',

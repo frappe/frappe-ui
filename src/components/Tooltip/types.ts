@@ -1,5 +1,4 @@
-import { type HTMLAttributes } from 'vue'
-import { type TooltipContentProps } from 'reka-ui'
+export type TooltipSide = 'top' | 'right' | 'bottom' | 'left'
 
 export interface TooltipProps {
   /**
@@ -14,18 +13,23 @@ export interface TooltipProps {
   hoverDelay?: number
 
   /**
-   * Position of the tooltip relative to the trigger.
+   * Side of the trigger the tooltip is placed on.
    */
-  placement?: TooltipContentProps['side']
+  side?: TooltipSide
 
   /**
-   * Custom classes applied to the tooltip arrow.
+   * Distance in px between the trigger and the tooltip.
    */
-  arrowClass?: HTMLAttributes['class']
+  offset?: number
 
   /**
-   * Disables the tooltip entirely.
+   * Render `#content` without the bubble shell. The arrow still renders.
+   * Use it for content that brings its own surface, like an image preview.
+   */
+  bare?: boolean
+
+  /**
+   * Disables the tooltip entirely. The trigger still renders.
    */
   disabled?: boolean
 }
-

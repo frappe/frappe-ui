@@ -1,11 +1,19 @@
 <template>
+  <!--
+    Controlled rather than trigger-driven: a single click opens the popover only
+    after a 200ms wait, so a double click can edit the event instead. Reka's
+    trigger toggles on click with no such delay, so `update:open` is honoured
+    only on the way down — Escape and outside-click still close it.
+  -->
   <Popover
-    placement="left"
-    transition="default"
+    :open="isPopoverOpen"
+    side="left"
+    align="center"
+    @update:open="(value) => !value && (isPopoverOpen = false)"
     @open="registerDeleteShortcut"
     @close="unregisterDeleteShortcut"
   >
-    <template #target="{ togglePopover, isOpen }">
+    <template #trigger>
       <div
         v-bind="$attrs"
         class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full overflow-hidden"
@@ -13,7 +21,13 @@
           active: activeEvent == (props.event?.id || props.event?.name),
         }"
         :style="eventBgStyle"
-        @click.stop="handleEventClick($event, togglePopover, isOpen)"
+        @click.stop="
+          handleEventClick(
+            $event,
+            () => (isPopoverOpen = !isPopoverOpen),
+            isPopoverOpen,
+          )
+        "
         @dblclick.prevent="handleEventEdit($event)"
       >
         <div
@@ -37,7 +51,7 @@
       </div>
     </template>
 
-    <template #body-main="{ close }">
+    <template #default="{ close }">
       <slot
         name="event-popover-content"
         :calendarEvent
@@ -77,8 +91,10 @@ import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '../Popover/Popover.vue'
 import { useEventBase } from './useEventBase'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { CalendarEvent } from './types'
+
+const isPopoverOpen = ref(false)
 
 const props = defineProps<{
   event: CalendarEvent

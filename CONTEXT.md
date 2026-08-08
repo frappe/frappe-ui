@@ -36,7 +36,7 @@ _Avoid_: using bare `v-model` for visibility on overlays
 **dismissible**:
 Whether an overlay closes via user-initiated dismiss channels — outside click and
 Escape. Default `true`; when `false`, it closes only programmatically or via an explicit
-control. Named for cross-overlay reuse but ships **only on Dialog** in v1. Replaces
+control. Ships on `Dialog`, `Popover`, `BottomSheet` and `Alert`. Replaces
 `disableOutsideClickToClose` (deprecated alias, warns).
 _Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick` (in new code)
 

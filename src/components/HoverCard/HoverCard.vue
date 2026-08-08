@@ -8,7 +8,11 @@ import {
 } from 'reka-ui'
 import { computed } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
-import type { HoverCardProps } from './types'
+import type {
+  HoverCardExposed,
+  HoverCardProps,
+  HoverCardSlotProps,
+} from './types'
 
 defineOptions({
   inheritAttrs: false,
@@ -32,7 +36,7 @@ const open = defineModel<boolean>('open', { default: false })
 const openDelay = computed(() => props.hoverDelay * 1000)
 const closeDelay = computed(() => props.leaveDelay * 1000)
 
-defineExpose({
+defineExpose<HoverCardExposed>({
   open: () => {
     open.value = true
   },
@@ -43,7 +47,7 @@ defineExpose({
 
 defineSlots<{
   /** Trigger element. Rendered as-child so hover/focus a11y is auto-wired. */
-  trigger?: (props: { open: boolean }) => any
+  trigger?: (props: HoverCardSlotProps) => any
   /** Card contents, rendered inside the standard PopoverPanel shell. */
   default?: () => any
 }>()

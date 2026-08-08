@@ -71,17 +71,12 @@ const txtClass = computed(() => {
 </script>
 
 <template>
-  <Popover
-    popover-class="mt-2 shadow-xl rounded-lg border bg-surface-elevation-2 p-2"
-  >
-    <template #target="{ togglePopover, isOpen }">
+  <Popover>
+    <template #trigger>
       <Button
-        @click="togglePopover"
         class="w-full justify-between border"
         :class="txtClass"
         :disabled="disabled"
-        aria-haspopup="dialog"
-        :aria-expanded="isOpen"
       >
         {{ model || props.placeholder }}
         <template #suffix>
@@ -90,7 +85,7 @@ const txtClass = computed(() => {
       </Button>
     </template>
 
-    <template #body>
+    <template #default>
       <div class="flex gap-2 justify-between">
         <Button variant="ghost" @click="prevClick" label="previous">
           <span class="lucide-chevron-left size-4 text-ink-gray-5" />

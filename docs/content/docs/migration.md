@@ -265,27 +265,198 @@ reason can move back.
 For the removed `Autocomplete`, see
 [Autocomplete (removed)](#autocomplete-removed).
 
-## Popover / HoverCard
+## Popover / HoverCard / Tooltip
 
-The v0 `Popover` API still works through v1.x — when only an old prop is bound
-it is mapped silently; binding both the old and new prop logs a one-time dev
-warning and the new prop wins.
+The v0 `Popover` API is **removed** in `1.0.0`. Nothing is aliased and nothing
+warns — Vue drops an unknown prop or slot without complaining, so a missed call
+site renders a popover with no trigger, or an empty one. Check every
+`<Popover>` in your app.
 
 | Before                                            | After                                                                                              |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `#target` slot                                    | `#trigger` — reka wires the click, so drop your own click handler                                  |
+| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                          |
+| `#body-main` slot                                 | `#default`                                                                                          |
+| `togglePopover` / `updatePosition` slot props     | `toggle` (`updatePosition` is gone — reka repositions on its own)                                   |
 | `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
-| `hideOnBlur`                                      | `dismissible`                                                                                      |
-| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                |
+| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `update:show` emit                                | `update:open`                                                                                       |
+| `hideOnBlur`                                      | `dismissible`                                                                                       |
+| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                 |
 | `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                |
-| `popoverClass`                                    | `data-slot` CSS hooks (no-op + warns)                                                              |
-| `transition="default"`                            | built-in motion (no-op)                                                                            |
-| `#target` slot                                    | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
-| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                         |
-| `#body-main` slot                                 | `#default`                                                                                         |
+| `popoverClass`                                    | `data-slot` CSS hooks                                                                               |
+| `transition="default"`                            | built-in motion — delete the prop                                                                   |
+| `PopoverPlacement` type                           | `PopoverSide` + `PopoverAlign`                                                                      |
+| `PopoverLegacySlotProps` type                     | `PopoverSlotProps`                                                                                  |
+| `NestedPopover`                                   | `Popover` — it never nested, and it was the last `@popperjs/core` consumer                          |
 
-Hover-driven panels move to the new [`HoverCard`](./components/hovercard)
+### Trigger and content slots
+
+`#target` did not wire anything — you called `togglePopover` yourself. `#trigger`
+renders through reka's `PopoverTrigger` as-child, which brings the click handler,
+keyboard support and `aria-expanded` with it. **Keeping your click handler makes
+the popover toggle twice and stay shut.**
+
+```vue
+<!-- Before -->
+<Popover placement="bottom-end">
+  <template #target="{ togglePopover }">
+    <Button label="Filter" @click="togglePopover" />
+  </template>
+  <template #body-main="{ close }">
+    <FilterPanel @done="close" />
+  </template>
+</Popover>
+
+<!-- After -->
+<Popover side="bottom" align="end">
+  <template #trigger>
+    <Button label="Filter" />
+  </template>
+  <template #default="{ close }">
+    <FilterPanel @done="close" />
+  </template>
+</Popover>
+```
+
+`#body` rendered outside the panel shell, so it maps to `#default` **plus**
+`bare` — without `bare` your content ends up inside a second panel.
+
+```vue
+<!-- Before -->
+<Popover>
+  <template #body><EmojiPicker /></template>
+</Popover>
+
+<!-- After -->
+<Popover bare>
+  <EmojiPicker />
+</Popover>
+```
+
+### Driving the popover yourself
+
+If your trigger needs custom timing (a delayed open, a drag that must not open
+it), bind `open` and accept only closes, so the trigger's own toggle cannot
+open it behind your back:
+
+```vue
+<Popover :open="isOpen" @update:open="(value) => !value && (isOpen = false)">
+  <template #trigger>
+    <div @click="onClick">…</div>
+  </template>
+</Popover>
+```
+
+### Slot props
+
+`#trigger` and `#default` receive `{ open, close, toggle }`.
+
+| Before                     | After                                    |
+| -------------------------- | ---------------------------------------- |
+| `isOpen`                   | `open`                                   |
+| `open` (a method to call)  | `toggle`, or nothing — see below         |
+| `togglePopover`            | `toggle`                                 |
+| `updatePosition`           | gone; reka repositions on its own        |
+
+`open` is now the boolean state, which is what it already means on `Dropdown`,
+`Select`, `MultiSelect`, `HoverCard` and `Sidebar`. It used to be a method on
+`Popover` alone.
+
+This one is silent and worth grepping for: a destructured `isOpen` becomes
+`undefined`, so a class bound to it stops applying with no error.
+
+```vue
+<!-- Before -->
+<template #trigger="{ isOpen }">
+  <Button :class="isOpen && 'ring-2'" label="Filter" />
+</template>
+
+<!-- After -->
+<template #trigger="{ open }">
+  <Button :class="open && 'ring-2'" label="Filter" />
+</template>
+```
+
+Most triggers need nothing at all — `#trigger` wires its own click, so the
+`open()` method it used to hand out had no callers. `toggle` is there for the
+cases that drive it by hand.
+
+### Attributes are not inherited
+
+`<Popover class="…">` and `<Popover :style="…">` used to land on a wrapper the
+legacy `#target` rendered. `#trigger` is as-child and renders no wrapper, so
+those attributes now go nowhere. Move them onto the element inside `#trigger`.
+
+### Hover panels
+
+Hover-driven panels move to the [`HoverCard`](./components/hovercard)
 component, which keeps `hoverDelay` / `leaveDelay` in seconds.
+
+### Tooltip
+
+| Before              | After                                                      |
+| ------------------- | ---------------------------------------------------------- |
+| `placement="right"` | `side="right"`                                             |
+| `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
+| `#body`             | `#content` (add `bare` if the content owns its surface)     |
+
+All three are silent — the tooltip keeps working, it just points the wrong way,
+loses the styling, or comes up empty. `arrowClass` was documented as the arrow's
+fill, but was mostly used to nudge the bubble's position; `offset` does that
+directly.
+
+`#default` is still the **trigger**. That is deliberate and is not changing.
+
+```vue
+<!-- Before -->
+<Tooltip text="Preview" placement="bottom" arrow-class="mb-3">
+  <Button label="Preview" />
+</Tooltip>
+
+<!-- After -->
+<Tooltip text="Preview" side="bottom" :offset="12">
+  <Button label="Preview" />
+</Tooltip>
+```
+
+`#body` replaced the whole bubble, surface included, so call sites hand-copied
+the bubble's own classes to get them back. `#content` renders inside the bubble,
+so that wrapper goes away:
+
+```vue
+<!-- Before -->
+<Tooltip>
+  <template #body>
+    <div
+      class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
+    >
+      <span>Hide password</span>
+    </div>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+
+<!-- After -->
+<Tooltip>
+  <template #content>
+    <span>Hide password</span>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+```
+
+If the content really does bring its own surface — an image preview, say — keep
+it and add `bare`:
+
+```vue
+<Tooltip bare>
+  <template #content>
+    <img :src="url" class="max-h-40 rounded shadow-xl" />
+  </template>
+  <span class="truncate">{{ filename }}</span>
+</Tooltip>
+```
 
 ## Inputs
 

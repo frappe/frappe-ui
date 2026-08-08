@@ -4,7 +4,7 @@
     hover between neighbours) and falls back to its own when a RailItem is used
     standalone.
   -->
-  <Tooltip placement="right">
+  <Tooltip side="right">
     <!--
       Link vs. button are split with v-if/v-else rather than a dynamic
       <component :is>: a raw 'button' string there resolves to a

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import * as LucideIcons from 'lucide-static'
-import { TextInput, toast } from 'frappe-ui'
-import { TooltipBubble } from 'frappe-ui'
-import { TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import { TextInput, Tooltip, TooltipProvider, toast } from 'frappe-ui'
 
 // Every lucide-static export is a full <svg>…</svg> string. The class
 // attribute already encodes the kebab-case name (e.g. `lucide lucide-house`),
@@ -69,23 +67,24 @@ const filteredIcons = computed(() => {
     <div class="h-[450px] overflow-auto">
       <TooltipProvider
         v-if="filteredIcons.length > 0"
-        :delay-duration="300"
-        :skip-delay-duration="1000"
+        :hover-delay="0.3"
+        :skip-delay="1"
       >
         <div
           class="grid grid-cols-[repeat(auto-fill,56px)] gap-1 justify-center"
         >
-          <TooltipRoot v-for="icon in filteredIcons" :key="icon.name">
-            <TooltipTrigger as-child>
-              <div
-                class="flex size-14 cursor-pointer items-center justify-center rounded text-ink-gray-7 hover:bg-surface-gray-2"
-                @click="copyName(icon.name)"
-              >
-                <span class="size-6 [&>svg]:size-full" v-html="icon.svg" />
-              </div>
-            </TooltipTrigger>
-            <TooltipBubble :text="icon.name" />
-          </TooltipRoot>
+          <Tooltip
+            v-for="icon in filteredIcons"
+            :key="icon.name"
+            :text="icon.name"
+          >
+            <div
+              class="flex size-14 cursor-pointer items-center justify-center rounded text-ink-gray-7 hover:bg-surface-gray-2"
+              @click="copyName(icon.name)"
+            >
+              <span class="size-6 [&>svg]:size-full" v-html="icon.svg" />
+            </div>
+          </Tooltip>
         </div>
       </TooltipProvider>
 

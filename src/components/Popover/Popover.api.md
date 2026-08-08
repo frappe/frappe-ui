@@ -73,72 +73,6 @@
     required: false,
     type: 'boolean',
     default: 'false'
-  },
-  {
-    name: 'show',
-    description: '',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `open` / `v-model:open`.'
-  },
-  {
-    name: 'trigger',
-    description: '',
-    required: false,
-    type: '"click" | "hover"',
-    default: '"click"',
-    deprecated: 'Use `<HoverCard>` for hover behavior.'
-  },
-  {
-    name: 'hoverDelay',
-    description: '',
-    required: false,
-    type: 'number',
-    default: '0',
-    deprecated: 'Use `<HoverCard>` (`hoverDelay`, in seconds).'
-  },
-  {
-    name: 'leaveDelay',
-    description: '',
-    required: false,
-    type: 'number',
-    default: '0.5',
-    deprecated: 'Use `<HoverCard>` (`leaveDelay`, in seconds).'
-  },
-  {
-    name: 'placement',
-    description: '',
-    required: false,
-    type: 'PopoverPlacement',
-    deprecated: 'Use `side` + `align`.'
-  },
-  {
-    name: 'popoverClass',
-    description: '',
-    required: false,
-    type: 'string | object | (string | object)[]',
-    deprecated: 'Use the `data-slot` CSS hooks (no-op).'
-  },
-  {
-    name: 'transition',
-    description: '',
-    required: false,
-    type: '"default" | null',
-    deprecated: 'Motion is now built in (no-op).'
-  },
-  {
-    name: 'hideOnBlur',
-    description: '',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `dismissible`.'
-  },
-  {
-    name: 'matchTargetWidth',
-    description: '',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `matchTriggerWidth`.'
   }
 ]
 
@@ -150,26 +84,8 @@
   },
   {
     name: 'default',
-    description: 'Popover content, rendered inside the shared panel shell.',
+    description: 'Popover content, rendered inside the shared panel shell unless `bare`.',
     type: 'PopoverSlotProps'
-  },
-  {
-    name: 'target',
-    description: '',
-    type: 'PopoverLegacySlotProps',
-    deprecated: 'Use `#trigger`. Rendered via reka PopoverAnchor (manual wiring).'
-  },
-  {
-    name: 'body',
-    description: '',
-    type: 'PopoverLegacySlotProps',
-    deprecated: 'Use `#default`. Full body override (no default chrome).'
-  },
-  {
-    name: 'body-main',
-    description: '',
-    type: 'PopoverLegacySlotProps',
-    deprecated: 'Use `#default`. Inner content inside the default container.'
   }
 ]
 
@@ -188,11 +104,6 @@
     name: 'close',
     description: 'Fired when the component closes.',
     type: '[]'
-  },
-  {
-    name: 'update:show',
-    description: 'Fired when the show changes.',
-    type: '[value: boolean]'
   }
 ]
 </script>
