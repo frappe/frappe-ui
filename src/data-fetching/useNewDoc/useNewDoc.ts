@@ -39,23 +39,31 @@ export function useNewDoc<T extends object>(
     ...options,
   })
 
+  // Captured before `out.submit` is overwritten below — the new `submit`
+  // calls this one, not `out.submit` (which would then call itself).
+  const callSubmit = out.submit
+
   function submit() {
-    return out
-      .submit()
-      .then((doc) =>
+    return callSubmit()
+      .then((created) =>
         docStore
-          .setDoc({ doctype, ...(doc as DocResponse) })
+          .setDoc({ doctype, ...(created as DocResponse) })
           .then(
             () =>
-              docStore.getDoc(doctype, (doc as DocResponse).name.toString())
+              docStore
+                .getDoc(doctype, (created as DocResponse).name.toString())
                 .value as T,
           ),
       )
   }
 
-  return reactive({
-    ...out,
-    submit,
-    doc,
-  })
+  // Extend `out` in place rather than spreading it into a new `reactive()`.
+  // `out.data`/`.error`/`.loading`/etc. are refs and computeds that
+  // `reactive()` auto-unwraps on read — `{ ...out }` reads each one once and
+  // freezes it at that value, which silently drops reactivity for the whole
+  // useCall surface this composable re-exposes.
+  return Object.assign(out, { submit, doc }) as Omit<typeof out, 'submit'> & {
+    submit: () => Promise<T>
+    doc: NewDoc<T>
+  }
 }
