@@ -32,26 +32,33 @@ describe('Tooltip', () => {
     cy.get('[role=tooltip]').should('not.exist')
   })
 
-  it('slots', () => {
-    cy.mount(h(Tooltip, { text: 'abc', hoverDelay: 0 }), {
+  it('#content renders inside the bubble and beats text', () => {
+    cy.mount(h(Tooltip, { text: 'ignored', hoverDelay: 0 }), {
       slots: {
         default: h(Button, {}, 'k'),
-        body: h('div', { 'data-cy': 'body' }, ['body']),
+        content: h('span', { 'data-cy': 'content' }, ['rich']),
       },
     })
 
     cy.get('button').trigger('focus')
-    cy.get('[data-cy=body]').should('exist')
+    // Inside the bubble, so the consumer inherits the surface instead of
+    // hand-copying its classes — which is what every #body call site did.
+    cy.get('[data-slot=bubble]').find('[data-cy=content]').should('exist')
+    cy.get('[data-slot=bubble]').should('not.contain.text', 'ignored')
+  })
 
-    cy.mount(h(Tooltip, { text: 'abc', hoverDelay: 0 }), {
+  it('bare drops the bubble shell but keeps the arrow', () => {
+    cy.mount(h(Tooltip, { hoverDelay: 0, bare: true }), {
       slots: {
         default: h(Button, {}, 'k'),
-        content: h('div', { 'data-cy': 'content' }, ['content']),
+        content: h('div', { 'data-cy': 'content' }, ['own surface']),
       },
     })
 
     cy.get('button').trigger('focus')
     cy.get('[data-cy=content]').should('exist')
+    cy.get('[data-slot=bubble]').should('not.exist')
+    cy.get('[data-slot=arrow]').should('exist')
   })
 
   it('exposes the arrow through a data-slot hook rather than a class prop', () => {

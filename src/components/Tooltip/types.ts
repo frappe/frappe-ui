@@ -23,6 +23,12 @@ export interface TooltipProps {
   offset?: number
 
   /**
+   * Render `#content` without the bubble shell. The arrow still renders.
+   * Use it for content that brings its own surface, like an image preview.
+   */
+  bare?: boolean
+
+  /**
    * Disables the tooltip entirely. The trigger still renders.
    */
   disabled?: boolean

@@ -5,7 +5,7 @@ import type { TooltipSide } from './types'
 /**
  * Renders the styled tooltip popover (portal + content + arrow) so the
  * bubble styling lives in exactly one place. Consumers supply the
- * content via `text`, `#content`, or `#body`.
+ * content via `text` or `#content`, and drop the bubble shell with `bare`.
  *
  * Used by:
  *  - `<Tooltip>` — the wrapper Vue component
@@ -22,19 +22,17 @@ withDefaults(
     side?: TooltipSide
     /** Distance in px between the trigger and the bubble. */
     offset?: number
-    /** Text content when neither `#content` nor `#body` is provided. */
+    /** Text content when `#content` is not provided. */
     text?: string
+    /** Render the content without the bubble shell. The arrow still renders. */
+    bare?: boolean
   }>(),
-  { side: 'top', offset: 4 },
+  { side: 'top', offset: 4, bare: false },
 )
 
 defineSlots<{
-  /** Replaces just the text inside the standard bubble. */
-  default?: () => any
-  /** Replaces just the text inside the standard bubble. */
+  /** The bubble's content. Takes precedence over `text`. */
   content?: () => any
-  /** Replaces the entire bubble (including its shell) — arrow still renders. */
-  body?: () => any
 }>()
 </script>
 
@@ -46,16 +44,14 @@ defineSlots<{
       :side-offset="offset"
       class="z-[100]"
     >
-      <slot name="body">
-        <div
-          data-slot="bubble"
-          class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
-        >
-          <slot name="content">
-            <slot>{{ text }}</slot>
-          </slot>
-        </div>
-      </slot>
+      <slot v-if="bare" name="content" />
+      <div
+        v-else
+        data-slot="bubble"
+        class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
+      >
+        <slot name="content">{{ text }}</slot>
+      </div>
       <TooltipArrow
         data-slot="arrow"
         class="fill-surface-gray-10"

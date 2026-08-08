@@ -153,9 +153,20 @@ Icon-only buttons, action toggles, and other controls that don't carry a value a
 - `#default` — main content
 - `#prefix` / `#suffix` — leading/trailing visual elements (icon, avatar, badge, indicator)
 - `#trigger` — the element that opens an overlay
+- `#content` — an overlay's content when `#default` is already the trigger
 - `#empty` — fallback when a list has no items
 - `#footer` / `#header` — region wrappers
 - `#label` / `#description` — overrides for the labeling contract (P5)
+
+**`#body` is not in the vocabulary.** It said "the content, but bypassing the
+component's own shell", which is a *prop* (`bare`), not a slot — and every call
+site that reached for it then hand-copied the shell classes it had just removed.
+Dialog warns on it, Popover dropped it, Tooltip's became `#content` + `bare`.
+
+**`#default` is the trigger on Tooltip**, the one inversion in the library. Its
+shorthand — `<Tooltip text="Delete"><Button /></Tooltip>` — is what over 200 of
+its call sites use, so `#content` names the other half rather than making every
+one of them wrap a trigger in a named slot for no behavioral gain.
 
 **Scoped slots (inside repeated units)** prefix with the unit name:
 - `#item-prefix` / `#item-suffix` / `#item-label` — per-item in a list / dropdown / select

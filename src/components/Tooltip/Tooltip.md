@@ -22,8 +22,14 @@ tooltip sits on; `offset` sets the gap in px. Both match `Popover` and
 
 ## Slots
 
-`#content` replaces the label inside the standard bubble. `#body` replaces the
-whole bubble, so the content brings its own surface — the arrow still renders.
+`#default` is the **trigger** — Tooltip is the one overlay that reads this way,
+because `<Tooltip text="Delete"><Button /></Tooltip>` is the shape almost every
+call site wants.
+
+`#content` is the tooltip's content, for anything richer than a string. It
+renders inside the standard bubble, so you inherit the surface rather than
+rebuilding it. Add `bare` when the content brings its own surface — an image
+preview, say. The arrow renders either way.
 
 <ComponentPreview name="Tooltip-Slots" />
 
@@ -45,7 +51,7 @@ There are no class-injection props. Style the tooltip through the stable
 | Hook                    | Element                                      |
 | ----------------------- | -------------------------------------------- |
 | `[data-slot="content"]` | the portaled content (reka `TooltipContent`) |
-| `[data-slot="bubble"]`  | the default bubble that owns the visuals     |
+| `[data-slot="bubble"]`  | the default bubble that owns the visuals (absent under `bare`) |
 | `[data-slot="arrow"]`   | the arrow pointing back at the trigger       |
 
 ```css
@@ -66,5 +72,31 @@ There are no class-injection props. Style the tooltip through the stable
 `placement` is now `side`, and `arrowClass` is gone — style the arrow through
 `[data-slot="arrow"]`, or use `offset` if you were using it to nudge the
 tooltip's position.
+
+`#body` is now `#content`, and it renders inside the bubble. Most `#body` call
+sites hand-copied the bubble's own classes to get them back, so the move usually
+means deleting that wrapper:
+
+```vue
+<!-- before -->
+<Tooltip>
+  <template #body>
+    <div class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl">
+      <span>Hide password</span>
+    </div>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+
+<!-- after -->
+<Tooltip>
+  <template #content>
+    <span>Hide password</span>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+```
+
+If the content genuinely brings its own surface, keep it and add `bare`.
 
 <!-- @include: ./Tooltip.api.md -->

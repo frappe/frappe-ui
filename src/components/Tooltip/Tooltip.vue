@@ -18,6 +18,7 @@ const props = withDefaults(defineProps<TooltipProps>(), {
   side: 'top',
   offset: 4,
   hoverDelay: 0.5,
+  bare: false,
   disabled: false,
 })
 
@@ -35,24 +36,15 @@ const providerProps = computed(() =>
 
 defineSlots<{
   /**
-   * Default trigger slot.
-   * Wraps the element that the tooltip is attached to.
+   * The trigger. Tooltip is the one overlay whose `#default` is the trigger
+   * rather than the content — the shorthand `<Tooltip text="…"><Button /></Tooltip>`
+   * is the overwhelmingly common shape, and `#content` names the other half.
    */
   default?: () => any
 
-  /**
-   * Slot for fully custom tooltip body.
-   * Replaces the default tooltip container entirely.
-   */
-  body?: () => any
-
-  /**
-   * Slot for tooltip content text.
-   * Used inside the default tooltip body.
-   */
+  /** The tooltip's content. Takes precedence over `text`. */
   content?: () => any
 }>()
-
 </script>
 
 <template>
@@ -63,14 +55,12 @@ defineSlots<{
         <slot />
       </TooltipTrigger>
       <TooltipBubble
-        v-if="props.text || $slots.body || $slots.content"
+        v-if="props.text || $slots.content"
         :side="props.side"
         :offset="props.offset"
         :text="props.text"
+        :bare="props.bare"
       >
-        <template v-if="$slots.body" #body>
-          <slot name="body" />
-        </template>
         <template v-if="$slots.content" #content>
           <slot name="content" />
         </template>

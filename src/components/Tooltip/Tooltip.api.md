@@ -34,6 +34,13 @@
     default: '4'
   },
   {
+    name: 'bare',
+    description: 'Render `#content` without the bubble shell. The arrow still renders.\nUse it for content that brings its own surface, like an image preview.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'disabled',
     description: 'Disables the tooltip entirely. The trigger still renders.',
     required: false,
@@ -45,17 +52,12 @@
   const tooltipSlots = [
   {
     name: 'default',
-    description: 'Default trigger slot.\nWraps the element that the tooltip is attached to.',
-    type: 'any'
-  },
-  {
-    name: 'body',
-    description: 'Slot for fully custom tooltip body.\nReplaces the default tooltip container entirely.',
+    description: 'The trigger. Tooltip is the one overlay whose `#default` is the trigger\nrather than the content — the shorthand `<Tooltip text="…"><Button /></Tooltip>`\nis the overwhelmingly common shape, and `#content` names the other half.',
     type: 'any'
   },
   {
     name: 'content',
-    description: 'Slot for tooltip content text.\nUsed inside the default tooltip body.',
+    description: 'The tooltip\'s content. Takes precedence over `text`.',
     type: 'any'
   }
 ]
