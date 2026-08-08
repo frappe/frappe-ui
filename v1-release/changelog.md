@@ -41,15 +41,16 @@ and `Rating` exports `RatingEmits`.
 ### Dialog — v1 spec
 
 - Flat top-level props (`title`, `message`, `icon`, `size`, `position`,
-  `paddingTop`, `actions`) are canonical; legacy `options` blob warns.
+  `paddingTop`, `actions`) are canonical. The legacy `options` blob is
+  removed — see below.
 - `v-model:open` is canonical; `v-model` (modelValue) still works silently.
 - New props: `dismissible` (default `true`, replaces
   `disableOutsideClickToClose`), `bare`, `showCloseButton` (default `true`,
   independent of the auto-header).
 - Canonical slots `#default`, `#title`, `#actions` (scoped with
-  `{ close, actions }`). Legacy `#body*` slots warn.
-- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`;
-  legacy value auto-mapped.
+  `{ close, actions }`). The legacy `#body*` slots are removed — see below.
+- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`,
+  which is removed — see below.
 - Auto-header no longer renders an "Untitled" fallback.
 
 ### Dialog — imperative `dialog.*` API
@@ -63,7 +64,49 @@ and `Rating` exports `RatingEmits`.
 - `<FrappeUIProvider>` now renders `<Dialogs />` next to `<Toasts />`, so
   apps wrapped with the provider get the imperative stack for free.
   `<Dialogs />` is still exported for callers that don't use the provider.
-- Legacy `confirmDialog()` warns; use `dialog.confirm()`.
+- `ConfirmDialog` and `confirmDialog()` are removed — see below; use
+  `dialog.confirm()` / `dialog.danger()`.
+- New root exports: `DangerArgs`, `DialogControl`, `PromptControl`,
+  `DialogHandle`, `PromptFieldValidator`. `DialogSlotProps` is exported from
+  the `Dialog` barrel.
+
+### Dialog — deprecated surface removed (breaking)
+
+Every member marked `@deprecated` is deleted, per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
+aliased and nothing warns.
+
+- **Breaking, silent:** the `options` blob prop and `DialogOptions` type are
+  gone. It bundled `title`/`size`/`icon`/`actions` into one object. An
+  `:options="{...}"` call site still compiles — Vue drops the unknown prop as
+  an inert attr — but the dialog silently loses its title, size and actions.
+  Use the flat top-level props.
+- **Breaking, silent:** `disableOutsideClickToClose` is gone. It still lands
+  as an inert attr, and `dismissible` (the inverse) defaults to `true`, so the
+  dialog silently becomes dismissible. Use `dismissible`.
+- **Breaking, silent:** `icon.appearance` and `DialogIconAppearance` are gone;
+  only `icon.theme` remains. An `appearance` key is dropped, so the icon
+  renders with no tone. Map `warning → yellow`, `info → blue`, `danger → red`,
+  `success → green`.
+- **Breaking, silent:** the legacy `#body`, `#body-content`, `#body-main`,
+  `#body-title` and `#body-header` slots are gone. Vue drops an unknown named
+  slot with no error, so a missed call site renders nothing where that slot's
+  content used to be. Use `#default`, `#title` and `#actions`; `#body` maps to
+  `bare` + `#default`.
+- **Breaking:** the callable-context shim on action `onClick` is gone. The
+  context used to be callable as well as a plain object (`ctx()` closed the
+  dialog); it is `{ close }` only now, so calling it as a function throws
+  `TypeError: ctx is not a function`.
+- **Breaking:** `defineExpose({ close })` and the `DialogExposed` type are
+  gone — Dialog exposes nothing on its template ref (ADR-0012). A template-ref
+  `.close()` call throws a `TypeError`. Use `v-model:open = false`, or the
+  `close` slot prop. Zero known call sites.
+- **Breaking:** `ConfirmDialog` and `confirmDialog()` are deleted. The import
+  fails, so the build names every call site. Use `dialog.confirm()` /
+  `dialog.danger()`.
+
+Before/after for the silent breaks is in the
+[migration guide](../docs/content/docs/migration.md#dialog).
 
 ### DatePicker family — v1 spec
 
@@ -783,7 +826,11 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | `useDatePicker` composable         | use picker components directly       | Warns on call                          |
 | `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
 | `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
-| Dialog legacy `options` blob       | flat top-level props                 | Warns once per instance                |
-| Dialog `#body*` slots              | `#default` / `#title` / `#actions`   | Warns when used                        |
-| Dialog `icon.appearance`           | `icon.theme`                         | Auto-mapped; warns                     |
-| `confirmDialog()`                  | `dialog.confirm()`                   | Warns on call                          |
+| Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
+| Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |
+| Dialog `#body*` slots               | `#default` / `#title` / `#actions`  | **Removed** — silent; renders nothing  |
+| Dialog `icon.appearance`           | `icon.theme`                         | **Removed** — silent; icon loses tone  |
+| Dialog action `onClick` callable context | `{ close }` object             | **Removed** — throws on call           |
+| Dialog template-ref `close()`      | `v-model:open` / `close` slot prop   | **Removed** — throws on call           |
+| `ConfirmDialog` component          | `dialog.confirm()` / `dialog.danger()` | **Removed** — import fails           |
+| `confirmDialog()`                  | `dialog.confirm()`                   | **Removed** — import fails             |

@@ -13,13 +13,13 @@ and emits on components that survive) go in the published migration guide,
 ## The list
 
 Verified against `src/index.ts` on 2026-07-26. Every row below is **still
-exported today**, except the two marked done.
+exported today**, except the four marked done.
 
 | Export                            | Lives in                                                             | Replaced by                                                    | Warns at runtime                                                                                                  |
 | --------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `Card`                            | `src/components/Card.vue`                                            | layout markup, or a domain-specific component in the app       | no                                                                                                                |
-| `ConfirmDialog`                   | `src/components/ConfirmDialog.vue`                                   | `dialog.confirm(...)`                                          | no                                                                                                                |
-| `confirmDialog`                   | `src/utils/confirmDialog.js`                                         | `dialog.confirm(...)`                                          | yes                                                                                                               |
+| ~~`ConfirmDialog`~~               | removed in [#960](https://github.com/frappe/frappe-ui/pull/960)      | `dialog.confirm(...)`                                          | —                                                                                                                  |
+| ~~`confirmDialog`~~               | removed in [#960](https://github.com/frappe/frappe-ui/pull/960)      | `dialog.confirm(...)`                                          | —                                                                                                                  |
 | `FeatherIcon`                     | `src/components/FeatherIcon.vue`                                     | a `lucide-*` string, or the `Icon` component                   | on feather-name icon props, via `warnFeatherIconUsage` in `src/utils/iconString.ts` — not on the component itself |
 | `Input`                           | `src/components/Input.vue`                                           | `TextInput` or `FormControl`                                   | yes                                                                                                               |
 | `ListItem`                        | `src/components/ListItem.vue`                                        | list primitives from `frappe-ui/list`, or app-owned row markup | no                                                                                                                |

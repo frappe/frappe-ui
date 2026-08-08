@@ -39,13 +39,15 @@
     name: 'size',
     description: 'Max-width size of the dialog. Default `\'lg\'`.',
     required: false,
-    type: 'DialogSize'
+    type: 'DialogSize',
+    default: '"lg"'
   },
   {
     name: 'position',
     description: 'Vertical placement. Default `\'center\'`.',
     required: false,
-    type: 'DialogPosition'
+    type: 'DialogPosition',
+    default: '"center"'
   },
   {
     name: 'paddingTop',
@@ -79,20 +81,6 @@
     required: false,
     type: 'boolean',
     default: 'false'
-  },
-  {
-    name: 'disableOutsideClickToClose',
-    description: '',
-    required: false,
-    type: 'boolean',
-    deprecated: 'Use `dismissible` (inverted) instead.'
-  },
-  {
-    name: 'options',
-    description: '',
-    required: false,
-    type: 'DialogOptions',
-    deprecated: 'Use flat top-level props instead.'
   }
 ]
 
@@ -111,36 +99,6 @@
     name: 'actions',
     description: 'Footer override; exposes `{ close, actions }`.',
     type: 'DialogActionsSlotProps'
-  },
-  {
-    name: 'body',
-    description: '',
-    type: 'any',
-    deprecated: 'Use `#default` + `bare` prop.'
-  },
-  {
-    name: 'body-main',
-    description: '',
-    type: 'any',
-    deprecated: 'Use `#default`.'
-  },
-  {
-    name: 'body-header',
-    description: '',
-    type: 'any',
-    deprecated: 'Use `#title` for extras (no direct replacement).'
-  },
-  {
-    name: 'body-title',
-    description: '',
-    type: 'any',
-    deprecated: 'Use `#title`.'
-  },
-  {
-    name: 'body-content',
-    description: '',
-    type: 'any',
-    deprecated: 'Use `#default`.'
   }
 ]
 

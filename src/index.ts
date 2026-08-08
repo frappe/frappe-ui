@@ -70,9 +70,14 @@ export * from './components/Popover'
 export {
   dialog,
   type ConfirmArgs,
+  type DangerArgs,
+  type DialogControl,
+  type DialogHandle,
   type DialogNamespace,
   type PromptArgs,
+  type PromptControl,
   type PromptField,
+  type PromptFieldValidator,
 } from './utils/dialog'
 export { toast } from './components/Toast/toast'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
@@ -116,11 +121,6 @@ export {
 /** @deprecated Use layout markup or domain-specific components instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as Card } from './components/Card.vue'
-/** @deprecated Use `dialog.confirm(...)` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
-/** @deprecated Use `dialog.confirm(...)` instead. */
-export { confirmDialog } from './utils/confirmDialog.js'
 /** @deprecated Use lucide icon names or the `Icon` component instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as FeatherIcon } from './components/FeatherIcon.vue'

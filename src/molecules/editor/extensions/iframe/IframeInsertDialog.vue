@@ -1,10 +1,6 @@
 <template>
-  <Dialog
-    v-model="open"
-    :options="{ title: dialogTitle, size: 'md' }"
-    @close="$emit('close')"
-  >
-    <template #body-content>
+  <Dialog v-model="open" :title="dialogTitle" size="md" @close="$emit('close')">
+    <template #default>
       <div>
         <label class="mb-2 block text-base text-ink-gray-5">
           URL or Embed Code

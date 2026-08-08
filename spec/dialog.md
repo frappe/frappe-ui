@@ -23,13 +23,13 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Component count | One `<Dialog>` only — no `<AlertDialog>` |
 | ARIA role | `role="dialog"` always |
 | Visibility model | `v-model:open` (canonical) **and** `v-model` (also supported) |
-| Prop surface | Flat top-level props; `options` blob retained as deprecated alias |
+| Prop surface | Flat top-level props only; the `options` blob was removed (ADR-0008) |
 | Dismiss control | `dismissible: boolean` (default `true`); replaces `disableOutsideClickToClose` |
 | Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
 | Close button | `showCloseButton: boolean` (default `true`); independent of header |
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
 | Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
-| Slots | Canonical: `#default`, `#title`, `#actions`. Legacy slots deprecated with internal forwarding. |
+| Slots | Canonical only: `#default`, `#title`, `#actions`. Legacy slots were removed (ADR-0008). |
 | Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
 | Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
 
@@ -56,17 +56,6 @@ type DialogActionContext = { close: () => void }
 
 interface DialogAction extends ButtonProps {
   onClick?: (context: DialogActionContext) => void | Promise<void>
-}
-
-/** Legacy blob — accepted for back-compat, warns once. */
-interface DialogOptions {
-  title?: string
-  message?: string
-  size?: DialogSize
-  icon?: string | DialogIcon
-  actions?: DialogAction[]
-  position?: DialogPosition
-  paddingTop?: string | number
 }
 ```
 
@@ -95,10 +84,6 @@ interface DialogProps {
   dismissible?: boolean             // default true
   showCloseButton?: boolean         // default true
   bare?: boolean                    // default false
-
-  // Deprecated (still supported, warn once).
-  disableOutsideClickToClose?: boolean
-  options?: DialogOptions
 }
 ```
 
@@ -109,7 +94,6 @@ interface DialogProps {
 - **`bare`** — when `true`, drops the chrome: no padded card, no auto-header, no auto-actions container. `#default` fills the modal shell directly. `title`/`actions` props become no-ops with a dev warning; `#title`/`#actions` slots are not rendered. Used for command palettes, full-screen settings, etc.
 - **`showCloseButton`** — controls the absolute-positioned top-right close button. Independent of the auto-header. Default `true`.
 - **`paddingTop`** — overrides the position-based top padding (escape hatch; kept for the single in-the-wild use case).
-- **`options`** — accepted for back-compat. Setting it triggers a one-time dev warning per Dialog instance. Flat props **override** any matching key in `options`. Internally flattened before rendering.
 
 ### Slots
 
@@ -126,7 +110,7 @@ interface DialogProps {
 - When neither `title` prop nor `#title` slot is set, the auto-header **does not render** (no "Untitled" fallback).
 - When `bare`, all auto-chrome (padded card, auto-header, auto-actions container) is suppressed.
 
-**Deprecated slots** (warn once, internally forwarded to the canonical slot):
+**Legacy slots** (removed per ADR-0008 — kept here as the migration mapping):
 
 | Legacy slot | Forwards to | Notes |
 |---|---|---|
@@ -401,7 +385,7 @@ socket.once('upload:done', () => handle.close())
 
 ## Deprecations
 
-Each deprecated surface keeps working in v1, emits a one-time dev-mode console warning (per instance / per session), and includes the canonical replacement in the message.
+Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md). The table documents the old → new mapping for migration.
 
 | Deprecated | Replacement |
 |---|---|
@@ -414,7 +398,7 @@ Each deprecated surface keeps working in v1, emits a one-time dev-mode console w
 | `#body` slot | `#default` + `bare` prop |
 | `action.onClick(callableContext)` shim | `action.onClick({ close })` |
 | `confirmDialog()` helper | `dialog.confirm()` |
-| `ConfirmDialog.vue` component | mounted internally by `dialog.confirm()`; not part of v1 public surface |
+| `ConfirmDialog.vue` component | deleted — `dialog.confirm()` renders its own internal dialog, not this component |
 
 `<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe (the second mount has no extra effect, but the imperative dialog stack lives in a shared module-level ref so the same stack drives both).
 
@@ -430,7 +414,7 @@ Each deprecated surface keeps working in v1, emits a one-time dev-mode console w
 <Dialog v-model:open="show" title="X" size="xl" />
 ```
 
-The flat props win over `options` keys, so partial migration (changing some keys to flat while leaving others in `options`) is safe but will continue to warn.
+The `options` prop is removed. Migrate every key to its matching flat prop — any value left behind in an `options` object is silently ignored.
 
 ### From `#body` to `#default` + `bare`
 

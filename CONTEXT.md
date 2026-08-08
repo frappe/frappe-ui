@@ -37,8 +37,8 @@ _Avoid_: using bare `v-model` for visibility on overlays
 Whether an overlay closes via user-initiated dismiss channels — outside click and
 Escape. Default `true`; when `false`, it closes only programmatically or via an explicit
 control. Ships on `Dialog`, `Popover`, `BottomSheet` and `Alert`. Replaces
-`disableOutsideClickToClose` (deprecated alias, warns).
-_Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick` (in new code)
+`disableOutsideClickToClose`, which is removed (ADR-0008).
+_Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick`
 
 ## Color axes
 
@@ -81,11 +81,6 @@ _Avoid_: `flush`, `chromeless`, `unstyled` (in new code)
 **chrome** (informal):
 The auto-rendered visual scaffolding around a component's content — padded card, header
 row, actions footer. Not an API term; it's the thing Dialog's `bare` removes.
-
-**options** (Dialog, legacy):
-A deprecated blob prop that bundled title/size/icon/actions into one object; the
-canonical surface is flat top-level props. Setting it warns once.
-_Avoid_: as the recommended public API for new code
 
 > Dialog's full API — props, slots, ARIA, the imperative `dialog.confirm/danger/prompt`
 > namespace, and `PromptField` — is specified in [`spec/dialog.md`](./spec/dialog.md).
