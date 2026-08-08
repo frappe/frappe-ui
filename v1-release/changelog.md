@@ -30,6 +30,13 @@ usage, superseded by `combo`). Both are **loud** breaks (removed props on a
 typed component). Also moved from a bare `KeyboardShortcut.vue` into its own
 directory with a `types.ts`, a docs page, and a Cypress test.
 
+### useShortcut — `matchesShortcut` no longer public (breaking)
+
+`matchesShortcut` is removed from the `frappe-ui` package export. Its own
+doc comment already said "exported for unit tests only" — it was never
+meant to be public API (Rule 9). Loud break (import error) for anyone who
+imported it directly; no signal of any real consumer doing so.
+
 ### KeyboardShortcutsModal / useShortcut — brought to bar
 
 `KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously

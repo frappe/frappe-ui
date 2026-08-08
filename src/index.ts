@@ -107,7 +107,6 @@ export * from './components/KeyboardShortcutsModal'
 export {
   formatShortcutLabel,
   getActiveShortcuts,
-  matchesShortcut,
   useShortcut,
   type ActiveShortcut,
   type RegisteredShortcut,
