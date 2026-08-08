@@ -9,6 +9,17 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — `content` export added
+
+`frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
+directories that emit Tailwind classes. Spread it into your app's
+`tailwind.config.js` `content` array instead of hand-maintaining the paths —
+see the new [Tailwind Setup](/docs/foundations/tailwind) docs page. Tailwind
+v3 doesn't merge a preset's `content`, so this was previously unavoidable
+hand-maintenance, and it had already drifted: some apps on
+`frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every
+class the editor and list molecules emit.
+
 ### Toggles and ranged inputs — deprecated members removed
 
 Per ADR-0008, the family's deprecated aliases are **removed**, not shipped
