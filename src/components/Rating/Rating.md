@@ -80,11 +80,4 @@ Each star exposes data-attribute hooks for styling:
 - Half-star fill: each star renders two half-spans with their own
   `data-state` for half-step granularity.
 
-## Deprecated props
-
-- `rating_from` is kept as an alias for `max`.
-- `readonly` is kept as an alias for `disabled`.
-
-Both fire a one-time dev-mode `warnDeprecated` warning.
-
 <!-- @include: ./Rating.api.md -->

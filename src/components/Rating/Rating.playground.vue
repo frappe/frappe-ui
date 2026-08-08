@@ -27,7 +27,7 @@ const knobs: Knob[] = [
       { label: 'xl', value: 'xl' },
     ],
   },
-  { name: 'readonly', type: 'switch', default: false },
+  { name: 'disabled', type: 'switch', default: false },
 ]
 
 function buildCode(v: Record<string, any>) {
@@ -36,7 +36,7 @@ function buildCode(v: Record<string, any>) {
   if (max && max !== 5) attrs.push(`:max="${max}"`)
   if (v.step !== '1') attrs.push(`:step="${v.step}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
-  if (v.readonly) attrs.push('readonly')
+  if (v.disabled) attrs.push('disabled')
   attrs.push('v-model="value"')
   return ['<Rating', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
@@ -50,7 +50,7 @@ function buildCode(v: Record<string, any>) {
         :max="Number(values.max) || 5"
         :step="Number(values.step) as 1 | 0.5"
         :size="values.size"
-        :readonly="values.readonly"
+        :disabled="values.disabled"
       />
     </template>
   </PlaygroundFrame>
