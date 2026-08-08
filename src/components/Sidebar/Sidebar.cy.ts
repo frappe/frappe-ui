@@ -67,11 +67,11 @@ describe('<SidebarSection />', () => {
         ],
       },
     })
-    cy.get("[aria-label='Junk']").should('exist')
+    cy.get("[aria-label='Junk']").should('be.visible')
     cy.contains('More').click()
-    cy.get("[aria-label='Junk']").should('not.exist')
+    cy.get("[aria-label='Junk']").should('not.be.visible')
     cy.contains('More').click()
-    cy.get("[aria-label='Junk']").should('exist')
+    cy.get("[aria-label='Junk']").should('be.visible')
   })
 
   it('collapsible: bound `collapsed` model lets the app own the state', () => {
@@ -87,7 +87,7 @@ describe('<SidebarSection />', () => {
     })
     // Starts collapsed because the bound model says so — the app can default a
     // section closed, which the internal-state version could not.
-    cy.get("[aria-label='Junk']").should('not.exist')
+    cy.get("[aria-label='Junk']").should('not.be.visible')
     cy.contains('More').click()
     cy.get('@update').should('have.been.calledWith', false)
   })
@@ -100,9 +100,9 @@ describe('<SidebarSection />', () => {
       props: { label: 'More', collapsible: true, collapsed: true },
       slots: { default: () => h(SidebarItem, { label: 'Junk' }) },
     })
-    cy.get("[aria-label='Junk']").should('not.exist')
+    cy.get("[aria-label='Junk']").should('not.be.visible')
     cy.contains('More').click()
-    cy.get("[aria-label='Junk']").should('exist')
+    cy.get("[aria-label='Junk']").should('be.visible')
   })
 
   it('keyboard: the collapsible trigger is a focusable, labeled toggle button', () => {
@@ -169,9 +169,13 @@ describe('<SidebarItem />', () => {
     cy.get('@options').should('have.been.calledOnce')
   })
 
-  it('is keyboard reachable and shows a visible focus ring', () => {
+  it('is keyboard reachable and shows a visible focus-visible outline', () => {
     cy.mount(SidebarItem, { props: { label: 'Design', to: '/design' } })
-    cy.get('a').focus().should('have.focus')
+    cy.get('a')
+      .focus()
+      .should('have.focus')
+      .should('have.css', 'outline-style', 'solid')
+      .and('not.have.css', 'outline-width', '0px')
   })
 })
 
@@ -193,7 +197,7 @@ describe('<SidebarHeader />', () => {
     cy.get('[role=menuitem]').should('have.length', menuItems.length)
   })
 
-  it('renders the #prefix slot instead of the default logo box', () => {
+  it('renders the #prefix slot filling the default logo box', () => {
     cy.mount(SidebarHeader, {
       props: { title: 'Frappe CRM' },
       slots: { prefix: () => h('span', { 'data-test': 'logo' }, 'L') },

@@ -86,7 +86,7 @@ const props = withDefaults(defineProps<SidebarHeaderProps>(), {
 })
 
 defineSlots<{
-  /** Overrides the default logo/initial box. Falls back to the `logo` prop, then the title's first letter. */
+  /** Fills the default logo/initial box (a `size-7 overflow-hidden` frame — wide content clips). Falls back to the `logo` prop, then the title's first letter. */
   prefix?: () => any
 }>()
 

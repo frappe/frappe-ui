@@ -24,7 +24,7 @@
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
+      class="flex h-full min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -63,7 +63,7 @@
       type="button"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
-      class="flex h-full text-left min-w-0 flex-1 items-center pl-2 focus:outline-none focus-visible:ring-0"
+      class="flex h-full text-left min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip

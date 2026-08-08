@@ -43,9 +43,10 @@ route. A click invokes `onClick` (bound from `@click`) in both cases.
 
 The app-switcher / workspace-identity row. A fixed 48px region that lines up
 with `PageHeader`, rendered as a dropdown trigger. `title` and `subtitle` are
-plain strings; `#prefix` overrides the default logo/initial box (falls back to
-the `logo` prop, or the title's first letter); `showLogo: false` drops the box
-entirely for a flush-left title. `menuItems` renders inside the trigger's
+plain strings; `#prefix` fills the default logo/initial box (a `size-7
+overflow-hidden` frame — wide content clips), falling back to the `logo` prop,
+or the title's first letter; `showLogo: false` drops the box entirely for a
+flush-left title. `menuItems` renders inside the trigger's
 dropdown — the same structured-options shape `Dropdown` itself takes.
 
 ## SidebarSection

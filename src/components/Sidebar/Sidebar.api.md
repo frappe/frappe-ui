@@ -167,7 +167,7 @@
   const sidebarHeaderSlots = [
   {
     name: 'prefix',
-    description: 'Overrides the default logo/initial box. Falls back to the `logo` prop, then the title\'s first letter.',
+    description: 'Fills the default logo/initial box (a `size-7 overflow-hidden` frame — wide content clips). Falls back to the `logo` prop, then the title\'s first letter.',
     type: 'any'
   }
 ]

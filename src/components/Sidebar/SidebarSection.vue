@@ -10,30 +10,12 @@
     class="mt-2 flex flex-col"
   >
     <div v-if="label" class="relative flex items-center gap-1 px-2 py-1.5">
-      <button
-        v-if="collapsible"
-        :id="triggerId"
-        type="button"
-        class="flex items-center gap-1 rounded text-sm text-ink-gray-5 transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-        :class="
-          isSidebarCollapsed
-            ? 'w-0 overflow-hidden opacity-0'
-            : 'w-auto opacity-100'
-        "
-        :aria-expanded="!isSectionCollapsed"
-        :aria-controls="bodyId"
-        :aria-hidden="isSidebarCollapsed || undefined"
-        :tabindex="isSidebarCollapsed ? -1 : undefined"
-        @click="isSectionCollapsed = !isSectionCollapsed"
-      >
-        <h3 class="h-4">{{ label }}</h3>
-        <span
-          class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
-          :class="{ 'rotate-90': !isSectionCollapsed }"
-        />
-      </button>
+      <!--
+        ARIA accordion pattern: the heading wraps the button, not the other
+        way around — a <button> only accepts phrasing content, so nesting an
+        <h3> inside it strips the heading from the accessibility tree.
+      -->
       <h3
-        v-else
         class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
         :class="
           isSidebarCollapsed
@@ -41,7 +23,24 @@
             : 'w-auto opacity-100'
         "
       >
-        {{ label }}
+        <button
+          v-if="collapsible"
+          :id="triggerId"
+          type="button"
+          class="flex items-center gap-1 rounded focus-visible:ring-0 focus-visible:focus-ring"
+          :aria-expanded="!isSectionCollapsed"
+          :aria-controls="bodyId"
+          :aria-hidden="isSidebarCollapsed || undefined"
+          :tabindex="isSidebarCollapsed ? -1 : undefined"
+          @click="isSectionCollapsed = !isSectionCollapsed"
+        >
+          {{ label }}
+          <span
+            class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
+            :class="{ 'rotate-90': !isSectionCollapsed }"
+          />
+        </button>
+        <template v-else>{{ label }}</template>
       </h3>
       <div
         v-if="isSidebarCollapsed"
@@ -60,8 +59,14 @@
       enter-from-class="max-h-0 overflow-hidden"
       leave-to-class="max-h-0 overflow-hidden"
     >
+      <!--
+        v-show, not v-if: `aria-controls="bodyId"` on the trigger button must
+        resolve to a real element at all times, including the instant
+        aria-expanded flips to "false" — an id that only exists while
+        expanded breaks the reference exactly when it's read.
+      -->
       <nav
-        v-if="!isSectionCollapsed"
+        v-show="!isSectionCollapsed"
         :id="bodyId"
         :aria-labelledby="collapsible && label ? triggerId : undefined"
         class="flex flex-col gap-0.5"
