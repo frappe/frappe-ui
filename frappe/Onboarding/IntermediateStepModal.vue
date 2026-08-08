@@ -1,9 +1,6 @@
 <template>
-  <Dialog v-model="show" :options="options">
-    <template #boday-header>
-      <slot name="body-header"></slot>
-    </template>
-    <template #body-content>
+  <Dialog v-model="show" :title="options.title" :size="options.size" :actions="options.actions">
+    <template #default>
       <slot>
         <div class="flex flex-col gap-2 text-ink-gray-9 text-base">
           <div v-if="currentStep.message">{{ currentStep.message }}</div>
