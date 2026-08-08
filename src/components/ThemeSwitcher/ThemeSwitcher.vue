@@ -71,17 +71,20 @@
 <script setup lang="ts">
 import { computed, useId, useSlots } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
-import { useTheme, type Theme } from '../../utils/theme'
+import {
+  useColorScheme,
+  type ColorScheme,
+} from '../../composables/useColorScheme'
 import { warnDeprecated } from '../../utils/warnDeprecated'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
 
 defineOptions({ name: 'ThemeSwitcher' })
 
-warnDeprecated('ThemeSwitcher', 'Select with the useTheme composable')
+warnDeprecated('ThemeSwitcher', 'Select with the useColorScheme composable')
 
 interface ThemeOption {
-  value: Theme
+  value: ColorScheme
   defaultLabel: string
 }
 
@@ -99,7 +102,7 @@ const props = withDefaults(defineProps<ThemeSwitcherProps>(), {
 
 const emit = defineEmits<{
   /** Fired when the selected theme changes. */
-  'update:modelValue': [theme: Theme]
+  'update:modelValue': [theme: ColorScheme]
 }>()
 
 defineSlots<{
@@ -111,20 +114,20 @@ defineSlots<{
    * Overrides a single option's label. Receives the option's `value`.
    * Falls back to the `themeLabels` prop, then the built-in label.
    */
-  'item-label'?: (props: { value: Theme }) => any
+  'item-label'?: (props: { value: ColorScheme }) => any
 }>()
 
-const { currentTheme, setTheme } = useTheme()
+const { colorScheme, setColorScheme } = useColorScheme()
 
 // Not `defineModel`: when unbound, the switcher falls back to the shared
-// `currentTheme` and must keep mirroring it in real time (so a separate toggle
+// `colorScheme` and must keep mirroring it in real time (so a separate toggle
 // button stays in sync); a local `defineModel` ref can't track that once
-// written. The setter always drives `setTheme`, so a bare `<ThemeSwitcher />`
-// still switches the app theme.
-const selected = computed<Theme>({
-  get: () => props.modelValue ?? currentTheme.value,
+// written. The setter always drives `setColorScheme`, so a bare
+// `<ThemeSwitcher />` still switches the app theme.
+const selected = computed<ColorScheme>({
+  get: () => props.modelValue ?? colorScheme.value,
   set: (value) => {
-    setTheme(value)
+    setColorScheme(value)
     emit('update:modelValue', value)
   },
 })

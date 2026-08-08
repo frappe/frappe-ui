@@ -17,10 +17,4 @@ export interface SwitchProps extends InputLabelingProps {
 
   /** Optional icon rendered alongside the label. Strings starting with `lucide-` are rendered via the shared Lucide Tailwind utility; component values are rendered with `<component :is>`. */
   icon?: string | Component
-
-  /**
-   * Custom classes applied to the label element.
-   * @deprecated Use `data-*` styling hooks instead.
-   */
-  labelClasses?: string
 }

@@ -80,10 +80,20 @@ const isSidebarCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),
 )
+
+// `defineModel` already declares this event, but it carries no place to write
+// the event's own description. Redeclaring it here is what puts the sentence
+// in the generated API table.
+defineEmits<{
+  /** Fired when the section is collapsed or expanded. */
+  'update:collapsed': [value: boolean]
+}>()
+
 // Per-section open/closed state for `collapsible` sections — distinct from the
-// whole-sidebar collapse above. A model so apps can own it (start a section
-// collapsed, persist the choice); left unbound it behaves as before — local
-// state starting expanded.
+// whole-sidebar collapse above. The JSDoc below stays on one line: the
+// generator copies it into the API table verbatim, and the table renders its
+// line breaks.
+/** v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded. */
 const isSectionCollapsed = defineModel<boolean>('collapsed', { default: false })
 
 const visibleItems = computed(() =>

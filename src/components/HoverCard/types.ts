@@ -45,3 +45,17 @@ export interface HoverCardProps {
    */
   arrow?: boolean
 }
+
+/** Slot props passed to the `#trigger` slot. */
+export interface HoverCardSlotProps {
+  /** Whether the card is currently open. */
+  open: boolean
+}
+
+/** Methods available on a `<HoverCard>` template ref. */
+export interface HoverCardExposed {
+  /** Opens the card. */
+  open: () => void
+  /** Closes the card. */
+  close: () => void
+}

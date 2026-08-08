@@ -262,30 +262,201 @@ second time and drops fuzzy, ranked, or id-based matches. Pass
 `:filterable="false"` to turn it off. Apps that forked the component for this
 reason can move back.
 
-For the deprecated `Autocomplete`, see
-[Autocomplete (deprecated)](#autocomplete-deprecated).
+For the removed `Autocomplete`, see
+[Autocomplete (removed)](#autocomplete-removed).
 
-## Popover / HoverCard
+## Popover / HoverCard / Tooltip
 
-The v0 `Popover` API still works through v1.x — when only an old prop is bound
-it is mapped silently; binding both the old and new prop logs a one-time dev
-warning and the new prop wins.
+The v0 `Popover` API is **removed** in `1.0.0`. Nothing is aliased and nothing
+warns — Vue drops an unknown prop or slot without complaining, so a missed call
+site renders a popover with no trigger, or an empty one. Check every
+`<Popover>` in your app.
 
 | Before                                            | After                                                                                              |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `#target` slot                                    | `#trigger` — reka wires the click, so drop your own click handler                                  |
+| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                          |
+| `#body-main` slot                                 | `#default`                                                                                          |
+| `togglePopover` / `updatePosition` slot props     | `toggle` (`updatePosition` is gone — reka repositions on its own)                                   |
 | `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
-| `hideOnBlur`                                      | `dismissible`                                                                                      |
-| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                |
+| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `update:show` emit                                | `update:open`                                                                                       |
+| `hideOnBlur`                                      | `dismissible`                                                                                       |
+| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                 |
 | `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                |
-| `popoverClass`                                    | `data-slot` CSS hooks (no-op + warns)                                                              |
-| `transition="default"`                            | built-in motion (no-op)                                                                            |
-| `#target` slot                                    | `#trigger` (old `#target` contract preserved with manual wiring; `updatePosition` is now a no-op)  |
-| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                         |
-| `#body-main` slot                                 | `#default`                                                                                         |
+| `popoverClass`                                    | `data-slot` CSS hooks                                                                               |
+| `transition="default"`                            | built-in motion — delete the prop                                                                   |
+| `PopoverPlacement` type                           | `PopoverSide` + `PopoverAlign`                                                                      |
+| `PopoverLegacySlotProps` type                     | `PopoverSlotProps`                                                                                  |
+| `NestedPopover`                                   | `Popover` — it never nested, and it was the last `@popperjs/core` consumer                          |
 
-Hover-driven panels move to the new [`HoverCard`](./components/hovercard)
+### Trigger and content slots
+
+`#target` did not wire anything — you called `togglePopover` yourself. `#trigger`
+renders through reka's `PopoverTrigger` as-child, which brings the click handler,
+keyboard support and `aria-expanded` with it. **Keeping your click handler makes
+the popover toggle twice and stay shut.**
+
+```vue
+<!-- Before -->
+<Popover placement="bottom-end">
+  <template #target="{ togglePopover }">
+    <Button label="Filter" @click="togglePopover" />
+  </template>
+  <template #body-main="{ close }">
+    <FilterPanel @done="close" />
+  </template>
+</Popover>
+
+<!-- After -->
+<Popover side="bottom" align="end">
+  <template #trigger>
+    <Button label="Filter" />
+  </template>
+  <template #default="{ close }">
+    <FilterPanel @done="close" />
+  </template>
+</Popover>
+```
+
+`#body` rendered outside the panel shell, so it maps to `#default` **plus**
+`bare` — without `bare` your content ends up inside a second panel.
+
+```vue
+<!-- Before -->
+<Popover>
+  <template #body><EmojiPicker /></template>
+</Popover>
+
+<!-- After -->
+<Popover bare>
+  <EmojiPicker />
+</Popover>
+```
+
+### Driving the popover yourself
+
+If your trigger needs custom timing (a delayed open, a drag that must not open
+it), bind `open` and accept only closes, so the trigger's own toggle cannot
+open it behind your back:
+
+```vue
+<Popover :open="isOpen" @update:open="(value) => !value && (isOpen = false)">
+  <template #trigger>
+    <div @click="onClick">…</div>
+  </template>
+</Popover>
+```
+
+### Slot props
+
+`#trigger` and `#default` receive `{ open, close, toggle }`.
+
+| Before                     | After                                    |
+| -------------------------- | ---------------------------------------- |
+| `isOpen`                   | `open`                                   |
+| `open` (a method to call)  | `toggle`, or nothing — see below         |
+| `togglePopover`            | `toggle`                                 |
+| `updatePosition`           | gone; reka repositions on its own        |
+
+`open` is now the boolean state, which is what it already means on `Dropdown`,
+`Select`, `MultiSelect`, `HoverCard` and `Sidebar`. It used to be a method on
+`Popover` alone.
+
+This one is silent and worth grepping for: a destructured `isOpen` becomes
+`undefined`, so a class bound to it stops applying with no error.
+
+```vue
+<!-- Before -->
+<template #trigger="{ isOpen }">
+  <Button :class="isOpen && 'ring-2'" label="Filter" />
+</template>
+
+<!-- After -->
+<template #trigger="{ open }">
+  <Button :class="open && 'ring-2'" label="Filter" />
+</template>
+```
+
+Most triggers need nothing at all — `#trigger` wires its own click, so the
+`open()` method it used to hand out had no callers. `toggle` is there for the
+cases that drive it by hand.
+
+### Attributes are not inherited
+
+`<Popover class="…">` and `<Popover :style="…">` used to land on a wrapper the
+legacy `#target` rendered. `#trigger` is as-child and renders no wrapper, so
+those attributes now go nowhere. Move them onto the element inside `#trigger`.
+
+### Hover panels
+
+Hover-driven panels move to the [`HoverCard`](./components/hovercard)
 component, which keeps `hoverDelay` / `leaveDelay` in seconds.
+
+### Tooltip
+
+| Before              | After                                                      |
+| ------------------- | ---------------------------------------------------------- |
+| `placement="right"` | `side="right"`                                             |
+| `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
+| `#body`             | `#content` (add `bare` if the content owns its surface)     |
+
+All three are silent — the tooltip keeps working, it just points the wrong way,
+loses the styling, or comes up empty. `arrowClass` was documented as the arrow's
+fill, but was mostly used to nudge the bubble's position; `offset` does that
+directly.
+
+`#default` is still the **trigger**. That is deliberate and is not changing.
+
+```vue
+<!-- Before -->
+<Tooltip text="Preview" placement="bottom" arrow-class="mb-3">
+  <Button label="Preview" />
+</Tooltip>
+
+<!-- After -->
+<Tooltip text="Preview" side="bottom" :offset="12">
+  <Button label="Preview" />
+</Tooltip>
+```
+
+`#body` replaced the whole bubble, surface included, so call sites hand-copied
+the bubble's own classes to get them back. `#content` renders inside the bubble,
+so that wrapper goes away:
+
+```vue
+<!-- Before -->
+<Tooltip>
+  <template #body>
+    <div
+      class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
+    >
+      <span>Hide password</span>
+    </div>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+
+<!-- After -->
+<Tooltip>
+  <template #content>
+    <span>Hide password</span>
+  </template>
+  <Button icon="eye" />
+</Tooltip>
+```
+
+If the content really does bring its own surface — an image preview, say — keep
+it and add `bare`:
+
+```vue
+<Tooltip bare>
+  <template #content>
+    <img :src="url" class="max-h-40 rounded shadow-xl" />
+  </template>
+  <span class="truncate">{{ filename }}</span>
+</Tooltip>
+```
 
 ## Inputs
 
@@ -301,6 +472,12 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks |
 | `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
 
+The first four rows are **removed**, not aliased. The old names are silently
+ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
+Rating becomes interactive, a `Switch` `@change` handler never fires, and
+`labelClasses` / `Checkbox.padding` stop styling anything. Nothing breaks at
+build time, so grep for these names when upgrading.
+
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 
@@ -313,6 +490,144 @@ The legacy `Input` component is deprecated. Use
 | Before           | After            |
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
+
+## Data fetching (useDoctype / useList)
+
+The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
+`runDocMethod`, `runMethod`) and on `useList` (`insert`, `setValue`, `delete`)
+used to share one request between all their submits. Each one now sends its own
+request, so the shared-request members are gone.
+
+Nothing fails to build, so grep for these by hand. The app keeps rendering and
+then throws the first time the removed member is read — usually the first time
+someone deletes a row.
+
+| Before                                              | After                        |
+| --------------------------------------------------- | ---------------------------- |
+| `delete.loading && delete.params.name === row.name` | `delete.isLoading(row.name)` |
+| `setValue.params.name`                              | `setValue.isLoading(name)`   |
+| `delete.execute()` / `.fetch()` / `.reload()`       | `delete.submit({ name })`    |
+| `insert.reset()` / `.abort()`                       | removed, no replacement      |
+| `runMethod.isFetching` / `.isFinished`              | `runMethod.loading`          |
+| `setValue.promise`                                  | `await setValue.submit(...)` |
+| `delete.url`                                        | removed, no replacement      |
+
+All eight now have the same five members: `submit()`, `data`, `error`,
+`loading` and `isLoading()`.
+
+`isLoading()` takes whatever identifies one submit:
+
+```js
+todos.delete.isLoading(row.name)
+todos.setValue.isLoading(row.name)
+todos.runDocMethod.isLoading(row.name, 'archive')
+todos.runMethod.isLoading('sync_all')
+todos.insert.isLoading() // no argument: a new row has no name yet
+```
+
+`insert.isLoading()` gives the same answer as `insert.loading`. It is there so
+every write method reads the same way.
+
+More changes you will not see at build time:
+
+- `submit()` now resolves with its own response. Code that fired two submits
+  and read the result of the first was receiving the second one's data, or
+  `null`. If you queued submits to work around that, you can drop the queue.
+- `data` and `error` belong to the submit that started last, not the one that
+  answered last. A slow submit that comes back after a newer one writes
+  nothing and clears nothing. It still answers its own caller with its own
+  outcome — resolving with its response, or rejecting with its error.
+- **`data` is no longer reset to `null` when a submit fails.** It used to be,
+  because the shared request cleared it on any not-ok response. It now keeps
+  the last successful response.
+
+  ```js
+  await todos.setValue.submit({ name: 'TODO-1', status: 'Done' })
+  await todos.setValue.submit({ name: 'TODO-2', status: 'Done' }) // fails
+
+  todos.setValue.data // still the TODO-1 response
+  todos.setValue.error // the failure
+  ```
+
+  Test `error`, not `data`, to tell a failed submit from a successful one.
+  `if (!todos.setValue.data)` used to mean "the last save failed" and no
+  longer does.
+
+- `error` is no longer cleared when a submit starts. It used to be, which
+  erased the error of a sibling submit still in flight. It now stands until
+  the newest submit settles. To blank an error banner while a retry runs, hide
+  it on `loading` yourself.
+- **`submit()` rejects on any failure.** It resolves with the response, or
+  rejects with the error. A failed `validate` already rejected; a failed
+  request used to resolve with `null`. Both reject now.
+
+  ```js
+  // Before
+  const doc = await todos.insert.submit({ title: 'Buy milk' })
+  if (!doc) return showError(todos.insert.error)
+
+  // After
+  try {
+    const doc = await todos.insert.submit({ title: 'Buy milk' })
+  } catch (e) {
+    showError(e)
+  }
+  ```
+
+  `null` no longer means "it failed". A server that answers with `null`
+  resolves with `null`, like any other response. Every `if (!result)` check
+  after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
+  unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
+  rejection.
+- `useList`'s `insert` and `delete` now send to the `baseUrl` you passed to
+  `useList`. They used to ignore it and hit the current origin. `setValue`
+  already honoured it, so all three write methods now agree. `useDoctype` was
+  never affected.
+
+## Data fetching (exports)
+
+`useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
+`useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
+parses the response, and leaves the URL, the params and the caching to you.
+Pick the composable that matches what you are fetching.
+
+| Before                                   | After                       |
+| ---------------------------------------- | --------------------------- |
+| `useFrappeFetch('/api/v2/method/…')`     | `useCall({ url })`          |
+| `useFrappeFetch('/api/v2/document/…')`   | `useDoc({ doctype, name })` |
+| `useFrappeFetch('/api/v2/document/…?…')` | `useList({ doctype, … })`   |
+
+This is a build failure at the import, so nothing changes silently.
+
+```js
+// Before
+import { useFrappeFetch } from 'frappe-ui'
+const { data } = useFrappeFetch('/api/v2/method/ping').get()
+
+// After
+import { useCall } from 'frappe-ui'
+const ping = useCall({ url: '/api/v2/method/ping' })
+```
+
+`FrappeResponseError` is exported now. A Frappe error response raises it — it
+lands on `.error`, and the write methods above reject with it. The class was
+never exported, so you could not tell it apart from a network or parse failure.
+Narrow it with `instanceof` and you get `title`, `type`, `indicator` and
+`exception`:
+
+```ts
+import { FrappeResponseError } from 'frappe-ui'
+
+try {
+  await todos.insert.submit({ title: 'Buy milk' })
+} catch (e) {
+  if (e instanceof FrappeResponseError) {
+    showError(e.title, e.type)
+  } else {
+    throw e
+  }
+}
+```
 
 ## Tree
 
@@ -497,31 +812,45 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
   `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
-## Autocomplete (deprecated)
+## Autocomplete (removed)
 
-`Autocomplete` still ships (with a one-time dev `console.warn`) but will be
-removed in a future major release. It merged single- and multi-select via the
+`Autocomplete` is gone in v1. It merged single- and multi-select via the
 `multiple` boolean; v1 splits them: [`Combobox`](./components/combobox) for
 single, [`MultiSelect`](./components/multiselect) for multiple.
 
-The model value changes shape. `Autocomplete` took and emitted the full option
-object; the new components model the value only. `Combobox` is `string | null`
-and `MultiSelect` is `string[]`. To read the full option, listen to `Combobox`'s
-`@update:selected-option`.
+The import fails, so your build tells you where every call site is. Three
+things inside those call sites change quietly instead, and each has a
+before/after below: the **v-model payload**, the **group key**, and the
+**`open` slot prop**, which was a function and is now a boolean.
+
+Sweep your codebase:
+
+```bash
+grep -rln '<Autocomplete\b' src --include='*.vue'   # find usages
+grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
+grep -rn 'items:' src --include='*.vue'             # grouped options — see below
+```
 
 | Before (`Autocomplete`)           | After                                     |
 | --------------------------------- | ----------------------------------------- |
 | `:multiple="false"` (default)     | use `Combobox`                            |
 | `:multiple="true"`                | use `MultiSelect`                         |
 | `v-model` (option or value)       | `v-model` (value / value array)           |
-| `@change`                         | `@update:modelValue`                      |
+| `@change`                         | `@update:modelValue` (`@update:selectedOption` for the option) |
 | grouped `{ group, items }`        | grouped `{ group, options }`              |
 | `placement` (string)              | `side` + `align`                          |
 | `:showFooter`                     | `#footer` slot (MultiSelect has built-in) |
 | `:bodyClasses`                    | `data-slot` CSS                           |
 | `:maxOptions`                     | no equivalent                             |
-| `#target`                         | `#trigger`                                |
+| `#target="{ togglePopover }"`     | `#trigger`, with no click handler (`open` is now a boolean) |
 | `#prefix` / `#suffix` / `#item-*` | same (`#suffix` now replaces chevron)     |
+
+### The v-model payload inverts
+
+`Autocomplete` took and emitted the **whole option object**; both replacements
+model the **value only** — `Combobox` is `string | number | null`, `MultiSelect`
+is `(string | number)[]`. Code that reads `country.value` off the model gets
+`undefined` rather than a type error, since the model was loosely typed.
 
 ```vue
 <!-- Before -->
@@ -529,24 +858,206 @@ and `MultiSelect` is `string[]`. To read the full option, listen to `Combobox`'s
 <!-- country === { label: 'India', value: 'in' } -->
 
 <!-- After -->
-<Combobox
-  v-model="country"
-  :options="countries"
-  @update:model-value="onChange"
-/>
+<Combobox v-model="country" :options="countries" @update:model-value="onChange" />
 <!-- country === 'in' -->
 ```
 
-Sweep your codebase:
+Still need the whole option — for its `description`, an id field, anything
+beyond the value? Listen to `@update:selectedOption`, which carries it:
 
-```bash
-grep -rln '<Autocomplete\b' src --include='*.vue'   # find usages
-grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
+```vue
+<Combobox
+  v-model="country"
+  :options="countries"
+  @update:selected-option="(option) => (label = option?.label ?? '')"
+/>
 ```
 
-`FormControl` itself is not deprecated, but its `type="autocomplete"` value is.
-Switch to `type="combobox"`, or use the standalone
-[`Combobox`](./components/combobox).
+### Grouped options: `items` → `options`
+
+The key holding a group's children is now `options`, matching the top-level
+prop. Both components throw and name the group if they find the old key, so
+this one is caught the first time the picker opens — but only then, not at
+build time.
+
+```vue
+<!-- Before -->
+<Autocomplete :options="[{ group: 'Asia', items: [india, japan] }]" />
+
+<!-- After -->
+<Combobox :options="[{ group: 'Asia', options: [india, japan] }]" />
+```
+
+### `#target` → `#trigger`, and drop the click handler
+
+The slot is renamed, and the wiring inside it changes. `Autocomplete` handed
+`#target` a `togglePopover` function you had to call yourself. `Combobox` and
+`MultiSelect` attach the open toggle to the `#trigger` element for you, so the
+handler is not just unnecessary — a `togglePopover()` carried through the
+rename throws `togglePopover is not a function` on every click. The popover
+still opens, because the component's own handler already ran, so this reads as
+"works, but noisy" until someone looks at the console.
+
+```vue
+<!-- Before -->
+<Autocomplete :options="fields">
+  <template #target="{ togglePopover }">
+    <Button label="Add filter" @click="togglePopover()" />
+  </template>
+</Autocomplete>
+
+<!-- After -->
+<Combobox :options="fields">
+  <template #trigger>
+    <Button label="Add filter" />
+  </template>
+</Combobox>
+```
+
+**`open` changed from a function to a boolean, and that part is silent.** On
+`#target` it was the function that opened the popover, so anything reading it
+as a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading a
+function object and was **always truthy**. On `#trigger` it is the real open
+state, so those expressions start doing what they always looked like they did.
+
+`#trigger` receives
+`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`. Use
+`setOpen` for a trigger that has to open the popover from somewhere other than
+its own click.
+
+### The default trigger is `trigger="button"`
+
+`Autocomplete` rendered a button showing the selection, with the search box
+inside the popover. `Combobox` defaults to `trigger="input"` — the trigger
+_is_ the search field. Pass `trigger="button"` to keep the old shape.
+
+## FormControl `type="autocomplete"` (removed)
+
+**This one is silent.** `FormControl` is a dispatcher: with the `autocomplete`
+case gone, the type falls through to `TextInput` and is still forwarded as an
+html input type. The result is `<input type="autocomplete">`, which every
+browser renders as a plain text box. No build error, no runtime error — just a
+picker that turned into a text field. A dev-only `console.error` names it.
+
+```vue
+<!-- Before -->
+<FormControl type="autocomplete" :options="countries" v-model="country" />
+<!-- country === { label: 'India', value: 'in' } -->
+
+<!-- After -->
+<FormControl type="combobox" :options="countries" v-model="country" />
+<!-- country === 'in' -->
+```
+
+The v-model payload inverts here too, for the same reason as above. Or use the
+standalone [`Combobox`](./components/combobox), which exposes the full set of
+props and slots without the wrapper.
+
+## HTTP transport and the `FrappeUI` plugin
+
+v1 has one HTTP path. `frappeRequest` is it; `call` is a thin wrapper over it
+for the common "POST to a whitelisted method" case. `request`, `createCall` and
+`initSocket` are gone, and `app.use(FrappeUI)` is down to a single option.
+
+| Before                          | After                                        |
+| ------------------------------- | -------------------------------------------- |
+| `import { request }`            | `import { frappeRequest }`                   |
+| `createCall(options)`           | wrap `call` yourself, or use `frappeRequest` |
+| `import initSocket`             | your own `io(...)` connection                |
+| `app.use(FrappeUI, { config })` | `setConfig(key, value)` per entry            |
+| `app.use(FrappeUI, { call })`   | `import { call }` where you need it          |
+| `this.$resources` (implicit)    | `app.use(FrappeUI, { resources: true })`     |
+
+The first three are build failures — your bundler or type-check names them. The
+rest are the silent ones.
+
+### `call` now honours `setConfig`
+
+`call` built its own `fetch` and never read the config, so `requestBaseUrl` and
+`requestHeaders` were quietly ignored on every `call()` while `frappeRequest`
+respected them. That inconsistency is fixed, which means a `call` in an app that
+sets either one now behaves differently — usually the way you assumed it already
+did. Two knock-on effects worth checking:
+
+- If you set `requestBaseUrl` for local dev against a remote site, `call` now
+  goes to the remote site too, with `credentials: 'include'`.
+- If you set `serverMessagesHandler`, `_server_messages` returned by a `call`
+  now reach it. Previously only `frappeRequest` and the resources fed it, so
+  expect toasts from paths that used to be silent.
+
+`call`'s signature, the value it resolves to, and the
+`{ response, status, error }` object passed to `onError` are all unchanged.
+
+### The plugin's `config` option is gone
+
+```js
+// Before
+app.use(FrappeUI, {
+  config: {
+    resourceFetcher: frappeRequest,
+    defaultListUrl: 'gameplan.extends.client.get_list',
+    systemTimezone: window.system_timezone || null,
+  },
+})
+
+// After
+setConfig('resourceFetcher', frappeRequest)
+setConfig('defaultListUrl', 'gameplan.extends.client.get_list')
+setConfig('systemTimezone', window.system_timezone || null)
+app.use(FrappeUI)
+```
+
+Passing a removed option is not a type error if your `main.js` is plain JS, so
+the plugin logs a dev-mode warning naming the option it ignored. Note that
+`setConfig` only accepts keys of `FrappeUIConfig` — if you were passing a key
+that isn't one, it was never read and can be deleted.
+
+### `$resources` is opt-in
+
+The plugin used to install the v1 resources Options API mixin by default, so
+`this.$resources`, `$getResource`, `$getDoc`, `$getListResource` and
+`$refetchResource` existed in any app that called `app.use(FrappeUI)`. It now
+installs only when asked:
+
+```js
+app.use(FrappeUI, { resources: true })
+```
+
+Nothing changes for Composition API code — `createResource`,
+`createListResource` and `createDocumentResource` never went through the plugin.
+You need the option only if you declare a `resources: { … }` block in a
+component's options.
+
+You will not have to work this out from a blank screen. A component that
+declares `resources` without the option throws on creation, naming itself and
+the fix, and reading `this.$resources` throws too. Both throw in production
+builds as well as dev — this is a break that has no quiet failure mode.
+
+### `initSocket` is gone
+
+It was a nine-line `io()` wrapper, and the plugin created one by default — which
+meant apps that also built their own socket held two live connections per page
+load. If you relied on the `$socket` global the plugin set, create the
+connection yourself:
+
+```js
+import { io } from 'socket.io-client'
+
+const host = window.location.hostname
+const port = window.location.port ? ':9000' : ''
+const protocol = port ? 'http' : 'https'
+const siteName = import.meta.env.DEV ? host : window.site_name
+
+app.config.globalProperties.$socket = io(
+  `${protocol}://${host}${port}/${siteName}`,
+  { withCredentials: true },
+)
+```
+
+Until you do, reading `this.$socket` throws with that instruction rather than
+returning `undefined` and crashing in whatever realtime handler reads it next.
+Assigning your own replaces the guard. The same applies to `$call`, the other
+global the plugin used to install — import `call` from `frappe-ui` instead.
 
 ## FAQ
 

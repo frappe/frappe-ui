@@ -9,7 +9,14 @@ function onDocumentClick(e: Event, el: Element, fn?: (e: Event) => void): void {
   }
 }
 
-export default {
+/**
+ * Calls the bound handler when a click lands outside the element.
+ *
+ * Named `vOnOutsideClick` because `<script setup>` auto-registers only
+ * `vFoo`-shaped bindings — anything else has to be aliased by hand at every
+ * call site.
+ */
+export const vOnOutsideClick = {
   beforeMount(el: Element, binding: DirectiveBinding, vnode: VNode): void {
     const fn = binding.value as (e: Event) => void
     const clickHandler = function (e: Event) {

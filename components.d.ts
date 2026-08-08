@@ -13,7 +13,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     Alert: typeof import('./src/components/Alert/Alert.vue')['default']
     'Alert.playground': typeof import('./src/components/Alert/Alert.playground.vue')['default']
-    Autocomplete: typeof import('./src/components/Autocomplete/Autocomplete.vue')['default']
     Avatar: typeof import('./src/components/Avatar/Avatar.vue')['default']
     'Avatar.playground': typeof import('./src/components/Avatar/Avatar.playground.vue')['default']
     AxisChart: typeof import('./src/components/Charts/AxisChart.vue')['default']
@@ -128,7 +127,6 @@ declare module 'vue' {
     MultiSelect: typeof import('./src/components/MultiSelect/MultiSelect.vue')['default']
     'MultiSelect.playground': typeof import('./src/components/MultiSelect/MultiSelect.playground.vue')['default']
     MultiSelectResults: typeof import('./src/components/MultiSelect/MultiSelectResults.vue')['default']
-    NestedPopover: typeof import('./src/components/ListFilter/NestedPopover.vue')['default']
     NewEventModal: typeof import('./src/components/Calendar/NewEventModal.vue')['default']
     NotificationsPanel: typeof import('./src/components/SettingsDialog/stories/panels/NotificationsPanel.vue')['default']
     NumberChart: typeof import('./src/components/Charts/NumberChart.vue')['default']

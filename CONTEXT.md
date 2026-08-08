@@ -36,7 +36,7 @@ _Avoid_: using bare `v-model` for visibility on overlays
 **dismissible**:
 Whether an overlay closes via user-initiated dismiss channels — outside click and
 Escape. Default `true`; when `false`, it closes only programmatically or via an explicit
-control. Named for cross-overlay reuse but ships **only on Dialog** in v1. Replaces
+control. Ships on `Dialog`, `Popover`, `BottomSheet` and `Alert`. Replaces
 `disableOutsideClickToClose` (deprecated alias, warns).
 _Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick` (in new code)
 
@@ -49,6 +49,22 @@ The only two axes used to color components — there is intentionally **no** sem
 - **theme** — color tone, by color name: `yellow | blue | red | green | …` (Button, Badge, Alert, Dialog)
 
 A legacy `appearance` (`warning | info | danger | success`) maps to `theme` color names.
+
+**theme** means color tone and nothing else. It is the library's most-used
+vocabulary word — roughly 300 `theme="…"` sites across the apps — so the
+light/dark axis gets its own word rather than competing for this one.
+
+**colorScheme**:
+The light/dark axis: `light | dark | system`. Owned by the `useColorScheme`
+composable, which is the only writer — `colorScheme` itself is read-only,
+because the ref, the `<html data-theme>` attribute and the stored preference
+have to move together and `setColorScheme` is what moves all three.
+_Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
+
+> The `data-theme` DOM attribute and the `theme` `localStorage` key keep the
+> older word. Apps ship `[data-theme='dark']` rules in their own CSS and users
+> have a saved value under that key; both are outside our API, and renaming
+> either would break running apps with no compile error.
 
 ## Shared component vocabulary
 

@@ -1,6 +1,35 @@
+import { h } from 'vue'
 import Slider from './Slider.vue'
 
 describe('Slider', () => {
+  it('moves the value with arrow keys and emits the update', () => {
+    cy.mount(Slider, {
+      props: {
+        modelValue: [50],
+        step: 10,
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[role="slider"]').focus().trigger('keydown', { key: 'ArrowRight' })
+    cy.get('@onUpdate').should('have.been.calledWith', [60])
+    cy.get('[role="slider"]').trigger('keydown', { key: 'Home' })
+    cy.get('@onUpdate').should('have.been.calledWith', [0])
+  })
+
+  it('renders the label and description slots', () => {
+    cy.mount(Slider, {
+      props: { label: 'prop label', description: 'prop description' },
+      slots: {
+        label: () => h('span', 'slot label'),
+        description: () => h('span', 'slot description'),
+      },
+    })
+
+    cy.contains('slot label').should('exist')
+    cy.contains('slot description').should('exist')
+  })
+
   it('renders one thumb for a single value', () => {
     cy.mount(Slider, {
       props: {

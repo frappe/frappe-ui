@@ -23,7 +23,7 @@
     name: 'editorClass',
     description: 'Custom classes applied to the editor root',
     required: false,
-    type: 'string | object | string[]',
+    type: 'string | string[] | object',
     default: '"prose-sm"'
   },
   {
@@ -130,6 +130,11 @@
 
   const emitsData = [
   {
+    name: 'blur',
+    description: '',
+    type: '[event: FocusEvent]'
+  },
+  {
     name: 'change',
     description: 'Fired after the value is committed.',
     type: '[content: string]'
@@ -140,22 +145,17 @@
     type: '[event: FocusEvent]'
   },
   {
-    name: 'blur',
-    description: '',
-    type: '[event: FocusEvent]'
-  },
-  {
     name: 'transaction',
     description: '',
     type: '[editor: object]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="TextEditor" :data="propsData"/> 
+<PropsTable name="TextEditor" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

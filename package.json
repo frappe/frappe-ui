@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "1.0.0-beta.35",
+  "version": "1.0.0-beta.39",
   "description": "A set of components and utilities for rapid UI development",
   "engines": {
     "node": ">=20.19.0"
@@ -41,6 +41,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:gen": "tsx docs/scripts/propsgen.ts",
     "docs:gen:all": "yarn docs:gen --all",
+    "docs:check": "tsx docs/scripts/propsgen.ts --check",
     "sync-tokens": "node tailwind/figma-tokens-to-theme.js"
   },
   "exports": {
@@ -147,7 +148,6 @@
     "@codemirror/lang-yaml": "^6.1.3",
     "@floating-ui/dom": "^1.7.4",
     "@headlessui/vue": "^1.7.14",
-    "@popperjs/core": "^2.11.2",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/typography": "^0.5.16",

@@ -6,21 +6,6 @@
 
   const datePickerProps = [
   {
-    name: 'value',
-    description: 'Uncontrolled initial value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
-  },
-  {
-    name: 'modelValue',
-    description: 'Controlled value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""'
-  },
-  {
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
@@ -168,6 +153,21 @@
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
+    name: 'value',
+    description: 'Uncontrolled initial value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -235,40 +235,18 @@
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   }
 ]
 
   const dateRangePickerProps = [
-  {
-    name: 'value',
-    description: 'Uncontrolled initial range value as `[from, to]` in `YYYY-MM-DD` format.',
-    required: false,
-    type: 'string[]',
-    default: '[]',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
-  },
-  {
-    name: 'modelValue',
-    description: 'Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for no selection.',
-    required: false,
-    type: 'string[]',
-    default: '[]'
-  },
-  {
-    name: 'dualPane',
-    description: 'Render two calendar panels side by side (current month + next month).',
-    required: false,
-    type: 'boolean',
-    default: 'false'
-  },
   {
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
@@ -417,6 +395,27 @@
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
+    name: 'value',
+    description: 'Uncontrolled initial range value as `[from, to]` in `YYYY-MM-DD` format.',
+    required: false,
+    type: 'string[]',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for no selection.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
+    name: 'dualPane',
+    description: 'Render two calendar panels side by side (current month + next month).',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -484,54 +483,18 @@
     type: '[value: DateRangeValue]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: DateRangeValue]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: DateRangeValue]'
   }
 ]
 
   const dateTimePickerProps = [
-  {
-    name: 'value',
-    description: 'Uncontrolled initial value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""',
-    deprecated: 'Use `modelValue` with `v-model` instead.'
-  },
-  {
-    name: 'modelValue',
-    description: 'Controlled value for the picker.',
-    required: false,
-    type: 'string',
-    default: '""'
-  },
-  {
-    name: 'minDateTime',
-    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `min` instead.'
-  },
-  {
-    name: 'maxDateTime',
-    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
-    required: false,
-    type: 'string',
-    deprecated: 'Use `max` instead.'
-  },
-  {
-    name: 'allowCustomTime',
-    description: 'Allows typing a custom time into the embedded time picker.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
-  },
   {
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
@@ -680,6 +643,42 @@
     deprecated: 'Apply `class` directly to the DatePicker component element to control width.'
   },
   {
+    name: 'value',
+    description: 'Uncontrolled initial value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""',
+    deprecated: 'Use `modelValue` with `v-model` instead.'
+  },
+  {
+    name: 'modelValue',
+    description: 'Controlled value for the picker.',
+    required: false,
+    type: 'string',
+    default: '""'
+  },
+  {
+    name: 'minDateTime',
+    description: 'Earliest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
+    required: false,
+    type: 'string',
+    deprecated: 'Use `min` instead.'
+  },
+  {
+    name: 'maxDateTime',
+    description: 'Latest selectable date-time in `YYYY-MM-DD HH:mm:ss` format.',
+    required: false,
+    type: 'string',
+    deprecated: 'Use `max` instead.'
+  },
+  {
+    name: 'allowCustomTime',
+    description: 'Allows typing a custom time into the embedded time picker.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,
@@ -747,40 +746,40 @@
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'change',
+    description: 'Fired after the value is committed.',
+    type: '[value: string]'
   }
 ]
 </script>
+
 ## API Reference
 
 ### DatePicker
 
-<PropsTable name="DatePicker" :data="datePickerProps"/> 
+<PropsTable name="DatePicker" :data="datePickerProps"/>
 
-<SlotsTable :data="datePickerSlots"/> 
+<SlotsTable :data="datePickerSlots"/>
 
-<EmitsTable :data="datePickerEmits"/> 
+<EmitsTable :data="datePickerEmits"/>
 
 ### DateRangePicker
 
-<PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/> 
+<PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/>
 
-<SlotsTable :data="dateRangePickerSlots"/> 
+<SlotsTable :data="dateRangePickerSlots"/>
 
-<EmitsTable :data="dateRangePickerEmits"/> 
+<EmitsTable :data="dateRangePickerEmits"/>
 
 ### DateTimePicker
 
-<PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/> 
+<PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/>
 
-<SlotsTable :data="dateTimePickerSlots"/> 
+<SlotsTable :data="dateTimePickerSlots"/>
 
-<EmitsTable :data="dateTimePickerEmits"/> 
-
+<EmitsTable :data="dateTimePickerEmits"/>

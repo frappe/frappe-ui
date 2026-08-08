@@ -9,7 +9,7 @@
     name: 'orientation',
     description: '',
     required: false,
-    type: '"vertical" | "horizontal"',
+    type: '"horizontal" | "vertical"',
     default: '"horizontal"'
   },
   {
@@ -33,7 +33,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Divider" :data="propsData"/> 
-
+<PropsTable name="Divider" :data="propsData"/>

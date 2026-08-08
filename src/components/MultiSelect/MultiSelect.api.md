@@ -230,13 +230,8 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the selection changes.',
     type: '[value: (string | number)[]]'
-  },
-  {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
   },
   {
     name: 'update:open',
@@ -244,17 +239,22 @@
     type: '[value: boolean]'
   },
   {
+    name: 'update:query',
+    description: 'Fired when the search query changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'update:selectedOptions',
-    description: 'Fired when the selected options changes.',
+    description: 'Fired alongside `update:modelValue` with the original option objects\nresolved out of `options`, so custom fields on an option survive.',
     type: '[value: MultiSelectOption[]]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="MultiSelect" :data="propsData"/> 
+<PropsTable name="MultiSelect" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

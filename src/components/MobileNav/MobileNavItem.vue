@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
-import { scrollToTop } from '../../composables/useScrollContainer'
+import { scrollShellToTop } from '../../composables/useShellScrolled'
 import type { MobileNavItemProps } from './types'
 
 const props = defineProps<MobileNavItemProps>()
@@ -119,7 +119,7 @@ const resolvedActive = computed(() => props.active ?? isCurrent.value)
 function onButtonClick(event: MouseEvent) {
   // Reached only when this item is already current (or has no target): a tap
   // scrolls the shell's scroll container to the top.
-  if (isCurrent.value) scrollToTop()
+  if (isCurrent.value) scrollShellToTop()
   emit('click', event)
 }
 </script>

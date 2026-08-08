@@ -2,7 +2,8 @@ export { default as Popover } from './Popover.vue'
 export type {
   PopoverProps,
   PopoverEmits,
-  PopoverPlacement,
   PopoverSlotProps,
-  PopoverLegacySlotProps,
+  PopoverExposed,
+  PopoverSide,
+  PopoverAlign,
 } from './types'

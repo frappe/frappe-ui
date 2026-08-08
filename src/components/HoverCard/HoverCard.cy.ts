@@ -65,6 +65,45 @@ describe('HoverCard', () => {
     cy.get('[data-slot="content"]').should('not.exist')
   })
 
+  it('opens on keyboard focus and closes on Escape (P12)', () => {
+    // A hover-only card is unreachable without a pointer. reka's trigger opens
+    // on focus and closes on Escape; this pins that wiring to the wrapper.
+    cy.mount(HoverCard, { slots: Slots, props: { hoverDelay: 0 } })
+
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-cy="trigger"]').focus()
+    cy.get('[data-slot="content"]').should('exist')
+
+    cy.get('body').trigger('keydown', { key: 'Escape' })
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('emits update:open when the card opens from the trigger', () => {
+    const onUpdate = cy.spy().as('update')
+    cy.mount(HoverCard, {
+      slots: Slots,
+      props: { hoverDelay: 0, 'onUpdate:open': onUpdate },
+    })
+
+    cy.get('[data-cy="trigger"]').focus()
+    cy.get('@update').should('have.been.calledWith', true)
+  })
+
+  it('exposes open() and close() methods', () => {
+    const cardRef = ref<any>(null)
+    const Harness = defineComponent({
+      setup() {
+        return () => h(HoverCard, { ref: cardRef, hoverDelay: 0 }, Slots)
+      },
+    })
+
+    cy.mount(Harness)
+    cy.then(() => cardRef.value.open())
+    cy.get('[data-slot="content"]').should('exist')
+    cy.then(() => cardRef.value.close())
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
   it('positions the card via side + align', () => {
     cy.clock()
     cy.mount(HoverCard, {

@@ -1,5 +1,6 @@
 import {
   matchesByLabelOrValue,
+  readGroupOptions,
   resolveItemSlots,
 } from '../shared/selection/utils'
 import type {
@@ -80,7 +81,7 @@ export function normalizeMultiSelectOptions(
     if (isGroupedOption(option)) {
       flushUngrouped()
 
-      const normalizedOptions = option.options
+      const normalizedOptions = readGroupOptions(option, 'MultiSelect')
         .map(normalizeOption)
         .filter((item): item is NormalizedOption => Boolean(item))
 

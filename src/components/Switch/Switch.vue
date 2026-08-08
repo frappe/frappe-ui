@@ -66,10 +66,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useAttrs, useSlots, watch, watchEffect } from 'vue'
+import { computed, useSlots } from 'vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -79,11 +78,9 @@ const props = withDefaults(defineProps<SwitchProps>(), {
   size: 'sm',
   padded: false,
   disabled: false,
-  labelClasses: '',
 })
 
 const model = defineModel<boolean>({ default: false })
-const attrs = useAttrs()
 const slots = useSlots()
 
 defineSlots<{
@@ -92,26 +89,6 @@ defineSlots<{
   /** Overrides the rendered description content. */
   description?: () => any
 }>()
-
-watch(model, (val) => {
-  const onChange = attrs.onChange as
-    | ((value: boolean) => void)
-    | ((value: boolean) => void)[]
-    | undefined
-  if (!onChange) return
-  warnDeprecated('Switch.change', 'update:modelValue / v-model')
-  if (Array.isArray(onChange)) {
-    onChange.forEach((h) => h(val))
-  } else {
-    onChange(val)
-  }
-})
-
-watchEffect(() => {
-  if (props.labelClasses) {
-    warnDeprecated('Switch.labelClasses', 'data-* styling hooks')
-  }
-})
 
 const {
   inputId,

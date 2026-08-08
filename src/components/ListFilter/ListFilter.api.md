@@ -29,6 +29,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="ListFilter" :data="propsData"/>

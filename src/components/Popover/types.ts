@@ -1,21 +1,6 @@
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
-/** Legacy placement union (deprecated — use `side` + `align`). */
-export type PopoverPlacement =
-  | 'top-start'
-  | 'top-end'
-  | 'bottom-start'
-  | 'bottom-end'
-  | 'right-start'
-  | 'right-end'
-  | 'left-start'
-  | 'left-end'
-  | 'top'
-  | 'bottom'
-  | 'right'
-  | 'left'
-
 export interface PopoverProps {
   /** Controls visibility (v-model:open). */
   open?: boolean
@@ -52,67 +37,31 @@ export interface PopoverProps {
    * surface.
    */
   arrow?: boolean
-
-  // ---------------------------------------------------------------------------
-  // Deprecated props (kept working through v1.x — see Popover.vue back-compat).
-  // ---------------------------------------------------------------------------
-
-  /** @deprecated Use `open` / `v-model:open`. */
-  show?: boolean
-
-  /** @deprecated Use `<HoverCard>` for hover behavior. */
-  trigger?: 'click' | 'hover'
-
-  /** @deprecated Use `<HoverCard>` (`hoverDelay`, in seconds). */
-  hoverDelay?: number
-
-  /** @deprecated Use `<HoverCard>` (`leaveDelay`, in seconds). */
-  leaveDelay?: number
-
-  /** @deprecated Use `side` + `align`. */
-  placement?: PopoverPlacement
-
-  /** @deprecated Use the `data-slot` CSS hooks (no-op). */
-  popoverClass?: string | object | Array<string | object>
-
-  /** @deprecated Motion is now built in (no-op). */
-  transition?: 'default' | null
-
-  /** @deprecated Use `dismissible`. */
-  hideOnBlur?: boolean
-
-  /** @deprecated Use `matchTriggerWidth`. */
-  matchTargetWidth?: boolean
 }
 
 export interface PopoverEmits {
-  /** Fired when the open state changes (canonical). */
+  /** Fired when the open state changes. */
   (event: 'update:open', value: boolean): void
   /** Fired when the popover opens. */
   (event: 'open'): void
   /** Fired when the popover closes. */
   (event: 'close'): void
-  /** @deprecated Use `update:open`. */
-  (event: 'update:show', value: boolean): void
 }
 
-/** Slot props passed to the new `#trigger` / `#default` slots. */
+/** Slot props passed to the `#trigger` and `#default` slots. */
 export interface PopoverSlotProps {
-  open: () => void
+  /** Whether the popover is currently open. */
+  open: boolean
+  /** Closes the popover. No-op when it is already closed. */
   close: () => void
+  /** Flips the open state, or sets it when passed a boolean. */
   toggle: (flag?: boolean | Event) => void
-  isOpen: boolean
 }
 
-/**
- * Slot props passed to the deprecated `#target` / `#body` / `#body-main`
- * slots. Preserved verbatim so existing callers do not double-toggle.
- */
-export interface PopoverLegacySlotProps {
-  togglePopover: () => void
-  updatePosition: () => void
+/** Methods available on a `<Popover>` template ref. */
+export interface PopoverExposed {
+  /** Opens the popover. No-op when it is already open. */
   open: () => void
+  /** Closes the popover. No-op when it is already closed. */
   close: () => void
-  toggle: (flag?: boolean | Event) => void
-  isOpen: boolean
 }

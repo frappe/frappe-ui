@@ -1,16 +1,28 @@
 <script setup lang="ts">
-import { Button, Tooltip } from 'frappe-ui'
+import { Button, KeyboardShortcut, Tooltip } from 'frappe-ui'
 </script>
 
 <template>
-  <Tooltip arrow-class="fill-surface-base" placement="top">
-    <template #body>
-      <div
-        class="min-w-[6rem] rounded bg-surface-base px-2 py-1 text-xs text-ink-gray-9 shadow-xl"
-      >
-        Test
-      </div>
-    </template>
-    <Button theme="red">Delete</Button>
-  </Tooltip>
+  <div class="flex items-center gap-4">
+    <Tooltip side="top">
+      <template #content>
+        <span class="flex items-center gap-1">
+          Delete
+          <KeyboardShortcut bg combo="Mod+Backspace" class="px-1" />
+        </span>
+      </template>
+      <Button theme="red">Delete</Button>
+    </Tooltip>
+
+    <Tooltip side="top" bare>
+      <template #content>
+        <img
+          src="https://frappeui.com/frappe-ui-logo.svg"
+          alt="frappe-ui"
+          class="size-20 rounded bg-surface-white p-2 shadow-xl"
+        />
+      </template>
+      <Button>Preview</Button>
+    </Tooltip>
+  </div>
 </template>

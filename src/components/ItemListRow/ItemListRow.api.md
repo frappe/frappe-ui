@@ -65,9 +65,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="ItemListRow" :data="propsData"/> 
+<PropsTable name="ItemListRow" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

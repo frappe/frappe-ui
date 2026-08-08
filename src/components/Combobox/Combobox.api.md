@@ -23,7 +23,7 @@
     name: 'trigger',
     description: 'Shape of the trigger.\n- `\'input\'` (default): user types directly into the trigger\n- `\'button\'`: render a button trigger; search input moves into the\n  popover header. Label + prefix auto-derive from the selected option.',
     required: false,
-    type: '"button" | "input"',
+    type: '"input" | "button"',
     default: '"input"'
   },
   {
@@ -246,13 +246,8 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    description: 'Fired when the committed value changes.',
     type: '[value: ComboboxOptionValue | null]'
-  },
-  {
-    name: 'update:query',
-    description: 'Fired when the query changes.',
-    type: '[value: string]'
   },
   {
     name: 'update:open',
@@ -261,26 +256,31 @@
   },
   {
     name: 'blur',
-    description: '',
+    description: 'Fired when the input loses focus.',
     type: '[event: FocusEvent]'
   },
   {
     name: 'focus',
-    description: '',
+    description: 'Fired when the input receives focus.',
     type: '[event: FocusEvent]'
   },
   {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'update:selectedOption',
-    description: 'Fired when the selected option changes.',
+    description: 'Fired when the resolved selected option changes.',
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Combobox" :data="propsData"/> 
+<PropsTable name="Combobox" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

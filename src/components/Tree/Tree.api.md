@@ -100,11 +100,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable name="Tree" :data="propsData"/> 
+<PropsTable name="Tree" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

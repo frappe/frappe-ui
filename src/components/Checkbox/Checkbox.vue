@@ -4,10 +4,7 @@
     :class="[props.padded ? 'flex' : 'inline-flex', containerClasses]"
     @click="onContainerClick"
   >
-    <div
-      class="inline-flex items-center gap-2 rounded transition"
-      :class="rowClasses"
-    >
+    <div class="inline-flex items-center gap-2 rounded transition">
       <input
         ref="inputRef"
         class="rounded-sm mt-[1px]"
@@ -58,7 +55,6 @@
 <script lang="ts" setup>
 import { computed, ref, useAttrs, watchEffect } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -67,18 +63,11 @@ import type { CheckboxBaseProps } from './types'
 const props = withDefaults(defineProps<CheckboxBaseProps>(), {
   size: 'sm',
   padded: false,
-  padding: false,
   indeterminate: false,
 })
 
 const model = defineModel<boolean | 1 | 0>()
 const attrs = useAttrs()
-
-watchEffect(() => {
-  if (props.padding) {
-    warnDeprecated('Checkbox.padding', 'padded')
-  }
-})
 
 const checked = computed(() => Boolean(model.value))
 
@@ -127,15 +116,6 @@ const labelClasses = computed(() => {
     'select-none',
     props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
   ]
-})
-
-const rowClasses = computed(() => {
-  return {
-    'px-2.5 py-1.5': props.padding && props.size === 'sm',
-    'px-3 py-2': props.padding && props.size === 'md',
-    'focus-within:bg-surface-gray-2 focus-within:ring-2 focus-within:ring-outline-gray-3 hover:bg-surface-gray-3 active:bg-surface-gray-4':
-      props.padding && !props.disabled,
-  }
 })
 
 // When padded, the whole row is a clickable surface. Mirrors Switch's padded
@@ -201,7 +181,7 @@ const inputClasses = computed(() => {
   }
 
   // When padded the row drives hover; otherwise the control does.
-  const padded = props.padding || props.padded
+  const padded = props.padded
   return [
     sizeClasses,
     'cursor-pointer transition focus:ring-0 focus:ring-offset-0',

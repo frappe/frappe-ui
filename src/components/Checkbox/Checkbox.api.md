@@ -26,14 +26,6 @@
     type: 'boolean'
   },
   {
-    name: 'padding',
-    description: 'Adds padding around the checkbox.',
-    required: false,
-    type: 'boolean',
-    default: 'false',
-    deprecated: 'Use `padded` instead.'
-  },
-  {
     name: 'indeterminate',
     description: 'Renders the mixed "—" state (e.g. a select-all that\'s partially selected).\nPurely visual — the native `indeterminate` DOM property is not reflected as\nan attribute, so it must be set via this prop, not markup.',
     required: false,

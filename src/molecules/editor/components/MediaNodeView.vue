@@ -59,19 +59,63 @@ const uploadProgress = computed(() =>
 const uploadPercent = computed(() => uploadProgress.value?.percent ?? 0)
 const hasError = computed(() => Boolean(props.node.attrs.error))
 
-const showCaption = ref(Boolean(props.node.attrs.alt))
-const caption = ref(props.node.attrs.alt || '')
+/**
+ * Stable identity of the media this view is showing.
+ *
+ * ProseMirror reuses ONE inline node view for a DIFFERENT node of the same
+ * type when two of them sit next to each other, and Vue keeps `setup()` state
+ * across that reuse — which is how one image's caption ended up under several
+ * images. `uploadId` survives the whole upload (it is never cleared on
+ * success) and is forced to `null` when parsing HTML, so it is stable within a
+ * session and `src` covers everything loaded from the document.
+ */
+const nodeKey = computed(() =>
+  String(props.node.attrs.uploadId ?? props.node.attrs.src ?? ''),
+)
 
-// Re-sync the caption input when the source attr changes elsewhere (collab,
-// undo, etc.) without clobbering local typing — commit happens on blur/Enter.
+/**
+ * A node carrying an `uploadId` was inserted during this editing session
+ * (`parseHTML` forces the attribute to `null`). Those get the caption field
+ * opened for them, so the affordance is visible right where a caption is
+ * normally written instead of hiding behind a toolbar icon.
+ */
+const isFreshInsert = ref(Boolean(props.node.attrs.uploadId))
+
+const caption = ref<string>(props.node.attrs.caption || '')
+
+/** User's explicit caption toggle. `null` means "not decided, use the default". */
+const captionToggle = ref<boolean | null>(null)
+
+const showCaption = computed(() => {
+  if (captionToggle.value !== null) return captionToggle.value
+  if (props.node.attrs.caption) return true
+  return isEditable.value && isFreshInsert.value
+})
+const showCaptionText = computed(() =>
+  Boolean(!isEditable.value && props.node.attrs.caption && !hasError.value),
+)
+const showCaptionField = computed(
+  () => isEditable.value && !hasError.value && showCaption.value,
+)
+
+// Re-sync the input when the caption attr changes elsewhere (collab, undo, a
+// reused node view) without clobbering local typing — commit is on blur/Enter,
+// so the attr never moves while the user is mid-word.
 watch(
-  () => props.node.attrs.alt,
-  (alt) => {
-    const next = alt || ''
+  () => props.node.attrs.caption,
+  (value) => {
+    const next = value || ''
     if (next !== caption.value) caption.value = next
-    if (next) showCaption.value = true
   },
 )
+
+// A reused node view starts over: local text AND the open/closed toggle, which
+// has no attribute to watch and would otherwise leak to the next image.
+watch(nodeKey, () => {
+  caption.value = props.node.attrs.caption || ''
+  captionToggle.value = null
+  isFreshInsert.value = Boolean(props.node.attrs.uploadId)
+})
 
 const { isResizing, startResize } = useNodeViewResize(editor, {
   mediaEl: () => mediaRef.value,
@@ -144,14 +188,17 @@ function onResizeKeydown(event: KeyboardEvent) {
 }
 
 function commitCaption() {
-  props.updateAttributes({ alt: caption.value })
+  if ((props.node.attrs.caption || '') === caption.value) return
+  props.updateAttributes({ caption: caption.value || null })
 }
 
 function toggleCaptions() {
-  showCaption.value = !showCaption.value
-  if (!showCaption.value) {
+  const next = !showCaption.value
+  captionToggle.value = next
+  isFreshInsert.value = false
+  if (!next) {
     caption.value = ''
-    props.updateAttributes({ alt: '' })
+    if (props.node.attrs.caption) props.updateAttributes({ caption: null })
   }
 }
 
@@ -350,16 +397,43 @@ function setVideoOptions(options: {
         </div>
       </div>
 
-      <input
-        v-if="(node.attrs.alt || showCaption) && !hasError"
-        v-model="caption"
-        class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
-        placeholder="Add caption"
-        aria-label="Media caption"
-        :disabled="!isEditable"
-        @blur="commitCaption"
-        @keydown="onCaptionKeydown"
-      />
+      <!-- Read mode renders the caption as text. It used to be a disabled
+           <input>, which looks like a broken form field to everyone who cannot
+           edit the document. -->
+      <div
+        v-if="showCaptionText"
+        class="w-full px-1 pt-1 text-center text-sm text-ink-gray-6"
+      >
+        {{ node.attrs.caption }}
+      </div>
+
+      <!-- The field sits inside an inline, draggable, contenteditable=false
+           node view. Without `draggable="false"` the browser starts dragging
+           the image on pointerdown instead of focusing the field, and without
+           stopping drag/clipboard events here ProseMirror handles them against
+           the document rather than the input. -->
+      <div
+        v-else-if="showCaptionField"
+        data-media-text-field
+        draggable="false"
+        class="w-full"
+        @pointerdown.stop
+        @mousedown.stop
+        @dragstart.stop.prevent
+        @copy.stop
+        @cut.stop
+        @paste.stop
+      >
+        <input
+          v-model="caption"
+          draggable="false"
+          class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
+          placeholder="Add a caption"
+          aria-label="Caption"
+          @blur="commitCaption"
+          @keydown="onCaptionKeydown"
+        />
+      </div>
     </div>
   </NodeViewWrapper>
 </template>

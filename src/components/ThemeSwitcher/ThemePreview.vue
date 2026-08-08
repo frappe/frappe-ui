@@ -23,13 +23,13 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
-import type { Theme } from '../../utils/theme'
+import type { ColorScheme } from '../../composables/useColorScheme'
 import PreviewWindow, { type PreviewTone } from './previews/PreviewWindow.vue'
 
 defineOptions({ name: 'ThemePreview' })
 
 const props = defineProps<{
-  theme: Theme
+  theme: ColorScheme
   logo?: string | Component
   name?: string
   logoIsImage: boolean

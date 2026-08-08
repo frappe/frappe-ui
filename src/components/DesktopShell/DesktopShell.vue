@@ -12,8 +12,8 @@
 
       <!--
         The scroll region. Registered into the shared scroll-container registry
-        (via ScrollArea's exposed viewport element) so `useScrollContainer()` /
-        `getScrollContainer()` resolve it with zero app wiring.
+        (via ScrollArea's exposed viewport element) so `shellScrollContainer`
+        and `useShellScrolled()` resolve it with zero app wiring.
       -->
       <ScrollArea v-if="scroll" ref="scrollArea" class="min-h-0 flex-1">
         <slot />
@@ -38,9 +38,9 @@ import { onBeforeUnmount, ref, watch } from 'vue'
 import ScrollArea from '../ScrollArea/ScrollArea.vue'
 import PageHeaderTarget from '../PageHeader/PageHeaderTarget.vue'
 import {
-  registerScrollContainer,
-  unregisterScrollContainer,
-} from '../../composables/useScrollContainer'
+  registerShellScrollContainer,
+  unregisterShellScrollContainer,
+} from '../../composables/useShellScrolled'
 
 withDefaults(
   defineProps<{
@@ -64,11 +64,11 @@ watch(
   () => scrollArea.value?.viewportElement ?? null,
   (el) => {
     if (registered && registered !== el) {
-      unregisterScrollContainer(registered)
+      unregisterShellScrollContainer(registered)
       registered = null
     }
     if (el && el !== registered) {
-      registerScrollContainer(el)
+      registerShellScrollContainer(el)
       registered = el
     }
   },
@@ -76,6 +76,6 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (registered) unregisterScrollContainer(registered)
+  if (registered) unregisterShellScrollContainer(registered)
 })
 </script>

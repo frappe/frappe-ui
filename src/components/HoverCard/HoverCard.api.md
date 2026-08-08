@@ -9,7 +9,7 @@
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"left" | "right" | "bottom" | "top"',
+    type: '"top" | "right" | "bottom" | "left"',
     default: '"bottom"'
   },
   {
@@ -74,7 +74,7 @@
   {
     name: 'trigger',
     description: 'Trigger element. Rendered as-child so hover/focus a11y is auto-wired.',
-    type: '{ open: boolean; }'
+    type: 'HoverCardSlotProps'
   },
   {
     name: 'default',
@@ -91,6 +91,7 @@
   }
 ]
 </script>
+
 ## API Reference
 
 <PropsTable name="HoverCard" :data="propsData"/>
