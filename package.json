@@ -109,7 +109,6 @@
   "files": [
     "frappe",
     "src",
-    "scripts",
     "vite",
     "icons",
     "tailwind",

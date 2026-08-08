@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import colors from './colors.json' assert { type: 'json' }
+import colors from '../tailwind/colors.json' assert { type: 'json' }
 
 function generateClassMap() {
   const classMap = {
