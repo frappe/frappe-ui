@@ -190,12 +190,8 @@ describe('createListResource', () => {
       'USER-4',
     ])
     expect(list.data[0].status).toBe('Inactive')
-    // documents existing behavior, not desired behavior: reload() computes
-    // hasPreviousPage while start is temporarily reset to 0 for the
-    // single-page re-fetch, and restoring start afterward does not
-    // recompute it — so this stays false even though start is back to 2.
-    // Out of scope to fix here: ADR-0013 keeps this implementation frozen
-    // for this ticket.
-    expect(list.hasPreviousPage).toBe(false)
+    // hasPreviousPage reflects the restored start, not the temporary 0 used
+    // for the single-page re-fetch inside reload()
+    expect(list.hasPreviousPage).toBe(true)
   })
 })
