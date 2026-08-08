@@ -630,6 +630,100 @@ function focusIt() {
 `Duration` already exposed `focus()`; it now takes the same `options?`
 parameter as the rest of the family.
 
+## FileUploader
+
+`FileUploader` reached structural bar in `1.0.0`: TypeScript, flat props, and
+a security fix to the default it shares with `useFileUpload` /
+`FileUploadHandler`.
+
+### Uploads default to private
+
+`useFileUpload()` and `FileUploadHandler` now resolve an upload with no
+stated `private` / `is_private` to **private**, not public. `FileUploader`
+itself is unaffected — it has uploaded private by default since
+`v1.0.0-beta.21`; this only changes the two lower-level primitives, called
+directly.
+
+```ts
+// Same call, before and after — the result changes:
+await useFileUpload().upload(file, {})
+await new FileUploadHandler().upload(file, {})
+// Before: is_private=0 (public).  After: is_private=1 (private).
+
+// State the intent explicitly instead of relying on the default:
+await useFileUpload().upload(file, { private: false }) // public
+await useFileUpload().upload(file, { private: true }) // private
+```
+
+If your app serves an uploaded file with no session — an avatar in an email
+digest, an image embedded on a public page — audit every call that omits
+`private` / `is_private` before upgrading. A file that flips to private
+returns `403` to a session-less request instead of the image.
+
+### `uploadArgs` → flat props
+
+The single `uploadArgs` object prop is gone. Its commonly-used fields are now
+flat props on the component:
+
+| Before (`uploadArgs`)      | After                       |
+| --------------------------- | ---------------------------- |
+| `private` / `is_private`    | `private`                    |
+| `folder`                    | `folder`                     |
+| `doctype`                   | `doctype`                    |
+| `docname`                   | `docname`                    |
+| `fieldname`                 | `fieldname`                  |
+| `upload_endpoint`           | `uploadEndpoint`             |
+| `optimize`                  | `optimize`                   |
+| `max_width` / `max_height`  | `maxWidth` / `maxHeight`     |
+
+```vue
+<!-- Before -->
+<FileUploader :uploadArgs="{ private: false, folder: 'Attachments' }" />
+
+<!-- After -->
+<FileUploader :private="false" folder="Attachments" />
+```
+
+This is silent: `uploadArgs` isn't a recognized prop anymore, so Vue passes it
+through as an inert HTML attribute on the root element. Nothing throws — the
+options it carried just stop applying, and (combined with the default flip
+above) a `uploadArgs="{ private: false }"` override that used to make an
+upload public silently starts uploading private instead. `grep` every
+`<FileUploader>` for `uploadArgs=` / `:upload-args=` and move each field to
+its flat prop.
+
+`file_url`, `method`, `type`, `params`, and upload cancellation (`signal`) have
+no flat-prop equivalent — they had no measured use on the component. Use
+[`useFileUpload()`](./other/utilities#usefileupload-fileuploadhandler)
+directly for those.
+
+### Template ref — `inputRef` removed
+
+`FileUploader` hands back nothing through a template ref, per
+[ADR-0012](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0012-template-ref-surface.md).
+`inputRef()` (a function, despite the name) is gone with nothing in its
+place — the `openFileSelector` slot prop already covers what it opened.
+
+```vue
+<!-- Before -->
+<FileUploader ref="uploader" />
+<script setup>
+uploader.value.inputRef().click()
+</script>
+
+<!-- After -->
+<FileUploader v-slot="{ openFileSelector }">
+  <Button @click="openFileSelector">Upload</Button>
+</FileUploader>
+```
+
+### `fileToBase64` and the size-limit helpers — no longer exported
+
+`fileToBase64`, `formatBytes`, `getMaxFileSize`, and `fileSizeLimitMessage`
+are no longer exported from `frappe-ui`; the import fails at build time.
+There were no external call sites at the v1 sweep. Computing a file's base64
+representation yourself is a few lines of `FileReader.readAsDataURL`.
+
 ## Divider
 
 | Before           | After            |
