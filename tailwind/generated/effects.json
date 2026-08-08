@@ -16,9 +16,7 @@
       "xl": "inset 0px 0.5px 1.5px 0.5px #ffffff0a, 0px 0px 14px 2px #0000001f, 0px 26px 34px -6px #0000006b",
       "2xl": "inset 0px 0.5px 1.5px 0.5px #ffffff0f, 0px 0px 14px 10px #0000001f, 0px 44px 52px -4px #0000006b"
     },
-    "custom": {
-      "status": "0px 0px 0px 1.5px #ffffff"
-    }
+    "custom": {}
   },
   "focus": {
     "light": {

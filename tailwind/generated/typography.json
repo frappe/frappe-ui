@@ -10,14 +10,6 @@
     "black": 800
   },
   "fontSize": {
-    "tiny": [
-      "11px",
-      {
-        "lineHeight": "1.15",
-        "letterSpacing": "0.09em",
-        "fontWeight": "420"
-      }
-    ],
     "2xs": [
       "11px",
       {
@@ -161,43 +153,9 @@
         "letterSpacing": "0.005em",
         "fontWeight": "420"
       }
-    ],
-    "13xl": [
-      "64px",
-      {
-        "lineHeight": "1.3",
-        "letterSpacing": "0em",
-        "fontWeight": "420"
-      }
-    ],
-    "14xl": [
-      "72px",
-      {
-        "lineHeight": "1.3",
-        "letterSpacing": "0em",
-        "fontWeight": "420"
-      }
-    ],
-    "15xl": [
-      "80px",
-      {
-        "lineHeight": "1.2",
-        "letterSpacing": "0em",
-        "fontWeight": "420"
-      }
-    ],
-    "16xl": [
-      "88px",
-      {
-        "lineHeight": "1.2",
-        "letterSpacing": "0em",
-        "fontWeight": "420"
-      }
     ]
   },
-  "textTransform": {
-    "tiny": "uppercase"
-  },
+  "textTransform": {},
   "paragraph": {
     "2xs": {
       "lineHeight": "1.6",
@@ -242,13 +200,6 @@
   },
   "tracking": {
     "text": {
-      "tiny": {
-        "regular": "0.09em",
-        "medium": "0.09em",
-        "semibold": "0.09em",
-        "bold": "0.09em",
-        "black": "0.09em"
-      },
       "2xs": {
         "regular": "0.01em",
         "medium": "0.01em",
@@ -369,34 +320,6 @@
       },
       "12xl": {
         "regular": "0.005em",
-        "medium": "0em",
-        "semibold": "0em",
-        "bold": "0em",
-        "black": "0em"
-      },
-      "13xl": {
-        "regular": "0em",
-        "medium": "0em",
-        "semibold": "0em",
-        "bold": "0em",
-        "black": "0em"
-      },
-      "14xl": {
-        "regular": "0em",
-        "medium": "0em",
-        "semibold": "0em",
-        "bold": "0em",
-        "black": "0em"
-      },
-      "15xl": {
-        "regular": "0em",
-        "medium": "0.005em",
-        "semibold": "0em",
-        "bold": "0em",
-        "black": "0em"
-      },
-      "16xl": {
-        "regular": "0em",
         "medium": "0em",
         "semibold": "0em",
         "bold": "0em",
