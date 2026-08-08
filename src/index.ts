@@ -139,12 +139,6 @@ export * from './components/MonthPicker'
 export { default as Toast } from './components/Toast/Toast.vue'
 /** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
-/** @deprecated Use the `frappe-ui/editor` subpath instead. */
-export * from './components/TextEditor'
-/** @deprecated Use extensions from `frappe-ui/editor` instead. */
-export * from './components/TextEditor/extensions/image'
-/** @deprecated Use extensions from `frappe-ui/editor` instead. */
-export * from './components/TextEditor/extensions/suggestion'
 
 // Charts
 export { default as AxisChart } from './components/Charts/AxisChart.vue'
