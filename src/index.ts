@@ -11,7 +11,8 @@ export type { FrappeUIConfig } from './utils/config'
 
 // Data fetching
 export * from './data-fetching'
-// Legacy resource API. Keep public until official apps finish the v3 migration.
+// v1 resource API. Supported and frozen through 1.x, un-deprecated — see #886
+// and ADR-0013 (implementation stays JS; no changes to internal code).
 export * from './resources/index.ts'
 // One HTTP transport. `request` stays internal — it is the bare fetch wrapper
 // `frappeRequest` and the v1 resources are built on, with none of the Frappe
