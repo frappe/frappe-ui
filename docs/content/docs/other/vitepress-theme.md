@@ -17,10 +17,17 @@ config.
 
 ```ts
 // .vitepress/config.ts
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineDocsConfig } from 'frappe-ui/vitepress'
 
+// VitePress config runs as native ESM — there's no __dirname. Derive the
+// docs root from the config file's own URL instead.
+const configDir = path.dirname(fileURLToPath(import.meta.url))
+const rootDir = path.resolve(configDir, '..')
+
 export default defineDocsConfig({
-  rootDir: __dirname,
+  rootDir,
   name: 'My Docs',
   description: '…',
   sidebar: [
