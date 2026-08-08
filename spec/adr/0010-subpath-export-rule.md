@@ -63,7 +63,7 @@ separate category, decided on their own terms.
 | `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. Now also home to `CodeEditor` and `CodePreview` (see below). |
 | `frappe-ui/code-editor` | none | Removed. `CodeEditor`'s only dependency (CodeMirror) is entirely behind `await import()` — nothing static. It is a form-field sibling of `Textarea`/`TextInput` (its own prop types are derived from the shared `InputVariant`/`InputSize` union), not a family with a composition model. `CodePreview` statically imports `marked`, which would otherwise re-enter root's dependency graph the moment ADR-0008 deletes the deprecated `TextEditor` re-export (`marked`'s only other path to root). Rather than fold `CodeEditor` into root and leave `CodePreview` behind on a single-purpose subpath, both move to `frappe-ui/experimental` together — P14 carries no stability promise, so the pair can grow into a fuller code-editing parts family later, against real usage, without needing a `2.0.0`. |
 | `frappe-ui/frappe`, `frappe-ui/drive`, `frappe-ui/drive/*` | — | Disposition is #867's decision, not this rule's. |
-| `frappe-ui/tailwind`, `frappe-ui/tailwind/tokens.js`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/tsconfig.base.json`, `frappe-ui/hljs-theme.css` | — | Build-time/tooling category; #887's decision. |
+| `frappe-ui/tailwind`, `frappe-ui/tailwind/tokens.js`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/tsconfig.base.json`, ~~`frappe-ui/hljs-theme.css`~~ (removed, #938) | — | Build-time/tooling category; #887's decision. |
 
 ### What this hands to other tickets
 
