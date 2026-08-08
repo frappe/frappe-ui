@@ -354,6 +354,8 @@ The exact data-slot / data-state taxonomy is per component family; each family's
 
 **The Button exception:** Button has a singular `#icon` slot (and `icon` prop with no left/right pair) because square icon-only buttons are a standard, common component.
 
+**The Rating exception:** Rating pairs its `icon` prop with an `#icon` slot. The star glyph *is* the component's content — `#prefix`/`#suffix` don't exist on it — and the slot receives per-star fill state (`state`, `previewValue`, …) that a prop cannot carry, which P7 requires for state-driven rendering (e.g. per-position emoji scales).
+
 **Forbidden:**
 - Structured icon-config objects (`icon: { name, theme, … }`). Identity is one value; theme/size are component-level concerns, not fields packed inside the icon prop.
 - Bare un-namespaced names (`icon="edit"`) — collides the moment a second icon set ships.

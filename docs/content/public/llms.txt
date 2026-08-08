@@ -29,7 +29,6 @@ Two cross-cutting conventions to know before reading anything else:
 - [Calendar](https://ui.frappe.io/docs/components/calendar): month/week calendar view.
 - [Charts](https://ui.frappe.io/docs/components/charts): chart family (line, bar, etc.).
 - [Checkbox](https://ui.frappe.io/docs/components/checkbox): boolean input; standard labeling contract.
-- [CircularProgressBar](https://ui.frappe.io/docs/components/circularprogressbar): radial progress indicator.
 - [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
 - [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissible`/`bare`. Imperative API: `dialog.confirm`, `dialog.alert`, `dialog.prompt`.

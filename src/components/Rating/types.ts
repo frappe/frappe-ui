@@ -15,20 +15,8 @@ export interface RatingProps extends InputLabelingProps {
    */
   step?: 1 | 0.5
 
-  /**
-   * Number of stars to render.
-   * @deprecated Use `max` instead.
-   */
-  rating_from?: number
-
   /** If true, disables interaction. */
   disabled?: boolean
-
-  /**
-   * If true, disables interaction.
-   * @deprecated Use `disabled` instead.
-   */
-  readonly?: boolean
 
   /**
    * Icon to render for each star. Accepts a Vue component (e.g. an auto-imported

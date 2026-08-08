@@ -12,12 +12,6 @@ export interface CheckboxBaseProps extends InputLabelingProps {
   disabled?: boolean
 
   /**
-   * Adds padding around the checkbox.
-   * @deprecated Use `padded` instead.
-   */
-  padding?: boolean
-
-  /**
    * Renders the mixed "—" state (e.g. a select-all that's partially selected).
    * Purely visual — the native `indeterminate` DOM property is not reflected as
    * an attribute, so it must be set via this prop, not markup.

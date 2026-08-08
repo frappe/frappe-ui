@@ -1,12 +1,7 @@
 import { defineComponent, h } from 'vue'
 import Rating from './Rating.vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Rating', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   it('Renders', () => {
     cy.mount(Rating, { props: { modelValue: 2, label: 'abc' } })
 
@@ -41,15 +36,6 @@ describe('Rating', () => {
     cy.get('@onUpdate').should('not.have.been.called')
   })
 
-  it('readonly (deprecated alias for disabled)', () => {
-    cy.mount(Rating, {
-      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate'), readonly: true },
-    })
-
-    cy.get('[role="radio"]').eq(1).click()
-    cy.get('@onUpdate').should('not.have.been.called')
-  })
-
   it('sizes', () => {
     const sizes = {
       sm: 'size-4',
@@ -71,18 +57,6 @@ describe('Rating', () => {
   it('max controls star count', () => {
     cy.mount(Rating, { props: { modelValue: 2, max: 10 } })
     cy.get('[role="radio"]').should('have.length', 10)
-  })
-
-  it('rating_from alias still works and warns', () => {
-    cy.window().then((win) => {
-      cy.spy(win.console, 'warn').as('consoleWarn')
-    })
-    cy.mount(Rating, { props: { modelValue: 2, rating_from: 10 } })
-    cy.get('[role="radio"]').should('have.length', 10)
-    cy.get('@consoleWarn').should(
-      'have.been.calledWithMatch',
-      /Rating\.rating_from is deprecated/,
-    )
   })
 
   describe('step=0.5 (slider mode)', () => {

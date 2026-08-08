@@ -472,6 +472,12 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Switch.labelClasses` / `Checkbox.padding` | `data-*` styling hooks |
 | `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
 
+The first four rows are **removed**, not aliased. The old names are silently
+ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
+Rating becomes interactive, a `Switch` `@change` handler never fires, and
+`labelClasses` / `Checkbox.padding` stop styling anything. Nothing breaks at
+build time, so grep for these names when upgrading.
+
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 

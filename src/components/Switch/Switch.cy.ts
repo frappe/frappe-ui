@@ -1,11 +1,7 @@
+import { h } from 'vue'
 import Switch from './Switch.vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 describe('Switch', () => {
-  beforeEach(() => {
-    _resetWarnDeprecated()
-  })
-
   it('renders the component', () => {
     cy.mount(Switch)
 
@@ -46,20 +42,41 @@ describe('Switch', () => {
     cy.mount(Switch, {
       props: {
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
-        onChange: cy.spy().as('onChange'),
       },
     })
 
     cy.get('@onUpdate').should('not.be.called')
-    cy.get('@onChange').should('not.be.called')
 
     cy.get('[role="switch"]').click()
     cy.get('@onUpdate').should('be.calledWith', true)
-    cy.get('@onChange').should('be.calledWith', true)
     cy.get('[role="switch"]').click()
 
     cy.get('@onUpdate').should('be.calledWith', false)
-    cy.get('@onChange').should('be.calledWith', false)
+  })
+
+  it('toggles with the keyboard', () => {
+    cy.mount(Switch, {
+      props: {
+        label: 'Notifications',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('[role="switch"]').focus().trigger('keydown', { key: 'Enter' })
+    cy.get('@onUpdate').should('have.been.calledWith', true)
+  })
+
+  it('renders the label and description slots', () => {
+    cy.mount(Switch, {
+      props: { label: 'prop label', description: 'prop description' },
+      slots: {
+        label: () => h('span', 'slot label'),
+        description: () => h('span', 'slot description'),
+      },
+    })
+
+    cy.contains('slot label').should('exist')
+    cy.contains('slot description').should('exist')
   })
 
   describe('shared labeling contract', () => {
@@ -79,31 +96,6 @@ describe('Switch', () => {
       })
       cy.get('[role="switch"]').should('have.attr', 'aria-invalid', 'true')
       cy.contains('Please select one.').should('exist')
-    })
-
-    it('warns once when @change is bound', () => {
-      cy.window().then((win) => {
-        cy.spy(win.console, 'warn').as('consoleWarn')
-      })
-      cy.mount(Switch, { attrs: { onChange: cy.spy().as('onChange') } })
-      cy.get('[role="switch"]').click()
-      cy.get('[role="switch"]').click()
-      cy.get('@consoleWarn')
-        .should('have.been.calledOnce')
-        .and('have.been.calledWithMatch', /Switch\.change is deprecated/)
-    })
-
-    it('warns once when labelClasses is set', () => {
-      cy.window().then((win) => {
-        cy.spy(win.console, 'warn').as('consoleWarn')
-      })
-      cy.mount(Switch, {
-        props: { label: 'abc', labelClasses: 'text-blue-500' },
-      })
-      cy.get('@consoleWarn').should(
-        'have.been.calledWithMatch',
-        /Switch\.labelClasses is deprecated/,
-      )
     })
 
     it('renders the canonical data-* hooks on the control', () => {
