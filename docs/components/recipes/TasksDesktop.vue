@@ -993,12 +993,12 @@ function addComment() {
               <span class="text-sm text-ink-gray-5">
                 {{ visibleTasks.length }} tasks
               </span>
-              <Dropdown :options="groupByDropdownOptions" placement="right">
+              <Dropdown :options="groupByDropdownOptions" align="end">
                 <Button variant="ghost" icon-left="lucide-layers">
                   Group: {{ groupByLabel }}
                 </Button>
               </Dropdown>
-              <Dropdown :options="sortDropdownOptions" placement="right">
+              <Dropdown :options="sortDropdownOptions" align="end">
                 <Button variant="ghost" icon-left="lucide-arrow-up-down">
                   {{ sortLabel }}
                 </Button>

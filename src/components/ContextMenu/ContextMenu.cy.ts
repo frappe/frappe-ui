@@ -204,4 +204,65 @@ describe('ContextMenu', () => {
       expect(event.defaultPrevented).to.be.false
     })
   })
+
+  it('disabled items do not fire onClick', () => {
+    const onClick = cy.stub().as('onClick')
+
+    cy.mount(ContextMenu, {
+      props: { options: [{ label: 'Delete', disabled: true, onClick }] },
+      slots: { default: trigger },
+    })
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[role=menuitem]').should('have.attr', 'data-disabled')
+    cy.get('[role=menuitem]').click({ force: true })
+    cy.get('@onClick').should('not.have.been.called')
+  })
+
+  it('supports arrow keys, Enter, and Escape', () => {
+    const onClick = cy.stub().as('onClick')
+
+    cy.mount(ContextMenu, {
+      props: {
+        options: [
+          { label: 'Open', onClick: () => {} },
+          { label: 'Rename', onClick },
+        ],
+      },
+      slots: { default: trigger },
+    })
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[role=menu]').type('{downarrow}{downarrow}')
+    cy.contains('[role=menuitem]', 'Rename').should(
+      'have.attr',
+      'data-highlighted',
+    )
+    cy.focused().type('{enter}')
+    cy.get('@onClick').should('have.been.called')
+    cy.get('[role=menu]').should('not.exist')
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[role=menu]').type('{esc}')
+    cy.get('[role=menu]').should('not.exist')
+  })
+
+  it('renders the empty state, and #empty replaces it', () => {
+    cy.mount(ContextMenu, {
+      props: { options: [] },
+      slots: { default: trigger },
+    })
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[data-slot=empty]').should('contain.text', 'No options')
+
+    cy.mount(ContextMenu, {
+      props: { options: [] },
+      slots: {
+        default: trigger,
+        empty: () => h('span', {}, 'Nothing here'),
+      },
+    })
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[data-slot=empty]').should('contain.text', 'Nothing here')
+  })
 })

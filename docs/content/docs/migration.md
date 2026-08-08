@@ -175,6 +175,64 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | `displayValue` slot prop | `summary` on `#summary`, or `selectedOptions`                       |
 | `toggleOpen` slot prop   | `setOpen(boolean)`                                                  |
 
+### Dropdown and ContextMenu
+
+| Before                                     | After                            |
+| ------------------------------------------ | -------------------------------- |
+| `placement` prop, `DropdownPlacement` type | `align`                          |
+| `{ group, items }`                         | `{ group, options }`             |
+| `component:` option rows                   | `slots: { item: fn }`            |
+| `DropdownExposed` type                     | nothing — it described a template ref surface that never existed; use `v-model:open` or the `close` slot prop |
+
+All three behavioral removals are silent in plain-JS apps — the old code still
+runs and renders wrong instead of failing — so check each one. TypeScript
+callers get errors instead: the removed keys stay in the types as `never`. A
+dev-mode console warning also fires when `items` or `component` reaches the
+menu at runtime.
+
+**`placement` is ignored now.** The menu falls back to `align="start"`, so a
+right-aligned menu quietly moves left:
+
+```vue
+<!-- Before -->
+<Dropdown :options="options" placement="right" />
+<Dropdown :options="options" placement="center" />
+
+<!-- After -->
+<Dropdown :options="options" align="end" />
+<Dropdown :options="options" align="center" />
+```
+
+**A `{ group, items }` entry renders an empty menu** — the group resolves to
+zero options:
+
+```ts
+// Before
+const actions = [{ group: 'Edit', items: [{ label: 'Rename', onClick: rename }] }]
+
+// After
+const actions = [{ group: 'Edit', options: [{ label: 'Rename', onClick: rename }] }]
+```
+
+**A `component:` row renders as a plain action row** using its `label`, which
+for most of these rows is empty:
+
+```ts
+// Before
+{ component: h(Button, { theme: 'red' }, () => 'Delete') }
+
+// After
+{
+  label: 'Delete',
+  slots: {
+    item: () => h(Button, { theme: 'red' }, () => 'Delete'),
+  },
+}
+```
+
+These apply identically to `ContextMenu`, which shares the option shape
+(`ContextMenuComponentOption` is removed with `DropdownComponentOption`).
+
 ### Custom rows
 
 `Select` and `MultiSelect` lost `#option`, and `Combobox` lost `render`. They

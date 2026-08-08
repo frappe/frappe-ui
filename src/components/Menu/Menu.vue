@@ -9,7 +9,6 @@ import {
   menuClasses,
   getMenuBackgroundColor,
   groupHasIcons,
-  isMenuComponentOption,
   isMenuSubmenuOption,
   isMenuSwitchOption,
   normalizeMenuOptions,
@@ -154,19 +153,6 @@ async function handleItemSelect(item: MenuOption, event: Event) {
               item.slots.item({ item, close, selected: !!item.selected })
             "
           />
-        </component>
-
-        <component
-          :is="primitives.Item"
-          v-else-if="isMenuComponentOption(item)"
-          as-child
-          data-slot="item"
-          :data-disabled="item.disabled ? '' : undefined"
-          :disabled="item.disabled"
-          class="data-[disabled]:cursor-not-allowed"
-          @select="handleItemSelect(item, $event)"
-        >
-          <component :is="item.component" :active="false" />
         </component>
 
         <component

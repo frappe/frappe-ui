@@ -1,5 +1,5 @@
 import Dropdown from './Dropdown.vue'
-import { defineComponent, h } from 'vue'
+import { h } from 'vue'
 
 const options = [
   { label: 'Edit', icon: 'lucide-edit' },
@@ -64,12 +64,6 @@ const nestedSubmenuActions = [
   },
 ]
 
-const ComponentItem = defineComponent({
-  render() {
-    return h('button', { 'data-cy': 'component-item' }, 'Archive')
-  },
-})
-
 describe('Dropdown', () => {
   it('Rendering', () => {
     cy.mount(Dropdown, { props: { options } })
@@ -121,15 +115,22 @@ describe('Dropdown', () => {
     cy.get('[role=menu]').should('not.exist')
   })
 
-  it('keeps component items as the outer menuitem element', () => {
+  it('keeps slots.item rows as the outer menuitem element', () => {
     cy.mount(Dropdown, {
       props: {
-        options: [{ component: ComponentItem }],
+        options: [
+          {
+            label: 'Archive',
+            slots: {
+              item: () => h('button', { 'data-cy': 'slots-item' }, 'Archive'),
+            },
+          },
+        ],
       },
     })
 
     cy.get('[aria-haspopup=menu]').click()
-    cy.get('[data-cy="component-item"]').should('have.attr', 'role', 'menuitem')
+    cy.get('[data-cy="slots-item"]').should('have.attr', 'role', 'menuitem')
   })
 
   it('opens on pointer press, not on release', () => {
@@ -219,5 +220,133 @@ describe('Dropdown', () => {
     })
 
     cy.get('[aria-haspopup=menu]').should('have.text', 'Trigger')
+  })
+
+  it('round-trips v-model:open', () => {
+    cy.mount(Dropdown, {
+      props: {
+        options,
+        open: true,
+        'onUpdate:open': cy.spy().as('updateOpen'),
+      },
+    })
+
+    cy.get('[role=menu]').should('exist')
+    cy.get('body').type('{esc}')
+    cy.get('@updateOpen').should('have.been.calledWith', false)
+  })
+
+  it('disables the trigger via button.disabled', () => {
+    cy.mount(Dropdown, {
+      props: { options, button: { label: 'Options', disabled: true } },
+    })
+
+    cy.get('[aria-haspopup=menu]').should('be.disabled')
+    cy.get('[aria-haspopup=menu]').click({ force: true })
+    cy.get('[role=menu]').should('not.exist')
+  })
+
+  it('disabled items do not fire onClick and are skipped by the keyboard', () => {
+    const onClick = cy.spy().as('onClick')
+    cy.mount(Dropdown, {
+      props: {
+        options: [
+          { label: 'Enabled', onClick: () => {} },
+          { label: 'Disabled', disabled: true, onClick },
+        ],
+      },
+    })
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.contains('[role=menuitem]', 'Disabled').should(
+      'have.attr',
+      'data-disabled',
+    )
+    cy.contains('[role=menuitem]', 'Disabled').click({ force: true })
+    cy.get('@onClick').should('not.have.been.called')
+
+    // Arrow navigation wraps over the disabled item back to the enabled one.
+    cy.get('[role=menu]').type('{downarrow}')
+    cy.contains('[role=menuitem]', 'Enabled').should(
+      'have.attr',
+      'data-highlighted',
+    )
+    cy.get('[role=menu]').type('{downarrow}')
+    cy.contains('[role=menuitem]', 'Enabled').should(
+      'have.attr',
+      'data-highlighted',
+    )
+  })
+
+  it('supports arrow keys, Enter, and Escape', () => {
+    const onClick = cy.spy().as('onClick')
+    cy.mount(Dropdown, {
+      props: {
+        options: [
+          { label: 'Edit', onClick: () => {} },
+          { label: 'Delete', onClick },
+        ],
+      },
+    })
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[role=menu]').type('{downarrow}{downarrow}')
+    cy.contains('[role=menuitem]', 'Delete').should(
+      'have.attr',
+      'data-highlighted',
+    )
+    cy.focused().type('{enter}')
+    cy.get('@onClick').should('have.been.called')
+    cy.get('[role=menu]').should('not.exist')
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[role=menu]').type('{esc}')
+    cy.get('[role=menu]').should('not.exist')
+  })
+
+  it('renders group labels, and #group-label overrides them', () => {
+    const grouped = [
+      { group: 'Edit', options: [{ label: 'Rename' }] },
+    ]
+    cy.mount(Dropdown, { props: { options: grouped } })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot=group-label]').should('contain.text', 'Edit')
+
+    cy.mount(Dropdown, {
+      props: { options: grouped },
+      slots: {
+        'group-label': ({ group }) =>
+          h('span', { 'data-cy': 'group-label' }, group.group.toUpperCase()),
+      },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-cy=group-label]').should('have.text', 'EDIT')
+  })
+
+  it('renders the empty state, and #empty replaces it', () => {
+    cy.mount(Dropdown, {
+      props: { options: [{ label: 'Hidden', condition: () => false }] },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot=empty]').should('contain.text', 'No options')
+
+    cy.mount(Dropdown, {
+      props: { options: [] },
+      slots: { empty: () => h('span', {}, 'Nothing here') },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot=empty]').should('contain.text', 'Nothing here')
+  })
+
+  it('does not render the removed { group, items } shape', () => {
+    cy.mount(Dropdown, {
+      props: {
+        options: [{ group: 'Edit', items: [{ label: 'Rename' }] }] as any,
+      },
+    })
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[role=menuitem]').should('not.exist')
+    cy.get('[data-slot=empty]').should('exist')
   })
 })

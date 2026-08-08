@@ -1,2 +1,20 @@
 export { default as ContextMenu } from './ContextMenu.vue'
-export * from './types'
+export type {
+  ContextMenuActionOption,
+  ContextMenuBaseOption,
+  ContextMenuGroupOption,
+  ContextMenuGroupSlotProps,
+  ContextMenuItem,
+  ContextMenuItemSlotProps,
+  ContextMenuItemSlots,
+  ContextMenuOption,
+  ContextMenuOptions,
+  ContextMenuProps,
+  ContextMenuSlotFn,
+  ContextMenuSlotProps,
+  ContextMenuSlots,
+  ContextMenuSubmenuOption,
+  ContextMenuSwitchOption,
+  ContextMenuTheme,
+  ContextMenuTriggerSlotProps,
+} from './types'

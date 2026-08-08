@@ -1,6 +1,10 @@
 <template>
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
-    <DropdownMenuTrigger as-child @pointerdown="openOnPointerDown">
+    <DropdownMenuTrigger
+      as-child
+      :disabled="triggerDisabled"
+      @pointerdown="openOnPointerDown"
+    >
       <slot
         v-if="$slots.trigger"
         name="trigger"
@@ -59,7 +63,7 @@ import {
 import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
-import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
+import { menuClasses, normalizeMenuOptions, warnRemoved } from '../Menu/utils'
 
 defineOptions({
   inheritAttrs: false,
@@ -72,6 +76,7 @@ const slots = useSlots()
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],
   side: 'bottom',
+  align: 'start',
   offset: 4,
   portalTo: 'body',
 })
@@ -93,12 +98,6 @@ const groups = computed(() => {
   return normalizeMenuOptions(props.options)
 })
 
-const align = computed(() => {
-  if (props.align !== undefined) return props.align
-  if (props.placement === 'right') return 'end' as const
-  if (props.placement === 'center') return 'center' as const
-  return 'start' as const
-})
 
 const triggerDisabled = computed(() => {
   return (
@@ -106,6 +105,12 @@ const triggerDisabled = computed(() => {
     (attrs.disabled !== undefined && attrs.disabled !== false)
   )
 })
+
+if (import.meta.env.DEV && 'placement' in attrs) {
+  warnRemoved(
+    '[Dropdown] `placement` is removed and ignored; use `align` (`placement="right"` → `align="end"`, `placement="center"` → `align="center"`).',
+  )
+}
 
 /**
  * Workaround for reka-ui 2.9.9: `DropdownMenuTrigger` binds only `click`, so
