@@ -105,9 +105,9 @@ describe('DatePicker', () => {
     cy.get('[data-slot="actions"]').should('exist')
   })
 
-  it('autoclose', () => {
+  it('keepOpen', () => {
     cy.mount(DatePicker, {
-      props: { autoClose: true },
+      props: { keepOpen: false },
     })
 
     cy.get('input').dblclick()
@@ -116,7 +116,7 @@ describe('DatePicker', () => {
     cy.get('[role=dialog]').should('not.exist')
 
     cy.mount(DatePicker, {
-      props: { autoClose: false },
+      props: { keepOpen: true },
     })
 
     cy.get('input').dblclick()

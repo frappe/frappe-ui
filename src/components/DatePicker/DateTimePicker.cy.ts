@@ -148,19 +148,6 @@ describe('DateTimePicker', () => {
       .should('match', /^12[:0]/)
   })
 
-  it('back-compat: minDateTime/maxDateTime still constrain selection', () => {
-    cy.mount(DateTimePicker, {
-      props: {
-        modelValue: '2025-06-15 14:00:00',
-        minDateTime: '2025-06-10 00:00:00',
-        maxDateTime: '2025-06-20 23:59:59',
-      },
-    })
-    cy.get('input').first().dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
-  })
-
   describe('keyboard navigation', () => {
     it('arrow-down on the input opens popover and focuses selected cell', () => {
       cy.mount(DateTimePicker, { props: { modelValue: '2025-06-15 12:00:00' } })

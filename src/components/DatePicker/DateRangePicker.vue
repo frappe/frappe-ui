@@ -19,7 +19,6 @@
     :placeholder="props.placeholder"
     :disabled="props.disabled"
     :readonly="inputReadonly"
-    :input-class="dp.inputClass"
     :display-label="displayLabel"
     content-class="w-fit"
     @blur="commitInput()"
@@ -29,7 +28,6 @@
     @request-focus="onShellRequestFocus"
   >
     <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.target" #target="ts"><slot name="target" v-bind="ts" /></template>
     <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
     <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
 
@@ -121,9 +119,7 @@ import {
   useKeepOpen,
   useTypeable,
   useDateCoercion,
-  useDeprecationWarnings,
   makeUnavailableCheck,
-  type LegacyDatePickerProps,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
 import type {
@@ -134,28 +130,19 @@ import type {
 } from './types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
-  // No default for the deprecated `value`: `[]` is truthy, which would make the
-  // deprecation guard (`useDeprecationWarnings`) fire for every v-model consumer.
-  // `pickIncoming()` already guards on `.length`, so `undefined` is safe.
   modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',
   typeable: true,
-  readonly: false,
-  allowCustom: true,
   disabled: false,
   clearable: true,
   dualPane: false,
   openOnFocus: false,
   openOnClick: true,
-  // Legacy default kept; see `useKeepOpen` for why.
-  autoClose: true,
 })
 const emit = defineEmits<DateRangePickerEmits>()
 
 const slots = defineSlots<DateRangePickerSlots>()
-
-const dp = props as unknown as LegacyDatePickerProps
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
@@ -266,17 +253,12 @@ function onPanelNavigate(target: Dayjs) {
   focusOn(target)
 }
 
-// ── Positioning / keepOpen / deprecations ────────────────────────────────────
+// ── Positioning / keepOpen ────────────────────────────────────────────────────
 
-const { resolvedSide, resolvedAlign, resolvedOffset } = usePopoverPositioning(
-  props,
-  dp,
-)
-const shouldKeepOpen = useKeepOpen(props, dp)
-const inputReadonly = useTypeable(props, dp)
-useDeprecationWarnings('DateRangePicker', dp, {
-  hasTargetSlot: computed(() => !!slots.target),
-})
+const { resolvedSide, resolvedAlign, resolvedOffset } =
+  usePopoverPositioning(props)
+const shouldKeepOpen = useKeepOpen(props)
+const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
 
@@ -329,9 +311,7 @@ function parseRangeInput(raw: string): [Dayjs | null, Dayjs | null] {
 }
 
 function pickIncoming(): string[] {
-  if (props.modelValue && props.modelValue.length) return props.modelValue
-  if (props.value && props.value.length) return props.value
-  return []
+  return props.modelValue && props.modelValue.length ? props.modelValue : []
 }
 
 function syncFromValue(val?: string[]): void {
@@ -350,7 +330,7 @@ function initFromValue(): void {
 }
 
 watch(
-  () => [props.modelValue, props.value],
+  () => props.modelValue,
   () => {
     syncFromValue(pickIncoming())
   },
