@@ -866,6 +866,75 @@ const options = [{ label: 'Edit', icon: 'edit' }]
 const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 ```
 
+## Card, ListItem, standalone `<Toast>` (removed)
+
+Three unmaintained wrappers are gone in v1, per
+[ADR-0008](../../../spec/adr/0008-no-deprecated-members-in-1-0-0.md) — each
+shipped `@deprecated` in code and had zero call sites left across our
+census of downstream apps.
+
+**`Card`** wrapped a title/subtitle/actions layout with a manual loading
+state. There's no drop-in replacement; rebuild the layout with plain
+markup, using [`LoadingText`](./components/loadingtext) or
+[`Skeleton`](./components/skeleton) for the loading state:
+
+```vue
+<!-- Before -->
+<Card title="Title" subtitle="Subtitle" :loading="loading">
+  <template #actions><Button label="Edit" /></template>
+  Content
+</Card>
+
+<!-- After -->
+<div class="flex flex-col rounded-lg border px-6 py-5">
+  <div class="flex items-baseline justify-between">
+    <h2 class="text-lg font-semibold">Title</h2>
+    <Button label="Edit" />
+  </div>
+  <p class="mt-1.5 text-ink-gray-6">Subtitle</p>
+  <LoadingText v-if="loading" class="mt-4" />
+  <div v-else class="mt-4">Content</div>
+</div>
+```
+
+**`ListItem`** rendered a title/subtitle/actions row. Same story — no
+drop-in replacement, rebuild with plain markup:
+
+```vue
+<!-- Before -->
+<ListItem title="Title" subtitle="Subtitle">
+  <template #actions><Button label="Edit" /></template>
+</ListItem>
+
+<!-- After -->
+<div class="flex items-center justify-between py-3">
+  <div>
+    <h3 class="font-medium">Title</h3>
+    <p class="text-ink-gray-6">Subtitle</p>
+  </div>
+  <Button label="Edit" />
+</div>
+```
+
+**Standalone `<Toast>`** — `import { Toast } from 'frappe-ui'` and
+`<Toast>` fail at the import. This only removes the raw `ToastRoot`-based
+component; the imperative API is unaffected and is what you almost
+certainly want:
+
+```vue
+<!-- Before -->
+<Toast v-model:open="open" message="Saved" type="success" />
+
+<!-- After -->
+<script setup>
+import { toast } from 'frappe-ui'
+toast.success('Saved')
+</script>
+```
+
+`<ToastProvider>` (mount once near your app root) and `toast.success()` /
+`toast.error()` / `toast.info()` / plain `toast()` are unchanged.
+
 ## Tokens
 
 Run the v2 token codemod from the app you are migrating:
