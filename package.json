@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "1.0.0-beta.39",
+  "version": "1.0.0-beta.40",
   "description": "A set of components and utilities for rapid UI development",
   "engines": {
     "node": ">=20.19.0"
@@ -87,6 +87,9 @@
     },
     "./vite": {
       "import": "./vite/index.js"
+    },
+    "./vite/lucideIconsPlugin": {
+      "import": "./vite/lucideIconsPlugin.js"
     },
     "./vitepress": {
       "types": "./vitepress/index.d.ts",
@@ -188,7 +191,6 @@
     "es-module-lexer": "^1.7.0",
     "feather-icons": "^4.28.0",
     "fuzzysort": "^3.1.0",
-    "grid-layout-plus": "^1.1.0",
     "highlight.js": "^11.11.1",
     "idb-keyval": "^6.2.0",
     "lowlight": "^3.3.0",

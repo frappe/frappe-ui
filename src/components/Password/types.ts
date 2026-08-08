@@ -13,10 +13,4 @@ export interface PasswordProps extends InputLabelingProps {
 
   /** Disables the input when true. */
   disabled?: boolean
-
-  /**
-   * Alternate way to set the password value.
-   * @deprecated Use `v-model` / `modelValue` instead.
-   */
-  value?: string | null
 }

@@ -562,12 +562,14 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 
 | Before                                     | After                  |
 | ------------------------------------------ | ---------------------- |
+| `<Input>` (removed)                        | `<TextInput>` or `FormControl` |
 | `Rating` `:rating_from`                    | `:max`                 |
 | `Rating` `:readonly`                       | `:disabled`            |
 | `Switch` `@change`                         | `@update:modelValue`   |
 | `Switch.labelClasses`                      | `data-*` styling hooks |
 | `Checkbox.padding`                         | `padded`               |
-| `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
+| `Password` `:value` prop (removed)         | `v-model`              |
+| `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
 The first five rows are **removed**, not aliased. The old names are silently
 ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
@@ -578,9 +580,55 @@ build time, so grep for these names when upgrading.
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 
-The legacy `Input` component is deprecated. Use
-[`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
-`Select` / `Checkbox` for the other type modes it accepted.
+### Password — `value` prop removed
+
+`value` was a deprecated alternate way to set the password, seeding
+`v-model` on mount. It's gone. `:value` now falls through as a plain HTML
+attribute on the native `<input>` instead of seeding the model — the field
+still renders, so nothing throws or warns.
+
+```vue
+<!-- Before -->
+<Password v-model="password" :value="initialValue" />
+
+<!-- After -->
+<Password v-model="password" />
+<script setup>
+password.value = initialValue
+</script>
+```
+
+### `TextInput`, `Textarea`, `Password` — ref surface
+
+`TextInput` and `Textarea` handed back `{ el }`, a raw ref on the native
+element. It's now `{ focus, inputElement }`: call `focus(options?)` to move
+keyboard focus, and read `inputElement` for the native element itself (a
+computed, so it can't be reassigned). `Password` gains the same pair — it
+previously exposed nothing.
+
+This is silent for plain JS: `ref.value.el` becomes `undefined` at runtime
+instead of throwing. A typed ref catches it as a build-time error instead.
+
+```vue
+<!-- Before -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.el.focus({ preventScroll: true })
+}
+</script>
+
+<!-- After -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.focus({ preventScroll: true })
+}
+</script>
+```
+
+`Duration` already exposed `focus()`; it now takes the same `options?`
+parameter as the rest of the family.
 
 ## Divider
 

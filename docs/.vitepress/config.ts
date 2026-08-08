@@ -105,6 +105,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'Utilities', link: '/docs/other/utilities' },
         { text: 'Composables', link: '/docs/other/composables' },
         { text: 'Directives', link: '/docs/other/directives' },
+        { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
   ]

@@ -321,7 +321,12 @@ keeps this from turning back into four names for one idea.
 **How to shape it:**
 
 - Always a **computed**, never the raw `ref`. After Vue's unwrapping, a computed
-  is read-only for the caller; a raw ref is not.
+  is read-only for the caller; a raw ref is not. A property **getter** that
+  reads the ref is also allowed: `defineExpose<T>()` type-checks the object
+  literal itself, and a `ComputedRef<X>` doesn't structurally match the plain
+  `X | null` a field like `inputElement` declares, so `TextInput`, `Textarea`,
+  and `Password` use a getter instead — same guarantees, read-only and
+  reactivity-tracked.
 - Always **`| null`** — the component may not be mounted yet. Type it as
   precisely as you can: `HTMLInputElement | null`, not `HTMLElement | null`.
 - **Never a function that returns the element.** That's `FileUploader.inputRef`,

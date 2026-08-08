@@ -43,7 +43,7 @@ export interface DropdownProps {
   /** Whether the dropdown width should match the trigger element. */
   matchTriggerWidth?: boolean
 
-  /** Teleport target for dropdown portal content. */
+  /** Teleport target for dropdown portal content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: string | HTMLElement
 }
 

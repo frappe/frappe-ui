@@ -5,6 +5,7 @@ import MenuItemContent from './MenuItemContent.vue'
 import MenuRenderContent from './MenuRenderContent.vue'
 import MenuRenderContentAsChild from './MenuRenderContentAsChild.vue'
 import type { MenuOption, MenuProps } from './types'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import {
   menuClasses,
   getMenuBackgroundColor,
@@ -20,8 +21,9 @@ defineOptions({
 
 const props = withDefaults(defineProps<MenuProps>(), {
   groups: () => [],
-  portalTo: 'body',
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const router = useRouter()
 
@@ -88,7 +90,7 @@ async function handleItemSelect(item: MenuOption, event: Event) {
             />
           </component>
 
-          <component :is="primitives.Portal" :to="portalTo">
+          <component :is="primitives.Portal" :to="portalTarget">
             <component
               :is="primitives.SubContent"
               data-slot="content"

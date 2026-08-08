@@ -29,3 +29,20 @@ export interface TextInputEmits {
   /** Fired when the input value changes. */
   'update:modelValue': [value: string]
 }
+
+/**
+ * Shared `defineExpose` shape for the plain-text input family — `TextInput`,
+ * `Textarea`, and `Password` all `defineExpose<TextInputExposed<...>>` this
+ * exact type, so a template ref works the same way whichever one it points
+ * at. Generic over the native element so `Textarea` can type its
+ * `inputElement` as `HTMLTextAreaElement` without a separate declaration.
+ */
+export interface TextInputExposed<
+  TElement extends HTMLElement = HTMLInputElement,
+> {
+  /** Moves focus to the native element. */
+  focus: (options?: FocusOptions) => void
+
+  /** The native element the user types into. `null` before mount. */
+  inputElement: TElement | null
+}
