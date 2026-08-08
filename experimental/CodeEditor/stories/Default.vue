@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CodeEditor } from 'frappe-ui/code-editor'
+import { CodeEditor } from '..'
 
 const code = ref(`function greet(name) {\n\treturn \`Hello, \${name}!\`\n}`)
 </script>

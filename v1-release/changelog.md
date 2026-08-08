@@ -910,6 +910,31 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### `code-editor` subpath — folded into `experimental` (breaking)
+
+- **Breaking:** `frappe-ui/code-editor` is removed. `CodeEditor`, `CodePreview`,
+  and `loadLanguage` move to `frappe-ui/experimental` (ADR-0010). One downstream
+  file imported the old subpath; the fix is a one-line import change.
+
+  ```ts
+  // before
+  import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+
+  // after
+  import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+  ```
+
+### `experimental` barrel — tidy and `FrappeUIError`
+
+- **Breaking:** `LabelingWrapper` is dropped from `frappe-ui/experimental`.
+  It stays exported from its own barrel (`src/components/InputLabeling`) —
+  `Combobox`, `Select`, `MultiSelect`, and `MultiEmailInput` import it from
+  there internally — only the `experimental` re-export had zero external
+  importers, so only that goes. The only member cut in the barrel tidy.
+- `FrappeUIError` is now exported from `frappe-ui/experimental` as a type. A
+  consumer previously hand-declared a structural copy of it because it wasn't
+  re-exported — that copy can now be dropped in favor of the real type.
+
 ### `tsconfig.base.json` — cleaned up (breaking for extenders)
 
 - **Breaking:** `tsconfig.base.json` no longer sets `types`

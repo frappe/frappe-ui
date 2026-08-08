@@ -104,7 +104,7 @@ v1 must make an explicit keep / refine / remove decision on each — tracked in 
 - **Pill** — used only inside `TabButtons` in practice. Decision: stop exporting from the public package surface.
 - **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
 - **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useColorScheme` composable for app-specific theme switching.
-- **CodeEditor** — currently **not exported**. Decision: promote to public v1 API (then API-audit) or keep internal and out of scope.
+- **CodeEditor** — exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: stays internal under P14 unless there is demand to promote it to a public entry point.
 
 `MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
 decision (see the refinement pass).
@@ -154,7 +154,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | Component | Direction | Type | Open PR / branch | Effort | Blocks v1 |
 | --- | --- | --- | --- | --- | --- |
 | **Alert** | Replace type-specific `#icon` slot with `#prefix` (deprecate `#icon`, P6); add uniform `icon?: string \| Component` prop (P11); reconcile `dismissible`/`theme` default drift (code vs JSDoc); add focus-visible on the dismiss button (P12). | refine | — | S | yes |
-| **CodeEditor** | Currently **not exported**. Decide: promote to public v1 API (then API-audit against the philosophy) or keep internal and out of the v1 contract. | decision | — | S→M | only if exposed |
+| **CodeEditor** | Exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: keep internal under P14 unless there is demand to promote it. | decided | #939 | — | no |
 | **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
 | **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (closed unmerged), #673 (CSV MIME) | L | yes |
 | **ListView** | Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1. | decision (deprecate) | — | S | no |
@@ -171,7 +171,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 
 - **MonthPicker → remove / deprecate** rather than rebuild.
 - **Pill → un-export** (internal-only).
-- **CodeEditor → keep internal** unless there is demand to promote it.
+- **CodeEditor → keep internal**, exported from `frappe-ui/experimental` (#939), unless there is demand to promote it.
 - **ThemeSwitcher → deprecated compatibility export**; `useColorScheme` stays available as the stable primitive.
 - **Radio (from #751) → confirm** whether a new component enters v1 scope or lands post-v1.
 

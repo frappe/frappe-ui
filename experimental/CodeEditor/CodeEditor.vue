@@ -38,7 +38,7 @@
 // lives in the sibling `CodePreview`). CodeMirror is lazy-loaded in `onMounted`
 // via dynamic `import()` so the static graph stays editor-free and each language
 // tree-shakes into its own async chunk — apps that never render a code field pay
-// no runtime cost (importing `frappe-ui/code-editor` pulls in no editor code
+// no runtime cost (importing `frappe-ui/experimental` pulls in no editor code
 // until a field actually mounts).
 import {
   computed,
@@ -51,11 +51,11 @@ import {
 } from 'vue'
 import type { EditorView } from '@codemirror/view'
 import type { Compartment, Extension } from '@codemirror/state'
-import { useInputLabeling } from '../../composables/useInputLabeling'
-import InputLabel from '../InputLabeling/InputLabel.vue'
-import InputDescription from '../InputLabeling/InputDescription.vue'
-import InputError from '../InputLabeling/InputError.vue'
-import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
+import { useInputLabeling } from '../../src/composables/useInputLabeling'
+import InputLabel from '../../src/components/InputLabeling/InputLabel.vue'
+import InputDescription from '../../src/components/InputLabeling/InputDescription.vue'
+import InputError from '../../src/components/InputLabeling/InputError.vue'
+import LabelingWrapper from '../../src/components/InputLabeling/LabelingWrapper.vue'
 import { loadLanguage } from './languages'
 import { buildBaseTheme, buildSyntaxHighlight } from './theme'
 import type { CodeEditorEmits, CodeEditorProps } from './types'

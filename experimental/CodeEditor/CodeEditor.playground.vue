@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+import { CodeEditor, CodePreview } from '.'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const seeds: Record<string, string> = {

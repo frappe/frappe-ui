@@ -65,10 +65,6 @@
       "import": "./src/molecules/list/index.ts",
       "types": "./src/molecules/list/index.ts"
     },
-    "./code-editor": {
-      "import": "./src/components/CodeEditor/index.ts",
-      "types": "./src/components/CodeEditor/index.ts"
-    },
     "./drive": {
       "import": "./frappe/drive/index.js"
     },

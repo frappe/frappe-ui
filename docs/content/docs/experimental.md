@@ -26,6 +26,19 @@ import { Accordion } from 'frappe-ui/experimental'
 See the [Accordion page](/docs/experimental/accordion) for examples and the full
 API reference.
 
+## CodeEditor
+
+A CodeMirror 6 code field with syntax highlighting and an optional sanitized
+preview (`CodePreview`). CodeMirror is lazy-loaded, so importing the barrel
+pulls in no editor code until a field actually mounts.
+
+```ts
+import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+```
+
+See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
+variants, and the labeling contract.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a
@@ -171,7 +184,6 @@ import {
   InputLabel,
   InputDescription,
   InputError,
-  LabelingWrapper,
   useInputLabeling,
 } from 'frappe-ui/experimental'
 
@@ -187,7 +199,7 @@ const {
 </script>
 
 <template>
-  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1.5">
+  <div v-if="hasLabeling" class="space-y-1.5">
     <InputLabel
       v-if="props.label"
       :id="labelId"
@@ -202,7 +214,8 @@ const {
       :description="props.description"
     />
     <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
-  </LabelingWrapper>
+  </div>
+  <slot v-else />
 </template>
 ```
 
@@ -224,13 +237,6 @@ slot content.
 Renders validation messages (`lines`) as a `role="alert"` region
 (`data-slot="error"`), one message per line. Renders nothing when `lines` is
 empty.
-
-### LabelingWrapper
-
-Conditionally wraps its slot content in a `<div>` (with optional `wrapperClass`
-/ `wrapperStyle`) when `enabled` is true, and renders the slot as-is otherwise.
-Lets a control add a labeling wrapper element only when it actually renders a
-label, description, or error.
 
 ## inputFontSizeClasses
 

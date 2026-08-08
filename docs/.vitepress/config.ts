@@ -219,10 +219,6 @@ const config = defineDocsConfig({
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
     'frappe-ui/list': path.resolve(repoRoot, 'src/molecules/list'),
-    'frappe-ui/code-editor': path.resolve(
-      repoRoot,
-      'src/components/CodeEditor',
-    ),
     'frappe-ui': path.resolve(repoRoot, 'src'),
     'dayjs/esm': 'dayjs',
   },

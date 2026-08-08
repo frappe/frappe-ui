@@ -1,8 +1,8 @@
 // Props/emits for the CodeEditor writer primitive. Kept here so the field
 // wrapper and stories can share the same contract without importing the .vue.
 
-import type { InputLabelingProps } from '../../composables/useInputLabeling'
-import type { InputSize, InputVariant } from '../../composables/inputTypes'
+import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
+import type { InputSize, InputVariant } from '../../src/composables/inputTypes'
 
 /** A language key understood by `loadLanguage`. */
 export type CodeLanguage =

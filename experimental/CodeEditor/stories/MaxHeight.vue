@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CodeEditor } from 'frappe-ui/code-editor'
+import { CodeEditor } from '..'
 
 const overflowing = ref(false)
 const code = ref(
