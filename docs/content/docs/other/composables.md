@@ -28,7 +28,7 @@ object:
 - `title` — sets `document.title`.
 - `icon` — a URL to a favicon image.
 - `emoji` — renders the emoji as the favicon, taking priority over `icon`.
-- Neither `icon` nor `emoji` restores the page's original favicon.
+- Omitting both `icon` and `emoji` restores the page's original favicon.
 
 Called inside a component, the watcher stops automatically on unmount — there
 is nothing to clean up. Called outside one (a router hook, a plain module),
