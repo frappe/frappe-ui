@@ -80,7 +80,7 @@ Single-select with search. `v-model="selected"` + `v-model:query="q"`. For optio
 ### `Checkbox` / `Switch`
 Boolean. `v-model="checked"` + `:label`. `Switch` for settings-style toggles; `Checkbox` for forms / multi-pick rows.
 
-### `DatePicker` / `MonthPicker` / `TimePicker` / `DateRangePicker`
+### `DatePicker` / `TimePicker` / `DateRangePicker` / `DateTimePicker`
 `v-model` holds the value. `DateRangePicker` v-model is `string[]` of length 2.
 
 ### `Slider` / `Rating`
@@ -146,7 +146,7 @@ Cmd-K palette. Compose with `Dialog bare`.
 ## Layout
 
 ### App shell
-`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarGroup`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
+`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
 
 ### `ScrollArea`
 For every app-owned scroll region (sidebar nav, panes; `orientation="horizontal"` for boards). Prefer over `overflow-auto` divs.

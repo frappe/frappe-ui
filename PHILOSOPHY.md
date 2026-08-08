@@ -132,6 +132,8 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 
 Icon-only buttons, action toggles, and other controls that don't carry a value are **not** input controls — P5 doesn't apply.
 
+**`Editor` carve-out.** `Editor` (`frappe-ui/editor`) holds a value the user enters, which would put it under P5, but it is **renderless** by design (ADR-0004): it makes zero layout decisions and renders no chrome of its own, so a `label`/`description`/`error` prop would have nowhere to draw itself. Labeling `Editor` is layout, same as its menus and action buttons — the consumer renders a label above the slot the same way it renders everything else inside it, typically via the app's own `FormControl`-style wrapper (see spec/editor.md's "build your app's component on `<Editor>`" pattern).
+
 **Why:** Forms are clusters of inputs. Inconsistent labeling props mean every form remembers which component spells the label `label` vs `title`, which auto-renders the required indicator, which wires `aria-describedby` correctly. Uniformity is what makes the input family a family and not a grab-bag.
 
 ```vue

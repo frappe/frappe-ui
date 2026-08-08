@@ -102,17 +102,31 @@ from inside `#default` / `#actions`.
 ## DatePicker / TimePicker family
 
 Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
-share the popover-trigger vocabulary.
+share the popover-trigger vocabulary. Removed members are deleted, not
+aliased — a call site that still uses one breaks at the tag rather than
+warning; `grep` for each old name after upgrading.
 
-| Before                                  | After                       |
-| --------------------------------------- | --------------------------- |
-| `:value` prop                           | `v-model`                   |
-| `@change`                               | `@update:modelValue`        |
-| `placement="bottom-start"`              | `side` + `align` + `offset` |
-| `:autoClose`                            | `:keepOpen` (inverted)      |
-| `allowCustom` / `readonly`              | `typeable`                  |
-| `minDate`/`maxDate`/`minTime`/`maxTime` | `min` / `max`               |
-| `#target`                               | `#trigger`                  |
+| Before                                   | After                        |
+| ----------------------------------------- | --------------------------- |
+| `:value` prop                             | `v-model`                    |
+| `placement="bottom-start"`                | `side` + `align` + `offset`  |
+| `:autoClose`                              | `:keepOpen` (inverted)       |
+| `allowCustom` / picker-level `readonly`   | `typeable`                   |
+| `inputClass`                              | `class`                      |
+| `minDate`/`maxDate`/`minTime`/`maxTime`   | `min` / `max`                |
+| `#target`                                 | `#trigger`                   |
+| `TimePicker.scrollMode`                   | nothing — list is always centered |
+| `TimePicker` template ref `.selectAll()` / `.blurInput()` | nothing — dead, no callers |
+
+`@change` still fires alongside `@update:modelValue` — it wasn't deprecated
+and doesn't need replacing.
+
+Most of the table above is a **silent break**: an old prop name that's no
+longer in the component's types lands as an inert extra attribute (or, for
+`min`/`max` aliases, the constraint just stops being enforced) instead of
+throwing. TypeScript callers get a compile error instead. `#target` is the
+one slot case — content in a leftover `<template #target>` silently stops
+rendering.
 
 Behavior changes that apply even if you don't touch your code:
 
@@ -124,6 +138,28 @@ Behavior changes that apply even if you don't touch your code:
   Clear inside `#actions` if you relied on it.
 - `DateRangePicker.clearable` now defaults to `true`. Pass `:clearable="false"`
   to opt out.
+- `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
+  `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
+  the picker components used them; drop the import.
+
+## MonthPicker
+
+`MonthPicker` is deleted — the import fails. Use `Select` with month options:
+
+```vue
+<!-- Before -->
+<MonthPicker v-model="month" />
+
+<!-- After -->
+<Select
+  v-model="month"
+  :options="[
+    { label: 'January', value: '01' },
+    { label: 'February', value: '02' },
+    // ...
+  ]"
+/>
+```
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
 
@@ -753,6 +789,51 @@ representation yourself is a few lines of `FileReader.readAsDataURL`.
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## Sidebar
+
+`Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /
+`SidebarLabel` / `SidebarItem` in its default slot instead of passing
+config-object props. See the [Sidebar](./components/sidebar) component page
+for the full API.
+
+| Before                                    | After                                             |
+| ------------------------------------------ | -------------------------------------------------- |
+| `:header="{ title, subtitle, menuItems }"` | `<SidebarHeader :title :subtitle :menu-items />` as a child |
+| `:sections="[{ label, items }]"`           | `<SidebarLabel>` + `<SidebarItem>` (or `<SidebarSection>`) as children |
+| `<template #header-logo>`                  | `<SidebarHeader>`'s `#prefix` slot                |
+| `<template #footer-items>`                 | plain markup in the default slot                  |
+| `<SidebarSection :items="rows">`           | `<SidebarSection>` with `<SidebarItem>` children  |
+| `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed |
+| `item.condition`                           | `v-if` on the composed `<SidebarItem>`            |
+| `SidebarItem.isActive`                     | `SidebarItem.active`                              |
+| `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
+
+```vue
+<!-- Before -->
+<Sidebar
+  :header="{ title: 'Frappe CRM', subtitle: 'crm.frappe.io', menuItems }"
+  :sections="[
+    { label: '', items: [{ label: 'Leads', to: '/leads', icon: 'lucide-user-plus' }] },
+    { label: 'Views', collapsible: true, items: viewItems },
+  ]"
+/>
+
+<!-- After -->
+<Sidebar>
+  <SidebarHeader title="Frappe CRM" subtitle="crm.frappe.io" :menu-items="menuItems" />
+  <div class="flex-1 overflow-y-auto px-2">
+    <SidebarItem label="Leads" to="/leads" icon="lucide-user-plus" />
+    <SidebarSection label="Views" collapsible>
+      <SidebarItem v-for="item in viewItems" :key="item.label" v-bind="item" />
+    </SidebarSection>
+  </div>
+</Sidebar>
+```
+
+`Sidebar` no longer wraps the middle list in a scroll container or applies any
+padding — that's app-owned now (see the component page's Collapse section for
+the full composition contract).
+
 ## Data fetching (useDoctype / useList)
 
 The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
@@ -984,10 +1065,11 @@ double-shift.
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 `frappe-ui/editor` family: a headless `<Editor>` you compose with **kits**
 (bundled, configurable extension sets) and **building-block** menus. Everything
-moves to the `frappe-ui/editor` subpath; nothing editor-related is exported from
-top-level `frappe-ui` except the deprecated v0 alias, so the two coexist during
-the migration window. See the [Editor](./molecules/editor) page for the full API
-and recipes.
+moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
+(`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`) are removed from top-level
+`frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
+[Editor](./molecules/editor) page for the full API and recipes.
 
 ```ts
 // Before
@@ -1373,6 +1455,45 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 
 `usePageMeta` works the same everywhere — see the
 [composables page](./other/composables#usepagemeta).
+
+## PageHeaderMobile family — slot names
+
+`PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
+are renamed to the shared `#prefix`/`#suffix` vocabulary (see
+[PHILOSOPHY.md P6](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md)).
+This is a **silent break**: Vue drops content passed to an unknown slot name
+with no error or warning — the back button, title icon, or trailing action
+just stops rendering.
+
+| Before                                | After                             |
+| -------------------------------------- | ---------------------------------- |
+| `PageHeaderMobile` `#left`             | `#prefix`                          |
+| `PageHeaderMobile` `#right`            | `#suffix`                          |
+| `PageHeaderMobileTitle` `#icon`        | `#prefix`                          |
+
+```vue
+<!-- Before -->
+<PageHeaderMobile title="Space">
+  <template #left><BackButton /></template>
+  <template #right><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #icon><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+
+<!-- After -->
+<PageHeaderMobile title="Space">
+  <template #prefix><BackButton /></template>
+  <template #suffix><Button icon="lucide-more-horizontal" /></template>
+</PageHeaderMobile>
+<PageHeaderMobileTitle title="Space">
+  <template #prefix><SpaceIcon /></template>
+</PageHeaderMobileTitle>
+```
+
+Grep for `#left`, `#right`, and `#icon` on these two components specifically —
+other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
+`#right` slots that are unaffected.
 
 ## FAQ
 

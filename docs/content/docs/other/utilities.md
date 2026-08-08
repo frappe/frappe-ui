@@ -138,6 +138,31 @@ to `credentials: 'include'`, so the server has to send
 authenticate with a token header instead, pass `credentials: 'omit'` per
 request.
 
+## FrappeResponseError
+
+The error [`useCall`](../data-fetching/use-call.md),
+[`useDoc`](../data-fetching/use-doc.md) and
+[`useList`](../data-fetching/use-list.md) raise on a Frappe error response — set
+on `.error` and the reason `submit()`/`execute()` rejects with. An `Error` with
+`title`, `type`, `exception` and `indicator` from the server's response.
+
+```vue
+<script setup>
+import { FrappeResponseError, useCall } from 'frappe-ui'
+
+const rename = useCall({
+  url: '/api/method/frappe.client.rename_doc',
+  method: 'POST',
+  immediate: false,
+  onError(error) {
+    if (error instanceof FrappeResponseError) {
+      console.log(error.title, error.type)
+    }
+  },
+})
+</script>
+```
+
 ## FrappeUI plugin
 
 An optional Vue plugin with one option. It installs the v1 resources Options API

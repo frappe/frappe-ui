@@ -27,6 +27,11 @@ import { SidebarLabelProps, sidebarCollapsedKey } from './types'
 
 defineProps<SidebarLabelProps>()
 
+defineSlots<{
+  /** The label text. */
+  default?: () => any
+}>()
+
 const isCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),

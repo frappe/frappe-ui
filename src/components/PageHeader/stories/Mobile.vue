@@ -5,7 +5,7 @@ import { Button, PageHeaderMobile, PageHeaderMobileTitle } from 'frappe-ui'
 <template>
   <div class="w-80 overflow-hidden border border-b-0 bg-surface-base">
     <PageHeaderMobile>
-      <template #left>
+      <template #prefix>
         <Button
           variant="ghost"
           size="md"
@@ -16,7 +16,7 @@ import { Button, PageHeaderMobile, PageHeaderMobileTitle } from 'frappe-ui'
       <PageHeaderMobileTitle
         title="A discussion title that is long enough to need centering"
       />
-      <template #right>
+      <template #suffix>
         <Button variant="ghost" icon="lucide-more-horizontal" label="Options" />
       </template>
     </PageHeaderMobile>
