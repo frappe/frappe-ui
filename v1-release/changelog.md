@@ -83,7 +83,7 @@ aliased and nothing warns.
   `dialog.danger()`.
 
 Before/after for the silent breaks is in the
-[migration guide](../docs/content/docs/migration.md#dialog-deprecated-surface-removed).
+[migration guide](../docs/content/docs/migration.md#dialog).
 
 ### DatePicker family — v1 spec
 

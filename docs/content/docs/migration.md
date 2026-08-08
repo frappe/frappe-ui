@@ -31,9 +31,13 @@ The `options` blob is flattened into top-level props. See the
 | `:options="{ title, size, actions }"` | `title` / `size` / `:actions`    |
 | `disableOutsideClickToClose`          | `:dismissible="false"`           |
 | `<template #body-content>`            | default slot                     |
+| `<template #body-main>`               | default slot                     |
 | `<template #body-title>`              | `<template #title>`              |
+| `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
+| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'yellow' }"`    |
+| `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
 ```vue
@@ -60,6 +64,40 @@ For reactive `:options` objects, spread them: `<Dialog v-bind="opts || {}" />`.
 For the imperative API, use `dialog.confirm` / `dialog.danger` / `dialog.prompt`
 from `frappe-ui` (callback-based: `onConfirm` resolves to close, throws to stay
 open) and wrap your app root in `<FrappeUIProvider>`.
+
+### `icon.appearance` → `icon.theme`
+
+```vue
+<!-- Before -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
+
+<!-- After -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" ... />
+```
+
+`appearance` is dropped silently — Vue accepts the unknown key with no error,
+so the icon renders with no tone. Map `warning → yellow`, `info → blue`,
+`danger → red`, `success → green`.
+
+### A template ref no longer exposes `close()`
+
+```vue
+<!-- Before -->
+<Dialog ref="dialogRef" v-model="show" />
+<script setup>
+dialogRef.value.close()
+</script>
+
+<!-- After -->
+<Dialog v-model:open="show" />
+<script setup>
+show.value = false
+</script>
+```
+
+`Dialog` exposes nothing on its template ref (ADR-0012); calling `.close()`
+now throws. Drive `open` through `v-model:open`, or use the `close` slot prop
+from inside `#default` / `#actions`.
 
 ## DatePicker / TimePicker family
 
