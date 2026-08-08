@@ -5,6 +5,7 @@ import SidebarItem from './SidebarItem.vue'
 import SidebarLabel from './SidebarLabel.vue'
 import SidebarSection from './SidebarSection.vue'
 import SidebarHeader from './SidebarHeader.vue'
+import SidebarCollapseToggle from './SidebarCollapseToggle.vue'
 
 function createTestRouter() {
   return createRouter({
@@ -205,5 +206,35 @@ describe('<SidebarHeader />', () => {
       props: { title: 'Frappe CRM', showLogo: false },
     })
     cy.get('.size-7').should('not.exist')
+  })
+})
+
+describe('<SidebarLabel />', () => {
+  it('renders its default slot, and `divider` while collapsed', () => {
+    cy.mount(SidebarLabel, { slots: { default: () => 'Spaces' } })
+    cy.get('[data-slot=sidebar-label]').should('contain.text', 'Spaces')
+    cy.mount(SidebarLabel, {
+      props: { divider: true },
+      slots: { default: () => 'Spaces' },
+    })
+    // Uncollapsed (no injected sidebarCollapsedKey): no divider line.
+    cy.get('hr').should('not.exist')
+  })
+})
+
+describe('<SidebarCollapseToggle />', () => {
+  it('renders a labeled toggle row and flips the injected collapsed state', () => {
+    const collapsed = ref(false)
+    cy.mount(
+      () =>
+        h(Sidebar, {
+          collapsed: collapsed.value,
+          'onUpdate:collapsed': (v: boolean | null) => (collapsed.value = v),
+        }, () => h(SidebarCollapseToggle)),
+      { global: { plugins: [createTestRouter()] } },
+    )
+    cy.contains('Collapse').should('exist')
+    cy.contains('Collapse').click()
+    cy.contains('Expand').should('exist')
   })
 })
