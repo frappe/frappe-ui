@@ -26,8 +26,8 @@ exported today**, except the four marked done.
 | `MonthPicker` (whole barrel)      | `src/components/MonthPicker/`                                        | `Select`                                                       | no                                                                                                                |
 | `Toast` (the SFC)                 | `src/components/Toast/Toast.vue`                                     | the imperative `toast(...)` API                                | yes                                                                                                               |
 | `ThemeSwitcher` (whole barrel)    | `src/components/ThemeSwitcher/`                                      | `Select` plus the `useColorScheme` composable                        | yes                                                                                                               |
-| TextEditor root exports           | `src/components/TextEditor/index.ts`                                 | the `frappe-ui/editor` subpath                                 | no                                                                                                                |
-| TextEditor extension barrels      | `src/components/TextEditor/extensions/{image,suggestion}`            | extensions from `frappe-ui/editor`                             | no                                                                                                                |
+| ~~TextEditor root exports~~       | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | the `frappe-ui/editor` subpath                                 | —                                                                                                                  |
+| ~~TextEditor extension barrels~~  | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | extensions from `frappe-ui/editor`                              | —                                                                                                                  |
 | ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
 | ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
 
@@ -72,8 +72,11 @@ in them is marked `@deprecated`:
   records the resulting at-bar exception (implementation stays JS).
 - **v2 data composables** — same #886 resolution: kept, supported, recommended
   for new code.
-- **`ListView`** — `src/index.ts:77` explicitly says not to deprecate it until
-  `frappe-ui/list` reaches parity.
+- **`ListView`** — sweep #882 confirmed the parity gap is real and structural
+  (resizable columns, per-column function props, tooltips, disabled-row
+  exclusion, select banner — none of which `frappe-ui/list`'s composition
+  model replicates by design, P3). Decision: ListView ships frozen, not
+  deprecated, for v1. See its row in `plan.md`.
 
 If any of the three gets a `@deprecated` marker before the tag, it joins the
 table above and has to be removed with the rest.

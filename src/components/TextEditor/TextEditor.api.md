@@ -130,17 +130,17 @@
 
   const emitsData = [
   {
-    name: 'blur',
-    description: '',
-    type: '[event: FocusEvent]'
-  },
-  {
     name: 'change',
     description: 'Fired after the value is committed.',
     type: '[content: string]'
   },
   {
     name: 'focus',
+    description: '',
+    type: '[event: FocusEvent]'
+  },
+  {
+    name: 'blur',
     description: '',
     type: '[event: FocusEvent]'
   },

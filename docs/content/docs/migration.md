@@ -867,10 +867,11 @@ double-shift.
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 `frappe-ui/editor` family: a headless `<Editor>` you compose with **kits**
 (bundled, configurable extension sets) and **building-block** menus. Everything
-moves to the `frappe-ui/editor` subpath; nothing editor-related is exported from
-top-level `frappe-ui` except the deprecated v0 alias, so the two coexist during
-the migration window. See the [Editor](./molecules/editor) page for the full API
-and recipes.
+moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
+(`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`) are removed from top-level
+`frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
+[Editor](./molecules/editor) page for the full API and recipes.
 
 ```ts
 // Before

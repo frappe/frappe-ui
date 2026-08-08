@@ -9,6 +9,48 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### ListView — stays, not deprecated
+
+`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
+primitive for new code, but it's a narrower, composition-based family by
+design — it has no equivalent for `ListView`'s config-driven columns
+(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
+disabled-row exclusion, the built-in select banner). If you're on `ListView`
+today, there's no forced migration for `1.0.0`.
+
+### `TextEditor` and its v0 exports — removed from root (breaking)
+
+Per ADR-0008, the deprecated v0 editor exports are removed from top-level
+`frappe-ui` — loud breaks, the import fails to resolve:
+
+- `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`
+- `ImageExtension`, `SetImageOptions`, `createSuggestionExtension`,
+  `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
+  `TextEditor/extensions/*` barrels also re-exported from root)
+
+Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
+[Editor section](../docs/content/docs/migration.md#editor). This confirms
+`CONTEXT.md`'s rule: the editor family is the only subsystem that exports
+from a subpath rather than root, and nothing editor-related is exported from
+root anymore.
+
+The underlying v0 component files (`src/components/TextEditor/`) still ship,
+unmodified, as `frappe-ui/editor`'s migration safety net — only the public
+export and its docs page are gone. Removing the files is a separate,
+human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
+`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
+out to `1.1`.
+
+### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
+
+`.ProseMirror ul[data-type='taskList'] input[type='checkbox']` used a
+Tailwind-v3-only `theme('colors.gray.900')` call in both
+`frappe-ui/editor`'s and the v0 `TextEditor`'s stylesheet, which broke
+Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
+same `var(--ink-gray-9)` token the rest of both files already use.
+
 ### v1 resources — at-bar exception documented; `listResource` gets test coverage
 
 v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
@@ -842,6 +884,19 @@ query.
 error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
 `FrappeRequestError` closed for `frappeRequest`.
+
+### Data fetching (v2) — docs, and the sidebar splits from Resources
+
+`useCall`, `useDoc`, `useList`, `useDoctype` and `useNewDoc` each get a docs
+page for the first time, under a new **Data Fetching** sidebar section —
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for
+a query, `useDoctype` for write-only access to a DocType, `useNewDoc` for a
+draft-and-insert form.
+
+The old **Data Fetching** section is renamed **Resources** and keeps its
+three pages (Resource, List Resource, Document Resource) unchanged. Both
+sections link to each other: Resources stays fully supported through `1.x`;
+the new composables are the recommended layer for new code.
 
 ### Root composables and directives — renamed and shrunk
 
