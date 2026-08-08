@@ -15,11 +15,14 @@ function makeUsers(count: number) {
 
 describe('createListResource', () => {
   let users: any[]
+  let getListCallCount: number
 
   beforeEach(() => {
     users = makeUsers(5)
+    getListCallCount = 0
     setConfig('resourceFetcher', async (options: any) => {
       if (options.url === 'frappe.client.get_list') {
+        getListCallCount++
         let { start = 0, limit_page_length = 20 } = options.params
         return users.slice(start, start + limit_page_length)
       }
@@ -35,7 +38,11 @@ describe('createListResource', () => {
         let { name, fieldname } = options.params
         let doc = users.find((u) => u.name === name)
         Object.assign(doc, fieldname)
-        return doc
+        // a fresh object, distinct from the one already sitting in
+        // list.data — otherwise the assertion below would pass even if
+        // updateRowInListResource were deleted, because get_list and
+        // set_value would be handing out the same row reference
+        return { ...doc }
       }
       throw new Error(`unexpected request to ${options.url}`)
     })
@@ -53,7 +60,7 @@ describe('createListResource', () => {
 
   it('fetches the first page with default props', async () => {
     let list = createListResource({
-      doctype: 'User',
+      doctype: 'ListResourceTestPage',
       pageLength: 2,
       auto: false,
     })
@@ -65,9 +72,23 @@ describe('createListResource', () => {
     expect(list.hasNextPage).toBe(true)
   })
 
+  it('hasNextPage is false once a page comes back short of pageLength', async () => {
+    let list = createListResource({
+      doctype: 'ListResourceTestLastPage',
+      pageLength: 20,
+      auto: false,
+    })
+
+    await list.list.fetch()
+
+    // 5 users on a 20-row page: the page is short, so there is no next page
+    expect(list.data).toHaveLength(5)
+    expect(list.hasNextPage).toBe(false)
+  })
+
   it('paginates forward and back with next()/previous()', async () => {
     let list = createListResource({
-      doctype: 'User',
+      doctype: 'ListResourceTestPaginate',
       pageLength: 2,
       auto: false,
     })
@@ -92,7 +113,7 @@ describe('createListResource', () => {
 
   it('inserting a row refreshes the list', async () => {
     let list = createListResource({
-      doctype: 'User',
+      doctype: 'ListResourceTestInsert',
       pageLength: 20,
       auto: false,
     })
@@ -106,16 +127,18 @@ describe('createListResource', () => {
 
   it('setValue updates the matching row in place, without a refetch', async () => {
     let list = createListResource({
-      doctype: 'User',
+      doctype: 'ListResourceTestSetValue',
       pageLength: 20,
       auto: false,
     })
     await list.list.fetch()
+    expect(getListCallCount).toBe(1)
 
     await list.setValue.submit({ name: 'USER-2', status: 'Inactive' })
 
+    // no second list.list fetch — the row updates in place
+    expect(getListCallCount).toBe(1)
     expect(list.getRow('USER-2').status).toBe('Inactive')
-    // the row updated in place; no second list.list fetch was needed
     expect(list.data.find((u: any) => u.name === 'USER-1').status).toBe(
       'Active',
     )
@@ -123,20 +146,24 @@ describe('createListResource', () => {
 
   it('caches by cache key and reuses the same reactive resource', () => {
     let list = createListResource({
-      doctype: 'User',
-      cache: 'user-list',
+      doctype: 'ListResourceTestCache',
+      cache: 'list-resource-test-cache-key',
       auto: false,
     })
 
     expect(
-      createListResource({ doctype: 'User', cache: 'user-list', auto: false }),
+      createListResource({
+        doctype: 'ListResourceTestCache',
+        cache: 'list-resource-test-cache-key',
+        auto: false,
+      }),
     ).toBe(list)
-    expect(getCachedListResource('user-list')).toBe(list)
+    expect(getCachedListResource('list-resource-test-cache-key')).toBe(list)
   })
 
   it('reload() re-fetches from the start, then restores pagination state', async () => {
     let list = createListResource({
-      doctype: 'User',
+      doctype: 'ListResourceTestReload',
       pageLength: 2,
       auto: false,
     })
@@ -144,10 +171,31 @@ describe('createListResource', () => {
     list.next()
     await list.list.promise
     expect(list.start).toBe(2)
+    expect(list.data).toHaveLength(4)
+
+    // mutate the backing store so a real re-fetch is observable
+    users[0].status = 'Inactive'
 
     await list.reload()
 
+    // pagination state is restored to what it was before reload()
     expect(list.start).toBe(2)
     expect(list.pageLength).toBe(2)
+    // the accumulated 4 rows are still there, freshly re-fetched
+    expect(list.data).toHaveLength(4)
+    expect(list.data.map((u: any) => u.name)).toEqual([
+      'USER-1',
+      'USER-2',
+      'USER-3',
+      'USER-4',
+    ])
+    expect(list.data[0].status).toBe('Inactive')
+    // documents existing behavior, not desired behavior: reload() computes
+    // hasPreviousPage while start is temporarily reset to 0 for the
+    // single-page re-fetch, and restoring start afterward does not
+    // recompute it — so this stays false even though start is back to 2.
+    // Out of scope to fix here: ADR-0013 keeps this implementation frozen
+    // for this ticket.
+    expect(list.hasPreviousPage).toBe(false)
   })
 })
