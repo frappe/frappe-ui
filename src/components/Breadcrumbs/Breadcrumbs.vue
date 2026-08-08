@@ -18,7 +18,7 @@
         <router-link
           v-if="item.route"
           :to="item.route"
-          @click="item.onClick ? item.onClick() : null"
+          @click="item.onClick?.($event)"
           class="flex items-center rounded px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
@@ -38,7 +38,7 @@
         <a
           v-else-if="item.href"
           :href="item.href"
-          @click="item.onClick ? item.onClick() : null"
+          @click="onLinkClick(item, $event)"
           class="flex items-center rounded px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
@@ -57,7 +57,7 @@
         </a>
         <button
           v-else
-          @click="item.onClick ? item.onClick() : null"
+          @click="item.onClick?.($event)"
           class="flex items-center rounded px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
@@ -142,6 +142,26 @@ const dropdownItems = computed(() => {
 })
 
 const crumbs = computed(() => items.value.slice(overflowedX.value ? -2 : 0))
+
+function isModifiedClick(event: MouseEvent) {
+  return (
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button !== 0
+  )
+}
+
+// An item may set both `href` and `onClick`, so the crumb keeps a real URL for
+// new-tab clicks and "copy link address" while `onClick` does the in-app
+// navigation. Modified clicks stay with the browser.
+function onLinkClick(item: BreadcrumbItem, event: MouseEvent) {
+  if (!item.onClick) return
+  if (isModifiedClick(event)) return
+  event.preventDefault()
+  item.onClick(event)
+}
 
 defineSlots<{
   /** Content shown before each breadcrumb label */

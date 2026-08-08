@@ -1,0 +1,22 @@
+<template>
+  <label class="block text-ink-gray-5" :class="labelClasses" :for="id">
+    {{ label }}
+    <RequiredIndicator :required="required" />
+  </label>
+</template>
+<script setup lang="ts">
+import { computed } from 'vue'
+import RequiredIndicator from '../InputLabeling/RequiredIndicator.vue'
+import type { FormLabelProps } from './types'
+
+const props = withDefaults(defineProps<FormLabelProps>(), {
+  size: 'sm',
+})
+
+const labelClasses = computed(() => {
+  return {
+    sm: 'text-xs',
+    md: 'text-base',
+  }[props.size]
+})
+</script>

@@ -1,0 +1,69 @@
+export function request(_options) {
+    let options = Object.assign({}, _options);
+    if (!options.url) {
+        throw new Error('[request] options.url is required');
+    }
+    if (options.transformRequest) {
+        options = options.transformRequest(_options);
+    }
+    if (!options.responseType) {
+        options.responseType = 'json';
+    }
+    if (!options.method) {
+        options.method = 'GET';
+    }
+    let url = options.url;
+    let body;
+    if (options.params) {
+        if (options.method === 'GET') {
+            let params = new URLSearchParams();
+            for (let key in options.params) {
+                params.append(key, String(options.params[key]));
+            }
+            url = options.url + '?' + params.toString();
+        }
+        else {
+            body = JSON.stringify(options.params);
+        }
+    }
+    return fetch(url, {
+        method: options.method || 'GET',
+        headers: options.headers,
+        body,
+        signal: options.signal,
+        ...(options.credentials ? { credentials: options.credentials } : {}),
+    })
+        .then((response) => {
+        if (options.transformResponse) {
+            return options.transformResponse(response, options);
+        }
+        if (response.status >= 200 && response.status < 300) {
+            if (options.responseType === 'json') {
+                return response.json();
+            }
+            return response;
+        }
+        else {
+            let error = new Error(response.statusText);
+            error.response = response;
+            throw error;
+        }
+    })
+        // A trailing `.catch`, so `transformError` sees everything that can fail:
+        // transport errors, and whatever `transformResponse` throws. The latter
+        // matters for an *ok* response that still fails to parse — a 200 carrying
+        // Frappe's login HTML after the session expired makes `response.json()`
+        // throw, and that must reach the caller's error handler.
+        //
+        // Reporting it twice is the failure mode this shape has to avoid, since
+        // `transformResponse` is also where `frappeRequest` builds and throws its
+        // own error for a non-ok response. That is handled where the reporting
+        // lives, by marking an error as already reported — not here by narrowing
+        // what `transformError` can see.
+        .catch((error) => {
+        if (options.transformError) {
+            return options.transformError(error);
+        }
+        throw error;
+    });
+}

@@ -80,7 +80,7 @@ import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
-import type { TextInputEmits, TextInputProps } from './types'
+import type { TextInputEmits, TextInputExposed, TextInputProps } from './types'
 
 defineOptions({
   inheritAttrs: false,
@@ -145,7 +145,20 @@ const hasLabeling = computed(() => {
 
 const inputRef = ref<HTMLInputElement | null>(null)
 
-defineExpose({ el: inputRef })
+function focus(options?: FocusOptions) {
+  inputRef.value?.focus(options)
+}
+
+// A getter rather than `computed(...)`: Vue unwraps a handed-back ref/computed
+// at the proxy boundary regardless, but `defineExpose<TextInputExposed>`
+// type-checks the object literal itself, and a ComputedRef doesn't
+// structurally match the plain `HTMLInputElement | null` the type declares.
+defineExpose<TextInputExposed>({
+  focus,
+  get inputElement() {
+    return inputRef.value
+  },
+})
 
 const textColor = computed(() => {
   return props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8'
@@ -194,7 +207,7 @@ const inputClasses = computed(() => {
         ? 'border-outline-gray-2'
         : 'border-transparent',
     ],
-    ghost: 'border-0 focus:ring-0 focus-visible:outline-none',
+    ghost: 'border-0 bg-transparent focus:ring-0 focus-visible:outline-none',
   }[variant]
 
   return [

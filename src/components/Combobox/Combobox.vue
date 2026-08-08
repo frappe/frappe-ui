@@ -21,6 +21,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
@@ -76,12 +77,13 @@ const props = withDefaults(defineProps<ComboboxProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
   loading: false,
   emptyText: 'No results',
   hideSearch: false,
   filterable: true,
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
@@ -646,7 +648,7 @@ defineSlots<ComboboxSlots>()
           </ComboboxAnchor>
         </template>
 
-        <ComboboxPortal :to="portalTo">
+        <ComboboxPortal :to="portalTarget">
           <ComboboxContent
             data-slot="content"
             data-selection

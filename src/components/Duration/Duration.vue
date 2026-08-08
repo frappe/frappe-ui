@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<DurationProps>(), {
 
 const model = defineModel<number | null>({ default: null })
 
-const inputRef = ref<{ el: HTMLInputElement | null } | null>(null)
+const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const isFocused = ref(false)
 const editValue = ref('')
 const internalError = ref('')
@@ -53,7 +53,7 @@ function handleFocus() {
   // round-trips through parseDuration regardless of the display `format`.
   editValue.value = formatDuration(model.value, 'short')
   internalError.value = ''
-  nextTick(() => inputRef.value?.el?.select())
+  nextTick(() => inputRef.value?.inputElement?.select())
 }
 
 function handleInput(event: Event) {
@@ -76,10 +76,10 @@ function handleBlur() {
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter') {
     event.preventDefault()
-    inputRef.value?.el?.blur()
+    inputRef.value?.inputElement?.blur()
   } else if (event.key === 'Escape') {
     cancelled.value = true
-    inputRef.value?.el?.blur()
+    inputRef.value?.inputElement?.blur()
   }
 }
 
@@ -110,5 +110,7 @@ function commit() {
   model.value = seconds
 }
 
-defineExpose<DurationExposed>({ focus: () => inputRef.value?.el?.focus() })
+defineExpose<DurationExposed>({
+  focus: (options) => inputRef.value?.focus(options),
+})
 </script>

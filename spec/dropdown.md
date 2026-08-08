@@ -61,7 +61,8 @@ Defaults:
 - `align = 'start'`
 - `offset = 4`
 - `matchTriggerWidth = false`
-- `portalTo = 'body'`
+- `portalTo = 'body'` — the fallback when neither the prop nor an embedding
+  host names a target. See [`portal-target.md`](./portal-target.md).
 
 `side` picks which side of the trigger the menu opens on, `align` how it lines
 up along that side, `offset` the gap in px, and `portalTo` where the content is

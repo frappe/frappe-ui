@@ -562,12 +562,14 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 
 | Before                                     | After                  |
 | ------------------------------------------ | ---------------------- |
+| `<Input>` (removed)                        | `<TextInput>` or `FormControl` |
 | `Rating` `:rating_from`                    | `:max`                 |
 | `Rating` `:readonly`                       | `:disabled`            |
 | `Switch` `@change`                         | `@update:modelValue`   |
 | `Switch.labelClasses`                      | `data-*` styling hooks |
 | `Checkbox.padding`                         | `padded`               |
-| `Password` `:value` + `@input` workaround  | `v-model` (now works)  |
+| `Password` `:value` prop (removed)         | `v-model`              |
+| `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
 The first five rows are **removed**, not aliased. The old names are silently
 ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
@@ -578,9 +580,55 @@ build time, so grep for these names when upgrading.
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 
-The legacy `Input` component is deprecated. Use
-[`TextInput`](./components/textinput) for text-like modes, or `Textarea` /
-`Select` / `Checkbox` for the other type modes it accepted.
+### Password — `value` prop removed
+
+`value` was a deprecated alternate way to set the password, seeding
+`v-model` on mount. It's gone. `:value` now falls through as a plain HTML
+attribute on the native `<input>` instead of seeding the model — the field
+still renders, so nothing throws or warns.
+
+```vue
+<!-- Before -->
+<Password v-model="password" :value="initialValue" />
+
+<!-- After -->
+<Password v-model="password" />
+<script setup>
+password.value = initialValue
+</script>
+```
+
+### `TextInput`, `Textarea`, `Password` — ref surface
+
+`TextInput` and `Textarea` handed back `{ el }`, a raw ref on the native
+element. It's now `{ focus, inputElement }`: call `focus(options?)` to move
+keyboard focus, and read `inputElement` for the native element itself (a
+computed, so it can't be reassigned). `Password` gains the same pair — it
+previously exposed nothing.
+
+This is silent for plain JS: `ref.value.el` becomes `undefined` at runtime
+instead of throwing. A typed ref catches it as a build-time error instead.
+
+```vue
+<!-- Before -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.el.focus({ preventScroll: true })
+}
+</script>
+
+<!-- After -->
+<TextInput ref="input" />
+<script setup>
+function focusIt() {
+  input.value.focus({ preventScroll: true })
+}
+</script>
+```
+
+`Duration` already exposed `focus()`; it now takes the same `options?`
+parameter as the rest of the family.
 
 ## Divider
 
@@ -909,6 +957,25 @@ skip `<Editor>` and drive `useEditor` yourself — see
 - **TipTap must be v3.** The v1 editor is built on TipTap 3 — pin
   `@tiptap/core`, `@tiptap/pm`, and `@tiptap/vue-3` to `^3`.
 
+## Family stylesheets (list-style.css / editor-style.css)
+
+The manual `frappe-ui/list-style.css` and `frappe-ui/editor-style.css` exports
+are removed. The `frappe-ui/list` and `frappe-ui/editor` barrels are now marked
+as side-effectful, so each family's CSS lands in your production build
+automatically when you import anything from its subpath.
+
+Delete the manual imports; there is nothing to add back:
+
+```css
+/* Before */
+@import 'frappe-ui/list-style.css';
+@import 'frappe-ui/editor-style.css';
+/* After: nothing — the CSS ships with the subpath import */
+```
+
+The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
+package`) until the lines are gone.
+
 ## Autocomplete (removed)
 
 `Autocomplete` is gone in v1. It merged single- and multi-select via the
@@ -1155,6 +1222,40 @@ Until you do, reading `this.$socket` throws with that instruction rather than
 returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
+
+## pageMetaPlugin — removed
+
+`pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
+component option still compiles — it's a plain, unread object key — but
+nothing calls it anymore, so `document.title` and the favicon stop updating.
+This is a **silent break**: no error, no warning, the page just stops
+retitling itself.
+
+| Before                                    | After                                   |
+| ------------------------------------------ | ---------------------------------------- |
+| `app.use(pageMetaPlugin)`                  | delete — nothing to install              |
+| `pageMeta() { return { title, emoji } }`   | `usePageMeta(() => ({ title, emoji }))` in `setup()` |
+
+```vue
+<!-- Before -->
+<script>
+export default {
+  pageMeta() {
+    return { title: this.pageTitle, emoji: '🌈' }
+  },
+}
+</script>
+
+<!-- After -->
+<script setup>
+import { usePageMeta } from 'frappe-ui'
+
+usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
+</script>
+```
+
+`usePageMeta` works the same everywhere — see the
+[composables page](./other/composables#usepagemeta).
 
 ## FAQ
 

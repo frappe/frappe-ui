@@ -73,7 +73,7 @@ const alignment = ref<'left' | 'center' | 'right'>('center')
 const customWidth = ref<number>(640)
 const customHeight = ref<number>(360)
 
-const urlInput = ref<HTMLInputElement>()
+const urlInput = ref<InstanceType<typeof Textarea>>()
 
 const isValidUrl = computed(() => {
   if (!embedUrl.value) return false
@@ -156,7 +156,7 @@ function openIframeDialog() {
   customHeight.value = 360
 
   nextTick(() => {
-    urlInput.value?.el?.focus()
+    urlInput.value?.focus()
   })
 }
 

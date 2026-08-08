@@ -8,8 +8,6 @@ export { default as FrappeUI } from './utils/plugin'
 export { default as FrappeUIProvider } from './components/Provider/FrappeUIProvider.vue'
 export { getConfig, setConfig } from './utils/config'
 export type { FrappeUIConfig } from './utils/config'
-export { default as pageMetaPlugin } from './utils/pageMeta.js'
-export { usePageMeta } from './utils/pageMeta'
 
 // Data fetching
 export * from './data-fetching'
@@ -46,7 +44,7 @@ export * from './components/Duration'
 export * from './components/ErrorMessage'
 export * from './components/FileUploader'
 export * from './components/FormControl'
-export { default as FormLabel } from './components/FormLabel.vue'
+export * from './components/FormLabel'
 export * from './components/MultiSelect'
 export * from './components/Password'
 export * from './components/Radio'
@@ -124,9 +122,6 @@ export { default as Card } from './components/Card.vue'
 /** @deprecated Use lucide icon names or the `Icon` component instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as FeatherIcon } from './components/FeatherIcon.vue'
-/** @deprecated Use `TextInput` or `FormControl` instead. */
-// @ts-expect-error Deprecated JS SFC compatibility export.
-export { default as Input } from './components/Input.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'
@@ -151,10 +146,8 @@ export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
 export { default as NumberChart } from './components/Charts/NumberChart.vue'
 export { default as useAxisChartOptions } from './components/Charts/axisChartOptions'
 
-// Grid layout
-export { default as GridLayout } from './components/VueGridLayout/Layout.vue'
-
 // Composables
+export { usePageMeta, type PageMeta } from './utils/pageMeta'
 export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
 export {
   shellScrollContainer,
@@ -165,6 +158,14 @@ export {
   type UseSheetDrag,
   type UseSheetDragOptions,
 } from './composables/useSheetDrag'
+
+// Embedding: name one portal target for every overlay under a Vue app
+export {
+  portalTargetKey,
+  providePortalTarget,
+  usePortalTarget,
+} from './composables/usePortalTarget'
+export type { PortalTarget } from './composables/usePortalTarget'
 
 // Directives
 export { vFocus } from './directives/focus'

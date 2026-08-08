@@ -12,6 +12,7 @@ import Button from '../Button/Button.vue'
 import LoadingIndicator from '../LoadingIndicator.vue'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
@@ -61,8 +62,9 @@ const props = withDefaults(defineProps<MultiSelectProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
 })
+
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<MultiSelectEmits>()
 const attrs = useAttrs()
@@ -459,7 +461,7 @@ defineSlots<MultiSelectSlots>()
         </button>
       </ComboboxAnchor>
 
-      <ComboboxPortal :to="portalTo">
+      <ComboboxPortal :to="portalTarget">
         <ComboboxContent
           data-slot="content"
           data-selection
