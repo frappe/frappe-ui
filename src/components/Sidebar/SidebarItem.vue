@@ -24,8 +24,7 @@
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
-      :class="isCollapsed ? 'justify-center' : 'pl-2'"
+      class="flex h-full min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -33,12 +32,11 @@
         placement="right"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
-             so it reads as a centered rail button, not a left-hugged glyph. -->
-        <span
-          class="grid shrink-0 place-items-center"
-          :class="isCollapsed && 'size-7'"
-        >
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+             and the glyph its natural size, so the icon holds one position
+             through the width animation instead of swinging to a centered
+             square and back (the whole row is already the hit target). -->
+        <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
@@ -65,8 +63,7 @@
       type="button"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
-      class="flex h-full text-left min-w-0 flex-1 items-center focus:outline-none focus-visible:ring-0"
-      :class="isCollapsed ? 'justify-center' : 'pl-2'"
+      class="flex h-full text-left min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -74,12 +71,11 @@
         placement="right"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Collapsed: the icon sits in a 28px square (matches the row height)
-             so it reads as a centered rail button, not a left-hugged glyph. -->
-        <span
-          class="grid shrink-0 place-items-center"
-          :class="isCollapsed && 'size-7'"
-        >
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+             and the glyph its natural size, so the icon holds one position
+             through the width animation instead of swinging to a centered
+             square and back (the whole row is already the hit target). -->
+        <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
             <SidebarItemIcon :icon="icon" />
           </slot>
@@ -127,13 +123,21 @@ import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarItemIcon from './SidebarItemIcon.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
-// `active`/`isActive` must default to `undefined`, not Vue's implicit boolean
-// `false` — "not passed" and "passed false" are different states here: absence
-// falls through to the deprecated alias and then to route inference.
+// `active` must default to `undefined`, not Vue's implicit boolean `false` —
+// "not passed" and "passed false" are different states here: absence falls
+// through to route inference.
 const props = withDefaults(defineProps<SidebarItemProps>(), {
   active: undefined,
-  isActive: undefined,
 })
+
+defineSlots<{
+  /** Leading icon or avatar. Overrides the `icon` prop. */
+  prefix?: () => any
+  /** The label region. Overrides the `label` prop; put inline adornments here. */
+  default?: () => any
+  /** The trailing zone — a sibling of the link/button, not nested inside it. Overrides the `suffix` prop. */
+  suffix?: () => any
+}>()
 
 const isCollapsed = inject(
   sidebarCollapsedKey,
@@ -171,11 +175,10 @@ const resolvedRoute = computed(() =>
   props.to && globals?.$router ? globals.$router.resolve(props.to) : null,
 )
 
-// Explicit `active` (or the deprecated `isActive`) wins; otherwise infer from
-// the current route so config-driven items light up without extra wiring.
+// Explicit `active` wins; otherwise infer from the current route so
+// router-driven items light up without extra wiring.
 const resolvedActive = computed(() => {
   if (props.active !== undefined) return props.active
-  if (props.isActive !== undefined) return props.isActive
 
   const target = resolvedRoute.value
   const current = globals?.$route

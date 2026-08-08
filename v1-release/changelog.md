@@ -9,6 +9,41 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Sidebar — deprecated config API removed (breaking)
+
+Per ADR-0008, every member marked `@deprecated` is deleted. `Sidebar` is now a
+bare composable frame: `SidebarHeader` / `SidebarSection` / `SidebarLabel` /
+`SidebarItem` compose in the default slot, matching the direction agreed in
+`v1-release/plan.md`.
+
+- **Breaking, silent:** `Sidebar`'s `header` and `sections` config-object props
+  are gone. Old code still compiles — Vue drops them as inert attrs — but the
+  sidebar renders empty instead of the configured header/sections. Compose
+  `SidebarHeader` and `SidebarLabel` + `SidebarItem` (or `SidebarSection`)
+  directly in the default slot.
+- **Breaking, silent:** `Sidebar`'s `#header-logo` and `#footer-items` slots
+  are gone (they only existed to reach into the config-object layout). Old
+  `<template #header-logo>` / `#footer-items>` content stops rendering. Put
+  that markup directly in the default slot instead.
+- **Breaking, silent:** `SidebarSection`'s `items` prop and `#sidebar-item`
+  scoped slot are gone. It's now a plain collapsible-group wrapper — `label`,
+  `collapsible`, `v-model:collapsed` — whose children are `SidebarItem`s
+  composed directly in its default slot, instead of an `items` array plus a
+  slot to customize each row.
+- **Breaking, silent:** `SidebarItemProps.isActive` (alias for `active`) and
+  `.condition` (config-object visibility filter) are gone. Use `active`; use
+  `v-if` on the composed `SidebarItem` instead of `condition`.
+- **Breaking, silent:** `SidebarHeader`'s `#logo` slot is renamed to `#prefix`
+  (P6 — no type-specific slot names when a generic one covers them). Old
+  `<template #logo>` content stops rendering; the default logo/initial box
+  shows instead.
+- `SidebarItem`'s collapsed-rail icon no longer swaps to a centered square and
+  back while the sidebar's width animates — it holds one position through the
+  transition (also fixes the icon sitting 2px off the rail's center line).
+- `SidebarSection`'s collapsible label is now a real `<button>` with
+  `aria-expanded` / `aria-controls`, keyboard-operable (was a `<div>` with a
+  click handler and no keyboard path).
+
 ### ListView — stays, not deprecated
 
 `ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended

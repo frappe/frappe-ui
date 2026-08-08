@@ -672,6 +672,51 @@ parameter as the rest of the family.
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## Sidebar
+
+`Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /
+`SidebarLabel` / `SidebarItem` in its default slot instead of passing
+config-object props. See the [Sidebar](./components/sidebar) component page
+for the full API.
+
+| Before                                    | After                                             |
+| ------------------------------------------ | -------------------------------------------------- |
+| `:header="{ title, subtitle, menuItems }"` | `<SidebarHeader :title :subtitle :menu-items />` as a child |
+| `:sections="[{ label, items }]"`           | `<SidebarLabel>` + `<SidebarItem>` (or `<SidebarSection>`) as children |
+| `<template #header-logo>`                  | `<SidebarHeader>`'s `#prefix` slot                |
+| `<template #footer-items>`                 | plain markup in the default slot                  |
+| `<SidebarSection :items="rows">`           | `<SidebarSection>` with `<SidebarItem>` children  |
+| `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed |
+| `item.condition`                           | `v-if` on the composed `<SidebarItem>`            |
+| `SidebarItem.isActive`                     | `SidebarItem.active`                              |
+| `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
+
+```vue
+<!-- Before -->
+<Sidebar
+  :header="{ title: 'Frappe CRM', subtitle: 'crm.frappe.io', menuItems }"
+  :sections="[
+    { label: '', items: [{ label: 'Leads', to: '/leads', icon: 'lucide-user-plus' }] },
+    { label: 'Views', collapsible: true, items: viewItems },
+  ]"
+/>
+
+<!-- After -->
+<Sidebar>
+  <SidebarHeader title="Frappe CRM" subtitle="crm.frappe.io" :menu-items="menuItems" />
+  <div class="flex-1 overflow-y-auto px-2">
+    <SidebarItem label="Leads" to="/leads" icon="lucide-user-plus" />
+    <SidebarSection label="Views" collapsible>
+      <SidebarItem v-for="item in viewItems" :key="item.label" v-bind="item" />
+    </SidebarSection>
+  </div>
+</Sidebar>
+```
+
+`Sidebar` no longer wraps the middle list in a scroll container or applies any
+padding — that's app-owned now (see the component page's Collapse section for
+the full composition contract).
+
 ## Data fetching (useDoctype / useList)
 
 The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
