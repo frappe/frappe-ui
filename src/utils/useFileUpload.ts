@@ -26,6 +26,12 @@ export interface UploadOptions {
   }) => void
 }
 
+/**
+ * Resolves whether an upload is private. `private` wins over `is_private`;
+ * unset resolves to **private** — a file with no stated intent is treated as
+ * access-controlled, not world-readable. Pass `private: false` for
+ * intentionally public files.
+ */
 export function isPrivateUpload(options: UploadOptions = {}) {
   if (options.private !== undefined) return options.private
   if (options.is_private !== undefined) {
@@ -35,7 +41,7 @@ export function isPrivateUpload(options: UploadOptions = {}) {
       options.is_private === '1'
     )
   }
-  return false
+  return true
 }
 
 export interface UploadState {
@@ -94,25 +100,22 @@ function extractUploadErrorMessage(error: any): string {
   return 'Upload failed'
 }
 
-export function useFileUpload() {
-  const state = reactive<UploadState>({
+function createUploadState(): UploadState {
+  return {
     uploading: false,
     progress: 0,
     uploaded: 0,
     total: 0,
     error: null,
     result: null,
-  })
+  }
+}
+
+export function useFileUpload() {
+  const state = reactive<UploadState>(createUploadState())
 
   // Function to reset the state
-  const reset = () => {
-    state.uploading = false
-    state.progress = 0
-    state.uploaded = 0
-    state.total = 0
-    state.error = null
-    state.result = null
-  }
+  const reset = () => Object.assign(state, createUploadState())
 
   // Computed values for convenience
   const isUploading = computed(() => state.uploading)
@@ -122,7 +125,7 @@ export function useFileUpload() {
 
   return {
     upload: (file: File, options: UploadOptions = {}) =>
-      upload(file, options, state, reset),
+      uploadWithState(file, options, state, reset),
     reset,
     state,
     isUploading,
@@ -132,11 +135,26 @@ export function useFileUpload() {
   }
 }
 
-async function upload(
+/**
+ * Uploads a file to Frappe's upload endpoint. Standalone — no reactive state
+ * required; call this directly when you only need the promise (e.g.
+ * `onProgress` in `options` covers progress). `useFileUpload()` wraps the
+ * same request with a reactive `state` object for components that want
+ * progress/error tracking without threading a promise through their own
+ * refs.
+ */
+export function upload(
   file: File | null,
   options: UploadOptions = {},
-  state: UploadState,
-  reset: () => void,
+): Promise<UploadedFile> {
+  return uploadWithState(file, options)
+}
+
+async function uploadWithState(
+  file: File | null,
+  options: UploadOptions = {},
+  state: UploadState = createUploadState(),
+  reset: () => void = () => Object.assign(state, createUploadState()),
 ): Promise<UploadedFile> {
   reset()
   const limitMessage = fileSizeLimitMessage(file)
@@ -301,5 +319,3 @@ declare global {
     csrf_token?: string
   }
 }
-
-export { upload }

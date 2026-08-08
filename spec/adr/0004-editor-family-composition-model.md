@@ -28,6 +28,20 @@ needs no per-item icon plumbing. The wording in points 2 and 5 and in Consequenc
 below is updated to match; the rest of the decision (one component, one engine,
 kits, presets, no ready-mades) stands.
 
+## Amendment (implementation): building blocks default to an injected editor
+
+The spec originally said building blocks take no provide/inject, no implicit
+defaults — every one needs an explicit `editor` prop. Implementation added one
+narrow exception: `<Editor>` publishes its live editor ref via `provide`/`inject`
+(`editor-context.ts`), and each building block's `editor` prop is now optional —
+it resolves to the injected value when the prop is omitted, and an explicit
+`:editor` (even `null`) always wins over the injection. This is additive, not a
+contract change: the building blocks stay usable standalone at L4 with an
+explicit `:editor`, which is what keeps them composable outside `<Editor>` (the
+Primitives recipe). The win is ergonomic — the common case
+(`<Editor v-slot="{ editor }">` composing `EditorContent` + menus in the slot)
+no longer needs `:editor="editor"` threaded onto every building block by hand.
+
 ## Context
 
 The v0 `TextEditor` is a monolith. Every consumer app (gameplan, helpdesk, drive, crm, insights) wraps it to peel off defaults it can't control: auto-loaded extensions, frappe-coupled upload, fixed menu presets, opinionated layout slots. A bench-wide usage audit showed 4 of 5 apps maintain their own wrapper, five copies of the same toolbar-button array exist in the fleet, and most apps fight the same defaults in slightly different ways. Static imports in `TextEditor.vue` also defeat tree-shaking — everyone pays for every extension.

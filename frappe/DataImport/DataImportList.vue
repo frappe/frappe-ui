@@ -11,7 +11,7 @@
 			</div>
             <Button variant="solid" @click="showModal = true">
                 <template #prefix>
-                    <FeatherIcon name="plus" class="size-4 stroke-1.5" />
+                    <span class="lucide-plus size-4" aria-hidden="true" />
                 </template>
                 Import
             </Button>
@@ -60,7 +60,7 @@
             <div class="my-5 flex justify-center">
                 <Button v-if="props.dataImports.hasNextPage" @click="props.dataImports.next()">
                     <template #prefix>
-                        <FeatherIcon name="refresh-cw" class="size-4 stroke-1.5" />
+                        <span class="lucide-refresh-cw size-4" aria-hidden="true" />
                     </template>
                     Load More
                 </Button>
@@ -106,7 +106,6 @@ import type { BadgeProps } from '../../src/components/Badge/types'
 import { toast } from "../../src/components/Toast/toast"
 import Button from '../../src/components/Button/Button.vue'
 import Dialog from '../../src/components/Dialog/Dialog.vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import FormControl from '../../src/components/FormControl/FormControl.vue'
 import Link from "../Link/Link.vue"
 

@@ -10,4 +10,9 @@
 
 <script setup lang="ts">
 import PageHeaderBase from './PageHeaderBase.vue'
+
+defineSlots<{
+  /** The header's contents — title, breadcrumbs, actions. */
+  default?: () => any
+}>()
 </script>

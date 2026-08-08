@@ -218,7 +218,7 @@ Shipped kits (members **tentative** — final lists settle in implementation):
 
 ## 4. Building-block components
 
-Each takes an unwrapped `editor: Editor | null` prop (templates auto-unwrap the `useEditor` ref). No provide/inject, no implicit defaults. Each sets a stable `data-slot` for styling (P10).
+Each takes an unwrapped `editor: Editor | null` prop (templates auto-unwrap the `useEditor` ref) — required at L4, since nothing there provides it. Inside `<Editor>`'s slot the prop is optional: `<Editor>` provides its live editor ref via context, and a building block with no explicit `:editor` resolves to that; an explicit `:editor` (even `null`) always wins over the injection. See [ADR-0004](./adr/0004-editor-family-composition-model.md)'s implementation amendment. Each sets a stable `data-slot` for styling (P10).
 
 ### `EditorContent`
 

@@ -8,7 +8,7 @@ import MediaNodeView from '../components/MediaNodeView.vue'
 import { Plugin, Selection, Transaction, EditorState } from '@tiptap/pm/state'
 import { EditorView } from '@tiptap/pm/view'
 import { Node } from '@tiptap/pm/model'
-import { fileToBase64 } from '../../../index'
+import fileToBase64 from '../../../utils/file-to-base64'
 import { UploadedFile } from '../../../utils/useFileUpload'
 import { localFileMap } from './image/image-extension'
 

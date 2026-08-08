@@ -7,13 +7,13 @@
   const slotsData = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The routed page content, placed in the native-scrolling content area.',
+    type: 'any'
   },
   {
     name: 'nav',
-    description: '',
-    type: '{}'
+    description: 'The bottom navigation — usually a `MobileNav`.',
+    type: 'any'
   }
 ]
 </script>

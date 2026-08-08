@@ -20,9 +20,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
 import { Button } from '../../index'
-import { warnDeprecated } from '../../utils/warnDeprecated'
 import type { DividerProps } from './types'
 
 const props = withDefaults(defineProps<DividerProps>(), {
@@ -30,14 +29,8 @@ const props = withDefaults(defineProps<DividerProps>(), {
   position: 'center',
 })
 
-watchEffect(() => {
-  if (props.action?.handler) {
-    warnDeprecated('Divider.action.handler', 'Divider.action.onClick')
-  }
-})
-
 const actionOnClick = computed(() => {
-  return props.action?.onClick ?? props.action?.handler
+  return props.action?.onClick
 })
 
 const dividerClasses = computed(() => {

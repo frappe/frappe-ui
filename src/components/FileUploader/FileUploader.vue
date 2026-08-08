@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div data-slot="root" :data-state="dataState">
     <input
       ref="input"
       type="file"
@@ -20,9 +20,12 @@
         openFileSelector,
       }"
     >
-      <Button @click="openFileSelector" :loading="uploading">
-        {{ uploading ? `Uploading ${progress}%` : 'Upload File' }}
-      </Button>
+      <div>
+        <Button @click="openFileSelector" :loading="uploading">
+          {{ uploading ? `Uploading ${progress}%` : 'Upload File' }}
+        </Button>
+        <ErrorMessage :message="error ?? undefined" class="mt-1" />
+      </div>
     </slot>
   </div>
 </template>
@@ -30,6 +33,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Button } from '../Button'
+import { ErrorMessage } from '../ErrorMessage'
 import FileUploadHandler from '../../utils/fileUploadHandler'
 import type {
   FileUploaderEmits,
@@ -44,7 +48,7 @@ defineOptions({
 })
 
 const props = withDefaults(defineProps<FileUploaderProps>(), {
-  uploadArgs: undefined,
+  private: true,
   validateFile: undefined,
 })
 
@@ -58,7 +62,7 @@ const uploader = ref<FileUploadHandler | null>(null)
 const uploading = ref(false)
 const uploaded = ref(0)
 const total = ref(0)
-const error = ref<unknown>(null)
+const error = ref<string | null>(null)
 const message = ref('')
 const file = ref<File | null>(null)
 const finishedUploading = ref(false)
@@ -78,17 +82,22 @@ const success = computed(() => {
   return finishedUploading.value && !error.value
 })
 
-const uploadOptions = computed<UploadOptions>(() => {
-  const uploadArgs = props.uploadArgs || {}
-  if (uploadArgs.private !== undefined || uploadArgs.is_private !== undefined) {
-    return uploadArgs
-  }
-  return { ...uploadArgs, private: true }
+const dataState = computed(() => {
+  if (uploading.value) return 'uploading'
+  if (success.value) return 'success'
+  if (error.value) return 'error'
+  return 'idle'
 })
 
-function inputRef() {
-  return input.value
-}
+const uploadOptions = computed<UploadOptions>(() => ({
+  private: props.private,
+  folder: props.folder,
+  doctype: props.doctype,
+  docname: props.docname,
+  fieldname: props.fieldname,
+  upload_endpoint: props.uploadEndpoint,
+  optimize: props.optimize,
+}))
 
 function openFileSelector() {
   input.value?.click()
@@ -105,7 +114,11 @@ async function onFileAdd(event: Event) {
 
   const validationError = await validateSelectedFile(selectedFile)
   if (validationError) {
-    error.value = validationError
+    error.value =
+      validationError instanceof Error
+        ? validationError.message
+        : validationError
+    emit('failure', validationError)
     return
   }
 
@@ -176,6 +189,4 @@ function getUploadErrorMessage(uploadError: unknown) {
   }
   return 'Error Uploading File'
 }
-
-defineExpose({ inputRef })
 </script>

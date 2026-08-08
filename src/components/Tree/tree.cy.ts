@@ -174,6 +174,27 @@ describe('Tree', () => {
       })
   })
 
+  it('freezes expand/collapse and drag when disabled', () => {
+    cy.mount(Tree, {
+      props: {
+        nodes: makeNodes(),
+        nodeKey: 'id',
+        disabled: true,
+        draggable: true,
+      },
+    })
+    cy.contains('Node A').should('exist')
+    cy.get('[data-slot="toggle"]').first().click()
+    cy.contains('Node A').should('exist') // click had no effect
+    cy.contains('[role="treeitem"]', 'Root').should(
+      'have.attr',
+      'data-disabled',
+    )
+    cy.get('[data-slot="row"]')
+      .first()
+      .should('have.attr', 'draggable', 'false')
+  })
+
   it('renders connector guides', () => {
     cy.mount(Tree, {
       props: {

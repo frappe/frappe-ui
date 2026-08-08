@@ -8,7 +8,7 @@
         :debounce="300"
       >
         <template #prefix>
-          <FeatherIcon name="search" class="h-4 text-ink-gray-5" />
+          <span class="lucide-search h-4 text-ink-gray-5" aria-hidden="true" />
         </template>
       </TextInput>
     </div>
@@ -17,7 +17,7 @@
     >
       <div>All articles</div>
       <Button variant="ghost" @click="openDocs">
-        <FeatherIcon name="arrow-up-right" class="h-4 text-ink-gray-5" />
+        <span class="lucide-arrow-up-right h-4 text-ink-gray-5" aria-hidden="true" />
       </Button>
     </div>
     <div class="flex flex-col gap-1.5 overflow-y-auto">
@@ -31,9 +31,10 @@
           @click="a.opened = !a.opened"
         >
           <div class="flex items-center gap-2">
-            <FeatherIcon
-              :name="a.opened ? 'chevron-down' : 'chevron-right'"
+            <span
+              :class="a.opened ? 'lucide-chevron-down' : 'lucide-chevron-right'"
               class="h-4 text-ink-gray-5"
+              aria-hidden="true"
             />
             <div class="text-base text-ink-gray-8">{{ a.title }}</div>
           </div>
@@ -46,14 +47,14 @@
             @click="() => openDoc(subArticle.name)"
           >
             <div class="flex items-center gap-2">
-              <FeatherIcon name="file-text" class="h-4 text-ink-gray-5" />
+              <span class="lucide-file-text h-4 text-ink-gray-5" aria-hidden="true" />
               <div class="text-base text-ink-gray-8">
                 {{ subArticle.title }}
               </div>
             </div>
-            <FeatherIcon
-              name="arrow-up-right"
-              class="h-4 hidden group-hover:flex text-ink-gray-5"
+            <span
+              class="lucide-arrow-up-right h-4 hidden group-hover:flex text-ink-gray-5"
+              aria-hidden="true"
             />
           </div>
         </div>
@@ -63,7 +64,6 @@
 </template>
 <script setup>
 import Button from '../../src/components/Button/Button.vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import TextInput from '../../src/components/TextInput/TextInput.vue'
 import { ref, computed, onMounted } from 'vue'
 

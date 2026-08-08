@@ -19,3 +19,12 @@ export interface SettingsDialogEmits {
   /** Fired when the dialog is opened or closed. */
   'update:modelValue': [value: boolean]
 }
+
+/**
+ * Shared with `ScrollArea` (imperative-api.md §2.5) once that component's own
+ * sweep types its `defineExpose`. Kept local to this family until then.
+ */
+export interface SettingsBodyExposed {
+  /** The element that actually scrolls. `null` before mount. */
+  viewportElement: HTMLElement | null
+}

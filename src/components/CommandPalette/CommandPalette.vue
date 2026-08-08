@@ -1,112 +1,107 @@
 <template>
-  <template>
-    <Dialog
-      v-model="show"
-      size="xl"
-      position="top"
-      bare
-      @after-leave="searchQuery = ''"
-    >
-      <template #default>
-        <div>
-          <Combobox nullable @update:model-value="select">
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
-                <span class="lucide-search size-4" aria-hidden="true" />
-              </div>
-              <ComboboxInput
-                placeholder="Search"
-                class="w-full border-none bg-transparent py-3 pl-11.5 pr-4.5 text-base text-ink-gray-8 placeholder-ink-gray-4 focus:ring-0"
-                v-model="searchQuery"
-                autocomplete="off"
-              />
+  <Dialog
+    v-model:open="open"
+    size="xl"
+    position="top"
+    bare
+    @after-leave="searchQuery = ''"
+  >
+    <template #default>
+      <div>
+        <Combobox nullable @update:model-value="select">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-4.5">
+              <span class="lucide-search size-4" aria-hidden="true" />
             </div>
-            <ComboboxOptions
-              class="max-h-96 overflow-auto border-t border-gray-100"
-              static
-              :hold="true"
+            <ComboboxInput
+              placeholder="Search"
+              class="w-full border-none bg-transparent py-3 pl-11.5 pr-4.5 text-base text-ink-gray-8 placeholder-ink-gray-4 focus:ring-0"
+              v-model="searchQuery"
+              autocomplete="off"
+            />
+          </div>
+          <ComboboxOptions
+            class="max-h-96 overflow-auto border-t border-gray-100"
+            static
+            :hold="true"
+          >
+            <div
+              class="mb-2 mt-4.5 first:mt-3"
+              v-for="group in groups"
+              :key="group.title"
             >
               <div
-                class="mb-2 mt-4.5 first:mt-3"
-                v-for="(group, index) in groups"
-                :key="group.title"
+                class="mb-2.5 px-4.5 text-base text-ink-gray-5"
+                v-if="!group.hideTitle"
               >
-                <div
-                  class="mb-2.5 px-4.5 text-base text-ink-gray-5"
-                  v-if="!group.hideTitle"
-                >
-                  {{ group.title }}
-                </div>
-                <ComboboxOption
-                  v-for="item in group.items"
-                  :key="item.name"
-                  v-slot="{ active }"
-                  :value="item"
-                  class="px-2.5"
-                  :disabled="item.disabled"
-                >
-                  <component
-                    :is="group.component"
-                    :item="item"
-                    :active="active"
-                  />
-                </ComboboxOption>
+                {{ group.title }}
               </div>
-            </ComboboxOptions>
-          </Combobox>
-        </div>
-      </template>
-    </Dialog>
-  </template>
+              <ComboboxOption
+                v-for="item in group.items"
+                :key="item.name"
+                v-slot="{ active }"
+                :value="item"
+                class="px-2.5"
+                :disabled="item.disabled"
+              >
+                <component
+                  :is="group.component ?? CommandPaletteItem"
+                  :item="item"
+                  :active="active"
+                />
+              </ComboboxOption>
+            </div>
+          </ComboboxOptions>
+        </Combobox>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   Combobox,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
 } from '@headlessui/vue'
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import Dialog from '../Dialog/Dialog.vue'
+import CommandPaletteItem from './CommandPaletteItem.vue'
+import { useShortcut } from '../../composables/useShortcut'
+import type { CommandPaletteItemData, CommandPaletteProps } from './types'
 
-const emit = defineEmits(['update:show', 'update:searchQuery', 'select'])
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  searchQuery: { type: String, default: '' },
-  groups: { type: Array, default: () => [] },
+defineOptions({ name: 'CommandPalette' })
+
+withDefaults(defineProps<CommandPaletteProps>(), {
+  groups: () => [],
 })
 
-const show = computed({
-  get: () => props.show,
-  set: (value) => emit('update:show', value),
-})
+const emit = defineEmits<{
+  select: [item: CommandPaletteItemData]
+}>()
 
-const searchQuery = computed({
-  get: () => props.searchQuery,
-  set: (value) => emit('update:searchQuery', value),
-})
+const open = defineModel<boolean>('open', { default: false })
+const searchQuery = defineModel<string>('searchQuery', { default: '' })
 
-function select(item) {
+function select(item: CommandPaletteItemData | null) {
+  if (!item) return
   emit('select', item)
-  show.value = false
+  open.value = false
 }
 
-function keydownWatcher(e) {
-  if (e.key === 'Escape' && show.value) {
-    show.value = false
-    e.preventDefault()
-  }
+// Cmd/Ctrl+K opens the palette. Fires while a normal input is focused (so it
+// works from anywhere on the page), but not while the rich text editor has
+// focus — Mod+K is also its own shortcut there.
+useShortcut({
+  key: 'k',
+  ctrl: true,
+  description: 'Open command palette',
+  allowInInput: true,
+  condition: () => !document.activeElement?.closest('.ProseMirror'),
+  handler: () => {
+    open.value = true
+  },
+})
 
-  if (
-    e.key === 'k' &&
-    (e.ctrlKey || e.metaKey) &&
-    !e.target.classList.contains('ProseMirror')
-  ) {
-    show.value = true
-    e.preventDefault()
-  }
-}
-
-onMounted(() => window.addEventListener('keydown', keydownWatcher))
-onBeforeUnmount(() => window.removeEventListener('keydown', keydownWatcher))
+// Escape-to-close is handled natively by Dialog (reka-ui DialogContent).
 </script>

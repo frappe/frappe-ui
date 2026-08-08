@@ -1,20 +1,9 @@
-<script setup>
-defineProps({
-  item: { type: Object, required: true },
-  active: { type: Boolean, default: false },
-})
-</script>
-
 <template>
   <div
     class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base-medium text-ink-gray-8"
     :class="{ 'bg-surface-gray-2': active }"
   >
-    <component
-      :is="item.icon"
-      v-if="item.icon"
-      class="mr-3 h-4 w-4 text-ink-gray-7"
-    />
+    <OptionIcon v-if="item.icon" :icon="item.icon" class="mr-3" />
     <span class="overflow-hidden text-ellipsis whitespace-nowrap">
       {{ item.title }}
     </span>
@@ -26,3 +15,17 @@ defineProps({
     </span>
   </div>
 </template>
+
+<script setup lang="ts">
+import OptionIcon from '../shared/selection/OptionIcon.vue'
+import type { CommandPaletteItemData } from './types'
+
+defineOptions({ name: 'CommandPaletteItem' })
+
+defineProps<{
+  /** The item to render. */
+  item: CommandPaletteItemData
+  /** Whether this item is the currently highlighted (keyboard/hover) option. */
+  active?: boolean
+}>()
+</script>

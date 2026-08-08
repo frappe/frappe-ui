@@ -72,7 +72,9 @@ async function rename(name, newName) {
   `cacheKey` shows the cached value immediately while it refetches in the
   background.
 - `staleOnError` — when `true` and `cacheKey` is set, a failed refetch keeps
-  showing the last cached `data` instead of clearing it. Defaults to `false`.
+  showing the last cached `data` instead of clearing it. Does not apply when
+  the failure is a Frappe error response (`FrappeResponseError`) — that still
+  clears the cache. Defaults to `false`.
 - `transform` — receives the raw response data and returns the value `data`
   should hold. Return `undefined` to leave the response untouched.
 - `beforeSubmit` — runs before a `submit()` call sends its request. Use it for

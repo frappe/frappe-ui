@@ -4,9 +4,16 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const commandPaletteProps = [
   {
-    name: 'show',
+    name: 'groups',
+    description: 'Groups of items to search and pick from.',
+    required: false,
+    type: 'CommandPaletteGroup[]',
+    default: '[]'
+  },
+  {
+    name: 'open',
     description: '',
     required: false,
     type: 'boolean',
@@ -17,38 +24,52 @@
     description: '',
     required: false,
     type: 'string',
-    default: '\'\''
-  },
-  {
-    name: 'groups',
-    description: '',
-    required: false,
-    type: 'unknown[]',
-    default: '[]'
+    default: '""'
   }
 ]
 
-  const emitsData = [
+  const commandPaletteEmits = [
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
+  },
   {
     name: 'select',
     description: '',
-    type: 'any[]'
-  },
-  {
-    name: 'update:show',
-    description: 'Fired when the show changes.',
-    type: 'any[]'
+    type: '[item: CommandPaletteItemData]'
   },
   {
     name: 'update:searchQuery',
     description: 'Fired when the search query changes.',
-    type: 'any[]'
+    type: '[value: string]'
+  }
+]
+
+  const commandPaletteItemProps = [
+  {
+    name: 'item',
+    description: 'The item to render.',
+    required: true,
+    type: 'CommandPaletteItemData'
+  },
+  {
+    name: 'active',
+    description: 'Whether this item is the currently highlighted (keyboard/hover) option.',
+    required: false,
+    type: 'boolean'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable name="CommandPalette" :data="propsData"/>
+### CommandPalette
 
-<EmitsTable :data="emitsData"/>
+<PropsTable name="CommandPalette" :data="commandPaletteProps"/>
+
+<EmitsTable :data="commandPaletteEmits"/>
+
+### CommandPaletteItem
+
+<PropsTable folder="CommandPalette" name="CommandPaletteItem" :data="commandPaletteItemProps"/>

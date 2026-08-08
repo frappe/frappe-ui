@@ -99,7 +99,9 @@ async function close(name) {
   in memory and IndexedDB under that key, shown immediately on the next
   `useList` with the same key while it refetches in the background.
 - `staleOnError` — when `true` and `cacheKey` is set, a failed refetch keeps
-  showing the last cached `data` instead of clearing it. Defaults to `false`.
+  showing the last cached `data` instead of clearing it. Does not apply when
+  the failure is a Frappe error response (`FrappeResponseError`) — that still
+  clears the cache. Defaults to `false`.
 - `initialData` — the value `data` holds before the first response.
 - `immediate` — fire the first request automatically. Defaults to `true`.
 - `refetch` — automatically refetch when a reactive filter/sort dependency
