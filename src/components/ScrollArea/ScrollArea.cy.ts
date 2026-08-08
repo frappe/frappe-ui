@@ -2,6 +2,15 @@ import { h } from 'vue'
 import ScrollArea from './ScrollArea.vue'
 
 describe('<ScrollArea />', () => {
+  // reka-ui's ScrollArea uses a ResizeObserver internally to track content
+  // size. Mounting/resizing several times in one test can trigger the
+  // browser's benign "ResizeObserver loop completed with undelivered
+  // notifications" warning, which Cypress otherwise treats as a fatal
+  // uncaught exception. It carries no actual failure.
+  Cypress.on('uncaught:exception', (err) => {
+    if (err.message.includes('ResizeObserver loop')) return false
+  })
+
   it('renders the default slot content', () => {
     cy.mount(ScrollArea, {
       slots: { default: () => h('div', { 'data-test': 'content' }, 'Hello') },
