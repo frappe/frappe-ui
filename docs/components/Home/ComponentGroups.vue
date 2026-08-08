@@ -40,7 +40,7 @@ const componentGroups = {
   },
   "DateTime": {
     component: Datetime,
-    list: ["Calendar", "DatePicker", "MonthPicker", "TimePicker"],
+    list: ["Calendar", "DatePicker", "TimePicker"],
   },
   "Overlays": {
     component: Overlays,

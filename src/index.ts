@@ -133,8 +133,6 @@ export { default as FeatherIcon } from './components/FeatherIcon.vue'
 /** @deprecated Use list primitives from `frappe-ui/list` or app-owned row markup instead. */
 // @ts-expect-error Deprecated JS SFC compatibility export.
 export { default as ListItem } from './components/ListItem.vue'
-/** @deprecated Use `Select` for month picking instead. */
-export * from './components/MonthPicker'
 /** @deprecated Use the imperative `toast(...)` API instead. The `<Toast />` SFC will be removed in a future major. */
 export { default as Toast } from './components/Toast/Toast.vue'
 /** @deprecated Use `Select` with `useColorScheme` instead. */

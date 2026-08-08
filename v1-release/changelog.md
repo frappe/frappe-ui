@@ -224,22 +224,21 @@ Before/after for the silent breaks is in the
 popover-trigger vocabulary used by `Combobox` / `Dropdown` / `Select`.
 
 - `side` (default `'bottom'`) + `align` (default `'start'`) + `offset`
-  (default `4`) replace `placement` (deprecated alias).
-- `keepOpen` (default `false`) replaces `autoClose` (deprecated, inverse).
+  (default `4`) replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed, inverse).
 - `typeable` (default `true`) replaces picker-level `readonly` and
-  `allowCustom` (both deprecated). `:typeable="false"` blocks typing while
+  `allowCustom` (both removed). `:typeable="false"` blocks typing while
   keeping the popover interactive.
 - Constraints: `min?: string` and `max?: string` (`YYYY-MM-DD`, plus
   `YYYY-MM-DD HH:mm:ss` on `DateTimePicker`), and
   `isDateUnavailable?: (date: Dayjs) => boolean` for arbitrary disabling.
   Min/max and the predicate compose. On `DateTimePicker`,
-  `minDateTime`/`maxDateTime` are deprecated aliases.
+  `minDateTime`/`maxDateTime` are removed in favor of `min`/`max`.
 - `v-model:open` supported on all three pickers via `open` + `update:open`.
 - `openOnFocus` (default `false`) and `openOnClick` (default `true`) let
   consumers opt out of either trigger path. Same defaults applied to
   `Combobox` for parity.
-- `#trigger` is the canonical custom-trigger slot; `#target` is a
-  deprecated alias.
+- `#trigger` is the canonical custom-trigger slot; `#target` is removed.
 - `DateRangePicker.clearable` now defaults to `true`; footer hides when
   there is nothing to clear. Live hover preview while picking the end
   date and a stable trigger width derived from `format` were added in the
@@ -295,15 +294,18 @@ and close from `@update:modelValue`, or render an "Apply" button in
 
 Same vocabulary as the DatePicker family plus a flexible parser.
 
-- `side` / `align` / `offset` replace `placement`.
-- `keepOpen` (default `false`) replaces `autoClose`.
-- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`.
+- `side` / `align` / `offset` replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed).
+- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`
+  (both removed).
 - `v-model:open` via `open` + `update:open`; new `openOnFocus` (default
   `false`) and `openOnClick` (default `true`) props.
 - Flexible typed input: `"3pm"`, `"3.30pm"`, `"1500"`, `"9:30:15 am"`
   parse to canonical `HH:mm[:ss]`.
-- `min` / `max` replace `minTime` / `maxTime` (deprecated aliases).
-- `scrollMode` is deprecated; list is always centered on the selection.
+- `min` / `max` replace `minTime` / `maxTime` (removed).
+- `scrollMode` is removed; list is always centered on the selection.
+- Template ref exposes only `focus()` (ADR-0012). `selectAll()` and
+  `blurInput()`, dead members with no callers, are removed.
 
 ### DatePicker family — keyboard navigation
 
@@ -325,11 +327,35 @@ and leaves the grid as a single unit. Custom `#trigger` slots opt in
 automatically — any open path moves focus into the grid since a
 non-`TextInput` trigger has no typing context.
 
-### DatePicker family — legacy composable deprecated
+### DatePicker family — legacy composable removed
 
 `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
-`getDaysInMonth`, `isLeapYear`) are not used by any picker component and
-are not part of the v1 API. They remain exported through v1.x and warn.
+`getDaysInMonth`, `isLeapYear`) were not used by any picker component and
+were not part of the v1 API. Deleted outright — the import fails, so the
+break is loud.
+
+### DatePicker / TimePicker family — deprecated aliases removed (ADR-0008)
+
+The back-compat aliases these components carried through the betas are
+deleted, not kept as warn-and-map shims — per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+deprecated member ships in `1.0.0`. Before/afters in the
+[migration guide](../docs/content/docs/migration.md#datepicker--timepicker-family).
+
+- **`placement`, `autoClose`, `allowCustom`, picker-level `readonly`,
+  `inputClass`, `value` prop removed.** All silent: a leftover prop lands as
+  an inert extra attribute instead of doing anything.
+- **`#target` slot removed.** Content in a leftover `<template #target>`
+  silently stops rendering. Use `#trigger`.
+- **`DateTimePicker.minDateTime`/`maxDateTime` and
+  `TimePicker.minTime`/`maxTime` removed.** Silent: the constraint just stops
+  being enforced. Use `min`/`max`.
+- **`TimePicker.scrollMode` removed.** Silent; the list is always centered.
+
+`change` stays as a supported second emit alongside `update:modelValue` —
+it was never deprecated on `TimePicker`, and `DateTimePicker` depends on it
+internally, so removing it from the other two pickers would have been an
+inconsistent, unforced break.
 
 ### Input family — shared labeling contract
 
@@ -456,10 +482,15 @@ a bare `src/components/FormLabel.vue`, matching the rest of the input
 family. It gains `types.ts`, tests, stories, and a docs page. The import
 path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
 
-### Legacy components — dev-mode warnings
+### MonthPicker — removed (breaking)
 
-`MonthPicker` is deprecated. For simple month picking, use `Select` with month
-options.
+`MonthPicker` and its whole barrel (`MonthPicker.vue`, types, stories) are
+deleted. It duplicated `Select` for a narrower case. Use `Select` with month
+options — see the
+[migration guide](../docs/content/docs/migration.md#monthpicker). The import
+fails, so the break is loud.
+
+### Legacy components — dev-mode warnings
 
 `Pill` is no longer exported from the package entrypoint. It remains an
 internal `TabButtons` detail.
@@ -1097,21 +1128,22 @@ names.
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
 | `GridLayout`                       | depend on `grid-layout-plus` directly | **Removed** — loud; import fails      |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
-| DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
-| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
-| DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |
-| DatePicker family `readonly`       | `typeable: false`                    | Picker-level only; warns               |
-| DatePicker family `inputClass`     | `class` on the component element     | Warns when set                         |
-| DatePicker family `value` prop     | `v-model` / `modelValue`             | Warns when set                         |
-| DatePicker family `change` emit    | `update:modelValue` / `v-model`      | Warns when bound                       |
-| DatePicker family `#target` slot   | `#trigger`                           | Silent alias; warns                    |
-| `TimePicker.scrollMode`            | none (always centered)               | Warns when set                         |
-| `DateTimePicker.minDateTime`       | `min`                                | Mapped internally; warns               |
-| `DateTimePicker.maxDateTime`       | `max`                                | Mapped internally; warns               |
-| `TimePicker.minTime`               | `min`                                | Mapped internally; warns               |
-| `TimePicker.maxTime`               | `max`                                | Mapped internally; warns               |
-| `useDatePicker` composable         | use picker components directly       | Warns on call                          |
-| `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
+| DatePicker family `placement`      | `side` + `align` + `offset`          | **Removed** — silent; inert extra attribute |
+| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | **Removed** — silent; inert extra attribute |
+| DatePicker family `allowCustom`    | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `readonly`       | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `inputClass`     | `class` on the component element     | **Removed** — silent; inert extra attribute |
+| DatePicker family `value` prop     | `v-model` / `modelValue`             | **Removed** — silent; inert extra attribute |
+| DatePicker family `#target` slot   | `#trigger`                           | **Removed** — silent; slot content stops rendering |
+| `TimePicker.scrollMode`            | none (always centered)               | **Removed** — silent; inert extra attribute |
+| `DateTimePicker.minDateTime`       | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `DateTimePicker.maxDateTime`       | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.minTime`               | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.maxTime`               | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.selectAll()` / `.blurInput()` | none — dead, no callers       | **Removed** — loud; template-ref member gone |
+| `useDatePicker` composable         | use picker components directly       | **Removed** — loud; import fails       |
+| `getDate` / `getDatesAfter` / etc. | use picker components directly       | **Removed** — loud; import fails       |
+| `MonthPicker`                      | `Select`                             | **Removed** — loud; import fails       |
 | `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
 | Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
 | Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |

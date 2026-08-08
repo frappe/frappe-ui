@@ -102,17 +102,31 @@ from inside `#default` / `#actions`.
 ## DatePicker / TimePicker family
 
 Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
-share the popover-trigger vocabulary.
+share the popover-trigger vocabulary. Removed members are deleted, not
+aliased — a call site that still uses one breaks at the tag rather than
+warning; `grep` for each old name after upgrading.
 
-| Before                                  | After                       |
-| --------------------------------------- | --------------------------- |
-| `:value` prop                           | `v-model`                   |
-| `@change`                               | `@update:modelValue`        |
-| `placement="bottom-start"`              | `side` + `align` + `offset` |
-| `:autoClose`                            | `:keepOpen` (inverted)      |
-| `allowCustom` / `readonly`              | `typeable`                  |
-| `minDate`/`maxDate`/`minTime`/`maxTime` | `min` / `max`               |
-| `#target`                               | `#trigger`                  |
+| Before                                   | After                        |
+| ----------------------------------------- | --------------------------- |
+| `:value` prop                             | `v-model`                    |
+| `placement="bottom-start"`                | `side` + `align` + `offset`  |
+| `:autoClose`                              | `:keepOpen` (inverted)       |
+| `allowCustom` / picker-level `readonly`   | `typeable`                   |
+| `inputClass`                              | `class`                      |
+| `minDate`/`maxDate`/`minTime`/`maxTime`   | `min` / `max`                |
+| `#target`                                 | `#trigger`                   |
+| `TimePicker.scrollMode`                   | nothing — list is always centered |
+| `TimePicker` template ref `.selectAll()` / `.blurInput()` | nothing — dead, no callers |
+
+`@change` still fires alongside `@update:modelValue` — it wasn't deprecated
+and doesn't need replacing.
+
+Most of the table above is a **silent break**: an old prop name that's no
+longer in the component's types lands as an inert extra attribute (or, for
+`min`/`max` aliases, the constraint just stops being enforced) instead of
+throwing. TypeScript callers get a compile error instead. `#target` is the
+one slot case — content in a leftover `<template #target>` silently stops
+rendering.
 
 Behavior changes that apply even if you don't touch your code:
 
@@ -124,6 +138,28 @@ Behavior changes that apply even if you don't touch your code:
   Clear inside `#actions` if you relied on it.
 - `DateRangePicker.clearable` now defaults to `true`. Pass `:clearable="false"`
   to opt out.
+- `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
+  `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
+  the picker components used them; drop the import.
+
+## MonthPicker
+
+`MonthPicker` is deleted — the import fails. Use `Select` with month options:
+
+```vue
+<!-- Before -->
+<MonthPicker v-model="month" />
+
+<!-- After -->
+<Select
+  v-model="month"
+  :options="[
+    { label: 'January', value: '01' },
+    { label: 'February', value: '02' },
+    // ...
+  ]"
+/>
+```
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
 
