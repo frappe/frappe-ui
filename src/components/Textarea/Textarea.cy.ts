@@ -138,7 +138,9 @@ describe('Textarea', () => {
 
     it('renders ghost variant', () => {
       cy.mount(Textarea, { props: { variant: 'ghost' } })
-      cy.get('textarea').should('have.class', 'border-0')
+      cy.get('textarea')
+        .should('have.class', 'border-0')
+        .and('have.class', 'bg-transparent')
     })
 
     it('renders the canonical data-* hooks on the control', () => {

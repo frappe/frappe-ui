@@ -22,9 +22,9 @@ const sizeCLass = {
 }
 
 const variantClasses = {
-  subtle: 'bg-surface-gray-2',
-  outline: 'bg-surface-base',
-  ghost: 'border-0',
+  subtle: ['bg-surface-gray-2'],
+  outline: ['bg-surface-base'],
+  ghost: ['border-0', 'bg-transparent'],
 }
 
 describe('Textinput', () => {
@@ -69,7 +69,9 @@ describe('Textinput', () => {
         props: { variant: variant },
       })
 
-      cy.get(`input[type=text]`).should('have.class', variantClasses[variant])
+      for (const cls of variantClasses[variant]) {
+        cy.get(`input[type=text]`).should('have.class', cls)
+      }
     }
   })
 

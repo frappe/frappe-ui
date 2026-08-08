@@ -138,7 +138,7 @@ const inputClasses = computed(() => {
         ? 'border-outline-gray-2'
         : 'border-transparent',
     ],
-    ghost: 'border-0 focus:ring-0 focus-visible:outline-none',
+    ghost: 'border-0 bg-transparent focus:ring-0 focus-visible:outline-none',
   }[variant]
 
   return [

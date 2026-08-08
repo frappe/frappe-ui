@@ -284,6 +284,12 @@ In favor of `padded`. (Now removed — see "Toggles and ranged inputs" above.)
 `Textarea` now accepts the `'ghost'` variant (matching `TextInput` and
 `Password`) and the shared `required` prop.
 
+### TextInput / Textarea — `ghost` variant paints transparent (fix)
+
+`ghost` set no `bg-*` class, so `@tailwindcss/forms` preflight painted the
+input `#fff` — a white pill in dark mode. `ghost` now sets `bg-transparent`,
+matching Combobox's own ghost search input. Closes #851.
+
 ### FeatherIcon — deprecated; `lucide-*` recommended
 
 `FeatherIcon` remains exported. Feather-name strings passed to
