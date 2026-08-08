@@ -56,25 +56,6 @@
       </template>
     </template>
     <template v-else>
-      <span v-if="ctrl || meta">
-        <span
-          v-if="isMac"
-          class="lucide-command size-3"
-          role="img"
-          aria-label="Command"
-        />
-        <span v-else class="font-mono text-[10px] leading-none">Ctrl</span>
-      </span>
-      <span v-if="shift">
-        <span
-          class="lucide-arrow-big-up size-3"
-          role="img"
-          aria-label="Shift"
-        />
-      </span>
-      <span v-if="alt">
-        <span class="lucide-option size-3" role="img" aria-label="Option" />
-      </span>
       <slot></slot>
     </template>
   </span>
@@ -97,6 +78,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { KeyboardShortcutProps } from './types'
 
 const isMac = computed(() => {
   if (typeof navigator === 'undefined') return false
@@ -112,40 +94,15 @@ interface Part {
   display: string
 }
 
-const props = withDefaults(
-  defineProps<{
-    meta?: boolean
-    ctrl?: boolean
-    shift?: boolean
-    alt?: boolean
-    /** Background chip style */
-    bg?: boolean
-    /** Modern single shortcut combo string, e.g. "Mod+Shift+K" */
-    combo?: string
-    /**
-     * @deprecated Use `combo` instead. Will be removed in the next major.
-     * @example `<KeyboardShortcut combo="Mod+K" />` instead of `<KeyboardShortcut shortcut="Mod+K" />`
-     */
-    shortcut?: string
-    /** Whether to visually show + separators between keys (non-bg mode only) */
-    showPlus?: boolean
-    /** Alternative equivalent combos (display only) */
-    altCombos?: string[]
-    /** Render icons for certain non-modifier keys (arrows, enter, backspace) */
-    useIcons?: boolean
-  }>(),
-  { showPlus: true, altCombos: () => [], useIcons: true },
-)
+const props = withDefaults(defineProps<KeyboardShortcutProps>(), {
+  showPlus: true,
+  altCombos: () => [],
+  useIcons: true,
+})
 
 const showPlus = computed<boolean>(() => props.showPlus)
 
-if (process.env.NODE_ENV !== 'production' && props.shortcut) {
-  console.warn(
-    '[KeyboardShortcut] The `shortcut` prop is deprecated. Use `combo` instead.',
-  )
-}
-
-const effectiveCombo = computed(() => props.combo ?? props.shortcut)
+const effectiveCombo = computed(() => props.combo)
 
 function parseCombo(raw?: string): Part[] {
   if (!raw) return []
@@ -258,6 +215,11 @@ const ariaLabel = computed(() => {
 })
 
 defineOptions({ name: 'KeyboardShortcut' })
+
+defineSlots<{
+  /** Fallback content shown when no `combo` is given. */
+  default?: () => any
+}>()
 
 const keyIconMap: Record<string, string> = {
   '↑': 'lucide-arrow-up',

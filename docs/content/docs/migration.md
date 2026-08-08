@@ -1554,6 +1554,37 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 `usePageMeta` works the same everywhere — see the
 [composables page](./other/composables#usepagemeta).
 
+## CommandPalette
+
+`show` is renamed to `open`, matching the rest of the library's overlay
+vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
+with no error, so the palette just never opens.
+
+| Before                  | After                    |
+| ------------------------ | ------------------------ |
+| `v-model:show="show"`    | `v-model:open="open"`    |
+
+```vue
+<!-- Before -->
+<CommandPalette v-model:show="show" :groups="groups" @select="onSelect" />
+
+<!-- After -->
+<CommandPalette v-model:open="open" :groups="groups" @select="onSelect" />
+```
+
+`Mod+K` now opens the palette on its own (registered internally via
+`useShortcut`) — delete any app-level keydown listener that toggled it.
+
+## KeyboardShortcut
+
+The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
+`alt` boolean props, are removed. Use `combo` — a string like `"Mod+Shift+K"`.
+
+| Before                                   | After                        |
+| ------------------------------------------ | ----------------------------- |
+| `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
+| `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
+
 ## PageHeaderMobile family — slot names
 
 `PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
