@@ -815,6 +815,21 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### GridLayout — removed (breaking)
+
+- **Breaking:** `GridLayout` is no longer exported. It was a thin passthrough
+  to `grid-layout-plus` with no docs page and no tests. The import fails, so
+  the build names every call site. Depend on `grid-layout-plus` directly.
+- `grid-layout-plus` is dropped from `dependencies` — it had no other
+  importer left in `src/`.
+- Two bugs in the deleted component, so consumers wiring up
+  `grid-layout-plus` themselves should expect different behavior:
+  - `cols` and `rowHeight` were read once at setup inside a `reactive()`
+    options object, not `computed`, so changing either prop after mount did
+    nothing.
+  - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
+    so it ignored dark mode.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
