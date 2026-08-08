@@ -92,7 +92,6 @@ declare module 'vue' {
     KeyboardShortcut: typeof import('./src/components/KeyboardShortcut.vue')['default']
     KeyboardShortcutsModal: typeof import('./src/components/KeyboardShortcutsModal/KeyboardShortcutsModal.vue')['default']
     LabelingWrapper: typeof import('./src/components/InputLabeling/LabelingWrapper.vue')['default']
-    Layout: typeof import('./src/components/VueGridLayout/Layout.vue')['default']
     LinkPopup: typeof import('./src/components/TextEditor/components/LinkPopup.vue')['default']
     ListEmptyState: typeof import('./src/components/ListView/ListEmptyState.vue')['default']
     ListFilter: typeof import('./src/components/ListFilter/ListFilter.vue')['default']
