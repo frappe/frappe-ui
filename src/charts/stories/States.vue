@@ -37,7 +37,7 @@ const rtl = ref(false)
 const dir = computed(() => (rtl.value ? 'rtl' : 'ltr') as 'rtl' | 'ltr')
 
 const card =
-  'flex min-w-0 flex-col rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3'
+  'flex min-w-0 flex-col rounded-4 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3'
 const caption = 'text-p-sm text-ink-gray-5'
 </script>
 

@@ -24,7 +24,7 @@ function retry() {
 }
 
 const card =
-  'flex min-w-0 flex-col rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3'
+  'flex min-w-0 flex-col rounded-4 border border-outline-gray-1 bg-surface-elevation-2 px-4 py-3'
 </script>
 
 <template>

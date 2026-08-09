@@ -99,7 +99,7 @@ describe('NumberCard', () => {
       card()
         .should('have.class', 'border')
         .and('have.class', 'bg-surface-elevation-2')
-        .and('have.class', 'rounded-7')
+        .and('have.class', 'rounded-4')
         .and('have.class', 'px-4')
     })
 
@@ -109,7 +109,7 @@ describe('NumberCard', () => {
         .should('contain.text', 'Revenue')
         .and('not.have.class', 'border')
         .and('not.have.class', 'bg-surface-elevation-2')
-        .and('not.have.class', 'rounded-7')
+        .and('not.have.class', 'rounded-4')
         .and('not.have.class', 'px-4')
     })
 
