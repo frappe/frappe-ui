@@ -27,10 +27,13 @@ function glob(pattern) {
 // `experimental/**` is deliberately excluded: frappe-ui/experimental carries
 // no P14 promise and first-party consumers are told not to depend on it, so
 // it isn't part of the supported public content contract this list covers.
-// One explicit exception: `experimental/SpriteIcons` is a migration parking
-// spot for a previously supported surface (moved out of `frappe-ui/icons` in
-// #904). IconPicker emits classes, so it stays under the content contract
-// until it is removed.
+// Two explicit exceptions, both migration parking spots for previously
+// supported surfaces, covered until they are removed:
+// - `experimental/SpriteIcons` (moved out of `frappe-ui/icons` in #904;
+//   IconPicker emits classes)
+// - `experimental/TextEditor` (the v0 editor family, a supported root
+//   surface until #974, parked in #1007 while apps migrate to
+//   `frappe-ui/editor`)
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:
@@ -42,4 +45,5 @@ export const content = [
   glob('src/**/*.{vue,js,ts,jsx,tsx}'),
   glob('icons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
 ]
