@@ -26,7 +26,7 @@ const tabs = [
           />
         </TabList>
         <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
-          <div class="p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
+          <div class="w-32 p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
         </TabPanel>
       </Tabs>
     </div>
@@ -35,7 +35,7 @@ const tabs = [
       <div class="text-sm text-ink-gray-6">Attached right</div>
       <Tabs v-model="right" vertical class="flex">
         <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
-          <div class="p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
+          <div class="w-32 p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
         </TabPanel>
         <TabList variant="browser-tab" direction="right">
           <TabTrigger

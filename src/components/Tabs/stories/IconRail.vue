@@ -25,7 +25,8 @@ const tabs = [
       />
     </TabList>
     <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
-      <div class="p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
+      <!-- Fixed width so the rail doesn't move when panel text changes. -->
+      <div class="w-40 p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
     </TabPanel>
   </Tabs>
 </template>
