@@ -86,7 +86,8 @@ which receives `{ calendarEvent, date, isEditMode, close }`.
 
 `CalendarActiveEvent` exports the ref holding the id of the event whose
 popover is open. Set it from outside to highlight an event, or clear it with
-an empty string.
+an empty string. The ref is module-level: every `<Calendar>` on the page
+shares it.
 
 ## Template ref
 
@@ -109,7 +110,7 @@ calendar.value.currentMonthYear // formatted title, e.g. "August 2026"
 calendar.value.currentYear // 2026
 calendar.value.currentMonth // 7 (0 = January)
 calendar.value.currentDay // day of month anchoring the view
-calendar.value.enabledModes // view options not disabled via config
+calendar.value.enabledModes // view options not disabled via config (fixed at mount)
 calendar.value.selectedMonthDate // the month picker's date, `YYYY-MM-DD`
 calendar.value.onMonthYearChange // jump to a date and sync the month picker
 ```
