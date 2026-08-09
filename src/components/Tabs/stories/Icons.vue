@@ -3,34 +3,37 @@ import { reactive } from 'vue'
 import { Tabs } from 'frappe-ui'
 
 const state = reactive({
-  index: 0,
+  tab: 'home',
 
   tabs: [
     {
+      value: 'home',
       label: 'Home',
       content:
         'Welcome to the home tab. This is a simple example showing how tabs can be paired with icons to give each section a clear, scannable identity.',
-      icon: 'lucide-house',
+      iconLeft: 'lucide-house',
     },
     {
+      value: 'messages',
       label: 'Messages',
       content:
         'The messages tab groups all your conversations in one place. Use it to keep track of unread threads and pick up where you left off.',
-      icon: 'lucide-message-circle',
+      iconLeft: 'lucide-message-circle',
     },
     {
+      value: 'settings',
       label: 'Settings',
       content:
         'Adjust your preferences in the settings tab — change your theme, manage notifications, and configure how the app behaves.',
-      icon: 'lucide-settings',
+      iconLeft: 'lucide-settings',
     },
   ],
 })
 </script>
 
 <template>
-  <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
-    <template #tab-panel="{ tab }">
+  <Tabs class="border rounded" v-model="state.tab" :tabs="state.tabs">
+    <template #panel="{ tab }">
       <div class="p-5">{{ tab.content }}</div>
     </template>
   </Tabs>

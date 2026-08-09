@@ -1,108 +1,100 @@
-import Tabs from './Tabs.vue'
 import { defineComponent, h, ref } from 'vue'
+import Tabs from './Tabs.vue'
+import TabList from './TabList.vue'
+import TabTrigger from './TabTrigger.vue'
+import TabPanel from './TabPanel.vue'
 
-const tabs = [
-  {
-    label: 'Tab 1',
-    content: 'Tab 1 content',
-  },
-  {
-    label: 'Tab 2',
-    content: 'Tab 2 content',
-  },
+const items = [
+  { value: 'home', label: 'Home' },
+  { value: 'activity', label: 'Activity' },
 ]
 
 describe('Tabs', () => {
-  it('Vertical', () => {
+  it('renders shorthand tabs with tablist semantics', () => {
     cy.mount(Tabs, {
-      props: { tabs },
-      slots: { 'tab-panel': ({ tab }) => tab.contentkkkk },
+      props: { tabs: items },
+      slots: {
+        panel: ({ tab }: { tab: (typeof items)[number] }) =>
+          h('div', `${tab.label} content`),
+      },
     })
 
-    cy.get('[role=tablist]').should('exist')
-    cy.get('[role=tab]').should('have.length', tabs.length)
     cy.get('[role=tablist]').should(
       'have.attr',
       'aria-orientation',
       'horizontal',
     )
+    cy.get('[role=tab]').should('have.length', items.length)
+    cy.contains('Home content').should('exist')
   })
 
-  it('Horizontal', () => {
+  it('renders vertically', () => {
     cy.mount(Tabs, {
-      props: { tabs, vertical: true },
-      slots: { 'tab-panel': ({ tab }) => tab.content },
+      props: { tabs: items, vertical: true },
     })
 
-    cy.get('[role=tablist]').should('exist')
-    cy.get('[role=tab]').should('have.length', tabs.length)
     cy.get('[role=tablist]').should('have.attr', 'aria-orientation', 'vertical')
   })
 
-  it('Slots', () => {
+  it('selects the first tab without emitting when uncontrolled', () => {
     cy.mount(Tabs, {
-      props: { tabs },
-
-      slots: {
-        'tab-item': ({ tab }) => h('div', { 'data-cy': tab.label }, tab.label),
-        'tab-panel': ({ tab }) =>
-          h('div', { 'data-cy': tab.content }, tab.content),
-      },
+      props: { tabs: items, 'onUpdate:modelValue': cy.spy().as('onUpdate') },
     })
 
-    cy.get(`[data-cy="${tabs[0].label}"]`).should('exist')
-    cy.get(`[data-cy="${tabs[0].content}"]`).should('exist')
-  })
-
-  it('supports uncontrolled selection fallback', () => {
-    cy.mount(Tabs, {
-      props: { tabs, 'onUpdate:modelValue': cy.spy().as('onUpdate') },
-      slots: {
-        'tab-panel': ({ tab }) =>
-          h('div', { 'data-cy': tab.content }, tab.content),
-      },
-    })
-
+    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'true')
     cy.get('@onUpdate').should('not.have.been.called')
-    cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false')
 
     cy.get('[role=tab]').eq(1).click()
 
-    cy.get('@onUpdate').should('have.been.calledWith', 1)
+    cy.get('@onUpdate').should('have.been.calledWith', 'activity')
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')
   })
 
-  it('supports controlled v-model round-trip', () => {
+  it('falls back to the first tab and emits when the model matches nothing', () => {
+    cy.mount(Tabs, {
+      props: {
+        tabs: items,
+        modelValue: 'missing',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+
+    cy.get('@onUpdate').should('have.been.calledWith', 'home')
+    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'true')
+  })
+
+  it('supports the composed form with a v-model round-trip', () => {
     const Harness = defineComponent({
       setup() {
-        const value = ref(0)
+        const value = ref<string | number>('home')
 
         return () =>
           h(
             Tabs,
             {
-              tabs,
               modelValue: value.value,
               'onUpdate:modelValue': (nextValue: string | number) => {
                 value.value = nextValue
               },
             },
-            {
-              'tab-panel': ({ tab }) =>
-                h('div', { 'data-cy': tab.content }, tab.content),
-            },
+            () => [
+              h(TabList, { variant: 'subtle' }, () => [
+                h(TabTrigger, { value: 'home', label: 'Home' }),
+                h(TabTrigger, { value: 'activity', label: 'Activity' }),
+              ]),
+              h(TabPanel, { value: 'home' }, () => 'Home content'),
+              h(TabPanel, { value: 'activity' }, () => 'Activity content'),
+            ],
           )
       },
     })
 
     cy.mount(Harness)
 
-    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'true')
-    cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'false')
-
+    cy.contains('Home content').should('exist')
     cy.get('[role=tab]').eq(1).click()
-
-    cy.get('[role=tab]').eq(0).should('have.attr', 'aria-selected', 'false')
     cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')
+    cy.contains('Activity content').should('exist')
+    cy.contains('Home content').should('not.exist')
   })
 })

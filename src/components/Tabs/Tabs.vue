@@ -1,39 +1,152 @@
 <script setup lang="ts">
-import { computed, h, ref, watch, type Component } from 'vue'
-import {
-  TabsContent,
-  TabsIndicator,
-  TabsList,
-  TabsRoot,
-  TabsTrigger,
-} from 'reka-ui'
+import { computed, provide, ref, shallowRef, watch } from 'vue'
+import { TabsRoot } from 'reka-ui'
+import TabList from './TabList.vue'
+import TabTrigger from './TabTrigger.vue'
+import TabPanel from './TabPanel.vue'
+import { tabsRootKey, type TabTriggerRegistration } from './context'
+import type {
+  TabItem,
+  TabsEmits,
+  TabsProps,
+  TabTriggerSlotProps,
+  TabValue,
+} from './types'
 
-import type { TabsEmits, TabsProps } from './types'
-
-const props = defineProps<TabsProps>()
-const emit = defineEmits<TabsEmits>()
-
-const internalModel = ref<string | number>(props.modelValue ?? 0)
-
-watch(
-  () => props.modelValue,
-  (value) => {
-    if (value !== undefined) {
-      internalModel.value = value
-    }
-  },
-  { immediate: true },
-)
-
-const model = computed({
-  get: () => props.modelValue ?? internalModel.value,
-  set: (value: string | number) => {
-    internalModel.value = value
-    emit('update:modelValue', value)
-  },
+const props = withDefaults(defineProps<TabsProps>(), {
+  vertical: false,
+  variant: 'underline',
+  size: 'sm',
 })
 
-const dir = computed<'rtl' | 'ltr'>(
+const emit = defineEmits<TabsEmits>()
+
+const slots = defineSlots<{
+  /** Composed mode: `TabList` / `TabPanel` children. */
+  default?: () => any
+  /** Shorthand mode: leading content in every generated trigger. */
+  prefix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  /** Shorthand mode: replaces the label region of every generated trigger. */
+  tab?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  /** Shorthand mode: trailing content in every generated trigger. */
+  suffix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  /** Shorthand mode: panel body for the selected tab. */
+  panel?: (props: { tab: TabItem }) => any
+}>()
+
+if (import.meta.env.DEV) {
+  let warned = false
+  watch(
+    () => Boolean(props.tabs && slots.default),
+    (conflict) => {
+      if (conflict && !warned) {
+        warned = true
+        console.warn(
+          '[frappe-ui] Tabs: default-slot children are not supported when `tabs` is set. Use the shorthand slots (#prefix/#tab/#suffix/#panel) or drop the `tabs` prop.',
+        )
+      }
+    },
+    { immediate: true },
+  )
+}
+
+// Trigger registry. Triggers register during setup so the registry is
+// SSR-consistent; document-order sorting kicks in once elements mount.
+const triggers = shallowRef<TabTriggerRegistration[]>([])
+
+function register(trigger: TabTriggerRegistration) {
+  triggers.value = [...triggers.value, trigger]
+  return () => {
+    triggers.value = triggers.value.filter((t) => t !== trigger)
+  }
+}
+
+const orderedTriggers = computed(() =>
+  [...triggers.value].sort((a, b) => {
+    const ae = a.el.value
+    const be = b.el.value
+    if (!ae || !be) return 0
+    return ae.compareDocumentPosition(be) & Node.DOCUMENT_POSITION_FOLLOWING
+      ? -1
+      : 1
+  }),
+)
+
+function firstSelectable(): TabValue | undefined {
+  const list = orderedTriggers.value
+  const trigger = list.find((t) => !t.disabled()) ?? list[0]
+  return trigger?.value()
+}
+
+const modelBound = computed(() => props.modelValue !== undefined)
+
+// Route mode: with no model binding and at least one route trigger,
+// selection derives from the current route.
+const routeMode = computed(
+  () => !modelBound.value && triggers.value.some((t) => t.hasRoute()),
+)
+
+const routeSelected = computed<TabValue | undefined>(() => {
+  const list = orderedTriggers.value
+  const exact = list.find((t) => t.routeExactActive?.value)
+  if (exact) return exact.value()
+  return list.find((t) => t.routeActive?.value)?.value()
+})
+
+const internalValue = ref<TabValue | undefined>(props.modelValue)
+
+const selected = computed<TabValue | undefined>(() => {
+  if (routeMode.value) return routeSelected.value
+  const desired = modelBound.value ? props.modelValue : internalValue.value
+  const list = triggers.value
+  if (!list.length) return desired
+  if (desired !== undefined && list.some((t) => t.value() === desired)) {
+    return desired
+  }
+  return firstSelectable()
+})
+
+// Stale-model fallback: when the model matches no visible trigger, select
+// the first visible one and emit. The initial uncontrolled pick stays
+// internal and does not emit.
+watch(
+  [orderedTriggers, () => props.modelValue],
+  () => {
+    if (routeMode.value) return
+    const list = orderedTriggers.value
+    if (!list.length) return
+    const desired = modelBound.value ? props.modelValue : internalValue.value
+    if (desired !== undefined && list.some((t) => t.value() === desired)) {
+      internalValue.value = desired
+      return
+    }
+    const fallback = firstSelectable()
+    if (fallback === undefined) return
+    internalValue.value = fallback
+    if (desired !== undefined) emit('update:modelValue', fallback)
+  },
+  { immediate: true, flush: 'post' },
+)
+
+const orientation = computed<'horizontal' | 'vertical'>(() =>
+  props.vertical ? 'vertical' : 'horizontal',
+)
+
+provide(tabsRootKey, {
+  selected,
+  orientation,
+  register,
+})
+
+function onRekaUpdate(value: TabValue) {
+  // In route mode, clicking a trigger navigates; the route drives
+  // selection and no model update is emitted.
+  if (routeMode.value) return
+  internalValue.value = value
+  emit('update:modelValue', value)
+}
+
+const dir = computed<'ltr' | 'rtl'>(
   () =>
     props.dir ??
     (typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
@@ -41,83 +154,57 @@ const dir = computed<'rtl' | 'ltr'>(
       : 'ltr'),
 )
 
-const indicatorXCss = `left-0 bottom-0 h-[2px] w-[--reka-tabs-indicator-size] transition-[width,transform]
-                          translate-x-[--reka-tabs-indicator-position] translate-y-[1px]`
-
-const indicatorYCss = `end-0 top-0 w-[2px] h-[--reka-tabs-indicator-size]
-                       translate-y-[--reka-tabs-indicator-position] transition-[height,transform]`
-
-// Using a plain <button> element via `h('button')` to avoid picking up
-// the globally registered Button component and its styles.
-const Btn = h('button')
-
-defineSlots<{
-  /** Custom renderer for a tab trigger (icon + label / router-link). */
-  'tab-item'?: (props: {
-    tab: { label: string; icon?: string | Component; route?: string }
-  }) => any
-
-  /** Content rendered for each tab panel. */
-  'tab-panel'?: (props: {
-    tab: { label: string; icon?: string | Component; route?: string }
-  }) => any
-}>()
+const visibleTabs = computed(() =>
+  (props.tabs ?? []).filter((tab) => !tab.condition || tab.condition()),
+)
 </script>
 
 <template>
   <TabsRoot
-    :as="props.as"
+    :model-value="selected"
+    :orientation="orientation"
     :dir="dir"
-    class="flex flex-1 overflow-hidden flex-col data-[orientation=vertical]:flex-row"
-    :orientation="props.vertical ? 'vertical' : 'horizontal'"
-    :default-value="props.tabs[0].label"
-    v-model="model"
+    :class="
+      props.tabs ? 'flex flex-col data-[orientation=vertical]:flex-row' : undefined
+    "
+    @update:model-value="onRekaUpdate($event as TabValue)"
   >
-    <TabsList
-      class="relative min-h-fit flex data-[orientation=vertical]:flex-col p-1 border-b data-[orientation=vertical]:border-e gap-5"
-      :class="{
-        'overflow-x-auto overflow-y-hidden px-5': !props.vertical,
-        'py-3': props.vertical,
-      }"
-    >
-      <TabsIndicator
-        class="absolute rounded-full duration-300"
-        :class="props.vertical ? indicatorYCss : indicatorXCss"
-      >
-        <div class="w-full h-full bg-surface-gray-10" />
-      </TabsIndicator>
+    <template v-if="props.tabs">
+      <TabList :variant="props.variant" :size="props.size">
+        <TabTrigger
+          v-for="tab in visibleTabs"
+          :key="tab.value"
+          :value="tab.value"
+          :label="tab.label"
+          :icon="tab.icon"
+          :icon-left="tab.iconLeft"
+          :icon-right="tab.iconRight"
+          :disabled="tab.disabled"
+          :route="tab.route"
+        >
+          <template v-if="slots.prefix" #prefix="triggerSlotProps">
+            <slot name="prefix" :tab="tab" v-bind="triggerSlotProps" />
+          </template>
+          <template v-if="slots.tab" #default="triggerSlotProps">
+            <slot name="tab" :tab="tab" v-bind="triggerSlotProps" />
+          </template>
+          <template v-if="slots.suffix" #suffix="triggerSlotProps">
+            <slot name="suffix" :tab="tab" v-bind="triggerSlotProps" />
+          </template>
+        </TabTrigger>
+      </TabList>
 
-      <TabsTrigger as="template" v-for="(tab, i) in props.tabs" :value="i">
-        <slot name="tab-item" v-bind="{ tab, selected: model === i }">
-          <component
-            :is="tab.route ? 'router-link' : Btn"
-            :to="tab.route"
-            class="flex items-center gap-1.5 text-base text-ink-gray-5 duration-300 ease-in-out hover:text-ink-gray-9 data-[state=active]:text-ink-gray-9"
-            :class="{ 'px-2.5': props.vertical, 'py-2.5': !props.vertical }"
-          >
-            <span
-              v-if="tab.icon && typeof tab.icon === 'string' && tab.icon.startsWith('lucide-')"
-              class="size-4"
-              :class="tab.icon"
-            />
-            <component
-              v-else-if="tab.icon"
-              :is="tab.icon"
-              class="size-4"
-            />
+      <template v-if="slots.panel">
+        <TabPanel
+          v-for="tab in visibleTabs"
+          :key="tab.value"
+          :value="tab.value"
+        >
+          <slot name="panel" :tab="tab" />
+        </TabPanel>
+      </template>
+    </template>
 
-            {{ tab.label }}
-          </component>
-        </slot>
-      </TabsTrigger>
-    </TabsList>
-
-    <TabsContent
-      v-for="(tab, i) in props.tabs"
-      :value="i"
-      class="flex flex-col overflow-auto"
-    >
-      <slot name="tab-panel" v-bind="{ tab }" />
-    </TabsContent>
+    <slot v-else />
   </TabsRoot>
 </template>

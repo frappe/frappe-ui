@@ -1,37 +1,88 @@
 import type { Component } from 'vue'
+import type { RouteLocationRaw } from 'vue-router'
 
-export interface Tab {
-  /** Text shown for the tab. */
-  label: string
+export type TabValue = string | number
+export type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
+export type TabsSize = 'sm' | 'md'
+export type TabsDirection = 'left' | 'right'
 
-  /**
-   * Optional icon shown with the label. Pass a `lucide-*` class string for
-   * the recommended class-based form, or a Vue component for custom icons.
-   */
-  icon?: string | Component
-
-  /** Optional route to navigate to when the tab is clicked. */
-  route?: string
-}
+/** A `lucide-*` class string or a Vue component. */
+export type TabIcon = string | Component
 
 export interface TabsProps {
-  /** Element/component used to render the tab container. */
-  as?: string
-
-  /** List of tabs to render. */
-  tabs: Tab[]
+  /** Currently selected tab value. */
+  modelValue?: TabValue
 
   /** Renders tabs vertically instead of horizontally. */
   vertical?: boolean
 
-  /** Currently selected tab value. */
-  modelValue?: string | number
+  /** Forces layout direction; defaults to the resolved document direction. */
+  dir?: 'ltr' | 'rtl'
 
-  /** Forces layout direction; defaults to `document.documentElement.dir`. */
-  dir?: 'rtl' | 'ltr'
+  /** Shorthand mode only: items to generate triggers (and panels) from. */
+  tabs?: TabItem[]
+
+  /** Shorthand mode only; forwarded to the generated TabList. */
+  variant?: TabsVariant
+
+  /** Shorthand mode only; forwarded to the generated TabList. */
+  size?: TabsSize
 }
 
 export interface TabsEmits {
   /** Fired when the selected tab changes. */
-  'update:modelValue': [value: string | number]
+  'update:modelValue': [value: TabValue]
+}
+
+export interface TabListProps {
+  /** Visual variant. */
+  variant?: TabsVariant
+
+  /** Size of the triggers. */
+  size?: TabsSize
+
+  /** browser-tab + vertical only: which edge the tabs attach to. */
+  direction?: TabsDirection
+}
+
+export interface TabTriggerProps {
+  value: TabValue
+
+  /** Text shown in the label region. */
+  label?: string
+
+  /** Icon-only trigger; `label` becomes the accessible name. */
+  icon?: TabIcon
+
+  /** Leading accent icon, rendered next to the visible label. */
+  iconLeft?: TabIcon
+
+  /** Trailing accent icon, rendered next to the visible label. */
+  iconRight?: TabIcon
+
+  disabled?: boolean
+
+  /** Renders the trigger as a RouterLink. See route mode in the spec. */
+  route?: RouteLocationRaw
+}
+
+export type TabTriggerSlotProps = { selected: boolean; disabled: boolean }
+
+export interface TabPanelProps {
+  value: TabValue
+}
+
+/** Item for the `tabs` shorthand on the `Tabs` root. */
+export interface TabItem {
+  value: TabValue
+  label?: string
+  icon?: TabIcon
+  iconLeft?: TabIcon
+  iconRight?: TabIcon
+  disabled?: boolean
+  route?: RouteLocationRaw
+  /** Item renders only while this returns true. */
+  condition?: () => boolean
+  /** Extra app-defined fields pass through to slot props unchanged. */
+  [key: string]: any
 }

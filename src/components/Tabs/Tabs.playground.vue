@@ -3,32 +3,53 @@ import { Tabs } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const tabs = [
-  { label: 'Overview', icon: 'lucide-layout-dashboard' },
-  { label: 'Activity', icon: 'lucide-activity' },
-  { label: 'Settings', icon: 'lucide-settings' },
+  { value: 'overview', label: 'Overview', iconLeft: 'lucide-layout-dashboard' },
+  { value: 'activity', label: 'Activity', iconLeft: 'lucide-activity' },
+  { value: 'settings', label: 'Settings', iconLeft: 'lucide-settings' },
 ]
 
 const knobs: Knob[] = [
+  {
+    name: 'variant',
+    type: 'tabs',
+    options: ['underline', 'subtle', 'ghost', 'browser-tab'].map((v) => ({
+      label: v,
+      value: v,
+    })),
+    default: 'underline',
+  },
+  {
+    name: 'size',
+    type: 'tabs',
+    options: [
+      { label: 'sm', value: 'sm' },
+      { label: 'md', value: 'md' },
+    ],
+    default: 'sm',
+  },
   { name: 'vertical', type: 'switch', default: false },
   { name: 'icons', type: 'switch', default: true },
 ]
 
 function buildCode(v: Record<string, any>) {
-  const items = (v.icons ? tabs : tabs.map((t) => ({ label: t.label })))
+  const items = tabsFor(v.icons)
     .map((t) =>
-      'icon' in t
-        ? `    { label: '${t.label}', icon: '${(t as any).icon}' },`
-        : `    { label: '${t.label}' },`,
+      'iconLeft' in t
+        ? `    { value: '${t.value}', label: '${t.label}', iconLeft: '${(t as any).iconLeft}' },`
+        : `    { value: '${t.value}', label: '${t.label}' },`,
     )
     .join('\n')
   const attrs: string[] = []
+  if (v.variant !== 'underline') attrs.push(`variant="${v.variant}"`)
+  if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.vertical) attrs.push('vertical')
   attrs.push(`:tabs="[\n${items}\n  ]"`)
   return [
     '<Tabs',
+    '  v-model="tab"',
     ...attrs.map((a) => '  ' + a),
     '>',
-    '  <template #tab-panel="{ tab }">',
+    '  <template #panel="{ tab }">',
     '    <div class="p-4 text-ink-gray-7">{{ tab.label }} content</div>',
     '  </template>',
     '</Tabs>',
@@ -36,7 +57,9 @@ function buildCode(v: Record<string, any>) {
 }
 
 function tabsFor(icons: boolean) {
-  return icons ? tabs : tabs.map((t) => ({ label: t.label }))
+  return icons
+    ? tabs
+    : tabs.map((t) => ({ value: t.value, label: t.label }))
 }
 </script>
 
@@ -47,8 +70,13 @@ function tabsFor(icons: boolean) {
         class="w-full max-w-md overflow-hidden rounded-lg border border-outline-gray-1"
         :class="values.vertical ? 'h-[200px]' : 'h-[160px]'"
       >
-        <Tabs :tabs="tabsFor(values.icons)" :vertical="values.vertical">
-          <template #tab-panel="{ tab }">
+        <Tabs
+          :tabs="tabsFor(values.icons)"
+          :variant="values.variant"
+          :size="values.size"
+          :vertical="values.vertical"
+        >
+          <template #panel="{ tab }">
             <div class="p-4 text-base text-ink-gray-7">
               {{ tab.label }} content
             </div>
