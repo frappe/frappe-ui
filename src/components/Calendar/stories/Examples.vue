@@ -6,7 +6,6 @@ const config = {
   defaultMode: 'Month',
   isEditMode: true,
   eventIcons: {},
-  allowCustomClickEvents: true,
   enableShortcuts: false,
 }
 
@@ -62,7 +61,7 @@ const events = ref([
     toDate: currentMonthYear + '-21',
     fromTime: '16:30',
     toTime: '17:30',
-    color: 'red',
+    color: 'pink',
   },
   {
     title: 'Frappe Meet with John',

@@ -25,7 +25,7 @@
             @update:modelValue="(val) => onMonthYearChange(val)"
             :clearable="false"
           >
-            <template #target="{ togglePopover }">
+            <template #trigger="{ togglePopover }">
               <Button
                 variant="ghost"
                 class="text-lg-medium text-ink-gray-7"
