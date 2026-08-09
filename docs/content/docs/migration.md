@@ -1338,6 +1338,58 @@ Delete the manual imports; there is nothing to add back:
 The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
 package`) until the lines are gone.
 
+## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
+
+Both subpaths are gone in v1. frappe-ui is a UI library; the members that
+know about doctypes, onboarding flows, or billing moved to `@framework/ui`
+(the `ui/` package in the [frappe repo](https://github.com/frappe/frappe)).
+Every break here is loud — the import path stops resolving.
+
+| Before (`frappe-ui/frappe`)     | After                              |
+| ------------------------------- | ---------------------------------- |
+| `useTelemetry`, `telemetryPlugin` | `@framework/ui`                  |
+| `useOnboarding`, `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`, `showHelpModal`, `minimize` | `@framework/ui` |
+| `TrialBanner`, `SignupBanner`   | `@framework/ui`                    |
+| `DataImport`                    | `@framework/ui`                    |
+| `Link`, `LinkProps`, `LinkEmits`, `LinkExposed`, `LinkOption` | `@framework/ui` (superset, see below) |
+| `Filter`                        | `@framework/ui` (superset, see below) |
+| `OnboardingSteps`, `HelpCenter`, `showHelpCenter` | removed — they live on inside `@framework/ui`'s `HelpModal` |
+| `frappe-ui/drive`, `frappe-ui/drive/*` | removed, no replacement     |
+
+`@framework/ui` peer-depends on `frappe-ui`, so add it as a dependency if
+your app does not carry it yet, then change the import path:
+
+```js
+// Before
+import { useTelemetry, TrialBanner } from 'frappe-ui/frappe'
+
+// After
+import { useTelemetry, TrialBanner } from '@framework/ui'
+```
+
+Two replacements are supersets of what they replace — existing call sites
+work unchanged:
+
+- `Link` adds `redirectable` / `editable` props and `redirect` / `edit`
+  emits.
+- `Filter` adds a `useFilters` composable, `parseFilters` /
+  `serializeFilters`, and an operator registry.
+
+The drive components were removed because the drive app already owns the
+live copy of all six; nothing imported the subpath.
+
+Finally, drop the stale Tailwind glob. The `frappe/` directory no longer
+ships, so this line in `tailwind.config.js` scans nothing:
+
+```js
+// Delete this line
+'./node_modules/frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
+```
+
+Better: replace the hand-copied list with the
+[`content` export](/docs/foundations/tailwind#the-content-export), which
+tracks the library's source directories for you.
+
 ## Autocomplete (removed)
 
 `Autocomplete` is gone in v1. It merged single- and multi-select via the

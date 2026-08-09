@@ -39,7 +39,6 @@ const EXPERIMENTAL_ROOT = path.join(__dirname, '../../experimental')
 const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
   path.join(__dirname, '../../src/molecules'),
-  path.join(__dirname, '../../frappe'),
   EXPERIMENTAL_ROOT,
 ]
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'

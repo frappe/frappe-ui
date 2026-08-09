@@ -10,12 +10,6 @@
     "experimental/**/*.d.ts",
     "experimental/**/*.tsx",
     "experimental/**/*.vue",
-    "frappe/**/*.ts",
-    "frappe/**/*.d.ts",
-    "frappe/**/*.tsx",
-    "frappe/**/*.vue",
-    "frappe/index.js",
-    "frappe/index.d.ts",
     "vite/index.d.ts"
   ],
   "exclude": [
@@ -24,7 +18,6 @@
     "src/**/stories/**/*",
     "src/components/TextEditor/**/*",
     "experimental/**/*.cy.ts",
-    "frappe/**/*.cy.ts",
     "src/mocks/**/*"
   ],
   "extends": "./tsconfig.base.json",

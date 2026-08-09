@@ -45,7 +45,6 @@ export default {
     // this, theme-only classes like `lg:grid-cols-[220px_1fr]` aren't emitted
     // and the docs layout collapses.
     './vitepress/**/*.{vue,js,ts,css}',
-    './frappe/**/*.{vue,js,ts,jsx,tsx}',
     './icons/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {

@@ -45,7 +45,6 @@ import { content } from 'frappe-ui/tailwind'
 console.log(content)
 // [
 //   '.../frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/icons/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}',
 // ]
