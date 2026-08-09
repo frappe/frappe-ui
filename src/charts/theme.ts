@@ -7,7 +7,7 @@ import type { ChartPalette, ChartPaletteName } from './types'
  * substitution; every token is read back as a computed value first.
  */
 export type ChartTheme = {
-  palette: string[]
+  categorical: string[]
   sequential: string[]
   diverging: string[]
   axisLabel: string
@@ -23,7 +23,7 @@ export type ChartTheme = {
 
 export type ColorScheme = 'light' | 'dark'
 
-export const CHART_PALETTE_LENGTH = 10
+export const CHART_CATEGORICAL_LENGTH = 10
 export const CHART_SEQUENTIAL_LENGTH = 9
 export const CHART_DIVERGING_LENGTH = 9
 
@@ -36,7 +36,7 @@ export const CHART_DIVERGING_LENGTH = 9
  * series keeps its hue across a theme flip. See style.css for the derivation.
  */
 // "Jewel": five hue families, each a dark member then its light partner.
-const LIGHT_PALETTE = [
+const LIGHT_CATEGORICAL = [
   '#2283c3',
   '#84c5f9',
   '#289e60',
@@ -75,7 +75,7 @@ const LIGHT_DIVERGING = [
 ]
 
 // Same hue, lightness dropped 0.03, chroma held; see style.css.
-const DARK_PALETTE = [
+const DARK_CATEGORICAL = [
   '#137ab9',
   '#7bbbef',
   '#189557',
@@ -113,9 +113,9 @@ const DARK_DIVERGING = [
   '#a73b34',
 ]
 
-const FALLBACK_PALETTE: Record<ColorScheme, string[]> = {
-  light: LIGHT_PALETTE,
-  dark: DARK_PALETTE,
+const FALLBACK_CATEGORICAL: Record<ColorScheme, string[]> = {
+  light: LIGHT_CATEGORICAL,
+  dark: DARK_CATEGORICAL,
 }
 
 const FALLBACK_SEQUENTIAL: Record<ColorScheme, string[]> = {
@@ -140,7 +140,7 @@ const TOKENS = {
   dataLabel: '--ink-gray-6',
   // Its own token rather than `--ink-gray-8`: the ink on a fill answers to the
   // fill, not to the page, and `--ink-gray-8` inverts to a light gray in dark
-  // mode — invisible on the palette's light-tier stops. See style.css.
+  // mode — invisible on the categorical ramp's light-tier stops. See style.css.
   insideLabel: '--chart-inside-label',
   cellGap: '--chart-cell-gap',
 } as const
@@ -185,7 +185,7 @@ export function currentColorScheme(): ColorScheme {
 }
 
 /**
- * Reads the palette and plot-area tokens as computed values. `el` scopes the
+ * Reads the color ramps and plot-area tokens as computed values. `el` scopes the
  * lookup so a subtree that redefines `--chart-*` wins over the document root.
  */
 export function resolveChartTheme(el?: HTMLElement | null): ChartTheme {
@@ -194,7 +194,7 @@ export function resolveChartTheme(el?: HTMLElement | null): ChartTheme {
 
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {
     return {
-      palette: FALLBACK_PALETTE[scheme],
+      categorical: FALLBACK_CATEGORICAL[scheme],
       sequential: FALLBACK_SEQUENTIAL[scheme],
       diverging: FALLBACK_DIVERGING[scheme],
       ...fallbacks,
@@ -213,12 +213,12 @@ export function resolveChartTheme(el?: HTMLElement | null): ChartTheme {
     return ramp
   }
 
-  const palette = readRamp('--chart-categorical-', CHART_PALETTE_LENGTH)
+  const categorical = readRamp('--chart-categorical-', CHART_CATEGORICAL_LENGTH)
   const sequential = readRamp('--chart-sequential-', CHART_SEQUENTIAL_LENGTH)
   const diverging = readRamp('--chart-diverging-', CHART_DIVERGING_LENGTH)
 
   return {
-    palette: palette.length ? palette : FALLBACK_PALETTE[scheme],
+    categorical: categorical.length ? categorical : FALLBACK_CATEGORICAL[scheme],
     sequential: sequential.length ? sequential : FALLBACK_SEQUENTIAL[scheme],
     diverging: diverging.length ? diverging : FALLBACK_DIVERGING[scheme],
     axisLabel: read(TOKENS.axisLabel) || fallbacks.axisLabel,
@@ -245,9 +245,9 @@ function ensureThemeObserver() {
   })
 }
 
-export function pickSeriesColor(palette: string[], index: number) {
-  if (!palette.length) return FALLBACK_PALETTE.light[0]
-  return palette[index % palette.length]
+export function pickSeriesColor(ramp: string[], index: number) {
+  if (!ramp.length) return FALLBACK_CATEGORICAL.light[0]
+  return ramp[index % ramp.length]
 }
 
 /** The two palest sequential stops vanish against a white card. */
@@ -297,10 +297,10 @@ export function paletteColors(
   const cycle = (ramp: string[]) =>
     Array.from({ length: count }, (_, i) => pickSeriesColor(ramp, i))
 
-  if (name === 'categorical') return cycle(theme.palette)
+  if (name === 'categorical') return cycle(theme.categorical)
 
   const ramp = name === 'diverging' ? theme.diverging : theme.sequential
-  if (!ramp.length) return cycle(theme.palette)
+  if (!ramp.length) return cycle(theme.categorical)
 
   if (count === 1) {
     if (name === 'diverging') return [ramp[0]]
@@ -319,10 +319,10 @@ export function paletteColors(
  * `paletteColors` would hand it a set of slots instead.
  */
 function namedRamp(name: ChartPaletteName, theme: ChartTheme): string[] {
-  if (name === 'categorical') return theme.palette
+  if (name === 'categorical') return theme.categorical
   const ramp =
     name === 'diverging' ? theme.diverging : usableSequential(theme.sequential)
-  return ramp.length ? ramp : theme.palette
+  return ramp.length ? ramp : theme.categorical
 }
 
 /**

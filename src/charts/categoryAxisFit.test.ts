@@ -12,7 +12,7 @@ import type { AxisChartConfig } from './types'
  */
 
 const theme: ChartTheme = {
-  palette: ['#111111'],
+  categorical: ['#111111'],
   sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#003300'],
   axisLabel: 'ink-5',

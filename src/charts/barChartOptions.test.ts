@@ -6,7 +6,7 @@ import type { ChartTheme } from './theme'
 import type { AxisChartConfig } from './types'
 
 const theme: ChartTheme = {
-  palette: ['#111111', '#222222', '#333333'],
+  categorical: ['#111111', '#222222', '#333333'],
   // Five stops so the sequential pale-tail trim and even spacing are visible.
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],

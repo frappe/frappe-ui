@@ -12,7 +12,7 @@ import type {
 import type { ChartTheme } from './theme'
 
 const theme: ChartTheme = {
-  palette: ['#111111', '#222222', '#333333'],
+  categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',

@@ -12,7 +12,7 @@ import type { ChartTheme } from './theme'
 import type { HeatmapChartConfig } from './types'
 
 const theme: ChartTheme = {
-  palette: ['#111111', '#222222', '#333333'],
+  categorical: ['#111111', '#222222', '#333333'],
   // Nine stops, dark to light, like the shipped ramp.
   sequential: [
     '#0a0a0a',

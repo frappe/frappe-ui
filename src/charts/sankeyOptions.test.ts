@@ -4,7 +4,7 @@ import { paletteColors, type ChartTheme } from './theme'
 import type { SankeyChartConfig } from './types'
 
 const theme: ChartTheme = {
-  palette: ['#111111', '#222222', '#333333', '#444444'],
+  categorical: ['#111111', '#222222', '#333333', '#444444'],
   sequential: ['#0a0a0a', '#5a5a5a', '#cccccc'],
   diverging: ['#0000ff', '#ffffff', '#ff0000'],
   axisLabel: 'ink-5',

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { chartColors, paletteColors, type ChartTheme } from './theme'
 
 const theme: ChartTheme = {
-  palette: ['#111111', '#222222', '#333333'],
+  categorical: ['#111111', '#222222', '#333333'],
   // Nine stops, dark to light, like the shipped ramp.
   sequential: [
     '#0a0a0a',
@@ -41,19 +41,19 @@ describe('chartColors: precedence', () => {
   it('reads the ramp the caller named over the family default', () => {
     expect(
       chartColors('categorical', theme, { fallback: 'sequential', count: 3 }),
-    ).toEqual(theme.palette)
+    ).toEqual(theme.categorical)
   })
 
   it('falls back to the ramp the chart family picked', () => {
     expect(
       chartColors(undefined, theme, { fallback: 'categorical', count: 3 }),
-    ).toEqual(theme.palette)
+    ).toEqual(theme.categorical)
   })
 
   it('reads an empty list as no palette at all', () => {
     expect(
       chartColors([], theme, { fallback: 'categorical', count: 2 }),
-    ).toEqual(theme.palette.slice(0, 2))
+    ).toEqual(theme.categorical.slice(0, 2))
     expect(
       chartColors([], theme, { fallback: 'sequential', count: 'ramp' }),
     ).toEqual(USABLE_SEQUENTIAL)
@@ -161,7 +161,7 @@ describe('chartColors: which end of the ramp leads', () => {
         count: 3,
         deepEnd: 'last',
       }),
-    ).toEqual(theme.palette)
+    ).toEqual(theme.categorical)
   })
 
   it('leaves a diverging ramp alone, its direction being its meaning', () => {
