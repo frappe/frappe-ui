@@ -36,6 +36,8 @@ function warnExtraHost() {
 import {
   computed,
   inject,
+  onActivated,
+  onDeactivated,
   onMounted,
   onUnmounted,
   provide,
@@ -81,6 +83,12 @@ function release() {
 
 onMounted(claim)
 onUnmounted(release)
+// Inside <KeepAlive> a deactivated host never unmounts — it renders into a
+// detached container while still holding the claim. Treat deactivation
+// like unmount and reactivation like mount. `claim` is idempotent because
+// onActivated also fires right after the initial mount.
+onActivated(claim)
+onDeactivated(release)
 
 // The stack is empty until after mount, so gating on `isMounted` keeps
 // server and client hydration markup identical — both sides render the

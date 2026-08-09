@@ -1,4 +1,4 @@
-import { h, ref } from 'vue'
+import { h, KeepAlive, ref } from 'vue'
 import FrappeUIProvider from './FrappeUIProvider.vue'
 import Dialogs from '../Dialogs.vue'
 import { dialog, dialogs } from '../../utils/dialog'
@@ -52,6 +52,20 @@ describe('<FrappeUIProvider />', () => {
     cy.then(() => dialog.confirm({ title: 'After handover' }))
     cy.get('[role=dialog]').should('have.length', 1)
     cy.get('[role=dialog]').should('contain.text', 'After handover')
+  })
+
+  it('hands the claim over when a keep-alive host deactivates', () => {
+    // A deactivated component never unmounts — without the deactivated
+    // hook it would keep the claim and render into detached DOM.
+    const Other = { template: '<div>Other</div>' }
+    const view = ref<any>(Dialogs)
+    cy.mount(FrappeUIProvider, {
+      slots: { default: () => h(KeepAlive, null, [h(view.value)]) },
+    })
+    cy.then(() => (view.value = Other))
+    cy.then(() => dialog.confirm({ title: 'After deactivate' }))
+    cy.get('[role=dialog]').should('have.length', 1)
+    cy.get('[role=dialog]').should('contain.text', 'After deactivate')
   })
 
   it('releases the host claim on unmount so a new mount renders again', () => {
