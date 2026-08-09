@@ -296,6 +296,28 @@ describe('useDoc concurrency', () => {
     expect(user.setValue.isFinished).toBe(true)
   })
 
+  it('does not let a stale setValue success overwrite the doc store', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let [slow, quick] = await Promise.all([
+      user.setValue.submit({ email: 'slow@example.com' }),
+      user.setValue.submit({ email: 'quick@example.com' }),
+    ])
+
+    expect(slow?.email).toBe('slow@example.com')
+    expect(quick?.email).toBe('quick@example.com')
+    // The slow submit settles last, but it is stale — its `onSuccess` must
+    // not run, or `docStore` (and every view bound to `user.doc`) would
+    // show the stale document while `setValue.data` holds the fresh one.
+    expect(user.doc!.email).toBe('quick@example.com')
+    expect(user.setValue.data?.email).toBe('quick@example.com')
+  })
+
   it('does not let a stale setValue success clear the newest submit error', async () => {
     const user = useDoc<User>({
       baseUrl,

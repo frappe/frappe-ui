@@ -30,8 +30,10 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  *
  * The shared refs follow `useAction`'s newest-wins rule: `data` and `error`
  * belong to the submit that started last. A submit that is no longer the
- * newest when it settles writes nothing shared — it only answers its own
- * caller. `loading` is true while any submit is in flight.
+ * newest when it settles writes nothing shared — not `data` or `error`, not
+ * the `onSuccess`/`onError` hooks (where `useDoc` writes its stores), not
+ * the idb cache. It only answers its own caller. `loading` is true while
+ * any submit is in flight.
  *
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
  * response, resolves `null` on a failed request (read `error`), and rejects
@@ -96,6 +98,8 @@ export function useIsolatedCall<
   const isFinished = computed(() => settledOnce.value && pending.value === 0)
   const canAbort = computed(() => pending.value > 0)
 
+  const normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
+
   // The sequence number of the submit that started most recently. Only that
   // submit may write `data` and `error`.
   let lastStarted = 0
@@ -134,11 +138,24 @@ export function useIsolatedCall<
           baseUrl,
           immediate: false,
           refetch: false,
-          cacheKey,
           staleOnError,
           transform,
-          onSuccess,
-          onError,
+          // The hooks and the cache write are shared side effects — this is
+          // where `useDoc` writes `docStore` and `listStore`. They follow the
+          // same newest-wins gate as `data` and `error` below: a submit that
+          // is no longer the newest fires nothing, or its stale response
+          // would overwrite a fresher one in the stores and in idb.
+          onSuccess: (data: TResponse) => {
+            if (!isNewest()) return
+            if (normalizedCacheKey) {
+              idbStore.set(normalizedCacheKey, data)
+            }
+            onSuccess?.(data)
+          },
+          onError: (error: Error) => {
+            if (!isNewest()) return
+            onError?.(error)
+          },
         }),
       )!
       inflight.add(call)
@@ -205,7 +222,6 @@ export function useIsolatedCall<
   }
 
   // Cached fallback, same rules as `useCall`'s `_data`.
-  let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
   let cachedResponse = ref<TResponse | null>(null)
 
   const data = computed(() => {
