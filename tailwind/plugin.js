@@ -17,36 +17,27 @@ let cssVariables = mergeVariableLayers(
   generateRadiusVariables(),
 )
 
-// Emit `--radius-{key}` for every radius token (numeric scale + aliases) so
-// the values are inspectable as real CSS variables. `borderRadius` is rewired
-// below to consume these vars, so `rounded-4` and `--radius-4` stay in sync.
+// Emit `--radius-{key}` for every radius token (the numbered scale plus the
+// kept `none` / `full` names — the deprecated size aliases were removed in
+// 1.0.0 per ADR-0006, #998) so the values are inspectable as real CSS
+// variables. `borderRadius` is rewired below to consume these vars, so
+// `rounded-4` and `--radius-4` stay in sync.
 function generateRadiusVariables() {
   const vars = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
-    if (key === 'DEFAULT') continue
     vars[`--radius-${key}`] = value
   }
   return { ':root': vars }
 }
 
-// Map `DEFAULT` (Tailwind's `rounded` class) onto the numeric var that
-// shares its value, so we don't emit a `--radius-DEFAULT` (awkward name).
 // Each value carries a trailing `/* {px} */` comment so editor tooling
 // (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
-// the opaque `var(--radius-*)` reference.
+// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
+// `rounded` utility no longer exists — use `rounded-4`.
 function buildRadiusConfig() {
-  const numericByValue = {}
-  for (const [key, value] of Object.entries(radiusTokens)) {
-    if (/^\d+$/.test(key)) numericByValue[value] = key
-  }
   const out = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
-    if (key === 'DEFAULT') {
-      const numeric = numericByValue[value]
-      out[key] = numeric ? `var(--radius-${numeric}) /* ${value} */` : value
-    } else {
-      out[key] = `var(--radius-${key}) /* ${value} */`
-    }
+    out[key] = `var(--radius-${key}) /* ${value} */`
   }
   return out
 }
