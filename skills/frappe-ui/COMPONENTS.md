@@ -125,9 +125,6 @@ Renders a kbd combo. `<KeyboardShortcut keys="cmd+k" />`.
 ### `List` family (`frappe-ui/list`)
 The list primitive — use it for **every** list. `List` + `ListRow`/`ListCell`; feed mode (no columns) or table mode (`:columns` + `ListHeader`/`ListHeaderCellSort`); `ListGroup` for labelled buckets. Selection via `selectable` + `v-model:selection`, active row via `v-model:active`. Sort state and comparators are app code — header cells only render the `direction` you pass. Size rows via `:row-height` and the `list-row-px-*` / `list-gap-*` utilities.
 
-### `ListFilter`
-Filter builder UI matched to Frappe-style queries.
-
 ### `Tree`
 Hierarchical lists.
 

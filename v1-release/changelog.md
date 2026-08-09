@@ -9,6 +9,13 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### ListFilter — removed (breaking)
+
+- **Breaking, loud:** `ListFilter` is no longer exported — the import fails.
+  Its internals (`SearchComplete`, `FilterIcon`) are gone with it (#992,
+  #999). No consumer app used it. Build filter UI in app code with `Select`
+  and `Combobox`.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave

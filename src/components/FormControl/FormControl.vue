@@ -58,9 +58,9 @@ const attrs = useAttrs()
 
 // FormControl represents "form context = full width" — the legacy template
 // hard-coded `class="w-full"` on Select/Combobox. Preserve that contract for
-// all select-like dispatched types (including bare uses with no label, e.g.
-// ListFilter's operator picker placed inside a min-width column). Standalone
-// Select/Combobox/MultiSelect retain their own hasLabeling heuristic.
+// all select-like dispatched types, including bare uses with no label.
+// Standalone Select/Combobox/MultiSelect retain their own hasLabeling
+// heuristic.
 const fillWidth = computed(() =>
   new Set([
     'select',

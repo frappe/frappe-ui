@@ -86,7 +86,6 @@ export * from './components/ItemListRow'
 // ListView family moved to `frappe-ui/experimental` (#985, P14) — it stays
 // there, unstable, until `frappe-ui/list` reaches functional parity. See
 // v1-release/plan.md's ListView row.
-export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export * from './components/Calendar'
 export * from './components/Tree'
 
