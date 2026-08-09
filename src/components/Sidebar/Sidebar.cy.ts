@@ -246,7 +246,7 @@ describe('<SidebarCard />', () => {
 
   it('shows the theme icon automatically for non-gray themes', () => {
     cy.mount(SidebarCard, { props: { title, theme: 'blue' } })
-    cy.get('[data-slot=prefix] .lucide-info')
+    cy.get('[data-slot=prefix] svg')
       .should('exist')
       .and('have.class', 'text-ink-blue-8')
 
@@ -254,7 +254,7 @@ describe('<SidebarCard />', () => {
     cy.get('[data-slot=prefix]').should('not.exist')
 
     cy.mount(SidebarCard, { props: { title, icon: true } })
-    cy.get('[data-slot=prefix] .lucide-info')
+    cy.get('[data-slot=prefix] svg')
       .should('exist')
       .and('have.class', 'text-ink-gray-8')
 

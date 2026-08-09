@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, watchEffect, type Component } from 'vue'
+import { computed, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
-import type { ButtonProps } from '../Button'
+import { warnUnsupportedIconString } from '../../utils/iconString'
 import {
-  isLucideIconString,
-  warnUnsupportedIconString,
-} from '../../utils/iconString'
+  lineStatusIcons,
+  mergeActionProps,
+  useStatusIcon,
+} from '../shared/statusIcon'
 import type { AlertAction } from '../Alert'
 import type { SidebarCardProps, SidebarCardTheme } from './types'
 
@@ -43,14 +44,6 @@ watchEffect(() => {
   }
 })
 
-const themeIcons: Record<SidebarCardTheme, string> = {
-  gray: 'lucide-info',
-  blue: 'lucide-info',
-  green: 'lucide-circle-check',
-  amber: 'lucide-triangle-alert',
-  red: 'lucide-circle-x',
-}
-
 // The card uses the 700-level ink — one step deeper than Alert's icons,
 // per the Figma compact masters.
 const iconColorClasses: Record<SidebarCardTheme, string> = {
@@ -61,24 +54,12 @@ const iconColorClasses: Record<SidebarCardTheme, string> = {
   red: 'text-ink-red-8',
 }
 
-const resolvedIcon = computed<string | Component | null>(() => {
-  if (props.icon === false) return null
-  if (props.icon === true) return themeIcons[props.theme]
-  if (props.icon === undefined) {
-    return props.theme === 'gray' ? null : themeIcons[props.theme]
-  }
-  return props.icon
+// Auto icons are the exact Figma line status glyphs (the compact-card set).
+const { lucideIcon, componentIcon } = useStatusIcon({
+  icon: () => props.icon,
+  theme: () => props.theme,
+  icons: lineStatusIcons,
 })
-
-const lucideIcon = computed(() =>
-  isLucideIconString(resolvedIcon.value) ? resolvedIcon.value : null,
-)
-
-const componentIcon = computed(() =>
-  resolvedIcon.value && typeof resolvedIcon.value !== 'string'
-    ? resolvedIcon.value
-    : null,
-)
 
 const showPrefix = computed(() =>
   Boolean(slots.prefix || lucideIcon.value || componentIcon.value),
@@ -98,16 +79,6 @@ function dismiss() {
 
 function handleAction(action?: AlertAction) {
   action?.onClick?.({ dismiss })
-}
-
-/** Button defaults; caller-provided fields win. `onClick` is bound separately with the `{ dismiss }` context. */
-function mergeActionProps(
-  defaults: ButtonProps,
-  action: AlertAction,
-): ButtonProps {
-  const { onClick: _onClick, ...rest } = action
-  void _onClick
-  return { ...defaults, ...rest }
 }
 
 // Button has no `amber` theme, so amber falls back to gray and gets its ramp

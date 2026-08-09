@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, watchEffect, type Component } from 'vue'
+import { computed, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
-import type { ButtonProps } from '../Button'
+import { warnUnsupportedIconString } from '../../utils/iconString'
 import {
-  isLucideIconString,
-  warnUnsupportedIconString,
-} from '../../utils/iconString'
+  mergeActionProps,
+  solidStatusIcons,
+  useStatusIcon,
+} from '../shared/statusIcon'
 import { alertProps, type AlertAction, type AlertTheme } from './types'
 
 const props = defineProps(alertProps)
@@ -54,14 +55,6 @@ const role = computed(() =>
   props.theme === 'red' || props.theme === 'amber' ? 'alert' : 'status',
 )
 
-const themeIcons: Record<AlertTheme, string> = {
-  gray: 'lucide-info',
-  blue: 'lucide-info',
-  green: 'lucide-circle-check',
-  amber: 'lucide-triangle-alert',
-  red: 'lucide-circle-x',
-}
-
 const iconColorClasses: Record<AlertTheme, string> = {
   gray: 'text-ink-gray-7',
   blue: 'text-ink-blue-6',
@@ -70,24 +63,12 @@ const iconColorClasses: Record<AlertTheme, string> = {
   red: 'text-ink-red-6',
 }
 
-const resolvedIcon = computed<string | Component | null>(() => {
-  if (props.icon === false) return null
-  if (props.icon === true) return themeIcons[props.theme]
-  if (props.icon === undefined) {
-    return props.theme === 'gray' ? null : themeIcons[props.theme]
-  }
-  return props.icon
+// Auto icons are the exact Figma solid status glyphs.
+const { lucideIcon, componentIcon } = useStatusIcon({
+  icon: () => props.icon,
+  theme: () => props.theme,
+  icons: solidStatusIcons,
 })
-
-const lucideIcon = computed(() =>
-  isLucideIconString(resolvedIcon.value) ? resolvedIcon.value : null,
-)
-
-const componentIcon = computed(() =>
-  resolvedIcon.value && typeof resolvedIcon.value !== 'string'
-    ? resolvedIcon.value
-    : null,
-)
 
 const showPrefix = computed(() =>
   Boolean(slots.prefix || lucideIcon.value || componentIcon.value),
@@ -109,16 +90,6 @@ function dismiss() {
 
 function handleAction(action?: AlertAction) {
   action?.onClick?.({ dismiss })
-}
-
-/** Per-layout Button defaults; caller-provided fields win. `onClick` is bound separately with the `{ dismiss }` context. */
-function mergeActionProps(
-  defaults: ButtonProps,
-  action: AlertAction,
-): ButtonProps {
-  const { onClick: _onClick, ...rest } = action
-  void _onClick
-  return { ...defaults, ...rest }
 }
 
 const rowActionProps = computed(() =>
@@ -155,10 +126,15 @@ const bannerPrimaryProps = computed(() =>
     : undefined,
 )
 
-// The design's elevated neutral button — outline gray + a soft shadow
-// (approved off-Figma compromise). Dropped when the caller sets a variant.
+// The design's elevated neutral button — white surface + shadow, no border.
+// Outline gray gives the white bg and press state; `!border-transparent`
+// removes the border in every state (an important base declaration beats the
+// non-important hover/active border rules). Dropped when the caller sets a
+// variant.
 const bannerPrimaryClass = computed(() =>
-  props.primaryAction && !props.primaryAction.variant ? 'shadow-sm' : undefined,
+  props.primaryAction && !props.primaryAction.variant
+    ? 'shadow-sm !border-transparent'
+    : undefined,
 )
 
 const bannerSecondaryProps = computed(() =>
@@ -176,7 +152,7 @@ const bannerSecondaryProps = computed(() =>
     :role="role"
     :data-layout="layout"
     :data-theme="props.theme"
-    class="rounded-6 border border-outline-gray-1 bg-surface-gray-1"
+    class="rounded-6 bg-surface-gray-1"
     :class="
       layout === 'row'
         ? 'flex h-10 items-center py-1.5 pl-3.5 pr-1.5'

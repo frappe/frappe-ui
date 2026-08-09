@@ -32,12 +32,12 @@ describe('<Alert />', () => {
 
   it('shows the theme icon automatically for non-gray themes', () => {
     cy.mount(Alert, { props: { title, theme: 'blue' } })
-    cy.get('[data-slot="prefix"] .lucide-info')
+    cy.get('[data-slot="prefix"] svg')
       .should('exist')
       .and('have.class', 'text-ink-blue-6')
 
     cy.mount(Alert, { props: { title, theme: 'red' } })
-    cy.get('[data-slot="prefix"] .lucide-circle-x')
+    cy.get('[data-slot="prefix"] svg')
       .should('exist')
       .and('have.class', 'text-ink-red-6')
 
@@ -50,7 +50,7 @@ describe('<Alert />', () => {
     cy.get('[data-slot="prefix"]').should('not.exist')
 
     cy.mount(Alert, { props: { title, theme: 'gray', icon: true } })
-    cy.get('[data-slot="prefix"] .lucide-info')
+    cy.get('[data-slot="prefix"] svg')
       .should('exist')
       .and('have.class', 'text-ink-gray-7')
   })
