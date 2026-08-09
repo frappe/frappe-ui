@@ -3,13 +3,17 @@
  */
 import { computed, watchSyncEffect } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { docStore } from './docStore'
+import { docStore, DocStore } from './docStore'
 import { idbStore } from './idbStore'
 
 const DOCTYPE = 'User'
 
 function idbKey(name: string) {
   return `doc:${DOCTYPE}/${name}`
+}
+
+function namespacedIdbKey(namespace: string, name: string) {
+  return `doc:${namespace}::${DOCTYPE}/${name}`
 }
 
 /** A promise whose settlement the test controls, to hold an IDB call open. */
@@ -215,5 +219,122 @@ describe('docStore', () => {
 
     afterDelete.resolve(null)
     await flush()
+  })
+
+  // DocStore derives its namespace automatically from the `user_id` cookie
+  // every logged-in Frappe session already sets — there is no app-facing API
+  // to drive it, so these tests stub `document.cookie` (this file runs with
+  // `@vitest-environment node`, where `document` does not exist unless a test
+  // defines it) and construct a fresh `DocStore`, one per stub, to stand in
+  // for what a real page load — cookie already set, module re-evaluated —
+  // would produce. The module-level `docStore` singleton was already
+  // constructed with no `document` at all when this file loaded, which is
+  // exactly the case the "no cookie" test below also covers directly.
+  describe('cache namespacing (derived from the user_id cookie)', () => {
+    /** Stubs `document.cookie` for one DocStore construction, then restores it. */
+    function newStoreWithCookie(cookie: string | undefined): DocStore {
+      const original = (globalThis as { document?: unknown }).document
+      ;(globalThis as { document?: unknown }).document =
+        cookie === undefined ? undefined : { cookie }
+      try {
+        return new DocStore()
+      } finally {
+        ;(globalThis as { document?: unknown }).document = original
+      }
+    }
+
+    /** `newStoreWithCookie`, but also lets the constructor's fire-and-forget
+     * IDB reconciliation (and any purge it triggers) settle before returning. */
+    async function initStore(cookie: string | undefined): Promise<DocStore> {
+      const store = newStoreWithCookie(cookie)
+      await flush()
+      return store
+    }
+
+    afterEach(() => {
+      delete (globalThis as { document?: unknown }).document
+    })
+
+    it('no cookie, and an explicit Guest cookie, behave byte-identically to before this feature', async () => {
+      const noDocument = await initStore(undefined)
+      const guestCookie = await initStore('user_id=Guest; sid=abc')
+
+      for (const [store, name] of [
+        [noDocument, 'no-document-doc'],
+        [guestCookie, 'guest-cookie-doc'],
+      ] as const) {
+        const record = { doctype: DOCTYPE, name, bio: 'unscoped' }
+        await store.setDoc({ ...record })
+        // Same bare key `doctype/name` this store always used, pre-dating
+        // namespacing entirely.
+        expect(await idbStore.get(idbKey(name))).toMatchObject(record)
+        expect(store.getDoc(DOCTYPE, name).value).toMatchObject(record)
+      }
+    })
+
+    it('a signed-in user gets keys prefixed with their cookie value', async () => {
+      const store = await initStore('user_id=alice%40example.com; sid=abc123')
+      const name = 'namespaced-doc'
+      const record = { doctype: DOCTYPE, name, bio: 'alice doc' }
+
+      await store.setDoc({ ...record })
+
+      // The cookie value arrives URL-encoded, as Frappe sets it for an email
+      // address — the namespace is the decoded form.
+      expect(
+        await idbStore.get(namespacedIdbKey('alice@example.com', name)),
+      ).toMatchObject(record)
+      expect(await idbStore.get(idbKey(name))).toBeNull()
+    })
+
+    it('the same user across two inits keeps their cache', async () => {
+      const name = 'returning-alice'
+      const record = { doctype: DOCTYPE, name, bio: 'alice persisted' }
+
+      const firstLoad = await initStore('user_id=alice')
+      await firstLoad.setDoc({ ...record })
+
+      // A second "page load" for the same account — a fresh instance, same
+      // cookie, so its in-memory maps start empty and it has to read IDB.
+      const secondLoad = await initStore('user_id=alice')
+      secondLoad.getDoc(DOCTYPE, name)
+      await flush()
+
+      expect(secondLoad.getDoc(DOCTYPE, name).value).toMatchObject(record)
+    })
+
+    it('a different user across inits purges the outgoing account and cannot read its docs', async () => {
+      const name = 'handoff-doc'
+      const aliceRecord = { doctype: DOCTYPE, name, bio: 'alice secret' }
+
+      const aliceLoad = await initStore('user_id=alice')
+      await aliceLoad.setDoc({ ...aliceRecord })
+      expect(await idbStore.get(namespacedIdbKey('alice', name))).toMatchObject(
+        aliceRecord,
+      )
+
+      // Bob opens the same (shared) browser next.
+      const bobLoad = await initStore('user_id=bob')
+
+      // Bob's read is a fresh slot: no cross-account read of alice's doc.
+      expect(bobLoad.getDoc(DOCTYPE, name).value).toBe(null)
+      // The handoff also purges alice's doc from IDB rather than leaving it
+      // to rot behind its own prefix indefinitely.
+      expect(await idbStore.get(namespacedIdbKey('alice', name))).toBeNull()
+    })
+
+    it('the first namespaced init does not purge data cached before any user was known', async () => {
+      const name = 'pre-login-doc'
+      const record = { doctype: DOCTYPE, name, bio: 'cached before login' }
+      // Written by the unnamespaced module-level store, as if fetched before
+      // the app resolved who was signed in.
+      await docStore.setDoc({ ...record })
+
+      // First time this "browser" has ever recorded a namespace: nothing to
+      // distrust yet, so the existing unscoped cache must survive.
+      await initStore('user_id=alice')
+
+      expect(await idbStore.get(idbKey(name))).toMatchObject(record)
+    })
   })
 })

@@ -9,7 +9,12 @@ type Doc = {
 
 type DocKey = `${string}/${string}`
 
-class DocStore {
+// Reserved key for the last-seen namespace record — not a `doc:`-prefixed
+// entry, so it never turns up in a scan for actual document keys (clearAll,
+// purgeStoredNamespace) and a doctype can never collide with it.
+const NAMESPACE_META_KEY = 'docStore:lastNamespace'
+
+export class DocStore {
   private docs: Map<DocKey, Ref<Doc | null>>
   private lastFetched: Map<DocKey, number>
   private revisions: Map<DocKey, number>
@@ -20,12 +25,95 @@ class DocStore {
   private revisionCounter = 0
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
+  // Prefixes every key with the signed-in user, read once at construction
+  // from the `user_id` cookie every logged-in Frappe session already carries
+  // — no app wiring required. `null` (Guest, no cookie, or SSR) keeps keys
+  // exactly `doctype/name`, unchanged from before namespacing existed.
+  private namespace: string | null
 
   constructor() {
     this.docs = new Map<DocKey, Ref<Doc | null>>()
     this.lastFetched = new Map()
     this.revisions = new Map()
     this.inflight = new Map()
+    this.namespace = this.readCookieNamespace()
+    // Fire-and-forget: `this.namespace` above is set synchronously, so every
+    // key computed this tick or later already reflects it. Only the IDB
+    // reconciliation against the previous page load's namespace — and the
+    // purge it may trigger — trails behind.
+    this.reconcileNamespace().catch((error) => {
+      console.error('Failed to reconcile doc cache namespace:', error)
+    })
+  }
+
+  /**
+   * Reads the standard Frappe session cookie `user_id`, the same cookie every
+   * logged-in Frappe app already sets — nothing for an app to configure.
+   * `undefined` (SSR, or a test environment with no DOM), a missing cookie,
+   * and an explicit `Guest` value all resolve to `null`, matching today's
+   * unnamespaced behavior for a signed-out visitor.
+   */
+  private readCookieNamespace(): string | null {
+    if (typeof document === 'undefined' || !document.cookie) return null
+    for (const pair of document.cookie.split(';')) {
+      const eq = pair.indexOf('=')
+      if (eq === -1) continue
+      if (pair.slice(0, eq).trim() !== 'user_id') continue
+      const raw = pair.slice(eq + 1).trim()
+      let value: string
+      try {
+        value = decodeURIComponent(raw)
+      } catch {
+        value = raw
+      }
+      value = value.trim()
+      return value && value !== 'Guest' ? value : null
+    }
+    return null
+  }
+
+  /**
+   * Namespace changes are only ever detected here, at construction — there is
+   * no live cookie watcher. In practice that's fine: a Frappe login/logout
+   * flow reloads the document, which re-runs this module and constructs a
+   * fresh store. An app that somehow swaps the session user without a reload
+   * would not see the new namespace take effect until the next load.
+   *
+   * Compares the freshly-read namespace against the one recorded in IDB from
+   * the last time this ran. Purging only fires when both are non-null and
+   * differ — a real account handoff. Guest/no-cookie loads (`current` is
+   * null) never touch the record at all, so an intervening logged-out page
+   * load can't erase the trail: the next real login is still compared
+   * against the last account that was actually signed in, not against
+   * whatever happened in between.
+   */
+  private async reconcileNamespace() {
+    const current = this.namespace
+    if (!current) return
+    const stored = (await idbStore.get(NAMESPACE_META_KEY)) as string | null
+    if (stored === current) return
+    if (stored) {
+      // A different account was signed in as of the last page load. Purge it
+      // now rather than let it sit in IDB indefinitely — a shared browser
+      // should not keep accumulating every past account's cached docs.
+      await this.purgeStoredNamespace(stored)
+    }
+    await idbStore.set(NAMESPACE_META_KEY, current)
+  }
+
+  private async purgeStoredNamespace(namespace: string) {
+    // The in-memory `docs` map is always empty this early — this runs from
+    // the constructor, before any getDoc/setDoc call populates it — so the
+    // outgoing namespace's keys can only be found by scanning IDB directly,
+    // the same way clearAll() does.
+    const prefix = this.storePrefix + this.namespacePrefix(namespace)
+    const allKeys = await idbStore.keys()
+    const matching = allKeys.filter((key: string) => key.startsWith(prefix))
+    await Promise.all(matching.map((key: string) => idbStore.delete(key)))
+  }
+
+  private namespacePrefix(namespace: string | null): string {
+    return namespace ? `${namespace}::` : ''
   }
 
   /**
@@ -187,7 +275,7 @@ class DocStore {
   }
 
   private getKey(doctype: string, name: string): DocKey {
-    return `${doctype.trim()}/${name.trim()}` as DocKey
+    return `${this.namespacePrefix(this.namespace)}${doctype.trim()}/${name.trim()}` as DocKey
   }
 
   private isStale(key: DocKey): boolean {
@@ -214,6 +302,7 @@ class DocStore {
         key.startsWith(this.storePrefix),
       )
       await Promise.all(docKeys.map((key: string) => idbStore.delete(key)))
+      await idbStore.delete(NAMESPACE_META_KEY)
       this.docs.clear()
       this.lastFetched.clear()
       this.revisions.clear()
@@ -225,4 +314,10 @@ class DocStore {
   }
 }
 
+// The package's one DocStore instance. Not part of the public surface — there
+// is no app-facing API for this store at all. useDoc, useNewDoc, useDoctype
+// and useList reach it with a relative import; every doc it caches is
+// automatically scoped to whichever `user_id` cookie was present when this
+// module first ran (see the constructor / readCookieNamespace above), so
+// there is nothing for an app to call or configure.
 export const docStore = new DocStore()
