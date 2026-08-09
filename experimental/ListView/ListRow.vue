@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox/Checkbox.vue'
+import Checkbox from '#components/Checkbox/Checkbox.vue'
 import ListRowItem from './ListRowItem.vue'
 import { alignmentMap, getGridTemplateColumns } from './utils'
 import { computed, inject } from 'vue'

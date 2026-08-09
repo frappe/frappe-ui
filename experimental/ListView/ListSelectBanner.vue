@@ -69,8 +69,8 @@
 </template>
 
 <script setup>
-import Checkbox from '../Checkbox/Checkbox.vue'
-import { Button } from '../Button'
+import Checkbox from '#components/Checkbox/Checkbox.vue'
+import { Button } from '#components/Button'
 import { computed, inject } from 'vue'
 
 defineOptions({

@@ -18,3 +18,9 @@ export type {
   CodeEditorEmits,
   CodePreviewProps,
 } from './experimental/CodeEditor'
+// ListView family. Moved out of root (#985) — `frappe-ui/list` is
+// composition-based by design (P3) and doesn't replicate ListView's
+// config-driven columns (resizable widths, per-column getLabel/prefix
+// functions, tooltips, disabled-row exclusion, the select banner), so this
+// stays here, unstable, until `frappe-ui/list` reaches parity.
+export * from './experimental/ListView'

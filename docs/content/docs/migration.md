@@ -789,6 +789,26 @@ representation yourself is a few lines of `FileReader.readAsDataURL`.
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## ListView — moved to `frappe-ui/experimental`
+
+`ListView` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and stays there until
+`frappe-ui/list` reaches full functional parity. The import fails at the
+root; switch the subpath:
+
+```ts
+// Before
+import { ListView, ListRow, ListHeader } from 'frappe-ui'
+
+// After
+import { ListView, ListRow, ListHeader } from 'frappe-ui/experimental'
+```
+
+Every other name in the family moves the same way: `List`, `ListEmptyState`,
+`ListFooter`, `ListGroupHeader`, `ListGroupRows`, `ListGroups`,
+`ListHeaderItem`, `ListRowItem`, `ListRows`, `ListSelectBanner`. Nothing about
+the component itself changed — only where it's imported from.
+
 ## Sidebar
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /

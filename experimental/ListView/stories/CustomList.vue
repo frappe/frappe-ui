@@ -1,10 +1,8 @@
 <script setup>
 import { reactive } from 'vue'
 
+import { Avatar, Badge, Button } from 'frappe-ui'
 import {
-  Avatar,
-  Badge,
-  Button,
   ListHeader,
   ListHeaderItem,
   ListRow,
@@ -12,7 +10,7 @@ import {
   ListRows,
   ListSelectBanner,
   ListView,
-} from 'frappe-ui'
+} from 'frappe-ui/experimental'
 
 const custom_columns = reactive([
   { label: 'Name', key: 'name', width: 3, icon: 'lucide-user' },

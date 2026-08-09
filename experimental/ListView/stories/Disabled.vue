@@ -1,8 +1,10 @@
 <script setup>
 import { h, reactive } from 'vue'
-import { Avatar, Badge, ListView } from 'frappe-ui'
 
-const cols = reactive([
+import { Avatar } from 'frappe-ui'
+import { ListView } from 'frappe-ui/experimental'
+
+const columns = reactive([
   {
     label: 'Name',
     key: 'name',
@@ -19,6 +21,7 @@ const cols = reactive([
 const rows = [
   {
     id: 1,
+    disabled: true,
     name: 'John Doe',
     email: 'john@doe.com',
     status: 'Active',
@@ -38,28 +41,15 @@ const rows = [
 
 <template>
   <ListView
-    class="h-[250px]"
-    :columns="cols"
+    class="h-[150px]"
+    :columns="columns"
     :rows="rows"
     :options="{
+      getRowRoute: (row) => `/users/${row.id}`,
       selectable: true,
       showTooltip: true,
       resizeColumn: true,
-      emptyState: {
-        title: 'No records found',
-        description: 'Create a new record to get started',
-        button: {
-          label: 'New Record',
-          variant: 'solid',
-          onClick: () => console.log('New Record'),
-        },
-      },
     }"
     row-key="id"
-  >
-    <template #cell="{ item, row, column }">
-      <Badge v-if="column.key === 'status'">{{ item }}</Badge>
-      <span class="font-medium text-ink-gray-7" v-else>{{ item }}</span>
-    </template>
-  </ListView>
+  />
 </template>

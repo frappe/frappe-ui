@@ -75,8 +75,12 @@ in them is marked `@deprecated`:
 - **`ListView`** — sweep #882 confirmed the parity gap is real and structural
   (resizable columns, per-column function props, tooltips, disabled-row
   exclusion, select banner — none of which `frappe-ui/list`'s composition
-  model replicates by design, P3). Decision: ListView ships frozen, not
-  deprecated, for v1. See its row in `plan.md`.
+  model replicates by design, P3). #985 superseded the "ships frozen at root"
+  call: ListView is not taken to bar at root, and moves to
+  `frappe-ui/experimental` (P14, no stability promise) instead — it stays
+  there until `frappe-ui/list` reaches parity. Nothing on it is marked
+  `@deprecated`, so ADR-0008 still doesn't reach it. See its row in
+  `plan.md`.
 
 If any of the three gets a `@deprecated` marker before the tag, it joins the
 table above and has to be removed with the rest.
