@@ -81,7 +81,7 @@ means deleting that wrapper:
 <!-- before -->
 <Tooltip>
   <template #body>
-    <div class="rounded-4 bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl">
+    <div class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl">
       <span>Hide password</span>
     </div>
   </template>
