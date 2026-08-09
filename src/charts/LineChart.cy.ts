@@ -179,6 +179,62 @@ describe('LineChart', () => {
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '6')
   })
 
+  describe('numeric x axis', () => {
+    /**
+     * Uneven quantities: two neighbours and one far out. Evenly spaced numbers
+     * draw the same on either reading, which would prove nothing.
+     */
+    const byDiscount = [
+      { discount: 1, revenue: 10 },
+      { discount: 2, revenue: 20 },
+      { discount: 100, revenue: 30 },
+    ]
+
+    /** The symbols. A stroke has no position of its own; a dot does. */
+    const dots = () => cy.get(`${MARKS} path[fill^="#"]`)
+
+    function mountNumeric() {
+      return cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 480px; height: 300px' }, [
+                h(LineChart, {
+                  data: byDiscount,
+                  x: 'discount',
+                  y: 'revenue',
+                  xAxis: { type: 'value' },
+                  seriesConfig: { revenue: { showDataPoints: true } },
+                  echartOptions: { animation: false },
+                }),
+              ])
+          },
+        }),
+      )
+    }
+
+    it('places a point at its value, not in its row’s slot', () => {
+      mountNumeric()
+      dots().should('have.length', byDiscount.length)
+      dots().then(($dots) => {
+        const centers = [...$dots]
+          .map((el) => {
+            const box = el.getBoundingClientRect()
+            return box.left + box.width / 2
+          })
+          .sort((a, b) => a - b)
+
+        const [first, second, third] = centers
+
+        // Three slots put the same distance between both pairs, whatever the
+        // numbers say. Drawn on the scale, the gaps hold the ratio of the
+        // numbers behind them: 1 to 2 is a 99th of 1 to 100. Which axis the
+        // plot took is the whole of the difference between the two.
+        expect((second - first) / (third - first)).to.be.closeTo(1 / 99, 0.005)
+      })
+    })
+  })
+
   it('titles each value axis over the edge its axis is drawn on', () => {
     mountChart({
       y: 'sales',

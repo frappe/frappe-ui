@@ -4,6 +4,7 @@ import { useChart } from './useChart'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
   hasSecondaryValueAxis,
+  plotRows,
   resolveSeriesColors,
   resolveXAxis,
 } from '../axisChartCommon'
@@ -60,10 +61,11 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const stackShares = computed(() => args.stackShares?.())
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
-  // read the axis the way it is actually drawn.
-  const xAxis = computed(() => resolveXAxis(config.value))
+  // read the axis the way it is actually drawn — and the same row list, so a
+  // datapoint index means the same row on both sides.
+  const xAxis = computed(() => resolveXAxis(config.value, horizontal.value))
   const xAxisType = computed(() => xAxis.value.type)
-  const rows = computed(() => config.value.data ?? [])
+  const rows = computed(() => plotRows(config.value, xAxisType.value, true))
   const isEmpty = computed(
     () => !rows.value.length || !config.value.series.length,
   )
@@ -196,7 +198,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   /**
    * The hovered index comes from a pixel-to-value conversion rather than
    * echarts' `updateAxisPointer` payload, because that payload reports the axis
-   * *value*, which differs in shape between category and time axes.
+   * *value*, which differs in shape between a category axis and a scaled one.
    */
   function hoveredIndex(offsetX: number, offsetY: number): number | null {
     const instance = chart.value
@@ -218,16 +220,28 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       const index = Math.round(value)
       return index >= 0 && index < rows.value.length ? index : null
     }
-    return nearestByTime(value)
+
+    // A time or value axis converts to a coordinate rather than to a slot
+    // index, so what is being pointed at is the row nearest along that scale.
+    // One reading for both: they differ only in what turns a cell into a number.
+    const key = config.value.xAxis.key
+    return nearestOnScale(value, (row) =>
+      xAxisType.value === 'value'
+        ? Number(row[key])
+        : new Date(row[key]).getTime(),
+    )
   }
 
-  function nearestByTime(timestamp: number): number | null {
+  function nearestOnScale(
+    target: number,
+    coordinate: (row: Record<string, any>) => number,
+  ): number | null {
     let best: number | null = null
     let bestDistance = Infinity
     rows.value.forEach((row, index) => {
-      const time = new Date(row[config.value.xAxis.key]).getTime()
-      if (isNaN(time)) return
-      const distance = Math.abs(time - timestamp)
+      const at = coordinate(row)
+      if (isNaN(at)) return
+      const distance = Math.abs(at - target)
       if (distance < bestDistance) {
         bestDistance = distance
         best = index

@@ -4,10 +4,12 @@ import { insideLabelColor, type ChartTheme } from './theme'
 import {
   axisChartBase,
   buildAxisGrid,
-  buildCategoryAxis,
   buildValueAxes,
+  buildXAxis,
   hasSecondaryValueAxis,
+  plotRows,
   resolveSeriesColors,
+  resolveXAxis,
   toNumber,
   valueAxisIndex,
   BLUR_OPACITY,
@@ -72,6 +74,8 @@ type SeriesContext = {
   color: string
   /** Entry of the value-axis array this series is measured against. */
   yAxisIndex: number
+  /** Where a row sits along the x axis: its own number, or its category. */
+  xValue: (row: Record<string, any>) => any
   /** Whether this bar ends its column, in the direction that row runs. */
   carriesTip: (entry: PlottedSeries, rowIndex: number, value: number) => boolean
   /** Whether this area stacks onto another, i.e. reads as a band. */
@@ -102,7 +106,13 @@ export function buildAxisChartOption(
 ): EChartsCoreOption {
   const isRTL = config.dir === 'rtl'
   const horizontal = Boolean(config.horizontal)
-  const rows = config.data ?? []
+  const { type: xAxisType } = resolveXAxis(config, horizontal)
+  if (horizontal && config.xAxis.type === 'value') {
+    warn(
+      `\`horizontal\` gives the x column the vertical axis and runs the value axis across the plot, where a bar is sized from the slot it stands in. \`xAxis.type: "value"\` hands out no slots, so it is ignored and "${config.xAxis.key}" is drawn as categories.`,
+    )
+  }
+  const rows = plotRows(config, xAxisType)
   const colors = resolveSeriesColors(config, theme)
 
   const plotted = plotSeries(config)
@@ -113,8 +123,16 @@ export function buildAxisChartOption(
   // in the legend should not re-space the category axis under the plot.
   const hasBars = plotted.some((entry) => entry.mark === 'bar')
   const categories = rows.map((row) => row[config.xAxis.key])
+  // A point on a value axis carries its own coordinate; on the other two the
+  // pair holds whatever the column does and echarts matches it to a slot.
+  const xValue = (row: Record<string, any>) =>
+    xAxisType === 'value'
+      ? toNumber(row[config.xAxis.key])
+      : row[config.xAxis.key]
 
-  const categoryAxis = buildCategoryAxis(config, theme, {
+  // Not the x axis of the option: `horizontal` moves the column it carries to
+  // the vertical edge.
+  const xColumnAxis = buildXAxis(config, theme, {
     categories,
     horizontal,
     isRTL,
@@ -141,8 +159,8 @@ export function buildAxisChartOption(
       labelGutter: dataLabelGutter(plotted),
       xAxisTitle: config.xAxis.title,
     }),
-    xAxis: horizontal ? valueAxis : categoryAxis,
-    yAxis: horizontal ? categoryAxis : valueAxis,
+    xAxis: horizontal ? valueAxis : xColumnAxis,
+    yAxis: horizontal ? xColumnAxis : valueAxis,
     series: [
       ...visible.map((entry) =>
         buildSeries(entry, config, {
@@ -152,6 +170,7 @@ export function buildAxisChartOption(
           isRTL,
           color: colors[entry.series.name],
           yAxisIndex: valueAxisIndex(entry.series, hasSecondary),
+          xValue,
           carriesTip,
           banded: isBanded(entry, plotted),
           share: shares.get(entry.series.name) ?? null,
@@ -165,6 +184,9 @@ export function buildAxisChartOption(
         theme,
         horizontal,
         hasSecondaryValueAxis: hasSecondary,
+        // A numeric x axis has no categories, so `axis: 'x'` is a number on
+        // that scale — the same line a scatter draws, down the same path.
+        hasCategoryAxis: xAxisType !== 'value',
       }),
     ],
   }
@@ -243,7 +265,11 @@ export function buildStackShares(
   const visible = plotted.filter(
     (entry) => !hiddenSeries.includes(entry.series.name),
   )
-  return stackShares(config, visible, config.data ?? [])
+  // The rows the option laid out, not the ones the caller passed: the tooltip
+  // reads a share by datapoint index, so the two have to be counting the same
+  // list.
+  const { type } = resolveXAxis(config, Boolean(config.horizontal))
+  return stackShares(config, visible, plotRows(config, type, true))
 }
 
 function stackShares(
@@ -377,7 +403,7 @@ function buildSeries(
 ) {
   const base =
     entry.mark === 'bar'
-      ? buildBarSeries(entry, config, ctx)
+      ? buildBarSeries(entry, ctx)
       : buildLineSeries(entry, config, ctx)
 
   return mergeDeep(base, entry.series.echartOptions)
@@ -445,18 +471,14 @@ function barLabelPosition(
   return 'top'
 }
 
-function buildBarSeries(
-  entry: PlottedSeries,
-  config: AxisChartConfig,
-  ctx: SeriesContext,
-) {
+function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
   const { series } = entry
   const { rows, horizontal, isRTL, color, theme, carriesTip, yAxisIndex } = ctx
 
   const data = rows.map((row, index) => {
-    const category = row[config.xAxis.key]
+    const at = ctx.xValue(row)
     const value = ctx.share ? ctx.share[index] : toNumber(row[series.name])
-    const point = horizontal ? [value, category] : [category, value]
+    const point = horizontal ? [value, at] : [at, value]
     const rounded =
       value !== null && carriesTip(entry, index, value)
         ? borderRadius(value, horizontal, isRTL)
@@ -515,7 +537,7 @@ function buildLineSeries(
   const { rows, color, theme, yAxisIndex, banded } = ctx
 
   const data = rows.map((row, index) => [
-    row[config.xAxis.key],
+    ctx.xValue(row),
     ctx.share ? ctx.share[index] : toNumber(row[series.name]),
   ])
 

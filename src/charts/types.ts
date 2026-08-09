@@ -27,8 +27,14 @@ export type ChartXAxisConfig = {
    * Inferred: `'time'` when every value in `key` is a `Date` or ISO date
    * string, `'category'` otherwise. Set it to override — e.g. `'category'` to
    * line dates up as evenly spaced buckets rather than on a real timeline.
+   *
+   * `'value'` reads the column as a quantity: a point sits at its own number,
+   * so a row at 1 and a row at 100 stand a hundred apart rather than in
+   * neighbouring slots. It is only ever asked for, never inferred — a category
+   * column often holds numbers, and re-spacing those would redraw a chart
+   * nobody changed. It is ignored on a horizontal bar chart.
    */
-  type?: 'category' | 'time'
+  type?: 'category' | 'time' | 'value'
   /** Label granularity on a time axis. Inferred from the spacing of the data. */
   timeGrain?: TimeGrain
   title?: string
@@ -105,7 +111,8 @@ export type ReferenceLine = {
    *
    * On a scatter both axes are value axes, so `'x'` is a number on the
    * horizontal scale rather than a category, and `'y2'` names an axis a scatter
-   * does not have — it reads as `'y'`, with a dev-mode warning.
+   * does not have — it reads as `'y'`, with a dev-mode warning. An axis chart
+   * with `xAxis.type: 'value'` reads `'x'` the same way: a number on the scale.
    */
   axis?: 'y' | 'y2' | 'x'
   /** Printed at the far end of the line. Left out, the rule carries no text. */
@@ -579,8 +586,13 @@ export type ChartXAxisOptions = {
   /**
    * Inferred: `'time'` when every value in the `x` column is a `Date` or ISO
    * date string, `'category'` otherwise.
+   *
+   * `'value'` reads the column as a quantity and places every point by its own
+   * number, the way a scatter reads its x. Ask for it — it is never inferred,
+   * because a category column that happens to hold numbers still reads as a
+   * list of categories. Ignored when `horizontal` is set.
    */
-  type?: 'category' | 'time'
+  type?: 'category' | 'time' | 'value'
   /** Label granularity on a time axis. Inferred from the spacing of the data. */
   timeGrain?: TimeGrain
   format?: ChartCategoryFormatter

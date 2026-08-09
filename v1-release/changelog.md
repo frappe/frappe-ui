@@ -31,6 +31,9 @@ Landed so far:
 - `ScatterChart` and `SankeyChart`.
 - Category labels fit themselves — the library measures, tilts and truncates
   instead of taking an angle prop.
+- `xAxis.type: 'value'` reads the x column as a quantity: a point sits at its
+  own number instead of in its row's slot, and the rows draw in numeric order.
+  Ask for it — a column of numbers still reads as categories by default.
 
 ### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
 

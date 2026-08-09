@@ -30,6 +30,7 @@ Insights migrated.
 | Series cap | `maxSeries` | Conventions 3 and 4. A grouping column with 200 values produces an unreadable chart, and `maxSlices` already solves the same problem for the donut. |
 | Scatter | `ScatterChart`, with an optional size measure | Convention 1. It is a way to read two measures against each other. With `referenceLines` it also covers Insights' quadrant lines, so no `show_quadrants` prop. |
 | Sankey | `SankeyChart` | Convention 1. A flow between a source and a target is a reading of the data. |
+| Numeric x axis | `xAxis.type: 'value'` | Convention 1. Reading a measure against a quantity — conversion against discount, revenue against distance — is a statement about the data, the same one `'time'` already makes about a date. It is a third reading of the x column the axis is typed with, not a prop beside it, and the caller still says only what the column means. |
 
 Reference lines have an internal rule that is not API: each line is hosted on
 its own empty series, one per axis, so a legend toggle cannot remove the line
@@ -99,7 +100,7 @@ states, theme-reactive palettes, HTML tooltips with slots, and typed events.
 
 ## Consequences
 
-Two decisions fell out of the work and answer questions this record raised.
+Three decisions fell out of the work and answer questions this record raised.
 
 - **A reference line does not stretch the value axis.** A target far outside the
   data would flatten the data it is read against, so a line beyond the range is
@@ -107,6 +108,12 @@ Two decisions fell out of the work and answer questions this record raised.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.
+- **A numeric x axis is asked for, never inferred.** `'time'` is inferred
+  because a column of dates is a column of dates. A column of numbers is as
+  often a list of categories — quarters, store numbers, shirt sizes — so
+  inferring the scale would re-space charts nobody touched. `horizontal` ignores
+  the setting and says so in a dev-mode warning: it gives the x column the
+  vertical axis, where a bar is sized from the slot it stands in.
 
 One case is still open. **`show_scrollbar`** is a `dataZoom` slider. Insights
 reflows the grid and the legend to make room, and the orientation follows the

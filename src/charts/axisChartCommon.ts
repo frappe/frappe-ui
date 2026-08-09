@@ -90,7 +90,7 @@ export function resolveSeriesColors(
 }
 
 export type ResolvedXAxis = {
-  type: 'category' | 'time'
+  type: 'category' | 'time' | 'value'
   timeGrain?: TimeGrain
 }
 
@@ -98,12 +98,65 @@ export type ResolvedXAxis = {
  * What the x axis actually is, config and data taken together. A category axis
  * spaces its values evenly, which draws a gap-free month out of a series that
  * skips March — so an unset `type` picks `'time'` for a column of dates.
+ *
+ * `'value'` is only ever asked for. A column of numbers is as often a list of
+ * categories — quarters, store numbers, shirt sizes — as it is a quantity, so
+ * inferring the scale would re-space charts nobody touched.
  */
-export function resolveXAxis(config: AxisChartBaseConfig): ResolvedXAxis {
+export function resolveXAxis(
+  config: AxisChartBaseConfig,
+  horizontal = false,
+): ResolvedXAxis {
   const values = (config.data ?? []).map((row) => row[config.xAxis.key])
-  const type = config.xAxis.type ?? (isTemporal(values) ? 'time' : 'category')
+  const asked = config.xAxis.type
+  // `horizontal` runs the value axis across the plot and gives the x column the
+  // vertical one, where a bar is sized from the slot it stands in. A numeric
+  // scale has no slots to hand out, so the ask is dropped rather than half
+  // drawn; the option build says so out loud.
+  const type =
+    asked === 'value' && horizontal
+      ? 'category'
+      : (asked ?? (isTemporal(values) ? 'time' : 'category'))
   if (type !== 'time') return { type }
   return { type, timeGrain: config.xAxis.timeGrain ?? inferTimeGrain(values) }
+}
+
+/**
+ * The rows in the order the plot draws them, and only the rows it can place.
+ *
+ * A value axis puts a point at its own x number instead of in its row's slot,
+ * so rows arriving out of order would draw a line that doubles back on itself,
+ * and a row whose x is not a number has nowhere on the scale to sit. Every
+ * other axis draws the rows as they arrive: that order is the caller's reading
+ * of the data, not something to correct.
+ *
+ * Everything that counts datapoints — the tooltip, the click event, the stack
+ * shares — indexes into these rather than into `config.data`, so the row a
+ * reader points at is the row the option drew there.
+ */
+export function plotRows(
+  config: AxisChartBaseConfig,
+  type: ResolvedXAxis['type'],
+  /** `quiet` for a second read of the same config; see `plotSeries`. */
+  quiet = false,
+): Record<string, any>[] {
+  const rows = config.data ?? []
+  if (type !== 'value') return rows
+
+  const placed: { row: Record<string, any>; x: number }[] = []
+  for (const row of rows) {
+    const x = toNumber(row[config.xAxis.key])
+    if (x !== null) placed.push({ row, x })
+  }
+
+  const dropped = rows.length - placed.length
+  if (dropped && !quiet) {
+    warn(
+      `Dropped ${dropped} ${dropped === 1 ? 'row' : 'rows'}: \`xAxis.type: "value"\` reads "${config.xAxis.key}" as a quantity, and a point with no number for it has nowhere on the scale to sit.`,
+    )
+  }
+
+  return placed.sort((a, b) => a.x - b.x).map((entry) => entry.row)
 }
 
 /** Option keys that hold for any cartesian chart, whatever it draws. */
@@ -174,7 +227,12 @@ export function buildAxisGrid(opts: {
   }
 }
 
-export function buildCategoryAxis(
+/**
+ * The axis the x column is drawn against, whichever of the three readings it
+ * carries. One builder rather than one per type: they differ in how a tick
+ * prints and in whether the values are a list or a scale, and nowhere else.
+ */
+export function buildXAxis(
   config: AxisChartBaseConfig,
   theme: ChartTheme,
   opts: {
@@ -188,11 +246,15 @@ export function buildCategoryAxis(
   },
 ) {
   const { categories, horizontal, isRTL, boundaryGap } = opts
-  const { type, timeGrain } = resolveXAxis(config)
+  const { type, timeGrain } = resolveXAxis(config, horizontal)
   const { rotate, labelWidth } = categoryLabelFit(config, { ...opts, type })
 
   const axis = {
     type,
+    // A quantity read along the plot is a position, not a magnitude: there is
+    // no baseline to anchor to, so the scale follows the data the way both of
+    // a scatter's do.
+    ...(type === 'value' ? { scale: true } : {}),
     // RTL reads right-to-left along the horizontal axis; the vertical axis of a
     // horizontal bar chart is inverted so the first category sits on top.
     inverse: horizontal ? true : isRTL,
@@ -230,33 +292,49 @@ export function buildCategoryAxis(
       // Left out entirely when the labels fit, so a flat axis carries no
       // rotation key at all.
       ...(rotate ? { rotate } : {}),
-      ...(type === 'time'
-        ? {
-            // echarts hands a time axis' formatter the tick's level, which is
-            // what lets the year that opens a run of months read as its header
-            // rather than as another tick. `primary` is echarts' own name for
-            // that level's rich style.
-            formatter: (
-              value: any,
-              _index: number,
-              extra?: { level: number },
-            ) => formatTimeAxisLabel(value, timeGrain, extra?.level),
-            rich: {
-              primary: {
-                color: theme.axisTitle,
-                fontSize: AXIS_LABEL_FONT_SIZE,
-                fontWeight: 600,
-              },
-            },
-          }
-        : {
-            formatter: (value: any) =>
-              categoryLabel(formatAxisValue(value, type), labelWidth),
-          }),
+      ...xAxisLabelFormat(type, { theme, timeGrain, labelWidth }),
     },
   }
 
   return mergeDeep(axis, config.xAxis.echartOptions)
+}
+
+/**
+ * How a tick prints, which is most of what the three readings disagree about.
+ * A value axis prints the compact tick the value axis on the other side of the
+ * plot prints: both are numbers on a scale, and one chart should not round the
+ * same magnitude two ways.
+ */
+function xAxisLabelFormat(
+  type: ResolvedXAxis['type'],
+  opts: { theme: ChartTheme; timeGrain?: TimeGrain; labelWidth?: number },
+) {
+  if (type === 'time') {
+    return {
+      // echarts hands a time axis' formatter the tick's level, which is what
+      // lets the year that opens a run of months read as its header rather
+      // than as another tick. `primary` is echarts' own name for that level's
+      // rich style.
+      formatter: (value: any, _index: number, extra?: { level: number }) =>
+        formatTimeAxisLabel(value, opts.timeGrain, extra?.level),
+      rich: {
+        primary: {
+          color: opts.theme.axisTitle,
+          fontSize: AXIS_LABEL_FONT_SIZE,
+          fontWeight: 600,
+        },
+      },
+    }
+  }
+
+  if (type === 'value') {
+    return { formatter: (value: number) => formatValue(value, 1, true) }
+  }
+
+  return {
+    formatter: (value: any) =>
+      categoryLabel(formatAxisValue(value, type), opts.labelWidth),
+  }
 }
 
 type CategoryLabelFit = {
@@ -289,14 +367,16 @@ function categoryLabelFit(
     isRTL: boolean
     boundaryGap: boolean
     width?: number
-    type: 'category' | 'time'
+    type: ResolvedXAxis['type']
   },
 ): CategoryLabelFit {
   const { type, horizontal, isRTL, width } = opts
 
-  // A time axis picks its own ticks — it drops to a coarser interval rather
-  // than crowd them — and its levelled labels, a bold year heading a run of
-  // months, only read as a heading while they sit flat.
+  // Only a category axis draws a label per row, which is the crowding this
+  // measures. A time or value axis picks its own ticks — it drops to a coarser
+  // interval rather than crowd them — and both print something short: a round
+  // number, or a levelled date whose bold year only heads a run of months
+  // while it sits flat.
   if (type !== 'category') return { rotate: 0 }
 
   // A row chart's categories are already stacked one per line down the side,
@@ -507,4 +587,8 @@ export function toNumber(value: any): number | null {
   if (value === null || value === undefined || value === '') return null
   const parsed = Number(value)
   return isNaN(parsed) ? null : parsed
+}
+
+function warn(message: string) {
+  if (import.meta.env.DEV) console.warn(`[frappe-ui] ${message}`)
 }

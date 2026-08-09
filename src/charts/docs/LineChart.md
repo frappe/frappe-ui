@@ -9,6 +9,20 @@ Two series on a time axis, one dashed as the comparison. `smooth`, `lineType`,
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
+## A numeric x axis
+
+`xAxis.type: 'value'` reads the x column as a quantity. A point sits at its own
+number, so a row at 5 and a row at 60 stand as far apart as the numbers are, and
+the rows draw in numeric order whatever order they arrive in.
+
+The default reading is `'category'`, which gives every row an equal slot. A
+column of dates becomes `'time'` on its own, but a column of numbers never
+becomes a scale by itself — a category column often holds numbers, so the scale
+is asked for. `horizontal` ignores the setting, because a bar is sized from the
+slot it stands in.
+
+<ComponentPreview name="Charts-LineNumericAxis" csr="true" self-layout />
+
 ## A second value axis
 
 `y2` measures a column against a second value axis, drawn opposite the primary —
@@ -32,7 +46,8 @@ combo chart.
 
 `referenceLines` draws a rule over the plot at a fixed position. `axis` says what
 `value` is read against: `'y'` (the default) or `'y2'` for a rule across the plot
-at a measured value, `'x'` for one down it at a category or a date. Each line
+at a measured value, `'x'` for one down it at a category, a date, or a number on
+a numeric x axis. Each line
 also takes an optional `label`, `color` and `dashed`.
 
 <ComponentPreview name="Charts-LineThresholds" csr="true" self-layout />

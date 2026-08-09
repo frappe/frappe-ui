@@ -218,13 +218,16 @@ export function inferTimeGrain(values: any[]): TimeGrain {
   return match ? match[1] : 'year'
 }
 
-/** Axis tick labels for a category/time axis; values arrive raw from the row. */
+/** How a value of the x column reads; values arrive raw from the row. */
 export function formatAxisValue(
   value: any,
-  type: 'category' | 'time',
+  type: 'category' | 'time' | 'value',
   grain?: TimeGrain,
 ) {
   if (type === 'time') return formatDate(value, grain)
+  // Unshortened, unlike the tick that carries the same number: this is what the
+  // tooltip prints, and a reading of 1.2K there loses the value being read.
+  if (type === 'value') return formatValue(Number(value))
   return value === null || value === undefined ? '' : String(value)
 }
 
