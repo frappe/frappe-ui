@@ -17,6 +17,19 @@ import { shallowRef } from 'vue'
 // Client-only: on the server no unmount hook runs to release an entry, so
 // it would leak across requests.
 const hosts = shallowRef<symbol[]>([])
+
+// Warn once per session, like `warnDeprecated` — a route swap can hold two
+// hosts for a tick on every navigation, and that mount is one the app needs.
+let warnedExtraHost = false
+function warnExtraHost() {
+  if (!import.meta.env.DEV || warnedExtraHost) return
+  warnedExtraHost = true
+  console.warn(
+    '[frappe-ui] Multiple <Dialogs /> hosts are mounted; only one ' +
+      'renders the dialog stack. Remove the extra mount — ' +
+      '<FrappeUIProvider> already includes one.',
+  )
+}
 </script>
 
 <script setup lang="ts">
@@ -47,13 +60,7 @@ const hostId = Symbol('dialogs-host')
 
 if (typeof window !== 'undefined' && !hasParentHost) {
   hosts.value = [...hosts.value, hostId]
-  if (hosts.value.length > 1 && import.meta.env.DEV) {
-    console.warn(
-      '[frappe-ui] Multiple <Dialogs /> hosts are mounted; only one ' +
-        'renders the dialog stack. Remove the extra mount — ' +
-        '<FrappeUIProvider> already includes one.',
-    )
-  }
+  if (hosts.value.length > 1) warnExtraHost()
 }
 
 // The stack is empty until after mount, so gating on `isMounted` keeps
