@@ -42,6 +42,11 @@ import { computed, onBeforeUnmount } from 'vue'
 import Checkbox from '../../components/Checkbox/Checkbox.vue'
 import { useListContext } from './list-context'
 
+defineSlots<{
+  /** The header's columns — `<ListHeaderCell>` / `<ListHeaderCellSort>` elements. */
+  default?: () => unknown
+}>()
+
 const context = useListContext()
 
 const ariaChecked = computed(() => {

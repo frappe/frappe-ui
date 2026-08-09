@@ -7,8 +7,8 @@
   const railSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: '`RailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling.',
+    type: 'any'
   }
 ]
 
@@ -69,8 +69,8 @@
   const railItemSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'Custom content in place of the default icon — an image, avatar, or initials.',
+    type: 'any'
   }
 ]
 

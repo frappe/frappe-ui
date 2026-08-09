@@ -81,15 +81,22 @@ const props = withDefaults(defineProps<TreeProps>(), {
 const portalTarget = usePortalTarget()
 
 const emit = defineEmits<{
+  /** Fired when a drag is picked up. */
   'drag-start': [node: TreeNode]
+  /** Fired when a drag ends: the committed move, or `null` if it was cancelled. */
   'drag-end': [info: DropInfo | null]
 }>()
 
 defineSlots<{
+  /** Fully replaces a row's default rendering — receives `toggle` plus node state. */
   item: (props: TreeNodeSlotProps) => unknown
+  /** Leading content before the label, inside the default row layout. */
   'item-prefix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  /** Overrides the row's label text, inside the default row layout. */
   'item-label': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  /** Trailing content after the label, inside the default row layout. */
   'item-suffix': (props: Omit<TreeNodeSlotProps, 'toggle'>) => unknown
+  /** Rendered instead of the tree when `nodes` is empty. */
   empty: () => unknown
 }>()
 

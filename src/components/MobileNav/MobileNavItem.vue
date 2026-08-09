@@ -83,6 +83,10 @@ import type { MobileNavItemProps } from './types'
 
 const props = defineProps<MobileNavItemProps>()
 const emit = defineEmits<{ click: [event: MouseEvent] }>()
+defineSlots<{
+  /** Custom content in place of the default icon — an avatar, a badge. Receives `{ active }`. */
+  default?: (props: { active: boolean }) => any
+}>()
 
 // Read router/route off global properties (not useRouter/useRoute) so the item
 // works without warnings when mounted outside a vue-router app — docs, tests,

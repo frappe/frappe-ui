@@ -1,3 +1,13 @@
+// Node-side config builder for the reusable VitePress docs theme — the
+// `frappe-ui/vitepress` entry as seen by VitePress's Node config loader
+// (`node` export condition). The browser/SSR half (theme, components,
+// composables) lives in the sibling `index.ts`.
+//
+// UNSTABLE (P14) — no backward-compatibility promise. `DefineDocsConfigOptions`
+// was shaped by frappe-ui's own docs site, its only consumer today, and can
+// change shape or disappear in any release, including a patch, with no
+// deprecation window. Do not import this subpath from product apps or
+// third-party code.
 import path from 'node:path'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -76,7 +86,6 @@ const OPTIMIZE_DEPS_INCLUDE = [
   '@popperjs/core',
   'tippy.js',
   'vue-sonner',
-  'feather-icons',
   'fuzzysort',
   'shiki',
   'marked',

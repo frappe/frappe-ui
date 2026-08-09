@@ -13,4 +13,9 @@
 
 <script setup lang="ts">
 import TooltipProvider from '../Tooltip/TooltipProvider.vue'
+
+defineSlots<{
+  /** `RailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling. */
+  default?: () => any
+}>()
 </script>

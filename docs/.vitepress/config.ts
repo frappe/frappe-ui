@@ -71,6 +71,7 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
+        { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
         { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },
@@ -109,6 +110,16 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Data Fetching',
       items: [
+        { text: 'useCall', link: '/docs/data-fetching/use-call' },
+        { text: 'useDoc', link: '/docs/data-fetching/use-doc' },
+        { text: 'useList', link: '/docs/data-fetching/use-list' },
+        { text: 'useDoctype', link: '/docs/data-fetching/use-doctype' },
+        { text: 'useNewDoc', link: '/docs/data-fetching/use-new-doc' },
+      ],
+    },
+    {
+      text: 'Resources',
+      items: [
         { text: 'Resource', link: '/docs/data-fetching/resource' },
         { text: 'List Resource', link: '/docs/data-fetching/list-resource' },
         {
@@ -123,7 +134,10 @@ function buildSidebar(): SidebarSection[] {
       items: [
         { text: 'Icons', link: '/docs/other/icons' },
         { text: 'Utilities', link: '/docs/other/utilities' },
+        { text: 'Composables', link: '/docs/other/composables' },
         { text: 'Directives', link: '/docs/other/directives' },
+        { text: 'Vite Plugin', link: '/docs/other/vite' },
+        { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
   ]
@@ -240,10 +254,6 @@ const config = defineDocsConfig({
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
     'frappe-ui/list': path.resolve(repoRoot, 'src/molecules/list'),
-    'frappe-ui/code-editor': path.resolve(
-      repoRoot,
-      'src/components/CodeEditor',
-    ),
     'frappe-ui': path.resolve(repoRoot, 'src'),
     'dayjs/esm': 'dayjs',
   },

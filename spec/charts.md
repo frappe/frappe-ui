@@ -9,8 +9,8 @@ This spec states the conventions the family is built on, the rule that decides
 what enters it, and the contract between a plot and the chrome around it.
 
 The API itself is documented on the docs site. The shape it takes is
-[ADR-0013](./adr/0013-flat-props-name-columns.md). What the current family
-admits and refuses is [ADR-0014](./adr/0014-what-enters-charts.md).
+[ADR-0014](./adr/0014-flat-props-name-columns.md). What the current family
+admits and refuses is [ADR-0015](./adr/0015-what-enters-charts.md).
 
 The conventions govern `frappe-ui/charts` only. The chart exports at the package
 root are the earlier family. They keep working through the betas, and nothing

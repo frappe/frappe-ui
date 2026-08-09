@@ -9,4 +9,9 @@ defineProps<{
   /** Title text. Overridden by the default slot. */
   title?: string
 }>()
+
+defineSlots<{
+  /** Overrides `title` with custom markup. */
+  default?: () => any
+}>()
 </script>

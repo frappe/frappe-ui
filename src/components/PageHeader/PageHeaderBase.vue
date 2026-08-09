@@ -15,6 +15,11 @@ defineOptions({
   inheritAttrs: false,
 })
 
+defineSlots<{
+  /** The header's contents. */
+  default?: () => any
+}>()
+
 // The header teleports away to the target, but the anchor stays at the
 // declaration site — inside the page's scroll container — so the shell can
 // find that container without being told about it.

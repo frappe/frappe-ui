@@ -34,7 +34,11 @@ const COLOR_FAMILIES = [
   'pink',
   'violet',
 ]
-const ALPHA_FAMILIES = ['gray-alpha', 'red-alpha']
+// 'red-alpha' was listed here historically but Figma's primitives export has
+// never contained a `light.red-alpha` / `dark.red-alpha` family — the guard
+// below silently skips it, so it never emitted a token. Not listed, so the
+// dead branch isn't there to skip going forward (#940).
+const ALPHA_FAMILIES = ['gray-alpha']
 const SEMANTIC_CATEGORIES = ['surface', 'surface-alpha', 'ink', 'outline', 'outline-alpha']
 
 // Named aliases layered on top of Figma's numeric radius keys.
@@ -146,12 +150,42 @@ function mapShades(family) {
   return out
 }
 
+// Semantic names present in Figma's Styles export with zero call sites
+// anywhere (#940 rule-5 census: frappe-ui's own source/docs/stories, all 9
+// consumer apps, and frappe's ui/ package):
+//   - `alert-button-{default,info,success,warning,error}` (surface + ink):
+//     Alert's actual buttons color via the shared variant+theme axes (P4),
+//     not a per-alert-type token — this Figma spec never got wired to code.
+//   - `gray-2-overlay` (surface-alpha): resolves to the black/white overlay
+//     ramp rather than the gray-alpha ramp its name implies, breaking the
+//     `{family}-{step}` pattern every other surface-alpha entry follows, and
+//     nothing ever reached for it under either reading.
+const DROPPED_SEMANTIC_NAMES = {
+  surface: [
+    'alert-button-default',
+    'alert-button-info',
+    'alert-button-success',
+    'alert-button-warning',
+    'alert-button-error',
+  ],
+  'surface-alpha': ['gray-2-overlay'],
+  ink: [
+    'alert-button-default',
+    'alert-button-info',
+    'alert-button-success',
+    'alert-button-warning',
+    'alert-button-error',
+  ],
+}
+
 function collectSemanticCategory(styles, category, target) {
   const section = styles[category]
   if (!section) return
   target[category] = target[category] || {}
+  const dropped = DROPPED_SEMANTIC_NAMES[category] || []
   for (const [name, token] of Object.entries(section)) {
     if (!token?.$value) continue
+    if (dropped.includes(name)) continue
     // Resolve `{path.to.token}` aliases into the "lightMode/family/shade" format
     // that colorPalette.js#resolveColorReference understands.
     target[category][name] = aliasToReference(token.$value)
@@ -227,10 +261,29 @@ function round(n, places) {
   return Math.round(n * f) / f
 }
 
+// Sizes present in the Figma text-styles export that ship no vocabulary:
+// audited in #940 against frappe-ui's own source, docs, and stories, plus a
+// fresh rule-5 census of every consumer app (crm, helpdesk, gameplan,
+// insights, builder, suite, central, frappe_calendar, frappe-ui-starter,
+// frappe's ui/ package) — zero call sites anywhere for either.
+//   - `tiny`: also excluded from the docs type-scale page's own size lists
+//     (TypographyPage.vue), so even frappe-ui's own showcase doesn't use it.
+//   - `13xl`-`16xl`: the docs "display sizes" showcase itself stops at
+//     `12xl` (see DISPLAY_KEYS in TypographyPage.vue) — these four sizes are
+//     past what even the type-scale demo cares to show.
+const DROPPED_SIZES = ['tiny', '13xl', '14xl', '15xl', '16xl']
+
 function buildTypography() {
   const styles = readTokens('text.styles.tokens.json')
-  const text = styles.text || {}
-  const paragraphStyles = styles.paragraph || {}
+  const text = Object.fromEntries(
+    Object.entries(styles.text || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
+  )
+  // Same filter as `text` above — paragraph has no dropped-size entries today
+  // (it tops out at `4xl` and never had a `tiny`), but this keeps it that way
+  // if Figma ever adds one (#940).
+  const paragraphStyles = Object.fromEntries(
+    Object.entries(styles.paragraph || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
+  )
 
   const fontFamily = { text: text.base?.regular?.$value.fontFamily || 'Inter Variable' }
 
@@ -290,6 +343,13 @@ function buildTypography() {
 // layers, each with offsetX/offsetY/blur/spread/color (+ optional inset).
 // Emit pre-composed CSS box-shadow strings so the plugin can drop them into
 // CSS variables verbatim.
+// Custom elevation names present in Figma but with zero call sites anywhere
+// (#940 rule-5 census: frappe-ui's own source/docs/stories, all 9 consumer
+// apps, and frappe's ui/ package). `status` isn't even wired into the docs'
+// own elevation showcase (ElevationPreview.vue renders only the six numbered
+// steps) — it's named in prose once and never rendered.
+const DROPPED_CUSTOM_ELEVATIONS = ['status']
+
 function buildEffects() {
   const tokens = readTokens('effect.styles.tokens.json')
   const out = {
@@ -304,6 +364,7 @@ function buildEffects() {
     out.elevation.dark[step] = shadowToCss(tokens.elevation.dark[step].$value)
   }
   for (const [name, token] of Object.entries(tokens.elevation?.custom || {})) {
+    if (DROPPED_CUSTOM_ELEVATIONS.includes(name)) continue
     out.elevation.custom[name] = shadowToCss(token.$value)
   }
   for (const [name, token] of Object.entries(tokens.focus?.light || {})) {

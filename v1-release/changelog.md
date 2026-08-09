@@ -15,7 +15,7 @@ A second chart family ships alongside the one at the package root. It is
 additive: the root chart exports keep working and nothing here removes them.
 Import the components from `frappe-ui/charts` and the color tokens from
 `frappe-ui/charts-style.css`. `spec/charts.md` states the conventions, and
-`spec/adr/0014-what-enters-charts.md` records what the family admits.
+`spec/adr/0015-what-enters-charts.md` records what the family admits.
 
 Landed so far:
 
@@ -31,6 +31,317 @@ Landed so far:
 - `ScatterChart` and `SankeyChart`.
 - Category labels fit themselves — the library measures, tilts and truncates
   instead of taking an angle prop.
+
+### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
+
+`reload()` temporarily resets `start` to `0` to re-fetch the accumulated
+pages as one request, then restores it. `hasPreviousPage` was computed
+while `start` was still `0` and never recomputed after the restore, so it
+stayed `false` even when `start` was back above `0`. `reload()` now
+recomputes `hasPreviousPage` after restoring `start`.
+
+### CommandPalette — `show` renamed to `open` (breaking, silent)
+
+`show` → `open`, matching the rest of the library's overlay vocabulary
+(`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
+error, so the palette just never opens — grep for `CommandPalette` and
+`v-model:show` after upgrading. `Mod+K` now opens the palette on its own
+(registered internally via `useShortcut`); delete any app-level keydown
+listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
+gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
+`string | Component` (lucide class strings, emoji, or a component) instead of
+components only.
+
+### KeyboardShortcut — deprecated `shortcut` and unused modifier props removed (breaking)
+
+Per ADR-0008, the deprecated `shortcut` prop (superseded by `combo`) is
+removed rather than shipped frozen — it had zero call sites. The `meta` /
+`ctrl` / `shift` / `alt` boolean props are also removed (Rule 9: zero real
+usage, superseded by `combo`). Both are **loud** breaks (removed props on a
+typed component). Also moved from a bare `KeyboardShortcut.vue` into its own
+directory with a `types.ts`, a docs page, and a Cypress test.
+
+### useShortcut — `matchesShortcut` no longer public (breaking)
+
+`matchesShortcut` is removed from the `frappe-ui` package export. Its own
+doc comment already said "exported for unit tests only" — it was never
+meant to be public API (Rule 9). Loud break (import error) for anyone who
+imported it directly; no signal of any real consumer doing so.
+
+### KeyboardShortcutsModal / useShortcut — brought to bar
+
+`KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously
+only unit-tested). `useShortcut` gained a short entry on the
+[composables page](../docs/content/docs/other/composables.md); its API was
+already stable and is unchanged.
+
+### SettingsDialog — `SettingsBody`'s exposed type
+
+`SettingsBody`'s `viewportElement` expose now has a typed
+`SettingsBodyExposed` type (ADR-0012), exported from `frappe-ui`. No
+behavior change.
+
+### FileUploader — uploads default to private (security fix, breaking)
+
+- **Silent break:** `isPrivateUpload()` — the single resolver used by
+  `useFileUpload` and `FileUploadHandler` — now defaults an upload with no
+  stated `private` / `is_private` to **private**, not public. Previously
+  `FileUploader` patched this default at the component level while
+  `useFileUpload().upload(file, {})` and `new FileUploadHandler().upload(file,
+  {})` resolved the same missing intent to public. The two disagreeing was
+  [#922](https://github.com/frappe/frappe-ui/issues/922); `FileUploader`
+  itself already uploaded private (since `v1.0.0-beta.21`) and is unaffected.
+  A caller of `useFileUpload` or `FileUploadHandler` with no explicit privacy
+  option now gets a private file where it previously got a public one. See
+  the [migration guide](../docs/content/docs/migration.md#fileuploader).
+- Fixed: the standalone `upload(file, options)` export (re-exported from
+  `frappe-ui` alongside `useFileUpload`) crashed at runtime — it required
+  internal `state`/`reset` arguments the public signature never exposed a way
+  to pass. It's now a real standalone function; `useFileUpload()` wraps it
+  with reactive state.
+
+### FileUploader — flat props replace the `uploadArgs` blob (breaking, P3)
+
+- **Silent break:** `uploadArgs` is removed. Its fields that are actually used
+  in the wild are now flat props: `private`, `folder`, `doctype`, `docname`,
+  `fieldname`, `uploadEndpoint`, `optimize`. Old code keeps compiling —
+  `uploadArgs` becomes an inert attribute on the root element — so an app
+  that relied on it (`folder`, `doctype`, custom `private`, …) silently stops
+  applying those options. Advanced options with no flat prop (`file_url`,
+  `method`, `type`, `params`, `maxWidth`/`maxHeight`, upload cancellation) had
+  zero measured use on the component (rule 9); reach for `useFileUpload()`
+  directly for those. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
+
+### FileUploader — `success` / `failure` emits declared stable
+
+- Both emits lost their `@deprecated` tag (ADR-0008 forbids shipping
+  `@deprecated` members at `1.0.0`) and gained real types: `success: [data:
+  UploadedFile]`, `failure: [error: unknown]` (previously untyped `any`).
+  Both are load-bearing at real call sites and keep their names — they
+  already read as behaviors (P1), not interactions.
+- Fixed: `failure` didn't fire when `validateFile` rejected a file — only on
+  an actual upload error. `error` was set on the slot props either way, but a
+  listener on `@failure` never heard about a validation rejection. It now
+  emits `failure` with the validation error (string or `Error`) in both
+  cases, matching what the type already promised.
+
+### FileUploader — slot prop `error` is now always a string
+
+- **Silent break:** `FileUploaderSlotProps.error` changed from `unknown` to
+  `string | null`. Upload failures were already normalized to a message
+  string; validation failures (`validateFile` returning an `Error`) were not
+  — a custom slot could receive either a string or an `Error` object. Both
+  paths now normalize to a message string before reaching the slot. A slot
+  that did `{{ error.message }}` expecting the validation-`Error` case
+  (uncommon, but not impossible) silently renders nothing now that `error` is
+  always a string. See the
+  [migration guide](../docs/content/docs/migration.md#fileuploader).
+
+### FileUploader — `inputRef` removed, nothing in its place
+
+- **Breaking, loud:** per [ADR-0012](../spec/adr/0012-template-ref-surface.md),
+  `FileUploader` hands back nothing through a template ref. `inputRef` was a
+  function disguised as a ref (`uploader.value.inputRef().focus()`), and the
+  `openFileSelector` slot prop already covers what it was used for. Zero
+  known call sites.
+
+### FileUploader — structural bar: TypeScript, `types.ts`, tests, docs
+
+- `FileUploader` is now fully typed (`FileUploaderProps`, `FileUploaderEmits`,
+  `FileUploaderSlotProps` in `types.ts`), has `*.cy.ts` component tests
+  covering the five at-bar behaviors, and a `data-slot="root"` /
+  `data-state="idle" | "uploading" | "success" | "error"` pair for CSS hooks
+  (P10). The default fallback trigger now renders validation/upload errors
+  via `<ErrorMessage>` (`role="alert"`) — previously invisible unless the
+  caller used a custom slot.
+
+### `fileToBase64` and the `fileSize` helpers — unexported from root
+
+- **Breaking, loud:** `fileToBase64`, `formatBytes`, `getMaxFileSize`, and
+  `fileSizeLimitMessage` are no longer exported from `frappe-ui`. Zero
+  external call sites at the v1 sweep (rule 9) — all four stay as internal
+  helpers shared by `useFileUpload`, `FileUploadHandler`, and the editor's
+  media upload engine.
+
+### Sidebar — deprecated config API removed (breaking)
+
+Per ADR-0008, every member marked `@deprecated` is deleted. `Sidebar` is now a
+bare composable frame: `SidebarHeader` / `SidebarSection` / `SidebarLabel` /
+`SidebarItem` compose in the default slot, matching the direction agreed in
+`v1-release/plan.md`.
+
+- **Breaking, silent:** `Sidebar`'s `header` and `sections` config-object props
+  are gone. Old code still compiles — Vue drops them as inert attrs — but the
+  sidebar renders empty instead of the configured header/sections. Compose
+  `SidebarHeader` and `SidebarLabel` + `SidebarItem` (or `SidebarSection`)
+  directly in the default slot.
+- **Breaking, silent:** `Sidebar`'s `#header-logo` and `#footer-items` slots
+  are gone (they only existed to reach into the config-object layout). Old
+  `<template #header-logo>` / `#footer-items>` content stops rendering. Put
+  that markup directly in the default slot instead.
+- **Breaking, silent:** `SidebarSection`'s `items` prop and `#sidebar-item`
+  scoped slot are gone. It's now a plain collapsible-group wrapper — `label`,
+  `collapsible`, `v-model:collapsed` — whose children are `SidebarItem`s
+  composed directly in its default slot, instead of an `items` array plus a
+  slot to customize each row.
+- **Breaking, silent:** `SidebarItemProps.isActive` (alias for `active`) and
+  `.condition` (config-object visibility filter) are gone. Use `active`; use
+  `v-if` on the composed `SidebarItem` instead of `condition`.
+- **Breaking, silent:** `SidebarHeader`'s `#logo` slot is renamed to `#prefix`
+  (P6 — no type-specific slot names when a generic one covers them). Old
+  `<template #logo>` content stops rendering; the default logo/initial box
+  shows instead.
+- `SidebarItem`'s collapsed-rail icon no longer swaps to a centered square and
+  back while the sidebar's width animates — it holds one position through the
+  transition (also fixes the icon sitting 2px off the rail's center line).
+- `SidebarSection`'s collapsible label is now a real `<button>` with
+  `aria-expanded` / `aria-controls`, keyboard-operable (was a `<div>` with a
+  click handler and no keyboard path).
+
+### ListView — stays, not deprecated
+
+`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
+primitive for new code, but it's a narrower, composition-based family by
+design — it has no equivalent for `ListView`'s config-driven columns
+(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
+disabled-row exclusion, the built-in select banner). If you're on `ListView`
+today, there's no forced migration for `1.0.0`.
+
+### `TextEditor` and its v0 exports — removed from root (breaking)
+
+Per ADR-0008, the deprecated v0 editor exports are removed from top-level
+`frappe-ui` — loud breaks, the import fails to resolve:
+
+- `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`,
+  `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`
+- `ImageExtension`, `SetImageOptions`, `createSuggestionExtension`,
+  `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
+  `TextEditor/extensions/*` barrels also re-exported from root)
+
+Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
+[Editor section](../docs/content/docs/migration.md#editor). This confirms
+`CONTEXT.md`'s rule: the editor family is the only subsystem that exports
+from a subpath rather than root, and nothing editor-related is exported from
+root anymore.
+
+The underlying v0 component files (`src/components/TextEditor/`) still ship,
+unmodified, as `frappe-ui/editor`'s migration safety net — only the public
+export and its docs page are gone. Removing the files is a separate,
+human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
+`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
+out to `1.1`.
+
+### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
+
+`.ProseMirror ul[data-type='taskList'] input[type='checkbox']` used a
+Tailwind-v3-only `theme('colors.gray.900')` call in both
+`frappe-ui/editor`'s and the v0 `TextEditor`'s stylesheet, which broke
+Tailwind v4 builds (#861 — a remaining instance of #299). Replaced with the
+same `var(--ink-gray-9)` token the rest of both files already use.
+
+### v1 resources — at-bar exception documented; `listResource` gets test coverage
+
+v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
+`getCachedResource`, `getCachedListResource`, `getCachedDocumentResource`,
+`resourcesPlugin`, `saveLocal`, `getLocal`, `deleteLocal`, `onDocUpdate`) ship
+un-deprecated and frozen at `1.0.0`, per #886.
+[ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md) records the
+one exception: the implementation stays hand-written JavaScript rather than
+TypeScript, permanently — 344 production call sites make a rewrite riskier
+than the freeze. `createListResource`, the second-most-used export at 57 call
+sites, gets test coverage for the first time (`listResource.test.ts`):
+pagination, `insert`/`setValue` refreshing the list, caching, and `reload()`'s
+pagination-state restore.
+
+### Tailwind preset — `content` export added
+
+`frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
+directories that emit Tailwind classes. Spread it into your app's
+`tailwind.config.js` `content` array instead of hand-maintaining the paths —
+see the new [Tailwind Setup](/docs/foundations/tailwind) docs page. Tailwind
+v3 doesn't merge a preset's `content`, so this was previously unavoidable
+hand-maintenance, and it had already drifted: some apps on
+`frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every
+class the editor and list molecules emit.
+
+### Tailwind preset — `tokens.js` export removed (breaking)
+
+The `./tailwind/tokens.js` export is removed outright, with no deprecation
+window. It had zero importers anywhere and re-exported `colorPalette.js` via
+`export *`, the implementation-module re-export pattern disallowed by P15.
+Use the preset (`frappe-ui/tailwind`) directly.
+
+This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
+the freeze that requires a deprecation window starts at the tag, not before
+it. Zero call sites is also why it's a same-release removal rather than a
+carried-forward deprecation: there is no consumer for a warning to reach.
+
+### Tailwind preset — unused token vocabulary and utilities removed (breaking)
+
+Design-token audit before the additive-only freeze (#940): every family in
+`tailwind/generated/*.json` and every utility/`--*` variable `plugin.js`
+emits was checked against frappe-ui's own source, docs, and stories, plus a
+fresh census of all consumer apps (crm, helpdesk, gameplan, insights,
+builder, suite, central, frappe_calendar, frappe-ui-starter, and frappe's
+`ui/` package). The primitive and semantic color ramps (all twelve hues, in
+`surface-*`/`ink-*`/`outline-*`), and every typography weight (including
+`bold`/`black`) and size through `text-12xl`, turned out to be real,
+in-use vocabulary — none of that is touched. What had zero call sites
+everywhere is removed:
+
+- **`text-tiny`** and its uppercase text-transform. Not even
+  shown in the docs' own type-scale page.
+- **`text-13xl` through `text-16xl`** (and their `-medium`/`-semibold`/
+  `-bold`/`-black` variants). The docs' own "display sizes" showcase stops
+  at `text-12xl` — these four sizes were past what even the type-scale demo
+  used.
+- **`shadow-status`** and its backing `--elevation-status` variable. Named
+  once in prose on the elevation docs page but never rendered there or
+  anywhere else.
+- **`surface-alert-button-*` / `ink-alert-button-*`** (`default`, `info`,
+  `success`, `warning`, `error`). `Alert`'s buttons color via the shared
+  `variant`+`theme` axes (P4); this Figma spec never got wired to code.
+- **`surface-alpha-gray-2-overlay`**. Resolved to the black/white overlay
+  ramp rather than the gray-alpha ramp its name implies, breaking the
+  `{family}-{step}` pattern every other `surface-alpha` entry follows.
+
+All five are silent breaks — a missing Tailwind class or `--*` var just
+stops applying, no build or type error. See the migration guide.
+
+The token generator (`tailwind/figma-tokens-to-theme.js`) now filters these
+out at the source, so they stay gone on the next `yarn sync-tokens` run
+rather than reappearing. `ALPHA_FAMILIES` also dropped a dead `'red-alpha'`
+entry that never matched anything in the Figma export — no emitted token
+changed.
+
+**Also removed:** `tailwind/colors.js`, a 642-line legacy color module
+superseded by `colors.json` + `colorPalette.js`. It had zero importers and
+wasn't reachable through any `frappe-ui` package export (no `./tailwind/*`
+wildcard) — deleting it doesn't change anything for consumers.
+
+### `frappe-ui/vite` — types and docs
+
+`frappe-ui/vite` now ships hand-written types (`vite/index.d.ts`, wired via
+the `types` export condition), so `frappeui(...)` and its options
+(`frontendRoute`, `lucideIcons`, `barrelImports`, `frappeProxy`,
+`jinjaBootData`, `buildConfig`, `frappeTypes`) are typed without a
+`// @ts-expect-error` workaround. Also added a
+[docs page](../docs/content/docs/other/vite.md) covering every sub-plugin,
+including `barrelImports` — previously undocumented on the docs site.
+
+### list-style.css and editor-style.css exports — removed
+
+- **Breaking:** the manual `frappe-ui/list-style.css` and
+  `frappe-ui/editor-style.css` exports are gone (loud — the consumer build
+  fails with `Missing "./list-style.css" specifier`). They existed only
+  because bundlers tree-shook the side-effect `import './style.css'` inside
+  the `frappe-ui/list` and `frappe-ui/editor` barrels. The barrels are now
+  listed in `sideEffects`, so each family's CSS ships automatically the
+  moment you import anything from its subpath — delete the manual `@import`
+  lines. The tree-shake was never Rolldown-specific: plain Rollup/Vite
+  production builds dropped the CSS too.
 
 ### Toggles and ranged inputs — deprecated members removed
 
@@ -146,22 +457,21 @@ Before/after for the silent breaks is in the
 popover-trigger vocabulary used by `Combobox` / `Dropdown` / `Select`.
 
 - `side` (default `'bottom'`) + `align` (default `'start'`) + `offset`
-  (default `4`) replace `placement` (deprecated alias).
-- `keepOpen` (default `false`) replaces `autoClose` (deprecated, inverse).
+  (default `4`) replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed, inverse).
 - `typeable` (default `true`) replaces picker-level `readonly` and
-  `allowCustom` (both deprecated). `:typeable="false"` blocks typing while
+  `allowCustom` (both removed). `:typeable="false"` blocks typing while
   keeping the popover interactive.
 - Constraints: `min?: string` and `max?: string` (`YYYY-MM-DD`, plus
   `YYYY-MM-DD HH:mm:ss` on `DateTimePicker`), and
   `isDateUnavailable?: (date: Dayjs) => boolean` for arbitrary disabling.
   Min/max and the predicate compose. On `DateTimePicker`,
-  `minDateTime`/`maxDateTime` are deprecated aliases.
+  `minDateTime`/`maxDateTime` are removed in favor of `min`/`max`.
 - `v-model:open` supported on all three pickers via `open` + `update:open`.
 - `openOnFocus` (default `false`) and `openOnClick` (default `true`) let
   consumers opt out of either trigger path. Same defaults applied to
   `Combobox` for parity.
-- `#trigger` is the canonical custom-trigger slot; `#target` is a
-  deprecated alias.
+- `#trigger` is the canonical custom-trigger slot; `#target` is removed.
 - `DateRangePicker.clearable` now defaults to `true`; footer hides when
   there is nothing to clear. Live hover preview while picking the end
   date and a stable trigger width derived from `format` were added in the
@@ -217,15 +527,18 @@ and close from `@update:modelValue`, or render an "Apply" button in
 
 Same vocabulary as the DatePicker family plus a flexible parser.
 
-- `side` / `align` / `offset` replace `placement`.
-- `keepOpen` (default `false`) replaces `autoClose`.
-- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`.
+- `side` / `align` / `offset` replace `placement` (removed).
+- `keepOpen` (default `false`) replaces `autoClose` (removed).
+- `typeable` (default `true`) replaces picker-level `readonly` / `allowCustom`
+  (both removed).
 - `v-model:open` via `open` + `update:open`; new `openOnFocus` (default
   `false`) and `openOnClick` (default `true`) props.
 - Flexible typed input: `"3pm"`, `"3.30pm"`, `"1500"`, `"9:30:15 am"`
   parse to canonical `HH:mm[:ss]`.
-- `min` / `max` replace `minTime` / `maxTime` (deprecated aliases).
-- `scrollMode` is deprecated; list is always centered on the selection.
+- `min` / `max` replace `minTime` / `maxTime` (removed).
+- `scrollMode` is removed; list is always centered on the selection.
+- Template ref exposes only `focus()` (ADR-0012). `selectAll()` and
+  `blurInput()`, dead members with no callers, are removed.
 
 ### DatePicker family — keyboard navigation
 
@@ -247,11 +560,35 @@ and leaves the grid as a single unit. Custom `#trigger` slots opt in
 automatically — any open path moves focus into the grid since a
 non-`TextInput` trigger has no typing context.
 
-### DatePicker family — legacy composable deprecated
+### DatePicker family — legacy composable removed
 
 `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
-`getDaysInMonth`, `isLeapYear`) are not used by any picker component and
-are not part of the v1 API. They remain exported through v1.x and warn.
+`getDaysInMonth`, `isLeapYear`) were not used by any picker component and
+were not part of the v1 API. Deleted outright — the import fails, so the
+break is loud.
+
+### DatePicker / TimePicker family — deprecated aliases removed (ADR-0008)
+
+The back-compat aliases these components carried through the betas are
+deleted, not kept as warn-and-map shims — per
+[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+deprecated member ships in `1.0.0`. Before/afters in the
+[migration guide](../docs/content/docs/migration.md#datepicker--timepicker-family).
+
+- **`placement`, `autoClose`, `allowCustom`, picker-level `readonly`,
+  `inputClass`, `value` prop removed.** All silent: a leftover prop lands as
+  an inert extra attribute instead of doing anything.
+- **`#target` slot removed.** Content in a leftover `<template #target>`
+  silently stops rendering. Use `#trigger`.
+- **`DateTimePicker.minDateTime`/`maxDateTime` and
+  `TimePicker.minTime`/`maxTime` removed.** Silent: the constraint just stops
+  being enforced. Use `min`/`max`.
+- **`TimePicker.scrollMode` removed.** Silent; the list is always centered.
+
+`change` stays as a supported second emit alongside `update:modelValue` —
+it was never deprecated on `TimePicker`, and `DateTimePicker` depends on it
+internally, so removing it from the other two pickers would have been an
+inconsistent, unforced break.
 
 ### Input family — shared labeling contract
 
@@ -342,24 +679,38 @@ In favor of `padded`. (Now removed — see "Toggles and ranged inputs" above.)
 input `#fff` — a white pill in dark mode. `ghost` now sets `bg-transparent`,
 matching Combobox's own ghost search input. Closes #851.
 
-### FeatherIcon — deprecated; `lucide-*` recommended
+### FeatherIcon — removed (breaking)
 
-`FeatherIcon` remains exported. Feather-name strings passed to
-`Button.icon` / `iconLeft` / `iconRight`, `Dialog.options.icon`, `Dropdown`
-item icons, and `TabButtons` icons continue to render via `FeatherIcon`
-but now warn.
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), the
+deprecated `FeatherIcon` component is deleted, along with the
+`feather-icons` dependency. `lucide-*` strings (or a `Component`) are the
+only supported icon forms now.
+
+- **Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
+  `<FeatherIcon>` fail at the import.
+- **Breaking, silent:** every icon-name prop across the library
+  (`Button.icon` / `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown` /
+  `ContextMenu` item `icon`, `TabButtons` options `icon` / `iconLeft` /
+  `iconRight`, `Icon.name`) used to fall back to `FeatherIcon` for a bare
+  feather-style name (e.g. `"edit"`). That fallback is gone: an
+  unrecognized string now renders nothing, with a dev-mode console warning
+  once per (component, prop). Prefix the name with `lucide-`.
 
 ```vue
-<!-- preferred -->
-<Button icon="lucide-plus" />
-<span class="lucide-search size-4" aria-hidden="true" />
-
-<!-- still works, warns -->
+<!-- before -->
+<FeatherIcon name="plus" class="size-4" />
 <Button icon="plus" />
+
+<!-- after -->
+<span class="lucide-plus size-4" aria-hidden="true" />
+<Button icon="lucide-plus" />
 ```
 
 Hardcoded internal `FeatherIcon` usages across core components were
-migrated to `lucide-*` in this release. No consumer-visible behavior change.
+migrated to `lucide-*` in this release.
+
+Before/after for the silent break is in the
+[migration guide](../docs/content/docs/migration.md#icons).
 
 ### Input — removed (breaking)
 
@@ -371,6 +722,27 @@ migrated to `lucide-*` in this release. No consumer-visible behavior change.
   text-like modes, or `Textarea` / `Select` / `Checkbox` for the other type
   modes `Input` accepted.
 
+### Card, ListItem, standalone Toast — removed (breaking)
+
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), three
+unmaintained wrappers that shipped `@deprecated` in code are deleted, not
+carried forward. All three had zero call sites across the census of
+downstream apps.
+
+- **Breaking:** `Card` and its `.vue` file are removed. No drop-in
+  replacement — rebuild the title/subtitle/actions/loading layout with
+  plain markup, using `LoadingText` or `Skeleton` for the loading state.
+- **Breaking:** `ListItem` and its `.vue` file are removed. No drop-in
+  replacement — rebuild the title/subtitle/actions row with plain markup.
+- **Breaking:** the standalone `Toast` SFC (`import { Toast } from
+  'frappe-ui'`) is removed. This only affects direct usage of the raw
+  `ToastRoot`-based component; the imperative API (`toast()` /
+  `toast.success()` / `toast.error()` / `toast.info()`) and
+  `<ToastProvider>` are unaffected and unchanged.
+
+All three fail loudly at the import. Before/after examples are in the
+[migration guide](../docs/content/docs/migration.md#card-listitem-standalone-toast-removed).
+
 ### FormLabel — moved to a component directory (non-breaking)
 
 `FormLabel` now lives at `src/components/FormLabel/FormLabel.vue` instead of
@@ -378,10 +750,36 @@ a bare `src/components/FormLabel.vue`, matching the rest of the input
 family. It gains `types.ts`, tests, stories, and a docs page. The import
 path for consumers (`import { FormLabel } from 'frappe-ui'`) is unchanged.
 
-### Legacy components — dev-mode warnings
+### LoadingIndicator / LoadingText — moved to component directories (non-breaking)
 
-`MonthPicker` is deprecated. For simple month picking, use `Select` with month
-options.
+Same move as `FormLabel`, for the same reason: both now live at
+`src/components/LoadingIndicator/` and `src/components/LoadingText/`
+instead of bare `.vue` files directly under `src/components/`. Each gains
+`types.ts` (`LoadingIndicatorProps`, `LoadingTextProps`), stories, a docs
+page, and cypress tests. The import path for consumers
+(`import { LoadingIndicator, LoadingText } from 'frappe-ui'`) is
+unchanged.
+
+Kept as distinct components from `Spinner` and `Skeleton` (P8) — usage
+data across the consumer census shows real, separate demand:
+`LoadingIndicator` (~60 files) and `LoadingText` (~11 files) are both
+load-bearing, not redundant overlap.
+
+### Icon — docs page and stories added
+
+`Icon` had no `stories/` folder, so it did not appear in the docs site
+despite being a public export. It now has a docs page and two stories
+(lucide string form, and the `Component` escape hatch).
+
+### MonthPicker — removed (breaking)
+
+`MonthPicker` and its whole barrel (`MonthPicker.vue`, types, stories) are
+deleted. It duplicated `Select` for a narrower case. Use `Select` with month
+options — see the
+[migration guide](../docs/content/docs/migration.md#monthpicker). The import
+fails, so the break is loud.
+
+### Legacy components — dev-mode warnings
 
 `Pill` is no longer exported from the package entrypoint. It remains an
 internal `TabButtons` detail.
@@ -609,11 +1007,14 @@ keyboard on a phone. That also left focus on the trigger behind the overlay,
 with nothing holding it — `Tab` walked the page behind an open modal. The sheet
 now takes focus itself on open. The keyboard still stays down.
 
-### Divider — `action.onClick` preferred
+### Divider — `action.handler` removed (breaking)
 
-`action.handler` is deprecated. Warning emits via the shared
-`warnDeprecated` utility. Action mode preserves separator semantics for
-assistive technologies.
+Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md),
+`action.handler` is deleted, not carried forward as a warning. Use
+`action.onClick`. Zero call sites across the census. Silent break — a
+leftover `handler` is dropped as an unknown key, so the action button
+renders but does nothing on click. Action mode preserves separator
+semantics for assistive technologies.
 
 ### PageHeaderBackButton — `to` is now a fallback (breaking)
 
@@ -807,6 +1208,39 @@ error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
 `FrappeRequestError` closed for `frappeRequest`.
 
+### Data fetching (v2) — docs, and the sidebar splits from Resources
+
+`useCall`, `useDoc`, `useList`, `useDoctype` and `useNewDoc` each get a docs
+page for the first time, under a new **Data Fetching** sidebar section —
+`useCall` for a whitelisted method, `useDoc` for one document, `useList` for
+a query, `useDoctype` for write-only access to a DocType, `useNewDoc` for a
+draft-and-insert form.
+
+The old **Data Fetching** section is renamed **Resources** and keeps its
+three pages (Resource, List Resource, Document Resource) unchanged. Both
+sections link to each other: Resources stays fully supported through `1.x`;
+the new composables are the recommended layer for new code.
+
+### Data fetching (v2) — `useNewDoc` lost reactivity after submit (fix)
+
+`useNewDoc` built its return value with `reactive({ ...out, submit, doc })`.
+Spreading a `reactive()` proxy reads every ref and computed once and freezes
+the result, so `data`, `error` and `loading` stopped updating the moment the
+object was built — a template bound to `newDoc.loading` never saw it flip.
+The return value is now built by mutating the underlying object in place, so
+its properties stay live.
+
+### Data fetching (v2) — `initialData` did nothing on `useCall` and `useList` (fix)
+
+Both documented an `initialData` option to show a placeholder before the
+first response. Neither worked. `useCall` passed it straight to the
+underlying fetch, which expects the wrapped `{ data: ... }` shape the API
+actually returns — the unwrapped value was invisible, so `call.data` stayed
+`null` until the first response. `useList`'s `data` is read from a separate
+list built in `afterFetch`, which `initialData` never touched, so
+`list.data` stayed `null` the same way. Both now show the seeded value
+immediately, as documented.
+
 ### Root composables and directives — renamed and shrunk
 
 Every change below is a **loud break**: the import line fails, so the build,
@@ -888,11 +1322,109 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
+### `code-editor` subpath — folded into `experimental` (breaking)
+
+- **Breaking:** `frappe-ui/code-editor` is removed. `CodeEditor`, `CodePreview`,
+  and `loadLanguage` move to `frappe-ui/experimental` (ADR-0010). One downstream
+  file imported the old subpath; the fix is a one-line import change.
+
+  ```ts
+  // before
+  import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+
+  // after
+  import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+  ```
+
+### `experimental` barrel — tidy and `FrappeUIError`
+
+- **Breaking:** `LabelingWrapper` is dropped from `frappe-ui/experimental`.
+  It stays exported from its own barrel (`src/components/InputLabeling`) —
+  `Combobox`, `Select`, `MultiSelect`, and `MultiEmailInput` import it from
+  there internally — only the `experimental` re-export had zero external
+  importers, so only that goes. The only member cut in the barrel tidy.
+- `FrappeUIError` is now exported from `frappe-ui/experimental` as a type. A
+  consumer previously hand-declared a structural copy of it because it wasn't
+  re-exported — that copy can now be dropped in favor of the real type.
+
+### `tsconfig.base.json` — cleaned up (breaking for extenders)
+
+- **Breaking:** `tsconfig.base.json` no longer sets `types`
+  (`vitest/globals`, `unplugin-icons/types/vue`, `node`). If your app extends
+  this file and relies on any of these globals, add `types` to your own
+  `tsconfig.json`. Without it, `tsc` fails with a missing-global error (e.g.
+  `Cannot find name 'vi'`) the first time a global that used to come from
+  `vitest/globals` or `unplugin-icons/types/vue` is referenced. `noEmit`
+  stays — it's needed to keep `allowImportingTsExtensions` legal — but the
+  `declaration` / `emitDeclarationOnly` pair (contradictory alongside
+  `noEmit`, and unused by frappe-ui's own build) is gone.
+
+### `./hljs-theme.css` export removed
+
+- **Breaking:** `frappe-ui/hljs-theme.css` is no longer exported. It had zero
+  importers. The underlying file
+  (`src/components/TextEditor/hljs-github.css`) ships until the deprecated
+  `TextEditor` is removed.
+
+### pageMetaPlugin — removed
+
+- **Silent break:** `pageMetaPlugin` and the global mixin it installed are gone.
+  A leftover `pageMeta()` component option still compiles but is never read, so
+  `document.title` and the favicon quietly stop updating. See the
+  [migration guide](../docs/content/docs/migration.md#pagemetaplugin-removed).
+- `usePageMeta` is unchanged and now exports its `PageMeta` type.
+
+### GridLayout — removed (breaking)
+
+- **Breaking:** `GridLayout` is no longer exported. It was a thin passthrough
+  to `grid-layout-plus` with no docs page and no tests. The import fails, so
+  the build names every call site. Depend on `grid-layout-plus` directly.
+- `grid-layout-plus` is dropped from `dependencies` — it had no other
+  importer left in `src/`.
+- Two bugs in the deleted component, so consumers wiring up
+  `grid-layout-plus` themselves should expect different behavior:
+  - `cols` and `rowHeight` were read once at setup inside a `reactive()`
+    options object, not `computed`, so changing either prop after mount did
+    nothing.
+  - the drag placeholder color was a hardcoded `#b1b1b1`, not a theme token,
+    so it ignored dark mode.
+
+### App shell family — brought to bar
+
+`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
+`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
+names.
+
+- Every slot across the family now has a documented description, and each
+  component has a docs page, a story, and cypress tests (several had none).
+- **Breaking, silent:** `PageHeaderMobile`'s `#left`/`#right` slots and
+  `PageHeaderMobileTitle`'s `#icon` slot are renamed to the shared
+  `#prefix`/`#suffix` vocabulary (PHILOSOPHY.md P6 forbids type-specific
+  slots like `#icon` outside `Button`, and `#left`/`#right` were never in
+  the vocabulary). Vue drops content passed to an unknown slot name with no
+  error, so the old names don't warn — they just stop rendering. See the
+  [migration guide](../docs/content/docs/migration.md#pageheadermobile-family-slot-names).
+- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
+  `ScrollAreaExposed`) and `data-slot="scroll-area"` /
+  `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`
+  styling hooks — it had none. `viewportElement` on the template ref is now
+  typed via `ScrollAreaExposed`. (`SettingsDialog`'s `SettingsBody` exposes
+  the same shape today but isn't wired to this type yet — that's tracked
+  under SettingsDialog's own sweep.)
+- `FrappeUIProvider`'s source directory moved from `src/components/Provider`
+  to `src/components/FrappeUIProvider` to match its file name. Purely
+  internal — `import { FrappeUIProvider } from 'frappe-ui'` is unaffected.
+- **Breaking:** `FrappeUIProviderProps` is no longer exported. The component
+  has no props, so the type was empty and never wired to `defineProps` —
+  freezing it now would lock in nothing. Zero known consumers.
+  The mismatched directory name had made the whole component invisible to
+  the docs generator, so it previously had no docs page.
+
 ## Deprecation log
 
 | API                                | Replacement                          | Notes                                  |
 | ---------------------------------- | ------------------------------------ | -------------------------------------- |
-| `Divider.action.handler`           | `Divider.action.onClick`             | Warns when set                         |
+| `Divider.action.handler`           | `Divider.action.onClick`             | **Removed** — silent; key dropped, click does nothing |
 | `Password.value` prop              | `v-model` / `modelValue`             | **Removed in 1.0.0** (ADR-0008)        |
 | `Rating.rating_from` prop          | `max`                                | **Removed** — silent; prop ignored     |
 | `Rating.readonly` prop             | `disabled`                           | **Removed** — silent; prop ignored     |
@@ -906,23 +1438,28 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | Select `#item-*` slot prop `option` | `item`                              | **Removed** — silent; `{ option }` destructures to `undefined` |
 | `Input.vue`                        | `TextInput`                          | **Removed in 1.0.0** (ADR-0008)        |
 | `Autocomplete`                     | `Combobox` or `MultiSelect`          | **Removed** — import fails             |
+| `GridLayout`                       | depend on `grid-layout-plus` directly | **Removed** — loud; import fails      |
 | `FormControl type='autocomplete'`  | `type="combobox"`, or `Combobox` standalone | **Removed** — silent; dev-only `console.error` |
-| DatePicker family `placement`      | `side` + `align` + `offset`          | Mapped internally; warns               |
-| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | Mapped internally; warns               |
-| DatePicker family `allowCustom`    | `typeable: false`                    | Mapped internally; warns               |
-| DatePicker family `readonly`       | `typeable: false`                    | Picker-level only; warns               |
-| DatePicker family `inputClass`     | `class` on the component element     | Warns when set                         |
-| DatePicker family `value` prop     | `v-model` / `modelValue`             | Warns when set                         |
-| DatePicker family `change` emit    | `update:modelValue` / `v-model`      | Warns when bound                       |
-| DatePicker family `#target` slot   | `#trigger`                           | Silent alias; warns                    |
-| `TimePicker.scrollMode`            | none (always centered)               | Warns when set                         |
-| `DateTimePicker.minDateTime`       | `min`                                | Mapped internally; warns               |
-| `DateTimePicker.maxDateTime`       | `max`                                | Mapped internally; warns               |
-| `TimePicker.minTime`               | `min`                                | Mapped internally; warns               |
-| `TimePicker.maxTime`               | `max`                                | Mapped internally; warns               |
-| `useDatePicker` composable         | use picker components directly       | Warns on call                          |
-| `getDate` / `getDatesAfter` / etc. | use picker components directly       | JSDoc only; no runtime warning         |
-| `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | Warns when feather names pass through |
+| DatePicker family `placement`      | `side` + `align` + `offset`          | **Removed** — silent; inert extra attribute |
+| DatePicker family `autoClose`      | `keepOpen` (inverse)                 | **Removed** — silent; inert extra attribute |
+| DatePicker family `allowCustom`    | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `readonly`       | `typeable: false`                    | **Removed** — silent; inert extra attribute |
+| DatePicker family `inputClass`     | `class` on the component element     | **Removed** — silent; inert extra attribute |
+| DatePicker family `value` prop     | `v-model` / `modelValue`             | **Removed** — silent; inert extra attribute |
+| DatePicker family `#target` slot   | `#trigger`                           | **Removed** — silent; slot content stops rendering |
+| `TimePicker.scrollMode`            | none (always centered)               | **Removed** — silent; inert extra attribute |
+| `DateTimePicker.minDateTime`       | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `DateTimePicker.maxDateTime`       | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.minTime`               | `min`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.maxTime`               | `max`                                | **Removed** — silent; constraint no longer enforced |
+| `TimePicker.selectAll()` / `.blurInput()` | none — dead, no callers       | **Removed** — loud; template-ref member gone |
+| `useDatePicker` composable         | use picker components directly       | **Removed** — loud; import fails       |
+| `getDate` / `getDatesAfter` / etc. | use picker components directly       | **Removed** — loud; import fails       |
+| `MonthPicker`                      | `Select`                             | **Removed** — loud; import fails       |
+| `FeatherIcon`                      | `lucide-*` strings (or a `Component`) | **Removed** — import fails; feather-name props render nothing, dev-warns once |
+| `Card`                             | layout markup                        | **Removed in 1.0.0** (ADR-0008), import fails |
+| `ListItem`                         | layout markup                        | **Removed in 1.0.0** (ADR-0008), import fails |
+| `Toast` (SFC)                      | imperative `toast(...)` API          | **Removed in 1.0.0** (ADR-0008), import fails |
 | Dialog legacy `options` blob       | flat top-level props                 | **Removed** — silent; inert attr       |
 | Dialog `disableOutsideClickToClose` | `dismissible` (inverted)            | **Removed** — silent; inert attr       |
 | Dialog `#body*` slots               | `#default` / `#title` / `#actions`  | **Removed** — silent; renders nothing  |
@@ -931,3 +1468,8 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 | Dialog template-ref `close()`      | `v-model:open` / `close` slot prop   | **Removed** — throws on call           |
 | `ConfirmDialog` component          | `dialog.confirm()` / `dialog.danger()` | **Removed** — import fails           |
 | `confirmDialog()`                  | `dialog.confirm()`                   | **Removed** — import fails             |
+| `FileUploader.uploadArgs`          | flat props (`private`, `folder`, `doctype`, `docname`, `fieldname`, `uploadEndpoint`, `optimize`) | **Removed** — silent; inert attr |
+| `FileUploader` template-ref `inputRef` | `openFileSelector` slot prop      | **Removed** — throws on call           |
+| `FileUploader` slot prop `error`   | always `string \| null`, was `unknown` | **Changed** — silent; `.message` access renders nothing |
+| `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
+| `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |

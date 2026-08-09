@@ -242,7 +242,6 @@ export default plugin(
         lg: 'var(--elevation-lg)',
         xl: 'var(--elevation-xl)',
         '2xl': 'var(--elevation-2xl)',
-        status: 'var(--elevation-status)',
       },
       container: {
         padding: {

@@ -118,6 +118,69 @@ describe('useDoc', () => {
     expect(user.doc!.email).toBe(newEmail)
   })
 
+  it('sets error and leaves doc null when the fetch fails', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'missing-user',
+    })
+
+    await waitUntilValueChanges(() => user.loading, true)
+    await waitUntilValueChanges(() => user.loading, false)
+
+    expect(user.error).toBeTruthy()
+    expect(user.doc).toBe(null)
+  })
+
+  it('updates the doc via setValue', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+    })
+
+    await waitUntilValueChanges(() => user.loading, true)
+    await waitUntilValueChanges(() => user.loading, false)
+
+    const updated = await user.setValue.submit({
+      email: 'setvalue-updated@example.com',
+    })
+
+    expect(updated?.email).toBe('setvalue-updated@example.com')
+    expect(user.doc!.email).toBe('setvalue-updated@example.com')
+    expect(user.setValue.error).toBe(null)
+  })
+
+  it('deletes the doc and clears it from the store', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+    })
+
+    await waitUntilValueChanges(() => user.loading, false)
+    expect(user.doc).not.toBe(null)
+
+    await user.delete.submit()
+
+    expect(docStore.getDoc('User', 'user1').value).toBe(null)
+  })
+
   it('does not bind or fetch while the name is empty', async () => {
     interface User {
       name: string

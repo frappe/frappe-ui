@@ -30,7 +30,7 @@
                 @drop.prevent="(e) =>  uploadFile(e)"
                 class="h-[300px] flex items-center justify-center bg-surface-gray-1 border border-dashed border-outline-gray-3 rounded-md">
                 <div v-if="showFileSelector && !uploading" class="w-4/5 lg:w-2/5 text-center">
-                    <FeatherIcon name="upload-cloud" class="size-6 stroke-1.5 text-ink-gray-6 mx-auto mb-2.5" />
+                    <span class="lucide-upload-cloud size-6 text-ink-gray-6 mx-auto mb-2.5" aria-hidden="true" />
                     <input
                         ref="fileInput"
                         type="file"
@@ -74,9 +74,9 @@
                             {{ convertToKB(importFile.file_size) }}
                         </div>
                     </div>
-                    <FeatherIcon
-                        name="trash-2"
-                        class="size-4 stroke-1.5 text-ink-red-6 cursor-pointer"
+                    <span
+                        class="lucide-trash-2 size-4 text-ink-red-6 cursor-pointer"
+                        aria-hidden="true"
                         @click="deleteFile"
                     />
                 </div>
@@ -84,7 +84,7 @@
 
             <div v-else-if="showSheetSelector" class="flex flex-col h-[300px] p-4 border border-dashed border-outline-gray-3 rounded-md">
                 <div class="flex items-center space-x-2 text-ink-gray-7">
-                    <FeatherIcon name="chevron-left" class="size-4 cursor-pointer" @click="backToFileSelector" />
+                    <span class="lucide-chevron-left size-4 cursor-pointer" aria-hidden="true" @click="backToFileSelector" />
                     <div>
                         Google Sheet
                     </div>
@@ -128,14 +128,14 @@
                     <template v-slot="{ open }">
                         <Button variant="ghost">
                             <template #prefix>
-                                <FeatherIcon name="download" class="size-4 stroke-1.5" />
+                                <span class="lucide-download size-4" aria-hidden="true" />
                             </template>
                             Download CSV Template
                             <template #suffix>
-                                <FeatherIcon name="chevron-down" :class="[
-                                    'w-4 h-4 stroke-1.5 ml-1 transform transition-transform',
+                                <span class="lucide-chevron-down" :class="[
+                                    'w-4 h-4 ml-1 transform transition-transform',
                                     open ? 'rotate-180' : '',
-                                ]" />
+                                ]" aria-hidden="true" />
                             </template>
                         </Button>
                     </template>
@@ -159,7 +159,6 @@ import { fieldsToIgnore, getChildTableName, getBadgeColor } from './dataImport'
 import Badge from '../../src/components/Badge/Badge.vue'
 import Button from '../../src/components/Button/Button.vue'
 import Dropdown from '../../src/components/Dropdown/Dropdown.vue'
-import FeatherIcon from '../../src/components/FeatherIcon.vue'
 import FileUploadHandler from '../../src/utils/fileUploadHandler';
 import TemplateModal from './TemplateModal.vue'
 

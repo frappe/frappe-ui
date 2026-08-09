@@ -6,7 +6,9 @@ import lucideIconsPlugin from './lucideIconsPlugin.js'
 // NOTE: Tailwind v3 does NOT merge `content` from presets into the resolved
 // config (it reads only the top-level config's content.files). So consuming
 // apps must list frappe-ui's source globs in their own tailwind.config
-// `content` — declaring them here would be silently ignored.
+// `content` — declaring them here would be silently ignored. Spread the
+// `content` export from `frappe-ui/tailwind` (see content.js) instead of
+// hand-maintaining the glob list; see docs/content/docs/foundations/tailwind.md.
 // Stock Tailwind's numeric spacing scale has gaps above 12 (13, 15, 17, 18,
 // 19, 21… are undefined), so `h-17` / `size-17` silently don't compile. Fill
 // every integer 1–64 at the canonical 0.25rem step. Values match Tailwind's own

@@ -132,6 +132,8 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 
 Icon-only buttons, action toggles, and other controls that don't carry a value are **not** input controls — P5 doesn't apply.
 
+**`Editor` carve-out.** `Editor` (`frappe-ui/editor`) holds a value the user enters, which would put it under P5, but it is **renderless** by design (ADR-0004): it makes zero layout decisions and renders no chrome of its own, so a `label`/`description`/`error` prop would have nowhere to draw itself. Labeling `Editor` is layout, same as its menus and action buttons — the consumer renders a label above the slot the same way it renders everything else inside it, typically via the app's own `FormControl`-style wrapper (see spec/editor.md's "build your app's component on `<Editor>`" pattern).
+
 **Why:** Forms are clusters of inputs. Inconsistent labeling props mean every form remembers which component spells the label `label` vs `title`, which auto-renders the required indicator, which wires `aria-describedby` correctly. Uniformity is what makes the input family a family and not a grab-bag.
 
 ```vue
@@ -469,17 +471,21 @@ const isDismissible = computed(() => {
 })
 ```
 
-### P14. Experimental carries no promise
+### P14. Unstable entry points carry no promise
 
-**Rule:** Code reached through the `frappe-ui/experimental` subpath is private and **exempt from P13**. It can change shape or be removed in any release — including minor/patch — with no deprecation window. Use it from first-party Frappe libraries without expecting stability.
+**Rule:** Some entry points are curated barrels that ship with **no stability promise at all** — exempt from P13. They can change shape or be removed in any release, including minor/patch, with no deprecation window.
 
-**Why:** First-party libraries need to reuse internal building blocks, composables like `useInputLabeling`, class helpers, headless logic, and components whose API is still settling — without every one being promoted to the public API and frozen under P13. `experimental` is that escape hatch: the framework gets to consume these while the *public* surface stays small and the cost of evolving them stays zero. The alternative, re-exporting each helper from the public API, or opening a `./src/*` wildcard either freezes everything under P13 or exposes everything forever. `experimental` is the deliberate middle: a small, curated, explicitly-unstable surface.
+Two members today:
+- **`frappe-ui/experimental`** — private internal building blocks: composables like `useInputLabeling`, class helpers, headless logic, and components whose API is still settling. Use it from first-party Frappe libraries without expecting stability.
+- **`frappe-ui/vitepress`** — the shared VitePress docs theme. Ships at `1.0.0`, but is exempt from both P13 and P15's build-time additive-only rule. Its only consumer today is frappe-ui's own docs site, so every field of `DefineDocsConfigOptions` was shaped by exactly one caller; the theme needs room to change shape as a second Frappe docs site adopts it.
+
+**Why:** First-party code needs to reuse things the public API isn't ready to freeze — internal building blocks not yet promoted (`experimental`), or a config surface shaped by a single caller that would ossify around that caller's needs the moment a second one shows up (`vitepress`). The alternative — re-exporting each of these from a public, frozen entry point, or opening a `./src/*` wildcard — either freezes something not ready to freeze or exposes everything forever. An unstable entry point is the deliberate middle: a small, curated, explicitly-unstable surface.
 
 **Mechanics:**
-1. Exposed through a single curated barrel (`experimental.ts`) behind the `./experimental` export **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
-2. The barrel header restates the no-promise contract at the point of use.
-3. "Private" is by convention, `exports` can't scope visibility to a specific consumer so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
-4. To make an internal stable, deliberately promote it to a public entry point (and thus under P13). Until then, no guarantees.
+1. Exposed through a single curated barrel behind its own subpath export (`experimental.ts`; `vitepress/index.ts` + `index.node.ts` + `index.d.ts`) — **not** a `./src/*` wildcard. Re-export only what a first-party consumer actually needs.
+2. The barrel's header restates the no-promise contract at the point of use.
+3. "Private"/"unstable" is by convention — `exports` can't scope visibility to a specific consumer, so the contract is the disclaimer, not enforcement. Product/third-party code is told not to import it.
+4. To make a member stable, deliberately promote it to a public entry point (and thus under P13, or under P15's additive-only rule for a build-time member). Until then, no guarantees.
 
 ---
 
@@ -533,3 +539,11 @@ export * from './components/Button'
 ```
 
 Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.
+
+**Build-time and tooling entries are a separate category.** `tailwind`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
+
+**A build-time entry freezes additive-only at `1.0.0`.** Options, tokens, utilities, and compiler options may be *added* in a minor. Nothing may be renamed or removed before `2.0.0`.
+
+Neither of P15's other two shapes fits. A P13-style freeze would end the design-token vocabulary the day we tag — the Figma token sync exists to keep adding tokens, and a deprecate-then-remove cycle has no answer for "add a new one." A P14-style no-promise carve-out is the other extreme, and not one the six apps whose CSS and builds depend on the tailwind preset and the vite plugin would accept. Additive-only is the shape where existing names can't move and new ones can still appear.
+
+The one named exception is `frappe-ui/vitepress` — see P14.

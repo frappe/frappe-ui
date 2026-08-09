@@ -30,8 +30,8 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`charts.md`](./charts.md) — the conventions the chart family
   (`frappe-ui/charts`) is built on, the rule that decides what enters it, and
   the plot/chrome split. The API itself is documented on the docs site. The
-  shape it takes is [ADR-0013](./adr/0013-flat-props-name-columns.md), and what
-  the family admits is [ADR-0014](./adr/0014-what-enters-charts.md)
+  shape it takes is [ADR-0014](./adr/0014-flat-props-name-columns.md), and what
+  the family admits is [ADR-0015](./adr/0015-what-enters-charts.md)
 
 ## Freeze work
 

@@ -9,7 +9,7 @@ import {
   FocusScope,
 } from 'reka-ui'
 import Button from '../Button/Button.vue'
-import LoadingIndicator from '../LoadingIndicator.vue'
+import { LoadingIndicator } from '../LoadingIndicator'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { usePortalTarget } from '../../composables/usePortalTarget'
