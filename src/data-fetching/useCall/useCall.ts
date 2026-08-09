@@ -231,6 +231,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   }
 }
 
-function canUseCachedFallback(error: unknown, staleOnError: boolean) {
+// Shared with `useIsolatedCall`, which replicates the cached-fallback rules.
+export function canUseCachedFallback(error: unknown, staleOnError: boolean) {
   return !error || (staleOnError && !(error instanceof FrappeResponseError))
 }

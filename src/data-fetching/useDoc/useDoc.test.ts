@@ -239,3 +239,173 @@ describe('useDoc', () => {
     )
   })
 })
+
+// `setValue`, `delete` and every `methods:` entry target the one document the
+// composable is bound to, so two concurrent submits share a URL and differ
+// only in their body. Each submit must run its own request and answer its own
+// caller — one shared request would be aborted by the second submit (#991).
+// The mock server answers slowly when a body value starts with `slow`, so the
+// submit that starts first always answers second.
+describe('useDoc concurrency', () => {
+  interface User {
+    name: string
+    email: string
+  }
+
+  it('runs two setValue submits at once and gives each its own response', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let [slow, quick] = await Promise.all([
+      user.setValue.submit({ email: 'slow@example.com' }),
+      user.setValue.submit({ email: 'quick@example.com' }),
+    ])
+
+    expect(slow?.email).toBe('slow@example.com')
+    expect(quick?.email).toBe('quick@example.com')
+    expect(user.setValue.error).toBe(null)
+    expect(user.setValue.loading).toBe(false)
+    // `data` belongs to the submit that started last, not the one that
+    // settled last.
+    expect(user.setValue.data?.email).toBe('quick@example.com')
+  })
+
+  it('keeps setValue loading until every submit settles', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let slow = user.setValue.submit({ email: 'slow@example.com' })
+    let quick = user.setValue.submit({ email: 'quick@example.com' })
+    expect(user.setValue.loading).toBe(true)
+
+    await quick
+    // The slow submit is still in flight — the quick one settling must not
+    // clear the flag.
+    expect(user.setValue.loading).toBe(true)
+
+    await slow
+    expect(user.setValue.loading).toBe(false)
+    expect(user.setValue.isFinished).toBe(true)
+  })
+
+  it('does not let a stale setValue success overwrite the doc store', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let [slow, quick] = await Promise.all([
+      user.setValue.submit({ email: 'slow@example.com' }),
+      user.setValue.submit({ email: 'quick@example.com' }),
+    ])
+
+    expect(slow?.email).toBe('slow@example.com')
+    expect(quick?.email).toBe('quick@example.com')
+    // The slow submit settles last, but it is stale — its `onSuccess` must
+    // not run, or `docStore` (and every view bound to `user.doc`) would
+    // show the stale document while `setValue.data` holds the fresh one.
+    expect(user.doc!.email).toBe('quick@example.com')
+    expect(user.setValue.data?.email).toBe('quick@example.com')
+  })
+
+  it('does not let a stale setValue success clear the newest submit error', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let slow = user.setValue.submit({ email: 'slow@example.com' })
+    let quick = user.setValue.submit({ email: 'quick_fail' })
+
+    let [slowResult, quickResult] = await Promise.all([slow, quick])
+
+    // A failed request resolves `null`, per `useCall`'s submit contract.
+    expect(quickResult).toBe(null)
+    // The stale success still answers its own caller...
+    expect(slowResult?.email).toBe('slow@example.com')
+    // ...but writes nothing shared: the newest submit's error stays.
+    expect(user.setValue.error?.message).toContain('setValue user1 failed')
+    expect(user.setValue.data).toBe(null)
+  })
+
+  it('clears the previous error when a new submit starts', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    await user.setValue.submit({ email: 'quick_fail' })
+    expect(user.setValue.error).toBeTruthy()
+
+    // A retry must not sit at `loading: true` with the old error still set —
+    // `useCall` clears `error` on every `execute()`, and this matches it.
+    let retry = user.setValue.submit({ email: 'slow@example.com' })
+    expect(user.setValue.loading).toBe(true)
+    expect(user.setValue.error).toBe(null)
+
+    await retry
+    expect(user.setValue.error).toBe(null)
+    expect(user.setValue.data?.email).toBe('slow@example.com')
+  })
+
+  it('runs two delete submits at once and gives each its own response', async () => {
+    await docStore.setDoc({ doctype: 'User', name: 'user1' })
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    let [first, second] = await Promise.all([
+      user.delete.submit(),
+      user.delete.submit(),
+    ])
+
+    // With one shared request the second submit aborts the first, and the
+    // first caller resolves `null` instead of its own response.
+    expect(first).toBe('deleted user1')
+    expect(second).toBe('deleted user1')
+    expect(user.delete.error).toBe(null)
+    expect(user.delete.loading).toBe(false)
+    expect(docStore.getDoc('User', 'user1').value).toBe(null)
+  })
+
+  it('runs two submits of the same doc method at once without crossing responses', async () => {
+    interface UserMethods {
+      run: (params: { tag: string }) => any
+    }
+
+    const user = useDoc<User, UserMethods>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+      methods: { run: 'run' },
+    })
+
+    let [slow, quick] = await Promise.all([
+      user.run.submit({ tag: 'slow-first' }),
+      user.run.submit({ tag: 'quick-second' }),
+    ])
+
+    expect(slow).toMatchObject({ method: 'run', tag: 'slow-first' })
+    expect(quick).toMatchObject({ method: 'run', tag: 'quick-second' })
+    expect(user.run.error).toBe(null)
+    expect(user.run.loading).toBe(false)
+  })
+})

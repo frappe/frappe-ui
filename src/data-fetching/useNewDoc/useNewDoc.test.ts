@@ -96,6 +96,23 @@ describe('useNewDoc', () => {
     expect(invalid.data).toBe(null)
   })
 
+  it('runs two submits at once and gives each caller the created doc', async () => {
+    const user = useNewDoc<User>(
+      'User',
+      { name: 'slow-user', email: 'draft@example.com' },
+      { baseUrl },
+    )
+
+    // With one shared request the second submit aborts the first mid-flight
+    // and the first caller rejects instead of receiving its doc (#991).
+    let [first, second] = await Promise.all([user.submit(), user.submit()])
+
+    expect(first).toMatchObject({ name: 'slow-user' })
+    expect(second).toMatchObject({ name: 'slow-user' })
+    expect(user.error).toBe(null)
+    expect(user.loading).toBe(false)
+  })
+
   it('calls onSuccess with the created doc', async () => {
     const onSuccess = vi.fn()
     const user = useNewDoc<User>(
