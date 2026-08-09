@@ -35,10 +35,10 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  * `useDoc` writes its stores), and does not write the idb cache. `loading`
  * is true while any submit is in flight.
  *
- * One shared write is NOT gated: `useFrappeFetch`'s `afterFetch` pushes any
- * response carrying `docs` into `docStore`/`listStore` before the per-submit
- * call reaches the gated hooks, so a stale response can still land there.
- * Tracked in #1017.
+ * The shared stores gate themselves on top of this: every write into
+ * `docStore`/`listStore` — the `docs` side channel included — carries its
+ * request's dispatch version, and the stores reject a write that a
+ * later-dispatched request has overtaken (#1017).
  *
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
  * response, resolves `null` on a failed request (read `error`), and rejects

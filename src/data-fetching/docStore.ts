@@ -18,6 +18,21 @@ class DocStore {
   // would let a snapshot taken before a key was cleaned up match the value a
   // later slot starts from, which is how a deleted doc comes back to life.
   private revisionCounter = 0
+  // The write gate (#1017). A network write carries the dispatch version of
+  // the request that produced it (taken from `nextWriteVersion` when the
+  // request is dispatched, not when it settles). The store rejects a write for
+  // a document that a later-dispatched request has already written, so two
+  // concurrent writes to one document always land on the newer one — no
+  // matter which composable instance or channel (docs side channel, hook)
+  // carried them. A version is recorded only when a write lands: a
+  // later-dispatched request that failed wrote nothing on the server, so it
+  // must not gate out an older success. Grows like `revisions`: one number per
+  // document ever written, cleared with `clearAll`.
+  private writeVersions: Map<DocKey, number>
+  // Ambient version for hooks: `useCall` runs its `onSuccess` inside
+  // `runWithWriteVersion`, so store writes made synchronously from a hook are
+  // versioned without threading a parameter through every hook signature.
+  private currentWriteVersion: number | null = null
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
 
@@ -26,6 +41,50 @@ class DocStore {
     this.lastFetched = new Map()
     this.revisions = new Map()
     this.inflight = new Map()
+    this.writeVersions = new Map()
+  }
+
+  /**
+   * Take a dispatch version for a write. Called when a request is dispatched;
+   * the number rides along and is handed back to `setDoc`/`setDocs` when the
+   * response writes the store. Shares `revisionCounter`, so versions and
+   * publish revisions never collide on monotonicity.
+   */
+  nextWriteVersion(): number {
+    return ++this.revisionCounter
+  }
+
+  /** Run `fn` with `version` as the ambient write version for store writes. */
+  runWithWriteVersion<T>(version: number | undefined, fn: () => T): T {
+    const previous = this.currentWriteVersion
+    this.currentWriteVersion = version ?? null
+    try {
+      return fn()
+    } finally {
+      this.currentWriteVersion = previous
+    }
+  }
+
+  /**
+   * Whether a write at `version` may land on this document — no
+   * later-dispatched request has written it. Pure check, records nothing;
+   * `listStore` uses it to drop stale row updates. An unversioned write
+   * (no argument, no ambient version) is always admitted: it did not come
+   * from a dispatched request, so there is no order to compare.
+   */
+  admitsWrite(doctype: string, name: string, version?: number): boolean {
+    const v = version ?? this.currentWriteVersion
+    if (v == null) return true
+    const key = this.getKey(doctype, String(name))
+    return v >= (this.writeVersions.get(key) ?? 0)
+  }
+
+  /** `admitsWrite` plus recording: a landed write makes older writes stale. */
+  private admitAndRecord(key: DocKey, version: number | null): boolean {
+    if (version == null) return true
+    if (version < (this.writeVersions.get(key) ?? 0)) return false
+    this.writeVersions.set(key, version)
+    return true
   }
 
   /**
@@ -56,12 +115,15 @@ class DocStore {
     this.cacheTimeout = minutes * 60 * 1000
   }
 
-  async setDoc(doc: Doc) {
+  async setDoc(doc: Doc, version?: number) {
     if (!doc?.doctype || !doc?.name) {
       throw new Error('Invalid doc: must have doctype and name')
     }
     doc.name = doc.name.toString()
     const key = this.getKey(doc.doctype, doc.name)
+    // A stale write is dropped whole: no publish, no IDB write — persisting
+    // it would hand the stale doc right back on the next cached read.
+    if (!this.admitAndRecord(key, version ?? this.currentWriteVersion)) return
     // Publish before persisting, the way setDocs already does. Awaiting the
     // write first would leave readers on stale data for the length of an IDB
     // round trip, and widen the window a cached read can land in.
@@ -164,12 +226,16 @@ class DocStore {
     this.publish(key, idbDoc)
   }
 
-  async setDocs(docs: Doc[]) {
+  async setDocs(docs: Doc[], version?: number) {
+    const v = version ?? this.currentWriteVersion
     const docMap: Record<string, Doc> = {}
     for (const doc of docs) {
       if (!doc?.doctype || !doc?.name) continue
       doc.name = doc.name.toString()
       const key = this.getKey(doc.doctype, doc.name)
+      // Stale per document, not per response: one response can carry a fresh
+      // doc next to one that a later-dispatched request already wrote.
+      if (!this.admitAndRecord(key, v)) continue
       this.publish(key, doc)
       docMap[this.storePrefix + key] = doc
     }
@@ -218,6 +284,7 @@ class DocStore {
       this.lastFetched.clear()
       this.revisions.clear()
       this.inflight.clear()
+      this.writeVersions.clear()
     } catch (error) {
       console.error('Failed to clear all docs:', error)
       throw error

@@ -1,6 +1,11 @@
 import { computed, reactive, readonly, ref, unref } from 'vue'
 import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
-import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
+import {
+  FrappeResponseError,
+  getDispatchVersion,
+  useFrappeFetch,
+} from '../useFrappeFetch'
+import { docStore } from '../docStore'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
 import { idbStore } from '../idbStore'
 import { BasicParams, UseCallOptions } from './types'
@@ -85,7 +90,13 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
         if (onSuccess) {
           try {
-            onSuccess(ctx.data.data)
+            // The hook runs under this response's dispatch version, so store
+            // writes made from it (`useDoc`, `useDoctype`, `useList` write
+            // their stores here) are dropped when a later-dispatched request
+            // has already written the same document (#1017).
+            docStore.runWithWriteVersion(getDispatchVersion(ctx.response), () =>
+              onSuccess(ctx.data!.data),
+            )
           } catch (e) {
             console.error('Error in onSuccess hook:', e)
           }

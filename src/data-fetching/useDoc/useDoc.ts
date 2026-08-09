@@ -7,7 +7,7 @@ import {
   toValue,
 } from 'vue'
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
-import { useFrappeFetch } from '../useFrappeFetch'
+import { getDispatchVersion, useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
@@ -89,11 +89,14 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
-        docStore.setDoc(doc)
+        // Versioned with the request's dispatch version, so a reload that an
+        // in-between write has overtaken cannot put the older doc back (#1017).
+        let version = getDispatchVersion(ctx.response)
+        docStore.setDoc(doc, version)
         if (transform) {
           doc = transform(doc)
         }
-        listStore.updateRow(doctype, ctx.data.data)
+        listStore.updateRow(doctype, ctx.data.data, version)
         triggerSuccessCallbacks(doc)
       }
       return ctx

@@ -36,26 +36,33 @@ export class FrappeResponseError extends Error {
   }
 }
 
-// The `docs` writes in `afterFetch` below are versioned so a stale response
-// cannot overwrite a fresh document. Every request takes a number when it is
-// dispatched, carried to `afterFetch` on its Response. A response may write a
-// document only if no response from a later-dispatched request has written it
+// Every request takes a dispatch version from `docStore` when it is
+// dispatched, carried on its Response. The stores gate their writes on it: a
+// document is written only if no later-dispatched request has written it
 // already — without this, two concurrent writes to one document leave the
-// store on whichever response settled last (#1017). The composable-level
-// newest-wins gates (`useAction`, `useDoc`'s write members) cannot cover this
-// path: this hook runs before any per-call hook they can gate.
-let dispatchCounter = 0
-const dispatchSeq = new WeakMap<Response, number>()
-const lastDocsWrite = new Map<string, number>()
+// store on whichever response settled last (#1017). The bookkeeping lives in
+// `docStore`, so the docs side channel below and every store-writing hook
+// share one freshness domain.
+const dispatchVersions = new WeakMap<Response, number>()
+
+/**
+ * The dispatch version stamped on a Response by the wrapped fetch below.
+ * `undefined` for a Response that did not come through it.
+ */
+export function getDispatchVersion(
+  response: Response | null | undefined,
+): number | undefined {
+  return response ? dispatchVersions.get(response) : undefined
+}
 
 export const useFrappeFetch = createFetch({
   options: {
     // Wrapping the global fetch is required for vitest, and stamps each
-    // response with its request's dispatch number.
+    // response with its request's dispatch version.
     fetch: (...args) => {
-      const seq = ++dispatchCounter
+      const version = docStore.nextWriteVersion()
       return fetch(...args).then((response) => {
-        dispatchSeq.set(response, seq)
+        dispatchVersions.set(response, version)
         return response
       })
     },
@@ -75,23 +82,14 @@ export const useFrappeFetch = createFetch({
         console.groupEnd()
       }
       if (responseData.docs) {
-        // A missing number means the response did not come from the wrapped
-        // fetch; treat it as the newest.
-        let seq = dispatchSeq.get(ctx.response) ?? ++dispatchCounter
-        let docs = []
-        for (let doc of responseData.docs) {
-          doc.name = doc.name.toString()
-          let key = `${doc.doctype}/${doc.name}`
-          // Stale per document, not per response: one response can carry a
-          // fresh doc next to one that a newer request already wrote.
-          if (seq < (lastDocsWrite.get(key) ?? 0)) continue
-          lastDocsWrite.set(key, seq)
-          docs.push(doc)
-        }
-        if (docs.length) {
-          docStore.setDocs(docs)
-          listStore.updateRows(docs)
-        }
+        // A missing version means the response did not come from the wrapped
+        // fetch; treat it as the newest. The stores gate per document.
+        // `setDocs` runs synchronously up to its IDB write, so its records
+        // are in place when `updateRows` checks them.
+        let version =
+          dispatchVersions.get(ctx.response) ?? docStore.nextWriteVersion()
+        docStore.setDocs(responseData.docs, version)
+        listStore.updateRows(responseData.docs, version)
       }
       return ctx
     },
