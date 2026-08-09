@@ -49,34 +49,48 @@ import {
   Editor,
 
   // Building blocks (compose without Editor)
-  EditorContent, EditorFixedMenu, EditorBubbleMenu, EditorFloatingMenu,
+  EditorContent, EditorDropZone, EditorFixedMenu, EditorBubbleMenu,
+  EditorTableMenu, EditorFloatingMenu,
 
   // Kits — configurable extension bundles
   StarterKit, CommentKit, RichTextKit, InlineKit,
 
   // Individual extensions (flat named exports, frappe-ui default config applied)
-  Placeholder, Heading, Link, Code, CodeBlock,
-  Table, TableRow, TableCell, TableHeader, TaskList, TaskItem,
+  Placeholder, Heading, HeadingIds, Link, Code, CodeBlock,
+  Table, TableRow, TableCell, TableHeader,
+  TableNavigation, TableCellColor, TableSelectionOverlay,
+  TaskList, TaskItem,
   Typography, TextAlign, TextStyle, Color, Highlight,
-  Image, ImageGroup, ImageViewer, Video, Iframe,
+  Image, ImageGroup, ImageViewer, Video, Attachment, MediaDrop, Iframe,
   Mention, Tag, Emoji, SlashCommands, Toc,
-  ContentPaste, StyleClipboard, SuggestionExtension,
+  ContentPaste, StyleClipboard, EditorDropcursor, Markdown, SuggestionExtension,
+
+  // Utilities
+  setPlaceholder,   // sets placeholder text on a live editor (used by <Editor>)
 
   // Menu items (each ships a default lucide-string icon; pass `icon` to override)
   Bold, Italic, Strike, InlineCode, BulletList, OrderedList, Blockquote,
   Paragraph, H1, H2, H3, H4, H5, H6, HeadingGroup,
   AlignLeft, AlignCenter, AlignRight,
-  FontColor, FontHighlight, InsertImage, InsertVideo, InsertLink,
-  InsertTable, HorizontalRule, Undo, Redo, Separator,
+  FontColor, FontHighlight, InsertImage, InsertVideo, InsertAttachment,
+  InsertLink, InsertIframe, InsertTable, HorizontalRule, Undo, Redo, Separator,
+  TableAddColumnBefore, TableAddColumnAfter, TableDeleteColumn,
+  TableAddRowBefore, TableAddRowAfter, TableDeleteRow,
+  TableToggleHeaderRow, TableMergeOrSplit, TableDelete, CellColor,
   // InlineCode is the inline `code` toggle — named to avoid colliding with the `Code` extension.
-  // (full catalog defined in implementation)
 
   // Toolbar presets — plain MenuItem arrays (surface-agnostic)
-  commentToolbar, articleToolbar, minimalToolbar,
+  commentToolbar, articleToolbar, minimalToolbar, tableToolbar,
 
   // Types
-  type Editor, type JSONContent, type UploadedFile,
-  type MenuItem, type CommandMenuItem, type MenuGroupItem,
+  type TiptapEditor,   // the tiptap Editor instance type (the `Editor` name is the component)
+  type JSONContent, type UploadedFile,
+  type MenuItem, type CommandMenuItem, type MenuGroupItem, type MenuActionContext,
+  type StarterKitOptions, type CommentKitOptions,
+  type RichTextKitOptions, type InlineKitOptions,
+  type SuggestionExtensionOptions, type SuggestionRange,
+  type MentionSuggestionItem, type TagSuggestionItem,
+  type MediaUploadRequestOptions, type MarkdownExtensionOptions,
 } from 'frappe-ui/editor'
 ```
 
@@ -114,7 +128,7 @@ When the `extensions` list contains an extension named `'collaboration'`, conten
 
 ### Upload plumbing
 
-When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorage` extension and writes the function to `editor.storage.upload.uploadFunction` after construction. The upload-aware extensions (`Image`, `ImageGroup`, `Video`, `ContentPaste`) read from that slot. Per-extension override via `Image.configure({ uploadFunction })` wins. `uploadFunction` is shared by several extensions, which is why it's one engine option rather than configured per extension.
+When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorage` extension and writes the function to `editor.storage.upload.uploadFunction` after construction. The upload-aware extensions (`Image`, `ImageGroup`, `Video`, `Attachment`, `MediaDrop`, `ContentPaste`) read from that slot. Per-extension override via `Image.configure({ uploadFunction })` wins. `uploadFunction` is shared by several extensions, which is why it's one engine option rather than configured per extension.
 
 ### Naming collision
 
@@ -252,6 +266,22 @@ defineProps<{
 
 Empty-line menu (Notion-style "+"). Same shape as `EditorBubbleMenu`.
 
+### `EditorTableMenu`
+
+Contextual table toolbar. Anchors to the active table, not the text selection. Renders the `tableToolbar` items. Safe to render unconditionally: hidden outside tables, inert when the `Table` extension is absent.
+
+```ts
+defineProps<{ editor?: Editor | null }>()
+```
+
+### `EditorDropZone`
+
+File-drop target that wraps the editor surface (toolbar + content). A file dropped on the chrome uploads and inserts at the document end; drops on the prose stay with the media plugin. The `#overlay` scoped slot replaces the overlay look.
+
+```ts
+defineProps<{ editor: Editor | null; disabled?: boolean; label?: string }>()
+```
+
 ## 5. Menu items, presets, and the two-axis menu model
 
 A menu surface varies along two independent axes: **which buttons** (data) and **how it renders** (chrome). They are customized separately.
@@ -294,7 +324,7 @@ You render a menu building block (`EditorFixedMenu` / `EditorBubbleMenu` / `Edit
 :items="[Bold, Italic, Link, Separator, H2, H3]"      // fully custom set
 ```
 
-Presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`) are plain `MenuItem[]`, opt-in imports — unimported presets tree-shake away. The same `items` shape feeds all three menu building blocks.
+Presets (`commentToolbar`, `articleToolbar`, `minimalToolbar`, `tableToolbar`) are plain `MenuItem[]`, opt-in imports — unimported presets tree-shake away. The same `items` shape feeds all three menu building blocks.
 
 ### How it renders — your slot markup
 
@@ -314,8 +344,8 @@ Chrome (a floating pill, a segmented control, toolbar position, an actions row) 
 
 Every extension is a flat named export with frappe-ui defaults pre-applied; consumers `.configure(...)` to override. Splits by origin:
 
-- **Re-exports of tiptap extensions with our defaults**: `Placeholder`, `Heading`, `Link`, `Code`, `CodeBlock`, `Table`*, `TaskList`*, `Typography`, `TextAlign`, `TextStyle`, `Color`, `Highlight`. (`Color` requires `TextStyle` — register both together.) Raw tiptap behavior is available by importing from `@tiptap/extension-*` directly.
-- **Frappe-custom**: `Image`, `ImageGroup`, `ImageViewer`, `Video`, `Iframe`, `Mention`, `Tag`, `Emoji`, `SlashCommands`, `Toc`, `ContentPaste`, `StyleClipboard`.
+- **Re-exports of tiptap extensions with our defaults**: `Placeholder`, `Heading`, `Link`, `Code`, `CodeBlock`, `Table`*, `TaskList`*, `Typography`, `TextAlign`, `TextStyle`, `Color`, `Highlight`, `EditorDropcursor`, `Markdown`. (`Color` requires `TextStyle` — register both together.) Raw tiptap behavior is available by importing from `@tiptap/extension-*` directly.
+- **Frappe-custom**: `Image`, `ImageGroup`, `ImageViewer`, `Video`, `Attachment`, `MediaDrop`, `Iframe`, `Mention`, `Tag`, `Emoji`, `SlashCommands`, `Toc`, `ContentPaste`, `StyleClipboard`, `HeadingIds`, and the table companions `TableNavigation`, `TableCellColor`, `TableSelectionOverlay` (loaded alongside `Table` in the kits).
 - **Helper**: `SuggestionExtension.configure(...)` — the primitive behind `@` / `#` / `{{` / `:emoji:` suggestions.
 
 ```ts
@@ -447,7 +477,7 @@ const editor = useEditor({
 
 ## 12. Migration from the v0 monolith
 
-The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays in place, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. During the window, `import { TextEditor } from 'frappe-ui'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in the published migration guide ([`docs/content/docs/migration.md`](../docs/content/docs/migration.md), `## Editor`), and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
+The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays available, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. The v0 family left the root exports (#974) and now ships from `frappe-ui/experimental` (#1007). During the window, `import { TextEditor } from 'frappe-ui/experimental'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in the published migration guide ([`docs/content/docs/migration.md`](../docs/content/docs/migration.md), `## Editor`), and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
 
 Removing the v0 monolith is a deliberate, **human-gated** cleanup once all consumers are migrated and verified — implementation agents do not delete it. (Pre-v1 the library may still make this break; P13's freeze line is v1 release.)
 
