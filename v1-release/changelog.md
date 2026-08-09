@@ -9,6 +9,29 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Charts — a new family at `frappe-ui/charts`
+
+A second chart family ships alongside the one at the package root. It is
+additive: the root chart exports keep working and nothing here removes them.
+Import the components from `frappe-ui/charts` and the color tokens from
+`frappe-ui/charts-style.css`. `spec/charts.md` states the conventions, and
+`spec/adr/0014-what-enters-charts.md` records what the family admits.
+
+Landed so far:
+
+- The chrome is exported — `ChartCard`, `ChartContainer`, `ChartLegend` and
+  `ChartTooltip` — so a plot an app draws itself wears the family's look.
+  `ChartCard` owns the card surface, and `card: false` turns it off.
+- Combo series through `seriesConfig[key].type`, which also collapsed the three
+  axis option builders into one. Per-series area fill falls out of it.
+- Reference lines on the axis charts and on `ScatterChart`. A line beyond the
+  data range is clipped rather than stretching the value axis.
+- `stacked: 'normalized'` for shares, and `maxSeries` to cap a long grouping
+  column. `maxSeries` has no default.
+- `ScatterChart` and `SankeyChart`.
+- Category labels fit themselves — the library measures, tilts and truncates
+  instead of taking an angle prop.
+
 ### Toggles and ranged inputs — deprecated members removed
 
 Per ADR-0008, the family's deprecated aliases are **removed**, not shipped

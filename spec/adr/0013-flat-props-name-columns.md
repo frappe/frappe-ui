@@ -15,7 +15,7 @@ donut reads, and `series[]` used a series' display name as its identity, so
 renaming a series dropped the styling attached to it.
 
 v2 compared four API shapes against that constraint.
-[charts-scope.md](../charts-scope.md) holds the conventions the decision produced.
+[charts.md](../charts.md) holds the conventions the decision produced.
 
 ## Decision
 
@@ -44,7 +44,7 @@ chart means serializing markup and replaying it.
 **Grammar of graphics, channel bindings** (Plot, Vega-Lite). The most expressive
 of the four. It asks the caller to learn marks, scales and encodings before
 drawing a bar chart, and it hands the caller decisions the library should own —
-the opposite of the conventions in charts-scope.md.
+the opposite of the conventions in charts.md.
 
 **A single config object** (v1, ECharts). Round-trips. See Context for why it
 still loses.

@@ -27,9 +27,11 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
 - [`dropdown.md`](./dropdown.md) — the action menu
 - [`item-list-row.md`](./item-list-row.md) — the row shell both families use
-- [`charts-scope.md`](./charts-scope.md) — what belongs in the chart family
-  (`frappe-ui/charts`). The API itself is documented on the docs site; the shape
-  it takes is [ADR-0013](./adr/0013-flat-props-name-columns.md)
+- [`charts.md`](./charts.md) — the conventions the chart family
+  (`frappe-ui/charts`) is built on, the rule that decides what enters it, and
+  the plot/chrome split. The API itself is documented on the docs site. The
+  shape it takes is [ADR-0013](./adr/0013-flat-props-name-columns.md), and what
+  the family admits is [ADR-0014](./adr/0014-what-enters-charts.md)
 
 ## Freeze work
 
