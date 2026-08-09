@@ -1,5 +1,6 @@
 import { h } from 'vue'
 import FrappeUIProvider from './FrappeUIProvider.vue'
+import Dialogs from '../Dialogs.vue'
 import { dialog, dialogs } from '../../utils/dialog'
 
 describe('<FrappeUIProvider />', () => {
@@ -22,6 +23,26 @@ describe('<FrappeUIProvider />', () => {
     })
     cy.then(() => dialog.confirm({ title: 'Delete this?' }))
     cy.get('[role=dialog]').should('contain.text', 'Delete this?')
+  })
+
+  it('dedups a sibling <Dialogs /> mounted in the slot content', () => {
+    // The provider's internal <Dialogs /> and one mounted by the app are
+    // siblings, not ancestor/descendant — inject alone cannot dedup them.
+    cy.mount(FrappeUIProvider, {
+      slots: { default: () => [h('div', 'App'), h(Dialogs)] },
+    })
+    cy.then(() => dialog.confirm({ title: 'Only once' }))
+    cy.get('[role=dialog]').should('have.length', 1)
+  })
+
+  it('releases the host claim on unmount so a new mount renders again', () => {
+    cy.mount(FrappeUIProvider, {
+      slots: { default: () => [h(Dialogs), h(Dialogs)] },
+    }).then(({ wrapper }) => wrapper.unmount())
+    cy.mount(FrappeUIProvider)
+    cy.then(() => dialog.confirm({ title: 'Fresh host' }))
+    cy.get('[role=dialog]').should('have.length', 1)
+    cy.get('[role=dialog]').should('contain.text', 'Fresh host')
   })
 
   it('mounts a Toaster so toast.* has somewhere to render', () => {
