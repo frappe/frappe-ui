@@ -239,6 +239,12 @@ const BARE_ROUNDED_REGEX = /(?<![a-zA-Z0-9])rounded(?![a-zA-Z0-9-])/g
 // an `@apply` rule. Prose in markdown and comments has neither. Known gap: a
 // class list inside a multi-line template literal has no quote on its own
 // line and is skipped — grep for bare `rounded` after running the codemod.
+
+// An apostrophe inside a word (`row's`, `it's`) is not a string delimiter —
+// without this, `// the row's corners are rounded when it's hovered` would
+// count as "inside quotes" and get rewritten.
+const stripContractions = (s) => s.replace(/(?<=\w)'(?=\w)/g, '')
+
 function isClassContext(content, offset) {
   const lineStart = content.lastIndexOf('\n', offset - 1) + 1
   const lineEndIdx = content.indexOf('\n', offset)
@@ -247,8 +253,10 @@ function isClassContext(content, offset) {
   const after = content.slice(offset, lineEnd)
   if (/@apply[^;]*$/.test(before)) return true
   for (const quote of ['"', "'", '`']) {
-    const opensBefore = (before.split(quote).length - 1) % 2 === 1
-    if (opensBefore && after.includes(quote)) return true
+    const b = quote === "'" ? stripContractions(before) : before
+    const a = quote === "'" ? stripContractions(after) : after
+    const opensBefore = (b.split(quote).length - 1) % 2 === 1
+    if (opensBefore && a.includes(quote)) return true
   }
   return false
 }

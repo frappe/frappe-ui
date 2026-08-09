@@ -134,6 +134,22 @@ describe('tokens v2 migration', () => {
     )
   })
 
+  it('does not treat apostrophes in prose as string delimiters', () => {
+    const input = [
+      "// the row's corners are rounded when it's hovered",
+      "const cls = 'rounded' // it's the default",
+    ].join('\n')
+
+    const result = migrateTokens(input)
+
+    expect(result.migrated).toBe(
+      [
+        "// the row's corners are rounded when it's hovered",
+        "const cls = 'rounded-4' // it's the default",
+      ].join('\n'),
+    )
+  })
+
   it('flags text-*-black instead of renaming it (#998)', () => {
     const result = migrateTokens('<div class="text-base-black text-p-xl-black"></div>')
 
