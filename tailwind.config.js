@@ -6,7 +6,7 @@ import typography from './tailwind/generated/typography.json'
 // switcher, so the JIT scanner never sees the literal names. Build the exact
 // set the plugin emits (WEIGHT_VARIANTS, only pairings present in the tracking
 // export) and safelist it. Mirrors buildTextStyleUtilities() in plugin.js.
-const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold', 'black']
+const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 const typeSafelist = []
 for (const [group, prefix] of [
   ['text', 'text-'],

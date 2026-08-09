@@ -60,7 +60,9 @@ function mergeVariableLayers(...layers) {
 // can't follow font-weight, so each (size, weight) must ship as a self-contained
 // class. `regular` stays the bare `text-<size>` / `text-p-<size>` utility.
 // (Component classes are JIT-purged, so only the ones used in content emit.)
-const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold', 'black']
+// `black` was dropped in #998 — zero usage, and the Figma weights behind it
+// were corrupt export data.
+const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 
 function buildFontSize() {
   const out = {}
