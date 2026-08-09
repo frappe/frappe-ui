@@ -58,9 +58,11 @@ provide(DIALOGS_HOST_KEY, true)
 
 const hostId = Symbol('dialogs-host')
 
-if (typeof window !== 'undefined' && !hasParentHost) {
-  hosts.value = [...hosts.value, hostId]
-  if (hosts.value.length > 1) warnExtraHost()
+if (typeof window !== 'undefined') {
+  if (!hasParentHost) hosts.value = [...hosts.value, hostId]
+  // Nested extras yield via inject and never register, but they are still
+  // removable mounts — warn for them like for a losing sibling.
+  if (hasParentHost || hosts.value.length > 1) warnExtraHost()
 }
 
 // The stack is empty until after mount, so gating on `isMounted` keeps
