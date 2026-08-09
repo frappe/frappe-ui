@@ -48,7 +48,7 @@ const sizeClasses = computed(() => {
 
 const variantClasses = computed(() => {
   if (props.variant === 'underline') {
-    if (!props.active) return 'hover:text-ink-gray-7'
+    if (!props.active) return 'hover:text-ink-gray-8'
     if (!props.underlineIndicator) return ''
     // 1px indicator drawn over the track's rail, matching the Figma
     // trigger-edge stroke (outline-gray-8).
@@ -64,7 +64,7 @@ const variantClasses = computed(() => {
     // never changes the trigger's box (no layout shift). Inactive tabs keep
     // it fully transparent.
     if (!props.active) {
-      return 'border border-transparent hover:bg-surface-gray-2 hover:text-ink-gray-7'
+      return 'border border-transparent hover:text-ink-gray-8'
     }
     // Active tab: white card with a 1px rail-colored border. The attached
     // edge stays transparent (the card background shows through), and the
@@ -80,7 +80,7 @@ const variantClasses = computed(() => {
   }
 
   if (!props.active) {
-    return 'hover:bg-surface-gray-3/80 hover:text-ink-gray-7'
+    return 'hover:text-ink-gray-8'
   }
 
   // The track's sliding indicator paints the active surface instead.
