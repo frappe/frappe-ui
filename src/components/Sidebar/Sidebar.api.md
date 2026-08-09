@@ -240,7 +240,7 @@
     name: 'action',
     description: 'The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`)',
     required: false,
-    type: 'Action'
+    type: 'Action<ActionContext>'
   },
   {
     name: 'dismissible',

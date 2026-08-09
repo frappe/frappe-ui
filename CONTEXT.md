@@ -70,9 +70,11 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 ## Shared component vocabulary
 
 **action**:
-A button declared via a component's `actions` prop, rendered in its footer/toolbar row.
-Gets reactive `loading` state while its async `onClick` runs and a `{ close }` context.
-Shared by Dialog and TextEditor (P6-aligned).
+A button declared via a component's action prop(s), rendered in its footer/toolbar row.
+Typed by the generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`): Dialog's
+context is `{ close }`, Alert's and SidebarCard's is `{ dismiss }`. Gets reactive
+`loading` state while its async `onClick` runs.
+Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
 
 **content-driven layout** (Alert):
 Alert has no `layout` prop. It renders as a single-line `row`; a `description` (prop

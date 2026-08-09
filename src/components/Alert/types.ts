@@ -1,5 +1,5 @@
 import { type Component, type ExtractPublicPropTypes, type PropType } from 'vue'
-import type { Action } from '../shared/action'
+import type { Action, ActionContext } from '../shared/action'
 import type { StatusTheme } from '../shared/statusIcon'
 
 /** Color themes for the alert's status icon and row action label. */
@@ -30,12 +30,12 @@ export const alertProps = {
   },
   /** Primary action button (`ButtonProps` plus `onClick({ dismiss })`) */
   primaryAction: {
-    type: Object as PropType<Action>,
+    type: Object as PropType<Action<ActionContext>>,
     default: undefined,
   },
   /** Second action button; its presence forces the banner layout */
   secondaryAction: {
-    type: Object as PropType<Action>,
+    type: Object as PropType<Action<ActionContext>>,
     default: undefined,
   },
   /** Shows the dismiss (×) button, which emits `dismiss` */
