@@ -222,4 +222,39 @@ describe('Tabs', () => {
     // The label is not rendered as visible text.
     cy.contains('[role=tab] span', 'Search').should('have.class', 'sr-only')
   })
+
+  const shiftTabs = [
+    { value: 'deals', label: 'Deals' },
+    { value: 'contact', label: 'Contact' },
+    { value: 'orgs', label: 'Organizations' },
+  ]
+
+  for (const variant of [
+    'underline',
+    'subtle',
+    'ghost',
+    'browser-tab',
+  ] as const) {
+    it(`keeps trigger geometry stable across selection (${variant})`, () => {
+      cy.mount(Tabs, {
+        props: { tabs: shiftTabs, variant },
+      })
+
+      const rects: DOMRect[] = []
+      cy.get('[role=tab]').each(($el) => {
+        rects.push($el[0].getBoundingClientRect())
+      })
+
+      cy.get('[role=tab]').eq(1).click()
+      cy.get('[role=tab]').eq(1).should('have.attr', 'aria-selected', 'true')
+
+      cy.get('[role=tab]').each(($el, i) => {
+        const r = $el[0].getBoundingClientRect()
+        expect(r.x, `tab ${i} x`).to.be.closeTo(rects[i].x, 0.01)
+        expect(r.y, `tab ${i} y`).to.be.closeTo(rects[i].y, 0.01)
+        expect(r.width, `tab ${i} width`).to.be.closeTo(rects[i].width, 0.01)
+        expect(r.height, `tab ${i} height`).to.be.closeTo(rects[i].height, 0.01)
+      })
+    })
+  }
 })
