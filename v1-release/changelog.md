@@ -9,6 +9,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+<<<<<<< HEAD
 ### Calendar family — moved to `frappe-ui/experimental` (breaking)
 
 Calendar is not taken to bar at root for `1.0.0` (#1020, redirect of
@@ -27,6 +28,27 @@ replaces it.
 - **Fix:** the default header's month-title button renders again (it
   broke when DatePicker's `#target` slot became `#trigger`), and the
   all-day collapse buttons show their chevron icons again.
+
+### Data fetching (v2) — stale responses no longer write the shared stores (fix)
+
+Two concurrent writes to one document could leave `docStore`, `listStore`
+(and every view bound to them) on the response that settled last instead of
+the newest one, while `data` already held the fresh response (#1017). Two
+write paths were open:
+
+- Any response carrying `docs` wrote the stores unconditionally. A response
+  now writes a document only if no later-dispatched request has written that
+  document already.
+- `useDoctype` and `useList` write methods (`setValue`, `delete`) fired
+  their store-writing hooks for every settled submit. A stale submit — one
+  overtaken by a newer submit with the same key — no longer fires them.
+
+No API change. Behavior changes if you relied on it:
+
+- A stale `setValue`/`delete` on the same document no longer triggers
+  `useList`'s auto-refetch; the newest submit's refetch already ran.
+- Submits with different keys, and keyless submits (inserts), are
+  independent — all of their hooks still fire, as before.
 
 ### Radius aliases and `text-*-black` styles removed (breaking, silent)
 
