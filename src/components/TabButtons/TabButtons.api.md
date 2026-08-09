@@ -12,30 +12,23 @@
     type: 'TabButton[]'
   },
   {
-    name: 'buttons',
-    description: '',
-    required: false,
-    type: 'TabButton[]',
-    deprecated: 'Use `options` instead.'
-  },
-  {
     name: 'modelValue',
     description: '',
     required: false,
-    type: 'TabButtonValue'
+    type: 'TabValue'
   },
   {
-    name: 'type',
-    description: '',
+    name: 'variant',
+    description: 'Visual variant, shared with the Tabs family.',
     required: false,
-    type: 'TabButtonsType',
+    type: 'TabsVariant',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: '',
     required: false,
-    type: 'PillSize',
+    type: 'TabsSize',
     default: '"sm"'
   },
   {
@@ -47,10 +40,17 @@
   },
   {
     name: 'direction',
-    description: 'Edge the active browser tab attaches to. Only used when `type=\'browser-tab\'` and `vertical`.',
+    description: 'Edge the active browser tab attaches to. Only used when `variant=\'browser-tab\'` and `vertical`.',
     required: false,
-    type: 'TabButtonsDirection',
+    type: 'TabsDirection',
     default: '"left"'
+  },
+  {
+    name: 'fluid',
+    description: 'Buttons stretch to fill the container width.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 
@@ -58,12 +58,12 @@
   {
     name: 'prefix',
     description: '',
-    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
+    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
   },
   {
     name: 'suffix',
     description: '',
-    type: '{ button: { key: string; label: string | number | undefined; icon: TabButtonIcon | undefined; iconLe'
+    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
   }
 ]
 
@@ -71,7 +71,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: TabButtonValue | undefined]'
+    type: '[value: TabValue]'
   }
 ]
 </script>
