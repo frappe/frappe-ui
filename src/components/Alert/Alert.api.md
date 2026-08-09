@@ -7,73 +7,78 @@
   const propsData = [
   {
     name: 'title',
-    description: 'Main heading text of the alert',
-    required: true,
+    description: 'Main heading text of the alert. Optional when the `#title` slot is used',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Supporting text below the title; its presence switches the alert to the banner layout',
+    required: false,
     type: 'string'
   },
   {
     name: 'theme',
-    description: 'Color theme of the alert',
+    description: 'Color theme of the status icon and the row action label; the container never changes with theme',
     required: false,
-    type: 'Theme'
+    type: 'StatusTheme',
+    default: '\'gray\''
   },
   {
-    name: 'variant',
-    description: 'Visual style of the alert container',
+    name: 'icon',
+    description: 'Status icon: unset shows the theme\'s auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph',
     required: false,
-    type: '"subtle" | "outline"',
-    default: '"subtle"'
+    type: 'boolean | string | Component'
   },
   {
-    name: 'description',
-    description: 'Optional supporting text shown below the title',
+    name: 'primaryAction',
+    description: 'Primary action button (`ButtonProps` plus `onClick({ dismiss })`)',
     required: false,
-    type: 'string'
+    type: 'AlertAction'
+  },
+  {
+    name: 'secondaryAction',
+    description: 'Second action button; its presence forces the banner layout',
+    required: false,
+    type: 'AlertAction'
   },
   {
     name: 'dismissible',
-    description: 'Whether the alert can be closed by the user',
+    description: 'Shows the dismiss (×) button, which emits `dismiss`',
     required: false,
     type: 'boolean',
-    default: 'true'
-  },
-  {
-    name: 'modelValue',
-    description: 'Controls the visibility of the alert for dismissing or toggling it',
-    required: false,
-    type: 'boolean',
-    default: 'true'
+    default: 'false'
   }
 ]
 
   const slotsData = [
   {
-    name: 'icon',
-    description: 'Custom icon shown before the content',
+    name: 'prefix',
+    description: 'Overrides the status icon area',
+    type: 'any'
+  },
+  {
+    name: 'title',
+    description: 'Rich title content (overrides the `title` prop)',
     type: 'any'
   },
   {
     name: 'description',
-    description: 'Custom description content',
+    description: 'Rich description content; its presence forces the banner layout',
     type: 'any'
   },
   {
-    name: 'footer',
-    description: 'Footer content shown at the bottom of the alert',
-    type: 'any'
+    name: 'actions',
+    description: 'Replaces the auto-rendered action buttons; receives `{ dismiss }`',
+    type: 'AlertActionsSlotProps'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'dismiss',
-    description: 'Fired when the component is dismissed.',
-    type: 'any[]'
+    description: 'Fired when the user dismisses the alert — the × button or an action\'s `context.dismiss()`. The parent owns hiding.',
+    type: '[]'
   }
 ]
 </script>

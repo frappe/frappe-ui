@@ -67,7 +67,6 @@ Core set:
 - ErrorMessage
 - FileUploader
 - FormControl
-- ListView
 - MultiSelect
 - Password
 - Popover
@@ -104,6 +103,7 @@ v1 must make an explicit keep / refine / remove decision on each — tracked in 
 - **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
 - **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useColorScheme` composable for app-specific theme switching.
 - **CodeEditor** — exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: stays internal under P14 unless there is demand to promote it to a public entry point.
+- **ListView** — moved from root to `frappe-ui/experimental` (#985, P14). The parity gap with `frappe-ui/list` is real and structural (resizable columns, per-column function props, tooltips, disabled-row exclusion, select banner). Decided: stays there, unstable, until `frappe-ui/list` reaches parity.
 
 `MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
 decision (see the refinement pass).
@@ -156,7 +156,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | **CodeEditor** | Exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: keep internal under P14 unless there is demand to promote it. | decided | #939 | — | no |
 | **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
 | **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (closed unmerged), #673 (CSV MIME) | L | yes |
-| **ListView** | ~~Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1.~~ **Superseded** (sweep #882): parity isn't reached and can't close passively — `frappe-ui/list` is deliberately composition-based (P3) and has no equivalent for ListView's config-driven columns (resizable widths, per-column `getLabel`/`prefix` functions, tooltips, disabled-row exclusion, the select banner). Decision: ListView ships **frozen, not deprecated**, for v1. Bringing its 12-export barrel (all plain JS, no types, no `.cy.ts`) to the full at-bar checklist is its own follow-up ticket — this was mis-scoped as **S** effort; it's realistically **L**. | decision (keep, frozen) | split into follow-up ticket | L | yes — needs the follow-up ticket filed |
+| **ListView** | ~~Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1.~~ ~~Superseded (sweep #882): parity isn't reached and can't close passively... ListView ships **frozen, not deprecated**, for v1.~~ **Superseded again** (#985): not taken to bar at root. Moved to `frappe-ui/experimental` (P14, no stability promise) instead of frozen at root — stays there until `frappe-ui/list` reaches full functional parity (config-driven columns, per-column functions, tooltips, disabled-row exclusion, select banner). | decided (moved to experimental) | #985 | — | no |
 | **MonthPicker** | **Remove for v1** (recommended): deprecate the export with a warning + migration note and drop from the core set — it never moved onto the shared picker architecture. Alternative: rebuild on the DatePicker family arch. | decision (remove) | — | S→L | yes |
 | **Pill** | **Stop exporting** — confirmed used only inside `TabButtons`. Deprecate the public export (P13), keep it internal; retain `PillSize` for internal use. | decision (un-expose) | — | S | yes |
 | **Popover** | Refactor to the v1 floating vocab: `v-model:open`, `side`/`align`/`offset` (deprecate `placement`), `data-slot` hooks (drop `popoverClass`, P10), canonical slots, a11y. The last floating outlier. | refactor | — | M | yes |
@@ -255,8 +255,11 @@ tag: PR #610 (`frappe/client/`) was still open and unmerged when the
 it nothing. Consequences:
 
 - v3 ships in a later `1.x` minor, from whatever import path it lands at —
-  `frappe-ui/frappe/vue` is not that path, since `frappe-ui/frappe` is being
-  removed for `1.0.0` (#867, #924).
+  `frappe-ui/frappe/vue` is not that path, since `frappe-ui/frappe` was
+  removed for `1.0.0` (#867, #924). Nobody imported `frappe-ui/frappe/vue`
+  (0 files across all consumer apps), so nothing is stranded.
+- PR #610 needs a rebase off the deleted `frappe/client/` directory to a
+  home decided when that minor is planned.
 - The frozen-surface contract, the `createClient` dev notice, and the rest of
   v3's shape are questions for whenever that minor is planned. Nothing about
   v3 is frozen or required for `1.0.0`.
@@ -431,7 +434,7 @@ Fetching" docs section — they are not deprecated either.
 v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
-- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView ships frozen, not deprecated — see [ListView row](#v1-component-refinement-pass))
+- core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView moved to `frappe-ui/experimental` and is out of the core set — see [ListView row](#v1-component-refinement-pass))
 - the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
@@ -458,7 +461,8 @@ These stay in the plan, but should not block `1.0.0`:
 
 - session and user utilities
 - first-class socket.io utilities
-- full migration of `frappe-ui/frappe/*` internals to v3
+- full migration of `frappe-ui/frappe/*` internals to v3 (moot — the
+  directory is deleted, see #924)
 - TextEditor table editing UX improvements
 - downstream migration PRs across all products
 - Calendar stabilization
@@ -486,7 +490,6 @@ These are important, but should not block v1 unless they land naturally earlier.
 
 - session and user utilities
 - first-class socket.io utilities
-- broader internal migration of `frappe-ui/frappe/*` to v3
 - full Gameplan / downstream app migration to v3 data APIs
 
 ### Components and editor

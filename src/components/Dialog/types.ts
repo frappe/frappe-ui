@@ -1,4 +1,5 @@
 import type { ButtonProps } from '../Button'
+import type { Action } from '../shared/action'
 
 export type DialogSize =
   | 'xs'
@@ -27,9 +28,7 @@ export type DialogActionContext = {
   close: () => void
 }
 
-export type DialogAction = ButtonProps & {
-  onClick?: (context: DialogActionContext) => void | Promise<void>
-}
+export type DialogAction = Action<DialogActionContext>
 
 /** A `DialogAction` augmented with a reactive `loading` flag, as surfaced to the `#actions` slot. */
 export type DialogReactiveAction = DialogAction & { loading: boolean }

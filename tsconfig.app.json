@@ -10,21 +10,14 @@
     "experimental/**/*.d.ts",
     "experimental/**/*.tsx",
     "experimental/**/*.vue",
-    "frappe/**/*.ts",
-    "frappe/**/*.d.ts",
-    "frappe/**/*.tsx",
-    "frappe/**/*.vue",
-    "frappe/index.js",
-    "frappe/index.d.ts",
     "vite/index.d.ts"
   ],
   "exclude": [
     "src/**/*.cy.ts",
     "src/**/*.story.vue",
     "src/**/stories/**/*",
-    "src/components/TextEditor/**/*",
+    "experimental/TextEditor/**/*",
     "experimental/**/*.cy.ts",
-    "frappe/**/*.cy.ts",
     "src/mocks/**/*"
   ],
   "extends": "./tsconfig.base.json",

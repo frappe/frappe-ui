@@ -4,6 +4,7 @@ export { default as SidebarLabel } from './SidebarLabel.vue'
 export { default as SidebarCollapseToggle } from './SidebarCollapseToggle.vue'
 export { default as SidebarHeader } from './SidebarHeader.vue'
 export { default as SidebarSection } from './SidebarSection.vue'
+export { default as SidebarCard } from './SidebarCard.vue'
 
 export type {
   SidebarProps,
@@ -11,5 +12,9 @@ export type {
   SidebarLabelProps,
   SidebarHeaderProps,
   SidebarSectionProps,
+  SidebarCardProps,
+  SidebarCardEmits,
+  SidebarCardSlots,
+  SidebarCardActionsSlotProps,
 } from './types'
 export { sidebarCollapsedKey, sidebarToggleKey } from './types'

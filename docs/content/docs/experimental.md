@@ -39,6 +39,35 @@ import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
 See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
 variants, and the labeling contract.
 
+## ListView
+
+A config-driven data table: resizable columns, per-column `getLabel`/`prefix`
+functions, cell tooltips, grouped rows, disabled-row exclusion, and a select
+banner. `frappe-ui/list` is the composition-based replacement for new code,
+but it has no equivalent for ListView's config-driven columns yet — ListView
+stays here, unstable, until it does.
+
+```ts
+import { ListView } from 'frappe-ui/experimental'
+```
+
+See the [ListView page](/docs/experimental/listview) for examples and the
+full API reference.
+
+## TextEditor (v0)
+
+The deprecated v0 editor family, parked here while apps migrate to
+[`frappe-ui/editor`](/docs/molecules/editor). Removed from root in `1.0.0`;
+this subpath is the interim import path. Unstable — it will be removed once
+consumers migrate.
+
+```ts
+import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
+```
+
+See the [Editor migration section](/docs/migration#editor) for the
+before/after.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a

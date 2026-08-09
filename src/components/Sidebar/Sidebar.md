@@ -62,4 +62,18 @@ Bind `v-model:collapsed` to own a section's state (start a section collapsed,
 persist the choice); left unbound the section manages it internally, starting
 expanded.
 
+## SidebarCard
+
+A promotional or onboarding card for the sidebar footer — a trial notice, an
+upgrade prompt, a "what's new" pointer. A white card with an optional
+theme-colored icon and one full-width tinted action button. Like `Alert`, it is
+stateless: `dismiss` is an event and the parent owns hiding the card. It is not
+a status announcement, so it has no live-region role.
+
+<ComponentPreview name="Sidebar-Card" />
+
+`action` takes `ButtonProps` plus an `onClick({ dismiss })` handler (the same
+shape as `Alert`'s actions). `#prefix`, `#title`, `#description`, and
+`#actions` override the corresponding parts.
+
 <!-- @include: ./Sidebar.api.md -->

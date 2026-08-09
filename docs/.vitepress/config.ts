@@ -7,11 +7,7 @@ import {
   type SidebarSection,
 } from 'frappe-ui/vitepress'
 import { meta } from './meta'
-import {
-  getComponentItems,
-  getExperimentalItems,
-  getFrappeItems,
-} from './utils'
+import { getComponentItems, getExperimentalItems } from './utils'
 
 const configDir = path.dirname(fileURLToPath(import.meta.url))
 // rootDir is the docs dir (defineDocsConfig sets srcDir: 'content' under it).
@@ -24,7 +20,6 @@ const repoRoot = path.resolve(rootDir, '..')
 const sourceRoots = [
   path.resolve(repoRoot, 'src/components'),
   path.resolve(repoRoot, 'src/molecules'),
-  path.resolve(repoRoot, 'frappe'),
   path.resolve(repoRoot, 'experimental'),
   // `src` itself, for families that sit directly under it (src/charts).
   path.resolve(repoRoot, 'src'),
@@ -41,15 +36,6 @@ function buildSidebar(): SidebarSection[] {
     })),
     { text: 'Legacy components', link: '/docs/components/legacy' },
   ]
-
-  const frappeItems = getFrappeItems().map((name) => ({
-    text: name,
-    link: `/docs/frappe/${name.toLowerCase()}`,
-  }))
-
-  const frappeSection: SidebarSection[] = frappeItems.length
-    ? [{ text: 'Frappe Controls', items: frappeItems }]
-    : []
 
   const experimentalItems = [
     { text: 'Overview', link: '/docs/experimental' },
@@ -82,7 +68,6 @@ function buildSidebar(): SidebarSection[] {
       ],
     },
     { text: 'Components', items: componentItems },
-    ...frappeSection,
     {
       text: 'Charts',
       items: [
@@ -169,10 +154,6 @@ const colocatedRoots = [
     sourceDir: path.resolve(repoRoot, 'src/molecules'),
     proxyDir: path.resolve(rootDir, 'content/docs/molecules'),
   },
-  {
-    sourceDir: path.resolve(repoRoot, 'frappe'),
-    proxyDir: path.resolve(rootDir, 'content/docs/frappe'),
-  },
   // Experimental exports with a colocated page get one under /docs/experimental,
   // next to the hand-written overview page.
   {
@@ -247,7 +228,6 @@ const config = defineDocsConfig({
   // more-specific `frappe-ui/vitepress` alias is injected by defineDocsConfig
   // ahead of this `...alias` spread, so it still wins over `frappe-ui`.
   alias: {
-    'frappe-ui/frappe': path.resolve(repoRoot, 'frappe'),
     '@components': path.resolve(repoRoot, 'src/components'),
     '@molecules': path.resolve(repoRoot, 'src/molecules'),
     '@utils': path.resolve(repoRoot, 'src/utils'),

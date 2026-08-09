@@ -45,10 +45,15 @@ import { content } from 'frappe-ui/tailwind'
 console.log(content)
 // [
 //   '.../frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/icons/**/*.{vue,js,ts,jsx,tsx}',
+//   '.../frappe-ui/experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}',
 // ]
 ```
+
+The rest of `experimental/` is not covered — it carries no stability promise.
+`SpriteIcons` is the one exception: it holds a previously supported surface
+(`Icon`, `IconPicker`, `spritePlugin`, moved out of `frappe-ui/icons`), so its
+classes stay compiled until it is removed.
 
 The paths are resolved against wherever `frappe-ui` is actually installed
 (`node_modules`, a monorepo symlink, a local workspace checkout), so they work

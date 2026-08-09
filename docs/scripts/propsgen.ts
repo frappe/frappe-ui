@@ -39,7 +39,6 @@ const EXPERIMENTAL_ROOT = path.join(__dirname, '../../experimental')
 const SOURCE_ROOTS = [
   path.join(__dirname, '../../src/components'),
   path.join(__dirname, '../../src/molecules'),
-  path.join(__dirname, '../../frappe'),
   // `src` itself, for families that sit directly under it (src/charts).
   path.join(__dirname, '../../src'),
   EXPERIMENTAL_ROOT,

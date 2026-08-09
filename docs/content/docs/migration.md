@@ -789,6 +789,107 @@ representation yourself is a few lines of `FileReader.readAsDataURL`.
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+## ListView — moved to `frappe-ui/experimental`
+
+`ListView` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and stays there until
+`frappe-ui/list` reaches full functional parity. The import fails at the
+root; switch the subpath:
+
+```ts
+// Before
+import { ListView, ListRow, ListHeader } from 'frappe-ui'
+
+// After
+import { ListView, ListRow, ListHeader } from 'frappe-ui/experimental'
+```
+
+Every other name in the family moves the same way: `List`, `ListEmptyState`,
+`ListFooter`, `ListGroupHeader`, `ListGroupRows`, `ListGroups`,
+`ListHeaderItem`, `ListRowItem`, `ListRows`, `ListSelectBanner`. Nothing about
+the component itself changed — only where it's imported from.
+
+## Sprite icons — moved to `frappe-ui/experimental`
+
+The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1
+surface. They move from `frappe-ui/icons` to `frappe-ui/experimental`
+(P14 — no stability promise). The old import fails; switch the subpath:
+
+```ts
+// Before
+import { Icon, IconPicker, spritePlugin } from 'frappe-ui/icons'
+
+// After
+import { Icon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
+```
+
+Nothing about the components changed — only where they're imported from.
+Apps that spread `content` from `frappe-ui/tailwind` keep `IconPicker`
+styles automatically — no Tailwind change needed. Note that root
+`frappe-ui` exports a different `Icon`; alias one if you import both,
+e.g. `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
+`frappe-ui/icons`. For new code, use `lucide-*` classes — they are the
+canonical way to render icons.
+
+## Alert
+
+`Alert` is stateless now — it has no `v-model` and never hides itself. The
+parent renders it with `v-if` and reacts to `@dismiss`. Layout is
+content-driven: a description or a second action switches it to the banner
+layout; there is no `variant` prop. See the [Alert](./components/alert)
+component page for the full API.
+
+| Before                       | After                                            |
+| ---------------------------- | ------------------------------------------------ |
+| unnamed `v-model` (visibility) | `v-if` + `@dismiss` — the parent owns hiding   |
+| `theme="yellow"`             | `theme="amber"`                                  |
+| `theme` default `'blue'`     | default `'gray'`                                 |
+| `variant="subtle" / "outline"` | nothing — one container look, layout is content-driven |
+| `dismissible` default `true` | default `false` — pass `dismissible` to keep the × |
+| `#icon` slot                 | `#prefix` slot                                   |
+| `#footer` slot               | `primaryAction` / `secondaryAction` props, or `#actions` slot |
+| hand-rolled icon             | the theme shows a status icon on its own; `:icon="false"` opts out |
+
+Every row is a **silent break**: Vue drops the unknown prop or slot with no
+error. The old `v-model` is the one to check first — a dismissed alert now
+stays on screen until the parent hides it:
+
+```vue
+<!-- Before -->
+<Alert v-model="showAlert" title="Payment failed" theme="yellow">
+  <template #footer>
+    <Button label="Retry" @click="retry" />
+  </template>
+</Alert>
+
+<!-- After -->
+<Alert
+  v-if="showAlert"
+  title="Payment failed"
+  theme="amber"
+  dismissible
+  :primary-action="{ label: 'Retry', onClick: retry }"
+  @dismiss="showAlert = false"
+/>
+```
+
+An action is `ButtonProps` plus an `onClick` that receives `{ dismiss }` —
+call `context.dismiss()` to emit the alert's `dismiss` event:
+
+```ts
+const primaryAction = {
+  label: 'Retry',
+  onClick: ({ dismiss }) => {
+    retry()
+    dismiss()
+  },
+}
+```
+
+If the alert was really a promotional card in a sidebar, use the new
+[`SidebarCard`](./components/sidebar) component instead.
+
 ## Sidebar
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /
@@ -1191,6 +1292,14 @@ moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
 `frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
 [Editor](./molecules/editor) page for the full API and recipes.
 
+Not migrated yet? The v0 family is parked, unchanged, in
+`frappe-ui/experimental` as an interim import path. It is unstable — no
+deprecation window — and will be removed once consumers migrate:
+
+```ts
+import { TextEditor } from 'frappe-ui/experimental'
+```
+
 ```ts
 // Before
 import { TextEditor, TextEditorFixedMenu } from 'frappe-ui'
@@ -1294,6 +1403,58 @@ Delete the manual imports; there is nothing to add back:
 
 The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
 package`) until the lines are gone.
+
+## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
+
+Both subpaths are gone in v1. frappe-ui is a UI library; the members that
+know about doctypes, onboarding flows, or billing moved to `@framework/ui`
+(the `ui/` package in the [frappe repo](https://github.com/frappe/frappe)).
+Every break here is loud — the import path stops resolving.
+
+| Before (`frappe-ui/frappe`)     | After                              |
+| ------------------------------- | ---------------------------------- |
+| `useTelemetry`, `telemetryPlugin` | `@framework/ui`                  |
+| `useOnboarding`, `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`, `showHelpModal`, `minimize` | `@framework/ui` |
+| `TrialBanner`, `SignupBanner`   | `@framework/ui`                    |
+| `DataImport`                    | `@framework/ui`                    |
+| `Link`, `LinkProps`, `LinkEmits`, `LinkExposed`, `LinkOption` | `@framework/ui` (superset, see below) |
+| `Filter`                        | `@framework/ui` (superset, see below) |
+| `OnboardingSteps`, `HelpCenter`, `showHelpCenter` | removed — they live on inside `@framework/ui`'s `HelpModal` |
+| `frappe-ui/drive`, `frappe-ui/drive/*` | removed, no replacement     |
+
+`@framework/ui` peer-depends on `frappe-ui`, so add it as a dependency if
+your app does not carry it yet, then change the import path:
+
+```js
+// Before
+import { useTelemetry, TrialBanner } from 'frappe-ui/frappe'
+
+// After
+import { useTelemetry, TrialBanner } from '@framework/ui'
+```
+
+Two replacements are supersets of what they replace — existing call sites
+work unchanged:
+
+- `Link` adds `redirectable` / `editable` props and `redirect` / `edit`
+  emits.
+- `Filter` adds a `useFilters` composable, `parseFilters` /
+  `serializeFilters`, and an operator registry.
+
+The drive components were removed because the drive app already owns the
+live copy of all six; nothing imported the subpath.
+
+Finally, drop the stale Tailwind glob. The `frappe/` directory no longer
+ships, so this line in `tailwind.config.js` scans nothing:
+
+```js
+// Delete this line
+'./node_modules/frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
+```
+
+Better: replace the hand-copied list with the
+[`content` export](/docs/foundations/tailwind#the-content-export), which
+tracks the library's source directories for you.
 
 ## Autocomplete (removed)
 
@@ -1541,6 +1702,20 @@ Until you do, reading `this.$socket` throws with that instruction rather than
 returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
+
+## useCall: a throwing `beforeSubmit` now cancels the submit
+
+Previously a `beforeSubmit` hook that threw was caught and logged, and the
+request was **sent anyway**. Now the throw propagates: the request is not sent
+and `submit()` rejects with the hook's error.
+
+This is a silent behavior change. If one of your `beforeSubmit` hooks can
+throw, the submit it used to let through now stops. Either handle the rejection
+at the call site or make the hook non-throwing to keep the old behavior. A
+hook that returns normally is unaffected — it still cannot stop the request.
+
+`beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
+awaited, only the type said otherwise.
 
 ## pageMetaPlugin — removed
 

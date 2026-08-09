@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "1.0.0-beta.40",
+  "version": "1.0.0-beta.41",
   "description": "A set of components and utilities for rapid UI development",
   "engines": {
     "node": ">=20.19.0"
@@ -55,9 +55,6 @@
       "import": "./experimental.ts",
       "types": "./experimental.ts"
     },
-    "./frappe": {
-      "import": "./frappe/index.js"
-    },
     "./editor": {
       "import": "./src/molecules/editor/index.ts",
       "types": "./src/molecules/editor/index.ts"
@@ -69,12 +66,6 @@
     "./charts": {
       "import": "./src/charts/index.ts",
       "types": "./src/charts/index.ts"
-    },
-    "./drive": {
-      "import": "./frappe/drive/index.js"
-    },
-    "./drive/*": {
-      "import": "./frappe/drive/*"
     },
     "./icons": {
       "import": "./icons/index.ts"
@@ -104,7 +95,6 @@
     }
   },
   "files": [
-    "frappe",
     "src",
     "vite",
     "icons",

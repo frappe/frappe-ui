@@ -28,7 +28,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
 | Close button | `showCloseButton: boolean` (default `true`); independent of header |
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
-| Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`), matching `Alert.theme`. No semantic axis. |
+| Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`). No semantic axis. (`Alert.theme` uses its own palette: `gray \| blue \| green \| amber \| red`.) |
 | Slots | Canonical only: `#default`, `#title`, `#actions`. Legacy slots were removed (ADR-0008). |
 | Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
 | Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |

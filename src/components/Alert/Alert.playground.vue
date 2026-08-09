@@ -3,43 +3,66 @@ import { Alert } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'title', type: 'text', default: 'Heads up', width: '14rem' },
+  {
+    name: 'title',
+    type: 'text',
+    default: 'Your trial ends soon!',
+    width: '14rem',
+  },
   {
     name: 'description',
     type: 'text',
-    default: 'You can dismiss this alert.',
+    default: 'Upgrade to keep enjoying features.',
     width: '20rem',
   },
   {
     name: 'theme',
     type: 'tabs',
-    default: 'blue',
+    default: 'gray',
     options: [
-      { label: 'none', value: 'none' },
-      { label: 'yellow', value: 'yellow' },
+      { label: 'gray', value: 'gray' },
       { label: 'blue', value: 'blue' },
       { label: 'green', value: 'green' },
+      { label: 'amber', value: 'amber' },
       { label: 'red', value: 'red' },
     ],
   },
   {
-    name: 'variant',
+    name: 'icon',
     type: 'tabs',
-    default: 'subtle',
+    default: 'auto',
     options: [
-      { label: 'subtle', value: 'subtle' },
-      { label: 'outline', value: 'outline' },
+      { label: 'auto', value: 'auto' },
+      { label: 'show', value: 'show' },
+      { label: 'hide', value: 'hide' },
     ],
   },
-  { name: 'dismissible', type: 'switch', default: true },
+  { name: 'primaryAction', type: 'switch', default: true },
+  { name: 'secondaryAction', type: 'switch', default: false },
+  { name: 'dismissible', type: 'switch', default: false },
 ]
+
+function iconProp(value: string) {
+  if (value === 'show') return true
+  if (value === 'hide') return false
+  return undefined
+}
 
 function buildCode(v: Record<string, any>) {
   const attrs = [`title="${v.title}"`]
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.theme !== 'none') attrs.push(`theme="${v.theme}"`)
-  if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
-  if (!v.dismissible) attrs.push(':dismissible="false"')
+  if (v.theme !== 'gray') attrs.push(`theme="${v.theme}"`)
+  if (v.icon === 'show') attrs.push(':icon="true"')
+  if (v.icon === 'hide') attrs.push(':icon="false"')
+  if (v.primaryAction) {
+    attrs.push(
+      `:primary-action="{ label: 'Update now', onClick: ({ dismiss }) => dismiss() }"`,
+    )
+  }
+  if (v.secondaryAction) {
+    attrs.push(`:secondary-action="{ label: 'View plans' }"`)
+  }
+  if (v.dismissible) attrs.push('dismissible')
   return ['<Alert', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
@@ -51,8 +74,16 @@ function buildCode(v: Record<string, any>) {
         <Alert
           :title="values.title"
           :description="values.description || undefined"
-          :theme="values.theme === 'none' ? undefined : values.theme"
-          :variant="values.variant"
+          :theme="values.theme"
+          :icon="iconProp(values.icon)"
+          :primary-action="
+            values.primaryAction
+              ? { label: 'Update now', onClick: ({ dismiss }) => dismiss() }
+              : undefined
+          "
+          :secondary-action="
+            values.secondaryAction ? { label: 'View plans' } : undefined
+          "
           :dismissible="values.dismissible"
         />
       </div>
