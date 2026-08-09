@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { Button, Calendar, DatePicker, Select } from 'frappe-ui'
+import { Button, DatePicker, Select } from 'frappe-ui'
+import { Calendar } from '..'
 
 const config = {
   defaultMode: 'Month',

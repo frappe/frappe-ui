@@ -178,7 +178,7 @@ import {
   isWeekend,
 } from './calendarUtils'
 
-import { Button } from '../Button'
+import { Button } from '#components/Button'
 import useCalendarData from './composables/useCalendarData'
 import { useNow } from './composables/useNow'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'

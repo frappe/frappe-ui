@@ -10,8 +10,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import Tooltip from '../Tooltip/Tooltip.vue'
-import { dayjs } from '../../utils/dayjs'
+import Tooltip from '#components/Tooltip/Tooltip.vue'
+import { dayjs } from '#utils/dayjs'
 import { computed, inject } from 'vue'
 import { CALENDAR_CONFIG_KEY } from './types'
 import { useNow } from './composables/useNow'

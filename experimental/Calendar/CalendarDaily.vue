@@ -119,7 +119,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
-import { Button } from '../Button'
+import { Button } from '#components/Button'
 import {
   parseDate,
   twelveHoursFormat,

@@ -87,7 +87,8 @@ export * from './components/ItemListRow'
 // ListView family moved to `frappe-ui/experimental` (#985, P14) — it stays
 // there, unstable, until `frappe-ui/list` reaches functional parity. See
 // v1-release/plan.md's ListView row.
-export * from './components/Calendar'
+// Calendar family moved to `frappe-ui/experimental` (#1020, P14) — parked
+// there, API unchanged, until a redesigned calendar family replaces it.
 export * from './components/Tree'
 
 // Navigation and layout

@@ -7,33 +7,33 @@
   const propsData = [
   {
     name: 'events',
-    description: '',
+    description: 'Events to render. Each needs an `id`, a title, and date/time fields.',
     required: true,
     type: 'CalendarEvent[]',
     default: '[]'
   },
   {
     name: 'config',
-    description: '',
+    description: 'Behavior overrides, merged over the defaults.',
     required: false,
     type: 'Partial<CalendarConfig>',
     default: '{}'
   },
   {
     name: 'onClick',
-    description: '',
+    description: 'Replaces the default single-click behavior (opening the event\npopover) with your own handler.',
     required: false,
     type: '((data: { e: MouseEvent; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onDblClick',
-    description: '',
+    description: 'Replaces the default double-click behavior (opening the edit\nmodal) with your own handler.',
     required: false,
     type: '((data: { e: MouseEvent | null; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onCellClick',
-    description: '',
+    description: 'Replaces the default cell-click behavior (opening the new-event\nmodal in edit mode) with your own handler.',
     required: false,
     type: '((data: CalendarCellClickData) => void)'
   }
@@ -59,11 +59,6 @@
 
   const emitsData = [
   {
-    name: 'delete',
-    description: '',
-    type: '[eventID: string | number | undefined]'
-  },
-  {
     name: 'create',
     description: '',
     type: '[event: CalendarEvent]'
@@ -72,6 +67,11 @@
     name: 'update',
     description: '',
     type: '[event: CalendarEvent]'
+  },
+  {
+    name: 'delete',
+    description: '',
+    type: '[eventID: string | number | undefined]'
   },
   {
     name: 'rangeChange',
