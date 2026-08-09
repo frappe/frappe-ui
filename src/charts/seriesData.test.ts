@@ -1,9 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
-import type {
-  AxisChartConfig,
-  AxisChartProps,
-} from './types'
+import { resolveSeriesColors } from './axisChartCommon'
+import type { ChartTheme } from './theme'
+import type { AxisChartConfig, AxisChartProps } from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },
@@ -153,26 +152,70 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
   })
 })
 
-describe('normalizeAxisChartProps: y2', () => {
-  it('puts a y2 column on the second axis', () => {
-    const { config } = normalize({ y2: 'refunds' })
+describe('normalizeAxisChartProps: the second value axis', () => {
+  it('puts a series on the second axis from its style', () => {
+    const { config } = normalize({
+      seriesConfig: { refunds: { axis: 'y2' } },
+    })
     expect(config.series).toEqual([
       { name: 'sales' },
       { name: 'refunds', axis: 'y2' },
     ])
   })
 
-  it('appends y2 columns that y does not list', () => {
-    const { config } = normalize({ y: 'sales', y2: ['refunds'] })
-    expect(config.series).toEqual([
-      { name: 'sales' },
-      { name: 'refunds', axis: 'y2' },
-    ])
+  // The axis a series is measured against says nothing about where it is drawn.
+  // Series colors are handed out in this order, so a series that changed axis
+  // and changed place would silently change color with it.
+  it('keeps the series in y order whatever axis each one sits on', () => {
+    const { config } = normalize({
+      y: ['sales', 'refunds', 'rate'],
+      seriesConfig: { sales: { axis: 'y2' }, refunds: { axis: 'y' } },
+    })
+    expect(namesOf(config)).toEqual(['sales', 'refunds', 'rate'])
   })
 
   it('leaves series off the second axis by default', () => {
     const { config } = normalize()
     expect(config.series.every((series) => !series.axis)).toBe(true)
+  })
+
+  // The reading a chart is changed to make: give the second series its own
+  // scale. Colors are handed out along the series list, so the series that
+  // moved has to come back in the same color it went in.
+  it('keeps a series in its own color when it changes axis', () => {
+    const theme: ChartTheme = {
+      categorical: ['#111111', '#222222', '#333333'],
+      sequential: ['#000011', '#000022', '#000033'],
+      diverging: ['#001100', '#002200', '#003300'],
+      axisLabel: 'ink-5',
+      axisTitle: 'ink-7',
+      axisLine: 'outline-2',
+      splitLine: 'outline-1',
+      dataLabel: 'ink-6',
+      insideLabel: 'ink-8',
+      cellGap: '#ffffff',
+    }
+    const colorsOf = (props: Partial<AxisChartProps>) =>
+      resolveSeriesColors(normalize(props).config, theme)
+
+    expect(colorsOf({ seriesConfig: { refunds: { axis: 'y2' } } })).toEqual(
+      colorsOf({}),
+    )
+  })
+
+  // Long data reaches the second axis the same way, which the column list it
+  // has no columns to name could not do.
+  it('moves a long-data series by its grouping value', () => {
+    const { config } = normalize({
+      data: longRows,
+      y: 'amount',
+      series: 'region',
+      seriesConfig: { West: { axis: 'y2' } },
+    })
+    expect(config.series).toEqual([
+      { name: 'East' },
+      { name: 'West', axis: 'y2' },
+    ])
   })
 })
 

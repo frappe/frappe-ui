@@ -212,13 +212,15 @@ const revenueByPlanChart: BarChartProps = {
 const revenueVsTargetChart: LineChartProps = {
   data: revenueVsTarget,
   x: 'month',
-  y: ['revenue', 'target'],
-  y2: 'attainment',
+  y: ['revenue', 'target', 'attainment'],
   xAxis: { type: 'time', timeGrain: 'month' },
   yAxis: { title: 'Revenue ($)' },
   y2Axis: { title: 'Attainment (%)', min: 90, max: 110 },
   palette: 'categorical',
-  seriesConfig: { target: { lineType: 'dashed', lineWidth: 1.5 } },
+  seriesConfig: {
+    target: { lineType: 'dashed', lineWidth: 1.5 },
+    attainment: { axis: 'y2' },
+  },
   title: 'Revenue against target',
   subtitle: 'Committed plan vs actuals',
 }

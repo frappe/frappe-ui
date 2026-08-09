@@ -72,6 +72,12 @@
     type: 'string'
   },
   {
+    name: 'showDataLabels',
+    description: 'Prints the point\'s own name beside it, the way an axis series prints its\nvalue. `label` is what it prints, so a chart that names no label column has\nnothing to show and says so in a dev-mode warning. Names that would collide\nwith a neighbour are dropped, so a dense cloud carries few.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'xAxis',
     description: 'The horizontal scale. Both axes are value axes: a scatter has no categories.',
     required: false,
@@ -126,6 +132,21 @@
     name: 'tooltip',
     description: '',
     type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+  },
+  {
+    name: 'loading',
+    description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
+    type: 'any'
+  },
+  {
+    name: 'error',
+    description: 'Replaces the message, e.g. to put a retry button beside it.',
+    type: '{ error?: string | null | undefined; }'
+  },
+  {
+    name: 'empty',
+    description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
+    type: 'any'
   }
 ]
 
@@ -142,11 +163,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable folder="charts" name="ScatterChart" :data="propsData"/> 
+<PropsTable folder="charts" name="ScatterChart" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

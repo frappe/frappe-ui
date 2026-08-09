@@ -13,19 +13,26 @@ const data = [
  * is off: a bar grows from the baseline, and until it has arrived it is a
  * zero-height path nothing can be clicked on.
  */
-function mountChart(props: Record<string, any> = {}) {
+function mountChart(
+  props: Record<string, any> = {},
+  slots?: Record<string, () => unknown>,
+) {
   return cy.mount(
     defineComponent({
       setup() {
         return () =>
           h('div', { style: 'width: 480px; height: 300px' }, [
-            h(BarChart, {
-              data,
-              x: 'month',
-              y: ['sales', 'refunds'],
-              echartOptions: { animation: false },
-              ...props,
-            }),
+            h(
+              BarChart,
+              {
+                data,
+                x: 'month',
+                y: ['sales', 'refunds'],
+                echartOptions: { animation: false },
+                ...props,
+              },
+              slots,
+            ),
           ])
       },
     }),
@@ -160,9 +167,7 @@ describe('BarChart', () => {
 
     it('measures a line series against a second axis', () => {
       mountChart({
-        y: 'sales',
-        y2: 'refunds',
-        seriesConfig: { refunds: { type: 'line' } },
+        seriesConfig: { refunds: { type: 'line', axis: 'y2' } },
       })
       bars().should('have.length', data.length)
       lines().should('have.length', 1)
@@ -392,9 +397,9 @@ describe('BarChart', () => {
   })
 
   describe('states', () => {
-    it('spins while loading and keeps the plot mounted', () => {
+    it('holds the plot’s shape with a skeleton while loading', () => {
       mountChart({ loading: true })
-      cy.contains('Loading chart…').should('be.visible')
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('be.visible')
       // Unmounting the plot would dispose the echarts instance behind it.
       cy.get('[data-slot="chart-plot"]').should('exist')
     })
@@ -409,6 +414,37 @@ describe('BarChart', () => {
       mountChart({ data: [] })
       cy.contains('No data to show').should('be.visible')
       bars().should('not.exist')
+    })
+
+    // The chrome is the library's, so reaching one of its states costs the app
+    // a slot rather than a chart of its own.
+    it('puts an app’s retry button beside the error message', () => {
+      const retry = cy.spy().as('onRetry')
+      mountChart({ error: 'Query timed out' }, {
+        error: ({ error }: any) => [
+          h('span', `Failed: ${error}`),
+          h('button', { id: 'retry', onClick: retry }, 'Retry'),
+        ],
+      } as any)
+
+      cy.contains('Failed: Query timed out').should('be.visible')
+      cy.contains('Could not render this chart').should('not.exist')
+      cy.get('#retry').click()
+      cy.get('@onRetry').should('have.been.calledOnce')
+    })
+
+    it('takes an app’s own placeholder in place of the skeleton', () => {
+      mountChart({ loading: true }, { loading: () => h('div', { id: 'own' }) })
+
+      cy.get('#own').should('exist')
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('not.exist')
+    })
+
+    it('takes an app’s own line in place of “No data to show”', () => {
+      mountChart({ data: [] }, { empty: () => h('span', 'Widen the filters') })
+
+      cy.contains('Widen the filters').should('be.visible')
+      cy.contains('No data to show').should('not.exist')
     })
   })
 

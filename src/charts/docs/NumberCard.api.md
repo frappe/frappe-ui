@@ -30,17 +30,16 @@
     type: 'string | null'
   },
   {
-    name: 'card',
-    description: 'Draws the card surface: border, background, corner radius and padding. On\nby default. Set it to `false` for a chart the app has already placed inside\na card of its own, so a bordered box does not nest in a bordered box.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
-  },
-  {
     name: 'value',
     description: 'A string renders as given: the formatting props only apply to a number.',
     required: true,
-    type: 'string | number | null'
+    type: 'number | string | null'
+  },
+  {
+    name: 'color',
+    description: 'Ink the reading is printed in, e.g. the color of the series it summarizes\non a dashboard. One color for one mark, the way `SeriesStyle.color` names\na series\' own — it does not restyle the card, and the delta keeps the\ntone that says which way the number moved.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'prefix',
@@ -95,6 +94,13 @@
     description: '',
     required: false,
     type: 'NumberCardSparkline'
+  },
+  {
+    name: 'card',
+    description: 'Draws the card surface: border, background, corner radius and padding. On\nby default. Set it to `false` for a chart the app has already placed inside\na card of its own, so a bordered box does not nest in a bordered box.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
   }
 ]
 
@@ -105,8 +111,18 @@
     type: 'any'
   },
   {
+    name: 'loading',
+    description: 'Replaces the skeleton, e.g. with a placeholder of the app\'s own.',
+    type: 'any'
+  },
+  {
+    name: 'error',
+    description: 'Replaces the message, e.g. to put a retry button beside it.',
+    type: '{ error?: string | null | undefined; }'
+  },
+  {
     name: 'empty',
-    description: '',
+    description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
   },
   {
@@ -116,9 +132,9 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable folder="charts" name="NumberCard" :data="propsData"/> 
+<PropsTable folder="charts" name="NumberCard" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
-
+<SlotsTable :data="slotsData"/>

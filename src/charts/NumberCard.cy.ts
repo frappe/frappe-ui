@@ -2,13 +2,16 @@ import { defineComponent, h } from 'vue'
 import NumberCard from './NumberCard.vue'
 import './style.css'
 
-function mountCard(props: Record<string, any> = {}) {
+function mountCard(
+  props: Record<string, any> = {},
+  slots?: Record<string, () => unknown>,
+) {
   return cy.mount(
     defineComponent({
       setup() {
         return () =>
           h('div', { style: 'width: 260px' }, [
-            h(NumberCard, { title: 'Revenue', value: 12300, ...props }),
+            h(NumberCard, { title: 'Revenue', value: 12300, ...props }, slots),
           ])
       },
     }),
@@ -137,6 +140,50 @@ describe('NumberCard', () => {
     it('says there is no data rather than printing a zero', () => {
       mountCard({ value: null })
       card().should('contain.text', 'No data')
+    })
+
+    // The same three slots the plotted charts forward, so a card on a dashboard
+    // recovers from a failed query the way the charts beside it do.
+    it('puts an app’s retry button beside the error message', () => {
+      const retry = cy.spy().as('onRetry')
+      mountCard({ error: 'Query timed out' }, {
+        error: ({ error }: any) => [
+          h('span', `Failed: ${error}`),
+          h('button', { id: 'retry', onClick: retry }, 'Retry'),
+        ],
+      } as any)
+
+      card()
+        .should('contain.text', 'Failed: Query timed out')
+        .and('not.contain.text', 'Could not render this chart')
+      cy.get('#retry').click()
+      cy.get('@onRetry').should('have.been.calledOnce')
+    })
+
+    it('takes an app’s own placeholder in place of the skeleton', () => {
+      mountCard({ loading: true }, { loading: () => h('div', { id: 'own' }) })
+
+      cy.get('#own').should('exist')
+      cy.get('.animate-pulse').should('not.exist')
+    })
+  })
+
+  describe('color', () => {
+    it('prints the reading in the ink the caller named', () => {
+      mountCard({ color: 'rgb(255, 0, 0)' })
+      cy.contains('12,300').should('have.css', 'color', 'rgb(255, 0, 0)')
+    })
+
+    it('leaves the title and the delta alone', () => {
+      mountCard({ color: 'rgb(255, 0, 0)', delta: 12.5, deltaSuffix: '%' })
+      cy.contains('Revenue').should('not.have.css', 'color', 'rgb(255, 0, 0)')
+      cy.contains('12.5%').should('not.have.css', 'color', 'rgb(255, 0, 0)')
+    })
+
+    // An em dash is not a reading, so there is nothing for the ink to say.
+    it('leaves a card with no reading in its own muted ink', () => {
+      mountCard({ value: null, color: 'rgb(255, 0, 0)' })
+      cy.contains('—').should('not.have.css', 'color', 'rgb(255, 0, 0)')
     })
   })
 })

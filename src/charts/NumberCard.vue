@@ -77,37 +77,45 @@
         </div>
       </div>
 
-      <!-- Same two lines the other charts show through ChartContainer: a card
-           that failed says so instead of printing a stale or empty reading. -->
+      <!-- The same three states the other charts show through ChartContainer,
+           and the same three slots over them: a card that failed says so
+           instead of printing a stale or empty reading, and an app that wants a
+           retry button beside the message replaces the message. -->
       <template v-if="error">
-        <div class="text-sm-medium text-ink-red-8">
-          Could not render this chart
-        </div>
-        <div class="truncate text-p-sm text-ink-gray-5">{{ error }}</div>
+        <slot name="error" :error="error">
+          <div class="text-sm-medium text-ink-red-8">
+            Could not render this chart
+          </div>
+          <div class="truncate text-p-sm text-ink-gray-5">{{ error }}</div>
+        </slot>
+      </template>
+
+      <template v-else-if="loading">
+        <slot name="loading">
+          <div class="relative truncate text-3xl-semibold tabular-nums">
+            <!-- The number holds the line open while the skeleton covers it, so
+                 the card does not resettle when the reading arrives. -->
+            <Skeleton class="absolute inset-y-1 start-0 w-28 rounded-4" />
+            <span class="invisible">{{ valueText }}</span>
+          </div>
+          <Skeleton class="my-0.5 h-4 w-32 rounded-4" />
+        </slot>
       </template>
 
       <slot v-else-if="showEmptySlot" name="empty" />
 
       <template v-else>
+        <!-- The ink is the caller's on a reading that carries one, the way a
+             series' color is: a card standing for a series is read against it. -->
         <div
           class="relative truncate text-3xl-semibold tabular-nums"
           :class="isEmpty ? 'text-ink-gray-4' : 'text-ink-gray-9'"
+          :style="valueStyle"
         >
-          <!-- The number holds the line open while the skeleton covers it, so
-               the card does not resettle when the reading arrives. -->
-          <span
-            v-if="loading"
-            class="absolute inset-y-1 start-0 w-28 animate-pulse rounded-4 bg-surface-gray-3"
-          />
-          <span :class="{ invisible: loading }">{{ valueText }}</span>
+          {{ valueText }}
         </div>
 
-        <div
-          v-if="loading"
-          class="my-0.5 h-4 w-32 animate-pulse rounded-4 bg-surface-gray-2"
-        />
-
-        <div v-else-if="isEmpty" class="text-sm text-ink-gray-5">No data</div>
+        <div v-if="isEmpty" class="text-sm text-ink-gray-5">No data</div>
 
         <!-- One text line tall, and no taller: a control in the caption slot is
              the app's to fit into this row. -->
@@ -164,6 +172,7 @@ import {
 import { paletteColors, useChartTheme } from './theme'
 import { documentDir } from './utils'
 import { useId } from '#utils/useId'
+import Skeleton from '#components/Skeleton/Skeleton.vue'
 import ChartCard from './components/ChartCard.vue'
 import type { NumberCardProps } from './types'
 
@@ -177,6 +186,11 @@ const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
 const slots = defineSlots<{
   actions?: () => unknown
+  /** Replaces the skeleton, e.g. with a placeholder of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
   empty?: () => unknown
   /** Replaces `deltaCaption`, e.g. with a Dropdown that changes the period. */
   caption?: (props: { caption?: string }) => unknown
@@ -201,8 +215,11 @@ const toneClass = computed(
   () => TONE_CLASSES[deltaTone(props.delta, props.negativeIsBetter)],
 )
 const formattedDelta = computed(() => formatCardDelta(props, props.delta))
-const showEmptySlot = computed(
-  () => isEmpty.value && !props.loading && Boolean(slots.empty),
+const showEmptySlot = computed(() => isEmpty.value && Boolean(slots.empty))
+// Only over a reading. The em dash a card with no value prints is not a number
+// the color says anything about, and the loading skeleton is not one either.
+const valueStyle = computed(() =>
+  props.color && !isEmpty.value ? { color: props.color } : undefined,
 )
 const showDeltaRow = computed(
   () =>

@@ -127,6 +127,30 @@ describe('ScatterChart', () => {
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Spend')
   })
 
+  describe('point labels', () => {
+    it('prints each point’s own name beside it', () => {
+      mountChart({ label: 'account', showDataLabels: true })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Acme')
+        .and('contain.text', 'Globex')
+    })
+
+    it('prints nothing beside a point until it is asked to', () => {
+      mountChart({ label: 'account' })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'not.contain.text',
+        'Acme',
+      )
+    })
+
+    it('labels the points of every group', () => {
+      mountChart({ label: 'account', series: 'region', showDataLabels: true })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Acme')
+        .and('contain.text', 'Initech')
+    })
+  })
+
   describe('reference lines', () => {
     it('draws a labelled rule across the plot with no legend entry of its own', () => {
       mountChart({

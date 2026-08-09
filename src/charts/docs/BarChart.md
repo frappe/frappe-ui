@@ -79,7 +79,7 @@ and drops to a coarser interval rather than crowd them.
 `seriesConfig[key].type` sets the mark a single series draws as: `'bar'`,
 `'line'` or `'area'`. The chart component sets the default for the rest, so a
 `BarChart` with one `'line'` series is a combo chart. A rate belongs on its own
-scale, which `y2` gives it.
+scale, which `axis: 'y2'` in the same entry gives it.
 
 <ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
 

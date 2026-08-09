@@ -145,8 +145,7 @@ describe('LineChart', () => {
 
     it('reads a y2 line against the second axis', () => {
       mountChart({
-        y: 'sales',
-        y2: 'refunds',
+        seriesConfig: { refunds: { axis: 'y2' } },
         referenceLines: [
           { value: 15, label: 'Sales target' },
           { value: 5, axis: 'y2', label: 'Refund cap' },
@@ -173,7 +172,7 @@ describe('LineChart', () => {
   })
 
   it('measures a y2 series against a second axis, drawn opposite', () => {
-    mountChart({ y: 'sales', y2: 'refunds' })
+    mountChart({ seriesConfig: { refunds: { axis: 'y2' } } })
     lines().should('have.length', 2)
     // Two scales, so the axis labels no longer share a single set of values.
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '6')
@@ -237,8 +236,7 @@ describe('LineChart', () => {
 
   it('titles each value axis over the edge its axis is drawn on', () => {
     mountChart({
-      y: 'sales',
-      y2: 'refunds',
+      seriesConfig: { refunds: { axis: 'y2' } },
       yAxis: { title: 'Sales' },
       y2Axis: { title: 'Refunds' },
     })

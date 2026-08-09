@@ -389,6 +389,81 @@ describe('buildScatterOption', () => {
   })
 })
 
+describe('point labels on a scatter', () => {
+  const labelled = (overrides: Partial<ScatterChartConfig> = {}) =>
+    build({ labelColumn: 'account', showDataLabels: true, ...overrides })
+
+  it('prints each point’s own name beside it', () => {
+    const [points] = labelled().series
+
+    expect(points.label.show).toBe(true)
+    expect(points.data.map((item: any) => item.name)).toEqual([
+      'Acme',
+      'Globex',
+      'Initech',
+      'Umbrella',
+    ])
+    expect(points.label.formatter({ name: 'Acme' })).toBe('Acme')
+  })
+
+  it('prints the name rather than either measure, which the axes carry', () => {
+    const [points] = labelled().series
+
+    expect(points.label.formatter({ name: 'Acme', value: [400, 1200] })).toBe(
+      'Acme',
+    )
+  })
+
+  it('drops a name that collides with a neighbour', () => {
+    expect(labelled().series[0].labelLayout).toEqual({ hideOverlap: true })
+  })
+
+  it('leans the label the other way in RTL', () => {
+    expect(labelled().series[0].label.position).toBe('right')
+    expect(labelled({ dir: 'rtl' }).series[0].label.position).toBe('left')
+  })
+
+  it('labels every group, not just the first', () => {
+    const option = labelled({ seriesColumn: 'region' })
+
+    expect(option.series).toHaveLength(2)
+    expect(option.series.every((entry: any) => entry.label.show)).toBe(true)
+  })
+
+  it('carries no label option at all when nothing is labelled', () => {
+    const [points] = build({ labelColumn: 'account' }).series
+
+    expect(points.label).toBeUndefined()
+    expect(points.labelLayout).toBeUndefined()
+    expect(points.data[0].name).toBeUndefined()
+  })
+
+  it('says so when there is no label column to print', () => {
+    let option: any
+    const warnings = captureWarnings(() => {
+      option = build({ showDataLabels: true })
+    })
+
+    expect(option.series[0].label).toBeUndefined()
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]).toContain('[frappe-ui]')
+    expect(warnings[0]).toContain('showDataLabels')
+  })
+
+  it('leaves a point whose label is blank unlabelled', () => {
+    const option = buildScatterOption(
+      config({
+        data: [{ account: null, spend: 400, revenue: 1200 }],
+        labelColumn: 'account',
+        showDataLabels: true,
+      }),
+      { theme },
+    ) as any
+
+    expect(option.series[0].data[0].name).toBe('')
+  })
+})
+
 /** The series echarts is handed that actually carry reference lines. */
 const hostsOf = (option: any) =>
   option.series.filter((entry: any) => entry.markLine)

@@ -25,12 +25,19 @@ slot it stands in.
 
 ## A second value axis
 
-`y2` measures a column against a second value axis, drawn opposite the primary —
-for a series in another unit, like a rate against dollars. `y2Axis.min` / `max`
-pin the scale so the line reads as over or under plan rather than as its own
-trend.
+`seriesConfig[key].axis` measures a series against a second value axis, drawn
+opposite the primary — for a series in another unit, like a rate against
+dollars. `y2Axis.min` / `max` pin that scale so the line reads as over or under
+plan rather than as its own trend. The axis is only drawn when a series asks
+for it.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
+
+Which scale a series is read against is per-series meaning, so it sits in the
+same entry as that series' label and mark. It is not a second column list: `y`
+names every series once, in the order they are drawn and colored, and moving one
+across to the second axis leaves it where it was. Long data reaches the axis the
+same way, keyed by a value of the `series` column.
 
 ## Filling one series
 
