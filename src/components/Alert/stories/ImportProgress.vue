@@ -5,14 +5,15 @@ import { Alert, Spinner } from 'frappe-ui'
 // Slot overrides: #prefix swaps the status icon for a Spinner, and
 // #description carries rich text.
 const showImportBanner = ref(true)
+const status = ref('')
 
 function viewProgress() {
-  console.log('open import log')
+  status.value = 'Import log opened'
 }
 </script>
 
 <template>
-  <div class="w-full max-w-sm">
+  <div class="flex w-full max-w-sm flex-col gap-2">
     <Alert
       v-if="showImportBanner"
       title="Contact import is in progress"
@@ -31,10 +32,11 @@ function viewProgress() {
     </Alert>
     <button
       v-else
-      class="text-sm text-ink-gray-5 underline"
+      class="self-start text-sm text-ink-gray-5 underline"
       @click="showImportBanner = true"
     >
       Bring the banner back
     </button>
+    <p v-if="status" class="text-sm text-ink-gray-5">{{ status }}</p>
   </div>
 </template>

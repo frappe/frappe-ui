@@ -1,10 +1,13 @@
 <script setup>
+import { ref } from 'vue'
 import { Alert } from 'frappe-ui'
 
 // One-line status rows. The theme colors the icon and the action label;
-// the container stays neutral.
+// the container stays neutral. Actions report in the status line below.
+const status = ref('')
+
 function open(target) {
-  console.log('open', target)
+  status.value = `${target} opened`
 }
 </script>
 
@@ -13,22 +16,23 @@ function open(target) {
     <Alert
       title="SLA timer has started"
       theme="blue"
-      :primary-action="{ label: 'View SLA', onClick: () => open('sla') }"
+      :primary-action="{ label: 'View SLA', onClick: () => open('SLA details') }"
     />
     <Alert
       title="Failed to create lead"
       theme="red"
-      :primary-action="{ label: 'Try again', onClick: () => open('lead-form') }"
+      :primary-action="{ label: 'Try again', onClick: () => open('Lead form') }"
     />
     <Alert
       title="Meeting scheduled"
       theme="green"
-      :primary-action="{ label: 'Open calendar', onClick: () => open('calendar') }"
+      :primary-action="{ label: 'Open calendar', onClick: () => open('Calendar') }"
     />
     <Alert
       title="Storage is almost full"
       theme="amber"
-      :primary-action="{ label: 'Manage', onClick: () => open('storage') }"
+      :primary-action="{ label: 'Manage', onClick: () => open('Storage settings') }"
     />
+    <p v-if="status" class="text-sm text-ink-gray-5">{{ status }}</p>
   </div>
 </template>

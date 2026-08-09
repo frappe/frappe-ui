@@ -4,14 +4,15 @@ import { Alert } from 'frappe-ui'
 
 // An info banner with one action and a × button in the corner.
 const showTrialBanner = ref(true)
+const status = ref('')
 
 function openBilling() {
-  console.log('open billing page')
+  status.value = 'Billing page opened'
 }
 </script>
 
 <template>
-  <div class="w-full max-w-sm">
+  <div class="flex w-full max-w-sm flex-col gap-2">
     <Alert
       v-if="showTrialBanner"
       title="Your trial ends soon!"
@@ -23,10 +24,11 @@ function openBilling() {
     />
     <button
       v-else
-      class="text-sm text-ink-gray-5 underline"
+      class="self-start text-sm text-ink-gray-5 underline"
       @click="showTrialBanner = true"
     >
       Bring the banner back
     </button>
+    <p v-if="status" class="text-sm text-ink-gray-5">{{ status }}</p>
   </div>
 </template>
