@@ -278,10 +278,17 @@ value input, not a panel switcher. The two share:
 ## Motion
 
 - the `underline` indicator animates position and size on selection change,
-  as in v0
-- pill variants (`subtle`, `ghost`, `browser-tab`) switch instantly
+  as in v0 (300ms, default ease)
+- `subtle` and `ghost` slide the active pill surface (background + shadow)
+  between triggers with the same timing, in both `TabList` and `TabButtons`.
+  The sliding layer is an overlay behind the triggers; triggers never move.
+  No slide on initial mount — only on selection change
+- `browser-tab` switches instantly
+- hover state changes ease over 150ms; selection color changes ride the
+  sliding surface
 - panel switches are instant; no crossfade
-- `prefers-reduced-motion: reduce` disables the indicator animation
+- `prefers-reduced-motion: reduce` disables the indicator and slide
+  animations
 
 ## Accessibility and semantics
 
@@ -307,6 +314,16 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 - `Tab.label` as the implied value — `value` is required
 
 ## Changelog
+
+### 2026-08-10 (later)
+
+- **Motion: pill variants slide.** `subtle` and `ghost` animate the active
+  pill surface between triggers instead of switching instantly; `browser-tab`
+  keeps the instant switch. User decision during implementation review.
+- **Subtle variant styling follows the shipped v0 look** (ui.frappe.io) where
+  it differs from the Figma export: `surface-elevation-3` active pill, 13px
+  regular labels, 1px track padding at md. The other variants keep the Figma
+  values.
 
 ### 2026-08-10
 
