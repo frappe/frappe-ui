@@ -935,6 +935,64 @@ for the full API.
 padding — that's app-owned now (see the component page's Collapse section for
 the full composition contract).
 
+## Tabs
+
+The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
+`TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index.
+See the [Tabs](./components/tabs) component page for the full API.
+
+| Before                                      | After                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `v-model="tabIndex"` (index)                | `v-model="tab"` (trigger `value`)                                          |
+| `:tabs="[{ label, icon }]"` (required)      | `<TabTrigger>` children; the `tabs` shorthand stays for generated sets     |
+| `label` implied the value                   | `value` is required on every trigger                                       |
+| `as="div"`                                  | removed — compose and style the container directly                         |
+| `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`) |
+| `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children, or `#panel` in shorthand mode                |
+| `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
+| stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
+| `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
+
+```vue
+<!-- Before -->
+<Tabs v-model="tabIndex" :tabs="[{ label: 'Emails' }, { label: 'Calls' }]">
+  <template #tab-item="{ tab, selected }">
+    <span :class="selected ? 'text-ink-gray-9' : ''">{{ tab.label }}</span>
+  </template>
+  <template #tab-panel="{ tab }">
+    <div>{{ tab.label }} content</div>
+  </template>
+</Tabs>
+
+<!-- After -->
+<Tabs v-model="tab">
+  <TabList>
+    <TabTrigger value="emails" label="Emails" />
+    <TabTrigger value="calls" label="Calls" />
+  </TabList>
+  <TabPanel value="emails">Emails content</TabPanel>
+  <TabPanel value="calls">Calls content</TabPanel>
+</Tabs>
+```
+
+`Tabs` exposes nothing on the template ref, and `TabList` gains full variant
+parity with `TabButtons`: `underline`, `subtle`, `ghost`, `browser-tab`.
+
+## TabButtons
+
+`TabButtons` keeps its radiogroup role — a value input, not a panel switcher —
+and aligns its vocabulary with the Tabs family. See the
+[TabButtons](./components/tabbuttons) component page for the full API.
+
+| Before                                      | After                                       |
+| ------------------------------------------- | ------------------------------------------- |
+| `type="ghost"`                              | `variant="ghost"`                           |
+| `:buttons="items"` (deprecated)             | `:options="items"`                          |
+| `{ label: 'Day' }` (label as value)         | `value` is required on every option         |
+| `{ active: true }` fallback                 | the `v-model` is the single source of truth |
+| boolean `value` / `modelValue`              | `string \| number` only                     |
+| wrapper divs / raw CSS for equal-width tabs | `fluid` prop                                |
+
 ## Data fetching (useDoctype / useList)
 
 The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
