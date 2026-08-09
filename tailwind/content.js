@@ -30,7 +30,10 @@ function glob(pattern) {
 // One explicit exception: `experimental/SpriteIcons` is a migration parking
 // spot for a previously supported surface (moved out of `frappe-ui/icons` in
 // #904). IconPicker emits classes, so it stays under the content contract
-// until it is removed.
+// until it is removed. `experimental/TextEditor` is the same case: the v0
+// editor family was a supported root surface until #974 and is parked here
+// (#1007) while apps migrate to `frappe-ui/editor`, so its classes stay
+// covered until it is removed.
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:
@@ -42,4 +45,5 @@ export const content = [
   glob('src/**/*.{vue,js,ts,jsx,tsx}'),
   glob('icons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
 ]
