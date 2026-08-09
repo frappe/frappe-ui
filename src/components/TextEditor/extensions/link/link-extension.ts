@@ -29,6 +29,10 @@ export const LinkExtension = Link.extend({
     }
   },
 
+  inclusive() {
+    return false
+  },
+
   addCommands() {
     return {
       ...this.parent?.(),
