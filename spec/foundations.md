@@ -26,7 +26,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 | Typography model | Atomic size/weight/line-height tokens from Figma export, plus named-style utilities for composite styles |
 | Named typography utilities | `text-{size}-medium` for sizes whose medium-variant tracking is confirmed in Figma. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
 | Focus indicator | `focus-visible:ring-2` + themed `ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
-| Radius scale | Numbered tokens `rounded-0`…`rounded-9` are canonical. Named aliases (`rounded`, `rounded-md`, …) are deprecated. See [ADR-0006](./adr/0006-numbered-radius-tokens.md) |
+| Radius scale | Numbered tokens `rounded-0`…`rounded-9` are canonical. Named aliases (`rounded`, `rounded-md`, …) are removed. See [ADR-0006](./adr/0006-numbered-radius-tokens.md) |
 | Color themes | Figma defines `default` (gray) and `red`. `blue` and `green` are code-only extensions (see below) |
 | Component size scale | Figma defines `sm` / `md` / `lg`. `xs`, `xl`, and `2xl` are code-only extensions |
 
@@ -109,11 +109,11 @@ Generated from Figma `radius.*` tokens into [`tailwind/generated/radius.json`](.
 | `rounded-none` | 0 | — (semantic alias for `rounded-0`) |
 | `rounded-full` | 9999 | — (semantic, not on the scale) |
 
-### Deprecated — flagged for migration
+### Removed aliases
 
-These aliases remain in `tailwind/generated/radius.json` so consumer apps keep working, but they are **not** to be used in new code. Migrate existing usages in `src/` to the numbered equivalent:
+The named size aliases were removed in `1.0.0` (#998, per ADR-0006/ADR-0008). They emit no CSS anymore — a leftover alias is a silent no-op:
 
-| Deprecated alias | Migrate to | px |
+| Removed alias | Replacement | px |
 |---|---|---|
 | `rounded` / `rounded-DEFAULT` | `rounded-4` | 8 |
 | `rounded-sm` | `rounded-1` | 4 |
@@ -122,9 +122,9 @@ These aliases remain in `tailwind/generated/radius.json` so consumer apps keep w
 | `rounded-xl` | `rounded-7` | 16 |
 | `rounded-2xl` | `rounded-8` | 20 |
 
-Migration is purely vocabulary — pixel values are identical. The aliases will be removed in the next breaking release.
+Replacement is purely vocabulary — pixel values are identical. The `tokens-v2` codemod ([`tailwind/migrate-tokens-v2.js`](../tailwind/migrate-tokens-v2.js)) performs these renames, directional forms included.
 
-To find usages: `grep -rE "rounded(-md|-lg|-xl|-2xl|-sm|-DEFAULT)?\\b" src/`. A bare `rounded` (not `rounded-N`) is the most common occurrence.
+To find leftovers: `grep -rE "rounded(-md|-lg|-xl|-2xl|-sm|-DEFAULT)?\\b" src/`. A bare `rounded` (not `rounded-N`) is the most common occurrence.
 
 ## Themes & colors
 
