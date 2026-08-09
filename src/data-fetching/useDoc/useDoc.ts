@@ -9,6 +9,7 @@ import {
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
 import { useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
+import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 import { listStore } from '../useList/listStore'
@@ -102,7 +103,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   const { error, isFetching, isFinished, canAbort, aborted, abort, execute } =
     useFrappeFetch(url, fetchOptions).get()
 
-  let docMethods: Record<string, ReturnType<typeof useCall>> = {}
+  // `useIsolatedCall`, not `useCall`: one shared call drops or crosses
+  // concurrent submits (#991). Same public shape either way.
+  let docMethods: Record<string, ReturnType<typeof useIsolatedCall>> = {}
   if (methods) {
     for (let key in methods) {
       let option: DocMethodOption
@@ -126,11 +129,11 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         ),
       }
 
-      docMethods[key] = readonly(useCall(callOptions))
+      docMethods[key] = readonly(useIsolatedCall(callOptions))
     }
   }
 
-  let setValue = useCall<TDoc, Partial<TDoc>>({
+  let setValue = useIsolatedCall<TDoc, Partial<TDoc>>({
     url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
     method: 'PUT',
     baseUrl,
@@ -146,7 +149,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   })
 
   type DeleteResponse = 'ok'
-  const delete_ = useCall<DeleteResponse>({
+  const delete_ = useIsolatedCall<DeleteResponse>({
     url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),
     method: 'DELETE',
     baseUrl,
