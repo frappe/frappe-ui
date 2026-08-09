@@ -207,8 +207,8 @@ describe('FormControl', () => {
       cy.get('label').should('have.length', 1)
     })
 
-    it('renders bare select with w-full so it fills its container (ListFilter pattern)', () => {
-      // Mirrors how ListFilter renders FormControl in a min-width column:
+    it('renders bare select with w-full so it fills its container', () => {
+      // A bare FormControl select inside a min-width column:
       //   <div class="min-w-[140px]"><FormControl type="select" options /></div>
       // Old template hard-coded `class="w-full"` on Select; ensure the
       // dispatcher still produces a full-width trigger even without label.
