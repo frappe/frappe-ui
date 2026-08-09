@@ -35,13 +35,9 @@ const sizeClasses = computed(() => {
   }
 
   if (props.variant === 'browser-tab') {
-    const base = props.browserTabBase
-    // Attached vertical tabs: 28/26 tall. Detached (horizontal or vertical
-    // inactive): 32/28 tall via 7/5px y padding.
-    if (base === 'left' || base === 'right') {
-      return isSm ? 'h-6.5 gap-2 px-2' : 'h-7 gap-2 px-2.5'
-    }
-    if (vertical) return isSm ? 'gap-2 px-2 py-[5px]' : 'gap-2 px-2.5 py-[7px]'
+    // Vertical tabs (attached or not): fixed 28/26 height so selection
+    // cannot change row height. Horizontal: 32/28 tall.
+    if (vertical) return isSm ? 'h-6.5 gap-2 px-2' : 'h-7 gap-2 px-2.5'
     return isSm ? 'h-7 gap-2 px-2 py-[5px]' : 'h-8 gap-2 px-2.5 py-[7px]'
   }
 
@@ -63,19 +59,23 @@ const variantClasses = computed(() => {
   }
 
   if (props.variant === 'browser-tab') {
+    // Every browser tab carries a 1px border in both states so selection
+    // never changes the trigger's box (no layout shift). Inactive tabs keep
+    // it fully transparent.
     if (!props.active) {
-      return 'hover:bg-surface-gray-2 hover:text-ink-gray-7'
+      return 'border border-transparent hover:bg-surface-gray-2 hover:text-ink-gray-7'
     }
-    // Active tab: white card with a 1px rail-colored border, open on the
-    // attached edge. The after pseudo paints over the track's rail segment
-    // so the tab fuses with the area beyond the rail.
+    // Active tab: white card with a 1px rail-colored border. The attached
+    // edge stays transparent (the card background shows through), and the
+    // after pseudo paints over the track's rail segment so the tab fuses
+    // with the area beyond the rail.
     if (props.browserTabBase === 'left') {
-      return 'relative border border-l-0 border-outline-gray-1 bg-surface-base after:absolute after:-inset-y-px after:-left-px after:w-px after:bg-surface-base'
+      return 'relative border border-outline-gray-1 border-l-transparent bg-surface-base after:absolute after:-inset-y-px after:-left-[2px] after:w-px after:bg-surface-base'
     }
     if (props.browserTabBase === 'right') {
-      return 'relative border border-r-0 border-outline-gray-1 bg-surface-base after:absolute after:-inset-y-px after:-right-px after:w-px after:bg-surface-base'
+      return 'relative border border-outline-gray-1 border-r-transparent bg-surface-base after:absolute after:-inset-y-px after:-right-[2px] after:w-px after:bg-surface-base'
     }
-    return 'relative border border-b-0 border-outline-gray-1 bg-surface-base after:absolute after:-inset-x-px after:-bottom-px after:h-px after:bg-surface-base'
+    return 'relative border border-outline-gray-1 border-b-transparent bg-surface-base after:absolute after:-inset-x-px after:-bottom-[2px] after:h-px after:bg-surface-base'
   }
 
   if (!props.active) {
