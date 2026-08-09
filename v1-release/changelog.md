@@ -16,6 +16,23 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
   #999). No consumer app used it. Build filter UI in app code with `Select`
   and `Combobox`.
 
+### Data fetching (v2) — `useDoc` writes and `useNewDoc` get one request per submit (fix)
+
+`useDoc`'s `setValue`, `delete` and every `methods:` entry, and `useNewDoc`,
+still held a single shared request after the `useDoctype`/`useList` fix.
+Two submits at once aborted one another, and every submit resolved from the
+same `data`, so a caller could receive another caller's answer or `null`.
+Each submit now sends its own request and resolves with its own response
+(#991).
+
+- No API change. These members keep the full `useCall` surface — same
+  members, same types. `submit()` still resolves `null` on a failed request.
+- `data` and `error` belong to the submit that started last, same as
+  `useDoctype` and `useList`: a stale submit answers its own caller and
+  writes nothing shared. `loading` stays `true` until every submit settles.
+- Behavior change if you relied on it: a second submit no longer cancels the
+  first — both requests reach the server.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave
