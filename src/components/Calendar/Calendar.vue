@@ -55,7 +55,7 @@
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
-            :buttons="enabledModes"
+            :options="enabledModes"
             class="ml-2"
             v-model="activeView"
           />

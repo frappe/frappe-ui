@@ -34,20 +34,20 @@ describe('<TabButtons />', () => {
     cy.get('@onClick').should('have.been.calledOnce')
   })
 
-  it('syncs the model with the active fallback', () => {
+  it('leaves selection empty for a stale model', () => {
     cy.mount(TabButtons, {
       props: {
         options: [
           { label: 'Day', value: 'day' },
-          { label: 'Week', value: 'week', active: true },
+          { label: 'Week', value: 'week' },
         ],
         modelValue: 'month',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
 
-    cy.get('@onUpdate').should('have.been.calledWith', 'week')
-    cy.contains('button', 'Week').should('have.attr', 'data-state', 'checked')
+    cy.get('@onUpdate').should('not.have.been.called')
+    cy.get('button[data-state=checked]').should('not.exist')
   })
 
   it('keeps hidden labels accessible for icon-only buttons', () => {

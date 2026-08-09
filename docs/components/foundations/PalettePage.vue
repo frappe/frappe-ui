@@ -67,7 +67,7 @@ const overlayBlack = computed(
 </script>
 
 <template>
-  <TabButtons :buttons="modeButtons" v-model="mode" class="w-fit" />
+  <TabButtons :options="modeButtons" v-model="mode" class="w-fit" />
   <div class="grid gap-6 mt-6">
     <section
       v-for="family in families"

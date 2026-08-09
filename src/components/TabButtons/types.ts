@@ -1,23 +1,25 @@
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import type { PillSize } from './pillTypes'
+import type {
+  TabsDirection,
+  TabsSize,
+  TabsVariant,
+  TabValue,
+} from '../Tabs/types'
 
-export type TabButtonValue = string | number | boolean
+export type TabButtonValue = TabValue
 export type TabButtonIcon = string | Component
 export type NativeButtonClass = string | string[] | Record<string, boolean>
-export type TabButtonsType = 'subtle' | 'ghost' | 'underline' | 'browser-tab'
-export type TabButtonsDirection = 'left' | 'right'
 
 export interface TabButton {
+  value: TabButtonValue
   label?: string | number
-  value?: TabButtonValue
   /** Icon-only tab; `label` becomes accessibility text. */
   icon?: TabButtonIcon
   /** Leading accent icon, rendered next to the visible label. */
   iconLeft?: TabButtonIcon
   /** Trailing accent icon, rendered next to the visible label. */
   iconRight?: TabButtonIcon
-  active?: boolean
   disabled?: boolean
   tooltip?: string
   class?: NativeButtonClass
@@ -32,18 +34,22 @@ export interface TabButtonsProps {
   /** List of options to render. */
   options?: TabButton[]
 
-  /** @deprecated Use `options` instead. */
-  buttons?: TabButton[]
-
   modelValue?: TabButtonValue
-  type?: TabButtonsType
-  size?: PillSize
+
+  /** Visual variant, shared with the Tabs family. */
+  variant?: TabsVariant
+
+  size?: TabsSize
+
   vertical?: boolean
 
-  /** Edge the active browser tab attaches to. Only used when `type='browser-tab'` and `vertical`. */
-  direction?: TabButtonsDirection
+  /** Edge the active browser tab attaches to. Only used when `variant='browser-tab'` and `vertical`. */
+  direction?: TabsDirection
+
+  /** Buttons stretch to fill the container width. */
+  fluid?: boolean
 }
 
 export interface TabButtonsEmits {
-  'update:modelValue': [value: TabButtonValue | undefined]
+  'update:modelValue': [value: TabButtonValue]
 }
