@@ -248,7 +248,7 @@ describe('<SidebarCard />', () => {
     cy.mount(SidebarCard, { props: { title, theme: 'blue' } })
     cy.get('[data-slot=prefix] svg')
       .should('exist')
-      .and('have.class', 'text-ink-blue-8')
+      .and('have.class', 'text-ink-blue-7')
 
     // Gray shows the info glyph in black ink (Figma compact master).
     cy.mount(SidebarCard, { props: { title } })

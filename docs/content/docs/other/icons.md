@@ -29,7 +29,7 @@ utilities:
 <template>
   <span class="lucide-menu size-4 text-ink-gray-7" />
   <span class="lucide-chevron-down size-3" />
-  <span class="lucide-circle-check size-5 text-ink-green-6" />
+  <span class="lucide-circle-check size-5 text-ink-green-5" />
 </template>
 ```
 
@@ -64,7 +64,7 @@ The icon defaults to `1em × 1em` (it scales with surrounding text) and uses
 </div>
 
 <!-- Or set both explicitly -->
-<span class="lucide-info size-5 text-ink-blue-6" />
+<span class="lucide-info size-5 text-ink-blue-5" />
 ```
 
 Icons render as `display: block` (matching Tailwind's preflight default

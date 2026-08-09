@@ -23,7 +23,7 @@ function viewProgress() {
       @dismiss="showImportBanner = false"
     >
       <template #prefix>
-        <Spinner size="md" class="text-ink-blue-6" />
+        <Spinner size="md" class="text-ink-blue-5" />
       </template>
       <template #description>
         Importing <span class="font-medium text-ink-gray-7">contacts.csv</span> —

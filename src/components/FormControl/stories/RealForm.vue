@@ -184,7 +184,7 @@ function reset() {
       type="checkbox"
       label="I accept the terms and privacy policy"
     />
-    <p v-if="errors.acceptTerms" class="text-p-sm text-ink-red-6">
+    <p v-if="errors.acceptTerms" class="text-p-sm text-ink-red-5">
       {{ errors.acceptTerms }}
     </p>
 
@@ -193,7 +193,7 @@ function reset() {
       <Button variant="ghost" type="button" @click="reset">Reset</Button>
       <span
         v-if="submitted && isValid"
-        class="ml-auto text-p-sm text-ink-green-6"
+        class="ml-auto text-p-sm text-ink-green-5"
       >
         Looks good!
       </span>

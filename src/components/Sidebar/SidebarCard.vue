@@ -38,10 +38,10 @@ watchEffect(() => {
 // per the Figma compact masters.
 const iconColorClasses: Record<StatusTheme, string> = {
   gray: 'text-ink-gray-8',
-  blue: 'text-ink-blue-8',
-  green: 'text-ink-green-8',
-  amber: 'text-ink-amber-8',
-  red: 'text-ink-red-8',
+  blue: 'text-ink-blue-7',
+  green: 'text-ink-green-7',
+  amber: 'text-ink-amber-7',
+  red: 'text-ink-red-7',
 }
 
 // Auto icons are the exact Figma line status glyphs (the compact-card set).
@@ -112,7 +112,7 @@ const actionProps = computed(() =>
 // Button's utilities without depending on stylesheet order. Skipped when the
 // caller restyles the button.
 const amberActionClass =
-  '!bg-surface-amber-2 hover:!bg-surface-amber-3 active:!bg-surface-amber-4 !text-ink-amber-8'
+  '!bg-surface-amber-2 hover:!bg-surface-amber-3 active:!bg-surface-amber-4 !text-ink-amber-7'
 
 const actionClass = computed(() =>
   props.theme === 'amber' &&

@@ -41,7 +41,7 @@ describe('<Badge />', () => {
         label: 'Blue',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-blue-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-blue-2')
 
     // Green
@@ -51,7 +51,7 @@ describe('<Badge />', () => {
         label: 'Green',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-green-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-green-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-green-2')
 
     // Amber
@@ -61,7 +61,7 @@ describe('<Badge />', () => {
         label: 'Amber',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
 
     // Orange (deprecated alias for amber)
@@ -71,7 +71,7 @@ describe('<Badge />', () => {
         label: 'Orange',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
 
     // Red
@@ -81,7 +81,7 @@ describe('<Badge />', () => {
         label: 'Red',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-red-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-red-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-red-2')
 
     // Violet
@@ -91,7 +91,7 @@ describe('<Badge />', () => {
         label: 'Violet',
       },
     })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-violet-8')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-violet-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-violet-2')
   })
 

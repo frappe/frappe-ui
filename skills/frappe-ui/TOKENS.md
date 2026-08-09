@@ -14,8 +14,8 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 - `text-ink-gray-7` — secondary text.
 - `text-ink-gray-5` / `gray-4` — tertiary / placeholder.
 - `text-ink-blue-link` — links.
-- `text-ink-red-6` — destructive / error text.
-- `text-ink-green-6` — success text.
+- `text-ink-red-5` — destructive / error text.
+- `text-ink-green-5` — success text.
 
 ### `bg-surface-*` (backgrounds)
 

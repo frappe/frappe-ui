@@ -51,11 +51,11 @@ const props = withDefaults(defineProps<AvatarProps>(), {
 const fallbackThemeClasses = computed(() => {
   const classes: Record<AvatarTheme, string> = {
     gray: 'bg-surface-gray-2 text-ink-gray-5',
-    blue: 'bg-surface-blue-2 text-ink-blue-8',
-    green: 'bg-surface-green-2 text-ink-green-8',
-    amber: 'bg-surface-amber-2 text-ink-amber-8',
-    red: 'bg-surface-red-2 text-ink-red-8',
-    violet: 'bg-surface-violet-2 text-ink-violet-8',
+    blue: 'bg-surface-blue-2 text-ink-blue-7',
+    green: 'bg-surface-green-2 text-ink-green-7',
+    amber: 'bg-surface-amber-2 text-ink-amber-7',
+    red: 'bg-surface-red-2 text-ink-red-7',
+    violet: 'bg-surface-violet-2 text-ink-violet-7',
   }
   return classes[props.theme]
 })
