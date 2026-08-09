@@ -83,6 +83,7 @@ const rootClasses = computed(() => [
   // `isolate` keeps the -z-10 sliding indicator above the track's own
   // background while staying behind the (static) tab buttons.
   pillTrack.value && 'relative isolate',
+  underlineTrack.value && 'relative',
   ...tabTrackClasses({
     variant: props.variant,
     size: props.size,
@@ -99,6 +100,12 @@ const pillTrack = computed(
   () => props.variant === 'subtle' || props.variant === 'ghost',
 )
 
+// The underline variant slides a 1px rail bar instead of a pill surface,
+// matching TabList's underline TabsIndicator.
+const underlineTrack = computed(() => props.variant === 'underline')
+
+const hasIndicator = computed(() => pillTrack.value || underlineTrack.value)
+
 const trackRef = ref<HTMLElement | null>(null)
 const indicatorRect = ref<{
   x: number
@@ -112,7 +119,7 @@ const indicatorAnimated = ref(false)
 
 function measureIndicator() {
   const track = trackRef.value
-  if (!track || !pillTrack.value) {
+  if (!track || !hasIndicator.value) {
     indicatorRect.value = null
     return
   }
@@ -128,12 +135,37 @@ function measureIndicator() {
   // (fluid tracks especially).
   const trackRect = track.getBoundingClientRect()
   const rect = checked.getBoundingClientRect()
-  indicatorRect.value = {
-    x: rect.left - trackRect.left,
-    y: rect.top - trackRect.top,
-    w: rect.width,
-    h: rect.height,
+  // The indicator is positioned from the track's padding box; subtract any
+  // start-side border (the underline track has a rail border).
+  const style = getComputedStyle(track)
+  const border = {
+    top: parseFloat(style.borderTopWidth) || 0,
+    bottom: parseFloat(style.borderBottomWidth) || 0,
+    left: parseFloat(style.borderLeftWidth) || 0,
+    right: parseFloat(style.borderRightWidth) || 0,
   }
+  const x = rect.left - trackRect.left - border.left
+  const y = rect.top - trackRect.top - border.top
+
+  if (underlineTrack.value) {
+    // 1px bar overlaying the track's rail border, shifted one pixel outward
+    // past the padding box — same geometry as TabList's underline indicator.
+    if (props.vertical) {
+      const innerW = trackRect.width - border.left - border.right
+      indicatorRect.value = {
+        x: style.direction === 'rtl' ? -1 : innerW,
+        y,
+        w: 1,
+        h: rect.height,
+      }
+    } else {
+      const innerH = trackRect.height - border.top - border.bottom
+      indicatorRect.value = { x, y: innerH, w: rect.width, h: 1 }
+    }
+    return
+  }
+
+  indicatorRect.value = { x, y, w: rect.width, h: rect.height }
 }
 
 let resizeObserver: ResizeObserver | null = null
@@ -176,9 +208,11 @@ watch(
 )
 
 const indicatorClasses = computed(() => [
-  'pointer-events-none absolute left-0 top-0 -z-10 motion-reduce:transition-none',
+  'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none',
   indicatorAnimated.value && 'transition-[width,height,transform] duration-300',
-  ...tabIndicatorSurfaceClasses(props.variant, props.size),
+  ...(underlineTrack.value
+    ? ['bg-[var(--outline-gray-8)]']
+    : ['-z-10', ...tabIndicatorSurfaceClasses(props.variant, props.size)]),
 ])
 
 const indicatorStyle = computed(() => {
@@ -234,7 +268,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
   >
     <div ref="trackRef" :class="rootClasses">
       <div
-        v-if="pillTrack"
+        v-if="hasIndicator"
         aria-hidden="true"
         data-slot="tab-indicator"
         :class="indicatorClasses"
@@ -287,6 +321,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             :variant="variant"
             :browser-tab-base="browserTabBase(checked)"
             :orientation="vertical ? 'vertical' : 'horizontal'"
+            :underline-indicator="false"
             :active-surface="!pillTrack"
           >
             <template v-if="$slots.prefix" #prefix>
