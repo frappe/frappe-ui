@@ -21,7 +21,7 @@ Two cross-cutting conventions to know before reading anything else:
 
 ## Core components
 
-- [Alert](https://ui.frappe.io/docs/components/alert): inline banner with title, body, theme, variant.
+- [Alert](https://ui.frappe.io/docs/components/alert): inline status row or banner; title, description, theme-colored status icon, primary/secondary actions, dismiss.
 - [Avatar](https://ui.frappe.io/docs/components/avatar): user/entity avatar with image or label-derived initials.
 - [Badge](https://ui.frappe.io/docs/components/badge): status pill; same `variant` + `theme` axes as Button.
 - [Breadcrumbs](https://ui.frappe.io/docs/components/breadcrumbs): page-header trail; takes `items: { label, route }[]`.
