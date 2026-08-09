@@ -123,6 +123,10 @@ export function useIsolatedCall<
 
     pending.value += 1
     aborted.value = false
+    // A starting submit is the newest by definition, so the previous error
+    // no longer describes the current state. `useCall` behaves the same:
+    // VueUse's fetch nulls `error` on every `execute()`.
+    error.value = null
 
     // Detached so the per-submit call is not tied to whichever component
     // happened to call submit, and stopped below so its watchers and

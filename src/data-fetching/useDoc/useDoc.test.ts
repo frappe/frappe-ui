@@ -340,6 +340,28 @@ describe('useDoc concurrency', () => {
     expect(user.setValue.data).toBe(null)
   })
 
+  it('clears the previous error when a new submit starts', async () => {
+    const user = useDoc<User>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+    })
+
+    await user.setValue.submit({ email: 'quick_fail' })
+    expect(user.setValue.error).toBeTruthy()
+
+    // A retry must not sit at `loading: true` with the old error still set —
+    // `useCall` clears `error` on every `execute()`, and this matches it.
+    let retry = user.setValue.submit({ email: 'slow@example.com' })
+    expect(user.setValue.loading).toBe(true)
+    expect(user.setValue.error).toBe(null)
+
+    await retry
+    expect(user.setValue.error).toBe(null)
+    expect(user.setValue.data?.email).toBe('slow@example.com')
+  })
+
   it('runs two delete submits at once and gives each its own response', async () => {
     await docStore.setDoc({ doctype: 'User', name: 'user1' })
     const user = useDoc<User>({
