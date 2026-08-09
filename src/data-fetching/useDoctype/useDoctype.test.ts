@@ -304,6 +304,30 @@ describe('useDoctype stale store writes', () => {
     )
   })
 
+  it('does not let a stale setValue success overwrite the doc store', async () => {
+    await docStore.setDoc({
+      doctype: 'User',
+      name: 'user1',
+      email: 'old@example.com',
+    })
+    let user = useDoctype<User>('User', { baseUrl })
+
+    let [slow, quick] = await Promise.all([
+      user.setValue.submit({ name: 'user1', email: 'slow-stale@example.com' }),
+      user.setValue.submit({ name: 'user1', email: 'quick-fresh@example.com' }),
+    ])
+
+    // Each caller still receives its own response...
+    expect(slow).toMatchObject({ email: 'slow-stale@example.com' })
+    expect(quick).toMatchObject({ email: 'quick-fresh@example.com' })
+    // ...but only the newest submit for this document may write the store.
+    expect(docStore.getDoc('User', 'user1').value?.email).toBe(
+      'quick-fresh@example.com',
+    )
+    expect(user.setValue.data).toMatchObject({
+      email: 'quick-fresh@example.com',
+    })
+  })
 })
 
 // `data` and `error` belong to the submit that started last, not the one that

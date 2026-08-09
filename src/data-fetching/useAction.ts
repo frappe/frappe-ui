@@ -47,6 +47,13 @@ export interface UseActionOptions<TResponse, TParams> {
  * with the error. A failed `validate` and a failed request both reject. `null`
  * is a response like any other — a server that answers with `null` resolves.
  * A stale submit rejects its own caller too, but writes no `error`.
+ *
+ * The `onSuccess`/`onError` hooks are gated per target, not per action: they
+ * fire unless a newer submit with the same `key` started in the meantime.
+ * `useDoctype` and `useList` write `docStore` and `listStore` from these
+ * hooks, so a stale same-target submit must not fire them — its response
+ * would overwrite a fresher document (#1017). Submits with different keys
+ * (or no key) are independent writes, and every one of them fires its hooks.
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
   options: UseActionOptions<TResponse, TParams>,
@@ -64,6 +71,9 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
   // The sequence number of the submit that started most recently. Only that
   // submit may write `data` and `error`.
   let lastStarted = 0
+  // Per target, for the hooks: the store writes in `onSuccess`/`onError` only
+  // conflict between submits that act on the same target.
+  const lastStartedByTarget = new Map<string, number>()
 
   function isLoading(target: string) {
     return (pendingKeys.value.get(target) ?? 0) > 0
@@ -107,6 +117,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
     }
 
     let target = key ? key(params) : undefined
+    if (target != null) {
+      lastStartedByTarget.set(target, sequence)
+    }
+    // Whether the hooks may fire. Without a key there is no target to
+    // conflict on — two keyless submits (two inserts) are always independent
+    // writes, and gating them would drop the first one's hook.
+    let isNewestForTarget = () =>
+      target != null ? lastStartedByTarget.get(target) === sequence : true
     startPending(target)
 
     // Detached so the per-submit call is not tied to whichever component
@@ -121,11 +139,20 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
           baseUrl,
           immediate: false,
           refetch: false,
+          // Gated: this is where `useDoctype` and `useList` write the shared
+          // stores, and a stale same-target submit must not hand them its
+          // response.
           onSuccess: options.onSuccess
-            ? (response) => options.onSuccess!(response, params)
+            ? (response) => {
+                if (!isNewestForTarget()) return
+                options.onSuccess!(response, params)
+              }
             : undefined,
           onError: options.onError
-            ? (e) => options.onError!(e, params)
+            ? (e) => {
+                if (!isNewestForTarget()) return
+                options.onError!(e, params)
+              }
             : undefined,
         }),
       )!
