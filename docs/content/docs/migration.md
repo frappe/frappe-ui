@@ -1357,6 +1357,30 @@ The codemod no longer merges `font-extrabold` (or `font-black`) onto a
 instead. If you need weight 800, keep `font-extrabold`; there is no
 letter-spacing-corrected style class for it.
 
+### Ink chromatic scales shift one level
+
+The updated espresso v2 tokens shift every chromatic ink scale down one
+level: the new `ink-red-1` is the old `ink-red-2`, and so on for all 11
+chromatic families. The scales now end at `-9`. `ink-gray` keeps its own
+9-step scale and does not shift. This is a **silent** break: every
+`ink-<family>-N` site renders one shade off after the token update.
+
+Run the codemod once with `--ink-shift`:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift .
+```
+
+This mode runs only the ink shift — no color renames, no typography, no
+radius renames. Run it exactly once per codebase. There is no way to detect
+a prior run (`ink-red-5` is a valid name before and after), so a second run
+double-shifts.
+
+The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
+these sites have no automatic destination. The codemod flags them under
+"needs manual attention". The usual fix is `text-white` (or the literal CSS
+color `white` in hand-written CSS).
+
 ## Editor
 
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
