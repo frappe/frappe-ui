@@ -78,8 +78,9 @@ async function rename(name, newName) {
 - `transform` — receives the raw response data and returns the value `data`
   should hold. Return `undefined` to leave the response untouched.
 - `beforeSubmit` — runs before a `submit()` call sends its request. Use it for
-  side effects like clearing a previous validation message; it does not stop the
-  request from being sent.
+  side effects like clearing a previous validation message; a normal return does
+  not stop the request from being sent. If it throws, the request is not sent
+  and `submit()` rejects.
 - `onSuccess` — called with the response data after a successful request.
 - `onError` — called with the error after a failed request.
 

@@ -152,6 +152,23 @@ describe('useCall', () => {
     expect(beforeSubmit).toHaveBeenCalledWith({ name: 'test' })
   })
 
+  it('does not send the request and rejects when beforeSubmit throws', async () => {
+    const call = useCall<{ success: boolean }, { name: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      immediate: false,
+      beforeSubmit: () => {
+        throw new Error('invalid')
+      },
+    })
+
+    await expect(call.submit({ name: 'test' })).rejects.toThrow('invalid')
+
+    expect(call.loading).toBe(false)
+    expect(call.data).toBe(null)
+    expect(call.error).toBe(null)
+  })
+
   it('shows initialData before the first response arrives', () => {
     const call = useCall<{ value: string }>({
       url: url('/api/v2/method/get'),
