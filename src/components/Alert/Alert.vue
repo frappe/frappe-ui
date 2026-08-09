@@ -169,7 +169,7 @@ const bannerSecondaryClass = computed(() =>
   <div
     :role="role"
     :data-layout="layout"
-    :data-theme="props.theme"
+    :data-color="props.theme"
     class="rounded-6 bg-surface-gray-1"
     :class="
       layout === 'row'

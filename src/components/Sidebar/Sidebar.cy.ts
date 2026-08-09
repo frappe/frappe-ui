@@ -236,7 +236,7 @@ describe('<SidebarCard />', () => {
     cy.mount(SidebarCard, {
       props: { title, description, action: { label: 'Update now' } },
     })
-    cy.get('[data-slot=sidebar-card]').should('have.attr', 'data-theme', 'gray')
+    cy.get('[data-slot=sidebar-card]').should('have.attr', 'data-color', 'gray')
     cy.get('[data-slot=title]').should('have.text', title)
     cy.get('[data-slot=description]').should('have.text', description)
     cy.get('[data-slot=action]')

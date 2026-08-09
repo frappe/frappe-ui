@@ -127,7 +127,7 @@ const actionClass = computed(() =>
   <!-- Promotional content, not a status announcement — no role="alert"/"status". -->
   <div
     data-slot="sidebar-card"
-    :data-theme="props.theme"
+    :data-color="props.theme"
     class="relative rounded-6 border border-outline-alpha-gray-1 bg-surface-base p-3"
   >
     <div
