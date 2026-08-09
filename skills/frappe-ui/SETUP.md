@@ -85,7 +85,6 @@ export default {
     './src/**/*.{vue,js,ts,jsx,tsx}',
     // Include frappe-ui source so Tailwind generates classes for component internals.
     './node_modules/frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
-    './node_modules/frappe-ui/frappe/**/*.{vue,js,ts,jsx,tsx}',
   ],
 }
 ```

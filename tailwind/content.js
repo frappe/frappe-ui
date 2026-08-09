@@ -18,13 +18,11 @@ function glob(pattern) {
 }
 
 // Mirror this repo's own tailwind.config.js content globs for the supported
-// surfaces (`./src/**`, `./frappe/**`, `./icons/**`) — for those, two lists
-// that are supposed to agree must not be able to drift apart. The repo config
+// surfaces (`./src/**`, `./icons/**`) — for those, two lists that are
+// supposed to agree must not be able to drift apart. The repo config
 // also globs all of `./experimental/**`; this list does not (see below). Broad
 // `src/**` also covers files like src/utils/dialog.ts, which builds markup
-// with `h('div', { class: '...' })` outside any component tree. `frappe/**`
-// is the `frappe-ui/frappe` subpath (Link, ShareDialog, TrialBanner, …) and
-// ships in `files`, so it needs the same coverage.
+// with `h('div', { class: '...' })` outside any component tree.
 //
 // `experimental/**` is deliberately excluded: frappe-ui/experimental carries
 // no P14 promise and first-party consumers are told not to depend on it, so
@@ -42,7 +40,6 @@ function glob(pattern) {
  */
 export const content = [
   glob('src/**/*.{vue,js,ts,jsx,tsx}'),
-  glob('frappe/**/*.{vue,js,ts,jsx,tsx}'),
   glob('icons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
 ]

@@ -28,18 +28,13 @@
     "../src/**/*.vue",
     "../experimental/**/*.ts",
     "../experimental/**/*.d.ts",
-    "../experimental/**/*.vue",
-    "../frappe/**/*.ts",
-    "../frappe/**/*.d.ts",
-    "../frappe/**/*.vue"
+    "../experimental/**/*.vue"
   ],
   // vitest specs use vitest globals (typed by the app project) and would
   // clash with the cypress globals here
   "exclude": [
     "../src/**/*.spec.ts",
     "../src/**/*.test.ts",
-    "../frappe/**/*.spec.ts",
-    "../frappe/**/*.test.ts",
     "../src/mocks/**/*"
   ]
 }
