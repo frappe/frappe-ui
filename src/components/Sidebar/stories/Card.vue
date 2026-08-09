@@ -10,7 +10,7 @@ const status = ref('')
 </script>
 
 <template>
-  <div class="grid w-full max-w-md grid-cols-2 items-start gap-4">
+  <div class="grid w-full max-w-lg grid-cols-2 items-start gap-4">
     <div class="rounded-md bg-surface-gray-1 p-3">
       <SidebarCard
         title="Your trial ends soon!"
