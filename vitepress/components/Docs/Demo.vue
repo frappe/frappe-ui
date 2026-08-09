@@ -4,11 +4,8 @@ import { Button } from 'frappe-ui'
 
 interface ComponentPreviewProps {
   name: string
-  // Break the preview out of the prose column — see the `.preview-wide`
-  // comment below for the rule it comes with.
   wide?: boolean
-  // The demo lays itself out: the frame keeps a modest inset but drops the
-  // centering. For demos that render their own card chrome (charts).
+  // For demos that draw their own card chrome.
   selfLayout?: boolean
 }
 
@@ -16,17 +13,13 @@ const props = defineProps<ComponentPreviewProps>()
 
 const expanded = ref(false)
 
-// The editor renders its own `prose prose-v3` content, but Tailwind Typography's
-// `.not-prose` (used here to shield demos from the docs article's prose) also
-// suppresses prose *inside* it — and you can't re-enable it deeper in the tree.
-// So editor demos opt their preview out of `.not-prose`; every other demo keeps
-// the isolation unchanged.
+// Tailwind Typography cannot re-enable prose inside `.not-prose`, which every
+// preview uses to shield itself from the article. Editor demos render their own
+// prose content, so they opt out of it.
 const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 </script>
 
 <template>
-  <!-- The article's prose spaces the elements it knows; a bare div is not one
-       of them, so the block would sit against the paragraph under it. -->
   <div class="my-4" :class="{ 'preview-wide': wide }">
     <div
       class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"

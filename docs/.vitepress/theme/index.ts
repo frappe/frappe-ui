@@ -2,8 +2,8 @@ import type { Theme } from 'vitepress'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { h } from 'vue'
 import { theme as DocsTheme } from 'frappe-ui/vitepress'
-// `--chart-*` tokens. Apps import them as `frappe-ui/charts-style.css`; the
-// docs alias `frappe-ui` straight at src, so they come from the live source.
+// Apps import this as `frappe-ui/charts-style.css`; the docs alias `frappe-ui`
+// at src, so the subpath export does not apply here.
 import 'frappe-ui/charts/style.css'
 import Layout from './Layout.vue'
 

@@ -30,8 +30,16 @@ export type UseChartArgs = {
   container: Ref<HTMLElement | undefined>
   /** Getter, not a value: its reactive dependencies drive `setOption`. */
   option: () => EChartsCoreOption | undefined
+  /**
+   * Bound once, when the chart initialises. Unlike `option`, this is not a
+   * getter: a handler map swapped later is never read. Keep the handlers
+   * stable and let them close over reactive state.
+   */
   events?: ChartEventHandlers
-  /** Fires for clicks anywhere inside the chart, datapoint or not. */
+  /**
+   * Fires for clicks anywhere inside the chart, datapoint or not. Bound once,
+   * like `events`.
+   */
   onZrEvents?: ChartEventHandlers
 }
 

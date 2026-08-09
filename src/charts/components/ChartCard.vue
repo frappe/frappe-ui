@@ -1,7 +1,7 @@
 <template>
-  <!-- `relative` and `overflow-hidden` are structure, not decoration: a chart
-       draws inside this box and expects to be clipped by it, so both survive
-       `card: false`. Only the surface itself goes. -->
+  <!-- `relative` and `overflow-hidden` are structure. A chart draws inside this
+       box and expects the box to clip it. `card: false` removes the surface
+       classes only. -->
   <div
     data-slot="chart-card"
     :dir="dir"
