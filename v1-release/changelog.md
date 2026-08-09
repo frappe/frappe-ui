@@ -21,7 +21,11 @@ The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
 - **Breaking, loud:** `import { Icon, IconPicker, spritePlugin } from
   'frappe-ui/icons'` fails to resolve. Import from
   `frappe-ui/experimental` instead. Migration is the import-path change
-  only.
+  only. Apps that spread `content` from `frappe-ui/tailwind` keep
+  `IconPicker` styles automatically — no Tailwind change needed.
+- `frappe-ui/experimental` exports `Icon` (sprite); root `frappe-ui`
+  exports a different `Icon`. Alias one if you import both:
+  `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
 
 ### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
 

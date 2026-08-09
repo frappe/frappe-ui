@@ -824,6 +824,10 @@ import { Icon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
 ```
 
 Nothing about the components changed — only where they're imported from.
+Apps that spread `content` from `frappe-ui/tailwind` keep `IconPicker`
+styles automatically — no Tailwind change needed. Note that root
+`frappe-ui` exports a different `Icon`; alias one if you import both,
+e.g. `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
 The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
 `frappe-ui/icons`. For new code, use `lucide-*` classes — they are the
 canonical way to render icons.
