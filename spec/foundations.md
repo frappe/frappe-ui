@@ -124,7 +124,7 @@ The named size aliases were removed in `1.0.0` (#998, per ADR-0006/ADR-0008). Th
 
 Replacement is purely vocabulary — pixel values are identical. The `tokens-v2` codemod ([`tailwind/migrate-tokens-v2.js`](../tailwind/migrate-tokens-v2.js)) performs these renames, directional forms included.
 
-To find leftovers: `grep -rE "rounded(-md|-lg|-xl|-2xl|-sm|-DEFAULT)?\\b" src/`. A bare `rounded` (not `rounded-N`) is the most common occurrence.
+To find leftovers: `grep -rPn 'rounded(-(sm|md|lg|xl|2xl|DEFAULT))?(?![-\w])' src/`. The lookahead keeps migrated tokens (`rounded-4`) out of the results; a bare `rounded` (not `rounded-N`) is the most common leftover.
 
 ## Themes & colors
 
