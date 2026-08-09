@@ -37,11 +37,13 @@ the newest one, while `data` already held the fresh response (#1017). Two
 write paths were open:
 
 - Any response carrying `docs` wrote the stores unconditionally. A response
-  now writes a document only if no later-dispatched request has written that
-  document already.
+  now writes a document through this channel only if no later-dispatched
+  request has written that document through it already.
 - `useDoctype` and `useList` write methods (`setValue`, `delete`) fired
   their store-writing hooks for every settled submit. A stale submit — one
-  overtaken by a newer submit with the same key — no longer fires them.
+  whose target a newer same-key submit has already written — no longer
+  fires them. A newer submit that failed wrote nothing, so it does not
+  make the older success stale.
 
 No API change. Behavior changes if you relied on it:
 
