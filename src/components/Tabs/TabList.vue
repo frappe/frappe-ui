@@ -2,8 +2,10 @@
 import { computed, inject, provide } from 'vue'
 import { TabsIndicator, TabsList } from 'reka-ui'
 import {
+  browserTabCardClasses,
   tabIndicatorInsetClasses,
   tabIndicatorSurfaceClasses,
+  tabRadiusClasses,
   tabTrackClasses,
 } from '../shared/tabs/styles'
 import { tabListKey, tabsRootKey } from './context'
@@ -29,12 +31,18 @@ const pillTrack = computed(
   () => props.variant === 'subtle' || props.variant === 'ghost',
 )
 
+const browserTrack = computed(() => props.variant === 'browser-tab')
+
 const listClasses = computed(() => {
   const vertical = orientation.value === 'vertical'
   return [
     // `isolate` keeps the -z-10 sliding indicator above the track's own
-    // background while staying behind the (static) triggers.
-    pillTrack.value ? 'relative isolate inline-flex shrink-0' : 'relative flex',
+    // background and rail border while staying behind the (static) triggers.
+    pillTrack.value
+      ? 'relative isolate inline-flex shrink-0'
+      : browserTrack.value
+        ? 'relative isolate flex'
+        : 'relative flex',
     vertical ? 'flex-col' : 'items-center',
     ...tabTrackClasses({
       variant: props.variant,
@@ -68,6 +76,22 @@ const pillIndicatorClasses = computed(() => [
     : 'left-0 w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] transition-[width,transform]',
 ])
 
+// Sliding card for browser-tab: the indicator IS the active card (opaque
+// surface, 1px borders except the attached edge, rounded detached corners).
+// Its `after` fusion mask over the track's rail travels with it, so the
+// open edge in the rail moves continuously mid-flight.
+const browserIndicatorClasses = computed(() => {
+  const vertical = orientation.value === 'vertical'
+  const base = vertical ? props.direction : 'default'
+  return [
+    tabRadiusClasses('browser-tab', props.size, base),
+    browserTabCardClasses(base),
+    vertical
+      ? 'inset-x-0 top-0 h-[--reka-tabs-indicator-size] translate-y-[--reka-tabs-indicator-position] transition-[height,transform]'
+      : 'inset-y-0 left-0 w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] transition-[width,transform]',
+  ]
+})
+
 defineSlots<{
   default?: () => any
 }>()
@@ -93,6 +117,13 @@ defineSlots<{
       aria-hidden="true"
       class="pointer-events-none absolute -z-10 duration-300 motion-reduce:transition-none"
       :class="pillIndicatorClasses"
+    />
+
+    <TabsIndicator
+      v-if="browserTrack"
+      aria-hidden="true"
+      class="pointer-events-none absolute -z-10 duration-200 ease-out motion-reduce:transition-none"
+      :class="browserIndicatorClasses"
     />
 
     <slot />

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '../../Icon'
-import { tabRadiusClasses } from './styles'
+import { browserTabCardClasses, tabRadiusClasses } from './styles'
 import type { PillProps } from './pillTypes'
 
 const props = withDefaults(defineProps<PillProps>(), {
@@ -66,17 +66,14 @@ const variantClasses = computed(() => {
     if (!props.active) {
       return 'border border-transparent hover:text-ink-gray-8'
     }
+    // The track's sliding indicator carries the card between selections;
+    // the pill keeps its inactive box so triggers never move.
+    if (!props.activeSurface) return 'border border-transparent'
     // Active tab: white card with a 1px rail-colored border. The attached
     // edge stays transparent (the card background shows through), and the
     // after pseudo paints over the track's rail segment so the tab fuses
     // with the area beyond the rail.
-    if (props.browserTabBase === 'left') {
-      return 'relative border border-outline-gray-1 border-l-transparent bg-surface-base after:absolute after:-inset-y-px after:-left-[2px] after:w-px after:bg-surface-base'
-    }
-    if (props.browserTabBase === 'right') {
-      return 'relative border border-outline-gray-1 border-r-transparent bg-surface-base after:absolute after:-inset-y-px after:-right-[2px] after:w-px after:bg-surface-base'
-    }
-    return 'relative border border-outline-gray-1 border-b-transparent bg-surface-base after:absolute after:-inset-x-px after:-bottom-[2px] after:h-px after:bg-surface-base'
+    return ['relative', browserTabCardClasses(props.browserTabBase)]
   }
 
   if (!props.active) {

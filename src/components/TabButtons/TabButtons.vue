@@ -13,6 +13,7 @@ import { RouterLink } from 'vue-router'
 import Pill from '../shared/tabs/Pill.vue'
 import { NativeAnchor, NativeButton } from '../shared/nativeElements'
 import {
+  browserTabCardClasses,
   tabIndicatorSurfaceClasses,
   tabRadiusClasses,
   tabShellClasses,
@@ -81,8 +82,9 @@ const rootClasses = computed(() => [
   props.fluid ? 'flex w-full' : 'inline-flex shrink-0',
   props.vertical ? 'flex-col' : 'items-center',
   // `isolate` keeps the -z-10 sliding indicator above the track's own
-  // background while staying behind the (static) tab buttons.
-  pillTrack.value && 'relative isolate',
+  // background and rail border while staying behind the (static) tab
+  // buttons.
+  (pillTrack.value || browserTrack.value) && 'relative isolate',
   underlineTrack.value && 'relative',
   ...tabTrackClasses({
     variant: props.variant,
@@ -104,7 +106,14 @@ const pillTrack = computed(
 // matching TabList's underline TabsIndicator.
 const underlineTrack = computed(() => props.variant === 'underline')
 
-const hasIndicator = computed(() => pillTrack.value || underlineTrack.value)
+// browser-tab slides the active card itself: the indicator carries the
+// opaque surface, borders, radii, and the rail fusion mask; the checked
+// pill keeps its transparent inactive box (`activeSurface: false`).
+const browserTrack = computed(() => props.variant === 'browser-tab')
+
+const hasIndicator = computed(
+  () => pillTrack.value || underlineTrack.value || browserTrack.value,
+)
 
 const trackRef = ref<HTMLElement | null>(null)
 const indicatorRect = ref<{
@@ -207,12 +216,25 @@ watch(
   () => nextTick(measureIndicator),
 )
 
+const browserCardBase = computed<BrowserTabBase>(() =>
+  props.vertical ? props.direction : 'default',
+)
+
 const indicatorClasses = computed(() => [
   'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none',
-  indicatorAnimated.value && 'transition-[width,height,transform] duration-300',
+  indicatorAnimated.value &&
+    (browserTrack.value
+      ? 'transition-[width,height,transform] duration-200 ease-out'
+      : 'transition-[width,height,transform] duration-300'),
   ...(underlineTrack.value
     ? ['bg-[var(--outline-gray-8)]']
-    : ['-z-10', ...tabIndicatorSurfaceClasses(props.variant, props.size)]),
+    : browserTrack.value
+      ? [
+          '-z-10',
+          tabRadiusClasses('browser-tab', props.size, browserCardBase.value),
+          browserTabCardClasses(browserCardBase.value),
+        ]
+      : ['-z-10', ...tabIndicatorSurfaceClasses(props.variant, props.size)]),
 ])
 
 const indicatorStyle = computed(() => {
@@ -322,7 +344,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             :browser-tab-base="browserTabBase(checked)"
             :orientation="vertical ? 'vertical' : 'horizontal'"
             :underline-indicator="false"
-            :active-surface="!pillTrack"
+            :active-surface="false"
           >
             <template v-if="$slots.prefix" #prefix>
               <slot

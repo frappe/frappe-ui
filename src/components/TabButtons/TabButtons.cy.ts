@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import TabButtons from './TabButtons.vue'
 
 describe('<TabButtons />', () => {
@@ -142,5 +142,46 @@ describe('<TabButtons />', () => {
     // `underline` draws a bottom rail instead of the pill track.
     cy.get('.bg-surface-gray-2').should('not.exist')
     cy.get('.border-b').should('exist')
+  })
+
+  it('slides the browser-tab indicator card onto the checked button', () => {
+    const Harness = defineComponent({
+      setup() {
+        const value = ref('day')
+        return () =>
+          h(TabButtons, {
+            options: [
+              { label: 'Day', value: 'day' },
+              { label: 'Week', value: 'week' },
+              { label: 'Month', value: 'month' },
+            ],
+            variant: 'browser-tab',
+            modelValue: value.value,
+            'onUpdate:modelValue': (v: string | number) => {
+              value.value = String(v)
+            },
+          })
+      },
+    })
+
+    cy.mount(Harness)
+
+    cy.contains('button', 'Month').click()
+    cy.contains('button', 'Month').should('have.attr', 'data-state', 'checked')
+
+    // Retries until the 200ms slide settles: the indicator card covers the
+    // checked button's box exactly (rect-based measurement).
+    cy.contains('button', 'Month').should(($btn) => {
+      const indicator = document.querySelector<HTMLElement>(
+        '[data-slot="tab-indicator"]',
+      )
+      expect(indicator, 'indicator').to.exist
+      const ir = indicator!.getBoundingClientRect()
+      const br = $btn[0].getBoundingClientRect()
+      expect(ir.x, 'x').to.be.closeTo(br.x, 0.5)
+      expect(ir.width, 'width').to.be.closeTo(br.width, 0.5)
+      expect(ir.y, 'y').to.be.closeTo(br.y, 0.5)
+      expect(ir.height, 'height').to.be.closeTo(br.height, 0.5)
+    })
   })
 })

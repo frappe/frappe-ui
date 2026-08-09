@@ -283,7 +283,12 @@ value input, not a panel switcher. The two share:
   between triggers with the same timing, in both `TabList` and `TabButtons`.
   The sliding layer is an overlay behind the triggers; triggers never move.
   No slide on initial mount — only on selection change
-- `browser-tab` switches instantly
+- `browser-tab` slides the active card between triggers (200ms,
+  `cubic-bezier(0, 0, 0.2, 1)` — ease-out), in both `TabList` and
+  `TabButtons`. The sliding indicator IS the card: opaque surface, 1px
+  borders except the attached edge, rounded detached corners, and the rail
+  fusion mask — so the open edge in the rail travels with the card. Trigger
+  label colors transition separately (150ms)
 - hover state changes ease over 150ms; selection color changes ride the
   sliding surface
 - panel switches are instant; no crossfade
@@ -314,6 +319,14 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 - `Tab.label` as the implied value — `value` is required
 
 ## Changelog
+
+### 2026-08-10 (later still)
+
+- **Motion: `browser-tab` slides too.** The active card (surface, borders,
+  radii, rail fusion) moves as one sliding indicator; triggers stay static
+  and transparent. Timing is 200ms `cubic-bezier(0, 0, 0.2, 1)`, matching
+  the reference (espresso Base UI tabs) — the 300ms default ease reads as a
+  hesitation on the large opaque card. The at-rest render is unchanged.
 
 ### 2026-08-10 (later)
 

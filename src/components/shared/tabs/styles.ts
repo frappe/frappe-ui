@@ -90,6 +90,25 @@ export function tabIndicatorInsetClasses(opts: {
       : 'inset-y-px'
 }
 
+/**
+ * Browser-tab active card: opaque surface with a 1px border on every edge
+ * except the attached one (kept transparent so the box never changes), plus
+ * an `after` pseudo that paints over the track's 1px rail segment so the
+ * card fuses with the area beyond the rail. Shared by `Pill` (static card
+ * when it owns the active surface) and the track indicators (sliding card —
+ * the mask travels with the indicator). Callers add `relative`/`absolute`
+ * positioning and `tabRadiusClasses` themselves.
+ */
+export function browserTabCardClasses(base: BrowserTabBase): string {
+  if (base === 'left') {
+    return 'border border-outline-gray-1 border-l-transparent bg-surface-base after:absolute after:-inset-y-px after:-left-[2px] after:w-px after:bg-surface-base'
+  }
+  if (base === 'right') {
+    return 'border border-outline-gray-1 border-r-transparent bg-surface-base after:absolute after:-inset-y-px after:-right-[2px] after:w-px after:bg-surface-base'
+  }
+  return 'border border-outline-gray-1 border-b-transparent bg-surface-base after:absolute after:-inset-x-px after:-bottom-[2px] after:h-px after:bg-surface-base'
+}
+
 /** Reset + disabled treatment for the focusable element wrapping a pill. */
 export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60'

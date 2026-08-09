@@ -43,9 +43,9 @@ export interface PillProps {
   underlineIndicator?: boolean
 
   /**
-   * Paint the active background/shadow on the pill itself (subtle/ghost).
-   * TabList and TabButtons turn this off — their sliding track indicator
-   * owns the active surface.
+   * Paint the active surface on the pill itself: background/shadow for
+   * subtle/ghost, the bordered card for browser-tab. TabList and TabButtons
+   * turn this off — their sliding track indicator owns the active surface.
    */
   activeSurface?: boolean
 }

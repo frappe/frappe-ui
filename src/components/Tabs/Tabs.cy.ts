@@ -257,4 +257,30 @@ describe('Tabs', () => {
       })
     })
   }
+
+  it('slides the browser-tab indicator card onto the selected trigger', () => {
+    cy.mount(Tabs, {
+      props: { tabs: shiftTabs, variant: 'browser-tab' },
+    })
+
+    cy.get('[role=tab]').eq(2).click()
+    cy.get('[role=tab]').eq(2).should('have.attr', 'aria-selected', 'true')
+
+    // Retries until the 200ms slide settles. The indicator covers the
+    // trigger's box (reka measures integer offsets, so allow 1px).
+    cy.get('[role=tablist]').should(($list) => {
+      const indicator = $list[0].querySelector<HTMLElement>(
+        ':scope > [aria-hidden="true"]',
+      )
+      expect(indicator, 'indicator').to.exist
+      const ir = indicator!.getBoundingClientRect()
+      const tr = $list[0]
+        .querySelectorAll<HTMLElement>('[role=tab]')[2]
+        .getBoundingClientRect()
+      expect(ir.x, 'x').to.be.closeTo(tr.x, 1)
+      expect(ir.width, 'width').to.be.closeTo(tr.width, 1)
+      expect(ir.y, 'y').to.be.closeTo(tr.y, 1)
+      expect(ir.height, 'height').to.be.closeTo(tr.height, 1)
+    })
+  })
 })
