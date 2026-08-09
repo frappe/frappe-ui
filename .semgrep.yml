@@ -23,8 +23,6 @@ rules:
       include:
         - "src/**/*.ts"
         - "src/**/*.js"
-        - "frappe/**/*.ts"
-        - "frappe/**/*.js"
       exclude:
         - "**/*.cy.ts"
         - "**/*.story.ts"
@@ -47,9 +45,6 @@ rules:
         - "src/**/*.vue"
         - "src/**/*.ts"
         - "src/**/*.js"
-        - "frappe/**/*.vue"
-        - "frappe/**/*.ts"
-        - "frappe/**/*.js"
       exclude:
         - "src/components/FeatherIcon.vue"
         - "src/utils/iconString.ts"

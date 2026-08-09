@@ -109,17 +109,6 @@ reviews:
         Prefer comments only for real bugs, compatibility risks, or unsafe side effects.
         Do not push large rewrites just to modernize style.
 
-    - path: "/frappe/**/*.{vue,ts,js}"
-      instructions: |
-        This folder contains higher-level Frappe-specific components and helpers built on top of the library.
-
-        Focus on:
-        - integration correctness
-        - backwards compatibility for consuming apps
-        - API boundary clarity between generic library code and Frappe-specific code
-
-        Be conservative with suggestions that would force wide downstream app changes unless the PR is clearly doing that intentionally.
-
     - path: "/docs/**"
       instructions: |
         Only comment when docs are wrong, outdated, misleading, or missing important usage or accessibility guidance.

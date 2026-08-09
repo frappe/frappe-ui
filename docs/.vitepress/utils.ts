@@ -2,7 +2,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const components_path = path.resolve(__dirname, '../../src/components/')
-const frappe_path = path.resolve(__dirname, '../../frappe/')
 const experimental_path = path.resolve(__dirname, '../../experimental/')
 
 function listWithStories(rootPath: string): string[] {
@@ -25,8 +24,6 @@ function listWithStories(rootPath: string): string[] {
 }
 
 export const getComponentItems = () => listWithStories(components_path)
-
-export const getFrappeItems = () => listWithStories(frappe_path)
 
 // Experimental exports that ship a colocated page of their own; the rest are
 // documented inline on the Experimental overview page.

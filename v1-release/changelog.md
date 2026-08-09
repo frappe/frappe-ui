@@ -9,6 +9,24 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
+
+The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave
+`frappe-ui/icons` (#904). Apps still use them, so they park on
+`frappe-ui/experimental` (P14 — no stability promise) instead of being
+deleted. `lucide-*` classes are the canonical way to render icons.
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
+`frappe-ui/icons`.
+
+- **Breaking, loud:** `import { Icon, IconPicker, spritePlugin } from
+  'frappe-ui/icons'` fails to resolve. Import from
+  `frappe-ui/experimental` instead. Migration is the import-path change
+  only. Apps that spread `content` from `frappe-ui/tailwind` keep
+  `IconPicker` styles automatically — no Tailwind change needed.
+- `frappe-ui/experimental` exports `Icon` (sprite); root `frappe-ui`
+  exports a different `Icon`. Alias one if you import both:
+  `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
+
 ### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
 
 `reload()` temporarily resets `start` to `0` to re-fetch the accumulated
@@ -211,12 +229,23 @@ blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
 from a subpath rather than root, and nothing editor-related is exported from
 root anymore.
 
-The underlying v0 component files (`src/components/TextEditor/`) still ship,
-unmodified, as `frappe-ui/editor`'s migration safety net — only the public
-export and its docs page are gone. Removing the files is a separate,
-human-gated cleanup once every consumer has migrated (spec/editor.md §12); the
-`TextEditor` public API redesign itself is out of scope for `1.0.0` and carved
-out to `1.1`.
+The underlying v0 component files still ship, unmodified, as
+`frappe-ui/editor`'s migration safety net. They are parked in
+`frappe-ui/experimental` (`experimental/TextEditor/`, #1007), so apps
+mid-migration keep an import path:
+
+```ts
+import { TextEditor } from 'frappe-ui/experimental'
+```
+
+This path is unstable — no deprecation window. Sharing the `experimental`
+barrel costs its other importers nothing in production: #870's rollup
+measurement shows unused re-export chains are pruned before `sideEffects`
+marking applies, so the editor graph is tree-shaken out of non-editor
+imports. Removing the files is a
+separate, human-gated cleanup once every consumer has migrated (spec/editor.md
+§12); the `TextEditor` public API redesign itself is out of scope for `1.0.0`
+and carved out to `1.1`.
 
 ### Editor and TextEditor styles — Tailwind v4 `theme()` call fixed
 
@@ -1348,7 +1377,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 
 - **Breaking:** `frappe-ui/hljs-theme.css` is no longer exported. It had zero
   importers. The underlying file
-  (`src/components/TextEditor/hljs-github.css`) ships until the deprecated
+  (`experimental/TextEditor/hljs-github.css`) ships until the deprecated
   `TextEditor` is removed.
 
 ### pageMetaPlugin — removed
@@ -1404,6 +1433,28 @@ names.
   freezing it now would lock in nothing. Zero known consumers.
   The mismatched directory name had made the whole component invisible to
   the docs generator, so it previously had no docs page.
+
+### `frappe` and `drive` subpaths — removed (breaking)
+
+- **Breaking:** `frappe-ui/frappe` is removed and the `frappe/` directory is
+  deleted (rule 6: frappe-ui is a dumb library; decided in #867, moved in
+  frappe/frappe#41671). `useTelemetry`, `telemetryPlugin`, `useOnboarding`,
+  `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`,
+  `showHelpModal`, `minimize`, `TrialBanner`, `SignupBanner`, `DataImport`,
+  `Link`, `Filter` and `LinkProps` now live in `@framework/ui`. The `Link` and `Filter` there
+  are supersets (`Link`: `redirectable`/`editable` props, `redirect`/`edit`
+  emits; `Filter`: `useFilters`, `parseFilters`/`serializeFilters`, operator
+  registry).
+- **Breaking:** `OnboardingSteps`, `HelpCenter` and `showHelpCenter` are
+  removed with no standalone replacement — zero call sites across all
+  consumer apps (they still power `HelpModal` inside `@framework/ui`).
+- **Breaking:** `frappe-ui/drive` and `frappe-ui/drive/*` are removed with
+  no replacement. No app imported them — the drive app owns the live copy
+  of all six components.
+- The `content` export from `frappe-ui/tailwind` and the docs no longer
+  list a `frappe/**` glob; apps hand-maintaining
+  `node_modules/frappe-ui/frappe/**` in `tailwind.config.js` should drop
+  the line.
 
 ## Deprecation log
 

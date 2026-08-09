@@ -255,8 +255,11 @@ tag: PR #610 (`frappe/client/`) was still open and unmerged when the
 it nothing. Consequences:
 
 - v3 ships in a later `1.x` minor, from whatever import path it lands at —
-  `frappe-ui/frappe/vue` is not that path, since `frappe-ui/frappe` is being
-  removed for `1.0.0` (#867, #924).
+  `frappe-ui/frappe/vue` is not that path, since `frappe-ui/frappe` was
+  removed for `1.0.0` (#867, #924). Nobody imported `frappe-ui/frappe/vue`
+  (0 files across all consumer apps), so nothing is stranded.
+- PR #610 needs a rebase off the deleted `frappe/client/` directory to a
+  home decided when that minor is planned.
 - The frozen-surface contract, the `createClient` dev notice, and the rest of
   v3's shape are questions for whenever that minor is planned. Nothing about
   v3 is frozen or required for `1.0.0`.
@@ -458,7 +461,8 @@ These stay in the plan, but should not block `1.0.0`:
 
 - session and user utilities
 - first-class socket.io utilities
-- full migration of `frappe-ui/frappe/*` internals to v3
+- full migration of `frappe-ui/frappe/*` internals to v3 (moot — the
+  directory is deleted, see #924)
 - TextEditor table editing UX improvements
 - downstream migration PRs across all products
 - Calendar stabilization
@@ -486,7 +490,6 @@ These are important, but should not block v1 unless they land naturally earlier.
 
 - session and user utilities
 - first-class socket.io utilities
-- broader internal migration of `frappe-ui/frappe/*` to v3
 - full Gameplan / downstream app migration to v3 data APIs
 
 ### Components and editor

@@ -54,9 +54,6 @@
       "import": "./experimental.ts",
       "types": "./experimental.ts"
     },
-    "./frappe": {
-      "import": "./frappe/index.js"
-    },
     "./editor": {
       "import": "./src/molecules/editor/index.ts",
       "types": "./src/molecules/editor/index.ts"
@@ -64,12 +61,6 @@
     "./list": {
       "import": "./src/molecules/list/index.ts",
       "types": "./src/molecules/list/index.ts"
-    },
-    "./drive": {
-      "import": "./frappe/drive/index.js"
-    },
-    "./drive/*": {
-      "import": "./frappe/drive/*"
     },
     "./icons": {
       "import": "./icons/index.ts"
@@ -99,7 +90,6 @@
     }
   },
   "files": [
-    "frappe",
     "src",
     "vite",
     "icons",
