@@ -54,6 +54,20 @@ import { ListView } from 'frappe-ui/experimental'
 See the [ListView page](/docs/experimental/listview) for examples and the
 full API reference.
 
+## TextEditor (v0)
+
+The deprecated v0 editor family, parked here while apps migrate to
+[`frappe-ui/editor`](/docs/molecules/editor). Removed from root in `1.0.0`;
+this subpath is the interim import path. Unstable — it will be removed once
+consumers migrate.
+
+```ts
+import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
+```
+
+See the [Editor migration section](/docs/migration#editor) for the
+before/after.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a
