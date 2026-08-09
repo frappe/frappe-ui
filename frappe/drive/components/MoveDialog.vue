@@ -221,7 +221,7 @@ import {
   Tabs,
   Dropdown,
   Tree,
-  Input,
+  TextInput as Input,
   LoadingIndicator,
   toast,
 } from '../../../src'
