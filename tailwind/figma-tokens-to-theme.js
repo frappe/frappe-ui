@@ -77,7 +77,7 @@ const FONT_WEIGHT_MAP = {
 
 const fmt = (n) => String(Math.round(n * 1000) / 1000)
 
-function hexToOklch(hex) {
+export function hexToOklch(hex) {
   const value = hex.slice(1)
   const int = (i) => parseInt(value.slice(i, i + 2), 16)
   const [r, g, b] = [int(0), int(2), int(4)]
@@ -108,7 +108,7 @@ function hexToOklch(hex) {
 }
 
 // Literal color values pass through here; alias references don't.
-function toOklch(value) {
+export function toOklch(value) {
   return typeof value === 'string' && value.startsWith('#') ? hexToOklch(value) : value
 }
 
@@ -465,4 +465,7 @@ function main() {
   console.log('✓ done')
 }
 
-main()
+const scriptPath = fileURLToPath(import.meta.url)
+const invokedPath = process.argv[1]
+const isCLI = invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
+if (isCLI) main()
