@@ -832,6 +832,64 @@ The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
 `frappe-ui/icons`. For new code, use `lucide-*` classes — they are the
 canonical way to render icons.
 
+## Alert
+
+`Alert` is stateless now — it has no `v-model` and never hides itself. The
+parent renders it with `v-if` and reacts to `@dismiss`. Layout is
+content-driven: a description or a second action switches it to the banner
+layout; there is no `variant` prop. See the [Alert](./components/alert)
+component page for the full API.
+
+| Before                       | After                                            |
+| ---------------------------- | ------------------------------------------------ |
+| unnamed `v-model` (visibility) | `v-if` + `@dismiss` — the parent owns hiding   |
+| `theme="yellow"`             | `theme="amber"`                                  |
+| `theme` default `'blue'`     | default `'gray'`                                 |
+| `variant="subtle" / "outline"` | nothing — one container look, layout is content-driven |
+| `dismissible` default `true` | default `false` — pass `dismissible` to keep the × |
+| `#icon` slot                 | `#prefix` slot                                   |
+| `#footer` slot               | `primaryAction` / `secondaryAction` props, or `#actions` slot |
+| hand-rolled icon             | the theme shows a status icon on its own; `:icon="false"` opts out |
+
+Every row is a **silent break**: Vue drops the unknown prop or slot with no
+error. The old `v-model` is the one to check first — a dismissed alert now
+stays on screen until the parent hides it:
+
+```vue
+<!-- Before -->
+<Alert v-model="showAlert" title="Payment failed" theme="yellow">
+  <template #footer>
+    <Button label="Retry" @click="retry" />
+  </template>
+</Alert>
+
+<!-- After -->
+<Alert
+  v-if="showAlert"
+  title="Payment failed"
+  theme="amber"
+  dismissible
+  :primary-action="{ label: 'Retry', onClick: retry }"
+  @dismiss="showAlert = false"
+/>
+```
+
+An action is `ButtonProps` plus an `onClick` that receives `{ dismiss }` —
+call `context.dismiss()` to emit the alert's `dismiss` event:
+
+```ts
+const primaryAction = {
+  label: 'Retry',
+  onClick: ({ dismiss }) => {
+    retry()
+    dismiss()
+  },
+}
+```
+
+If the alert was really a promotional card in a sidebar, use the new
+[`SidebarCard`](./components/sidebar) component instead.
+
 ## Sidebar
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /

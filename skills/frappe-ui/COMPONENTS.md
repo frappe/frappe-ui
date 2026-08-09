@@ -95,7 +95,10 @@ Frappe-native file upload. Renders an upload control with progress; emits the up
 Status pill. `<Badge :label theme variant size />`. Same color axes as Button.
 
 ### `Alert`
-Inline banner. `<Alert :title variant theme>` + slot for body.
+Inline notice. `<Alert :title :description theme :icon :primary-action :secondary-action dismissible @dismiss />`.
+- No layout prop: renders a single-line row; `description` or `secondary-action` switches it to the stacked banner (`data-layout`).
+- `theme` (`gray | blue | green | amber | red`, default `gray`) colors the status icon; non-gray themes auto-show one (`:icon="false"` hides, a `lucide-*` string / Component customizes). The container itself never changes color.
+- Actions are `ButtonProps` plus `onClick(({ dismiss }))`. Stateless: `dismissible` shows a × that emits `dismiss`; the parent hides with `v-if`.
 
 ### `Avatar`
 `<Avatar :label :image size />`. `label` is used to generate initials when no image.
@@ -146,7 +149,7 @@ Cmd-K palette. Compose with `Dialog bare`.
 ## Layout
 
 ### App shell
-`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
+`DesktopShell` (slots `#rail`, `#sidebar`, default) and `MobileShell` (default, `#nav`) frame every app. Compose with the `Sidebar` family (`SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `SidebarCard` — a promotional footer card: `<SidebarCard :title :description theme :icon :action dismissible @dismiss />` — plus `Rail`/`RailItem`), `PageHeader`/`PageHeaderBase`/`PageHeaderMobile`, `MobileNav`/`MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. Anatomy and geometry: [DESIGN.md](DESIGN.md).
 
 ### `ScrollArea`
 For every app-owned scroll region (sidebar nav, panes; `orientation="horizontal"` for boards). Prefer over `overflow-auto` divs.

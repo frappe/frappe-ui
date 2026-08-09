@@ -1,5 +1,7 @@
 import type { Component, ComputedRef, InjectionKey } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
+import type { AlertAction } from '../Alert'
+import type { StatusTheme } from '../shared/statusIcon'
 
 /**
  * Read-only collapsed state, provided by `Sidebar` and consumed by
@@ -88,6 +90,56 @@ export type SidebarHeaderProps = {
     icon?: string | Component
     onClick?: () => void
   }[]
+}
+
+/**
+ * Promotional or onboarding card for the sidebar footer — a trial notice, an
+ * upgrade prompt, a "what's new" pointer. Stateless: `dismiss` is an event and
+ * the parent owns hiding the card.
+ */
+export interface SidebarCardProps {
+  /** Main heading text of the card. Optional when the `#title` slot is used */
+  title?: string
+
+  /** Supporting text below the title */
+  description?: string
+
+  /** Color theme of the icon and the tinted action button; the white container never changes with theme */
+  theme?: StatusTheme
+
+  /** Icon next to the title: unset shows the theme's auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
+  icon?: boolean | string | Component
+
+  /** The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`) */
+  action?: AlertAction
+
+  /** Shows the dismiss (×) button, which emits `dismiss` */
+  dismissible?: boolean
+}
+
+export interface SidebarCardEmits {
+  /** Fired when the user dismisses the card — the × button or the action's `context.dismiss()`. The parent owns hiding. */
+  dismiss: []
+}
+
+/** Scoped payload for the card's `#actions` slot. */
+export interface SidebarCardActionsSlotProps {
+  /** Emits the card's `dismiss` event. */
+  dismiss: () => void
+}
+
+export interface SidebarCardSlots {
+  /** Overrides the icon area next to the title */
+  prefix?: () => any
+
+  /** Rich title content (overrides the `title` prop) */
+  title?: () => any
+
+  /** Rich description content (overrides the `description` prop) */
+  description?: () => any
+
+  /** Replaces the auto-rendered action button; receives `{ dismiss }` */
+  actions?: (props: SidebarCardActionsSlotProps) => any
 }
 
 /**

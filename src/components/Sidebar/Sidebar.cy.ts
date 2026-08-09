@@ -6,6 +6,8 @@ import SidebarLabel from './SidebarLabel.vue'
 import SidebarSection from './SidebarSection.vue'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarCollapseToggle from './SidebarCollapseToggle.vue'
+import SidebarCard from './SidebarCard.vue'
+import type { AlertActionContext } from '../Alert'
 
 function createTestRouter() {
   return createRouter({
@@ -223,6 +225,129 @@ describe('<SidebarLabel />', () => {
     })
     // Uncollapsed (no injected sidebarCollapsedKey): no divider line.
     cy.get('hr').should('not.exist')
+  })
+})
+
+describe('<SidebarCard />', () => {
+  const title = 'Your trial ends soon!'
+  const description = 'Upgrade to keep enjoying features.'
+
+  it('renders title, description, and the full-width action button', () => {
+    cy.mount(SidebarCard, {
+      props: { title, description, action: { label: 'Update now' } },
+    })
+    cy.get('[data-slot=sidebar-card]').should('have.attr', 'data-color', 'gray')
+    cy.get('[data-slot=title]').should('have.text', title)
+    cy.get('[data-slot=description]').should('have.text', description)
+    cy.get('[data-slot=action]')
+      .should('have.text', 'Update now')
+      .and('have.class', 'w-full')
+  })
+
+  it('shows the theme icon automatically for every theme', () => {
+    cy.mount(SidebarCard, { props: { title, theme: 'blue' } })
+    cy.get('[data-slot=prefix] svg')
+      .should('exist')
+      .and('have.class', 'text-ink-blue-8')
+
+    // Gray shows the info glyph in black ink (Figma compact master).
+    cy.mount(SidebarCard, { props: { title } })
+    cy.get('[data-slot=prefix] svg')
+      .should('exist')
+      .and('have.class', 'text-ink-gray-8')
+
+    cy.mount(SidebarCard, { props: { title, icon: false } })
+    cy.get('[data-slot=prefix]').should('not.exist')
+
+    cy.mount(SidebarCard, { props: { title, theme: 'red', icon: false } })
+    cy.get('[data-slot=prefix]').should('not.exist')
+  })
+
+  it('action click gets a working context.dismiss (card stays — stateless)', () => {
+    const onDismiss = cy.spy().as('onDismiss')
+    cy.mount(SidebarCard, {
+      props: {
+        title,
+        action: {
+          label: 'Update now',
+          onClick: ({ dismiss }: AlertActionContext) => dismiss(),
+        },
+        onDismiss,
+      },
+    })
+    cy.get('[data-slot=action]').click()
+    cy.get('@onDismiss').should('have.been.calledOnce')
+    cy.get('[data-slot=sidebar-card]').should('exist')
+  })
+
+  it('async action shows loading and blocks re-clicks', () => {
+    let resolveClick!: () => void
+    const onClick = cy
+      .stub()
+      .callsFake(() => new Promise<void>((resolve) => (resolveClick = resolve)))
+      .as('onClick')
+    cy.mount(SidebarCard, {
+      props: { title, action: { label: 'Update now', onClick } },
+    })
+    cy.get('[data-slot=action]').click()
+    cy.get('[data-slot=action]').should('have.attr', 'aria-busy', 'true')
+    // A second click while pending is ignored.
+    cy.get('[data-slot=action]').click({ force: true })
+    cy.get('@onClick').should('have.been.calledOnce')
+    cy.then(() => resolveClick())
+    cy.get('[data-slot=action]').should('not.have.attr', 'aria-busy')
+  })
+
+  it('dismissible shows the × button and emits dismiss; hidden by default', () => {
+    cy.mount(SidebarCard, { props: { title } })
+    cy.get('[data-slot=dismiss]').should('not.exist')
+
+    const onDismiss = cy.spy().as('onDismiss')
+    cy.mount(SidebarCard, { props: { title, dismissible: true, onDismiss } })
+    cy.get('[data-slot=dismiss]')
+      .should('have.attr', 'aria-label', 'Dismiss')
+      .click()
+    cy.get('@onDismiss').should('have.been.calledOnce')
+  })
+
+  it('Tab reaches the dismiss button and Enter activates it', () => {
+    const onDismiss = cy.spy().as('onDismiss')
+    cy.mount(SidebarCard, { props: { title, dismissible: true, onDismiss } })
+    cy.press(Cypress.Keyboard.Keys.TAB)
+    cy.focused().should('have.attr', 'data-slot', 'dismiss')
+    cy.focused().type('{enter}')
+    cy.get('@onDismiss').should('have.been.calledOnce')
+  })
+
+  it('renders the #title slot without a title prop', () => {
+    cy.mount(SidebarCard, {
+      slots: { title: () => h('em', {}, 'Slot-only title') },
+    })
+    cy.get('[data-slot=title]').should('contain.text', 'Slot-only title')
+
+    // No prop and no slot: the title element is skipped entirely.
+    cy.mount(SidebarCard, { props: { description } })
+    cy.get('[data-slot=title]').should('not.exist')
+  })
+
+  it('renders slot overrides, and #actions receives dismiss', () => {
+    const onDismiss = cy.spy().as('onDismiss')
+    cy.mount(SidebarCard, {
+      props: { title, action: { label: 'Auto' }, onDismiss },
+      slots: {
+        prefix: () => h('svg', { 'data-test': 'custom-icon' }),
+        title: () => h('em', {}, 'Rich title'),
+        description: () => h('span', {}, 'Rich description'),
+        actions: ({ dismiss }: { dismiss: () => void }) =>
+          h('button', { 'data-test': 'custom-action', onClick: dismiss }, 'Go'),
+      },
+    })
+    cy.get('[data-test=custom-icon]').should('exist')
+    cy.get('[data-slot=title]').should('contain.text', 'Rich title')
+    cy.get('[data-slot=description]').should('contain.text', 'Rich description')
+    cy.get('[data-slot=action]').should('not.exist')
+    cy.get('[data-test=custom-action]').click()
+    cy.get('@onDismiss').should('have.been.calledOnce')
   })
 })
 
