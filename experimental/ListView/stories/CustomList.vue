@@ -10,7 +10,7 @@ import {
   ListRows,
   ListSelectBanner,
   ListView,
-} from 'frappe-ui/experimental'
+} from '..'
 
 const custom_columns = reactive([
   { label: 'Name', key: 'name', width: 3, icon: 'lucide-user' },

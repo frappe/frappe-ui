@@ -2,7 +2,7 @@
 import { h, reactive } from 'vue'
 
 import { Avatar } from 'frappe-ui'
-import { ListView } from 'frappe-ui/experimental'
+import { ListView } from '..'
 
 const columns = reactive([
   {
