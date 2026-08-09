@@ -176,14 +176,22 @@ bare composable frame: `SidebarHeader` / `SidebarSection` / `SidebarLabel` /
   `aria-expanded` / `aria-controls`, keyboard-operable (was a `<div>` with a
   click handler and no keyboard path).
 
-### ListView — stays, not deprecated
+### ListView family — moved to `frappe-ui/experimental` (breaking)
 
-`ListView` is not going away in `1.0.0`. `frappe-ui/list` is the recommended
-primitive for new code, but it's a narrower, composition-based family by
-design — it has no equivalent for `ListView`'s config-driven columns
-(resizable widths, per-column `getLabel`/`prefix` functions, cell tooltips,
-disabled-row exclusion, the built-in select banner). If you're on `ListView`
-today, there's no forced migration for `1.0.0`.
+`ListView` is not taken to bar at root for `1.0.0`. `frappe-ui/list` is the
+recommended primitive for new code, but it's a narrower, composition-based
+family by design — it has no equivalent for `ListView`'s config-driven
+columns (resizable widths, per-column `getLabel`/`prefix` functions, cell
+tooltips, disabled-row exclusion, the built-in select banner). Rather than
+freeze the whole 12-export barrel at root undeprecated, it moves to
+`frappe-ui/experimental` (P14 — no stability promise) and stays there until
+`frappe-ui/list` reaches full functional parity.
+
+- **Breaking, loud:** `import { ListView, ... } from 'frappe-ui'` fails to
+  resolve. Import from `frappe-ui/experimental` instead:
+  `List`, `ListView`, `ListEmptyState`, `ListFooter`, `ListGroupHeader`,
+  `ListGroupRows`, `ListGroups`, `ListHeader`, `ListHeaderItem`, `ListRow`,
+  `ListRowItem`, `ListRows`, `ListSelectBanner`.
 
 ### `TextEditor` and its v0 exports — removed from root (breaking)
 

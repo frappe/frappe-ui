@@ -1,7 +1,8 @@
 <script setup>
 import { h, reactive } from 'vue'
 
-import { Avatar, ListView } from 'frappe-ui'
+import { Avatar } from 'frappe-ui'
+import { ListView } from '..'
 
 const columns = reactive([
   {

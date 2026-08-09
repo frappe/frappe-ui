@@ -18,7 +18,7 @@
 
 <script setup>
 import { inject } from 'vue'
-import { Button } from '../Button'
+import { Button } from '#components/Button'
 
 const list = inject('list')
 </script>

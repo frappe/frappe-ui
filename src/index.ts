@@ -83,15 +83,9 @@ export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
 
 // Lists and collection views
 export * from './components/ItemListRow'
-// Legacy ListView family. Ships frozen (not deprecated) for v1 — see the
-// parity note in v1-release/plan.md's ListView row: `frappe-ui/list` is
-// composition-based by design (P3) and doesn't replicate ListView's
-// config-driven columns (resizable widths, per-column getLabel/prefix
-// functions, tooltips, disabled-row exclusion, the select banner), so this
-// isn't a "not yet" gap that will close on its own. Bringing ListView's own
-// 12-export barrel to the at-bar checklist (TS conversion, types.ts, tests,
-// docs) is tracked as a follow-up, not done in the same pass as this comment.
-export * from './components/ListView'
+// ListView family moved to `frappe-ui/experimental` (#985, P14) — it stays
+// there, unstable, until `frappe-ui/list` reaches functional parity. See
+// v1-release/plan.md's ListView row.
 export { default as ListFilter } from './components/ListFilter/ListFilter.vue'
 export * from './components/Calendar'
 export * from './components/Tree'

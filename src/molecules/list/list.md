@@ -6,8 +6,8 @@ table is an explicit one. The family owns geometry — columns, dividers, hover
 surfaces, selection and sort chrome — and nothing readable: cell contents
 (typography, avatars, badges, unread emphasis) are entirely app-authored.
 
-Not to be confused with the config-driven `ListView` in the main entry — that
-stays untouched; import from `frappe-ui/list` for this family.
+Not to be confused with the config-driven `ListView` in `frappe-ui/experimental`
+— that stays untouched; import from `frappe-ui/list` for this family.
 
 ## Feed mode
 

@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import { ListView } from 'frappe-ui'
+import { ListView } from '..'
 
 const group_columns = reactive([
   { label: 'Name', key: 'name', width: 3 },

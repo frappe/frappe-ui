@@ -39,6 +39,21 @@ import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
 See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
 variants, and the labeling contract.
 
+## ListView
+
+A config-driven data table: resizable columns, per-column `getLabel`/`prefix`
+functions, cell tooltips, grouped rows, disabled-row exclusion, and a select
+banner. `frappe-ui/list` is the composition-based replacement for new code,
+but it has no equivalent for ListView's config-driven columns yet — ListView
+stays here, unstable, until it does.
+
+```ts
+import { ListView } from 'frappe-ui/experimental'
+```
+
+See the [ListView page](/docs/experimental/listview) for examples and the
+full API reference.
+
 ## MultiEmailInput
 
 A multi-value email field: selected addresses render as removable chips, and a
