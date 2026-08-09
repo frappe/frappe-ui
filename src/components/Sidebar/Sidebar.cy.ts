@@ -244,19 +244,20 @@ describe('<SidebarCard />', () => {
       .and('have.class', 'w-full')
   })
 
-  it('shows the theme icon automatically for non-gray themes', () => {
+  it('shows the theme icon automatically for every theme', () => {
     cy.mount(SidebarCard, { props: { title, theme: 'blue' } })
     cy.get('[data-slot=prefix] svg')
       .should('exist')
       .and('have.class', 'text-ink-blue-8')
 
+    // Gray shows the info glyph in black ink (Figma compact master).
     cy.mount(SidebarCard, { props: { title } })
-    cy.get('[data-slot=prefix]').should('not.exist')
-
-    cy.mount(SidebarCard, { props: { title, icon: true } })
     cy.get('[data-slot=prefix] svg')
       .should('exist')
       .and('have.class', 'text-ink-gray-8')
+
+    cy.mount(SidebarCard, { props: { title, icon: false } })
+    cy.get('[data-slot=prefix]').should('not.exist')
 
     cy.mount(SidebarCard, { props: { title, theme: 'red', icon: false } })
     cy.get('[data-slot=prefix]').should('not.exist')

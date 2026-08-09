@@ -32,7 +32,7 @@ export const alertProps = {
   description: { type: String, default: undefined },
   /** Color theme of the status icon and the row action label; the container never changes with theme */
   theme: { type: String as PropType<AlertTheme>, default: 'gray' },
-  /** Status icon: unset shows the theme's auto icon (none for gray), `true` forces it, `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
+  /** Status icon: unset shows the theme's auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
   icon: {
     type: [Boolean, String, Object, Function] as PropType<
       boolean | string | Component

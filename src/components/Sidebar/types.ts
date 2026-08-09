@@ -109,7 +109,7 @@ export interface SidebarCardProps {
   /** Color theme of the icon and the tinted action button; the white container never changes with theme */
   theme?: SidebarCardTheme
 
-  /** Icon next to the title: unset shows the theme's auto icon (none for gray), `true` forces it, `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
+  /** Icon next to the title: unset shows the theme's auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
   icon?: boolean | string | Component
 
   /** The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`) */

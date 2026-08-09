@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import { Alert } from 'frappe-ui'
+import { Alert, Spinner } from 'frappe-ui'
 
-// Slot overrides: #prefix swaps the status icon for a spinner, and
+// Slot overrides: #prefix swaps the status icon for a Spinner, and
 // #description carries rich text.
 const showImportBanner = ref(true)
 
@@ -22,10 +22,7 @@ function viewProgress() {
       @dismiss="showImportBanner = false"
     >
       <template #prefix>
-        <span
-          class="lucide-loader-circle size-4 animate-spin text-ink-blue-6"
-          aria-hidden="true"
-        />
+        <Spinner size="md" class="text-ink-blue-6" />
       </template>
       <template #description>
         Importing <span class="font-medium text-ink-gray-7">contacts.csv</span> —

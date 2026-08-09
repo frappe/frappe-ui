@@ -2,8 +2,9 @@
 import { ref } from 'vue'
 import { Alert } from 'frappe-ui'
 
-// Plain confirmations with only a × button. The parent owns hiding —
-// dismiss just flips a flag.
+// Plain confirmations with only a × button — `:icon="false"` hides the
+// gray theme's default info icon, matching the design's neutral rows.
+// The parent owns hiding — dismiss just flips a flag.
 const messages = ref([
   { id: 1, title: 'Contacts added successfully' },
   { id: 2, title: 'Deal moved to Negotiation' },
@@ -20,6 +21,7 @@ function remove(id) {
       v-for="message in messages"
       :key="message.id"
       :title="message.title"
+      :icon="false"
       dismissible
       @dismiss="remove(message.id)"
     />

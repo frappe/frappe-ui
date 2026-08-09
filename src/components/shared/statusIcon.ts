@@ -40,8 +40,9 @@ export const lineStatusIcons: Record<StatusTheme, Component> = {
 
 /**
  * Resolves the three-state `icon` prop against a theme's auto glyph:
- * unset → auto icon for non-gray themes, `true` → force the theme icon,
- * `false` → none, string/Component → the caller's custom glyph.
+ * unset or `true` → the theme's icon (every theme has one — gray uses the
+ * info glyph in black ink), `false` → none, string/Component → the caller's
+ * custom glyph.
  */
 export function useStatusIcon(options: {
   icon: MaybeRefOrGetter<boolean | string | Component | undefined>
@@ -52,10 +53,7 @@ export function useStatusIcon(options: {
     const icon = toValue(options.icon)
     const theme = toValue(options.theme)
     if (icon === false) return null
-    if (icon === true) return options.icons[theme]
-    if (icon === undefined) {
-      return theme === 'gray' ? null : options.icons[theme]
-    }
+    if (icon === true || icon === undefined) return options.icons[theme]
     return icon
   })
 

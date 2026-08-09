@@ -136,6 +136,17 @@ const bannerSecondaryProps = computed(() =>
       )
     : undefined,
 )
+
+// Ghost gray renders ink-gray-8; the design's banner secondary label is
+// ink-gray-7. Same override pattern as the row action label — skipped when
+// the caller restyles the button.
+const bannerSecondaryClass = computed(() =>
+  props.secondaryAction &&
+  !props.secondaryAction.variant &&
+  !props.secondaryAction.theme
+    ? '!text-ink-gray-7'
+    : undefined,
+)
 </script>
 
 <template>
@@ -266,6 +277,7 @@ const bannerSecondaryProps = computed(() =>
               v-if="props.secondaryAction"
               data-slot="action"
               v-bind="bannerSecondaryProps"
+              :class="bannerSecondaryClass"
               @click="handleAction(props.secondaryAction)"
             />
           </slot>

@@ -30,7 +30,7 @@ describe('<Alert />', () => {
     cy.get(root).should('have.attr', 'data-layout', 'banner')
   })
 
-  it('shows the theme icon automatically for non-gray themes', () => {
+  it('shows the theme icon automatically for every theme', () => {
     cy.mount(Alert, { props: { title, theme: 'blue' } })
     cy.get('[data-slot="prefix"] svg')
       .should('exist')
@@ -41,18 +41,19 @@ describe('<Alert />', () => {
       .should('exist')
       .and('have.class', 'text-ink-red-6')
 
+    // Gray shows the info glyph in black ink (Figma default-intent master).
     cy.mount(Alert, { props: { title, theme: 'gray' } })
-    cy.get('[data-slot="prefix"]').should('not.exist')
-  })
-
-  it('icon: false hides the theme icon, true forces it for gray', () => {
-    cy.mount(Alert, { props: { title, theme: 'blue', icon: false } })
-    cy.get('[data-slot="prefix"]').should('not.exist')
-
-    cy.mount(Alert, { props: { title, theme: 'gray', icon: true } })
     cy.get('[data-slot="prefix"] svg')
       .should('exist')
       .and('have.class', 'text-ink-gray-7')
+  })
+
+  it('icon: false hides the theme icon', () => {
+    cy.mount(Alert, { props: { title, theme: 'blue', icon: false } })
+    cy.get('[data-slot="prefix"]').should('not.exist')
+
+    cy.mount(Alert, { props: { title, theme: 'gray', icon: false } })
+    cy.get('[data-slot="prefix"]').should('not.exist')
   })
 
   it('renders a custom lucide string icon in the theme color', () => {
@@ -92,7 +93,12 @@ describe('<Alert />', () => {
     })
     cy.get(root).should('have.attr', 'data-layout', 'banner')
     cy.get('[data-slot="action"]').should('have.length', 2)
-    cy.get('[data-slot="action"]').eq(1).should('have.text', 'Cancel').click()
+    // The design's banner secondary label is ink-gray-7, not Button's default.
+    cy.get('[data-slot="action"]')
+      .eq(1)
+      .should('have.class', '!text-ink-gray-7')
+      .and('have.text', 'Cancel')
+      .click()
     cy.get('@onSecondary').should('have.been.calledOnce')
   })
 
