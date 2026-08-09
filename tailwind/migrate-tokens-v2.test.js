@@ -186,6 +186,72 @@ describe('tokens v2 migration', () => {
     expect(getMigrationMode(state, { radiusOnly: true })).toBe('radius-only')
   })
 
+  it('ink-shift mode shifts chromatic ink scales down one level (#1016)', () => {
+    const result = migrateTokens(
+      '<div class="text-ink-red-2 bg-ink-blue-5 text-ink-pink-10"></div>',
+      { mode: 'ink-shift' },
+    )
+
+    expect(result.migrated).toBe(
+      '<div class="text-ink-red-1 bg-ink-blue-4 text-ink-pink-9"></div>',
+    )
+    expect(result.flagged).toEqual([])
+  })
+
+  it('ink-shift is single-pass: ink-red-3 lands on ink-red-2, not ink-red-1', () => {
+    const result = migrateTokens('<div class="text-ink-red-3 text-ink-red-2"></div>', {
+      mode: 'ink-shift',
+    })
+
+    expect(result.migrated).toBe('<div class="text-ink-red-2 text-ink-red-1"></div>')
+  })
+
+  it('ink-shift maps the old -10 top step onto the new -9 end of scale', () => {
+    const result = migrateTokens('var(--ink-red-10)', { mode: 'ink-shift' })
+
+    expect(result.migrated).toBe('var(--ink-red-9)')
+  })
+
+  it('ink-shift leaves ink-gray untouched', () => {
+    const input = '<div class="text-ink-gray-2 text-ink-gray-5 bg-ink-gray-9"></div>'
+    const result = migrateTokens(input, { mode: 'ink-shift' })
+
+    expect(result.migrated).toBe(input)
+    expect(result.flagged).toEqual([])
+  })
+
+  it('ink-shift never touches stale non-v2 numerics like ink-blue-600', () => {
+    const input = '<div class="text-ink-blue-600"></div>'
+    const result = migrateTokens(input, { mode: 'ink-shift' })
+
+    expect(result.migrated).toBe(input)
+    expect(result.replacements).toEqual([])
+    expect(result.flagged).toEqual([])
+  })
+
+  it('ink-shift flags ink-<family>-1 (old white step) instead of rewriting it', () => {
+    const input = '<div class="text-ink-red-1">var(--ink-blue-1)</div>'
+    const result = migrateTokens(input, { mode: 'ink-shift' })
+
+    expect(result.migrated).toBe(input)
+    expect(result.flagged.map((f) => f.token)).toEqual(['ink-red-1', 'ink-blue-1'])
+  })
+
+  it('ink-shift runs nothing else: colors, typography, radii, merges all untouched', () => {
+    const input =
+      '<div class="bg-surface-white text-xl font-medium rounded rounded-md text-base-black"></div>'
+    const result = migrateTokens(input, { mode: 'ink-shift' })
+
+    expect(result.migrated).toBe(input)
+    expect(result.merges).toEqual([])
+    expect(result.flagged).toEqual([])
+  })
+
+  it('getMigrationMode selects ink-shift regardless of migration state', () => {
+    expect(getMigrationMode({ likelyMigrated: true }, { inkShift: true })).toBe('ink-shift')
+    expect(getMigrationMode({ likelyMigrated: false }, { inkShift: true })).toBe('ink-shift')
+  })
+
   it('radius-only mode renames radii and touches nothing else', () => {
     const result = migrateTokens(
       '<div class="rounded rounded-md text-lg bg-surface-white text-base-black"></div>',
