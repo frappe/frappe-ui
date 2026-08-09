@@ -68,6 +68,50 @@ const FONT_WEIGHT_MAP = {
   extrabold: 800,
 }
 
+// ---------- HEX → OKLCH ----------
+
+// Figma exports every color as hex (8-digit when it carries alpha), but
+// colors.json ships oklch (fa18b8ade). Convert at generation time so a
+// routine `yarn sync-tokens` can't revert the palette to hex (#986).
+// Math from Björn Ottosson's OKLab reference implementation.
+
+const fmt = (n) => String(Math.round(n * 1000) / 1000)
+
+function hexToOklch(hex) {
+  const value = hex.slice(1)
+  const int = (i) => parseInt(value.slice(i, i + 2), 16)
+  const [r, g, b] = [int(0), int(2), int(4)]
+  const alpha = value.length === 8 ? int(6) / 255 : 1
+
+  const lin = (c) => {
+    const v = c / 255
+    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+  }
+  const [lr, lg, lb] = [lin(r), lin(g), lin(b)]
+
+  const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
+  const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
+  const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
+
+  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s
+  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
+  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+
+  const C = Math.sqrt(A * A + B * B)
+  let H = (Math.atan2(B, A) * 180) / Math.PI
+  if (H < 0) H += 360
+  // Achromatic: a hue on a zero-chroma color is noise.
+  if (Math.round(C * 1000) === 0) H = 0
+
+  const lch = `${fmt(L)} ${fmt(C)} ${fmt(H)}`
+  return alpha < 1 ? `oklch(${lch} / ${fmt(alpha)})` : `oklch(${lch})`
+}
+
+// Literal color values pass through here; alias references don't.
+function toOklch(value) {
+  return typeof value === 'string' && value.startsWith('#') ? hexToOklch(value) : value
+}
+
 function readTokens(filename) {
   return JSON.parse(fs.readFileSync(path.join(TOKENS_DIR, filename), 'utf8'))
 }
@@ -96,10 +140,10 @@ function buildColors() {
     darkMode: {},
     overlay: { white: {}, black: {} },
     neutral: {
-      white: primitives.neutral.white.$value,
-      black: primitives.neutral.black.$value,
+      white: toOklch(primitives.neutral.white.$value),
+      black: toOklch(primitives.neutral.black.$value),
       ...(primitives.neutral.transparent
-        ? { transparent: primitives.neutral.transparent.$value }
+        ? { transparent: toOklch(primitives.neutral.transparent.$value) }
         : {}),
     },
     themedVariables: {
@@ -144,7 +188,7 @@ function mapShades(family) {
   const out = {}
   for (const [shade, token] of Object.entries(family)) {
     if (token && token.$value) {
-      out[shade] = token.$value
+      out[shade] = toOklch(token.$value)
     }
   }
   return out
@@ -194,12 +238,11 @@ function collectSemanticCategory(styles, category, target) {
 
 // Convert a DTCG alias string like "{light.gray.50}" into the reference shape
 // stored in colors.json today: "lightMode/gray/50". Non-aliases (literal hex)
-// pass through unchanged so the consumer can decide whether to treat them as
-// resolved values.
+// convert to oklch like every other resolved value.
 function aliasToReference(value) {
   if (typeof value !== 'string') return value
   const match = value.match(/^\{(.+)\}$/)
-  if (!match) return value
+  if (!match) return toOklch(value)
   const segments = match[1].split('.')
 
   // {neutral.white} | {neutral.black}
