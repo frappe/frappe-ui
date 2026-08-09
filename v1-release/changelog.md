@@ -230,12 +230,13 @@ from a subpath rather than root, and nothing editor-related is exported from
 root anymore.
 
 The underlying v0 component files still ship, unmodified, as
-`frappe-ui/editor`'s migration safety net. They are parked in
-`frappe-ui/experimental` (`experimental/TextEditor/`, #1007), so apps
-mid-migration keep an import path:
+`frappe-ui/editor`'s migration safety net. They are parked behind a dedicated
+`frappe-ui/experimental/text-editor` entry (`experimental/TextEditor/`,
+#1007), so apps mid-migration keep an import path without the heavy editor
+graph entering the shared `frappe-ui/experimental` barrel:
 
 ```ts
-import { TextEditor } from 'frappe-ui/experimental'
+import { TextEditor } from 'frappe-ui/experimental/text-editor'
 ```
 
 This path is unstable — no deprecation window. Removing the files is a

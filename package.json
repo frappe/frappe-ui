@@ -54,6 +54,10 @@
       "import": "./experimental.ts",
       "types": "./experimental.ts"
     },
+    "./experimental/text-editor": {
+      "import": "./experimental/TextEditor/index.ts",
+      "types": "./experimental/TextEditor/index.ts"
+    },
     "./editor": {
       "import": "./src/molecules/editor/index.ts",
       "types": "./src/molecules/editor/index.ts"

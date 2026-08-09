@@ -90,6 +90,7 @@ declare module 'vue' {
     InsertVideo: typeof import('./experimental/TextEditor/components/InsertVideo.vue')['default']
     ItemListRow: typeof import('./src/components/ItemListRow/ItemListRow.vue')['default']
     KeyboardShortcut: typeof import('./src/components/KeyboardShortcut/KeyboardShortcut.vue')['default']
+    'KeyboardShortcut.playground': typeof import('./src/components/KeyboardShortcut/KeyboardShortcut.playground.vue')['default']
     KeyboardShortcutsModal: typeof import('./src/components/KeyboardShortcutsModal/KeyboardShortcutsModal.vue')['default']
     LabelingWrapper: typeof import('./src/components/InputLabeling/LabelingWrapper.vue')['default']
     LinkPopup: typeof import('./experimental/TextEditor/components/LinkPopup.vue')['default']
