@@ -17,9 +17,10 @@ function glob(pattern) {
   return path.join(packageRoot, pattern).split(path.sep).join('/')
 }
 
-// Mirror this repo's own tailwind.config.js content globs (`./src/**`,
-// `./frappe/**`, `./icons/**`) exactly, rather than curating subdirectories —
-// two lists that are supposed to agree must not be able to drift apart. Broad
+// Mirror this repo's own tailwind.config.js content globs for the supported
+// surfaces (`./src/**`, `./frappe/**`, `./icons/**`) — for those, two lists
+// that are supposed to agree must not be able to drift apart. The repo config
+// also globs all of `./experimental/**`; this list does not (see below). Broad
 // `src/**` also covers files like src/utils/dialog.ts, which builds markup
 // with `h('div', { class: '...' })` outside any component tree. `frappe/**`
 // is the `frappe-ui/frappe` subpath (Link, ShareDialog, TrialBanner, …) and
