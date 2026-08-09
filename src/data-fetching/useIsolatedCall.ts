@@ -38,6 +38,9 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
  * response, resolves `null` on a failed request (read `error`), and rejects
  * only when `beforeSubmit` throws.
+ *
+ * One default differs from `useCall`: `immediate` is `false` here, because
+ * every consumer is a write member that must only fire on `submit()`.
  */
 export function useIsolatedCall<
   TResponse,
