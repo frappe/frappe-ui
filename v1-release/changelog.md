@@ -1429,15 +1429,14 @@ names.
   deleted (rule 6: frappe-ui is a dumb library; decided in #867, moved in
   frappe/frappe#41671). `useTelemetry`, `telemetryPlugin`, `useOnboarding`,
   `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`,
-  `showHelpModal`, `minimize`, `TrialBanner`, `DataImport`, `Link`, `Filter`
-  and `LinkProps` now live in `@framework/ui`. The `Link` and `Filter` there
+  `showHelpModal`, `minimize`, `TrialBanner`, `SignupBanner`, `DataImport`,
+  `Link`, `Filter` and `LinkProps` now live in `@framework/ui`. The `Link` and `Filter` there
   are supersets (`Link`: `redirectable`/`editable` props, `redirect`/`edit`
   emits; `Filter`: `useFilters`, `parseFilters`/`serializeFilters`, operator
   registry).
-- **Breaking:** `OnboardingSteps`, `HelpCenter`, `showHelpCenter` and
-  `SignupBanner` are removed with no standalone replacement — zero call
-  sites across all consumer apps (they still power `HelpModal` inside
-  `@framework/ui`).
+- **Breaking:** `OnboardingSteps`, `HelpCenter` and `showHelpCenter` are
+  removed with no standalone replacement — zero call sites across all
+  consumer apps (they still power `HelpModal` inside `@framework/ui`).
 - **Breaking:** `frappe-ui/drive` and `frappe-ui/drive/*` are removed with
   no replacement. No app imported them — the drive app owns the live copy
   of all six components.
