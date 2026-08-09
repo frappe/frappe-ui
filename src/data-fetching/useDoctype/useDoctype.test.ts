@@ -270,6 +270,42 @@ describe('useDoctype submit outcome', () => {
   })
 })
 
+// A stale response must not land in the shared stores either. `docStore` is
+// written from two places: `useFrappeFetch`'s `afterFetch` for any response
+// carrying `docs` (#1017), and the per-method `onSuccess` hooks. In every test
+// below the stale submit starts first and settles last, so an implementation
+// that writes on settle leaves the store on the stale document.
+describe('useDoctype stale store writes', () => {
+  it('does not let a stale docs-channel response overwrite the doc store', async () => {
+    await docStore.setDoc({
+      doctype: 'User',
+      name: 'user1',
+      email: 'old@example.com',
+    })
+    let user = useDoctype<User>('User', { baseUrl })
+
+    // `update_email` answers with a `docs` array, which `useFrappeFetch`
+    // pushes into `docStore` on every response.
+    await Promise.all([
+      user.runDocMethod.submit({
+        name: 'user1',
+        method: 'update_email',
+        params: { email: 'slow-stale@example.com' },
+      }),
+      user.runDocMethod.submit({
+        name: 'user1',
+        method: 'update_email',
+        params: { email: 'quick-fresh@example.com' },
+      }),
+    ])
+
+    expect(docStore.getDoc('User', 'user1').value?.email).toBe(
+      'quick-fresh@example.com',
+    )
+  })
+
+})
+
 // `data` and `error` belong to the submit that started last, not the one that
 // settled last. In every test below the slow submit starts first and answers
 // second, so an implementation that writes on settle gets it backwards.
