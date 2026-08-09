@@ -7,10 +7,9 @@ chart is one typed object spread with `v-bind="savedChart"`.
 
 ```js
 import { BarChart, LineChart } from 'frappe-ui/charts'
-import 'frappe-ui/charts-style.css'
 ```
 
-The stylesheet carries the `--chart-*` color tokens. See
+The subpath carries the `--chart-*` color tokens with it. See
 [Chart Colors](/docs/foundations/colors/charts) for the three ramps and how to
 rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 `diverging` — or takes an explicit list of colors.

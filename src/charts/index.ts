@@ -1,3 +1,7 @@
+// The `--chart-*` color tokens ship with the package: importing from
+// `frappe-ui/charts` pulls in the ramps every chart draws from.
+import './style.css'
+
 export { default as AreaChart } from './AreaChart.vue'
 export { default as BarChart } from './BarChart.vue'
 export { default as DonutChart } from './DonutChart.vue'

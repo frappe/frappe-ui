@@ -9,7 +9,8 @@
   "sideEffects": [
     "**/*.css",
     "**/*.vue",
-    "src/molecules/*/index.ts"
+    "src/molecules/*/index.ts",
+    "src/charts/index.ts"
   ],
   "imports": {
     "#components/*": "./src/components/*",
@@ -96,9 +97,6 @@
     },
     "./style.css": {
       "import": "./src/style.css"
-    },
-    "./charts-style.css": {
-      "import": "./src/charts/style.css"
     },
     "./tsconfig.base.json": {
       "types": "./tsconfig.base.json",

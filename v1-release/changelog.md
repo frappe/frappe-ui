@@ -13,8 +13,8 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 A second chart family ships alongside the one at the package root. It is
 additive: the root chart exports keep working and nothing here removes them.
-Import the components from `frappe-ui/charts` and the color tokens from
-`frappe-ui/charts-style.css`. `spec/charts.md` states the conventions, and
+Import the components from `frappe-ui/charts`, which carries the `--chart-*`
+color tokens with it. `spec/charts.md` states the conventions, and
 `spec/adr/0015-what-enters-charts.md` records what the family admits.
 
 Landed so far:
