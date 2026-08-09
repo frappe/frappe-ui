@@ -10,12 +10,12 @@
 <script lang="ts">
 import { shallowRef } from 'vue'
 
-// Every claiming `<Dialogs />` registers here; the first entry renders the
-// stack. Module-level so sibling hosts dedup too — inject only sees
-// ancestors. Reactive so the claim hands over when the current winner
+// Every claiming `<Dialogs />` registers here on mount; the first entry
+// renders the stack. Module-level so sibling hosts dedup too — inject only
+// sees ancestors. Reactive so the claim hands over when the current winner
 // unmounts (a rerouted layout, a `v-if`) instead of leaving no renderer.
-// Client-only: on the server no unmount hook runs to release an entry, so
-// it would leak across requests.
+// Mount-time only, so it never runs on the server and cannot leak across
+// requests.
 const hosts = shallowRef<symbol[]>([])
 
 // Warn once per session, like `warnDeprecated` — a route swap can hold two
@@ -58,12 +58,29 @@ provide(DIALOGS_HOST_KEY, true)
 
 const hostId = Symbol('dialogs-host')
 
-if (typeof window !== 'undefined') {
-  if (!hasParentHost) hosts.value = [...hosts.value, hostId]
-  // Nested extras yield via inject and never register, but they are still
-  // removable mounts — warn for them like for a losing sibling.
-  if (hasParentHost || hosts.value.length > 1) warnExtraHost()
+// Claim on mount, not in setup — a host whose setup runs but never mounts
+// (a discarded Suspense branch, a sibling render error) must not hold the
+// claim forever. Mounted hooks fire in tree order, so the slot content's
+// host still beats the provider's own mount, same winner as before.
+function claim() {
+  if (hasParentHost) {
+    // Nested extras yield via inject and never register, but they are
+    // still removable mounts — warn for them like for a losing sibling.
+    warnExtraHost()
+    return
+  }
+  if (!hosts.value.includes(hostId)) hosts.value = [...hosts.value, hostId]
+  if (hosts.value.length > 1) warnExtraHost()
 }
+
+function release() {
+  // Hand the claim to the next registered host (the provider's own mount,
+  // the next test) so the stack keeps rendering.
+  hosts.value = hosts.value.filter((id) => id !== hostId)
+}
+
+onMounted(claim)
+onUnmounted(release)
 
 // The stack is empty until after mount, so gating on `isMounted` keeps
 // server and client hydration markup identical — both sides render the
@@ -72,10 +89,4 @@ if (typeof window !== 'undefined') {
 const isMounted = ref(false)
 onMounted(() => (isMounted.value = true))
 const isPrimaryHost = computed(() => hosts.value[0] === hostId)
-
-onUnmounted(() => {
-  // Hand the claim to the next registered host (the provider's own mount,
-  // the next test) so the stack keeps rendering.
-  hosts.value = hosts.value.filter((id) => id !== hostId)
-})
 </script>
