@@ -10,6 +10,9 @@ describe('hexToOklch', () => {
     expect(hexToOklch('#00000080')).toBe('oklch(0 0 0 / 0.502)')
   })
 
+  it('throws on shorthand hex instead of emitting NaN', () => {
+    expect(() => hexToOklch('#fff')).toThrow(/#rrggbb/)
+  })
 })
 
 describe('toOklch', () => {

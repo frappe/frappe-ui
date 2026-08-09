@@ -79,6 +79,9 @@ const fmt = (n) => String(Math.round(n * 1000) / 1000)
 
 export function hexToOklch(hex) {
   const value = hex.slice(1)
+  if (value.length !== 6 && value.length !== 8) {
+    throw new Error(`hexToOklch expects #rrggbb or #rrggbbaa, got "${hex}"`)
+  }
   const int = (i) => parseInt(value.slice(i, i + 2), 16)
   const [r, g, b] = [int(0), int(2), int(4)]
   const alpha = value.length === 8 ? int(6) / 255 : 1
