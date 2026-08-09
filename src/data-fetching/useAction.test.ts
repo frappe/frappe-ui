@@ -58,6 +58,28 @@ describe('useAction hook gating', () => {
     expect(onError).not.toHaveBeenCalled()
   })
 
+  it('fires the older onSuccess when the newer same-target submit fails', async () => {
+    const onSuccess = vi.fn()
+    const onError = vi.fn()
+    const action = makeSetValue(onSuccess, onError)
+
+    // The older submit is slow and succeeds; the newer one fails at once.
+    // The failed submit wrote nothing, so the older response is what the
+    // server holds — its hook must still hand it to the store writers.
+    let older = action.submit({ name: 'user1', email: 'slow-old@example.com' })
+    let newer = action.submit({ name: 'user1', email: 'quickfail' })
+
+    await expect(newer).rejects.toThrow('setValue user1 failed')
+    await older
+
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+    expect(onSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'slow-old@example.com' }),
+      expect.objectContaining({ email: 'slow-old@example.com' }),
+    )
+  })
+
   it('fires onSuccess for every target when the keys differ', async () => {
     const onSuccess = vi.fn()
     const action = makeSetValue(onSuccess)

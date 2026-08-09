@@ -49,10 +49,13 @@ export interface UseActionOptions<TResponse, TParams> {
  * A stale submit rejects its own caller too, but writes no `error`.
  *
  * The `onSuccess`/`onError` hooks are gated per target, not per action: they
- * fire unless a newer submit with the same `key` started in the meantime.
+ * fire unless a newer submit with the same `key` already succeeded.
  * `useDoctype` and `useList` write `docStore` and `listStore` from these
  * hooks, so a stale same-target submit must not fire them — its response
- * would overwrite a fresher document (#1017). Submits with different keys
+ * would overwrite a fresher document (#1017). The gate is on success, not
+ * on start: a newer submit that fails writes nothing on the server, so it
+ * must not block the older success from landing — the server holds the
+ * older submit's value in that case. Submits with different keys
  * (or no key) are independent writes, and every one of them fires its hooks.
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
@@ -71,9 +74,12 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
   // The sequence number of the submit that started most recently. Only that
   // submit may write `data` and `error`.
   let lastStarted = 0
-  // Per target, for the hooks: the store writes in `onSuccess`/`onError` only
-  // conflict between submits that act on the same target.
-  const lastStartedByTarget = new Map<string, number>()
+  // Per target, for the hooks: the sequence number of the newest submit that
+  // succeeded. The store writes in `onSuccess`/`onError` only conflict
+  // between submits that act on the same target, and only a submit that
+  // succeeded can make an older answer stale — a newer submit that failed
+  // wrote nothing on the server, so it blocks nothing.
+  const lastWrittenByTarget = new Map<string, number>()
 
   function isLoading(target: string) {
     return (pendingKeys.value.get(target) ?? 0) > 0
@@ -117,14 +123,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
     }
 
     let target = key ? key(params) : undefined
-    if (target != null) {
-      lastStartedByTarget.set(target, sequence)
-    }
-    // Whether the hooks may fire. Without a key there is no target to
+    // Whether the hooks may fire: no newer same-target submit has handed its
+    // response to `onSuccess` yet. Without a key there is no target to
     // conflict on — two keyless submits (two inserts) are always independent
     // writes, and gating them would drop the first one's hook.
-    let isNewestForTarget = () =>
-      target != null ? lastStartedByTarget.get(target) === sequence : true
+    let isFreshForTarget = () =>
+      target != null
+        ? sequence > (lastWrittenByTarget.get(target) ?? 0)
+        : true
     startPending(target)
 
     // Detached so the per-submit call is not tied to whichever component
@@ -142,15 +148,18 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
           // Gated: this is where `useDoctype` and `useList` write the shared
           // stores, and a stale same-target submit must not hand them its
           // response.
-          onSuccess: options.onSuccess
-            ? (response) => {
-                if (!isNewestForTarget()) return
-                options.onSuccess!(response, params)
-              }
-            : undefined,
+          // Always wrapped, even without a consumer hook: a success must be
+          // recorded either way, or it could not make older answers stale.
+          onSuccess: (response) => {
+            if (!isFreshForTarget()) return
+            if (target != null) lastWrittenByTarget.set(target, sequence)
+            options.onSuccess?.(response, params)
+          },
           onError: options.onError
             ? (e) => {
-                if (!isNewestForTarget()) return
+                // Gated by the same check, but an error records no write —
+                // a failed submit must not make an older success stale.
+                if (!isFreshForTarget()) return
                 options.onError!(e, params)
               }
             : undefined,
