@@ -1,2 +1,9 @@
 export { default as Alert } from './Alert.vue'
-export type { AlertProps } from './types.ts'
+export { alertProps } from './types.ts'
+export type {
+  AlertProps,
+  AlertTheme,
+  AlertLayout,
+  AlertAction,
+  AlertActionContext,
+} from './types.ts'

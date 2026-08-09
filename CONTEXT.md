@@ -36,8 +36,9 @@ _Avoid_: using bare `v-model` for visibility on overlays
 **dismissible**:
 Whether an overlay closes via user-initiated dismiss channels — outside click and
 Escape. Default `true`; when `false`, it closes only programmatically or via an explicit
-control. Ships on `Dialog`, `Popover`, `BottomSheet` and `Alert`. Replaces
-`disableOutsideClickToClose`, which is removed (ADR-0008).
+control. Ships on `Dialog`, `Popover` and `BottomSheet`. On `Alert` (not an overlay)
+it instead shows the × button (default `false`), which emits `dismiss` — the parent
+owns hiding. Replaces `disableOutsideClickToClose`, which is removed (ADR-0008).
 _Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick`
 
 ## Color axes
@@ -45,7 +46,7 @@ _Avoid_: `disableOutsideClickToClose`, `closeOnOutsideClick`
 The only two axes used to color components — there is intentionally **no** semantic axis
 (`intent`/`severity`/`appearance`/`kind`/`status`):
 
-- **variant** — visual style: `solid | outline | subtle | ghost` (Button, Badge, Alert)
+- **variant** — visual style: `solid | outline | subtle | ghost` (Button, Badge)
 - **theme** — color tone, by color name: `yellow | blue | red | green | …` (Button, Badge, Alert, Dialog)
 
 A legacy `appearance` (`warning | info | danger | success`) maps to `theme` color names.
@@ -72,6 +73,14 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 A button declared via a component's `actions` prop, rendered in its footer/toolbar row.
 Gets reactive `loading` state while its async `onClick` runs and a `{ close }` context.
 Shared by Dialog and TextEditor (P6-aligned).
+
+**content-driven layout** (Alert):
+Alert has no `layout` prop. It renders as a single-line `row`; a `description` (prop
+or slot) or a `secondaryAction` switches it to the stacked `banner` layout. The
+computed result is stamped as `data-layout`. Visibility is the parent's `v-if` —
+Alert is stateless and only emits `dismiss`. Alert themes are
+`gray | blue | green | amber | red`.
+_Avoid_ (Alert): `intent`, `visible`, `yellow`
 
 **bare** (Dialog):
 Prop (default `false`) that suppresses the dialog's default chrome so the `#default`

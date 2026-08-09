@@ -95,7 +95,10 @@ Frappe-native file upload. Renders an upload control with progress; emits the up
 Status pill. `<Badge :label theme variant size />`. Same color axes as Button.
 
 ### `Alert`
-Inline banner. `<Alert :title variant theme>` + slot for body.
+Inline notice. `<Alert :title :description theme :icon :primary-action :secondary-action dismissible @dismiss />`.
+- No layout prop: renders a single-line row; `description` or `secondary-action` switches it to the stacked banner (`data-layout`).
+- `theme` (`gray | blue | green | amber | red`, default `gray`) colors the status icon; non-gray themes auto-show one (`:icon="false"` hides, a `lucide-*` string / Component customizes). The container itself never changes color.
+- Actions are `ButtonProps` plus `onClick(({ dismiss }))`. Stateless: `dismissible` shows a × that emits `dismiss`; the parent hides with `v-if`.
 
 ### `Avatar`
 `<Avatar :label :image size />`. `label` is used to generate initials when no image.
