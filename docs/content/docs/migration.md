@@ -1351,7 +1351,7 @@ Every break here is loud — the import path stops resolving.
 | `useOnboarding`, `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`, `showHelpModal`, `minimize` | `@framework/ui` |
 | `TrialBanner`, `SignupBanner`   | `@framework/ui`                    |
 | `DataImport`                    | `@framework/ui`                    |
-| `Link`, `LinkProps`             | `@framework/ui` (superset, see below) |
+| `Link`, `LinkProps`, `LinkEmits`, `LinkExposed`, `LinkOption` | `@framework/ui` (superset, see below) |
 | `Filter`                        | `@framework/ui` (superset, see below) |
 | `OnboardingSteps`, `HelpCenter`, `showHelpCenter` | removed — they live on inside `@framework/ui`'s `HelpModal` |
 | `frappe-ui/drive`, `frappe-ui/drive/*` | removed, no replacement     |
