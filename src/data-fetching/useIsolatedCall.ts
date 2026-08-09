@@ -30,10 +30,15 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  *
  * The shared refs follow `useAction`'s newest-wins rule: `data` and `error`
  * belong to the submit that started last. A submit that is no longer the
- * newest when it settles writes nothing shared — not `data` or `error`, not
- * the `onSuccess`/`onError` hooks (where `useDoc` writes its stores), not
- * the idb cache. It only answers its own caller. `loading` is true while
- * any submit is in flight.
+ * newest when it settles only answers its own caller: it does not write
+ * `data` or `error`, does not fire the `onSuccess`/`onError` hooks (where
+ * `useDoc` writes its stores), and does not write the idb cache. `loading`
+ * is true while any submit is in flight.
+ *
+ * One shared write is NOT gated: `useFrappeFetch`'s `afterFetch` pushes any
+ * response carrying `docs` into `docStore`/`listStore` before the per-submit
+ * call reaches the gated hooks, so a stale response can still land there.
+ * Tracked in #1017.
  *
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
  * response, resolves `null` on a failed request (read `error`), and rejects
