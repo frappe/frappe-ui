@@ -1,5 +1,5 @@
 import { reactive, unref } from 'vue'
-import { useCall } from '../useCall/useCall'
+import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 
@@ -23,7 +23,9 @@ export function useNewDoc<T extends object>(
     name: string
   }
 
-  const out = useCall<DocResponse, Partial<T>>({
+  // `useIsolatedCall`, not `useCall`: with one shared call a second submit
+  // aborts the first mid-flight and both resolve off the same ref (#991).
+  const out = useIsolatedCall<DocResponse, Partial<T>>({
     url: `/api/v2/document/${doctype}`,
     method: 'POST',
     params() {
