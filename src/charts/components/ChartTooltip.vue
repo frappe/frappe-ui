@@ -5,7 +5,7 @@
       ref="tooltipEl"
       data-slot="chart-tooltip"
       class="pointer-events-none fixed z-[100] max-w-xs rounded-6 border border-outline-gray-1 bg-surface-elevation-2 px-3 py-2 shadow-lg"
-      :style="position"
+      :style="style"
       :dir="dir"
       role="tooltip"
     >
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch, type CSSProperties } from 'vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { formatPercent } from '../format'
 import type { ChartTooltipItem, ChartTooltipProps } from '../types'
@@ -62,13 +62,23 @@ const OFFSET = 12
 
 const tooltipEl = ref<HTMLElement>()
 const position = ref<Record<string, string>>({ left: '0px', top: '0px' })
+const placed = ref(false)
+
+const style = computed<CSSProperties>(() => ({
+  ...position.value,
+  visibility: placed.value ? 'visible' : 'hidden',
+}))
 
 // Measured after render rather than estimated: the slot content is the app's,
-// so its size isn't knowable up front.
+// so its size isn't knowable up front. The tooltip stays hidden for the frame
+// that measurement takes, because `position` still holds the previous point and
+// a visible tooltip would paint there first. The watcher runs before the DOM
+// update, so that frame never reaches the screen.
 watch(
   () => [props.open, props.x, props.y, props.items] as const,
   async () => {
     if (!props.open) return
+    placed.value = false
     await nextTick()
     const el = tooltipEl.value
     if (!el) return
@@ -84,8 +94,9 @@ watch(
       left: `${clamp(left, 4, window.innerWidth - width - 4)}px`,
       top: `${clamp(top, 4, window.innerHeight - height - 4)}px`,
     }
+    placed.value = true
   },
-  { immediate: true, flush: 'post' },
+  { immediate: true },
 )
 
 function clamp(value: number, min: number, max: number) {
