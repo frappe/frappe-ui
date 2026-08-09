@@ -84,6 +84,21 @@
     name: 'tooltip',
     description: '',
     type: '{ label?: string | undefined; items: ChartTooltipItem[]; stage?: FunnelStage | undefined; }'
+  },
+  {
+    name: 'loading',
+    description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
+    type: 'any'
+  },
+  {
+    name: 'error',
+    description: 'Replaces the message, e.g. to put a retry button beside it.',
+    type: '{ error?: string | null | undefined; }'
+  },
+  {
+    name: 'empty',
+    description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
+    type: 'any'
   }
 ]
 
@@ -95,11 +110,11 @@
   }
 ]
 </script>
+
 ## API Reference
 
-<PropsTable folder="charts" name="FunnelChart" :data="propsData"/> 
+<PropsTable folder="charts" name="FunnelChart" :data="propsData"/>
 
-<SlotsTable :data="slotsData"/> 
+<SlotsTable :data="slotsData"/>
 
-<EmitsTable :data="emitsData"/> 
-
+<EmitsTable :data="emitsData"/>

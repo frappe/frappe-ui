@@ -472,6 +472,8 @@ export type ScatterChartConfig = {
   seriesColumn?: string
   /** Row key holding the point's own name, which heads its tooltip. */
   labelColumn?: string
+  /** Prints the point's own name beside it. Needs `labelColumn` to have one. */
+  showDataLabels?: boolean
   title?: string
   subtitle?: string
   /** Both axes are value axes: a scatter reads one measure against another. */
@@ -622,6 +624,17 @@ export type SeriesStyle = {
    * sits in, so `BarChart` with one `'line'` series is a combo chart.
    */
   type?: ChartMark
+  /**
+   * Which value axis this series is measured against. `'y2'` gives a series in
+   * another unit or magnitude its own scale, drawn opposite the primary.
+   * Defaults to `'y'`. Ignored on a horizontal bar chart, which has no second
+   * value axis, and on a chart where no series asks for `'y2'` the second axis
+   * is not drawn at all.
+   *
+   * Moving a series here never moves it in the chart: the series are drawn in
+   * `y` order whatever axis each one sits on, so a series keeps its color.
+   */
+  axis?: 'y' | 'y2'
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -645,10 +658,12 @@ export type AxisChartProps = ChartBaseProps & {
   data: Record<string, any>[]
   /** Column holding the category or time each point sits at. */
   x: string
-  /** Value column(s). A list reads wide data: one series per column. */
+  /**
+   * Value column(s). A list reads wide data: one series per column, drawn and
+   * colored in the order given. `seriesConfig[key].axis` moves one of them to
+   * the second value axis without moving it in the list.
+   */
   y: string | string[]
-  /** Column(s) measured against the second value axis. Ignored when `horizontal`. */
-  y2?: string | string[]
   /** Grouping column, i.e. long data. Use with a single `y`. */
   series?: string
   /**
@@ -662,6 +677,7 @@ export type AxisChartProps = ChartBaseProps & {
   seriesConfig?: Record<string, SeriesStyle>
   xAxis?: ChartXAxisOptions
   yAxis?: ChartValueAxisOptions
+  /** The second value axis. Only drawn when a series sits on `axis: 'y2'`. */
   y2Axis?: ChartValueAxisOptions
   /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
   palette?: ChartPalette
@@ -776,6 +792,13 @@ export type ScatterChartProps = ChartBaseProps & {
   series?: string
   /** Row key holding the point's own name, which heads its tooltip. */
   label?: string
+  /**
+   * Prints the point's own name beside it, the way an axis series prints its
+   * value. `label` is what it prints, so a chart that names no label column has
+   * nothing to show and says so in a dev-mode warning. Names that would collide
+   * with a neighbour are dropped, so a dense cloud carries few.
+   */
+  showDataLabels?: boolean
   /** The horizontal scale. Both axes are value axes: a scatter has no categories. */
   xAxis?: ChartValueAxisOptions
   /** The vertical scale. */
@@ -804,6 +827,13 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     title: string
     /** A string renders as given: the formatting props only apply to a number. */
     value: number | string | null
+    /**
+     * Ink the reading is printed in, e.g. the color of the series it summarizes
+     * on a dashboard. One color for one mark, the way `SeriesStyle.color` names
+     * a series' own — it does not restyle the card, and the delta keeps the
+     * tone that says which way the number moved.
+     */
+    color?: string
     prefix?: string
     suffix?: string
     /** Change against the comparison period. Sign drives the arrow. */

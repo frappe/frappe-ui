@@ -18,6 +18,13 @@ Insights stores every chart config in the database, one row per workbook chart.
 A rename here becomes a data patch there. The names below were settled before
 Insights migrated.
 
+Insights then moved every one of its chart types onto v2, on 2026-08-09. Running
+the family behind a real consumer produced a second, shorter list of five. Two
+of them are about a seam an audit of two prop lists could not see — what it
+costs an app to reach the chrome — and those belong to the plot-and-chrome
+contract in [charts.md](../charts.md) rather than here. The other three are
+decided below, by the same rule, and are marked as second-pass entries.
+
 ## Decision
 
 ### Enters
@@ -31,11 +38,25 @@ Insights migrated.
 | Scatter | `ScatterChart`, with an optional size measure | Convention 1. It is a way to read two measures against each other. With `referenceLines` it also covers Insights' quadrant lines, so no `show_quadrants` prop. |
 | Sankey | `SankeyChart` | Convention 1. A flow between a source and a target is a reading of the data. |
 | Numeric x axis | `xAxis.type: 'value'` | Convention 1. Reading a measure against a quantity — conversion against discount, revenue against distance — is a statement about the data, the same one `'time'` already makes about a date. It is a third reading of the x column the axis is typed with, not a prop beside it, and the caller still says only what the column means. |
+| Series axis (2nd pass) | `seriesConfig[key].axis: 'y' \| 'y2'` | Convention 4. Which scale a series is measured against is per-series meaning, and `seriesConfig` is the one place per-series meaning lives. It replaces `y2`, which said the same thing in a second place and said it by moving the series — see Leaves. |
+| Scatter point labels (2nd pass) | `showDataLabels` on `ScatterChart` | Convention 4. A donut prints `showInlineLabels` and an axis series prints `showDataLabels`, so a scatter that cannot name its points is the odd one out. It prints the `label` column: both measures are already on the axes. |
+| `NumberCard` value color (2nd pass) | `color` on `NumberCardProps` | Consistency, against convention 2. See below. |
 
 Reference lines have an internal rule that is not API: each line is hosted on
 its own empty series, one per axis, so a legend toggle cannot remove the line
 and a dual-axis chart puts each line on the right scale. Insights'
 `getReferenceLineSeries` is the precedent.
+
+`NumberCard`'s `color` is the closest call on either list. Convention 2 owns the
+look, and the ink a number is printed in is decoration with no reading attached.
+What admits it is that v2 already takes a caller's color wherever a mark carries
+identity — `SeriesStyle.color`, `palette`, an explicit slice list,
+`NumberCardSparkline.color` — and a KPI value is a mark. The card accepted a
+color for the sparkline drawn under the reading and refused one for the reading
+itself. It is one color for one mark: it does not restyle the card, and the
+delta keeps the tone that says which way the number moved. The
+`number_columns` ruling further down assumes it, too — an app laying out one
+card per column has to be able to color each one.
 
 ### Solved without a prop
 
@@ -82,6 +103,20 @@ Convention 3 turns two requested options into library work.
   rendering. If the library ever owns that layer, Map enters. The count of apps
   asking for it was never the reason.
 
+### Leaves
+
+- **`y2`** (2nd pass) — the column list naming what the second value axis
+  measures. Convention 4: beside `seriesConfig[key].axis` it is a second
+  spelling of one idea. It is not sugar over the first either, because the two
+  can disagree — `y2` naming a column whose entry says `axis: 'y'` needs a
+  precedence rule, and a shorthand that needs one is a mechanism. It also
+  carried a side effect the per-series key does not. The series list was
+  `[...y, ...y2]` and series colors are handed out along it, so a caller moving
+  a column from `y` to `y2` moved it down the list and changed its color. v2 is
+  in beta, Insights is the only consumer and is updated in the same cycle, so
+  `y2` goes rather than staying on as a second way in. `y2Axis` stays: it
+  configures the axis, and one axis is one thing.
+
 ### Not a gap: the adapter layer
 
 Insights configs reference columns through `Dimension` and `Measure` objects,
@@ -108,6 +143,10 @@ Three decisions fell out of the work and answer questions this record raised.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.
+- **A long-data series can reach the second axis.** `y2` named columns, and long
+  data has none to name — the series come out of a grouping column — so a
+  grouped chart had no way to put one group on its own scale. Keying the axis by
+  series identity gives it one, and drops a branch instead of adding a prop.
 - **A numeric x axis is asked for, never inferred.** `'time'` is inferred
   because a column of dates is a column of dates. A column of numbers is as
   often a list of categories — quarters, store numbers, shirt sizes — so

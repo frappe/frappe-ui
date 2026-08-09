@@ -2,6 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import {
   AXIS_LABEL_FONT_SIZE,
   BLUR_OPACITY,
+  DATA_LABEL_FONT_SIZE,
   buildAxisGrid,
   buildValueAxis,
   toNumber,
@@ -172,6 +173,9 @@ export function buildScatterOption(
   const isRTL = config.dir === 'rtl'
   const series = buildScatterSeries(config, context)
   const visible = series.filter((entry) => !hiddenSeries.includes(entry.name))
+  // Asked once for the whole plot: the answer is the same for every group, and
+  // asking per group would raise its warning once per group.
+  const labelled = showLabels(config)
 
   const option = {
     animation: true,
@@ -202,7 +206,9 @@ export function buildScatterOption(
       format: format?.y,
     }),
     series: [
-      ...visible.map(buildSeries),
+      ...visible.map((entry) =>
+        buildSeries(entry, { theme, isRTL, showLabels: labelled }),
+      ),
       // Appended after the points, and read from `config.referenceLines` rather
       // than from the built series: the legend, `hiddenSeries` and the tooltip
       // all walk `buildScatterSeries`, which knows nothing of these, so a host
@@ -243,13 +249,42 @@ function warnSecondAxis(count: number) {
   )
 }
 
-function buildSeries(entry: ScatterSeries) {
+/**
+ * Whether the points print their own names. A scatter labels a point with what
+ * it *is*, not with what it measures: both of its measures are already on the
+ * axes, so printing one of them beside the symbol says nothing the plot did not.
+ * That leaves the label column, and a chart naming none has nothing to print.
+ */
+function showLabels(config: ScatterChartConfig) {
+  if (!config.showDataLabels) return false
+  if (config.labelColumn) return true
+  warnNoLabelColumn()
+  return false
+}
+
+function warnNoLabelColumn() {
+  if (!import.meta.env.DEV) return
+  console.warn(
+    "[frappe-ui] `showDataLabels` prints each point's own name, and this scatter chart names no `label` column, so there is nothing to print. Both axes already carry the measures.",
+  )
+}
+
+function buildSeries(
+  entry: ScatterSeries,
+  opts: { theme: ChartTheme; isRTL: boolean; showLabels: boolean },
+) {
+  const { theme, isRTL, showLabels } = opts
+
   return {
     type: 'scatter',
     name: entry.name,
     data: entry.points.map((point) => ({
       value: [point.x, point.y],
       symbolSize: point.symbolSize,
+      // The point's own name, carried on the item because that is where echarts
+      // reads a datapoint label from. A point whose label column is blank
+      // carries an empty string, which draws nothing.
+      ...(showLabels ? { name: point.label ?? '' } : {}),
     })),
     symbol: 'circle',
     itemStyle: { color: entry.color, opacity: SYMBOL_OPACITY, borderWidth: 0 },
@@ -257,7 +292,32 @@ function buildSeries(entry: ScatterSeries) {
     // something against the cloud around it, and fading that cloud takes the
     // reading away.
     emphasis: { focus: 'series', blurScope: 'coordinateSystem' },
-    blur: { itemStyle: { opacity: SYMBOL_OPACITY * BLUR_OPACITY } },
+    blur: {
+      itemStyle: { opacity: SYMBOL_OPACITY * BLUR_OPACITY },
+      label: { opacity: BLUR_OPACITY },
+    },
+    // Left out entirely when nothing is labelled: a cloud that prints no names
+    // carries no label option, and no layout pass over one.
+    ...(showLabels
+      ? {
+          label: {
+            show: true,
+            // Beside the symbol rather than over it, on the side the text runs
+            // towards. A bubble is sized by its magnitude and echarts offsets
+            // the label by that size, so it clears the largest as well as the
+            // smallest.
+            position: isRTL ? 'left' : 'right',
+            color: theme.dataLabel,
+            fontSize: DATA_LABEL_FONT_SIZE,
+            // Stated rather than left to echarts, whose default for a cartesian
+            // series prints the value: what the axes already say.
+            formatter: (params: any) => String(params?.name ?? ''),
+          },
+          // Points overlap by nature, so their names would too. The cloud keeps
+          // the names it has room for and drops the rest, as a crowded axis does.
+          labelLayout: { hideOverlap: true },
+        }
+      : {}),
   }
 }
 

@@ -47,18 +47,32 @@
         <slot />
       </div>
 
+      <!-- The loading state gets the whole plot box rather than a row in the
+           middle of it, because what it draws is the shape of the plot. A
+           caller replacing it is drawing a placeholder, not a caption. -->
       <div
-        v-if="state !== 'ready'"
+        v-if="state === 'loading'"
+        data-slot="chart-loading"
+        class="absolute inset-0"
+      >
+        <!-- Announced by the container, so an app's own placeholder does not
+             have to carry the announcement with it. -->
+        <span class="sr-only" role="status">Loading chart</span>
+        <slot name="loading">
+          <!-- A block the size of the plot, not a spinner in the middle of it.
+               A dashboard fills in a card at a time, and a placeholder holding
+               the grid's shape reads as one card arriving rather than as eight
+               spinners turning out of step. NumberCard, which has no plot,
+               skeletons its reading the same way. -->
+          <Skeleton class="h-full w-full rounded-4" />
+        </slot>
+      </div>
+
+      <div
+        v-else-if="state !== 'ready'"
         class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center"
       >
-        <template v-if="state === 'loading'">
-          <Spinner class="size-4 text-ink-gray-5" />
-          <slot name="loading">
-            <span class="text-p-sm text-ink-gray-5">Loading chart…</span>
-          </slot>
-        </template>
-
-        <template v-else-if="state === 'error'">
+        <template v-if="state === 'error'">
           <slot name="error" :error="error">
             <span class="text-sm-medium text-ink-red-8">
               Could not render this chart
@@ -96,10 +110,22 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import Spinner from '#components/Spinner/Spinner.vue'
+import Skeleton from '#components/Skeleton/Skeleton.vue'
 import type { ChartContainerProps } from '../types'
 
 const props = defineProps<ChartContainerProps>()
+
+defineSlots<{
+  default: () => unknown
+  actions?: () => unknown
+  legend?: () => unknown
+  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
+  empty?: () => unknown
+}>()
 
 const state = computed(() => {
   if (props.error) return 'error'
@@ -108,8 +134,9 @@ const state = computed(() => {
   return 'ready'
 })
 
-// The label heads an axis, so it goes wherever that axis does: over a spinner,
-// a message or an empty card it is a title for a plot that isn't drawn.
+// The label heads an axis, so it goes wherever that axis does: over a
+// placeholder, a message or an empty card it is a title for a plot that isn't
+// drawn.
 const showPlotLabel = computed(
   () =>
     state.value === 'ready' &&

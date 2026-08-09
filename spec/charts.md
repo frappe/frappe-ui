@@ -69,6 +69,21 @@ exported, so an app that draws its own plot reads as one of the family.
 </ChartContainer>
 ```
 
+Each of the three states is a slot: `loading`, `error` and `empty`. Every chart
+component forwards all three, and a slot replaces the whole state rather than a
+line inside it. A caller reaching a state — a retry button beside the message,
+a placeholder shaped like the card — must not have to drop the chart and
+rebuild the chrome to get there. That is convention 6 read the other way round:
+the library owns the chrome, so reaching one corner of it must not cost the
+caller the rest.
+
+What the states look like is still the library's, by convention 2. A loading
+chart draws a skeleton the size of its plot, because a dashboard fills in a card
+at a time and a placeholder that holds the grid's shape reads as one card
+arriving rather than as eight spinners turning out of step. `NumberCard` has no
+plot and skeletons its reading the same way. An app replaces that only when it
+knows the shape of its own card better than the library does.
+
 The card surface has one owner. `ChartCard` holds the card classes and the
 `card` prop turns them off. For a plot, the caller supplies the card, which is
 the established pattern. `NumberCard` draws one by default, because a reading

@@ -55,6 +55,19 @@ A line outside the range the plot covers is not drawn — each scale follows the
 data, not the annotation — so pin `xAxis.min` / `max` or `yAxis.min` / `max` to
 bring a distant one into frame.
 
+## Naming the points
+
+`showDataLabels` prints each point's own name beside it, as the chart above
+does. That is what a quadrant reading is for: it names the corner every product
+sits in without hovering over one. What it prints is the `label` column, so a
+chart that names none has nothing to show and says so in a dev-mode warning.
+The two measures are already on the axes, and printing one of them beside the
+symbol would say nothing the plot did not.
+
+Points overlap by nature and so would their names. Names that collide with a
+neighbour are dropped, the way a crowded axis drops labels, so a dense cloud
+carries few.
+
 ## Formatting
 
 `format` prints every number the chart shows. `xAxis.format` and `yAxis.format`

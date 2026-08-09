@@ -19,4 +19,10 @@ in periods.
 
 <ComponentPreview name="Charts-NumberSparklines" csr="true" self-layout />
 
+`color` prints the reading in an ink you name, for a card standing for a series
+that is drawn in that color elsewhere on the page — the storage card above is
+printed in the color of the trend under it. It is one color for one mark, the
+way `seriesConfig[key].color` names a series' own. It does not restyle the card,
+and the delta keeps the tone that says which way the number moved.
+
 <!-- @include: ./NumberCard.api.md -->

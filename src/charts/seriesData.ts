@@ -38,7 +38,6 @@ export function normalizeAxisChartProps(
 ): NormalizedAxisChart {
   const rows = props.data ?? []
   const yColumns = toColumns(props.y)
-  const y2Columns = toColumns(props.y2)
 
   if (import.meta.env.DEV && props.series && yColumns.length > 1) {
     console.warn(
@@ -57,9 +56,7 @@ export function normalizeAxisChartProps(
         pivot(rows, props.x, yColumns[0], props.series),
         props.maxSeries,
       )
-    : { data: rows, names: mergeColumns(yColumns, y2Columns) }
-
-  const secondary = new Set(props.series ? [] : y2Columns)
+    : { data: rows, names: yColumns }
 
   return {
     config: {
@@ -73,7 +70,7 @@ export function normalizeAxisChartProps(
       },
       yAxis: toValueAxis(props.yAxis),
       y2Axis: toValueAxis(props.y2Axis),
-      series: names.map((name) => buildSeries(name, props, secondary)),
+      series: names.map((name) => buildSeries(name, props)),
       referenceLines: props.referenceLines,
       title: props.title,
       subtitle: props.subtitle,
@@ -89,10 +86,16 @@ export function normalizeAxisChartProps(
   }
 }
 
+/**
+ * One series, i.e. one column of wide data or one value of the grouping column.
+ * The style is spread whole, `axis` included: which scale a series is measured
+ * against is per-series meaning, and it lives where the rest of that meaning
+ * does. Nothing here reads the axis, so a series never leaves the place `y` put
+ * it — which is what keeps the palette on the caller's column order.
+ */
 function buildSeries(
   name: string,
   props: AxisChartProps,
-  secondary: Set<string>,
 ): AxisChartSeriesConfig {
   // A saved config outlives the query behind it, so a `seriesConfig` entry for a
   // column that is no longer selected is expected, not an error.
@@ -104,18 +107,12 @@ function buildSeries(
     ...(name === OTHERS_KEY ? { label: OTHERS_LABEL } : {}),
     ...style,
     name,
-    ...(secondary.has(name) ? { axis: 'y2' as const } : {}),
   }
 }
 
 function toColumns(value?: string | string[]): string[] {
   if (!value) return []
   return Array.isArray(value) ? value.filter(Boolean) : [value]
-}
-
-/** `y2` columns need not repeat in `y`; the ones that do keep their `y` position. */
-function mergeColumns(y: string[], y2: string[]): string[] {
-  return [...y, ...y2.filter((column) => !y.includes(column))]
 }
 
 /**

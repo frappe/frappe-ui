@@ -38,6 +38,8 @@ const cards: NumberCardProps[] = [
     title: 'Storage used',
     value: 61,
     suffix: '%',
+    // The reading in the ink of the trend under it: one mark, one color.
+    color: '#f59e0b',
     sparkline: { data: storageUsed, color: '#f59e0b' },
   },
 ]

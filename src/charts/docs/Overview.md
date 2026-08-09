@@ -66,6 +66,11 @@ plot for the same HTML tooltip the built-in charts draw. `ChartCard` draws the
 card surface. Read the colors off `useChartTheme`, so the plot follows a theme
 switch with the rest of the page.
 
+The three states are slots — `#loading`, `#error` and `#empty` — on the
+container and on every built-in chart alike, so a retry button beside a failed
+query costs a slot rather than a chart of your own. See
+[States](/docs/charts/states).
+
 ```vue
 <script setup lang="ts">
 import { computed, ref } from 'vue'

@@ -18,13 +18,12 @@ const latency = [
     <LineChart
       :data="latency"
       x="day"
-      y="p95"
-      y2="errors"
+      :y="['p95', 'errors']"
       :x-axis="{ type: 'time', timeGrain: 'day' }"
       :y-axis="{ title: 'p95 latency', format: (value) => `${value} ms` }"
       :y2-axis="{ title: 'Error rate', format: (value) => `${value}%` }"
       palette="categorical"
-      :series-config="{ errors: { label: 'Errors' } }"
+      :series-config="{ errors: { label: 'Errors', axis: 'y2' } }"
       :reference-lines="[
         { value: 500, label: 'SLA', dashed: true },
         { value: 2, axis: 'y2', label: 'Error budget', dashed: true },

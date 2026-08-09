@@ -10,6 +10,15 @@
   >
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
 
+    <!-- The container owns the three states, so an app that wants a retry
+         button beside the message or a skeleton of its own reaches them here
+         rather than dropping the chart and rebuilding the chrome. -->
+    <template v-if="$slots.loading" #loading><slot name="loading" /></template>
+    <template v-if="$slots.error" #error="slotProps">
+      <slot name="error" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.empty" #empty><slot name="empty" /></template>
+
     <template #default>
       <div
         ref="plotEl"
@@ -47,6 +56,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ScatterChart as ScatterSeries } from 'echarts/charts'
 import { GridComponent, MarkLineComponent } from 'echarts/components'
+import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
@@ -66,9 +76,15 @@ import type {
 } from './types'
 
 // The grid carries both value axes and MarkLineComponent draws the reference
-// lines — without it they are dropped without a word. There is no tooltip
+// lines — without it they are dropped without a word. LabelLayout is what drops
+// a point label that collides with its neighbour. There is no tooltip
 // component, because the visible tooltip is a Vue one (see buildScatterOption).
-registerChartModules([ScatterSeries, GridComponent, MarkLineComponent])
+registerChartModules([
+  ScatterSeries,
+  GridComponent,
+  MarkLineComponent,
+  LabelLayout,
+])
 
 const props = defineProps<ScatterChartProps>()
 
@@ -83,6 +99,12 @@ const emit = defineEmits<{
 defineSlots<{
   actions?: () => unknown
   tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
+  empty?: () => unknown
 }>()
 
 const plotEl = ref<HTMLElement>()
@@ -101,6 +123,7 @@ const config = computed<ScatterChartConfig>(() => ({
   sizeColumn: props.size,
   seriesColumn: props.series,
   labelColumn: props.label,
+  showDataLabels: props.showDataLabels,
   xAxis: toValueAxis(props.xAxis),
   yAxis: toValueAxis(props.yAxis),
   referenceLines: props.referenceLines,

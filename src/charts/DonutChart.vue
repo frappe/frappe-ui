@@ -9,6 +9,15 @@
   >
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
 
+    <!-- The container owns the three states, so an app that wants a retry
+         button beside the message or a skeleton of its own reaches them here
+         rather than dropping the chart and rebuilding the chrome. -->
+    <template v-if="$slots.loading" #loading><slot name="loading" /></template>
+    <template v-if="$slots.error" #error="slotProps">
+      <slot name="error" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.empty" #empty><slot name="empty" /></template>
+
     <template #default>
       <div class="relative h-full w-full">
         <div ref="plotEl" class="h-full w-full" dir="ltr" />
@@ -124,6 +133,12 @@ defineSlots<{
     percent?: string
   }) => unknown
   tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
+  empty?: () => unknown
 }>()
 
 const plotEl = ref<HTMLElement>()

@@ -23,6 +23,7 @@ const percent = (value: number) => `${value}%`
       x="growth"
       y="margin"
       label="product"
+      show-data-labels
       :x-axis="{ title: 'Growth', format: percent }"
       :y-axis="{ title: 'Margin', format: percent }"
       :reference-lines="[
