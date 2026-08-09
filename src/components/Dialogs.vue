@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- v1 imperative `dialog.*` stack. -->
-    <template v-if="isPrimaryHost">
+    <template v-if="isMounted && isPrimaryHost">
       <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
     </template>
   </div>
@@ -20,7 +20,15 @@ const hosts = shallowRef<symbol[]>([])
 </script>
 
 <script setup lang="ts">
-import { computed, inject, onUnmounted, provide, type InjectionKey } from 'vue'
+import {
+  computed,
+  inject,
+  onMounted,
+  onUnmounted,
+  provide,
+  ref,
+  type InjectionKey,
+} from 'vue'
 import { dialogs as imperativeDialogs } from '../utils/dialog'
 
 // Only one `<Dialogs />` host renders the stack. Apps that wrap their tree in
@@ -36,26 +44,25 @@ const hasParentHost = inject(DIALOGS_HOST_KEY, false)
 provide(DIALOGS_HOST_KEY, true)
 
 const hostId = Symbol('dialogs-host')
-const isClient = typeof window !== 'undefined'
 
-if (!hasParentHost && isClient) {
+if (typeof window !== 'undefined' && !hasParentHost) {
   hosts.value = [...hosts.value, hostId]
   if (hosts.value.length > 1 && import.meta.env.DEV) {
     console.warn(
-      '[frappe-ui] Multiple <Dialogs /> hosts are mounted; only the first ' +
+      '[frappe-ui] Multiple <Dialogs /> hosts are mounted; only one ' +
         'renders the dialog stack. Remove the extra mount — ' +
         '<FrappeUIProvider> already includes one.',
     )
   }
 }
 
-// The wrapper <div> above renders unconditionally so server and client
-// markup match (during SSR the stack is empty, so every host emits the same
-// empty <div>). On the server the claim list stays empty; the inject guard
-// still dedups nested hosts there.
-const isPrimaryHost = computed(() =>
-  isClient ? hosts.value[0] === hostId : !hasParentHost,
-)
+// The stack is empty until after mount, so gating on `isMounted` keeps
+// server and client hydration markup identical — both sides render the
+// false branch — even though the claim list is client-only. The wrapper
+// <div> renders unconditionally for the same reason.
+const isMounted = ref(false)
+onMounted(() => (isMounted.value = true))
+const isPrimaryHost = computed(() => hosts.value[0] === hostId)
 
 onUnmounted(() => {
   // Hand the claim to the next registered host (the provider's own mount,
