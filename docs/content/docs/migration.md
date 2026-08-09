@@ -809,6 +809,27 @@ Every other name in the family moves the same way: `List`, `ListEmptyState`,
 `ListHeaderItem`, `ListRowItem`, `ListRows`, `ListSelectBanner`. Nothing about
 the component itself changed — only where it's imported from.
 
+## Calendar — moved to `frappe-ui/experimental`
+
+`Calendar` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and parks there,
+API unchanged, until a redesigned calendar family replaces it. The import
+fails at the root; switch the subpath:
+
+```ts
+// Before
+import { Calendar, CalendarColorMap } from 'frappe-ui'
+
+// After
+import { Calendar, CalendarColorMap } from 'frappe-ui/experimental'
+```
+
+Every other name in the family moves the same way: `CalendarActiveEvent`
+and the types `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
+`CalendarEvent`, `CalendarMode`, `CalendarPublicProps`, `CalendarTimeFormat`,
+`GroupedCalendarEvents`. Nothing about the component itself changed — only
+where it's imported from.
+
 ## Sprite icons — moved to `frappe-ui/experimental`
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1
