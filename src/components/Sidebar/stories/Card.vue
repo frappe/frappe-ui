@@ -8,8 +8,8 @@ const showFeatureCard = ref(true)
 </script>
 
 <template>
-  <div class="flex w-full flex-wrap items-start gap-4">
-    <div class="w-52 rounded-md bg-surface-gray-1 p-3">
+  <div class="grid w-full max-w-md grid-cols-2 items-start gap-4">
+    <div class="rounded-md bg-surface-gray-1 p-3">
       <SidebarCard
         title="Your trial ends soon!"
         description="Upgrade to keep enjoying features."
@@ -17,7 +17,7 @@ const showFeatureCard = ref(true)
       />
     </div>
 
-    <div class="w-52 rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-md bg-surface-gray-1 p-3">
       <SidebarCard
         v-if="showFeatureCard"
         theme="blue"
@@ -36,12 +36,21 @@ const showFeatureCard = ref(true)
       </button>
     </div>
 
-    <div class="w-52 rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-md bg-surface-gray-1 p-3">
       <SidebarCard
         theme="amber"
         title="Storage is almost full"
         description="Free up space or upgrade your plan."
         :action="{ label: 'Manage storage' }"
+      />
+    </div>
+
+    <div class="rounded-md bg-surface-gray-1 p-3">
+      <SidebarCard
+        theme="red"
+        title="Payment failed"
+        description="Update your card to avoid interruption."
+        :action="{ label: 'Fix billing' }"
       />
     </div>
   </div>
