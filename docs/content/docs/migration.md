@@ -584,7 +584,7 @@ it and add `bare`:
 ```vue
 <Tooltip bare>
   <template #content>
-    <img :src="url" class="max-h-40 rounded shadow-xl" />
+    <img :src="url" class="max-h-40 rounded-4 shadow-xl" />
   </template>
   <span class="truncate">{{ filename }}</span>
 </Tooltip>
@@ -1185,7 +1185,7 @@ markup, using [`LoadingText`](./components/loadingtext) or
 </Card>
 
 <!-- After -->
-<div class="flex flex-col rounded-lg border px-6 py-5">
+<div class="flex flex-col rounded-6 border px-6 py-5">
   <div class="flex items-baseline justify-between">
     <h2 class="text-lg font-semibold">Title</h2>
     <Button label="Edit" />
