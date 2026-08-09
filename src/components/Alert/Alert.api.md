@@ -7,8 +7,8 @@
   const propsData = [
   {
     name: 'title',
-    description: 'Main heading text of the alert',
-    required: true,
+    description: 'Main heading text of the alert. Optional when the `#title` slot is used',
+    required: false,
     type: 'string'
   },
   {

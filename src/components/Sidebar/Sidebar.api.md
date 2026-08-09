@@ -213,8 +213,8 @@
   const sidebarCardProps = [
   {
     name: 'title',
-    description: 'Main heading text of the card',
-    required: true,
+    description: 'Main heading text of the card. Optional when the `#title` slot is used',
+    required: false,
     type: 'string'
   },
   {

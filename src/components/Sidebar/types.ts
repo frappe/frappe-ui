@@ -100,8 +100,8 @@ export type SidebarCardTheme = 'gray' | 'blue' | 'green' | 'amber' | 'red'
  * the parent owns hiding the card.
  */
 export interface SidebarCardProps {
-  /** Main heading text of the card */
-  title: string
+  /** Main heading text of the card. Optional when the `#title` slot is used */
+  title?: string
 
   /** Supporting text below the title */
   description?: string

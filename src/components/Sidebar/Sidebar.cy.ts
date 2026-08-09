@@ -319,6 +319,17 @@ describe('<SidebarCard />', () => {
     cy.get('@onDismiss').should('have.been.calledOnce')
   })
 
+  it('renders the #title slot without a title prop', () => {
+    cy.mount(SidebarCard, {
+      slots: { title: () => h('em', {}, 'Slot-only title') },
+    })
+    cy.get('[data-slot=title]').should('contain.text', 'Slot-only title')
+
+    // No prop and no slot: the title element is skipped entirely.
+    cy.mount(SidebarCard, { props: { description } })
+    cy.get('[data-slot=title]').should('not.exist')
+  })
+
   it('renders slot overrides, and #actions receives dismiss', () => {
     const onDismiss = cy.spy().as('onDismiss')
     cy.mount(SidebarCard, {

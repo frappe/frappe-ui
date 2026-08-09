@@ -57,6 +57,8 @@ const showPrefix = computed(() =>
 
 const iconColorClass = computed(() => iconColorClasses[props.theme])
 
+const showTitle = computed(() => Boolean(props.title || slots.title))
+
 const showDescription = computed(() =>
   Boolean(props.description || slots.description),
 )
@@ -153,7 +155,11 @@ const actionClass = computed(() =>
           />
         </slot>
       </div>
-      <div data-slot="title" class="min-w-0 text-sm-medium text-ink-gray-8">
+      <div
+        v-if="showTitle"
+        data-slot="title"
+        class="min-w-0 text-sm-medium text-ink-gray-8"
+      >
         <slot name="title">{{ props.title }}</slot>
       </div>
     </div>

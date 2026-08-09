@@ -164,6 +164,17 @@ describe('<Alert />', () => {
     cy.get(root).should('have.attr', 'data-layout', 'banner')
   })
 
+  it('renders the #title slot without a title prop', () => {
+    cy.mount(Alert, {
+      slots: { title: () => h('em', {}, 'Slot-only title') },
+    })
+    cy.get('[data-slot="title"]').should('contain.text', 'Slot-only title')
+
+    // No prop and no slot: the title element is skipped entirely.
+    cy.mount(Alert, { props: { description } })
+    cy.get('[data-slot="title"]').should('not.exist')
+  })
+
   it('#actions slot replaces auto buttons and receives dismiss', () => {
     const onDismiss = cy.spy().as('onDismiss')
     cy.mount(Alert, {

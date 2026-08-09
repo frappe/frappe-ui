@@ -26,8 +26,8 @@ export type AlertAction = ButtonProps & {
  * action, `"banner"` otherwise.
  */
 export const alertProps = {
-  /** Main heading text of the alert */
-  title: { type: String, required: true as const },
+  /** Main heading text of the alert. Optional when the `#title` slot is used */
+  title: { type: String, default: undefined },
   /** Supporting text below the title; its presence switches the alert to the banner layout */
   description: { type: String, default: undefined },
   /** Color theme of the status icon and the row action label; the container never changes with theme */
