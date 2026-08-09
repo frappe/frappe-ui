@@ -4,65 +4,221 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const propsData = [
+  const tabsProps = [
   {
-    name: 'as',
-    description: 'Element/component used to render the tab container.',
+    name: 'modelValue',
+    description: 'Currently selected tab value.',
     required: false,
-    type: 'string'
-  },
-  {
-    name: 'tabs',
-    description: 'List of tabs to render.',
-    required: true,
-    type: 'Tab[]'
+    type: 'TabValue'
   },
   {
     name: 'vertical',
     description: 'Renders tabs vertically instead of horizontally.',
     required: false,
-    type: 'boolean'
-  },
-  {
-    name: 'modelValue',
-    description: 'Currently selected tab value.',
-    required: false,
-    type: 'string | number'
+    type: 'boolean',
+    default: 'false'
   },
   {
     name: 'dir',
-    description: 'Forces layout direction; defaults to `document.documentElement.dir`.',
+    description: 'Forces layout direction; defaults to the resolved document direction.',
     required: false,
-    type: '"rtl" | "ltr"'
-  }
-]
-
-  const slotsData = [
-  {
-    name: 'tab-item',
-    description: 'Custom renderer for a tab trigger (icon + label / router-link).',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    type: '"ltr" | "rtl"'
   },
   {
-    name: 'tab-panel',
-    description: 'Content rendered for each tab panel.',
-    type: '{ tab: { label: string; icon?: string | Component | undefined; route?: string | undefined; }; }'
+    name: 'tabs',
+    description: 'Shorthand mode only: items to generate triggers (and panels) from.',
+    required: false,
+    type: 'TabItem[]'
+  },
+  {
+    name: 'variant',
+    description: 'Shorthand mode only; forwarded to the generated TabList.',
+    required: false,
+    type: 'TabsVariant',
+    default: '"underline"'
+  },
+  {
+    name: 'size',
+    description: 'Shorthand mode only; forwarded to the generated TabList.',
+    required: false,
+    type: 'TabsSize',
+    default: '"sm"'
   }
 ]
 
-  const emitsData = [
+  const tabsSlots = [
+  {
+    name: 'default',
+    description: 'Composed mode: `TabList` / `TabPanel` children.',
+    type: 'any'
+  },
+  {
+    name: 'prefix',
+    description: 'Shorthand mode: leading content in every generated trigger.',
+    type: '{ tab: TabItem; } & TabTriggerSlotProps'
+  },
+  {
+    name: 'tab',
+    description: 'Shorthand mode: replaces the label region of every generated trigger.',
+    type: '{ tab: TabItem; } & TabTriggerSlotProps'
+  },
+  {
+    name: 'suffix',
+    description: 'Shorthand mode: trailing content in every generated trigger.',
+    type: '{ tab: TabItem; } & TabTriggerSlotProps'
+  },
+  {
+    name: 'panel',
+    description: 'Shorthand mode: panel body for the selected tab.',
+    type: '{ tab: TabItem; }'
+  }
+]
+
+  const tabsEmits = [
   {
     name: 'update:modelValue',
     description: 'Fired when the selected tab changes.',
-    type: '[value: string | number]'
+    type: '[value: TabValue]'
+  }
+]
+
+  const tabListProps = [
+  {
+    name: 'variant',
+    description: 'Visual variant.',
+    required: false,
+    type: 'TabsVariant',
+    default: '"underline"'
+  },
+  {
+    name: 'size',
+    description: 'Size of the triggers.',
+    required: false,
+    type: 'TabsSize',
+    default: '"sm"'
+  },
+  {
+    name: 'direction',
+    description: 'browser-tab + vertical only: which edge the tabs attach to.',
+    required: false,
+    type: 'TabsDirection',
+    default: '"left"'
+  }
+]
+
+  const tabListSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: 'any'
+  }
+]
+
+  const tabTriggerProps = [
+  {
+    name: 'value',
+    description: '',
+    required: true,
+    type: 'TabValue'
+  },
+  {
+    name: 'label',
+    description: 'Text shown in the label region.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'icon',
+    description: 'Icon-only trigger; `label` becomes the accessible name.',
+    required: false,
+    type: 'TabIcon'
+  },
+  {
+    name: 'iconLeft',
+    description: 'Leading accent icon, rendered next to the visible label.',
+    required: false,
+    type: 'TabIcon'
+  },
+  {
+    name: 'iconRight',
+    description: 'Trailing accent icon, rendered next to the visible label.',
+    required: false,
+    type: 'TabIcon'
+  },
+  {
+    name: 'disabled',
+    description: '',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'route',
+    description: 'Renders the trigger as a RouterLink. See route mode in the spec.',
+    required: false,
+    type: 'string | kt | Tt'
+  }
+]
+
+  const tabTriggerSlots = [
+  {
+    name: 'prefix',
+    description: 'Leading content, after `iconLeft`.',
+    type: 'TabTriggerSlotProps'
+  },
+  {
+    name: 'default',
+    description: 'Replaces the label region.',
+    type: 'TabTriggerSlotProps'
+  },
+  {
+    name: 'suffix',
+    description: 'Trailing content (badges, counts).',
+    type: 'TabTriggerSlotProps'
+  }
+]
+
+  const tabPanelProps = [
+  {
+    name: 'value',
+    description: '',
+    required: true,
+    type: 'TabValue'
+  }
+]
+
+  const tabPanelSlots = [
+  {
+    name: 'default',
+    description: '',
+    type: 'any'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable name="Tabs" :data="propsData"/>
+### Tabs
 
-<SlotsTable :data="slotsData"/>
+<PropsTable name="Tabs" :data="tabsProps"/>
 
-<EmitsTable :data="emitsData"/>
+<SlotsTable :data="tabsSlots"/>
+
+<EmitsTable :data="tabsEmits"/>
+
+### TabList
+
+<PropsTable folder="Tabs" name="TabList" :data="tabListProps"/>
+
+<SlotsTable :data="tabListSlots"/>
+
+### TabTrigger
+
+<PropsTable folder="Tabs" name="TabTrigger" :data="tabTriggerProps"/>
+
+<SlotsTable :data="tabTriggerSlots"/>
+
+### TabPanel
+
+<PropsTable folder="Tabs" name="TabPanel" :data="tabPanelProps"/>
+
+<SlotsTable :data="tabPanelSlots"/>
