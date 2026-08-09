@@ -60,7 +60,7 @@ separate category, decided on their own terms.
 | --- | --- | --- |
 | `frappe-ui/editor` | a + b + c | Static TipTap; open extension/menu registry (ADR-0004); `ListItem` and others already collide with root names. |
 | `frappe-ui/list` | b | An extensible parts family with a composition model — individual parts that work together and grow by adding more parts, the same footing as `editor` and `charts` (maintainer call, 2026-08-09). The original `1.0.0` basis was limb (c): `List`, `ListHeader`, `ListRow`, `ListRows` collided with the legacy `ListView` family at root. That collision dissolved when [#985](https://github.com/frappe/frappe-ui/issues/985) moved `ListView` to `frappe-ui/experimental` — the "fresh decision for that moment" this row reserved is this amendment. |
-| `frappe-ui/icons` | a | `spritePlugin` statically imports the full `lucide-static` sprite; `IconPicker` reads the injected sprite DOM. Holds only while `spritePlugin` ships — a smaller cleanup (rewire `IconPicker` to the tailwind plugin's build-time icon list, delete `spritePlugin` and the duplicate `Icon.vue`) would remove the only static dependency in the subpath and fold it into root. |
+| `frappe-ui/icons` | c | A flat namespace of bare `*Icon` names (`HelpIcon`, `CircleCheckIcon`, …). Until [#904](https://github.com/frappe/frappe-ui/issues/904) it also carried `Icon`, which collided outright with root's `Icon`; the remaining names don't collide today, but folding them into root would seed it with generic icon names root must then avoid forever — limb (c)'s "or would as root grows" clause. The original basis was limb (a): `spritePlugin` statically imported the full `lucide-static` sprite. That ended when #904 moved the sprite trio (`Icon`, `IconPicker`, `spritePlugin`) to `frappe-ui/experimental`. |
 | `frappe-ui/charts` (in flight, #890) | a | Statically imports `echarts/core`. Rule-compliant as designed. |
 | `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. Now also home to `CodeEditor` and `CodePreview` (see below). |
 | `frappe-ui/code-editor` | none | Removed. `CodeEditor`'s only dependency (CodeMirror) is entirely behind `await import()` — nothing static. It is a form-field sibling of `Textarea`/`TextInput` (its own prop types are derived from the shared `InputVariant`/`InputSize` union), not a family with a composition model. `CodePreview` statically imports `marked`, which would otherwise re-enter root's dependency graph the moment ADR-0008 deletes the deprecated `TextEditor` re-export (`marked`'s only other path to root). Rather than fold `CodeEditor` into root and leave `CodePreview` behind on a single-purpose subpath, both move to `frappe-ui/experimental` together — P14 carries no stability promise, so the pair can grow into a fuller code-editing parts family later, against real usage, without needing a `2.0.0`. |
@@ -106,12 +106,13 @@ separate category, decided on their own terms.
   limbs and flags the concrete collision (`ListItem`, among others) for the deprecated
   `TextEditor` removal to close out.
 - **#887** (build-time subpaths): `code-editor`'s disposition is decided here (moves to
-  `experimental`, not a build-time subpath). The icon cleanup this rule identified —
-  remove `spritePlugin`, rewire `IconPicker` off the sprite DOM to the tailwind
-  plugin's build-time name list, delete the duplicate `icons/Icon.vue` — is filed
-  separately (see below) rather than folded into this ticket's build-tooling scope,
-  since it's a component/API question that happens to touch a build plugin, not
-  build-tooling itself.
+  `experimental`, not a build-time subpath). The icon cleanup this rule identified was
+  filed separately as [#904](https://github.com/frappe/frappe-ui/issues/904) rather
+  than folded into this ticket's build-tooling scope, since it's a component/API
+  question that happens to touch a build plugin, not build-tooling itself. #904
+  resolved it by moving the sprite trio (`Icon`, `IconPicker`, `spritePlugin`) out of
+  `frappe-ui/icons` into `frappe-ui/experimental`; the subpath keeps only the bespoke
+  SVG icons and now stands on limb (c), not limb (a).
 
 ## Considered alternatives
 

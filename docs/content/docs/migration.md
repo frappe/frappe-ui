@@ -809,6 +809,29 @@ Every other name in the family moves the same way: `List`, `ListEmptyState`,
 `ListHeaderItem`, `ListRowItem`, `ListRows`, `ListSelectBanner`. Nothing about
 the component itself changed — only where it's imported from.
 
+## Sprite icons — moved to `frappe-ui/experimental`
+
+The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1
+surface. They move from `frappe-ui/icons` to `frappe-ui/experimental`
+(P14 — no stability promise). The old import fails; switch the subpath:
+
+```ts
+// Before
+import { Icon, IconPicker, spritePlugin } from 'frappe-ui/icons'
+
+// After
+import { Icon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
+```
+
+Nothing about the components changed — only where they're imported from.
+Apps that spread `content` from `frappe-ui/tailwind` keep `IconPicker`
+styles automatically — no Tailwind change needed. Note that root
+`frappe-ui` exports a different `Icon`; alias one if you import both,
+e.g. `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
+`frappe-ui/icons`. For new code, use `lucide-*` classes — they are the
+canonical way to render icons.
+
 ## Sidebar
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /

@@ -24,3 +24,7 @@ export type {
 // functions, tooltips, disabled-row exclusion, the select banner), so this
 // stays here, unstable, until `frappe-ui/list` reaches parity.
 export * from './experimental/ListView'
+// Sprite icon trio. Moved out of `frappe-ui/icons` (#904) as a parking spot
+// while apps migrate — `lucide-*` classes (and the root `Icon` component)
+// are the canonical way to render icons. Unstable; will be removed.
+export * from './experimental/SpriteIcons'
