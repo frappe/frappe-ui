@@ -1,7 +1,9 @@
 <template>
-  <div v-if="isPrimaryHost">
+  <div>
     <!-- v1 imperative `dialog.*` stack. -->
-    <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
+    <template v-if="isPrimaryHost">
+      <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
+    </template>
   </div>
 </template>
 
@@ -47,8 +49,10 @@ if (!hasParentHost && isClient) {
   }
 }
 
-// On the server the claim list stays empty; the inject guard still dedups
-// nested hosts there.
+// The wrapper <div> above renders unconditionally so server and client
+// markup match (during SSR the stack is empty, so every host emits the same
+// empty <div>). On the server the claim list stays empty; the inject guard
+// still dedups nested hosts there.
 const isPrimaryHost = computed(() =>
   isClient ? hosts.value[0] === hostId : !hasParentHost,
 )
