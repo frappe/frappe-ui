@@ -9,6 +9,20 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
+
+The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave
+`frappe-ui/icons` (#904). Apps still use them, so they park on
+`frappe-ui/experimental` (P14 — no stability promise) instead of being
+deleted. `lucide-*` classes are the canonical way to render icons.
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
+`frappe-ui/icons`.
+
+- **Breaking, loud:** `import { Icon, IconPicker, spritePlugin } from
+  'frappe-ui/icons'` fails to resolve. Import from
+  `frappe-ui/experimental` instead. Migration is the import-path change
+  only.
+
 ### `createListResource` — `hasPreviousPage` stale after `reload()` (fix)
 
 `reload()` temporarily resets `start` to `0` to re-fetch the accumulated

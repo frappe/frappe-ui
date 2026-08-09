@@ -24,6 +24,7 @@
     "src/**/stories/**/*",
     "src/components/TextEditor/**/*",
     "experimental/**/*.cy.ts",
+    "experimental/**/*.story.vue",
     "frappe/**/*.cy.ts",
     "src/mocks/**/*"
   ],
