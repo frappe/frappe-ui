@@ -25,7 +25,7 @@
             @update:modelValue="(val) => onMonthYearChange(val)"
             :clearable="false"
           >
-            <template #target="{ togglePopover }">
+            <template #trigger="{ togglePopover }">
               <Button
                 variant="ghost"
                 class="text-lg-medium text-ink-gray-7"
@@ -122,8 +122,8 @@ import {
   nextTick,
   type Component,
 } from 'vue'
-import { Button } from '../Button'
-import { TabButtons } from '../TabButtons'
+import { Button } from '#components/Button'
+import { TabButtons } from '#components/TabButtons'
 import {
   getCalendarDates,
   monthList,
@@ -131,11 +131,11 @@ import {
   formatMonthYear,
   getWeekMonthParts,
 } from './calendarUtils'
-import { dayjs } from '../../utils/dayjs'
+import { dayjs } from '#utils/dayjs'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
-import DatePicker from '../DatePicker/DatePicker.vue'
+import DatePicker from '#components/DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'

@@ -9,6 +9,25 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Calendar family — moved to `frappe-ui/experimental` (breaking)
+
+Calendar is not taken to bar at root for `1.0.0` (#1020, redirect of
+#989). It parks on `frappe-ui/experimental` (P14 — no stability promise)
+with its public API unchanged, until a redesigned calendar family
+replaces it.
+
+- **Breaking, loud:** `import { Calendar, ... } from 'frappe-ui'` fails
+  to resolve. Import from `frappe-ui/experimental` instead: `Calendar`,
+  `CalendarColorMap`, `CalendarActiveEvent`, and the types
+  `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
+  `CalendarEvent`, `CalendarMode`, `CalendarPublicProps`,
+  `CalendarTimeFormat`, `GroupedCalendarEvents`. Migration is the
+  import-path change only. Apps that spread `content` from
+  `frappe-ui/tailwind` keep Calendar styles automatically.
+- **Fix:** the default header's month-title button renders again (it
+  broke when DatePicker's `#target` slot became `#trigger`), and the
+  all-day collapse buttons show their chevron icons again.
+
 ### Radius aliases and `text-*-black` styles removed (breaking, silent)
 
 Per ADR-0006 and ADR-0008 (#998, decided in #993):

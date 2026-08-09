@@ -124,8 +124,8 @@ import './style.css'
 import { ref, inject, computed, reactive, type CSSProperties } from 'vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
-import Popover from '../Popover/Popover.vue'
-import type { PopoverSide } from '../Popover/types'
+import Popover from '#components/Popover/Popover.vue'
+import type { PopoverSide } from '#components/Popover/types'
 import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,

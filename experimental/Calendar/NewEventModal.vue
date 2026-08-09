@@ -89,10 +89,10 @@
 </template>
 <script setup lang="ts">
 import { computed, inject, reactive, ref } from 'vue'
-import { Dialog } from '../Dialog'
-import { FormControl } from '../FormControl'
-import { ErrorMessage } from '../ErrorMessage'
-import { Button } from '../Button'
+import { Dialog } from '#components/Dialog'
+import { FormControl } from '#components/FormControl'
+import { ErrorMessage } from '#components/ErrorMessage'
+import { Button } from '#components/Button'
 
 import { calculateDiff, colorMap, handleSeconds } from './calendarUtils'
 import { CALENDAR_ACTIONS_KEY, type CalendarEvent } from './types'

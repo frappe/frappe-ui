@@ -1,12 +1,12 @@
 <script setup>
 import { ref } from 'vue'
-import { Button, Calendar, DatePicker, Select } from 'frappe-ui'
+import { Button, DatePicker, Select } from 'frappe-ui'
+import { Calendar } from '..'
 
 const config = {
   defaultMode: 'Month',
   isEditMode: true,
   eventIcons: {},
-  allowCustomClickEvents: true,
   enableShortcuts: false,
 }
 
@@ -62,7 +62,7 @@ const events = ref([
     toDate: currentMonthYear + '-21',
     fromTime: '16:30',
     toTime: '17:30',
-    color: 'red',
+    color: 'pink',
   },
   {
     title: 'Frappe Meet with John',
@@ -110,7 +110,7 @@ const events = ref([
               @update:modelValue="(val) => headerProps.onMonthYearChange(val)"
               :clearable="false"
             >
-              <template #target="{ togglePopover }">
+              <template #trigger="{ togglePopover }">
                 <Button
                   variant="ghost"
                   class="text-lg-medium text-ink-gray-7"

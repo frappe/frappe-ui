@@ -33,7 +33,11 @@
           :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
           variant="ghost"
           :iconRight="
-            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
+            showCollapsable
+              ? isCollapsed
+                ? 'lucide-chevron-down'
+                : 'lucide-chevron-up'
+              : ''
           "
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
@@ -174,7 +178,7 @@ import {
   isWeekend,
 } from './calendarUtils'
 
-import { Button } from '../Button'
+import { Button } from '#components/Button'
 import useCalendarData from './composables/useCalendarData'
 import { useNow } from './composables/useNow'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'

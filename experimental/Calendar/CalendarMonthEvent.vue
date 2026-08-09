@@ -89,7 +89,7 @@ import './style.css'
 
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
-import Popover from '../Popover/Popover.vue'
+import Popover from '#components/Popover/Popover.vue'
 import { useEventBase } from './useEventBase'
 import { computed, ref } from 'vue'
 import type { CalendarEvent } from './types'
