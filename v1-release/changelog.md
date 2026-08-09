@@ -9,6 +9,24 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Radius aliases and `text-*-black` styles removed (breaking, silent)
+
+Per ADR-0006 and ADR-0008 (#998, decided in #993):
+
+- The named radius aliases (`rounded`, `rounded-sm`, `rounded-md`,
+  `rounded-lg`, `rounded-xl`, `rounded-2xl`, and their directional forms) are
+  removed. Numbered tokens are the only radius vocabulary
+  (`rounded` → `rounded-4`, sm→1, md→5, lg→6, xl→7, 2xl→8; identical px).
+  `rounded-none` and `rounded-full` stay. **Silent break:** the preset
+  replaces Tailwind's scale, so an unmigrated alias emits no CSS — square
+  corners, no build error. The `tokens-v2` codemod now performs these renames
+  (idempotent, runs in every mode); it rewrites bare `rounded` only inside
+  quoted strings and `@apply` rules, so grep for leftovers.
+- The `text-<size>-black` / `text-p-<size>-black` style classes are removed
+  (zero usage; the Figma black weights were corrupt export data). Also a
+  silent break. The codemod flags `font-extrabold` / `font-black` next to a
+  text size instead of merging onto the removed class.
+
 ### ListFilter — removed (breaking)
 
 - **Breaking, loud:** `ListFilter` is no longer exported — the import fails.

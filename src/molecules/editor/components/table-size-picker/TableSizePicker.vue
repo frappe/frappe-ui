@@ -52,7 +52,7 @@ function onKeydown(event: KeyboardEvent) {
 <template>
   <EditorPopover
     dialog-label="Insert table"
-    content-class="rounded-md p-2.5"
+    content-class="rounded-5 p-2.5"
     :autofocus="false"
   >
     <div data-slot="table-size-picker">
@@ -71,7 +71,7 @@ function onKeydown(event: KeyboardEvent) {
             :key="c"
             type="button"
             tabindex="-1"
-            class="size-4 rounded-sm border"
+            class="size-4 rounded-1 border"
             :class="
               r <= rows && c <= cols
                 ? 'border-outline-gray-3 bg-surface-gray-4'

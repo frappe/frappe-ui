@@ -4,10 +4,10 @@
     :class="[props.padded ? 'flex' : 'inline-flex', containerClasses]"
     @click="onContainerClick"
   >
-    <div class="inline-flex items-center gap-2 rounded transition">
+    <div class="inline-flex items-center gap-2 rounded-4 transition">
       <input
         ref="inputRef"
-        class="rounded-sm mt-[1px]"
+        class="rounded-1 mt-[1px]"
         :class="inputClasses"
         type="checkbox"
         :disabled="disabled"
@@ -135,7 +135,7 @@ const containerClasses = computed(() => {
       : props.size === 'sm'
         ? 'h-7 px-1.5'
         : 'h-6 px-1.5'
-  const classes = ['group rounded transition-colors', sizeClass]
+  const classes = ['group rounded-4 transition-colors', sizeClass]
   if (!hasDetail) classes.push('justify-center')
   classes.push(
     props.disabled

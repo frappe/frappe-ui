@@ -41,7 +41,7 @@ function lastNDays(days: number): [Dayjs, Dayjs] {
 
 // Canonical sidebar row styling.
 const rowCls =
-  'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
+  'w-full rounded-4 px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 
 // 4. Project sprint — weekdays only, span limited to ~2 weeks via `max`
 const sprint = ref<string[]>([])
@@ -232,7 +232,7 @@ const ret = computed(() =>
     <DateRangePicker v-model="flight" dual-pane :min="today">
       <template #trigger="{ togglePopover, isOpen }">
         <div
-          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded border bg-surface-base text-sm transition-colors"
+          class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded-4 border bg-surface-base text-sm transition-colors"
           :class="
             isOpen
               ? 'border-outline-gray-4 ring-2 ring-outline-gray-2'
@@ -241,7 +241,7 @@ const ret = computed(() =>
         >
           <button
             type="button"
-            class="flex items-center gap-2 rounded-l px-3 py-2 text-left hover:bg-surface-gray-1"
+            class="flex items-center gap-2 rounded-l-4 px-3 py-2 text-left hover:bg-surface-gray-1"
             @click="togglePopover"
           >
             <span
@@ -257,7 +257,7 @@ const ret = computed(() =>
           </button>
           <button
             type="button"
-            class="flex items-center gap-2 rounded-r px-3 py-2 text-left hover:bg-surface-gray-1"
+            class="flex items-center gap-2 rounded-r-4 px-3 py-2 text-left hover:bg-surface-gray-1"
             @click="togglePopover"
           >
             <span

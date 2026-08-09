@@ -153,7 +153,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
     <PageHeaderMobile :title="title">
       <template #prefix>
         <div
-          class="flex size-8 items-center justify-center rounded bg-surface-gray-7 text-ink-white"
+          class="flex size-8 items-center justify-center rounded-4 bg-surface-gray-7 text-ink-white"
         >
           <span class="lucide-landmark size-4" aria-hidden="true" />
         </div>
@@ -178,7 +178,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
 
     <!-- Cashflow ------------------------------------------------------------>
     <div v-if="section === 'cashflow'" class="space-y-4 px-4 pb-6 pt-3">
-      <div class="h-52 overflow-hidden rounded-lg border bg-surface-base p-3">
+      <div class="h-52 overflow-hidden rounded-6 border bg-surface-base p-3">
         <AxisChart :config="cashflow" />
       </div>
 
@@ -186,7 +186,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
         <div
           v-for="stat in cashflowStats"
           :key="stat.label"
-          class="rounded-lg border bg-surface-base p-3"
+          class="rounded-6 border bg-surface-base p-3"
         >
           <div class="text-sm text-ink-gray-6">{{ stat.label }}</div>
           <div
@@ -305,7 +305,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
     <div v-else class="px-4 pb-6 pt-3">
       <ScrollArea
         orientation="horizontal"
-        class="rounded-lg border bg-surface-base"
+        class="rounded-6 border bg-surface-base"
         viewport-class="p-3"
       >
         <List class="w-max" :columns="pnlColumns" :row-height="40">

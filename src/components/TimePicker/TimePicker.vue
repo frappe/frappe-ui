@@ -65,7 +65,7 @@
           ref="panelRef"
           data-slot="content-body"
           data-motion="instant"
-          class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-lg bg-surface-elevation-2 p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
+          class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-6 bg-surface-elevation-2 p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           role="listbox"
           :aria-activedescendant="activeDescendantId"
         >
@@ -76,7 +76,7 @@
             :id="optionId(idx)"
             type="button"
             role="option"
-            class="group flex h-7 w-full items-center rounded px-2 text-left tabular-nums"
+            class="group flex h-7 w-full items-center rounded-4 px-2 text-left tabular-nums"
             :class="rowClass(opt, idx)"
             :aria-selected="canonicalValue === opt.value || undefined"
             @click="selectOption(opt.value)"

@@ -288,7 +288,7 @@ const wrapperClasses = (float: string) => [
           :loop="node.attrs.loop" :muted="node.attrs.muted" :controls="isUploaded" @click.stop="selectMedia"
           @loadedmetadata="handleMediaLoaded" />
 
-        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
+        <div v-if="isUploaded" class="absolute top-2 right-2 items-center bg-black/65 px-1.5 py-1 gap-2 rounded-4"
           :class="selected && isEditable ? 'flex' : 'hidden'">
           <button>
             <LucideCaptions @click="toggleCaptions" class="size-4"
@@ -305,7 +305,7 @@ const wrapperClasses = (float: string) => [
           </button> -->
 
           <div ref="alignButtonRef" v-if="showAlignPopper && !isVideo"
-            class="absolute top-full mt-1 right-6 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
+            class="absolute top-full mt-1 right-6 bg-black/65 rounded-4 shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Align left" class="h-5">
               <button @click="setAlignment('left')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.align === 'left'
                 ? 'text-ink-base'
@@ -333,7 +333,7 @@ const wrapperClasses = (float: string) => [
           </div>
 
           <div v-if="showFloatPopper" ref="floatButtonRef"
-            class="absolute top-full mt-1 right-0 bg-black/65 rounded shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
+            class="absolute top-full mt-1 right-0 bg-black/65 rounded-4 shadow-lg px-1.5 py-1 z-50 gap-2.5 flex items-center">
             <Tooltip text="Float left" class="h-5">
               <button @click="setFloat('left')" class="text-ink-gray-4 hover:text-ink-base" :class="node.attrs.float === 'left'
                 ? 'text-ink-base'
@@ -367,13 +367,13 @@ const wrapperClasses = (float: string) => [
           @click="isVideo ? editor.commands.reuploadVideo(node.attrs.uploadId) : editor.commands.reuploadImage(node.attrs.uploadId)"
         />
 
-        <button v-if="selected && isEditable && isUploaded" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded p-1"
+        <button v-if="selected && isEditable && isUploaded" class="absolute bottom-2 right-2 cursor-nw-resize bg-black/65 rounded-4 p-1"
           @mousedown.prevent="startResize">
           <LucideMoveDiagonal2 class="text-white size-4" />
         </button>
         <div v-if="node.attrs.loading" class="inset-0 absolute flex items-center justify-center z-10">
           <div
-            class="bg-gray-900/80 p-2 inset-0 leading-none rounded-sm flex flex-col items-center justify-center gap-2">
+            class="bg-gray-900/80 p-2 inset-0 leading-none rounded-1 flex flex-col items-center justify-center gap-2">
             <div class="flex items-center gap-2">
               <LoadingIndicator class="text-gray-100 size-4" />
               <span class="text-gray-100">Uploading {{ isVideo ? 'video' : 'image' }}...</span>
@@ -381,7 +381,7 @@ const wrapperClasses = (float: string) => [
           </div>
         </div>
       </div>
-      <div v-else class="flex flex-col items-center justify-center gap-2 border rounded text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
+      <div v-else class="flex flex-col items-center justify-center gap-2 border rounded-4 text-ink-gray-6 text-sm py-5 max-w-full" :class="{ 'border-none': selected }" :style="{ width: node.attrs.width + 'px', aspectRatio: node.attrs.width && node.attrs.height ? `${node.attrs.width} / ${node.attrs.height}` : undefined,}">
         <div class="text-ink-gray-8 text-base">This {{ isVideo ? 'video' : 'image' }} hasn't yet been uploaded.</div>
         <div v-if="node.attrs.error" class="text-sm text-ink-red-8">{{ node.attrs.error }}</div>
       </div>

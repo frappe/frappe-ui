@@ -29,13 +29,31 @@
  * audit (#940) — no utility ships for them anymore. A class that would have
  * shifted onto one of them is left untouched and reported under "needs
  * manual attention" instead of being rewritten to a dead class.
+ *
+ * Radius aliases (`rounded`, `rounded-sm/md/lg/xl/2xl`, and their directional
+ * forms) were removed in 1.0.0 per ADR-0006. The codemod renames them to the
+ * numbered tokens (`rounded-4`, `rounded-1/5/6/7/8`). These renames are
+ * idempotent and run in every mode. `rounded-none` and `rounded-full` are
+ * kept tokens and stay untouched. The bare word `rounded` is also plain
+ * English, so it is only rewritten in class-like contexts (inside a quoted
+ * string or an `@apply` rule) — prose and comments keep their words.
+ *
+ * A codebase that already ran BOTH the color migration and the typography
+ * correction must not run either again (both shift names). Pass
+ * --radius-only there: it runs only the (idempotent) radius renames and the
+ * removed-token report.
+ *
+ * The `text-<size>-black` style classes were removed in 1.0.0 (#998, zero
+ * usage; the Figma weights behind them were corrupt export data). Existing
+ * `text-*-black` usage is flagged, never renamed, and a `font-extrabold` /
+ * `font-black` next to a text size is flagged instead of merged.
  */
 
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const USAGE = 'Usage: tokens-v2 [--dry-run] [--force] <dir-or-file...>'
+const USAGE = 'Usage: tokens-v2 [--dry-run] [--force] [--radius-only] <dir-or-file...>'
 
 // ---------- MAPPING ----------
 
@@ -165,7 +183,9 @@ const MIGRATED_TEXT_SIZE_SHIFT = MIGRATED_TEXT_SIZE_SHIFT_ALL.filter(
 )
 
 // Each size surfaces as a bare size utility, a paragraph variant, and weighted
-// component classes. All forms shift together.
+// component classes. All forms shift together. `-black` is absent on purpose:
+// the black style classes were removed in #998, so a `text-*-black` is never
+// renamed — it's flagged (see BLACK_STYLE_TOKENS below).
 const textSizeRenames = (shift) => Object.fromEntries(
   shift.flatMap(([from, to]) => [
     [`text-${from}`, `text-${to}`],
@@ -176,13 +196,70 @@ const textSizeRenames = (shift) => Object.fromEntries(
     [`text-p-${from}-semibold`, `text-p-${to}-semibold`],
     [`text-${from}-bold`, `text-${to}-bold`],
     [`text-p-${from}-bold`, `text-p-${to}-bold`],
-    [`text-${from}-black`, `text-${to}-black`],
-    [`text-p-${from}-black`, `text-p-${to}-black`],
   ]),
 )
 
 const UNMIGRATED_TEXT_SIZE_RENAMES = textSizeRenames(UNMIGRATED_TEXT_SIZE_SHIFT)
 const MIGRATED_TEXT_SIZE_RENAMES = textSizeRenames(MIGRATED_TEXT_SIZE_SHIFT)
+
+// ---------- RADIUS RENAMES ----------
+
+// ADR-0006 / #998: the named radius aliases are removed in 1.0.0 in favor of
+// the numbered scale. The map is deterministic (bare `rounded` = 8px =
+// `rounded-4`; sm→1, md→5, lg→6, xl→7, 2xl→8). `rounded-none` and
+// `rounded-full` are kept tokens, never touched. Unlike the color renames,
+// these are idempotent (no numbered token appears on the left), so they run in
+// every mode.
+const RADIUS_STEP_BY_ALIAS = { sm: '1', md: '5', lg: '6', xl: '7', '2xl': '8' }
+const RADIUS_BARE_STEP = '4'
+// Every side prefix Tailwind derives from the borderRadius scale, including
+// the 3.3+ logical sides. Numbered directional utilities (`rounded-t-6`,
+// `rounded-ss-1`, …) exist for all of them.
+const RADIUS_SIDES = ['t', 'r', 'b', 'l', 'tl', 'tr', 'br', 'bl', 's', 'e', 'ss', 'se', 'es', 'ee']
+
+export const RADIUS_RENAMES = {}
+for (const side of RADIUS_SIDES.map((s) => `-${s}`)) {
+  // Bare directional alias: `rounded-t` = `rounded-t-4`. (The side-less bare
+  // `rounded` is also plain English — see BARE_ROUNDED_REGEX below.)
+  RADIUS_RENAMES[`rounded${side}`] = `rounded${side}-${RADIUS_BARE_STEP}`
+}
+for (const side of ['', ...RADIUS_SIDES.map((s) => `-${s}`)]) {
+  for (const [alias, step] of Object.entries(RADIUS_STEP_BY_ALIAS)) {
+    RADIUS_RENAMES[`rounded${side}-${alias}`] = `rounded${side}-${step}`
+  }
+}
+
+// The bare `rounded` utility is an ordinary English word ("values are rounded
+// to px"), so a global text rename would corrupt prose and comments. It is
+// rewritten only in class-like contexts — see isClassContext().
+const BARE_ROUNDED_REGEX = /(?<![a-zA-Z0-9])rounded(?![a-zA-Z0-9-])/g
+
+// A bare `rounded` at `offset` counts as a class when its line puts it inside
+// a quoted string (class attributes, JS class lists, template literals) or in
+// an `@apply` rule. Prose in markdown and comments has neither. Known gap: a
+// class list inside a multi-line template literal has no quote on its own
+// line and is skipped — grep for bare `rounded` after running the codemod.
+
+// An apostrophe inside a word (`row's`, `it's`) is not a string delimiter —
+// without this, `// the row's corners are rounded when it's hovered` would
+// count as "inside quotes" and get rewritten.
+const stripContractions = (s) => s.replace(/(?<=\w)'(?=\w)/g, '')
+
+function isClassContext(content, offset) {
+  const lineStart = content.lastIndexOf('\n', offset - 1) + 1
+  const lineEndIdx = content.indexOf('\n', offset)
+  const lineEnd = lineEndIdx === -1 ? content.length : lineEndIdx
+  const before = content.slice(lineStart, offset)
+  const after = content.slice(offset, lineEnd)
+  if (/@apply[^;]*$/.test(before)) return true
+  for (const quote of ['"', "'", '`']) {
+    const b = quote === "'" ? stripContractions(before) : before
+    const a = quote === "'" ? stripContractions(after) : after
+    const opensBefore = (b.split(quote).length - 1) % 2 === 1
+    if (opensBefore && a.includes(quote)) return true
+  }
+  return false
+}
 
 // Full old token name → full new token name. NOTE: alpha categories must come
 // before their base category when building the alternation so that e.g.
@@ -199,13 +276,36 @@ export const COLOR_TOKEN_RENAMES = {
 export const TOKEN_RENAMES = {
   ...COLOR_TOKEN_RENAMES,
   ...UNMIGRATED_TEXT_SIZE_RENAMES,
+  ...RADIUS_RENAMES,
 }
+
+// Radius renames are idempotent, so they also run when the color/typography
+// migration is already done.
+const MIGRATED_MODE_RENAMES = {
+  ...MIGRATED_TEXT_SIZE_RENAMES,
+  ...RADIUS_RENAMES,
+}
+
+// The full text-size vocabulary ever seen by the codemod (live, dead, and
+// temp-scale names). Used for weight merging and the black-style flag list.
+const TEXT_SIZES = [
+  'tiny', '2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl',
+  '5xl', '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl',
+  '15xl', '16xl', '17xl',
+]
 
 // A dead size surfaces as a bare size utility and weighted component classes
 // (no `text-p-*` form — paragraph styles only ever went up to `4xl` and never
 // had a `tiny`, so those combinations never existed).
 const deadSizeTokens = (sizes) => sizes.flatMap((s) => [
   `text-${s}`, `text-${s}-medium`, `text-${s}-semibold`, `text-${s}-bold`, `text-${s}-black`,
+])
+
+// #998: the black weight styles were removed with zero usage. Any literal
+// `text-*-black` is dead in every mode — flagged, never renamed.
+const BLACK_STYLE_TOKENS = TEXT_SIZES.flatMap((s) => [
+  `text-${s}-black`,
+  `text-p-${s}-black`,
 ])
 
 // Tokens dropped in v2 with no replacement — usage is reported, never rewritten.
@@ -215,6 +315,7 @@ export const REMOVED_TOKENS = [
   // #940: dead in every mode — either the v2 name directly, or (for `tiny`,
   // which never shifted) the only name it ever had.
   ...deadSizeTokens(DEAD_SIZES),
+  ...BLACK_STYLE_TOKENS,
 ]
 
 // Old-scale `12xl` is only dead in *unmigrated* content: there it's the size
@@ -257,10 +358,11 @@ const buildFlagRegex = (tokens) => new RegExp(
   'g',
 )
 // Which "no replacement" tokens to flag depends on mode — see the `12xl` /
-// `17xl` note above.
+// `17xl` note above. Radius-only content is presumed migrated (a literal
+// `text-12xl` there is the healthy v2 name), so it shares the migrated list.
 const FULL_FLAG_REGEX = buildFlagRegex(UNMIGRATED_REMOVED_TOKENS)
 const MIGRATED_FLAG_REGEX = buildFlagRegex(MIGRATED_REMOVED_TOKENS)
-const flagRegexFor = (mode) => (mode === 'migrated-typography' ? MIGRATED_FLAG_REGEX : FULL_FLAG_REGEX)
+const flagRegexFor = (mode) => (mode === 'full' ? FULL_FLAG_REGEX : MIGRATED_FLAG_REGEX)
 
 // ---------- WEIGHT-CLASS MERGE ----------
 
@@ -281,15 +383,15 @@ const WEIGHT_SUFFIX = {
   'font-medium': 'medium',
   'font-semibold': 'semibold',
   'font-bold': 'bold',
-  'font-extrabold': 'black',
   'font-normal': '', // regular — drop the weight; the bare `text-<size>` is regular
 }
 
-const TEXT_SIZES = [
-  'tiny', '2xs', 'xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl',
-  '5xl', '6xl', '7xl', '8xl', '9xl', '10xl', '11xl', '12xl', '13xl', '14xl',
-  '15xl', '16xl', '17xl',
-]
+// #998 removed the `text-*-black` styles, so the black-ish weight utilities
+// have no style class to merge onto. A size + one of these is flagged for
+// manual attention instead of merged (`font-extrabold` was the old merge
+// source for `-black`; `font-black` is Tailwind's 900, which never had an
+// espresso style).
+const BLACK_WEIGHT_CLASSES = ['font-extrabold', 'font-black']
 const SIZE_CLASS = new RegExp(`^text-(?:p-)?(?:${TEXT_SIZES.join('|')})$`)
 
 // Static class/className attribute value — not `:class` / `v-bind:class` (the
@@ -303,10 +405,20 @@ const tokenRe = (tok) => new RegExp(`(?:^|\\s)${escapeRe(tok)}(?=\\s|$)`)
 
 export function mergeWeightClasses(content) {
   const merges = []
+  const flagged = []
   const migrated = content.replace(CLASS_ATTR, (full, name, eq, quote, value, offset) => {
     const words = value.split(/\s+/).filter(Boolean)
     const sizes = words.filter((w) => SIZE_CLASS.test(w))
     const weights = words.filter((w) => w in WEIGHT_SUFFIX)
+    const blacks = words.filter((w) => BLACK_WEIGHT_CLASSES.includes(w))
+    if (sizes.length === 1 && blacks.length > 0) {
+      // Would have merged onto a removed `text-*-black` class — flag instead.
+      flagged.push({
+        token: `${sizes[0]} + ${blacks[0]}`,
+        line: lineAt(content, offset),
+      })
+      return full
+    }
     if (sizes.length !== 1 || weights.length !== 1) return full
 
     const size = sizes[0]
@@ -320,7 +432,7 @@ export function mergeWeightClasses(content) {
     merges.push({ from: `${size} + ${weight}`, to: merged, line: lineAt(content, offset) })
     return `${name}${eq}${quote}${newValue}${quote}`
   })
-  return { migrated, merges }
+  return { migrated, merges, flagged }
 }
 
 // ---------- ALREADY-MIGRATED DETECTION ----------
@@ -355,14 +467,19 @@ export function detectMigrationState(files) {
   return { pre, post, likelyMigrated: post > 0 }
 }
 
-export function getMigrationMode({ likelyMigrated }, { force = false } = {}) {
+export function getMigrationMode({ likelyMigrated }, { force = false, radiusOnly = false } = {}) {
+  if (radiusOnly) return 'radius-only'
   return likelyMigrated && !force ? 'migrated-typography' : 'full'
 }
 
+const RENAMES_BY_MODE = {
+  full: TOKEN_RENAMES,
+  'migrated-typography': MIGRATED_MODE_RENAMES,
+  'radius-only': RADIUS_RENAMES,
+}
+
 export function migrateTokens(content, { mode = 'full' } = {}) {
-  const tokenRenames = mode === 'migrated-typography'
-    ? MIGRATED_TEXT_SIZE_RENAMES
-    : TOKEN_RENAMES
+  const tokenRenames = RENAMES_BY_MODE[mode]
   const renameRegex = renameRegexFor(tokenRenames)
   const replacements = []
   let migrated = content.replace(renameRegex, (match, _token, offset) => {
@@ -371,16 +488,25 @@ export function migrateTokens(content, { mode = 'full' } = {}) {
     return to
   })
 
+  // Bare `rounded` → `rounded-4`, class contexts only (see isClassContext).
+  migrated = migrated.replace(BARE_ROUNDED_REGEX, (match, offset) => {
+    if (!isClassContext(migrated, offset)) return match
+    const to = `rounded-${RADIUS_BARE_STEP}`
+    replacements.push({ from: match, to, line: lineAt(migrated, offset) })
+    return to
+  })
+
   let merges = []
+  const flagged = []
   if (mode === 'full') {
     // Merge weight classes on the post-rename text so `text-xl font-medium`
     // becomes `text-2xl-medium` (size shift first, then merge).
     const result = mergeWeightClasses(migrated)
     migrated = result.migrated
     merges = result.merges
+    flagged.push(...result.flagged)
   }
 
-  const flagged = []
   for (const m of content.matchAll(flagRegexFor(mode))) {
     flagged.push({ token: m[0], line: lineAt(content, m.index) })
   }
@@ -424,6 +550,7 @@ function main() {
   const help = args.includes('--help') || args.includes('-h')
   const dryRun = args.includes('--dry-run')
   const force = args.includes('--force')
+  const radiusOnly = args.includes('--radius-only')
   const targets = args.filter((a) => !a.startsWith('--'))
 
   if (help) {
@@ -441,8 +568,8 @@ function main() {
 
   // Guard against a destructive second full pass (the color renames reuse names).
   const { pre, post, likelyMigrated } = detectMigrationState(files)
-  const mode = getMigrationMode({ likelyMigrated }, { force })
-  if (likelyMigrated) {
+  const mode = getMigrationMode({ likelyMigrated }, { force, radiusOnly })
+  if (likelyMigrated && !radiusOnly) {
     console.warn('\n⚠  This codebase looks already or partially migrated to espresso v2.')
     console.warn(`   Found ${post} v2-only token(s) and ${pre} pre-v2 token(s).`)
     if (force) {
@@ -452,7 +579,8 @@ function main() {
         console.warn(`   ${pre} pre-v2 color token(s) will be left untouched.`)
         console.warn('   Pass --force to run the color migration too. Review carefully: color tokens may double-shift.')
       }
-      console.warn('   Running only the typography correction (`text-lg` → `text-md`, ...).\n')
+      console.warn('   Running only the typography correction (`text-lg` → `text-md`, ...) and the radius renames.')
+      console.warn('   Already ran the typography correction too? Use --radius-only instead.\n')
     }
   }
 
@@ -485,7 +613,8 @@ function main() {
   console.log(
     `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${filesChanged} files, ` +
       `${totalReplacements} token renames, ${totalMerges} weight-class merges` +
-      (mode === 'migrated-typography' ? ' (typography correction only)' : ''),
+      (mode === 'migrated-typography' ? ' (typography correction + radius renames)' : '') +
+      (mode === 'radius-only' ? ' (radius renames only)' : ''),
   )
 
   if (allFlagged.length > 0) {

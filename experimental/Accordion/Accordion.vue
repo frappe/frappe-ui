@@ -70,7 +70,7 @@ defineSlots<{
     >
       <AccordionHeader :as="props.headingTag" class="m-0 flex">
         <AccordionTrigger
-          class="group flex flex-1 select-none items-center gap-2 rounded px-2 py-3 text-left text-base font-medium text-ink-gray-8 outline-none transition-colors duration-150 hover:text-ink-gray-9 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-outline-gray-3 disabled:cursor-not-allowed disabled:text-ink-gray-4 disabled:hover:text-ink-gray-4"
+          class="group flex flex-1 select-none items-center gap-2 rounded-4 px-2 py-3 text-left text-base font-medium text-ink-gray-8 outline-none transition-colors duration-150 hover:text-ink-gray-9 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-outline-gray-3 disabled:cursor-not-allowed disabled:text-ink-gray-4 disabled:hover:text-ink-gray-4"
           data-slot="trigger"
         >
           <span class="flex min-w-0 flex-1 items-center gap-2">

@@ -71,7 +71,7 @@ code {
 }
 
 .shiki {
-  @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded;
+  @apply max-h-[500px] w-full overflow-auto leading-relaxed rounded-4;
   @apply !p-3 !py-3 sm:!p-5 sm:!py-4 !bg-surface-gray-1 dark:!bg-transparent dark:border;
 
   font-family: monospace;
@@ -164,7 +164,7 @@ code {
 /* doc typography */
 .docs {
   code:not(pre code) {
-    @apply text-sm rounded-sm bg-surface-gray-3 dark:bg-surface-gray-2 p-0.5 px-1;
+    @apply text-sm rounded-1 bg-surface-gray-3 dark:bg-surface-gray-2 p-0.5 px-1;
   }
 }
 

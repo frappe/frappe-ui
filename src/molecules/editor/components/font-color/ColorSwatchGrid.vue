@@ -10,7 +10,7 @@
         type="button"
         :aria-label="swatch.label"
         :aria-pressed="swatch.value === active"
-        class="flex h-6 w-6 items-center justify-center rounded-sm border text-base focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
+        class="flex h-6 w-6 items-center justify-center rounded-1 border text-base focus:outline-none focus-visible:ring focus-visible:ring-outline-gray-3"
         :class="[
           swatch.class,
           variant === 'highlight' ? 'text-ink-gray-9' : '',

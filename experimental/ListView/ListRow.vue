@@ -96,7 +96,7 @@
         v-if="!isLastRow"
         class="h-px border-t"
         :class="
-          roundedClass === 'rounded' || roundedClass?.includes?.('rounded-b')
+          roundedClass === 'rounded-4' || roundedClass?.includes?.('rounded-b-4')
             ? 'mx-2 border-outline-gray-1'
             : 'border-t-[--surface-gray-2]'
         "
@@ -174,7 +174,7 @@ const rowHeight = computed(() => {
 })
 
 const roundedClass = computed(() => {
-  if (!isSelected.value) return 'rounded'
+  if (!isSelected.value) return 'rounded-4'
 
   const selections = [...list.value.selections]
   let groups = list.value.rows[0]?.group
@@ -188,7 +188,7 @@ const roundedClass = computed(() => {
     let atBottom = !selections.includes(rows[currentIndex + 1]?.name)
     let atTop = !selections.includes(rows[currentIndex - 1]?.name)
 
-    return (atBottom ? 'rounded-b ' : '') + (atTop ? 'rounded-t' : '')
+    return (atBottom ? 'rounded-b-4 ' : '') + (atTop ? 'rounded-t-4' : '')
   }
 })
 

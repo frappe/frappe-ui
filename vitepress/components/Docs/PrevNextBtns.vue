@@ -35,7 +35,7 @@ const nextLink = computed(() => {
 
 const subtleMdLink =
   'inline-flex items-center gap-2 ' +
-  'h-8 px-2.5 rounded ' +
+  'h-8 px-2.5 rounded-4 ' +
   'text-base font-medium ' +
   'text-ink-gray-8 bg-surface-gray-2 ' +
   'hover:bg-surface-gray-3 active:bg-surface-gray-4 ' +

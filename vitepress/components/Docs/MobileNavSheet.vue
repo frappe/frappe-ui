@@ -91,7 +91,7 @@ onUnmounted(() => {
   >
     <div
       v-if="state.mobsidebar"
-      class="lg:hidden fixed inset-x-0 bottom-0 z-50 h-[80dvh] bg-surface-base rounded-t-2xl shadow-2xl flex flex-col"
+      class="lg:hidden fixed inset-x-0 bottom-0 z-50 h-[80dvh] bg-surface-base rounded-t-8 shadow-2xl flex flex-col"
       role="dialog"
       aria-modal="true"
       aria-label="Navigation"
@@ -131,7 +131,7 @@ onUnmounted(() => {
               v-for="item in section.items"
               :key="item.text"
               :href="withBase(item.link)"
-              class="pl-2 flex h-11 items-center rounded-md text-md transition-colors"
+              class="pl-2 flex h-11 items-center rounded-5 text-md transition-colors"
               :class="
                 isActive(item.link)
                   ? 'bg-surface-gray-2 text-ink-gray-8'

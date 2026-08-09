@@ -16,7 +16,7 @@
             <Popover>
               <template #trigger>
                 <button
-                  class="rounded p-1 text-base-medium text-ink-gray-8 transition-colors"
+                  class="rounded-4 p-1 text-base-medium text-ink-gray-8 transition-colors"
                   :class="
                     getActiveButton(button)
                       ? 'bg-surface-gray-3'
@@ -46,7 +46,7 @@
                     >
                       <template v-slot="componentSlotProps">
                         <button
-                          class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                          class="w-full h-7 rounded-4 px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                           :class="
                             option.isDisabled?.(editor) &&
                             'opacity-50 pointer-events-none'
@@ -78,7 +78,7 @@
                     </component>
                     <button
                       v-else
-                      class="w-full h-7 rounded px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
+                      class="w-full h-7 rounded-4 px-2 text-base flex items-center gap-2 hover:bg-surface-gray-3"
                       :class="
                         option.isDisabled?.(editor) &&
                         'opacity-50 pointer-events-none'
@@ -109,7 +109,7 @@
           </div>
           <button
             v-else-if="!button.component"
-            class="flex rounded text-ink-gray-8 transition-colors focus-within:ring-0"
+            class="flex rounded-4 text-ink-gray-8 transition-colors focus-within:ring-0"
             :class="[
               buttons.length > 1 ? 'p-1' : 'p-1.5 border',
               button.isDisabled?.(editor) && 'opacity-50 pointer-events-none',
@@ -139,7 +139,7 @@
             <component :is="button.component || 'div'" v-bind="{ editor }">
               <template v-slot="componentSlotProps">
                 <button
-                  class="flex rounded p-1 text-ink-gray-8 transition-colors"
+                  class="flex rounded-4 p-1 text-ink-gray-8 transition-colors"
                   :class="[
                     button.isDisabled?.(editor) &&
                       'opacity-50 pointer-events-none',
@@ -171,7 +171,7 @@
             </component>
             <template #fallback>
               <button
-                class="flex rounded p-1 text-ink-gray-8 transition-colors"
+                class="flex rounded-4 p-1 text-ink-gray-8 transition-colors"
                 :class="[
                   button.isDisabled?.(editor) &&
                     'opacity-50 pointer-events-none',

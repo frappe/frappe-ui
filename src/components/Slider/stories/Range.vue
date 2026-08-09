@@ -8,6 +8,6 @@ const value = ref([20, 80])
 <template>
   <div class="flex flex-col gap-3 w-full max-w-md">
     <Slider v-model="value" label="Price range" />
-    <Badge class="w-fit !rounded-sm">{{ value.join(' – ') }}</Badge>
+    <Badge class="w-fit !rounded-1">{{ value.join(' – ') }}</Badge>
   </div>
 </template>

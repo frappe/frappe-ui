@@ -111,7 +111,7 @@ function onEnter() {
         <li
           v-for="(cmd, i) in filtered"
           :key="cmd.label"
-          class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-base"
+          class="flex cursor-pointer items-center gap-3 rounded-5 px-3 py-2 text-base"
           :class="
             i === activeIndex
               ? 'bg-surface-gray-2 text-ink-gray-9'

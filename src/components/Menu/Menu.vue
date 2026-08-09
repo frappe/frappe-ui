@@ -112,7 +112,7 @@ async function handleItemSelect(item: MenuOption, event: Event) {
           v-else-if="isMenuSwitchOption(item)"
           data-slot="item"
           :data-disabled="item.disabled ? '' : undefined"
-          class="rounded"
+          class="rounded-4"
         >
           <MenuItemContent
             :item="item"

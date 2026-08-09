@@ -53,7 +53,7 @@ const posts = [
 <template>
   <!-- Bounded height so the shell's `h-full` has something to fill in the preview. -->
   <div
-    class="h-[560px] overflow-hidden rounded-md border w-full bg-surface-white"
+    class="h-[560px] overflow-hidden rounded-5 border w-full bg-surface-white"
   >
     <DesktopShell>
       <template #rail>

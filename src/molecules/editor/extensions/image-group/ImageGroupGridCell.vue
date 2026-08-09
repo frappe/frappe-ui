@@ -1,11 +1,11 @@
 <template>
   <div
-    class="relative aspect-square w-full h-full overflow-hidden group rounded bg-surface-gray-1"
+    class="relative aspect-square w-full h-full overflow-hidden group rounded-4 bg-surface-gray-1"
   >
     <button
       v-if="item.status !== 'uploading'"
       type="button"
-      class="absolute top-1 right-1 z-10 rounded bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+      class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
       aria-label="Remove image"
       @click.stop="$emit('remove')"
     >
@@ -15,7 +15,7 @@
     <!-- Unsupported preview (HEIC/HEIF): filename placeholder -->
     <div
       v-if="!previewable"
-      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded"
+      class="flex flex-col items-center justify-center w-full h-full text-ink-gray-4 bg-surface-gray-1 rounded-4"
     >
       <span
         class="text-p-xs text-ink-gray-4 w-full text-center px-2 mt-1"
@@ -40,7 +40,7 @@
          what they typed); hover-revealed "Add caption…" affordance when empty. -->
     <div
       v-if="previewable"
-      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b transition-opacity"
+      class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-4 transition-opacity"
       :class="
         editing || caption
           ? 'opacity-100'
@@ -66,7 +66,7 @@
           @blur="commit"
           @keydown.enter.prevent="commit"
           @keydown.escape="cancel"
-          class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-sm border-none outline-none"
+          class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-1 border-none outline-none"
           placeholder="Add caption..."
           maxlength="200"
           aria-label="Image caption"

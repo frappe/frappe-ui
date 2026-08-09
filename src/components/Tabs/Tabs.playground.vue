@@ -44,7 +44,7 @@ function tabsFor(icons: boolean) {
   <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="220px">
     <template #preview="{ values }">
       <div
-        class="w-full max-w-md overflow-hidden rounded-lg border border-outline-gray-1"
+        class="w-full max-w-md overflow-hidden rounded-6 border border-outline-gray-1"
         :class="values.vertical ? 'h-[200px]' : 'h-[160px]'"
       >
         <Tabs :tabs="tabsFor(values.icons)" :vertical="values.vertical">

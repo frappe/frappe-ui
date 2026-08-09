@@ -29,7 +29,7 @@
         >
           <DialogContent
             ref="contentRef"
-            class="my-8 inline-block w-full transform overflow-hidden rounded-xl bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
+            class="my-8 inline-block w-full transform overflow-hidden rounded-7 bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
             @open-auto-focus="handleOpenAutoFocus"
             @escape-key-down="

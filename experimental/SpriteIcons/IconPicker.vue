@@ -153,7 +153,7 @@ defineExpose({
       :open="isOpen"
     >
       <ComboboxAnchor
-        class="flex h-7 w-full items-center justify-between gap-2 rounded px-2 py-1 transition-colors"
+        class="flex h-7 w-full items-center justify-between gap-2 rounded-4 px-2 py-1 transition-colors"
         :class="{
           'opacity-50 pointer-events-none': disabled,
           [variantClasses]: true,
@@ -182,7 +182,7 @@ defineExpose({
       </ComboboxAnchor>
       <ComboboxPortal>
         <ComboboxContent
-          class="z-10 w-60 mt-1 bg-surface-elevation-2 overflow-hidden rounded-lg shadow-2xl"
+          class="z-10 w-60 mt-1 bg-surface-elevation-2 overflow-hidden rounded-6 shadow-2xl"
           position="popper"
           @openAutoFocus.prevent
           @closeAutoFocus.prevent
@@ -204,7 +204,7 @@ defineExpose({
                 :key="iconName"
                 @click="handleIconClick(iconName)"
                 type="button"
-                class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-gray-3 transition-colors"
+                class="w-8 h-8 flex items-center justify-center rounded-4 hover:bg-surface-gray-3 transition-colors"
                 :class="{
                   'bg-surface-gray-3': internalModelValue === iconName,
                 }"

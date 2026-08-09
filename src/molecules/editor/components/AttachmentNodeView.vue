@@ -53,7 +53,7 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
   >
     <component
       :is="isLink ? 'a' : 'span'"
-      class="inline-flex h-6 max-w-full items-center gap-1.5 rounded-lg border bg-surface-gray-2 px-2 text-sm no-underline"
+      class="inline-flex h-6 max-w-full items-center gap-1.5 rounded-6 border bg-surface-gray-2 px-2 text-sm no-underline"
       :class="[
         error
           ? 'border-dashed border-outline-gray-2 text-ink-gray-6'
@@ -94,7 +94,7 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
     <button
       v-if="isLoading && isEditable"
       type="button"
-      class="inline-flex items-center justify-center rounded p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
+      class="inline-flex items-center justify-center rounded-4 p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
       title="Cancel upload"
       contenteditable="false"
       @click="cancel"
@@ -104,7 +104,7 @@ const isLink = computed(() => isUploaded.value && !isLoading.value)
     <button
       v-else-if="error && isEditable"
       type="button"
-      class="inline-flex items-center justify-center rounded p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
+      class="inline-flex items-center justify-center rounded-4 p-0.5 text-ink-gray-6 hover:bg-surface-gray-3"
       title="Try again"
       contenteditable="false"
       @click="retry"

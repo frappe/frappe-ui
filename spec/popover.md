@@ -35,7 +35,7 @@ component (`Popover`, `Select`, `Combobox`, `DatePicker`, `TimePicker`).
 
 `PopoverPanel` owns:
 
-- the visual shell: `rounded-lg bg-surface-elevation-2 shadow-2xl ring-1
+- the visual shell: `rounded-6 bg-surface-elevation-2 shadow-2xl ring-1
   ring-black ring-opacity-5`
 - `data-slot="content"`
 - the motion-target wiring: `data-state="open|closed"` and
@@ -251,7 +251,7 @@ Stable hooks instead:
 - `data-state="open" | "closed"` — driven by the reka popover primitive
 - `data-motion="instant"` — on the content-body
 
-The shell visual is owned by `PopoverPanel`: `rounded-lg
+The shell visual is owned by `PopoverPanel`: `rounded-6
 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`. (This is a
 deliberate restyle from the legacy `rounded-lg border bg-surface-elevation-2
 shadow-xl` shell.)

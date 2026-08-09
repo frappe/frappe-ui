@@ -78,7 +78,7 @@ const hasDescription = computed(() =>
 // any click forwarding. Padding just adds the surface.
 const rowClasses = computed(() => {
   const classes = [
-    'group flex items-start gap-2 rounded text-start transition-colors',
+    'group flex items-start gap-2 rounded-4 text-start transition-colors',
     'focus:outline-none focus-visible:focus-ring',
     isDisabled.value ? 'cursor-not-allowed' : 'cursor-pointer',
   ]

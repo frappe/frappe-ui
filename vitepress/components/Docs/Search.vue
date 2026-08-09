@@ -24,7 +24,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   <button
     v-bind="$attrs"
     aria-label="Open search"
-    class="relative h-8 items-center rounded border border-[--surface-gray-2] bg-surface-gray-2 ps-9 pe-9 text-base text-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3"
+    class="relative h-8 items-center rounded-4 border border-[--surface-gray-2] bg-surface-gray-2 ps-9 pe-9 text-base text-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3"
     @click="state.searchDialog = true"
   >
     <span

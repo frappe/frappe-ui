@@ -186,7 +186,7 @@ const switchGroupClasses = computed(() => {
       : 'justify-between gap-x-3',
   ]
   if (!props.padded) {
-    classes.push('py-1.5 cursor-pointer rounded')
+    classes.push('py-1.5 cursor-pointer rounded-4')
     if (props.disabled) classes.push('cursor-not-allowed')
   }
   return classes
@@ -238,7 +238,7 @@ const containerClasses = computed(() => {
       : props.size === 'sm'
         ? 'h-7 px-2'
         : 'h-6 px-1.5'
-  const classes = ['group rounded transition-colors', sizeClass]
+  const classes = ['group rounded-4 transition-colors', sizeClass]
   if (!hasDetail) classes.push('justify-center')
   // With the switch at the start the row hugs its content; at the end it spans
   // the full width so `justify-between` can push the switch to the right edge.

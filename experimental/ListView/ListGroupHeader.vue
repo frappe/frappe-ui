@@ -2,7 +2,7 @@
   <div class="flex items-center">
     <button
       @click="toggleGroup"
-      class="ms-[3px] me-[11px] rounded p-1 hover:bg-surface-gray-2"
+      class="ms-[3px] me-[11px] rounded-4 p-1 hover:bg-surface-gray-2"
     >
       <DownSolid
         class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"

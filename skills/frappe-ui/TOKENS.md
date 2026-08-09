@@ -72,13 +72,16 @@ All have tuned letter-spacing — don't override unless you know why.
 | Class            | px    | Use                            |
 |------------------|-------|--------------------------------|
 | `rounded-none`   | 0     | Flush edges                    |
-| `rounded-sm`     | 4     | Tags, small chips              |
-| `rounded` (default) | 8  | Inputs, buttons, list items    |
-| `rounded-md`     | 10    | Cards                          |
-| `rounded-lg`     | 12    | Dialogs, larger surfaces       |
-| `rounded-xl`     | 16    | Hero panels                    |
-| `rounded-2xl`    | 20    | Marketing surfaces             |
+| `rounded-1`      | 4     | Tags, small chips              |
+| `rounded-4`      | 8     | Inputs, buttons, list items (default) |
+| `rounded-5`      | 10    | Cards                          |
+| `rounded-6`      | 12    | Dialogs, larger surfaces       |
+| `rounded-7`      | 16    | Hero panels                    |
+| `rounded-8`      | 20    | Marketing surfaces             |
 | `rounded-full`   | pill  | Avatars, status dots, pill badges |
+
+The full scale is `rounded-0` through `rounded-9` (see `spec/foundations.md`).
+The table lists the steps you will actually reach for.
 
 ## Shadow
 

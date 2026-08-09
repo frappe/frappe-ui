@@ -64,7 +64,7 @@ const RINGS = [
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-7">
         <div v-for="ring in RINGS" :key="ring.label" class="grid gap-3">
           <div
-            class="h-16 rounded-md bg-surface-base"
+            class="h-16 rounded-5 bg-surface-base"
             :class="ring.ringClass"
           ></div>
           <div class="grid gap-0.5">

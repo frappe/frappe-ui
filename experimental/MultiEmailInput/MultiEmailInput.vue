@@ -170,13 +170,13 @@ const showEmpty = computed(
 const rowAvatarSize = computed(() => (props.size === 'sm' ? 'sm' : 'md'))
 
 const boxClasses = computed(() => [
-  'flex flex-wrap items-center gap-1.5 rounded bg-surface-gray-2 px-1.5 py-1 transition-colors focus-within:ring-2 focus-within:ring-outline-gray-3',
+  'flex flex-wrap items-center gap-1.5 rounded-4 bg-surface-gray-2 px-1.5 py-1 transition-colors focus-within:ring-2 focus-within:ring-outline-gray-3',
   inputFontSizeClasses(props.size),
   props.disabled && 'cursor-not-allowed bg-surface-gray-1',
 ])
 
 const chipClasses =
-  'inline-flex items-center gap-1 rounded border border-outline-gray-1 bg-surface-base px-1.5 py-0.5 text-sm text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
+  'inline-flex items-center gap-1 rounded-4 border border-outline-gray-1 bg-surface-base px-1.5 py-0.5 text-sm text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
 const inputClasses = computed(() => [
   'min-w-[6rem] flex-1 border-0 bg-transparent p-0.5 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:ring-0 disabled:cursor-not-allowed',
@@ -328,7 +328,7 @@ defineSlots<MultiEmailInputSlots>()
               <span class="truncate">{{ chip.label }}</span>
               <TagsInputItemDelete
                 :aria-label="`Remove ${chip.value}`"
-                class="-mr-0.5 inline-flex items-center justify-center rounded-sm p-0.5 text-ink-gray-5 opacity-70 transition hover:text-ink-gray-7 hover:opacity-100"
+                class="-mr-0.5 inline-flex items-center justify-center rounded-1 p-0.5 text-ink-gray-5 opacity-70 transition hover:text-ink-gray-7 hover:opacity-100"
               >
                 <span class="lucide-x size-3" />
               </TagsInputItemDelete>
@@ -361,7 +361,7 @@ defineSlots<MultiEmailInputSlots>()
           :side="side"
           :align="align"
           :side-offset="offset"
-          class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl"
+          class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-6 bg-surface-elevation-2 shadow-2xl"
           @open-auto-focus.prevent
         >
           <ComboboxViewport class="max-h-60 overflow-auto p-1">

@@ -91,7 +91,7 @@ const overlayBlack = computed(
         >
           <Tooltip :hover-delay="0">
             <div
-              class="aspect-square rounded"
+              class="aspect-square rounded-4"
               :style="{ background: value as string }"
             ></div>
             <template #content>
@@ -115,7 +115,7 @@ const overlayBlack = computed(
         {{ family.label }}
       </h2>
       <div
-        class="grid gap-1.5 p-2 -mx-2 rounded"
+        class="grid gap-1.5 p-2 -mx-2 rounded-4"
         :style="{
           gridTemplateColumns: `repeat(${family.shades.length}, minmax(0, 1fr))`,
           background:
@@ -131,7 +131,7 @@ const overlayBlack = computed(
         >
           <Tooltip :hover-delay="0">
             <div
-              class="aspect-square rounded"
+              class="aspect-square rounded-4"
               :style="{ background: value as string }"
             ></div>
             <template #content>
@@ -139,7 +139,7 @@ const overlayBlack = computed(
             </template>
           </Tooltip>
           <span
-            class="text-xs font-medium text-ink-gray-7 bg-surface-base/80 dark:bg-surface-gray-1/80 rounded px-1 w-fit"
+            class="text-xs font-medium text-ink-gray-7 bg-surface-base/80 dark:bg-surface-gray-1/80 rounded-4 px-1 w-fit"
           >
             {{ shade }}
           </span>
@@ -166,7 +166,7 @@ const overlayBlack = computed(
             >
               <Tooltip :hover-delay="0">
                 <div
-                  class="aspect-square rounded"
+                  class="aspect-square rounded-4"
                   :style="{
                     background: `linear-gradient(${value}, ${value}), #0f0f0f`,
                   }"
@@ -196,7 +196,7 @@ const overlayBlack = computed(
             >
               <Tooltip :hover-delay="0">
                 <div
-                  class="aspect-square rounded"
+                  class="aspect-square rounded-4"
                   :style="{
                     background: `linear-gradient(${value}, ${value}), #ffffff`,
                   }"
@@ -223,7 +223,7 @@ const overlayBlack = computed(
         <div v-for="n in NEUTRALS" :key="n.key" class="grid gap-1 text-left">
           <Tooltip :hover-delay="0">
             <div
-              class="aspect-square rounded border border-outline-gray-2"
+              class="aspect-square rounded-4 border border-outline-gray-2"
               :style="{ background: n.value }"
             ></div>
             <template #content>

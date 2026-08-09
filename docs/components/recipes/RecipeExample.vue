@@ -145,7 +145,7 @@ onBeforeUnmount(() => observer?.disconnect())
     <div v-show="tab === 'preview'">
       <div
         v-if="isMobile"
-        class="flex justify-center rounded border bg-surface-gray-1 py-8"
+        class="flex justify-center rounded-4 border bg-surface-gray-1 py-8"
         :style="{ minHeight: frameHeight }"
       >
         <iframe
@@ -153,7 +153,7 @@ onBeforeUnmount(() => observer?.disconnect())
           :src="src"
           :title="heading"
           loading="lazy"
-          class="w-[390px] rounded border bg-surface-base shadow-lg"
+          class="w-[390px] rounded-4 border bg-surface-base shadow-lg"
           :style="{ height: frameHeight }"
         />
       </div>
@@ -163,12 +163,12 @@ onBeforeUnmount(() => observer?.disconnect())
           :src="src"
           :title="heading"
           loading="lazy"
-          class="w-full rounded border bg-surface-base"
+          class="w-full rounded-4 border bg-surface-base"
           :style="{ height: frameHeight }"
         />
         <div
           v-else
-          class="w-full rounded border bg-surface-gray-1"
+          class="w-full rounded-4 border bg-surface-gray-1"
           :style="{ height: frameHeight }"
         />
       </template>
@@ -179,7 +179,7 @@ onBeforeUnmount(() => observer?.disconnect())
          the height and let it scroll. -->
     <div
       v-show="tab === 'code'"
-      class="recipe-code overflow-hidden rounded border [&_div[class*=language-]]:my-0 [&_div[class*=language-]]:rounded-none [&_div[class*=language-]]:border-0"
+      class="recipe-code overflow-hidden rounded-4 border [&_div[class*=language-]]:my-0 [&_div[class*=language-]]:rounded-none [&_div[class*=language-]]:border-0"
       :style="{ maxHeight: frameHeight }"
     >
       <div class="h-full overflow-auto" :style="{ maxHeight: frameHeight }">

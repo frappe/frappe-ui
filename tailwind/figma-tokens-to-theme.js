@@ -42,15 +42,12 @@ const ALPHA_FAMILIES = ['gray-alpha']
 const SEMANTIC_CATEGORIES = ['surface', 'surface-alpha', 'ink', 'outline', 'outline-alpha']
 
 // Named aliases layered on top of Figma's numeric radius keys.
-// Each name is matched by px value, so the alias stays correct if Figma shifts.
+// Matched by px value, so the alias stays correct if Figma shifts.
+// Only `none` survives — the deprecated size aliases (`sm`, `DEFAULT`, `md`,
+// `lg`, `xl`, `2xl`) were removed in 1.0.0 per ADR-0006 (#998). Migrate old
+// code with tailwind/migrate-tokens-v2.js.
 const RADIUS_NAME_BY_PX = {
   '0px': 'none',
-  '4px': 'sm',
-  '8px': 'DEFAULT',
-  '10px': 'md',
-  '12px': 'lg',
-  '16px': 'xl',
-  '20px': '2xl',
 }
 // Preserved from current plugin.js — Figma doesn't model `full`.
 const RADIUS_EXTRA = { full: '9999px' }

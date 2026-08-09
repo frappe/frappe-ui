@@ -44,7 +44,7 @@ const isActive = (link: string) =>
                 v-for="item in section.items"
                 :key="item.text"
                 :href="withBase(item.link)"
-                class="pl-2 flex h-7 items-center rounded text-sm transition-colors"
+                class="pl-2 flex h-7 items-center rounded-4 text-sm transition-colors"
                 :class="
                   isActive(item.link)
                     ? 'bg-surface-gray-2 text-ink-gray-8'

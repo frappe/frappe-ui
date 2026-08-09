@@ -114,10 +114,10 @@ const attrsWithoutClassStyle = computed(() => {
 
 const inputClasses = computed(() => {
   let sizeClasses = {
-    sm: 'text-base rounded',
-    md: 'text-lg rounded',
-    lg: 'text-2xl rounded-md',
-    xl: 'text-3xl rounded-md',
+    sm: 'text-base rounded-4',
+    md: 'text-lg rounded-4',
+    lg: 'text-2xl rounded-5',
+    xl: 'text-3xl rounded-5',
   }[props.size]
 
   let paddingClasses = {

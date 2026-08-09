@@ -40,7 +40,7 @@ function mountEditor(
                   h(EditorContent, {
                     editor,
                     class:
-                      'min-h-24 w-[520px] rounded border border-outline-gray-2 p-3',
+                      'min-h-24 w-[520px] rounded-4 border border-outline-gray-2 p-3',
                   }),
                 ],
               },

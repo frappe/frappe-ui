@@ -29,7 +29,7 @@ const TableCellColorPanel = defineComponent({
     return () =>
       h(
         EditorPopover,
-        { dialogLabel: 'Cell color', contentClass: 'rounded-md p-2.5' },
+        { dialogLabel: 'Cell color', contentClass: 'rounded-5 p-2.5' },
         {
           default: () => [
             h('div', { 'data-slot': 'table-cell-color-panel' }, [

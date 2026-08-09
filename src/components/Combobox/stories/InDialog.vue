@@ -74,7 +74,7 @@ const emojis = [
           </Combobox>
         </div>
 
-        <div class="rounded bg-surface-gray-1 p-3 text-sm text-ink-gray-7">
+        <div class="rounded-4 bg-surface-gray-1 p-3 text-sm text-ink-gray-7">
           <div>
             Repo: <code>{{ repo || 'None' }}</code>
           </div>

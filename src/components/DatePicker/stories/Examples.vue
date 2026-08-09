@@ -41,7 +41,7 @@ const stardateCeil = dayjs('2300-12-31').format('YYYY-MM-DD')
 const dueDate = ref('')
 
 const rowCls =
-  'w-full rounded px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
+  'w-full rounded-4 px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 </script>
 
 <template>
