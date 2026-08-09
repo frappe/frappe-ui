@@ -1234,12 +1234,12 @@ moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
 `frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
 [Editor](./molecules/editor) page for the full API and recipes.
 
-Not migrated yet? The v0 family is parked, unchanged, behind its own
-`frappe-ui/experimental/text-editor` entry as an interim import path. It is
-unstable — no deprecation window — and will be removed once consumers migrate:
+Not migrated yet? The v0 family is parked, unchanged, in
+`frappe-ui/experimental` as an interim import path. It is unstable — no
+deprecation window — and will be removed once consumers migrate:
 
 ```ts
-import { TextEditor } from 'frappe-ui/experimental/text-editor'
+import { TextEditor } from 'frappe-ui/experimental'
 ```
 
 ```ts

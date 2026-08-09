@@ -56,15 +56,13 @@ full API reference.
 
 ## TextEditor (v0)
 
-The deprecated v0 editor family, parked while apps migrate to
-[`frappe-ui/editor`](/docs/molecules/editor). Removed from root in `1.0.0`.
-It lives behind its own `frappe-ui/experimental/text-editor` entry — not the
-shared barrel — so importing other experimental exports never pulls in the
-editor's heavy dependency graph. Unstable — it will be removed once consumers
-migrate.
+The deprecated v0 editor family, parked here while apps migrate to
+[`frappe-ui/editor`](/docs/molecules/editor). Removed from root in `1.0.0`;
+this subpath is the interim import path. Unstable — it will be removed once
+consumers migrate.
 
 ```ts
-import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental/text-editor'
+import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
 ```
 
 See the [Editor migration section](/docs/migration#editor) for the
