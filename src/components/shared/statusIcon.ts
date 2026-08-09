@@ -1,12 +1,14 @@
 /**
- * Shared status-icon and action-merging logic for `Alert` and `SidebarCard`.
+ * Shared status-icon logic for `Alert` and `SidebarCard`.
  *
  * Both components resolve a `boolean | string | Component` icon prop against a
  * theme-keyed map of the exact Figma status glyphs (espresso 2.0): the solid
  * set for Alert's row/banner layouts, the line set for the sidebar card.
+ *
+ * The icons are imported from their SFC files directly — they are not part of
+ * the public `frappe-ui/icons` subpath.
  */
 import { computed, toValue, type Component, type MaybeRefOrGetter } from 'vue'
-import type { ButtonProps } from '../Button'
 import { isLucideIconString } from '../../utils/iconString'
 import AlertCircleSolidIcon from '../../../icons/AlertCircleSolidIcon.vue'
 import SuccessSolidIcon from '../../../icons/SuccessSolidIcon.vue'
@@ -68,17 +70,4 @@ export function useStatusIcon(options: {
   )
 
   return { resolvedIcon, lucideIcon, componentIcon }
-}
-
-/**
- * Merges per-layout Button defaults with a caller-provided action; caller
- * fields win. `onClick` is stripped — the component binds it separately with
- * the `{ dismiss }` context.
- */
-export function mergeActionProps<
-  A extends ButtonProps & { onClick?: (...args: any[]) => any },
->(defaults: ButtonProps, action: A): ButtonProps {
-  const { onClick: _onClick, ...rest } = action
-  void _onClick
-  return { ...defaults, ...rest }
 }

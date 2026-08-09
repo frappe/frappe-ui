@@ -53,6 +53,10 @@ export * from './components/Select'
 // Shared by Select / MultiSelect / Combobox, so it belongs to the family
 // rather than to any one of their barrels.
 export type { SelectionExposed } from './components/shared/selection/types'
+// Shared by Alert's primaryAction/secondaryAction and SidebarCard's action,
+// so it belongs to neither component's barrel.
+export type { Action, ActionContext } from './components/shared/action'
+export type { StatusTheme } from './components/shared/statusIcon'
 export * from './components/Slider'
 export * from './components/Switch'
 export * from './components/Textarea'

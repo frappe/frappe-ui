@@ -227,7 +227,7 @@
     name: 'theme',
     description: 'Color theme of the icon and the tinted action button; the white container never changes with theme',
     required: false,
-    type: 'SidebarCardTheme',
+    type: 'StatusTheme',
     default: '"gray"'
   },
   {
@@ -240,7 +240,7 @@
     name: 'action',
     description: 'The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`)',
     required: false,
-    type: 'AlertAction'
+    type: 'Action'
   },
   {
     name: 'dismissible',

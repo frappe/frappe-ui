@@ -1,6 +1,6 @@
 import Alert from './Alert.vue'
 import { h } from 'vue'
-import type { AlertActionContext } from './types'
+import type { ActionContext } from '../shared/action'
 
 const title = 'Your trial ends soon!'
 const description = 'Upgrade to keep enjoying features.'
@@ -70,7 +70,7 @@ describe('<Alert />', () => {
         title,
         primaryAction: {
           label: 'Update now',
-          onClick: ({ dismiss }: AlertActionContext) => dismiss(),
+          onClick: ({ dismiss }: ActionContext) => dismiss(),
         },
         onDismiss,
       },

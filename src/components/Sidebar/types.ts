@@ -1,6 +1,7 @@
 import type { Component, ComputedRef, InjectionKey } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
-import type { AlertAction } from '../Alert'
+import type { Action } from '../shared/action'
+import type { StatusTheme } from '../shared/statusIcon'
 
 /**
  * Read-only collapsed state, provided by `Sidebar` and consumed by
@@ -92,7 +93,7 @@ export type SidebarHeaderProps = {
 }
 
 /** Color themes for the card's icon and tinted action button. */
-export type SidebarCardTheme = 'gray' | 'blue' | 'green' | 'amber' | 'red'
+export type SidebarCardTheme = StatusTheme
 
 /**
  * Promotional or onboarding card for the sidebar footer — a trial notice, an
@@ -113,7 +114,7 @@ export interface SidebarCardProps {
   icon?: boolean | string | Component
 
   /** The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`) */
-  action?: AlertAction
+  action?: Action
 
   /** Shows the dismiss (×) button, which emits `dismiss` */
   dismissible?: boolean

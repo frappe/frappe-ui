@@ -1,20 +1,9 @@
 import { type Component, type ExtractPublicPropTypes, type PropType } from 'vue'
-import type { ButtonProps } from '../Button'
+import type { Action } from '../shared/action'
+import type { StatusTheme } from '../shared/statusIcon'
 
 /** Color themes for the alert's status icon and row action label. */
-export type AlertTheme = 'gray' | 'blue' | 'green' | 'amber' | 'red'
-
-/** Context passed to an alert action's `onClick` handler. */
-export type AlertActionContext = {
-  /** Emits the alert's `dismiss` event. The parent owns hiding the alert. */
-  dismiss: () => void
-}
-
-/** Button config for `primaryAction`/`secondaryAction`: `ButtonProps` plus a context-aware `onClick`. */
-export type AlertAction = ButtonProps & {
-  /** Called on click with `{ dismiss }` to dismiss the alert from the handler. */
-  onClick?: (context: AlertActionContext) => void | Promise<void>
-}
+export type AlertTheme = StatusTheme
 
 /**
  * Runtime prop definitions — the single source of truth for the alert's props.
@@ -41,12 +30,12 @@ export const alertProps = {
   },
   /** Primary action button (`ButtonProps` plus `onClick({ dismiss })`) */
   primaryAction: {
-    type: Object as PropType<AlertAction>,
+    type: Object as PropType<Action>,
     default: undefined,
   },
   /** Second action button; its presence forces the banner layout */
   secondaryAction: {
-    type: Object as PropType<AlertAction>,
+    type: Object as PropType<Action>,
     default: undefined,
   },
   /** Shows the dismiss (×) button, which emits `dismiss` */

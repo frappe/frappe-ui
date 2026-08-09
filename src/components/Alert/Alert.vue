@@ -2,14 +2,10 @@
 import { computed, reactive, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import {
-  mergeActionProps,
-  solidStatusIcons,
-  useStatusIcon,
-} from '../shared/statusIcon'
+import { mergeActionProps, type Action } from '../shared/action'
+import { solidStatusIcons, useStatusIcon } from '../shared/statusIcon'
 import {
   alertProps,
-  type AlertAction,
   type AlertEmits,
   type AlertSlots,
   type AlertTheme,
@@ -86,10 +82,7 @@ function dismiss() {
 // `loading` always wins over the internal pending state.
 const actionPending = reactive({ primary: false, secondary: false })
 
-async function handleAction(
-  slot: 'primary' | 'secondary',
-  action?: AlertAction,
-) {
+async function handleAction(slot: 'primary' | 'secondary', action?: Action) {
   if (!action?.onClick || actionPending[slot]) return
   actionPending[slot] = true
   try {

@@ -2,12 +2,8 @@
 import { computed, ref, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import {
-  lineStatusIcons,
-  mergeActionProps,
-  useStatusIcon,
-} from '../shared/statusIcon'
-import type { AlertAction } from '../Alert'
+import { mergeActionProps, type Action } from '../shared/action'
+import { lineStatusIcons, useStatusIcon } from '../shared/statusIcon'
 import type {
   SidebarCardEmits,
   SidebarCardProps,
@@ -74,7 +70,7 @@ function dismiss() {
 // `loading` always wins over the internal pending state.
 const actionPending = ref(false)
 
-async function handleAction(action?: AlertAction) {
+async function handleAction(action?: Action) {
   if (!action?.onClick || actionPending.value) return
   actionPending.value = true
   try {

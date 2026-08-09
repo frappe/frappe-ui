@@ -21,7 +21,7 @@
     name: 'theme',
     description: 'Color theme of the status icon and the row action label; the container never changes with theme',
     required: false,
-    type: 'AlertTheme',
+    type: 'StatusTheme',
     default: '\'gray\''
   },
   {
@@ -34,13 +34,13 @@
     name: 'primaryAction',
     description: 'Primary action button (`ButtonProps` plus `onClick({ dismiss })`)',
     required: false,
-    type: 'AlertAction'
+    type: 'Action'
   },
   {
     name: 'secondaryAction',
     description: 'Second action button; its presence forces the banner layout',
     required: false,
-    type: 'AlertAction'
+    type: 'Action'
   },
   {
     name: 'dismissible',

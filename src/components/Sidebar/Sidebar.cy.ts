@@ -7,7 +7,7 @@ import SidebarSection from './SidebarSection.vue'
 import SidebarHeader from './SidebarHeader.vue'
 import SidebarCollapseToggle from './SidebarCollapseToggle.vue'
 import SidebarCard from './SidebarCard.vue'
-import type { AlertActionContext } from '../Alert'
+import type { ActionContext } from '../shared/action'
 
 function createTestRouter() {
   return createRouter({
@@ -270,7 +270,7 @@ describe('<SidebarCard />', () => {
         title,
         action: {
           label: 'Update now',
-          onClick: ({ dismiss }: AlertActionContext) => dismiss(),
+          onClick: ({ dismiss }: ActionContext) => dismiss(),
         },
         onDismiss,
       },
