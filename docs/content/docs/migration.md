@@ -1562,6 +1562,20 @@ returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
 
+## useCall: a throwing `beforeSubmit` now cancels the submit
+
+Previously a `beforeSubmit` hook that threw was caught and logged, and the
+request was **sent anyway**. Now the throw propagates: the request is not sent
+and `submit()` rejects with the hook's error.
+
+This is a silent behavior change. If one of your `beforeSubmit` hooks can
+throw, the submit it used to let through now stops. Either handle the rejection
+at the call site or make the hook non-throwing to keep the old behavior. A
+hook that returns normally is unaffected — it still cannot stop the request.
+
+`beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
+awaited, only the type said otherwise.
+
 ## pageMetaPlugin — removed
 
 `pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
