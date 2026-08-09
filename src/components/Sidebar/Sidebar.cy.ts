@@ -280,6 +280,24 @@ describe('<SidebarCard />', () => {
     cy.get('[data-slot=sidebar-card]').should('exist')
   })
 
+  it('async action shows loading and blocks re-clicks', () => {
+    let resolveClick!: () => void
+    const onClick = cy
+      .stub()
+      .callsFake(() => new Promise<void>((resolve) => (resolveClick = resolve)))
+      .as('onClick')
+    cy.mount(SidebarCard, {
+      props: { title, action: { label: 'Update now', onClick } },
+    })
+    cy.get('[data-slot=action]').click()
+    cy.get('[data-slot=action]').should('have.attr', 'aria-busy', 'true')
+    // A second click while pending is ignored.
+    cy.get('[data-slot=action]').click({ force: true })
+    cy.get('@onClick').should('have.been.calledOnce')
+    cy.then(() => resolveClick())
+    cy.get('[data-slot=action]').should('not.have.attr', 'aria-busy')
+  })
+
   it('dismissible shows the × button and emits dismiss; hidden by default', () => {
     cy.mount(SidebarCard, { props: { title } })
     cy.get('[data-slot=dismiss]').should('not.exist')

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import {
@@ -67,9 +67,24 @@ function dismiss() {
   emit('dismiss')
 }
 
-function handleAction(action?: AlertAction) {
-  action?.onClick?.({ dismiss })
+// While an async `onClick` is pending the button shows `loading` and
+// re-clicks are ignored (same pattern as Dialog's actions). A caller-provided
+// `loading` always wins over the internal pending state.
+const actionPending = ref(false)
+
+async function handleAction(action?: AlertAction) {
+  if (!action?.onClick || actionPending.value) return
+  actionPending.value = true
+  try {
+    await action.onClick({ dismiss })
+  } finally {
+    actionPending.value = false
+  }
 }
+
+const actionLoading = computed(
+  () => props.action?.loading ?? actionPending.value,
+)
 
 // Button has no `amber` theme, so amber falls back to gray and gets its ramp
 // from `actionClass` below.
@@ -160,6 +175,7 @@ const actionClass = computed(() =>
             v-if="props.action"
             data-slot="action"
             v-bind="actionProps"
+            :loading="actionLoading"
             :class="actionClass"
             @click="handleAction(props.action)"
           />

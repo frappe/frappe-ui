@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { computed, reactive, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import {
@@ -79,9 +79,31 @@ function dismiss() {
   emit('dismiss')
 }
 
-function handleAction(action?: AlertAction) {
-  action?.onClick?.({ dismiss })
+// While an async `onClick` is pending the button shows `loading` and
+// re-clicks are ignored (same pattern as Dialog's actions). A caller-provided
+// `loading` always wins over the internal pending state.
+const actionPending = reactive({ primary: false, secondary: false })
+
+async function handleAction(
+  slot: 'primary' | 'secondary',
+  action?: AlertAction,
+) {
+  if (!action?.onClick || actionPending[slot]) return
+  actionPending[slot] = true
+  try {
+    await action.onClick({ dismiss })
+  } finally {
+    actionPending[slot] = false
+  }
 }
+
+const primaryLoading = computed(
+  () => props.primaryAction?.loading ?? actionPending.primary,
+)
+
+const secondaryLoading = computed(
+  () => props.secondaryAction?.loading ?? actionPending.secondary,
+)
 
 const rowActionProps = computed(() =>
   props.primaryAction
@@ -200,8 +222,9 @@ const bannerSecondaryClass = computed(() =>
             v-if="props.primaryAction"
             data-slot="action"
             v-bind="rowActionProps"
+            :loading="primaryLoading"
             :class="rowActionLabelClass"
-            @click="handleAction(props.primaryAction)"
+            @click="handleAction('primary', props.primaryAction)"
           />
         </slot>
       </div>
@@ -270,15 +293,17 @@ const bannerSecondaryClass = computed(() =>
               v-if="props.primaryAction"
               data-slot="action"
               v-bind="bannerPrimaryProps"
+              :loading="primaryLoading"
               :class="bannerPrimaryClass"
-              @click="handleAction(props.primaryAction)"
+              @click="handleAction('primary', props.primaryAction)"
             />
             <Button
               v-if="props.secondaryAction"
               data-slot="action"
               v-bind="bannerSecondaryProps"
+              :loading="secondaryLoading"
               :class="bannerSecondaryClass"
-              @click="handleAction(props.secondaryAction)"
+              @click="handleAction('secondary', props.secondaryAction)"
             />
           </slot>
         </div>

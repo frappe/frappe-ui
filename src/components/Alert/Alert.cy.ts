@@ -82,6 +82,24 @@ describe('<Alert />', () => {
     cy.get(root).should('exist')
   })
 
+  it('async primaryAction shows loading and blocks re-clicks', () => {
+    let resolveClick!: () => void
+    const onClick = cy
+      .stub()
+      .callsFake(() => new Promise<void>((resolve) => (resolveClick = resolve)))
+      .as('onClick')
+    cy.mount(Alert, {
+      props: { title, primaryAction: { label: 'Update now', onClick } },
+    })
+    cy.get('[data-slot="action"]').click()
+    cy.get('[data-slot="action"]').should('have.attr', 'aria-busy', 'true')
+    // A second click while pending is ignored.
+    cy.get('[data-slot="action"]').click({ force: true })
+    cy.get('@onClick').should('have.been.calledOnce')
+    cy.then(() => resolveClick())
+    cy.get('[data-slot="action"]').should('not.have.attr', 'aria-busy')
+  })
+
   it('secondaryAction renders a second button and forces banner', () => {
     const onSecondary = cy.spy().as('onSecondary')
     cy.mount(Alert, {
