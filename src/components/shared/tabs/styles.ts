@@ -52,6 +52,44 @@ export function tabTrackClasses(opts: {
   }
 }
 
+/**
+ * Sliding active-pill indicator surface (subtle/ghost). The indicator is a
+ * layer behind the triggers that carries the active background and shadow;
+ * the pills themselves stay transparent (`activeSurface: false`) so the
+ * surface can slide between them, segmented-control style.
+ */
+export function tabIndicatorSurfaceClasses(
+  variant: TabsVariant,
+  size: TabsSize,
+): string[] {
+  return [
+    variant === 'ghost'
+      ? 'bg-surface-gray-2'
+      : 'bg-surface-elevation-3 shadow-base',
+    tabRadiusClasses(variant, size),
+  ]
+}
+
+/**
+ * Inset that centers the indicator inside the track: equal to the track's
+ * padding (1px everywhere except the ghost md track's 2px).
+ */
+export function tabIndicatorInsetClasses(opts: {
+  variant: TabsVariant
+  size: TabsSize
+  orientation: PillOrientation
+}): string {
+  const { variant, size, orientation } = opts
+  const thick = variant === 'ghost' && size === 'md'
+  return orientation === 'vertical'
+    ? thick
+      ? 'inset-x-0.5'
+      : 'inset-x-px'
+    : thick
+      ? 'inset-y-0.5'
+      : 'inset-y-px'
+}
+
 /** Reset + disabled treatment for the focusable element wrapping a pill. */
 export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60'

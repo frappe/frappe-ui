@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<PillProps>(), {
   browserTabBase: 'none',
   orientation: 'horizontal',
   underlineIndicator: true,
+  activeSurface: true,
 })
 
 // `icon` means icon-only intent (label, if provided, is rendered as
@@ -81,6 +82,9 @@ const variantClasses = computed(() => {
   if (!props.active) {
     return 'hover:bg-surface-gray-3/80 hover:text-ink-gray-7'
   }
+
+  // The track's sliding indicator paints the active surface instead.
+  if (!props.activeSurface) return ''
 
   // Shipped v1 subtle active pill (overrides Figma): elevation-3 so the
   // raised card stays lighter than the track in dark mode.

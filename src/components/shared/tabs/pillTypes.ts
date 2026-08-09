@@ -41,4 +41,11 @@ export interface PillProps {
    * TabList turns this off — its animated TabsIndicator owns the line.
    */
   underlineIndicator?: boolean
+
+  /**
+   * Paint the active background/shadow on the pill itself (subtle/ghost).
+   * TabList and TabButtons turn this off — their sliding track indicator
+   * owns the active surface.
+   */
+  activeSurface?: boolean
 }

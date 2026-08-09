@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  watchEffect,
+} from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { RouterLink } from 'vue-router'
 import Pill from '../shared/tabs/Pill.vue'
 import { NativeAnchor, NativeButton } from '../shared/nativeElements'
 import {
+  tabIndicatorSurfaceClasses,
   tabRadiusClasses,
   tabShellClasses,
   tabTrackClasses,
@@ -71,6 +80,9 @@ const model = computed({
 const rootClasses = computed(() => [
   props.fluid ? 'flex w-full' : 'inline-flex shrink-0',
   props.vertical ? 'flex-col' : 'items-center',
+  // `isolate` keeps the -z-10 sliding indicator above the track's own
+  // background while staying behind the (static) tab buttons.
+  pillTrack.value && 'relative isolate',
   ...tabTrackClasses({
     variant: props.variant,
     size: props.size,
@@ -78,6 +90,106 @@ const rootClasses = computed(() => [
     direction: props.direction,
   }),
 ])
+
+// Sliding active-pill surface for subtle/ghost, equivalent to TabList's
+// reka TabsIndicator (RadioGroup has no indicator primitive, so the checked
+// item is measured directly). Pills keep their own active background off
+// (`activeSurface: false`); this layer carries it between selections.
+const pillTrack = computed(
+  () => props.variant === 'subtle' || props.variant === 'ghost',
+)
+
+const trackRef = ref<HTMLElement | null>(null)
+const indicatorRect = ref<{
+  x: number
+  y: number
+  w: number
+  h: number
+} | null>(null)
+// Transitions switch on only after the first paint so the indicator never
+// slides in on mount.
+const indicatorAnimated = ref(false)
+
+function measureIndicator() {
+  const track = trackRef.value
+  if (!track || !pillTrack.value) {
+    indicatorRect.value = null
+    return
+  }
+  const checked = track.querySelector<HTMLElement>(
+    '[data-slot="tab-button"][data-state="checked"]',
+  )
+  if (!checked) {
+    indicatorRect.value = null
+    return
+  }
+  // Rect deltas, not offsetLeft/offsetWidth: offsets round to integers,
+  // which leaves the indicator up to half a pixel off fractional layouts
+  // (fluid tracks especially).
+  const trackRect = track.getBoundingClientRect()
+  const rect = checked.getBoundingClientRect()
+  indicatorRect.value = {
+    x: rect.left - trackRect.left,
+    y: rect.top - trackRect.top,
+    w: rect.width,
+    h: rect.height,
+  }
+}
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  measureIndicator()
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => measureIndicator())
+    watch(
+      trackRef,
+      (track) => {
+        resizeObserver?.disconnect()
+        if (track) resizeObserver?.observe(track)
+      },
+      { immediate: true },
+    )
+  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      indicatorAnimated.value = true
+    })
+  })
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
+})
+
+watch(
+  [
+    () => props.modelValue,
+    () => props.variant,
+    () => props.size,
+    () => props.vertical,
+    () => props.fluid,
+    options,
+  ],
+  () => nextTick(measureIndicator),
+)
+
+const indicatorClasses = computed(() => [
+  'pointer-events-none absolute left-0 top-0 -z-10 motion-reduce:transition-none',
+  indicatorAnimated.value && 'transition-[width,height,transform] duration-300',
+  ...tabIndicatorSurfaceClasses(props.variant, props.size),
+])
+
+const indicatorStyle = computed(() => {
+  const r = indicatorRect.value
+  if (!r) return { display: 'none' }
+  return {
+    width: `${r.w}px`,
+    height: `${r.h}px`,
+    transform: `translate(${r.x}px, ${r.y}px)`,
+  }
+})
 
 function browserTabBase(checked: boolean): BrowserTabBase {
   if (props.variant !== 'browser-tab') return 'none'
@@ -120,7 +232,14 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
     :orientation="vertical ? 'vertical' : 'horizontal'"
     v-bind="$attrs"
   >
-    <div :class="rootClasses">
+    <div ref="trackRef" :class="rootClasses">
+      <div
+        v-if="pillTrack"
+        aria-hidden="true"
+        data-slot="tab-indicator"
+        :class="indicatorClasses"
+        :style="indicatorStyle"
+      />
       <RadioGroupItem
         v-for="button in resolvedButtons"
         :key="button.value"
@@ -168,6 +287,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             :variant="variant"
             :browser-tab-base="browserTabBase(checked)"
             :orientation="vertical ? 'vertical' : 'horizontal'"
+            :active-surface="!pillTrack"
           >
             <template v-if="$slots.prefix" #prefix>
               <slot
