@@ -47,3 +47,6 @@ coverage
 cypress/screenshots
 
 .tmp-screenshots
+
+# Per-machine agent dev-server config.
+.claude/launch.json
