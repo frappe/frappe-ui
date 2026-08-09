@@ -82,18 +82,25 @@ const variantClasses = computed(() => {
     return 'hover:bg-surface-gray-3/80 hover:text-ink-gray-7'
   }
 
+  // Shipped v1 subtle active pill (overrides Figma): elevation-3 so the
+  // raised card stays lighter than the track in dark mode.
   return props.variant === 'ghost'
     ? 'bg-surface-gray-2'
-    : 'bg-surface-elevation-1 shadow-base'
+    : 'bg-surface-elevation-3 shadow-base'
 })
 
 const rootClasses = computed(() => [
-  'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap text-base outline-none transition-[background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none',
+  'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap outline-none transition-[background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none',
+  // Shipped v1 subtle typography (overrides Figma): 13px regular at both
+  // sizes, never medium.
+  props.variant === 'subtle' ? 'text-sm leading-[16.1px]' : 'text-base',
   props.active ? 'text-ink-gray-8' : 'text-ink-gray-5',
-  // Figma: md ghost/subtle/browser labels use text/base/medium (500,
-  // 0.015em); md underline and all sm labels stay regular. The selected
-  // state changes color only, never weight.
-  props.size === 'md' && props.variant !== 'underline'
+  // Figma: md ghost/browser labels use text/base/medium (500, 0.015em);
+  // md underline and all sm labels stay regular. The selected state
+  // changes color only, never weight.
+  props.size === 'md' &&
+  props.variant !== 'underline' &&
+  props.variant !== 'subtle'
     ? 'font-medium tracking-[0.015em]'
     : '',
   sizeClasses.value,

@@ -8,10 +8,11 @@ import type { BrowserTabBase, PillOrientation } from './pillTypes'
 /**
  * Track (container) visuals.
  *
- * Pill tracks (subtle/ghost): md = 2px padding, 10px radius, 6px gap;
- * sm = 1px padding, 8px radius, 4px gap. The Figma file has a stray 1px
- * padding on the md vertical tracks; the md horizontal value (2px) is
- * canonical.
+ * Ghost tracks: md = 2px padding, 10px radius, 6px gap; sm = 1px padding,
+ * 8px radius, 4px gap. The Figma file has a stray 1px padding on the md
+ * vertical tracks; the md horizontal value (2px) is canonical.
+ * Subtle tracks keep the shipped v1 geometry instead: 1px padding at both
+ * sizes (10px radius at md).
  */
 export function tabTrackClasses(opts: {
   variant: TabsVariant
@@ -25,9 +26,15 @@ export function tabTrackClasses(opts: {
 
   switch (variant) {
     case 'subtle':
+      // Shipped v1 geometry (overrides Figma): 1px padding at both sizes,
+      // 10px radius at md.
+      return [
+        'bg-surface-gray-2',
+        isSm ? 'gap-1 rounded p-px' : 'gap-1.5 rounded-[10px] p-px',
+      ]
     case 'ghost':
       return [
-        variant === 'subtle' ? 'bg-surface-gray-2' : 'bg-surface-base',
+        'bg-surface-base',
         isSm ? 'gap-1 rounded p-px' : 'gap-1.5 rounded-md p-0.5',
       ]
     case 'underline':
@@ -59,6 +66,11 @@ export function tabRadiusClasses(
   browserTabBase: BrowserTabBase = 'none',
 ): string {
   if (variant === 'underline') return ''
+  // Shipped v1 subtle radii (overrides Figma): 7px at sm, 9px at md — one
+  // step inside the track's 8/10px radius.
+  if (variant === 'subtle') {
+    return size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
+  }
   if (variant === 'browser-tab') {
     if (browserTabBase === 'left') return 'rounded-r'
     if (browserTabBase === 'right') return 'rounded-l'
