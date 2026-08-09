@@ -104,7 +104,7 @@ A component without a primary value (e.g. `Dialog` has visibility but no selecte
 - **`variant`** — visual style (`solid | outline | subtle | ghost`)
 - **`theme`** — color tone (concrete color names)
 
-No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" maps to `theme="yellow"` in the consumer, not in the API. Canonical values for `variant` and `theme` are defined in CONTEXT.md.
+No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" maps to `theme="amber"` in the consumer, not in the API. Canonical values for `variant` and `theme` are defined in CONTEXT.md.
 
 **State-driven appearance** (error, disabled, loading) is governed by state props (`error`, `disabled`, `loading`), not by `theme`. A `TextInput` turning red on error is not `theme="red"`.
 
@@ -119,7 +119,7 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 <Badge kind="success" />
 
 <!-- Good -->
-<Alert variant="subtle" theme="yellow" />
+<Alert theme="amber" />
 <Button variant="solid" theme="blue" />
 <Badge variant="subtle" theme="green" />
 ```

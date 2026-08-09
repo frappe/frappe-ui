@@ -270,7 +270,7 @@
   {
     name: 'actions',
     description: 'Replaces the auto-rendered action button; receives `{ dismiss }`',
-    type: '{ dismiss: () => void; }'
+    type: 'SidebarCardActionsSlotProps'
   }
 ]
 

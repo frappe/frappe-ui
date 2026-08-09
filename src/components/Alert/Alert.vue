@@ -7,28 +7,19 @@ import {
   solidStatusIcons,
   useStatusIcon,
 } from '../shared/statusIcon'
-import { alertProps, type AlertAction, type AlertTheme } from './types'
+import {
+  alertProps,
+  type AlertAction,
+  type AlertEmits,
+  type AlertSlots,
+  type AlertTheme,
+} from './types'
 
 const props = defineProps(alertProps)
 
-const emit = defineEmits<{
-  /** Fired when the user dismisses the alert — the × button or an action's `context.dismiss()`. The parent owns hiding. */
-  dismiss: []
-}>()
+const emit = defineEmits<AlertEmits>()
 
-const slots = defineSlots<{
-  /** Overrides the status icon area */
-  prefix?: () => any
-
-  /** Rich title content (overrides the `title` prop) */
-  title?: () => any
-
-  /** Rich description content; its presence forces the banner layout */
-  description?: () => any
-
-  /** Replaces the auto-rendered action buttons; receives `{ dismiss }` */
-  actions?: (props: { dismiss: () => void }) => any
-}>()
+const slots = defineSlots<AlertSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
@@ -189,7 +180,7 @@ const bannerSecondaryProps = computed(() =>
       </div>
 
       <div
-        v-if="$slots.actions || props.primaryAction || props.dismissible"
+        v-if="$slots.actions || props.primaryAction"
         data-slot="actions"
         class="ml-1.5 flex shrink-0 items-center gap-1"
       >
@@ -202,23 +193,25 @@ const bannerSecondaryProps = computed(() =>
             @click="handleAction(props.primaryAction)"
           />
         </slot>
-        <Button
-          v-if="props.dismissible"
-          data-slot="dismiss"
-          variant="ghost"
-          theme="gray"
-          size="sm"
-          icon="lucide-x"
-          aria-label="Dismiss"
-          @click="dismiss"
-        />
       </div>
+      <Button
+        v-if="props.dismissible"
+        data-slot="dismiss"
+        class="shrink-0"
+        :class="$slots.actions || props.primaryAction ? 'ml-1' : 'ml-1.5'"
+        variant="ghost"
+        theme="gray"
+        size="sm"
+        icon="lucide-x"
+        aria-label="Dismiss"
+        @click="dismiss"
+      />
     </template>
 
     <template v-else>
       <div
         class="flex items-center gap-1.5"
-        :class="props.dismissible ? 'pr-6' : ''"
+        :class="props.dismissible ? 'pr-8' : ''"
       >
         <div
           v-if="showPrefix"

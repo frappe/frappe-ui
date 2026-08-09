@@ -8,7 +8,12 @@ import {
   useStatusIcon,
 } from '../shared/statusIcon'
 import type { AlertAction } from '../Alert'
-import type { SidebarCardProps, SidebarCardTheme } from './types'
+import type {
+  SidebarCardEmits,
+  SidebarCardProps,
+  SidebarCardSlots,
+  SidebarCardTheme,
+} from './types'
 
 // `icon` needs its three-state semantics (unset = auto icon). The explicit
 // `default: undefined` stops Vue's Boolean-prop casting from coercing an
@@ -19,24 +24,9 @@ const props = withDefaults(defineProps<SidebarCardProps>(), {
   dismissible: false,
 })
 
-const emit = defineEmits<{
-  /** Fired when the user dismisses the card — the × button or the action's `context.dismiss()`. The parent owns hiding. */
-  dismiss: []
-}>()
+const emit = defineEmits<SidebarCardEmits>()
 
-const slots = defineSlots<{
-  /** Overrides the icon area next to the title */
-  prefix?: () => any
-
-  /** Rich title content (overrides the `title` prop) */
-  title?: () => any
-
-  /** Rich description content (overrides the `description` prop) */
-  description?: () => any
-
-  /** Replaces the auto-rendered action button; receives `{ dismiss }` */
-  actions?: (props: { dismiss: () => void }) => any
-}>()
+const slots = defineSlots<SidebarCardSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
@@ -83,6 +73,11 @@ function handleAction(action?: AlertAction) {
 
 // Button has no `amber` theme, so amber falls back to gray and gets its ramp
 // from `actionClass` below.
+//
+// Approved deviation from Figma: the default button uses Button's own subtle
+// ramp instead of the design's intent-50 bg + intent-700 label. Reusing the
+// Button ramp keeps hover/active states for free; do not "fix" toward the
+// Figma hexes.
 const actionProps = computed(() =>
   props.action
     ? mergeActionProps(
@@ -121,7 +116,7 @@ const actionClass = computed(() =>
   >
     <div
       class="flex items-center gap-1.5"
-      :class="props.dismissible ? 'pr-6' : ''"
+      :class="props.dismissible ? 'pr-8' : ''"
     >
       <div
         v-if="showPrefix"
@@ -143,7 +138,7 @@ const actionClass = computed(() =>
           />
         </slot>
       </div>
-      <div data-slot="title" class="min-w-0 text-sm font-medium text-ink-gray-8">
+      <div data-slot="title" class="min-w-0 text-sm-medium text-ink-gray-8">
         <slot name="title">{{ props.title }}</slot>
       </div>
     </div>

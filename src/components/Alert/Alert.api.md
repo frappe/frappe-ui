@@ -70,7 +70,7 @@
   {
     name: 'actions',
     description: 'Replaces the auto-rendered action buttons; receives `{ dismiss }`',
-    type: '{ dismiss: () => void; }'
+    type: 'AlertActionsSlotProps'
   }
 ]
 

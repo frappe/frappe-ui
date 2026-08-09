@@ -119,6 +119,31 @@ export interface SidebarCardProps {
   dismissible?: boolean
 }
 
+export interface SidebarCardEmits {
+  /** Fired when the user dismisses the card — the × button or the action's `context.dismiss()`. The parent owns hiding. */
+  dismiss: []
+}
+
+/** Scoped payload for the card's `#actions` slot. */
+export interface SidebarCardActionsSlotProps {
+  /** Emits the card's `dismiss` event. */
+  dismiss: () => void
+}
+
+export interface SidebarCardSlots {
+  /** Overrides the icon area next to the title */
+  prefix?: () => any
+
+  /** Rich title content (overrides the `title` prop) */
+  title?: () => any
+
+  /** Rich description content (overrides the `description` prop) */
+  description?: () => any
+
+  /** Replaces the auto-rendered action button; receives `{ dismiss }` */
+  actions?: (props: SidebarCardActionsSlotProps) => any
+}
+
 /**
  * Building block for a collapsible group of `SidebarItem`s. Compose children
  * in the default slot — `SidebarSection` owns only the label + collapse

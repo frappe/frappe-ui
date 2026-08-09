@@ -291,6 +291,15 @@ describe('<SidebarCard />', () => {
     cy.get('@onDismiss').should('have.been.calledOnce')
   })
 
+  it('Tab reaches the dismiss button and Enter activates it', () => {
+    const onDismiss = cy.spy().as('onDismiss')
+    cy.mount(SidebarCard, { props: { title, dismissible: true, onDismiss } })
+    cy.press(Cypress.Keyboard.Keys.TAB)
+    cy.focused().should('have.attr', 'data-slot', 'dismiss')
+    cy.focused().type('{enter}')
+    cy.get('@onDismiss').should('have.been.calledOnce')
+  })
+
   it('renders slot overrides, and #actions receives dismiss', () => {
     const onDismiss = cy.spy().as('onDismiss')
     cy.mount(SidebarCard, {

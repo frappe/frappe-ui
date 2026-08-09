@@ -47,7 +47,7 @@ The only two axes used to color components — there is intentionally **no** sem
 (`intent`/`severity`/`appearance`/`kind`/`status`):
 
 - **variant** — visual style: `solid | outline | subtle | ghost` (Button, Badge)
-- **theme** — color tone, by color name: `yellow | blue | red | green | …` (Button, Badge, Alert, Dialog)
+- **theme** — color tone, by color name: `yellow | blue | red | green | amber | …` (Button, Badge, Alert, Dialog; the Alert/SidebarCard palette is `gray | blue | green | amber | red`)
 
 A legacy `appearance` (`warning | info | danger | success`) maps to `theme` color names.
 

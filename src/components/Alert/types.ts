@@ -4,9 +4,6 @@ import type { ButtonProps } from '../Button'
 /** Color themes for the alert's status icon and row action label. */
 export type AlertTheme = 'gray' | 'blue' | 'green' | 'amber' | 'red'
 
-/** Computed layout of the alert, stamped on the root as `data-layout`. */
-export type AlertLayout = 'row' | 'banner'
-
 /** Context passed to an alert action's `onClick` handler. */
 export type AlertActionContext = {
   /** Emits the alert's `dismiss` event. The parent owns hiding the alert. */
@@ -23,6 +20,10 @@ export type AlertAction = ButtonProps & {
  * Runtime prop definitions — the single source of truth for the alert's props.
  * `Alert.vue` passes these to `defineProps`, and the public `AlertProps` type
  * is derived from them, so the runtime and the type can never drift apart.
+ *
+ * There is no layout prop. The computed layout is stamped on the root as
+ * `data-layout` — `"row"` when there is no description and no secondary
+ * action, `"banner"` otherwise.
  */
 export const alertProps = {
   /** Main heading text of the alert */
@@ -54,3 +55,28 @@ export const alertProps = {
 
 /** Public prop types for `<Alert>`. Derived from {@link alertProps}. */
 export type AlertProps = ExtractPublicPropTypes<typeof alertProps>
+
+export interface AlertEmits {
+  /** Fired when the user dismisses the alert — the × button or an action's `context.dismiss()`. The parent owns hiding. */
+  dismiss: []
+}
+
+/** Scoped payload for the `#actions` slot. */
+export interface AlertActionsSlotProps {
+  /** Emits the alert's `dismiss` event. */
+  dismiss: () => void
+}
+
+export interface AlertSlots {
+  /** Overrides the status icon area */
+  prefix?: () => any
+
+  /** Rich title content (overrides the `title` prop) */
+  title?: () => any
+
+  /** Rich description content; its presence forces the banner layout */
+  description?: () => any
+
+  /** Replaces the auto-rendered action buttons; receives `{ dismiss }` */
+  actions?: (props: AlertActionsSlotProps) => any
+}

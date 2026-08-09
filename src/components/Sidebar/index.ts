@@ -13,6 +13,9 @@ export type {
   SidebarHeaderProps,
   SidebarSectionProps,
   SidebarCardProps,
+  SidebarCardEmits,
+  SidebarCardSlots,
+  SidebarCardActionsSlotProps,
   SidebarCardTheme,
 } from './types'
 export { sidebarCollapsedKey, sidebarToggleKey } from './types'
