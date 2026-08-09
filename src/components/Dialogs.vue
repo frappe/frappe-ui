@@ -1,9 +1,7 @@
 <template>
-  <div>
+  <div v-if="isPrimaryHost">
     <!-- v1 imperative `dialog.*` stack. -->
-    <template v-if="isMounted && isPrimaryHost">
-      <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
-    </template>
+    <component v-for="d in imperativeDialogs" :is="d.component" :key="d.id" />
   </div>
 </template>
 
@@ -41,7 +39,6 @@ import {
   onMounted,
   onUnmounted,
   provide,
-  ref,
   type InjectionKey,
 } from 'vue'
 import { dialogs as imperativeDialogs } from '../utils/dialog'
@@ -90,11 +87,8 @@ onUnmounted(release)
 onActivated(claim)
 onDeactivated(release)
 
-// The stack is empty until after mount, so gating on `isMounted` keeps
-// server and client hydration markup identical — both sides render the
-// false branch — even though the claim list is client-only. The wrapper
-// <div> renders unconditionally for the same reason.
-const isMounted = ref(false)
-onMounted(() => (isMounted.value = true))
+// False during SSR and hydration — the claim list only fills on mount —
+// so server and client render the same placeholder and the winner appears
+// after mount. Losing hosts render nothing, not even an empty <div>.
 const isPrimaryHost = computed(() => hosts.value[0] === hostId)
 </script>
