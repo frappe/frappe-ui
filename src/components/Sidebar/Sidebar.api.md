@@ -209,6 +209,78 @@
     type: '[value: boolean]'
   }
 ]
+
+  const sidebarCardProps = [
+  {
+    name: 'title',
+    description: 'Main heading text of the card',
+    required: true,
+    type: 'string'
+  },
+  {
+    name: 'description',
+    description: 'Supporting text below the title',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'theme',
+    description: 'Color theme of the icon and the tinted action button; the white container never changes with theme',
+    required: false,
+    type: 'SidebarCardTheme',
+    default: '"gray"'
+  },
+  {
+    name: 'icon',
+    description: 'Icon next to the title: unset shows the theme\'s auto icon (none for gray), `true` forces it, `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph',
+    required: false,
+    type: 'boolean | string | Component'
+  },
+  {
+    name: 'action',
+    description: 'The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`)',
+    required: false,
+    type: 'AlertAction'
+  },
+  {
+    name: 'dismissible',
+    description: 'Shows the dismiss (×) button, which emits `dismiss`',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  }
+]
+
+  const sidebarCardSlots = [
+  {
+    name: 'prefix',
+    description: 'Overrides the icon area next to the title',
+    type: 'any'
+  },
+  {
+    name: 'title',
+    description: 'Rich title content (overrides the `title` prop)',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Rich description content (overrides the `description` prop)',
+    type: 'any'
+  },
+  {
+    name: 'actions',
+    description: 'Replaces the auto-rendered action button; receives `{ dismiss }`',
+    type: '{ dismiss: () => void; }'
+  }
+]
+
+  const sidebarCardEmits = [
+  {
+    name: 'dismiss',
+    description: 'Fired when the user dismisses the card — the × button or the action\'s `context.dismiss()`. The parent owns hiding.',
+    type: '[]'
+  }
+]
 </script>
 
 ## API Reference
@@ -246,3 +318,11 @@
 <SlotsTable :data="sidebarSectionSlots"/>
 
 <EmitsTable :data="sidebarSectionEmits"/>
+
+### SidebarCard
+
+<PropsTable folder="Sidebar" name="SidebarCard" :data="sidebarCardProps"/>
+
+<SlotsTable :data="sidebarCardSlots"/>
+
+<EmitsTable :data="sidebarCardEmits"/>
