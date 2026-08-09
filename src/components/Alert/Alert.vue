@@ -2,7 +2,8 @@
 import { computed, reactive, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import { mergeActionProps, type Action } from '../shared/action'
+import { mergeActionProps } from '../shared/action'
+import type { AlertAction } from './types'
 import {
   solidStatusIcons,
   useStatusIcon,
@@ -81,7 +82,7 @@ function dismiss() {
 // `loading` always wins over the internal pending state.
 const actionPending = reactive({ primary: false, secondary: false })
 
-async function handleAction(slot: 'primary' | 'secondary', action?: Action) {
+async function handleAction(slot: 'primary' | 'secondary', action?: AlertAction) {
   if (!action?.onClick || actionPending[slot]) return
   actionPending[slot] = true
   try {

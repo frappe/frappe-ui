@@ -5,18 +5,13 @@
  */
 import type { ButtonProps } from '../Button'
 
-/** Context passed to a dismissable component's action `onClick` handler. */
-export type ActionContext = {
-  /** Emits the component's `dismiss` event. The parent owns hiding. */
-  dismiss: () => void
-}
-
 /**
- * Button config for action props: `ButtonProps` plus an `onClick` that
- * receives the component's context — `{ close }` for Dialog, `{ dismiss }`
- * for Alert and SidebarCard.
+ * Internal generic behind the public action types (`AlertAction`,
+ * `DialogAction`): `ButtonProps` plus an `onClick` that receives the
+ * component's context — `{ close }` for Dialog, `{ dismiss }` for Alert
+ * and SidebarCard. Not exported from the package root.
  */
-export type Action<Ctx = ActionContext> = ButtonProps & {
+export type Action<Ctx> = ButtonProps & {
   /** Called on click with the component's context (e.g. `{ dismiss }` or `{ close }`). */
   onClick?: (context: Ctx) => void | Promise<void>
 }

@@ -2,7 +2,8 @@
 import { computed, ref, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import { mergeActionProps, type Action } from '../shared/action'
+import { mergeActionProps } from '../shared/action'
+import type { AlertAction } from '../Alert'
 import {
   lineStatusIcons,
   useStatusIcon,
@@ -73,7 +74,7 @@ function dismiss() {
 // `loading` always wins over the internal pending state.
 const actionPending = ref(false)
 
-async function handleAction(action?: Action) {
+async function handleAction(action?: AlertAction) {
   if (!action?.onClick || actionPending.value) return
   actionPending.value = true
   try {

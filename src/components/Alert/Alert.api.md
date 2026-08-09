@@ -34,13 +34,13 @@
     name: 'primaryAction',
     description: 'Primary action button (`ButtonProps` plus `onClick({ dismiss })`)',
     required: false,
-    type: 'Action<ActionContext>'
+    type: 'AlertAction'
   },
   {
     name: 'secondaryAction',
     description: 'Second action button; its presence forces the banner layout',
     required: false,
-    type: 'Action<ActionContext>'
+    type: 'AlertAction'
   },
   {
     name: 'dismissible',

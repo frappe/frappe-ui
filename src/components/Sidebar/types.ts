@@ -1,6 +1,6 @@
 import type { Component, ComputedRef, InjectionKey } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
-import type { Action, ActionContext } from '../shared/action'
+import type { AlertAction } from '../Alert'
 import type { StatusTheme } from '../shared/statusIcon'
 
 /**
@@ -111,7 +111,7 @@ export interface SidebarCardProps {
   icon?: boolean | string | Component
 
   /** The full-width tinted action button (`ButtonProps` plus `onClick({ dismiss })`) */
-  action?: Action<ActionContext>
+  action?: AlertAction
 
   /** Shows the dismiss (×) button, which emits `dismiss` */
   dismissible?: boolean

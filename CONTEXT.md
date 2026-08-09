@@ -71,8 +71,9 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 
 **action**:
 A button declared via a component's action prop(s), rendered in its footer/toolbar row.
-Typed by the generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`): Dialog's
-context is `{ close }`, Alert's and SidebarCard's is `{ dismiss }`. Gets reactive
+Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);
+the public names are `DialogAction` (context `{ close }`) and `AlertAction`
+(context `{ dismiss }`, shared with SidebarCard). Gets reactive
 `loading` state while its async `onClick` runs.
 Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
 
