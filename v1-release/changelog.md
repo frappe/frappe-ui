@@ -33,17 +33,21 @@ replaces it.
 
 Two concurrent writes to one document could leave `docStore`, `listStore`
 (and every view bound to them) on the response that settled last instead of
-the newest one, while `data` already held the fresh response (#1017). Two
-write paths were open:
+the newest one, while `data` already held the fresh response (#1017).
 
-- Any response carrying `docs` wrote the stores unconditionally. A response
-  now writes a document through this channel only if no later-dispatched
-  request has written that document through it already.
-- `useDoctype` and `useList` write methods (`setValue`, `delete`) fired
-  their store-writing hooks for every settled submit. A stale submit — one
-  whose target a newer same-key submit has already written — no longer
-  fires them. A newer submit that failed wrote nothing, so it does not
-  make the older success stale.
+The gate lives in the stores. Every request takes a dispatch version; the
+response's store writes carry it, and the stores reject a write for a
+document that a later-dispatched request has already written. One freshness
+domain covers every writer — the `docs` side channel, the `useDoctype` /
+`useList` / `useDoc` hooks, and any mix of instances or paths writing the
+same document. A version is recorded only when a write lands: a newer
+request that failed wrote nothing on the server, so it does not make the
+older success stale.
+
+`useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
+newer same-key submit of the same instance already outran — the store gate
+protects the stores, this skip only avoids re-running hook side effects
+with a stale response.
 
 No API change. Behavior changes if you relied on it:
 
