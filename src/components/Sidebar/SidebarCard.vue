@@ -3,12 +3,15 @@ import { computed, ref, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps, type Action } from '../shared/action'
-import { lineStatusIcons, useStatusIcon } from '../shared/statusIcon'
+import {
+  lineStatusIcons,
+  useStatusIcon,
+  type StatusTheme,
+} from '../shared/statusIcon'
 import type {
   SidebarCardEmits,
   SidebarCardProps,
   SidebarCardSlots,
-  SidebarCardTheme,
 } from './types'
 
 // `icon` needs its three-state semantics (unset = auto icon). The explicit
@@ -32,7 +35,7 @@ watchEffect(() => {
 
 // The card uses the 700-level ink — one step deeper than Alert's icons,
 // per the Figma compact masters.
-const iconColorClasses: Record<SidebarCardTheme, string> = {
+const iconColorClasses: Record<StatusTheme, string> = {
   gray: 'text-ink-gray-8',
   blue: 'text-ink-blue-8',
   green: 'text-ink-green-8',

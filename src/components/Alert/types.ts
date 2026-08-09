@@ -2,9 +2,6 @@ import { type Component, type ExtractPublicPropTypes, type PropType } from 'vue'
 import type { Action, ActionContext } from '../shared/action'
 import type { StatusTheme } from '../shared/statusIcon'
 
-/** Color themes for the alert's status icon and row action label. */
-export type AlertTheme = StatusTheme
-
 /**
  * Runtime prop definitions — the single source of truth for the alert's props.
  * `Alert.vue` passes these to `defineProps`, and the public `AlertProps` type
@@ -20,7 +17,7 @@ export const alertProps = {
   /** Supporting text below the title; its presence switches the alert to the banner layout */
   description: { type: String, default: undefined },
   /** Color theme of the status icon and the row action label; the container never changes with theme */
-  theme: { type: String as PropType<AlertTheme>, default: 'gray' },
+  theme: { type: String as PropType<StatusTheme>, default: 'gray' },
   /** Status icon: unset shows the theme's auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
   icon: {
     type: [Boolean, String, Object, Function] as PropType<

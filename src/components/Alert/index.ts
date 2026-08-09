@@ -4,5 +4,4 @@ export type {
   AlertEmits,
   AlertSlots,
   AlertActionsSlotProps,
-  AlertTheme,
 } from './types.ts'

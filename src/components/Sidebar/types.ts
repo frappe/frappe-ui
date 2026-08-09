@@ -92,9 +92,6 @@ export type SidebarHeaderProps = {
   }[]
 }
 
-/** Color themes for the card's icon and tinted action button. */
-export type SidebarCardTheme = StatusTheme
-
 /**
  * Promotional or onboarding card for the sidebar footer — a trial notice, an
  * upgrade prompt, a "what's new" pointer. Stateless: `dismiss` is an event and
@@ -108,7 +105,7 @@ export interface SidebarCardProps {
   description?: string
 
   /** Color theme of the icon and the tinted action button; the white container never changes with theme */
-  theme?: SidebarCardTheme
+  theme?: StatusTheme
 
   /** Icon next to the title: unset shows the theme's auto icon (gray shows the info glyph in black ink), `false` hides it, a `lucide-*` string or Component renders a custom theme-colored glyph */
   icon?: boolean | string | Component

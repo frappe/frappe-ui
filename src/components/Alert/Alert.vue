@@ -3,13 +3,12 @@ import { computed, reactive, watchEffect } from 'vue'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps, type Action } from '../shared/action'
-import { solidStatusIcons, useStatusIcon } from '../shared/statusIcon'
 import {
-  alertProps,
-  type AlertEmits,
-  type AlertSlots,
-  type AlertTheme,
-} from './types'
+  solidStatusIcons,
+  useStatusIcon,
+  type StatusTheme,
+} from '../shared/statusIcon'
+import { alertProps, type AlertEmits, type AlertSlots } from './types'
 
 const props = defineProps(alertProps)
 
@@ -42,7 +41,7 @@ const role = computed(() =>
   props.theme === 'red' || props.theme === 'amber' ? 'alert' : 'status',
 )
 
-const iconColorClasses: Record<AlertTheme, string> = {
+const iconColorClasses: Record<StatusTheme, string> = {
   gray: 'text-ink-gray-7',
   blue: 'text-ink-blue-6',
   green: 'text-ink-green-6',
@@ -109,7 +108,7 @@ const rowActionProps = computed(() =>
 // Ghost gray renders ink-gray-8; the design colors the row action label with
 // the theme's 600-level ink. `!` wins over Button's own text utility without
 // depending on stylesheet order. Skipped when the caller restyles the button.
-const rowActionLabelClasses: Record<AlertTheme, string> = {
+const rowActionLabelClasses: Record<StatusTheme, string> = {
   gray: '!text-ink-gray-7',
   blue: '!text-ink-blue-7',
   green: '!text-ink-green-7',
