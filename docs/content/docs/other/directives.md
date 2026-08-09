@@ -57,7 +57,7 @@ const setInactive = () => (active.value = false)
 </script>
 
 <template>
-  <div class="rounded-lg border p-8" v-on-outside-click="setInactive">
+  <div class="rounded-6 border p-8" v-on-outside-click="setInactive">
     <Button @click="active = true">
       {{ active ? 'Click outside' : 'Click me' }}
     </Button>

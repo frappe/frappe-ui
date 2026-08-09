@@ -127,7 +127,7 @@ const paragraphSample =
   <div class="grid gap-14">
     <header class="grid gap-6">
       <div
-        class="rounded-xl border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
+        class="rounded-7 border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
       >
         <div class="flex items-baseline justify-between gap-4">
           <span class="text-xl font-semibold text-ink-gray-8">{{

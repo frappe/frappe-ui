@@ -27,7 +27,7 @@
           v-if="collapsible"
           :id="triggerId"
           type="button"
-          class="flex items-center gap-1 rounded focus-visible:ring-0 focus-visible:focus-ring"
+          class="flex items-center gap-1 rounded-4 focus-visible:ring-0 focus-visible:focus-ring"
           :aria-expanded="!isSectionCollapsed"
           :aria-controls="bodyId"
           :aria-hidden="isSidebarCollapsed || undefined"

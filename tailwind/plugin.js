@@ -192,11 +192,11 @@ let globalStyles = (theme) => ({
 
 let componentStyles = {
   '.form-input, .form-textarea, .form-select': {
-    '@apply h-7 rounded border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-base focus:shadow-sm focus:ring-0':
+    '@apply h-7 rounded-4 border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-base focus:shadow-sm focus:ring-0':
       {},
   },
   '.form-checkbox': {
-    '@apply rounded-md bg-surface-gray-2 text-ink-blue-5 focus:ring-0': {},
+    '@apply rounded-5 bg-surface-gray-2 text-ink-blue-5 focus:ring-0': {},
   },
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,

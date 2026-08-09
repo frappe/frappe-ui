@@ -40,7 +40,7 @@
   <Teleport :to="portalTarget ?? 'body'">
     <div
       v-if="dragLabel"
-      class="frappe-tree-drag-label pointer-events-none fixed z-[1000] rounded-md bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-lg"
+      class="frappe-tree-drag-label pointer-events-none fixed z-[1000] rounded-5 bg-surface-gray-7 px-2 py-1 text-xs text-ink-white shadow-lg"
       :style="{
         top: `${dragDrop.state.y + 18}px`,
         left: `${dragDrop.state.x + 12}px`,

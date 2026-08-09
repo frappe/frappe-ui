@@ -11,7 +11,7 @@ const status = ref('')
 
 <template>
   <div class="grid w-full max-w-lg grid-cols-2 items-start gap-4">
-    <div class="rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-5 bg-surface-gray-1 p-3">
       <SidebarCard
         title="Your trial ends soon!"
         description="Upgrade to keep enjoying features."
@@ -22,7 +22,7 @@ const status = ref('')
       />
     </div>
 
-    <div class="rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-5 bg-surface-gray-1 p-3">
       <SidebarCard
         v-if="showFeatureCard"
         theme="blue"
@@ -44,7 +44,7 @@ const status = ref('')
       </button>
     </div>
 
-    <div class="rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-5 bg-surface-gray-1 p-3">
       <SidebarCard
         theme="amber"
         title="Storage is almost full"
@@ -56,7 +56,7 @@ const status = ref('')
       />
     </div>
 
-    <div class="rounded-md bg-surface-gray-1 p-3">
+    <div class="rounded-5 bg-surface-gray-1 p-3">
       <SidebarCard
         theme="red"
         title="Payment failed"

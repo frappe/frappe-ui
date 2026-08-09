@@ -52,7 +52,7 @@ function submit() {
       >
         <template #default="{ isEmpty }">
           <div
-            class="min-w-0 flex-1 rounded-lg border border-outline-gray-2 bg-surface-base focus-within:border-outline-gray-3"
+            class="min-w-0 flex-1 rounded-6 border border-outline-gray-2 bg-surface-base focus-within:border-outline-gray-3"
           >
             <EditorBubbleMenu :items="commentToolbar" />
             <EditorContent
@@ -92,7 +92,7 @@ function submit() {
       >
         FA
       </div>
-      <div class="min-w-0 flex-1 rounded-lg bg-surface-gray-1 px-3 py-2">
+      <div class="min-w-0 flex-1 rounded-6 bg-surface-gray-1 px-3 py-2">
         <div class="mb-0.5 text-sm-medium text-ink-gray-8">Faris Ansari</div>
         <Editor v-model="submitted" :extensions="extensions" :editable="false">
           <template #default>

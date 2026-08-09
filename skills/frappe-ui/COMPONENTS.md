@@ -153,7 +153,7 @@ For every app-owned scroll region (sidebar nav, panes; `orientation="horizontal"
 
 ### `Divider` — see Display.
 
-> Don't use `Card` — compose surfaces directly with `bg-surface-base rounded border border-outline-gray-1 p-4`.
+> Don't use `Card` — compose surfaces directly with `bg-surface-base rounded-4 border border-outline-gray-1 p-4`.
 
 ## Provider
 

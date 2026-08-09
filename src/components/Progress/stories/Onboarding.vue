@@ -52,7 +52,7 @@ function completeStep(index: number) {
 </script>
 
 <template>
-  <div class="w-full max-w-[320px] rounded-xl bg-surface-base p-2.5 shadow-lg">
+  <div class="w-full max-w-[320px] rounded-7 bg-surface-base p-2.5 shadow-lg">
     <Progress
       :value="percent"
       label="Get Started with Frappe Drive"
@@ -63,7 +63,7 @@ function completeStep(index: number) {
       <div
         v-for="(step, index) in steps"
         :key="step.title"
-        class="rounded-lg p-2"
+        class="rounded-6 p-2"
         :class="{ 'bg-surface-gray-1': expanded === index }"
       >
         <button

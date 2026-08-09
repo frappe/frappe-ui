@@ -135,7 +135,7 @@ const onFilterKeydown = (e: KeyboardEvent) => {
                 as="a"
                 :value="item.link"
                 :href="withBase(item.link)"
-                class="flex w-full min-w-0 items-center rounded px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
+                class="flex w-full min-w-0 items-center rounded-4 px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
                 @click="onItemClick($event, item)"
               >
                 <span class="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -161,12 +161,12 @@ const onFilterKeydown = (e: KeyboardEvent) => {
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-1">
               <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
               >
                 <span class="lucide-arrow-down size-4" />
               </kbd>
               <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
               >
                 <span class="lucide-arrow-up size-4" />
               </kbd>
@@ -174,7 +174,7 @@ const onFilterKeydown = (e: KeyboardEvent) => {
             </div>
             <div class="flex items-center gap-1">
               <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
               >
                 <span class="lucide-corner-down-left size-4" />
               </kbd>
@@ -182,7 +182,7 @@ const onFilterKeydown = (e: KeyboardEvent) => {
             </div>
             <div class="flex items-center gap-1">
               <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
               >
                 <span class="lucide-command w-3 h-3" />
                 <span class="lucide-corner-down-left size-4" />
@@ -191,7 +191,7 @@ const onFilterKeydown = (e: KeyboardEvent) => {
             </div>
             <div class="flex items-center gap-1">
               <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 px-1 font-[inherit] font-medium leading-normal tracking-[0.02em] text-sm text-ink-gray-5"
+                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 px-1 font-[inherit] font-medium leading-normal tracking-[0.02em] text-sm text-ink-gray-5"
               >
                 esc
               </kbd>
@@ -200,7 +200,7 @@ const onFilterKeydown = (e: KeyboardEvent) => {
           </div>
           <div class="flex items-center gap-1">
             <kbd
-              class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-sm bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
+              class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
             >
               <span class="lucide-command w-3 h-3" />
               <span class="text-sm">K</span>

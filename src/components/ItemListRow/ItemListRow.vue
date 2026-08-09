@@ -50,7 +50,7 @@ defineSlots<{
     :data-state="isEmphasized ? 'active' : 'inactive'"
     :data-disabled="disabled ? '' : undefined"
     :class="[
-      'flex w-full items-center gap-2 rounded transition-colors',
+      'flex w-full items-center gap-2 rounded-4 transition-colors',
       sizeClasses,
       stateClasses,
     ]"

@@ -7,11 +7,11 @@ let bars = [22, 36, 28, 44, 30, 52, 34, 40, 26, 48, 32, 44, 28];
   <div
     class="p-3 flex items-end gap-6 overflow-hidden"
   >
-    <div class="flex items-end gap-2 w-full bg-surface-elevation-1 p-4 pt-8 rounded overflow-hidden shadow-lg dark:shadow-none ">
+    <div class="flex items-end gap-2 w-full bg-surface-elevation-1 p-4 pt-8 rounded-4 overflow-hidden shadow-lg dark:shadow-none ">
       <div
         v-for="(h, i) in bars"
         :key="i"
-        class="min-w-[10px] rounded-sm bg-surface-gray-4"
+        class="min-w-[10px] rounded-1 bg-surface-gray-4"
         :style="{ height: `${h * 2}px` }"
       />
     </div>

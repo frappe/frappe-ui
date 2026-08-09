@@ -269,7 +269,7 @@ function setVideoOptions(options: {
   >
     <div
       ref="containerRef"
-      class="group relative isolate overflow-hidden not-prose rounded"
+      class="group relative isolate overflow-hidden not-prose rounded-4"
       :class="containerClasses(node.attrs, selected)"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
@@ -281,7 +281,7 @@ function setVideoOptions(options: {
         <img
           v-if="!isVideo"
           ref="mediaRef"
-          class="rounded"
+          class="rounded-4"
           :class="!isUploaded && 'opacity-40'"
           :src="node.attrs.src || fileContent"
           :alt="node.attrs.alt || ''"
@@ -292,7 +292,7 @@ function setVideoOptions(options: {
         <img
           v-else-if="isVideo && !isUploaded && videoPoster"
           ref="mediaRef"
-          class="rounded"
+          class="rounded-4"
           :src="videoPoster"
           :alt="node.attrs.alt || 'Video preview'"
           :width="node.attrs.width"
@@ -302,7 +302,7 @@ function setVideoOptions(options: {
         <video
           v-else-if="isVideo"
           ref="mediaRef"
-          class="rounded"
+          class="rounded-4"
           :class="!isUploaded && 'opacity-40'"
           :src="node.attrs.src || fileContent"
           :width="node.attrs.width"
@@ -370,7 +370,7 @@ function setVideoOptions(options: {
 
       <div
         v-else
-        class="flex flex-col items-center justify-center gap-3 border rounded text-ink-gray-6 text-sm px-4 py-5 max-w-full"
+        class="flex flex-col items-center justify-center gap-3 border rounded-4 text-ink-gray-6 text-sm px-4 py-5 max-w-full"
         :class="{ 'border-none': selected }"
         :style="{
           width: node.attrs.width ? `${node.attrs.width}px` : undefined,

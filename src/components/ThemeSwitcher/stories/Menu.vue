@@ -37,7 +37,7 @@ const crmLogo = 'https://raw.githubusercontent.com/frappe/crm/develop/.github/lo
   <Dropdown :options="menuOptions">
     <template #default="{ open }">
       <button
-        class="flex items-center gap-2 rounded-md px-2 py-2"
+        class="flex items-center gap-2 rounded-5 px-2 py-2"
         :class="open ? 'bg-surface-gray-3' : 'hover:bg-surface-gray-2'"
       >
         <Avatar shape='square' :image="crmLogo" label="CRM" />

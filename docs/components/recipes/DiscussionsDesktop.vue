@@ -1056,7 +1056,7 @@ const spaceActions = [
               <div
                 v-for="emoji in customEmojis"
                 :key="emoji"
-                class="grid size-10 place-content-center rounded-lg border text-xl"
+                class="grid size-10 place-content-center rounded-6 border text-xl"
               >
                 {{ emoji }}
               </div>

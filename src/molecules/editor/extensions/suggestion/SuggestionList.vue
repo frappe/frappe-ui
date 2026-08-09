@@ -7,7 +7,7 @@
       :trapped="false"
       :loop="false"
       :content-class="[
-        'relative max-h-[300px] min-w-40 overflow-y-auto rounded-lg p-1 text-base',
+        'relative max-h-[300px] min-w-40 overflow-y-auto rounded-6 p-1 text-base',
         containerClass,
       ]"
     >

@@ -19,7 +19,7 @@ const emit = defineEmits<{ (e: 'cancel'): void }>()
     aria-live="polite"
   >
     <div
-      class="pointer-events-auto flex items-center gap-2 rounded bg-black/65 px-1.5 py-1"
+      class="pointer-events-auto flex items-center gap-2 rounded-4 bg-black/65 px-1.5 py-1"
     >
       <span class="tabular-nums text-sm text-white">{{ percent }}%</span>
       <button

@@ -49,8 +49,8 @@ const data = props.data.slice(0, props.data.length - 1);
         </div>
 
         <div class="text-sm text-ink-gray-5 grid gap-2">
-          <span class="h-3 rounded-sm bg-surface-gray-2 w-1/2"> </span>
-          <span class="h-5 rounded-sm bg-surface-gray-3 w-full"> </span>
+          <span class="h-3 rounded-1 bg-surface-gray-2 w-1/2"> </span>
+          <span class="h-5 rounded-1 bg-surface-gray-3 w-full"> </span>
         </div>
 
         <div class="flex items-center justify-between">

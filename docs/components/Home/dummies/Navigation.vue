@@ -18,18 +18,18 @@ onUnmounted(() => {
 <template>
   <div class="p-6 px-20 grid">
     <div
-      class="flex items-center gap-1 bg-surface-gray-4 rounded-sm p-1 m-auto w-full"
+      class="flex items-center gap-1 bg-surface-gray-4 rounded-1 p-1 m-auto w-full"
     >
       <div
         v-for="(_, i) in 3"
         :key="i"
-        class="h-3 w-full rounded-sm transition-all duration-500 ease-in-out"
+        class="h-3 w-full rounded-1 transition-all duration-500 ease-in-out"
         :class="active === i ? 'bg-surface-base' : 'bg-surface-gray-2'"
       />
     </div>
 
     <div
-      class="mt-2 p-5 animate-pulse rounded flex items-center w-full bg-surface-gray-4 dark:bg-surface-gray-3"
+      class="mt-2 p-5 animate-pulse rounded-4 flex items-center w-full bg-surface-gray-4 dark:bg-surface-gray-3"
     />
   </div>
 </template>

@@ -26,7 +26,7 @@ describe('<DesktopShell />', () => {
       .should('have.class', 'flex')
       .and('have.class', 'min-w-0')
       .and('have.class', 'flex-1')
-      .and('not.have.class', 'rounded-lg')
+      .and('not.have.class', 'rounded-6')
   })
 
   it('registers its scroll region so shellScrollContainer resolves', () => {

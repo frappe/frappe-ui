@@ -44,7 +44,7 @@ const resetState = () => {
 
 <template>
   <section
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+    class="grid gap-5 *:rounded-4 *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="h-fit">
       <Tabs :tabs v-model="val" class='[&>[role=tablist]]:px-4'>
@@ -114,7 +114,7 @@ const resetState = () => {
       <Progress :value="20" label="Daily Progress" size="lg" :hint="true" />
 
       <div class="flex gap-3">
-        <span class="p-3 px-4 rounded bg-surface-gray-2 flex items-center">
+        <span class="p-3 px-4 rounded-4 bg-surface-gray-2 flex items-center">
           <LucideTag class="size-5" />
         </span>
 
@@ -147,12 +147,12 @@ const resetState = () => {
       <div class="!col-span-1 flex flex-wrap gap-x-1">
         <label class="w-full">Status</label>
 
-        <Badge theme="blue" class="rounded-sm"> Stable</Badge>
-        <Badge theme="orange" class="rounded-sm"> Moderate</Badge>
+        <Badge theme="blue" class="rounded-1"> Stable</Badge>
+        <Badge theme="orange" class="rounded-1"> Moderate</Badge>
       </div>
     </div>
 
-    <div class="p-2 grid h-full [&_label]:!m-0 *:rounded *:cursor-pointer">
+    <div class="p-2 grid h-full [&_label]:!m-0 *:rounded-4 *:cursor-pointer">
       <div class="flex items-center gap-2 boder-b p-2 px-2 pb-3 !rounded-none">
         <span class="text-ink-gray-5"> Settings </span>
         <LucideRight class="size-4 text-ink-gray-5" />

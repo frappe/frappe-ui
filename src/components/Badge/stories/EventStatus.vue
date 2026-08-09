@@ -3,7 +3,7 @@ import { Badge } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="w-96 rounded-r-md border-l-2 border-outline-gray-3 px-3 py-2 transition-colors hover:bg-surface-gray-1">
+  <div class="w-96 rounded-r-5 border-l-2 border-outline-gray-3 px-3 py-2 transition-colors hover:bg-surface-gray-1">
     <Badge theme="red" size="md">
       <template #prefix>
         <span class="lucide-mail" aria-hidden="true" />

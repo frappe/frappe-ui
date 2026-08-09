@@ -28,7 +28,7 @@ const options = [
         <button
           type="button"
           :aria-label="`Remove ${value}`"
-          class="-mr-0.5 grid size-4 place-items-center rounded-sm text-ink-gray-5 hover:text-ink-gray-7"
+          class="-mr-0.5 grid size-4 place-items-center rounded-1 text-ink-gray-5 hover:text-ink-gray-7"
           @click="removeTag"
         >
           <span class="lucide-x size-3" />

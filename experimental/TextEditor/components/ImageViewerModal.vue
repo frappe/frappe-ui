@@ -49,7 +49,7 @@
         <!-- Caption -->
         <div
           v-if="currentImage.alt"
-          class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
+          class="absolute bottom-4 p-2 text-center rounded-1 text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
           :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
         >
           {{ currentImage.alt }}
@@ -67,10 +67,10 @@
           @wheel.stop
         >
           <!-- Navigation controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="bg-black/65 rounded-4 flex items-center">
             <Tooltip text="Previous image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
                 @click.stop="previousImage"
               >
                 <LucideChevronLeft class="size-4" />
@@ -83,7 +83,7 @@
 
             <Tooltip text="Next image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none"
                 @click.stop="nextImage"
               >
                 <LucideChevronRight class="size-4" />
@@ -92,10 +92,10 @@
           </div>
 
           <!-- Zoom controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="bg-black/65 rounded-4 flex items-center">
             <Tooltip text="Zoom out">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
                 @click.stop="zoomOut"
               >
                 <LucideMinus class="size-4" />
@@ -113,7 +113,7 @@
 
             <Tooltip text="Zoom in">
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none"
                 @click.stop="zoomIn"
               >
                 <LucidePlus class="size-4" />
@@ -122,10 +122,10 @@
           </div>
 
           <!-- Action controls -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="bg-black/65 rounded-4 flex items-center">
             <Tooltip text="Download image">
               <button
-                class="p-2 hover:bg-gray-900 rounded-l focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
                 @click.stop="downloadImage"
               >
                 <LucideDownload class="size-4" />
@@ -136,7 +136,7 @@
               :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
             >
               <button
-                class="p-2 hover:bg-gray-900 rounded-r focus:outline-none hidden sm:block"
+                class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none hidden sm:block"
                 @click.stop="toggleFullscreen"
               >
                 <LucideMaximize v-if="!isFullscreen" class="size-4" />
@@ -146,10 +146,10 @@
           </div>
 
           <!-- Close button -->
-          <div class="bg-black/65 rounded flex items-center">
+          <div class="bg-black/65 rounded-4 flex items-center">
             <Tooltip text="Close">
               <button
-                class="p-2 hover:bg-gray-900 rounded focus:outline-none"
+                class="p-2 hover:bg-gray-900 rounded-4 focus:outline-none"
                 @click.stop="close"
               >
                 <LucideX class="size-4" />

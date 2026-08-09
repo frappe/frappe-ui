@@ -16,7 +16,7 @@
  * Combobox, HoverCard, DatePicker, TimePicker, …).
  *
  * It owns ONLY two things:
- *   1. the visual shell — `rounded-lg bg-surface-elevation-2 shadow-2xl
+ *   1. the visual shell — `rounded-6 bg-surface-elevation-2 shadow-2xl
  *      ring-1 ring-black ring-opacity-5` — matching what the selection family
  *      renders today, plus the `data-slot="content-body"` hook, and
  *   2. the open/close motion wiring (`data-motion` + the co-located
@@ -57,5 +57,5 @@ defineSlots<{ default?: () => any }>()
 // selection family's `content-body` so every popover surface shares one look.
 // Consumer `class` (layout) auto-merges after this.
 const shellClass =
-  'overflow-hidden rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity]'
+  'overflow-hidden rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 will-change-[opacity]'
 </script>

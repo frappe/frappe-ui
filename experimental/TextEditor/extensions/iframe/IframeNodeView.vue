@@ -186,7 +186,7 @@ function setCursorBeforeIframe() {
   <NodeViewWrapper>
     <div
       ref="containerRef"
-      class="relative overflow-hidden not-prose my-6 rounded-lg block max-w-full focus:outline-none"
+      class="relative overflow-hidden not-prose my-6 rounded-6 block max-w-full focus:outline-none"
       :class="[
         { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
@@ -204,7 +204,7 @@ function setCursorBeforeIframe() {
         <iframe
           v-if="node.attrs.src"
           ref="iframeRef"
-          class="rounded-lg border-0 block max-w-full h-auto"
+          class="rounded-6 border-0 block max-w-full h-auto"
           :class="{
             'pointer-events-none': isEditable && !props.node.attrs.interactive,
           }"
@@ -231,7 +231,7 @@ function setCursorBeforeIframe() {
           <!-- Alignment Controls -->
           <div
             v-if="selected && isEditable"
-            class="flex divide-x divide-ink-gray-6 rounded-md bg-black/65"
+            class="flex divide-x divide-ink-gray-6 rounded-5 bg-black/65"
           >
             <button
               @click.stop="setAlignment('left')"
@@ -268,7 +268,7 @@ function setCursorBeforeIframe() {
           <!-- Resize Handle -->
           <button
             v-if="selected && isEditable"
-            class="cursor-nw-resize bg-black/65 rounded-md p-1"
+            class="cursor-nw-resize bg-black/65 rounded-5 p-1"
             @mousedown.prevent="startResize"
             title="Resize"
           >
@@ -280,7 +280,7 @@ function setCursorBeforeIframe() {
         <!-- Loading state for new embeds -->
         <div
           v-if="!node.attrs.src"
-          class="flex items-center justify-center bg-surface-gray-1 rounded-lg w-[640px] h-[360px]"
+          class="flex items-center justify-center bg-surface-gray-1 rounded-6 w-[640px] h-[360px]"
         >
           <div class="text-ink-gray-5 text-center">
             <div class="text-lg mb-1">🔗</div>

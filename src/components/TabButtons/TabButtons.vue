@@ -130,7 +130,7 @@ function horizontalClasses() {
     case 'ghost': {
       const surface =
         props.type === 'subtle' ? 'bg-surface-gray-2' : 'bg-surface-base'
-      const shape = isSm ? 'gap-1 rounded' : 'gap-1.5 rounded-[10px]'
+      const shape = isSm ? 'gap-1 rounded-4' : 'gap-1.5 rounded-[10px]'
       return [...base, 'p-px', surface, shape]
     }
     case 'underline':
@@ -154,7 +154,7 @@ function verticalClasses() {
     case 'ghost': {
       const surface =
         props.type === 'subtle' ? 'bg-surface-gray-2' : 'bg-surface-base'
-      const shape = isSm ? 'gap-1 rounded' : 'gap-1.5 rounded-[10px]'
+      const shape = isSm ? 'gap-1 rounded-4' : 'gap-1.5 rounded-[10px]'
       return [...base, 'p-px', surface, shape, 'items-center']
     }
     case 'underline':

@@ -15,10 +15,10 @@ const inputTypes = [
 ]
 
 const sizeCLass = {
-  sm: 'text-base rounded h-7',
-  md: 'text-base rounded h-8',
-  lg: 'text-lg rounded-md h-10',
-  xl: 'text-2xl rounded-md h-10',
+  sm: 'text-base rounded-4 h-7',
+  md: 'text-base rounded-4 h-8',
+  lg: 'text-lg rounded-5 h-10',
+  xl: 'text-2xl rounded-5 h-10',
 }
 
 const variantClasses = {

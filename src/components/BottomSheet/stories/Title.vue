@@ -14,7 +14,7 @@ const options = ['Rename', 'Duplicate', 'Move to folder', 'Delete']
       <button
         v-for="option in options"
         :key="option"
-        class="rounded px-3 py-2.5 text-start text-p-base text-ink-gray-8 hover:bg-surface-gray-2"
+        class="rounded-4 px-3 py-2.5 text-start text-p-base text-ink-gray-8 hover:bg-surface-gray-2"
         @click="open = false"
       >
         {{ option }}

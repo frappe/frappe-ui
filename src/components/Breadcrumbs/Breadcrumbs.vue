@@ -19,7 +19,7 @@
           v-if="item.route"
           :to="item.route"
           @click="item.onClick?.($event)"
-          class="flex items-center rounded px-0.5 py-1 text-lg-medium"
+          class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
               ? 'min-w-0 text-ink-gray-9'
@@ -39,7 +39,7 @@
           v-else-if="item.href"
           :href="item.href"
           @click="onLinkClick(item, $event)"
-          class="flex items-center rounded px-0.5 py-1 text-lg-medium"
+          class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
               ? 'min-w-0 text-ink-gray-9'
@@ -58,7 +58,7 @@
         <button
           v-else
           @click="item.onClick?.($event)"
-          class="flex items-center rounded px-0.5 py-1 text-lg-medium"
+          class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium"
           :class="[
             i == crumbs.length - 1
               ? 'min-w-0 text-ink-gray-9'

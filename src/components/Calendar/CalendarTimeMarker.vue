@@ -5,7 +5,7 @@
     v-if="parseDate(date) === parseDate(now)"
   >
     <Tooltip :text="dayjs(now).format('ddd, MMM D, YYYY h:mm a')">
-      <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
+      <div class="current-time relative h-0.5 bg-[#E03636] rounded-4" />
     </Tooltip>
   </div>
 </template>

@@ -36,7 +36,7 @@ const copyToClipboard = (txt: string) => {
       <div class="grid gap-3" v-else>
         <div
           v-if="color.value"
-          class="rounded size-20"
+          class="rounded-4 size-20"
           :style="{ backgroundColor: color.value }"
         ></div>
 

@@ -44,7 +44,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
 
 <template>
   <section
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+    class="grid gap-5 *:rounded-4 *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="grid p-5 grid-cols-2 gap-y-5 gap-x-4 h-fit">
       <FormControl
@@ -130,7 +130,7 @@ const selOpts = ["Admin", "Editor", "Viewer", "Guest"]
       />
 
       <div class="flex gap-3">
-        <div class="my-auto bg-surface-gray-2 p-2 rounded">
+        <div class="my-auto bg-surface-gray-2 p-2 rounded-4">
           <LucideGlobe class="size-6" />
         </div>
         <div class="grid gap-1 mr-auto">

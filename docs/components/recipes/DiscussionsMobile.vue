@@ -235,7 +235,7 @@ const discussions = [
           v-for="space in spaces"
           :key="space.name"
           :value="space.name"
-          class="h-11 rounded-md"
+          class="h-11 rounded-5"
           @click="selectSpace(space.name)"
         >
           <ListCell>

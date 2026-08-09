@@ -10,7 +10,7 @@
       ref="panel"
       v-bind="$attrs"
       :data-state="mode"
-      class="floating-window relative flex flex-col rounded-lg border border-outline-gray-2 bg-surface-elevation-1"
+      class="floating-window relative flex flex-col rounded-6 border border-outline-gray-2 bg-surface-elevation-1"
       :class="isDocked ? '' : 'shadow-2xl'"
       :style="style"
     >
@@ -114,7 +114,7 @@
           type="button"
           data-resize="se"
           aria-label="Resize window"
-          class="absolute -bottom-1 -right-1 z-10 size-4 cursor-nwse-resize rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          class="absolute -bottom-1 -right-1 z-10 size-4 cursor-nwse-resize rounded-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           @pointerdown.prevent="startResize($event, { x: 1, y: 1 })"
           @keydown="onResizeKey"
         />

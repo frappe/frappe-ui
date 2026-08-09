@@ -29,7 +29,7 @@ const para =
 
 <template>
   <div class="grid gap-3">
-    <Tabs :tabs v-model="activeTab" class="[&>div]:!px-1 rounded" />
+    <Tabs :tabs v-model="activeTab" class="[&>div]:!px-1 rounded-4" />
 
     <template v-if='activeTabLabel === "Text Color"'>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">
@@ -56,7 +56,7 @@ const para =
       <div
         v-for="item in data.fontSize"
         :key="item.name"
-        class="rounded border border-outline-gray-3 p-4"
+        class="rounded-4 border border-outline-gray-3 p-4"
       >
         <div class="text-xs opacity-60 mb-1">
           {{ item.name }}
@@ -88,7 +88,7 @@ const para =
       <div
         v-for="item in data.fontWeight"
         :key="item.name"
-        class="rounded border border-outline-gray-2 p-4"
+        class="rounded-4 border border-outline-gray-2 p-4"
       >
         <div class="text-sm text-gray-500 mb-1">
           {{ item.name }} ({{ item.value }})
@@ -107,7 +107,7 @@ const para =
       <div
         v-for="item in data.letterSpacing"
         :key="item.name"
-        class="rounded border p-4"
+        class="rounded-4 border p-4"
         :style='
           {
             letterSpacing: item.value,
@@ -128,7 +128,7 @@ const para =
       <div
         v-for="item in data.lineHeight"
         :key="item.name"
-        class="rounded border border-outline-gray-2 p-3"
+        class="rounded-4 border border-outline-gray-2 p-3"
       >
         <div class="text-xs opacity-60 mb-1">
           leading-{{ item.name }}
