@@ -1318,6 +1318,13 @@ plain English, so the codemod only rewrites it inside quoted strings and
 `@apply` rules. A class list inside a multi-line template literal can be
 missed — grep for bare `rounded` after running it.
 
+The alias CSS variables go away with the aliases. Hand-written CSS that
+reads `var(--radius-sm)` / `var(--radius-md)` / `var(--radius-lg)` /
+`var(--radius-xl)` / `var(--radius-2xl)` resolves to nothing — the same
+silent break. The codemod only rewrites `rounded-*` classes, so grep for
+`--radius-(sm|md|lg|xl|2xl)` and switch to the numbered variables
+(`var(--radius-5)` for the old `--radius-md`, same map as above).
+
 ### `text-*-black` styles removed
 
 The `text-<size>-black` / `text-p-<size>-black` style classes are removed —
