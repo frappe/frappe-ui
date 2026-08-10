@@ -91,12 +91,16 @@ describe('Slider', () => {
         props: { label: 'Volume', description: 'Adjust volume.' },
       })
       cy.get('[role="slider"]')
-        .parents('[aria-labelledby]')
+        .first()
+        .then(($thumb) => {
+          const labelledBy = $thumb.attr('aria-labelledby')!
+          cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
+        })
+      cy.get('[role="slider"]')
+        .parents('[aria-describedby]')
         .first()
         .then(($root) => {
-          const labelledBy = $root.attr('aria-labelledby')!
           const describedBy = $root.attr('aria-describedby')!
-          cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
           cy.get(`#${describedBy}`).should('contain.text', 'Adjust volume.')
         })
     })
