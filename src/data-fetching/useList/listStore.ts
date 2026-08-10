@@ -32,7 +32,7 @@ class ListStore {
     // An entry without doctype or name identifies no row. Skipped, matching
     // `setDocs`'s guard — reaching `admitsWrite` with it would throw on
     // `doctype.trim()` and reject the whole response it rode in on.
-    if (!doctype || doc.name == null) return
+    if (!doctype || !doc.name) return
     // Same freshness domain as the doc store (#1017): a row update from a
     // request that a later-dispatched request has already overtaken for this
     // document is dropped. `docStore` is the bookkeeper; the matching

@@ -3,18 +3,23 @@
  */
 
 import { baseUrl } from '../mocks/utils'
-import { useAction } from './useAction'
+import { useAction, UseActionOptions } from './useAction'
 
 interface SetValueParams {
   name: string
   email: string
 }
 
+type SetValueOptions = UseActionOptions<SetValueParams, SetValueParams>
+
 // `useDoctype` and `useList` write `docStore` and `listStore` from these
 // hooks, so a hook that fires for a stale submit writes a stale document.
 // The mock server answers slowly when a value starts with `slow`, so the
 // submit that starts first always settles last.
-function makeSetValue(onSuccess?: any, onError?: any) {
+function makeSetValue(
+  onSuccess?: SetValueOptions['onSuccess'],
+  onError?: SetValueOptions['onError'],
+) {
   return useAction<SetValueParams, SetValueParams>({
     url: ({ name }) => `/api/v2/document/User/${name}`,
     method: 'PUT',

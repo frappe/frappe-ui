@@ -27,6 +27,10 @@ records nothing — the server may answer a later reload before an earlier
 save commits, and the save must still land. A delete records a fresh
 version when it settles — a delete is terminal — so no in-flight write or
 reload, whatever its dispatch order, can re-create a deleted document.
+One accepted limitation: the gate orders by dispatch time, so a read
+dispatched after a save, handled by the server before the save committed
+and answered after it, is admitted and republishes the pre-save value —
+resolving that needs server-side sequencing, which this design trades away.
 
 `useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
 newer same-key submit of the same instance already outran — the store gate
