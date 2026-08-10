@@ -12,13 +12,21 @@ import { canJoin } from '@tiptap/pm/transform'
  * group covers a consumer's own list node too, with no list of names to keep
  * in sync.
  */
+const listTypeCache = new WeakMap<Schema, Set<NodeType>>()
+
 function listTypesIn(schema: Schema): Set<NodeType> {
+  // A schema is fixed for the life of an editor, so resolve it once instead of
+  // on every doc-changing transaction.
+  const cached = listTypeCache.get(schema)
+  if (cached) return cached
+
   const types = new Set<NodeType>()
   for (const name of Object.keys(schema.nodes)) {
     const type = schema.nodes[name]
     const groups = String(type.spec.group ?? '').split(' ')
     if (groups.includes('list')) types.add(type)
   }
+  listTypeCache.set(schema, types)
   return types
 }
 
@@ -87,6 +95,12 @@ declare module '@tiptap/core' {
        * automatically on every edit and when the editor view is created;
        * call it directly to repair a document in an editor that has not been
        * mounted yet (see `useEditor`).
+       *
+       * It sets no transaction metadata, so it composes in a chain without
+       * changing how the caller's own edit is recorded. Repairing a document
+       * on open is not the user's edit — mark that at the call site:
+       * `chain().joinAdjacentLists().setMeta('preventUpdate', true)
+       *   .setMeta('addToHistory', false).run()`
        */
       joinAdjacentLists: () => ReturnType
     }
@@ -117,10 +131,6 @@ export const ListJoin = Extension.create({
           if (!dispatch) return true
 
           for (const pos of positions) tr.join(pos)
-          // Repairing a document on open is not the user's edit: keep it out
-          // of the `update` event and out of the undo stack. The `transaction`
-          // event still fires — dirty-tracking should listen to `update`.
-          tr.setMeta('preventUpdate', true).setMeta('addToHistory', false)
           return true
         },
     }
@@ -144,6 +154,9 @@ export const ListJoin = Extension.create({
         view: (view) => {
           const tr = view.state.tr
           if (joinAdjacentListsIn(tr, view.state.schema)) {
+            // Repairing a document on open is not the user's edit: keep it out
+            // of the `update` event and out of the undo stack. The `transaction`
+            // event still fires — dirty-tracking should listen to `update`.
             view.dispatch(
               tr.setMeta('preventUpdate', true).setMeta('addToHistory', false),
             )

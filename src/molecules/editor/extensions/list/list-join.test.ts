@@ -228,6 +228,34 @@ describe('ListJoin', () => {
     ).toHaveLength(2)
   })
 
+  it('sets no metadata of its own, so it composes in a chain', () => {
+    const editor = editorWith(
+      '<p>keep</p><ol><li><p>a</p></li></ol><p>gone</p><ol><li><p>b</p></li></ol>',
+    )
+    // Settle TrailingNode first: it appends its paragraph on the first
+    // transaction, and undo does not take that back out.
+    editor.view.dispatch(editor.state.tr)
+    const before = editor.getJSON()
+    const onUpdate = vi.fn()
+    editor.on('update', onUpdate)
+
+    // Delete the paragraph between the lists and join, in one chain.
+    let from = -1
+    editor.state.doc.descendants((node, pos) => {
+      if (node.isText && node.text === 'gone') from = pos
+    })
+    editor
+      .chain()
+      .deleteRange({ from: from - 1, to: from + 5 })
+      .joinAdjacentLists()
+      .run()
+
+    // The chain is the user's edit: it reports an update and takes one undo.
+    expect(onUpdate).toHaveBeenCalledTimes(1)
+    editor.commands.undo()
+    expect(editor.getJSON()).toEqual(before)
+  })
+
   it('merges list nodes whose attributes are deep-equal objects', () => {
     const ListWithObjectAttr = OrderedList.extend({
       addAttributes() {
