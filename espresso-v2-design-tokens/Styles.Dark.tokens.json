@@ -648,441 +648,397 @@
     },
     "red-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.red.800}"
     },
     "red-2": {
       "$type": "color",
-      "$value": "{dark.red.800}"
+      "$value": "{dark.red.700}"
     },
     "red-3": {
       "$type": "color",
-      "$value": "{dark.red.700}"
+      "$value": "{dark.red.600}"
     },
     "red-4": {
       "$type": "color",
-      "$value": "{dark.red.600}"
+      "$value": "{dark.red.500}"
     },
     "red-5": {
       "$type": "color",
-      "$value": "{dark.red.500}"
+      "$value": "{dark.red.400}"
     },
     "red-6": {
       "$type": "color",
-      "$value": "{dark.red.400}"
+      "$value": "{dark.red.300}"
     },
     "red-7": {
       "$type": "color",
-      "$value": "{dark.red.300}"
+      "$value": "{dark.red.200}"
     },
     "red-8": {
       "$type": "color",
-      "$value": "{dark.red.200}"
-    },
-    "red-9": {
-      "$type": "color",
       "$value": "{dark.red.100}"
     },
-    "red-10": {
+    "red-9": {
       "$type": "color",
       "$value": "{dark.red.50}"
     },
     "blue-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.blue.800}"
     },
     "blue-2": {
       "$type": "color",
-      "$value": "{dark.blue.800}"
+      "$value": "{dark.blue.700}"
     },
     "blue-3": {
       "$type": "color",
-      "$value": "{dark.blue.700}"
+      "$value": "{dark.blue.600}"
     },
     "blue-4": {
       "$type": "color",
-      "$value": "{dark.blue.600}"
+      "$value": "{dark.blue.500}"
     },
     "blue-5": {
       "$type": "color",
-      "$value": "{dark.blue.500}"
+      "$value": "{dark.blue.400}"
     },
     "blue-6": {
       "$type": "color",
-      "$value": "{dark.blue.400}"
+      "$value": "{dark.blue.300}"
     },
     "blue-7": {
       "$type": "color",
-      "$value": "{dark.blue.300}"
+      "$value": "{dark.blue.200}"
     },
     "blue-8": {
       "$type": "color",
-      "$value": "{dark.blue.200}"
-    },
-    "blue-9": {
-      "$type": "color",
       "$value": "{dark.blue.100}"
     },
-    "blue-10": {
+    "blue-9": {
       "$type": "color",
       "$value": "{dark.blue.50}"
     },
     "green-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.green.800}"
     },
     "green-2": {
       "$type": "color",
-      "$value": "{dark.green.800}"
+      "$value": "{dark.green.700}"
     },
     "green-3": {
       "$type": "color",
-      "$value": "{dark.green.700}"
+      "$value": "{dark.green.600}"
     },
     "green-4": {
       "$type": "color",
-      "$value": "{dark.green.600}"
+      "$value": "{dark.green.500}"
     },
     "green-5": {
       "$type": "color",
-      "$value": "{dark.green.500}"
+      "$value": "{dark.green.400}"
     },
     "green-6": {
       "$type": "color",
-      "$value": "{dark.green.400}"
+      "$value": "{dark.green.300}"
     },
     "green-7": {
       "$type": "color",
-      "$value": "{dark.green.300}"
+      "$value": "{dark.green.200}"
     },
     "green-8": {
       "$type": "color",
-      "$value": "{dark.green.200}"
-    },
-    "green-9": {
-      "$type": "color",
       "$value": "{dark.green.100}"
     },
-    "green-10": {
+    "green-9": {
       "$type": "color",
       "$value": "{dark.green.50}"
     },
     "amber-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.amber.800}"
     },
     "amber-2": {
       "$type": "color",
-      "$value": "{dark.amber.800}"
+      "$value": "{dark.amber.700}"
     },
     "amber-3": {
       "$type": "color",
-      "$value": "{dark.amber.700}"
+      "$value": "{dark.amber.600}"
     },
     "amber-4": {
       "$type": "color",
-      "$value": "{dark.amber.600}"
+      "$value": "{dark.amber.500}"
     },
     "amber-5": {
       "$type": "color",
-      "$value": "{dark.amber.500}"
+      "$value": "{dark.amber.400}"
     },
     "amber-6": {
       "$type": "color",
-      "$value": "{dark.amber.400}"
+      "$value": "{dark.amber.300}"
     },
     "amber-7": {
       "$type": "color",
-      "$value": "{dark.amber.300}"
+      "$value": "{dark.amber.200}"
     },
     "amber-8": {
       "$type": "color",
-      "$value": "{dark.amber.200}"
-    },
-    "amber-9": {
-      "$type": "color",
       "$value": "{dark.amber.100}"
     },
-    "amber-10": {
+    "amber-9": {
       "$type": "color",
       "$value": "{dark.amber.50}"
     },
     "violet-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.violet.800}"
     },
     "violet-2": {
       "$type": "color",
-      "$value": "{dark.violet.800}"
+      "$value": "{dark.violet.700}"
     },
     "violet-3": {
       "$type": "color",
-      "$value": "{dark.violet.700}"
+      "$value": "{dark.violet.600}"
     },
     "violet-4": {
       "$type": "color",
-      "$value": "{dark.violet.600}"
+      "$value": "{dark.violet.500}"
     },
     "violet-5": {
       "$type": "color",
-      "$value": "{dark.violet.500}"
+      "$value": "{dark.violet.400}"
     },
     "violet-6": {
       "$type": "color",
-      "$value": "{dark.violet.400}"
+      "$value": "{dark.violet.300}"
     },
     "violet-7": {
       "$type": "color",
-      "$value": "{dark.violet.300}"
+      "$value": "{dark.violet.200}"
     },
     "violet-8": {
       "$type": "color",
-      "$value": "{dark.violet.200}"
-    },
-    "violet-9": {
-      "$type": "color",
       "$value": "{dark.violet.100}"
     },
-    "violet-10": {
+    "violet-9": {
       "$type": "color",
       "$value": "{dark.violet.50}"
     },
     "yellow-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.yellow.800}"
     },
     "yellow-2": {
       "$type": "color",
-      "$value": "{dark.yellow.800}"
+      "$value": "{dark.yellow.700}"
     },
     "yellow-3": {
       "$type": "color",
-      "$value": "{dark.yellow.700}"
+      "$value": "{dark.yellow.600}"
     },
     "yellow-4": {
       "$type": "color",
-      "$value": "{dark.yellow.600}"
+      "$value": "{dark.yellow.500}"
     },
     "yellow-5": {
       "$type": "color",
-      "$value": "{dark.yellow.500}"
+      "$value": "{dark.yellow.400}"
     },
     "yellow-6": {
       "$type": "color",
-      "$value": "{dark.yellow.400}"
+      "$value": "{dark.yellow.300}"
     },
     "yellow-7": {
       "$type": "color",
-      "$value": "{dark.yellow.300}"
+      "$value": "{dark.yellow.200}"
     },
     "yellow-8": {
       "$type": "color",
-      "$value": "{dark.yellow.200}"
-    },
-    "yellow-9": {
-      "$type": "color",
       "$value": "{dark.yellow.100}"
     },
-    "yellow-10": {
+    "yellow-9": {
       "$type": "color",
       "$value": "{dark.yellow.50}"
     },
     "orange-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.orange.800}"
     },
     "orange-2": {
       "$type": "color",
-      "$value": "{dark.orange.800}"
+      "$value": "{dark.orange.700}"
     },
     "orange-3": {
       "$type": "color",
-      "$value": "{dark.orange.700}"
+      "$value": "{dark.orange.600}"
     },
     "orange-4": {
       "$type": "color",
-      "$value": "{dark.orange.600}"
+      "$value": "{dark.orange.500}"
     },
     "orange-5": {
       "$type": "color",
-      "$value": "{dark.orange.500}"
+      "$value": "{dark.orange.400}"
     },
     "orange-6": {
       "$type": "color",
-      "$value": "{dark.orange.400}"
+      "$value": "{dark.orange.300}"
     },
     "orange-7": {
       "$type": "color",
-      "$value": "{dark.orange.300}"
+      "$value": "{dark.orange.200}"
     },
     "orange-8": {
       "$type": "color",
-      "$value": "{dark.orange.200}"
-    },
-    "orange-9": {
-      "$type": "color",
       "$value": "{dark.orange.100}"
     },
-    "orange-10": {
+    "orange-9": {
       "$type": "color",
       "$value": "{dark.orange.50}"
     },
     "teal-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.teal.800}"
     },
     "teal-2": {
       "$type": "color",
-      "$value": "{dark.teal.800}"
+      "$value": "{dark.teal.700}"
     },
     "teal-3": {
       "$type": "color",
-      "$value": "{dark.teal.700}"
+      "$value": "{dark.teal.600}"
     },
     "teal-4": {
       "$type": "color",
-      "$value": "{dark.teal.600}"
+      "$value": "{dark.teal.500}"
     },
     "teal-5": {
       "$type": "color",
-      "$value": "{dark.teal.500}"
+      "$value": "{dark.teal.400}"
     },
     "teal-6": {
       "$type": "color",
-      "$value": "{dark.teal.400}"
+      "$value": "{dark.teal.300}"
     },
     "teal-7": {
       "$type": "color",
-      "$value": "{dark.teal.300}"
+      "$value": "{dark.teal.200}"
     },
     "teal-8": {
       "$type": "color",
-      "$value": "{dark.teal.200}"
-    },
-    "teal-9": {
-      "$type": "color",
       "$value": "{dark.teal.100}"
     },
-    "teal-10": {
+    "teal-9": {
       "$type": "color",
       "$value": "{dark.teal.50}"
     },
     "cyan-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.cyan.800}"
     },
     "cyan-2": {
       "$type": "color",
-      "$value": "{dark.cyan.800}"
+      "$value": "{dark.cyan.700}"
     },
     "cyan-3": {
       "$type": "color",
-      "$value": "{dark.cyan.700}"
+      "$value": "{dark.cyan.600}"
     },
     "cyan-4": {
       "$type": "color",
-      "$value": "{dark.cyan.600}"
+      "$value": "{dark.cyan.500}"
     },
     "cyan-5": {
       "$type": "color",
-      "$value": "{dark.cyan.500}"
+      "$value": "{dark.cyan.400}"
     },
     "cyan-6": {
       "$type": "color",
-      "$value": "{dark.cyan.400}"
+      "$value": "{dark.cyan.300}"
     },
     "cyan-7": {
       "$type": "color",
-      "$value": "{dark.cyan.300}"
+      "$value": "{dark.cyan.200}"
     },
     "cyan-8": {
       "$type": "color",
-      "$value": "{dark.cyan.200}"
-    },
-    "cyan-9": {
-      "$type": "color",
       "$value": "{dark.cyan.100}"
     },
-    "cyan-10": {
+    "cyan-9": {
       "$type": "color",
       "$value": "{dark.cyan.50}"
     },
     "purple-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.purple.800}"
     },
     "purple-2": {
       "$type": "color",
-      "$value": "{dark.purple.800}"
+      "$value": "{dark.purple.700}"
     },
     "purple-3": {
       "$type": "color",
-      "$value": "{dark.purple.700}"
+      "$value": "{dark.purple.600}"
     },
     "purple-4": {
       "$type": "color",
-      "$value": "{dark.purple.600}"
+      "$value": "{dark.purple.500}"
     },
     "purple-5": {
       "$type": "color",
-      "$value": "{dark.purple.500}"
+      "$value": "{dark.purple.400}"
     },
     "purple-6": {
       "$type": "color",
-      "$value": "{dark.purple.400}"
+      "$value": "{dark.purple.300}"
     },
     "purple-7": {
       "$type": "color",
-      "$value": "{dark.purple.300}"
+      "$value": "{dark.purple.200}"
     },
     "purple-8": {
       "$type": "color",
-      "$value": "{dark.purple.200}"
-    },
-    "purple-9": {
-      "$type": "color",
       "$value": "{dark.purple.100}"
     },
-    "purple-10": {
+    "purple-9": {
       "$type": "color",
       "$value": "{dark.purple.50}"
     },
     "pink-1": {
       "$type": "color",
-      "$value": "{neutral.white}"
+      "$value": "{dark.pink.800}"
     },
     "pink-2": {
       "$type": "color",
-      "$value": "{dark.pink.800}"
+      "$value": "{dark.pink.700}"
     },
     "pink-3": {
       "$type": "color",
-      "$value": "{dark.pink.700}"
+      "$value": "{dark.pink.600}"
     },
     "pink-4": {
       "$type": "color",
-      "$value": "{dark.pink.600}"
+      "$value": "{dark.pink.500}"
     },
     "pink-5": {
       "$type": "color",
-      "$value": "{dark.pink.500}"
+      "$value": "{dark.pink.400}"
     },
     "pink-6": {
       "$type": "color",
-      "$value": "{dark.pink.400}"
+      "$value": "{dark.pink.300}"
     },
     "pink-7": {
       "$type": "color",
-      "$value": "{dark.pink.300}"
+      "$value": "{dark.pink.200}"
     },
     "pink-8": {
       "$type": "color",
-      "$value": "{dark.pink.200}"
-    },
-    "pink-9": {
-      "$type": "color",
       "$value": "{dark.pink.100}"
     },
-    "pink-10": {
+    "pink-9": {
       "$type": "color",
       "$value": "{dark.pink.50}"
     },
