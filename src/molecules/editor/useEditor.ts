@@ -120,12 +120,16 @@ export function useEditor(
   // the child mounts, a markdown export that never renders — reads back the
   // split lists it was handed. No-op once the schema has no list node.
   // The metas are ours, not the command's: opening a document is not an edit.
-  editor.value
-    .chain()
-    .joinAdjacentLists()
-    .setMeta('preventUpdate', true)
-    .setMeta('addToHistory', false)
-    .run()
+  // Guarded by `can()` because a chain dispatches even when its command
+  // returns false, and an empty transaction still reaches `onTransaction`.
+  if (editor.value.can().joinAdjacentLists?.()) {
+    editor.value
+      .chain()
+      .joinAdjacentLists()
+      .setMeta('preventUpdate', true)
+      .setMeta('addToHistory', false)
+      .run()
+  }
 
   const editorStorage = editor.value.storage as typeof editor.value.storage & {
     upload?: { uploadFunction: UseEditorOptions['uploadFunction'] }
@@ -156,12 +160,14 @@ export function useEditor(
         // Same reason as at construction: while unmounted there are no
         // plugins, so nothing normalizes what `setContent` just parsed.
         // No-op when there is nothing to join.
-        editor.value
-          .chain()
-          .joinAdjacentLists()
-          .setMeta('preventUpdate', true)
-          .setMeta('addToHistory', false)
-          .run()
+        if (editor.value.can().joinAdjacentLists?.()) {
+          editor.value
+            .chain()
+            .joinAdjacentLists()
+            .setMeta('preventUpdate', true)
+            .setMeta('addToHistory', false)
+            .run()
+        }
       } finally {
         applyingExternalUpdate = false
       }

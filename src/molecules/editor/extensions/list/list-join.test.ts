@@ -10,12 +10,15 @@ import { StarterKit } from '../../extensions'
 import { useEditor } from '../../useEditor'
 
 /** Mount `useEditor` the way a consumer does, without rendering EditorContent. */
-function mountUseEditor(content: ReturnType<typeof ref<string>>) {
+function mountUseEditor(
+  content: ReturnType<typeof ref<string>>,
+  options: Record<string, unknown> = {},
+) {
   let editor: ReturnType<typeof useEditor> | null = null
   createApp(
     defineComponent({
       setup() {
-        editor = useEditor({ content, extensions: [StarterKit] })
+        editor = useEditor({ content, extensions: [StarterKit], ...options })
         return () => null
       },
     }),
@@ -196,6 +199,38 @@ describe('ListJoin', () => {
       content: '<ol><li><p>a</p></li></ol>',
     })
     expect(editor.commands.joinAdjacentLists()).toBe(false)
+  })
+
+  it('repairs content handed to useEditor at construction, still unmounted', () => {
+    // What the comment in useEditor promises: a headless caller reading back
+    // before <EditorContent> mounts gets the repaired document.
+    const editor = mountUseEditor(
+      ref('<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>'),
+    )
+    expect(editor.value!.state.plugins).toHaveLength(0)
+    expect(editor.value!.getHTML()).toBe(
+      '<ol><li><p>a</p></li><li><p>b</p></li></ol>',
+    )
+  })
+
+  it('fires no transaction when useEditor has nothing to join', () => {
+    const onTransaction = vi.fn()
+    // A chain dispatches even when its command returns false, so useEditor
+    // probes with can() first — otherwise every editor built, and every
+    // external content write, would push an empty transaction at consumers.
+    mountUseEditor(ref('<ol><li><p>a</p></li></ol>'), { onTransaction })
+    expect(onTransaction).not.toHaveBeenCalled()
+  })
+
+  it('can be turned off through the kit', () => {
+    const editor = new Editor({
+      extensions: [StarterKit.configure({ listJoin: false })],
+      element: null,
+      content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
+    })
+    expect(
+      editor.getJSON().content!.filter((n) => n.type === 'orderedList'),
+    ).toHaveLength(2)
   })
 
   it('repairs content written through the useEditor ref, still unmounted', async () => {

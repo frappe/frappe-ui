@@ -34,8 +34,13 @@ vi.mock('@tiptap/core', () => {
     }
     content: any
 
-    // `useEditor` normalizes the parsed document through a chain; the real
-    // behaviour is covered against a real editor in list-join.test.ts.
+    // `useEditor` normalizes the parsed document through a chain, guarded by
+    // `can()`; the real behaviour is covered against a real editor in
+    // list-join.test.ts, so nothing to join is the right answer here.
+    can() {
+      return { joinAdjacentLists: () => false }
+    }
+
     chain() {
       const api: any = {
         joinAdjacentLists: () => api,

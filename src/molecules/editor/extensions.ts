@@ -106,6 +106,7 @@ export interface StarterKitOptions {
   italic?: StarterKitMember<ItalicOptions>
   link?: false
   listItem?: StarterKitMember<ListItemOptions>
+  listJoin?: false
   listKeymap?: StarterKitMember<ListKeymapOptions>
   orderedList?: StarterKitMember<OrderedListOptions>
   paragraph?: StarterKitMember<ParagraphOptions>
@@ -156,10 +157,10 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     pushConfigured(list, ListItem, this.options.listItem)
     pushConfigured(list, ListKeymap, this.options.listKeymap)
     pushConfigured(list, OrderedList, this.options.orderedList)
-    // Re-merges lists that an edit split apart. Unconditional: it covers task
-    // lists too (added by RichTextKit, not here) and no-ops when the schema
-    // has no list node at all.
-    list.push(ListJoin)
+    // Re-merges lists that an edit split apart. Its own key rather than a
+    // bulletList/orderedList guard: it also covers task lists, which come from
+    // RichTextKit. Opt out to keep parsed HTML structurally untouched.
+    if (this.options.listJoin !== false) list.push(ListJoin)
     pushConfigured(list, Paragraph, this.options.paragraph)
     pushConfigured(list, Strike, this.options.strike)
     if (this.options.text !== false) list.push(Text)
