@@ -94,7 +94,7 @@ function buildCode(v: Record<string, any>) {
           v-if="hasPreview"
           :model-value="code"
           :language="language"
-          class="min-h-[4.5rem] rounded-md border border-surface-gray-2 p-3"
+          class="min-h-[4.5rem] rounded-5 border border-surface-gray-2 p-3"
         />
       </div>
     </template>

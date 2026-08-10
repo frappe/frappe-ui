@@ -666,7 +666,7 @@ function goHome() {
         <button
           v-for="item in nav"
           :key="item.label"
-          class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition"
+          class="flex w-full items-center gap-2 rounded-6 px-3 py-2.5 text-left transition"
           :class="
             item.label === activeNav
               ? 'bg-surface-gray-3'
@@ -698,7 +698,7 @@ function goHome() {
         <button
           v-for="action in activeItemActions"
           :key="action.label"
-          class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition hover:bg-surface-gray-2"
+          class="flex w-full items-center gap-2 rounded-6 px-3 py-2.5 text-left transition hover:bg-surface-gray-2"
           @click="runAction(action)"
         >
           <span

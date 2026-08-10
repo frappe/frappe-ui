@@ -20,7 +20,7 @@ function continueForm() {
 </script>
 
 <template>
-  <div class="w-full max-w-[400px] rounded-xl border border-outline-gray-1 p-4">
+  <div class="w-full max-w-[400px] rounded-7 border border-outline-gray-1 p-4">
     <Progress
       :value="percent"
       :label="steps[step]"

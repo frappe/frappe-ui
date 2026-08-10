@@ -34,6 +34,8 @@ function glob(pattern) {
 // - `experimental/TextEditor` (the v0 editor family, a supported root
 //   surface until #974, parked in #1007 while apps migrate to
 //   `frappe-ui/editor`)
+// - `experimental/Calendar` (a supported root surface until #1020, parked
+//   with its API unchanged until a redesigned calendar family replaces it)
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:
@@ -46,4 +48,5 @@ export const content = [
   glob('icons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/Calendar/**/*.{vue,js,ts,jsx,tsx}'),
 ]

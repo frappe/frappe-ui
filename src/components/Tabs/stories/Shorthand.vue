@@ -31,7 +31,7 @@ const tabs = [
       v-model="tab"
       :tabs="tabs"
       variant="subtle"
-      class="rounded border p-2"
+      class="rounded-4 border p-2"
     >
       <template #panel="{ tab: t }">
         <div class="p-4 text-base text-ink-gray-7">{{ t.content }}</div>

@@ -44,7 +44,7 @@ const modeButtons = [
         class="flex w-full items-center gap-4 py-4 text-left"
       >
         <div
-          class="size-16 shrink-0 rounded-lg bg-surface-elevation-2"
+          class="size-16 shrink-0 rounded-6 bg-surface-elevation-2"
           :class="`shadow-${row.name}`"
         ></div>
         <div class="grid gap-0.5 min-w-0 flex-1">

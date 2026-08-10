@@ -93,7 +93,7 @@
                       saveCaption(`${item.type}-${idx}`, idx)
                     "
                     @keydown.escape="cancelEditingCaption"
-                    class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-sm border-none outline-none"
+                    class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-1 border-none outline-none"
                     placeholder="Add caption..."
                     maxlength="200"
                   />
@@ -153,7 +153,7 @@
                         saveCaption(`${item.type}-${idx}`, idx)
                       "
                       @keydown.escape="cancelEditingCaption"
-                      class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded border-none outline-none"
+                      class="w-full text-xs bg-white/90 text-gray-900 px-1 py-0.5 rounded-4 border-none outline-none"
                       placeholder="Add caption..."
                       maxlength="200"
                     />
@@ -172,7 +172,7 @@
           class="flex flex-col items-center justify-center min-h-[200px]"
         >
           <div
-            class="w-full flex flex-1 flex-col items-center justify-center border border-outline-gray-2 rounded-lg bg-surface-gray-1 h-full cursor-pointer transition hover:border-primary-400 hover:bg-primary-50 text-center"
+            class="w-full flex flex-1 flex-col items-center justify-center border border-outline-gray-2 rounded-6 bg-surface-gray-1 h-full cursor-pointer transition hover:border-primary-400 hover:bg-primary-50 text-center"
             @click="triggerFileInput"
             @dragover.prevent
             @drop.prevent="onDrop"
@@ -189,7 +189,7 @@
           <div class="mb-2 text-sm">
             Uploading: {{ uploadedCount }}/{{ totalCount }}
           </div>
-          <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
+          <div class="w-full bg-gray-200 rounded-4 h-2 overflow-hidden">
             <div
               class="bg-surface-gray-8 h-2 transition-all"
               :style="{ width: uploadProgress + '%' }"

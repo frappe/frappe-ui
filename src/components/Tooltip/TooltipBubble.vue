@@ -51,7 +51,7 @@ defineSlots<{
       <div
         v-else
         data-slot="bubble"
-        class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
+        class="rounded-4 bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl"
       >
         <slot name="content">{{ text }}</slot>
       </div>

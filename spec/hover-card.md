@@ -187,7 +187,7 @@ entrance only puts motion between the press and the content. `HoverCard` was the
 last holdout, on the argument that a hover open is not on a latency path. That
 is true, but it is not worth being the only surface with its own rhythm.
 
-`PopoverPanel` owns the **shell only** (rounded-lg, `bg-surface-elevation-2`,
+`PopoverPanel` owns the **shell only** (rounded-6, `bg-surface-elevation-2`,
 shadow, ring + the `data-slot`/`data-state`/`data-motion` wiring). `HoverCard`
 renders its own `HoverCardContent` and its own contents inside `PopoverPanel`.
 It does not delegate behavior to the panel. This is the same DRY split applied

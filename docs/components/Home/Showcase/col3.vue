@@ -71,7 +71,7 @@ const toggledDiv = ref(false)
 
 <template>
   <section
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+    class="grid gap-5 *:rounded-4 *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="p-5 h-fit prose prose-sm">
       <Progress
@@ -96,7 +96,7 @@ const toggledDiv = ref(false)
           :key="tag"
           :theme="themes[tagIndex] || 'gray'"
           size="lg"
-          class="rounded-sm"
+          class="rounded-1"
         >
           {{ tag }}
         </Badge>
@@ -114,7 +114,7 @@ const toggledDiv = ref(false)
         <span class="ml-3 text-sm !text-ink-gray-9"> + 5 more </span>
       </div>
 
-      <div class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded pt-3">
+      <div class="grid grid-cols-2 mt-3 gap-3 *:py-4 border-t rounded-4 pt-3">
         <Button @click="decProgress">Back</Button>
         <Button @click="incProgress" variant="solid">Next</Button>
       </div>
@@ -126,7 +126,7 @@ const toggledDiv = ref(false)
           <LucideCoins class="size-4" />
           Price range
         </span>
-        <Badge size="lg" class="rounded-sm">
+        <Badge size="lg" class="rounded-1">
           ${{ slider2Val[0] * 10 }} - ${{ slider2Val[1] * 10 }}
         </Badge>
       </div>

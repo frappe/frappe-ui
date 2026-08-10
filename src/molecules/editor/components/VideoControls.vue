@@ -136,7 +136,7 @@ function onTrackPointerUp() {
 <template>
   <div
     v-if="videoEl && !hidden"
-    class="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded bg-black/65 px-2 py-1.5 transition-opacity"
+    class="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-4 bg-black/65 px-2 py-1.5 transition-opacity"
     :class="
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'

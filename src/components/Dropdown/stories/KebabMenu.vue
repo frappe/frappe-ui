@@ -53,7 +53,7 @@ function rowActions(task: Task): DropdownOptions {
 
 <template>
   <div
-    class="w-80 divide-y divide-outline-gray-1 rounded-lg border border-outline-gray-1 bg-surface-base"
+    class="w-80 divide-y divide-outline-gray-1 rounded-6 border border-outline-gray-1 bg-surface-base"
   >
     <div
       v-for="task in tasks"

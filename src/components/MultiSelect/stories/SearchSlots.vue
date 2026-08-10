@@ -35,7 +35,7 @@ function clearSearch(setQuery: (value: string) => void, focus: () => void) {
         v-if="query"
         type="button"
         aria-label="Clear search"
-        class="grid size-5 shrink-0 place-items-center rounded text-ink-gray-5 hover:bg-surface-gray-2 hover:text-ink-gray-8"
+        class="grid size-5 shrink-0 place-items-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-2 hover:text-ink-gray-8"
         @pointerdown.prevent
         @click="clearSearch(setQuery, focus)"
       >
@@ -43,7 +43,7 @@ function clearSearch(setQuery: (value: string) => void, focus: () => void) {
       </button>
       <kbd
         v-else
-        class="shrink-0 flex items-center justify-center rounded-sm size-5 border border-outline-gray-2 bg-surface-gray-1 text-p-xs text-ink-gray-5"
+        class="shrink-0 flex items-center justify-center rounded-1 size-5 border border-outline-gray-2 bg-surface-gray-1 text-p-xs text-ink-gray-5"
       >
         F
       </kbd>

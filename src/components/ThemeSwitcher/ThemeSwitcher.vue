@@ -38,7 +38,7 @@
         <div
           data-slot="option"
           :data-theme-option="option.value"
-          class="flex-1 max-w-[227px] min-h-[42px] cursor-pointer overflow-hidden rounded-lg border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+          class="flex-1 max-w-[227px] min-h-[42px] cursor-pointer overflow-hidden rounded-6 border outline-none transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
           :class="checked ? 'border-outline-gray-5' : 'border-outline-gray-modals'"
         >
           <ThemePreview

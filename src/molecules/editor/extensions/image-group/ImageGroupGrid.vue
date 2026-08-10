@@ -12,7 +12,7 @@
       @drop="onDrop(idx)"
       @dragend="onDragEnd"
       @dragleave="onDragLeave(idx)"
-      class="group cursor-grab rounded transition-opacity active:cursor-grabbing"
+      class="group cursor-grab rounded-4 transition-opacity active:cursor-grabbing"
       :class="{
         'ring-2 ring-outline-gray-4 ring-offset-1 z-10': isDropTarget(idx),
         'opacity-50': draggedIndex === idx,
@@ -20,7 +20,7 @@
     >
       <div class="relative">
         <div
-          class="absolute left-1 top-1 z-10 rounded bg-white/80 p-1 text-ink-gray-6 opacity-100 shadow-sm sm:opacity-0 sm:group-hover:opacity-100"
+          class="absolute left-1 top-1 z-10 rounded-4 bg-white/80 p-1 text-ink-gray-6 opacity-100 shadow-sm sm:opacity-0 sm:group-hover:opacity-100"
           aria-hidden="true"
         >
           <span class="lucide-grip size-3" />

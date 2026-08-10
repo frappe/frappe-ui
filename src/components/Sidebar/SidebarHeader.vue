@@ -7,7 +7,7 @@
     <Dropdown :options="props.menuItems" match-trigger-width>
       <template v-slot="{ open }">
         <button
-          class="flex h-10 items-center rounded px-1.5 duration-300 ease-in-out"
+          class="flex h-10 items-center rounded-4 px-1.5 duration-300 ease-in-out"
           :class="
             isCollapsed
               ? 'w-auto'

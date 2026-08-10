@@ -2,7 +2,7 @@
   <div
     data-slot="sidebar-item"
     :data-state="resolvedActive ? 'active' : 'inactive'"
-    class="group/sidebar-item flex h-7 items-center rounded transition"
+    class="group/sidebar-item flex h-7 items-center rounded-4 transition"
     :class="
       resolvedActive
         ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
@@ -24,7 +24,7 @@
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -63,7 +63,7 @@
       type="button"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
-      class="flex h-full text-left min-w-0 flex-1 items-center rounded pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full text-left min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip

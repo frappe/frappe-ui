@@ -52,7 +52,7 @@ function buildCode(v: Record<string, any>) {
     '  <template #panel="{ tab }">',
     '    <div class="' +
       (v.vertical ? 'ms-3 flex-1' : 'mt-3') +
-      ' rounded-lg border border-outline-gray-1 p-4 text-ink-gray-7">',
+      ' rounded-6 border border-outline-gray-1 p-4 text-ink-gray-7">',
     '      {{ tab.label }} content',
     '    </div>',
     '  </template>',
@@ -79,7 +79,7 @@ function tabsFor(icons: boolean) {
         >
           <template #panel="{ tab }">
             <div
-              class="min-h-[80px] rounded-lg border border-outline-gray-1 p-4 text-base text-ink-gray-7"
+              class="min-h-[80px] rounded-6 border border-outline-gray-1 p-4 text-base text-ink-gray-7"
               :class="values.vertical ? 'ms-3 flex-1' : 'mt-3'"
             >
               {{ tab.label }} content

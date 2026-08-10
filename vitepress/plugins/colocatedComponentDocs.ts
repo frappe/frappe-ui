@@ -57,20 +57,47 @@ interface Entry {
   proxyDir: string // absolute path to the proxy root that owns this entry
 }
 
+// Two source layouts, one page either way:
+//   <sourceDir>/Button/Button.md   — a folder that documents itself
+//   <sourceDir>/docs/BarChart.md   — a family whose components each own a page,
+//                                    because one page cannot carry nine APIs
+// propsgen reads the same `docs/` rule to place its `<Name>.api.md` tables.
 function discover(sourceDir: string, proxyDir: string): Entry[] {
   if (!fs.existsSync(sourceDir)) return []
   const entries: Entry[] = []
-  for (const name of fs.readdirSync(sourceDir)) {
-    const source = path.join(sourceDir, name, `${name}.md`)
-    if (!fs.existsSync(source)) continue
+  const add = (name: string, source: string) =>
     entries.push({
       name,
       source,
       proxy: path.join(proxyDir, `${name.toLowerCase()}.md`),
       proxyDir,
     })
+
+  const pagesDir = path.join(sourceDir, 'docs')
+  if (fs.existsSync(pagesDir)) {
+    for (const file of fs.readdirSync(pagesDir)) {
+      // `.api.md` is the generated table the page next to it includes.
+      if (!file.endsWith('.md') || file.endsWith('.api.md')) continue
+      add(path.basename(file, '.md'), path.join(pagesDir, file))
+    }
+  }
+
+  for (const name of fs.readdirSync(sourceDir)) {
+    const source = path.join(sourceDir, name, `${name}.md`)
+    if (!fs.existsSync(source)) continue
+    add(name, source)
   }
   return entries
+}
+
+// VitePress drops an included file's frontmatter, so a page that needs one
+// (`outline: false`, to clear the aside for a wide preview) declares it at the
+// top of the source and the proxy carries it up.
+function leadingFrontmatter(source: string) {
+  const content = fs.readFileSync(source, 'utf-8')
+  if (!content.startsWith('---\n')) return ''
+  const end = content.indexOf('\n---\n', 3)
+  return end === -1 ? '' : content.slice(0, end + 5)
 }
 
 function proxyContent(entry: Entry) {
@@ -82,13 +109,13 @@ function proxyContent(entry: Entry) {
     .relative(entry.proxyDir, entry.source)
     .split(path.sep)
     .join('/')
-  return `${PROXY_HEADER}${sourceRel} -->\n<!-- @include: ${includePath} -->\n`
+  return `${leadingFrontmatter(entry.source)}${PROXY_HEADER}${sourceRel} -->\n<!-- @include: ${includePath} -->\n`
 }
 
 function isManagedProxy(filePath: string) {
   if (!fs.existsSync(filePath)) return false
-  const first = fs.readFileSync(filePath, 'utf-8').split('\n', 1)[0] ?? ''
-  return first.startsWith(PROXY_HEADER)
+  // Not just the first line: a proxy may open with lifted frontmatter.
+  return fs.readFileSync(filePath, 'utf-8').includes(PROXY_HEADER)
 }
 
 function writeIfChanged(filePath: string, content: string) {

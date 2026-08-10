@@ -18,7 +18,7 @@ const _data = props.data.slice(0, props.data.length - 2)
 
       <div v-else class="grid gap-2">
         <div
-          class="rounded border-2 flex items-end p-5"
+          class="rounded-4 border-2 flex items-end p-5"
           :style="{ borderColor: color.value }"
         ></div>
         <span>{{ color.name }}</span>

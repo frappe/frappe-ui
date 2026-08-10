@@ -13,10 +13,10 @@ export type SelectionVariant = 'subtle' | 'outline' | 'ghost'
 
 export function triggerSizeClasses(size: SelectionSize) {
   return {
-    sm: 'min-h-7 rounded px-2',
-    md: 'min-h-8 rounded px-2.5',
-    lg: 'min-h-10 rounded-md px-3',
-    xl: 'min-h-10 rounded-md px-3',
+    sm: 'min-h-7 rounded-4 px-2',
+    md: 'min-h-8 rounded-4 px-2.5',
+    lg: 'min-h-10 rounded-5 px-3',
+    xl: 'min-h-10 rounded-5 px-3',
   }[size]
 }
 
@@ -76,7 +76,7 @@ export const triggerBaseClassesFocusWithin =
   'relative inline-flex items-center gap-2 text-left text-ink-gray-7 outline-none transition-[background-color,border-color,box-shadow] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-within:focus-ring data-[state=open]:focus-ring'
 
 export const itemClasses =
-  'select-none rounded border-0 text-base text-ink-gray-9 transition-colors duration-100 ease-out data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-alpha-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4'
+  'select-none rounded-4 border-0 text-base text-ink-gray-9 transition-colors duration-100 ease-out data-[disabled]:text-ink-gray-4 data-[highlighted]:bg-surface-alpha-gray-2 data-[state=checked]:bg-surface-gray-3 data-[highlighted]:data-[state=checked]:bg-surface-gray-4'
 
 /**
  * Case-insensitive substring match against an option's label and value.

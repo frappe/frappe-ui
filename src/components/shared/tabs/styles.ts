@@ -33,12 +33,12 @@ export function tabTrackClasses(opts: {
       // sits next to the track.
       return [
         'bg-surface-gray-2 overflow-hidden',
-        isSm ? 'gap-1 rounded p-px' : 'gap-1.5 rounded-[10px] p-px',
+        isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-[10px] p-px',
       ]
     case 'ghost':
       return [
         'bg-surface-base',
-        isSm ? 'gap-1 rounded p-px' : 'gap-1.5 rounded-md p-0.5',
+        isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-5 p-0.5',
       ]
     case 'underline':
       return vertical
@@ -128,7 +128,7 @@ export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60'
 
 /**
- * Trigger radius: 8px (`rounded`) at md, 7px at sm. Browser tabs round the
+ * Trigger radius: 8px (`rounded-4`) at md, 7px at sm. Browser tabs round the
  * detached corners at 8px in both sizes; the attached edge stays square.
  */
 export function tabRadiusClasses(
@@ -143,9 +143,9 @@ export function tabRadiusClasses(
     return size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
   }
   if (variant === 'browser-tab') {
-    if (browserTabBase === 'left') return 'rounded-r'
-    if (browserTabBase === 'right') return 'rounded-l'
-    if (browserTabBase === 'default') return 'rounded-t'
+    if (browserTabBase === 'left') return 'rounded-r-4'
+    if (browserTabBase === 'right') return 'rounded-l-4'
+    if (browserTabBase === 'default') return 'rounded-t-4'
   }
-  return size === 'sm' ? 'rounded-[7px]' : 'rounded'
+  return size === 'sm' ? 'rounded-[7px]' : 'rounded-4'
 }

@@ -76,6 +76,8 @@ the public names are `DialogAction` (context `{ close }`) and `AlertAction`
 (context `{ dismiss }`, shared with SidebarCard). Gets reactive
 `loading` state while its async `onClick` runs.
 Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
+Charts take no action prop — a chart header renders caller-supplied
+buttons through the `#actions` slot (spec/charts.md).
 
 **content-driven layout** (Alert):
 Alert has no `layout` prop. It renders as a single-line `row`; a `description` (prop

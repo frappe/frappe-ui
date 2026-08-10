@@ -18,7 +18,7 @@
   >
     <div
       data-slot="row"
-      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-md px-1.5"
+      class="frappe-tree-row group/row relative flex items-center gap-1.5 rounded-5 px-1.5"
       :class="[
         ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
         // When the row is fully overridden via #item, the consumer owns its hover/selected surface
@@ -42,7 +42,7 @@
           type="button"
           data-slot="toggle"
           :data-state="expanded ? 'expanded' : 'collapsed'"
-          class="flex size-5 shrink-0 items-center justify-center rounded text-ink-gray-5 hover:bg-surface-gray-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+          class="flex size-5 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
           :aria-label="expanded ? 'Collapse' : 'Expand'"
           tabindex="-1"
           @click.stop="ctx.toggle(node)"

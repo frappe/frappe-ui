@@ -22,7 +22,7 @@
           >
             <button
               :aria-label="color.name"
-              class="flex h-5 w-5 items-center justify-center rounded border text-base"
+              class="flex h-5 w-5 items-center justify-center rounded-4 border text-base"
               :class="color.class"
               @click="setForegroundColor(color)"
             >
@@ -40,7 +40,7 @@
           >
             <button
               :aria-label="color.name"
-              class="flex h-5 w-5 items-center justify-center rounded border text-base text-ink-gray-9"
+              class="flex h-5 w-5 items-center justify-center rounded-4 border text-base text-ink-gray-9"
               :class="color.class"
               @click="setBackgroundColor(color)"
             >

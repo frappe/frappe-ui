@@ -47,7 +47,7 @@ const leads = [
 
 <template>
   <div
-    class="w-full max-w-[640px] overflow-hidden rounded-lg border border-outline-gray-1 bg-surface-base shadow-sm"
+    class="w-full max-w-[640px] overflow-hidden rounded-6 border border-outline-gray-1 bg-surface-base shadow-sm"
   >
     <div class="flex items-center justify-between border-b border-outline-gray-1 px-3 py-2.5">
       <h3 class="m-0 text-base-medium text-ink-gray-8">Lead pipeline</h3>
@@ -71,7 +71,7 @@ const leads = [
       >
         <div class="flex min-w-0 items-center gap-2">
           <div
-            class="flex size-6 shrink-0 items-center justify-center rounded bg-surface-gray-2 text-xs-medium text-ink-gray-6"
+            class="flex size-6 shrink-0 items-center justify-center rounded-4 bg-surface-gray-2 text-xs-medium text-ink-gray-6"
           >
             {{ lead.name.slice(0, 1) }}
           </div>

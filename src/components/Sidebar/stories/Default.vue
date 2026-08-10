@@ -51,15 +51,15 @@ const sortOptions = [
 </script>
 
 <template>
-  <div class="flex h-[560px] w-fit overflow-hidden rounded-md border">
+  <div class="flex h-[560px] w-fit overflow-hidden rounded-5 border">
     <Sidebar disable-collapse width="14rem">
       <!-- App switcher — the app owns the header. -->
       <div class="flex shrink-0 items-center p-2">
         <button
-          class="flex h-8 w-full items-center gap-2 rounded px-1 transition hover:bg-surface-gray-2"
+          class="flex h-8 w-full items-center gap-2 rounded-4 px-1 transition hover:bg-surface-gray-2"
         >
           <div
-            class="grid size-6 shrink-0 place-items-center rounded bg-surface-gray-7 text-xs font-medium text-ink-white"
+            class="grid size-6 shrink-0 place-items-center rounded-4 bg-surface-gray-7 text-xs font-medium text-ink-white"
           >
             F
           </div>

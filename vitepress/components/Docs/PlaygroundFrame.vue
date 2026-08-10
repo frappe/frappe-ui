@@ -104,7 +104,7 @@ function onCopy() {
 <template>
   <div class="not-prose">
     <div
-      class="overflow-hidden rounded-xl border border-outline-gray-1 divide-y divide-outline-gray-1"
+      class="overflow-hidden rounded-7 border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
         class="flex items-center justify-center bg-surface-base p-8 dot-grid"
@@ -116,7 +116,6 @@ function onCopy() {
       <div
         class="flex flex-col gap-6 bg-surface-gray-1 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-10"
       >
-        <!-- Left column: text fields and tab groups -->
         <div v-if="rowKnobs.length" class="flex flex-col gap-3">
           <div v-for="knob in rowKnobs" :key="knob.name" class="knob-row">
             <span class="knob-label">{{ knob.name }}</span>
@@ -134,7 +133,6 @@ function onCopy() {
             />
           </div>
         </div>
-        <!-- Right column: toggles, stacked top to bottom -->
         <div
           v-if="switchKnobs.length"
           class="flex flex-col gap-3 sm:w-48 sm:shrink-0"

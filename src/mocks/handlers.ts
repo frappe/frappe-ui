@@ -136,7 +136,9 @@ export const handlers = [
     url('/api/v2/document/User/:name/method/:method'),
     async ({ request, params }) => {
       let body = await readBody(request)
-      await delayIfSlow(params.name, params.method)
+      // Body values count too: `useDoc` methods always target one document,
+      // so two concurrent submits differ only in their body.
+      await delayIfSlow(params.name, params.method, ...Object.values(body))
       return HttpResponse.json({
         data: { name: params.name, method: params.method, ...body },
       })
@@ -145,7 +147,13 @@ export const handlers = [
 
   http.put(url('/api/v2/document/User/:name'), async ({ request, params }) => {
     let body = await readBody(request)
-    await delayIfSlow(params.name)
+    // Body values count too: `useDoc().setValue` always targets one document,
+    // so two concurrent submits differ only in their body. A body value
+    // ending in `fail` fails the request, same as a doc name would.
+    await delayIfSlow(params.name, ...Object.values(body))
+    if (Object.values(body).some((value) => String(value).endsWith('fail'))) {
+      return methodError(`setValue ${params.name}`)
+    }
     return HttpResponse.json({
       data: { ...body, name: params.name },
     })

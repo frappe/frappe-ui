@@ -87,7 +87,8 @@ Core set:
 
 ### Explicitly not core for v1
 
-- Calendar
+- Calendar — moved from root to `frappe-ui/experimental` (#1020, P14). Parked
+  as-is, API unchanged, until a redesigned calendar family replaces it.
 - Resource
 
 These can still exist in the package, but they are not part of the v1 stabilization contract.
@@ -496,6 +497,7 @@ These are important, but should not block v1 unless they land naturally earlier.
 
 - TextEditor table editing UX improvements
 - Calendar stabilization and future promotion into the core set if appropriate
+  (the v0 family is parked in `frappe-ui/experimental` meanwhile, #1020)
 - deeper component coverage beyond the baseline docs/stories/tests standard
 
 ### Ecosystem

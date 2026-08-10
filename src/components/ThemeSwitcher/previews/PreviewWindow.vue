@@ -10,7 +10,7 @@
       viewBox="0 0 207 68"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      class="block h-auto rounded-tl-sm"
+      class="block h-auto rounded-tl-1"
       :class="{ 'w-full': fill }"
     >
       <path d="M0 4C0 1.79086 1.79086 0 4 0H207V83H0V4Z" :fill="colors.background" />

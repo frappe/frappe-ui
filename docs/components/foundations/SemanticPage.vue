@@ -122,7 +122,7 @@ const sections = computed(() =>
         >
           <Tooltip :hover-delay="0">
             <div
-              class="size-8 rounded-md shrink-0"
+              class="size-8 rounded-5 shrink-0"
               :style="{ background: entry.value }"
             ></div>
             <template #content>

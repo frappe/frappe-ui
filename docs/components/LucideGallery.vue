@@ -79,7 +79,7 @@ const filteredIcons = computed(() => {
             :text="icon.name"
           >
             <div
-              class="flex size-14 cursor-pointer items-center justify-center rounded text-ink-gray-7 hover:bg-surface-gray-2"
+              class="flex size-14 cursor-pointer items-center justify-center rounded-4 text-ink-gray-7 hover:bg-surface-gray-2"
               @click="copyName(icon.name)"
             >
               <span class="size-6 [&>svg]:size-full" v-html="icon.svg" />

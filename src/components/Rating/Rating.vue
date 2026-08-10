@@ -17,7 +17,7 @@
     <div
       :id="inputId"
       ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-sm"
+      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-1"
       :class="hasLabeling ? null : (attrs.class as any)"
       :style="hasLabeling ? null : (attrs.style as any)"
       :role="isSliderMode ? 'slider' : 'radiogroup'"
@@ -42,7 +42,7 @@
         v-for="index in starCount"
         :key="index"
         type="button"
-        class="rating-star relative inline-flex shrink-0 rounded-sm"
+        class="rating-star relative inline-flex shrink-0 rounded-1"
         :class="[sizeClass, isDisabled ? 'cursor-default' : 'cursor-pointer']"
         data-slot="star"
         :data-index="index"

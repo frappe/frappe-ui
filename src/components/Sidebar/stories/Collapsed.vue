@@ -17,7 +17,7 @@ const items = [
 </script>
 
 <template>
-  <div class="flex h-[360px] w-fit overflow-hidden rounded-md border">
+  <div class="flex h-[360px] w-fit overflow-hidden rounded-5 border">
     <!-- v-model:collapsed is app state; SidebarCollapseToggle flips it. -->
     <Sidebar v-model:collapsed="collapsed">
       <div class="flex-1 overflow-y-auto px-2 pt-2">

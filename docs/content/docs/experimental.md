@@ -26,6 +26,20 @@ import { Accordion } from 'frappe-ui/experimental'
 See the [Accordion page](/docs/experimental/accordion) for examples and the full
 API reference.
 
+## Calendar
+
+A date and event view with Month, Week, and Day modes: event CRUD, drag and
+resize, keyboard shortcuts, and a replaceable header and event popover. Moved
+here from root in `1.0.0` with its public API unchanged; it stays, unstable,
+until a redesigned calendar family replaces it.
+
+```ts
+import { Calendar } from 'frappe-ui/experimental'
+```
+
+See the [Calendar page](/docs/experimental/calendar) for examples and the
+full API reference.
+
 ## CodeEditor
 
 A CodeMirror 6 code field with syntax highlighting and an optional sanitized
