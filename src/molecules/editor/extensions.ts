@@ -156,10 +156,10 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     pushConfigured(list, ListItem, this.options.listItem)
     pushConfigured(list, ListKeymap, this.options.listKeymap)
     pushConfigured(list, OrderedList, this.options.orderedList)
-    // Re-merges lists that an edit split apart; harmless when no list node
-    // is in the schema, so it rides along with any list at all.
-    if (this.options.bulletList !== false || this.options.orderedList !== false)
-      list.push(ListJoin)
+    // Re-merges lists that an edit split apart. Unconditional: it covers task
+    // lists too (added by RichTextKit, not here) and no-ops when the schema
+    // has no list node at all.
+    list.push(ListJoin)
     pushConfigured(list, Paragraph, this.options.paragraph)
     pushConfigured(list, Strike, this.options.strike)
     if (this.options.text !== false) list.push(Text)
@@ -222,6 +222,12 @@ export const Heading = HeadingExtension
  * Registered alongside `Heading` in the kits; `collectHeadings` reads its ids.
  */
 export const HeadingIds = HeadingIdsExtension
+/**
+ * Re-merges adjacent same-kind lists (bullet, ordered, task) that an edit split
+ * apart, so ordered-list numbering never restarts mid-list. In `StarterKit`;
+ * exported for anyone assembling extensions by hand.
+ */
+export { ListJoin }
 // frappe-ui's link: inline edit popup, Mod-k shortcut, smart paste handling, and
 // boundary clearing. Already defaults openOnClick:false / autolink:true.
 export const Link = LinkExtension

@@ -1,8 +1,9 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { Editor } from '@tiptap/core'
+import { RichTextKit } from '../../kits'
 import { StarterKit } from '../../extensions'
 
 function editorWith(content: string) {
@@ -127,6 +128,59 @@ describe('ListJoin', () => {
     expect(lists).toHaveLength(1)
     expect(lists[0].attrs!.start).toBe(5)
     expect(lists[0].content).toHaveLength(2)
+  })
+
+  it('repairs a document that arrives already split', () => {
+    // Initial content is parsed without a transaction, so only the view-init
+    // pass can fix a document saved back when the bug was live.
+    const editor = editorWith(
+      '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
+    )
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].content).toHaveLength(2)
+  })
+
+  it('does not mark a document dirty when repairing it on load', () => {
+    const onUpdate = vi.fn()
+    new Editor({
+      extensions: [StarterKit],
+      content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
+      onUpdate,
+    })
+    expect(onUpdate).not.toHaveBeenCalled()
+  })
+
+  it('merges adjacent task lists, which only RichTextKit enables', () => {
+    const taskList = (text: string) =>
+      `<ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>${text}</p></li></ul>`
+    const editor = new Editor({
+      extensions: [RichTextKit],
+      content: taskList('a') + taskList('b'),
+    })
+    const lists = editor.getJSON().content!.filter((n) => n.type === 'taskList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].content).toHaveLength(2)
+  })
+
+  it('reverts the join and the edit together on a single undo', () => {
+    const editor = editorWith(
+      '<ol><li><p>a</p></li></ol><p></p><ol><li><p>b</p></li></ol>',
+    )
+    const pos = emptyParagraphPos(editor)
+    editor.commands.deleteRange({ from: pos - 1, to: pos + 1 })
+    expect(
+      editor.getJSON().content!.filter((n) => n.type === 'orderedList'),
+    ).toHaveLength(1)
+
+    // One undo, not two: the join rides on the user's own history entry.
+    editor.commands.undo()
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(2)
   })
 
   it('merges nested lists split inside a list item', () => {
