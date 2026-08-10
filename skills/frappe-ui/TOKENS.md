@@ -8,7 +8,9 @@ Three semantic categories — each takes a color + numeric step. Higher = strong
 
 ### `text-ink-*` (foreground / text & icons)
 
-`base | gray-1..9 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..10 | blue-link`
+`base | gray-1..9 | {red,green,amber,blue,cyan,pink,violet,orange,purple,teal,yellow}-1..9 | blue-link`
+
+Ink and surface chromatic ramps no longer share numeric steps (`ink-red-5` is red/500, `surface-red-5` stays red/400) — existing pairings render the same, but the numbers are not interchangeable across categories.
 
 - `text-ink-gray-9` — primary text (headings, body).
 - `text-ink-gray-7` — secondary text.
