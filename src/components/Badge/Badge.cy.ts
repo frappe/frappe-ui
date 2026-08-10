@@ -106,6 +106,17 @@ describe('<Badge />', () => {
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-base')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-gray-10')
 
+    // Solid with a chromatic theme uses white text
+    cy.mount(Badge, {
+      props: {
+        theme: 'red',
+        variant: 'solid',
+        label: 'Solid red',
+      },
+    })
+    cy.get('.inline-flex.rounded-full').should('have.class', 'text-white')
+    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-red-7')
+
     // Subtle (default)
     cy.mount(Badge, {
       props: {
