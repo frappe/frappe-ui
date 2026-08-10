@@ -261,9 +261,18 @@ function readCell(index: number) {
     : ''
 }
 
+/** Takes the emphasis off the cell the cursor has left. */
+function downplayCell(index: number | null) {
+  if (index === null) return
+  dispatch({ type: 'downplay', seriesIndex: 0, dataIndex: index })
+}
+
 const keyboard = usePlotKeyboard({
   count: () => matrix.value.cells.length,
-  move: readCell,
+  move: (index, previous) => {
+    downplayCell(previous)
+    readCell(index)
+  },
   // The column the cursor is in, one row along. A grid with a hole in it skips
   // nothing sideways, so the vertical step is the one that has to look.
   cross: (delta) => {
@@ -275,8 +284,7 @@ const keyboard = usePlotKeyboard({
         cell.xIndex === from.xIndex && cell.yIndex === from.yIndex + delta,
     )
     if (next < 0) return
-    keyboard.index.value = next
-    readCell(next)
+    keyboard.goTo(next)
   },
   activate: (index) => {
     const cell = matrix.value.cells[index]
@@ -288,14 +296,8 @@ const keyboard = usePlotKeyboard({
       row: cell.row,
     })
   },
-  clear: () => {
-    if (keyboard.index.value !== null) {
-      dispatch({
-        type: 'downplay',
-        seriesIndex: 0,
-        dataIndex: keyboard.index.value,
-      })
-    }
+  clear: (previous) => {
+    downplayCell(previous)
     tooltip.open = false
     reading.value = ''
   },

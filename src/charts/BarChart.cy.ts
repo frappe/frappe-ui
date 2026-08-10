@@ -552,6 +552,16 @@ describe('BarChart', () => {
       })
     })
 
+    // A press focuses the plot as well. Putting the cursor on the first
+    // category there would pull the tooltip off the bar under the pointer.
+    it('holds the cursor back when a pointer causes the focus', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      plot().trigger('pointerdown')
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+    })
+
     it('clears the tooltip and the reading on blur', () => {
       mountChart()
       bars().should('have.length', data.length * 2)

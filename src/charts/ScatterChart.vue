@@ -371,9 +371,23 @@ function readPoint(index: number) {
   )
 }
 
+/** Takes the emphasis off the point the cursor has left. */
+function downplayPoint(index: number | null) {
+  const hit = index === null ? undefined : walk.value[index]
+  if (!hit) return
+  dispatch({
+    type: 'downplay',
+    seriesIndex: hit.seriesIndex,
+    dataIndex: hit.dataIndex,
+  })
+}
+
 const keyboard = usePlotKeyboard({
   count: () => walk.value.length,
-  move: readPoint,
+  move: (index, previous) => {
+    downplayPoint(previous)
+    readPoint(index)
+  },
   activate: (index) => {
     const hit = walk.value[index]
     if (!hit) return
@@ -386,18 +400,8 @@ const keyboard = usePlotKeyboard({
       row: hit.point.row,
     })
   },
-  clear: () => {
-    const hit =
-      keyboard.index.value === null
-        ? undefined
-        : walk.value[keyboard.index.value]
-    if (hit) {
-      dispatch({
-        type: 'downplay',
-        seriesIndex: hit.seriesIndex,
-        dataIndex: hit.dataIndex,
-      })
-    }
+  clear: (previous) => {
+    downplayPoint(previous)
     tooltip.open = false
     reading.value = ''
   },

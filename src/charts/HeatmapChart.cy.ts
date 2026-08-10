@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import HeatmapChart from './HeatmapChart.vue'
 import './style.css'
 
@@ -228,6 +228,26 @@ describe('HeatmapChart', () => {
         y: 'Mon',
         value: 8,
         row: { day: 'Mon', hour: '10am', tickets: 8 },
+      })
+    })
+
+    // One cursor, not a trail: the cell the cursor leaves goes back to rest,
+    // and so does the last one when focus leaves the grid.
+    it('takes the emphasis off the cell the cursor leaves', () => {
+      const chart = ref<any>(null)
+      mountChart({ ref: chart })
+      cells().should('have.length', data.length)
+      cy.then(() => cy.spy(chart.value.chart, 'dispatchAction').as('dispatch'))
+      plot().focus()
+      plot().type('{rightarrow}')
+      cy.get('@dispatch').should('have.been.calledWithMatch', {
+        type: 'downplay',
+        dataIndex: 0,
+      })
+      plot().blur()
+      cy.get('@dispatch').should('have.been.calledWithMatch', {
+        type: 'downplay',
+        dataIndex: 1,
       })
     })
 

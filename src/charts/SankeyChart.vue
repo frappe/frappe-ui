@@ -259,9 +259,23 @@ function readLink(index: number) {
   )
 }
 
+/** Takes the emphasis off the link the cursor has left. */
+function downplayLink(index: number | null) {
+  if (index === null) return
+  dispatch({
+    type: 'downplay',
+    seriesIndex: 0,
+    dataType: 'edge',
+    dataIndex: index,
+  })
+}
+
 const keyboard = usePlotKeyboard({
   count: () => graph.value.links.length,
-  move: readLink,
+  move: (index, previous) => {
+    downplayLink(previous)
+    readLink(index)
+  },
   activate: (index) => {
     const link = graph.value.links[index]
     if (!link) return
@@ -272,15 +286,8 @@ const keyboard = usePlotKeyboard({
       row: link.row,
     })
   },
-  clear: () => {
-    if (keyboard.index.value !== null) {
-      dispatch({
-        type: 'downplay',
-        seriesIndex: 0,
-        dataType: 'edge',
-        dataIndex: keyboard.index.value,
-      })
-    }
+  clear: (previous) => {
+    downplayLink(previous)
     tooltip.open = false
     reading.value = ''
   },
