@@ -72,10 +72,11 @@ const orderedTriggers = computed(() =>
   }),
 )
 
+// Undefined when every trigger is disabled: nothing is selected, rather than
+// falling back to a tab the user cannot reach. Same rule as route mode with no
+// match — a disabled trigger counts as absent everywhere.
 function firstSelectable(): TabValue | undefined {
-  const list = orderedTriggers.value
-  const trigger = list.find((t) => !t.disabled()) ?? list[0]
-  return trigger?.value()
+  return orderedTriggers.value.find((t) => !t.disabled())?.value()
 }
 
 const modelBound = computed(() => props.modelValue !== undefined)

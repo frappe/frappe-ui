@@ -160,7 +160,8 @@ interface TabTriggerProps {
 - disabled triggers are skipped by keyboard navigation and cannot be selected.
   A disabled trigger counts as absent everywhere selection is resolved: a
   `v-model` pointing at one falls back to the first selectable trigger and
-  emits, and disabling the selected trigger moves selection off it the same way
+  emits, and disabling the selected trigger moves selection off it the same
+  way. An all-disabled list selects nothing and emits nothing
 
 Slots:
 

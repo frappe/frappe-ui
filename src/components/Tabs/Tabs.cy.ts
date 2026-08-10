@@ -213,6 +213,28 @@ describe('Tabs', () => {
       })
   })
 
+  it('selects nothing when every trigger is disabled', () => {
+    const onUpdate = cy.spy().as('onUpdate')
+    cy.mount(Tabs, {
+      props: {
+        'onUpdate:modelValue': onUpdate,
+        tabs: [
+          { value: 'home', label: 'Home', disabled: true },
+          { value: 'activity', label: 'Activity', disabled: true },
+        ],
+      },
+    })
+
+    // No tab is reachable, so none may be shown as selected and no value may
+    // be handed to a controlled model.
+    cy.get('[role=tab]').each(($el) => {
+      cy.wrap($el)
+        .find('[data-state]')
+        .should('have.attr', 'data-state', 'inactive')
+    })
+    cy.get('@onUpdate').should('not.have.been.called')
+  })
+
   it('does not start on a disabled trigger the model points at', () => {
     const model = ref('activity')
     cy.mount(Tabs, {
