@@ -54,23 +54,24 @@ if (import.meta.env.DEV) {
 // SSR-consistent; document-order sorting kicks in once elements mount.
 const triggers = shallowRef<TabTriggerRegistration[]>([])
 
-// Route mode, mixed lists: the value of a non-route trigger the user clicked.
-// Such a trigger has nothing to navigate to, so the route can never represent
-// it — without this it would either sit unselectable behind a matching route
+// Route mode, mixed lists: the non-route trigger the user clicked. Such a
+// trigger has nothing to navigate to, so the route can never represent it —
+// without this it would either sit unselectable behind a matching route
 // trigger or emit a value the root does not show. The click wins until the
-// route moves again, the trigger stops being selectable, or it unregisters.
-const routeOverride = ref<TabValue | undefined>(undefined)
+// route moves again, the trigger turns disabled, or it unregisters.
+//
+// This holds the registration, not its value: `value` is a live prop, so a
+// value-keyed override would survive a trigger renaming itself and could then
+// be claimed by an unrelated trigger that later took the old value.
+const routeOverride = shallowRef<TabTriggerRegistration | null>(null)
 
 function register(trigger: TabTriggerRegistration) {
   triggers.value = [...triggers.value, trigger]
   return () => {
     triggers.value = triggers.value.filter((t) => t !== trigger)
     // The override leaves with its trigger. A `condition` that flips back
-    // remounts the same value, and a stale override would let that tab
-    // silently reclaim selection from the route.
-    if (routeOverride.value === trigger.value()) {
-      routeOverride.value = undefined
-    }
+    // remounts an identical trigger, which must not reclaim selection.
+    if (routeOverride.value === trigger) routeOverride.value = null
   }
 }
 
@@ -122,17 +123,15 @@ function triggerFor(value: TabValue) {
 }
 
 watch(routeSelected, () => {
-  routeOverride.value = undefined
+  routeOverride.value = null
 })
 
 const selected = computed<TabValue | undefined>(() => {
   if (routeMode.value) {
-    // The override is dropped once its trigger goes away or turns disabled,
-    // so a tab the user can no longer select cannot stay active.
-    const override =
-      routeOverride.value !== undefined
-        ? triggerFor(routeOverride.value)
-        : undefined
+    // The override is dropped once its trigger turns disabled, so a tab the
+    // user can no longer select cannot stay active. Unregistering clears it
+    // in `register`'s cleanup.
+    const override = routeOverride.value
     if (override && !override.disabled()) return override.value()
     const fromRoute = routeSelected.value
     if (fromRoute !== undefined) return fromRoute
@@ -201,13 +200,14 @@ function onRekaUpdate(value: TabValue) {
   if (routeMode.value) {
     // Clicking a route trigger navigates; the route drives selection from
     // here and no model update is emitted. Hand selection back to it.
-    if (triggerFor(value)?.hasRoute()) {
-      routeOverride.value = undefined
+    const trigger = triggerFor(value)
+    if (trigger?.hasRoute()) {
+      routeOverride.value = null
       return
     }
     // A non-route trigger has no route to follow, so the click selects it
     // directly even while a route matches elsewhere in the list.
-    routeOverride.value = value
+    routeOverride.value = trigger ?? null
   }
   internalValue.value = value
   emit('update:modelValue', value)

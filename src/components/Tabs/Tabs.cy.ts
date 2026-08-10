@@ -558,6 +558,43 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'inactive')
   })
 
+  it('keeps route-mode selection on a trigger that changes its value', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/inbox', component: { template: '<div />' } }],
+    })
+
+    const draftsValue = ref('drafts')
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: draftsValue.value, label: 'Drafts' }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    // The override tracks the trigger, not the value it had when clicked, so
+    // renaming it keeps the same tab selected instead of dropping back to the
+    // route and leaving the old value loose for another trigger to claim.
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.then(() => {
+      draftsValue.value = 'drafts-2'
+    })
+    // Wait for the rename to reach the DOM before reading the state, or the
+    // assertion passes on the pre-update render and proves nothing.
+    cy.contains('[role=tab]', 'Drafts')
+      .should('have.attr', 'id')
+      .and('contain', 'drafts-2')
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+  })
+
   it('does not let a remounted conditional tab reclaim route-mode selection', () => {
     const router = createRouter({
       history: createMemoryHistory(),
