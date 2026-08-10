@@ -243,6 +243,9 @@ A trigger with `route` renders as a `RouterLink`.
 - lists may mix route and non-route triggers. A non-route trigger has nothing
   to navigate, so clicking it selects it and emits `update:modelValue`, even
   while a route matches elsewhere. The next navigation takes selection back
+- when no route matches, selection falls back to the first selectable
+  non-route trigger. An all-route list starts with nothing selected —
+  highlighting a trigger would claim a route the app is not on
 - a `route` added after the trigger mounts does nothing — `useLink` runs at
   setup only. DEV warns; remount with a `:key` to change it
 - panels are usually omitted in route mode; the app places a `<router-view>`

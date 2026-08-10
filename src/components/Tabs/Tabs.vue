@@ -121,10 +121,15 @@ const selected = computed<TabValue | undefined>(() => {
   if (routeMode.value) {
     const override = routeOverride.value
     if (override !== undefined && triggerFor(override)) return override
-    // No route matches and nothing was clicked: every trigger stays
-    // unselected. Highlighting a route trigger would claim a route the app is
-    // not on.
-    return routeSelected.value
+    const fromRoute = routeSelected.value
+    if (fromRoute !== undefined) return fromRoute
+    // No route matches. Fall back to the first selectable trigger with no
+    // `route` — it claims no URL, so selecting it is safe. A route trigger
+    // stays unselected: highlighting one would claim a route the app is not
+    // on. An all-route list therefore starts with nothing selected.
+    return orderedTriggers.value
+      .find((t) => !t.disabled() && !t.hasRoute())
+      ?.value()
   }
   const desired = modelBound.value ? props.modelValue : internalValue.value
   const list = triggers.value

@@ -299,6 +299,45 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'inactive')
   })
 
+  it('falls back to a non-route trigger when only a disabled route matches', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/archive', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, {
+              value: 'archive',
+              label: 'Archive',
+              route: '/archive',
+              disabled: true,
+            }),
+            h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+          ]),
+        ]),
+    })
+
+    // The URL matches only the disabled trigger, which route selection skips.
+    // The enabled non-route trigger claims no URL, so it must take selection
+    // rather than leaving the whole list blank at mount.
+    cy.wrap(router.push('/archive'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+    cy.contains('[role=tab]', 'Archive')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'inactive')
+  })
+
   it('lets a non-route click win over a matching route, until the route moves', () => {
     const router = createRouter({
       history: createMemoryHistory(),
