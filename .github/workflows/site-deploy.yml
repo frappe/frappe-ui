@@ -33,6 +33,10 @@ jobs:
 
       - name: Build with VitePress
         run: VITEPRESS_BASE=/ yarn docs:build
+        env:
+          # The docs site has outgrown node's 4 GB default heap. The runner has
+          # 16 GB.
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: Publish docs site
         run: bash .github/scripts/docs-pages.sh deploy-root docs/.vitepress/dist
