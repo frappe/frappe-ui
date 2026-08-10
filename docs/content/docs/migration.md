@@ -1793,7 +1793,7 @@ hook that returns normally is unaffected — it still cannot stop the request.
 `beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
 awaited, only the type said otherwise.
 
-## pageMetaPlugin — removed
+## pageMetaPlugin — removed {#pagemetaplugin-removed}
 
 `pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
 component option still compiles — it's a plain, unread object key — but
@@ -1858,7 +1858,7 @@ The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
 | `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
 | `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
 
-## PageHeaderMobile family — slot names
+## PageHeaderMobile family — slot names {#pageheadermobile-family-slot-names}
 
 `PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
 are renamed to the shared `#prefix`/`#suffix` vocabulary (see

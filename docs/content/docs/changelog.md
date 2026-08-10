@@ -697,7 +697,7 @@ The back-compat aliases these components carried through the betas are
 deleted, not kept as warn-and-map shims — per
 [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
 deprecated member ships in `1.0.0`. Before/afters in the
-[migration guide](/docs/migration#datepicker--timepicker-family).
+[migration guide](/docs/migration#datepicker-timepicker-family).
 
 - **`placement`, `autoClose`, `allowCustom`, picker-level `readonly`,
   `inputClass`, `value` prop removed.** All silent: a leftover prop lands as
