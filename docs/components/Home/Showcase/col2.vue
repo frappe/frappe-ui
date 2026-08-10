@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import LucideUser from '~icons/lucide/user'
-import LucideCog from '~icons/lucide/cog'
 import LucideRight from '~icons/lucide/chevron-right'
+import LucideUser from '~icons/lucide/user'
 import {
   Tabs,
   Badge,
@@ -14,17 +13,19 @@ import {
 } from 'frappe-ui'
 import LucideTag from '~icons/lucide/tag'
 
-const val = ref(0)
+const val = ref('Profile')
 const followed = ref(false)
 
 const tabs = [
   {
+    value: 'Profile',
     label: 'Profile',
-    icon: LucideUser,
+    iconLeft: 'lucide-user',
   },
   {
+    value: 'Settings',
     label: 'Settings',
-    icon: LucideCog,
+    iconLeft: 'lucide-cog',
   },
 ]
 
@@ -47,7 +48,7 @@ const resetState = () => {
     class="grid gap-5 *:rounded-4 *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="h-fit">
-      <Tabs :tabs v-model="val" class='[&>[role=tablist]]:px-4'>
+      <Tabs :tabs v-model="val" class="[&_[data-slot=tab-list]]:px-4">
         <template #tab-panel="{ tab }">
           <div v-if="tab.label == 'Profile'" class="p-5">
             <div class="flex items-center gap-4 mb-4">
