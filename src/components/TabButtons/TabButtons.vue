@@ -14,6 +14,7 @@ import Pill from '../shared/tabs/Pill.vue'
 import { NativeAnchor, NativeButton } from '../shared/nativeElements'
 import {
   browserTabCardClasses,
+  tabIndicatorMotionClasses,
   tabIndicatorSurfaceClasses,
   tabRadiusClasses,
   tabShellClasses,
@@ -223,9 +224,7 @@ const browserCardBase = computed<BrowserTabBase>(() =>
 const indicatorClasses = computed(() => [
   'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none',
   indicatorAnimated.value &&
-    (browserTrack.value
-      ? 'transition-[width,height,transform] duration-200 ease-out'
-      : 'transition-[width,height,transform] duration-300'),
+    `transition-[width,height,transform] ${tabIndicatorMotionClasses}`,
   ...(underlineTrack.value
     ? ['bg-[var(--outline-gray-8)]']
     : browserTrack.value

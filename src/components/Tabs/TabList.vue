@@ -4,6 +4,7 @@ import { TabsIndicator, TabsList } from 'reka-ui'
 import {
   browserTabCardClasses,
   tabIndicatorInsetClasses,
+  tabIndicatorMotionClasses,
   tabIndicatorSurfaceClasses,
   tabRadiusClasses,
   tabTrackClasses,
@@ -106,8 +107,8 @@ defineSlots<{
   >
     <TabsIndicator
       v-if="props.variant === 'underline'"
-      class="absolute duration-300 motion-reduce:transition-none"
-      :class="indicatorClasses"
+      class="absolute motion-reduce:transition-none"
+      :class="[indicatorClasses, tabIndicatorMotionClasses]"
     >
       <div class="size-full bg-[var(--outline-gray-8)]" />
     </TabsIndicator>
@@ -115,15 +116,15 @@ defineSlots<{
     <TabsIndicator
       v-if="pillTrack"
       aria-hidden="true"
-      class="pointer-events-none absolute -z-10 duration-300 motion-reduce:transition-none"
-      :class="pillIndicatorClasses"
+      class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
+      :class="[pillIndicatorClasses, tabIndicatorMotionClasses]"
     />
 
     <TabsIndicator
       v-if="browserTrack"
       aria-hidden="true"
-      class="pointer-events-none absolute -z-10 duration-200 ease-out motion-reduce:transition-none"
-      :class="browserIndicatorClasses"
+      class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
+      :class="[browserIndicatorClasses, tabIndicatorMotionClasses]"
     />
 
     <slot />

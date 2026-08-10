@@ -277,15 +277,17 @@ value input, not a panel switcher. The two share:
 
 ## Motion
 
+- every sliding indicator uses one timing: 200ms
+  `cubic-bezier(0.23, 1, 0.32, 1)` (easeOutQuint), in both `TabList` and
+  `TabButtons`
 - the `underline` indicator animates position and size on selection change,
-  as in v0 (300ms, default ease)
+  as in v0
 - `subtle` and `ghost` slide the active pill surface (background + shadow)
-  between triggers with the same timing, in both `TabList` and `TabButtons`.
+  between triggers, in both `TabList` and `TabButtons`.
   The sliding layer is an overlay behind the triggers; triggers never move.
   No slide on initial mount — only on selection change
-- `browser-tab` slides the active card between triggers (200ms,
-  `cubic-bezier(0, 0, 0.2, 1)` — ease-out), in both `TabList` and
-  `TabButtons`. The sliding indicator IS the card: opaque surface, 1px
+- `browser-tab` slides the active card between triggers, in both `TabList`
+  and `TabButtons`. The sliding indicator IS the card: opaque surface, 1px
   borders except the attached edge, rounded detached corners, and the rail
   fusion mask — so the open edge in the rail travels with the card. Trigger
   label colors transition separately (150ms)
@@ -319,6 +321,16 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 - `Tab.label` as the implied value — `value` is required
 
 ## Changelog
+
+### 2026-08-10 (motion unified)
+
+- **One slide timing for every indicator.** All sliding indicators
+  (underline, subtle, ghost, browser-tab) now use 200ms
+  `cubic-bezier(0.23, 1, 0.32, 1)` (easeOutQuint) in both `TabList` and
+  `TabButtons`, replacing the 300ms-default / 200ms-ease-out split. Chosen
+  from filmstrip comparison: the strong deceleration makes the switch feel
+  immediate while long hops still read as travel; 150ms with the same ease
+  read as a flicker.
 
 ### 2026-08-10 (later still)
 

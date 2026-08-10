@@ -109,6 +109,17 @@ export function browserTabCardClasses(base: BrowserTabBase): string {
   return 'border border-outline-gray-1 border-b-transparent bg-surface-base after:absolute after:-inset-x-px after:-bottom-[2px] after:h-px after:bg-surface-base'
 }
 
+/**
+ * Sliding-indicator motion, shared by every variant (underline, subtle,
+ * ghost, browser-tab) in both `TabList` and `TabButtons`: 200ms easeOutQuint.
+ * The strong deceleration front-loads the travel (~73% at 50ms) so the
+ * switch feels immediate, while the 200ms tail lets the indicator settle
+ * instead of stopping hard. Callers add the `transition-[...]` property list
+ * and `motion-reduce:transition-none` themselves.
+ */
+export const tabIndicatorMotionClasses =
+  'duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]'
+
 /** Reset + disabled treatment for the focusable element wrapping a pill. */
 export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60'
