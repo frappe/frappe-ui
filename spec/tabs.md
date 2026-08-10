@@ -322,6 +322,16 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 
 ## Changelog
 
+### 2026-08-10 (track containment)
+
+- **Pill tracks hug their content.** `subtle` and `ghost` tracks in `TabList`
+  get `self-start`. `inline-flex` alone does not stop a flex item from
+  stretching, so shorthand mode (a flex root) rendered a full-width track.
+  `underline` and `browser-tab` rails still span the full width.
+- **The `subtle` track clips its own shadow.** The track has 1px of padding,
+  so the active pill's `shadow-base` spilled past the track edge onto
+  neighbouring content. The track now sets `overflow-hidden`.
+
 ### 2026-08-10 (motion unified)
 
 - **One slide timing for every indicator.** All sliding indicators
