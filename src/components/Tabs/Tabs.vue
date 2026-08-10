@@ -54,10 +54,23 @@ if (import.meta.env.DEV) {
 // SSR-consistent; document-order sorting kicks in once elements mount.
 const triggers = shallowRef<TabTriggerRegistration[]>([])
 
+// Route mode, mixed lists: the value of a non-route trigger the user clicked.
+// Such a trigger has nothing to navigate to, so the route can never represent
+// it — without this it would either sit unselectable behind a matching route
+// trigger or emit a value the root does not show. The click wins until the
+// route moves again, the trigger stops being selectable, or it unregisters.
+const routeOverride = ref<TabValue | undefined>(undefined)
+
 function register(trigger: TabTriggerRegistration) {
   triggers.value = [...triggers.value, trigger]
   return () => {
     triggers.value = triggers.value.filter((t) => t !== trigger)
+    // The override leaves with its trigger. A `condition` that flips back
+    // remounts the same value, and a stale override would let that tab
+    // silently reclaim selection from the route.
+    if (routeOverride.value === trigger.value()) {
+      routeOverride.value = undefined
+    }
   }
 }
 
@@ -108,12 +121,6 @@ function triggerFor(value: TabValue) {
   return triggers.value.find((t) => t.value() === value)
 }
 
-// Route mode, mixed lists: the value of a non-route trigger the user clicked.
-// Such a trigger has nothing to navigate to, so the route can never represent
-// it — without this it would either sit unselectable behind a matching route
-// trigger or emit a value the root does not show. The click wins until the
-// route moves again (below, and in `onRekaUpdate`).
-const routeOverride = ref<TabValue | undefined>(undefined)
 watch(routeSelected, () => {
   routeOverride.value = undefined
 })

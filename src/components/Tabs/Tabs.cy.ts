@@ -558,6 +558,51 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'inactive')
   })
 
+  it('does not let a remounted conditional tab reclaim route-mode selection', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/inbox', component: { template: '<div />' } }],
+    })
+
+    const show = ref(true)
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, {
+          tabs: [
+            { value: 'inbox', label: 'Inbox', route: '/inbox' },
+            { value: 'drafts', label: 'Drafts', condition: () => show.value },
+          ],
+        }),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    // Hiding Drafts hands selection back to the route. Showing it again must
+    // not silently take selection back — the user did not ask for that.
+    cy.then(() => {
+      show.value = false
+    })
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    cy.then(() => {
+      show.value = true
+    })
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'inactive')
+  })
+
   it('lets a non-route click win over a matching route, until the route moves', () => {
     const router = createRouter({
       history: createMemoryHistory(),
