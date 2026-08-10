@@ -1,3 +1,5 @@
+import { moduleSingleton } from './moduleSingleton'
+
 export interface FrappeUIConfig {
   // Timezone configurations
   systemTimezone?: string | null
@@ -35,7 +37,11 @@ export interface FrappeUIConfig {
   requestHeaders?: Record<string, string> | (() => Record<string, string>)
 }
 
-let config: FrappeUIConfig = {}
+// Apps call `setConfig` from their entry (a .ts module, so Vite may pre-bundle
+// it) while SFCs and composables read it back. A plain module-level object
+// splits across a duplicated copy of the package and `getConfig` returns null
+// on the side that never saw the writes — see moduleSingleton.
+const config = moduleSingleton<FrappeUIConfig>('config', () => ({}))
 
 export function setConfig<K extends keyof FrappeUIConfig>(
   key: K,
