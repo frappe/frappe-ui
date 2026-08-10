@@ -254,7 +254,8 @@ describe('tokens v2 migration', () => {
   })
 
   it('ink-shift marker round-trips: absent, written, found', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-'))
+    // realpath: the search resolves symlinks, and os.tmpdir() is one on macOS.
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
     tempDirs.push(dir)
 
     expect(findInkShiftMarker(dir)).toBe(null)
@@ -352,14 +353,25 @@ describe('tokens v2 migration', () => {
     fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
     const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
 
+    // A symlink alias of the subdirectory is the same target, not a third one.
+    const alias = path.join(root, 'src-alias')
+    fs.symlinkSync(sub, alias)
+
     const result = spawnSync(
       process.execPath,
-      [script, '--ink-shift', root, sub],
+      [script, '--ink-shift', root, sub, alias],
       { encoding: 'utf8' },
     )
     expect(result.status).toBe(0)
     // One shift (-3 → -2), not one per overlapping target (-3 → -1).
     expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+
+    // The marker is also found through the alias, so a retry via the symlink refuses.
+    const retry = spawnSync(process.execPath, [script, '--ink-shift', alias], {
+      encoding: 'utf8',
+    })
+    expect(retry.status).toBe(1)
+    expect(retry.stderr).toContain('already ran')
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {

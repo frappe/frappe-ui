@@ -385,7 +385,9 @@ export const INK_SHIFT_MARKER = '.tokens-v2-ink-shift'
 // Search the directory and every ancestor: a run on a repo root must also
 // block a later run on one of its subdirectories.
 export function findInkShiftMarker(dir) {
-  let current = path.resolve(dir)
+  // realpath, not resolve: a symlink alias must share the identity of its
+  // target, or it bypasses the guard.
+  let current = fs.realpathSync(dir)
   for (;;) {
     const file = path.join(current, INK_SHIFT_MARKER)
     if (fs.existsSync(file)) return file
@@ -399,7 +401,7 @@ export function findInkShiftMarker(dir) {
 // its parent, or the already-shifted subtree double-shifts. Mirrors walk()'s
 // directory skip list.
 export function findInkShiftMarkerBelow(dir) {
-  const resolved = path.resolve(dir)
+  const resolved = fs.realpathSync(dir)
   const file = path.join(resolved, INK_SHIFT_MARKER)
   if (fs.existsSync(file)) return file
   for (const entry of fs.readdirSync(resolved, { withFileTypes: true })) {
@@ -674,14 +676,14 @@ function main() {
     process.exit(1)
   }
 
-  // Dedupe by resolved path: overlapping targets (`src src/components`) must
-  // not process a shared file once per target — in ink-shift mode a second
-  // pass is a double-shift.
+  // Dedupe by real path: overlapping targets (`src src/components`) or a
+  // symlink alias of one must not process a shared file once per target — in
+  // ink-shift mode a second pass is a double-shift.
   const files = []
   const seenFiles = new Set()
   for (const target of targets) {
     for (const file of walk(target)) {
-      const resolved = path.resolve(file)
+      const resolved = fs.realpathSync(file)
       if (seenFiles.has(resolved)) continue
       seenFiles.add(resolved)
       files.push(file)
@@ -691,8 +693,9 @@ function main() {
   // Guard against a destructive second full pass (the color renames reuse names).
   const { pre, post, likelyMigrated } = detectMigrationState(files)
   const mode = getMigrationMode({ likelyMigrated }, { force, radiusOnly, inkShift })
+  // realpath so a symlink alias and its target share one identity.
   const inkShiftMarkerDirs =
-    mode === 'ink-shift' ? [...new Set(targets.map((t) => path.resolve(t)))] : []
+    mode === 'ink-shift' ? [...new Set(targets.map((t) => fs.realpathSync(t)))] : []
   if (mode === 'ink-shift') {
     // The marker records "this subtree shifted" — a file target would make it
     // over-claim the whole directory, so only directory targets are allowed.
