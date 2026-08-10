@@ -14,7 +14,7 @@ This directory contains the active planning docs for `frappe-ui` v1.
   (source:
   [`docs/content/docs/migration.md`](../docs/content/docs/migration.md)).
   Per-component before/after tables for app teams upgrading to v1.
-- [`changelog.md`](./changelog.md)
+- [`changelog.md`](../docs/content/docs/changelog.md)
   - Rolling v1 changelog for consumer-facing changes, deprecations, and
     migration notes.
 - [`deprecated-removals.md`](./deprecated-removals.md)

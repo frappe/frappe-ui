@@ -7,7 +7,7 @@ pageClass: migration-page
 A guide for moving an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section opens with a before/after table. For
 the full change list see the
-[changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md);
+[changelog](/docs/changelog);
 for the rationale behind each API see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
@@ -1887,7 +1887,7 @@ hook that returns normally is unaffected — it still cannot stop the request.
 `beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
 awaited, only the type said otherwise.
 
-## pageMetaPlugin — removed
+## pageMetaPlugin (removed)
 
 `pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
 component option still compiles — it's a plain, unread object key — but
@@ -1952,7 +1952,7 @@ The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
 | `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
 | `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
 
-## PageHeaderMobile family — slot names
+## PageHeaderMobile family: slot names
 
 `PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
 are renamed to the shared `#prefix`/`#suffix` vocabulary (see
