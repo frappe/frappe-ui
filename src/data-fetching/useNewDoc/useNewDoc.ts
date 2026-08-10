@@ -66,12 +66,12 @@ export function useNewDoc<T extends object>(
           (out.error as Error | null) ?? new Error(`insert ${doctype} failed`)
         )
       }
-      // The store's copy when this submit's `onSuccess` wrote it (the hook
-      // ran before `callSubmit` resolved). A submit that was overtaken by a
-      // newer one gets no hook, so it answers with its own response — each
-      // caller still receives the doc it created.
-      return (docStore.getDoc(doctype, response.name.toString()).value ??
-        response) as T
+      // The caller's own response, never the store's copy. The two only
+      // differ when another request's write won the store for this name —
+      // and then the store holds the OTHER caller's document, which is
+      // exactly what this caller must not receive. The store keeps the
+      // winning write; each caller resolves with the doc it created.
+      return response as T
     })
   }
 

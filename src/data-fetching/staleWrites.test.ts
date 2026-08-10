@@ -2,7 +2,7 @@
  * @vitest-environment node
  */
 
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { server } from '../mocks/node'
 import { baseUrl, url } from '../mocks/utils'
 import { docStore } from './docStore'
@@ -339,6 +339,43 @@ describe('useNewDoc writes are stamped', () => {
     expect(created).toMatchObject({ email: 'inserted@example.com' })
     expect(docStore.getDoc('User', 'race-insert').value?.email).toBe(
       'inserted@example.com',
+    )
+  })
+
+  it('each caller receives its own document when two instances insert one name', async () => {
+    // The standard insert mock delays on `name`, which both instances share
+    // here — delay on `email` instead so the older dispatch settles last.
+    server.use(
+      http.post(url('/api/v2/document/User'), async ({ request }) => {
+        let body = (await request.json()) as Record<string, any>
+        if (String(body.email).startsWith('slow')) await delay(60)
+        return HttpResponse.json({ data: body })
+      }),
+    )
+
+    // Instance A dispatches first and settles last; instance B's insert
+    // lands first and wins the store. A's own write is rejected by the
+    // gate — but A's caller must still resolve with A's document, not B's
+    // store entry.
+    let a = useNewDoc<User>(
+      'User',
+      { name: 'cross-insert', email: 'slow-a@example.com' },
+      { baseUrl },
+    )
+    let b = useNewDoc<User>(
+      'User',
+      { name: 'cross-insert', email: 'fast-b@example.com' },
+      { baseUrl },
+    )
+
+    let submitA = a.submit()
+    let submitB = b.submit()
+    let [docA, docB] = await Promise.all([submitA, submitB])
+
+    expect(docA).toMatchObject({ email: 'slow-a@example.com' })
+    expect(docB).toMatchObject({ email: 'fast-b@example.com' })
+    expect(docStore.getDoc('User', 'cross-insert').value?.email).toBe(
+      'fast-b@example.com',
     )
   })
 })
