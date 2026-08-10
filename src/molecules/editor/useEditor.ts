@@ -114,6 +114,23 @@ export function useEditor(
 
   editor.value = new TiptapEditor(editorOptions as EditorOptions)
 
+  // We build with `element: null` and let `<EditorContent>` mount later, so an
+  // unmounted editor has no view and no ProseMirror plugins at all. Normalize
+  // the parsed document here instead, or a headless caller — `getHTML()` before
+  // the child mounts, a markdown export that never renders — reads back the
+  // split lists it was handed. No-op once the schema has no list node.
+  // The metas are ours, not the command's: opening a document is not an edit.
+  // Guarded by `can()` because a chain dispatches even when its command
+  // returns false, and an empty transaction still reaches `onTransaction`.
+  if (editor.value.can().joinAdjacentLists?.()) {
+    editor.value
+      .chain()
+      .joinAdjacentLists()
+      .setMeta('preventUpdate', true)
+      .setMeta('addToHistory', false)
+      .run()
+  }
+
   const editorStorage = editor.value.storage as typeof editor.value.storage & {
     upload?: { uploadFunction: UseEditorOptions['uploadFunction'] }
   }
@@ -140,6 +157,17 @@ export function useEditor(
             ? { emitUpdate: false, contentType: 'markdown' }
             : { emitUpdate: false },
         )
+        // Same reason as at construction: while unmounted there are no
+        // plugins, so nothing normalizes what `setContent` just parsed.
+        // No-op when there is nothing to join.
+        if (editor.value.can().joinAdjacentLists?.()) {
+          editor.value
+            .chain()
+            .joinAdjacentLists()
+            .setMeta('preventUpdate', true)
+            .setMeta('addToHistory', false)
+            .run()
+        }
       } finally {
         applyingExternalUpdate = false
       }

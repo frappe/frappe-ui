@@ -34,6 +34,22 @@ vi.mock('@tiptap/core', () => {
     }
     content: any
 
+    // `useEditor` normalizes the parsed document through a chain, guarded by
+    // `can()`; the real behaviour is covered against a real editor in
+    // list-join.test.ts, so nothing to join is the right answer here.
+    can() {
+      return { joinAdjacentLists: () => false }
+    }
+
+    chain() {
+      const api: any = {
+        joinAdjacentLists: () => api,
+        setMeta: () => api,
+        run: () => true,
+      }
+      return api
+    }
+
     constructor(options: any) {
       this.options = options
       this.content = options.content ?? ''
@@ -51,7 +67,9 @@ vi.mock('@tiptap/core', () => {
     }
 
     getJSON() {
-      return typeof this.content === 'object' ? this.content : { type: 'doc', content: [] }
+      return typeof this.content === 'object'
+        ? this.content
+        : { type: 'doc', content: [] }
     }
 
     getMarkdown() {
@@ -67,7 +85,15 @@ vi.mock('@tiptap/core', () => {
     }
   }
 
-  return { Editor, Extension, Node, Mark, mergeAttributes, nodeInputRule, markInputRule }
+  return {
+    Editor,
+    Extension,
+    Node,
+    Mark,
+    mergeAttributes,
+    nodeInputRule,
+    markInputRule,
+  }
 })
 
 vi.mock('@tiptap/markdown', () => ({
@@ -192,7 +218,9 @@ describe('frappe-ui/editor minimal primitives', () => {
 
     content.value = '<p>External</p>'
     await nextTick()
-    expect(editor.commands.setContent).toHaveBeenCalledWith('<p>External</p>', { emitUpdate: false })
+    expect(editor.commands.setContent).toHaveBeenCalledWith('<p>External</p>', {
+      emitUpdate: false,
+    })
   })
 
   it('binds JSON content bidirectionally without echoing external writes back', async () => {
@@ -214,10 +242,15 @@ describe('frappe-ui/editor minimal primitives', () => {
     content.value = external
     await nextTick()
 
-    expect(editor.commands.setContent).toHaveBeenCalledWith(external, { emitUpdate: false })
+    expect(editor.commands.setContent).toHaveBeenCalledWith(external, {
+      emitUpdate: false,
+    })
     expect(toRaw(content.value)).toBe(external)
 
-    editor.content = { type: 'doc', content: [{ type: 'paragraph', content: [] }] }
+    editor.content = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [] }],
+    }
     editor.options.onUpdate({ editor })
     expect(toRaw(content.value)).toBe(editor.content)
 
@@ -233,7 +266,11 @@ describe('frappe-ui/editor minimal primitives', () => {
     createApp(
       defineComponent({
         setup() {
-          useEditor({ content: ref('# Hi'), format: 'markdown', extensions: [] })
+          useEditor({
+            content: ref('# Hi'),
+            format: 'markdown',
+            extensions: [],
+          })
           return () => null
         },
       }),
@@ -241,7 +278,9 @@ describe('frappe-ui/editor minimal primitives', () => {
 
     expect(editors[0].options.contentType).toBe('markdown')
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("format: 'markdown' needs the Markdown extension"),
+      expect.stringContaining(
+        "format: 'markdown' needs the Markdown extension",
+      ),
     )
     warn.mockRestore()
   })
@@ -253,7 +292,11 @@ describe('frappe-ui/editor minimal primitives', () => {
     createApp(
       defineComponent({
         setup() {
-          useEditor({ content, format: 'markdown', extensions: [Markdown as any] })
+          useEditor({
+            content,
+            format: 'markdown',
+            extensions: [Markdown as any],
+          })
           return () => null
         },
       }),

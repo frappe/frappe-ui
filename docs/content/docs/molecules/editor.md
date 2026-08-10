@@ -145,7 +145,7 @@ Individual TipTap extensions with frappe-ui defaults already applied. Use these 
 | Blocks      | `CodeBlock`, `Table`, `TableRow`, `TableCell`, `TableHeader`, `TaskList`, `TaskItem` |
 | Media       | `Image`, `ImageGroup`, `ImageViewer`, `Video`, `Iframe`             |
 | Suggestions | `Mention`, `Tag`, `Emoji`, `SlashCommands`, `SuggestionExtension`   |
-| Behavior    | `Typography`, `TextAlign`, `Toc`, `ContentPaste`, `StyleClipboard`  |
+| Behavior    | `Typography`, `TextAlign`, `Toc`, `ContentPaste`, `StyleClipboard`, `ListJoin` |
 
 ### Menu items
 
