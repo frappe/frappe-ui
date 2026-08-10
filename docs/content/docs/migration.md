@@ -1390,8 +1390,9 @@ marker file in each target directory. It refuses to run again while a marker
 exists in the target, an ancestor, or anywhere in the target subtree. The
 marker is written before the first file rewrite, so an interrupted run
 refuses to retry instead of double-shifting; restore the tree with git,
-delete the marker, and re-run. Keep the marker until the migration lands;
-delete it only to re-run the shift on purpose.
+delete the marker, and re-run. Commit the marker with the migration — on a
+fresh clone without it the guard is gone, and a teammate's re-run
+double-shifts. Delete it only to re-run the shift on purpose.
 
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
