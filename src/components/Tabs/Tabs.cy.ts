@@ -1057,4 +1057,77 @@ describe('Tabs', () => {
         expect(router.currentRoute.value.path).to.equal('/inbox')
       })
   })
+
+  it('does not call a panel component scoped slot while scanning', () => {
+    // The scan runs inside setup. Calling an arbitrary component's scoped
+    // default slot with no argument throws where the slot destructures, and a
+    // throw there takes the whole component down rather than degrading.
+    const Scoped = defineComponent({
+      setup(_, { slots }) {
+        return () => h('div', slots.default?.({ item: { name: 'panel ok' } }))
+      },
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, { modelValue: 'inbox' }, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox' }),
+          ]),
+          h(TabPanel, { value: 'inbox' }, () => [
+            h(Scoped, null, {
+              default: ({ item }: { item: { name: string } }) =>
+                h('span', item.name),
+            }),
+          ]),
+        ]),
+    })
+
+    cy.mount(Harness)
+
+    cy.get('[role=tab]').should('have.length', 1)
+    cy.contains('panel ok').should('exist')
+  })
+
+  it('ignores route triggers that belong to a nested Tabs in a panel', () => {
+    // A nested route list must not turn off arrow-key selection in the outer,
+    // route-free one.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.spy().as('onUpdate')
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, { 'onUpdate:modelValue': onUpdate }, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'one', label: 'One' }),
+            h(TabTrigger, { value: 'two', label: 'Two' }),
+          ]),
+          h(TabPanel, { value: 'one' }, () => [
+            h(Tabs, null, () => [
+              h(TabList, { variant: 'underline' }, () => [
+                h(TabTrigger, {
+                  value: 'inbox',
+                  label: 'Inbox',
+                  route: '/inbox',
+                }),
+              ]),
+            ]),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    // Outer list keeps automatic activation: arrowing selects.
+    cy.contains('[role=tab]', 'One').focus().type('{rightarrow}')
+    cy.get('@onUpdate').should('have.been.calledWith', 'two')
+  })
 })

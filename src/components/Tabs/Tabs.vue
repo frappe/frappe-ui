@@ -61,24 +61,37 @@ if (import.meta.env.DEV) {
 // re-keying the root to force a re-read would tear down every panel with it.
 //
 // So look at what the caller passed instead. Shorthand mode reads `tabs`.
-// Composed mode reads the slot's own vnodes, before they mount.
-function slotHasRoute(nodes: unknown): boolean {
+// Composed mode reads the default slot's vnodes, which exist before they
+// mount.
+//
+// The walk is deliberately narrow. It enters fragments (`v-for`, `v-if`) and
+// `TabList`, and reads `route` off `TabTrigger` — nothing else. It must never
+// call an unknown component's slot: a scoped slot destructures its argument,
+// so calling it with none throws, and this runs inside setup where a throw
+// takes the whole component down. Staying out of panels also keeps a nested
+// route `Tabs` from flipping the outer, route-free list to manual.
+function anyRouteTrigger(nodes: unknown): boolean {
   if (!Array.isArray(nodes)) return false
   return nodes.some((node: any) => {
     if (!node || typeof node !== 'object') return false
-    if (node.props?.route) return true
+    if (node.type === TabTrigger) return Boolean(node.props?.route)
+    // Fragments carry a symbol type; `TabList` is ours, and its default slot
+    // takes no arguments, so calling it is safe.
+    const isFragment = typeof node.type === 'symbol'
+    if (!isFragment && node.type !== TabList) return false
     const children = node.children
-    if (Array.isArray(children)) return slotHasRoute(children)
-    // `v-for` and nested lists arrive as a slot object, not an array.
-    if (typeof children?.default === 'function') {
-      return slotHasRoute(children.default())
+    if (Array.isArray(children)) return anyRouteTrigger(children)
+    if (node.type === TabList && typeof children?.default === 'function') {
+      return anyRouteTrigger(children.default())
     }
     return false
   })
 }
 
 const activationMode: 'automatic' | 'manual' = (
-  props.tabs ? props.tabs.some((tab) => tab.route) : slotHasRoute(slots.default?.())
+  props.tabs
+    ? props.tabs.some((tab) => tab.route)
+    : anyRouteTrigger(slots.default?.())
 )
   ? 'manual'
   : 'automatic'
@@ -101,7 +114,7 @@ const routeOverride = shallowRef<TabTriggerRegistration | null>(null)
 function register(trigger: TabTriggerRegistration) {
   if (import.meta.env.DEV && trigger.hasRoute() && activationMode === 'automatic') {
     console.warn(
-      '[frappe-ui] Tabs: a trigger has a `route`, but the root could not see it before rendering and so left arrow-key activation on. Arrow keys will select without navigating while a click does both. This happens when triggers sit inside your own wrapper component — put `TabTrigger` directly in `TabList`, or use the `tabs` prop.',
+      '[frappe-ui] Tabs: a trigger has a `route`, but the root could not see it before its first render, so arrow-key activation stayed on. Arrow keys will select without navigating while a click does both. Either the trigger sits inside your own wrapper component (put `TabTrigger` directly in `TabList`), or `tabs` arrived after mount (render `Tabs` once the routed items are known, with `v-if` or a `:key`).',
     )
   }
   triggers.value = [...triggers.value, trigger]

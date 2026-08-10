@@ -351,8 +351,15 @@ value input, not a panel switcher. The two share:
   registry — triggers register after the root renders — and remounting the
   root to force a re-read would tear down every panel. Shorthand mode reads
   `tabs`; composed mode reads the default slot's vnodes, which exist before
-  they mount. A trigger the scan cannot see, because the app wrapped it in
-  its own component, leaves the mode automatic and DEV warns on registration
+  they mount. That walk is narrow by rule: it enters fragments and `TabList`
+  and reads `route` off `TabTrigger`, and nothing else. It must never call an
+  unknown component's slot — a scoped slot destructures its argument, so
+  calling it with none throws, and this runs in setup where a throw takes the
+  whole component down. Staying out of panels also keeps a nested route
+  `Tabs` from flipping the outer, route-free list
+- a trigger the scan cannot see leaves the mode automatic and DEV warns when
+  it registers. Two ways to land there: the app wrapped its triggers in its
+  own component, or `tabs` arrived from a resource after mount
 - every focusable trigger carries `focus-visible:focus-ring` (P12), and no
   track may clip it. The subtle track has 1px of padding, so it cannot use
   `overflow-hidden` — the active pill's shadow spills a little instead
