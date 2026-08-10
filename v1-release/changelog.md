@@ -35,7 +35,11 @@ resolving that needs server-side sequencing, which this design trades away.
 `useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
 newer same-key submit of the same instance already outran — the store gate
 protects the stores, this skip only avoids re-running hook side effects
-with a stale response.
+with a stale response. `useDoc`'s write members and `useNewDoc` skip their
+hooks the same way, but their store writes stay outside that skip: only the
+store gate decides them. It compares per document and knows whether the
+newer request landed, so an overtaken insert of a different document still
+lands, and an older success is kept when the newer submit failed.
 
 No API change. Behavior changes if you relied on it:
 

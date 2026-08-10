@@ -146,7 +146,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl,
     immediate: false,
     refetch: false,
-    onSuccess(data) {
+    onStoreWrite(data) {
       // Store the untransformed doc; the `doc` computed applies `transform` on
       // read. Transforming here too would run it twice (a bug for any
       // non-idempotent transform). Mirrors afterFetch.
@@ -162,7 +162,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl,
     immediate: false,
     refetch: false,
-    onSuccess() {
+    onStoreWrite() {
       docStore.removeDoc(doctype, toValue(name))
       listStore.removeRow(doctype, toValue(name))
     },

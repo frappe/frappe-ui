@@ -46,9 +46,8 @@ export function useNewDoc<T extends object>(
     // recording — the one store write outside the gate (#1017). Matters
     // when the caller supplies `name`: a stale earlier-dispatched response
     // for the same document must not overwrite the insert.
-    onSuccess(created: DocResponse) {
+    onStoreWrite(created: DocResponse) {
       docStore.setDoc({ doctype, ...created })
-      options.onSuccess?.(created)
     },
   })
 

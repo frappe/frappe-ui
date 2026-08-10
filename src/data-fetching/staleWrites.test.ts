@@ -380,6 +380,57 @@ describe('useNewDoc writes are stamped', () => {
   })
 })
 
+// `useIsolatedCall` keeps its own newest-started rule for `data` and `error`.
+// That rule is instance-wide, so it used to skip the store write of any
+// overtaken submit — losing a write the per-document gate would have kept.
+describe('one instance, two submits: the store gate decides, not submit order', () => {
+  it('an overtaken insert still lands in the store', async () => {
+    let maker = useNewDoc<User>('User', {}, { baseUrl })
+
+    // Two inserts from one instance, each creating a different document. The
+    // first is slow, so the second overtakes it. Both documents exist on the
+    // server, so both must be in the store: they share no key for the gate
+    // to reject.
+    maker.doc.name = 'slow-overtaken'
+    maker.doc.email = 'overtaken@example.com'
+    let first = maker.submit()
+
+    maker.doc.name = 'quick-winner'
+    maker.doc.email = 'winner@example.com'
+    let second = maker.submit()
+
+    await Promise.all([first, second])
+
+    expect(docStore.getDoc('User', 'slow-overtaken').value?.email).toBe(
+      'overtaken@example.com',
+    )
+    expect(docStore.getDoc('User', 'quick-winner').value?.email).toBe(
+      'winner@example.com',
+    )
+  })
+
+  it('a newer failed submit does not gate out an older success', async () => {
+    await seedUser1()
+    let doc = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+    })
+
+    // Same pair as the cross-instance case below, from one instance: the
+    // older submit is slow and succeeds, the newer one fails at once. The
+    // failed submit wrote nothing on the server, so the older response is
+    // what the server holds.
+    let older = doc.setValue.submit({ email: 'slow-old@example.com' })
+    let newer = doc.setValue.submit({ email: 'quickfail' })
+
+    await Promise.all([older, newer])
+
+    expect(storedEmail()).toBe('slow-old@example.com')
+  })
+})
+
 describe('store gate records on success only', () => {
   it('a newer failed submit does not gate out an older success', async () => {
     await seedUser1()
