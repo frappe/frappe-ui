@@ -9,12 +9,16 @@ export type PlotKeyboardArgs<T> = {
    */
   marks: () => readonly T[]
   /**
-   * What names a mark across a redraw — the app's own row, usually. The cursor
-   * holds on to it, so a plot that filters, sorts or grows keeps the reader on
-   * the mark they were on rather than on the slot it used to sit in. Left out,
-   * the mark itself is the name; a name it cannot find falls back to the slot.
+   * What names a mark across a redraw: its place in the data, as a value — the
+   * category on the axis, the pair of categories on a cell. A value rather than
+   * the row object, because a refetch answers with rows that are equal and not
+   * the same, and the cursor has to survive that as much as a re-sort.
+   *
+   * The cursor holds the name and looks for it again, so a plot that filters,
+   * sorts or grows keeps the reader on the mark they were on. A name that is
+   * gone falls back to the slot, which is read out like any other move.
    */
-  key?: (mark: T) => unknown
+  key: (mark: T) => unknown
   /**
    * Puts the cursor on a mark: highlight it, open its tooltip, read it out.
    * `previous` is the mark the cursor came off, for the plot to downplay, and
@@ -79,7 +83,7 @@ export function usePlotKeyboard<T>(
   // redraw can put the cursor back on the same mark, wherever it has moved to.
   let held: unknown
 
-  const keyOf = (mark: T) => (args.key ? args.key(mark) : mark)
+  const keyOf = (mark: T) => args.key(mark)
 
   function place(next: number) {
     const previous = index.value

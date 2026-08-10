@@ -384,7 +384,9 @@ function downplayPoint(index: number | null) {
 
 const keyboard = usePlotKeyboard({
   marks: () => walk.value,
-  key: (hit) => hit.point.row,
+  // A point is its group and its place on the axes. Two points that sit on top
+  // of each other are one name, which costs nothing: they draw as one mark.
+  key: (hit) => `${hit.entry.name} ${hit.point.x} ${hit.point.y}`,
   move: (index, previous) => {
     downplayPoint(previous)
     readPoint(index)

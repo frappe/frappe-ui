@@ -272,7 +272,9 @@ function downplayLink(index: number | null) {
 
 const keyboard = usePlotKeyboard({
   marks: () => graph.value.links,
-  key: (link) => link.row,
+  // The two ends name the band: a refetch that rebuilds the rows still draws
+  // the same flow between the same nodes.
+  key: (link) => `${link.source} ${link.target}`,
   move: (index, previous) => {
     downplayLink(previous)
     readLink(index)

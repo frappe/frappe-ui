@@ -20,6 +20,7 @@ function setup(count = 4) {
   scope.run(() => {
     keyboard = usePlotKeyboard({
       marks: () => marks.value,
+      key: (mark) => mark,
       move: (index, previous) => moves.push({ index, previous }),
       activate: (index) => activated.push(index),
       clear: (previous) => cleared.push(previous),
@@ -153,7 +154,9 @@ describe('usePlotKeyboard', () => {
     expect(plot.keyboard.index.value).toBe(2)
   })
 
-  it('takes the name a chart gives a mark', async () => {
+  // A refetch answers with rows that are equal and not the same, so the name
+  // has to be a value rather than the row object.
+  it('finds its mark again in rows a refetch rebuilt', async () => {
     const rows = ref([{ id: 'a' }, { id: 'b' }, { id: 'c' }])
     const scope = effectScope()
     let keyboard!: PlotKeyboardReturn
@@ -168,10 +171,11 @@ describe('usePlotKeyboard', () => {
     })
 
     keyboard.goTo(2)
-    // Rebuilt objects, same names: the cursor stays on c.
-    rows.value = [{ id: 'x' }, { id: 'b' }, { id: 'c' }]
+    // Rebuilt objects, reordered, and c is now first: the cursor is on the
+    // mark, so it follows.
+    rows.value = [{ id: 'c' }, { id: 'b' }, { id: 'a' }]
     await nextTick()
-    expect(keyboard.index.value).toBe(2)
+    expect(keyboard.index.value).toBe(0)
 
     rows.value = [{ id: 'c' }]
     await nextTick()

@@ -335,6 +335,7 @@ function readSlice(index: number) {
 
 const { attrs: plotAttrs } = usePlotKeyboard({
   marks: () => visibleSlices.value,
+  // A slice is its category, which is what the ring is cut by.
   key: (slice) => slice.name,
   move: readSlice,
   activate: (index) => {
