@@ -139,7 +139,7 @@ const paragraphSample =
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
-        <TabButtons :buttons="weightButtons" v-model="weight" class="w-fit" />
+        <TabButtons :options="weightButtons" v-model="weight" class="w-fit" />
       </div>
     </header>
 

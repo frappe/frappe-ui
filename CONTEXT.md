@@ -92,6 +92,17 @@ Prop (default `false`) that suppresses the dialog's default chrome so the `#defa
 slot fills the entire modal shell. For command palettes, full-screen settings, etc.
 _Avoid_: `flush`, `chromeless`, `unstyled` (in new code)
 
+**fluid** (TabButtons):
+Prop (default `false`) that makes the items share the container width equally
+instead of sizing to their labels. Use this name for any "stretch to fill the
+parent" prop.
+_Avoid_: `fullWidth`, `block`, `stretch`, `grow`
+
+**side** (Tabs family):
+Prop naming the edge a component attaches to (`left | right`). Distinct from
+`dir`, which is the `ltr`/`rtl` writing direction.
+_Avoid_: `direction`, `placement` (for a single edge), `align`
+
 **chrome** (informal):
 The auto-rendered visual scaffolding around a component's content — padded card, header
 row, actions footer. Not an API term; it's the thing Dialog's `bare` removes.

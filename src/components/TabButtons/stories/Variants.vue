@@ -19,22 +19,22 @@ const browserTab = ref('task')
   <div class="flex flex-col gap-6 p-2">
     <div class="flex items-center gap-6">
       <div class="w-24 text-sm text-ink-gray-6">Subtle</div>
-      <TabButtons v-model="subtle" :options="buttons" type="subtle" />
+      <TabButtons v-model="subtle" :options="buttons" variant="subtle" />
     </div>
 
     <div class="flex items-center gap-6">
       <div class="w-24 text-sm text-ink-gray-6">Ghost</div>
-      <TabButtons v-model="ghost" :options="buttons" type="ghost" />
+      <TabButtons v-model="ghost" :options="buttons" variant="ghost" />
     </div>
 
     <div class="flex items-center gap-6">
       <div class="w-24 text-sm text-ink-gray-6">Underline</div>
-      <TabButtons v-model="underline" :options="buttons" type="underline" />
+      <TabButtons v-model="underline" :options="buttons" variant="underline" />
     </div>
 
     <div class="flex items-center gap-6">
       <div class="w-24 text-sm text-ink-gray-6">Browser tab</div>
-      <TabButtons v-model="browserTab" :options="buttons" type="browser-tab" />
+      <TabButtons v-model="browserTab" :options="buttons" variant="browser-tab" />
     </div>
   </div>
 </template>

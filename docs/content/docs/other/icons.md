@@ -240,7 +240,8 @@ const options = computed(() =>
 ### Other components
 
 `TextInput`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
-components either accept the same `icon` / `iconLeft` / `iconRight` props
-or expose a slot where you can drop a `<span class="lucide-..." />`
+components either accept an `icon` prop of the same shape (some add
+`iconLeft` / `iconRight`) or expose a slot where you can drop a
+`<span class="lucide-..." />`
 directly. Check each component's reference page for the exact prop
 names — the icon API conventions are consistent across the library.

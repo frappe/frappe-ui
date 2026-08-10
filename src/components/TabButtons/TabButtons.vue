@@ -1,12 +1,33 @@
 <script setup lang="ts">
-import { computed, watch, watchEffect, h, type FunctionalComponent } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  watchEffect,
+} from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { RouterLink } from 'vue-router'
-import Pill from './Pill.vue'
-import type { BrowserTabBase } from './pillTypes'
-import { warnDeprecated } from '../../utils/warnDeprecated'
+import Pill from '../shared/tabs/Pill.vue'
+import { NativeAnchor, NativeButton } from '../shared/nativeElements'
+import {
+  browserTabCardClasses,
+  tabIndicatorMotionClasses,
+  tabIndicatorSurfaceClasses,
+  tabRadiusClasses,
+  tabShellClasses,
+  tabTrackClasses,
+} from '../shared/tabs/styles'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import type { TabButton, TabButtonsEmits, TabButtonsProps } from './types'
+import type { BrowserTabBase } from '../shared/tabs/pillTypes'
+import type {
+  TabButton,
+  TabButtonsEmits,
+  TabButtonsProps,
+  TabButtonValue,
+} from './types'
 
 defineOptions({
   name: 'TabButtons',
@@ -14,213 +35,245 @@ defineOptions({
 })
 
 const props = withDefaults(defineProps<TabButtonsProps>(), {
-  type: 'subtle',
+  variant: 'subtle',
   size: 'sm',
   vertical: false,
-  direction: 'left',
+  side: 'left',
+  fluid: false,
 })
 
 const emit = defineEmits<TabButtonsEmits>()
 
-watchEffect(() => {
-  if (props.buttons) {
-    warnDeprecated('TabButtons `buttons` prop', '`options`')
-  }
-})
-
-const options = computed(() => props.options ?? props.buttons ?? [])
+const options = computed(() => props.options ?? [])
 
 watchEffect(() => {
   for (const option of options.value) {
     warnUnsupportedIconString('TabButtons', 'options.icon', option.icon)
     warnUnsupportedIconString('TabButtons', 'options.iconLeft', option.iconLeft)
-    warnUnsupportedIconString('TabButtons', 'options.iconRight', option.iconRight)
   }
 })
 
 const resolvedButtons = computed(() => {
-  return options.value.map((button, index) => {
-    const {
-      value,
-      label,
-      icon,
-      iconLeft,
-      iconRight,
-      active = false,
-      class: customClass,
-      onClick,
-      tooltip,
-      disabled,
-      route,
-      href,
-    } = button
+  return options.value.map((button) => {
+    const { value, label, icon, tooltip } = button
 
     const isIconOnly = Boolean(icon)
     const visibleLabel = hasLabel(label) && !isIconOnly
     const accessibleLabel = hasLabel(label) ? String(label) : tooltip
 
     return {
-      key: `tab-button-${index}`,
-      label,
-      icon,
-      iconLeft,
-      iconRight,
-      active,
-      customClass,
-      onClick,
-      tooltip,
-      disabled,
+      ...button,
+      value,
+      customClass: button.class,
       visibleLabel,
       accessibleLabel,
-      route,
-      href,
-      modelValue: value ?? label ?? index,
     }
   })
 })
 
+// Selection state. A bound `modelValue` wins; otherwise the component holds
+// its own, so `RadioGroupRoot` is always controlled. Handing it `undefined`
+// would let reka fall back to its own uncontrolled state: the checked pill
+// would change text color while `props.modelValue` stayed `undefined`, so the
+// re-measure watcher below would never fire and the sliding indicator would
+// stay parked — or stay hidden, when nothing was checked at mount.
+const internalValue = ref<TabButtonValue | undefined>(props.modelValue)
+
+// Handed to `RadioGroupRoot` when nothing is selected, for the same reason
+// `Tabs` does it: an undefined model reads as uncontrolled, and reka would
+// then track the checked item privately where nothing here can see it.
+const NO_SELECTION = '__frappe-ui-tab-buttons-none__'
+
+const model = computed({
+  get: () =>
+    props.modelValue !== undefined
+      ? props.modelValue
+      : (internalValue.value ?? NO_SELECTION),
+  set: (value) => {
+    if (value === undefined || value === NO_SELECTION) return
+    internalValue.value = value
+    emit('update:modelValue', value)
+  },
+})
+
+const rootClasses = computed(() => [
+  props.fluid ? 'flex w-full' : 'inline-flex shrink-0',
+  props.vertical ? 'flex-col' : 'items-center',
+  // `isolate` keeps the -z-10 sliding indicator above the track's own
+  // background and rail border while staying behind the (static) tab
+  // buttons.
+  (pillTrack.value || browserTrack.value) && 'relative isolate',
+  underlineTrack.value && 'relative',
+  ...tabTrackClasses({
+    variant: props.variant,
+    size: props.size,
+    orientation: props.vertical ? 'vertical' : 'horizontal',
+    side: props.side,
+  }),
+])
+
+// Sliding active-pill surface for subtle/ghost, equivalent to TabList's
+// reka TabsIndicator (RadioGroup has no indicator primitive, so the checked
+// item is measured directly). Pills never paint an active background
+// themselves; this layer carries it between selections.
+const pillTrack = computed(
+  () => props.variant === 'subtle' || props.variant === 'ghost',
+)
+
+// The underline variant slides a 1px rail bar instead of a pill surface,
+// matching TabList's underline TabsIndicator.
+const underlineTrack = computed(() => props.variant === 'underline')
+
+// browser-tab slides the active card itself: the indicator carries the
+// opaque surface, borders, radii, and the rail fusion mask; the checked
+// pill keeps its transparent inactive box.
+const browserTrack = computed(() => props.variant === 'browser-tab')
+
+const hasIndicator = computed(
+  () => pillTrack.value || underlineTrack.value || browserTrack.value,
+)
+
+const trackRef = ref<HTMLElement | null>(null)
+const indicatorRect = ref<{
+  x: number
+  y: number
+  w: number
+  h: number
+} | null>(null)
+// Transitions switch on only after the first paint so the indicator never
+// slides in on mount.
+const indicatorAnimated = ref(false)
+
+function measureIndicator() {
+  const track = trackRef.value
+  if (!track || !hasIndicator.value) {
+    indicatorRect.value = null
+    return
+  }
+  const checked = track.querySelector<HTMLElement>(
+    '[data-slot="tab-button"][data-state="checked"]',
+  )
+  if (!checked) {
+    indicatorRect.value = null
+    return
+  }
+  // Rect deltas, not offsetLeft/offsetWidth: offsets round to integers,
+  // which leaves the indicator up to half a pixel off fractional layouts
+  // (fluid tracks especially).
+  const trackRect = track.getBoundingClientRect()
+  const rect = checked.getBoundingClientRect()
+  // The indicator is positioned from the track's padding box; subtract any
+  // start-side border (the underline track has a rail border).
+  const style = getComputedStyle(track)
+  const border = {
+    top: parseFloat(style.borderTopWidth) || 0,
+    bottom: parseFloat(style.borderBottomWidth) || 0,
+    left: parseFloat(style.borderLeftWidth) || 0,
+    right: parseFloat(style.borderRightWidth) || 0,
+  }
+  const x = rect.left - trackRect.left - border.left
+  const y = rect.top - trackRect.top - border.top
+
+  if (underlineTrack.value) {
+    // 1px bar overlaying the track's rail border, shifted one pixel outward
+    // past the padding box — same geometry as TabList's underline indicator.
+    if (props.vertical) {
+      const innerW = trackRect.width - border.left - border.right
+      indicatorRect.value = {
+        x: style.direction === 'rtl' ? -1 : innerW,
+        y,
+        w: 1,
+        h: rect.height,
+      }
+    } else {
+      const innerH = trackRect.height - border.top - border.bottom
+      indicatorRect.value = { x, y: innerH, w: rect.width, h: 1 }
+    }
+    return
+  }
+
+  indicatorRect.value = { x, y, w: rect.width, h: rect.height }
+}
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  measureIndicator()
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => measureIndicator())
+    watch(
+      trackRef,
+      (track) => {
+        resizeObserver?.disconnect()
+        if (track) resizeObserver?.observe(track)
+      },
+      { immediate: true },
+    )
+  }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      indicatorAnimated.value = true
+    })
+  })
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
+})
+
 watch(
-  [resolvedButtons, () => props.modelValue],
-  ([buttons]) => {
-    const selectedButton = buttons.find((button) =>
-      Object.is(button.modelValue, props.modelValue),
-    )
-
-    if (selectedButton) return
-
-    const fallbackButton = buttons.find((button) => button.active)
-    if (
-      fallbackButton &&
-      !Object.is(fallbackButton.modelValue, props.modelValue)
-    ) {
-      emit('update:modelValue', fallbackButton.modelValue)
-    }
-  },
-  { immediate: true },
+  [
+    // `model`, not `props.modelValue`: an unbound component moves selection
+    // through `internalValue`, and the indicator has to follow that too.
+    model,
+    () => props.variant,
+    () => props.size,
+    () => props.vertical,
+    () => props.fluid,
+    options,
+  ],
+  () => nextTick(measureIndicator),
 )
 
-const selectedButtonKey = computed({
-  get: () => {
-    const selectedButton = resolvedButtons.value.find((button) =>
-      Object.is(button.modelValue, props.modelValue),
-    )
-
-    if (selectedButton) return selectedButton.key
-
-    return resolvedButtons.value.find((button) => button.active)?.key
-  },
-  set: (nextKey) => {
-    const selectedButton = resolvedButtons.value.find(
-      (button) => button.key === nextKey,
-    )
-    emit('update:modelValue', selectedButton?.modelValue)
-  },
-})
-
-const rootClasses = computed(() =>
-  props.vertical ? verticalClasses() : horizontalClasses(),
+const browserCardBase = computed<BrowserTabBase>(() =>
+  props.vertical ? props.side : 'default',
 )
 
-function horizontalClasses() {
-  const base = ['inline-flex shrink-0 items-center overflow-hidden']
-  const isSm = props.size === 'sm'
+const indicatorClasses = computed(() => [
+  'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none',
+  indicatorAnimated.value &&
+    `transition-[width,height,transform] ${tabIndicatorMotionClasses}`,
+  ...(underlineTrack.value
+    ? ['bg-[var(--outline-gray-8)]']
+    : browserTrack.value
+      ? [
+          '-z-10',
+          tabRadiusClasses('browser-tab', props.size, browserCardBase.value),
+          browserTabCardClasses(browserCardBase.value),
+        ]
+      : ['-z-10', ...tabIndicatorSurfaceClasses(props.variant, props.size)]),
+])
 
-  switch (props.type) {
-    case 'subtle':
-    case 'ghost': {
-      const surface =
-        props.type === 'subtle' ? 'bg-surface-gray-2' : 'bg-surface-base'
-      const shape = isSm ? 'gap-1 rounded-4' : 'gap-1.5 rounded-[10px]'
-      return [...base, 'p-px', surface, shape]
-    }
-    case 'underline':
-      return [...base, 'border-b border-outline-gray-1 gap-6']
-    case 'browser-tab':
-      return [...base, 'border-b border-outline-gray-1 gap-1']
+const indicatorStyle = computed(() => {
+  const r = indicatorRect.value
+  if (!r) return { display: 'none' }
+  return {
+    width: `${r.w}px`,
+    height: `${r.h}px`,
+    transform: `translate(${r.x}px, ${r.y}px)`,
   }
-  return base
-}
-
-// Vertical mode is a separate layout. Buttons/pills below get `w-full` so
-// every tab stretches to the container's intrinsic max width — the active
-// indicator then lands on the container's rail rather than at the pill's
-// own text width.
-function verticalClasses() {
-  const base = ['inline-flex shrink-0 flex-col']
-  const isSm = props.size === 'sm'
-
-  switch (props.type) {
-    case 'subtle':
-    case 'ghost': {
-      const surface =
-        props.type === 'subtle' ? 'bg-surface-gray-2' : 'bg-surface-base'
-      const shape = isSm ? 'gap-1 rounded-4' : 'gap-1.5 rounded-[10px]'
-      return [...base, 'p-px', surface, shape, 'items-center']
-    }
-    case 'underline':
-      return [...base, 'border-r border-outline-gray-1 gap-1.5']
-    case 'browser-tab': {
-      const rule =
-        props.direction === 'right'
-          ? 'border-r border-outline-gray-1'
-          : 'border-l border-outline-gray-1'
-      return [...base, rule, 'gap-1']
-    }
-  }
-  return base
-}
-
-const pillVariant = computed(() => {
-  if (props.type === 'underline') return 'underline'
-  if (props.type === 'browser-tab') return 'browser-tab'
-  return 'default'
 })
-
-const pillActiveStyle = computed(() =>
-  props.type === 'ghost' ? 'subtle' : 'raised',
-)
 
 function browserTabBase(checked: boolean): BrowserTabBase {
-  if (props.type !== 'browser-tab') return 'none'
+  if (props.variant !== 'browser-tab') return 'none'
   if (!props.vertical) return 'default'
-  if (!checked) return 'none'
-  return props.direction
-}
-
-function tabButtonRadiusClass(checked: boolean) {
-  if (props.type === 'underline') return ''
-
-  if (props.type === 'browser-tab') {
-    const base = browserTabBase(checked)
-    if (base === 'left')
-      return props.size === 'sm' ? 'rounded-r-[7px]' : 'rounded-r-[9px]'
-    if (base === 'right')
-      return props.size === 'sm' ? 'rounded-l-[7px]' : 'rounded-l-[9px]'
-    if (base === 'default')
-      return props.size === 'sm' ? 'rounded-t-[7px]' : 'rounded-t-[9px]'
-  }
-
-  return props.size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
+  return checked ? props.side : 'default'
 }
 
 function hasLabel(label: TabButton['label']) {
   return label !== undefined && label !== null && label !== ''
 }
-
-// Native tab elements are rendered through these functional wrappers rather
-// than bare 'button'/'a' tag strings. A string `:is` binding runs through
-// Vue's component resolver, which capitalizes the name and matches a globally
-// registered component — so in apps that do `app.component('Button', ...)`
-// (e.g. Gameplan), `<component :is="'button'">` resolves to that Button
-// component instead of a native <button>. Binding a component value skips the
-// resolver. `inheritAttrs: false` keeps the merged Reka/data/class/@click
-// attrs from being applied twice.
-const NativeButton: FunctionalComponent = (_props, { attrs, slots }) =>
-  h('button', attrs, slots.default?.())
-NativeButton.inheritAttrs = false
-const NativeAnchor: FunctionalComponent = (_props, { attrs, slots }) =>
-  h('a', attrs, slots.default?.())
-NativeAnchor.inheritAttrs = false
 
 // Pick the wrapper element for a tab. `route` → RouterLink, `href` →
 // anchor, otherwise a native button. Disabled forces the button form so
@@ -249,18 +302,25 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
 
 <template>
   <RadioGroupRoot
-    v-model="selectedButtonKey"
+    v-model="model"
     :orientation="vertical ? 'vertical' : 'horizontal'"
     v-bind="$attrs"
   >
-    <div :class="rootClasses">
+    <div ref="trackRef" data-slot="tab-buttons" :class="rootClasses">
+      <div
+        v-if="hasIndicator"
+        aria-hidden="true"
+        data-slot="tab-indicator"
+        :class="indicatorClasses"
+        :style="indicatorStyle"
+      />
       <RadioGroupItem
         v-for="button in resolvedButtons"
-        :key="button.key"
+        :key="button.value"
         v-slot="{ checked, disabled }"
         as="template"
         :disabled="button.disabled"
-        :value="button.key"
+        :value="button.value"
       >
         <component
           :is="tabElement(button)"
@@ -279,25 +339,27 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
               : button.tooltip
           "
           :class="[
-            'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60',
-            tabButtonRadiusClass(checked),
+            tabShellClasses,
+            tabRadiusClasses(variant, size, browserTabBase(checked)),
             vertical && 'w-full',
+            fluid && 'flex-1 min-w-0',
             button.customClass,
           ]"
           @click="button.onClick?.($event)"
         >
           <Pill
-            :class="vertical ? 'w-full !justify-start' : ''"
+            :class="[
+              vertical ? 'w-full !justify-start' : '',
+              fluid ? 'w-full' : '',
+            ]"
             :label="button.label"
             :icon="button.icon"
             :icon-left="button.iconLeft"
-            :icon-right="button.iconRight"
             :active="checked"
             :size="size"
-            :variant="pillVariant"
+            :variant="variant"
             :browser-tab-base="browserTabBase(checked)"
             :orientation="vertical ? 'vertical' : 'horizontal'"
-            :active-style="pillActiveStyle"
           >
             <template v-if="$slots.prefix" #prefix>
               <slot

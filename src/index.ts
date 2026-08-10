@@ -101,7 +101,7 @@ export * from './components/ScrollArea'
 export * from './components/SettingsDialog'
 export * from './components/Sidebar/index.ts'
 export * from './components/TabButtons'
-export { default as Tabs } from './components/Tabs/Tabs.vue'
+export * from './components/Tabs'
 
 // Command and keyboard surfaces
 export * from './components/CommandPalette'

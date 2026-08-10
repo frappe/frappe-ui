@@ -34,7 +34,7 @@ const modeButtons = [
 <template>
   <div>
     <div class="flex justify-end mb-3">
-      <TabButtons :buttons="modeButtons" v-model="previewTheme" class="w-fit" />
+      <TabButtons :options="modeButtons" v-model="previewTheme" class="w-fit" />
     </div>
 
     <div class="grid divide-y divide-outline-gray-1">
