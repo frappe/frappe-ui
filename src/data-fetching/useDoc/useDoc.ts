@@ -7,7 +7,7 @@ import {
   toValue,
 } from 'vue'
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
-import { getDispatchVersion, useFrappeFetch } from '../useFrappeFetch'
+import { getDispatchStamp, useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
@@ -89,17 +89,18 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
-        // Versioned with the request's dispatch version, so a reload that an
+        // Versioned with the request's dispatch stamp, so a reload that an
         // in-between write has overtaken cannot put the older doc back
-        // (#1017). `record: false` — this is a read: the server may answer it
-        // before an earlier-dispatched save commits, and recording here would
-        // gate that save's response out for good.
-        let version = getDispatchVersion(ctx.response)
-        docStore.setDoc(doc, version, false)
+        // (#1017). The stamp's `record` is false for this GET: a read is
+        // admitted on its version but must not record — the server may
+        // answer it before an earlier-dispatched save commits, and recording
+        // here would gate that save's response out for good.
+        let stamp = getDispatchStamp(ctx.response)
+        docStore.setDoc(doc, stamp?.version, stamp?.record ?? false)
         if (transform) {
           doc = transform(doc)
         }
-        listStore.updateRow(doctype, ctx.data.data, version)
+        listStore.updateRow(doctype, ctx.data.data, stamp?.version)
         triggerSuccessCallbacks(doc)
       }
       return ctx

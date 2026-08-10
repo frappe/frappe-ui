@@ -59,21 +59,21 @@ class DocStore {
   }
 
   /**
-   * Run `fn` with `version` as the ambient write version for store writes.
-   * `record` says whether the request that produced the response mutates the
-   * server (anything but GET): only those writes record their version.
+   * Run `fn` with `write` as the ambient write stamp for store writes — the
+   * response's dispatch version plus whether the request mutates the server
+   * (anything but GET): only mutating writes record their version. The stamp
+   * comes whole from `getDispatchStamp`, so the rule has one source.
    *
-   * The ambient version is synchronous: a hook that writes the store after an
+   * The ambient stamp is synchronous: a hook that writes the store after an
    * `await` runs outside it, and that write is unversioned — always admitted,
    * never recorded. Consumer hooks must write the stores before any `await`.
    */
   runWithWriteVersion<T>(
-    version: number | undefined,
-    record: boolean,
+    write: { version: number; record: boolean } | undefined,
     fn: () => T,
   ): T {
     const previous = this.currentWrite
-    this.currentWrite = version != null ? { version, record } : null
+    this.currentWrite = write ?? null
     try {
       return fn()
     } finally {

@@ -46,19 +46,20 @@ export class FrappeResponseError extends Error {
 // `record` is whether the request mutates the server (anything but GET): only
 // mutating responses record their version in the store, a read is admitted on
 // its version but must not make an earlier-dispatched save stale.
-const dispatchVersions = new WeakMap<
-  Response,
-  { version: number; record: boolean }
->()
+export type DispatchStamp = { version: number; record: boolean }
+
+const dispatchStamps = new WeakMap<Response, DispatchStamp>()
 
 /**
- * The dispatch version stamped on a Response by the wrapped fetch below.
- * `undefined` for a Response that did not come through it.
+ * The stamp put on a Response by the wrapped fetch below. The single source
+ * for both halves of the write-gate rule: the dispatch version and whether
+ * the response may record it. `undefined` for a Response that did not come
+ * through the wrapped fetch.
  */
-export function getDispatchVersion(
+export function getDispatchStamp(
   response: Response | null | undefined,
-): number | undefined {
-  return response ? dispatchVersions.get(response)?.version : undefined
+): DispatchStamp | undefined {
+  return response ? dispatchStamps.get(response) : undefined
 }
 
 export const useFrappeFetch = createFetch({
@@ -69,7 +70,7 @@ export const useFrappeFetch = createFetch({
       const version = docStore.nextWriteVersion()
       const record = (init?.method ?? 'GET').toUpperCase() !== 'GET'
       return fetch(input, init).then((response) => {
-        dispatchVersions.set(response, { version, record })
+        dispatchStamps.set(response, { version, record })
         return response
       })
     },
@@ -93,7 +94,7 @@ export const useFrappeFetch = createFetch({
         // fetch; treat it as the newest. The stores gate per document.
         // `setDocs` runs synchronously up to its IDB write, so its records
         // are in place when `updateRows` checks them.
-        let stamp = dispatchVersions.get(ctx.response) ?? {
+        let stamp = dispatchStamps.get(ctx.response) ?? {
           version: docStore.nextWriteVersion(),
           record: true,
         }

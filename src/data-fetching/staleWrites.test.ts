@@ -2,7 +2,9 @@
  * @vitest-environment node
  */
 
-import { baseUrl } from '../mocks/utils'
+import { http, HttpResponse } from 'msw'
+import { server } from '../mocks/node'
+import { baseUrl, url } from '../mocks/utils'
 import { docStore } from './docStore'
 import { useDoc } from './useDoc/useDoc'
 import { useDoctype } from './useDoctype/useDoctype'
@@ -237,6 +239,35 @@ describe('reads do not record a version', () => {
     await Promise.all([save, read])
 
     expect(storedEmail()).toBe('slow-fresh@example.com')
+  })
+})
+
+describe('docs channel robustness', () => {
+  it('ignores a docs entry without doctype and still lands the response', async () => {
+    await seedUser1()
+    server.use(
+      http.post(url('/api/v2/method/User/mixed_docs'), () =>
+        HttpResponse.json({
+          data: 'ok',
+          docs: [
+            // No doctype: identifies no document, must be skipped — not
+            // throw inside the global afterFetch and reject the response.
+            { name: 'orphan' },
+            {
+              doctype: 'User',
+              name: 'user1',
+              email: 'mixed-fresh@example.com',
+            },
+          ],
+        }),
+      ),
+    )
+    let dt = useDoctype<User>('User', { baseUrl })
+
+    await expect(dt.runMethod.submit({ method: 'mixed_docs' })).resolves.toBe(
+      'ok',
+    )
+    expect(storedEmail()).toBe('mixed-fresh@example.com')
   })
 })
 
