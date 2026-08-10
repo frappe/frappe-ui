@@ -4,18 +4,22 @@ import type {
   NodeType,
   Schema,
 } from '@tiptap/pm/model'
-import { Plugin, PluginKey, type EditorState } from '@tiptap/pm/state'
-import type { Transaction } from '@tiptap/pm/state'
+import { Plugin, PluginKey, type Transaction } from '@tiptap/pm/state'
 import { canJoin } from '@tiptap/pm/transform'
 
-const LIST_NODE_NAMES = ['bulletList', 'orderedList', 'taskList']
-
+/**
+ * Every list node TipTap ships declares `group: 'block list'`, so reading the
+ * group covers a consumer's own list node too, with no list of names to keep
+ * in sync.
+ */
 function listTypesIn(schema: Schema): Set<NodeType> {
-  return new Set(
-    LIST_NODE_NAMES.map((name) => schema.nodes[name]).filter(
-      (type): type is NodeType => Boolean(type),
-    ),
-  )
+  const types = new Set<NodeType>()
+  for (const name of Object.keys(schema.nodes)) {
+    const type = schema.nodes[name]
+    const groups = String(type.spec.group ?? '').split(' ')
+    if (groups.includes('list')) types.add(type)
+  }
+  return types
 }
 
 /**
@@ -59,23 +63,40 @@ function collectJoinPositions(
 }
 
 /**
- * Transaction that merges every pair of adjacent same-kind lists in `state`,
- * or `null` when the document already has none.
+ * Merge every pair of adjacent same-kind lists in `tr.doc`. Returns whether
+ * anything was joined.
  */
-function joinAdjacentLists(
-  state: EditorState,
-  listTypes: Set<NodeType>,
-): Transaction | null {
-  const positions: number[] = []
-  collectJoinPositions(state.doc, 0, listTypes, positions)
-  if (positions.length === 0) return null
+function joinAdjacentListsIn(tr: Transaction, schema: Schema): boolean {
+  const listTypes = listTypesIn(schema)
+  if (listTypes.size === 0) return false
 
-  const tr = state.tr
+  const positions: number[] = []
+  collectJoinPositions(tr.doc, 0, listTypes, positions)
+  if (positions.length === 0) return false
+
   // Join back-to-front so each join leaves the earlier positions valid.
+  let joined = false
   for (const pos of positions.sort((a, b) => b - a)) {
-    if (canJoin(tr.doc, pos)) tr.join(pos)
+    if (canJoin(tr.doc, pos)) {
+      tr.join(pos)
+      joined = true
+    }
   }
-  return tr.docChanged ? tr : null
+  return joined
+}
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    listJoin: {
+      /**
+       * Merge every pair of adjacent same-kind lists in the document. Runs
+       * automatically on every edit and when the editor view is created;
+       * call it directly to repair a document in an editor that has not been
+       * mounted yet (see `useEditor`).
+       */
+      joinAdjacentLists: () => ReturnType
+    }
+  }
 }
 
 /**
@@ -89,10 +110,24 @@ function joinAdjacentLists(
 export const ListJoin = Extension.create({
   name: 'listJoin',
 
-  addProseMirrorPlugins() {
-    const listTypes = listTypesIn(this.editor.schema)
-    if (listTypes.size === 0) return []
+  addCommands() {
+    return {
+      joinAdjacentLists:
+        () =>
+        ({ tr, dispatch }) => {
+          if (!joinAdjacentListsIn(tr, tr.doc.type.schema)) return false
+          if (dispatch) {
+            // Repairing a document on open is not the user's edit: keep it out
+            // of the `update` event and out of the undo stack. The `transaction`
+            // event still fires — dirty-tracking should listen to `update`.
+            tr.setMeta('preventUpdate', true).setMeta('addToHistory', false)
+          }
+          return true
+        },
+    }
+  },
 
+  addProseMirrorPlugins() {
     return [
       new Plugin({
         key: new PluginKey('listJoin'),
@@ -101,15 +136,15 @@ export const ListJoin = Extension.create({
          * transaction, so `appendTransaction` never sees it. A document saved
          * back while this bug was live would keep rendering `1.` mid-list —
          * until the first keystroke, and forever in a read-only editor.
-         * Repair it here: this runs synchronously as the view is created, so
-         * the first paint is already correct.
+         *
+         * This runs synchronously as the view is created, so the first paint
+         * is already correct. It does not cover an editor built with
+         * `element: null`, which has no view and, until it mounts, no plugins
+         * at all — `useEditor` runs the command directly for that.
          */
         view: (view) => {
-          const tr = joinAdjacentLists(view.state, listTypes)
-          if (tr) {
-            // `preventUpdate` keeps the repair out of the `update` event:
-            // opening a document must not mark it dirty or fire an autosave
-            // the user never asked for. Any later edit saves the fixed doc.
+          const tr = view.state.tr
+          if (joinAdjacentListsIn(tr, view.state.schema)) {
             view.dispatch(
               tr.setMeta('preventUpdate', true).setMeta('addToHistory', false),
             )
@@ -120,7 +155,8 @@ export const ListJoin = Extension.create({
           if (!transactions.some((transaction) => transaction.docChanged)) {
             return null
           }
-          return joinAdjacentLists(newState, listTypes)
+          const tr = newState.tr
+          return joinAdjacentListsIn(tr, newState.schema) ? tr : null
         },
       }),
     ]

@@ -114,6 +114,13 @@ export function useEditor(
 
   editor.value = new TiptapEditor(editorOptions as EditorOptions)
 
+  // We build with `element: null` and let `<EditorContent>` mount later, so an
+  // unmounted editor has no view and no ProseMirror plugins at all. Normalize
+  // the parsed document here instead, or a headless caller — `getHTML()` before
+  // the child mounts, a markdown export that never renders — reads back the
+  // split lists it was handed. No-op once the schema has no list node.
+  editor.value.commands.joinAdjacentLists?.()
+
   const editorStorage = editor.value.storage as typeof editor.value.storage & {
     upload?: { uploadFunction: UseEditorOptions['uploadFunction'] }
   }

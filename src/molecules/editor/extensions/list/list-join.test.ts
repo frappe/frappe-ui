@@ -153,6 +153,43 @@ describe('ListJoin', () => {
     expect(onUpdate).not.toHaveBeenCalled()
   })
 
+  it('repairs an unmounted editor through the command', () => {
+    // `useEditor` builds with `element: null`, so there is no view — and until
+    // it mounts, no ProseMirror plugins either. The command is the only path.
+    const editor = new Editor({
+      extensions: [StarterKit],
+      element: null,
+      content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
+    })
+    expect(editor.state.plugins).toHaveLength(0)
+
+    editor.commands.joinAdjacentLists()
+
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].content).toHaveLength(2)
+  })
+
+  it('reports nothing to do when the document has no split list', () => {
+    const editor = new Editor({
+      extensions: [StarterKit],
+      element: null,
+      content: '<ol><li><p>a</p></li></ol>',
+    })
+    expect(editor.commands.joinAdjacentLists()).toBe(false)
+  })
+
+  it('finds list nodes by their schema group, not by name', () => {
+    const editor = editorWith('<p>x</p>')
+    const groupOf = (name: string) =>
+      String(editor.schema.nodes[name].spec.group ?? '').split(' ')
+    expect(groupOf('orderedList')).toContain('list')
+    expect(groupOf('bulletList')).toContain('list')
+    expect(groupOf('paragraph')).not.toContain('list')
+  })
+
   it('merges adjacent task lists, which only RichTextKit enables', () => {
     const taskList = (text: string) =>
       `<ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>${text}</p></li></ul>`
