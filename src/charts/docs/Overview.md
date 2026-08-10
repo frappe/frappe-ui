@@ -101,7 +101,7 @@ useChart({ container: plotEl, option: () => option.value })
     <ChartContainer title="Plan satisfaction" :loading="loading" :error="error">
       <div ref="plotEl" class="h-full w-full" />
       <template #legend>
-        <ChartLegend :items="legendItems" @toggle="toggleSeries" />
+        <ChartLegend :items="legendItems" @change="toggleSeries" />
       </template>
     </ChartContainer>
   </ChartCard>

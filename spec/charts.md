@@ -96,3 +96,9 @@ The color ramps carry one name each, from the CSS token through to the theme
 object: `categorical`, `sequential`, `diverging`. "Palette" names the choice
 between them — the `palette` prop, `ChartPalette`, `paletteColors` — never a
 ramp itself.
+
+The slot vocabulary is P6's: `actions`, `loading`, `error` and `empty` come from
+the shared list, and the family adds two region slots for parts only a chart
+has, `legend` and `tooltip`. `ChartLegend` emits behavior names per P1:
+`change` when an entry flips a series' visibility, `highlight` when the
+highlighted series changes (`null` clears it) — not `toggle` or `hover`.

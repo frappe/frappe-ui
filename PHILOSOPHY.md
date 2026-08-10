@@ -162,8 +162,14 @@ Icon-only buttons, action toggles, and other controls that don't carry a value a
 - `#trigger` — the element that opens an overlay
 - `#content` — an overlay's content when `#default` is already the trigger
 - `#empty` — fallback when a list has no items
+- `#loading` / `#error` — the loading and error states; a slot replaces the whole state, not a line inside it
+- `#actions` — the row of action buttons in a header or toolbar
 - `#footer` / `#header` — region wrappers
 - `#label` / `#description` — overrides for the labeling contract (P5)
+
+A family spec may add region slots for parts only that family has — charts add
+`#legend` and `#tooltip` (spec/charts.md). A family-specific slot still names the
+part, never the interaction, and the family spec is where it is recorded.
 
 **`#body` is not in the vocabulary.** It said "the content, but bypassing the
 component's own shell", which is a *prop* (`bare`), not a slot — and every call

@@ -13,11 +13,11 @@
       size="xs"
       :aria-pressed="!item.hidden"
       :label="toggleLabel(item)"
-      @click="emit('toggle', item.name)"
-      @mouseenter="emit('hover', item.name)"
-      @mouseleave="emit('hover', null)"
-      @focus="emit('hover', item.name)"
-      @blur="emit('hover', null)"
+      @click="emit('change', item.name)"
+      @mouseenter="emit('highlight', item.name)"
+      @mouseleave="emit('highlight', null)"
+      @focus="emit('highlight', item.name)"
+      @blur="emit('highlight', null)"
     >
       <span class="flex items-center gap-1.5">
         <span
@@ -45,8 +45,10 @@ import type { ChartLegendItem, ChartLegendProps } from '../types'
 defineProps<ChartLegendProps>()
 
 const emit = defineEmits<{
-  toggle: [name: string]
-  hover: [name: string | null]
+  /** An entry was pressed: the named series' visibility flipped. */
+  change: [name: string]
+  /** The highlighted series, or null when the highlight clears. */
+  highlight: [name: string | null]
 }>()
 
 // The visible text is the series label; the accessible name has to say what the

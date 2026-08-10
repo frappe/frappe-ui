@@ -94,7 +94,7 @@ function toggle(name: string) {
     >
       <div ref="plotEl" class="h-full w-full" />
       <template #legend>
-        <ChartLegend :items="legendItems" @toggle="toggle" />
+        <ChartLegend :items="legendItems" @change="toggle" />
       </template>
     </ChartContainer>
   </ChartCard>

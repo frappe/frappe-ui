@@ -45,8 +45,8 @@
     <template v-if="legendItems.length > 1" #legend>
       <ChartLegend
         :items="legendItems"
-        @toggle="toggleSeries"
-        @hover="hoverSeries"
+        @change="toggleSeries"
+        @highlight="hoverSeries"
       />
     </template>
   </ChartContainer>

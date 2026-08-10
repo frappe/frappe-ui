@@ -83,8 +83,8 @@
     <template v-if="legendItems.length > 1" #legend>
       <ChartLegend
         :items="legendItems"
-        @toggle="toggleSlice"
-        @hover="hoverSlice"
+        @change="toggleSlice"
+        @highlight="hoverSlice"
       />
     </template>
   </ChartContainer>
