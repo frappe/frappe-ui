@@ -391,6 +391,10 @@ describe('tokens v2 migration', () => {
     const externalFixture = path.join(shared, 'b.vue')
     fs.writeFileSync(externalFixture, '<i class="text-ink-red-3"></i>')
     fs.symlinkSync(shared, path.join(root, 'linked-pkg'))
+    // External file link: same break through a narrower entry point.
+    const externalFile = path.join(shared, 'theme.css')
+    fs.writeFileSync(externalFile, '.a { @apply text-ink-red-3; }')
+    fs.symlinkSync(externalFile, path.join(root, 'theme.css'))
     const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
 
     const result = spawnSync(process.execPath, [script, '--ink-shift', root], {
@@ -403,8 +407,11 @@ describe('tokens v2 migration', () => {
     // The external package is untouched — it has no marker of its own, so a
     // rewrite here would set up a double-shift on a later direct run.
     expect(fs.readFileSync(externalFixture, 'utf8')).toContain('ink-red-3')
+    // A symlinked file out of the target is skipped and reported too.
+    expect(fs.readFileSync(externalFile, 'utf8')).toContain('ink-red-3')
     expect(result.stdout).toContain('NOT migrated')
     expect(result.stdout).toContain('linked-pkg')
+    expect(result.stdout).toContain('theme.css')
   })
 
   it('ink-shift CLI ignores a marker inside an external linked package', () => {

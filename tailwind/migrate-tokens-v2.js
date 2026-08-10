@@ -657,12 +657,12 @@ const SKIP_DIRS = new Set([
   'node_modules', '.git', 'dist', 'cache', 'generated', 'espresso-v2-design-tokens',
 ])
 
-// Symlinked directories are followed only while their real path stays inside
-// one of the run's target subtrees. A link to an external package is skipped
-// and reported instead of rewritten: rewriting it would leave it without a
-// run-once marker of its own, and a later direct --ink-shift run on that
-// package would double-shift it. `ctx.seenDirs` is the cycle guard — an
-// internal link back to an ancestor must not recurse forever.
+// Symlinks — directories and files alike — are followed only while their real
+// path stays inside one of the run's target subtrees. A link to an external
+// package is skipped and reported instead of rewritten: rewriting it would
+// leave it without a run-once marker of its own, and a later direct
+// --ink-shift run on that package would double-shift it. `ctx.seenDirs` is the
+// cycle guard — an internal link back to an ancestor must not recurse forever.
 function makeWalkContext(targets) {
   return {
     roots: targets.map((t) => fs.realpathSync(t)),
@@ -683,17 +683,21 @@ function* walk(target, ctx = makeWalkContext([target])) {
   for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
     const full = path.join(target, entry.name)
     let isDirectory = entry.isDirectory()
-    if (!isDirectory && entry.isSymbolicLink()) {
+    if (entry.isSymbolicLink()) {
+      let real
       try {
+        real = fs.realpathSync(full)
         isDirectory = fs.statSync(full).isDirectory()
       } catch {
         continue // broken symlink
       }
-      if (isDirectory && !SKIP_DIRS.has(entry.name)) {
-        if (!isInsideRoots(fs.realpathSync(full), ctx.roots)) {
-          ctx.externals.push(full)
-          continue
-        }
+      // Only links the run would otherwise rewrite are worth reporting.
+      const wouldRewrite = isDirectory
+        ? !SKIP_DIRS.has(entry.name)
+        : EXTENSIONS.has(path.extname(entry.name))
+      if (wouldRewrite && !isInsideRoots(real, ctx.roots)) {
+        ctx.externals.push(full)
+        continue
       }
     }
     if (isDirectory) {
