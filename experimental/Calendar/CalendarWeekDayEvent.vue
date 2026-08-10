@@ -23,7 +23,7 @@
       <div class="flex" :style="containerStyle">
       <div
         ref="eventRef"
-        class="event min-h-6 mx-px shadow rounded transition-all duration-75 shrink-0"
+        class="event min-h-6 mx-px shadow rounded-4 transition-all duration-75 shrink-0"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
         }"
@@ -43,7 +43,7 @@
         <div class="flex gap-1.5 h-full p-[5px]">
           <div
             v-if="props.event.fromTime"
-            class="event-border h-full w-[2px] rounded shrink-0"
+            class="event-border h-full w-[2px] rounded-4 shrink-0"
             :style="eventBorderStyle"
           />
           <div
@@ -124,8 +124,8 @@ import './style.css'
 import { ref, inject, computed, reactive, type CSSProperties } from 'vue'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
-import Popover from '../Popover/Popover.vue'
-import type { PopoverSide } from '../Popover/types'
+import Popover from '#components/Popover/Popover.vue'
+import type { PopoverSide } from '#components/Popover/types'
 import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,

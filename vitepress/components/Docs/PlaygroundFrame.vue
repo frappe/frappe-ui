@@ -104,7 +104,7 @@ function onCopy() {
 <template>
   <div class="not-prose">
     <div
-      class="overflow-hidden rounded-xl border border-outline-gray-1 divide-y divide-outline-gray-1"
+      class="overflow-hidden rounded-7 border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
         class="flex items-center justify-center bg-surface-base p-8 dot-grid"

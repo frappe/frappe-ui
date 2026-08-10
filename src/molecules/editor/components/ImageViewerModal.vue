@@ -41,7 +41,7 @@
         <!-- Caption -->
         <div
           v-if="currentImage.alt"
-          class="absolute bottom-4 p-2 text-center rounded-sm text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
+          class="absolute bottom-4 p-2 text-center rounded-1 text-white text-sm bg-black/65 z-10 transition-opacity duration-300 ease-in-out"
           :class="{ 'opacity-0 pointer-events-none': !isControlsVisible }"
         >
           {{ currentImage.alt }}

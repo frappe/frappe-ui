@@ -76,6 +76,104 @@ describe('tokens v2 migration', () => {
     expect(result.flagged).toEqual([])
   })
 
+  it('renames radius aliases to numbered tokens (ADR-0006)', () => {
+    const result = migrateTokens(
+      '<div class="rounded rounded-sm rounded-md rounded-lg rounded-xl rounded-2xl"></div>',
+    )
+
+    expect(result.migrated).toBe(
+      '<div class="rounded-4 rounded-1 rounded-5 rounded-6 rounded-7 rounded-8"></div>',
+    )
+    expect(result.flagged).toEqual([])
+  })
+
+  it('renames directional and variant-prefixed radius aliases', () => {
+    const result = migrateTokens(
+      '<div class="rounded-t rounded-t-lg rounded-tl-sm hover:rounded-2xl rounded-ss-md"></div>',
+    )
+
+    expect(result.migrated).toBe(
+      '<div class="rounded-t-4 rounded-t-6 rounded-tl-1 hover:rounded-8 rounded-ss-5"></div>',
+    )
+  })
+
+  it('keeps rounded-none, rounded-full, numbered tokens, and arbitrary radii', () => {
+    const input = '<div class="rounded-none rounded-full rounded-5 rounded-[3px]"></div>'
+    const result = migrateTokens(input)
+
+    expect(result.migrated).toBe(input)
+  })
+
+  it('renames radius aliases in migrated-typography mode too', () => {
+    const result = migrateTokens('<div class="rounded rounded-md text-lg"></div>', {
+      mode: 'migrated-typography',
+    })
+
+    expect(result.migrated).toBe('<div class="rounded-4 rounded-5 text-md"></div>')
+  })
+
+  it('rewrites bare `rounded` in class contexts and @apply, not in prose', () => {
+    const input = [
+      "const cls = 'px-2 rounded border'",
+      '// line-heights are rounded to px',
+      'The shell (rounded/bg/shadow) is owned by the parent.',
+      '.btn { @apply rounded border; }',
+      'Values are rounded up, per the `rounded` utility docs.',
+    ].join('\n')
+
+    const result = migrateTokens(input)
+
+    expect(result.migrated).toBe(
+      [
+        "const cls = 'px-2 rounded-4 border'",
+        '// line-heights are rounded to px',
+        'The shell (rounded/bg/shadow) is owned by the parent.',
+        '.btn { @apply rounded-4 border; }',
+        'Values are rounded up, per the `rounded-4` utility docs.',
+      ].join('\n'),
+    )
+  })
+
+  it('does not treat apostrophes in prose as string delimiters', () => {
+    const input = [
+      "// the row's corners are rounded when it's hovered",
+      "const cls = 'rounded' // it's the default",
+    ].join('\n')
+
+    const result = migrateTokens(input)
+
+    expect(result.migrated).toBe(
+      [
+        "// the row's corners are rounded when it's hovered",
+        "const cls = 'rounded-4' // it's the default",
+      ].join('\n'),
+    )
+  })
+
+  it('flags text-*-black instead of renaming it (#998)', () => {
+    const result = migrateTokens('<div class="text-base-black text-p-xl-black"></div>')
+
+    expect(result.migrated).toBe('<div class="text-base-black text-p-xl-black"></div>')
+    expect(result.flagged.map((f) => f.token)).toEqual([
+      'text-base-black',
+      'text-p-xl-black',
+    ])
+  })
+
+  it('flags a size + font-extrabold/font-black pair instead of merging (#998)', () => {
+    const result = migrateTokens('<div class="text-xl font-extrabold"></div>')
+
+    // The size still shifts (xl → 2xl); the weight is not merged onto the
+    // removed black style.
+    expect(result.migrated).toBe('<div class="text-2xl font-extrabold"></div>')
+    expect(result.merges).toEqual([])
+    expect(result.flagged.map((f) => f.token)).toEqual(['text-2xl + font-extrabold'])
+
+    const black = migrateTokens('<div class="text-sm font-black"></div>')
+    expect(black.migrated).toBe('<div class="text-sm font-black"></div>')
+    expect(black.flagged.map((f) => f.token)).toEqual(['text-sm + font-black'])
+  })
+
   it('selects typography-only mode when v2 sentinels are present', () => {
     const file = writeTempFile(
       '<div class="bg-surface-base bg-surface-white text-xl"></div>',
@@ -85,6 +183,19 @@ describe('tokens v2 migration', () => {
     expect(state).toEqual({ pre: 1, post: 1, likelyMigrated: true })
     expect(getMigrationMode(state)).toBe('migrated-typography')
     expect(getMigrationMode(state, { force: true })).toBe('full')
+    expect(getMigrationMode(state, { radiusOnly: true })).toBe('radius-only')
+  })
+
+  it('radius-only mode renames radii and touches nothing else', () => {
+    const result = migrateTokens(
+      '<div class="rounded rounded-md text-lg bg-surface-white text-base-black"></div>',
+      { mode: 'radius-only' },
+    )
+
+    expect(result.migrated).toBe(
+      '<div class="rounded-4 rounded-5 text-lg bg-surface-white text-base-black"></div>',
+    )
+    expect(result.flagged.map((f) => f.token)).toEqual(['text-base-black'])
   })
 })
 

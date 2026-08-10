@@ -71,7 +71,7 @@ const actions: ContextMenuOptions = [
 <template>
   <ContextMenu :options="actions">
     <div
-      class="w-72 cursor-default select-none rounded-xl border border-outline-gray-2 bg-surface-base p-4 shadow-sm"
+      class="w-72 cursor-default select-none rounded-7 border border-outline-gray-2 bg-surface-base p-4 shadow-sm"
     >
       <div class="mb-3 flex items-start justify-between gap-2">
         <Badge theme="orange" label="In Progress" />

@@ -104,7 +104,7 @@ const columns = ref([
         <div
           v-for="column in columns"
           :key="column.status"
-          class="flex min-h-0 w-72 shrink-0 snap-start flex-col rounded-lg bg-surface-gray-1"
+          class="flex min-h-0 w-72 shrink-0 snap-start flex-col rounded-6 bg-surface-gray-1"
         >
           <div class="flex items-center justify-between pl-3 pr-1 pt-1">
             <div class="flex items-center gap-2">
@@ -130,7 +130,7 @@ const columns = ref([
               <div
                 v-for="deal in column.deals"
                 :key="deal.org"
-                class="rounded-lg border bg-surface-base p-3 shadow-sm"
+                class="rounded-6 border bg-surface-base p-3 shadow-sm"
               >
                 <div class="flex items-center gap-2">
                   <Avatar

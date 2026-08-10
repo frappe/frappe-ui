@@ -10,11 +10,5 @@
   "8": "20px",
   "9": "999px",
   "full": "9999px",
-  "none": "0px",
-  "sm": "4px",
-  "DEFAULT": "8px",
-  "md": "10px",
-  "lg": "12px",
-  "xl": "16px",
-  "2xl": "20px"
+  "none": "0px"
 }

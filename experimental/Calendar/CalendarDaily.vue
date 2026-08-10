@@ -13,7 +13,11 @@
           :class="{ '!pl-1.5 pr-1 py-1 !gap-1': showCollapsable }"
           variant="ghost"
           :iconRight="
-            showCollapsable ? (isCollapsed ? 'chevron-down' : 'chevron-up') : ''
+            showCollapsable
+              ? isCollapsed
+                ? 'lucide-chevron-down'
+                : 'lucide-chevron-up'
+              : ''
           "
           @click="showCollapsable && (isCollapsed = !isCollapsed)"
         >
@@ -115,7 +119,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
-import { Button } from '../Button'
+import { Button } from '#components/Button'
 import {
   parseDate,
   twelveHoursFormat,

@@ -9,7 +9,7 @@
   >
     <TextEditorBubbleMenu :buttons="bubbleMenu" :options="bubbleMenuOptions" />
     <TextEditorFixedMenu
-      class="w-full overflow-x-auto rounded-t-lg border border-outline-elevation-2"
+      class="w-full overflow-x-auto rounded-t-6 border border-outline-elevation-2"
       :buttons="fixedMenu"
     />
     <TextEditorFloatingMenu :buttons="floatingMenu" />

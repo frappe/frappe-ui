@@ -27,7 +27,7 @@
         v-if="showIndicator"
         data-slot="rail-item-indicator"
         aria-hidden="true"
-        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r bg-surface-gray-8"
+        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
       <slot>
         <span
@@ -60,7 +60,7 @@
         v-if="showIndicator"
         data-slot="rail-item-indicator"
         aria-hidden="true"
-        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r bg-surface-gray-8"
+        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
       <slot>
         <span

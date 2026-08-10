@@ -6,7 +6,7 @@
   >
     <ScrollAreaThumb
       data-slot="scroll-area-thumb"
-      class="relative flex-1 rounded-lg bg-gray-400 transition-opacity duration-150 ease-out before:absolute before:left-1/2 before:top-1/2 before:h-full before:w-full before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] dark:bg-gray-700"
+      class="relative flex-1 rounded-6 bg-gray-400 transition-opacity duration-150 ease-out before:absolute before:left-1/2 before:top-1/2 before:h-full before:w-full before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] dark:bg-gray-700"
       :class="[
         isThumbVisible
           ? 'opacity-100 pointer-events-auto'

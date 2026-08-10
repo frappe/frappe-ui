@@ -25,7 +25,7 @@ const frequencyOptions = [
     full dialog SettingsDialog provides it; here we add a minimal one to show a
     single panel in isolation.
   -->
-  <div class="h-96 w-full overflow-hidden rounded border border-outline-gray-2">
+  <div class="h-96 w-full overflow-hidden rounded-4 border border-outline-gray-2">
     <TabsRoot default-value="notifications" class="flex h-full">
       <SettingsPanel value="notifications">
         <SettingsHeader title="Notifications" />

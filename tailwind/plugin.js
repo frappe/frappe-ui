@@ -17,36 +17,27 @@ let cssVariables = mergeVariableLayers(
   generateRadiusVariables(),
 )
 
-// Emit `--radius-{key}` for every radius token (numeric scale + aliases) so
-// the values are inspectable as real CSS variables. `borderRadius` is rewired
-// below to consume these vars, so `rounded-4` and `--radius-4` stay in sync.
+// Emit `--radius-{key}` for every radius token (the numbered scale plus the
+// kept `none` / `full` names — the deprecated size aliases were removed in
+// 1.0.0 per ADR-0006, #998) so the values are inspectable as real CSS
+// variables. `borderRadius` is rewired below to consume these vars, so
+// `rounded-4` and `--radius-4` stay in sync.
 function generateRadiusVariables() {
   const vars = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
-    if (key === 'DEFAULT') continue
     vars[`--radius-${key}`] = value
   }
   return { ':root': vars }
 }
 
-// Map `DEFAULT` (Tailwind's `rounded` class) onto the numeric var that
-// shares its value, so we don't emit a `--radius-DEFAULT` (awkward name).
 // Each value carries a trailing `/* {px} */` comment so editor tooling
 // (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
-// the opaque `var(--radius-*)` reference.
+// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
+// `rounded` utility no longer exists — use `rounded-4`.
 function buildRadiusConfig() {
-  const numericByValue = {}
-  for (const [key, value] of Object.entries(radiusTokens)) {
-    if (/^\d+$/.test(key)) numericByValue[value] = key
-  }
   const out = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
-    if (key === 'DEFAULT') {
-      const numeric = numericByValue[value]
-      out[key] = numeric ? `var(--radius-${numeric}) /* ${value} */` : value
-    } else {
-      out[key] = `var(--radius-${key}) /* ${value} */`
-    }
+    out[key] = `var(--radius-${key}) /* ${value} */`
   }
   return out
 }
@@ -69,7 +60,9 @@ function mergeVariableLayers(...layers) {
 // can't follow font-weight, so each (size, weight) must ship as a self-contained
 // class. `regular` stays the bare `text-<size>` / `text-p-<size>` utility.
 // (Component classes are JIT-purged, so only the ones used in content emit.)
-const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold', 'black']
+// `black` was dropped in #998 — zero usage, and the Figma weights behind it
+// were corrupt export data.
+const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 
 function buildFontSize() {
   const out = {}
@@ -192,11 +185,11 @@ let globalStyles = (theme) => ({
 
 let componentStyles = {
   '.form-input, .form-textarea, .form-select': {
-    '@apply h-7 rounded border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-base focus:shadow-sm focus:ring-0':
+    '@apply h-7 rounded-4 border border-[--surface-gray-2] bg-surface-gray-2 py-1.5 pl-2 pr-2 text-base text-ink-gray-8 placeholder-ink-gray-4 transition-colors hover:border-outline-elevation-2 hover:bg-surface-gray-3 focus:border-outline-gray-4 focus:bg-surface-base focus:shadow-sm focus:ring-0':
       {},
   },
   '.form-checkbox': {
-    '@apply rounded-md bg-surface-gray-2 text-ink-blue-5 focus:ring-0': {},
+    '@apply rounded-5 bg-surface-gray-2 text-ink-blue-5 focus:ring-0': {},
   },
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,

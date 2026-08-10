@@ -11,7 +11,7 @@ const communities = [
 </script>
 
 <template>
-  <div class="flex h-[420px] overflow-hidden rounded-md border bg-surface-base">
+  <div class="flex h-[420px] overflow-hidden rounded-5 border bg-surface-base">
     <Rail>
       <RailItem label="Home" variant="ghost" icon="lucide-house" @click="active = ''" />
 

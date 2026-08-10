@@ -33,7 +33,7 @@ reviewed or removed.
 
 It was tempting to expect this to shrink the sweep by dropping internal-only directories.
 It does not. Tracing the export graph from every entry point, only `Menu/` and `types/` are
-unreachable; `Provider`, `ScrollArea`, `CommandPalette` and `ListFilter` are all exported,
+unreachable; `Provider`, `ScrollArea`, and `CommandPalette` are all exported,
 and `InputLabeling/` and `shared/` export types. **An exported type freezes like any other
 member**, which is a consequence worth stating plainly rather than a saving.
 

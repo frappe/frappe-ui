@@ -33,7 +33,7 @@ function removeTag(value: string | number) {
       <button
         type="button"
         :data-state="open ? 'open' : 'closed'"
-        class="flex w-96 min-h-8 cursor-pointer items-center gap-1.5 rounded border border-[--surface-gray-2] px-1.5 py-1 text-left transition-colors hover:border-outline-elevation-2 data-[state=open]:focus-ring"
+        class="flex w-96 min-h-8 cursor-pointer items-center gap-1.5 rounded-4 border border-[--surface-gray-2] px-1.5 py-1 text-left transition-colors hover:border-outline-elevation-2 data-[state=open]:focus-ring"
         @click="setOpen(!open)"
       >
         <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
@@ -48,7 +48,7 @@ function removeTag(value: string | number) {
               <span
                 role="button"
                 tabindex="-1"
-                class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-sm p-0.5 opacity-70 hover:opacity-100"
+                class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
                 @click.stop="removeTag(option.value)"
                 @pointerdown.stop
               >

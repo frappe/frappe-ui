@@ -6,7 +6,7 @@ const NUMERIC_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 // Display order for the unified scale: numerics in order, then `full`.
 const SCALE_KEYS = [...NUMERIC_KEYS, 'full']
 
-// Map each alias (`rounded-sm`, `rounded-md`, `rounded`, …) to the numeric
+// Map each alias (`rounded-1`, `rounded-5`, `rounded-4`, …) to the numeric
 // scale entry that shares its value. The page renders one row per scale
 // step; aliases land alongside their numeric twin.
 const ALIASES_BY_NUMERIC = computed(() => {
@@ -19,7 +19,7 @@ const ALIASES_BY_NUMERIC = computed(() => {
     const value = table[aliasKey]
     const numeric = NUMERIC_KEYS.find((n) => table[n] === value)
     if (!numeric) continue
-    const cls = aliasKey === 'DEFAULT' ? 'rounded' : `rounded-${aliasKey}`
+    const cls = aliasKey === 'DEFAULT' ? 'rounded-4' : `rounded-${aliasKey}`
     ;(aliases[numeric] ||= []).push(cls)
   }
   return aliases
@@ -62,7 +62,7 @@ const rows = computed(() =>
             <span
               v-for="alias in r.aliases"
               :key="alias"
-              class="text-2xs font-mono text-ink-gray-6 bg-surface-gray-2 rounded px-1.5 py-0.5"
+              class="text-2xs font-mono text-ink-gray-6 bg-surface-gray-2 rounded-4 px-1.5 py-0.5"
             >
               {{ alias }}
             </span>

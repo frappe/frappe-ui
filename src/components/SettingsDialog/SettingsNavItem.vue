@@ -6,7 +6,7 @@
   -->
   <TabsTrigger
     :value="value"
-    class="flex h-7 w-full items-center gap-2 rounded px-2 text-left text-base text-ink-gray-7 data-[state=active]:bg-surface-elevation-3 data-[state=active]:shadow-sm data-[state=inactive]:hover:bg-surface-gray-2"
+    class="flex h-7 w-full items-center gap-2 rounded-4 px-2 text-left text-base text-ink-gray-7 data-[state=active]:bg-surface-elevation-3 data-[state=active]:shadow-sm data-[state=inactive]:hover:bg-surface-gray-2"
   >
     <slot name="prefix" />
     <span class="min-w-0 flex-1 truncate"><slot /></span>

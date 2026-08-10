@@ -16,7 +16,7 @@
     <template #trigger>
       <div
         v-bind="$attrs"
-        class="event flex gap-1.5 min-h-6 mx-px rounded p-[5px] transition-all duration-75 w-full overflow-hidden"
+        class="event flex gap-1.5 min-h-6 mx-px rounded-4 p-[5px] transition-all duration-75 w-full overflow-hidden"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
         }"
@@ -32,7 +32,7 @@
       >
         <div
           v-if="props.event.fromTime"
-          class="event-border w-[2px] rounded shrink-0"
+          class="event-border w-[2px] rounded-4 shrink-0"
           :style="eventBorderStyle"
         />
         <div
@@ -89,7 +89,7 @@ import './style.css'
 
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
-import Popover from '../Popover/Popover.vue'
+import Popover from '#components/Popover/Popover.vue'
 import { useEventBase } from './useEventBase'
 import { computed, ref } from 'vue'
 import type { CalendarEvent } from './types'

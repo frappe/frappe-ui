@@ -43,7 +43,7 @@ const typeDefinition = computed(() => {
   <div class="not-prose mt-2">
     <details class="group">
       <summary
-        class="flex rounded cursor-pointer list-none items-center gap-2 py-2 text-sm font-medium text-ink-gray-6 transition-colors hover:text-ink-gray-9"
+        class="flex rounded-4 cursor-pointer list-none items-center gap-2 py-2 text-sm font-medium text-ink-gray-6 transition-colors hover:text-ink-gray-9"
       >
         <LucideChevronRight
           class="size-4 shrink-0 transition-transform group-open:rotate-90"
@@ -51,7 +51,7 @@ const typeDefinition = computed(() => {
         Show types
       </summary>
 
-      <div class="mt-1 overflow-hidden rounded-xl border bg-surface-gray-1">
+      <div class="mt-1 overflow-hidden rounded-7 border bg-surface-gray-1">
         <slot v-if="hasCustomCodeSlot" name="code" />
         <pre
           v-else

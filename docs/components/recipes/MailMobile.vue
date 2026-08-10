@@ -628,7 +628,7 @@ function goToMail() {
         <button
           v-for="box in mailboxes"
           :key="box.label"
-          class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition"
+          class="flex w-full items-center gap-2 rounded-6 px-3 py-2.5 text-left transition"
           :class="
             box.label === activeMailbox
               ? 'bg-surface-gray-3'
@@ -653,7 +653,7 @@ function goToMail() {
         <button
           v-for="label in labels"
           :key="label"
-          class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition"
+          class="flex w-full items-center gap-2 rounded-6 px-3 py-2.5 text-left transition"
           :class="
             label === activeMailbox
               ? 'bg-surface-gray-3'

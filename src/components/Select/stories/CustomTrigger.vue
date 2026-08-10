@@ -30,7 +30,7 @@ const options = [
       <template #trigger="{ selectedOption, open }">
         <span
           :class="[
-            'rounded px-1 -mx-1 font-medium text-ink-gray-8 decoration-outline-gray-3 underline-offset-4 transition-colors duration-150',
+            'rounded-4 px-1 -mx-1 font-medium text-ink-gray-8 decoration-outline-gray-3 underline-offset-4 transition-colors duration-150',
             open ? 'bg-surface-gray-3' : 'underline hover:bg-surface-gray-3',
           ]"
         >

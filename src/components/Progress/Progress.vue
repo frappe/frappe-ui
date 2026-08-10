@@ -26,7 +26,7 @@
       :model-value="clampedValue"
       :max="MAX_VALUE"
       :get-value-label="() => valueLabel"
-      class="transform-gpu overflow-hidden rounded-xl"
+      class="transform-gpu overflow-hidden rounded-7"
       :class="indicatorContainerClasses"
     >
       <!-- Continuous Progress Bar -->

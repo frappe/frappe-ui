@@ -70,7 +70,7 @@ const bidirectionalRangeStyles = computed(() => {
 
 const trackClasses = computed(() => {
   return [
-    'relative grow rounded',
+    'relative grow rounded-4',
     props.size === 'md' ? 'h-1.5' : 'h-1',
     props.disabled ? 'bg-surface-gray-2' : 'bg-surface-gray-3',
   ]
@@ -78,7 +78,7 @@ const trackClasses = computed(() => {
 
 const rangeClasses = computed(() => {
   return [
-    'absolute h-full rounded',
+    'absolute h-full rounded-4',
     props.disabled ? 'bg-surface-gray-4' : 'bg-surface-gray-10',
   ]
 })

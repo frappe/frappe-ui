@@ -16,7 +16,7 @@
       <button
         ref="button"
         type="button"
-        class="group inline-flex h-7 min-w-0 items-center gap-1 rounded text-sm-medium text-ink-gray-5 transition-colors"
+        class="group inline-flex h-7 min-w-0 items-center gap-1 rounded-4 text-sm-medium text-ink-gray-5 transition-colors"
         @click="emit('click', $event)"
       >
         <!-- End-aligned: the glyph leads so the label stays flush with the

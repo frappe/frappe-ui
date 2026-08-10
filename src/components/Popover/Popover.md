@@ -63,7 +63,7 @@ to match the panel surface.
 ## Styling
 
 The popover ships with its panel shell baked in
-(`rounded-lg bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`)
+(`rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`)
 — there are no class-injection props. Style it through the stable `data-slot`
 hooks instead:
 

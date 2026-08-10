@@ -584,7 +584,7 @@ it and add `bare`:
 ```vue
 <Tooltip bare>
   <template #content>
-    <img :src="url" class="max-h-40 rounded shadow-xl" />
+    <img :src="url" class="max-h-40 rounded-4 shadow-xl" />
   </template>
   <span class="truncate">{{ filename }}</span>
 </Tooltip>
@@ -808,6 +808,27 @@ Every other name in the family moves the same way: `List`, `ListEmptyState`,
 `ListFooter`, `ListGroupHeader`, `ListGroupRows`, `ListGroups`,
 `ListHeaderItem`, `ListRowItem`, `ListRows`, `ListSelectBanner`. Nothing about
 the component itself changed — only where it's imported from.
+
+## Calendar — moved to `frappe-ui/experimental`
+
+`Calendar` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and parks there,
+API unchanged, until a redesigned calendar family replaces it. The import
+fails at the root; switch the subpath:
+
+```ts
+// Before
+import { Calendar, CalendarColorMap } from 'frappe-ui'
+
+// After
+import { Calendar, CalendarColorMap } from 'frappe-ui/experimental'
+```
+
+Every other name in the family moves the same way: `CalendarActiveEvent`
+and the types `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
+`CalendarEvent`, `CalendarMode`, `CalendarPublicProps`, `CalendarTimeFormat`,
+`GroupedCalendarEvents`. Nothing about the component itself changed — only
+where it's imported from.
 
 ## Sprite icons — moved to `frappe-ui/experimental`
 
@@ -1185,7 +1206,7 @@ markup, using [`LoadingText`](./components/loadingtext) or
 </Card>
 
 <!-- After -->
-<div class="flex flex-col rounded-lg border px-6 py-5">
+<div class="flex flex-col rounded-6 border px-6 py-5">
   <div class="flex items-baseline justify-between">
     <h2 class="text-lg font-semibold">Title</h2>
     <Button label="Edit" />
@@ -1249,15 +1270,22 @@ npx --package frappe-ui@beta tokens-v2 .
 ```
 
 The codemod renames espresso color tokens like `bg-surface-white` to
-`bg-surface-base` and merges static text size + weight class pairs, for example
-`text-base font-medium` to `text-base-medium`. Run it once per codebase; the
-token migration is not idempotent because some v2 names overlap with v0 names.
+`bg-surface-base`, merges static text size + weight class pairs (for example
+`text-base font-medium` to `text-base-medium`), and renames the removed
+radius aliases (`rounded-md` → `rounded-5`, see below). Run it once per
+codebase; the token migration is not idempotent because some v2 names overlap
+with v0 names. The radius renames are idempotent and also run on
+already-migrated codebases.
 
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
-`text-xl` → `text-lg`, ...). Apps that still have pre-v2 color tokens can pass
-`--force`, but review the output carefully because color tokens may
-double-shift.
+`text-xl` → `text-lg`, ...) and the radius renames. Apps that still have
+pre-v2 color tokens can pass `--force`, but review the output carefully
+because color tokens may double-shift.
+
+Already ran the typography correction too? Pass `--radius-only`. It performs
+only the radius renames (safe to repeat) and reports removed tokens — it
+never touches color or text-size names, so nothing can double-shift.
 
 ### Unused tokens and utilities removed
 
@@ -1280,6 +1308,54 @@ If your build used any of these, replace them with the nearest step on the
 regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` →
 `shadow-sm`, `surface-alert-button-error` → `surface-red-2` (or whichever
 `variant`+`theme` pairing the design calls for).
+
+### Radius aliases removed
+
+The named radius aliases are removed in `1.0.0`. Numbered tokens are the only
+radius vocabulary now ([ADR-0006](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0006-numbered-radius-tokens.md)).
+`rounded-none` and `rounded-full` are kept.
+
+This is a **silent** break. The preset replaces Tailwind's `borderRadius`
+scale, so an unmigrated `rounded-md` emits no CSS at all — no build error, no
+type error, just square corners. Run the codemod, then grep for leftover
+aliases.
+
+| Before | After | px |
+|---|---|---|
+| `rounded` | `rounded-4` | 8 |
+| `rounded-sm` | `rounded-1` | 4 |
+| `rounded-md` | `rounded-5` | 10 |
+| `rounded-lg` | `rounded-6` | 12 |
+| `rounded-xl` | `rounded-7` | 16 |
+| `rounded-2xl` | `rounded-8` | 20 |
+
+The same map applies to directional and corner forms (`rounded-t-lg` →
+`rounded-t-6`, `rounded-tl-sm` → `rounded-tl-1`) and to variant prefixes
+(`hover:rounded-2xl` → `hover:rounded-8`). Pixel values are identical — the
+migration changes vocabulary, not rendering.
+
+The codemod handles all of these. One caveat: the bare word `rounded` is
+plain English, so the codemod only rewrites it inside quoted strings and
+`@apply` rules. A class list inside a multi-line template literal can be
+missed — grep for bare `rounded` after running it.
+
+The alias CSS variables go away with the aliases. Hand-written CSS that
+reads `var(--radius-sm)` / `var(--radius-md)` / `var(--radius-lg)` /
+`var(--radius-xl)` / `var(--radius-2xl)` resolves to nothing — the same
+silent break. The codemod only rewrites `rounded-*` classes, so grep for
+`--radius-(sm|md|lg|xl|2xl)` and switch to the numbered variables
+(`var(--radius-5)` for the old `--radius-md`, same map as above).
+
+### `text-*-black` styles removed
+
+The `text-<size>-black` / `text-p-<size>-black` style classes are removed —
+zero usage anywhere, and the Figma weights behind them were corrupt export
+data. This is also a **silent** break: the class stops emitting CSS.
+
+The codemod no longer merges `font-extrabold` (or `font-black`) onto a
+`text-*-black` class. It flags the pair under "needs manual attention"
+instead. If you need weight 800, keep `font-extrabold`; there is no
+letter-spacing-corrected style class for it.
 
 ## Editor
 

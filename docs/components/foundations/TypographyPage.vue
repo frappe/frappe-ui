@@ -9,7 +9,7 @@ type SizeMeta = {
   fontWeight?: string
 }
 type SizeEntry = [string, SizeMeta]
-type Weight = 'regular' | 'medium' | 'semibold' | 'bold' | 'black'
+type Weight = 'regular' | 'medium' | 'semibold' | 'bold'
 type TrackGroup = 'text' | 'paragraph'
 
 // Group sizes for the page. Order matters: it drives display order.
@@ -35,7 +35,6 @@ const weightButtons = [
   { label: 'Medium (500)', value: 'medium' },
   { label: 'Semibold (600)', value: 'semibold' },
   { label: 'Bold (700)', value: 'bold' },
-  { label: 'Black (800)', value: 'black' },
 ]
 
 const fontWeight = computed(
@@ -44,8 +43,8 @@ const fontWeight = computed(
 
 // Resolve the real token class for the current weight, so the sample carries
 // the exact `text-<size>-<weight>` utility (inspectable, not inline styles).
-// A few weight pairings aren't exported (e.g. base+black), so fall back to the
-// bare regular token, which is the only style that ships for them.
+// If a (size, weight) pairing is ever missing from the export, fall back to
+// the bare regular token, which is the only style that ships for it.
 function tokenClass(prefix: string, group: TrackGroup, size: string): string {
   if (weight.value === 'regular') return `${prefix}${size}`
   const byWeight = (
@@ -127,7 +126,7 @@ const paragraphSample =
   <div class="grid gap-14">
     <header class="grid gap-6">
       <div
-        class="rounded-xl border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
+        class="rounded-7 border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
       >
         <div class="flex items-baseline justify-between gap-4">
           <span class="text-xl font-semibold text-ink-gray-8">{{

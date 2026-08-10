@@ -11,7 +11,7 @@ const items = Array.from({ length: 1000 }, (_, i) => ({
 <template>
   <!-- The scroll container is app-owned: ListRows finds the nearest
        scrollable ancestor and windows against it. -->
-  <div class="h-72 w-full overflow-y-auto rounded border">
+  <div class="h-72 w-full overflow-y-auto rounded-4 border">
     <List :columns="['3rem', 'minmax(0,1fr)', '6rem']" :row-height="44" class="px-2">
       <ListRows :items="items" virtual v-slot="{ item }">
         <ListRow>

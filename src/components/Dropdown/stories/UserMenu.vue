@@ -89,12 +89,12 @@ const userMenuItems = computed(() => [
     <Dropdown :options="userMenuItems">
       <template #default="{ open }">
         <button
-          class="flex w-56 items-center rounded-md px-2 py-2 text-left transition-colors"
+          class="flex w-56 items-center rounded-5 px-2 py-2 text-left transition-colors"
           :class="open ? 'bg-surface-gray-3' : 'hover:bg-surface-gray-2'"
         >
           <!-- Gameplan logo -->
           <svg
-            class="size-8 rounded"
+            class="size-8 rounded-4"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 44 44"

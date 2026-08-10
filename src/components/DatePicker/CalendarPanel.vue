@@ -158,7 +158,7 @@
             v-for="y in years"
             type="button"
             :key="y"
-            class="w-full text-ink-gray-8 h-7 shrink-0 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            class="w-full text-ink-gray-8 h-7 shrink-0 rounded-4 py-1 text-sm text-center cursor-pointer transition-colors duration-100"
             :class="
               y === currentYear
                 ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
@@ -181,7 +181,7 @@
             v-for="(m, i) in months"
             type="button"
             :key="m"
-            class="w-full text-ink-gray-8 shrink-0 h-7 rounded py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            class="w-full text-ink-gray-8 shrink-0 h-7 rounded-4 py-1 text-sm text-center cursor-pointer transition-colors duration-100"
             :class="
               i === currentMonth
                 ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
@@ -461,7 +461,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
 
   if (cell.isUnavailable) {
     return [
-      'rounded',
+      'rounded-4',
       ...restingText,
       todayFont,
       'opacity-30 cursor-not-allowed',
@@ -470,7 +470,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
 
   if (cell.isRangeStart || cell.isRangeEnd || cell.isSelected) {
     return [
-      'rounded',
+      'rounded-4',
       todayFont,
       'bg-surface-gray-9 text-ink-base hover:bg-surface-gray-9 cursor-pointer',
     ]
@@ -478,7 +478,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
 
   if (cell.inRange) {
     return [
-      'rounded',
+      'rounded-4',
       ...restingText,
       todayFont,
       'bg-surface-gray-3 hover:bg-surface-gray-3 cursor-pointer',
@@ -486,7 +486,7 @@ function cellClass(cell: CalendarPanelCell): Array<string | false> {
   }
 
   return [
-    'rounded',
+    'rounded-4',
     ...restingText,
     todayFont,
     'hover:bg-surface-gray-2 cursor-pointer',

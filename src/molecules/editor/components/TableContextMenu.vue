@@ -109,7 +109,7 @@ function onKeydown(event: KeyboardEvent) {
   <div
     ref="menu"
     role="menu"
-    class="min-w-[208px] rounded-lg border border-outline-gray-1 bg-surface-elevation-2 p-1 text-base shadow-xl outline-none"
+    class="min-w-[208px] rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-1 text-base shadow-xl outline-none"
     @keydown="onKeydown"
   >
     <template v-for="(item, index) in visible" :key="index">
@@ -123,7 +123,7 @@ function onKeydown(event: KeyboardEvent) {
         type="button"
         :role="item.isActive ? 'menuitemcheckbox' : 'menuitem'"
         :aria-checked="item.isActive ? isChecked(item) : undefined"
-        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-ink-gray-8 hover:bg-surface-gray-3 focus-visible:bg-surface-gray-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        class="flex w-full items-center gap-2 rounded-4 px-2 py-1.5 text-left text-ink-gray-8 hover:bg-surface-gray-3 focus-visible:bg-surface-gray-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         :disabled="disabled(item)"
         @click="run(item, $event)"
       >

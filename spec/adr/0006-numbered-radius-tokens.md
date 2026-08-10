@@ -1,6 +1,6 @@
 # Numbered radius tokens are canonical
 
-**Status**: accepted
+**Status**: accepted (amended — see [Amendment](#amendment-2026-08-09-aliases-removed-in-100))
 
 ## Context
 
@@ -36,6 +36,16 @@ The canonical mapping:
 | `rounded-full` | 9999 | — (kept; semantically meaningful, not part of the scale) |
 
 `rounded-none` and `rounded-full` are retained — they're semantic, not size-named, and have no numbered ambiguity.
+
+## Amendment (2026-08-09): aliases removed in 1.0.0
+
+The "next breaking release" arrived: `1.0.0` removes the deprecated aliases (#998, decided in #993; ADR-0008 forbids shipping deprecated members at the tag). This supersedes the "remain as deprecated migration aliases" language above:
+
+- `tailwind/generated/radius.json` now ships only the numbered scale plus `none` and `full`. The alias keys (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`) are gone; an unmigrated alias emits no CSS (silent break — the preset replaces Tailwind's `borderRadius` scale). The alias `--radius-sm/md/lg/xl/2xl` CSS variables go with them.
+- The codemod exists now: `tailwind/migrate-tokens-v2.js` (`tokens-v2`) performs the renames from the table above, directional and variant-prefixed forms included, and has a `--radius-only` mode for already-migrated codebases.
+- The internal migration is complete (#997 swept `src/`, docs, and stories).
+
+`rounded-none` and `rounded-full` remain kept, as decided above. See the [migration guide](../../docs/content/docs/migration.md) for the consumer-facing before/after.
 
 ## Rationale
 

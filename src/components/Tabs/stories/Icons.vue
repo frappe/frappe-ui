@@ -29,7 +29,7 @@ const state = reactive({
 </script>
 
 <template>
-  <Tabs class="border rounded" v-model="state.index" :tabs="state.tabs">
+  <Tabs class="border rounded-4" v-model="state.index" :tabs="state.tabs">
     <template #tab-panel="{ tab }">
       <div class="p-5">{{ tab.content }}</div>
     </template>

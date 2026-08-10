@@ -49,7 +49,7 @@ function restore() {
         </div>
         <div
           v-if="!deleted"
-          class="w-fit cursor-default select-none rounded-2xl rounded-tl-sm bg-surface-gray-3 px-3.5 py-2 text-sm text-ink-gray-8"
+          class="w-fit cursor-default select-none rounded-8 rounded-tl-1 bg-surface-gray-3 px-3.5 py-2 text-sm text-ink-gray-8"
         >
           {{ text }}
         </div>

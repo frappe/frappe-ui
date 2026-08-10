@@ -86,7 +86,7 @@ function clear(key: string, event: Event) {
             <span
               v-if="field.key === 'colour'"
               :class="[
-                'inline-block size-3 rounded-sm',
+                'inline-block size-3 rounded-1',
                 colourSwatch[getOptionValue(item)] ?? 'bg-surface-gray-3',
               ]"
             />
@@ -129,7 +129,7 @@ function clear(key: string, event: Event) {
             type="button"
             aria-label="Clear"
             tabindex="-1"
-            class="grid size-4 place-items-center rounded-sm text-ink-gray-5 opacity-0 hover:bg-surface-gray-3 hover:text-ink-gray-7 group-hover:opacity-100 focus:opacity-100"
+            class="grid size-4 place-items-center rounded-1 text-ink-gray-5 opacity-0 hover:bg-surface-gray-3 hover:text-ink-gray-7 group-hover:opacity-100 focus:opacity-100"
             @click="clear(field.key, $event)"
             @pointerdown.stop
           >

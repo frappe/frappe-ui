@@ -79,7 +79,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="absolute top-2 right-2 z-20 max-w-[calc(100%-1rem)] flex-wrap justify-end items-center bg-black/65 px-1.5 py-1 gap-2 rounded"
+    class="absolute top-2 right-2 z-20 max-w-[calc(100%-1rem)] flex-wrap justify-end items-center bg-black/65 px-1.5 py-1 gap-2 rounded-4"
     :class="isVisible ? 'flex' : 'hidden'"
   >
     <!-- The caption toggle carries a visible word, not just an icon: it is the
@@ -145,13 +145,13 @@ onUnmounted(() => {
     <div
       v-if="showVideoOptions && isVideo"
       ref="videoOptionsRef"
-      class="absolute top-full right-0 z-50 mt-1 w-40 rounded bg-black/80 p-1 shadow-lg"
+      class="absolute top-full right-0 z-50 mt-1 w-40 rounded-4 bg-black/80 p-1 shadow-lg"
     >
       <button
         v-for="option in videoOptionKeys"
         :key="option"
         type="button"
-        class="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs text-white/80 hover:bg-white/10 hover:text-white"
+        class="flex w-full items-center justify-between rounded-4 px-2 py-1 text-left text-xs text-white/80 hover:bg-white/10 hover:text-white"
         :aria-pressed="Boolean(node.attrs[option])"
         @click.stop="toggleVideoOption(option)"
       >

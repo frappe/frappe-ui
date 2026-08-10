@@ -57,6 +57,67 @@ Landed so far:
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
 
+### Calendar family — moved to `frappe-ui/experimental` (breaking)
+
+Calendar is not taken to bar at root for `1.0.0` (#1020, redirect of
+#989). It parks on `frappe-ui/experimental` (P14 — no stability promise)
+with its public API unchanged, until a redesigned calendar family
+replaces it.
+
+- **Breaking, loud:** `import { Calendar, ... } from 'frappe-ui'` fails
+  to resolve. Import from `frappe-ui/experimental` instead: `Calendar`,
+  `CalendarColorMap`, `CalendarActiveEvent`, and the types
+  `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
+  `CalendarEvent`, `CalendarMode`, `CalendarPublicProps`,
+  `CalendarTimeFormat`, `GroupedCalendarEvents`. Migration is the
+  import-path change only. Apps that spread `content` from
+  `frappe-ui/tailwind` keep Calendar styles automatically.
+- **Fix:** the default header's month-title button renders again (it
+  broke when DatePicker's `#target` slot became `#trigger`), and the
+  all-day collapse buttons show their chevron icons again.
+
+### Radius aliases and `text-*-black` styles removed (breaking, silent)
+
+Per ADR-0006 and ADR-0008 (#998, decided in #993):
+
+- The named radius aliases (`rounded`, `rounded-sm`, `rounded-md`,
+  `rounded-lg`, `rounded-xl`, `rounded-2xl`, and their directional forms) are
+  removed. Numbered tokens are the only radius vocabulary
+  (`rounded` → `rounded-4`, sm→1, md→5, lg→6, xl→7, 2xl→8; identical px).
+  `rounded-none` and `rounded-full` stay. **Silent break:** the preset
+  replaces Tailwind's scale, so an unmigrated alias emits no CSS — square
+  corners, no build error. The `tokens-v2` codemod now performs these renames
+  (idempotent, runs in every mode); it rewrites bare `rounded` only inside
+  quoted strings and `@apply` rules, so grep for leftovers.
+- The `text-<size>-black` / `text-p-<size>-black` style classes are removed
+  (zero usage; the Figma black weights were corrupt export data). Also a
+  silent break. The codemod flags `font-extrabold` / `font-black` next to a
+  text size instead of merging onto the removed class.
+
+### ListFilter — removed (breaking)
+
+- **Breaking, loud:** `ListFilter` is no longer exported — the import fails.
+  Its internals (`SearchComplete`, `FilterIcon`) are gone with it (#992,
+  #999). No consumer app used it. Build filter UI in app code with `Select`
+  and `Combobox`.
+
+### Data fetching (v2) — `useDoc` writes and `useNewDoc` get one request per submit (fix)
+
+`useDoc`'s `setValue`, `delete` and every `methods:` entry, and `useNewDoc`,
+still held a single shared request after the `useDoctype`/`useList` fix.
+Two submits at once aborted one another, and every submit resolved from the
+same `data`, so a caller could receive another caller's answer or `null`.
+Each submit now sends its own request and resolves with its own response
+(#991).
+
+- No API change. These members keep the full `useCall` surface — same
+  members, same types. `submit()` still resolves `null` on a failed request.
+- `data` and `error` belong to the submit that started last, same as
+  `useDoctype` and `useList`: a stale submit answers its own caller and
+  writes nothing shared. `loading` stays `true` until every submit settles.
+- Behavior change if you relied on it: a second submit no longer cancels the
+  first — both requests reach the server.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave

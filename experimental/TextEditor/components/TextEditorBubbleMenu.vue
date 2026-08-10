@@ -1,13 +1,13 @@
 <template>
   <BubbleMenu
     v-if="bubbleMenuButtons"
-    class="bubble-menu rounded-md z-[100]"
+    class="bubble-menu rounded-5 z-[100]"
     :class="bubbleMenuButtons.length > 1 && 'shadow-sm'"
     :editor="editor"
     v-bind="options"
   >
     <TextEditorMenu
-      class="rounded"
+      class="rounded-4"
       :class="bubbleMenuButtons.length > 1 && 'shadow-lg'"
       :buttons="bubbleMenuButtons"
     />

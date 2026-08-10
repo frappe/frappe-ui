@@ -49,7 +49,7 @@
           <div
             v-for="shortcut in shortcuts"
             :key="shortcut.id.toString()"
-            class="grid grid-cols-[1fr_auto] items-start gap-3 rounded py-0.5"
+            class="grid grid-cols-[1fr_auto] items-start gap-3 rounded-4 py-0.5"
           >
             <span class="text-p-base text-ink-gray-6">
               {{ shortcut.description }}

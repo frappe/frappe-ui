@@ -521,7 +521,7 @@ onBeforeUnmount(() => {
           <div
             v-for="(column, ci) in columns"
             :key="column.status"
-            class="flex min-h-0 w-72 shrink-0 flex-col rounded-lg bg-surface-gray-1 dark:bg-transparent dark:border"
+            class="flex min-h-0 w-72 shrink-0 flex-col rounded-6 bg-surface-gray-1 dark:bg-transparent dark:border"
           >
             <div class="flex items-center justify-between pl-3 pr-1 pt-1">
               <div class="flex items-center gap-2">
@@ -565,12 +565,12 @@ onBeforeUnmount(() => {
                        carries its content while it's lifted. -->
                   <div
                     v-if="deal === drag.deal"
-                    class="rounded-lg border-2 border-dashed border-outline-gray-2 bg-surface-gray-2"
+                    class="rounded-6 border-2 border-dashed border-outline-gray-2 bg-surface-gray-2"
                     :style="{ height: drag.height + 'px' }"
                   />
                   <div
                     v-else
-                    class="group cursor-grab rounded-lg border bg-surface-elevation-1 p-3 transition hover:shadow-sm"
+                    class="group cursor-grab rounded-6 border bg-surface-elevation-1 p-3 transition hover:shadow-sm"
                   >
                     <DealCard :deal="deal" :owners="owners" :logo="logo" />
                   </div>
@@ -597,7 +597,7 @@ onBeforeUnmount(() => {
         }"
       >
         <div
-          class="drag-ghost rounded-lg border bg-surface-elevation-1 p-3 transition-[transform,box-shadow] duration-150 ease-out"
+          class="drag-ghost rounded-6 border bg-surface-elevation-1 p-3 transition-[transform,box-shadow] duration-150 ease-out"
           :class="drag.settling ? '' : 'rotate-2 scale-[1.02] shadow-xl'"
         >
           <DealCard :deal="drag.deal" :owners="owners" :logo="logo" ghost />

@@ -22,7 +22,7 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 <template>
   <div class="my-4" :class="{ 'preview-wide': wide }">
     <div
-      class="rounded-xl overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
+      class="rounded-7 overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
         :class="[

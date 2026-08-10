@@ -19,7 +19,7 @@ import { Button, KeyboardShortcut, Tooltip } from 'frappe-ui'
         <img
           src="https://frappeui.com/frappe-ui-logo.svg"
           alt="frappe-ui"
-          class="size-20 rounded bg-surface-white p-2 shadow-xl"
+          class="size-20 rounded-4 bg-surface-white p-2 shadow-xl"
         />
       </template>
       <Button>Preview</Button>

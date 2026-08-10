@@ -24,8 +24,9 @@ Only if the app uses the imperative `dialog.*` / `toast.*` helpers (or
 `Dialog`'s `dialog.confirm` / `alert` / `prompt` family). An app that mounts
 neither doesn't need it. An app that wants the portals without the wrapper can
 mount `<Dialogs />` and `<ToastProvider />` directly instead — both stay
-exported for that case. Mount each once: `<ToastProvider />` has no dedup
-guard, so a second one renders every toast twice, and `<Dialogs />`'s guard
-only catches true ancestor/descendant nesting, not two mounted as siblings.
+exported for that case. Mount `<ToastProvider />` once: it has no dedup
+guard, so a second one renders every toast twice. `<Dialogs />` dedups
+itself — only one host renders the stack, nested or sibling, and an extra
+mount warns in dev.
 
 <!-- @include: ./FrappeUIProvider.api.md -->

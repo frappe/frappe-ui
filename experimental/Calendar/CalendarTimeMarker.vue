@@ -5,13 +5,13 @@
     v-if="parseDate(date) === parseDate(now)"
   >
     <Tooltip :text="dayjs(now).format('ddd, MMM D, YYYY h:mm a')">
-      <div class="current-time relative h-0.5 bg-[#E03636] rounded" />
+      <div class="current-time relative h-0.5 bg-[#E03636] rounded-4" />
     </Tooltip>
   </div>
 </template>
 <script setup lang="ts">
-import Tooltip from '../Tooltip/Tooltip.vue'
-import { dayjs } from '../../utils/dayjs'
+import Tooltip from '#components/Tooltip/Tooltip.vue'
+import { dayjs } from '#utils/dayjs'
 import { computed, inject } from 'vue'
 import { CALENDAR_CONFIG_KEY } from './types'
 import { useNow } from './composables/useNow'

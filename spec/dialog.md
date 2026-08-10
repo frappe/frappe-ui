@@ -400,7 +400,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 | `confirmDialog()` helper | `dialog.confirm()` |
 | `ConfirmDialog.vue` component | deleted — `dialog.confirm()` renders its own internal dialog, not this component |
 
-`<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe (the second mount has no extra effect, but the imperative dialog stack lives in a shared module-level ref so the same stack drives both).
+`<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe — only the first mounted host renders the stack, whether the extra host is nested or a sibling; the others warn in dev. When the rendering host unmounts, the claim hands over to the next mounted host, so the stack never loses its renderer.
 
 ## Migration notes
 

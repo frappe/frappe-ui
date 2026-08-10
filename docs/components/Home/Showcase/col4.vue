@@ -109,7 +109,7 @@ const notifs = [
 
 <template>
   <section
-    class="grid gap-5 *:rounded *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
+    class="grid gap-5 *:rounded-4 *:border [&_label]:text-ink-gray-9 [&_label]:mb-2 [&_label]:text-base h-fit"
   >
     <div class="p-5 bg-urface-cards h-fit">
       <Tree
@@ -178,7 +178,7 @@ const notifs = [
         </template>
       </Progress>
 
-      <div class="px-8 !py-3 rounded bg-surface-gray-1 text-sm text-ink-gray-5">
+      <div class="px-8 !py-3 rounded-4 bg-surface-gray-1 text-sm text-ink-gray-5">
         <li :class='{ "line-through opacity-60": hasValidLength }'>
           Includes 9-16 characters
         </li>

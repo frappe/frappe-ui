@@ -1009,7 +1009,7 @@ function addComment() {
           <div class="mt-4 space-y-4">
             <div v-for="group in groupedTasks" :key="group.key">
               <button
-                class="group flex w-full items-baseline rounded-sm bg-surface-sidebar px-2.5 py-2 text-base transition hover:bg-surface-gray-2"
+                class="group flex w-full items-baseline rounded-1 bg-surface-sidebar px-2.5 py-2 text-base transition hover:bg-surface-gray-2"
                 @click="toggleGroup(group.key)"
               >
                 <span class="font-medium text-ink-gray-8">
