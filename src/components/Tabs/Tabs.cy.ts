@@ -971,4 +971,90 @@ describe('Tabs', () => {
       )
     })
   })
+
+  it('keeps activation manual for composed route triggers', () => {
+    // Composed triggers register after the root renders, and reka reads the
+    // activation mode before that. The root reads the slot's own vnodes
+    // instead, so a hand-written route list behaves like a `tabs` one.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.spy().as('onUpdate')
+
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate },
+          () => [
+            h(TabList, { variant: 'underline' }, () => [
+              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+            ]),
+          ],
+        ),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type('{rightarrow}')
+
+    cy.focused().should('contain.text', 'Sent')
+    cy.get('@onUpdate').should('not.have.been.called')
+    cy.contains('a[role=tab]', 'Inbox')
+      .should('have.attr', 'aria-selected', 'true')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
+
+  it('finds route triggers behind a v-for in the slot', () => {
+    // `v-for` hands the slot a nested list rather than flat vnodes, so the
+    // scan has to walk into it.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.spy().as('onUpdate')
+    const links = [
+      { value: 'inbox', label: 'Inbox', route: '/inbox' },
+      { value: 'sent', label: 'Sent', route: '/sent' },
+    ]
+
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate },
+          () => [
+            h(TabList, { variant: 'underline' }, () =>
+              links.map((link) => h(TabTrigger, { key: link.value, ...link })),
+            ),
+          ],
+        ),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type('{rightarrow}')
+
+    cy.get('@onUpdate')
+      .should('not.have.been.called')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
 })

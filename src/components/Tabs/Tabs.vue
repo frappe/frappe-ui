@@ -50,6 +50,39 @@ if (import.meta.env.DEV) {
   )
 }
 
+// A route trigger navigates when it is selected, so arrow keys must move
+// focus without selecting — otherwise the keyboard changes the highlight
+// while only a click changes the URL. The ARIA APG asks for manual
+// activation whenever activation has a significant side effect.
+//
+// This has to be decided before the first render: reka reads
+// `activationMode` once in its own setup and keeps the value. The trigger
+// registry is too late — triggers register after the root renders — and
+// re-keying the root to force a re-read would tear down every panel with it.
+//
+// So look at what the caller passed instead. Shorthand mode reads `tabs`.
+// Composed mode reads the slot's own vnodes, before they mount.
+function slotHasRoute(nodes: unknown): boolean {
+  if (!Array.isArray(nodes)) return false
+  return nodes.some((node: any) => {
+    if (!node || typeof node !== 'object') return false
+    if (node.props?.route) return true
+    const children = node.children
+    if (Array.isArray(children)) return slotHasRoute(children)
+    // `v-for` and nested lists arrive as a slot object, not an array.
+    if (typeof children?.default === 'function') {
+      return slotHasRoute(children.default())
+    }
+    return false
+  })
+}
+
+const activationMode: 'automatic' | 'manual' = (
+  props.tabs ? props.tabs.some((tab) => tab.route) : slotHasRoute(slots.default?.())
+)
+  ? 'manual'
+  : 'automatic'
+
 // Trigger registry. Triggers register during setup so the registry is
 // SSR-consistent; document-order sorting kicks in once elements mount.
 const triggers = shallowRef<TabTriggerRegistration[]>([])
@@ -66,6 +99,11 @@ const triggers = shallowRef<TabTriggerRegistration[]>([])
 const routeOverride = shallowRef<TabTriggerRegistration | null>(null)
 
 function register(trigger: TabTriggerRegistration) {
+  if (import.meta.env.DEV && trigger.hasRoute() && activationMode === 'automatic') {
+    console.warn(
+      '[frappe-ui] Tabs: a trigger has a `route`, but the root could not see it before rendering and so left arrow-key activation on. Arrow keys will select without navigating while a click does both. This happens when triggers sit inside your own wrapper component — put `TabTrigger` directly in `TabList`, or use the `tabs` prop.',
+    )
+  }
   triggers.value = [...triggers.value, trigger]
   return () => {
     triggers.value = triggers.value.filter((t) => t !== trigger)
@@ -213,18 +251,6 @@ provide(tabsRootKey, {
 // trigger carries keeps the root controlled and selects nothing.
 const NO_SELECTION = '__frappe-ui-tabs-none__'
 
-// Read once, before the first render, because reka reads `activationMode`
-// once in its own setup and keeps the value. It cannot be derived from the
-// trigger registry: triggers register after the root renders, and re-keying
-// the root to force a re-read would tear down every panel with it.
-//
-// Shorthand mode knows the answer from `tabs`. Composed mode cannot, so it
-// stays automatic — see the note in the spec.
-const activationMode: 'automatic' | 'manual' = props.tabs?.some(
-  (tab) => tab.route,
-)
-  ? 'manual'
-  : 'automatic'
 
 function onRekaUpdate(value: TabValue) {
   if (routeMode.value) {

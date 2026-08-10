@@ -346,6 +346,13 @@ value input, not a panel switcher. The two share:
   side effect. This does not depend on whether a model is bound: with a bound
   model the router still moves on click, so automatic activation would land
   the keyboard and the mouse on different URLs
+- the mode is decided before the first render, because the reka primitive
+  reads it once during its own setup. It cannot come from the trigger
+  registry — triggers register after the root renders — and remounting the
+  root to force a re-read would tear down every panel. Shorthand mode reads
+  `tabs`; composed mode reads the default slot's vnodes, which exist before
+  they mount. A trigger the scan cannot see, because the app wrapped it in
+  its own component, leaves the mode automatic and DEV warns on registration
 - every focusable trigger carries `focus-visible:focus-ring` (P12), and no
   track may clip it. The subtle track has 1px of padding, so it cannot use
   `overflow-hidden` — the active pill's shadow spills a little instead
