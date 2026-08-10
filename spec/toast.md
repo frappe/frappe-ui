@@ -60,12 +60,14 @@ Wrap the app once with `<FrappeUIProvider>`:
 
 The provider renders sonner's `<Toaster>` with our baked-in defaults. No other setup required.
 
-Apps that don't use the provider can mount the viewport themselves:
+Apps that don't use the provider can mount the viewport themselves. Put it
+before the app content: it only shows toasts published after it subscribes, so
+anything the app toasts from `setup()` is lost if it mounts later.
 
 ```vue
 <template>
-  <RouterView />
   <ToastProvider />
+  <RouterView />
 </template>
 ```
 

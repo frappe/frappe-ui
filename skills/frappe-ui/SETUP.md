@@ -59,9 +59,7 @@ export default defineConfig({
     // converted to ESM for the browser — list them explicitly so Vite
     // prebundles them.
     include: [
-      'feather-icons',
       'tippy.js',
-      'showdown',
       'engine.io-client',
       'socket.io-client',
       'debug',
