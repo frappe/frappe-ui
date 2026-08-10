@@ -18,9 +18,12 @@ const rows = STEPS.map((step) => ({
 // The switcher drives the global theme, so the page and these cards swap
 // together, with no detached preview, and `bg-surface-*` resolves straight from
 // the document's `data-theme`.
+// No "system" option here: the toggle is explicit light/dark, so an initial
+// `system` scheme just reads as light — passing `system` through would leave
+// both tabs unselected.
 const { colorScheme, setColorScheme } = useColorScheme()
-const previewTheme = computed({
-  get: () => colorScheme.value,
+const previewTheme = computed<'light' | 'dark'>({
+  get: () => (colorScheme.value === 'dark' ? 'dark' : 'light'),
   set: (next) => setColorScheme(next),
 })
 
