@@ -21,6 +21,7 @@ import {
   OrderedList,
   type OrderedListOptions,
 } from '@tiptap/extension-list'
+import { ListJoin } from './extensions/list/list-join'
 import { Paragraph, type ParagraphOptions } from '@tiptap/extension-paragraph'
 import { Strike, type StrikeOptions } from '@tiptap/extension-strike'
 import { Text } from '@tiptap/extension-text'
@@ -155,6 +156,10 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     pushConfigured(list, ListItem, this.options.listItem)
     pushConfigured(list, ListKeymap, this.options.listKeymap)
     pushConfigured(list, OrderedList, this.options.orderedList)
+    // Re-merges lists that an edit split apart; harmless when no list node
+    // is in the schema, so it rides along with any list at all.
+    if (this.options.bulletList !== false || this.options.orderedList !== false)
+      list.push(ListJoin)
     pushConfigured(list, Paragraph, this.options.paragraph)
     pushConfigured(list, Strike, this.options.strike)
     if (this.options.text !== false) list.push(Text)
@@ -244,7 +249,9 @@ export const Table = TiptapTable.configure({ resizable: true }).extend({
             }),
           ]
         : []),
-      tableEditing({ allowTableNodeSelection: this.options.allowTableNodeSelection }),
+      tableEditing({
+        allowTableNodeSelection: this.options.allowTableNodeSelection,
+      }),
     ]
   },
 })
