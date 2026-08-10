@@ -1,5 +1,5 @@
 import { createFetch } from '@vueuse/core'
-import { docStore } from './docStore'
+import { docStore, type DispatchStamp } from './docStore'
 import { listStore } from './useList/listStore'
 
 export class FrappeResponseError extends Error {
@@ -46,7 +46,7 @@ export class FrappeResponseError extends Error {
 // `record` is whether the request mutates the server (anything but GET): only
 // mutating responses record their version in the store, a read is admitted on
 // its version but must not make an earlier-dispatched save stale.
-export type DispatchStamp = { version: number; record: boolean }
+export type { DispatchStamp } from './docStore'
 
 const dispatchStamps = new WeakMap<Response, DispatchStamp>()
 
@@ -90,15 +90,20 @@ export const useFrappeFetch = createFetch({
         console.groupEnd()
       }
       if (responseData.docs) {
-        // A missing version means the response did not come from the wrapped
-        // fetch; treat it as the newest. The stores gate per document.
-        // `setDocs` runs synchronously up to its IDB write, so its records
-        // are in place when `updateRows` checks them.
+        // A missing stamp means the response did not come from the wrapped
+        // fetch; treat it as the newest, and as recording. Unreachable today
+        // — every call site goes through the wrapped fetch — and it answers
+        // "no stamp" differently from `admitsWrite`, which treats an
+        // unstamped write as admitted-and-never-recording. Kept as the safer
+        // default for a docs payload (a mutation, in practice) if the fetch
+        // wrapper is ever bypassed. The stores gate per document. `setDocs`
+        // runs synchronously up to its IDB write, so its records are in
+        // place when `updateRows` checks them.
         let stamp = dispatchStamps.get(ctx.response) ?? {
           version: docStore.nextWriteVersion(),
           record: true,
         }
-        docStore.setDocs(responseData.docs, stamp.version, stamp.record)
+        docStore.setDocs(responseData.docs, stamp)
         listStore.updateRows(responseData.docs, stamp.version)
       }
       return ctx

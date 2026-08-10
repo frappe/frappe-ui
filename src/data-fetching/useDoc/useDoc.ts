@@ -96,7 +96,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
         // answer it before an earlier-dispatched save commits, and recording
         // here would gate that save's response out for good.
         let stamp = getDispatchStamp(ctx.response)
-        docStore.setDoc(doc, stamp?.version, stamp?.record ?? false)
+        docStore.setDoc(doc, stamp)
         if (transform) {
           doc = transform(doc)
         }

@@ -9,6 +9,15 @@ type Doc = {
 
 type DocKey = `${string}/${string}`
 
+/**
+ * A write's identity for the gate: the dispatch version of the request that
+ * produced it, and whether the write may record that version (mutating
+ * request) or is only admitted on it (read). Always handled whole — carrying
+ * the halves separately invites passing a version without its `record` and
+ * silently letting a read gate out saves.
+ */
+export type DispatchStamp = { version: number; record: boolean }
+
 class DocStore {
   private docs: Map<DocKey, Ref<Doc | null>>
   private lastFetched: Map<DocKey, number>
@@ -36,7 +45,7 @@ class DocStore {
   // Ambient version for hooks: `useCall` runs its `onSuccess` inside
   // `runWithWriteVersion`, so store writes made synchronously from a hook are
   // versioned without threading a parameter through every hook signature.
-  private currentWrite: { version: number; record: boolean } | null = null
+  private currentWrite: DispatchStamp | null = null
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
 
@@ -68,10 +77,7 @@ class DocStore {
    * `await` runs outside it, and that write is unversioned — always admitted,
    * never recorded. Consumer hooks must write the stores before any `await`.
    */
-  runWithWriteVersion<T>(
-    write: { version: number; record: boolean } | undefined,
-    fn: () => T,
-  ): T {
+  runWithWriteVersion<T>(write: DispatchStamp | undefined, fn: () => T): T {
     const previous = this.currentWrite
     this.currentWrite = write ?? null
     try {
@@ -100,10 +106,7 @@ class DocStore {
    * stale. A read (`record: false`) is admitted on its version but records
    * nothing — see the `writeVersions` comment.
    */
-  private admitAndRecord(
-    key: DocKey,
-    write: { version: number; record: boolean } | null,
-  ): boolean {
+  private admitAndRecord(key: DocKey, write: DispatchStamp | null): boolean {
     if (write == null) return true
     if (write.version < (this.writeVersions.get(key) ?? 0)) return false
     if (write.record) this.writeVersions.set(key, write.version)
@@ -138,7 +141,7 @@ class DocStore {
     this.cacheTimeout = minutes * 60 * 1000
   }
 
-  async setDoc(doc: Doc, version?: number, record = true) {
+  async setDoc(doc: Doc, stamp?: DispatchStamp) {
     if (!doc?.doctype || !doc?.name) {
       throw new Error('Invalid doc: must have doctype and name')
     }
@@ -146,8 +149,7 @@ class DocStore {
     const key = this.getKey(doc.doctype, doc.name)
     // A stale write is dropped whole: no publish, no IDB write — persisting
     // it would hand the stale doc right back on the next cached read.
-    const write = version != null ? { version, record } : this.currentWrite
-    if (!this.admitAndRecord(key, write)) return
+    if (!this.admitAndRecord(key, stamp ?? this.currentWrite)) return
     // Publish before persisting, the way setDocs already does. Awaiting the
     // write first would leave readers on stale data for the length of an IDB
     // round trip, and widen the window a cached read can land in.
@@ -250,8 +252,8 @@ class DocStore {
     this.publish(key, idbDoc)
   }
 
-  async setDocs(docs: Doc[], version?: number, record = true) {
-    const write = version != null ? { version, record } : this.currentWrite
+  async setDocs(docs: Doc[], stamp?: DispatchStamp) {
+    const write = stamp ?? this.currentWrite
     const docMap: Record<string, Doc> = {}
     for (const doc of docs) {
       if (!doc?.doctype || !doc?.name) continue
