@@ -1,6 +1,8 @@
+import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   detectMigrationState,
@@ -277,6 +279,31 @@ describe('tokens v2 migration', () => {
     // A marker written at the root is found from the subdirectory.
     writeInkShiftMarker(root)
     expect(findInkShiftMarker(sub)).toBe(path.join(root, INK_SHIFT_MARKER))
+  })
+
+  it('ink-shift CLI guard: real run writes the marker, a second real run refuses, --dry-run previews', () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    const fixture = path.join(root, 'a.vue')
+    fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+    const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+    const run = (...cliArgs) =>
+      spawnSync(process.execPath, [script, ...cliArgs], { encoding: 'utf8' })
+
+    const first = run('--ink-shift', root)
+    expect(first.status).toBe(0)
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+    expect(fs.existsSync(path.join(root, INK_SHIFT_MARKER))).toBe(true)
+
+    const second = run('--ink-shift', root)
+    expect(second.status).toBe(1)
+    expect(second.stderr).toContain('already ran')
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+
+    const dry = run('--ink-shift', '--dry-run', root)
+    expect(dry.status).toBe(0)
+    expect(dry.stderr).toContain('already ran')
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {
