@@ -111,6 +111,7 @@ defineSlots<{
     <TabsIndicator
       v-if="props.variant === 'underline'"
       aria-hidden="true"
+      data-slot="tab-indicator"
       class="absolute motion-reduce:transition-none"
       :class="[indicatorClasses, tabIndicatorMotionClasses]"
     >
@@ -120,6 +121,7 @@ defineSlots<{
     <TabsIndicator
       v-if="pillTrack"
       aria-hidden="true"
+      data-slot="tab-indicator"
       class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
       :class="[pillIndicatorClasses, tabIndicatorMotionClasses]"
     />
@@ -127,6 +129,7 @@ defineSlots<{
     <TabsIndicator
       v-if="browserTrack"
       aria-hidden="true"
+      data-slot="tab-indicator"
       class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
       :class="[browserIndicatorClasses, tabIndicatorMotionClasses]"
     />

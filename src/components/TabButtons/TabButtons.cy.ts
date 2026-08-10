@@ -19,6 +19,26 @@ describe('<TabButtons />', () => {
     cy.get('@onUpdate').should('have.been.calledWith', 'week')
   })
 
+  it('exposes the same data-slot hooks as the Tabs family', () => {
+    // The two are pixel-identical at the same variant, so track and indicator
+    // CSS must be targetable with one selector per part (P10).
+    cy.mount(TabButtons, {
+      props: {
+        options: [
+          { label: 'Day', value: 'day' },
+          { label: 'Week', value: 'week' },
+        ],
+        modelValue: 'day',
+        variant: 'subtle',
+      },
+    })
+
+    cy.get('[data-slot="tab-buttons"] [data-slot="tab-indicator"]').should(
+      'exist',
+    )
+    cy.get('[data-slot="tab-button"]').should('have.length', 2)
+  })
+
   it('does not double-call button click handlers', () => {
     const onClick = cy.spy().as('onClick')
 

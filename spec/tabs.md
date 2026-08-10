@@ -288,6 +288,13 @@ value input, not a panel switcher. The two share:
 
 - `data-slot="tab-list"`, `data-slot="tab-trigger"`, `data-slot="tab-panel"`
 - `data-slot="tab-prefix"`, `data-slot="tab-suffix"` on the trigger regions
+- `data-slot="tab-indicator"` on the sliding indicator, in `TabList` and in
+  `TabButtons`. The two are pixel-identical at the same variant, so indicator
+  CSS must reach both with one selector
+- `TabButtons` names its track `data-slot="tab-buttons"` and its shells
+  `data-slot="tab-button"`. The track and shell names differ from `TabList`
+  because the roles differ (radiogroup, not tablist); the shared parts —
+  indicator, prefix, suffix — do not
 - `data-variant` and `data-size` on `TabList`
 - `data-state="active|inactive"` on triggers and panels via the primitive
 - `data-disabled` on disabled triggers

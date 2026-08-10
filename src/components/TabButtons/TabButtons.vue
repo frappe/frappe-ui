@@ -282,7 +282,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
     :orientation="vertical ? 'vertical' : 'horizontal'"
     v-bind="$attrs"
   >
-    <div ref="trackRef" :class="rootClasses">
+    <div ref="trackRef" data-slot="tab-buttons" :class="rootClasses">
       <div
         v-if="hasIndicator"
         aria-hidden="true"

@@ -29,6 +29,34 @@ describe('Tabs', () => {
     cy.contains('Home content').should('exist')
   })
 
+  it('renders every shorthand slot into its generated tab', () => {
+    // Vue fails silently on an unknown slot name, so a typo in the four
+    // shorthand keys would ship green. This renders all of them.
+    cy.mount(Tabs, {
+      props: { tabs: items },
+      slots: {
+        'tab-prefix': ({ tab }: { tab: (typeof items)[number] }) =>
+          h('span', `[${tab.value}`),
+        'tab-label': ({ tab, selected }: { tab: (typeof items)[number]; selected: boolean }) =>
+          h('span', `${tab.label}${selected ? '*' : ''}`),
+        'tab-suffix': () => h('span', ']'),
+        'tab-panel': ({ tab }: { tab: (typeof items)[number] }) =>
+          h('div', `${tab.label} content`),
+      },
+    })
+
+    cy.get('[role=tab]').eq(0).should('have.text', '[homeHome*]')
+    cy.get('[role=tab]').eq(1).should('have.text', '[activityActivity]')
+    cy.contains('Home content').should('exist')
+  })
+
+  it('exposes a shared data-slot on the sliding indicator', () => {
+    // `TabButtons` is pixel-identical at the same variant, so indicator CSS
+    // must be able to target both with one selector (P10).
+    cy.mount(Tabs, { props: { tabs: items, variant: 'subtle' } })
+    cy.get('[data-slot="tab-list"] [data-slot="tab-indicator"]').should('exist')
+  })
+
   it('renders vertically', () => {
     cy.mount(Tabs, {
       props: { tabs: items, vertical: true },
