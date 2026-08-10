@@ -187,8 +187,9 @@ export type DonutChartConfig = {
   title?: string
   subtitle?: string
   /**
-   * Slices past this many are summed into a single "Others" slice. A ring stops
-   * being readable long before the palette runs out, so it defaults to 9.
+   * How many slices the ring holds, "Others" included: past that it keeps the
+   * largest `maxSlices - 1` and sums the tail into "Others". A ring stops being
+   * readable long before the palette runs out, so it defaults to 9.
    */
   maxSlices?: number
   /**
@@ -717,8 +718,10 @@ export type DonutChartProps = ChartBaseProps & {
   /** Row key holding the slice size. */
   value: string
   /**
-   * Slices past this many are summed into a single "Others" slice, named
-   * `OTHERS_KEY`.
+   * How many slices the ring holds, "Others" included. Past that the ring keeps
+   * the largest `maxSlices - 1` and sums the tail into a single "Others" slice,
+   * named `OTHERS_KEY`. Defaults to 9 — a ring stops being readable long before
+   * the palette runs out.
    */
   maxSlices?: number
   showInlineLabels?: boolean
