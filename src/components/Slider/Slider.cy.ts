@@ -86,19 +86,18 @@ describe('Slider', () => {
   })
 
   describe('shared labeling contract', () => {
-    it('wires aria-labelledby and aria-describedby', () => {
+    it('wires aria-labelledby and aria-describedby on the slider thumb', () => {
       cy.mount(Slider, {
         props: { label: 'Volume', description: 'Adjust volume.' },
       })
-      cy.get('[role="slider"]')
-        .parents('[aria-labelledby]')
-        .first()
-        .then(($root) => {
-          const labelledBy = $root.attr('aria-labelledby')!
-          const describedBy = $root.attr('aria-describedby')!
-          cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
-          cy.get(`#${describedBy}`).should('contain.text', 'Adjust volume.')
-        })
+      cy.get('[role="slider"]').should(($thumb) => {
+        const labelledBy = $thumb.attr('aria-labelledby')!
+        const describedBy = $thumb.attr('aria-describedby')!
+        expect(labelledBy).to.exist
+        expect(describedBy).to.exist
+        cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
+        cy.get(`#${describedBy}`).should('contain.text', 'Adjust volume.')
+      })
     })
 
     it('renders error state', () => {

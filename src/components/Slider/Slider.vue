@@ -137,10 +137,6 @@ const hasLabeling = computed(() => {
       :step="props.step"
       :disabled="props.disabled"
       :aria-disabled="props.disabled || undefined"
-      :aria-labelledby="labelledBy"
-      :aria-describedby="describedBy"
-      :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-invalid="hasError || undefined"
       data-slot="control"
       v-bind="dataAttrs"
       @value-commit="onValueCommit"
@@ -160,6 +156,10 @@ const hasLabeling = computed(() => {
         v-for="(_, i) in sliderValue"
         :key="`slider-thumb-${i}`"
         :class="thumbClasses"
+        :aria-labelledby="labelledBy"
+        :aria-describedby="describedBy"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-invalid="hasError || undefined"
       />
     </SliderRoot>
     <InputDescription
