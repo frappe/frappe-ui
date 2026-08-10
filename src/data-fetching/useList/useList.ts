@@ -200,6 +200,10 @@ export function useList<T extends { name: string }>(
     method: 'PUT',
     baseUrl,
     key: ({ name }) => name,
+    // SAFETY: `key` equals the document name (`name`), so a store write
+    // from a skipped stale submit is one the store gate would reject anyway.
+    // If `key` is ever narrowed to `name/fieldname` or similar, this safety
+    // breaks: the skip in `useAction` would silently decide store writes.
     onSuccess(data) {
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)

@@ -131,6 +131,19 @@ describe('useNewDoc', () => {
     expect(user.loading).toBe(false)
   })
 
+  it('normalizes a numeric name from an autoincrement doctype', async () => {
+    const doc = useNewDoc<User>(
+      'AutoIncrementDoc',
+      { email: 'autoincrement@example.com' },
+      { baseUrl },
+    )
+
+    const created = await doc.submit()
+
+    expect(typeof created.name).toBe('string')
+    expect(created.name).toBe('42')
+  })
+
   it('calls onSuccess with the created doc', async () => {
     const onSuccess = vi.fn()
     const user = useNewDoc<User>(

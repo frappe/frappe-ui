@@ -121,6 +121,13 @@ export const handlers = [
     return HttpResponse.json({ data: body })
   }),
 
+  // Returns a numeric `name` to simulate an autoincrement doctype.
+  // useNewDoc must normalize it to a string.
+  http.post(url('/api/v2/document/AutoIncrementDoc'), async ({ request }) => {
+    let body = await readBody(request)
+    return HttpResponse.json({ data: { ...body, name: 42 } })
+  }),
+
   http.post(url('/api/v2/method/User/:method'), async ({ request, params }) => {
     let body = await readBody(request)
     await delayIfSlow(params.method)
