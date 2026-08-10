@@ -39,6 +39,7 @@ docs/css/shiki.css
 docs/content/docs/components/*.md
 !docs/content/docs/components/legacy.md
 docs/content/docs/experimental/*.md
+docs/content/docs/charts/*.md
 
 coverage
 .nyc_output
@@ -46,3 +47,6 @@ coverage
 cypress/screenshots
 
 .tmp-screenshots
+
+# Per-machine agent dev-server config.
+.claude/launch.json

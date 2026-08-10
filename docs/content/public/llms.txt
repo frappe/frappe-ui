@@ -27,7 +27,7 @@ Two cross-cutting conventions to know before reading anything else:
 - [Breadcrumbs](https://ui.frappe.io/docs/components/breadcrumbs): page-header trail; takes `items: { label, route }[]`.
 - [Button](https://ui.frappe.io/docs/components/button): primary trigger element; supports `route`/`link` for nav, `icon`/`iconLeft`/`iconRight`, `loading`, `disabled`.
 - [Calendar](https://ui.frappe.io/docs/experimental/calendar): month/week calendar view (experimental).
-- [Charts](https://ui.frappe.io/docs/components/charts): chart family (line, bar, etc.).
+- [Charts](https://ui.frappe.io/docs/charts/overview): chart family (line, bar, etc.); one page per chart under `/docs/charts`.
 - [Checkbox](https://ui.frappe.io/docs/components/checkbox): boolean input; standard labeling contract.
 - [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).

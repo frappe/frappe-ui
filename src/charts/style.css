@@ -1,0 +1,138 @@
+/**
+ * Chart color tokens.
+ *
+ * `--chart-categorical-1` … `--chart-categorical-10` is the categorical ramp:
+ * series pick from it in order, cycling past the tenth. Every ramp is named the
+ * same way, `--chart-<ramp>-<stop>`. `--chart-sequential-*` runs dark to light for
+ * one-directional magnitude, `--chart-diverging-*` runs cool to warm around a
+ * neutral middle stop. Redefine any of them in your own CSS to rebrand every
+ * chart at once; per-chart overrides go through the `palette` prop instead.
+ *
+ * The dark categorical ramp is derived from the light one slot for slot — same
+ * hue, a lower lightness — so a series keeps its hue identity across a theme
+ * flip: series 1 is blue in both.
+ */
+:root {
+  /* The "Jewel" ramp: ten slots are five hue families — blue, emerald, violet,
+     amber, crimson — each a dark member followed by its light partner, so a
+     two-series chart opens on one family at two strengths and a five-series one
+     never repeats a hue. Slot 1 is the sequential ramp's mid-blue.
+
+     The hues sit at jewel-tone depth rather than at their safe positions, so the
+     dark members run a step below the anchor's lightness; chroma is capped at
+     0.19 so the violet and the crimson cannot out-shout the blue. */
+  --chart-categorical-1: #2283c3;
+  --chart-categorical-2: #84c5f9;
+  --chart-categorical-3: #289e60;
+  --chart-categorical-4: #84d4a1;
+  --chart-categorical-5: #753cbb;
+  --chart-categorical-6: #bb9df1;
+  --chart-categorical-7: #c98c28;
+  --chart-categorical-8: #f5ca8e;
+  --chart-categorical-9: #ba205a;
+  --chart-categorical-10: #f98da7;
+
+  --chart-sequential-1: #095895;
+  --chart-sequential-2: #2283c3;
+  --chart-sequential-3: #4eacdf;
+  --chart-sequential-4: #71bde5;
+  --chart-sequential-5: #91ccec;
+  --chart-sequential-6: #9cd1ee;
+  --chart-sequential-7: #b8def2;
+  --chart-sequential-8: #dceef9;
+  --chart-sequential-9: #edf7fc;
+
+  /* Blue → pale warm yellow → red, built from the sequential ramp's darkest
+     blue so a diverging chart opens on the same family a sequential one does.
+     The two ends are turned down from that blue and its weighed red counterpart
+     (lightness +0.075, chroma ×0.85): at full strength the extremes of a heatmap
+     were read before its pattern was. Green→red lost because a red outweighs a
+     green at any matched lightness, so the negative half always shouted. */
+  --chart-diverging-1: #366ea3;
+  --chart-diverging-2: #5b8ec1;
+  --chart-diverging-3: #81b0de;
+  --chart-diverging-4: #a9d2fb;
+  --chart-diverging-5: #fbf1c7;
+  --chart-diverging-6: #eec88c;
+  --chart-diverging-7: #e09e62;
+  --chart-diverging-8: #ce7249;
+  --chart-diverging-9: #b5473f;
+
+  /* Plot-area rules: the horizontal gridlines and the category baseline
+     (`--chart-gridline`), and the line the axis pointer draws under the cursor
+     (`--chart-axis-line`), one step firmer. Both are read as computed values,
+     which resolves the `var()` before echarts ever sees it. */
+  --chart-gridline: var(--outline-gray-1);
+  --chart-axis-line: var(--outline-gray-2);
+
+  /* Ink for a label printed on a pale fill — a stacked segment, say. Deliberately
+     not `--ink-gray-8` and deliberately not overridden below: a pale fill is pale
+     in both themes, so the ink that has to clear it does not invert with the
+     page. Charts flip to white on a fill dark enough to need it. */
+  --chart-inside-label: oklch(0.271 0 0);
+
+  /* What a heatmap paints the gap between two cells in. A gap has to be drawn,
+     not left out — a cell is a filled rect, so the only way to separate two of
+     them is a border in whatever is behind the plot. Defaults to the elevated
+     card surface, which is where a chart normally sits; an app that puts one on
+     another background redefines this on that subtree. */
+  --chart-cell-gap: var(--surface-elevation-2);
+}
+
+[data-theme='dark'] {
+  /* Derived from the light stops, never drawn by hand: same hue, lightness
+     dropped 0.03, chroma held. Deriving dark mechanically is what keeps a
+     series recognisably itself across a theme flip. */
+  --chart-categorical-1: #137ab9;
+  --chart-categorical-2: #7bbbef;
+  --chart-categorical-3: #189557;
+  --chart-categorical-4: #7aca98;
+  --chart-categorical-5: #6d32b1;
+  --chart-categorical-6: #b294e7;
+  --chart-categorical-7: #bf8319;
+  --chart-categorical-8: #ebc085;
+  --chart-categorical-9: #af0f52;
+  --chart-categorical-10: #ef849e;
+
+  --chart-sequential-1: #074677;
+  --chart-sequential-2: #1b699c;
+  --chart-sequential-3: #3e8ab2;
+  --chart-sequential-4: #5a97b7;
+  --chart-sequential-5: #74a3bd;
+  --chart-sequential-6: #7da7be;
+  --chart-sequential-7: #93b2c2;
+  --chart-sequential-8: #b4c2cb;
+  --chart-sequential-9: #c1c9cd;
+
+  /* Derived from the light stops the same way the categorical ramp is: same
+     hue, lightness dropped 0.04, chroma held. */
+  --chart-diverging-1: #2a6296;
+  --chart-diverging-2: #4f82b4;
+  --chart-diverging-3: #75a3d1;
+  --chart-diverging-4: #9cc5ee;
+  --chart-diverging-5: #eee4ba;
+  --chart-diverging-6: #e1bb80;
+  --chart-diverging-7: #d39256;
+  --chart-diverging-8: #c1663d;
+  --chart-diverging-9: #a73b34;
+
+  /* One stop firmer than light, because the outline ramp inverts across themes:
+     `--outline-gray-1` here is the same value as an elevated card surface, so a
+     gridline drawn in it would vanish. `--outline-gray-2` holds the same
+     recessive-hairline reading as `--outline-gray-1` does on a white card. */
+  --chart-gridline: var(--outline-gray-2);
+  --chart-axis-line: var(--outline-gray-3);
+}
+
+/* Digits hold their width while a value changes (count-up, tooltip sweeps).
+   HTML chrome only: zrender measures plot labels on a canvas, which cannot see
+   CSS font features, so tabular figures in the SVG would render wider than
+   they were measured and clip at the plot edge. */
+[data-slot='chart-card'],
+[data-slot='chart-container'] {
+  font-variant-numeric: tabular-nums;
+}
+[data-slot='chart-card'] svg,
+[data-slot='chart-container'] svg {
+  font-variant-numeric: normal;
+}
