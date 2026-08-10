@@ -4,7 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* used only for theme switching for temporarily disabling transitions */
+/* `useColorScheme` stamps this on <html> for the two frames around a light/dark
+   swap. Without it every transitioning surface cross-fades at once and the
+   swap reads as a flash. Apps that skip this stylesheet lose the suppression,
+   not the swap. The docs site keeps its own copy — it loads
+   vitepress/css/style.css instead of this file. */
 .no-transition *,
 .no-transition *::before,
 .no-transition *::after {

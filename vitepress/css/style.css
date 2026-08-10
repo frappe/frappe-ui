@@ -2,9 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* needed as theme switcher dynamically adds this class
- * since many frappe-ui components use transitions
- * fixes flash bang during theme switching */
+/* Copy of the rule in src/style.css, which this stylesheet replaces rather
+   than imports — the docs theme is self-contained. `useColorScheme` stamps
+   `.no-transition` on <html> for the two frames around a light/dark swap, so
+   the transitioning surfaces don't all cross-fade at once. Keep both in sync. */
 .no-transition *,
 .no-transition *::before,
 .no-transition *::after {

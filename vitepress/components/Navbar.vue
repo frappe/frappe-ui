@@ -6,8 +6,8 @@
 // or replace search via `#search` — or override the whole `#navbar` slot.
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useData, withBase } from 'vitepress'
-import { Button, Select, useTheme } from 'frappe-ui'
-import type { Theme } from 'frappe-ui'
+import { Button, Select, useColorScheme } from 'frappe-ui'
+import type { ColorScheme } from 'frappe-ui'
 
 import Search from './Docs/Search.vue'
 
@@ -32,7 +32,9 @@ onMounted(() => {
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
-const { currentTheme, setTheme } = useTheme()
+// A picker rather than a light/dark toggle: `system` is the default scheme, and
+// a two-state toggle gives no way back to it once the reader has picked a side.
+const { colorScheme, setColorScheme } = useColorScheme()
 
 const themeOptions = [
   { label: 'Light', value: 'light', icon: 'lucide-sun' },
@@ -41,7 +43,9 @@ const themeOptions = [
 ]
 
 const themeIcon = computed(
-  () => themeOptions.find((option) => option.value === currentTheme.value)?.icon ?? 'lucide-monitor',
+  () =>
+    themeOptions.find((option) => option.value === colorScheme.value)?.icon ??
+    'lucide-monitor',
 )
 </script>
 
@@ -108,14 +112,16 @@ const themeIcon = computed(
       </Button>
 
       <Select
-        :model-value="currentTheme"
+        :model-value="colorScheme"
         :options="themeOptions"
         size="sm"
         aria-label="Theme"
         side="bottom"
         align="end"
         class="!h-7 !w-7 !min-h-7 !px-0 !rounded-4 justify-center"
-        @update:model-value="(value) => value && setTheme(value as Theme)"
+        @update:model-value="
+          (value) => value && setColorScheme(value as ColorScheme)
+        "
       >
         <template #trigger>
           <span :class="themeIcon" class="size-4" aria-hidden="true" />

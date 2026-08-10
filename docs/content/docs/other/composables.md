@@ -67,6 +67,12 @@ const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
   persists it.
 - `toggleColorScheme()` — flips between light and dark.
 
+Switching schemes would otherwise cross-fade every transitioning surface at
+once, which reads as a flash. To suppress it, `useColorScheme` puts a
+`no-transition` class on `<html>` for the two frames around the swap; the
+rule that acts on it ships in `frappe-ui/style.css`. Apps that don't load
+that stylesheet still switch correctly — they just see the cross-fade.
+
 ## shellScrollContainer / useShellScrolled
 
 `shellScrollContainer` is a computed ref pointing at the scroll element of the
