@@ -31,7 +31,6 @@ export type ChartTokens = {
  * and the OS setting; a chart has no `'system'` state to hold, because it reads
  * what the document is painted in rather than what the user selected.
  */
-export { resolvedColorScheme as currentColorScheme }
 export type { ResolvedColorScheme } from '../composables/useColorScheme'
 
 export const CHART_CATEGORICAL_LENGTH = 10

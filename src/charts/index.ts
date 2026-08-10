@@ -26,27 +26,20 @@ export type {
   UseChartReturn,
 } from './core/useChart'
 
-export {
-  currentColorScheme,
-  paletteColors,
-  resolveChartTokens,
-  useChartTokens,
-  type ChartTokens,
-  type ResolvedColorScheme,
-} from './tokens'
+// The plot-area colors, for a plot an app draws itself. `resolveChartTokens`
+// reads them once and stays internal: a plot that does not re-resolve on a
+// theme flip is the bug the composable exists to prevent.
+export { paletteColors, useChartTokens, type ChartTokens } from './tokens'
+export type { ResolvedColorScheme } from './tokens'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
 // so a caller can style it without hardcoding the reserved key.
 export { OTHERS_KEY, OTHERS_LABEL } from './utils'
 
-export {
-  formatAxisValue,
-  formatDate,
-  formatLabel,
-  formatPercent,
-  formatValue,
-  type TimeGrain,
-} from './format'
+// The grain a time x axis is read at. The format helpers that consume it are
+// internal: each one hardcodes `en-US`, so exporting them would freeze that
+// until `2.0.0`.
+export type { TimeGrain } from './format'
 
 export type {
   AreaChartEmits,
