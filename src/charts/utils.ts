@@ -61,6 +61,17 @@ export function plotReading(
   return [label, body].filter(Boolean).join(': ')
 }
 
+/**
+ * A data value as the name of a mark, for the keyboard cursor to hold on to.
+ * Names are compared with `===`, and a refetch answers with a fresh `Date` for
+ * the same instant, so a date reads as its time and everything else as itself.
+ */
+export function markName(value: unknown): string | number | undefined {
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'string' || typeof value === 'number') return value
+  return value === null || value === undefined ? undefined : String(value)
+}
+
 /** The center of an element in viewport coordinates, for a tooltip with no pointer to hang off. */
 export function elementCenter(el: HTMLElement | undefined) {
   if (!el) return undefined

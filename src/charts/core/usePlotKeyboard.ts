@@ -17,8 +17,11 @@ export type PlotKeyboardArgs<T> = {
    * The cursor holds the name and looks for it again, so a plot that filters,
    * sorts or grows keeps the reader on the mark they were on. A name that is
    * gone falls back to the slot, which is read out like any other move.
+   *
+   * Return a string or a number. Names are compared with `===`, so a Date or
+   * any other object would only ever match itself and never survive a refetch.
    */
-  key: (mark: T) => unknown
+  key: (mark: T) => string | number | undefined
   /**
    * Puts the cursor on a mark: highlight it, open its tooltip, read it out.
    * `previous` is the mark the cursor came off, for the plot to downplay, and
@@ -81,9 +84,28 @@ export function usePlotKeyboard<T>(
 
   // What the cursor is on, as the plot names it. Kept beside the index so a
   // redraw can put the cursor back on the same mark, wherever it has moved to.
-  let held: unknown
+  let held: string | number | undefined
 
   const keyOf = (mark: T) => args.key(mark)
+
+  /**
+   * Where the held mark is now: the match nearest the slot it was in. Nearest
+   * rather than first, because a name is not always unique — two rows can carry
+   * the same category — and the one beside the old slot is the one the reader
+   * was on. -1 when the name has gone.
+   */
+  function findHeld(from: number) {
+    if (held === undefined) return -1
+    let at = -1
+    let gap = Infinity
+    marks.value.forEach((mark, i) => {
+      if (keyOf(mark) !== held) return
+      if (Math.abs(i - from) >= gap) return
+      at = i
+      gap = Math.abs(i - from)
+    })
+    return at
+  }
 
   function place(next: number) {
     const previous = index.value
@@ -108,10 +130,7 @@ export function usePlotKeyboard<T>(
     if (!count.value) return leave()
     // The same mark first, wherever the redraw has put it. Gone, and the cursor
     // holds its place in the order instead.
-    const found =
-      held === undefined
-        ? -1
-        : marks.value.findIndex((mark) => keyOf(mark) === held)
+    const found = findHeld(index.value)
     goTo(found >= 0 ? found : index.value)
   }
 

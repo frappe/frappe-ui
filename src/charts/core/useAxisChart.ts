@@ -14,7 +14,7 @@ import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import type { AxisChartFormatters } from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
-import { documentDir, plotReading } from '../utils'
+import { documentDir, markName, plotReading } from '../utils'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
@@ -382,7 +382,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     marks: () => rows.value,
     // The category is what the mark is called on the axis, so the cursor holds
     // its place through a sort, a filter or a refetch.
-    key: (row) => row[config.value.xAxis.key],
+    key: (row) => markName(row[config.value.xAxis.key]),
     move: (index) => {
       cursorSeries.value = Math.min(
         cursorSeries.value,

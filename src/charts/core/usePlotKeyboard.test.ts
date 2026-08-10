@@ -182,6 +182,18 @@ describe('usePlotKeyboard', () => {
     expect(keyboard.index.value).toBe(0)
   })
 
+  // Two rows can carry the same category. The one beside the old slot is the
+  // one the reader was on, so a name that repeats is resolved by nearness.
+  it('picks the nearer of two marks with the same name', async () => {
+    const plot = setup()
+    plot.marks.value = ['a', 'b', 'a', 'c']
+    plot.keyboard.goTo(2)
+    // Two marks called a: at 0, and at 3 beside the slot the cursor was in.
+    plot.marks.value = ['a', 'b', 'x', 'a', 'c']
+    await nextTick()
+    expect(plot.keyboard.index.value).toBe(3)
+  })
+
   it('reads the mark again when a chart asks', () => {
     const plot = setup()
     plot.focus()
