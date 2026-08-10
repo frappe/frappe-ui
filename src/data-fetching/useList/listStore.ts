@@ -24,7 +24,10 @@ class ListStore {
 
   updateRows(docs: Array<Doc>, version?: number) {
     for (let doc of docs) {
-      this.updateRow(doc.doctype, doc, version)
+      // `doc?.` matches `setDocs`'s guard: a `null` entry in a docs payload
+      // must fall through to `updateRow`'s guard, not throw here and reject
+      // the whole response.
+      this.updateRow(doc?.doctype, doc, version)
     }
   }
 

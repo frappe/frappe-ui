@@ -9,6 +9,7 @@ import { docStore } from './docStore'
 import { useDoc } from './useDoc/useDoc'
 import { useDoctype } from './useDoctype/useDoctype'
 import { useList } from './useList/useList'
+import { useNewDoc } from './useNewDoc/useNewDoc'
 
 interface User {
   name: string
@@ -292,8 +293,10 @@ describe('docs channel robustness', () => {
         HttpResponse.json({
           data: 'ok',
           docs: [
-            // No doctype: identifies no document, must be skipped — not
-            // throw inside the global afterFetch and reject the response.
+            // No doctype, or no entry at all: identifies no document, must
+            // be skipped — not throw inside the global afterFetch and
+            // reject the response.
+            null,
             { name: 'orphan' },
             {
               doctype: 'User',
@@ -310,6 +313,33 @@ describe('docs channel robustness', () => {
       'ok',
     )
     expect(storedEmail()).toBe('mixed-fresh@example.com')
+  })
+})
+
+describe('useNewDoc writes are stamped', () => {
+  it('a stale earlier-dispatched write cannot overwrite a landed insert', async () => {
+    let dt = useDoctype<User>('User', { baseUrl })
+
+    // The setValue is dispatched first (slow); the insert to the same
+    // caller-supplied name is dispatched later and lands first. The insert's
+    // store write must carry its dispatch stamp and record, so the older
+    // response is rejected — before the fix it ran outside the gate.
+    let stale = dt.setValue.submit({
+      name: 'race-insert',
+      email: 'slow-stale@example.com',
+    })
+    let maker = useNewDoc<User>(
+      'User',
+      { name: 'race-insert', email: 'inserted@example.com' },
+      { baseUrl },
+    )
+    let created = await maker.submit()
+    await stale
+
+    expect(created).toMatchObject({ email: 'inserted@example.com' })
+    expect(docStore.getDoc('User', 'race-insert').value?.email).toBe(
+      'inserted@example.com',
+    )
   })
 })
 

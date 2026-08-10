@@ -39,6 +39,17 @@ export function useNewDoc<T extends object>(
     },
     immediate: false,
     ...options,
+    // The store write lives here, not in `submit()`'s `.then`: this hook
+    // runs inside `useCall`'s `runWithWriteVersion` window, so the write
+    // carries the POST's dispatch stamp and records. In the `.then` it ran
+    // after the window closed — unversioned, always admitted, never
+    // recording — the one store write outside the gate (#1017). Matters
+    // when the caller supplies `name`: a stale earlier-dispatched response
+    // for the same document must not overwrite the insert.
+    onSuccess(created: DocResponse) {
+      docStore.setDoc({ doctype, ...created })
+      options.onSuccess?.(created)
+    },
   })
 
   // Captured before `out.submit` is overwritten below — the new `submit`
@@ -46,17 +57,22 @@ export function useNewDoc<T extends object>(
   const callSubmit = out.submit
 
   function submit() {
-    return callSubmit()
-      .then((created) =>
-        docStore
-          .setDoc({ doctype, ...(created as DocResponse) })
-          .then(
-            () =>
-              docStore
-                .getDoc(doctype, (created as DocResponse).name.toString())
-                .value as T,
-          ),
-      )
+    return callSubmit().then((created) => {
+      const response = created as DocResponse | null
+      if (!response?.name) {
+        // A failed request resolves `null` (`useIsolatedCall`'s contract
+        // toward its own caller); `submit()` keeps rejecting instead.
+        throw (
+          (out.error as Error | null) ?? new Error(`insert ${doctype} failed`)
+        )
+      }
+      // The store's copy when this submit's `onSuccess` wrote it (the hook
+      // ran before `callSubmit` resolved). A submit that was overtaken by a
+      // newer one gets no hook, so it answers with its own response — each
+      // caller still receives the doc it created.
+      return (docStore.getDoc(doctype, response.name.toString()).value ??
+        response) as T
+    })
   }
 
   // Extend `out` in place rather than spreading it into a new `reactive()`.
