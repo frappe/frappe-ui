@@ -55,7 +55,7 @@ import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
 import { formatLabel, formatValue } from './format'
-import { useChartTheme } from './theme'
+import { useChartTokens } from './tokens'
 import {
   chartAriaLabel,
   documentDir,
@@ -98,10 +98,10 @@ const config = computed<SankeyChartConfig>(() => ({
   echartOptions: props.echartOptions,
 }))
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const graph = computed(() =>
-  buildSankeyGraph(config.value, { theme: theme.value }),
+  buildSankeyGraph(config.value, { tokens: tokens.value }),
 )
 
 // A graph whose every flow is zero has bands of no width and nodes of no
@@ -116,7 +116,7 @@ const built = computed(() => {
   try {
     return {
       option: buildSankeyOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         format: props.format,
       }),
       error: null as string | null,

@@ -13,7 +13,7 @@ import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import type { AxisChartFormatters } from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
-import { useChartTheme } from '../theme'
+import { useChartTokens } from '../tokens'
 import { documentDir, plotReading } from '../utils'
 import type {
   AxisChartBaseConfig,
@@ -89,9 +89,9 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       : undefined,
   )
 
-  const { theme } = useChartTheme(plotEl)
+  const { tokens } = useChartTokens(plotEl)
   const seriesColors = computed(() =>
-    resolveSeriesColors(config.value, theme.value),
+    resolveSeriesColors(config.value, tokens.value),
   )
 
   // A malformed config throws while building the option; surfacing it as an
@@ -105,7 +105,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
             format.value,
           ),
           {
-            theme: theme.value,
+            tokens: tokens.value,
             hiddenSeries: hiddenSeries.value,
             width: plotWidth.value,
           },

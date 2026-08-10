@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -34,7 +34,7 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
 }
 
 describe('line chart option axes', () => {
@@ -50,14 +50,14 @@ describe('line chart option axes', () => {
     expect(build().xAxis.boundaryGap).toBe(false)
   })
 
-  it('draws horizontal gridlines only, in theme ink', () => {
+  it('draws horizontal gridlines only, in token ink', () => {
     const option = build()
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(theme.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
     expect(option.yAxis.axisLine.show).toBe(false)
-    expect(option.xAxis.axisLabel.color).toBe(theme.axisLabel)
-    expect(option.yAxis.axisLabel.color).toBe(theme.axisLabel)
+    expect(option.xAxis.axisLabel.color).toBe(tokens.axisLabel)
+    expect(option.yAxis.axisLabel.color).toBe(tokens.axisLabel)
   })
 
   it('flips the axes in RTL', () => {
@@ -312,7 +312,7 @@ describe('line chart option second value axis', () => {
         y2Axis: { title: 'rate' },
         series: [{ name: 'sales' }, { name: 'refunds', axis: 'y2' }],
       }),
-      { theme, hiddenSeries: ['refunds'] },
+      { tokens, hiddenSeries: ['refunds'] },
     ) as any
     expect(option.yAxis).toHaveLength(2)
     expect(option.series).toHaveLength(1)

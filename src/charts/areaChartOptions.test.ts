@@ -4,10 +4,10 @@ import {
   DEFAULT_FILL_OPACITY,
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -38,7 +38,7 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
 }
 
 function alphaOf(rgba: string) {

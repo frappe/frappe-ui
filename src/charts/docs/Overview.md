@@ -63,7 +63,7 @@ plot needs — nothing is registered for you.
 Wrap the plot in `ChartContainer` for the title, the value-axis labels and the
 states. Put `ChartLegend` in its `legend` slot, and `ChartTooltip` beside the
 plot for the same HTML tooltip the built-in charts draw. `ChartCard` draws the
-card surface. Read the colors off `useChartTheme`, so the plot follows a theme
+card surface. Read the colors off `useChartTokens`, so the plot follows a theme
 switch with the rest of the page.
 
 The three states are slots — `#loading`, `#error` and `#empty` — on the

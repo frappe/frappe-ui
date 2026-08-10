@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { applyAxisFormatters } from './axisFormat'
 import { buildAxisChartOption } from './axisChartOptions'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -38,7 +38,7 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
 ) {
   return buildAxisChartOption(applyAxisFormatters(config(overrides), formats), {
-    theme,
+    tokens,
   }) as any
 }
 
@@ -83,7 +83,7 @@ describe('applyAxisFormatters', () => {
     const option = buildAxisChartOption(
       applyAxisFormatters(base, { y: currency }),
       {
-        theme,
+        tokens,
       },
     ) as any
 

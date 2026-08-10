@@ -9,7 +9,7 @@ import {
   paletteColors,
   registerChartModules,
   useChart,
-  useChartTheme,
+  useChartTokens,
 } from 'frappe-ui/charts'
 import type { ChartLegendItem } from 'frappe-ui/charts'
 
@@ -32,11 +32,11 @@ const PLANS = [
 ]
 
 const plotEl = ref<HTMLElement>()
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const hidden = ref<string[]>([])
 const colors = computed(() =>
-  paletteColors('categorical', theme.value, PLANS.length),
+  paletteColors('categorical', tokens.value, PLANS.length),
 )
 
 const legendItems = computed<ChartLegendItem[]>(() =>
@@ -54,9 +54,9 @@ const option = computed(() => ({
   radar: {
     indicator: CRITERIA.map((name) => ({ name, max: 100 })),
     radius: '62%',
-    axisName: { color: theme.value.axisLabel, fontSize: 11 },
-    axisLine: { lineStyle: { color: theme.value.splitLine } },
-    splitLine: { lineStyle: { color: theme.value.splitLine, type: 'dashed' } },
+    axisName: { color: tokens.value.axisLabel, fontSize: 11 },
+    axisLine: { lineStyle: { color: tokens.value.splitLine } },
+    splitLine: { lineStyle: { color: tokens.value.splitLine, type: 'dashed' } },
     splitArea: { show: false },
   },
   series: [

@@ -164,7 +164,7 @@
 import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
-import { chartColors, useChartTheme } from './theme'
+import { chartColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -221,13 +221,13 @@ const shapes = computed(() =>
   ),
 )
 
-const { theme } = useChartTheme(root)
+const { tokens } = useChartTokens(root)
 
 const FUNNEL_PALETTE: ChartPaletteName = 'sequential'
 
 /** Palest first, deepest last, so the color darkens as the population narrows. */
 const colors = computed(() =>
-  chartColors(props.palette, theme.value, {
+  chartColors(props.palette, tokens.value, {
     fallback: FUNNEL_PALETTE,
     count: stages.value.length,
     deepEnd: 'last',

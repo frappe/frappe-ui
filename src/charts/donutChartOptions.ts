@@ -2,7 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatPercent } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTheme } from './theme'
+import { chartColors, type ChartTokens } from './tokens'
 import { mergeDeep, OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type { ChartPaletteName, DonutChartConfig, DonutSlice } from './types'
 
@@ -10,7 +10,7 @@ import type { ChartPaletteName, DonutChartConfig, DonutSlice } from './types'
 // the four can't disagree about what a slice is worth.
 
 export type DonutChartOptionContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** Slice names the legend has switched off. Dropped from the ring. */
   hiddenSlices?: string[]
 }
@@ -50,10 +50,10 @@ const EMPHASIS_SCALE = 4
  */
 export function buildDonutSlices(
   config: DonutChartConfig,
-  { theme, hiddenSlices = [] }: DonutChartOptionContext,
+  { tokens, hiddenSlices = [] }: DonutChartOptionContext,
 ): DonutSlice[] {
   const grouped = groupRows(config)
-  const colors = chartColors(config.palette, theme, {
+  const colors = chartColors(config.palette, tokens, {
     fallback: DONUT_PALETTE,
     count: grouped.length,
   })
@@ -145,7 +145,7 @@ export function buildDonutChartOption(
   config: DonutChartConfig,
   context: DonutChartOptionContext,
 ): EChartsCoreOption {
-  const { theme } = context
+  const { tokens } = context
   const isRTL = config.dir === 'rtl'
   const slices = buildDonutSlices(config, context)
   const visible = slices.filter((slice) => !slice.hidden)
@@ -187,7 +187,7 @@ export function buildDonutChartOption(
         avoidLabelOverlap: true,
         label: {
           show: Boolean(config.showInlineLabels),
-          color: theme.dataLabel,
+          color: tokens.dataLabel,
           fontSize: DATA_LABEL_FONT_SIZE,
           // `params.percent` is echarts' own share of the series total, which is
           // the visible total — the same denominator the legend uses.
@@ -201,7 +201,7 @@ export function buildDonutChartOption(
           length: 8,
           length2: 12,
           smooth: true,
-          lineStyle: { width: 1, color: theme.axisLine },
+          lineStyle: { width: 1, color: tokens.axisLine },
         },
         // Hovering one slice pushes the rest of the ring back, rather than only
         // lifting the hovered arc out of it.

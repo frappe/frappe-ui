@@ -29,11 +29,11 @@ export type {
 export {
   currentColorScheme,
   paletteColors,
-  resolveChartTheme,
-  useChartTheme,
-  type ChartTheme,
+  resolveChartTokens,
+  useChartTokens,
+  type ChartTokens,
   type ResolvedColorScheme,
-} from './theme'
+} from './tokens'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
 // so a caller can style it without hardcoding the reserved key.

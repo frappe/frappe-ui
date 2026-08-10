@@ -10,7 +10,7 @@ import {
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
 import { buildReferenceLineSeries } from './referenceLines'
-import { chartColors, type ChartTheme } from './theme'
+import { chartColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
@@ -25,7 +25,7 @@ import type {
 // under the pointer can't disagree with the one the option drew.
 
 export type ScatterOptionContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** Series names the legend has switched off. Dropped from the option. */
   hiddenSeries?: string[]
   /** Prints the numbers the option itself prints, i.e. the two axis scales. */
@@ -60,7 +60,7 @@ const AXIS_INSET = '6%'
  */
 export function buildScatterSeries(
   config: ScatterChartConfig,
-  { theme }: ScatterOptionContext,
+  { tokens }: ScatterOptionContext,
 ): ScatterSeries[] {
   const rows = config.data ?? []
   const names: string[] = []
@@ -95,7 +95,7 @@ export function buildScatterSeries(
   if (dropped) warnDropped(dropped, config)
 
   const scale = symbolSizeScale(sizes, Boolean(config.sizeColumn))
-  const colors = chartColors(config.palette, theme, {
+  const colors = chartColors(config.palette, tokens, {
     fallback: SCATTER_PALETTE,
     count: names.length,
   })
@@ -169,7 +169,7 @@ export function buildScatterOption(
   config: ScatterChartConfig,
   context: ScatterOptionContext,
 ): EChartsCoreOption {
-  const { theme, hiddenSeries = [], format } = context
+  const { tokens, hiddenSeries = [], format } = context
   const isRTL = config.dir === 'rtl'
   const series = buildScatterSeries(config, context)
   const visible = series.filter((entry) => !hiddenSeries.includes(entry.name))
@@ -194,27 +194,27 @@ export function buildScatterOption(
     // The x axis title is drawn on the axis, the way the category axis carries
     // its own; the y axis title is chrome, drawn above the plot by the
     // component. Same split as every other cartesian chart.
-    xAxis: valueAxis(config.xAxis, theme, {
+    xAxis: valueAxis(config.xAxis, tokens, {
       horizontal: true,
       isRTL,
       format: format?.x,
       name: config.xAxis?.title,
     }),
-    yAxis: valueAxis(config.yAxis, theme, {
+    yAxis: valueAxis(config.yAxis, tokens, {
       horizontal: false,
       isRTL,
       format: format?.y,
     }),
     series: [
       ...visible.map((entry) =>
-        buildSeries(entry, { theme, isRTL, showLabels: labelled }),
+        buildSeries(entry, { tokens, isRTL, showLabels: labelled }),
       ),
       // Appended after the points, and read from `config.referenceLines` rather
       // than from the built series: the legend, `hiddenSeries` and the tooltip
       // all walk `buildScatterSeries`, which knows nothing of these, so a host
       // series cannot reach any of them.
       ...buildReferenceLineSeries(referenceLines(config), {
-        theme,
+        tokens,
         // Both scales are value scales here, so neither carries categories and
         // there is no second one to fall back from.
         horizontal: false,
@@ -271,9 +271,9 @@ function warnNoLabelColumn() {
 
 function buildSeries(
   entry: ScatterSeries,
-  opts: { theme: ChartTheme; isRTL: boolean; showLabels: boolean },
+  opts: { tokens: ChartTokens; isRTL: boolean; showLabels: boolean },
 ) {
-  const { theme, isRTL, showLabels } = opts
+  const { tokens, isRTL, showLabels } = opts
 
   return {
     type: 'scatter',
@@ -307,7 +307,7 @@ function buildSeries(
             // the label by that size, so it clears the largest as well as the
             // smallest.
             position: isRTL ? 'left' : 'right',
-            color: theme.dataLabel,
+            color: tokens.dataLabel,
             fontSize: DATA_LABEL_FONT_SIZE,
             // Stated rather than left to echarts, whose default for a cartesian
             // series prints the value: what the axes already say.
@@ -330,7 +330,7 @@ function buildSeries(
  */
 function valueAxis(
   axis: ChartYAxisConfig | undefined,
-  theme: ChartTheme,
+  tokens: ChartTokens,
   opts: {
     horizontal: boolean
     isRTL: boolean
@@ -355,7 +355,7 @@ function valueAxis(
             nameLocation: 'end',
             nameGap: 8,
             nameTextStyle: {
-              color: theme.axisTitle,
+              color: tokens.axisTitle,
               fontSize: AXIS_LABEL_FONT_SIZE,
             },
           }
@@ -368,7 +368,7 @@ function valueAxis(
     axis?.echartOptions,
   )
 
-  return buildValueAxis({ ...axis, echartOptions }, theme, {
+  return buildValueAxis({ ...axis, echartOptions }, tokens, {
     horizontal,
     isRTL,
   })

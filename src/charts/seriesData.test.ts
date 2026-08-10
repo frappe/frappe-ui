@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
 import { resolveSeriesColors } from './axisChartCommon'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps } from './types'
 
 const wideRows = [
@@ -183,7 +183,7 @@ describe('normalizeAxisChartProps: the second value axis', () => {
   // scale. Colors are handed out along the series list, so the series that
   // moved has to come back in the same color it went in.
   it('keeps a series in its own color when it changes axis', () => {
-    const theme: ChartTheme = {
+    const tokens: ChartTokens = {
       categorical: ['#111111', '#222222', '#333333'],
       sequential: ['#000011', '#000022', '#000033'],
       diverging: ['#001100', '#002200', '#003300'],
@@ -196,7 +196,7 @@ describe('normalizeAxisChartProps: the second value axis', () => {
       cellGap: '#ffffff',
     }
     const colorsOf = (props: Partial<AxisChartProps>) =>
-      resolveSeriesColors(normalize(props).config, theme)
+      resolveSeriesColors(normalize(props).config, tokens)
 
     expect(colorsOf({ seriesConfig: { refunds: { axis: 'y2' } } })).toEqual(
       colorsOf({}),

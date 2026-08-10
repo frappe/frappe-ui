@@ -8,10 +8,10 @@ import {
   HEATMAP_RAMP_SAMPLES,
 } from './heatmapOptions'
 import { hexToOklch } from './colorMath'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { HeatmapChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   // Nine stops, dark to light, like the shipped ramp.
   sequential: [
@@ -53,11 +53,11 @@ function config(
 }
 
 function matrix(overrides: Partial<HeatmapChartConfig> = {}) {
-  return buildHeatmapMatrix(config(overrides), { theme })
+  return buildHeatmapMatrix(config(overrides), { tokens })
 }
 
 function build(overrides: Partial<HeatmapChartConfig> = {}) {
-  return buildHeatmapOption(config(overrides), { theme }) as any
+  return buildHeatmapOption(config(overrides), { tokens }) as any
 }
 
 describe('buildHeatmapMatrix', () => {
@@ -174,7 +174,7 @@ describe('buildHeatmapMatrix', () => {
 
   it('colors cells along the ramp, deepest at the top of the scale', () => {
     const built = matrix()
-    const stops = heatmapRampStops(config(), theme)
+    const stops = heatmapRampStops(config(), tokens)
 
     expect(built.cells[0].color.toLowerCase()).toBe(stops[0].toLowerCase())
     expect(built.cells[3].color.toLowerCase()).toBe(
@@ -189,7 +189,7 @@ describe('buildHeatmapMatrix', () => {
         { day: 'Tue', hour: '8am', orders: 7 },
       ],
     })
-    const stops = heatmapRampStops(config(), theme)
+    const stops = heatmapRampStops(config(), tokens)
 
     expect(built.cells.map((cell) => cell.color.toLowerCase())).toEqual([
       stops[stops.length - 1].toLowerCase(),
@@ -200,7 +200,7 @@ describe('buildHeatmapMatrix', () => {
 
 describe('heatmapRampStops', () => {
   it('reverses the sequential ramp and trims its palest stops', () => {
-    const stops = heatmapRampStops(config(), theme)
+    const stops = heatmapRampStops(config(), tokens)
 
     expect(stops).toEqual([
       '#cccccc',
@@ -214,14 +214,14 @@ describe('heatmapRampStops', () => {
   })
 
   it('takes the diverging ramp as authored, cool end first', () => {
-    expect(heatmapRampStops(config({ palette: 'diverging' }), theme)).toEqual(
-      theme.diverging,
+    expect(heatmapRampStops(config({ palette: 'diverging' }), tokens)).toEqual(
+      tokens.diverging,
     )
   })
 
   it('takes an explicit list in the order it was written', () => {
     const colors = ['#ffffff', '#000000']
-    expect(heatmapRampStops(config({ palette: colors }), theme)).toEqual(colors)
+    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(colors)
   })
 })
 
@@ -289,7 +289,7 @@ describe('buildHeatmapOption', () => {
     })
     expect(option.visualMap.inRange.color).toHaveLength(HEATMAP_RAMP_SAMPLES)
     expect(option.visualMap.inRange.color).toEqual(
-      sampleRamp(heatmapRampStops(config(), theme)),
+      sampleRamp(heatmapRampStops(config(), tokens)),
     )
   })
 
@@ -308,7 +308,7 @@ describe('buildHeatmapOption', () => {
     expect(itemStyle).toMatchObject({
       borderRadius: 2,
       borderWidth: 2,
-      borderColor: theme.cellGap,
+      borderColor: tokens.cellGap,
     })
   })
 
@@ -321,7 +321,7 @@ describe('buildHeatmapOption', () => {
 
     // The resting border, restated: a hovered cell keeps the gap around it.
     expect(series.emphasis.itemStyle).toEqual({
-      borderColor: theme.cellGap,
+      borderColor: tokens.cellGap,
       borderWidth: 2,
       shadowBlur: 0,
       shadowColor: 'transparent',
@@ -384,7 +384,7 @@ describe('hoverCellColor', () => {
     expect(series.label.show).toBe(true)
     expect(series.labelLayout).toEqual({ hideOverlap: true })
     // The palest cell keeps the theme ink; the deepest flips to white.
-    expect(series.data[0].label.color).toBe(theme.insideLabel)
+    expect(series.data[0].label.color).toBe(tokens.insideLabel)
     expect(series.data[3].label.color).toBe('#ffffff')
   })
 
@@ -396,7 +396,7 @@ describe('hoverCellColor', () => {
 
   it('prints the value through `format` when one is given', () => {
     const option = buildHeatmapOption(config({ showValues: true }), {
-      theme,
+      tokens,
       format: (value: number) => `${value} orders`,
     }) as any
 

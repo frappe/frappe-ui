@@ -10,7 +10,7 @@ import {
   type TimeGrain,
 } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTheme } from './theme'
+import { chartColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
@@ -20,7 +20,7 @@ import type {
 } from './types'
 
 export type AxisChartOptionContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** Series names the legend has switched off. Dropped from the option. */
   hiddenSeries?: string[]
   /** Plot width in pixels, once measured. Unset leaves pixel sizes to echarts. */
@@ -76,9 +76,9 @@ const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 /** Series colors, keyed by name so a hidden series never shifts its neighbours. */
 export function resolveSeriesColors(
   config: AxisChartBaseConfig,
-  theme: ChartTheme,
+  tokens: ChartTokens,
 ): Record<string, string> {
-  const assigned = chartColors(config.palette, theme, {
+  const assigned = chartColors(config.palette, tokens, {
     fallback: DEFAULT_PALETTE,
     count: config.series.length,
   })
@@ -161,7 +161,7 @@ export function plotRows(
 
 /** Option keys that hold for any cartesian chart, whatever it draws. */
 export function axisChartBase(
-  theme: ChartTheme,
+  tokens: ChartTokens,
   axisPointer: 'shadow' | 'line',
 ) {
   return {
@@ -183,7 +183,7 @@ export function axisChartBase(
           ? { type: 'shadow' }
           : {
               type: 'line',
-              lineStyle: { color: theme.axisLine, width: 1 },
+              lineStyle: { color: tokens.axisLine, width: 1 },
             }),
       },
     },
@@ -234,7 +234,7 @@ export function buildAxisGrid(opts: {
  */
 export function buildXAxis(
   config: AxisChartBaseConfig,
-  theme: ChartTheme,
+  tokens: ChartTokens,
   opts: {
     categories: any[]
     horizontal: boolean
@@ -263,13 +263,13 @@ export function buildXAxis(
     name: config.xAxis.title ? formatLabel(config.xAxis.title) : undefined,
     nameLocation: 'end',
     nameGap: 8,
-    nameTextStyle: { color: theme.axisTitle, fontSize: AXIS_LABEL_FONT_SIZE },
+    nameTextStyle: { color: tokens.axisTitle, fontSize: AXIS_LABEL_FONT_SIZE },
     splitLine: { show: false },
     // The baseline gets the same dotted hairline as the gridlines: it reads as
     // the zero line of that grid rather than as a frame around the plot.
     axisLine: {
       show: true,
-      lineStyle: { color: theme.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
     },
     axisTick: { show: false },
     axisLabel: {
@@ -283,7 +283,7 @@ export function buildXAxis(
       // datapoint, so labelling it says nothing about where the series stops.
       ...(type === 'category' ? { showMaxLabel: true } : {}),
       margin: 8,
-      color: theme.axisLabel,
+      color: tokens.axisLabel,
       fontSize: AXIS_LABEL_FONT_SIZE,
       // The formatter does the shortening (echarts only ellipsises the end),
       // but the cap still has to be declared: it is what `containLabel`
@@ -292,7 +292,7 @@ export function buildXAxis(
       // Left out entirely when the labels fit, so a flat axis carries no
       // rotation key at all.
       ...(rotate ? { rotate } : {}),
-      ...xAxisLabelFormat(type, { theme, timeGrain, labelWidth }),
+      ...xAxisLabelFormat(type, { tokens, timeGrain, labelWidth }),
     },
   }
 
@@ -307,7 +307,7 @@ export function buildXAxis(
  */
 function xAxisLabelFormat(
   type: ResolvedXAxis['type'],
-  opts: { theme: ChartTheme; timeGrain?: TimeGrain; labelWidth?: number },
+  opts: { tokens: ChartTokens; timeGrain?: TimeGrain; labelWidth?: number },
 ) {
   if (type === 'time') {
     return {
@@ -319,7 +319,7 @@ function xAxisLabelFormat(
         formatTimeAxisLabel(value, opts.timeGrain, extra?.level),
       rich: {
         primary: {
-          color: opts.theme.axisTitle,
+          color: opts.tokens.axisTitle,
           fontSize: AXIS_LABEL_FONT_SIZE,
           fontWeight: 600,
         },
@@ -506,14 +506,14 @@ export function valueAxisIndex(
 /** The value axis, or both of them when a series sits on `y2`. */
 export function buildValueAxes(
   config: AxisChartBaseConfig,
-  theme: ChartTheme,
+  tokens: ChartTokens,
   opts: { horizontal: boolean; isRTL: boolean },
 ) {
-  const primary = buildValueAxis(config.yAxis, theme, opts)
+  const primary = buildValueAxis(config.yAxis, tokens, opts)
   if (!hasSecondaryValueAxis(config, opts.horizontal)) return primary
   return [
     primary,
-    buildValueAxis(config.y2Axis, theme, { ...opts, secondary: true }),
+    buildValueAxis(config.y2Axis, tokens, { ...opts, secondary: true }),
   ]
 }
 
@@ -524,7 +524,7 @@ export function buildValueAxes(
  */
 export function buildValueAxis(
   axisConfig: ChartYAxisConfig | undefined,
-  theme: ChartTheme,
+  tokens: ChartTokens,
   opts: {
     horizontal: boolean
     isRTL: boolean
@@ -552,7 +552,7 @@ export function buildValueAxis(
     // the same rows, so it adds nothing but a doubled line.
     splitLine: {
       show: !secondary,
-      lineStyle: { color: theme.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
     },
     axisLine: { show: false },
     axisTick: { show: false },
@@ -563,7 +563,7 @@ export function buildValueAxis(
       // the scale keeps its label even in a short plot.
       showMaxLabel: true,
       margin: 8,
-      color: theme.axisLabel,
+      color: tokens.axisLabel,
       fontSize: AXIS_LABEL_FONT_SIZE,
       formatter: (value: number) => formatValue(value, 1, true),
     },

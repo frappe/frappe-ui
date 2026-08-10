@@ -169,7 +169,7 @@ import {
   sparklineLinePath,
   sparklinePoints,
 } from './sparkline'
-import { paletteColors, useChartTheme } from './theme'
+import { paletteColors, useChartTokens } from './tokens'
 import { documentDir, prefersReducedMotion } from './utils'
 import { useId } from '#utils/useId'
 import Skeleton from '#components/Skeleton/Skeleton.vue'
@@ -258,10 +258,10 @@ const showSparkline = computed(
 const linePath = computed(() => sparklineLinePath(points.value))
 const areaPath = computed(() => sparklineAreaPath(points.value, VIEW_HEIGHT))
 
-const { theme } = useChartTheme(root)
+const { tokens } = useChartTokens(root)
 const sparklineColor = computed(
   () =>
-    props.sparkline?.color ?? paletteColors('sequential', theme.value, 1)[0],
+    props.sparkline?.color ?? paletteColors('sequential', tokens.value, 1)[0],
 )
 
 // Time runs with the reading direction, so an RTL card reads oldest-first from

@@ -1,5 +1,5 @@
 import { DATA_LABEL_FONT_SIZE, DOTTED_LINE, toNumber } from './axisChartCommon'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { ReferenceLine } from './types'
 
 /** Heavier than a gridline: the rule is a statement, not part of the grid. */
@@ -13,7 +13,7 @@ const REFERENCE_LINE_WIDTH = 1.5
 const HOST_SERIES_NAME = '__frappe-ui-reference-lines'
 
 export type ReferenceLineContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** True when the category axis is Y, i.e. the value axis runs across the plot. */
   horizontal: boolean
   /** Whether the chart actually draws a second value axis. */
@@ -92,7 +92,7 @@ function hostIndex(line: ReferenceLine, ctx: ReferenceLineContext) {
 
 function markLineEntry(
   line: ReferenceLine,
-  { theme, horizontal, hasCategoryAxis = true }: ReferenceLineContext,
+  { tokens, horizontal, hasCategoryAxis = true }: ReferenceLineContext,
 ): Record<string, any> | null {
   const onXAxis = line.axis === 'x'
   // A value-axis line is read as a number; a category one carries whatever the
@@ -108,7 +108,7 @@ function markLineEntry(
   const axisKey = onXAxis !== horizontal ? 'xAxis' : 'yAxis'
   // The ink data labels are printed in: a reference line annotates the plot, so
   // it should not read as another measure drawn in a palette color.
-  const color = line.color || theme.dataLabel
+  const color = line.color || tokens.dataLabel
 
   return {
     [axisKey]: at,

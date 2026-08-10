@@ -112,7 +112,7 @@ import {
   HALF_CENTER_Y,
 } from './donutChartOptions'
 import { formatLabel, formatPercent, formatValue } from './format'
-import { useChartTheme } from './theme'
+import { useChartTokens } from './tokens'
 import {
   chartAriaLabel,
   documentDir,
@@ -180,11 +180,11 @@ const readoutStyle = computed(() =>
     : { transform: `translateY(${FULL_READOUT_DROP})` },
 )
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const slices = computed(() =>
   buildDonutSlices(config.value, {
-    theme: theme.value,
+    tokens: tokens.value,
     hiddenSlices: hiddenSlices.value,
   }),
 )
@@ -201,7 +201,7 @@ const built = computed(() => {
   try {
     return {
       option: buildDonutChartOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         hiddenSlices: hiddenSlices.value,
       }),
       error: null as string | null,

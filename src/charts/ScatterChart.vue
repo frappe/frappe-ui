@@ -67,7 +67,7 @@ import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
-import { useChartTheme } from './theme'
+import { useChartTokens } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
@@ -140,10 +140,10 @@ function toValueAxis(axis?: ScatterChartProps['xAxis']) {
   }
 }
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const series = computed(() =>
-  buildScatterSeries(config.value, { theme: theme.value }),
+  buildScatterSeries(config.value, { tokens: tokens.value }),
 )
 
 const isEmpty = computed(() =>
@@ -162,7 +162,7 @@ const built = computed(() => {
   try {
     return {
       option: buildScatterOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         hiddenSeries: hiddenSeries.value,
         format: { x: formatX.value, y: formatY.value },
       }),

@@ -78,7 +78,7 @@ import {
   sampleRamp,
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
-import { useChartTheme } from './theme'
+import { useChartTokens } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -123,10 +123,10 @@ const config = computed<HeatmapChartConfig>(() => ({
   echartOptions: props.echartOptions,
 }))
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const matrix = computed(() =>
-  buildHeatmapMatrix(config.value, { theme: theme.value }),
+  buildHeatmapMatrix(config.value, { tokens: tokens.value }),
 )
 const isEmpty = computed(() => !matrix.value.cells.length)
 
@@ -136,7 +136,7 @@ const built = computed(() => {
   try {
     return {
       option: buildHeatmapOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         format: props.format,
       }),
       error: null as string | null,

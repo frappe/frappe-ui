@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { chartColors, paletteColors, type ChartTheme } from './theme'
+import { chartColors, paletteColors, type ChartTokens } from './tokens'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   // Nine stops, dark to light, like the shipped ramp.
   sequential: [
@@ -26,12 +26,12 @@ const theme: ChartTheme = {
 }
 
 /** The sequential ramp minus the two palest stops, as every chart reads it. */
-const USABLE_SEQUENTIAL = theme.sequential.slice(0, 7)
+const USABLE_SEQUENTIAL = tokens.sequential.slice(0, 7)
 
 describe('chartColors: precedence', () => {
   it("draws in the caller's own colors when they passed a list", () => {
     expect(
-      chartColors(['#aaaaaa', '#bbbbbb'], theme, {
+      chartColors(['#aaaaaa', '#bbbbbb'], tokens, {
         fallback: 'categorical',
         count: 2,
       }),
@@ -40,22 +40,22 @@ describe('chartColors: precedence', () => {
 
   it('reads the ramp the caller named over the family default', () => {
     expect(
-      chartColors('categorical', theme, { fallback: 'sequential', count: 3 }),
-    ).toEqual(theme.categorical)
+      chartColors('categorical', tokens, { fallback: 'sequential', count: 3 }),
+    ).toEqual(tokens.categorical)
   })
 
   it('falls back to the ramp the chart family picked', () => {
     expect(
-      chartColors(undefined, theme, { fallback: 'categorical', count: 3 }),
-    ).toEqual(theme.categorical)
+      chartColors(undefined, tokens, { fallback: 'categorical', count: 3 }),
+    ).toEqual(tokens.categorical)
   })
 
   it('reads an empty list as no palette at all', () => {
     expect(
-      chartColors([], theme, { fallback: 'categorical', count: 2 }),
-    ).toEqual(theme.categorical.slice(0, 2))
+      chartColors([], tokens, { fallback: 'categorical', count: 2 }),
+    ).toEqual(tokens.categorical.slice(0, 2))
     expect(
-      chartColors([], theme, { fallback: 'sequential', count: 'ramp' }),
+      chartColors([], tokens, { fallback: 'sequential', count: 'ramp' }),
     ).toEqual(USABLE_SEQUENTIAL)
   })
 })
@@ -63,7 +63,7 @@ describe('chartColors: precedence', () => {
 describe('chartColors: one color per thing drawn', () => {
   it("cycles the caller's list once it runs out", () => {
     expect(
-      chartColors(['#aaaaaa', '#bbbbbb'], theme, {
+      chartColors(['#aaaaaa', '#bbbbbb'], tokens, {
         fallback: 'categorical',
         count: 5,
       }),
@@ -74,18 +74,18 @@ describe('chartColors: one color per thing drawn', () => {
     for (const name of ['categorical', 'sequential', 'diverging'] as const) {
       for (const count of [1, 2, 5, 12]) {
         expect(
-          chartColors(name, theme, { fallback: 'categorical', count }),
-        ).toEqual(paletteColors(name, theme, count))
+          chartColors(name, tokens, { fallback: 'categorical', count }),
+        ).toEqual(paletteColors(name, tokens, count))
       }
     }
   })
 
   it('draws nothing when there is nothing to draw', () => {
     expect(
-      chartColors('sequential', theme, { fallback: 'categorical', count: 0 }),
+      chartColors('sequential', tokens, { fallback: 'categorical', count: 0 }),
     ).toEqual([])
     expect(
-      chartColors(['#aaaaaa'], theme, { fallback: 'categorical', count: 0 }),
+      chartColors(['#aaaaaa'], tokens, { fallback: 'categorical', count: 0 }),
     ).toEqual([])
   })
 })
@@ -93,7 +93,7 @@ describe('chartColors: one color per thing drawn', () => {
 describe('chartColors: the ramp itself', () => {
   it('gives the stops rather than a slot each', () => {
     expect(
-      chartColors('sequential', theme, {
+      chartColors('sequential', tokens, {
         fallback: 'sequential',
         count: 'ramp',
       }),
@@ -101,7 +101,7 @@ describe('chartColors: the ramp itself', () => {
   })
 
   it('trims the sequential stops that vanish against a card', () => {
-    const ramp = chartColors(undefined, theme, {
+    const ramp = chartColors(undefined, tokens, {
       fallback: 'sequential',
       count: 'ramp',
     })
@@ -111,16 +111,16 @@ describe('chartColors: the ramp itself', () => {
 
   it('takes a diverging ramp end to end', () => {
     expect(
-      chartColors('diverging', theme, {
+      chartColors('diverging', tokens, {
         fallback: 'sequential',
         count: 'ramp',
       }),
-    ).toEqual(theme.diverging)
+    ).toEqual(tokens.diverging)
   })
 
   it("takes the caller's list as the ramp, uncycled", () => {
     const colors = ['#ffffff', '#000000']
-    const ramp = chartColors(colors, theme, {
+    const ramp = chartColors(colors, tokens, {
       fallback: 'sequential',
       count: 'ramp',
     })
@@ -132,13 +132,13 @@ describe('chartColors: the ramp itself', () => {
 describe('chartColors: which end of the ramp leads', () => {
   it('runs a sequential ramp deep to pale by default', () => {
     expect(
-      chartColors('sequential', theme, { fallback: 'sequential', count: 3 }),
+      chartColors('sequential', tokens, { fallback: 'sequential', count: 3 }),
     ).toEqual(['#0a0a0a', '#5a5a5a', '#cccccc'])
   })
 
   it('flips a sequential ramp for a plot whose color runs with the value', () => {
     expect(
-      chartColors('sequential', theme, {
+      chartColors('sequential', tokens, {
         fallback: 'sequential',
         count: 3,
         deepEnd: 'last',
@@ -146,7 +146,7 @@ describe('chartColors: which end of the ramp leads', () => {
     ).toEqual(['#cccccc', '#5a5a5a', '#0a0a0a'])
 
     expect(
-      chartColors(undefined, theme, {
+      chartColors(undefined, tokens, {
         fallback: 'sequential',
         count: 'ramp',
         deepEnd: 'last',
@@ -156,28 +156,28 @@ describe('chartColors: which end of the ramp leads', () => {
 
   it('leaves a categorical set alone, having no order to reverse', () => {
     expect(
-      chartColors('categorical', theme, {
+      chartColors('categorical', tokens, {
         fallback: 'sequential',
         count: 3,
         deepEnd: 'last',
       }),
-    ).toEqual(theme.categorical)
+    ).toEqual(tokens.categorical)
   })
 
   it('leaves a diverging ramp alone, its direction being its meaning', () => {
     expect(
-      chartColors('diverging', theme, {
+      chartColors('diverging', tokens, {
         fallback: 'sequential',
         count: 'ramp',
         deepEnd: 'last',
       }),
-    ).toEqual(theme.diverging)
+    ).toEqual(tokens.diverging)
   })
 
   it("leaves the caller's list in the order it was written", () => {
     const colors = ['#aaaaaa', '#bbbbbb', '#cccccc']
     expect(
-      chartColors(colors, theme, {
+      chartColors(colors, tokens, {
         fallback: 'sequential',
         count: 3,
         deepEnd: 'last',

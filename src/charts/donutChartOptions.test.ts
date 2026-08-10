@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { buildDonutChartOption, buildDonutSlices } from './donutChartOptions'
 import { OTHERS_KEY } from './utils'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { DonutChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -34,7 +34,7 @@ function slices(
   overrides: Partial<DonutChartConfig> = {},
   hiddenSlices?: string[],
 ) {
-  return buildDonutSlices(config(overrides), { theme, hiddenSlices })
+  return buildDonutSlices(config(overrides), { tokens, hiddenSlices })
 }
 
 function build(
@@ -42,7 +42,7 @@ function build(
   hiddenSlices?: string[],
 ) {
   return buildDonutChartOption(config(overrides), {
-    theme,
+    tokens,
     hiddenSlices,
   }) as any
 }
