@@ -157,7 +157,10 @@ interface TabTriggerProps {
   `label` becomes the `aria-label`
 - there is no `iconRight`. Trailing content on a tab is a count or a badge,
   which the `#suffix` slot already carries
-- disabled triggers are skipped by keyboard navigation and cannot be selected
+- disabled triggers are skipped by keyboard navigation and cannot be selected.
+  A disabled trigger counts as absent everywhere selection is resolved: a
+  `v-model` pointing at one falls back to the first selectable trigger and
+  emits, and disabling the selected trigger moves selection off it the same way
 
 Slots:
 

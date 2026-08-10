@@ -179,6 +179,162 @@ describe('Tabs', () => {
     cy.get('@onUpdate').should('not.have.been.called')
   })
 
+  it('moves off a selected trigger that turns disabled, and never starts on one', () => {
+    const lock = ref(false)
+    const model = ref('activity')
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, {
+          modelValue: model.value,
+          'onUpdate:modelValue': (v: string) => (model.value = v),
+          tabs: [
+            { value: 'home', label: 'Home' },
+            { value: 'activity', label: 'Activity', disabled: lock.value },
+          ],
+        }),
+    })
+
+    cy.mount(Harness)
+    cy.contains('[role=tab]', 'Activity').should(
+      'have.attr',
+      'aria-selected',
+      'true',
+    )
+
+    // Disabling the selected trigger must move selection to the first
+    // selectable one and tell the app, the same way a stale model does.
+    cy.then(() => {
+      lock.value = true
+    })
+    cy.contains('[role=tab]', 'Home')
+      .should('have.attr', 'aria-selected', 'true')
+      .then(() => {
+        expect(model.value).to.equal('home')
+      })
+  })
+
+  it('does not start on a disabled trigger the model points at', () => {
+    const model = ref('activity')
+    cy.mount(Tabs, {
+      props: {
+        modelValue: model.value,
+        'onUpdate:modelValue': (v: string) => (model.value = v),
+        tabs: [
+          { value: 'home', label: 'Home' },
+          { value: 'activity', label: 'Activity', disabled: true },
+        ],
+      },
+    })
+
+    cy.contains('[role=tab]', 'Home')
+      .should('have.attr', 'aria-selected', 'true')
+      .then(() => {
+        expect(model.value).to.equal('home')
+      })
+  })
+
+  it('keeps the parent tab selected on a child route, and prefers an exact match', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/settings', component: { template: '<div />' } },
+        {
+          path: '/settings/billing',
+          component: { template: '<router-view />' },
+          children: [
+            { path: 'history', component: { template: '<div />' } },
+          ],
+        },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, {
+              value: 'settings',
+              label: 'Settings',
+              route: '/settings',
+            }),
+            h(TabTrigger, {
+              value: 'billing',
+              label: 'Billing',
+              route: '/settings/billing',
+            }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/settings'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+    cy.contains('[role=tab]', 'Settings')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    // `/settings/billing` is inclusively active for both triggers. The exact
+    // match must win, or a nested route would keep selecting its parent tab.
+    cy.then(() => router.push('/settings/billing'))
+    cy.contains('[role=tab]', 'Billing')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    // A child route with no trigger of its own keeps the parent selected,
+    // via RouterLink's inclusive matching.
+    cy.then(() => router.push('/settings/billing/history'))
+    cy.contains('[role=tab]', 'Billing')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+  })
+
+  it('lets a bound model win over route triggers', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const model = ref('sent')
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          {
+            modelValue: model.value,
+            'onUpdate:modelValue': (v: string) => (model.value = v),
+          },
+          () => [
+            h(TabList, { variant: 'underline' }, () => [
+              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+            ]),
+          ],
+        ),
+    })
+
+    // The URL says Inbox, the model says Sent. With a binding present the
+    // model is the source of truth and `route` is only a navigation side
+    // effect, so route mode must stay off.
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+    cy.contains('[role=tab]', 'Sent')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    // Clicking still navigates and now also updates the model.
+    cy.contains('[role=tab]', 'Inbox').click()
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+      .then(() => {
+        expect(model.value).to.equal('inbox')
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
+
   it('does not select a disabled trigger whose route is current', () => {
     const router = createRouter({
       history: createMemoryHistory(),

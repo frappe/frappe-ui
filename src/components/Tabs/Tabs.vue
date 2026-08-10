@@ -139,23 +139,35 @@ const selected = computed<TabValue | undefined>(() => {
   const desired = modelBound.value ? props.modelValue : internalValue.value
   const list = triggers.value
   if (!list.length) return desired
-  if (desired !== undefined && list.some((t) => t.value() === desired)) {
-    return desired
-  }
+  // A disabled trigger counts as absent, so a model pointing at one falls back
+  // like a stale model rather than selecting a tab the user cannot reach.
+  if (desired !== undefined && selectable(list, desired)) return desired
   return firstSelectable()
 })
 
-// Stale-model fallback: when the model matches no visible trigger, select
-// the first visible one and emit. The initial uncontrolled pick stays
+// Values of the triggers a user can actually select. The fallback watcher
+// tracks this rather than `orderedTriggers` so that disabling the selected
+// trigger re-runs it — a trigger's `disabled` changes without the registry
+// array changing identity.
+const selectableValues = computed(() =>
+  orderedTriggers.value.filter((t) => !t.disabled()).map((t) => t.value()),
+)
+
+function selectable(list: TabTriggerRegistration[], value: TabValue) {
+  return list.some((t) => t.value() === value && !t.disabled())
+}
+
+// Stale-model fallback: when the model matches no selectable trigger, select
+// the first selectable one and emit. The initial uncontrolled pick stays
 // internal and does not emit.
 watch(
-  [orderedTriggers, () => props.modelValue],
+  [selectableValues, () => props.modelValue],
   () => {
     if (routeMode.value) return
     const list = orderedTriggers.value
     if (!list.length) return
     const desired = modelBound.value ? props.modelValue : internalValue.value
-    if (desired !== undefined && list.some((t) => t.value() === desired)) {
+    if (desired !== undefined && selectable(list, desired)) {
       internalValue.value = desired
       return
     }
