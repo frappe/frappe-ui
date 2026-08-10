@@ -93,9 +93,15 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
             // The hook runs under this response's dispatch version, so store
             // writes made from it (`useDoc`, `useDoctype`, `useList` write
             // their stores here) are dropped when a later-dispatched request
-            // has already written the same document (#1017).
-            docStore.runWithWriteVersion(getDispatchVersion(ctx.response), () =>
-              onSuccess(ctx.data!.data),
+            // has already written the same document (#1017). Only a mutating
+            // request records its version; a GET's hook writes are admitted
+            // on the version but must not make an earlier save stale. The
+            // version is ambient and synchronous: hooks must write the
+            // stores before any `await`.
+            docStore.runWithWriteVersion(
+              getDispatchVersion(ctx.response),
+              method !== 'GET',
+              () => onSuccess(ctx.data!.data),
             )
           } catch (e) {
             console.error('Error in onSuccess hook:', e)

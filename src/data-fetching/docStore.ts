@@ -24,15 +24,19 @@ class DocStore {
   // a document that a later-dispatched request has already written, so two
   // concurrent writes to one document always land on the newer one — no
   // matter which composable instance or channel (docs side channel, hook)
-  // carried them. A version is recorded only when a write lands: a
-  // later-dispatched request that failed wrote nothing on the server, so it
-  // must not gate out an older success. Grows like `revisions`: one number per
-  // document ever written, cleared with `clearAll`.
+  // carried them. A version is recorded only when a MUTATING write lands:
+  // a later-dispatched request that failed wrote nothing on the server, so
+  // it must not gate out an older success — and a read (GET) is not an
+  // ordered write at all. The server may answer a later-dispatched read
+  // before an earlier save commits, so a read is admitted on its version but
+  // records nothing, or it would gate the save's response out for good.
+  // Grows like `revisions`: one number per document ever written, cleared
+  // with `clearAll`.
   private writeVersions: Map<DocKey, number>
   // Ambient version for hooks: `useCall` runs its `onSuccess` inside
   // `runWithWriteVersion`, so store writes made synchronously from a hook are
   // versioned without threading a parameter through every hook signature.
-  private currentWriteVersion: number | null = null
+  private currentWrite: { version: number; record: boolean } | null = null
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
   private storePrefix = 'doc:'
 
@@ -54,14 +58,26 @@ class DocStore {
     return ++this.revisionCounter
   }
 
-  /** Run `fn` with `version` as the ambient write version for store writes. */
-  runWithWriteVersion<T>(version: number | undefined, fn: () => T): T {
-    const previous = this.currentWriteVersion
-    this.currentWriteVersion = version ?? null
+  /**
+   * Run `fn` with `version` as the ambient write version for store writes.
+   * `record` says whether the request that produced the response mutates the
+   * server (anything but GET): only those writes record their version.
+   *
+   * The ambient version is synchronous: a hook that writes the store after an
+   * `await` runs outside it, and that write is unversioned — always admitted,
+   * never recorded. Consumer hooks must write the stores before any `await`.
+   */
+  runWithWriteVersion<T>(
+    version: number | undefined,
+    record: boolean,
+    fn: () => T,
+  ): T {
+    const previous = this.currentWrite
+    this.currentWrite = version != null ? { version, record } : null
     try {
       return fn()
     } finally {
-      this.currentWriteVersion = previous
+      this.currentWrite = previous
     }
   }
 
@@ -73,17 +89,24 @@ class DocStore {
    * from a dispatched request, so there is no order to compare.
    */
   admitsWrite(doctype: string, name: string, version?: number): boolean {
-    const v = version ?? this.currentWriteVersion
+    const v = version ?? this.currentWrite?.version
     if (v == null) return true
     const key = this.getKey(doctype, String(name))
     return v >= (this.writeVersions.get(key) ?? 0)
   }
 
-  /** `admitsWrite` plus recording: a landed write makes older writes stale. */
-  private admitAndRecord(key: DocKey, version: number | null): boolean {
-    if (version == null) return true
-    if (version < (this.writeVersions.get(key) ?? 0)) return false
-    this.writeVersions.set(key, version)
+  /**
+   * `admitsWrite` plus recording: a landed mutating write makes older writes
+   * stale. A read (`record: false`) is admitted on its version but records
+   * nothing — see the `writeVersions` comment.
+   */
+  private admitAndRecord(
+    key: DocKey,
+    write: { version: number; record: boolean } | null,
+  ): boolean {
+    if (write == null) return true
+    if (write.version < (this.writeVersions.get(key) ?? 0)) return false
+    if (write.record) this.writeVersions.set(key, write.version)
     return true
   }
 
@@ -115,7 +138,7 @@ class DocStore {
     this.cacheTimeout = minutes * 60 * 1000
   }
 
-  async setDoc(doc: Doc, version?: number) {
+  async setDoc(doc: Doc, version?: number, record = true) {
     if (!doc?.doctype || !doc?.name) {
       throw new Error('Invalid doc: must have doctype and name')
     }
@@ -123,7 +146,8 @@ class DocStore {
     const key = this.getKey(doc.doctype, doc.name)
     // A stale write is dropped whole: no publish, no IDB write — persisting
     // it would hand the stale doc right back on the next cached read.
-    if (!this.admitAndRecord(key, version ?? this.currentWriteVersion)) return
+    const write = version != null ? { version, record } : this.currentWrite
+    if (!this.admitAndRecord(key, write)) return
     // Publish before persisting, the way setDocs already does. Awaiting the
     // write first would leave readers on stale data for the length of an IDB
     // round trip, and widen the window a cached read can land in.
@@ -226,8 +250,8 @@ class DocStore {
     this.publish(key, idbDoc)
   }
 
-  async setDocs(docs: Doc[], version?: number) {
-    const v = version ?? this.currentWriteVersion
+  async setDocs(docs: Doc[], version?: number, record = true) {
+    const write = version != null ? { version, record } : this.currentWrite
     const docMap: Record<string, Doc> = {}
     for (const doc of docs) {
       if (!doc?.doctype || !doc?.name) continue
@@ -235,7 +259,7 @@ class DocStore {
       const key = this.getKey(doc.doctype, doc.name)
       // Stale per document, not per response: one response can carry a fresh
       // doc next to one that a later-dispatched request already wrote.
-      if (!this.admitAndRecord(key, v)) continue
+      if (!this.admitAndRecord(key, write)) continue
       this.publish(key, doc)
       docMap[this.storePrefix + key] = doc
     }
@@ -270,6 +294,21 @@ class DocStore {
     // and clearing the entry would hand the next slot a revision an older read
     // still matches.
     this.revisions.set(key, ++this.revisionCounter)
+    // A delete is a write, and it records: an older in-flight write settling
+    // after it must not re-create the document. The delete itself is never
+    // gated — a delete that succeeded is truthful whatever the dispatch
+    // order, since the server holds the document deleted either way. The
+    // ambient version (the DELETE request's dispatch version) orders it
+    // against concurrent writes; a manual `removeDoc` takes a fresh number,
+    // which gates everything dispatched before the call. `max`: the record
+    // only ever moves forward.
+    this.writeVersions.set(
+      key,
+      Math.max(
+        this.writeVersions.get(key) ?? 0,
+        this.currentWrite?.version ?? ++this.revisionCounter,
+      ),
+    )
     await idbStore.delete(this.storePrefix + key)
   }
 

@@ -20,9 +20,12 @@ response's store writes carry it, and the stores reject a write for a
 document that a later-dispatched request has already written. One freshness
 domain covers every writer — the `docs` side channel, the `useDoctype` /
 `useList` / `useDoc` hooks, and any mix of instances or paths writing the
-same document. A version is recorded only when a write lands: a newer
-request that failed wrote nothing on the server, so it does not make the
-older success stale.
+same document. A version is recorded only when a mutating write lands: a
+newer request that failed wrote nothing on the server, so it does not make
+the older success stale, and a read (GET) is admitted on its version but
+records nothing — the server may answer a later reload before an earlier
+save commits, and the save must still land. A delete records too, so an
+older in-flight write cannot re-create a deleted document.
 
 `useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
 newer same-key submit of the same instance already outran — the store gate

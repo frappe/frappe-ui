@@ -4,6 +4,7 @@
 
 import { baseUrl } from '../mocks/utils'
 import { docStore } from './docStore'
+import { useDoc } from './useDoc/useDoc'
 import { useDoctype } from './useDoctype/useDoctype'
 import { useList } from './useList/useList'
 
@@ -162,6 +163,46 @@ describe('mixed docs-channel and hook-path stale writes', () => {
     ])
 
     expect(storedEmail()).toBe('quick-fresh@example.com')
+  })
+})
+
+describe('deletes record a version', () => {
+  it('an older in-flight write cannot resurrect a deleted document', async () => {
+    await seedUser1()
+    let dt = useDoctype<User>('User', { baseUrl })
+
+    // The save is dispatched first and settles last; the delete is dispatched
+    // later and lands first. The server ends with the document deleted, so
+    // the older save response must not re-create it in the store.
+    await Promise.all([
+      dt.setValue.submit({ name: 'user1', email: 'slow-stale@example.com' }),
+      dt.delete.submit({ name: 'user1' }),
+    ])
+
+    expect(docStore.getDoc('User', 'user1').value).toBe(null)
+  })
+})
+
+describe('reads do not record a version', () => {
+  it('a reload answered before a slower save commits does not gate the save out', async () => {
+    await seedUser1()
+    let doc = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+    })
+
+    // The save is dispatched first (slow); the reload is dispatched later and
+    // the server answers it before the save commits (the GET mock returns the
+    // pre-save email). The read is admitted but must not record: the save is
+    // the mutation, and the server's final state holds it.
+    let save = doc.setValue.submit({ email: 'slow-fresh@example.com' })
+    let read = doc.reload()
+
+    await Promise.all([save, read])
+
+    expect(storedEmail()).toBe('slow-fresh@example.com')
   })
 })
 

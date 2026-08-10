@@ -90,9 +90,12 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           name: String(ctx.data.data.name),
         }
         // Versioned with the request's dispatch version, so a reload that an
-        // in-between write has overtaken cannot put the older doc back (#1017).
+        // in-between write has overtaken cannot put the older doc back
+        // (#1017). `record: false` — this is a read: the server may answer it
+        // before an earlier-dispatched save commits, and recording here would
+        // gate that save's response out for good.
         let version = getDispatchVersion(ctx.response)
-        docStore.setDoc(doc, version)
+        docStore.setDoc(doc, version, false)
         if (transform) {
           doc = transform(doc)
         }

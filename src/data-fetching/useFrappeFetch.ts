@@ -43,7 +43,13 @@ export class FrappeResponseError extends Error {
 // store on whichever response settled last (#1017). The bookkeeping lives in
 // `docStore`, so the docs side channel below and every store-writing hook
 // share one freshness domain.
-const dispatchVersions = new WeakMap<Response, number>()
+// `record` is whether the request mutates the server (anything but GET): only
+// mutating responses record their version in the store, a read is admitted on
+// its version but must not make an earlier-dispatched save stale.
+const dispatchVersions = new WeakMap<
+  Response,
+  { version: number; record: boolean }
+>()
 
 /**
  * The dispatch version stamped on a Response by the wrapped fetch below.
@@ -52,17 +58,18 @@ const dispatchVersions = new WeakMap<Response, number>()
 export function getDispatchVersion(
   response: Response | null | undefined,
 ): number | undefined {
-  return response ? dispatchVersions.get(response) : undefined
+  return response ? dispatchVersions.get(response)?.version : undefined
 }
 
 export const useFrappeFetch = createFetch({
   options: {
     // Wrapping the global fetch is required for vitest, and stamps each
     // response with its request's dispatch version.
-    fetch: (...args) => {
+    fetch: (input, init) => {
       const version = docStore.nextWriteVersion()
-      return fetch(...args).then((response) => {
-        dispatchVersions.set(response, version)
+      const record = (init?.method ?? 'GET').toUpperCase() !== 'GET'
+      return fetch(input, init).then((response) => {
+        dispatchVersions.set(response, { version, record })
         return response
       })
     },
@@ -86,10 +93,12 @@ export const useFrappeFetch = createFetch({
         // fetch; treat it as the newest. The stores gate per document.
         // `setDocs` runs synchronously up to its IDB write, so its records
         // are in place when `updateRows` checks them.
-        let version =
-          dispatchVersions.get(ctx.response) ?? docStore.nextWriteVersion()
-        docStore.setDocs(responseData.docs, version)
-        listStore.updateRows(responseData.docs, version)
+        let stamp = dispatchVersions.get(ctx.response) ?? {
+          version: docStore.nextWriteVersion(),
+          record: true,
+        }
+        docStore.setDocs(responseData.docs, stamp.version, stamp.record)
+        listStore.updateRows(responseData.docs, stamp.version)
       }
       return ctx
     },
