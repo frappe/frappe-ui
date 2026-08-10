@@ -339,10 +339,16 @@ value input, not a panel switcher. The two share:
 - `Tabs` follows the tabs pattern via the underlying reka-ui primitives:
   `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-selected`,
   `aria-controls`
-- activation is automatic: arrow keys move focus and select. Route mode is
-  the one exception — it activates manually, so arrow keys move focus and
-  Enter commits. Selecting a route tab navigates, and the ARIA APG asks for
-  manual activation whenever activation has a significant side effect
+- activation is automatic: arrow keys move focus and select. A list holding
+  any route trigger is the one exception — it activates manually, so arrow
+  keys move focus and Enter commits. Selecting a route tab navigates, and the
+  ARIA APG asks for manual activation whenever activation has a significant
+  side effect. This does not depend on whether a model is bound: with a bound
+  model the router still moves on click, so automatic activation would land
+  the keyboard and the mouse on different URLs
+- every focusable trigger carries `focus-visible:focus-ring` (P12), and no
+  track may clip it. The subtle track has 1px of padding, so it cannot use
+  `overflow-hidden` — the active pill's shadow spills a little instead
 - the root never hands the reka primitive an undefined model. reka reads
   that as uncontrolled and starts driving selection itself, which would flip
   `aria-selected` onto a trigger the rest of the component still draws as

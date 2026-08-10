@@ -906,4 +906,67 @@ describe('Tabs', () => {
         expect(router.currentRoute.value.path).to.equal('/')
       })
   })
+
+  it('keeps activation manual when a model is bound alongside routes', () => {
+    // A bound model turns route mode off, but clicking a route trigger still
+    // navigates. Under automatic activation the arrow key emitted the value
+    // without navigating while a click did both, so the keyboard and the
+    // mouse ended on different URLs.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.spy().as('onUpdate')
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate }, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type('{rightarrow}')
+
+    // Focus moved, but nothing was selected and nothing navigated.
+    cy.focused().should('contain.text', 'Sent')
+    cy.get('@onUpdate')
+      .should('not.have.been.called')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
+
+  it('shows a focus ring that the track does not clip', () => {
+    // P12: the shell owns the ring for both components and every track. The
+    // subtle track has 1px of padding, so `overflow-hidden` there used to cut
+    // the outer half of it off.
+    cy.mount(Tabs, { props: { tabs: items, variant: 'subtle' } })
+
+    cy.get('[role=tab]').eq(1).focus()
+
+    cy.get('[role=tab]')
+      .eq(1)
+      .should(($tab) => {
+        const outline = getComputedStyle($tab[0]).outline
+        expect(outline, 'outline').to.not.equal('')
+        expect(outline, 'outline').to.not.contain('none')
+      })
+
+    cy.get('[data-slot="tab-list"]').should(($list) => {
+      expect(getComputedStyle($list[0]).overflow, 'track overflow').to.not.equal(
+        'hidden',
+      )
+    })
+  })
 })

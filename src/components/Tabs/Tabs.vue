@@ -105,6 +105,13 @@ const routeMode = computed(
     triggers.value.some((t) => t.hasRoute() && !t.disabled()),
 )
 
+// Broader than `routeMode`: a bound model keeps selection off the router,
+// but clicking a route trigger still navigates. Activation stays manual
+// there too, so the keyboard and the mouse cannot land on different URLs.
+const hasAnyRoute = computed(() =>
+  triggers.value.some((t) => t.hasRoute() && !t.disabled()),
+)
+
 // Disabled triggers are skipped here as well as in keyboard navigation: a
 // disabled trigger renders as a button rather than a link, but `useLink`
 // still tracks its route, so reaching that URL any other way would
@@ -202,6 +209,7 @@ const orientation = computed<'horizontal' | 'vertical'>(() =>
 provide(tabsRootKey, {
   selected,
   routeMode,
+  hasAnyRoute,
   orientation,
   register,
 })
@@ -212,6 +220,15 @@ provide(tabsRootKey, {
 // because every part of this component reads `selected` instead. A value no
 // trigger carries keeps the root controlled and selects nothing.
 const NO_SELECTION = '__frappe-ui-tabs-none__'
+
+// reka reads `activationMode` once in its own setup and keeps the value, so
+// it cannot see triggers that register afterwards — which is all of them.
+// Keying the root on the mode remounts it the one time routes appear. A
+// trigger's route-ness is fixed for its lifetime (`useLink` runs at setup),
+// so this settles immediately and never flips back.
+const activationMode = computed<'automatic' | 'manual'>(() =>
+  hasAnyRoute.value ? 'manual' : 'automatic',
+)
 
 function onRekaUpdate(value: TabValue) {
   if (routeMode.value) {
@@ -245,7 +262,9 @@ const visibleTabs = computed(() =>
 
 <template>
   <TabsRoot
+    :key="activationMode"
     :model-value="selected ?? NO_SELECTION"
+    :activation-mode="activationMode"
     :orientation="orientation"
     :dir="dir"
     :class="

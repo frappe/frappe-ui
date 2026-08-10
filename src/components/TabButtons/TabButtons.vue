@@ -79,11 +79,18 @@ const resolvedButtons = computed(() => {
 // stay parked — or stay hidden, when nothing was checked at mount.
 const internalValue = ref<TabButtonValue | undefined>(props.modelValue)
 
+// Handed to `RadioGroupRoot` when nothing is selected, for the same reason
+// `Tabs` does it: an undefined model reads as uncontrolled, and reka would
+// then track the checked item privately where nothing here can see it.
+const NO_SELECTION = '__frappe-ui-tab-buttons-none__'
+
 const model = computed({
   get: () =>
-    props.modelValue !== undefined ? props.modelValue : internalValue.value,
+    props.modelValue !== undefined
+      ? props.modelValue
+      : (internalValue.value ?? NO_SELECTION),
   set: (value) => {
-    if (value === undefined) return
+    if (value === undefined || value === NO_SELECTION) return
     internalValue.value = value
     emit('update:modelValue', value)
   },

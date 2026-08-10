@@ -28,11 +28,12 @@ export function tabTrackClasses(opts: {
     case 'subtle':
       // Shipped v1 geometry (overrides Figma): 1px padding at both sizes,
       // 10px radius at md.
-      // `overflow-hidden` clips the active pill's shadow at the track edge —
-      // with only 1px of padding the shadow otherwise spills onto whatever
-      // sits next to the track.
+      // No `overflow-hidden`: with 1px of padding it also clipped the outer
+      // half of a focused trigger's 2px ring, and a clipped focus ring is a
+      // worse defect than the active pill's shadow spilling a pixel or two
+      // past the track edge.
       return [
-        'bg-surface-gray-2 overflow-hidden',
+        'bg-surface-gray-2',
         isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-[10px] p-px',
       ]
     case 'ghost':
@@ -123,9 +124,14 @@ export function browserTabCardClasses(base: BrowserTabBase): string {
 export const tabIndicatorMotionClasses =
   'duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]'
 
-/** Reset + disabled treatment for the focusable element wrapping a pill. */
+/**
+ * Reset, focus ring, and disabled treatment for the focusable element
+ * wrapping a pill. The shell owns the ring (P12) so every track and both
+ * components get the same one; `focus-visible:ring-0` clears the UA ring
+ * first, matching `SidebarItem` and `RailItem`.
+ */
 export const tabShellClasses =
-  'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline disabled:pointer-events-none disabled:opacity-60'
+  'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline focus-visible:ring-0 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-60'
 
 /**
  * Trigger radius: 8px (`rounded-4`) at md, 7px at sm. Browser tabs round the
