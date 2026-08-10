@@ -119,8 +119,13 @@ watch(routeSelected, () => {
 
 const selected = computed<TabValue | undefined>(() => {
   if (routeMode.value) {
-    const override = routeOverride.value
-    if (override !== undefined && triggerFor(override)) return override
+    // The override is dropped once its trigger goes away or turns disabled,
+    // so a tab the user can no longer select cannot stay active.
+    const override =
+      routeOverride.value !== undefined
+        ? triggerFor(routeOverride.value)
+        : undefined
+    if (override && !override.disabled()) return override.value()
     const fromRoute = routeSelected.value
     if (fromRoute !== undefined) return fromRoute
     // No route matches. Fall back to the first selectable trigger with no

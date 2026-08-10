@@ -299,6 +299,48 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'inactive')
   })
 
+  it('drops a clicked non-route trigger from route mode once it is disabled', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+      ],
+    })
+
+    const lock = ref(false)
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, {
+              value: 'drafts',
+              label: 'Drafts',
+              disabled: lock.value,
+            }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    // Drafts wins the click, then turns disabled. A tab the user can no
+    // longer select must not stay active — selection returns to the route.
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    cy.then(() => {
+      lock.value = true
+    })
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+  })
+
   it('falls back to a non-route trigger when only a disabled route matches', () => {
     const router = createRouter({
       history: createMemoryHistory(),
