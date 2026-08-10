@@ -4,6 +4,7 @@
 
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useDoc, useNewDoc } from '../index'
+import { docStore } from '../docStore'
 
 interface User {
   name: string
@@ -82,6 +83,23 @@ describe('useNewDoc', () => {
       immediate: false,
     })
     expect(existing.doc).toMatchObject({ email: 'new-user-1@example.com' })
+  })
+
+  it('resolves with a doc that carries its doctype, even when the response omits it', async () => {
+    const user = useNewDoc<User>(
+      'User',
+      { name: 'new-user-2', email: 'new-user-2@example.com' },
+      { baseUrl },
+    )
+
+    // The insert endpoint echoes the payload back, so the response has no
+    // `doctype`. The resolved doc carries the same shape the store holds.
+    const created = (await user.submit()) as User & { doctype: string }
+
+    expect(created.doctype).toBe('User')
+    expect(docStore.getDoc('User', 'new-user-2').value).toMatchObject({
+      doctype: 'User',
+    })
   })
 
   it('sets error and rejects on a failed insert', async () => {

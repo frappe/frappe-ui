@@ -71,7 +71,9 @@ export function useNewDoc<T extends object>(
       // and then the store holds the OTHER caller's document, which is
       // exactly what this caller must not receive. The store keeps the
       // winning write; each caller resolves with the doc it created.
-      return response as T
+      // `doctype` is merged the same way `onSuccess` merges it for the
+      // store, so the resolved doc keeps the shape callers had before.
+      return { doctype, ...response } as T
     })
   }
 
