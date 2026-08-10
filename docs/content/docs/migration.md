@@ -1897,6 +1897,52 @@ Grep for `#left`, `#right`, and `#icon` on these two components specifically —
 other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
 `#right` slots that are unaffected.
 
+## Charts
+
+Only for apps already on `frappe-ui/charts` from `1.0.0-beta.41` or later. The
+family is new in v1, so an app coming from v0 has nothing to migrate here.
+
+The six mark emits are renamed to `select`. This is a **silent break**: Vue
+attaches a listener for an emit the component no longer declares as a plain
+attribute, so the handler stops firing with no error and no warning. The
+payload is unchanged, so only the name moves.
+
+| Before                            | After                     |
+| --------------------------------- | ------------------------- |
+| `AreaChart` `@datapoint-click`    | `@select`                 |
+| `BarChart` `@datapoint-click`     | `@select`                 |
+| `LineChart` `@datapoint-click`    | `@select`                 |
+| `DonutChart` `@slice-click`       | `@select`                 |
+| `FunnelChart` `@stage-click`      | `@select`                 |
+| `HeatmapChart` `@cell-click`      | `@select`                 |
+| `SankeyChart` `@link-click`       | `@select`                 |
+| `ScatterChart` `@point-click`     | `@select`                 |
+
+```vue
+<!-- Before -->
+<BarChart :data="rows" x="warehouse" :y="['picked']" @datapoint-click="open" />
+<DonutChart :data="rows" category="channel" value="sessions" @slice-click="open" />
+<SankeyChart :data="rows" source="from" target="to" value="amount" @link-click="open" />
+
+<!-- After -->
+<BarChart :data="rows" x="warehouse" :y="['picked']" @select="open" />
+<DonutChart :data="rows" category="channel" value="sessions" @select="open" />
+<SankeyChart :data="rows" source="from" target="to" value="amount" @select="open" />
+```
+
+`select` also fires on Enter and Space over the plot's keyboard cursor, which
+is why the old names had to go — they described the mouse, not the behavior.
+
+Grep for `datapoint-click`, `slice-click`, `stage-click`, `cell-click`,
+`link-click` and `point-click`, and for the camelCase spellings in render
+functions and `h()` props.
+
+The rest of the family's breaks are loud — the build or the type-check reports
+them. `ChartTheme` is `ChartTokens`, `useChartTheme` is `useChartTokens` and it
+returns `{ tokens }` instead of `{ theme }`. `formatValue`, `formatDate`,
+`formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
+`resolveChartTheme` are no longer exported.
+
 ## FAQ
 
 **Will my CSS break?** Where structure changed, components expose `data-*` hooks
