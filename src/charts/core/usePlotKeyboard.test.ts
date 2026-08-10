@@ -195,6 +195,38 @@ describe('usePlotKeyboard', () => {
     expect(plot.keyboard.index.value).toBe(3)
   })
 
+  // Escape leaves the focus on the plot. The cross keys have no mark to cross
+  // from then, so they place the cursor like the others rather than doing
+  // nothing or crossing from an assumed first mark.
+  it('places the cursor when a cross key comes with none', () => {
+    const crossed: number[] = []
+    const scope = effectScope()
+    let keyboard!: PlotKeyboardReturn
+    scope.run(() => {
+      keyboard = usePlotKeyboard({
+        marks: () => ['a', 'b', 'c'],
+        key: (mark) => mark,
+        move: () => {},
+        activate: () => {},
+        clear: () => {},
+        cross: (delta) => crossed.push(delta),
+      })
+    })
+    const press = (key: string) =>
+      (keyboard.attrs.value as Record<string, any>).onKeydown({
+        key,
+        preventDefault: () => {},
+      })
+
+    press('ArrowDown')
+    expect(keyboard.index.value).toBe(0)
+    expect(crossed).toEqual([])
+
+    press('ArrowDown')
+    expect(crossed).toEqual([1])
+    expect(keyboard.index.value).toBe(0)
+  })
+
   it('reads the mark again when a chart asks', () => {
     const plot = setup()
     plot.focus()

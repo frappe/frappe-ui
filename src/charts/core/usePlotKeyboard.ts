@@ -125,6 +125,17 @@ export function usePlotKeyboard<T>(
     place(Math.min(count.value - 1, Math.max(0, next)))
   }
 
+  /**
+   * The perpendicular arrows. With no cursor there is no mark to cross from —
+   * after Escape, say — so they place it on the first mark, as the other keys
+   * do, rather than crossing from nothing.
+   */
+  function cross(delta: number) {
+    if (!args.cross) return step(delta)
+    if (index.value === null) return step(1)
+    args.cross(delta)
+  }
+
   function refresh() {
     if (index.value === null) return
     if (!count.value) return leave()
@@ -159,10 +170,10 @@ export function usePlotKeyboard<T>(
         step(-1)
         break
       case 'ArrowDown':
-        args.cross ? args.cross(1) : step(1)
+        cross(1)
         break
       case 'ArrowUp':
-        args.cross ? args.cross(-1) : step(-1)
+        cross(-1)
         break
       case 'Home':
         goTo(0)
