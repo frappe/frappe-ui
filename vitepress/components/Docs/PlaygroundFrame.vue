@@ -186,7 +186,7 @@ function onCopy() {
 }
 .dot-grid {
   /* Black dots vanish on the dark surface, so flip to light ones — the docs
-     stamp `data-theme` on <html> (see useTheme). */
+     stamp `data-theme` on <html> (see useColorScheme). */
   --dot-color: rgba(0, 0, 0, 0.08);
   background-image: radial-gradient(
     circle,

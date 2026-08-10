@@ -5,6 +5,8 @@ import { TabButtons, Tooltip, useColorScheme } from 'frappe-ui'
 type Mode = 'light' | 'dark'
 
 // The switcher drives the global theme so the whole page matches the ramps.
+// No "system" option here: the toggle is explicit light/dark, so an initial
+// `system` scheme just reads as light.
 const { colorScheme, setColorScheme } = useColorScheme()
 const mode = computed<Mode>({
   get: () => (colorScheme.value === 'dark' ? 'dark' : 'light'),
