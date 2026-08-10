@@ -592,6 +592,7 @@ export type ChartBaseProps = {
 }
 
 export type ChartXAxisOptions = {
+  /** Heads the axis, under its labels. Left out, the axis carries no name. */
   title?: string
   /**
    * Inferred: `'time'` when every value in the `x` column is a `Date` or ISO
@@ -605,15 +606,25 @@ export type ChartXAxisOptions = {
   type?: 'category' | 'time' | 'value'
   /** Label granularity on a time axis. Inferred from the spacing of the data. */
   timeGrain?: TimeGrain
+  /** Prints each category label. Takes whatever the column holds. */
   format?: ChartCategoryFormatter
+  /** Escape hatch: deep-merged into this axis' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
 
 export type ChartValueAxisOptions = {
+  /**
+   * Names what the axis measures. Drawn above the plot rather than turned
+   * sideways along it, so it reads with the chart title.
+   */
   title?: string
+  /** Bottom of the scale. Defaults to a round number under the data. */
   min?: number
+  /** Top of the scale. Defaults to a round number over the data. */
   max?: number
+  /** Prints each tick label, and every value this axis carries elsewhere. */
   format?: ChartValueFormatter
+  /** Escape hatch: deep-merged into this axis' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -626,6 +637,7 @@ export type ChartValueAxisOptions = {
 export type SeriesStyle = {
   /** Display name. The `seriesConfig` key stays the identity. */
   label?: string
+  /** Takes this series out of the palette, e.g. to pin one to a brand color. */
   color?: string
   /**
    * Mark this series draws as. Defaults to the mark of the chart component it
@@ -643,6 +655,7 @@ export type SeriesStyle = {
    * `y` order whatever axis each one sits on, so a series keeps its color.
    */
   axis?: 'y' | 'y2'
+  /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -659,6 +672,7 @@ export type SeriesStyle = {
   smooth?: boolean
   /** Overrides the chart-level `fillOpacity`. Area series only. */
   fillOpacity?: number
+  /** Escape hatch: deep-merged into this series' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
 
