@@ -60,7 +60,6 @@ export default defineConfig({
     // prebundles them.
     include: [
       'tippy.js',
-      'showdown',
       'engine.io-client',
       'socket.io-client',
       'debug',
