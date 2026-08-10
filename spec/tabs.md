@@ -87,6 +87,7 @@ interface TabsProps {
   /** Shorthand mode only; forwarded to the generated TabList. */
   variant?: TabsVariant
   size?: TabsSize
+  side?: TabsSide
 }
 
 interface TabsEmits {
@@ -104,8 +105,15 @@ Defaults:
 State rules:
 
 - the model is the trigger `value`, never an index
+- "bound" means the `modelValue` prop was passed, not that it holds a value.
+  `const tab = ref()` with `v-model` is a bound model that starts undefined,
+  and it must not be mistaken for an unbound root — route mode would turn on,
+  and route mode never emits for a route trigger, so the ref would stay
+  undefined and the binding would be dead for the life of the component.
+  Listening to `update:modelValue` without passing the prop is not a binding
 - with no `v-model`, the component keeps internal state; the first visible
-  trigger is selected initially
+  trigger is selected initially. That initial pick does not emit. A bound
+  model is always told, including one that started undefined
 - if the model matches no visible trigger, the component selects the first
   visible trigger and emits `update:modelValue`. This replaces the stale-index
   clamps apps wrote in v0

@@ -166,7 +166,22 @@ function firstSelectable(): TabValue | undefined {
   return orderedTriggers.value.find((t) => !t.disabled())?.value()
 }
 
-const modelBound = computed(() => props.modelValue !== undefined)
+// Whether a model is *bound*, not whether it currently holds a value.
+// `const tab = ref()` with `v-model` is ordinary, and reading the value would
+// call that unbound: route mode would turn on, and route mode never emits for
+// a route trigger, so the ref would stay undefined and the binding would be
+// dead for the life of the component. The binding itself is on the vnode.
+// The prop key, not the update listener: an app may listen to
+// `update:modelValue` to observe selection without binding a model at all,
+// and that must stay uncontrolled. `v-model` always passes the key.
+const modelBindingPresent = (() => {
+  const vnodeProps = getCurrentInstance()?.vnode.props ?? {}
+  return 'modelValue' in vnodeProps || 'model-value' in vnodeProps
+})()
+
+const modelBound = computed(
+  () => modelBindingPresent || props.modelValue !== undefined,
+)
 
 // Route mode: with no model binding and at least one selectable route
 // trigger, selection derives from the current route. Disabled route
@@ -263,7 +278,10 @@ watch(
     const fallback = firstSelectable()
     if (fallback === undefined) return
     internalValue.value = fallback
-    if (desired !== undefined) emit('update:modelValue', fallback)
+    // Emit whenever a model is bound: an unbound root's initial pick stays
+    // internal, but a bound one asked to be told — including the `ref()` that
+    // started undefined.
+    if (modelBound.value) emit('update:modelValue', fallback)
   },
   { immediate: true, flush: 'post' },
 )
@@ -329,7 +347,11 @@ const visibleTabs = computed(() =>
     @update:model-value="onRekaUpdate($event as TabValue)"
   >
     <template v-if="props.tabs">
-      <TabList :variant="props.variant" :size="props.size">
+      <TabList
+        :variant="props.variant"
+        :size="props.size"
+        :side="props.side"
+      >
         <TabTrigger
           v-for="tab in visibleTabs"
           :key="tab.value"

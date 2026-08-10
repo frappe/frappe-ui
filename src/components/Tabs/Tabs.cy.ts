@@ -1179,4 +1179,68 @@ describe('Tabs', () => {
         expect(router.currentRoute.value.path).to.equal('/inbox')
       })
   })
+
+  it('honours a bound model that starts undefined over route triggers', () => {
+    // `const tab = ref()` with `v-model` is ordinary. Testing the model's
+    // value rather than the binding turned route mode on, and route mode
+    // never emits for a route trigger — so the ref stayed undefined and the
+    // binding was dead for the life of the component.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const tab = ref<string | undefined>(undefined)
+
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          {
+            modelValue: tab.value,
+            'onUpdate:modelValue': (value: string) => {
+              tab.value = value
+            },
+          },
+          () => [
+            h(TabList, { variant: 'underline' }, () => [
+              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+            ]),
+          ],
+        ),
+    })
+
+    cy.wrap(router.push('/'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    // The model wins: it fills in rather than deferring to the router.
+    cy.wrap(tab).its('value').should('equal', 'inbox')
+
+    cy.contains('a[role=tab]', 'Sent').click()
+    cy.wrap(tab).its('value').should('equal', 'sent')
+  })
+
+  it('forwards side to the generated TabList in shorthand mode', () => {
+    // `variant` and `size` were forwarded and `side` was not, so a shorthand
+    // vertical browser-tab list could only ever attach left.
+    cy.mount(Tabs, {
+      props: {
+        tabs: items,
+        variant: 'browser-tab',
+        vertical: true,
+        side: 'right',
+      },
+    })
+
+    cy.get('[data-slot="tab-list"]').should(($list) => {
+      expect(getComputedStyle($list[0]).borderRightWidth, 'right rail').to.not.equal(
+        '0px',
+      )
+    })
+  })
 })

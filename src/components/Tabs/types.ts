@@ -27,6 +27,9 @@ export interface TabsProps {
 
   /** Shorthand mode only; forwarded to the generated TabList. */
   size?: TabsSize
+
+  /** Shorthand mode only; forwarded to the generated TabList. */
+  side?: TabsSide
 }
 
 export interface TabsEmits {

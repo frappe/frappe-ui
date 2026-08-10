@@ -43,6 +43,12 @@
     required: false,
     type: 'TabsSize',
     default: '"sm"'
+  },
+  {
+    name: 'side',
+    description: 'Shorthand mode only; forwarded to the generated TabList.',
+    required: false,
+    type: 'TabsSide'
   }
 ]
 
