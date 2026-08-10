@@ -39,8 +39,11 @@ const listClasses = computed(() => {
   return [
     // `isolate` keeps the -z-10 sliding indicator above the track's own
     // background and rail border while staying behind the (static) triggers.
+    // `self-start` keeps the pill track content-hugging: `inline-flex` alone
+    // still stretches to the cross axis when the root is a flex container
+    // (shorthand mode). Underline and browser-tab rails do want to span.
     pillTrack.value
-      ? 'relative isolate inline-flex shrink-0'
+      ? 'relative isolate inline-flex shrink-0 self-start'
       : browserTrack.value
         ? 'relative isolate flex'
         : 'relative flex',
