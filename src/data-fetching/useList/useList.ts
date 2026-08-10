@@ -200,9 +200,11 @@ export function useList<T extends { name: string }>(
     method: 'PUT',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(data) {
+    onStoreWrite(data) {
       docStore.setDoc({ doctype, ...data })
       listStore.updateRow(doctype, data)
+    },
+    onSuccess() {
       if (refetch) execute()
     },
   })
@@ -224,10 +226,12 @@ export function useList<T extends { name: string }>(
     method: 'DELETE',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(_data, { name }) {
-      if (refetch) execute()
+    onStoreWrite(_data, { name }) {
       docStore.removeDoc(doctype, name)
       listStore.removeRow(doctype, name)
+    },
+    onSuccess() {
+      if (refetch) execute()
     },
   })
 

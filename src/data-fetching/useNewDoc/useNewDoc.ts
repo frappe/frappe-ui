@@ -72,7 +72,10 @@ export function useNewDoc<T extends object>(
       // winning write; each caller resolves with the doc it created.
       // `doctype` is merged the same way `onSuccess` merges it for the
       // store, so the resolved doc keeps the shape callers had before.
-      return { doctype, ...response } as T
+      // `name` is cast to String because an autoincrement doctype answers
+      // with a JSON number, and the type says `name: string` — feed it
+      // back into `useDoc` and `toValue(name)?.trim()` would throw.
+      return { doctype, ...response, name: String(response.name) } as T
     })
   }
 

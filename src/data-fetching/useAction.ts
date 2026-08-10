@@ -15,6 +15,13 @@ export interface UseActionOptions<TResponse, TParams> {
   key?: (params: TParams) => string
   /** Return a message to reject the submit before any request is sent. */
   validate?: (params: TParams) => string | void
+  /**
+   * Store write callback, firing for every successful submit — NOT gated by
+   * the per-target freshness check. Like `useIsolatedCall`'s `onStoreWrite`,
+   * this lets the store gate itself via dispatch version (#1017) instead of
+   * being silently dropped by the per-target skip.
+   */
+  onStoreWrite?: (data: TResponse, params: TParams) => void
   onSuccess?: (data: TResponse, params: TParams) => void
   onError?: (error: Error, params: TParams) => void
 }
@@ -156,12 +163,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
           baseUrl,
           immediate: false,
           refetch: false,
-          // Gated: this is where `useDoctype` and `useList` write the shared
-          // stores, and a stale same-target submit must not hand them its
-          // response.
+          // Store writes fire for every successful submit — the store gates
+          // itself via dispatch version (#1017). Consumer hooks remain gated
+          // per target: a stale same-target submit must not hand them its
+          // response or re-run their side effects (refetch, etc.).
           // Always wrapped, even without a consumer hook: a success must be
           // recorded either way, or it could not make older answers stale.
           onSuccess: (response) => {
+            options.onStoreWrite?.(response, params)
             if (!isFreshForTarget()) return
             if (target != null) lastWrittenByTarget.set(target, sequence)
             options.onSuccess?.(response, params)
