@@ -3,8 +3,25 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { Editor } from '@tiptap/core'
+import { OrderedList } from '@tiptap/extension-list'
+import { ref, nextTick, createApp, defineComponent } from 'vue'
 import { RichTextKit } from '../../kits'
 import { StarterKit } from '../../extensions'
+import { useEditor } from '../../useEditor'
+
+/** Mount `useEditor` the way a consumer does, without rendering EditorContent. */
+function mountUseEditor(content: ReturnType<typeof ref<string>>) {
+  let editor: ReturnType<typeof useEditor> | null = null
+  createApp(
+    defineComponent({
+      setup() {
+        editor = useEditor({ content, extensions: [StarterKit] })
+        return () => null
+      },
+    }),
+  ).mount(document.createElement('div'))
+  return editor!
+}
 
 function editorWith(content: string) {
   return new Editor({ extensions: [StarterKit], content })
@@ -179,6 +196,73 @@ describe('ListJoin', () => {
       content: '<ol><li><p>a</p></li></ol>',
     })
     expect(editor.commands.joinAdjacentLists()).toBe(false)
+  })
+
+  it('repairs content written through the useEditor ref, still unmounted', async () => {
+    const split = '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>'
+    const content = ref('<p>start</p>')
+    const editor = mountUseEditor(content)
+    expect(editor.value!.state.plugins).toHaveLength(0)
+
+    content.value = split
+    await nextTick()
+
+    const lists = editor
+      .value!.getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].content).toHaveLength(2)
+  })
+
+  it('leaves the document alone when the command is only probed', () => {
+    const editor = new Editor({
+      extensions: [StarterKit],
+      element: null,
+      content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
+    })
+    expect(editor.can().joinAdjacentLists()).toBe(true)
+    // A probe shares its transaction with the rest of a can().chain(), so it
+    // must not join: later commands would be tested against the merged doc.
+    expect(
+      editor.getJSON().content!.filter((n) => n.type === 'orderedList'),
+    ).toHaveLength(2)
+  })
+
+  it('merges list nodes whose attributes are deep-equal objects', () => {
+    const ListWithObjectAttr = OrderedList.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          meta: {
+            default: null,
+            parseHTML: (element: HTMLElement) => {
+              const raw = element.getAttribute('data-meta')
+              return raw ? JSON.parse(raw) : null
+            },
+            renderHTML: (attributes: { meta?: unknown }) =>
+              attributes.meta
+                ? { 'data-meta': JSON.stringify(attributes.meta) }
+                : {},
+          },
+        }
+      },
+    })
+    const list = '<ol data-meta=\'{"a":1}\'><li><p>x</p></li></ol>'
+    const editor = new Editor({
+      extensions: [
+        StarterKit.configure({ orderedList: false }),
+        ListWithObjectAttr,
+      ],
+      element: null,
+      content: list + list,
+    })
+    editor.commands.joinAdjacentLists()
+
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].attrs!.meta).toEqual({ a: 1 })
   })
 
   it('finds list nodes by their schema group, not by name', () => {

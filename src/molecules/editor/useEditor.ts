@@ -147,6 +147,10 @@ export function useEditor(
             ? { emitUpdate: false, contentType: 'markdown' }
             : { emitUpdate: false },
         )
+        // Same reason as at construction: while unmounted there are no
+        // plugins, so nothing normalizes what `setContent` just parsed.
+        // No-op when there is nothing to join.
+        editor.value.commands.joinAdjacentLists?.()
       } finally {
         applyingExternalUpdate = false
       }

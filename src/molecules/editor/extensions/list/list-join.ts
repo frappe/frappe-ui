@@ -32,15 +32,9 @@ function isJoinablePair(
   after: ProseMirrorNode,
   listTypes: Set<NodeType>,
 ): boolean {
-  if (before.type !== after.type || !listTypes.has(before.type)) return false
-  const keys = new Set([
-    ...Object.keys(before.attrs),
-    ...Object.keys(after.attrs),
-  ])
-  for (const key of keys) {
-    if (before.attrs[key] !== after.attrs[key]) return false
-  }
-  return true
+  // sameMarkup deep-compares attributes, so a list node with an object or
+  // array attribute still merges with its twin.
+  return listTypes.has(before.type) && before.sameMarkup(after)
 }
 
 /** Absolute positions of every boundary between two joinable sibling lists. */
@@ -63,26 +57,26 @@ function collectJoinPositions(
 }
 
 /**
+ * Boundaries in `doc` where two adjacent same-kind lists can be joined,
+ * ordered back-to-front so applying them leaves the earlier ones valid.
+ */
+function joinablePositions(doc: ProseMirrorNode, schema: Schema): number[] {
+  const listTypes = listTypesIn(schema)
+  if (listTypes.size === 0) return []
+
+  const positions: number[] = []
+  collectJoinPositions(doc, 0, listTypes, positions)
+  return positions.sort((a, b) => b - a).filter((pos) => canJoin(doc, pos))
+}
+
+/**
  * Merge every pair of adjacent same-kind lists in `tr.doc`. Returns whether
  * anything was joined.
  */
 function joinAdjacentListsIn(tr: Transaction, schema: Schema): boolean {
-  const listTypes = listTypesIn(schema)
-  if (listTypes.size === 0) return false
-
-  const positions: number[] = []
-  collectJoinPositions(tr.doc, 0, listTypes, positions)
-  if (positions.length === 0) return false
-
-  // Join back-to-front so each join leaves the earlier positions valid.
-  let joined = false
-  for (const pos of positions.sort((a, b) => b - a)) {
-    if (canJoin(tr.doc, pos)) {
-      tr.join(pos)
-      joined = true
-    }
-  }
-  return joined
+  const positions = joinablePositions(tr.doc, schema)
+  for (const pos of positions) tr.join(pos)
+  return positions.length > 0
 }
 
 declare module '@tiptap/core' {
@@ -115,13 +109,18 @@ export const ListJoin = Extension.create({
       joinAdjacentLists:
         () =>
         ({ tr, dispatch }) => {
-          if (!joinAdjacentListsIn(tr, tr.doc.type.schema)) return false
-          if (dispatch) {
-            // Repairing a document on open is not the user's edit: keep it out
-            // of the `update` event and out of the undo stack. The `transaction`
-            // event still fires — dirty-tracking should listen to `update`.
-            tr.setMeta('preventUpdate', true).setMeta('addToHistory', false)
-          }
+          // Answer without touching `tr` when this is only a probe: a
+          // `can().chain()` shares one transaction, so joining here would test
+          // every later command against an already-joined document.
+          const positions = joinablePositions(tr.doc, tr.doc.type.schema)
+          if (positions.length === 0) return false
+          if (!dispatch) return true
+
+          for (const pos of positions) tr.join(pos)
+          // Repairing a document on open is not the user's edit: keep it out
+          // of the `update` event and out of the undo stack. The `transaction`
+          // event still fires — dirty-tracking should listen to `update`.
+          tr.setMeta('preventUpdate', true).setMeta('addToHistory', false)
           return true
         },
     }
