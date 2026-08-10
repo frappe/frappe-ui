@@ -22,6 +22,11 @@ function stubSystemScheme(prefersDark: boolean) {
   return listeners
 }
 
+/** Advance one animation frame, so the double-rAF restore can be stepped. */
+function nextFrame() {
+  return new Promise((resolve) => requestAnimationFrame(resolve))
+}
+
 beforeEach(() => {
   _resetColorScheme()
   localStorage.clear()
@@ -116,5 +121,60 @@ describe('useColorScheme', () => {
     listeners.forEach((fn) => fn())
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+  })
+
+  describe('muting transitions across the swap', () => {
+    it('mutes transitions in the same tick that data-theme changes', () => {
+      const { setColorScheme } = useColorScheme()
+
+      setColorScheme('dark')
+
+      expect(document.documentElement.classList.contains('no-transition')).toBe(
+        true,
+      )
+    })
+
+    it('keeps them muted through the frame that paints the new theme', async () => {
+      const { setColorScheme } = useColorScheme()
+
+      setColorScheme('dark')
+      await nextFrame()
+
+      expect(document.documentElement.classList.contains('no-transition')).toBe(
+        true,
+      )
+    })
+
+    it('restores transitions once that paint is past', async () => {
+      const { setColorScheme } = useColorScheme()
+
+      setColorScheme('dark')
+      await nextFrame()
+      await nextFrame()
+
+      expect(document.documentElement.classList.contains('no-transition')).toBe(
+        false,
+      )
+    })
+
+    it('a second swap mid-flight holds the mute open for its own paint', async () => {
+      const { setColorScheme } = useColorScheme()
+
+      setColorScheme('dark')
+      await nextFrame()
+      // Lands while the first swap's restore is one frame from firing: without
+      // the cancel, that stale frame would unmute before this swap paints.
+      setColorScheme('light')
+      await nextFrame()
+
+      expect(document.documentElement.classList.contains('no-transition')).toBe(
+        true,
+      )
+
+      await nextFrame()
+      expect(document.documentElement.classList.contains('no-transition')).toBe(
+        false,
+      )
+    })
   })
 })

@@ -60,16 +60,29 @@ export function resolvedColorScheme(): ResolvedColorScheme {
   return resolveSystemScheme()
 }
 
+// The pending frame that restores transitions, so a second swap arriving mid-
+// flight can cancel it rather than uncover its own repaint. Null when idle.
+let resumeTransitionsFrame: number | null = null
+
 function applyColorScheme(scheme: ColorScheme): void {
   if (!isBrowser) return
   const resolved = scheme === 'system' ? resolveSystemScheme() : scheme
 
+  // Components across the library transition their colors, so flipping
+  // `data-theme` cross-fades every surface on screen at once — a visible
+  // flash. `.no-transition` (see src/style.css) mutes them for the swap.
   document.documentElement.classList.add('no-transition')
   document.documentElement.setAttribute(DOM_ATTRIBUTE, resolved)
 
-  // Double rAF: wait for the no-transition css to paint before re-enabling transitions
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
+  // Two frames, not one: the first callback still runs before the repaint that
+  // lands the new `data-theme`, so unmuting there would restore transitions in
+  // time to animate the very swap being hidden. The second is past that paint.
+  if (resumeTransitionsFrame !== null) {
+    cancelAnimationFrame(resumeTransitionsFrame)
+  }
+  resumeTransitionsFrame = requestAnimationFrame(() => {
+    resumeTransitionsFrame = requestAnimationFrame(() => {
+      resumeTransitionsFrame = null
       document.documentElement.classList.remove('no-transition')
     })
   })
@@ -130,4 +143,10 @@ export function useColorScheme(): {
 export function _resetColorScheme() {
   initialized = false
   currentScheme.value = 'light'
+  if (!isBrowser) return
+  if (resumeTransitionsFrame !== null) {
+    cancelAnimationFrame(resumeTransitionsFrame)
+    resumeTransitionsFrame = null
+  }
+  document.documentElement.classList.remove('no-transition')
 }
