@@ -785,7 +785,8 @@ function main() {
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
-      console.error('   Delete the marker only to re-run the shift on purpose.\n')
+      console.error('   Delete the marker only to re-run the shift on purpose.')
+      console.error('   If the marker sits under a vendored package, run the codemod per package root instead.\n')
       process.exit(1)
     }
     if (marker) {

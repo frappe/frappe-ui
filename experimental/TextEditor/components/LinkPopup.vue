@@ -14,7 +14,7 @@
     />
     <a
       v-else
-      class="text-ink-gray-700 underline text-sm flex-1 truncate pl-1"
+      class="text-ink-gray-7 underline text-sm flex-1 truncate pl-1"
       :title="_href"
       :href="_href"
       target="_blank"
