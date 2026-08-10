@@ -50,7 +50,11 @@ function buildCode(v: Record<string, any>) {
     ...attrs.map((a) => '  ' + a),
     '>',
     '  <template #panel="{ tab }">',
-    '    <div class="p-4 text-ink-gray-7">{{ tab.label }} content</div>',
+    '    <div class="' +
+      (v.vertical ? 'ms-3 flex-1' : 'mt-3') +
+      ' rounded-lg border border-outline-gray-1 p-4 text-ink-gray-7">',
+    '      {{ tab.label }} content',
+    '    </div>',
     '  </template>',
     '</Tabs>',
   ].join('\n')
@@ -66,10 +70,7 @@ function tabsFor(icons: boolean) {
 <template>
   <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="220px">
     <template #preview="{ values }">
-      <div
-        class="w-full max-w-md overflow-hidden rounded-lg border border-outline-gray-1"
-        :class="values.vertical ? 'h-[200px]' : 'h-[160px]'"
-      >
+      <div class="w-full max-w-md">
         <Tabs
           :tabs="tabsFor(values.icons)"
           :variant="values.variant"
@@ -77,7 +78,10 @@ function tabsFor(icons: boolean) {
           :vertical="values.vertical"
         >
           <template #panel="{ tab }">
-            <div class="p-4 text-base text-ink-gray-7">
+            <div
+              class="min-h-[80px] rounded-lg border border-outline-gray-1 p-4 text-base text-ink-gray-7"
+              :class="values.vertical ? 'ms-3 flex-1' : 'mt-3'"
+            >
               {{ tab.label }} content
             </div>
           </template>
