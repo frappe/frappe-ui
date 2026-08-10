@@ -7,7 +7,7 @@ import {
   toValue,
 } from 'vue'
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
-import { useFrappeFetch } from '../useFrappeFetch'
+import { getDispatchStamp, useFrappeFetch } from '../useFrappeFetch'
 import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
@@ -89,11 +89,18 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
-        docStore.setDoc(doc)
+        // Versioned with the request's dispatch stamp, so a reload that an
+        // in-between write has overtaken cannot put the older doc back
+        // (#1017). The stamp's `record` is false for this GET: a read is
+        // admitted on its version but must not record — the server may
+        // answer it before an earlier-dispatched save commits, and recording
+        // here would gate that save's response out for good.
+        let stamp = getDispatchStamp(ctx.response)
+        docStore.setDoc(doc, stamp)
         if (transform) {
           doc = transform(doc)
         }
-        listStore.updateRow(doctype, ctx.data.data)
+        listStore.updateRow(doctype, ctx.data.data, stamp?.version)
         triggerSuccessCallbacks(doc)
       }
       return ctx
@@ -139,7 +146,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl,
     immediate: false,
     refetch: false,
-    onSuccess(data) {
+    onStoreWrite(data) {
       // Store the untransformed doc; the `doc` computed applies `transform` on
       // read. Transforming here too would run it twice (a bug for any
       // non-idempotent transform). Mirrors afterFetch.
@@ -155,7 +162,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl,
     immediate: false,
     refetch: false,
-    onSuccess() {
+    onStoreWrite() {
       docStore.removeDoc(doctype, toValue(name))
       listStore.removeRow(doctype, toValue(name))
     },
@@ -177,7 +184,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       try {
         value = transform(value as TDoc & { doctype: string })
       } catch (e) {
-        docStore.removeDoc(doctype, nameStr)
+        // Invalidate, not remove: the doc broke locally, the server still
+        // has it. `removeDoc`'s terminal stamp would reject an in-flight
+        // write that should repopulate the store.
+        docStore.invalidateDoc(doctype, nameStr)
         return null
       }
     }

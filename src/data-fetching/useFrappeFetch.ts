@@ -1,5 +1,5 @@
 import { createFetch } from '@vueuse/core'
-import { docStore } from './docStore'
+import { docStore, type DispatchStamp } from './docStore'
 import { listStore } from './useList/listStore'
 
 export class FrappeResponseError extends Error {
@@ -36,9 +36,44 @@ export class FrappeResponseError extends Error {
   }
 }
 
+// Every request takes a dispatch version from `docStore` when it is
+// dispatched, carried on its Response. The stores gate their writes on it: a
+// document is written only if no later-dispatched request has written it
+// already — without this, two concurrent writes to one document leave the
+// store on whichever response settled last (#1017). The bookkeeping lives in
+// `docStore`, so the docs side channel below and every store-writing hook
+// share one freshness domain.
+// `record` is whether the request mutates the server (anything but GET): only
+// mutating responses record their version in the store, a read is admitted on
+// its version but must not make an earlier-dispatched save stale.
+export type { DispatchStamp } from './docStore'
+
+const dispatchStamps = new WeakMap<Response, DispatchStamp>()
+
+/**
+ * The stamp put on a Response by the wrapped fetch below. The single source
+ * for both halves of the write-gate rule: the dispatch version and whether
+ * the response may record it. `undefined` for a Response that did not come
+ * through the wrapped fetch.
+ */
+export function getDispatchStamp(
+  response: Response | null | undefined,
+): DispatchStamp | undefined {
+  return response ? dispatchStamps.get(response) : undefined
+}
+
 export const useFrappeFetch = createFetch({
   options: {
-    fetch: (...args) => fetch(...args), // required for vitest
+    // Wrapping the global fetch is required for vitest, and stamps each
+    // response with its request's dispatch version.
+    fetch: (input, init) => {
+      const version = docStore.nextWriteVersion()
+      const record = (init?.method ?? 'GET').toUpperCase() !== 'GET'
+      return fetch(input, init).then((response) => {
+        dispatchStamps.set(response, { version, record })
+        return response
+      })
+    },
     beforeFetch({ options }) {
       options.headers = setHeaders(options.headers || {})
       return { options }
@@ -55,12 +90,21 @@ export const useFrappeFetch = createFetch({
         console.groupEnd()
       }
       if (responseData.docs) {
-        let docs = responseData.docs
-        for (let doc of docs) {
-          doc.name = doc.name.toString()
+        // A missing stamp means the response did not come from the wrapped
+        // fetch; treat it as the newest, and as recording. Unreachable today
+        // — every call site goes through the wrapped fetch — and it answers
+        // "no stamp" differently from `admitsWrite`, which treats an
+        // unstamped write as admitted-and-never-recording. Kept as the safer
+        // default for a docs payload (a mutation, in practice) if the fetch
+        // wrapper is ever bypassed. The stores gate per document. `setDocs`
+        // runs synchronously up to its IDB write, so its records are in
+        // place when `updateRows` checks them.
+        let stamp = getDispatchStamp(ctx.response) ?? {
+          version: docStore.nextWriteVersion(),
+          record: true,
         }
-        docStore.setDocs(docs)
-        listStore.updateRows(docs)
+        docStore.setDocs(responseData.docs, stamp)
+        listStore.updateRows(responseData.docs, stamp.version)
       }
       return ctx
     },
