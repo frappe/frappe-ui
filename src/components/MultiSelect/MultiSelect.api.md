@@ -228,14 +228,14 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the selection changes.',
-    type: '[value: (string | number)[]]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the selection changes.',
+    type: '[value: (string | number)[]]'
   },
   {
     name: 'update:query',

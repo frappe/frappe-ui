@@ -1,21 +1,19 @@
 import type { Component } from 'vue'
+import type { TabsSize, TabsVariant } from '../../Tabs/types'
 
-export type PillSize = 'sm' | 'md'
-export type PillVariant = 'default' | 'outline' | 'underline' | 'browser-tab'
 export type BrowserTabBase = 'none' | 'default' | 'left' | 'right'
 export type PillIcon = string | Component
 export type PillOrientation = 'horizontal' | 'vertical'
-export type PillActiveStyle = 'raised' | 'subtle'
 
 export interface PillProps {
   /** Text shown inside the pill. */
   label?: string | number
 
-  /** Visual variant. */
-  variant?: PillVariant
+  /** Visual variant, shared with TabList / TabButtons. */
+  variant?: TabsVariant
 
   /** Size of the pill. */
-  size?: PillSize
+  size?: TabsSize
 
   /** Active/selected state. */
   active?: boolean
@@ -29,15 +27,9 @@ export interface PillProps {
   /** Leading accent icon, rendered next to a visible label. */
   iconLeft?: PillIcon
 
-  /** Trailing accent icon, rendered next to a visible label. */
-  iconRight?: PillIcon
-
-  /** Browser-tab active edge shape. */
+  /** Browser-tab attached-edge shape. */
   browserTabBase?: BrowserTabBase
 
-  /** Axis used by underline tabs. */
+  /** Axis of the surrounding track. */
   orientation?: PillOrientation
-
-  /** Active treatment for default pills. */
-  activeStyle?: PillActiveStyle
 }

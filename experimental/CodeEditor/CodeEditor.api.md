@@ -15,7 +15,7 @@
     name: 'language',
     description: 'CodeMirror language key; falls through to plain text when unset/unknown.\nTyped as `CodeLanguage | (string & {})` so the known keys autocomplete\nwhile an arbitrary string still type-checks.',
     required: false,
-    type: 'CodeLanguage | (string & {})',
+    type: '(string & {}) | CodeLanguage',
     default: '"plain"'
   },
   {
@@ -93,13 +93,13 @@
 
   const codeEditorEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Live document text on every change — mirrors the textarea field contract.',
+    name: 'change',
+    description: 'Commit (blur). The field wrapper normalizes (e.g. JSON pretty-print) here.',
     type: '[value: string]'
   },
   {
-    name: 'change',
-    description: 'Commit (blur). The field wrapper normalizes (e.g. JSON pretty-print) here.',
+    name: 'update:modelValue',
+    description: 'Live document text on every change — mirrors the textarea field contract.',
     type: '[value: string]'
   },
   {
@@ -120,7 +120,7 @@
     name: 'language',
     description: 'Only `markdown` / `html` render a preview; anything else renders nothing.',
     required: false,
-    type: 'CodeLanguage | (string & {})'
+    type: '(string & {}) | CodeLanguage'
   }
 ]
 </script>

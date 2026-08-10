@@ -178,11 +178,6 @@
 
   const datePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -190,6 +185,11 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   }
 ]
@@ -375,11 +375,6 @@
 
   const dateRangePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: DateRangeValue]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -387,6 +382,11 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
+    type: '[value: DateRangeValue]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: DateRangeValue]'
   }
 ]
@@ -572,11 +572,6 @@
 
   const dateTimePickerEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -584,6 +579,11 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   }
 ]

@@ -5,7 +5,7 @@ import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
   {
-    name: 'type',
+    name: 'variant',
     type: 'tabs',
     default: 'subtle',
     options: [
@@ -51,7 +51,7 @@ const countByValue: Record<string, number> = {
 
 function buildCode(v: Record<string, any>) {
   const attrs = [`v-model="tab"`, `:options="options"`]
-  if (v.type !== 'subtle') attrs.push(`type="${v.type}"`)
+  if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.vertical) attrs.push('vertical')
 
@@ -90,13 +90,13 @@ function buildCode(v: Record<string, any>) {
       <TabButtons
         v-model="modelValue"
         :options="options"
-        :type="values.type"
+        :variant="values.variant"
         :size="values.size"
         :vertical="values.vertical"
       >
         <template v-if="values.prefix" #prefix="{ button }">
           <span
-            :class="iconByValue[String(button.modelValue)]"
+            :class="iconByValue[String(button.value)]"
             class="size-4 shrink-0"
           />
         </template>
@@ -104,7 +104,7 @@ function buildCode(v: Record<string, any>) {
           <span
             class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
           >
-            {{ countByValue[String(button.modelValue)] }}
+            {{ countByValue[String(button.value)] }}
           </span>
         </template>
       </TabButtons>
