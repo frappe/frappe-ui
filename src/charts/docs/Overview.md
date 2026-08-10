@@ -49,6 +49,16 @@ Every chart shares the same
 [loading, error and empty states](/docs/charts/states), and they compose into a
 [dashboard](/docs/charts/dashboard) without extra chrome.
 
+## The chrome
+
+The pieces every chart is built from. Compose them yourself for a plot the
+library does not draw — see [Custom charts](#custom-charts).
+
+- [ChartCard](/docs/charts/chartcard) — the card surface
+- [ChartContainer](/docs/charts/chartcontainer) — title block, axis titles, states
+- [ChartLegend](/docs/charts/chartlegend) — the row of series names
+- [ChartTooltip](/docs/charts/charttooltip) — the reading beside the pointer
+
 ## Custom charts
 
 A chart has two layers. The plot is echarts inside a box. The chrome is
