@@ -1,4 +1,4 @@
-import { dayjs } from '../../utils/dayjs'
+import { dayjs } from '#utils/dayjs'
 
 export function formatLabel(name: string) {
   return name

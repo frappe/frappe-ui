@@ -12,12 +12,13 @@ The API itself is documented on the docs site. The shape it takes is
 [ADR-0014](./adr/0014-flat-props-name-columns.md). What the current family
 admits and refuses is [ADR-0015](./adr/0015-what-enters-charts.md).
 
-The conventions govern `frappe-ui/charts` only. The chart exports at the package
-root are the earlier family. They keep working through the betas and go before
-`1.0.0`. The current family covers everything they did, so a shim would only be
-a deprecated export that [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md)
-keeps out of the release.
-[#942](https://github.com/frappe/frappe-ui/issues/942) tracks the removal.
+The conventions govern `frappe-ui/charts` only. The earlier family used to sit
+at the package root. It is parked on `frappe-ui/experimental`
+([#942](https://github.com/frappe/frappe-ui/issues/942), P14) with its API
+unchanged, as an interim import path while apps migrate. It is not a shim: a
+deprecated root export is what
+[ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md) keeps out of the
+release, and the current family covers everything the earlier one drew.
 
 ## The conventions
 

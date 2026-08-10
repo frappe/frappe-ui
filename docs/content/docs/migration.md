@@ -830,6 +830,38 @@ and the types `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
 `GroupedCalendarEvents`. Nothing about the component itself changed — only
 where it's imported from.
 
+## Charts (v1) — moved to `frappe-ui/experimental`
+
+The first chart family is not core v1 surface. `AxisChart`, `DonutChart`,
+`ECharts`, `FunnelChart`, `NumberChart` and `useAxisChartOptions` move out of
+the root export to `frappe-ui/experimental` (P14 — no stability promise) and
+park there, API unchanged, while apps migrate. The import fails at the root;
+switch the subpath:
+
+```ts
+// Before
+import { AxisChart, DonutChart, NumberChart } from 'frappe-ui'
+
+// After
+import { AxisChart, DonutChart, NumberChart } from 'frappe-ui/experimental'
+```
+
+Nothing about the components changed — only where they're imported from. Apps
+that spread `content` from `frappe-ui/tailwind` keep their styles
+automatically.
+
+For new code, use [`frappe-ui/charts`](/docs/charts/overview) instead. It is
+the replacement family and draws everything the old one did. Its props are
+flat and name the columns of your rows, so a `config` object becomes props:
+
+```vue
+<!-- Before -->
+<AxisChart :config="{ data: rows, xAxis: { key: 'week' }, series: [{ name: 'balance', type: 'area' }] }" />
+
+<!-- After -->
+<AreaChart :data="rows" x="week" y="balance" />
+```
+
 ## Sprite icons — moved to `frappe-ui/experimental`
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1

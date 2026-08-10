@@ -50,8 +50,8 @@ No API change. Behavior changes if you relied on it:
 
 ### Charts — a new family at `frappe-ui/charts`
 
-A second chart family ships alongside the one at the package root. It is
-additive: the root chart exports keep working and nothing here removes them.
+The chart family for v1. It replaces the one that used to sit at the package
+root, which is parked on `frappe-ui/experimental` (see the next entry).
 Import the components from `frappe-ui/charts`, which carries the `--chart-*`
 color tokens with it. `spec/charts.md` states the conventions, and
 `spec/adr/0015-what-enters-charts.md` records what the family admits.
@@ -116,6 +116,22 @@ Changed since `1.0.0-beta.41`, the first beta that shipped the family:
   each format helper hardcodes `en-US`. Read the plot-area colors with
   `useChartTokens`, which re-resolves on a theme flip; `currentColorScheme` was
   the root `resolvedColorScheme` under another name.
+
+### Charts (v1) family — moved to `frappe-ui/experimental` (breaking)
+
+The first chart family is not taken to bar at root for `1.0.0` (#942).
+It parks on `frappe-ui/experimental` (P14 — no stability promise) with its
+public API unchanged, while apps migrate to `frappe-ui/charts`, which draws
+everything it did.
+
+- **Breaking, loud:** `import { AxisChart, ... } from 'frappe-ui'` fails to
+  resolve. Import from `frappe-ui/experimental` instead: `AxisChart`,
+  `DonutChart`, `ECharts`, `FunnelChart`, `NumberChart` and
+  `useAxisChartOptions`. Migration is the import-path change only. Apps that
+  spread `content` from `frappe-ui/tailwind` keep the styles automatically.
+- For new code, use `frappe-ui/charts`. Its props are flat and name the
+  columns of your rows, so a `config` object becomes props — see the
+  [migration guide](/docs/migration).
 
 ### Calendar family — moved to `frappe-ui/experimental` (breaking)
 

@@ -134,8 +134,8 @@ Hierarchical lists.
 ### `Calendar`
 Month/week calendar view.
 
-### `Charts`
-Chart family (line, bar, etc.) wrapping ECharts/Frappe Charts.
+### `Charts` (`frappe-ui/charts`)
+Chart family built on ECharts: `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `FunnelChart`, `HeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome (`ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`). Props are flat and name the columns of your rows (`:data`, `x`, `y`). The older root chart exports (`AxisChart`, `ECharts`, ...) are parked on `frappe-ui/experimental` — do not use them in new code.
 
 ### `Editor` (`frappe-ui/editor`)
 TipTap-based rich text: `Editor` + `EditorFixedMenu` + `RichTextKit`. Heavy, and not SSR-safe.

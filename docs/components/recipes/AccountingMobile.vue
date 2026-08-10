@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import {
-  AxisChart,
   Avatar,
   Button,
   MobileNav,
@@ -11,6 +10,7 @@ import {
   ScrollArea,
   TabButtons,
 } from 'frappe-ui'
+import { AreaChart } from 'frappe-ui/charts'
 import { List, ListCell, ListRow } from 'frappe-ui/list'
 
 // Bottom-tab sections. The same four screens as the desktop recipe, re-laid
@@ -32,26 +32,23 @@ const currency = (n) =>
     maximumFractionDigits: 2,
   })}`
 
+// Axis labels and tooltip: whole dollars, sign before the symbol.
+const compactCurrency = (n) =>
+  `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString('en-US')}`
+
 /* -- Cashflow ------------------------------------------------------------- */
 
-const cashflow = {
-  data: [
-    { week: new Date('2026-03-16'), balance: 11800 },
-    { week: new Date('2026-03-23'), balance: 2400 },
-    { week: new Date('2026-03-30'), balance: 16400 },
-    { week: new Date('2026-04-06'), balance: 9800 },
-    { week: new Date('2026-04-13'), balance: 20100 },
-    { week: new Date('2026-04-20'), balance: 14081 },
-    { week: new Date('2026-04-27'), balance: 6200 },
-    { week: new Date('2026-05-04'), balance: -3900 },
-    { week: new Date('2026-05-11'), balance: -1518 },
-  ],
-  title: 'Cashflow',
-  subtitle: 'Weekly balance',
-  xAxis: { key: 'week', type: 'time', timeGrain: 'week' },
-  yAxis: { prefix: '$' },
-  series: [{ name: 'balance', type: 'area' }],
-}
+const cashflow = [
+  { week: new Date('2026-03-16'), balance: 11800 },
+  { week: new Date('2026-03-23'), balance: 2400 },
+  { week: new Date('2026-03-30'), balance: 16400 },
+  { week: new Date('2026-04-06'), balance: 9800 },
+  { week: new Date('2026-04-13'), balance: 20100 },
+  { week: new Date('2026-04-20'), balance: 14081 },
+  { week: new Date('2026-04-27'), balance: 6200 },
+  { week: new Date('2026-05-04'), balance: -3900 },
+  { week: new Date('2026-05-11'), balance: -1518 },
+]
 
 const cashflowStats = [
   { label: 'Todays balance', value: 14081.09 },
@@ -179,7 +176,16 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
     <!-- Cashflow ------------------------------------------------------------>
     <div v-if="section === 'cashflow'" class="space-y-4 px-4 pb-6 pt-3">
       <div class="h-52 overflow-hidden rounded-6 border bg-surface-base p-3">
-        <AxisChart :config="cashflow" />
+        <AreaChart
+          :data="cashflow"
+          x="week"
+          y="balance"
+          title="Cashflow"
+          subtitle="Weekly balance"
+          :x-axis="{ type: 'time', timeGrain: 'week' }"
+          :y-axis="{ format: (value) => compactCurrency(value) }"
+          :series-config="{ balance: { label: 'Balance' } }"
+        />
       </div>
 
       <div class="grid grid-cols-2 gap-3">

@@ -27,7 +27,7 @@ function glob(pattern) {
 // `experimental/**` is deliberately excluded: frappe-ui/experimental carries
 // no P14 promise and first-party consumers are told not to depend on it, so
 // it isn't part of the supported public content contract this list covers.
-// Two explicit exceptions, both migration parking spots for previously
+// The explicit exceptions are migration parking spots for previously
 // supported surfaces, covered until they are removed:
 // - `experimental/SpriteIcons` (moved out of `frappe-ui/icons` in #904;
 //   IconPicker emits classes)
@@ -36,6 +36,8 @@ function glob(pattern) {
 //   `frappe-ui/editor`)
 // - `experimental/Calendar` (a supported root surface until #1020, parked
 //   with its API unchanged until a redesigned calendar family replaces it)
+// - `experimental/Charts` (the v1 chart family, a supported root surface
+//   until #942, parked while apps migrate to `frappe-ui/charts`)
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:
@@ -49,4 +51,5 @@ export const content = [
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/Calendar/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/Charts/**/*.{vue,js,ts,jsx,tsx}'),
 ]
