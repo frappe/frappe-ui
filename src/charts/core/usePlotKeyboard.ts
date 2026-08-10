@@ -160,6 +160,9 @@ export function usePlotKeyboard<T>(
 
   function onKeydown(event: KeyboardEvent) {
     if (!count.value) return
+    // A held modifier makes the key someone else's: Alt or Cmd with an arrow is
+    // browser back, Ctrl with Home or End is the top or the bottom of the page.
+    if (event.ctrlKey || event.metaKey || event.altKey) return
 
     switch (event.key) {
       case 'ArrowRight':

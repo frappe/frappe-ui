@@ -82,6 +82,27 @@ describe('usePlotKeyboard', () => {
     expect(plot.cleared).toEqual([0])
   })
 
+  // Alt or Cmd with an arrow is browser back, Ctrl with Home is the top of the
+  // page. The plot answers none of them and keeps its hands off the event.
+  it('leaves a key with a modifier held to the browser', () => {
+    const plot = setup()
+    plot.focus()
+    const handlers = () => plot.keyboard.attrs.value as Record<string, any>
+    for (const modifier of ['altKey', 'metaKey', 'ctrlKey']) {
+      const event = {
+        key: 'ArrowRight',
+        [modifier]: true,
+        prevented: false,
+        preventDefault() {
+          event.prevented = true
+        },
+      }
+      handlers().onKeydown(event)
+      expect(event.prevented).toBe(false)
+    }
+    expect(plot.keyboard.index.value).toBe(0)
+  })
+
   it('holds no cursor to clear after Escape', () => {
     const plot = setup()
     plot.focus()
