@@ -9,17 +9,17 @@ const tabs = [
   {
     value: 'discussions',
     label: 'Discussions',
-    content: 'Discussions for this project show up here.',
+    data: { content: 'Discussions for this project show up here.' },
   },
   {
     value: 'pages',
     label: 'Pages',
-    content: 'Pages for this project show up here.',
+    data: { content: 'Pages for this project show up here.' },
   },
   {
     value: 'tasks',
     label: 'Tasks',
-    content: 'Tasks for this project show up here.',
+    data: { content: 'Tasks for this project show up here.' },
     condition: () => showTasks.value,
   },
 ]
@@ -34,7 +34,7 @@ const tabs = [
       class="rounded-4 border p-2"
     >
       <template #panel="{ tab: t }">
-        <div class="p-4 text-base text-ink-gray-7">{{ t.content }}</div>
+        <div class="p-4 text-base text-ink-gray-7">{{ t.data?.content }}</div>
       </template>
     </Tabs>
     <Switch v-model="showTasks" label="Show the Tasks tab" />

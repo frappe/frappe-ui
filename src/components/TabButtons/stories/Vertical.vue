@@ -47,7 +47,7 @@ const iconButtons = [
         :options="navButtons"
         variant="browser-tab"
         vertical
-        direction="left"
+        side="left"
       />
     </div>
 

@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<TabButtonsProps>(), {
   variant: 'subtle',
   size: 'sm',
   vertical: false,
-  direction: 'left',
+  side: 'left',
   fluid: false,
 })
 
@@ -86,7 +86,7 @@ const rootClasses = computed(() => [
     variant: props.variant,
     size: props.size,
     orientation: props.vertical ? 'vertical' : 'horizontal',
-    direction: props.direction,
+    side: props.side,
   }),
 ])
 
@@ -213,7 +213,7 @@ watch(
 )
 
 const browserCardBase = computed<BrowserTabBase>(() =>
-  props.vertical ? props.direction : 'default',
+  props.vertical ? props.side : 'default',
 )
 
 const indicatorClasses = computed(() => [
@@ -244,7 +244,7 @@ const indicatorStyle = computed(() => {
 function browserTabBase(checked: boolean): BrowserTabBase {
   if (props.variant !== 'browser-tab') return 'none'
   if (!props.vertical) return 'default'
-  return checked ? props.direction : 'default'
+  return checked ? props.side : 'default'
 }
 
 function hasLabel(label: TabButton['label']) {

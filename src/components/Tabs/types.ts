@@ -4,7 +4,7 @@ import type { RouteLocationRaw } from 'vue-router'
 export type TabValue = string | number
 export type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 export type TabsSize = 'sm' | 'md'
-export type TabsDirection = 'left' | 'right'
+export type TabsSide = 'left' | 'right'
 
 /** A `lucide-*` class string or a Vue component. */
 export type TabIcon = string | Component
@@ -42,7 +42,7 @@ export interface TabListProps {
   size?: TabsSize
 
   /** browser-tab + vertical only: which edge the tabs attach to. */
-  direction?: TabsDirection
+  side?: TabsSide
 }
 
 export interface TabTriggerProps {
@@ -79,6 +79,10 @@ export interface TabItem {
   route?: RouteLocationRaw
   /** Item renders only while this returns true. */
   condition?: () => boolean
-  /** Extra app-defined fields pass through to slot props unchanged. */
-  [key: string]: any
+  /**
+   * App-defined extras, passed to the shorthand slots as `tab.data`. Fields
+   * live here rather than on the item itself so a misspelled `label` or
+   * `route` is still a type error.
+   */
+  data?: Record<string, unknown>
 }

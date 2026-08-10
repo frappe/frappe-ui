@@ -27,7 +27,7 @@ const slots = defineSlots<{
   /** Shorthand mode: leading content in every generated trigger. */
   prefix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: replaces the label region of every generated trigger. */
-  tab?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  label?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: trailing content in every generated trigger. */
   suffix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: panel body for the selected tab. */
@@ -42,7 +42,7 @@ if (import.meta.env.DEV) {
       if (conflict && !warned) {
         warned = true
         console.warn(
-          '[frappe-ui] Tabs: default-slot children are not supported when `tabs` is set. Use the shorthand slots (#prefix/#tab/#suffix/#panel) or drop the `tabs` prop.',
+          '[frappe-ui] Tabs: default-slot children are not supported when `tabs` is set. Use the shorthand slots (#prefix/#label/#suffix/#panel) or drop the `tabs` prop.',
         )
       }
     },
@@ -209,8 +209,8 @@ const visibleTabs = computed(() =>
           <template v-if="slots.prefix" #prefix="triggerSlotProps">
             <slot name="prefix" :tab="tab" v-bind="triggerSlotProps" />
           </template>
-          <template v-if="slots.tab" #default="triggerSlotProps">
-            <slot name="tab" :tab="tab" v-bind="triggerSlotProps" />
+          <template v-if="slots.label" #default="triggerSlotProps">
+            <slot name="label" :tab="tab" v-bind="triggerSlotProps" />
           </template>
           <template v-if="slots.suffix" #suffix="triggerSlotProps">
             <slot name="suffix" :tab="tab" v-bind="triggerSlotProps" />

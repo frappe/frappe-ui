@@ -52,7 +52,7 @@ A disabled trigger cannot be selected. Keyboard navigation skips it.
 
 ## Vertical browser tabs
 
-With `variant="browser-tab"` and a vertical root, `direction` sets the edge the
+With `variant="browser-tab"` and a vertical root, `side` sets the edge the
 tabs attach to.
 
 <ComponentPreview name="Tabs-VerticalBrowserTab" />
@@ -79,6 +79,10 @@ For generated tab sets, pass a `tabs` array and the component renders the parts
 itself. An item with a `condition` renders only while the function returns true.
 When the selected tab disappears, the component selects the first visible
 trigger and emits `update:modelValue`.
+
+The `#prefix`, `#label`, `#suffix`, and `#panel` slots shape every generated
+tab; each one receives its item as `tab`. Put app-defined extras in the item's
+`data` field and read them as `tab.data`.
 
 <ComponentPreview name="Tabs-Shorthand" />
 

@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import type {
-  TabsDirection,
+  TabsSide,
   TabsSize,
   TabsVariant,
   TabValue,
@@ -42,7 +42,7 @@ export interface TabButtonsProps {
   vertical?: boolean
 
   /** Edge the active browser tab attaches to. Only used when `variant='browser-tab'` and `vertical`. */
-  direction?: TabsDirection
+  side?: TabsSide
 
   /** Buttons stretch to fill the container width. */
   fluid?: boolean

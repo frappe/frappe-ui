@@ -179,11 +179,6 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
@@ -202,6 +197,11 @@
     name: 'close',
     description: 'Fired when the component closes.',
     type: '[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
   },
   {
     name: 'input-invalid',

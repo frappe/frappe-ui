@@ -72,7 +72,7 @@ styles them directly. A `tabs` shorthand remains for generated tab sets.
 type TabValue = string | number
 type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 type TabsSize = 'sm' | 'md'
-type TabsDirection = 'left' | 'right'
+type TabsSide = 'left' | 'right'
 ```
 
 ### `Tabs` (root)
@@ -118,17 +118,17 @@ interface TabListProps {
   variant?: TabsVariant
   size?: TabsSize
   /** browser-tab + vertical only: which edge the tabs attach to. */
-  direction?: TabsDirection
+  side?: TabsSide
 }
 ```
 
-Defaults: `variant = 'underline'`, `size = 'sm'`, `direction = 'left'`.
+Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
 
 - `TabList` renders one element the app can style directly: padding, gap,
   borders, and visibility belong to the call site. The v0
   `[&_[role='tablist']]` selectors and the hidden-tablist hack are no longer
   needed
-- every variant supports both orientations. `direction` applies only when
+- every variant supports both orientations. `side` applies only when
   `variant = 'browser-tab'` and the root is `vertical`, matching v0
   `TabButtons`
 - `underline` renders the animated active indicator; `subtle` renders raised
@@ -206,7 +206,7 @@ interface TabItem {
   disabled?: boolean
   route?: RouteLocationRaw
   condition?: () => boolean
-  [key: string]: any
+  data?: Record<string, unknown>
 }
 ```
 
@@ -214,7 +214,7 @@ Shorthand slots:
 
 - `#prefix="{ tab, selected, disabled }"` / `#suffix="{ ... }"` — forwarded
   into every generated trigger
-- `#tab="{ tab, selected, disabled }"` — replaces the label region of every
+- `#label="{ tab, selected, disabled }"` — replaces the label region of every
   generated trigger
 - `#panel="{ tab }"` — the panel body for the selected tab
 
@@ -223,7 +223,9 @@ Rules:
 - `condition()` is evaluated before rendering; items that return false are
   omitted. The model fallback rule above handles the selected tab
   disappearing
-- extra app-defined fields pass through to slot props unchanged
+- app-defined extras go in `data` and reach the slots as `tab.data`. The item
+  itself takes no unknown keys, so a misspelled `label` or `route` is a type
+  error instead of silent passthrough
 - shorthand and composed children are mutually exclusive; when `tabs` is set,
   default-slot `TabList`/`TabPanel` children are not supported
 
@@ -250,7 +252,7 @@ computed.
 `TabButtons` stays a separate component with radiogroup semantics. It is a
 value input, not a panel switcher. The two share:
 
-- `TabValue`, `TabsVariant`, `TabsSize`, `TabsDirection`
+- `TabValue`, `TabsVariant`, `TabsSize`, `TabsSide`
 - the item vocabulary: `value` (required), `label`, `icon`, `iconLeft`,
   `disabled`
 - trigger visuals: at the same `variant` and `size`, a `TabButtons` and a
@@ -332,7 +334,23 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
   story, doc, or Figma usage pattern used `iconRight` — trailing content on a
   tab is a count or a badge, which `#suffix` already carries, and `#suffix`
   reaches shorthand mode too. `iconLeft` stays: leading icons are a real
-  pattern, and `TabItem` is a data array a slot cannot reach into.
+  pattern, and a one-line item field beats a slot for the common case. (The
+  first version of this note said a slot could not read a `TabItem`. That was
+  wrong — `#prefix` receives `{ tab }`. `iconLeft` stays on ergonomics alone.)
+
+### 2026-08-10 (vocabulary)
+
+- **`direction` is now `side`** on `TabList` and `TabButtons`; `TabsDirection`
+  is `TabsSide`. `direction` sat one letter from `dir` (`ltr`/`rtl`) in the
+  same family, and `side` is the word the library already uses for an edge.
+- **`TabItem` no longer takes unknown keys.** The `[key: string]: any` index
+  signature put `any` on the public surface and switched off typo checking for
+  every other field, so `{ value, lable }` type-checked. App extras move to
+  `data?: Record<string, unknown>` and reach the slots as `tab.data`.
+- **The shorthand label slot is `#label`**, not `#tab`. `#tab` read like it
+  rendered a whole tab; it replaces the label region only. `#prefix`/`#suffix`
+  keep their names — they are the same shared vocabulary the composed
+  `TabTrigger` uses.
 
 ### 2026-08-10 (track containment)
 

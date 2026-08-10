@@ -58,7 +58,7 @@
     type: '{ tab: TabItem; } & TabTriggerSlotProps'
   },
   {
-    name: 'tab',
+    name: 'label',
     description: 'Shorthand mode: replaces the label region of every generated trigger.',
     type: '{ tab: TabItem; } & TabTriggerSlotProps'
   },
@@ -98,10 +98,10 @@
     default: '"sm"'
   },
   {
-    name: 'direction',
+    name: 'side',
     description: 'browser-tab + vertical only: which edge the tabs attach to.',
     required: false,
-    type: 'TabsDirection',
+    type: 'TabsSide',
     default: '"left"'
   }
 ]

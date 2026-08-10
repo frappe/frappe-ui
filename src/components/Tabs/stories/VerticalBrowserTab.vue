@@ -17,7 +17,7 @@ const tabs = [
     <div class="flex flex-col gap-3">
       <div class="text-sm text-ink-gray-6">Attached left</div>
       <Tabs v-model="left" vertical class="flex">
-        <TabList variant="browser-tab" direction="left">
+        <TabList variant="browser-tab" side="left">
           <TabTrigger
             v-for="t in tabs"
             :key="t.value"
@@ -37,7 +37,7 @@ const tabs = [
         <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
           <div class="w-32 p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
         </TabPanel>
-        <TabList variant="browser-tab" direction="right">
+        <TabList variant="browser-tab" side="right">
           <TabTrigger
             v-for="t in tabs"
             :key="t.value"

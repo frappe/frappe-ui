@@ -39,10 +39,10 @@
     default: 'false'
   },
   {
-    name: 'direction',
+    name: 'side',
     description: 'Edge the active browser tab attaches to. Only used when `variant=\'browser-tab\'` and `vertical`.',
     required: false,
-    type: 'TabsDirection',
+    type: 'TabsSide',
     default: '"left"'
   },
   {

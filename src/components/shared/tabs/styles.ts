@@ -1,4 +1,4 @@
-import type { TabsDirection, TabsSize, TabsVariant } from '../../Tabs/types'
+import type { TabsSide, TabsSize, TabsVariant } from '../../Tabs/types'
 import type { BrowserTabBase, PillOrientation } from './pillTypes'
 
 // Single source of styling truth for tab tracks and triggers, shared by
@@ -18,9 +18,9 @@ export function tabTrackClasses(opts: {
   variant: TabsVariant
   size: TabsSize
   orientation: PillOrientation
-  direction: TabsDirection
+  side: TabsSide
 }): string[] {
-  const { variant, size, orientation, direction } = opts
+  const { variant, size, orientation, side } = opts
   const isSm = size === 'sm'
   const vertical = orientation === 'vertical'
 
@@ -48,7 +48,7 @@ export function tabTrackClasses(opts: {
       if (!vertical) return ['gap-1 border-b border-outline-gray-1']
       return [
         'gap-1',
-        direction === 'right'
+        side === 'right'
           ? 'border-r border-outline-gray-1'
           : 'border-l border-outline-gray-1',
       ]

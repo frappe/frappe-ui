@@ -968,7 +968,8 @@ See the [Tabs](./components/tabs) component page for the full API.
 | `:tabs="[{ label, icon }]"` (required)      | `<TabTrigger>` children; the `tabs` shorthand stays for generated sets     |
 | `label` implied the value                   | `value` is required on every trigger                                       |
 | `as="div"`                                  | removed — compose and style the container directly                         |
-| `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`) |
+| `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#label` in shorthand mode |
+| extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
 | `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children, or `#panel` in shorthand mode                |
 | `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
 | stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
