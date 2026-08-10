@@ -13,8 +13,11 @@ The API itself is documented on the docs site. The shape it takes is
 admits and refuses is [ADR-0015](./adr/0015-what-enters-charts.md).
 
 The conventions govern `frappe-ui/charts` only. The chart exports at the package
-root are the earlier family. They keep working through the betas, and nothing
-here schedules their removal.
+root are the earlier family. They keep working through the betas and go before
+`1.0.0`. The current family covers everything they did, so a shim would only be
+a deprecated export that [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md)
+keeps out of the release.
+[#1021](https://github.com/frappe/frappe-ui/issues/1021) tracks the removal.
 
 ## The conventions
 
