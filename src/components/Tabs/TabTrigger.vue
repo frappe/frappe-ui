@@ -47,6 +47,18 @@ const link = props.route
   ? useLink({ to: computed(() => props.route!) })
   : null
 
+if (import.meta.env.DEV) {
+  let warned = false
+  watchEffect(() => {
+    if (props.route && !link && !warned) {
+      warned = true
+      console.warn(
+        '[frappe-ui] TabTrigger: `route` was added after the trigger mounted. `useLink` can only run during setup, so this trigger cannot drive or follow route selection. Give it a `route` from the start, or re-mount it with a `:key`.',
+      )
+    }
+  })
+}
+
 const pillRef = ref<ComponentPublicInstance | null>(null)
 const el = computed<HTMLElement | null>(
   () => (pillRef.value?.$el as HTMLElement | undefined) ?? null,
@@ -56,7 +68,10 @@ const unregister = root?.register({
   value: () => props.value,
   disabled: () => !!props.disabled,
   el,
-  hasRoute: () => !!props.route,
+  // Report the captured link, not the current prop: a `route` added after
+  // setup has no `useLink`, so counting it would turn route mode on for a
+  // trigger that can never match.
+  hasRoute: () => link !== null,
   routeActive: link?.isActive,
   routeExactActive: link?.isExactActive,
 })
