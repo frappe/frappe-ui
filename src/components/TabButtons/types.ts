@@ -18,8 +18,6 @@ export interface TabButton {
   icon?: TabButtonIcon
   /** Leading accent icon, rendered next to the visible label. */
   iconLeft?: TabButtonIcon
-  /** Trailing accent icon, rendered next to the visible label. */
-  iconRight?: TabButtonIcon
   disabled?: boolean
   tooltip?: string
   class?: NativeButtonClass

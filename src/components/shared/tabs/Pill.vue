@@ -15,8 +15,8 @@ const props = withDefaults(defineProps<PillProps>(), {
 })
 
 // `icon` means icon-only intent (label, if provided, is rendered as
-// sr-only). `iconLeft`/`iconRight` are accent icons next to a visible
-// label. This matches Button's semantics.
+// sr-only). `iconLeft` is an accent icon next to a visible label. Trailing
+// content is the `#suffix` slot's job — counts and badges, not glyphs.
 const isIconOnly = computed(() => Boolean(props.icon))
 
 const sizeClasses = computed(() => {
@@ -158,11 +158,5 @@ defineSlots<{
     >
       <slot name="suffix" />
     </span>
-
-    <Icon
-      v-if="iconRight && !isIconOnly"
-      :name="iconRight"
-      :class="iconClass"
-    />
   </span>
 </template>

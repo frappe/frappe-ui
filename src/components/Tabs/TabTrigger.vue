@@ -39,7 +39,6 @@ const orientation = computed(() => root?.orientation.value ?? 'horizontal')
 watchEffect(() => {
   warnUnsupportedIconString('TabTrigger', 'icon', props.icon)
   warnUnsupportedIconString('TabTrigger', 'iconLeft', props.iconLeft)
-  warnUnsupportedIconString('TabTrigger', 'iconRight', props.iconRight)
 })
 
 // Route mode. `route` is assumed present-or-absent for the trigger's
@@ -110,7 +109,6 @@ const shellClasses = computed(() => [
         :label="props.label"
         :icon="props.icon"
         :icon-left="props.iconLeft"
-        :icon-right="props.iconRight"
         :active="selected"
         :variant="variant"
         :size="size"

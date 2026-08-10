@@ -952,6 +952,7 @@ See the [Tabs](./components/tabs) component page for the full API.
 | `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
 | stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
 | `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
+| `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` — the icon silently stops rendering, nothing throws   |
 
 ```vue
 <!-- Before -->
@@ -992,6 +993,7 @@ and aligns its vocabulary with the Tabs family. See the
 | `{ active: true }` fallback                 | the `v-model` is the single source of truth |
 | boolean `value` / `modelValue`              | `string \| number` only                     |
 | wrapper divs / raw CSS for equal-width tabs | `fluid` prop                                |
+| `iconRight` on an option                    | `<template #suffix>` — silent, nothing throws |
 
 ## Data fetching (useDoctype / useList)
 
@@ -1198,7 +1200,7 @@ differ or were renamed.
 
 **Breaking, silent:** every icon-name prop across the library (`Button.icon`
 / `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
-`icon`, `TabButtons` options `icon` / `iconLeft` / `iconRight`, the `Icon`
+`icon`, `TabButtons` options `icon` / `iconLeft`, the `Icon`
 component's `name` prop) used to render a bare feather-style name (e.g.
 `"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
 unrecognized string now renders nothing. No build or type error — the icon

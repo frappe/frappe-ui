@@ -178,7 +178,6 @@ const visibleTabs = computed(() =>
           :label="tab.label"
           :icon="tab.icon"
           :icon-left="tab.iconLeft"
-          :icon-right="tab.iconRight"
           :disabled="tab.disabled"
           :route="tab.route"
         >

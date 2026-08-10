@@ -145,7 +145,6 @@ interface TabTriggerProps {
   /** Icon-only trigger; `label` becomes the accessible name. */
   icon?: string | Component
   iconLeft?: string | Component
-  iconRight?: string | Component
   disabled?: boolean
   /** Renders the trigger as a RouterLink. See Route mode. */
   route?: RouteLocationRaw
@@ -156,6 +155,8 @@ interface TabTriggerProps {
 - `icon` strings use the `lucide-*` class form, the same as every other
   component. `icon` without a default slot makes an icon-only trigger and
   `label` becomes the `aria-label`
+- there is no `iconRight`. Trailing content on a tab is a count or a badge,
+  which the `#suffix` slot already carries
 - disabled triggers are skipped by keyboard navigation and cannot be selected
 
 Slots:
@@ -202,7 +203,6 @@ interface TabItem {
   label?: string
   icon?: string | Component
   iconLeft?: string | Component
-  iconRight?: string | Component
   disabled?: boolean
   route?: RouteLocationRaw
   condition?: () => boolean
@@ -252,7 +252,7 @@ value input, not a panel switcher. The two share:
 
 - `TabValue`, `TabsVariant`, `TabsSize`, `TabsDirection`
 - the item vocabulary: `value` (required), `label`, `icon`, `iconLeft`,
-  `iconRight`, `disabled`
+  `disabled`
 - trigger visuals: at the same `variant` and `size`, a `TabButtons` and a
   `TabList` are pixel-identical
 
@@ -319,8 +319,20 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 - `Tab.route` as a string — `route` is a `RouteLocationRaw` on `TabTrigger`
   and `TabItem`
 - `Tab.label` as the implied value — `value` is required
+- `iconRight` on `TabTrigger`, `TabItem`, and `TabButtons` options — the
+  `#suffix` slot covers trailing content
 
 ## Changelog
+
+### 2026-08-10 (iconRight removed)
+
+- **`iconRight` is gone** from `TabTrigger`, `TabItem`, and `TabButtons`
+  options. P11 asks for one `icon` prop plus the `#prefix`/`#suffix` slots;
+  the family had inherited Button's three-prop shape without needing it. No
+  story, doc, or Figma usage pattern used `iconRight` — trailing content on a
+  tab is a count or a badge, which `#suffix` already carries, and `#suffix`
+  reaches shorthand mode too. `iconLeft` stays: leading icons are a real
+  pattern, and `TabItem` is a data array a slot cannot reach into.
 
 ### 2026-08-10 (track containment)
 

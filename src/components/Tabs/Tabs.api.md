@@ -140,12 +140,6 @@
     type: 'TabIcon'
   },
   {
-    name: 'iconRight',
-    description: 'Trailing accent icon, rendered next to the visible label.',
-    required: false,
-    type: 'TabIcon'
-  },
-  {
     name: 'disabled',
     description: '',
     required: false,

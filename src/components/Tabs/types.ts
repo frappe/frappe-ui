@@ -57,9 +57,6 @@ export interface TabTriggerProps {
   /** Leading accent icon, rendered next to the visible label. */
   iconLeft?: TabIcon
 
-  /** Trailing accent icon, rendered next to the visible label. */
-  iconRight?: TabIcon
-
   disabled?: boolean
 
   /** Renders the trigger as a RouterLink. See route mode in the spec. */
@@ -78,7 +75,6 @@ export interface TabItem {
   label?: string
   icon?: TabIcon
   iconLeft?: TabIcon
-  iconRight?: TabIcon
   disabled?: boolean
   route?: RouteLocationRaw
   /** Item renders only while this returns true. */

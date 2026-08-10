@@ -45,11 +45,6 @@ watchEffect(() => {
   for (const option of options.value) {
     warnUnsupportedIconString('TabButtons', 'options.icon', option.icon)
     warnUnsupportedIconString('TabButtons', 'options.iconLeft', option.iconLeft)
-    warnUnsupportedIconString(
-      'TabButtons',
-      'options.iconRight',
-      option.iconRight,
-    )
   }
 })
 
@@ -336,7 +331,6 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             :label="button.label"
             :icon="button.icon"
             :icon-left="button.iconLeft"
-            :icon-right="button.iconRight"
             :active="checked"
             :size="size"
             :variant="variant"

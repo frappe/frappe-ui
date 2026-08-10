@@ -27,9 +27,6 @@ export interface PillProps {
   /** Leading accent icon, rendered next to a visible label. */
   iconLeft?: PillIcon
 
-  /** Trailing accent icon, rendered next to a visible label. */
-  iconRight?: PillIcon
-
   /** Browser-tab attached-edge shape. */
   browserTabBase?: BrowserTabBase
 

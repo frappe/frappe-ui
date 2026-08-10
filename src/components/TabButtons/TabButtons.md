@@ -87,8 +87,9 @@ entries:
   longer honored. Use `Button` or `Pill` directly if you need per-tab theming or
   a loading spinner.
 - `hideLabel` on options is gone. Use `icon` for an icon-only tab — its `label`,
-  if provided, is automatically exposed as accessibility text. Use `iconLeft` /
-  `iconRight` for an accent icon next to a visible label.
+  if provided, is automatically exposed as accessibility text. Use `iconLeft`
+  for an accent icon before a visible label, and the `#suffix` slot for
+  trailing content.
 - `route` and `href` on options are honored: a tab renders as a `<RouterLink>`
   when `route` is set, or an `<a href target=_blank>` when `href` is set.
 - The per-tab `tooltip` value surfaces as the native `title` attribute rather
