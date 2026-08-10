@@ -1,0 +1,144 @@
+<template>
+  <ChartContainer
+    :title="title"
+    :subtitle="subtitle"
+    :plot-label="plotLabel"
+    :plot-label-secondary="plotLabelSecondary"
+    :loading="loading"
+    :error="error || renderError"
+    :empty="isEmpty"
+    :dir="dir"
+  >
+    <template v-if="$slots.actions" #actions><slot name="actions" /></template>
+
+    <!-- The container owns the three states, so an app that wants a retry
+         button beside the message or a skeleton of its own reaches them here
+         rather than dropping the chart and rebuilding the chrome. -->
+    <template v-if="$slots.loading" #loading><slot name="loading" /></template>
+    <template v-if="$slots.error" #error="slotProps">
+      <slot name="error" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.empty" #empty><slot name="empty" /></template>
+
+    <template #default>
+      <div
+        ref="plotEl"
+        class="h-full w-full"
+        dir="ltr"
+        role="img"
+        :aria-label="chartAriaLabel(title, subtitle)"
+      />
+
+      <ChartTooltip
+        :open="tooltip.open"
+        :x="tooltip.x"
+        :y="tooltip.y"
+        :label="tooltip.label"
+        :items="tooltip.items"
+        :dir="dir"
+      >
+        <template v-if="$slots.tooltip" #default="slotProps">
+          <slot name="tooltip" v-bind="slotProps" />
+        </template>
+      </ChartTooltip>
+    </template>
+
+    <template v-if="legendItems.length > 1" #legend>
+      <ChartLegend
+        :items="legendItems"
+        @change="toggleSeries"
+        @highlight="hoverSeries"
+      />
+    </template>
+  </ChartContainer>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+// An area is a line series with a fill, so it needs no module of its own. The
+// bar module is registered all the same: any axis chart draws any mark.
+import { BarChart as BarSeries, LineChart as LineSeries } from 'echarts/charts'
+import {
+  GridComponent,
+  MarkLineComponent,
+  TooltipComponent,
+} from 'echarts/components'
+import { LabelLayout } from 'echarts/features'
+import { registerChartModules } from './core/useChart'
+import { useAxisChart } from './core/useAxisChart'
+import { buildAxisChartOption, buildStackShares } from './axisChartOptions'
+import { normalizeAxisChartProps } from './seriesData'
+import { chartAriaLabel } from './utils'
+import ChartContainer from './components/ChartContainer.vue'
+import ChartLegend from './components/ChartLegend.vue'
+import ChartTooltip from './components/ChartTooltip.vue'
+import type {
+  AreaChartProps,
+  AxisChartConfig,
+  ChartDatapointEvent,
+  ChartExposed,
+  ChartTooltipItem,
+} from './types'
+
+registerChartModules([
+  BarSeries,
+  LineSeries,
+  GridComponent,
+  MarkLineComponent,
+  TooltipComponent,
+  LabelLayout,
+])
+
+const props = defineProps<AreaChartProps>()
+
+const hiddenSeries = defineModel<string[]>('hiddenSeries', {
+  default: () => [],
+})
+
+const emit = defineEmits<{
+  datapointClick: [event: ChartDatapointEvent]
+}>()
+
+defineSlots<{
+  actions?: () => unknown
+  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
+  empty?: () => unknown
+}>()
+
+const normalized = computed(() => normalizeAxisChartProps(props))
+const config = computed<AxisChartConfig>(() => ({
+  ...normalized.value.config,
+  type: 'area',
+  stacked: props.stacked,
+  connectNulls: props.connectNulls,
+  fillOpacity: props.fillOpacity,
+}))
+
+const {
+  plotEl,
+  chart,
+  dir,
+  isEmpty,
+  plotLabel,
+  plotLabelSecondary,
+  renderError,
+  tooltip,
+  legendItems,
+  toggleSeries,
+  hoverSeries,
+} = useAxisChart({
+  config: () => config.value,
+  format: () => normalized.value.format,
+  buildOption: buildAxisChartOption,
+  stackShares: () => buildStackShares(config.value, hiddenSeries.value),
+  hiddenSeries,
+  onDatapointClick: (event) => emit('datapointClick', event),
+})
+
+defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+</script>

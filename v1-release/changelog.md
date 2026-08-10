@@ -9,6 +9,54 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Charts — a new family at `frappe-ui/charts`
+
+A second chart family ships alongside the one at the package root. It is
+additive: the root chart exports keep working and nothing here removes them.
+Import the components from `frappe-ui/charts`, which carries the `--chart-*`
+color tokens with it. `spec/charts.md` states the conventions, and
+`spec/adr/0015-what-enters-charts.md` records what the family admits.
+
+Landed so far:
+
+- The chrome is exported — `ChartCard`, `ChartContainer`, `ChartLegend` and
+  `ChartTooltip` — so a plot an app draws itself wears the family's look.
+  `ChartCard` owns the card surface, and `card: false` turns it off.
+- Combo series through `seriesConfig[key].type`, which also collapsed the three
+  axis option builders into one. Per-series area fill falls out of it.
+- Reference lines on the axis charts and on `ScatterChart`. A line beyond the
+  data range is clipped rather than stretching the value axis.
+- `stacked: 'normalized'` for shares, and `maxSeries` to cap a long grouping
+  column. `maxSeries` has no default.
+- `ScatterChart` and `SankeyChart`.
+- Category labels fit themselves — the library measures, tilts and truncates
+  instead of taking an angle prop.
+- `xAxis.type: 'value'` reads the x column as a quantity: a point sits at its
+  own number instead of in its row's slot, and the rows draw in numeric order.
+  Ask for it — a column of numbers still reads as categories by default.
+- The three states are slots — `#loading`, `#error` and `#empty` — on
+  `ChartContainer` and on every chart component, so an app puts a retry button
+  beside a failed query without drawing chrome of its own. `#loading` replaces
+  the whole placeholder rather than a caption under a spinner.
+- A loading chart draws a skeleton the size of its plot, where it used to draw
+  a spinner and the words "Loading chart…". A dashboard fills in a card at a
+  time, and a placeholder that holds the grid's shape reads better than eight
+  spinners turning out of step. `#loading` takes it back.
+- `seriesConfig[key].axis` puts a series on the second value axis. It replaces
+  the `y2` prop, **which is removed**: `y` names every series once, in the order
+  they are drawn and colored, so a series no longer changes color when it
+  changes axis. Long data reaches the second axis for the first time, keyed by a
+  value of the `series` column, and `y2Axis` is unchanged. To migrate, move each
+  `y2` column into `y` at the position it should draw at and add `axis: 'y2'` to
+  that column's `seriesConfig` entry. TypeScript reports the removed prop, but a
+  plain template passes it through as an attribute and draws the column not at
+  all — grep for `y2` on the v2 charts after upgrading.
+- `ScatterChart` takes `showDataLabels`, which prints each point's `label`
+  beside it. Names that collide with a neighbour are dropped.
+- `NumberCard` takes `color`, the ink the reading is printed in, for a card
+  standing for a series drawn in that color elsewhere. The card, the title and
+  the delta tone are unchanged by it.
+
 ### Calendar family — moved to `frappe-ui/experimental` (breaking)
 
 Calendar is not taken to bar at root for `1.0.0` (#1020, redirect of
