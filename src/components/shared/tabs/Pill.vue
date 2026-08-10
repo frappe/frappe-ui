@@ -10,8 +10,6 @@ const props = withDefaults(defineProps<PillProps>(), {
   active: false,
   browserTabBase: 'none',
   orientation: 'horizontal',
-  underlineIndicator: true,
-  activeSurface: true,
 })
 
 const slots = defineSlots<{
@@ -56,47 +54,20 @@ const sizeClasses = computed(() => {
 })
 
 const variantClasses = computed(() => {
-  if (props.variant === 'underline') {
-    if (!props.active) return 'hover:text-ink-gray-8'
-    if (!props.underlineIndicator) return ''
-    // 1px indicator drawn over the track's rail, matching the Figma
-    // trigger-edge stroke (outline-gray-8).
-    const indicator =
-      props.orientation === 'vertical'
-        ? 'after:absolute after:inset-y-0 after:-end-px after:w-px after:bg-[var(--outline-gray-8)]'
-        : 'after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-[var(--outline-gray-8)]'
-    return ['relative', indicator]
-  }
-
+  // The pill never paints the active surface or the underline itself. Both
+  // tracks (`TabList`, `TabButtons`) own a sliding indicator that carries
+  // them between selections, so an active pill differs from an inactive one
+  // only in text color — which is what lets the indicator slide.
   if (props.variant === 'browser-tab') {
     // Every browser tab carries a 1px border in both states so selection
-    // never changes the trigger's box (no layout shift). Inactive tabs keep
-    // it fully transparent.
-    if (!props.active) {
-      return 'border border-transparent hover:text-ink-gray-8'
-    }
-    // The track's sliding indicator carries the card between selections;
-    // the pill keeps its inactive box so triggers never move.
-    if (!props.activeSurface) return 'border border-transparent'
-    // Active tab: white card with a 1px rail-colored border. The attached
-    // edge stays transparent (the card background shows through), and the
-    // after pseudo paints over the track's rail segment so the tab fuses
-    // with the area beyond the rail.
-    return ['relative', browserTabCardClasses(props.browserTabBase)]
+    // never changes the trigger's box. Inactive tabs keep it transparent;
+    // active ones keep the same box while the track's card slides beneath.
+    return props.active
+      ? 'border border-transparent'
+      : 'border border-transparent hover:text-ink-gray-8'
   }
 
-  if (!props.active) {
-    return 'hover:text-ink-gray-8'
-  }
-
-  // The track's sliding indicator paints the active surface instead.
-  if (!props.activeSurface) return ''
-
-  // Shipped v1 subtle active pill (overrides Figma): elevation-3 so the
-  // raised card stays lighter than the track in dark mode.
-  return props.variant === 'ghost'
-    ? 'bg-surface-gray-2'
-    : 'bg-surface-elevation-3 shadow-base'
+  return props.active ? '' : 'hover:text-ink-gray-8'
 })
 
 const rootClasses = computed(() => [

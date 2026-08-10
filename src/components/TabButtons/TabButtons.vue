@@ -92,8 +92,8 @@ const rootClasses = computed(() => [
 
 // Sliding active-pill surface for subtle/ghost, equivalent to TabList's
 // reka TabsIndicator (RadioGroup has no indicator primitive, so the checked
-// item is measured directly). Pills keep their own active background off
-// (`activeSurface: false`); this layer carries it between selections.
+// item is measured directly). Pills never paint an active background
+// themselves; this layer carries it between selections.
 const pillTrack = computed(
   () => props.variant === 'subtle' || props.variant === 'ghost',
 )
@@ -104,7 +104,7 @@ const underlineTrack = computed(() => props.variant === 'underline')
 
 // browser-tab slides the active card itself: the indicator carries the
 // opaque surface, borders, radii, and the rail fusion mask; the checked
-// pill keeps its transparent inactive box (`activeSurface: false`).
+// pill keeps its transparent inactive box.
 const browserTrack = computed(() => props.variant === 'browser-tab')
 
 const hasIndicator = computed(
@@ -336,8 +336,6 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             :variant="variant"
             :browser-tab-base="browserTabBase(checked)"
             :orientation="vertical ? 'vertical' : 'horizontal'"
-            :underline-indicator="false"
-            :active-surface="false"
           >
             <template v-if="$slots.prefix" #prefix>
               <slot

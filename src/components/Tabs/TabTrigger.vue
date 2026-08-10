@@ -129,8 +129,6 @@ const shellClasses = computed(() => [
         :size="size"
         :browser-tab-base="browserTabBase"
         :orientation="orientation"
-        :underline-indicator="false"
-        :active-surface="false"
       >
         <template v-if="slots.prefix" #prefix>
           <slot name="prefix" v-bind="slotProps" />

@@ -32,17 +32,4 @@ export interface PillProps {
 
   /** Axis of the surrounding track. */
   orientation?: PillOrientation
-
-  /**
-   * Draw the 1px active indicator on the pill itself (underline variant).
-   * TabList turns this off — its animated TabsIndicator owns the line.
-   */
-  underlineIndicator?: boolean
-
-  /**
-   * Paint the active surface on the pill itself: background/shadow for
-   * subtle/ghost, the bordered card for browser-tab. TabList and TabButtons
-   * turn this off — their sliding track indicator owns the active surface.
-   */
-  activeSurface?: boolean
 }

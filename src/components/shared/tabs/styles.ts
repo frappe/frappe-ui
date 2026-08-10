@@ -58,7 +58,7 @@ export function tabTrackClasses(opts: {
 /**
  * Sliding active-pill indicator surface (subtle/ghost). The indicator is a
  * layer behind the triggers that carries the active background and shadow;
- * the pills themselves stay transparent (`activeSurface: false`) so the
+ * the pills themselves stay transparent so the
  * surface can slide between them, segmented-control style.
  */
 export function tabIndicatorSurfaceClasses(
