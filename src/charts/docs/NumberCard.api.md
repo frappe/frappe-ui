@@ -7,7 +7,7 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.\nWhat the reading is, printed above the number.',
     required: true,
     type: 'string'
   },
@@ -19,13 +19,13 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
@@ -43,13 +43,13 @@
   },
   {
     name: 'prefix',
-    description: '',
+    description: 'Printed before the number, e.g. a currency sign.',
     required: false,
     type: 'string'
   },
   {
     name: 'suffix',
-    description: '',
+    description: 'Printed after the number, e.g. a unit.',
     required: false,
     type: 'string'
   },
@@ -61,13 +61,13 @@
   },
   {
     name: 'deltaSuffix',
-    description: '',
+    description: 'Unit printed after the delta, e.g. `\'%\'`.',
     required: false,
     type: 'string'
   },
   {
     name: 'deltaCaption',
-    description: '',
+    description: 'What the delta is measured against, e.g. `\'vs last month\'`.',
     required: false,
     type: 'string'
   },
@@ -91,7 +91,7 @@
   },
   {
     name: 'sparkline',
-    description: '',
+    description: 'A trend across the bottom of the card: shape only, no axes to read against.',
     required: false,
     type: 'NumberCardSparkline'
   },
@@ -106,13 +106,8 @@
 
   const slotsData = [
   {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
     name: 'loading',
-    description: 'Replaces the skeleton, e.g. with a placeholder of the app\'s own.',
+    description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
     type: 'any'
   },
   {
@@ -123,6 +118,11 @@
   {
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
+    type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
     type: 'any'
   },
   {

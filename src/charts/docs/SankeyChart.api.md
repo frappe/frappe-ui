@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,13 +25,13 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
@@ -73,7 +73,7 @@
   },
   {
     name: 'format',
-    description: '',
+    description: 'Prints every number the flow shows, i.e. what a band or node carries.',
     required: false,
     type: 'ChartValueFormatter'
   },
@@ -85,23 +85,13 @@
   },
   {
     name: 'echartOptions',
-    description: '',
+    description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,
     type: 'EchartOptionsOverride'
   }
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -116,13 +106,23 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'linkClick',
-    description: '',
+    name: 'select',
+    description: 'A band was selected, by click or by Enter on the keyboard cursor. Carries\nits two nodes and the row behind it. A node emits nothing: it stands for\nevery row that passes through it, not one.',
     type: '[event: SankeyLinkEvent]'
   }
 ]
