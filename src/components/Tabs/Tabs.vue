@@ -136,7 +136,7 @@ const routeOverride = shallowRef<TabTriggerRegistration | null>(null)
 function register(trigger: TabTriggerRegistration) {
   if (import.meta.env.DEV && trigger.hasRoute() && activationMode === 'automatic') {
     console.warn(
-      '[frappe-ui] Tabs: a trigger has a `route`, but the root could not see it before its first render, so arrow-key activation stayed on. Arrow keys will select without navigating while a click does both. Either the trigger sits inside your own wrapper component (put `TabTrigger` directly in `TabList`), or `tabs` arrived after mount (render `Tabs` once the routed items are known, with `v-if` or a `:key`).',
+      '[frappe-ui] Tabs: a trigger has a `route`, but the root could not see it before its first render, so arrow-key activation stayed on. Arrow keys will select without navigating while a click does both. Either the trigger sits inside your own wrapper component (put `TabTrigger` directly in `TabList`), or the routed items arrived after mount — from a resource, or through `tabs`. For late items, render `Tabs` once they are known, with `v-if` or a `:key`.',
     )
   }
   triggers.value = [...triggers.value, trigger]

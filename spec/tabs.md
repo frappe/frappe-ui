@@ -364,7 +364,8 @@ value input, not a panel switcher. The two share:
   when it is called outside a render — which is where this runs
 - a trigger the scan cannot see leaves the mode automatic and DEV warns when
   it registers. Two ways to land there: the app wrapped its triggers in its
-  own component, or `tabs` arrived from a resource after mount
+  own component, or the routed items arrived after mount — whether they came
+  through `tabs` or through a `v-for` over a resource in composed mode
 - every focusable trigger carries `focus-visible:focus-ring` (P12), and no
   track may clip it. The subtle track has 1px of padding, so it cannot use
   `overflow-hidden` — the active pill's shadow spills a little instead
