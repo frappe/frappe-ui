@@ -36,6 +36,11 @@ A `TabPanel` attaches flush below the tab bar:
 Set `vertical` on the root for vertical orientation. An icon-only trigger takes
 `icon` without a default slot; its `label` becomes the accessible name.
 
+`vertical` sets the orientation, not the layout. In composed mode the root
+ships no layout classes, so add `class="flex"` yourself to put the list beside
+the panel. Shorthand mode (`tabs` prop) owns the whole structure and does this
+for you.
+
 <ComponentPreview name="Tabs-IconRail" />
 
 ## Sizes
