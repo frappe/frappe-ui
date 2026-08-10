@@ -399,11 +399,20 @@ export function findInkShiftMarker(dir) {
   }
 }
 
+// True when a real path is one of the roots or sits inside one.
+function isInsideRoots(real, roots) {
+  return roots.some((r) => real === r || real.startsWith(r + path.sep))
+}
+
 // Search the subtree: a run on a subdirectory must also block a later run on
 // its parent, or the already-shifted subtree double-shifts. Mirrors walk()'s
-// directory skip list.
-export function findInkShiftMarkerBelow(dir, seenDirs = new Set()) {
+// directory skip list and its symlink rule — the search must cover exactly
+// what the run would rewrite. A link out of the target subtrees is skipped:
+// walk() does not rewrite it, so a marker there belongs to another codebase
+// and must not block this run.
+export function findInkShiftMarkerBelow(dir, roots = null, seenDirs = new Set()) {
   const resolved = fs.realpathSync(dir)
+  const bounds = roots ?? [resolved]
   if (seenDirs.has(resolved)) return null
   seenDirs.add(resolved)
   const file = path.join(resolved, INK_SHIFT_MARKER)
@@ -411,17 +420,17 @@ export function findInkShiftMarkerBelow(dir, seenDirs = new Set()) {
   for (const entry of fs.readdirSync(resolved, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue
     const full = path.join(resolved, entry.name)
-    // Follow symlinked directories like walk() does; skip broken links.
     let isDirectory = entry.isDirectory()
     if (!isDirectory && entry.isSymbolicLink()) {
       try {
         isDirectory = fs.statSync(full).isDirectory()
       } catch {
-        continue
+        continue // broken symlink
       }
+      if (isDirectory && !isInsideRoots(fs.realpathSync(full), bounds)) continue
     }
     if (!isDirectory) continue
-    const found = findInkShiftMarkerBelow(full, seenDirs)
+    const found = findInkShiftMarkerBelow(full, bounds, seenDirs)
     if (found) return found
   }
   return null
@@ -681,11 +690,7 @@ function* walk(target, ctx = makeWalkContext([target])) {
         continue // broken symlink
       }
       if (isDirectory && !SKIP_DIRS.has(entry.name)) {
-        const realTarget = fs.realpathSync(full)
-        const internal = ctx.roots.some(
-          (r) => realTarget === r || realTarget.startsWith(r + path.sep),
-        )
-        if (!internal) {
+        if (!isInsideRoots(fs.realpathSync(full), ctx.roots)) {
           ctx.externals.push(full)
           continue
         }
@@ -758,7 +763,9 @@ function main() {
     }
     const marker =
       inkShiftMarkerDirs.map((d) => findInkShiftMarker(d)).find(Boolean) ||
-      inkShiftMarkerDirs.map((d) => findInkShiftMarkerBelow(d)).find(Boolean)
+      inkShiftMarkerDirs
+        .map((d) => findInkShiftMarkerBelow(d, inkShiftMarkerDirs))
+        .find(Boolean)
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')

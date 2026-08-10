@@ -407,6 +407,30 @@ describe('tokens v2 migration', () => {
     expect(result.stdout).toContain('linked-pkg')
   })
 
+  it('ink-shift CLI ignores a marker inside an external linked package', () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    const fixture = path.join(root, 'a.vue')
+    fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+    // An external package that already shifted on its own, linked under a
+    // target that has not. The run never rewrites it, so its marker must not
+    // block the target.
+    const shared = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-shared-')))
+    tempDirs.push(shared)
+    writeInkShiftMarker(shared)
+    fs.symlinkSync(shared, path.join(root, 'linked-pkg'))
+
+    expect(findInkShiftMarkerBelow(root)).toBe(null)
+
+    const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+    const result = spawnSync(process.execPath, [script, '--ink-shift', root], {
+      encoding: 'utf8',
+      timeout: 30_000,
+    })
+    expect(result.status).toBe(0)
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+  })
+
   it('getMigrationMode selects ink-shift regardless of migration state', () => {
     expect(getMigrationMode({ likelyMigrated: true }, { inkShift: true })).toBe('ink-shift')
     expect(getMigrationMode({ likelyMigrated: false }, { inkShift: true })).toBe('ink-shift')

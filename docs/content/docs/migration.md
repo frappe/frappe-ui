@@ -1395,8 +1395,9 @@ fresh clone without it the guard is gone, and a teammate's re-run
 double-shifts. Delete it only to re-run the shift on purpose.
 
 Symlinks that point outside the target are skipped and listed at the end of
-the run. Run the codemod on each real package root directly, so every
-migrated tree gets its own marker. If the refusal names a marker inside a
+the run. The marker search skips them too, so a marker in a linked external
+package never blocks a target the run would not rewrite. Run the codemod on
+each real package root directly, so every migrated tree gets its own marker. If the refusal names a marker inside a
 vendored dependency (for example `vendor/frappe-ui/.tokens-v2-ink-shift`),
 that dependency is already shifted — run the codemod per package root and
 leave the vendored marker alone.
