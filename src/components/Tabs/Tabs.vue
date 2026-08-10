@@ -86,8 +86,12 @@ const routeMode = computed(
   () => !modelBound.value && triggers.value.some((t) => t.hasRoute()),
 )
 
+// Disabled triggers are skipped here as well as in keyboard navigation: a
+// disabled trigger renders as a button rather than a link, but `useLink`
+// still tracks its route, so reaching that URL any other way would
+// otherwise select a tab the user cannot select themselves.
 const routeSelected = computed<TabValue | undefined>(() => {
-  const list = orderedTriggers.value
+  const list = orderedTriggers.value.filter((t) => !t.disabled())
   const exact = list.find((t) => t.routeExactActive?.value)
   if (exact) return exact.value()
   return list.find((t) => t.routeActive?.value)?.value()

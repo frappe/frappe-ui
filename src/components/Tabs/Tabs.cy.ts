@@ -179,6 +179,46 @@ describe('Tabs', () => {
     cy.get('@onUpdate').should('not.have.been.called')
   })
 
+  it('does not select a disabled trigger whose route is current', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/archive', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, {
+              value: 'archive',
+              label: 'Archive',
+              route: '/archive',
+              disabled: true,
+            }),
+          ]),
+          h(TabPanel, { value: 'inbox' }, () => 'Inbox panel'),
+          h(TabPanel, { value: 'archive' }, () => 'Archive panel'),
+        ]),
+    })
+
+    // Reaching a disabled trigger's route directly must not select it — the
+    // trigger renders as a button, so the user could never select it either.
+    cy.wrap(router.push('/archive'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('[role=tab]', 'Archive').should(
+      'have.attr',
+      'aria-selected',
+      'false',
+    )
+    cy.contains('Archive panel').should('not.exist')
+  })
+
   it('skips disabled triggers with the keyboard and on click', () => {
     cy.mount(Tabs, {
       props: {
