@@ -103,8 +103,24 @@ const routeSelected = computed<TabValue | undefined>(() => {
 
 const internalValue = ref<TabValue | undefined>(props.modelValue)
 
+function triggerFor(value: TabValue) {
+  return triggers.value.find((t) => t.value() === value)
+}
+
 const selected = computed<TabValue | undefined>(() => {
-  if (routeMode.value) return routeSelected.value
+  if (routeMode.value) {
+    const fromRoute = routeSelected.value
+    if (fromRoute !== undefined) return fromRoute
+    // No route matches. A route trigger stays unselected — highlighting it
+    // would claim a route the app is not on. A non-route trigger in the same
+    // list has nothing to navigate, so it selects normally instead of being
+    // locked out.
+    const internal = internalValue.value
+    if (internal !== undefined && triggerFor(internal)?.hasRoute() === false) {
+      return internal
+    }
+    return undefined
+  }
   const desired = modelBound.value ? props.modelValue : internalValue.value
   const list = triggers.value
   if (!list.length) return desired
@@ -147,9 +163,10 @@ provide(tabsRootKey, {
 })
 
 function onRekaUpdate(value: TabValue) {
-  // In route mode, clicking a trigger navigates; the route drives
-  // selection and no model update is emitted.
-  if (routeMode.value) return
+  // Clicking a route trigger navigates; the route drives selection and no
+  // model update is emitted. A non-route trigger has no route to follow, so
+  // it updates the value model even while route mode is on.
+  if (routeMode.value && triggerFor(value)?.hasRoute()) return
   internalValue.value = value
   emit('update:modelValue', value)
 }

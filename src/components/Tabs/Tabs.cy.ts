@@ -262,6 +262,43 @@ describe('Tabs', () => {
     )
   })
 
+  it('selects a non-route trigger while route mode is on', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+          ]),
+        ]),
+    })
+
+    // The route matches no trigger, so the route trigger stays unselected —
+    // but the non-route trigger has nothing to navigate and must still be
+    // selectable rather than locked out by route mode.
+    cy.wrap(router.push('/'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    // Assert the root's own selection (which drives the active styling), not
+    // just reka's aria-selected — reka falls back to uncontrolled state when
+    // the model is undefined, so aria-selected flips either way.
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'inactive')
+  })
+
   it('skips disabled triggers with the keyboard and on click', () => {
     cy.mount(Tabs, {
       props: {
