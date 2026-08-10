@@ -126,11 +126,20 @@ watch(routeSelected, () => {
   routeOverride.value = null
 })
 
+// Turning the clicked trigger disabled ends the override for good, rather
+// than parking it: re-enabling the tab must not hand selection back without
+// another click.
+watch(
+  () => routeOverride.value?.disabled() ?? false,
+  (isDisabled) => {
+    if (isDisabled) routeOverride.value = null
+  },
+)
+
 const selected = computed<TabValue | undefined>(() => {
   if (routeMode.value) {
-    // The override is dropped once its trigger turns disabled, so a tab the
-    // user can no longer select cannot stay active. Unregistering clears it
-    // in `register`'s cleanup.
+    // The `disabled` guard also covers the tick before the watch above
+    // flushes. Unregistering clears the override in `register`'s cleanup.
     const override = routeOverride.value
     if (override && !override.disabled()) return override.value()
     const fromRoute = routeSelected.value

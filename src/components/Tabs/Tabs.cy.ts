@@ -545,6 +545,19 @@ describe('Tabs', () => {
     cy.contains('[role=tab]', 'Inbox')
       .find('[data-state]')
       .should('have.attr', 'data-state', 'active')
+
+    // Re-enabling must not hand selection back. The override ended when the
+    // trigger went disabled; taking it again needs another click.
+    cy.then(() => {
+      lock.value = false
+    })
+    cy.contains('[role=tab]', 'Drafts').should('not.have.attr', 'disabled')
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'inactive')
   })
 
   it('falls back to a non-route trigger when only a disabled route matches', () => {

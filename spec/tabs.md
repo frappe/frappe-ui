@@ -247,8 +247,9 @@ A trigger with `route` renders as a `RouterLink`.
 - lists may mix route and non-route triggers. A non-route trigger has nothing
   to navigate, so clicking it selects it and emits `update:modelValue`, even
   while a route matches elsewhere. Selection returns to the route on the next
-  navigation, or when that trigger turns disabled or unmounts. A `condition`
-  that flips back does not let the tab reclaim selection
+  navigation, or when that trigger turns disabled or unmounts. Those exits are
+  final: re-enabling the trigger, or a `condition` flipping back, does not let
+  the tab reclaim selection without another click
 - when no route matches, selection falls back to the first selectable
   non-route trigger. An all-route list starts with nothing selected —
   highlighting a trigger would claim a route the app is not on
