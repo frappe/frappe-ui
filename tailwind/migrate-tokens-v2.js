@@ -738,6 +738,16 @@ function main() {
     }
   }
 
+  // Write the markers BEFORE any file rewrite so an interrupted run fails
+  // closed: the retry refuses instead of double-shifting the files that were
+  // already rewritten. Recovery: restore with git, delete the marker, re-run.
+  if (mode === 'ink-shift' && !dryRun) {
+    for (const dir of inkShiftMarkerDirs) writeInkShiftMarker(dir)
+    console.log(
+      `Wrote ${INK_SHIFT_MARKER} in ${inkShiftMarkerDirs.join(', ')} — it blocks an accidental second run.\n`,
+    )
+  }
+
   let filesChanged = 0
   let totalReplacements = 0
   let totalMerges = 0
@@ -779,12 +789,6 @@ function main() {
     }
   }
 
-  if (mode === 'ink-shift' && !dryRun) {
-    for (const dir of inkShiftMarkerDirs) writeInkShiftMarker(dir)
-    console.log(
-      `\nWrote ${INK_SHIFT_MARKER} in ${inkShiftMarkerDirs.join(', ')} — it blocks an accidental second run.`,
-    )
-  }
 }
 
 const scriptPath = fileURLToPath(import.meta.url)
