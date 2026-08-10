@@ -21,6 +21,8 @@ const sourceRoots = [
   path.resolve(repoRoot, 'src/components'),
   path.resolve(repoRoot, 'src/molecules'),
   path.resolve(repoRoot, 'experimental'),
+  // `src` itself, for families that sit directly under it (src/charts).
+  path.resolve(repoRoot, 'src'),
 ]
 
 // frappe-ui's information architecture. The shared Sidebar is data-driven —
@@ -58,6 +60,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
+        { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Radius', link: '/docs/foundations/radius' },
         { text: 'Elevation', link: '/docs/foundations/elevation' },
@@ -65,6 +68,23 @@ function buildSidebar(): SidebarSection[] {
       ],
     },
     { text: 'Components', items: componentItems },
+    {
+      text: 'Charts',
+      items: [
+        { text: 'Overview', link: '/docs/charts/overview' },
+        { text: 'BarChart', link: '/docs/charts/barchart' },
+        { text: 'LineChart', link: '/docs/charts/linechart' },
+        { text: 'AreaChart', link: '/docs/charts/areachart' },
+        { text: 'DonutChart', link: '/docs/charts/donutchart' },
+        { text: 'FunnelChart', link: '/docs/charts/funnelchart' },
+        { text: 'HeatmapChart', link: '/docs/charts/heatmapchart' },
+        { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
+        { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
+        { text: 'NumberCard', link: '/docs/charts/numbercard' },
+        { text: 'States', link: '/docs/charts/states' },
+        { text: 'Dashboard', link: '/docs/charts/dashboard' },
+      ],
+    },
     {
       text: 'Molecules',
       items: [
@@ -139,6 +159,11 @@ const colocatedRoots = [
   {
     sourceDir: path.resolve(repoRoot, 'experimental'),
     proxyDir: path.resolve(rootDir, 'content/docs/experimental'),
+  },
+  // Charts keep one page per component under `src/charts/docs`.
+  {
+    sourceDir: path.resolve(repoRoot, 'src/charts'),
+    proxyDir: path.resolve(rootDir, 'content/docs/charts'),
   },
 ]
 
