@@ -127,12 +127,11 @@ export function usePlotKeyboard<T>(
 
   /**
    * The perpendicular arrows. With no cursor there is no mark to cross from —
-   * after Escape, say — so they place it on the first mark, as the other keys
-   * do, rather than crossing from nothing.
+   * after Escape, say — so they step like the other keys rather than crossing
+   * from nothing, and one key answers the same whether the chart crosses.
    */
   function cross(delta: number) {
-    if (!args.cross) return step(delta)
-    if (index.value === null) return step(1)
+    if (!args.cross || index.value === null) return step(delta)
     args.cross(delta)
   }
 

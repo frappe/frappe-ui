@@ -227,6 +227,32 @@ describe('usePlotKeyboard', () => {
     expect(keyboard.index.value).toBe(0)
   })
 
+  // The same key has to answer the same way whether or not the chart crosses,
+  // so ArrowUp with no cursor lands on the last mark either way.
+  it('steps a cross key by its own direction when there is no cursor', () => {
+    const scope = effectScope()
+    let keyboard!: PlotKeyboardReturn
+    scope.run(() => {
+      keyboard = usePlotKeyboard({
+        marks: () => ['a', 'b', 'c'],
+        key: (mark) => mark,
+        move: () => {},
+        activate: () => {},
+        clear: () => {},
+        cross: () => {},
+      })
+    })
+    ;(keyboard.attrs.value as Record<string, any>).onKeydown({
+      key: 'ArrowUp',
+      preventDefault: () => {},
+    })
+    expect(keyboard.index.value).toBe(2)
+
+    const plain = setup(3)
+    plain.press('ArrowUp')
+    expect(plain.keyboard.index.value).toBe(2)
+  })
+
   it('reads the mark again when a chart asks', () => {
     const plot = setup()
     plot.focus()
