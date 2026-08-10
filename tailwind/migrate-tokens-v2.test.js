@@ -7,9 +7,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   detectMigrationState,
   findInkShiftMarker,
+  findInkShiftMarkerBelow,
   getMigrationMode,
   INK_SHIFT_MARKER,
-  inkShiftMarkerDir,
   migrateTokens,
   writeInkShiftMarker,
 } from './migrate-tokens-v2.js'
@@ -262,23 +262,29 @@ describe('tokens v2 migration', () => {
     expect(findInkShiftMarker(dir)).toBe(path.join(dir, INK_SHIFT_MARKER))
   })
 
-  it('ink-shift marker anchors to the target, and a root marker blocks a subdirectory run', () => {
+  it('ink-shift marker is found in both directions: ancestor and subtree', () => {
     // realpath: os.tmpdir() is a symlink on macOS, and path.resolve does not
     // follow symlinks.
     const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
     tempDirs.push(root)
     const sub = path.join(root, 'src')
     fs.mkdirSync(sub)
-    const file = path.join(sub, 'a.vue')
-    fs.writeFileSync(file, '')
 
-    // A file target anchors to its containing directory.
-    expect(inkShiftMarkerDir(file)).toBe(sub)
-    expect(inkShiftMarkerDir(sub)).toBe(sub)
-
-    // A marker written at the root is found from the subdirectory.
+    // A marker written at the root is found from the subdirectory (ancestor
+    // search), and a marker written in the subdirectory is found from the
+    // root (subtree search) — but not by the ancestor search alone.
     writeInkShiftMarker(root)
     expect(findInkShiftMarker(sub)).toBe(path.join(root, INK_SHIFT_MARKER))
+    fs.rmSync(path.join(root, INK_SHIFT_MARKER))
+    writeInkShiftMarker(sub)
+    expect(findInkShiftMarkerBelow(root)).toBe(path.join(sub, INK_SHIFT_MARKER))
+
+    // node_modules is skipped like the file walk skips it.
+    fs.rmSync(path.join(sub, INK_SHIFT_MARKER))
+    const nm = path.join(root, 'node_modules')
+    fs.mkdirSync(nm)
+    writeInkShiftMarker(nm)
+    expect(findInkShiftMarkerBelow(root)).toBe(null)
   })
 
   it('ink-shift CLI guard: real run writes the marker, a second real run refuses, --dry-run previews', () => {
@@ -304,6 +310,11 @@ describe('tokens v2 migration', () => {
     expect(dry.status).toBe(0)
     expect(dry.stderr).toContain('already ran')
     expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+
+    // A file target is rejected — its marker would over-claim the directory.
+    const fileRun = run('--ink-shift', fixture)
+    expect(fileRun.status).toBe(1)
+    expect(fileRun.stderr).toContain('directory targets only')
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {

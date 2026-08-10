@@ -1384,11 +1384,12 @@ npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
 This mode runs only the ink shift — no color renames, no typography, no
 radius renames. Run it exactly once per codebase. There is no way to detect
 a prior run from file content (`ink-red-5` is a valid name before and
-after), so a second run double-shifts. To guard against that, a real run
-writes a `.tokens-v2-ink-shift` marker file in each target directory and
-refuses to run again while one exists there or in an ancestor directory.
-Keep the marker until the migration lands; delete it only to re-run the
-shift on purpose.
+after), so a second run double-shifts. To guard against that, `--ink-shift`
+takes directory targets only, and a real run writes a `.tokens-v2-ink-shift`
+marker file in each target directory. It refuses to run again while a marker
+exists in the target, an ancestor, or anywhere in the target subtree. Keep
+the marker until the migration lands; delete it only to re-run the shift on
+purpose.
 
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under

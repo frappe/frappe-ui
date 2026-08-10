@@ -56,9 +56,10 @@
  * no weight merges. Like the color migration, there is no sentinel that can
  * tell whether the shift already ran (`ink-red-5` is a valid name on both
  * sides), so --ink-shift MUST run exactly once per codebase — a second run
- * would double-shift. A real run writes a `.tokens-v2-ink-shift` marker file
- * in each target directory and refuses to run again while one exists there
- * or in any ancestor directory.
+ * would double-shift. --ink-shift takes directory targets only; a real run
+ * writes a `.tokens-v2-ink-shift` marker file in each target directory and
+ * refuses to run again while one exists there, in any ancestor directory,
+ * or anywhere in the target subtree.
  * Old `ink-<family>-1` (the neutral-white step) has no
  * automatic destination (the new `-1` is a light tint, not white); it is
  * flagged for manual attention, never rewritten.
@@ -381,13 +382,6 @@ export const INK_SHIFT_FLAGGED_TOKENS = CHROMATIC_INK_FAMILIES.map(
 // double-shift.
 export const INK_SHIFT_MARKER = '.tokens-v2-ink-shift'
 
-// The directory a marker guards for a given CLI target: the target itself,
-// or the containing directory for a file target.
-export function inkShiftMarkerDir(target) {
-  const resolved = path.resolve(target)
-  return fs.statSync(resolved).isDirectory() ? resolved : path.dirname(resolved)
-}
-
 // Search the directory and every ancestor: a run on a repo root must also
 // block a later run on one of its subdirectories.
 export function findInkShiftMarker(dir) {
@@ -399,6 +393,21 @@ export function findInkShiftMarker(dir) {
     if (parent === current) return null
     current = parent
   }
+}
+
+// Search the subtree: a run on a subdirectory must also block a later run on
+// its parent, or the already-shifted subtree double-shifts. Mirrors walk()'s
+// directory skip list.
+export function findInkShiftMarkerBelow(dir) {
+  const resolved = path.resolve(dir)
+  const file = path.join(resolved, INK_SHIFT_MARKER)
+  if (fs.existsSync(file)) return file
+  for (const entry of fs.readdirSync(resolved, { withFileTypes: true })) {
+    if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) continue
+    const found = findInkShiftMarkerBelow(path.join(resolved, entry.name))
+    if (found) return found
+  }
+  return null
 }
 
 export function writeInkShiftMarker(dir) {
@@ -672,9 +681,19 @@ function main() {
   const { pre, post, likelyMigrated } = detectMigrationState(files)
   const mode = getMigrationMode({ likelyMigrated }, { force, radiusOnly, inkShift })
   const inkShiftMarkerDirs =
-    mode === 'ink-shift' ? [...new Set(targets.map(inkShiftMarkerDir))] : []
+    mode === 'ink-shift' ? [...new Set(targets.map((t) => path.resolve(t)))] : []
   if (mode === 'ink-shift') {
-    const marker = inkShiftMarkerDirs.map(findInkShiftMarker).find(Boolean)
+    // The marker records "this subtree shifted" — a file target would make it
+    // over-claim the whole directory, so only directory targets are allowed.
+    const fileTarget = inkShiftMarkerDirs.find((t) => !fs.statSync(t).isDirectory())
+    if (fileTarget) {
+      console.error(`\n✗  --ink-shift takes directory targets only, got a file: ${fileTarget}`)
+      console.error(`   The ${INK_SHIFT_MARKER} run-once marker guards a directory subtree.\n`)
+      process.exit(1)
+    }
+    const marker =
+      inkShiftMarkerDirs.map(findInkShiftMarker).find(Boolean) ||
+      inkShiftMarkerDirs.map(findInkShiftMarkerBelow).find(Boolean)
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
