@@ -1400,9 +1400,11 @@ fresh clone without it the guard is gone, and a teammate's re-run
 double-shifts. Delete it only to re-run the shift on purpose.
 
 Each marker is created exclusively, so two runs on the same directory cannot
-both start: the second stops before it rewrites anything. Nested targets (a
-repo root and one of its subdirectories) can still race — one more reason to
-run the shift once, per package root.
+both start: the second stops before it rewrites anything. For nested targets
+(a repo root and one of its subdirectories) the run searches again after it
+claims its markers, and stops if another run claimed an overlapping tree.
+Both runs can stop this way. Neither has rewritten a file at that point, so
+re-run whichever tree is still unshifted.
 
 The marker search follows the same symlink rule as the run: a marker in a
 linked external package never blocks a target the run would not rewrite. Run

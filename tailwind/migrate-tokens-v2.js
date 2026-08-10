@@ -386,13 +386,15 @@ export const INK_SHIFT_MARKER = '.tokens-v2-ink-shift'
 
 // Search the directory and every ancestor: a run on a repo root must also
 // block a later run on one of its subdirectories.
-export function findInkShiftMarker(dir) {
+// `ignore` holds the markers this run wrote itself. The claim-then-verify
+// pass searches again after writing, and must not stop on its own marker.
+export function findInkShiftMarker(dir, { ignore = new Set() } = {}) {
   // realpath, not resolve: a symlink alias must share the identity of its
   // target, or it bypasses the guard.
   let current = fs.realpathSync(dir)
   for (;;) {
     const file = path.join(current, INK_SHIFT_MARKER)
-    if (fs.existsSync(file)) return file
+    if (fs.existsSync(file) && !ignore.has(file)) return file
     const parent = path.dirname(current)
     if (parent === current) return null
     current = parent
@@ -410,13 +412,16 @@ function isInsideRoots(real, roots) {
 // what the run would rewrite. A link out of the target subtrees is skipped:
 // walk() does not rewrite it, so a marker there belongs to another codebase
 // and must not block this run.
-export function findInkShiftMarkerBelow(dir, roots = null, seenDirs = new Set()) {
+export function findInkShiftMarkerBelow(
+  dir,
+  { roots = null, seenDirs = new Set(), ignore = new Set() } = {},
+) {
   const resolved = fs.realpathSync(dir)
   const bounds = roots ?? [resolved]
   if (seenDirs.has(resolved)) return null
   seenDirs.add(resolved)
   const file = path.join(resolved, INK_SHIFT_MARKER)
-  if (fs.existsSync(file)) return file
+  if (fs.existsSync(file) && !ignore.has(file)) return file
   for (const entry of fs.readdirSync(resolved, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue
     const full = path.join(resolved, entry.name)
@@ -430,7 +435,7 @@ export function findInkShiftMarkerBelow(dir, roots = null, seenDirs = new Set())
       if (isDirectory && !isInsideRoots(fs.realpathSync(full), bounds)) continue
     }
     if (!isDirectory) continue
-    const found = findInkShiftMarkerBelow(full, bounds, seenDirs)
+    const found = findInkShiftMarkerBelow(full, { roots: bounds, seenDirs, ignore })
     if (found) return found
   }
   return null
@@ -775,7 +780,7 @@ function main() {
     const marker =
       inkShiftMarkerDirs.map((d) => findInkShiftMarker(d)).find(Boolean) ||
       inkShiftMarkerDirs
-        .map((d) => findInkShiftMarkerBelow(d, inkShiftMarkerDirs))
+        .map((d) => findInkShiftMarkerBelow(d, { roots: inkShiftMarkerDirs }))
         .find(Boolean)
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
@@ -818,12 +823,7 @@ function main() {
     // so the markers already written must go too. Keeping them would refuse a
     // retry on targets that never shifted.
     const written = []
-    try {
-      for (const dir of inkShiftMarkerDirs) {
-        writeInkShiftMarker(dir)
-        written.push(path.join(dir, INK_SHIFT_MARKER))
-      }
-    } catch (err) {
+    const rollBack = () => {
       for (const file of written) {
         try {
           fs.unlinkSync(file)
@@ -831,6 +831,14 @@ function main() {
           console.error(`   Could not remove ${file} — delete it before you re-run.`)
         }
       }
+    }
+    try {
+      for (const dir of inkShiftMarkerDirs) {
+        writeInkShiftMarker(dir)
+        written.push(path.join(dir, INK_SHIFT_MARKER))
+      }
+    } catch (err) {
+      rollBack()
       if (err.code === 'EEXIST') {
         console.error(`\n✗  Another --ink-shift run claimed ${err.path} first.`)
         console.error('   No file was rewritten here. Let that run finish.\n')
@@ -840,6 +848,27 @@ function main() {
       }
       process.exit(1)
     }
+
+    // Claim, then verify. An exclusive create only serialises runs on the SAME
+    // directory. Nested targets — a repo root against one of its
+    // subdirectories — claim different directories, so both could pass the
+    // first check. Searching again after the claim finds the other run's
+    // marker, which the first check could not have seen. Both runs may abort;
+    // that is the safe outcome, because neither has rewritten a file yet.
+    const ours = new Set(written)
+    const rival =
+      inkShiftMarkerDirs.map((d) => findInkShiftMarker(d, { ignore: ours })).find(Boolean) ||
+      inkShiftMarkerDirs
+        .map((d) => findInkShiftMarkerBelow(d, { roots: inkShiftMarkerDirs, ignore: ours }))
+        .find(Boolean)
+    if (rival) {
+      rollBack()
+      console.error(`\n✗  ${rival} appeared while this run was claiming its targets.`)
+      console.error('   Another --ink-shift run overlaps this one. No file was rewritten.')
+      console.error('   Let it finish, then re-run only what is still unshifted.\n')
+      process.exit(1)
+    }
+
     console.log(
       `Wrote ${INK_SHIFT_MARKER} in ${inkShiftMarkerDirs.join(', ')} — it blocks an accidental second run.\n`,
     )

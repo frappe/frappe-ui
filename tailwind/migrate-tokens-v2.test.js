@@ -288,6 +288,28 @@ describe('tokens v2 migration', () => {
     expect(findInkShiftMarkerBelow(root)).toBe(null)
   })
 
+  it('marker search ignores this run own markers but still finds a rival', () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    const sub = path.join(root, 'src')
+    fs.mkdirSync(sub)
+    // This is what claim-then-verify does: our own claim must not look like a
+    // rival, or every run would abort itself.
+    writeInkShiftMarker(root)
+    const ours = new Set([path.join(root, INK_SHIFT_MARKER)])
+    expect(findInkShiftMarker(root, { ignore: ours })).toBe(null)
+    expect(findInkShiftMarkerBelow(root, { ignore: ours })).toBe(null)
+
+    // A concurrent run claiming a nested target is still found.
+    writeInkShiftMarker(sub)
+    expect(findInkShiftMarkerBelow(root, { ignore: ours })).toBe(
+      path.join(sub, INK_SHIFT_MARKER),
+    )
+    expect(findInkShiftMarker(sub, { ignore: new Set([path.join(sub, INK_SHIFT_MARKER)]) })).toBe(
+      path.join(root, INK_SHIFT_MARKER),
+    )
+  })
+
   it('ink-shift CLI guard: real run writes the marker, a second real run refuses, --dry-run previews', () => {
     const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
     tempDirs.push(root)
