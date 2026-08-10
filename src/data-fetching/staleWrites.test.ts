@@ -181,6 +181,40 @@ describe('deletes record a version', () => {
 
     expect(docStore.getDoc('User', 'user1').value).toBe(null)
   })
+
+  it('a later-dispatched write settling after the delete cannot resurrect it either', async () => {
+    await seedUser1()
+    let dt = useDoctype<User>('User', { baseUrl })
+
+    // The delete is dispatched first and lands first; the save is dispatched
+    // later but settles last. For that save to have succeeded the server must
+    // have committed it before the delete, so the server still holds the
+    // document deleted — a delete is terminal regardless of dispatch order.
+    await Promise.all([
+      dt.delete.submit({ name: 'user1' }),
+      dt.setValue.submit({ name: 'user1', email: 'slow-stale@example.com' }),
+    ])
+
+    expect(docStore.getDoc('User', 'user1').value).toBe(null)
+  })
+
+  it('a reload racing a delete cannot re-publish the deleted doc', async () => {
+    await seedUser1()
+    let dt = useDoctype<User>('User', { baseUrl })
+    let doc = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+    })
+
+    // The reload is dispatched after the delete but can be answered before
+    // the delete commits. Whatever order the two settle in, the document
+    // stays deleted.
+    await Promise.all([dt.delete.submit({ name: 'user1' }), doc.reload()])
+
+    expect(docStore.getDoc('User', 'user1').value).toBe(null)
+  })
 })
 
 describe('reads do not record a version', () => {

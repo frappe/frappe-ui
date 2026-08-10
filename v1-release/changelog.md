@@ -24,8 +24,9 @@ same document. A version is recorded only when a mutating write lands: a
 newer request that failed wrote nothing on the server, so it does not make
 the older success stale, and a read (GET) is admitted on its version but
 records nothing — the server may answer a later reload before an earlier
-save commits, and the save must still land. A delete records too, so an
-older in-flight write cannot re-create a deleted document.
+save commits, and the save must still land. A delete records a fresh
+version when it settles — a delete is terminal — so no in-flight write or
+reload, whatever its dispatch order, can re-create a deleted document.
 
 `useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
 newer same-key submit of the same instance already outran — the store gate

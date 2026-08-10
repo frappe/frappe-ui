@@ -294,20 +294,19 @@ class DocStore {
     // and clearing the entry would hand the next slot a revision an older read
     // still matches.
     this.revisions.set(key, ++this.revisionCounter)
-    // A delete is a write, and it records: an older in-flight write settling
-    // after it must not re-create the document. The delete itself is never
-    // gated — a delete that succeeded is truthful whatever the dispatch
-    // order, since the server holds the document deleted either way. The
-    // ambient version (the DELETE request's dispatch version) orders it
-    // against concurrent writes; a manual `removeDoc` takes a fresh number,
-    // which gates everything dispatched before the call. `max`: the record
-    // only ever moves forward.
+    // A delete is a write, and it records a FRESH number, not its dispatch
+    // version: a delete becomes true when it settles. Any write already in
+    // flight — dispatched before or after the delete — must have been
+    // committed by the server before the delete to have succeeded, so its
+    // response is dead data and must not re-create the document. The same
+    // stamp covers a racing reload answered before the delete committed.
+    // Anything dispatched after this point takes a higher number and is
+    // admitted. The delete itself is never gated — a delete that succeeded
+    // is truthful whatever the dispatch order. `max`: the record only ever
+    // moves forward.
     this.writeVersions.set(
       key,
-      Math.max(
-        this.writeVersions.get(key) ?? 0,
-        this.currentWrite?.version ?? ++this.revisionCounter,
-      ),
+      Math.max(this.writeVersions.get(key) ?? 0, ++this.revisionCounter),
     )
     await idbStore.delete(this.storePrefix + key)
   }
