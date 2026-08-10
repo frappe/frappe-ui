@@ -83,7 +83,7 @@
            retry button beside the message replaces the message. -->
       <template v-if="error">
         <slot name="error" :error="error">
-          <div class="text-sm-medium text-ink-red-8">
+          <div class="text-sm-medium text-ink-red-7">
             Could not render this chart
           </div>
           <div class="truncate text-p-sm text-ink-gray-5">{{ error }}</div>
@@ -202,11 +202,11 @@ const isEmpty = computed(
   () => props.value === null || props.value === undefined,
 )
 
-// The `-8` inks are the ones Badge prints its green and red text in, and the
+// The `-7` inks are the ones Badge prints its green and red text in, and the
 // only stops on either ramp that clear text contrast against a white card.
 const TONE_CLASSES: Record<DeltaTone, string> = {
-  positive: 'text-ink-green-8',
-  negative: 'text-ink-red-8',
+  positive: 'text-ink-green-7',
+  negative: 'text-ink-red-7',
   neutral: 'text-ink-gray-6',
 }
 

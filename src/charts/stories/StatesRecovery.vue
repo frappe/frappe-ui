@@ -40,7 +40,7 @@ const card =
         subtitle="Press Retry to run it again"
       >
         <template #error="{ error: message }">
-          <span class="text-sm-medium text-ink-red-8">
+          <span class="text-sm-medium text-ink-red-7">
             Could not render this chart
           </span>
           <span class="max-w-sm text-p-sm text-ink-gray-5">{{ message }}</span>
