@@ -379,7 +379,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   }
 
   const keyboard = usePlotKeyboard({
-    count: () => rows.value.length,
+    marks: () => rows.value,
     move: (index) => {
       cursorSeries.value = Math.min(
         cursorSeries.value,
@@ -411,6 +411,11 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       reading.value = ''
     },
   })
+
+  // The reading names the series Enter would fire for, and the tooltip lists
+  // the visible ones. A legend toggle under a reader who is on the plot has to
+  // reach both, which the row list alone does not say.
+  watch(visibleSeries, () => keyboard.refresh(), { flush: 'post' })
 
   // Series that disappear while hidden shouldn't stay in the hidden list forever.
   watch(

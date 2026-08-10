@@ -9,8 +9,8 @@ type Move = { index: number; previous: number | null }
  * callback recorded. A scope stands in for the component: the count watcher
  * needs one to live in.
  */
-function setup(marks = 4) {
-  const count = ref(marks)
+function setup(count = 4) {
+  const marks = ref(Array.from({ length: count }, (_, i) => `mark ${i}`))
   const moves: Move[] = []
   const cleared: (number | null)[] = []
   const activated: number[] = []
@@ -19,7 +19,7 @@ function setup(marks = 4) {
 
   scope.run(() => {
     keyboard = usePlotKeyboard({
-      count: () => count.value,
+      marks: () => marks.value,
       move: (index, previous) => moves.push({ index, previous }),
       activate: (index) => activated.push(index),
       clear: (previous) => cleared.push(previous),
@@ -28,7 +28,7 @@ function setup(marks = 4) {
 
   const handlers = () => keyboard.attrs.value as Record<string, any>
   return {
-    count,
+    marks,
     moves,
     cleared,
     activated,
@@ -90,6 +90,20 @@ describe('usePlotKeyboard', () => {
     expect(plot.moves).toEqual([{ index: 0, previous: null }])
   })
 
+  // A press that ends outside the plot never sends the release back to it, so
+  // leaving the plot has to clear the flag as well.
+  it('takes the next focus after a press that ended elsewhere', () => {
+    const plot = setup()
+    plot.focus()
+    plot.pointerdown()
+    plot.blur()
+    plot.focus()
+    expect(plot.moves).toEqual([
+      { index: 0, previous: null },
+      { index: 0, previous: null },
+    ])
+  })
+
   // Fewer marks under a focused plot, and a cursor left past the end would make
   // Enter do nothing at all.
   it('follows the marks that remain when the data shrinks', async () => {
@@ -98,7 +112,7 @@ describe('usePlotKeyboard', () => {
     plot.press('End')
     expect(plot.keyboard.index.value).toBe(3)
 
-    plot.count.value = 2
+    plot.marks.value = ['mark 0', 'mark 1']
     await nextTick()
     expect(plot.keyboard.index.value).toBe(1)
 
@@ -106,10 +120,37 @@ describe('usePlotKeyboard', () => {
     expect(plot.activated).toEqual([1])
   })
 
+  // Same count, new values: the tooltip and the reading are taken at the move,
+  // so without this the plot announces a number that has gone.
+  it('reads the mark again when the data is replaced', async () => {
+    const plot = setup()
+    plot.focus()
+    plot.marks.value = ['new 0', 'new 1', 'new 2', 'new 3']
+    await nextTick()
+    expect(plot.moves).toEqual([
+      { index: 0, previous: null },
+      { index: 0, previous: 0 },
+    ])
+  })
+
+  it('reads the mark again when a chart asks', () => {
+    const plot = setup()
+    plot.focus()
+    plot.keyboard.refresh()
+    expect(plot.moves).toHaveLength(2)
+  })
+
+  it('does nothing on a refresh with no cursor', () => {
+    const plot = setup()
+    plot.keyboard.refresh()
+    expect(plot.moves).toEqual([])
+    expect(plot.cleared).toEqual([])
+  })
+
   it('drops the cursor when the last mark goes', async () => {
     const plot = setup()
     plot.focus()
-    plot.count.value = 0
+    plot.marks.value = []
     await nextTick()
     expect(plot.keyboard.index.value).toBe(null)
     expect(plot.cleared).toEqual([0])

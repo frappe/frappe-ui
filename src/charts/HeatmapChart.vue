@@ -268,7 +268,7 @@ function downplayCell(index: number | null) {
 }
 
 const keyboard = usePlotKeyboard({
-  count: () => matrix.value.cells.length,
+  marks: () => matrix.value.cells,
   move: (index, previous) => {
     downplayCell(previous)
     readCell(index)

@@ -562,6 +562,34 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-tooltip"]').should('not.exist')
     })
 
+    // The tooltip and the reading are taken when the cursor moves. New rows
+    // under a reader who is still on the plot have to reach both.
+    it('reads the bar under the cursor again when the data changes', () => {
+      const rows = ref(data)
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 480px; height: 300px' }, [
+                h(BarChart, {
+                  data: rows.value,
+                  x: 'month',
+                  y: ['sales'],
+                  echartOptions: { animation: false },
+                }),
+              ])
+          },
+        }),
+      )
+      plot().focus()
+      cy.get('[role="status"]').should('contain.text', '10')
+      cy.then(() => {
+        rows.value = [{ month: 'Jan', sales: 99, refunds: 4 }, ...data.slice(1)]
+      })
+      cy.get('[role="status"]').should('contain.text', '99')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', '99')
+    })
+
     it('clears the tooltip and the reading on blur', () => {
       mountChart()
       bars().should('have.length', data.length * 2)
