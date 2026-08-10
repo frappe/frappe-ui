@@ -170,7 +170,7 @@ import {
   sparklinePoints,
 } from './sparkline'
 import { paletteColors, useChartTheme } from './theme'
-import { documentDir } from './utils'
+import { documentDir, prefersReducedMotion } from './utils'
 import { useId } from '#utils/useId'
 import Skeleton from '#components/Skeleton/Skeleton.vue'
 import ChartCard from './components/ChartCard.vue'
@@ -332,13 +332,6 @@ function easeOut(progress: number) {
 function cancel() {
   if (frame !== undefined) cancelAnimationFrame(frame)
   frame = undefined
-}
-
-function prefersReducedMotion() {
-  return Boolean(
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
-  )
 }
 
 onBeforeUnmount(cancel)

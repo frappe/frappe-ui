@@ -21,11 +21,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the bands
+           with the arrow keys has not got. The same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -47,10 +52,16 @@
 import { computed, reactive, ref } from 'vue'
 import { SankeyChart as SankeySeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
 import { formatLabel, formatValue } from './format'
 import { useChartTheme } from './theme'
-import { chartAriaLabel, documentDir } from './utils'
+import {
+  chartAriaLabel,
+  documentDir,
+  elementCenter,
+  plotReading,
+} from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
@@ -132,7 +143,7 @@ const tooltip = reactive({
   items: [] as ChartTooltipItem[],
 })
 
-const { chart } = useChart({
+const { chart, dispatch } = useChart({
   container: plotEl,
   option: () => built.value.option,
   events: {
@@ -174,7 +185,12 @@ function showTooltip(params: any) {
     tooltip.open = false
     return
   }
+  showReading(reading, pointer.x, pointer.y)
+}
 
+type SankeyReading = { label: string; color: string; value: number }
+
+function showReading(reading: SankeyReading, x: number, y: number) {
   tooltip.label = reading.label
   tooltip.items = [
     {
@@ -187,8 +203,8 @@ function showTooltip(params: any) {
         : formatValue(reading.value),
     },
   ]
-  tooltip.x = pointer.x
-  tooltip.y = pointer.y
+  tooltip.x = x
+  tooltip.y = y
   tooltip.open = true
 }
 
@@ -211,6 +227,66 @@ function readingAt(params: any) {
   if (params?.dataType !== 'node' || !node) return undefined
   return { label: node.name, color: node.color, value: node.value }
 }
+
+// The flow is one tab stop and the arrow keys walk its bands: an echarts plot
+// draws into a single element, so there are no per-band nodes to tab through.
+// Bands only — a node is the sum of everything through it, and `linkClick` is
+// the only event a click can raise either.
+const reading = ref('')
+
+function readLink(index: number) {
+  const link = graph.value.links[index]
+  if (!link) return
+  const center = elementCenter(plotEl.value)
+  const label = `${link.source} → ${link.target}`
+  dispatch({
+    type: 'highlight',
+    seriesIndex: 0,
+    dataType: 'edge',
+    dataIndex: index,
+  })
+  showReading(
+    { label, color: link.color, value: link.value },
+    center?.x ?? pointer.x,
+    center?.y ?? pointer.y,
+  )
+  reading.value = plotReading(
+    label,
+    tooltip.items.map((item) => ({
+      label: item.label,
+      value: item.formattedValue,
+    })),
+  )
+}
+
+const keyboard = usePlotKeyboard({
+  count: () => graph.value.links.length,
+  move: readLink,
+  activate: (index) => {
+    const link = graph.value.links[index]
+    if (!link) return
+    emit('linkClick', {
+      source: link.source,
+      target: link.target,
+      value: link.value,
+      row: link.row,
+    })
+  },
+  clear: () => {
+    if (keyboard.index.value !== null) {
+      dispatch({
+        type: 'downplay',
+        seriesIndex: 0,
+        dataType: 'edge',
+        dataIndex: keyboard.index.value,
+      })
+    }
+    tooltip.open = false
+    reading.value = ''
+  },
+})
+
+const plotAttrs = keyboard.attrs
 
 defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
 </script>

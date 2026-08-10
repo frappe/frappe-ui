@@ -21,11 +21,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the grid
+           with the arrow keys has not got. The same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -66,6 +71,7 @@ import { HeatmapChart as HeatmapSeries } from 'echarts/charts'
 import { GridComponent, VisualMapContinuousComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildHeatmapMatrix,
   buildHeatmapOption,
@@ -73,7 +79,7 @@ import {
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
 import { useChartTheme } from './theme'
-import { chartAriaLabel, documentDir } from './utils'
+import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
@@ -157,7 +163,7 @@ const tooltip = reactive({
   items: [] as ChartTooltipItem[],
 })
 
-const { chart } = useChart({
+const { chart, dispatch } = useChart({
   container: plotEl,
   option: () => built.value.option,
   events: {
@@ -212,6 +218,90 @@ function showTooltip(dataIndex: number) {
   tooltip.y = pointer.y
   tooltip.open = true
 }
+
+// The grid is one tab stop and the arrow keys walk it: an echarts plot draws
+// into a single element, so there are no per-cell nodes to tab through. Left
+// and right run along the data order, up and down hold the column.
+const reading = ref('')
+
+function cellPoint(index: number) {
+  const el = plotEl.value
+  const cell = matrix.value.cells[index]
+  if (!el || !cell) return undefined
+  const rect = el.getBoundingClientRect()
+  const at = chart.value?.convertToPixel({ seriesIndex: 0 }, [
+    cell.xIndex,
+    cell.yIndex,
+  ]) as unknown as number[] | undefined
+
+  if (!at || at.some((n) => typeof n !== 'number' || isNaN(n))) {
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+  }
+  return { x: rect.left + at[0], y: rect.top + at[1] }
+}
+
+function readCell(index: number) {
+  const cell = matrix.value.cells[index]
+  if (!cell) return
+  const point = cellPoint(index)
+  if (point) {
+    pointer.x = point.x
+    pointer.y = point.y
+  }
+  dispatch({ type: 'highlight', seriesIndex: 0, dataIndex: index })
+  showTooltip(index)
+  reading.value = tooltip.open
+    ? plotReading(
+        tooltip.label,
+        tooltip.items.map((item) => ({
+          label: item.label,
+          value: item.formattedValue,
+        })),
+      )
+    : ''
+}
+
+const keyboard = usePlotKeyboard({
+  count: () => matrix.value.cells.length,
+  move: readCell,
+  // The column the cursor is in, one row along. A grid with a hole in it skips
+  // nothing sideways, so the vertical step is the one that has to look.
+  cross: (delta) => {
+    const cells = matrix.value.cells
+    const from = cells[keyboard.index.value ?? 0]
+    if (!from) return
+    const next = cells.findIndex(
+      (cell) =>
+        cell.xIndex === from.xIndex && cell.yIndex === from.yIndex + delta,
+    )
+    if (next < 0) return
+    keyboard.index.value = next
+    readCell(next)
+  },
+  activate: (index) => {
+    const cell = matrix.value.cells[index]
+    if (!cell) return
+    emit('cellClick', {
+      x: cell.x,
+      y: cell.y,
+      value: cell.value,
+      row: cell.row,
+    })
+  },
+  clear: () => {
+    if (keyboard.index.value !== null) {
+      dispatch({
+        type: 'downplay',
+        seriesIndex: 0,
+        dataIndex: keyboard.index.value,
+      })
+    }
+    tooltip.open = false
+    reading.value = ''
+  },
+})
+
+const plotAttrs = keyboard.attrs
 
 /** The ramp scale in the chrome, painted from the stops the cells came from. */
 const scale = computed(() => {

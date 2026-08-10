@@ -1,6 +1,10 @@
 <template>
+  <!-- The state is on the element as well as in what it draws, so an app can
+       style a loading or failed card from CSS without tracking the state
+       itself: `[data-state='error'] { … }`. -->
   <div
     data-slot="chart-container"
+    :data-state="state"
     class="flex h-full w-full min-w-0 flex-col gap-1.5"
     :dir="dir"
   >

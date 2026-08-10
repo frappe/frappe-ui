@@ -20,7 +20,18 @@
 
     <template #default>
       <div class="relative h-full w-full">
-        <div ref="plotEl" class="h-full w-full" dir="ltr" />
+        <div
+          ref="plotEl"
+          class="h-full w-full rounded-2 focus-visible:focus-ring"
+          dir="ltr"
+          role="img"
+          :aria-label="chartAriaLabel(title, subtitle)"
+          v-bind="plotAttrs"
+        />
+
+        <!-- The tooltip hangs off the pointer, which a reader walking the ring
+             with the arrow keys has not got. The same reading in text. -->
+        <span class="sr-only" role="status">{{ reading }}</span>
 
         <!-- HTML rather than an echarts graphic: swapping the readout on hover
              costs two spans instead of a `setOption` on the ring. -->
@@ -94,6 +105,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildDonutChartOption,
   buildDonutSlices,
@@ -101,7 +113,12 @@ import {
 } from './donutChartOptions'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { useChartTheme } from './theme'
-import { documentDir } from './utils'
+import {
+  chartAriaLabel,
+  documentDir,
+  elementCenter,
+  plotReading,
+} from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -293,6 +310,48 @@ const legendItems = computed<ChartLegendItem[]>(() =>
     hint: slice.hidden ? undefined : formatPercent(slice.percent),
   })),
 )
+
+// The ring is one tab stop and the arrow keys walk it: an echarts plot draws
+// into a single element, so there are no per-slice nodes to tab through.
+const reading = ref('')
+
+function readSlice(index: number) {
+  const slice = visibleSlices.value[index]
+  if (!slice) return
+  const center = elementCenter(plotEl.value)
+  if (center) {
+    pointer.x = center.x
+    pointer.y = center.y
+  }
+  hovered.value = slice.name
+  showTooltip(slice.name)
+  reading.value = plotReading(undefined, [
+    {
+      label: slice.label,
+      value: `${formatMeasure(slice.value)} ${formatPercent(slice.percent)}`,
+    },
+  ])
+}
+
+const { attrs: plotAttrs } = usePlotKeyboard({
+  count: () => visibleSlices.value.length,
+  move: readSlice,
+  activate: (index) => {
+    const slice = visibleSlices.value[index]
+    if (!slice) return
+    emit('sliceClick', {
+      name: slice.label,
+      value: slice.value,
+      percent: slice.percent,
+      rows: slice.rows,
+    })
+  },
+  clear: () => {
+    hovered.value = null
+    tooltip.open = false
+    reading.value = ''
+  },
+})
 
 function toggleSlice(name: string) {
   const hidden = hiddenSlices.value

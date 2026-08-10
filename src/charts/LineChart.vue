@@ -23,11 +23,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the plot
+           with the arrow keys has not got. This is the same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -120,6 +125,8 @@ const {
   legendItems,
   toggleSeries,
   hoverSeries,
+  plotAttrs,
+  reading,
 } = useAxisChart({
   config: () => config.value,
   format: () => normalized.value.format,
