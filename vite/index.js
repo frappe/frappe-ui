@@ -52,7 +52,30 @@ function frappeuiPlugin(options = {}) {
     config() {
       return {
         optimizeDeps: {
-          include: ['highlight.js/lib/core', 'interactjs'],
+          include: [
+            // Every entry here must be a frappe-ui dependency. A name that no
+            // installed package resolves makes Vite log "Failed to resolve
+            // dependency ... present in 'optimizeDeps.include'" on each dev
+            // start of every consuming app.
+            'highlight.js/lib/core',
+            // Deps behind the imperative `toast()` / `dialog.*` surfaces.
+            //
+            // Both are backed by module-level state — the `dialogs` ref in
+            // src/utils/dialog.ts and vue-sonner's ToastState — which a full
+            // page reload wipes. So when one of these is discovered late (the
+            // dep optimizer only crawls what the scanner reached, and it misses
+            // dynamic imports inside template expressions among other things),
+            // Vite logs "optimized dependencies changed. reloading" and the
+            // toast or dialog the user just triggered never paints. It works on
+            // the next click, which is what makes it read as flaky.
+            //
+            // Pre-declaring them keeps that discovery at server start. The cost
+            // is an esbuild pre-bundle the browser only downloads if something
+            // actually imports it, and every frappe-ui app pulls these anyway.
+            'reka-ui',
+            'vue-sonner',
+            'dompurify',
+          ],
         },
       }
     },

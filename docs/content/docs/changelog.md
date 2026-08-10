@@ -9,6 +9,45 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Data fetching (v2) — stale responses no longer write the shared stores (fix)
+
+Two concurrent writes to one document could leave `docStore`, `listStore`
+(and every view bound to them) on the response that settled last instead of
+the newest one, while `data` already held the fresh response (#1017).
+
+The gate lives in the stores. Every request takes a dispatch version; the
+response's store writes carry it, and the stores reject a write for a
+document that a later-dispatched request has already written. One freshness
+domain covers every writer — the `docs` side channel, the `useDoctype` /
+`useList` / `useDoc` hooks, and any mix of instances or paths writing the
+same document. A version is recorded only when a mutating write lands: a
+newer request that failed wrote nothing on the server, so it does not make
+the older success stale, and a read (GET) is admitted on its version but
+records nothing — the server may answer a later reload before an earlier
+save commits, and the save must still land. A delete records a fresh
+version when it settles — a delete is terminal — so no in-flight write or
+reload, whatever its dispatch order, can re-create a deleted document.
+One accepted limitation: the gate orders by dispatch time, so a read
+dispatched after a save, handled by the server before the save committed
+and answered after it, is admitted and republishes the pre-save value —
+resolving that needs server-side sequencing, which this design trades away.
+
+`useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
+newer same-key submit of the same instance already outran — the store gate
+protects the stores, this skip only avoids re-running hook side effects
+with a stale response. `useDoc`'s write members and `useNewDoc` skip their
+hooks the same way, but their store writes stay outside that skip: only the
+store gate decides them. It compares per document and knows whether the
+newer request landed, so an overtaken insert of a different document still
+lands, and an older success is kept when the newer submit failed.
+
+No API change. Behavior changes if you relied on it:
+
+- A stale `setValue`/`delete` on the same document no longer triggers
+  `useList`'s auto-refetch; the newest submit's refetch already ran.
+- Submits with different keys, and keyless submits (inserts), are
+  independent — all of their hooks still fire, as before.
+
 ### Charts — a new family at `frappe-ui/charts`
 
 A second chart family ships alongside the one at the package root. It is

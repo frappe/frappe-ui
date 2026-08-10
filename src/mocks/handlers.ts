@@ -92,7 +92,10 @@ export const handlers = [
   http.post(
     url('/api/v2/document/User/user1/method/update_email'),
     async ({ request }) => {
-      let body = await request.json()
+      let body = (await request.json()) as Record<string, any>
+      // Body values count: this method always targets user1, so two
+      // concurrent submits differ only in the email they send.
+      await delayIfSlow(...Object.values(body))
       return HttpResponse.json({
         docs: [
           {
