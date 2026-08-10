@@ -974,6 +974,7 @@ See the [Tabs](./components/tabs) component page for the full API.
 | `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
 | stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
 | `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
+| built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |
 | `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` — the icon silently stops rendering, nothing throws   |
 
 ```vue
@@ -1000,6 +1001,38 @@ See the [Tabs](./components/tabs) component page for the full API.
 
 `Tabs` exposes nothing on the template ref, and `TabList` gains full variant
 parity with `TabButtons`: `underline`, `subtle`, `ghost`, `browser-tab`.
+
+### Scrolling
+
+v0 shipped layout defaults: the root was `flex flex-1 overflow-hidden
+flex-col`, the tablist `overflow-x-auto`, and every panel `flex flex-col
+overflow-auto`. v1 sets none of them, because they broke as often as they
+helped — a `Tabs` that force-grows to fill its parent is wrong everywhere the
+tabs are not the whole screen.
+
+Nothing throws. Inside a height-constrained container the panel stops
+scrolling and overflows instead. Check any call site that relied on it.
+
+In composed mode the app owns the elements, so put the classes back where you
+want them:
+
+```vue
+<Tabs v-model="tab" class="flex min-h-0 flex-1 flex-col">
+  <TabList class="overflow-x-auto">…</TabList>
+  <TabPanel value="emails" class="min-h-0 flex-1 overflow-auto">…</TabPanel>
+</Tabs>
+```
+
+In shorthand mode the generated elements are not yours to class, so reach them
+through their `data-slot` hooks:
+
+```vue
+<Tabs
+  v-model="tab"
+  :tabs="items"
+  class="min-h-0 flex-1 [&_[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-panel]]:min-h-0 [&_[data-slot=tab-panel]]:flex-1 [&_[data-slot=tab-panel]]:overflow-auto"
+/>
+```
 
 ## TabButtons
 

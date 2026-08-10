@@ -128,6 +128,12 @@ Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
   borders, and visibility belong to the call site. The v0
   `[&_[role='tablist']]` selectors and the hidden-tablist hack are no longer
   needed
+- no component in the family ships layout defaults. v0 forced `flex flex-1
+  overflow-hidden flex-col` on the root, `overflow-x-auto` on the list, and
+  `flex flex-col overflow-auto` on every panel. A `Tabs` that force-grows to
+  fill its parent is wrong everywhere the tabs are not the whole screen, and
+  apps fought those defaults more often than they used them. Scrolling is the
+  call site's decision; the migration guide carries the recipe for both modes
 - every variant supports both orientations. `side` applies only when
   `variant = 'browser-tab'` and the root is `vertical`, matching v0
   `TabButtons`
