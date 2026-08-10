@@ -242,6 +242,39 @@ describe('reads do not record a version', () => {
   })
 })
 
+describe('invalidation is not a delete', () => {
+  it('an in-flight save repopulates the store after a transform-throws eviction', async () => {
+    await docStore.setDoc({
+      doctype: 'User',
+      name: 'user1',
+      email: 'poison',
+    })
+    let doc = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+      transform: (d) => {
+        if (d.email === 'poison') throw new Error('bad doc')
+        return d
+      },
+    })
+
+    // The save is in flight when the transform throws and evicts the doc.
+    // Eviction invalidates — the server still has the document — so the
+    // save's response must land and repopulate the store. Only a real
+    // delete records the terminal stamp that rejects in-flight writes.
+    let save = doc.setValue.submit({ email: 'slow-fresh@example.com' })
+    // Let the PUT dispatch (the slow mock answers after 60ms), then trigger
+    // the eviction while it is in flight.
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(doc.doc).toBe(null) // reads the poisoned doc, evicts it
+    await save
+
+    expect(storedEmail()).toBe('slow-fresh@example.com')
+  })
+})
+
 describe('docs channel robustness', () => {
   it('ignores a docs entry without doctype and still lands the response', async () => {
     await seedUser1()

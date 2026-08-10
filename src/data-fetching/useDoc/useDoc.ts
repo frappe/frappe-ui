@@ -184,7 +184,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       try {
         value = transform(value as TDoc & { doctype: string })
       } catch (e) {
-        docStore.removeDoc(doctype, nameStr)
+        // Invalidate, not remove: the doc broke locally, the server still
+        // has it. `removeDoc`'s terminal stamp would reject an in-flight
+        // write that should repopulate the store.
+        docStore.invalidateDoc(doctype, nameStr)
         return null
       }
     }

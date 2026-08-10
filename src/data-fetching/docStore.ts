@@ -266,13 +266,38 @@ class DocStore {
     await idbStore.setMany(docMap)
   }
 
+  /**
+   * Drop the local copy of a document the server still has (a broken cached
+   * doc, say). Unlike `removeDoc` it records nothing: an in-flight write may
+   * settle after the invalidation and repopulate the store — that response
+   * is still the server's truth.
+   */
   async invalidateDoc(doctype: string, name: string) {
     if (!doctype || !name) return
     const key = this.getKey(doctype, name)
     await this.cleanup(key)
   }
 
+  /**
+   * The document is deleted on the server. Records a FRESH version, not the
+   * delete's dispatch version: a delete becomes true when it settles. Any
+   * write already in flight — dispatched before or after the delete — must
+   * have been committed by the server before the delete to have succeeded,
+   * so its response is dead data and must not re-create the document. The
+   * same stamp covers a racing reload answered before the delete committed.
+   * Anything dispatched after this point takes a higher number and is
+   * admitted. The delete itself is never gated — a delete that succeeded is
+   * truthful whatever the dispatch order. `max`: the record only ever moves
+   * forward.
+   */
   removeDoc(doctype: string, name: string) {
+    if (doctype && name) {
+      const key = this.getKey(doctype, name)
+      this.writeVersions.set(
+        key,
+        Math.max(this.writeVersions.get(key) ?? 0, ++this.revisionCounter),
+      )
+    }
     return this.invalidateDoc(doctype, name)
   }
 
@@ -294,20 +319,9 @@ class DocStore {
     // and clearing the entry would hand the next slot a revision an older read
     // still matches.
     this.revisions.set(key, ++this.revisionCounter)
-    // A delete is a write, and it records a FRESH number, not its dispatch
-    // version: a delete becomes true when it settles. Any write already in
-    // flight — dispatched before or after the delete — must have been
-    // committed by the server before the delete to have succeeded, so its
-    // response is dead data and must not re-create the document. The same
-    // stamp covers a racing reload answered before the delete committed.
-    // Anything dispatched after this point takes a higher number and is
-    // admitted. The delete itself is never gated — a delete that succeeded
-    // is truthful whatever the dispatch order. `max`: the record only ever
-    // moves forward.
-    this.writeVersions.set(
-      key,
-      Math.max(this.writeVersions.get(key) ?? 0, ++this.revisionCounter),
-    )
+    // No `writeVersions` stamp here: cleanup serves invalidation too, and an
+    // invalidated doc still exists on the server — an in-flight write must
+    // stay admitted. The terminal stamp for real deletes lives in `removeDoc`.
     await idbStore.delete(this.storePrefix + key)
   }
 
