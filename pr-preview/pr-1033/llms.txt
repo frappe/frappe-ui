@@ -93,4 +93,4 @@ Fully supported through `1.x`; use Data Fetching above for new code.
 
 - [v1-release plan](https://github.com/frappe/frappe-ui/tree/main/v1-release): API-freeze plan, component specs, ADRs. Read when contributing to frappe-ui itself or making decisions about API direction.
 - [GitHub repository](https://github.com/frappe/frappe-ui): source, issues, releases.
-- [Changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md): notable changes per release.
+- [Changelog](https://ui.frappe.io/docs/changelog): notable changes per release.
