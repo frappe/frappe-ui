@@ -79,6 +79,56 @@ describe('ListJoin', () => {
     expect(lists[1].attrs!.start).toBe(7)
   })
 
+  it('keeps a list with its own marker style separate', () => {
+    const editor = editorWith(
+      '<ol><li><p>a</p></li></ol><p></p><ol type="a"><li><p>b</p></li></ol>',
+    )
+    const pos = emptyParagraphPos(editor)
+    editor.commands.deleteRange({ from: pos - 1, to: pos + 1 })
+
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(2)
+    expect(lists[1].attrs!.type).toBe('a')
+  })
+
+  it('merges a chain of three adjacent lists in one pass', () => {
+    const editor = editorWith(
+      '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol><ol><li><p>c</p></li></ol><p>x</p>',
+    )
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'y')
+
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].content).toHaveLength(3)
+  })
+
+  it('carries a non-default start across a split', () => {
+    const editor = editorWith(
+      '<ol start="5"><li><p>a</p></li><li><p>b</p></li><li><p>c</p></li></ol>',
+    )
+    let bPos = -1
+    editor.state.doc.descendants((node, pos) => {
+      if (node.isText && node.text === 'b') bPos = pos
+    })
+    editor.commands.setTextSelection(bPos + 1)
+    editor.commands.deleteRange({ from: bPos, to: bPos + 1 })
+    editor.commands.liftListItem('listItem')
+    // Remove the paragraph the lifted item left behind.
+    const pos = emptyParagraphPos(editor)
+    editor.commands.deleteRange({ from: pos - 1, to: pos + 1 })
+
+    const lists = editor
+      .getJSON()
+      .content!.filter((n) => n.type === 'orderedList')
+    expect(lists).toHaveLength(1)
+    expect(lists[0].attrs!.start).toBe(5)
+    expect(lists[0].content).toHaveLength(2)
+  })
+
   it('merges nested lists split inside a list item', () => {
     const editor = editorWith(
       '<ul><li><p>parent</p><ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol></li></ul>',
