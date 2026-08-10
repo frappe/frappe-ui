@@ -1,10 +1,45 @@
+import fs from 'fs'
+import os from 'os'
 import path from 'path'
 
 import { describe, expect, it } from 'vitest'
 
-import { findBrokenAnchorLinks, headingIds, slugify } from './anchor-links'
+import {
+  findBrokenAnchorLinks,
+  headingIds,
+  slugify,
+  type DocsRoot,
+} from './anchor-links'
 
-const CONTENT = path.resolve(__dirname, '../content/docs')
+const repoRoot = path.resolve(__dirname, '../..')
+
+/**
+ * The same roots `docs/.vitepress/config.ts` serves: the hand-written tree,
+ * then the four colocated ones it proxies in.
+ */
+const ROOTS: DocsRoot[] = [
+  { dir: path.join(repoRoot, 'docs/content/docs'), route: '/docs' },
+  {
+    dir: path.join(repoRoot, 'src/components'),
+    route: '/docs/components',
+    flatten: true,
+  },
+  {
+    dir: path.join(repoRoot, 'src/molecules'),
+    route: '/docs/molecules',
+    flatten: true,
+  },
+  {
+    dir: path.join(repoRoot, 'experimental'),
+    route: '/docs/experimental',
+    flatten: true,
+  },
+  {
+    dir: path.join(repoRoot, 'src/charts'),
+    route: '/docs/charts',
+    flatten: true,
+  },
+]
 
 describe('slugify', () => {
   it('collapses the hyphens that a separator run produces', () => {
@@ -39,6 +74,36 @@ describe('headingIds', () => {
 
 describe('docs anchor links', () => {
   it('every #fragment link resolves to a heading', () => {
-    expect(findBrokenAnchorLinks(CONTENT)).toEqual([])
+    expect(findBrokenAnchorLinks(ROOTS)).toEqual([])
+  })
+
+  it('resolves a relative link, and a flattened colocated route', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'anchor-links-'))
+    const content = path.join(dir, 'content')
+    const source = path.join(dir, 'src')
+    fs.mkdirSync(path.join(content, 'guides'), { recursive: true })
+    fs.mkdirSync(path.join(source, 'Button'), { recursive: true })
+
+    fs.writeFileSync(
+      path.join(content, 'guides/start.md'),
+      [
+        '# Start',
+        '[up](../index#welcome)',
+        '[sibling](./next.md#step-two)',
+        '[component](/docs/components/button#props)',
+        '[gone](../index#missing)',
+      ].join('\n\n'),
+    )
+    fs.writeFileSync(path.join(content, 'index.md'), '# Welcome')
+    fs.writeFileSync(path.join(content, 'guides/next.md'), '## Step two')
+    fs.writeFileSync(path.join(source, 'Button/Button.md'), '## Props')
+
+    const broken = findBrokenAnchorLinks([
+      { dir: content, route: '/docs' },
+      { dir: source, route: '/docs/components', flatten: true },
+    ])
+
+    fs.rmSync(dir, { recursive: true, force: true })
+    expect(broken.map((b) => b.href)).toEqual(['../index#missing'])
   })
 })
