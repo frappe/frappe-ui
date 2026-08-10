@@ -1277,6 +1277,11 @@ codebase; the token migration is not idempotent because some v2 names overlap
 with v0 names. The radius renames are idempotent and also run on
 already-migrated codebases.
 
+In every mode, the codemod stays inside the directories you give it. A
+symlink whose real path leaves the target — a file or a directory — is
+skipped and listed at the end of the run. Run the codemod on each real
+package root, so a shared package linked into several apps is migrated once.
+
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
 `text-xl` → `text-lg`, ...) and the radius renames. Apps that still have
@@ -1394,13 +1399,13 @@ delete the marker, and re-run. Commit the marker with the migration — on a
 fresh clone without it the guard is gone, and a teammate's re-run
 double-shifts. Delete it only to re-run the shift on purpose.
 
-Symlinks that point outside the target are skipped and listed at the end of
-the run. The marker search skips them too, so a marker in a linked external
-package never blocks a target the run would not rewrite. Run the codemod on
-each real package root directly, so every migrated tree gets its own marker. If the refusal names a marker inside a
-vendored dependency (for example `vendor/frappe-ui/.tokens-v2-ink-shift`),
-that dependency is already shifted — run the codemod per package root and
-leave the vendored marker alone.
+The marker search follows the same symlink rule as the run: a marker in a
+linked external package never blocks a target the run would not rewrite. Run
+the codemod on each real package root directly, so every migrated tree gets
+its own marker. If the refusal names a marker inside a vendored dependency
+(for example `vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is
+already shifted — run the codemod per package root and leave the vendored
+marker alone.
 
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
