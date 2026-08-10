@@ -4,10 +4,11 @@ import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   detectMigrationState,
+  findInkShiftMarker,
   getMigrationMode,
   INK_SHIFT_MARKER,
+  inkShiftMarkerDir,
   migrateTokens,
-  readInkShiftMarker,
   writeInkShiftMarker,
 } from './migrate-tokens-v2.js'
 
@@ -250,14 +251,32 @@ describe('tokens v2 migration', () => {
     expect(result.flagged).toEqual([])
   })
 
-  it('ink-shift marker round-trips: absent, written, read back', () => {
+  it('ink-shift marker round-trips: absent, written, found', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-'))
     tempDirs.push(dir)
 
-    expect(readInkShiftMarker(dir)).toBe(null)
+    expect(findInkShiftMarker(dir)).toBe(null)
     writeInkShiftMarker(dir)
-    expect(fs.existsSync(path.join(dir, INK_SHIFT_MARKER))).toBe(true)
-    expect(readInkShiftMarker(dir)).toContain('double-shift')
+    expect(findInkShiftMarker(dir)).toBe(path.join(dir, INK_SHIFT_MARKER))
+  })
+
+  it('ink-shift marker anchors to the target, and a root marker blocks a subdirectory run', () => {
+    // realpath: os.tmpdir() is a symlink on macOS, and path.resolve does not
+    // follow symlinks.
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    const sub = path.join(root, 'src')
+    fs.mkdirSync(sub)
+    const file = path.join(sub, 'a.vue')
+    fs.writeFileSync(file, '')
+
+    // A file target anchors to its containing directory.
+    expect(inkShiftMarkerDir(file)).toBe(sub)
+    expect(inkShiftMarkerDir(sub)).toBe(sub)
+
+    // A marker written at the root is found from the subdirectory.
+    writeInkShiftMarker(root)
+    expect(findInkShiftMarker(sub)).toBe(path.join(root, INK_SHIFT_MARKER))
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {

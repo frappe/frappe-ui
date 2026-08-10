@@ -57,7 +57,8 @@
  * tell whether the shift already ran (`ink-red-5` is a valid name on both
  * sides), so --ink-shift MUST run exactly once per codebase — a second run
  * would double-shift. A real run writes a `.tokens-v2-ink-shift` marker file
- * in the working directory and refuses to run again while it exists.
+ * in each target directory and refuses to run again while one exists there
+ * or in any ancestor directory.
  * Old `ink-<family>-1` (the neutral-white step) has no
  * automatic destination (the new `-1` is a light tint, not white); it is
  * flagged for manual attention, never rewritten.
@@ -374,13 +375,30 @@ export const INK_SHIFT_FLAGGED_TOKENS = CHROMATIC_INK_FAMILIES.map(
 )
 
 // `ink-red-5` is a valid name before and after the shift, so file content
-// cannot reveal a prior run. A marker file in the working directory is the
-// only guard against a silent double-shift.
+// cannot reveal a prior run. A marker file anchored to the migrated target
+// (not the caller's working directory — the codemod is often run from
+// elsewhere with an explicit path) is the only guard against a silent
+// double-shift.
 export const INK_SHIFT_MARKER = '.tokens-v2-ink-shift'
 
-export function readInkShiftMarker(dir) {
-  const file = path.join(dir, INK_SHIFT_MARKER)
-  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null
+// The directory a marker guards for a given CLI target: the target itself,
+// or the containing directory for a file target.
+export function inkShiftMarkerDir(target) {
+  const resolved = path.resolve(target)
+  return fs.statSync(resolved).isDirectory() ? resolved : path.dirname(resolved)
+}
+
+// Search the directory and every ancestor: a run on a repo root must also
+// block a later run on one of its subdirectories.
+export function findInkShiftMarker(dir) {
+  let current = path.resolve(dir)
+  for (;;) {
+    const file = path.join(current, INK_SHIFT_MARKER)
+    if (fs.existsSync(file)) return file
+    const parent = path.dirname(current)
+    if (parent === current) return null
+    current = parent
+  }
 }
 
 export function writeInkShiftMarker(dir) {
@@ -653,20 +671,22 @@ function main() {
   // Guard against a destructive second full pass (the color renames reuse names).
   const { pre, post, likelyMigrated } = detectMigrationState(files)
   const mode = getMigrationMode({ likelyMigrated }, { force, radiusOnly, inkShift })
+  const inkShiftMarkerDirs =
+    mode === 'ink-shift' ? [...new Set(targets.map(inkShiftMarkerDir))] : []
   if (mode === 'ink-shift') {
-    const marker = readInkShiftMarker(process.cwd())
-    if (marker !== null && !dryRun) {
-      console.error(`\n✗  ${INK_SHIFT_MARKER} found: --ink-shift already ran in this directory.`)
+    const marker = inkShiftMarkerDirs.map(findInkShiftMarker).find(Boolean)
+    if (marker && !dryRun) {
+      console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
-      console.error(`   Delete ${INK_SHIFT_MARKER} only to re-run the shift on purpose.\n`)
+      console.error('   Delete the marker only to re-run the shift on purpose.\n')
       process.exit(1)
     }
-    if (marker !== null) {
-      console.warn(`\n⚠  ${INK_SHIFT_MARKER} found: --ink-shift already ran here.`)
+    if (marker) {
+      console.warn(`\n⚠  ${marker} found: --ink-shift already ran on this target.`)
       console.warn('   A real run would double-shift and will refuse to start.\n')
     } else {
       console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
-      console.warn(`   A ${INK_SHIFT_MARKER} marker file will record this run.\n`)
+      console.warn(`   A ${INK_SHIFT_MARKER} marker file in each target directory will record this run.\n`)
     }
   }
   if (likelyMigrated && !radiusOnly && !inkShift) {
@@ -726,8 +746,10 @@ function main() {
   }
 
   if (mode === 'ink-shift' && !dryRun) {
-    writeInkShiftMarker(process.cwd())
-    console.log(`\nWrote ${INK_SHIFT_MARKER} — it blocks an accidental second run.`)
+    for (const dir of inkShiftMarkerDirs) writeInkShiftMarker(dir)
+    console.log(
+      `\nWrote ${INK_SHIFT_MARKER} in ${inkShiftMarkerDirs.join(', ')} — it blocks an accidental second run.`,
+    )
   }
 }
 

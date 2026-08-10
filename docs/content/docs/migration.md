@@ -1385,9 +1385,10 @@ This mode runs only the ink shift — no color renames, no typography, no
 radius renames. Run it exactly once per codebase. There is no way to detect
 a prior run from file content (`ink-red-5` is a valid name before and
 after), so a second run double-shifts. To guard against that, a real run
-writes a `.tokens-v2-ink-shift` marker file in the working directory and
-refuses to run again while it exists. Keep the marker until the migration
-lands; delete it only to re-run the shift on purpose.
+writes a `.tokens-v2-ink-shift` marker file in each target directory and
+refuses to run again while one exists there or in an ancestor directory.
+Keep the marker until the migration lands; delete it only to re-run the
+shift on purpose.
 
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
