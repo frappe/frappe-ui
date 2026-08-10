@@ -133,7 +133,7 @@ const {
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
   hiddenSeries,
-  onDatapointClick: (event) => emit('datapointClick', event),
+  onSelect: (event) => emit('select', event),
 })
 
 defineExpose<ChartExposed>({ chart: computed(() => chart.value) })

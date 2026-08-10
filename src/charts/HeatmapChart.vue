@@ -172,7 +172,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const cell = matrix.value.cells[params.dataIndex]
       if (!cell) return
-      emit('cellClick', {
+      emit('select', {
         x: cell.x,
         y: cell.y,
         value: cell.value,
@@ -281,7 +281,7 @@ const keyboard = usePlotKeyboard({
   activate: (index) => {
     const cell = matrix.value.cells[index]
     if (!cell) return
-    emit('cellClick', {
+    emit('select', {
       x: cell.x,
       y: cell.y,
       value: cell.value,

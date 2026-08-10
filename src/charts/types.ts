@@ -1007,10 +1007,11 @@ export type ChartActionsSlot = {
 
 export type AxisChartEmits = {
   /**
-   * A mark was clicked. Carries the series it belongs to, its position along
-   * the category axis, and the row behind it.
+   * A mark was selected, by click or by Enter on the keyboard cursor. Carries
+   * the series it belongs to, its position along the category axis, and the
+   * row behind it.
    */
-  datapointClick: [event: ChartDatapointEvent]
+  select: [event: ChartDatapointEvent]
 }
 
 export type AxisChartSlots = ChartActionsSlot &
@@ -1031,10 +1032,11 @@ export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
   /**
-   * A slice was clicked. The "Others" slice carries every row it grouped, so a
-   * caller can drill into the tail as well as into a named slice.
+   * A slice was selected, by click or by Enter on the keyboard cursor. The
+   * "Others" slice carries every row it grouped, so a caller can drill into
+   * the tail as well as into a named slice.
    */
-  sliceClick: [event: DonutSliceEvent]
+  select: [event: DonutSliceEvent]
 }
 
 export type DonutChartSlots = ChartActionsSlot &
@@ -1055,10 +1057,11 @@ export type DonutChartSlots = ChartActionsSlot &
 
 export type FunnelChartEmits = {
   /**
-   * A stage was clicked. Carries its position in the funnel and the row behind
-   * it; the whole column is the hit area, not just the shape it draws.
+   * A stage was selected, by click or by Enter on the keyboard cursor. Carries
+   * its position in the funnel and the row behind it; the whole column is the
+   * hit area, not just the shape it draws.
    */
-  stageClick: [event: FunnelStageEvent]
+  select: [event: FunnelStageEvent]
 }
 
 export type FunnelChartSlots = ChartActionsSlot &
@@ -1075,8 +1078,11 @@ export type FunnelChartSlots = ChartActionsSlot &
   }
 
 export type HeatmapChartEmits = {
-  /** A cell was clicked. Carries both its categories and the row behind it. */
-  cellClick: [event: HeatmapCellEvent]
+  /**
+   * A cell was selected, by click or by Enter on the keyboard cursor. Carries
+   * both its categories and the row behind it.
+   */
+  select: [event: HeatmapCellEvent]
 }
 
 export type HeatmapChartSlots = ChartActionsSlot &
@@ -1087,10 +1093,11 @@ export type HeatmapChartSlots = ChartActionsSlot &
 
 export type SankeyChartEmits = {
   /**
-   * A band was clicked. Carries its two nodes and the row behind it. A node
-   * emits nothing: it stands for every row that passes through it, not one.
+   * A band was selected, by click or by Enter on the keyboard cursor. Carries
+   * its two nodes and the row behind it. A node emits nothing: it stands for
+   * every row that passes through it, not one.
    */
-  linkClick: [event: SankeyLinkEvent]
+  select: [event: SankeyLinkEvent]
 }
 
 export type SankeyChartSlots = ChartActionsSlot &
@@ -1100,8 +1107,11 @@ export type SankeyChartSlots = ChartActionsSlot &
   }
 
 export type ScatterChartEmits = {
-  /** A point was clicked. Carries both measures and the row behind it. */
-  pointClick: [event: ScatterPointEvent]
+  /**
+   * A point was selected, by click or by Enter on the keyboard cursor. Carries
+   * both measures and the row behind it.
+   */
+  select: [event: ScatterPointEvent]
 }
 
 export type ScatterChartSlots = ChartActionsSlot &

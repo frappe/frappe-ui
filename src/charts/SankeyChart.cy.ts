@@ -79,10 +79,10 @@ describe('SankeyChart', () => {
     )
   })
 
-  it('emits linkClick with the row behind the band', () => {
-    mountChart({ onLinkClick: cy.spy().as('onClick') })
+  it('emits select with the row behind the band', () => {
+    mountChart({ onSelect: cy.spy().as('onSelect') })
     bands().first().click({ force: true })
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       source: 'Search',
       target: 'Trial',
       value: 120,
@@ -243,12 +243,12 @@ describe('SankeyChart', () => {
       )
     })
 
-    it('fires linkClick on Enter, for the band under the cursor', () => {
-      mountChart({ onLinkClick: cy.spy().as('onClick') })
+    it('fires select on Enter, for the band under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       bands().should('have.length', data.length)
       plot().focus()
       plot().type('{rightarrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         source: 'Referral',
         target: 'Trial',
         value: 80,

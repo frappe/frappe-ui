@@ -66,11 +66,11 @@ describe('DonutChart', () => {
       .and('contain.text', '50%')
   })
 
-  it('emits sliceClick with the row behind the slice', () => {
-    mountChart({ onSliceClick: cy.spy().as('onClick') })
+  it('emits select with the row behind the slice', () => {
+    mountChart({ onSelect: cy.spy().as('onSelect') })
     slices().should('have.length', data.length)
     onFirstSlice().click(350, 135)
-    cy.get('@onClick')
+    cy.get('@onSelect')
       .should('have.been.calledWithMatch', {
         name: 'Search',
         value: 50,
@@ -236,13 +236,13 @@ describe('DonutChart', () => {
       cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Direct')
     })
 
-    it('emits sliceClick for the slice under the cursor', () => {
-      mountChart({ onSliceClick: cy.spy().as('onClick') })
+    it('emits select for the slice under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       slices().should('have.length', data.length)
       plot().focus()
       plot().type('{rightarrow}')
       plot().type('{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         name: 'Direct',
         value: 30,
         percent: 30,

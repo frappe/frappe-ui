@@ -137,7 +137,7 @@ const {
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
   horizontal: () => Boolean(props.horizontal),
   hiddenSeries,
-  onDatapointClick: (event) => emit('datapointClick', event),
+  onSelect: (event) => emit('select', event),
 })
 
 defineExpose<ChartExposed>({ chart: computed(() => chart.value) })

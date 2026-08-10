@@ -152,7 +152,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const link = linkAt(params)
       if (!link) return
-      emit('linkClick', {
+      emit('select', {
         source: link.source,
         target: link.target,
         value: link.value,
@@ -230,7 +230,7 @@ function readingAt(params: any) {
 
 // The flow is one tab stop and the arrow keys walk its bands: an echarts plot
 // draws into a single element, so there are no per-band nodes to tab through.
-// Bands only — a node is the sum of everything through it, and `linkClick` is
+// Bands only — a node is the sum of everything through it, and `select` is
 // the only event a click can raise either.
 const reading = ref('')
 
@@ -265,7 +265,7 @@ const keyboard = usePlotKeyboard({
   activate: (index) => {
     const link = graph.value.links[index]
     if (!link) return
-    emit('linkClick', {
+    emit('select', {
       source: link.source,
       target: link.target,
       value: link.value,

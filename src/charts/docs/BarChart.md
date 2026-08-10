@@ -102,11 +102,12 @@ a date. `horizontal` swaps the two axes and the lines follow. A line outside the
 range the plot covers is not drawn — the scale follows the data, not the
 annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
 
-## Clicking a bar
+## Selecting a bar
 
-`datapointClick` reports the series, the value and the row behind the bar, so a
-chart can open the records it summarizes.
+`select` reports the series, the value and the row behind the bar, so a chart
+can open the records it summarizes. It fires on a click and on Enter or Space
+over the keyboard cursor.
 
-<ComponentPreview name="Charts-BarClick" csr="true" self-layout />
+<ComponentPreview name="Charts-BarSelect" csr="true" self-layout />
 
 <!-- @include: ./BarChart.api.md -->

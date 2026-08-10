@@ -199,7 +199,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const hit = pointAt(params)
       if (!hit) return
-      emit('pointClick', {
+      emit('select', {
         seriesName: hit.series.name,
         x: hit.point.x,
         y: hit.point.y,
@@ -377,7 +377,7 @@ const keyboard = usePlotKeyboard({
   activate: (index) => {
     const hit = walk.value[index]
     if (!hit) return
-    emit('pointClick', {
+    emit('select', {
       seriesName: hit.entry.name,
       x: hit.point.x,
       y: hit.point.y,

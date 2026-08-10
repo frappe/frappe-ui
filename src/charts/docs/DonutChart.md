@@ -12,7 +12,7 @@ prints — slices, tooltip and the total alike.
 
 ## Grouping the tail
 
-Slices past `maxSlices` are summed into a single "Others" slice. `sliceClick`
+Slices past `maxSlices` are summed into a single "Others" slice. `select`
 carries the rows behind the slice — every grouped row, for "Others".
 
 <ComponentPreview name="Charts-DonutOthers" csr="true" self-layout />

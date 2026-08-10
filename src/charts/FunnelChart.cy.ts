@@ -69,10 +69,10 @@ describe('FunnelChart', () => {
     cy.get('[aria-label="Visited, 50"]').should('exist')
   })
 
-  it('emits stageClick with the row behind the stage', () => {
-    mountChart({ onStageClick: cy.spy().as('onClick') })
+  it('emits select with the row behind the stage', () => {
+    mountChart({ onSelect: cy.spy().as('onSelect') })
     cy.get('[aria-label="Demoed, 30"]').click()
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       label: 'Demoed',
       value: 30,
       index: 1,
@@ -116,10 +116,10 @@ describe('FunnelChart', () => {
         })
     })
 
-    it('emits stageClick from the focused stage', () => {
-      mountChart({ onStageClick: cy.spy().as('onClick') })
+    it('emits select from the focused stage', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       cy.get('[aria-label="Won, 20"]').focus().type('{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         label: 'Won',
         value: 20,
         index: 2,

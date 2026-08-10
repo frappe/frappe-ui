@@ -108,10 +108,10 @@ describe('ScatterChart', () => {
     })
   })
 
-  it('emits pointClick with the row behind the point', () => {
-    mountChart({ label: 'account', onPointClick: cy.spy().as('onClick') })
+  it('emits select with the row behind the point', () => {
+    mountChart({ label: 'account', onSelect: cy.spy().as('onSelect') })
     points().first().click({ force: true })
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       x: 400,
       y: 1200,
       label: 'Acme',
@@ -372,12 +372,12 @@ describe('ScatterChart', () => {
       cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Globex')
     })
 
-    it('fires pointClick on Enter, for the point under the cursor', () => {
-      mountChart({ label: 'account', onPointClick: cy.spy().as('onClick') })
+    it('fires select on Enter, for the point under the cursor', () => {
+      mountChart({ label: 'account', onSelect: cy.spy().as('onSelect') })
       points().should('have.length', data.length)
       plot().focus()
       plot().type('{rightarrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         x: 900,
         y: 2400,
         label: 'Globex',

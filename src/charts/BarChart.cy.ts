@@ -76,10 +76,10 @@ describe('BarChart', () => {
   })
 
   describe('interaction', () => {
-    it('emits datapointClick with the row behind the bar', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+    it('emits select with the row behind the bar', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().first().click()
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
         dataIndex: 0,
         value: 10,
@@ -513,12 +513,12 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Feb')
     })
 
-    it('fires datapointClick on Enter, for the bar under the cursor', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+    it('fires select on Enter, for the bar under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().should('have.length', data.length * 2)
       plot().focus()
       plot().type('{rightarrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
         dataIndex: 1,
         value: 20,
@@ -529,11 +529,11 @@ describe('BarChart', () => {
     // Two dimensions to walk: left and right run along the categories, up and
     // down pick which series inside one Enter fires for.
     it('picks the series with up and down', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().should('have.length', data.length * 2)
       plot().focus()
       plot().type('{downarrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'refunds',
         dataIndex: 0,
         value: 4,
@@ -541,11 +541,11 @@ describe('BarChart', () => {
     })
 
     it('comes back up to the first series', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().should('have.length', data.length * 2)
       plot().focus()
       plot().type('{downarrow}{uparrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
         dataIndex: 0,
         value: 10,

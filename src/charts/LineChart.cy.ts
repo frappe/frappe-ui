@@ -68,14 +68,14 @@ describe('LineChart', () => {
       .and('contain.text', 'Refunds')
   })
 
-  it('emits datapointClick with the row behind the point', () => {
+  it('emits select with the row behind the point', () => {
     mountChart({
       seriesConfig: { sales: { showDataPoints: true } },
-      onDatapointClick: cy.spy().as('onClick'),
+      onSelect: cy.spy().as('onSelect'),
     })
     // The stroke is a thin target; the symbols are what a reader aims at.
     cy.get(`${MARKS} path[fill^="#"]`).first().click()
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       seriesName: 'sales',
       row: { month: 'Jan', sales: 10 },
     })
@@ -349,13 +349,13 @@ describe('LineChart', () => {
     })
 
     it('picks the series Enter fires for with up and down', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       lines().should('have.length', 2)
       plot().focus()
       plot().type('{downarrow}')
       reading().should('contain.text', 'Refunds')
       plot().type('{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'refunds',
         dataIndex: 0,
         value: 4,
@@ -363,13 +363,13 @@ describe('LineChart', () => {
       })
     })
 
-    it('emits datapointClick for the mark under the cursor', () => {
-      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+    it('emits select for the mark under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       lines().should('have.length', 2)
       plot().focus()
       plot().type('{rightarrow}')
       plot().type('{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
         dataIndex: 1,
         value: 20,

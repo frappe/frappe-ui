@@ -42,7 +42,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * beside it, so the reader gets both.
    */
   stackShares?: () => Map<string, (number | null)[]>
-  onDatapointClick?: (event: ChartDatapointEvent) => void
+  onSelect?: (event: ChartDatapointEvent) => void
 }
 
 /**
@@ -130,7 +130,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       click: (params: any) => {
         const row = rows.value[params.dataIndex]
         if (!row) return
-        args.onDatapointClick?.({
+        args.onSelect?.({
           seriesName: params.seriesName,
           dataIndex: params.dataIndex,
           value: Number(row[params.seriesName]),
@@ -399,7 +399,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       const row = rows.value[index]
       const series = visibleSeries.value[cursorSeries.value]
       if (!row || !series) return
-      args.onDatapointClick?.({
+      args.onSelect?.({
         seriesName: series.name,
         dataIndex: index,
         value: Number(row[series.name]),

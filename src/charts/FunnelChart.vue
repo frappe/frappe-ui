@@ -97,7 +97,7 @@
             @focus="focusStage(stage, $event)"
             @blur="clearHover"
             @click="
-              emit('stageClick', {
+              emit('select', {
                 label: stage.label,
                 value: stage.value,
                 index: stage.index,

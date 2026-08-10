@@ -245,7 +245,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const slice = sliceByName.value.get(params.name)
       if (!slice) return
-      emit('sliceClick', {
+      emit('select', {
         name: slice.label,
         value: slice.value,
         percent: slice.percent,
@@ -339,7 +339,7 @@ const { attrs: plotAttrs } = usePlotKeyboard({
   activate: (index) => {
     const slice = visibleSlices.value[index]
     if (!slice) return
-    emit('sliceClick', {
+    emit('select', {
       name: slice.label,
       value: slice.value,
       percent: slice.percent,

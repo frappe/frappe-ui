@@ -12,7 +12,7 @@ first, which is what a funnel is read for. `format` runs on the counts.
 ## Counts and clicks
 
 Turn the percentages off with `showPercentages: false` when the absolute counts
-are the point. `stageClick` reports the stage and its row.
+are the point. `select` reports the stage and its row.
 
 <ComponentPreview name="Charts-FunnelDeals" csr="true" self-layout />
 

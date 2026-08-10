@@ -7,7 +7,7 @@ A flow from one set of nodes to another, a band per row.
 `source`, `target` and `value` name the three columns a flow needs, so the data
 is one row per band. The nodes are the de-duplicated union of the source and
 target columns: a node that a row sends flow to and another row sends flow from
-sits between the two, which is how a multi-stage flow is drawn. `linkClick`
+sits between the two, which is how a multi-stage flow is drawn. `select`
 carries the row behind the band.
 
 <ComponentPreview name="Charts-SankeySignups" csr="true" self-layout />

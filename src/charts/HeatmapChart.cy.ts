@@ -87,10 +87,10 @@ describe('HeatmapChart', () => {
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '8')
   })
 
-  it('emits cellClick with the row behind the cell', () => {
-    mountChart({ onCellClick: cy.spy().as('onClick') })
+  it('emits select with the row behind the cell', () => {
+    mountChart({ onSelect: cy.spy().as('onSelect') })
     cells().first().click()
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       row: { day: 'Mon', hour: '9am', tickets: 4 },
     })
   })
@@ -218,12 +218,12 @@ describe('HeatmapChart', () => {
       cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Tue · 9am')
     })
 
-    it('fires cellClick on Enter, for the cell under the cursor', () => {
-      mountChart({ onCellClick: cy.spy().as('onClick') })
+    it('fires select on Enter, for the cell under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
       cells().should('have.length', data.length)
       plot().focus()
       plot().type('{rightarrow}{enter}')
-      cy.get('@onClick').should('have.been.calledWithMatch', {
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
         x: '10am',
         y: 'Mon',
         value: 8,

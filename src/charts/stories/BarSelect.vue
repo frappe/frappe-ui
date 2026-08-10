@@ -11,7 +11,7 @@ const warehouses = [
   { warehouse: 'Kolkata', picked: 1480, shipped: 1305 },
 ]
 
-const clicked = ref<ChartDatapointEvent | null>(null)
+const selected = ref<ChartDatapointEvent | null>(null)
 </script>
 
 <template>
@@ -24,15 +24,15 @@ const clicked = ref<ChartDatapointEvent | null>(null)
         :y-axis="{ title: 'Orders' }"
         title="Orders picked and shipped"
         subtitle="Fulfilment, week of 27 July 2026"
-        @datapoint-click="clicked = $event"
+        @select="selected = $event"
       />
     </div>
     <p class="text-p-sm text-ink-gray-5">
-      <template v-if="clicked">
-        Clicked {{ clicked.seriesName }} · {{ clicked.row.warehouse }} ·
-        {{ clicked.value.toLocaleString('en-US') }}
+      <template v-if="selected">
+        Selected {{ selected.seriesName }} · {{ selected.row.warehouse }} ·
+        {{ selected.value.toLocaleString('en-US') }}
       </template>
-      <template v-else>Click a bar.</template>
+      <template v-else>Select a bar.</template>
     </p>
   </div>
 </template>

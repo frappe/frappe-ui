@@ -7,7 +7,7 @@ Two measures read against each other, a point per row.
 `x` and `y` name the two value columns. Both axes are measured — this is the one
 chart in the family with no category axis — so each scale follows the data
 instead of anchoring to zero, and the cloud fills the plot. `label` names the
-column that titles a point in the tooltip, and `pointClick` carries the row
+column that titles a point in the tooltip, and `select` carries the row
 behind it.
 
 The `xAxis` title is drawn on its axis, the `yAxis` title above the plot, the
