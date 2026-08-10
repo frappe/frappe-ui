@@ -65,9 +65,9 @@ const indicatorClasses = computed(() =>
     : 'left-0 bottom-0 h-px w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-px transition-[width,transform]',
 )
 
-// Sliding active-pill surface for subtle/ghost: rides behind the triggers
-// (which keep their own active background off via `activeSurface: false`)
-// and carries the background + shadow between selections.
+// Sliding active-pill surface for subtle/ghost: rides behind the triggers,
+// which never paint an active background themselves, and carries the
+// background + shadow between selections.
 const pillIndicatorClasses = computed(() => [
   ...tabIndicatorSurfaceClasses(props.variant, props.size),
   tabIndicatorInsetClasses({
