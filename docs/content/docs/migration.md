@@ -1371,6 +1371,16 @@ Run the codemod once with `--ink-shift`:
 npx --package frappe-ui@beta tokens-v2 --ink-shift .
 ```
 
+Run the codemod in the same change as the frappe-ui upgrade that ships the
+shifted tokens. The upgrade without the codemod renders one shade off. The
+codemod without the upgrade also renders one shade off. Land both together.
+
+Add `--dry-run` first to review the renames before they apply:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
+```
+
 This mode runs only the ink shift — no color renames, no typography, no
 radius renames. Run it exactly once per codebase. There is no way to detect
 a prior run (`ink-red-5` is a valid name before and after), so a second run
