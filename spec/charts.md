@@ -93,6 +93,25 @@ the established pattern. `NumberCard` draws one by default, because a reading
 with no plot is a card, and `:card="false"` lets an app lay out several readings
 inside its own card.
 
+## The template ref
+
+Every echarts-backed chart hands back one member, the echarts instance, as
+`chart`. `FunnelChart` and `NumberCard` draw no echarts plot and hand back
+nothing.
+
+It is the imperative half of the escape hatch `echartOptions` opens for options.
+Reach for it when an app needs an echarts call that no option key expresses — an
+image for a download button in the `actions` slot, chart coordinates for an
+overlay of its own.
+
+Two limits. The instance is `undefined` until the plot has a size and the fonts
+settle, so watch it rather than read it once. And the component rebuilds the
+whole option with `notMerge: true` on every reactive change, so state applied
+through the instance does not survive the next prop change. `ECharts` is echarts'
+type, not the library's: a major echarts bump can change it inside a frappe-ui
+minor. [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) records why the
+handle is allowed and what it does not promise.
+
 ## Naming
 
 The color ramps carry one name each, from the CSS token through to the theme
