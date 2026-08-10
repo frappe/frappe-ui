@@ -686,7 +686,11 @@ function main() {
       console.warn('   A real run would double-shift and will refuse to start.\n')
     } else {
       console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
-      console.warn(`   A ${INK_SHIFT_MARKER} marker file in each target directory will record this run.\n`)
+      console.warn(
+        dryRun
+          ? `   A real run writes a ${INK_SHIFT_MARKER} marker file in each target directory; --dry-run writes nothing.\n`
+          : `   A ${INK_SHIFT_MARKER} marker file in each target directory will record this run.\n`,
+      )
     }
   }
   if (likelyMigrated && !radiusOnly && !inkShift) {
