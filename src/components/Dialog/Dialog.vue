@@ -286,10 +286,10 @@ const dialogIconClasses = computed(() => {
   const theme = iconTheme.value
   if (!theme) return 'text-ink-gray-5'
   const map: Record<DialogTheme, string> = {
-    yellow: 'text-ink-amber-6',
-    blue: 'text-ink-blue-6',
-    red: 'text-ink-red-8',
-    green: 'text-ink-green-6',
+    yellow: 'text-ink-amber-5',
+    blue: 'text-ink-blue-5',
+    red: 'text-ink-red-7',
+    green: 'text-ink-green-5',
   }
   return map[theme]
 })

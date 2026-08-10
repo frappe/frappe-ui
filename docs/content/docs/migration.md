@@ -1371,6 +1371,11 @@ codebase; the token migration is not idempotent because some v2 names overlap
 with v0 names. The radius renames are idempotent and also run on
 already-migrated codebases.
 
+In every mode, the codemod stays inside the directories you give it. A
+symlink whose real path leaves the target — a file or a directory — is
+skipped and listed at the end of the run. Run the codemod on each real
+package root, so a shared package linked into several apps is migrated once.
+
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
 `text-xl` → `text-lg`, ...) and the radius renames. Apps that still have
@@ -1450,6 +1455,63 @@ The codemod no longer merges `font-extrabold` (or `font-black`) onto a
 `text-*-black` class. It flags the pair under "needs manual attention"
 instead. If you need weight 800, keep `font-extrabold`; there is no
 letter-spacing-corrected style class for it.
+
+### Ink chromatic scales shift one level
+
+The updated espresso v2 tokens shift every chromatic ink scale down one
+level: the new `ink-red-1` is the old `ink-red-2`, and so on for all 11
+chromatic families. The scales now end at `-9`. `ink-gray` keeps its own
+9-step scale and does not shift. This is a **silent** break: every
+`ink-<family>-N` site renders one shade off after the token update.
+
+Run the codemod once with `--ink-shift`:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift .
+```
+
+Run the codemod in the same change as the frappe-ui upgrade that ships the
+shifted tokens. The upgrade without the codemod renders one shade off. The
+codemod without the upgrade also renders one shade off. Land both together.
+
+Add `--dry-run` first to review the renames before they apply:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
+```
+
+This mode runs only the ink shift — no color renames, no typography, no
+radius renames. Run it exactly once per codebase. There is no way to detect
+a prior run from file content (`ink-red-5` is a valid name before and
+after), so a second run double-shifts. To guard against that, `--ink-shift`
+takes directory targets only, and a real run writes a `.tokens-v2-ink-shift`
+marker file in each target directory. It refuses to run again while a marker
+exists in the target, an ancestor, or anywhere in the target subtree. The
+marker is written before the first file rewrite, so an interrupted run
+refuses to retry instead of double-shifting; restore the tree with git,
+delete the marker, and re-run. Commit the marker with the migration — on a
+fresh clone without it the guard is gone, and a teammate's re-run
+double-shifts. Delete it only to re-run the shift on purpose.
+
+Each marker is created exclusively, so two runs on the same directory cannot
+both start: the second stops before it rewrites anything. For nested targets
+(a repo root and one of its subdirectories) the run searches again after it
+claims its markers, and stops if another run claimed an overlapping tree.
+Both runs can stop this way. Neither has rewritten a file at that point, so
+re-run whichever tree is still unshifted.
+
+The marker search follows the same symlink rule as the run: a marker in a
+linked external package never blocks a target the run would not rewrite. Run
+the codemod on each real package root directly, so every migrated tree gets
+its own marker. If the refusal names a marker inside a vendored dependency
+(for example `vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is
+already shifted — run the codemod per package root and leave the vendored
+marker alone.
+
+The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
+these sites have no automatic destination. The codemod flags them under
+"needs manual attention". The usual fix is `text-white` (or the literal CSS
+color `white` in hand-written CSS).
 
 ## Editor
 

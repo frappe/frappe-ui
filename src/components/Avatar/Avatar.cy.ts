@@ -62,7 +62,7 @@ describe('Avatar', () => {
 
     cy.get('[data-cy="avatar"] > div')
       .should('have.class', 'bg-surface-blue-2')
-      .and('have.class', 'text-ink-blue-8')
+      .and('have.class', 'text-ink-blue-7')
   })
 
 })

@@ -44,10 +44,10 @@ const role = computed(() =>
 
 const iconColorClasses: Record<StatusTheme, string> = {
   gray: 'text-ink-gray-7',
-  blue: 'text-ink-blue-6',
-  green: 'text-ink-green-6',
-  amber: 'text-ink-amber-6',
-  red: 'text-ink-red-6',
+  blue: 'text-ink-blue-5',
+  green: 'text-ink-green-5',
+  amber: 'text-ink-amber-5',
+  red: 'text-ink-red-5',
 }
 
 // Auto icons are the exact Figma solid status glyphs.
@@ -111,10 +111,10 @@ const rowActionProps = computed(() =>
 // depending on stylesheet order. Skipped when the caller restyles the button.
 const rowActionLabelClasses: Record<StatusTheme, string> = {
   gray: '!text-ink-gray-7',
-  blue: '!text-ink-blue-7',
-  green: '!text-ink-green-7',
-  amber: '!text-ink-amber-7',
-  red: '!text-ink-red-7',
+  blue: '!text-ink-blue-6',
+  green: '!text-ink-green-6',
+  amber: '!text-ink-amber-6',
+  red: '!text-ink-red-6',
 }
 
 const rowActionLabelClass = computed(() =>

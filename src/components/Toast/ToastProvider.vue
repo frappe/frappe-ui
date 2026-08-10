@@ -19,8 +19,8 @@
           'flex shrink-0 text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base mr-2 ml-auto bg-transparent hover:bg-surface-gray-8 rounded-4 !transition-colors',
         cancelButton:
           'flex text-ink-blue-link font-medium py-1.5 px-2 text-base hover:bg-surface-gray-8 transition-colors',
-        error: '[&_[data-icon]]:text-ink-red-5',
-        warning: '[&_[data-icon]]:text-ink-amber-5',
+        error: '[&_[data-icon]]:text-ink-red-4',
+        warning: '[&_[data-icon]]:text-ink-amber-4',
       },
     }"
   />

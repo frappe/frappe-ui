@@ -34,12 +34,12 @@ describe('<Alert />', () => {
     cy.mount(Alert, { props: { title, theme: 'blue' } })
     cy.get('[data-slot="prefix"] svg')
       .should('exist')
-      .and('have.class', 'text-ink-blue-6')
+      .and('have.class', 'text-ink-blue-5')
 
     cy.mount(Alert, { props: { title, theme: 'red' } })
     cy.get('[data-slot="prefix"] svg')
       .should('exist')
-      .and('have.class', 'text-ink-red-6')
+      .and('have.class', 'text-ink-red-5')
 
     // Gray shows the info glyph in black ink (Figma default-intent master).
     cy.mount(Alert, { props: { title, theme: 'gray' } })
@@ -60,7 +60,7 @@ describe('<Alert />', () => {
     cy.mount(Alert, { props: { title, theme: 'green', icon: 'lucide-rocket' } })
     cy.get('[data-slot="prefix"] .lucide-rocket')
       .should('exist')
-      .and('have.class', 'text-ink-green-6')
+      .and('have.class', 'text-ink-green-5')
   })
 
   it('primaryAction click gets a working context.dismiss', () => {

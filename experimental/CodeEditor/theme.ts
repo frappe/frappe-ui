@@ -195,7 +195,7 @@ export function buildBaseTheme(
       color: 'var(--ink-gray-5, #64748b)',
     },
     '.cm-completionMatchedText': {
-      color: 'var(--ink-blue-6)',
+      color: 'var(--ink-blue-5)',
       textDecoration: 'none',
       fontWeight: '600',
     },
@@ -219,11 +219,11 @@ export async function buildSyntaxHighlight(
   const highlightStyle = HighlightStyle.define([
     {
       tag: [tags.keyword, tags.moduleKeyword, tags.controlKeyword],
-      color: 'var(--ink-blue-6)',
+      color: 'var(--ink-blue-5)',
     },
     {
       tag: [tags.string, tags.special(tags.string), tags.regexp],
-      color: 'var(--ink-green-6)',
+      color: 'var(--ink-green-5)',
     },
     {
       tag: [tags.comment, tags.lineComment, tags.blockComment],
@@ -232,11 +232,11 @@ export async function buildSyntaxHighlight(
     },
     {
       tag: [tags.number, tags.bool, tags.null, tags.atom],
-      color: 'var(--ink-amber-6)',
+      color: 'var(--ink-amber-5)',
     },
     {
       tag: [tags.typeName, tags.className, tags.namespace],
-      color: 'var(--ink-amber-6)',
+      color: 'var(--ink-amber-5)',
     },
     {
       tag: [
@@ -244,10 +244,10 @@ export async function buildSyntaxHighlight(
         tags.function(tags.propertyName),
         tags.labelName,
       ],
-      color: 'var(--ink-blue-6)',
+      color: 'var(--ink-blue-5)',
     },
-    { tag: [tags.propertyName, tags.attributeName], color: 'var(--ink-red-6)' },
-    { tag: [tags.tagName, tags.angleBracket], color: 'var(--ink-red-6)' },
+    { tag: [tags.propertyName, tags.attributeName], color: 'var(--ink-red-5)' },
+    { tag: [tags.tagName, tags.angleBracket], color: 'var(--ink-red-5)' },
     {
       tag: [tags.operator, tags.punctuation, tags.separator, tags.bracket],
       color: 'var(--ink-gray-6)',
@@ -259,14 +259,14 @@ export async function buildSyntaxHighlight(
     { tag: tags.meta, color: 'var(--ink-gray-5)' },
     {
       tag: [tags.link, tags.url],
-      color: 'var(--ink-blue-6)',
+      color: 'var(--ink-blue-5)',
       textDecoration: 'underline',
     },
-    { tag: tags.heading, color: 'var(--ink-blue-6)', fontWeight: 'bold' },
+    { tag: tags.heading, color: 'var(--ink-blue-5)', fontWeight: 'bold' },
     { tag: tags.strong, fontWeight: 'bold' },
     { tag: tags.emphasis, fontStyle: 'italic' },
     { tag: tags.strikethrough, textDecoration: 'line-through' },
-    { tag: tags.invalid, color: 'var(--ink-red-8)' },
+    { tag: tags.invalid, color: 'var(--ink-red-7)' },
   ])
   return cmState.Prec.highest(syntaxHighlighting(highlightStyle))
 }

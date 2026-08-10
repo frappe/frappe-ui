@@ -118,8 +118,8 @@ Icons: `size-4` default, `size-3.5` inline meta, `size-5` mobile row leading,
 Gray everywhere, except where color encodes meaning:
 
 - Status / priority / unread dots: `bg-surface-{red,amber,blue,green}-7`.
-- Financial sign: `text-ink-red-6` negative, `text-ink-green-6` positive.
-- SLA / severity: `ink-red-6/7`, `ink-green-6`, `ink-amber-7`.
+- Financial sign: `text-ink-red-5` negative, `text-ink-green-5` positive.
+- SLA / severity: `ink-red-5/6`, `ink-green-5`, `ink-amber-6`.
 - Status badges: `<Badge :label="status" :theme="statusTheme(status)" variant="subtle" />`
   with themes mapped in one lookup:
   `({ open: 'blue', closed: 'gray', error: 'red', done: 'green' })[s] ?? 'gray'`.
