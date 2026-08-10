@@ -317,6 +317,25 @@ describe('tokens v2 migration', () => {
     expect(fileRun.stderr).toContain('directory targets only')
   })
 
+  it('ink-shift CLI shifts a file once when targets overlap', () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    const sub = path.join(root, 'src')
+    fs.mkdirSync(sub)
+    const fixture = path.join(sub, 'a.vue')
+    fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+    const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+
+    const result = spawnSync(
+      process.execPath,
+      [script, '--ink-shift', root, sub],
+      { encoding: 'utf8' },
+    )
+    expect(result.status).toBe(0)
+    // One shift (-3 → -2), not one per overlapping target (-3 → -1).
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+  })
+
   it('getMigrationMode selects ink-shift regardless of migration state', () => {
     expect(getMigrationMode({ likelyMigrated: true }, { inkShift: true })).toBe('ink-shift')
     expect(getMigrationMode({ likelyMigrated: false }, { inkShift: true })).toBe('ink-shift')

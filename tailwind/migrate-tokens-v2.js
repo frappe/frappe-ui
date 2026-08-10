@@ -674,8 +674,19 @@ function main() {
     process.exit(1)
   }
 
+  // Dedupe by resolved path: overlapping targets (`src src/components`) must
+  // not process a shared file once per target — in ink-shift mode a second
+  // pass is a double-shift.
   const files = []
-  for (const target of targets) for (const file of walk(target)) files.push(file)
+  const seenFiles = new Set()
+  for (const target of targets) {
+    for (const file of walk(target)) {
+      const resolved = path.resolve(file)
+      if (seenFiles.has(resolved)) continue
+      seenFiles.add(resolved)
+      files.push(file)
+    }
+  }
 
   // Guard against a destructive second full pass (the color renames reuse names).
   const { pre, post, likelyMigrated } = detectMigrationState(files)
