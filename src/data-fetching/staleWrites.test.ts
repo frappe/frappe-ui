@@ -264,10 +264,19 @@ describe('invalidation is not a delete', () => {
     // Eviction invalidates — the server still has the document — so the
     // save's response must land and repopulate the store. Only a real
     // delete records the terminal stamp that rejects in-flight writes.
+    // Pin the ordering without wall-clock margins: the fetch wrapper takes
+    // the dispatch version right before calling the global fetch, so once
+    // the spy has fired, the PUT holds its stamp. Dispatch is a bounded
+    // chain of microtasks (the slow mock only delays server-side), so
+    // draining them deterministically reaches it.
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
     let save = doc.setValue.submit({ email: 'slow-fresh@example.com' })
-    // Let the PUT dispatch (the slow mock answers after 60ms), then trigger
-    // the eviction while it is in flight.
-    await new Promise((resolve) => setTimeout(resolve, 10))
+    for (let i = 0; i < 100 && fetchSpy.mock.calls.length === 0; i++) {
+      await Promise.resolve()
+    }
+    expect(fetchSpy).toHaveBeenCalled()
+    fetchSpy.mockRestore()
+
     expect(doc.doc).toBe(null) // reads the poisoned doc, evicts it
     await save
 

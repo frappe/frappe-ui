@@ -99,7 +99,7 @@ export const useFrappeFetch = createFetch({
         // wrapper is ever bypassed. The stores gate per document. `setDocs`
         // runs synchronously up to its IDB write, so its records are in
         // place when `updateRows` checks them.
-        let stamp = dispatchStamps.get(ctx.response) ?? {
+        let stamp = getDispatchStamp(ctx.response) ?? {
           version: docStore.nextWriteVersion(),
           record: true,
         }
