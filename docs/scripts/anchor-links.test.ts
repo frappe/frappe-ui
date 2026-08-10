@@ -96,7 +96,12 @@ describe('docs anchor links', () => {
     )
     fs.writeFileSync(path.join(content, 'index.md'), '# Welcome')
     fs.writeFileSync(path.join(content, 'guides/next.md'), '## Step two')
-    fs.writeFileSync(path.join(source, 'Button/Button.md'), '## Props')
+    fs.writeFileSync(
+      path.join(source, 'Button/Button.md'),
+      '<!-- @include: ./Button.api.md -->',
+    )
+    // The heading a component page inherits from its generated table.
+    fs.writeFileSync(path.join(source, 'Button/Button.api.md'), '## Props')
 
     const broken = findBrokenAnchorLinks([
       { dir: content, route: '/docs' },

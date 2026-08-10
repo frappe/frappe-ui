@@ -85,6 +85,24 @@ function stripFences(source: string): string {
 }
 
 /**
+ * Inline what `<!-- @include: ./x.md -->` pulls in, because those headings
+ * get ids on the rendered page too. Every component page takes its
+ * `## API Reference` from the generated `.api.md` next to it.
+ */
+function expandIncludes(source: string, file: string, depth = 0): string {
+  if (depth > 4) return source
+  return source.replace(
+    /<!--\s*@include:\s*([^\s>]+?)\s*-->/g,
+    (whole, href: string) => {
+      // The `#region` form includes a named slice; leave it to the renderer.
+      const target = path.resolve(path.dirname(file), href.split('#')[0])
+      if (href.includes('#') || !fs.existsSync(target)) return whole
+      return expandIncludes(fs.readFileSync(target, 'utf8'), target, depth + 1)
+    },
+  )
+}
+
+/**
  * A generated `@include` stub holds no headings of its own. It is untracked,
  * so it exists after a docs build and not in a fresh checkout; skip it either
  * way and read the colocated source instead.
@@ -154,16 +172,16 @@ export function findBrokenAnchorLinks(roots: DocsRoot[]): BrokenLink[] {
     else walk(root.dir, root)
   }
 
+  const read = (file: string) =>
+    expandIncludes(fs.readFileSync(file, 'utf8'), file)
+
   const ids = new Map(
-    pages.map(({ file, route }) => [
-      route,
-      headingIds(fs.readFileSync(file, 'utf8')),
-    ]),
+    pages.map(({ file, route }) => [route, headingIds(read(file))]),
   )
 
   const broken: BrokenLink[] = []
   for (const { file, route } of pages) {
-    const source = stripFences(fs.readFileSync(file, 'utf8'))
+    const source = stripFences(read(file))
     for (const [, href] of source.matchAll(/\]\(([^)\s]*#[^)\s]+)\)/g)) {
       const [page, fragment] = href.split('#')
 
