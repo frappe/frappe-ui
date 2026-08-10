@@ -317,27 +317,31 @@ describe('tokens v2 migration', () => {
     expect(fileRun.stderr).toContain('directory targets only')
   })
 
-  it('ink-shift CLI fails closed when interrupted: marker lands before rewrites, retry refuses', () => {
-    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
-    tempDirs.push(root)
-    // Unwritable file: the run crashes mid-loop after the marker is written.
-    const blocked = path.join(root, 'a.vue')
-    fs.writeFileSync(blocked, '<i class="text-ink-red-3"></i>')
-    fs.chmodSync(blocked, 0o444)
-    const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
-    const run = () =>
-      spawnSync(process.execPath, [script, '--ink-shift', root], { encoding: 'utf8' })
+  // chmod 0o444 does not stop root, so the simulated interrupt never happens there.
+  it.skipIf(process.getuid?.() === 0)(
+    'ink-shift CLI fails closed when interrupted: marker lands before rewrites, retry refuses',
+    () => {
+      const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+      tempDirs.push(root)
+      // Unwritable file: the run crashes mid-loop after the marker is written.
+      const blocked = path.join(root, 'a.vue')
+      fs.writeFileSync(blocked, '<i class="text-ink-red-3"></i>')
+      fs.chmodSync(blocked, 0o444)
+      const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+      const run = () =>
+        spawnSync(process.execPath, [script, '--ink-shift', root], { encoding: 'utf8' })
 
-    const interrupted = run()
-    expect(interrupted.status).not.toBe(0)
-    expect(fs.existsSync(path.join(root, INK_SHIFT_MARKER))).toBe(true)
-    expect(fs.readFileSync(blocked, 'utf8')).toContain('ink-red-3')
+      const interrupted = run()
+      expect(interrupted.status).not.toBe(0)
+      expect(fs.existsSync(path.join(root, INK_SHIFT_MARKER))).toBe(true)
+      expect(fs.readFileSync(blocked, 'utf8')).toContain('ink-red-3')
 
-    // The retry refuses instead of double-shifting whatever was rewritten.
-    const retry = run()
-    expect(retry.status).toBe(1)
-    expect(retry.stderr).toContain('already ran')
-  })
+      // The retry refuses instead of double-shifting whatever was rewritten.
+      const retry = run()
+      expect(retry.status).toBe(1)
+      expect(retry.stderr).toContain('already ran')
+    },
+  )
 
   it('ink-shift CLI shifts a file once when targets overlap', () => {
     const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
