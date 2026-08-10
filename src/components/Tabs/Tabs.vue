@@ -25,13 +25,13 @@ const slots = defineSlots<{
   /** Composed mode: `TabList` / `TabPanel` children. */
   default?: () => any
   /** Shorthand mode: leading content in every generated trigger. */
-  prefix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  'tab-prefix'?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: replaces the label region of every generated trigger. */
-  label?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  'tab-label'?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: trailing content in every generated trigger. */
-  suffix?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
+  'tab-suffix'?: (props: { tab: TabItem } & TabTriggerSlotProps) => any
   /** Shorthand mode: panel body for the selected tab. */
-  panel?: (props: { tab: TabItem }) => any
+  'tab-panel'?: (props: { tab: TabItem }) => any
 }>()
 
 if (import.meta.env.DEV) {
@@ -42,7 +42,7 @@ if (import.meta.env.DEV) {
       if (conflict && !warned) {
         warned = true
         console.warn(
-          '[frappe-ui] Tabs: default-slot children are not supported when `tabs` is set. Use the shorthand slots (#prefix/#label/#suffix/#panel) or drop the `tabs` prop.',
+          '[frappe-ui] Tabs: default-slot children are not supported when `tabs` is set. Use the shorthand slots (#tab-prefix/#tab-label/#tab-suffix/#tab-panel) or drop the `tabs` prop.',
         )
       }
     },
@@ -241,25 +241,25 @@ const visibleTabs = computed(() =>
           :disabled="tab.disabled"
           :route="tab.route"
         >
-          <template v-if="slots.prefix" #prefix="triggerSlotProps">
-            <slot name="prefix" :tab="tab" v-bind="triggerSlotProps" />
+          <template v-if="slots['tab-prefix']" #prefix="triggerSlotProps">
+            <slot name="tab-prefix" :tab="tab" v-bind="triggerSlotProps" />
           </template>
-          <template v-if="slots.label" #default="triggerSlotProps">
-            <slot name="label" :tab="tab" v-bind="triggerSlotProps" />
+          <template v-if="slots['tab-label']" #default="triggerSlotProps">
+            <slot name="tab-label" :tab="tab" v-bind="triggerSlotProps" />
           </template>
-          <template v-if="slots.suffix" #suffix="triggerSlotProps">
-            <slot name="suffix" :tab="tab" v-bind="triggerSlotProps" />
+          <template v-if="slots['tab-suffix']" #suffix="triggerSlotProps">
+            <slot name="tab-suffix" :tab="tab" v-bind="triggerSlotProps" />
           </template>
         </TabTrigger>
       </TabList>
 
-      <template v-if="slots.panel">
+      <template v-if="slots['tab-panel']">
         <TabPanel
           v-for="tab in visibleTabs"
           :key="tab.value"
           :value="tab.value"
         >
-          <slot name="panel" :tab="tab" />
+          <slot name="tab-panel" :tab="tab" />
         </TabPanel>
       </template>
     </template>

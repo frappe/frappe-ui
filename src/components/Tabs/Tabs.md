@@ -80,9 +80,9 @@ itself. An item with a `condition` renders only while the function returns true.
 When the selected tab disappears, the component selects the first visible
 trigger and emits `update:modelValue`.
 
-The `#prefix`, `#label`, `#suffix`, and `#panel` slots shape every generated
-tab; each one receives its item as `tab`. Put app-defined extras in the item's
-`data` field and read them as `tab.data`.
+The `#tab-prefix`, `#tab-label`, `#tab-suffix`, and `#tab-panel` slots shape
+every generated tab; each one receives its item as `tab`. Put app-defined
+extras in the item's `data` field and read them as `tab.data`.
 
 <ComponentPreview name="Tabs-Shorthand" />
 
@@ -100,7 +100,7 @@ owns the `TabList` and `TabPanel` elements. See the
 | `v-model="index"` (number)         | `v-model="value"` (trigger `value`)          |
 | `:tabs="[{ label: 'Emails' }]"`    | `value` is required; `label` is display-only |
 | `<template #tab-item>`             | `TabTrigger` props and slots                 |
-| `<template #tab-panel="{ tab }">`  | `<TabPanel :value>` children, or `#panel`    |
+| `<template #tab-panel="{ tab }">`  | `<TabPanel :value>` children; the shorthand slot keeps the same name |
 | `as="div"`                         | removed — compose the container directly     |
 | `[&_[role='tablist']]:...` classes | style `<TabList class="...">` directly       |
 

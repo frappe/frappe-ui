@@ -15,7 +15,7 @@ describe('Tabs', () => {
     cy.mount(Tabs, {
       props: { tabs: items },
       slots: {
-        panel: ({ tab }: { tab: (typeof items)[number] }) =>
+        'tab-panel': ({ tab }: { tab: (typeof items)[number] }) =>
           h('div', `${tab.label} content`),
       },
     })

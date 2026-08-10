@@ -53,22 +53,22 @@
     type: 'any'
   },
   {
-    name: 'prefix',
+    name: 'tab-prefix',
     description: 'Shorthand mode: leading content in every generated trigger.',
     type: '{ tab: TabItem; } & TabTriggerSlotProps'
   },
   {
-    name: 'label',
+    name: 'tab-label',
     description: 'Shorthand mode: replaces the label region of every generated trigger.',
     type: '{ tab: TabItem; } & TabTriggerSlotProps'
   },
   {
-    name: 'suffix',
+    name: 'tab-suffix',
     description: 'Shorthand mode: trailing content in every generated trigger.',
     type: '{ tab: TabItem; } & TabTriggerSlotProps'
   },
   {
-    name: 'panel',
+    name: 'tab-panel',
     description: 'Shorthand mode: panel body for the selected tab.',
     type: '{ tab: TabItem; }'
   }

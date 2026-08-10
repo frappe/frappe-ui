@@ -197,7 +197,7 @@ array and renders the parts itself:
 
 ```vue
 <Tabs v-model="tab" :tabs="items" variant="subtle">
-  <template #panel="{ tab }">…</template>
+  <template #tab-panel="{ tab }">…</template>
 </Tabs>
 ```
 
@@ -216,11 +216,11 @@ interface TabItem {
 
 Shorthand slots:
 
-- `#prefix="{ tab, selected, disabled }"` / `#suffix="{ ... }"` — forwarded
-  into every generated trigger
-- `#label="{ tab, selected, disabled }"` — replaces the label region of every
-  generated trigger
-- `#panel="{ tab }"` — the panel body for the selected tab
+- `#tab-prefix="{ tab, selected, disabled }"` / `#tab-suffix="{ ... }"` —
+  forwarded into every generated trigger
+- `#tab-label="{ tab, selected, disabled }"` — replaces the label region of
+  every generated trigger
+- `#tab-panel="{ tab }"` — the panel body for the selected tab
 
 Rules:
 
@@ -361,10 +361,16 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
   signature put `any` on the public surface and switched off typo checking for
   every other field, so `{ value, lable }` type-checked. App extras move to
   `data?: Record<string, unknown>` and reach the slots as `tab.data`.
-- **The shorthand label slot is `#label`**, not `#tab`. `#tab` read like it
-  rendered a whole tab; it replaces the label region only. `#prefix`/`#suffix`
-  keep their names — they are the same shared vocabulary the composed
-  `TabTrigger` uses.
+- **The root shorthand slots carry the `tab-` unit prefix**:
+  `#tab-prefix` / `#tab-label` / `#tab-suffix` / `#tab-panel`. They were
+  `#prefix` / `#tab` / `#suffix` / `#panel`. Every one of them is per-tab, and
+  P6 prefixes slots inside a repeated unit — `Select` names the same shape
+  `#item-prefix` / `#item-label` / `#item-suffix`, and `Tree` moved `#label` to
+  `#item-label` for the same reason. `#label` also already means the P5
+  labeling override at top level, so it could not carry a second meaning here.
+  Composed `TabTrigger` keeps plain `#prefix` / `#suffix`, which is what makes
+  the two modes distinguishable at the call site. `#tab-panel` lands back on
+  its v0 name.
 
 ### 2026-08-10 (track containment)
 

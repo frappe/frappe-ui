@@ -33,7 +33,7 @@ const tabs = [
       variant="subtle"
       class="rounded-4 border p-2"
     >
-      <template #panel="{ tab: t }">
+      <template #tab-panel="{ tab: t }">
         <div class="p-4 text-base text-ink-gray-7">{{ t.data?.content }}</div>
       </template>
     </Tabs>
