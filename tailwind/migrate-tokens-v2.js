@@ -436,12 +436,19 @@ export function findInkShiftMarkerBelow(dir, roots = null, seenDirs = new Set())
   return null
 }
 
+// `wx` fails when the file exists, so the create is the claim. Reading the
+// guard and then writing leaves a window in which two concurrent runs both
+// pass and both shift the same files; an exclusive create closes it for the
+// target directories. Nested targets (a root run against a subdirectory run)
+// still race — the ancestor and subtree searches cannot be atomic — which is
+// why the guide says to run the shift once, per package root.
 export function writeInkShiftMarker(dir) {
   fs.writeFileSync(
     path.join(dir, INK_SHIFT_MARKER),
     `The ink scale shift (tokens-v2 --ink-shift, #1016) ran here on ${new Date().toISOString()}.\n` +
       'A second run would double-shift every chromatic ink token.\n' +
       'Delete this file only to re-run the shift on purpose.\n',
+    { flag: 'wx' },
   )
 }
 
@@ -824,8 +831,13 @@ function main() {
           console.error(`   Could not remove ${file} — delete it before you re-run.`)
         }
       }
-      console.error(`\n✗  Could not write the ${INK_SHIFT_MARKER} marker: ${err.message}`)
-      console.error('   No file was rewritten. Fix the permission and re-run.\n')
+      if (err.code === 'EEXIST') {
+        console.error(`\n✗  Another --ink-shift run claimed ${err.path} first.`)
+        console.error('   No file was rewritten here. Let that run finish.\n')
+      } else {
+        console.error(`\n✗  Could not write the ${INK_SHIFT_MARKER} marker: ${err.message}`)
+        console.error('   No file was rewritten. Fix the permission and re-run.\n')
+      }
       process.exit(1)
     }
     console.log(

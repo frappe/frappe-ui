@@ -1399,6 +1399,11 @@ delete the marker, and re-run. Commit the marker with the migration — on a
 fresh clone without it the guard is gone, and a teammate's re-run
 double-shifts. Delete it only to re-run the shift on purpose.
 
+Each marker is created exclusively, so two runs on the same directory cannot
+both start: the second stops before it rewrites anything. Nested targets (a
+repo root and one of its subdirectories) can still race — one more reason to
+run the shift once, per package root.
+
 The marker search follows the same symlink rule as the run: a marker in a
 linked external package never blocks a target the run would not rewrite. Run
 the codemod on each real package root directly, so every migrated tree gets

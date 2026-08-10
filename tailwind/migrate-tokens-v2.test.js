@@ -318,6 +318,15 @@ describe('tokens v2 migration', () => {
     expect(fileRun.stderr).toContain('directory targets only')
   })
 
+  it('writeInkShiftMarker claims the directory: a second write throws EEXIST', () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(dir)
+    writeInkShiftMarker(dir)
+    // Exclusive create, so the claim is atomic: a concurrent run cannot pass
+    // the guard and write over the winner.
+    expect(() => writeInkShiftMarker(dir)).toThrow(/EEXIST/)
+  })
+
   // chmod 0o444 does not stop root, so the simulated interrupt never happens there.
   it.skipIf(process.getuid?.() === 0)(
     'ink-shift CLI fails closed when interrupted: marker lands before rewrites, retry refuses',
