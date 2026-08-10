@@ -41,6 +41,13 @@ function setup(count = 4) {
     pointerup: () => handlers().onPointerup(),
     press: (key: string) =>
       handlers().onKeydown({ key, preventDefault: () => {} }),
+    pressEvent: (key: string) => {
+      const event = { key, prevented: false, preventDefault() {
+        event.prevented = true
+      } }
+      handlers().onKeydown(event)
+      return event
+    },
   }
 }
 
@@ -62,6 +69,17 @@ describe('usePlotKeyboard', () => {
     plot.blur()
     expect(plot.cleared).toEqual([1])
     expect(plot.keyboard.index.value).toBe(null)
+  })
+
+  // A plot inside a dialog: the dialog closes on Escape unless something has
+  // already prevented the event. With no cursor the plot has nothing to
+  // dismiss, so it leaves the key alone.
+  it('leaves Escape alone when it has no cursor to drop', () => {
+    const plot = setup()
+    plot.focus()
+    expect(plot.pressEvent('Escape').prevented).toBe(true)
+    expect(plot.pressEvent('Escape').prevented).toBe(false)
+    expect(plot.cleared).toEqual([0])
   })
 
   it('holds no cursor to clear after Escape', () => {

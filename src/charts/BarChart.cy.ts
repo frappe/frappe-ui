@@ -1,5 +1,6 @@
 import { defineComponent, h, ref } from 'vue'
 import BarChart from './BarChart.vue'
+import Dialog from '../components/Dialog/Dialog.vue'
 import './style.css'
 
 const data = [
@@ -598,6 +599,45 @@ describe('BarChart', () => {
       plot().blur()
       cy.get('[data-slot="chart-tooltip"]').should('not.exist')
       cy.get('[role="status"]').should('have.text', '')
+    })
+
+    // The first Escape drops the cursor, and the plot keeps the key. With no
+    // cursor left it has nothing to dismiss, so the next Escape belongs to
+    // whatever is around the plot — the dialog it sits in.
+    it('gives Escape back once the cursor is gone', () => {
+      const open = ref(true)
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h(
+                Dialog,
+                {
+                  open: open.value,
+                  'onUpdate:open': (value: boolean) => (open.value = value),
+                },
+                {
+                  default: () =>
+                    h('div', { style: 'width: 480px; height: 300px' }, [
+                      h(BarChart, {
+                        data,
+                        x: 'month',
+                        y: ['sales'],
+                        echartOptions: { animation: false },
+                      }),
+                    ]),
+                },
+              )
+          },
+        }),
+      )
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('exist')
+      plot().type('{esc}')
+      cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      cy.get('[role="dialog"]').should('exist')
+      plot().type('{esc}')
+      cy.get('[role="dialog"]').should('not.exist')
     })
 
     // Nothing to walk, so the plot drops out of the tab order rather than

@@ -185,7 +185,11 @@ export function usePlotKeyboard<T>(
         if (index.value === null) step(1)
         else args.activate(index.value)
         break
+      // With no cursor there is nothing to dismiss, and the key belongs to
+      // whatever is around the plot — a dialog closes on the Escape that a
+      // prevented event would otherwise swallow.
       case 'Escape':
+        if (index.value === null) return
         leave()
         break
       default:
