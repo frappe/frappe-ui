@@ -9,17 +9,16 @@ defineProps({
   },
 });
 
-const activeTab = ref(0);
-
 const tabs = [
-	{ label: "Text Color" },
-  { label: "Font Size" },
-  { label: "Font Weight" },
-  { label: "Letter Spacing" },
-  { label: "Line Height" },
+  { value: "Text Color", label: "Text Color" },
+  { value: "Font Size", label: "Font Size" },
+  { value: "Font Weight", label: "Font Weight" },
+  { value: "Letter Spacing", label: "Letter Spacing" },
+  { value: "Line Height", label: "Line Height" },
 ];
 
-const activeTabLabel = computed(() => tabs[activeTab.value].label);
+const activeTab = ref(tabs[0].value);
+const activeTabLabel = computed(() => activeTab.value);
 
 const text = ref("The quick brown fox jumps over the lazy dog");
 
@@ -29,7 +28,7 @@ const para =
 
 <template>
   <div class="grid gap-3">
-    <Tabs :tabs v-model="activeTab" class="[&>div]:!px-1 rounded-4" />
+    <Tabs :tabs v-model="activeTab" class="[&_[data-slot=tab-list]]:!px-1 rounded-4" />
 
     <template v-if='activeTabLabel === "Text Color"'>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10">

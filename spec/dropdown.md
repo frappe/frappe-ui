@@ -255,7 +255,7 @@ Notes:
 
 `icon` takes a Vue component or a string, the same as in the selection
 pickers. Strings starting with `lucide-` render as that Lucide icon
-(`icon: 'lucide-pen'`), sized and colored by the component — `text-ink-red-6`
+(`icon: 'lucide-pen'`), sized and colored by the component — `text-ink-red-5`
 on a `theme: 'red'` row, `text-ink-gray-6` otherwise. Write the class out in
 full; a name built at runtime is invisible to Tailwind's scanner and renders
 nothing. Other strings still route to `FeatherIcon` for back-compat.

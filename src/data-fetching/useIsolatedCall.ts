@@ -31,14 +31,17 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  * The shared refs follow `useAction`'s newest-wins rule: `data` and `error`
  * belong to the submit that started last. A submit that is no longer the
  * newest when it settles only answers its own caller: it does not write
- * `data` or `error`, does not fire the `onSuccess`/`onError` hooks (where
- * `useDoc` writes its stores), and does not write the idb cache. `loading`
- * is true while any submit is in flight.
+ * `data` or `error`, does not fire the `onSuccess`/`onError` hooks, and does
+ * not write the idb cache. `loading` is true while any submit is in flight.
  *
- * One shared write is NOT gated: `useFrappeFetch`'s `afterFetch` pushes any
- * response carrying `docs` into `docStore`/`listStore` before the per-submit
- * call reaches the gated hooks, so a stale response can still land there.
- * Tracked in #1017.
+ * Store writes do NOT follow that rule — they go through `onStoreWrite`,
+ * which fires for every successful submit. `docStore`/`listStore` gate
+ * themselves: every write carries its request's dispatch version, and the
+ * stores reject a write for a document a later-dispatched request has
+ * already written (#1017). That gate is per document and knows whether the
+ * newer request actually landed, which this instance-wide rule does not: it
+ * would drop the insert of an overtaken submit for a different document,
+ * and drop an older success whose newer submit failed.
  *
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
  * response, resolves `null` on a failed request (read `error`), and rejects
@@ -47,10 +50,20 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  * One default differs from `useCall`: `immediate` is `false` here, because
  * every consumer is a write member that must only fire on `submit()`.
  */
+// `onStoreWrite` is internal: `useDoc` and `useNewDoc` use it to write the
+// shared stores. It is not part of the public call options, because the
+// stores decide freshness for it and a consumer callback cannot.
+type IsolatedCallOptions<
+  TResponse,
+  TParams extends BasicParams,
+> = UseCallOptions<TResponse, TParams> & {
+  onStoreWrite?: (data: TResponse) => void
+}
+
 export function useIsolatedCall<
   TResponse,
   TParams extends BasicParams = undefined,
->(options: UseCallOptions<TResponse, TParams>) {
+>(options: IsolatedCallOptions<TResponse, TParams>) {
   const {
     url,
     method = 'GET',
@@ -65,6 +78,7 @@ export function useIsolatedCall<
     beforeSubmit,
     onSuccess,
     onError,
+    onStoreWrite,
   } = options
 
   let submitParams = ref<TParams | null | undefined>(null)
@@ -152,12 +166,17 @@ export function useIsolatedCall<
           refetch: false,
           staleOnError,
           transform,
-          // The hooks and the cache write are shared side effects — this is
-          // where `useDoc` writes `docStore` and `listStore`. They follow the
-          // same newest-wins gate as `data` and `error` below: a submit that
-          // is no longer the newest fires nothing, or its stale response
-          // would overwrite a fresher one in the stores and in idb.
           onSuccess: (data: TResponse) => {
+            // Store writes run for every successful submit. They carry this
+            // request's dispatch stamp (this hook runs inside `useCall`'s
+            // write-version window), and the stores reject the stale ones
+            // per document — a finer and better-informed rule than the
+            // newest-started gate below.
+            onStoreWrite?.(data)
+            // The consumer hooks and the cache write are shared side
+            // effects, so they keep the newest-wins gate that `data` and
+            // `error` use: a stale response must not overwrite a fresher
+            // one in idb, nor report itself as the current outcome.
             if (!isNewest()) return
             if (normalizedCacheKey) {
               idbStore.set(normalizedCacheKey, data)

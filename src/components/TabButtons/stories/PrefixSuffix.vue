@@ -31,13 +31,13 @@ const viewButtons = [
   <div class="flex flex-col gap-6 p-2">
     <TabButtons v-model="inboxTab" :options="inboxButtons" size="md">
       <template #prefix="{ button }">
-        <span :class="inboxIcons[button.modelValue]" class="size-4 shrink-0" />
+        <span :class="inboxIcons[button.value]" class="size-4 shrink-0" />
       </template>
       <template #suffix="{ button }">
         <span
           class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
         >
-          {{ inboxCounts[button.modelValue] }}
+          {{ inboxCounts[button.value] }}
         </span>
       </template>
     </TabButtons>
@@ -45,17 +45,17 @@ const viewButtons = [
     <TabButtons
       v-model="inboxTab"
       :options="inboxButtons"
-      type="underline"
+      variant="underline"
       size="md"
     >
       <template #prefix="{ button }">
-        <span :class="inboxIcons[button.modelValue]" class="size-4 shrink-0" />
+        <span :class="inboxIcons[button.value]" class="size-4 shrink-0" />
       </template>
       <template #suffix="{ button }">
         <span
           class="rounded-full bg-surface-gray-2 px-1.5 text-xs text-ink-gray-7"
         >
-          {{ inboxCounts[button.modelValue] }}
+          {{ inboxCounts[button.value] }}
         </span>
       </template>
     </TabButtons>

@@ -33,8 +33,8 @@ const priorityIcon = {
   Low: 'lucide-signal-low',
 }
 const priorityColor = {
-  High: 'text-ink-red-7',
-  Medium: 'text-ink-amber-7',
+  High: 'text-ink-red-6',
+  Medium: 'text-ink-amber-6',
   Low: 'text-ink-gray-5',
 }
 

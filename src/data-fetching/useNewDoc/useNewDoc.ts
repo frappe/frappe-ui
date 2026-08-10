@@ -39,6 +39,16 @@ export function useNewDoc<T extends object>(
     },
     immediate: false,
     ...options,
+    // The store write lives here, not in `submit()`'s `.then`: this hook
+    // runs inside `useCall`'s `runWithWriteVersion` window, so the write
+    // carries the POST's dispatch stamp and records. In the `.then` it ran
+    // after the window closed — unversioned, always admitted, never
+    // recording — the one store write outside the gate (#1017). Matters
+    // when the caller supplies `name`: a stale earlier-dispatched response
+    // for the same document must not overwrite the insert.
+    onStoreWrite(created: DocResponse) {
+      docStore.setDoc({ doctype, ...created })
+    },
   })
 
   // Captured before `out.submit` is overwritten below — the new `submit`
@@ -46,17 +56,24 @@ export function useNewDoc<T extends object>(
   const callSubmit = out.submit
 
   function submit() {
-    return callSubmit()
-      .then((created) =>
-        docStore
-          .setDoc({ doctype, ...(created as DocResponse) })
-          .then(
-            () =>
-              docStore
-                .getDoc(doctype, (created as DocResponse).name.toString())
-                .value as T,
-          ),
-      )
+    return callSubmit().then((created) => {
+      const response = created as DocResponse | null
+      if (!response?.name) {
+        // A failed request resolves `null` (`useIsolatedCall`'s contract
+        // toward its own caller); `submit()` keeps rejecting instead.
+        throw (
+          (out.error as Error | null) ?? new Error(`insert ${doctype} failed`)
+        )
+      }
+      // The caller's own response, never the store's copy. The two only
+      // differ when another request's write won the store for this name —
+      // and then the store holds the OTHER caller's document, which is
+      // exactly what this caller must not receive. The store keeps the
+      // winning write; each caller resolves with the doc it created.
+      // `doctype` is merged the same way `onSuccess` merges it for the
+      // store, so the resolved doc keeps the shape callers had before.
+      return { doctype, ...response } as T
+    })
   }
 
   // Extend `out` in place rather than spreading it into a new `reactive()`.

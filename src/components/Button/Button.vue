@@ -101,26 +101,26 @@ export default defineComponent({
 
       const subtleClasses = {
         gray: 'text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-surface-blue-2 hover:bg-surface-blue-3 active:bg-surface-blue-4',
+        blue: 'text-ink-blue-5 bg-surface-blue-2 hover:bg-surface-blue-3 active:bg-surface-blue-4',
         green:
-          'text-ink-green-9 bg-surface-green-2 hover:bg-surface-green-3 active:bg-surface-green-4',
-        red: 'text-ink-red-8 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
+          'text-ink-green-8 bg-surface-green-2 hover:bg-surface-green-3 active:bg-surface-green-4',
+        red: 'text-ink-red-7 bg-surface-red-2 hover:bg-surface-red-3 active:bg-surface-red-4',
       }[props.theme]
 
       const outlineClasses = {
         gray: 'text-ink-gray-8 bg-surface-base border border-outline-gray-2 hover:border-outline-gray-3 active:border-outline-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-surface-base border border-outline-blue-1 hover:border-outline-blue-4 active:border-outline-blue-4 active:bg-surface-blue-4',
+        blue: 'text-ink-blue-5 bg-surface-base border border-outline-blue-1 hover:border-outline-blue-4 active:border-outline-blue-4 active:bg-surface-blue-4',
         green:
-          'text-ink-green-9 bg-surface-base border border-outline-green-3 hover:border-outline-green-5 active:border-outline-green-5 active:bg-surface-green-4',
-        red: 'text-ink-red-8 bg-surface-base border border-outline-red-1 hover:border-outline-red-3 active:border-outline-red-3 active:bg-surface-red-3',
+          'text-ink-green-8 bg-surface-base border border-outline-green-3 hover:border-outline-green-5 active:border-outline-green-5 active:bg-surface-green-4',
+        red: 'text-ink-red-7 bg-surface-base border border-outline-red-1 hover:border-outline-red-3 active:border-outline-red-3 active:bg-surface-red-3',
       }[props.theme]
 
       const ghostClasses = {
         gray: 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3 active:bg-surface-gray-4',
-        blue: 'text-ink-blue-6 bg-transparent hover:bg-surface-blue-3 active:bg-surface-blue-4',
+        blue: 'text-ink-blue-5 bg-transparent hover:bg-surface-blue-3 active:bg-surface-blue-4',
         green:
-          'text-ink-green-9 bg-transparent hover:bg-surface-green-3 active:bg-surface-green-4',
-        red: 'text-ink-red-8 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
+          'text-ink-green-8 bg-transparent hover:bg-surface-green-3 active:bg-surface-green-4',
+        red: 'text-ink-red-7 bg-transparent hover:bg-surface-red-3 active:bg-surface-red-4',
       }[props.theme]
 
       const focusClasses = {
@@ -152,17 +152,17 @@ export default defineComponent({
           'bg-surface-blue-2 text-ink-blue-link border border-outline-blue-1',
         'blue-ghost': 'text-ink-blue-link',
 
-        'green-solid': 'bg-surface-green-2 text-ink-green-5',
-        'green-subtle': 'bg-surface-green-2 text-ink-green-5',
+        'green-solid': 'bg-surface-green-2 text-ink-green-4',
+        'green-subtle': 'bg-surface-green-2 text-ink-green-4',
         'green-outline':
-          'bg-surface-green-2 text-ink-green-5 border border-outline-green-3',
-        'green-ghost': 'text-ink-green-5',
+          'bg-surface-green-2 text-ink-green-4 border border-outline-green-3',
+        'green-ghost': 'text-ink-green-4',
 
-        'red-solid': 'bg-surface-red-2 text-ink-red-5',
-        'red-subtle': 'bg-surface-red-2 text-ink-red-5',
+        'red-solid': 'bg-surface-red-2 text-ink-red-4',
+        'red-subtle': 'bg-surface-red-2 text-ink-red-4',
         'red-outline':
-          'bg-surface-red-2 text-ink-red-5 border border-outline-red-1',
-        'red-ghost': 'text-ink-red-5',
+          'bg-surface-red-2 text-ink-red-4 border border-outline-red-1',
+        'red-ghost': 'text-ink-red-4',
       }
       const disabledClasses = disabledClassesMap[themeVariant]
 
@@ -176,22 +176,22 @@ export default defineComponent({
         'gray-ghost': 'text-ink-gray-8 bg-surface-gray-4',
 
         'blue-solid': 'text-ink-base bg-surface-blue-8',
-        'blue-subtle': 'text-ink-blue-6 bg-surface-blue-4',
+        'blue-subtle': 'text-ink-blue-5 bg-surface-blue-4',
         'blue-outline':
-          'text-ink-blue-6 bg-surface-blue-4 border border-outline-blue-4',
-        'blue-ghost': 'text-ink-blue-6 bg-surface-blue-4',
+          'text-ink-blue-5 bg-surface-blue-4 border border-outline-blue-4',
+        'blue-ghost': 'text-ink-blue-5 bg-surface-blue-4',
 
         'green-solid': 'text-ink-base bg-surface-green-9',
-        'green-subtle': 'text-ink-green-9 bg-surface-green-4',
+        'green-subtle': 'text-ink-green-8 bg-surface-green-4',
         'green-outline':
-          'text-ink-green-9 bg-surface-green-4 border border-outline-green-5',
-        'green-ghost': 'text-ink-green-9 bg-surface-green-4',
+          'text-ink-green-8 bg-surface-green-4 border border-outline-green-5',
+        'green-ghost': 'text-ink-green-8 bg-surface-green-4',
 
         'red-solid': 'text-ink-base bg-surface-red-9',
-        'red-subtle': 'text-ink-red-8 bg-surface-red-4',
+        'red-subtle': 'text-ink-red-7 bg-surface-red-4',
         'red-outline':
-          'text-ink-red-8 bg-surface-red-3 border border-outline-red-3',
-        'red-ghost': 'text-ink-red-8 bg-surface-red-4',
+          'text-ink-red-7 bg-surface-red-3 border border-outline-red-3',
+        'red-ghost': 'text-ink-red-7 bg-surface-red-4',
       }
       const activeClasses = activeClassesMap[themeVariant]
 

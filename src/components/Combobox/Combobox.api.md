@@ -244,11 +244,6 @@
 
   const emitsData = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the committed value changes.',
-    type: '[value: ComboboxOptionValue | null]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -262,6 +257,11 @@
     name: 'focus',
     description: 'Fired when the input receives focus.',
     type: '[event: FocusEvent]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the committed value changes.',
+    type: '[value: ComboboxOptionValue | null]'
   },
   {
     name: 'update:query',

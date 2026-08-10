@@ -7,7 +7,7 @@ pageClass: migration-page
 A guide for moving an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section opens with a before/after table. For
 the full change list see the
-[changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md);
+[changelog](/docs/changelog);
 for the rationale behind each API see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
@@ -956,6 +956,100 @@ for the full API.
 padding — that's app-owned now (see the component page's Collapse section for
 the full composition contract).
 
+## Tabs
+
+The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
+`TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index.
+See the [Tabs](./components/tabs) component page for the full API.
+
+| Before                                      | After                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `v-model="tabIndex"` (index)                | `v-model="tab"` (trigger `value`)                                          |
+| `:tabs="[{ label, icon }]"` (required)      | `<TabTrigger>` children; the `tabs` shorthand stays for generated sets     |
+| `label` implied the value                   | `value` is required on every trigger                                       |
+| `as="div"`                                  | removed — compose and style the container directly                         |
+| `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#tab-label` in shorthand mode |
+| extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
+| `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot keeps the same name       |
+| `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
+| stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
+| `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
+| built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |
+| `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` — the icon silently stops rendering, nothing throws   |
+
+```vue
+<!-- Before -->
+<Tabs v-model="tabIndex" :tabs="[{ label: 'Emails' }, { label: 'Calls' }]">
+  <template #tab-item="{ tab, selected }">
+    <span :class="selected ? 'text-ink-gray-9' : ''">{{ tab.label }}</span>
+  </template>
+  <template #tab-panel="{ tab }">
+    <div>{{ tab.label }} content</div>
+  </template>
+</Tabs>
+
+<!-- After -->
+<Tabs v-model="tab">
+  <TabList>
+    <TabTrigger value="emails" label="Emails" />
+    <TabTrigger value="calls" label="Calls" />
+  </TabList>
+  <TabPanel value="emails">Emails content</TabPanel>
+  <TabPanel value="calls">Calls content</TabPanel>
+</Tabs>
+```
+
+`Tabs` exposes nothing on the template ref, and `TabList` gains full variant
+parity with `TabButtons`: `underline`, `subtle`, `ghost`, `browser-tab`.
+
+### Scrolling
+
+v0 shipped layout defaults: the root was `flex flex-1 overflow-hidden
+flex-col`, the tablist `overflow-x-auto`, and every panel `flex flex-col
+overflow-auto`. v1 sets none of them, because they broke as often as they
+helped — a `Tabs` that force-grows to fill its parent is wrong everywhere the
+tabs are not the whole screen.
+
+Nothing throws. Inside a height-constrained container the panel stops
+scrolling and overflows instead. Check any call site that relied on it.
+
+In composed mode the app owns the elements, so put the classes back where you
+want them:
+
+```vue
+<Tabs v-model="tab" class="flex min-h-0 flex-1 flex-col">
+  <TabList class="overflow-x-auto">…</TabList>
+  <TabPanel value="emails" class="min-h-0 flex-1 overflow-auto">…</TabPanel>
+</Tabs>
+```
+
+In shorthand mode the generated elements are not yours to class, so reach them
+through their `data-slot` hooks:
+
+```vue
+<Tabs
+  v-model="tab"
+  :tabs="items"
+  class="min-h-0 flex-1 [&_[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-panel]]:min-h-0 [&_[data-slot=tab-panel]]:flex-1 [&_[data-slot=tab-panel]]:overflow-auto"
+/>
+```
+
+## TabButtons
+
+`TabButtons` keeps its radiogroup role — a value input, not a panel switcher —
+and aligns its vocabulary with the Tabs family. See the
+[TabButtons](./components/tabbuttons) component page for the full API.
+
+| Before                                      | After                                       |
+| ------------------------------------------- | ------------------------------------------- |
+| `type="ghost"`                              | `variant="ghost"`                           |
+| `:buttons="items"` (deprecated)             | `:options="items"`                          |
+| `{ label: 'Day' }` (label as value)         | `value` is required on every option         |
+| `{ active: true }` fallback                 | the `v-model` is the single source of truth |
+| boolean `value` / `modelValue`              | `string \| number` only                     |
+| wrapper divs / raw CSS for equal-width tabs | `fluid` prop                                |
+| `iconRight` on an option                    | `<template #suffix>` — silent, nothing throws |
+
 ## Data fetching (useDoctype / useList)
 
 The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
@@ -1161,7 +1255,7 @@ differ or were renamed.
 
 **Breaking, silent:** every icon-name prop across the library (`Button.icon`
 / `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
-`icon`, `TabButtons` options `icon` / `iconLeft` / `iconRight`, the `Icon`
+`icon`, `TabButtons` options `icon` / `iconLeft`, the `Icon`
 component's `name` prop) used to render a bare feather-style name (e.g.
 `"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
 unrecognized string now renders nothing. No build or type error — the icon
@@ -1277,6 +1371,11 @@ codebase; the token migration is not idempotent because some v2 names overlap
 with v0 names. The radius renames are idempotent and also run on
 already-migrated codebases.
 
+In every mode, the codemod stays inside the directories you give it. A
+symlink whose real path leaves the target — a file or a directory — is
+skipped and listed at the end of the run. Run the codemod on each real
+package root, so a shared package linked into several apps is migrated once.
+
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
 `text-xl` → `text-lg`, ...) and the radius renames. Apps that still have
@@ -1356,6 +1455,63 @@ The codemod no longer merges `font-extrabold` (or `font-black`) onto a
 `text-*-black` class. It flags the pair under "needs manual attention"
 instead. If you need weight 800, keep `font-extrabold`; there is no
 letter-spacing-corrected style class for it.
+
+### Ink chromatic scales shift one level
+
+The updated espresso v2 tokens shift every chromatic ink scale down one
+level: the new `ink-red-1` is the old `ink-red-2`, and so on for all 11
+chromatic families. The scales now end at `-9`. `ink-gray` keeps its own
+9-step scale and does not shift. This is a **silent** break: every
+`ink-<family>-N` site renders one shade off after the token update.
+
+Run the codemod once with `--ink-shift`:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift .
+```
+
+Run the codemod in the same change as the frappe-ui upgrade that ships the
+shifted tokens. The upgrade without the codemod renders one shade off. The
+codemod without the upgrade also renders one shade off. Land both together.
+
+Add `--dry-run` first to review the renames before they apply:
+
+```sh
+npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
+```
+
+This mode runs only the ink shift — no color renames, no typography, no
+radius renames. Run it exactly once per codebase. There is no way to detect
+a prior run from file content (`ink-red-5` is a valid name before and
+after), so a second run double-shifts. To guard against that, `--ink-shift`
+takes directory targets only, and a real run writes a `.tokens-v2-ink-shift`
+marker file in each target directory. It refuses to run again while a marker
+exists in the target, an ancestor, or anywhere in the target subtree. The
+marker is written before the first file rewrite, so an interrupted run
+refuses to retry instead of double-shifting; restore the tree with git,
+delete the marker, and re-run. Commit the marker with the migration — on a
+fresh clone without it the guard is gone, and a teammate's re-run
+double-shifts. Delete it only to re-run the shift on purpose.
+
+Each marker is created exclusively, so two runs on the same directory cannot
+both start: the second stops before it rewrites anything. For nested targets
+(a repo root and one of its subdirectories) the run searches again after it
+claims its markers, and stops if another run claimed an overlapping tree.
+Both runs can stop this way. Neither has rewritten a file at that point, so
+re-run whichever tree is still unshifted.
+
+The marker search follows the same symlink rule as the run: a marker in a
+linked external package never blocks a target the run would not rewrite. Run
+the codemod on each real package root directly, so every migrated tree gets
+its own marker. If the refusal names a marker inside a vendored dependency
+(for example `vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is
+already shifted — run the codemod per package root and leave the vendored
+marker alone.
+
+The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
+these sites have no automatic destination. The codemod flags them under
+"needs manual attention". The usual fix is `text-white` (or the literal CSS
+color `white` in hand-written CSS).
 
 ## Editor
 
@@ -1793,7 +1949,7 @@ hook that returns normally is unaffected — it still cannot stop the request.
 `beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
 awaited, only the type said otherwise.
 
-## pageMetaPlugin — removed
+## pageMetaPlugin (removed)
 
 `pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
 component option still compiles — it's a plain, unread object key — but
@@ -1858,7 +2014,7 @@ The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
 | `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
 | `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
 
-## PageHeaderMobile family — slot names
+## PageHeaderMobile family: slot names
 
 `PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
 are renamed to the shared `#prefix`/`#suffix` vocabulary (see

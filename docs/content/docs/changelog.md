@@ -9,6 +9,45 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Data fetching (v2) — stale responses no longer write the shared stores (fix)
+
+Two concurrent writes to one document could leave `docStore`, `listStore`
+(and every view bound to them) on the response that settled last instead of
+the newest one, while `data` already held the fresh response (#1017).
+
+The gate lives in the stores. Every request takes a dispatch version; the
+response's store writes carry it, and the stores reject a write for a
+document that a later-dispatched request has already written. One freshness
+domain covers every writer — the `docs` side channel, the `useDoctype` /
+`useList` / `useDoc` hooks, and any mix of instances or paths writing the
+same document. A version is recorded only when a mutating write lands: a
+newer request that failed wrote nothing on the server, so it does not make
+the older success stale, and a read (GET) is admitted on its version but
+records nothing — the server may answer a later reload before an earlier
+save commits, and the save must still land. A delete records a fresh
+version when it settles — a delete is terminal — so no in-flight write or
+reload, whatever its dispatch order, can re-create a deleted document.
+One accepted limitation: the gate orders by dispatch time, so a read
+dispatched after a save, handled by the server before the save committed
+and answered after it, is admitted and republishes the pre-save value —
+resolving that needs server-side sequencing, which this design trades away.
+
+`useAction` still skips the `onSuccess`/`onError` hooks of a submit that a
+newer same-key submit of the same instance already outran — the store gate
+protects the stores, this skip only avoids re-running hook side effects
+with a stale response. `useDoc`'s write members and `useNewDoc` skip their
+hooks the same way, but their store writes stay outside that skip: only the
+store gate decides them. It compares per document and knows whether the
+newer request landed, so an overtaken insert of a different document still
+lands, and an older success is kept when the newer submit failed.
+
+No API change. Behavior changes if you relied on it:
+
+- A stale `setValue`/`delete` on the same document no longer triggers
+  `useList`'s auto-refetch; the newest submit's refetch already ran.
+- Submits with different keys, and keyless submits (inserts), are
+  independent — all of their hooks still fire, as before.
+
 ### Charts — a new family at `frappe-ui/charts`
 
 A second chart family ships alongside the one at the package root. It is
@@ -197,7 +236,7 @@ imported it directly; no signal of any real consumer doing so.
 
 `KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously
 only unit-tested). `useShortcut` gained a short entry on the
-[composables page](../docs/content/docs/other/composables.md); its API was
+[composables page](/docs/other/composables); its API was
 already stable and is unchanged.
 
 ### SettingsDialog — `SettingsBody`'s exposed type
@@ -218,7 +257,7 @@ behavior change.
   itself already uploaded private (since `v1.0.0-beta.21`) and is unaffected.
   A caller of `useFileUpload` or `FileUploadHandler` with no explicit privacy
   option now gets a private file where it previously got a public one. See
-  the [migration guide](../docs/content/docs/migration.md#fileuploader).
+  the [migration guide](/docs/migration#fileuploader).
 - Fixed: the standalone `upload(file, options)` export (re-exported from
   `frappe-ui` alongside `useFileUpload`) crashed at runtime — it required
   internal `state`/`reset` arguments the public signature never exposed a way
@@ -236,7 +275,7 @@ behavior change.
   `method`, `type`, `params`, `maxWidth`/`maxHeight`, upload cancellation) had
   zero measured use on the component (rule 9); reach for `useFileUpload()`
   directly for those. See the
-  [migration guide](../docs/content/docs/migration.md#fileuploader).
+  [migration guide](/docs/migration#fileuploader).
 
 ### FileUploader — `success` / `failure` emits declared stable
 
@@ -258,14 +297,15 @@ behavior change.
   string; validation failures (`validateFile` returning an `Error`) were not
   — a custom slot could receive either a string or an `Error` object. Both
   paths now normalize to a message string before reaching the slot. A slot
-  that did `{{ error.message }}` expecting the validation-`Error` case
+  that did <span v-pre>`{{ error.message }}`</span> expecting the
+  validation-`Error` case
   (uncommon, but not impossible) silently renders nothing now that `error` is
   always a string. See the
-  [migration guide](../docs/content/docs/migration.md#fileuploader).
+  [migration guide](/docs/migration#fileuploader).
 
 ### FileUploader — `inputRef` removed, nothing in its place
 
-- **Breaking, loud:** per [ADR-0012](../spec/adr/0012-template-ref-surface.md),
+- **Breaking, loud:** per [ADR-0012](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0012-template-ref-surface.md),
   `FileUploader` hands back nothing through a template ref. `inputRef` was a
   function disguised as a ref (`uploader.value.inputRef().focus()`), and the
   `openFileSelector` slot prop already covers what it was used for. Zero
@@ -352,9 +392,9 @@ Per ADR-0008, the deprecated v0 editor exports are removed from top-level
   `BaseSuggestionItem`, `CreateSuggestionExtensionOptions` (the two
   `TextEditor/extensions/*` barrels also re-exported from root)
 
-Use [`Editor`](../docs/content/docs/molecules/editor.md) and its kits/building
+Use [`Editor`](/docs/molecules/editor) and its kits/building
 blocks from the `frappe-ui/editor` subpath instead — see the migration guide's
-[Editor section](../docs/content/docs/migration.md#editor). This confirms
+[Editor section](/docs/migration#editor). This confirms
 `CONTEXT.md`'s rule: the editor family is the only subsystem that exports
 from a subpath rather than root, and nothing editor-related is exported from
 root anymore.
@@ -391,7 +431,7 @@ v1 resources (`createResource`, `createListResource`, `createDocumentResource`,
 `getCachedResource`, `getCachedListResource`, `getCachedDocumentResource`,
 `resourcesPlugin`, `saveLocal`, `getLocal`, `deleteLocal`, `onDocUpdate`) ship
 un-deprecated and frozen at `1.0.0`, per #886.
-[ADR-0013](../spec/adr/0013-v1-resources-implementation-freeze.md) records the
+[ADR-0013](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0013-v1-resources-implementation-freeze.md) records the
 one exception: the implementation stays hand-written JavaScript rather than
 TypeScript, permanently — 344 production call sites make a rewrite riskier
 than the freeze. `createListResource`, the second-most-used export at 57 call
@@ -472,7 +512,7 @@ the `types` export condition), so `frappeui(...)` and its options
 (`frontendRoute`, `lucideIcons`, `barrelImports`, `frappeProxy`,
 `jinjaBootData`, `buildConfig`, `frappeTypes`) are typed without a
 `// @ts-expect-error` workaround. Also added a
-[docs page](../docs/content/docs/other/vite.md) covering every sub-plugin,
+[docs page](/docs/other/vite) covering every sub-plugin,
 including `barrelImports` — previously undocumented on the docs site.
 
 ### list-style.css and editor-style.css exports — removed
@@ -523,7 +563,7 @@ and `Rating` exports `RatingEmits`.
   still gets `'body'`, now as a fallback. No existing call behaves differently.
 - New `usePortalTarget` / `providePortalTarget` / `portalTargetKey` exports let
   an embedding host redirect every overlay at once. See
-  [`spec/portal-target.md`](../spec/portal-target.md).
+  [`spec/portal-target.md`](https://github.com/frappe/frappe-ui/blob/main/spec/portal-target.md).
 
 ### Dialog — v1 spec
 
@@ -560,7 +600,7 @@ and `Rating` exports `RatingEmits`.
 ### Dialog — deprecated surface removed (breaking)
 
 Every member marked `@deprecated` is deleted, per
-[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
+[ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
 aliased and nothing warns.
 
 - **Breaking, silent:** the `options` blob prop and `DialogOptions` type are
@@ -593,7 +633,7 @@ aliased and nothing warns.
   `dialog.danger()`.
 
 Before/after for the silent breaks is in the
-[migration guide](../docs/content/docs/migration.md#dialog).
+[migration guide](/docs/migration#dialog).
 
 ### DatePicker family — v1 spec
 
@@ -715,9 +755,9 @@ break is loud.
 
 The back-compat aliases these components carried through the betas are
 deleted, not kept as warn-and-map shims — per
-[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+[ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
 deprecated member ships in `1.0.0`. Before/afters in the
-[migration guide](../docs/content/docs/migration.md#datepicker--timepicker-family).
+[migration guide](/docs/migration#datepicker-timepicker-family).
 
 - **`placement`, `autoClose`, `allowCustom`, picker-level `readonly`,
   `inputClass`, `value` prop removed.** All silent: a leftover prop lands as
@@ -761,14 +801,14 @@ CSS can target inputs without class-injection props:
 
 ### Password — `value` prop removed (breaking)
 
-Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+Per [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
 deprecated member ships in `1.0.0`. `value` warned and seeded `v-model` since
 it was deprecated earlier in this cycle; a census of every downstream app
 found zero call sites still passing it. Use `v-model` / `modelValue`.
 
 ### TextInput / Textarea / Password / Duration — `focus()` and `inputElement` on the ref
 
-Implements [ADR-0012](../spec/adr/0012-template-ref-surface.md).
+Implements [ADR-0012](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0012-template-ref-surface.md).
 
 - **Breaking:** `TextInput.el` and `Textarea.el` are renamed to
   `inputElement` — a computed, typed `HTMLInputElement | null` /
@@ -825,7 +865,7 @@ matching Combobox's own ghost search input. Closes #851.
 
 ### FeatherIcon — removed (breaking)
 
-Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), the
+Per [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), the
 deprecated `FeatherIcon` component is deleted, along with the
 `feather-icons` dependency. `lucide-*` strings (or a `Component`) are the
 only supported icon forms now.
@@ -854,12 +894,12 @@ Hardcoded internal `FeatherIcon` usages across core components were
 migrated to `lucide-*` in this release.
 
 Before/after for the silent break is in the
-[migration guide](../docs/content/docs/migration.md#icons).
+[migration guide](/docs/migration#icons).
 
 ### Input — removed (breaking)
 
 - **Breaking:** `Input` and its `Input.cy.ts` tests are deleted. Per
-  [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
+  [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), no
   deprecated member ships in `1.0.0`; a census of downstream apps found no
   live call sites left that render `<Input>` (five registrations were dead
   global component registrations, never rendered). Use `TextInput` for
@@ -868,7 +908,7 @@ Before/after for the silent break is in the
 
 ### Card, ListItem, standalone Toast — removed (breaking)
 
-Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md), three
+Per [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md), three
 unmaintained wrappers that shipped `@deprecated` in code are deleted, not
 carried forward. All three had zero call sites across the census of
 downstream apps.
@@ -885,7 +925,7 @@ downstream apps.
   `<ToastProvider>` are unaffected and unchanged.
 
 All three fail loudly at the import. Before/after examples are in the
-[migration guide](../docs/content/docs/migration.md#card-listitem-standalone-toast-removed).
+[migration guide](/docs/migration#card-listitem-standalone-toast-removed).
 
 ### FormLabel — moved to a component directory (non-breaking)
 
@@ -920,7 +960,7 @@ despite being a public export. It now has a docs page and two stories
 `MonthPicker` and its whole barrel (`MonthPicker.vue`, types, stories) are
 deleted. It duplicated `Select` for a narrower case. Use `Select` with month
 options — see the
-[migration guide](../docs/content/docs/migration.md#monthpicker). The import
+[migration guide](/docs/migration#monthpicker). The import
 fails, so the break is loud.
 
 ### Legacy components — dev-mode warnings
@@ -957,14 +997,14 @@ new theme switchers, compose `Select` with the `useColorScheme` composable.
   inside a `map` call.
 
 Before/after for each silent break is in the
-[migration guide](../docs/content/docs/migration.md#autocomplete-removed).
+[migration guide](/docs/migration#autocomplete-removed).
 
 ### Dropdown / ContextMenu — deprecated members removed (ADR-0008)
 
 Three surfaces that shipped as deprecated aliases in the betas are deleted,
 not aliased. All three are **silent breaks** in plain-JS apps — before/afters
 in the
-[migration guide](../docs/content/docs/migration.md#dropdown-and-contextmenu);
+[migration guide](/docs/migration#dropdown-and-contextmenu);
 TypeScript callers get compile errors (the removed keys stay typed as
 `never`), and a dev-mode console warning fires when the old shape reaches the
 menu at runtime.
@@ -1056,7 +1096,7 @@ when there is nothing to label.
 ### Popover — v0 API removed (breaking)
 
 Every member marked `@deprecated` is deleted, per
-[ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
+[ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md). Nothing is
 aliased and nothing warns.
 
 - **Breaking, silent:** the `#target`, `#body` and `#body-main` slots are gone.
@@ -1095,7 +1135,7 @@ aliased and nothing warns.
   channel was wired, while `CONTEXT.md` defines `dismissible` as covering both.
 
 Before/after for each silent break is in the
-[migration guide](../docs/content/docs/migration.md#popover-hovercard-tooltip).
+[migration guide](/docs/migration#popover-hovercard-tooltip).
 
 ### NestedPopover — removed (breaking)
 
@@ -1136,7 +1176,7 @@ Before/after for each silent break is in the
   would move every one of them for no behavioral gain.
 
 Before/after is in the
-[migration guide](../docs/content/docs/migration.md#tooltip).
+[migration guide](/docs/migration#tooltip).
 
 ### HoverCard — `open()` and `close()` on the template ref
 
@@ -1153,7 +1193,7 @@ now takes focus itself on open. The keyboard still stays down.
 
 ### Divider — `action.handler` removed (breaking)
 
-Per [ADR-0008](../spec/adr/0008-no-deprecated-members-in-1-0-0.md),
+Per [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md),
 `action.handler` is deleted, not carried forward as a warning. Use
 `action.onClick`. Zero call sites across the census. Silent break — a
 leftover `handler` is dropped as an unknown key, so the action button
@@ -1515,7 +1555,7 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 - **Silent break:** `pageMetaPlugin` and the global mixin it installed are gone.
   A leftover `pageMeta()` component option still compiles but is never read, so
   `document.title` and the favicon quietly stop updating. See the
-  [migration guide](../docs/content/docs/migration.md#pagemetaplugin-removed).
+  [migration guide](/docs/migration#pagemetaplugin-removed).
 - `usePageMeta` is unchanged and now exports its `PageMeta` type.
 
 ### GridLayout — removed (breaking)
@@ -1547,7 +1587,7 @@ names.
   slots like `#icon` outside `Button`, and `#left`/`#right` were never in
   the vocabulary). Vue drops content passed to an unknown slot name with no
   error, so the old names don't warn — they just stop rendering. See the
-  [migration guide](../docs/content/docs/migration.md#pageheadermobile-family-slot-names).
+  [migration guide](/docs/migration#pageheadermobile-family-slot-names).
 - `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
   `ScrollAreaExposed`) and `data-slot="scroll-area"` /
   `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`

@@ -21,6 +21,7 @@ import {
   OrderedList,
   type OrderedListOptions,
 } from '@tiptap/extension-list'
+import { ListJoin } from './extensions/list/list-join'
 import { Paragraph, type ParagraphOptions } from '@tiptap/extension-paragraph'
 import { Strike, type StrikeOptions } from '@tiptap/extension-strike'
 import { Text } from '@tiptap/extension-text'
@@ -105,6 +106,7 @@ export interface StarterKitOptions {
   italic?: StarterKitMember<ItalicOptions>
   link?: false
   listItem?: StarterKitMember<ListItemOptions>
+  listJoin?: false
   listKeymap?: StarterKitMember<ListKeymapOptions>
   orderedList?: StarterKitMember<OrderedListOptions>
   paragraph?: StarterKitMember<ParagraphOptions>
@@ -155,6 +157,10 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     pushConfigured(list, ListItem, this.options.listItem)
     pushConfigured(list, ListKeymap, this.options.listKeymap)
     pushConfigured(list, OrderedList, this.options.orderedList)
+    // Re-merges lists that an edit split apart. Its own key rather than a
+    // bulletList/orderedList guard: it also covers task lists, which come from
+    // RichTextKit. Opt out to keep parsed HTML structurally untouched.
+    if (this.options.listJoin !== false) list.push(ListJoin)
     pushConfigured(list, Paragraph, this.options.paragraph)
     pushConfigured(list, Strike, this.options.strike)
     if (this.options.text !== false) list.push(Text)
@@ -217,6 +223,12 @@ export const Heading = HeadingExtension
  * Registered alongside `Heading` in the kits; `collectHeadings` reads its ids.
  */
 export const HeadingIds = HeadingIdsExtension
+/**
+ * Re-merges adjacent same-kind lists (bullet, ordered, task) that an edit split
+ * apart, so ordered-list numbering never restarts mid-list. In `StarterKit`;
+ * exported for anyone assembling extensions by hand.
+ */
+export { ListJoin }
 // frappe-ui's link: inline edit popup, Mod-k shortcut, smart paste handling, and
 // boundary clearing. Already defaults openOnClick:false / autolink:true.
 export const Link = LinkExtension
@@ -244,7 +256,9 @@ export const Table = TiptapTable.configure({ resizable: true }).extend({
             }),
           ]
         : []),
-      tableEditing({ allowTableNodeSelection: this.options.allowTableNodeSelection }),
+      tableEditing({
+        allowTableNodeSelection: this.options.allowTableNodeSelection,
+      }),
     ]
   },
 })

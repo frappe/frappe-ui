@@ -52,8 +52,8 @@ const priorityDot = {
 // SLA state → text color. `met`/`breached` read as pass/fail against the
 // target, `pending` is still counting down, `none` means no target applies.
 const slaTextClass = {
-  met: 'text-ink-green-6',
-  breached: 'text-ink-red-6',
+  met: 'text-ink-green-5',
+  breached: 'text-ink-red-5',
   pending: 'text-ink-gray-5',
   none: 'text-ink-gray-4',
 }

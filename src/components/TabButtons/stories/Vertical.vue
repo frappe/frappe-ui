@@ -35,7 +35,7 @@ const iconButtons = [
       <TabButtons
         v-model="underline"
         :options="navButtons"
-        type="underline"
+        variant="underline"
         vertical
       />
     </div>
@@ -45,9 +45,9 @@ const iconButtons = [
       <TabButtons
         v-model="browserLeft"
         :options="navButtons"
-        type="browser-tab"
+        variant="browser-tab"
         vertical
-        direction="left"
+        side="left"
       />
     </div>
 
@@ -56,7 +56,7 @@ const iconButtons = [
       <TabButtons
         v-model="sidebar"
         :options="iconButtons"
-        type="ghost"
+        variant="ghost"
         vertical
       />
     </div>

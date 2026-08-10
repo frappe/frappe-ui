@@ -29,7 +29,7 @@ utilities:
 <template>
   <span class="lucide-menu size-4 text-ink-gray-7" />
   <span class="lucide-chevron-down size-3" />
-  <span class="lucide-circle-check size-5 text-ink-green-6" />
+  <span class="lucide-circle-check size-5 text-ink-green-5" />
 </template>
 ```
 
@@ -64,7 +64,7 @@ The icon defaults to `1em × 1em` (it scales with surrounding text) and uses
 </div>
 
 <!-- Or set both explicitly -->
-<span class="lucide-info size-5 text-ink-blue-6" />
+<span class="lucide-info size-5 text-ink-blue-5" />
 ```
 
 Icons render as `display: block` (matching Tailwind's preflight default
@@ -240,7 +240,8 @@ const options = computed(() =>
 ### Other components
 
 `TextInput`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
-components either accept the same `icon` / `iconLeft` / `iconRight` props
-or expose a slot where you can drop a `<span class="lucide-..." />`
+components either accept an `icon` prop of the same shape (some add
+`iconLeft` / `iconRight`) or expose a slot where you can drop a
+`<span class="lucide-..." />`
 directly. Check each component's reference page for the exact prop
 names — the icon API conventions are consistent across the library.

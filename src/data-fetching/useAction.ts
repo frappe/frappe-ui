@@ -47,6 +47,21 @@ export interface UseActionOptions<TResponse, TParams> {
  * with the error. A failed `validate` and a failed request both reject. `null`
  * is a response like any other — a server that answers with `null` resolves.
  * A stale submit rejects its own caller too, but writes no `error`.
+ *
+ * The `onSuccess`/`onError` hooks are gated per target, not per action: they
+ * fire unless a newer submit with the same `key` already succeeded. A stale
+ * same-target submit firing its hooks would re-run their side effects (for
+ * `useList`, a needless refetch) with a stale response. The gate is on
+ * success, not on start: a newer submit that fails writes nothing on the
+ * server, so it must not block the older success from landing — the server
+ * holds the older submit's value in that case. Submits with different keys
+ * (or no key) are independent writes, and every one of them fires its hooks.
+ *
+ * This gate only decides which hooks fire, and only within this instance.
+ * Store freshness does not depend on it: every store write carries its
+ * request's dispatch version and `docStore`/`listStore` reject a write that a
+ * later-dispatched request has overtaken, across instances and across the
+ * docs side channel (#1017).
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
   options: UseActionOptions<TResponse, TParams>,
@@ -64,6 +79,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
   // The sequence number of the submit that started most recently. Only that
   // submit may write `data` and `error`.
   let lastStarted = 0
+  // Per target, for the hooks: the sequence number of the newest submit that
+  // succeeded. Hooks only conflict between submits that act on the same
+  // target, and only a submit that succeeded can make an older answer stale —
+  // a newer submit that failed wrote nothing on the server, so it blocks
+  // nothing. Entries only matter while submits for the target overlap: a
+  // future submit always takes a higher sequence, so `finishPending` drops
+  // the entry when the target goes idle and the map does not grow.
+  const lastWrittenByTarget = new Map<string, number>()
 
   function isLoading(target: string) {
     return (pendingKeys.value.get(target) ?? 0) > 0
@@ -86,6 +109,10 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
       next.set(target, count)
     } else {
       next.delete(target)
+      // No submit for this target is in flight, so nothing can settle stale:
+      // the record has done its job. Hooks run inside `call.submit` (before
+      // this `finally`), so no gate check reads the map after this delete.
+      lastWrittenByTarget.delete(target)
     }
     pendingKeys.value = next
   }
@@ -107,6 +134,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
     }
 
     let target = key ? key(params) : undefined
+    // Whether the hooks may fire: no newer same-target submit has handed its
+    // response to `onSuccess` yet. Without a key there is no target to
+    // conflict on — two keyless submits (two inserts) are always independent
+    // writes, and gating them would drop the first one's hook.
+    let isFreshForTarget = () =>
+      target != null
+        ? sequence > (lastWrittenByTarget.get(target) ?? 0)
+        : true
     startPending(target)
 
     // Detached so the per-submit call is not tied to whichever component
@@ -121,11 +156,23 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
           baseUrl,
           immediate: false,
           refetch: false,
-          onSuccess: options.onSuccess
-            ? (response) => options.onSuccess!(response, params)
-            : undefined,
+          // Gated: this is where `useDoctype` and `useList` write the shared
+          // stores, and a stale same-target submit must not hand them its
+          // response.
+          // Always wrapped, even without a consumer hook: a success must be
+          // recorded either way, or it could not make older answers stale.
+          onSuccess: (response) => {
+            if (!isFreshForTarget()) return
+            if (target != null) lastWrittenByTarget.set(target, sequence)
+            options.onSuccess?.(response, params)
+          },
           onError: options.onError
-            ? (e) => options.onError!(e, params)
+            ? (e) => {
+                // Gated by the same check, but an error records no write —
+                // a failed submit must not make an older success stale.
+                if (!isFreshForTarget()) return
+                options.onError!(e, params)
+              }
             : undefined,
         }),
       )!

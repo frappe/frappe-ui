@@ -78,7 +78,7 @@
       >
         <template v-if="state === 'error'">
           <slot name="error" :error="error">
-            <span class="text-sm-medium text-ink-red-8">
+            <span class="text-sm-medium text-ink-red-7">
               Could not render this chart
             </span>
             <span v-if="error" class="max-w-sm text-p-sm text-ink-gray-5">

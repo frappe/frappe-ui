@@ -9,7 +9,7 @@ knowledge_base:
       - "v1-release/plan.md"
       - "v1-release/04-components-audit.md"
       - "v1-release/08-selection-and-menu-api-spec.md"
-      - "v1-release/changelog.md"
+      - "docs/content/docs/changelog.md"
   learnings:
     scope: local
   linked_repositories:
@@ -144,9 +144,10 @@ reviews:
 
           The section must contain one of:
           - A short (one or two sentences) description of the user-facing change,
-            written so it could be pasted into v1-release/changelog.md under the
-            Unreleased heading. Phrase it for consumers of the library, not
-            contributors. Mention the component or API surface affected.
+            written so it could be pasted into
+            docs/content/docs/changelog.md under the Unreleased heading.
+            Phrase it for consumers of the library, not contributors. Mention
+            the component or API surface affected.
           - The literal text `None — <reason>` where `<reason>` briefly states
             why the PR has no user-facing impact (examples: "internal refactor",
             "test only", "docs only", "build config only").
@@ -160,10 +161,11 @@ reviews:
           Pass the check when the section contains either a real consumer-facing
           entry or an explicit `None — <reason>` declaration.
 
-          Reference v1-release/changelog.md for the existing entry style. The
-          changelog's own guidance says NOT to log internal refactors, tests, or
-          planning/doc maintenance unless they affect consumers — so `None — ...`
-          is the correct choice for those PRs, not a fabricated entry.
+          Reference docs/content/docs/changelog.md for the existing entry
+          style. The changelog's own guidance says NOT to log internal
+          refactors, tests, or planning/doc maintenance unless they affect
+          consumers — so `None — ...` is the correct choice for those PRs,
+          not a fabricated entry.
 
   tools:
     semgrep:

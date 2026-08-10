@@ -191,7 +191,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
           <div class="text-sm text-ink-gray-6">{{ stat.label }}</div>
           <div
             class="mt-1 text-xl font-semibold"
-            :class="stat.value < 0 ? 'text-ink-red-6' : 'text-ink-gray-9'"
+            :class="stat.value < 0 ? 'text-ink-red-5' : 'text-ink-gray-9'"
           >
             {{ currency(stat.value) }}
           </div>
@@ -226,7 +226,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
             <span
               class="text-lg font-medium tabular-nums"
               :class="
-                flowTab === 'incomings' ? 'text-ink-green-6' : 'text-ink-gray-8'
+                flowTab === 'incomings' ? 'text-ink-green-5' : 'text-ink-gray-8'
               "
             >
               {{ flowTab === 'incomings' ? '+' : '-'

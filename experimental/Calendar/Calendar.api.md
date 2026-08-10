@@ -59,6 +59,11 @@
 
   const emitsData = [
   {
+    name: 'delete',
+    description: '',
+    type: '[eventID: string | number | undefined]'
+  },
+  {
     name: 'create',
     description: '',
     type: '[event: CalendarEvent]'
@@ -67,11 +72,6 @@
     name: 'update',
     description: '',
     type: '[event: CalendarEvent]'
-  },
-  {
-    name: 'delete',
-    description: '',
-    type: '[eventID: string | number | undefined]'
   },
   {
     name: 'rangeChange',

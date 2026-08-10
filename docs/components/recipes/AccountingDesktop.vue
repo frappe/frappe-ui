@@ -488,7 +488,7 @@ const pnlColumns = computed(() => [
               <div class="text-xs text-ink-gray-5">{{ stat.label }}</div>
               <div
                 class="mt-1 text-2xl font-semibold"
-                :class="stat.value < 0 ? 'text-ink-red-6' : 'text-ink-gray-9'"
+                :class="stat.value < 0 ? 'text-ink-red-5' : 'text-ink-gray-9'"
               >
                 {{ currency(stat.value) }}
               </div>
@@ -536,7 +536,7 @@ const pnlColumns = computed(() => [
                       class="text-sm"
                       :class="
                         flowTab === 'incomings'
-                          ? 'text-ink-green-6'
+                          ? 'text-ink-green-5'
                           : 'text-ink-gray-8'
                       "
                     >
@@ -582,7 +582,7 @@ const pnlColumns = computed(() => [
                   <span
                     class="shrink-0 text-sm"
                     :class="
-                      account.balance < 0 ? 'text-ink-red-6' : 'text-ink-gray-8'
+                      account.balance < 0 ? 'text-ink-red-5' : 'text-ink-gray-8'
                     "
                   >
                     {{ currency(account.balance) }}

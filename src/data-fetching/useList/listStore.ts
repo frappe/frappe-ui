@@ -1,3 +1,5 @@
+import { docStore } from '../docStore'
+
 export interface ListInstanceMethods {
   updateRow: (doc: Partial<{ name: string }> & Record<string, unknown>) => void
   removeRow: (name: string) => void
@@ -20,13 +22,28 @@ class ListStore {
     this.byDocType[doctype].push(list)
   }
 
-  updateRows(docs: Array<Doc>) {
+  updateRows(docs: Array<Doc>, version?: number) {
     for (let doc of docs) {
-      this.updateRow(doc.doctype, doc)
+      // `doc?.` matches `setDocs`'s guard: a `null` entry in a docs payload
+      // must fall through to `updateRow`'s guard, not throw here and reject
+      // the whole response.
+      this.updateRow(doc?.doctype, doc, version)
     }
   }
 
-  updateRow(doctype: string, doc: Doc) {
+  updateRow(doctype: string, doc: Doc, version?: number) {
+    // An entry without doctype or name identifies no row. Skipped, matching
+    // `setDocs`'s guard — reaching `admitsWrite` with it would throw on
+    // `doctype.trim()` and reject the whole response it rode in on.
+    if (!doctype || !doc.name) return
+    // Same freshness domain as the doc store (#1017): a row update from a
+    // request that a later-dispatched request has already overtaken for this
+    // document is dropped. `docStore` is the bookkeeper; the matching
+    // `docStore.setDoc`/`setDocs` call recorded this write's version, so an
+    // equal version passes.
+    if (!docStore.admitsWrite(doctype, doc.name, version)) {
+      return
+    }
     this.ensureList(doctype)
     this.byDocType[doctype].forEach((list) => {
       list.updateRow(doc)

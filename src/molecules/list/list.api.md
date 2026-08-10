@@ -152,12 +152,12 @@
   {
     name: 'prefix',
     description: 'Leading adornment, rendered before the label.',
-    type: '{ direction: "desc" | "asc" | null; }'
+    type: '{ direction: "asc" | "desc" | null; }'
   },
   {
     name: 'suffix',
     description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
-    type: '{ direction: "desc" | "asc" | null; }'
+    type: '{ direction: "asc" | "desc" | null; }'
   }
 ]
 

@@ -104,7 +104,7 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
 
 The v0 API is gone in `1.0.0`. `#target` becomes `#trigger`, `#body` and
 `#body-main` become `#default`, and `placement` splits into `side` + `align`.
-See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard)
+See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard-tooltip)
 for the full table.
 
 <!-- @include: ./Popover.api.md -->
