@@ -19,8 +19,6 @@ export interface TabsRootContext {
   selected: ComputedRef<TabValue | undefined>
   /** Selection follows the router rather than the model. */
   routeMode: ComputedRef<boolean>
-  /** Any trigger carries a `route`, whether or not the model is bound. */
-  hasAnyRoute: ComputedRef<boolean>
   orientation: ComputedRef<'horizontal' | 'vertical'>
   /** Returns an unregister function. */
   register: (trigger: TabTriggerRegistration) => () => void

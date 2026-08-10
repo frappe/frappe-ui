@@ -925,12 +925,14 @@ describe('Tabs', () => {
 
     const Harness = defineComponent({
       render: () =>
-        h(Tabs, { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate }, () => [
-          h(TabList, { variant: 'underline' }, () => [
-            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
-            h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
-          ]),
-        ]),
+        h(Tabs, {
+          modelValue: 'inbox',
+          'onUpdate:modelValue': onUpdate,
+          tabs: [
+            { value: 'inbox', label: 'Inbox', route: '/inbox' },
+            { value: 'sent', label: 'Sent', route: '/sent' },
+          ],
+        }),
     })
 
     cy.wrap(router.push('/inbox'))
