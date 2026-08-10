@@ -466,22 +466,26 @@ function getAvailableComponents(rootDir: string) {
 // A folder's `index.ts` may re-export additional public sub-components
 // alongside the primary one (e.g. DatePicker also exports DateRangePicker
 // and DateTimePicker). Each public sub-component gets its own meta file.
+//
+// The SFC may sit in a sub-directory of the folder (src/charts exports its
+// chrome from `./components/`), so the match keeps the whole relative path and
+// only the basename has to equal the exported name.
 function getPublicComponentsFromIndex(
   rootDir: string,
   folder: string,
-): string[] {
+): { name: string; relativePath: string }[] {
   const indexPath = path.join(rootDir, folder, 'index.ts')
   if (!fs.existsSync(indexPath)) return []
 
   const content = fs.readFileSync(indexPath, 'utf8')
   const re =
-    /export\s*\{\s*default\s+as\s+(\w+)\s*\}\s*from\s*['"]\.\/(\w+)\.vue['"]/g
-  const names = new Set<string>()
+    /export\s*\{\s*default\s+as\s+(\w+)\s*\}\s*from\s*['"]\.\/((?:[\w-]+\/)*(\w+))\.vue['"]/g
+  const found = new Map<string, string>()
   let m: RegExpExecArray | null
   while ((m = re.exec(content))) {
-    if (m[1] === m[2]) names.add(m[1])
+    if (m[1] === m[3]) found.set(m[1], `${m[2]}.vue`)
   }
-  return [...names]
+  return [...found].map(([name, relativePath]) => ({ name, relativePath }))
 }
 
 type Documentable = {
@@ -498,19 +502,23 @@ function getDocumentables(): Documentable[] {
     for (const folder of getAvailableComponents(rootDir)) {
       const primary = pascalCase(folder)
       const fromIndex = getPublicComponentsFromIndex(rootDir, folder)
-      const candidates = fromIndex.length > 0 ? fromIndex : [primary]
-      const names = (
-        candidates.includes(primary) ? candidates : [primary, ...candidates]
-      ).filter((name) =>
-        fs.existsSync(path.join(rootDir, folder, `${name}.vue`)),
+      const primaryEntry = { name: primary, relativePath: `${primary}.vue` }
+      const candidates = fromIndex.length > 0 ? fromIndex : [primaryEntry]
+      const entries = (
+        candidates.some((c) => c.name === primary)
+          ? candidates
+          : [primaryEntry, ...candidates]
+      ).filter((entry) =>
+        fs.existsSync(path.join(rootDir, folder, entry.relativePath)),
       )
+      const names = entries.map((entry) => entry.name)
 
-      for (const name of names) {
+      for (const entry of entries) {
         docs.push({
           folder,
-          name,
+          name: entry.name,
           rootDir,
-          vuePath: path.join(rootDir, folder, `${name}.vue`),
+          vuePath: path.join(rootDir, folder, entry.relativePath),
           siblings: names,
         })
       }
