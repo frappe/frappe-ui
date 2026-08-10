@@ -6,6 +6,7 @@ import {
   type Component,
   type Ref,
 } from 'vue'
+import { moduleSingleton } from './moduleSingleton'
 import Dialog from '../components/Dialog/Dialog.vue'
 import { Button } from '../components/Button'
 import FormControl from '../components/FormControl/FormControl.vue'
@@ -188,11 +189,20 @@ interface DialogInstance {
   component: Component
 }
 
-export const dialogs: Ref<DialogInstance[]> = ref([])
-let nextId = 0
+// The stack is written by `dialog.*` (a .ts module, so Vite may pre-bundle it)
+// and read by <Dialogs /> (an SFC, always raw source). A global singleton keeps
+// both sides on one ref even when the package is instantiated twice — see
+// moduleSingleton. The id counter shares the store so ids stay unique across
+// copies; two counters would collide and hand Vue duplicate `:key`s.
+const stack = moduleSingleton('dialog-stack', () => ({
+  dialogs: ref<DialogInstance[]>([]),
+  nextId: 0,
+}))
+
+export const dialogs: Ref<DialogInstance[]> = stack.dialogs
 
 function add(component: Component): number {
-  const id = nextId++
+  const id = stack.nextId++
   dialogs.value = [...dialogs.value, { id, component }]
   return id
 }
