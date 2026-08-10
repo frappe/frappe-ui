@@ -62,6 +62,9 @@ export function useTreeKeyboard(options: KeyboardOptions) {
   }
 
   function onKeydown(e: KeyboardEvent): void {
+    // Let the browser handle modified keys (Alt/Cmd/Ctrl+Arrow, Ctrl+Home/End, etc.)
+    if (e.altKey || e.metaKey || e.ctrlKey) return
+
     const index = indexOfFocused()
     const current = flat.value[index]
     if (!current && !['Home', 'End'].includes(e.key)) return
