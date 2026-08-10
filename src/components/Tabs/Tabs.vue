@@ -107,19 +107,24 @@ function triggerFor(value: TabValue) {
   return triggers.value.find((t) => t.value() === value)
 }
 
+// Route mode, mixed lists: the value of a non-route trigger the user clicked.
+// Such a trigger has nothing to navigate to, so the route can never represent
+// it — without this it would either sit unselectable behind a matching route
+// trigger or emit a value the root does not show. The click wins until the
+// route moves again (below, and in `onRekaUpdate`).
+const routeOverride = ref<TabValue | undefined>(undefined)
+watch(routeSelected, () => {
+  routeOverride.value = undefined
+})
+
 const selected = computed<TabValue | undefined>(() => {
   if (routeMode.value) {
-    const fromRoute = routeSelected.value
-    if (fromRoute !== undefined) return fromRoute
-    // No route matches. A route trigger stays unselected — highlighting it
-    // would claim a route the app is not on. A non-route trigger in the same
-    // list has nothing to navigate, so it selects normally instead of being
-    // locked out.
-    const internal = internalValue.value
-    if (internal !== undefined && triggerFor(internal)?.hasRoute() === false) {
-      return internal
-    }
-    return undefined
+    const override = routeOverride.value
+    if (override !== undefined && triggerFor(override)) return override
+    // No route matches and nothing was clicked: every trigger stays
+    // unselected. Highlighting a route trigger would claim a route the app is
+    // not on.
+    return routeSelected.value
   }
   const desired = modelBound.value ? props.modelValue : internalValue.value
   const list = triggers.value
@@ -163,10 +168,17 @@ provide(tabsRootKey, {
 })
 
 function onRekaUpdate(value: TabValue) {
-  // Clicking a route trigger navigates; the route drives selection and no
-  // model update is emitted. A non-route trigger has no route to follow, so
-  // it updates the value model even while route mode is on.
-  if (routeMode.value && triggerFor(value)?.hasRoute()) return
+  if (routeMode.value) {
+    // Clicking a route trigger navigates; the route drives selection from
+    // here and no model update is emitted. Hand selection back to it.
+    if (triggerFor(value)?.hasRoute()) {
+      routeOverride.value = undefined
+      return
+    }
+    // A non-route trigger has no route to follow, so the click selects it
+    // directly even while a route matches elsewhere in the list.
+    routeOverride.value = value
+  }
   internalValue.value = value
   emit('update:modelValue', value)
 }

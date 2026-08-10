@@ -1,6 +1,6 @@
-import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import type {
+  TabIcon,
   TabsSide,
   TabsSize,
   TabsVariant,
@@ -8,7 +8,7 @@ import type {
 } from '../Tabs/types'
 
 export type TabButtonValue = TabValue
-export type TabButtonIcon = string | Component
+export type TabButtonIcon = TabIcon
 export type NativeButtonClass = string | string[] | Record<string, boolean>
 
 export interface TabButton {

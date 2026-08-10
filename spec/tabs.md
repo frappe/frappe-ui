@@ -238,6 +238,13 @@ A trigger with `route` renders as a `RouterLink`.
   resolved route is active, using RouterLink's inclusive matching. Child
   routes keep the parent tab selected
 - clicking a route trigger navigates; it does not emit `update:modelValue`
+- disabled route triggers are excluded. They render as buttons, so a matching
+  URL must not select one, and one on its own does not turn route mode on
+- lists may mix route and non-route triggers. A non-route trigger has nothing
+  to navigate, so clicking it selects it and emits `update:modelValue`, even
+  while a route matches elsewhere. The next navigation takes selection back
+- a `route` added after the trigger mounts does nothing — `useLink` runs at
+  setup only. DEV warns; remount with a `:key` to change it
 - panels are usually omitted in route mode; the app places a `<router-view>`
 - if the root also binds `v-model`, the model wins and `route` is only a
   navigation side effect

@@ -299,6 +299,48 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'inactive')
   })
 
+  it('lets a non-route click win over a matching route, until the route moves', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.stub().as('update')
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, { 'onUpdate:modelValue': onUpdate }, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+          ]),
+        ]),
+    })
+
+    // The route matches Inbox. Clicking Drafts must select Drafts rather than
+    // emit a value the root does not show — Drafts has no route, so the URL
+    // can never stand for it.
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.contains('[role=tab]', 'Drafts')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+    cy.get('@update').should('have.been.calledWith', 'drafts')
+
+    // Clicking back onto the route trigger hands selection to the route again.
+    cy.contains('[role=tab]', 'Inbox').click()
+    cy.contains('[role=tab]', 'Inbox')
+      .find('[data-state]')
+      .should('have.attr', 'data-state', 'active')
+  })
+
   it('skips disabled triggers with the keyboard and on click', () => {
     cy.mount(Tabs, {
       props: {
