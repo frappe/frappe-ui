@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, provide, ref, shallowRef, watch } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  provide,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue'
 import { TabsRoot } from 'reka-ui'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
@@ -75,10 +82,14 @@ function anyRouteTrigger(nodes: unknown): boolean {
   return nodes.some((node: any) => {
     if (!node || typeof node !== 'object') return false
     if (node.type === TabTrigger) return Boolean(node.props?.route)
-    // Fragments carry a symbol type; `TabList` is ours, and its default slot
-    // takes no arguments, so calling it is safe.
+    // Fragments carry a symbol type. Plain elements are safe too: Vue
+    // normalises an element vnode's children into an array when it creates
+    // it, so there is no slot function left to call — and a `TabList` inside
+    // a toolbar row is an ordinary way to write this. `TabList` is ours, and
+    // its default slot takes no arguments, so calling that one is safe.
     const isFragment = typeof node.type === 'symbol'
-    if (!isFragment && node.type !== TabList) return false
+    const isElement = typeof node.type === 'string'
+    if (!isFragment && !isElement && node.type !== TabList) return false
     const children = node.children
     if (Array.isArray(children)) return anyRouteTrigger(children)
     if (node.type === TabList && typeof children?.default === 'function') {
@@ -88,10 +99,21 @@ function anyRouteTrigger(nodes: unknown): boolean {
   })
 }
 
+// The raw children off the vnode, not `slots.default`. Vue wraps a slot
+// passed from a render function or JSX, and that wrapper dev-warns when it is
+// called outside a render — which is exactly where this runs. Compiled
+// templates and render functions both leave the original function here.
+function rawDefaultSlot(): (() => unknown) | undefined {
+  const children = getCurrentInstance()?.vnode.children as any
+  if (typeof children === 'function') return children
+  if (typeof children?.default === 'function') return children.default
+  return undefined
+}
+
 const activationMode: 'automatic' | 'manual' = (
   props.tabs
     ? props.tabs.some((tab) => tab.route)
-    : anyRouteTrigger(slots.default?.())
+    : anyRouteTrigger(rawDefaultSlot()?.())
 )
   ? 'manual'
   : 'automatic'

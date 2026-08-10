@@ -1130,4 +1130,53 @@ describe('Tabs', () => {
     cy.contains('[role=tab]', 'One').focus().type('{rightarrow}')
     cy.get('@onUpdate').should('have.been.calledWith', 'two')
   })
+
+  it('finds route triggers through a plain element wrapper', () => {
+    // A TabList inside a toolbar row is ordinary. Element children are
+    // normalised into an array at vnode creation, so descending into them
+    // cannot call a slot.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const onUpdate = cy.spy().as('onUpdate')
+
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate },
+          () => [
+            h('div', { class: 'flex justify-between' }, [
+              h(TabList, { variant: 'underline' }, () => [
+                h(TabTrigger, {
+                  value: 'inbox',
+                  label: 'Inbox',
+                  route: '/inbox',
+                }),
+                h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+              ]),
+              h('button', 'Action'),
+            ]),
+          ],
+        ),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type('{rightarrow}')
+
+    cy.focused().should('contain.text', 'Sent')
+    cy.get('@onUpdate')
+      .should('not.have.been.called')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
 })

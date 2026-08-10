@@ -351,12 +351,17 @@ value input, not a panel switcher. The two share:
   registry — triggers register after the root renders — and remounting the
   root to force a re-read would tear down every panel. Shorthand mode reads
   `tabs`; composed mode reads the default slot's vnodes, which exist before
-  they mount. That walk is narrow by rule: it enters fragments and `TabList`
-  and reads `route` off `TabTrigger`, and nothing else. It must never call an
-  unknown component's slot — a scoped slot destructures its argument, so
-  calling it with none throws, and this runs in setup where a throw takes the
-  whole component down. Staying out of panels also keeps a nested route
-  `Tabs` from flipping the outer, route-free list
+  they mount. That walk is narrow by rule: it enters fragments, plain
+  elements, and `TabList`, and reads `route` off `TabTrigger`. It must never
+  call an unknown component's slot — a scoped slot destructures its argument,
+  so calling it with none throws, and this runs in setup where a throw takes
+  the whole component down. Elements are safe because Vue normalises their
+  children into an array at creation, leaving no slot function to call.
+  Staying out of panels also keeps a nested route `Tabs` from flipping the
+  outer, route-free list
+- the walk reads the raw children off the vnode, not `slots.default`. Vue
+  wraps a slot passed from a render function or JSX, and that wrapper warns
+  when it is called outside a render — which is where this runs
 - a trigger the scan cannot see leaves the mode automatic and DEV warns when
   it registers. Two ways to land there: the app wrapped its triggers in its
   own component, or `tabs` arrived from a resource after mount
