@@ -400,13 +400,26 @@ export function findInkShiftMarker(dir) {
 // Search the subtree: a run on a subdirectory must also block a later run on
 // its parent, or the already-shifted subtree double-shifts. Mirrors walk()'s
 // directory skip list.
-export function findInkShiftMarkerBelow(dir) {
+export function findInkShiftMarkerBelow(dir, seenDirs = new Set()) {
   const resolved = fs.realpathSync(dir)
+  if (seenDirs.has(resolved)) return null
+  seenDirs.add(resolved)
   const file = path.join(resolved, INK_SHIFT_MARKER)
   if (fs.existsSync(file)) return file
   for (const entry of fs.readdirSync(resolved, { withFileTypes: true })) {
-    if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) continue
-    const found = findInkShiftMarkerBelow(path.join(resolved, entry.name))
+    if (SKIP_DIRS.has(entry.name)) continue
+    const full = path.join(resolved, entry.name)
+    // Follow symlinked directories like walk() does; skip broken links.
+    let isDirectory = entry.isDirectory()
+    if (!isDirectory && entry.isSymbolicLink()) {
+      try {
+        isDirectory = fs.statSync(full).isDirectory()
+      } catch {
+        continue
+      }
+    }
+    if (!isDirectory) continue
+    const found = findInkShiftMarkerBelow(full, seenDirs)
     if (found) return found
   }
   return null
@@ -633,16 +646,30 @@ const SKIP_DIRS = new Set([
   'node_modules', '.git', 'dist', 'cache', 'generated', 'espresso-v2-design-tokens',
 ])
 
-function* walk(target) {
+function* walk(target, seenDirs = new Set()) {
   const stat = fs.statSync(target)
   if (stat.isFile()) {
     yield target
     return
   }
+  // Cycle guard: symlinked directories are followed (a monorepo may link a
+  // shared package under the target), so a link back to an ancestor must not
+  // recurse forever.
+  const real = fs.realpathSync(target)
+  if (seenDirs.has(real)) return
+  seenDirs.add(real)
   for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
     const full = path.join(target, entry.name)
-    if (entry.isDirectory()) {
-      if (!SKIP_DIRS.has(entry.name)) yield* walk(full)
+    let isDirectory = entry.isDirectory()
+    if (!isDirectory && entry.isSymbolicLink()) {
+      try {
+        isDirectory = fs.statSync(full).isDirectory()
+      } catch {
+        continue // broken symlink
+      }
+    }
+    if (isDirectory) {
+      if (!SKIP_DIRS.has(entry.name)) yield* walk(full, seenDirs)
     } else if (EXTENSIONS.has(path.extname(entry.name))) {
       yield full
     }
@@ -706,8 +733,8 @@ function main() {
       process.exit(1)
     }
     const marker =
-      inkShiftMarkerDirs.map(findInkShiftMarker).find(Boolean) ||
-      inkShiftMarkerDirs.map(findInkShiftMarkerBelow).find(Boolean)
+      inkShiftMarkerDirs.map((d) => findInkShiftMarker(d)).find(Boolean) ||
+      inkShiftMarkerDirs.map((d) => findInkShiftMarkerBelow(d)).find(Boolean)
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
@@ -791,7 +818,6 @@ function main() {
       console.log(`  ${f.file}:L${f.line}  ${f.token}`)
     }
   }
-
 }
 
 const scriptPath = fileURLToPath(import.meta.url)

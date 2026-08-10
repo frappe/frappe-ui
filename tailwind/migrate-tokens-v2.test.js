@@ -374,6 +374,28 @@ describe('tokens v2 migration', () => {
     expect(retry.stderr).toContain('already ran')
   })
 
+  it('ink-shift CLI follows a symlinked package directory and survives a cycle', () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+    tempDirs.push(root)
+    // A shared package outside the target, linked under it — monorepo layout.
+    const shared = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-shared-')))
+    tempDirs.push(shared)
+    const fixture = path.join(shared, 'a.vue')
+    fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+    fs.symlinkSync(shared, path.join(root, 'linked-pkg'))
+    // A cycle: the shared package links back to the target root.
+    fs.symlinkSync(root, path.join(shared, 'back'))
+    const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+
+    const result = spawnSync(process.execPath, [script, '--ink-shift', root], {
+      encoding: 'utf8',
+      timeout: 30_000,
+    })
+    expect(result.status).toBe(0)
+    // The linked package is shifted, exactly once.
+    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+  })
+
   it('getMigrationMode selects ink-shift regardless of migration state', () => {
     expect(getMigrationMode({ likelyMigrated: true }, { inkShift: true })).toBe('ink-shift')
     expect(getMigrationMode({ likelyMigrated: false }, { inkShift: true })).toBe('ink-shift')
