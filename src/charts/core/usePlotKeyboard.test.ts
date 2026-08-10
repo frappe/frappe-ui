@@ -1,6 +1,7 @@
 import { effectScope, nextTick, ref } from 'vue'
 import { describe, expect, it } from 'vitest'
 import { usePlotKeyboard, type PlotKeyboardReturn } from './usePlotKeyboard'
+import { markName } from '../utils'
 
 type Move = { index: number; previous: number | null }
 
@@ -221,5 +222,25 @@ describe('usePlotKeyboard', () => {
     const plot = setup()
     plot.keyboard.goTo(99)
     expect(plot.keyboard.index.value).toBe(3)
+  })
+})
+
+// What a chart hands the cursor as a name. Names are compared with `===`, so a
+// value a refetch rebuilds has to read the same each time.
+describe('markName', () => {
+  it('leaves a category and a number as they are', () => {
+    expect(markName('Jan')).toBe('Jan')
+    expect(markName(12)).toBe(12)
+  })
+
+  it('reads a date as its instant', () => {
+    const at = '2026-01-01T00:00:00.000Z'
+    expect(markName(new Date(at))).toBe(markName(new Date(at)))
+    expect(markName(new Date(at))).toBe(Date.parse(at))
+  })
+
+  it('has no name for a blank cell', () => {
+    expect(markName(null)).toBe(undefined)
+    expect(markName(undefined)).toBe(undefined)
   })
 })
