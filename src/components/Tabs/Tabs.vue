@@ -80,10 +80,14 @@ function firstSelectable(): TabValue | undefined {
 
 const modelBound = computed(() => props.modelValue !== undefined)
 
-// Route mode: with no model binding and at least one route trigger,
-// selection derives from the current route.
+// Route mode: with no model binding and at least one selectable route
+// trigger, selection derives from the current route. Disabled route
+// triggers do not count — they are excluded from route selection below, so
+// counting them would leave nothing selected and discard every update.
 const routeMode = computed(
-  () => !modelBound.value && triggers.value.some((t) => t.hasRoute()),
+  () =>
+    !modelBound.value &&
+    triggers.value.some((t) => t.hasRoute() && !t.disabled()),
 )
 
 // Disabled triggers are skipped here as well as in keyboard navigation: a

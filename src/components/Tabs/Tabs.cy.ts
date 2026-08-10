@@ -219,6 +219,49 @@ describe('Tabs', () => {
     cy.contains('Archive panel').should('not.exist')
   })
 
+  it('stays in value mode when the only route trigger is disabled', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/archive', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox' }),
+            h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+            h(TabTrigger, {
+              value: 'archive',
+              label: 'Archive',
+              route: '/archive',
+              disabled: true,
+            }),
+          ]),
+        ]),
+    })
+
+    // A disabled route trigger is excluded from route selection, so it must
+    // not put the root in route mode either — otherwise nothing is selected
+    // and every click on an enabled trigger is discarded.
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('[role=tab]', 'Inbox').should(
+      'have.attr',
+      'aria-selected',
+      'true',
+    )
+    cy.contains('[role=tab]', 'Drafts').click()
+    cy.contains('[role=tab]', 'Drafts').should(
+      'have.attr',
+      'aria-selected',
+      'true',
+    )
+  })
+
   it('skips disabled triggers with the keyboard and on click', () => {
     cy.mount(Tabs, {
       props: {
