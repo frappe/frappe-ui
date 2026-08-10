@@ -52,6 +52,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'Introduction', link: '/docs/introduction' },
         { text: 'Getting Started', link: '/docs/getting-started' },
         { text: 'Migration from v0', link: '/docs/migration' },
+        { text: 'Changelog', link: '/docs/changelog' },
       ],
     },
     {

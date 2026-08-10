@@ -89,7 +89,7 @@ table above and has to be removed with the rest.
 
 Each row needs the same three things, per ADR-0008:
 
-- a changelog entry in [`changelog.md`](./changelog.md)
+- a changelog entry in [`changelog.md`](../docs/content/docs/changelog.md)
 - a before/after example in the migration guide where the shape changed
   meaningfully
 - no remaining internal call sites in `src/` — migrate them first, since that

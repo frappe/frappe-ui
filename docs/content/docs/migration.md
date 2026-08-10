@@ -7,7 +7,7 @@ pageClass: migration-page
 A guide for moving an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section opens with a before/after table. For
 the full change list see the
-[changelog](https://github.com/frappe/frappe-ui/blob/main/v1-release/changelog.md);
+[changelog](/docs/changelog);
 for the rationale behind each API see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
