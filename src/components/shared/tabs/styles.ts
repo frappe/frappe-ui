@@ -28,8 +28,11 @@ export function tabTrackClasses(opts: {
     case 'subtle':
       // Shipped v1 geometry (overrides Figma): 1px padding at both sizes,
       // 10px radius at md.
+      // `overflow-hidden` clips the active pill's shadow at the track edge —
+      // with only 1px of padding the shadow otherwise spills onto whatever
+      // sits next to the track.
       return [
-        'bg-surface-gray-2',
+        'bg-surface-gray-2 overflow-hidden',
         isSm ? 'gap-1 rounded p-px' : 'gap-1.5 rounded-[10px] p-px',
       ]
     case 'ghost':
