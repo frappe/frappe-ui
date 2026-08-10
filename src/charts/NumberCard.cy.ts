@@ -52,7 +52,7 @@ describe('NumberCard', () => {
         .should('contain.text', '12.5%')
         .and('contain.text', 'vs last month')
       cy.get('.lucide-arrow-up-right').should('exist')
-      cy.get('.text-ink-green-2, [class*="ink-green"]').should('exist')
+      cy.get('.text-ink-green-7').should('exist')
     })
 
     it('points a fall down, and drops the sign the arrow carries', () => {
