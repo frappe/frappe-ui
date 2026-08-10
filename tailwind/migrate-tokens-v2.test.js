@@ -374,17 +374,23 @@ describe('tokens v2 migration', () => {
     expect(retry.stderr).toContain('already ran')
   })
 
-  it('ink-shift CLI follows a symlinked package directory and survives a cycle', () => {
+  it('ink-shift CLI follows internal symlinks, reports external ones, survives a cycle', () => {
     const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
     tempDirs.push(root)
-    // A shared package outside the target, linked under it — monorepo layout.
+    // Internal: a symlink to a sibling directory inside the target.
+    const pkg = path.join(root, 'pkg')
+    fs.mkdirSync(pkg)
+    const internalFixture = path.join(pkg, 'a.vue')
+    fs.writeFileSync(internalFixture, '<i class="text-ink-red-3"></i>')
+    fs.symlinkSync(pkg, path.join(root, 'pkg-link'))
+    // A cycle: an internal link back to the root itself.
+    fs.symlinkSync(root, path.join(pkg, 'back'))
+    // External: a shared package outside the target, linked under it.
     const shared = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-shared-')))
     tempDirs.push(shared)
-    const fixture = path.join(shared, 'a.vue')
-    fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+    const externalFixture = path.join(shared, 'b.vue')
+    fs.writeFileSync(externalFixture, '<i class="text-ink-red-3"></i>')
     fs.symlinkSync(shared, path.join(root, 'linked-pkg'))
-    // A cycle: the shared package links back to the target root.
-    fs.symlinkSync(root, path.join(shared, 'back'))
     const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
 
     const result = spawnSync(process.execPath, [script, '--ink-shift', root], {
@@ -392,8 +398,13 @@ describe('tokens v2 migration', () => {
       timeout: 30_000,
     })
     expect(result.status).toBe(0)
-    // The linked package is shifted, exactly once.
-    expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+    // Internal content is shifted exactly once, through both the dir and its link.
+    expect(fs.readFileSync(internalFixture, 'utf8')).toContain('ink-red-2')
+    // The external package is untouched — it has no marker of its own, so a
+    // rewrite here would set up a double-shift on a later direct run.
+    expect(fs.readFileSync(externalFixture, 'utf8')).toContain('ink-red-3')
+    expect(result.stdout).toContain('NOT migrated')
+    expect(result.stdout).toContain('linked-pkg')
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {

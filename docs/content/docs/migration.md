@@ -1394,6 +1394,13 @@ delete the marker, and re-run. Commit the marker with the migration — on a
 fresh clone without it the guard is gone, and a teammate's re-run
 double-shifts. Delete it only to re-run the shift on purpose.
 
+Symlinks that point outside the target are skipped and listed at the end of
+the run. Run the codemod on each real package root directly, so every
+migrated tree gets its own marker. If the refusal names a marker inside a
+vendored dependency (for example `vendor/frappe-ui/.tokens-v2-ink-shift`),
+that dependency is already shifted — run the codemod per package root and
+leave the vendored marker alone.
+
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
 "needs manual attention". The usual fix is `text-white` (or the literal CSS

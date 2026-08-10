@@ -59,7 +59,9 @@
  * would double-shift. --ink-shift takes directory targets only; a real run
  * writes a `.tokens-v2-ink-shift` marker file in each target directory and
  * refuses to run again while one exists there, in any ancestor directory,
- * or anywhere in the target subtree.
+ * or anywhere in the target subtree. Symlinks that leave the target subtree
+ * are skipped and reported, never rewritten — an external package must be
+ * migrated directly so it gets its own marker.
  * Old `ink-<family>-1` (the neutral-white step) has no
  * automatic destination (the new `-1` is a light tint, not white); it is
  * flagged for manual attention, never rewritten.
@@ -646,18 +648,29 @@ const SKIP_DIRS = new Set([
   'node_modules', '.git', 'dist', 'cache', 'generated', 'espresso-v2-design-tokens',
 ])
 
-function* walk(target, seenDirs = new Set()) {
+// Symlinked directories are followed only while their real path stays inside
+// one of the run's target subtrees. A link to an external package is skipped
+// and reported instead of rewritten: rewriting it would leave it without a
+// run-once marker of its own, and a later direct --ink-shift run on that
+// package would double-shift it. `ctx.seenDirs` is the cycle guard — an
+// internal link back to an ancestor must not recurse forever.
+function makeWalkContext(targets) {
+  return {
+    roots: targets.map((t) => fs.realpathSync(t)),
+    seenDirs: new Set(),
+    externals: [],
+  }
+}
+
+function* walk(target, ctx = makeWalkContext([target])) {
   const stat = fs.statSync(target)
   if (stat.isFile()) {
     yield target
     return
   }
-  // Cycle guard: symlinked directories are followed (a monorepo may link a
-  // shared package under the target), so a link back to an ancestor must not
-  // recurse forever.
   const real = fs.realpathSync(target)
-  if (seenDirs.has(real)) return
-  seenDirs.add(real)
+  if (ctx.seenDirs.has(real)) return
+  ctx.seenDirs.add(real)
   for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
     const full = path.join(target, entry.name)
     let isDirectory = entry.isDirectory()
@@ -667,9 +680,19 @@ function* walk(target, seenDirs = new Set()) {
       } catch {
         continue // broken symlink
       }
+      if (isDirectory && !SKIP_DIRS.has(entry.name)) {
+        const realTarget = fs.realpathSync(full)
+        const internal = ctx.roots.some(
+          (r) => realTarget === r || realTarget.startsWith(r + path.sep),
+        )
+        if (!internal) {
+          ctx.externals.push(full)
+          continue
+        }
+      }
     }
     if (isDirectory) {
-      if (!SKIP_DIRS.has(entry.name)) yield* walk(full, seenDirs)
+      if (!SKIP_DIRS.has(entry.name)) yield* walk(full, ctx)
     } else if (EXTENSIONS.has(path.extname(entry.name))) {
       yield full
     }
@@ -708,8 +731,9 @@ function main() {
   // ink-shift mode a second pass is a double-shift.
   const files = []
   const seenFiles = new Set()
+  const walkCtx = makeWalkContext(targets)
   for (const target of targets) {
-    for (const file of walk(target)) {
+    for (const file of walk(target, walkCtx)) {
       const resolved = fs.realpathSync(file)
       if (seenFiles.has(resolved)) continue
       seenFiles.add(resolved)
@@ -817,6 +841,14 @@ function main() {
     for (const f of allFlagged) {
       console.log(`  ${f.file}:L${f.line}  ${f.token}`)
     }
+  }
+
+  if (walkCtx.externals.length > 0) {
+    console.log('\n⚠ Symlinks to external packages were NOT migrated:')
+    for (const link of walkCtx.externals) {
+      console.log(`  ${link} -> ${fs.realpathSync(link)}`)
+    }
+    console.log('  Run the codemod on each real package root directly.')
   }
 }
 
