@@ -110,6 +110,7 @@ defineSlots<{
   >
     <TabsIndicator
       v-if="props.variant === 'underline'"
+      aria-hidden="true"
       class="absolute motion-reduce:transition-none"
       :class="[indicatorClasses, tabIndicatorMotionClasses]"
     >

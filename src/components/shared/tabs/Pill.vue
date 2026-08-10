@@ -14,10 +14,19 @@ const props = withDefaults(defineProps<PillProps>(), {
   activeSurface: true,
 })
 
+const slots = defineSlots<{
+  prefix?: () => any
+  default?: () => any
+  suffix?: () => any
+}>()
+
 // `icon` means icon-only intent (label, if provided, is rendered as
 // sr-only). `iconLeft` is an accent icon next to a visible label. Trailing
 // content is the `#suffix` slot's job — counts and badges, not glyphs.
-const isIconOnly = computed(() => Boolean(props.icon))
+// A default slot cancels icon-only intent: the caller is supplying visible
+// label content, so hiding it would drop what they passed. `TabTrigger` reads
+// the same rule for the `aria-label`/`title` it derives from `label`.
+const isIconOnly = computed(() => Boolean(props.icon) && !slots.default)
 
 const sizeClasses = computed(() => {
   const isSm = props.size === 'sm'
@@ -123,11 +132,6 @@ function hasLabel(label: PillProps['label']) {
   return label !== undefined && label !== null && label !== ''
 }
 
-defineSlots<{
-  prefix?: () => any
-  default?: () => any
-  suffix?: () => any
-}>()
 </script>
 
 <template>
