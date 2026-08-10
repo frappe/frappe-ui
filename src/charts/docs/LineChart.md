@@ -18,8 +18,9 @@ the rows draw in numeric order whatever order they arrive in.
 The default reading is `'category'`, which gives every row an equal slot. A
 column of dates becomes `'time'` on its own, but a column of numbers never
 becomes a scale by itself — a category column often holds numbers, so the scale
-is asked for. `horizontal` ignores the setting, because a bar is sized from the
-slot it stands in.
+is asked for. A horizontal `BarChart` ignores the setting, because a bar is
+sized from the slot it stands in; `horizontal` is a `BarChart` prop, and a line
+chart has none.
 
 <ComponentPreview name="Charts-LineNumericAxis" csr="true" self-layout />
 
@@ -64,6 +65,13 @@ never in the tooltip, and it cannot be switched off — which is what a threshol
 has to be to stay comparable. A line outside the range the plot covers is not
 drawn, because stretching the scale to fit a distant target would flatten the
 data it is meant to be read against; pin `yAxis.min` / `max` instead.
+
+## Hiding a series
+
+A chart with more than one series draws a legend under the plot. Press an entry
+to take that line out of the chart, or bind `v-model:hiddenSeries` to own that
+list yourself. It is described under
+[BarChart](/docs/charts/barchart#hiding-a-series).
 
 ## Gaps
 
