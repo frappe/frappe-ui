@@ -53,8 +53,11 @@ function frappeuiPlugin(options = {}) {
       return {
         optimizeDeps: {
           include: [
+            // Every entry here must be a frappe-ui dependency. A name that no
+            // installed package resolves makes Vite log "Failed to resolve
+            // dependency ... present in 'optimizeDeps.include'" on each dev
+            // start of every consuming app.
             'highlight.js/lib/core',
-            'interactjs',
             // Deps behind the imperative `toast()` / `dialog.*` surfaces.
             //
             // Both are backed by module-level state — the `dialogs` ref in
@@ -72,7 +75,6 @@ function frappeuiPlugin(options = {}) {
             'reka-ui',
             'vue-sonner',
             'dompurify',
-            'feather-icons',
           ],
         },
       }
