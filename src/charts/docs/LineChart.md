@@ -18,8 +18,9 @@ the rows draw in numeric order whatever order they arrive in.
 The default reading is `'category'`, which gives every row an equal slot. A
 column of dates becomes `'time'` on its own, but a column of numbers never
 becomes a scale by itself — a category column often holds numbers, so the scale
-is asked for. `horizontal` ignores the setting, because a bar is sized from the
-slot it stands in.
+is asked for. A horizontal `BarChart` ignores the setting, because a bar is
+sized from the slot it stands in; `horizontal` is a `BarChart` prop, and a line
+chart has none.
 
 <ComponentPreview name="Charts-LineNumericAxis" csr="true" self-layout />
 
