@@ -7,7 +7,7 @@ import {
 import { hexToOklch, interpolateRamp, oklchToHex } from './colorMath'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, insideLabelColor, type ChartTheme } from './theme'
+import { chartColors, insideLabelColor, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
@@ -21,7 +21,7 @@ import type {
 // `HeatmapMatrix`, so the scale in the corner can't disagree with the fills.
 
 export type HeatmapOptionContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** Prints the value inside a cell. Defaults to a shortened number. */
   format?: ChartValueFormatter
 }
@@ -80,7 +80,7 @@ export function hoverCellColor(color: string): string {
  */
 export function buildHeatmapMatrix(
   config: HeatmapChartConfig,
-  { theme }: HeatmapOptionContext,
+  { tokens }: HeatmapOptionContext,
 ): HeatmapMatrix {
   const rows = config.data ?? []
   const xCategories: string[] = []
@@ -129,7 +129,7 @@ export function buildHeatmapMatrix(
 
   const unsized = [...placed.values()]
   const { min, max } = resolveScale(config, unsized)
-  const stops = heatmapRampStops(config, theme)
+  const stops = heatmapRampStops(config, tokens)
   const span = max - min
 
   const cells: HeatmapCell[] = unsized.map((cell) => ({
@@ -174,9 +174,9 @@ function resolveScale(
  */
 export function heatmapRampStops(
   config: HeatmapChartConfig,
-  theme: ChartTheme,
+  tokens: ChartTokens,
 ): string[] {
-  return chartColors(config.palette, theme, {
+  return chartColors(config.palette, tokens, {
     fallback: HEATMAP_PALETTE,
     count: 'ramp',
     deepEnd: 'last',
@@ -221,7 +221,7 @@ export function buildHeatmapOption(
   config: HeatmapChartConfig,
   context: HeatmapOptionContext,
 ): EChartsCoreOption {
-  const { theme, format } = context
+  const { tokens, format } = context
   const isRTL = config.dir === 'rtl'
   const matrix = buildHeatmapMatrix(config, context)
   const showValues = Boolean(config.showValues)
@@ -255,7 +255,7 @@ export function buildHeatmapOption(
       axisLabel: {
         hideOverlap: true,
         margin: 8,
-        color: theme.axisLabel,
+        color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
       },
     },
@@ -273,7 +273,7 @@ export function buildHeatmapOption(
       axisLabel: {
         hideOverlap: true,
         margin: 8,
-        color: theme.axisLabel,
+        color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
       },
     },
@@ -297,7 +297,7 @@ export function buildHeatmapOption(
         itemStyle: {
           borderRadius: CELL_RADIUS,
           borderWidth: CELL_BORDER_WIDTH,
-          borderColor: theme.cellGap,
+          borderColor: tokens.cellGap,
         },
         // Hover only lightens the fill (per cell, below). The border stays the
         // resting one and the shadow is turned off: a heatmap is read by
@@ -306,7 +306,7 @@ export function buildHeatmapOption(
         emphasis: {
           focus: 'none',
           itemStyle: {
-            borderColor: theme.cellGap,
+            borderColor: tokens.cellGap,
             borderWidth: CELL_BORDER_WIDTH,
             shadowBlur: 0,
             shadowColor: 'transparent',
@@ -336,7 +336,7 @@ export function buildHeatmapOption(
           ...(showValues
             ? {
                 label: {
-                  color: insideLabelColor(cell.color, theme.insideLabel),
+                  color: insideLabelColor(cell.color, tokens.insideLabel),
                 },
               }
             : null),

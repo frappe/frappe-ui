@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
-import { paletteColors, type ChartTheme } from './theme'
+import { paletteColors, type ChartTokens } from './tokens'
 import type { SankeyChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333', '#444444'],
   sequential: ['#0a0a0a', '#5a5a5a', '#cccccc'],
   diverging: ['#0000ff', '#ffffff', '#ff0000'],
@@ -32,11 +32,11 @@ function config(overrides: Partial<SankeyChartConfig> = {}): SankeyChartConfig {
 }
 
 function graph(overrides: Partial<SankeyChartConfig> = {}) {
-  return buildSankeyGraph(config(overrides), { theme })
+  return buildSankeyGraph(config(overrides), { tokens })
 }
 
 function build(overrides: Partial<SankeyChartConfig> = {}) {
-  return buildSankeyOption(config(overrides), { theme }) as any
+  return buildSankeyOption(config(overrides), { tokens }) as any
 }
 
 /** Every warning this module raises is dev-only, so every test that expects one
@@ -139,7 +139,7 @@ describe('buildSankeyGraph', () => {
 
   it('colors nodes from the categorical palette by default', () => {
     const built = graph()
-    const colors = paletteColors('categorical', theme, built.nodes.length)
+    const colors = paletteColors('categorical', tokens, built.nodes.length)
 
     expect(built.nodes.map((node) => node.color)).toEqual(colors)
   })
@@ -148,7 +148,7 @@ describe('buildSankeyGraph', () => {
     const built = graph({ palette: 'sequential' })
 
     expect(built.nodes.map((node) => node.color)).toEqual(
-      paletteColors('sequential', theme, built.nodes.length),
+      paletteColors('sequential', tokens, built.nodes.length),
     )
   })
 
@@ -317,7 +317,7 @@ describe('buildSankeyOption', () => {
     const series = build().series[0]
 
     expect(series.label.show).toBe(true)
-    expect(series.label.color).toBe(theme.dataLabel)
+    expect(series.label.color).toBe(tokens.dataLabel)
     expect(series.label.formatter({ name: 'Trial', value: 12400 })).toBe(
       'Trial · 12.4K',
     )
@@ -325,7 +325,7 @@ describe('buildSankeyOption', () => {
 
   it('prints a node value through `format` when one is given', () => {
     const option = buildSankeyOption(config(), {
-      theme,
+      tokens,
       format: (value: number) => `${value} signups`,
     }) as any
 

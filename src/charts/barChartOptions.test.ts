@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { AXIS_LABEL_FONT_SIZE, resolveSeriesColors } from './axisChartCommon'
 import { estimateTextWidth } from './format'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   // Five stops so the sequential pale-tail trim and even spacing are visible.
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
@@ -39,14 +39,14 @@ function build(
   width?: number,
 ) {
   return buildAxisChartOption(config(overrides), {
-    theme,
+    tokens,
     hiddenSeries,
     width,
   }) as any
 }
 
 function colorsFor(overrides: Partial<AxisChartConfig> = {}) {
-  return resolveSeriesColors(config(overrides), theme)
+  return resolveSeriesColors(config(overrides), tokens)
 }
 
 /** The plain [category, value] pairs behind a series' data items. */
@@ -143,16 +143,16 @@ describe('bar chart option axes', () => {
     expect(option.yAxis.position).toBe('right')
   })
 
-  it('gridlines the value axis and baselines the category axis, in theme ink', () => {
+  it('gridlines the value axis and baselines the category axis, in token ink', () => {
     const option = build()
-    expect(option.xAxis.axisLabel.color).toBe(theme.axisLabel)
+    expect(option.xAxis.axisLabel.color).toBe(tokens.axisLabel)
 
     // Gridlines run across the values; the category axis carries the baseline.
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(theme.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.axisLine.show).toBe(false)
-    expect(option.xAxis.axisLine.lineStyle.color).toBe(theme.splitLine)
+    expect(option.xAxis.axisLine.lineStyle.color).toBe(tokens.splitLine)
   })
 
   it('puts dates on a time axis without being told to', () => {

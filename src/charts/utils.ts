@@ -46,6 +46,47 @@ export function chartAriaLabel(title?: string, subtitle?: string): string {
   return [title, subtitle].filter(Boolean).join(', ') || 'Chart'
 }
 
+/**
+ * What the mark under the keyboard cursor says, as one line for a live region.
+ * The tooltip is drawn beside the pointer, which a reader walking the plot with
+ * the arrow keys never has; this is the same reading in text.
+ */
+export function plotReading(
+  label: string | undefined,
+  readings: { label: string; value: string }[],
+): string {
+  const body = readings
+    .map((reading) => `${reading.label} ${reading.value}`)
+    .join(', ')
+  return [label, body].filter(Boolean).join(': ')
+}
+
+/**
+ * A data value as the name of a mark, for the keyboard cursor to hold on to.
+ * Names are compared with `===`, and a refetch answers with a fresh `Date` for
+ * the same instant, so a date reads as its time and everything else as itself.
+ */
+export function markName(value: unknown): string | number | undefined {
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'string' || typeof value === 'number') return value
+  return value === null || value === undefined ? undefined : String(value)
+}
+
+/** The center of an element in viewport coordinates, for a tooltip with no pointer to hang off. */
+export function elementCenter(el: HTMLElement | undefined) {
+  if (!el) return undefined
+  const rect = el.getBoundingClientRect()
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+}
+
+/** Whether the reader has asked the OS for less movement. */
+export function prefersReducedMotion(): boolean {
+  return Boolean(
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  )
+}
+
 export function documentDir(): 'ltr' | 'rtl' {
   if (typeof document === 'undefined') return 'ltr'
   return document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'

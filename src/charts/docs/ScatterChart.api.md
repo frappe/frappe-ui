@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,13 +25,13 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
@@ -64,6 +64,13 @@
     description: 'Grouping column: one series per distinct value.',
     required: false,
     type: 'string'
+  },
+  {
+    name: 'hiddenSeries',
+    description: 'Groups the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app. Left unbound, the\nlegend owns it.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
   },
   {
     name: 'label',
@@ -109,30 +116,13 @@
   },
   {
     name: 'echartOptions',
-    description: '',
+    description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,
     type: 'EchartOptionsOverride'
-  },
-  {
-    name: 'hiddenSeries',
-    description: '',
-    required: false,
-    type: 'string[]',
-    default: '[]'
   }
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -147,19 +137,29 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
   }
 ]
 
   const emitsData = [
   {
+    name: 'select',
+    description: 'A point was selected, by click or by Enter on the keyboard cursor. Carries\nboth measures and the row behind it.',
+    type: '[event: ScatterPointEvent]'
+  },
+  {
     name: 'update:hiddenSeries',
     description: 'Fired when the hidden series changes.',
     type: '[value: string[]]'
-  },
-  {
-    name: 'pointClick',
-    description: '',
-    type: '[event: ScatterPointEvent]'
   }
 ]
 </script>

@@ -12,6 +12,7 @@ import { SVGRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
 import debounce from '#utils/debounce'
 import { installTextMeasurer } from '../measureText'
+import { prefersReducedMotion } from '../utils'
 
 // SVG only: it keeps text selectable and crisp at any DPI, and the canvas
 // renderer is a large slice of echarts we would pay for on every page.
@@ -52,6 +53,8 @@ export type UseChartReturn = {
 }
 
 const RESIZE_DEBOUNCE_MS = 100
+/** Long enough to read as the plot moving, short enough not to hold a drag up. */
+const RESIZE_ANIMATION_MS = 200
 
 /**
  * Label widths are measured once and kept for the life of the page — by
@@ -107,7 +110,11 @@ export function useChart({
   // re-lay the plot. Publishing the width here is what makes it re-run.
   const resize = () => {
     width.value = container.value?.clientWidth ?? 0
-    chart.value?.resize({ animation: { duration: 200 } })
+    // The plot slides to its new size, unless the reader has asked for less
+    // movement — a whole chart re-laying itself is a large piece of motion.
+    chart.value?.resize({
+      animation: { duration: prefersReducedMotion() ? 0 : RESIZE_ANIMATION_MS },
+    })
   }
   const debouncedResize = debounce(resize, RESIZE_DEBOUNCE_MS)
   let resizeObserver: ResizeObserver | undefined

@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { plotRows, resolveXAxis } from './axisChartCommon'
 import { normalizeAxisChartProps } from './seriesData'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -39,7 +39,7 @@ function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
 }
 
 function build(overrides: Partial<AxisChartConfig> = {}) {
-  return buildAxisChartOption(config(overrides), { theme }) as any
+  return buildAxisChartOption(config(overrides), { tokens }) as any
 }
 
 /** The [x, y] pairs behind a series' data items, whichever way they are wrapped. */
@@ -104,7 +104,7 @@ describe('numeric x axis: the axis itself', () => {
       revenue: i,
     }))
     const option = buildAxisChartOption(config({ data }), {
-      theme,
+      tokens,
       width: 200,
     }) as any
     expect(option.xAxis.axisLabel.rotate).toBeUndefined()

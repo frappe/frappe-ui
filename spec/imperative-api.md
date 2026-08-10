@@ -267,11 +267,12 @@ component's internal state by assigning to it. Meanwhile TypeScript still
 reports it as a `Ref<T>`. Types and behaviour disagree on every live value the
 library hands back.
 
-So: **functions, plus the two element cases in §2.3, plus one documented
-exception** — a computed with a noun name, declared in the component's type.
-Today that's `Editor.isEmpty`. A computed is safe here precisely because
-assigning to an unwrapped computed fails loudly instead of silently corrupting
-state.
+So: **functions, plus the two element cases in §2.3, plus two documented
+exceptions** — a computed with a noun name, declared in the component's type.
+Today those are `Editor.isEmpty` and the chart family's `chart`
+([ADR-0016](./adr/0016-charts-expose-echarts-instance.md)). A computed is safe
+here precisely because assigning to an unwrapped computed fails loudly instead of
+silently corrupting state.
 
 ### 2.3 Policy: handing back a DOM element
 
@@ -367,6 +368,13 @@ there's no way to offer it short of re-exporting Tiptap. It's documented
 the `useEditor` layer. `TextEditor.vue:282`'s copy disappears with that
 deprecated component.
 
+**The seven echarts-backed charts stay too**, handing back the echarts instance
+as `chart`. `echartOptions` reaches every option key and no instance method, and
+`echarts.getInstanceByDom` reaches the instance whatever the component exposes —
+so the choice is a declared seam or an undeclared one.
+[ADR-0016](./adr/0016-charts-expose-echarts-instance.md) records the argument and
+the limits, and `charts.md` states the contract.
+
 **Nothing else hands back a third-party object without an ADR.** That's the line
 that stops "just expose the reka instance" from spreading.
 
@@ -433,6 +441,7 @@ Applied:
 | `ScrollArea` | `{ viewportElement }` | same, plus a type | No |
 | `SettingsBody` | `{ viewportElement }` | same, sharing ScrollArea's type | No |
 | `Editor` | `{ editor, isEmpty }` | same, plus a type | No |
+| The seven echarts-backed charts | `{ chart }` | unchanged — [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) | No |
 | `Autocomplete`, `TextEditor` | various | deleted with the component | Policy |
 | `CalendarPanel`, `PickerShell`, editor lists | various | internal, shared types | No |
 | everything else you can type in or tab to | nothing | `{ focus }` | No |

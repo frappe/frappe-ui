@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,19 +25,19 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
   {
     name: 'data',
-    description: '',
+    description: 'The rows to plot. One row is one position on the category axis.',
     required: true,
     type: 'Record<string, any>[]'
   },
@@ -72,14 +72,21 @@
     type: 'Record<string, SeriesStyle>'
   },
   {
+    name: 'hiddenSeries',
+    description: 'Series the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app, or to keep what a\nreader hid across a reload. Left unbound, the legend owns it.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
     name: 'xAxis',
-    description: '',
+    description: 'The category axis: its title, how the `x` column reads, and label format.',
     required: false,
     type: 'ChartXAxisOptions'
   },
   {
     name: 'yAxis',
-    description: '',
+    description: 'The primary value axis: its title, its range, and how a value prints.',
     required: false,
     type: 'ChartValueAxisOptions'
   },
@@ -121,30 +128,13 @@
   },
   {
     name: 'echartOptions',
-    description: '',
+    description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,
     type: 'EchartOptionsOverride'
-  },
-  {
-    name: 'hiddenSeries',
-    description: '',
-    required: false,
-    type: 'string[]',
-    default: '[]'
   }
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -159,19 +149,29 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
   }
 ]
 
   const emitsData = [
   {
+    name: 'select',
+    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its position along the category axis, and the\nrow behind it.',
+    type: '[event: ChartDatapointEvent]'
+  },
+  {
     name: 'update:hiddenSeries',
     description: 'Fired when the hidden series changes.',
     type: '[value: string[]]'
-  },
-  {
-    name: 'datapointClick',
-    description: '',
-    type: '[event: ChartDatapointEvent]'
   }
 ]
 </script>

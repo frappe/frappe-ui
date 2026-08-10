@@ -102,11 +102,24 @@ a date. `horizontal` swaps the two axes and the lines follow. A line outside the
 range the plot covers is not drawn — the scale follows the data, not the
 annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
 
-## Clicking a bar
+## Hiding a series
 
-`datapointClick` reports the series, the value and the row behind the bar, so a
-chart can open the records it summarizes.
+A chart with more than one series draws a legend under the plot. Press an entry
+to take that series out of the chart, and the value axis rescales to what is
+left.
 
-<ComponentPreview name="Charts-BarClick" csr="true" self-layout />
+`v-model:hiddenSeries` binds that list, so the app can start with a series
+hidden, or drive the same toggles from a control of its own. It holds series
+identities: a `y` column name on wide data, a value of the `series` column on
+long data, or `__others__` for a capped tail. `LineChart`, `AreaChart` and
+`ScatterChart` take the same model.
+
+## Selecting a bar
+
+`select` reports the series, the value and the row behind the bar, so a chart
+can open the records it summarizes. It fires on a click and on Enter or Space
+over the keyboard cursor.
+
+<ComponentPreview name="Charts-BarSelect" csr="true" self-layout />
 
 <!-- @include: ./BarChart.api.md -->

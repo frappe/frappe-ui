@@ -34,6 +34,10 @@ jobs:
       - name: Build preview
         run: >-
           VITEPRESS_BASE=/pr-preview/pr-${{ github.event.pull_request.number }}/ yarn docs:build
+        env:
+          # The docs site has outgrown node's 4 GB default heap. The runner has
+          # 16 GB.
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: Upload preview artifact
         uses: actions/upload-artifact@v4

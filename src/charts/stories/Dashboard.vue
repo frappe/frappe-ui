@@ -11,7 +11,7 @@ import {
   HeatmapChart,
   LineChart,
   NumberCard,
-  useChartTheme,
+  useChartTokens,
 } from 'frappe-ui/charts'
 import type {
   AreaChartProps,
@@ -286,7 +286,7 @@ const ordersVsTypicalChart: HeatmapChartProps = {
 }
 
 const root = ref<HTMLElement>()
-const { theme } = useChartTheme(root)
+const { tokens } = useChartTokens(root)
 
 /**
  * One series read as two directions off a shared rest point, which is what the
@@ -294,8 +294,8 @@ const { theme } = useChartTheme(root)
  * flip re-colors the bars.
  */
 const marginChart = computed<BarChartProps>(() => {
-  const ahead = theme.value.diverging[0]
-  const behind = theme.value.diverging.at(-1)!
+  const ahead = tokens.value.diverging[0]
+  const behind = tokens.value.diverging.at(-1)!
 
   return {
     data: marginVariance,

@@ -21,11 +21,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the grid
+           with the arrow keys has not got. The same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -66,22 +71,24 @@ import { HeatmapChart as HeatmapSeries } from 'echarts/charts'
 import { GridComponent, VisualMapContinuousComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildHeatmapMatrix,
   buildHeatmapOption,
   sampleRamp,
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
-import { useChartTheme } from './theme'
-import { chartAriaLabel, documentDir } from './utils'
+import { useChartTokens } from './tokens'
+import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   ChartExposed,
   ChartTooltipItem,
-  HeatmapCellEvent,
   HeatmapChartConfig,
+  HeatmapChartEmits,
   HeatmapChartProps,
+  HeatmapChartSlots,
 } from './types'
 
 // The continuous visual map only: a heatmap has no piecewise scale to draw, and
@@ -95,20 +102,9 @@ registerChartModules([
 
 const props = defineProps<HeatmapChartProps>()
 
-const emit = defineEmits<{
-  cellClick: [event: HeatmapCellEvent]
-}>()
+const emit = defineEmits<HeatmapChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<HeatmapChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 
@@ -127,10 +123,10 @@ const config = computed<HeatmapChartConfig>(() => ({
   echartOptions: props.echartOptions,
 }))
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const matrix = computed(() =>
-  buildHeatmapMatrix(config.value, { theme: theme.value }),
+  buildHeatmapMatrix(config.value, { tokens: tokens.value }),
 )
 const isEmpty = computed(() => !matrix.value.cells.length)
 
@@ -140,7 +136,7 @@ const built = computed(() => {
   try {
     return {
       option: buildHeatmapOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         format: props.format,
       }),
       error: null as string | null,
@@ -167,7 +163,7 @@ const tooltip = reactive({
   items: [] as ChartTooltipItem[],
 })
 
-const { chart } = useChart({
+const { chart, dispatch } = useChart({
   container: plotEl,
   option: () => built.value.option,
   events: {
@@ -176,7 +172,7 @@ const { chart } = useChart({
     click: (params: any) => {
       const cell = matrix.value.cells[params.dataIndex]
       if (!cell) return
-      emit('cellClick', {
+      emit('select', {
         x: cell.x,
         y: cell.y,
         value: cell.value,
@@ -222,6 +218,95 @@ function showTooltip(dataIndex: number) {
   tooltip.y = pointer.y
   tooltip.open = true
 }
+
+// The grid is one tab stop and the arrow keys walk it: an echarts plot draws
+// into a single element, so there are no per-cell nodes to tab through. Left
+// and right run along the data order, up and down hold the column.
+const reading = ref('')
+
+function cellPoint(index: number) {
+  const el = plotEl.value
+  const cell = matrix.value.cells[index]
+  if (!el || !cell) return undefined
+  const rect = el.getBoundingClientRect()
+  const at = chart.value?.convertToPixel({ seriesIndex: 0 }, [
+    cell.xIndex,
+    cell.yIndex,
+  ]) as unknown as number[] | undefined
+
+  if (!at || at.some((n) => typeof n !== 'number' || isNaN(n))) {
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+  }
+  return { x: rect.left + at[0], y: rect.top + at[1] }
+}
+
+function readCell(index: number) {
+  const cell = matrix.value.cells[index]
+  if (!cell) return
+  const point = cellPoint(index)
+  if (point) {
+    pointer.x = point.x
+    pointer.y = point.y
+  }
+  dispatch({ type: 'highlight', seriesIndex: 0, dataIndex: index })
+  showTooltip(index)
+  reading.value = tooltip.open
+    ? plotReading(
+        tooltip.label,
+        tooltip.items.map((item) => ({
+          label: item.label,
+          value: item.formattedValue,
+        })),
+      )
+    : ''
+}
+
+/** Takes the emphasis off the cell the cursor has left. */
+function downplayCell(index: number | null) {
+  if (index === null) return
+  dispatch({ type: 'downplay', seriesIndex: 0, dataIndex: index })
+}
+
+const keyboard = usePlotKeyboard({
+  marks: () => matrix.value.cells,
+  // The pair of categories names the cell, whatever order the grid ends up in
+  // and whichever refetch built the rows.
+  key: (cell) => `${cell.y} ${cell.x}`,
+  move: (index, previous) => {
+    downplayCell(previous)
+    readCell(index)
+  },
+  // The column the cursor is in, one row along. A grid with a hole in it skips
+  // nothing sideways, so the vertical step is the one that has to look.
+  cross: (delta) => {
+    const cells = matrix.value.cells
+    const from = cells[keyboard.index.value ?? 0]
+    if (!from) return
+    const next = cells.findIndex(
+      (cell) =>
+        cell.xIndex === from.xIndex && cell.yIndex === from.yIndex + delta,
+    )
+    if (next < 0) return
+    keyboard.goTo(next)
+  },
+  activate: (index) => {
+    const cell = matrix.value.cells[index]
+    if (!cell) return
+    emit('select', {
+      x: cell.x,
+      y: cell.y,
+      value: cell.value,
+      row: cell.row,
+    })
+  },
+  clear: (previous) => {
+    downplayCell(previous)
+    tooltip.open = false
+    reading.value = ''
+  },
+})
+
+const plotAttrs = keyboard.attrs
 
 /** The ramp scale in the chrome, painted from the stops the cells came from. */
 const scale = computed(() => {

@@ -97,7 +97,7 @@
             @focus="focusStage(stage, $event)"
             @blur="clearHover"
             @click="
-              emit('stageClick', {
+              emit('select', {
                 label: stage.label,
                 value: stage.value,
                 index: stage.index,
@@ -164,7 +164,7 @@
 import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
-import { chartColors, useChartTheme } from './theme'
+import { chartColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -172,9 +172,10 @@ import type {
   ChartPaletteName,
   ChartTooltipItem,
   FunnelChartConfig,
+  FunnelChartEmits,
   FunnelChartProps,
+  FunnelChartSlots,
   FunnelStage,
-  FunnelStageEvent,
 } from './types'
 
 // Segmented columns rather than a centered cone: the shapes read as one
@@ -185,24 +186,9 @@ const props = withDefaults(defineProps<FunnelChartProps>(), {
   showPercentages: true,
 })
 
-const emit = defineEmits<{
-  stageClick: [event: FunnelStageEvent]
-}>()
+const emit = defineEmits<FunnelChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: {
-    label?: string
-    items: ChartTooltipItem[]
-    stage?: FunnelStage
-  }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<FunnelChartSlots>()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())
@@ -235,13 +221,13 @@ const shapes = computed(() =>
   ),
 )
 
-const { theme } = useChartTheme(root)
+const { tokens } = useChartTokens(root)
 
 const FUNNEL_PALETTE: ChartPaletteName = 'sequential'
 
 /** Palest first, deepest last, so the color darkens as the population narrows. */
 const colors = computed(() =>
-  chartColors(props.palette, theme.value, {
+  chartColors(props.palette, tokens.value, {
     fallback: FUNNEL_PALETTE,
     count: stages.value.length,
     deepEnd: 'last',

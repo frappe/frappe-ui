@@ -9,19 +9,26 @@ const data = [
 ]
 
 /** Animation off: a line draws itself in, and half a line is not clickable. */
-function mountChart(props: Record<string, any> = {}) {
+function mountChart(
+  props: Record<string, any> = {},
+  slots?: Record<string, (props?: any) => unknown>,
+) {
   return cy.mount(
     defineComponent({
       setup() {
         return () =>
           h('div', { style: 'width: 480px; height: 300px' }, [
-            h(LineChart, {
-              data,
-              x: 'month',
-              y: ['sales', 'refunds'],
-              echartOptions: { animation: false },
-              ...props,
-            }),
+            h(
+              LineChart,
+              {
+                data,
+                x: 'month',
+                y: ['sales', 'refunds'],
+                echartOptions: { animation: false },
+                ...props,
+              },
+              slots,
+            ),
           ])
       },
     }),
@@ -61,14 +68,14 @@ describe('LineChart', () => {
       .and('contain.text', 'Refunds')
   })
 
-  it('emits datapointClick with the row behind the point', () => {
+  it('emits select with the row behind the point', () => {
     mountChart({
       seriesConfig: { sales: { showDataPoints: true } },
-      onDatapointClick: cy.spy().as('onClick'),
+      onSelect: cy.spy().as('onSelect'),
     })
     // The stroke is a thin target; the symbols are what a reader aims at.
     cy.get(`${MARKS} path[fill^="#"]`).first().click()
-    cy.get('@onClick').should('have.been.calledWithMatch', {
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
       seriesName: 'sales',
       row: { month: 'Jan', sales: 10 },
     })
@@ -243,5 +250,141 @@ describe('LineChart', () => {
     cy.get('[data-slot="chart-container"]')
       .should('contain.text', 'Sales')
       .and('contain.text', 'Refunds')
+  })
+
+  describe('states', () => {
+    /** The state an app styles the card from, without tracking it itself. */
+    const container = () => cy.get('[data-slot="chart-container"]')
+
+    it('holds the plot’s shape with a skeleton while loading', () => {
+      mountChart({ loading: true })
+      container().should('have.attr', 'data-state', 'loading')
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('be.visible')
+      // The plot stays mounted — unmounting it would dispose the echarts
+      // instance — so it is hidden rather than removed.
+      lines().should('not.be.visible')
+    })
+
+    it('reports an error over the plot', () => {
+      mountChart({ error: 'boom' })
+      container().should('have.attr', 'data-state', 'error')
+      cy.contains('Could not render this chart').should('be.visible')
+      cy.contains('boom').should('be.visible')
+    })
+
+    it('says so when there is nothing to plot', () => {
+      mountChart({ data: [] })
+      container().should('have.attr', 'data-state', 'empty')
+      cy.contains('No data to show').should('be.visible')
+    })
+
+    it('takes an app’s own placeholder in place of the skeleton', () => {
+      mountChart({ loading: true }, { loading: () => h('div', { id: 'own' }) })
+      cy.get('#own').should('exist')
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('not.exist')
+    })
+
+    it('hands the error to the app’s own message', () => {
+      mountChart(
+        { error: 'boom' },
+        { error: ({ error }: any) => h('span', `Failed: ${error}`) },
+      )
+      cy.contains('Failed: boom').should('be.visible')
+      cy.contains('Could not render this chart').should('not.exist')
+    })
+
+    it('takes an app’s own line in place of “No data to show”', () => {
+      mountChart({ data: [] }, { empty: () => h('span', 'Widen the filters') })
+      cy.contains('Widen the filters').should('be.visible')
+      cy.contains('No data to show').should('not.exist')
+    })
+  })
+
+  describe('slots', () => {
+    it('puts an app’s controls in the header', () => {
+      mountChart({ title: 'Revenue' }, { actions: () => h('button', 'Export') })
+      cy.get('[data-slot="chart-header"]').should('contain.text', 'Export')
+    })
+
+    it('takes an app’s own tooltip body', () => {
+      mountChart(
+        {},
+        {
+          tooltip: ({ label, items }: any) =>
+            h('span', `${label} / ${items.length}`),
+        },
+      )
+      lines().should('have.length', 2)
+      cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('contain.text', 'Jan / 2')
+        // The default body is replaced, not decorated.
+        .and('not.contain.text', 'Sales')
+    })
+  })
+
+  describe('keyboard', () => {
+    /** The tab stop: echarts draws into one element, so the plot is the target. */
+    const plot = () => cy.get('[data-slot="chart-plot"] [role="img"]')
+    /** The tooltip in text, for a reader with no pointer to hang it off. */
+    const reading = () => cy.get('[role="status"]')
+
+    it('lands the cursor on the first category and reads it out', () => {
+      mountChart()
+      lines().should('have.length', 2)
+      plot().focus()
+      reading().should('contain.text', 'Jan').and('contain.text', 'Sales')
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('exist')
+        .and('contain.text', 'Jan')
+    })
+
+    it('steps along the categories with the arrow keys', () => {
+      mountChart()
+      lines().should('have.length', 2)
+      plot().focus()
+      plot().type('{rightarrow}')
+      reading().should('contain.text', 'Feb')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Feb')
+    })
+
+    it('picks the series Enter fires for with up and down', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
+      lines().should('have.length', 2)
+      plot().focus()
+      plot().type('{downarrow}')
+      reading().should('contain.text', 'Refunds')
+      plot().type('{enter}')
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
+        seriesName: 'refunds',
+        dataIndex: 0,
+        value: 4,
+        row: { month: 'Jan', refunds: 4 },
+      })
+    })
+
+    it('emits select for the mark under the cursor', () => {
+      mountChart({ onSelect: cy.spy().as('onSelect') })
+      lines().should('have.length', 2)
+      plot().focus()
+      plot().type('{rightarrow}')
+      plot().type('{enter}')
+      cy.get('@onSelect').should('have.been.calledWithMatch', {
+        seriesName: 'sales',
+        dataIndex: 1,
+        value: 20,
+        row: { month: 'Feb', sales: 20 },
+      })
+    })
+
+    it('drops the tooltip and the reading when focus leaves', () => {
+      mountChart()
+      lines().should('have.length', 2)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('exist')
+      plot().blur()
+      cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      reading().should('have.text', '')
+    })
   })
 })

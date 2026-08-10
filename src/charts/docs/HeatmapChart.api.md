@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,13 +25,13 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
@@ -61,53 +61,43 @@
   },
   {
     name: 'min',
-    description: '',
+    description: 'Bottom of the color scale. Defaults to the smallest value in the data.',
     required: false,
     type: 'number'
   },
   {
     name: 'max',
-    description: '',
+    description: 'Top of the color scale. Defaults to the largest value in the data.',
     required: false,
     type: 'number'
   },
   {
     name: 'showValues',
-    description: '',
+    description: 'Prints each cell\'s value inside it. A label that would collide with its\nneighbour is dropped, so a grid too fine to carry numbers shows none.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'format',
-    description: '',
+    description: 'Prints every number the grid shows: the cells, the scale ends, the tooltip.',
     required: false,
     type: 'ChartValueFormatter'
   },
   {
     name: 'palette',
-    description: '',
+    description: 'Ramp cells are colored from. Defaults to `\'sequential\'`, which is what a\nmagnitude reads as; `\'diverging\'` is for signed data and centers on zero.',
     required: false,
     type: 'HeatmapPalette'
   },
   {
     name: 'echartOptions',
-    description: '',
+    description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,
     type: 'EchartOptionsOverride'
   }
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -122,13 +112,23 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `items` holds the hovered cell alone.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'cellClick',
-    description: '',
+    name: 'select',
+    description: 'A cell was selected, by click or by Enter on the keyboard cursor. Carries\nboth its categories and the row behind it.',
     type: '[event: HeatmapCellEvent]'
   }
 ]

@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
 import { useChart } from './useChart'
+import { usePlotKeyboard } from './usePlotKeyboard'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
   hasSecondaryValueAxis,
@@ -12,8 +13,8 @@ import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import type { AxisChartFormatters } from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
-import { useChartTheme } from '../theme'
-import { documentDir } from '../utils'
+import { useChartTokens } from '../tokens'
+import { documentDir, markName, plotReading } from '../utils'
 import type {
   AxisChartBaseConfig,
   AxisChartSeriesConfig,
@@ -41,7 +42,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * beside it, so the reader gets both.
    */
   stackShares?: () => Map<string, (number | null)[]>
-  onDatapointClick?: (event: ChartDatapointEvent) => void
+  onSelect?: (event: ChartDatapointEvent) => void
 }
 
 /**
@@ -88,9 +89,9 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       : undefined,
   )
 
-  const { theme } = useChartTheme(plotEl)
+  const { tokens } = useChartTokens(plotEl)
   const seriesColors = computed(() =>
-    resolveSeriesColors(config.value, theme.value),
+    resolveSeriesColors(config.value, tokens.value),
   )
 
   // A malformed config throws while building the option; surfacing it as an
@@ -99,9 +100,12 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     try {
       return {
         option: args.buildOption(
-          applyAxisFormatters({ ...config.value, dir: dir.value }, format.value),
+          applyAxisFormatters(
+            { ...config.value, dir: dir.value },
+            format.value,
+          ),
           {
-            theme: theme.value,
+            tokens: tokens.value,
             hiddenSeries: hiddenSeries.value,
             width: plotWidth.value,
           },
@@ -126,7 +130,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       click: (params: any) => {
         const row = rows.value[params.dataIndex]
         if (!row) return
-        args.onDatapointClick?.({
+        args.onSelect?.({
           seriesName: params.seriesName,
           dataIndex: params.dataIndex,
           value: Number(row[params.seriesName]),
@@ -260,7 +264,10 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       tooltip.open = false
       return
     }
+    showIndex(index, nativeEvent?.clientX, nativeEvent?.clientY)
+  }
 
+  function showIndex(index: number, clientX?: number, clientY?: number) {
     const row = rows.value[index]
     const items = config.value.series
       .filter((series) => !hiddenSeries.value.includes(series.name))
@@ -289,10 +296,129 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       ? format.value.x(category)
       : formatAxisValue(category, xAxis.value.type, xAxis.value.timeGrain)
     tooltip.items = items
-    tooltip.x = nativeEvent?.clientX ?? tooltip.x
-    tooltip.y = nativeEvent?.clientY ?? tooltip.y
+    tooltip.x = clientX ?? tooltip.x
+    tooltip.y = clientY ?? tooltip.y
     tooltip.open = true
   }
+
+  // --- Keyboard ------------------------------------------------------------
+  // The plot is one tab stop; the arrow keys walk it. Left and right step along
+  // the category axis, up and down pick the series the click event carries —
+  // the tooltip lists every series at once, so without that a multi-series
+  // chart would have no way to say which one Enter means.
+
+  const visibleSeries = computed(() =>
+    config.value.series.filter(
+      (series) => !hiddenSeries.value.includes(series.name),
+    ),
+  )
+  const cursorSeries = ref(0)
+
+  /**
+   * Where a category sits on screen, so the tooltip hangs off the mark rather
+   * than off the middle of the plot. Falls back to the plot's center when the
+   * axis cannot convert — an empty scale, or a chart that has not laid out yet.
+   */
+  function categoryPoint(index: number) {
+    const el = plotEl.value
+    if (!el) return undefined
+    const rect = el.getBoundingClientRect()
+    const center = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    }
+
+    const along = convertCategory(index)
+    if (along === undefined) return center
+    return horizontal.value
+      ? { x: center.x, y: rect.top + along }
+      : { x: rect.left + along, y: center.y }
+  }
+
+  function convertCategory(index: number): number | undefined {
+    const instance = chart.value
+    if (!instance) return undefined
+    const finder = horizontal.value ? { yAxisIndex: 0 } : { xAxisIndex: 0 }
+    const key = config.value.xAxis.key
+    const row = rows.value[index]
+    // A category axis is addressed by slot, a scaled one by the value itself.
+    const at =
+      xAxisType.value === 'category'
+        ? index
+        : xAxisType.value === 'value'
+          ? Number(row?.[key])
+          : new Date(row?.[key]).getTime()
+    if (typeof at !== 'number' || isNaN(at)) return undefined
+    const pixel = instance.convertToPixel(finder, at) as unknown as number
+    return typeof pixel === 'number' && !isNaN(pixel) ? pixel : undefined
+  }
+
+  /** The reading the live region carries, i.e. the tooltip as one line. */
+  const reading = ref('')
+
+  function readCursor(index: number) {
+    const point = categoryPoint(index)
+    showIndex(index, point?.x, point?.y)
+    if (!tooltip.open) {
+      reading.value = ''
+      return
+    }
+    // One series is the whole tooltip; several, and the reading names the one
+    // Enter would fire for rather than repeating the list beside it.
+    const series = visibleSeries.value[cursorSeries.value]
+    const item = tooltip.items.find((entry) => entry.name === series?.name)
+    reading.value = plotReading(
+      tooltip.label,
+      item
+        ? [{ label: item.label, value: item.formattedValue }]
+        : tooltip.items.map((entry) => ({
+            label: entry.label,
+            value: entry.formattedValue,
+          })),
+    )
+  }
+
+  const keyboard = usePlotKeyboard({
+    marks: () => rows.value,
+    // The category is what the mark is called on the axis, so the cursor holds
+    // its place through a sort, a filter or a refetch.
+    key: (row) => markName(row[config.value.xAxis.key]),
+    move: (index) => {
+      cursorSeries.value = Math.min(
+        cursorSeries.value,
+        Math.max(0, visibleSeries.value.length - 1),
+      )
+      readCursor(index)
+    },
+    cross: (delta) => {
+      const last = visibleSeries.value.length - 1
+      cursorSeries.value = Math.min(
+        last,
+        Math.max(0, cursorSeries.value + delta),
+      )
+      if (keyboard.index.value !== null) readCursor(keyboard.index.value)
+    },
+    activate: (index) => {
+      const row = rows.value[index]
+      const series = visibleSeries.value[cursorSeries.value]
+      if (!row || !series) return
+      args.onSelect?.({
+        seriesName: series.name,
+        dataIndex: index,
+        value: Number(row[series.name]),
+        row,
+      })
+    },
+    clear: () => {
+      tooltip.open = false
+      reading.value = ''
+    },
+  })
+
+  // The reading names the series Enter would fire for, and the tooltip lists
+  // the visible ones. A legend toggle under a reader who is on the plot has to
+  // reach both, which the row list alone does not say.
+  watch(visibleSeries, () => keyboard.refresh(), { flush: 'post' })
 
   // Series that disappear while hidden shouldn't stay in the hidden list forever.
   watch(
@@ -315,5 +441,9 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     legendItems,
     toggleSeries,
     hoverSeries,
+    /** `v-bind` onto the plot element: the tab stop and its arrow keys. */
+    plotAttrs: keyboard.attrs,
+    /** What the live region announces while the cursor walks the plot. */
+    reading,
   }
 }

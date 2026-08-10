@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { DOTTED_LINE } from './axisChartCommon'
 import { pruneHiddenSeries } from './hiddenSeries'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -35,7 +35,7 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
 }
 
 /** The series echarts is handed that actually carry reference lines. */
@@ -204,11 +204,11 @@ describe('reference line looks', () => {
     ).toBeUndefined()
   })
 
-  it('takes its default ink from the theme, not from the palette', () => {
+  it('takes its default ink from the tokens, not from the palette', () => {
     const option = build({ referenceLines: [{ value: 15, label: 'Target' }] })
     const [entry] = entriesOf(option)
-    expect(entry.lineStyle.color).toBe(theme.dataLabel)
-    expect(entry.label.color).toBe(theme.dataLabel)
+    expect(entry.lineStyle.color).toBe(tokens.dataLabel)
+    expect(entry.label.color).toBe(tokens.dataLabel)
   })
 
   it('breaks a dashed line up with the same texture the gridlines use', () => {

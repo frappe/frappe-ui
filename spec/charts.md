@@ -93,6 +93,25 @@ the established pattern. `NumberCard` draws one by default, because a reading
 with no plot is a card, and `:card="false"` lets an app lay out several readings
 inside its own card.
 
+## The template ref
+
+Every echarts-backed chart hands back one member, the echarts instance, as
+`chart`. `FunnelChart` and `NumberCard` draw no echarts plot and hand back
+nothing.
+
+It is the imperative half of the escape hatch `echartOptions` opens for options.
+Reach for it when an app needs an echarts call that no option key expresses — an
+image for a download button in the `actions` slot, chart coordinates for an
+overlay of its own.
+
+Two limits. The instance is `undefined` until the plot has a size and the fonts
+settle, so watch it rather than read it once. And the component rebuilds the
+whole option with `notMerge: true` on every reactive change, so state applied
+through the instance does not survive the next prop change. `ECharts` is echarts'
+type, not the library's: a major echarts bump can change it inside a frappe-ui
+minor. [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) records why the
+handle is allowed and what it does not promise.
+
 ## Naming
 
 The color ramps carry one name each, from the CSS token through to the theme
@@ -101,7 +120,16 @@ between them — the `palette` prop, `ChartPalette`, `paletteColors` — never a
 ramp itself.
 
 The slot vocabulary is P6's: `actions`, `loading`, `error` and `empty` come from
-the shared list, and the family adds two region slots for parts only a chart
-has, `legend` and `tooltip`. `ChartLegend` emits behavior names per P1:
+the shared list, and the family adds four slots for parts only a chart has.
+`legend` and `tooltip` are regions of the chrome, on the container and on every
+plot that draws one. The other two belong to one component each, because only
+one component has the part:
+
+- `center` on `DonutChart` — the readout in the hole of the ring, which reads
+  the total until a slice is hovered.
+- `caption` on `NumberCard` — the line beside the delta, so an app whose reader
+  can change the comparison period puts its own control there.
+
+`ChartLegend` emits behavior names per P1:
 `change` when an entry flips a series' visibility, `highlight` when the
 highlighted series changes (`null` clears it) — not `toggle` or `hover`.

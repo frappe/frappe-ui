@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
 import { estimateTextWidth } from './format'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
 /**
@@ -11,7 +11,7 @@ import type { AxisChartConfig } from './types'
  * width of the labels themselves.
  */
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111'],
   sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#003300'],
@@ -45,7 +45,7 @@ function build(
     series: [{ name: 'sales' }],
     ...overrides,
   }
-  return buildAxisChartOption(config, { theme, width }) as any
+  return buildAxisChartOption(config, { tokens, width }) as any
 }
 
 /** The category axis' labels, whichever chart axis it landed on. */

@@ -28,16 +28,16 @@ const slice = ref<DonutSliceEvent | null>(null)
         center-label="sessions"
         title="Traffic by channel"
         subtitle="Sessions in July 2026"
-        @slice-click="slice = $event"
+        @select="slice = $event"
       />
     </div>
     <p class="text-p-sm text-ink-gray-5">
       <template v-if="slice">
-        Clicked {{ slice.name }} · {{ Math.round(slice.percent) }}% ·
+        Selected {{ slice.name }} · {{ Math.round(slice.percent) }}% ·
         {{ slice.rows.length }} row(s) behind it
       </template>
       <template v-else
-        >Click a slice — Others carries every row it groups.</template
+        >Select a slice — Others carries every row it groups.</template
       >
     </p>
   </div>

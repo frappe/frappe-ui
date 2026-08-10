@@ -22,11 +22,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the cloud
+           with the arrow keys has not got. The same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -58,11 +63,12 @@ import { ScatterChart as ScatterSeries } from 'echarts/charts'
 import { GridComponent, MarkLineComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
-import { useChartTheme } from './theme'
-import { chartAriaLabel, documentDir } from './utils'
+import { useChartTokens } from './tokens'
+import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -71,8 +77,11 @@ import type {
   ChartLegendItem,
   ChartTooltipItem,
   ScatterChartConfig,
+  ScatterChartEmits,
   ScatterChartProps,
-  ScatterPointEvent,
+  ScatterChartSlots,
+  ScatterPoint,
+  ScatterSeries as ScatterSeriesGroup,
 } from './types'
 
 // The grid carries both value axes and MarkLineComponent draws the reference
@@ -92,20 +101,9 @@ const hiddenSeries = defineModel<string[]>('hiddenSeries', {
   default: () => [],
 })
 
-const emit = defineEmits<{
-  pointClick: [event: ScatterPointEvent]
-}>()
+const emit = defineEmits<ScatterChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<ScatterChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 
@@ -142,10 +140,10 @@ function toValueAxis(axis?: ScatterChartProps['xAxis']) {
   }
 }
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const series = computed(() =>
-  buildScatterSeries(config.value, { theme: theme.value }),
+  buildScatterSeries(config.value, { tokens: tokens.value }),
 )
 
 const isEmpty = computed(() =>
@@ -164,7 +162,7 @@ const built = computed(() => {
   try {
     return {
       option: buildScatterOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         hiddenSeries: hiddenSeries.value,
         format: { x: formatX.value, y: formatY.value },
       }),
@@ -201,7 +199,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const hit = pointAt(params)
       if (!hit) return
-      emit('pointClick', {
+      emit('select', {
         seriesName: hit.series.name,
         x: hit.point.x,
         y: hit.point.y,
@@ -241,6 +239,12 @@ function showTooltip(params: any) {
     tooltip.open = false
     return
   }
+  showHit(hit, pointer.x, pointer.y)
+}
+
+type ScatterHit = { series: ScatterSeriesGroup; point: ScatterPoint }
+
+function showHit(hit: ScatterHit, x: number, y: number) {
   const { series: entry, point } = hit
 
   // What identifies the point: its own name, and the group it belongs to. With
@@ -250,20 +254,20 @@ function showTooltip(params: any) {
 
   tooltip.label = label || undefined
   tooltip.items = [
-    reading(props.x, point.x, formatX.value, entry.color),
-    reading(props.y, point.y, formatY.value, entry.color),
+    tooltipItem(props.x, point.x, formatX.value, entry.color),
+    tooltipItem(props.y, point.y, formatY.value, entry.color),
     // Only when the chart draws a size: a bubble whose magnitude is blank is
     // sized by nothing, so there is no number to print.
     ...(props.size && point.size !== null
-      ? [reading(props.size, point.size, props.format, entry.color)]
+      ? [tooltipItem(props.size, point.size, props.format, entry.color)]
       : []),
   ]
-  tooltip.x = pointer.x
-  tooltip.y = pointer.y
+  tooltip.x = x
+  tooltip.y = y
   tooltip.open = true
 }
 
-function reading(
+function tooltipItem(
   column: string,
   value: number,
   format: ((value: number) => string) | undefined,
@@ -309,6 +313,104 @@ watch(hoveredSeries, (name, previous) => {
     dispatch({ type: 'highlight', seriesName: name })
   }
 })
+
+// The cloud is one tab stop and the arrow keys walk it, group by group: an
+// echarts plot draws into a single element, so there are no per-point nodes to
+// tab through — and a cloud of 400 points would be 400 tab stops if there were.
+const reading = ref('')
+
+// `seriesIndex` counts the drawn series, which is what an echarts action is
+// addressed by — a hidden group is not in the option at all.
+const walk = computed(() =>
+  series.value
+    .filter((entry) => !hiddenSeries.value.includes(entry.name))
+    .flatMap((entry, seriesIndex) =>
+      entry.points.map((point, dataIndex) => ({
+        entry,
+        point,
+        seriesIndex,
+        dataIndex,
+      })),
+    ),
+)
+
+function pointPoint(x: number, y: number) {
+  const el = plotEl.value
+  if (!el) return undefined
+  const rect = el.getBoundingClientRect()
+  const at = chart.value?.convertToPixel({ gridIndex: 0 }, [
+    x,
+    y,
+  ]) as unknown as number[] | undefined
+  if (!at || at.some((n) => typeof n !== 'number' || isNaN(n))) {
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+  }
+  return { x: rect.left + at[0], y: rect.top + at[1] }
+}
+
+function readPoint(index: number) {
+  const hit = walk.value[index]
+  if (!hit) return
+  const at = pointPoint(hit.point.x, hit.point.y)
+  dispatch({
+    type: 'highlight',
+    seriesIndex: hit.seriesIndex,
+    dataIndex: hit.dataIndex,
+  })
+  showHit(
+    { series: hit.entry, point: hit.point },
+    at?.x ?? pointer.x,
+    at?.y ?? pointer.y,
+  )
+  reading.value = plotReading(
+    tooltip.label,
+    tooltip.items.map((item) => ({
+      label: item.label,
+      value: item.formattedValue,
+    })),
+  )
+}
+
+/** Takes the emphasis off the point the cursor has left. */
+function downplayPoint(index: number | null) {
+  const hit = index === null ? undefined : walk.value[index]
+  if (!hit) return
+  dispatch({
+    type: 'downplay',
+    seriesIndex: hit.seriesIndex,
+    dataIndex: hit.dataIndex,
+  })
+}
+
+const keyboard = usePlotKeyboard({
+  marks: () => walk.value,
+  // A point is its group and its place on the axes. Two points that sit on top
+  // of each other are one name, which costs nothing: they draw as one mark.
+  key: (hit) => `${hit.entry.name} ${hit.point.x} ${hit.point.y}`,
+  move: (index, previous) => {
+    downplayPoint(previous)
+    readPoint(index)
+  },
+  activate: (index) => {
+    const hit = walk.value[index]
+    if (!hit) return
+    emit('select', {
+      seriesName: hit.entry.name,
+      x: hit.point.x,
+      y: hit.point.y,
+      size: hit.point.size,
+      label: hit.point.label,
+      row: hit.point.row,
+    })
+  },
+  clear: (previous) => {
+    downplayPoint(previous)
+    tooltip.open = false
+    reading.value = ''
+  },
+})
+
+const plotAttrs = keyboard.attrs
 
 // Groups that disappear while hidden shouldn't stay in the hidden list forever.
 watch(

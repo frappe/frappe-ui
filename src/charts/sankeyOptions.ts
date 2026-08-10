@@ -2,7 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTheme } from './theme'
+import { chartColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
@@ -16,7 +16,7 @@ import type {
 // the pointer can't disagree with the one the option drew.
 
 export type SankeyOptionContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   /** Prints a flow wherever a number is printed: node labels, tooltip. */
   format?: ChartValueFormatter
 }
@@ -45,7 +45,7 @@ const BLANK_NODE = '(Blank)'
  */
 export function buildSankeyGraph(
   config: SankeyChartConfig,
-  { theme }: SankeyOptionContext,
+  { tokens }: SankeyOptionContext,
 ): SankeyGraph {
   const rows = config.data ?? []
   const names: string[] = []
@@ -91,7 +91,7 @@ export function buildSankeyGraph(
     unpainted.push({ source, target, value, row })
   }
 
-  const colors = chartColors(config.palette, theme, {
+  const colors = chartColors(config.palette, tokens, {
     fallback: SANKEY_PALETTE,
     count: names.length,
   })
@@ -160,7 +160,7 @@ export function buildSankeyOption(
   config: SankeyChartConfig,
   context: SankeyOptionContext,
 ): EChartsCoreOption {
-  const { theme, format } = context
+  const { tokens, format } = context
   const graph = buildSankeyGraph(config, context)
   const isVertical = config.orient === 'vertical'
 
@@ -192,7 +192,7 @@ export function buildSankeyOption(
           // A vertical node is a wide bar, so a label beside it would sit over
           // its neighbour instead of next to it.
           position: isVertical ? 'top' : 'right',
-          color: theme.dataLabel,
+          color: tokens.dataLabel,
           fontSize: DATA_LABEL_FONT_SIZE,
           formatter: (params: any) =>
             `${params.name} · ${printValue(Number(params.value), format)}`,

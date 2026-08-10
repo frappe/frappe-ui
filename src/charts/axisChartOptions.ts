@@ -1,6 +1,6 @@
 import type { EChartsCoreOption } from 'echarts/core'
 import { formatPercent, formatValue } from './format'
-import { insideLabelColor, type ChartTheme } from './theme'
+import { insideLabelColor, type ChartTokens } from './tokens'
 import {
   axisChartBase,
   buildAxisGrid,
@@ -67,7 +67,7 @@ type PlottedSeries = {
 }
 
 type SeriesContext = {
-  theme: ChartTheme
+  tokens: ChartTokens
   rows: Record<string, any>[]
   horizontal: boolean
   isRTL: boolean
@@ -102,7 +102,7 @@ export type StackShares = Map<string, (number | null)[]>
  */
 export function buildAxisChartOption(
   config: AxisChartConfig,
-  { theme, hiddenSeries = [], width }: AxisChartOptionContext,
+  { tokens, hiddenSeries = [], width }: AxisChartOptionContext,
 ): EChartsCoreOption {
   const isRTL = config.dir === 'rtl'
   const horizontal = Boolean(config.horizontal)
@@ -113,7 +113,7 @@ export function buildAxisChartOption(
     )
   }
   const rows = plotRows(config, xAxisType)
-  const colors = resolveSeriesColors(config, theme)
+  const colors = resolveSeriesColors(config, tokens)
 
   const plotted = plotSeries(config)
   const visible = plotted.filter(
@@ -132,7 +132,7 @@ export function buildAxisChartOption(
 
   // Not the x axis of the option: `horizontal` moves the column it carries to
   // the vertical edge.
-  const xColumnAxis = buildXAxis(config, theme, {
+  const xColumnAxis = buildXAxis(config, tokens, {
     categories,
     horizontal,
     isRTL,
@@ -144,7 +144,7 @@ export function buildAxisChartOption(
   const shares = stackShares(config, visible, rows)
   const valueAxis = buildValueAxes(
     pinNormalizedAxes(config, visible, shares, hasSecondary),
-    theme,
+    tokens,
     { horizontal, isRTL },
   )
   const carriesTip = tipResolver(visible, config, rows)
@@ -152,7 +152,7 @@ export function buildAxisChartOption(
   const option = {
     // A bar has a width for the pointer to shade; a line has none, so a chart
     // without bars points its axis with a rule instead.
-    ...axisChartBase(theme, hasBars ? 'shadow' : 'line'),
+    ...axisChartBase(tokens, hasBars ? 'shadow' : 'line'),
     grid: buildAxisGrid({
       horizontal,
       isRTL,
@@ -164,7 +164,7 @@ export function buildAxisChartOption(
     series: [
       ...visible.map((entry) =>
         buildSeries(entry, config, {
-          theme,
+          tokens,
           rows,
           horizontal,
           isRTL,
@@ -181,7 +181,7 @@ export function buildAxisChartOption(
       // legend, `hiddenSeries`, the tooltip, the bar count above — walks the
       // latter, so a host series cannot reach any of them.
       ...buildReferenceLineSeries(config.referenceLines, {
-        theme,
+        tokens,
         horizontal,
         hasSecondaryValueAxis: hasSecondary,
         // A numeric x axis has no categories, so `axis: 'x'` is a number on
@@ -473,7 +473,7 @@ function barLabelPosition(
 
 function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
   const { series } = entry
-  const { rows, horizontal, isRTL, color, theme, carriesTip, yAxisIndex } = ctx
+  const { rows, horizontal, isRTL, color, tokens, carriesTip, yAxisIndex } = ctx
 
   const data = rows.map((row, index) => {
     const at = ctx.xValue(row)
@@ -514,8 +514,8 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
       // A label sitting on the fill has to clear the fill, not the card.
       color:
         position === 'inside'
-          ? insideLabelColor(color, theme.insideLabel)
-          : theme.dataLabel,
+          ? insideLabelColor(color, tokens.insideLabel)
+          : tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
       formatter: (params: any) =>
         plottedLabel(
@@ -534,7 +534,7 @@ function buildLineSeries(
   ctx: SeriesContext,
 ) {
   const { series, mark } = entry
-  const { rows, color, theme, yAxisIndex, banded } = ctx
+  const { rows, color, tokens, yAxisIndex, banded } = ctx
 
   const data = rows.map((row, index) => [
     ctx.xValue(row),
@@ -571,7 +571,7 @@ function buildLineSeries(
     label: {
       show: Boolean(series.showDataLabels),
       position: 'top',
-      color: theme.dataLabel,
+      color: tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
       formatter: (params: any) =>
         plottedLabel(params.value?.[1], Boolean(ctx.share)),

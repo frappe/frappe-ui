@@ -24,14 +24,14 @@ const stage = ref<FunnelStageEvent | null>(null)
         :show-percentages="false"
         title="Deal pipeline"
         subtitle="Open deals by stage, this quarter"
-        @stage-click="stage = $event"
+        @select="stage = $event"
       />
     </div>
     <p class="text-p-sm text-ink-gray-5">
       <template v-if="stage">
-        Clicked {{ stage.label }} · {{ stage.value }} · index {{ stage.index }}
+        Selected {{ stage.label }} · {{ stage.value }} · index {{ stage.index }}
       </template>
-      <template v-else>Click a stage.</template>
+      <template v-else>Select a stage.</template>
     </p>
   </div>
 </template>

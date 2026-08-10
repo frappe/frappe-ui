@@ -14,9 +14,10 @@ The subpath carries the `--chart-*` color tokens with it. See
 rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 `diverging` — or takes an explicit list of colors.
 
-Each component registers only the echarts modules it can draw. A donut costs a
-donut; the three axis charts share the bar and line modules, because any of them
-draws any mark.
+An echarts-backed component registers only the modules it can draw. A donut
+costs a donut; the three axis charts share the bar and line modules, because any
+of them draws any mark. `FunnelChart` and `NumberCard` use no echarts at all —
+both draw their own SVG — so they add nothing to the bundle.
 
 ## Data shapes
 
@@ -48,6 +49,16 @@ Every chart shares the same
 [loading, error and empty states](/docs/charts/states), and they compose into a
 [dashboard](/docs/charts/dashboard) without extra chrome.
 
+## The chrome
+
+The pieces every chart is built from. Compose them yourself for a plot the
+library does not draw — see [Custom charts](#custom-charts).
+
+- [ChartCard](/docs/charts/chartcard) — the card surface
+- [ChartContainer](/docs/charts/chartcontainer) — title block, axis titles, states
+- [ChartLegend](/docs/charts/chartlegend) — the row of series names
+- [ChartTooltip](/docs/charts/charttooltip) — the reading beside the pointer
+
 ## Custom charts
 
 A chart has two layers. The plot is echarts inside a box. The chrome is
@@ -60,11 +71,16 @@ container has a size and the fonts settle, follows resizes, and disposes the
 instance on unmount. Call `registerChartModules` with the echarts modules your
 plot needs — nothing is registered for you.
 
-Wrap the plot in `ChartContainer` for the title, the value-axis labels and the
-states. Put `ChartLegend` in its `legend` slot, and `ChartTooltip` beside the
-plot for the same HTML tooltip the built-in charts draw. `ChartCard` draws the
-card surface. Read the colors off `useChartTheme`, so the plot follows a theme
-switch with the rest of the page.
+Wrap the plot in [`ChartContainer`](/docs/charts/chartcontainer) for the title,
+the value-axis labels and the states. Put
+[`ChartLegend`](/docs/charts/chartlegend) in its `legend` slot, and
+[`ChartTooltip`](/docs/charts/charttooltip) beside the plot for the same HTML
+tooltip the built-in charts draw. [`ChartCard`](/docs/charts/chartcard) draws
+the card surface.
+
+Take the plot-area colors from `useChartTokens`. It takes the element the plot
+draws into and hands back `tokens` that re-resolve when the theme flips, so
+the axes and the series follow a theme switch with the rest of the page.
 
 The three states are slots — `#loading`, `#error` and `#empty` — on the
 container and on every built-in chart alike, so a retry button beside a failed
@@ -80,20 +96,42 @@ import {
   ChartCard,
   ChartContainer,
   ChartLegend,
+  paletteColors,
   registerChartModules,
   useChart,
+  useChartTokens,
 } from 'frappe-ui/charts'
 
 registerChartModules([RadarChart, RadarComponent])
 
 const plotEl = ref<HTMLElement>()
-const hidden = ref<string[]>([])
+// The plot element, so the colors resolve against the theme it is drawn under.
+const { tokens } = useChartTokens(plotEl)
 
-// Your own option builder and your own legend rows.
-const option = computed(() => radarOption(plans, hidden.value))
-const legendItems = computed(() => legendRows(plans, hidden.value))
+const hidden = ref<string[]>([])
+const colors = computed(() =>
+  paletteColors('categorical', tokens.value, plans.length),
+)
+
+// Your own option builder and your own legend rows. `tokens` carries the axis,
+// grid and label colors; `colors` carries one per series.
+const option = computed(() => radarOption(plans, colors.value, tokens.value))
+const legendItems = computed(() =>
+  plans.map((plan, index) => ({
+    name: plan.name,
+    label: plan.name,
+    color: colors.value[index],
+    hidden: hidden.value.includes(plan.name),
+  })),
+)
 
 useChart({ container: plotEl, option: () => option.value })
+
+function toggleSeries(name: string) {
+  hidden.value = hidden.value.includes(name)
+    ? hidden.value.filter((plan) => plan !== name)
+    : [...hidden.value, name]
+}
 </script>
 
 <template>
@@ -108,9 +146,62 @@ useChart({ container: plotEl, option: () => option.value })
 </template>
 ```
 
+`plans`, `radarOption`, `loading` and `error` are your own: the rows to draw,
+the option builder over them, and the state of the query that fetched them.
+
 <ComponentPreview name="Charts-CustomRadar" csr="true" self-layout />
 
 `ChartCard` takes `card`, and so does `NumberCard`. Set it to `false` for a
 chart the app has already placed inside a card of its own: the content renders
 with no border, background, radius or padding, and one bordered box stops
 nesting in another.
+
+## Utilities
+
+The subpath exports three helpers beside the components. A built-in chart calls
+all three for you; a plot you draw yourself calls them itself.
+
+### `useChartTokens`
+
+```ts
+function useChartTokens(el: Ref<HTMLElement | undefined>): {
+  tokens: ComputedRef<ChartTokens>
+}
+```
+
+The plot-area colors, resolved against the element you pass. Read the `--chart-*`
+tokens off that element rather than the document, so a plot inside a dark panel
+on a light page takes the panel's colors. Pass the element the plot draws into.
+
+`tokens` re-resolve when the page theme flips, so a `computed` option built from
+it rebuilds and `setOption` runs again with the new values. It carries the three
+ramps — `categorical`, `sequential` and `diverging` — and the inks the chrome
+draws in: `axisLabel`, `axisTitle`, `axisLine`, `splitLine`, `dataLabel`,
+`insideLabel` and `cellGap`.
+
+Color a chart's own series through the `palette` prop instead. `useChartTokens`
+is for a plot the library does not draw.
+
+### `paletteColors`
+
+```ts
+function paletteColors(
+  name: ChartPaletteName,
+  tokens: ChartTokens,
+  count: number,
+): string[]
+```
+
+`count` colors off one named ramp, the same way a built-in chart picks its
+series colors. `'categorical'` cycles the ramp, so eleven series reuse the first
+hue. `'sequential'` and `'diverging'` spread the count over the ramp instead,
+because a stop only means something against the stops beside it — three series
+take three spaced stops, not the first three.
+
+### `OTHERS_KEY`
+
+The series identity a cap collapses its tail into: `maxSeries` on an axis chart,
+`maxSlices` on a donut. It is reserved, so a group whose name really is "Others"
+cannot collide with it, and stable, so `seriesConfig[OTHERS_KEY]` renames or
+recolors the bucket like any other series. `OTHERS_LABEL` is the name it reads
+as until a `label` overrides it.

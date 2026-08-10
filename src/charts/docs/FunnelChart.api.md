@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,13 +25,13 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
@@ -43,13 +43,13 @@
   },
   {
     name: 'category',
-    description: '',
+    description: 'Row key holding the stage name.',
     required: true,
     type: 'string'
   },
   {
     name: 'value',
-    description: '',
+    description: 'Row key holding how many reached the stage.',
     required: true,
     type: 'string'
   },
@@ -62,7 +62,7 @@
   },
   {
     name: 'format',
-    description: '',
+    description: 'Prints every number the funnel shows: the stage values and the tooltip.',
     required: false,
     type: 'ChartValueFormatter'
   },
@@ -75,16 +75,6 @@
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; stage?: FunnelStage | undefined; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -99,13 +89,23 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `stage` carries the two conversion rates the\ndefault body prints under the value.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; stage?: FunnelStage | undefined; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'stageClick',
-    description: '',
+    name: 'select',
+    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits position in the funnel and the row behind it; the whole column is the\nhit area, not just the shape it draws.',
     type: '[event: FunnelStageEvent]'
   }
 ]

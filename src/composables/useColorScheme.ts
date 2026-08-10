@@ -6,6 +6,12 @@ import { readonly, ref, type Ref } from 'vue'
  */
 export type ColorScheme = 'light' | 'dark' | 'system'
 
+/**
+ * A preference with `system` already resolved, i.e. what the page is actually
+ * painted in. What anything that has to pick a value per scheme reads.
+ */
+export type ResolvedColorScheme = Exclude<ColorScheme, 'system'>
+
 const isBrowser = typeof window !== 'undefined'
 
 /**
@@ -29,11 +35,29 @@ const currentScheme: Ref<ColorScheme> = ref('light')
  */
 const colorScheme = readonly(currentScheme)
 
-function resolveSystemScheme(): 'light' | 'dark' {
+function resolveSystemScheme(): ResolvedColorScheme {
   if (!isBrowser) return 'light'
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light'
+}
+
+/**
+ * The scheme the document is painted in right now, read from the document
+ * rather than from this module's state — so it is right even in an app that
+ * never calls `useColorScheme` and sets `data-theme` itself.
+ *
+ * Reads, in order: the `data-theme` attribute this composable writes, then the
+ * `dark` class Tailwind's class strategy uses, then the OS setting. Pure: it
+ * neither initializes the shared state nor writes anything.
+ */
+export function resolvedColorScheme(): ResolvedColorScheme {
+  if (typeof document === 'undefined') return 'light'
+  const root = document.documentElement
+  const attribute = root.getAttribute(DOM_ATTRIBUTE)
+  if (attribute === 'dark' || attribute === 'light') return attribute
+  if (root.classList.contains('dark')) return 'dark'
+  return resolveSystemScheme()
 }
 
 function applyColorScheme(scheme: ColorScheme): void {

@@ -4,14 +4,14 @@ Two measures read against each other, a point per row.
 
 ## Two measured axes
 
-`x` and `y` name the two value columns. Both axes are measured — this is the one
-chart in the family with no category axis — so each scale follows the data
-instead of anchoring to zero, and the cloud fills the plot. `label` names the
-column that titles a point in the tooltip, and `pointClick` carries the row
-behind it.
+`x` and `y` name the two value columns. Both axes are measured — a scatter has
+no category axis, and unlike an axis chart it cannot be asked for one — so each
+scale follows the data instead of anchoring to zero, and the cloud fills the
+plot. `label` names the column that titles a point in the tooltip, and
+`select` carries the row behind it.
 
 The `xAxis` title is drawn on its axis, the `yAxis` title above the plot, the
-same way every cartesian chart in v2 places them.
+same way every cartesian chart in the family places them.
 
 <ComponentPreview name="Charts-ScatterSpend" csr="true" self-layout />
 
@@ -38,9 +38,10 @@ and `dashed`. They are annotations, not series: no legend entry, no tooltip
 entry, and no way to switch one off, so a rule stays put while a legend toggle
 takes a group out of the plot.
 
-`axis` says which scale `value` is read against. Both are measured here — this
-is the one chart in the family with no category axis — so `'x'` and `'y'` are
-the same kind of thing: a number. `'y'` (the default) draws a rule across the
+`axis` says which scale `value` is read against. Both scales are measured here,
+so `'x'` and `'y'` are the same kind of thing: a number. An axis chart reads
+`'x'` as a category or a date instead, unless `xAxis.type` is `'value'`. `'y'`
+(the default) draws a rule across the
 plot, `'x'` draws one down it. A scatter has no second value axis, so `'y2'`
 reads as `'y'` with a dev-mode warning.
 

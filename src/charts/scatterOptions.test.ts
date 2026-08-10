@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { DOTTED_LINE } from './axisChartCommon'
 import { pruneHiddenSeries } from './hiddenSeries'
-import { paletteColors, type ChartTheme } from './theme'
+import { paletteColors, type ChartTokens } from './tokens'
 import type { ScatterChartConfig } from './types'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333', '#444444'],
   sequential: ['#0a0a0a', '#5a5a5a', '#cccccc'],
   diverging: ['#0000ff', '#ffffff', '#ff0000'],
@@ -46,11 +46,11 @@ function config(
 }
 
 function series(overrides: Partial<ScatterChartConfig> = {}) {
-  return buildScatterSeries(config(overrides), { theme })
+  return buildScatterSeries(config(overrides), { tokens })
 }
 
 function build(overrides: Partial<ScatterChartConfig> = {}) {
-  return buildScatterOption(config(overrides), { theme }) as any
+  return buildScatterOption(config(overrides), { tokens }) as any
 }
 
 /** Every warning this module raises is dev-only, so every test that expects one
@@ -230,7 +230,7 @@ describe('buildScatterSeries', () => {
     const built = series({ seriesColumn: 'region' })
 
     expect(built.map((entry) => entry.color)).toEqual(
-      paletteColors('categorical', theme, 2),
+      paletteColors('categorical', tokens, 2),
     )
   })
 
@@ -238,7 +238,7 @@ describe('buildScatterSeries', () => {
     const built = series({ seriesColumn: 'region', palette: 'sequential' })
 
     expect(built.map((entry) => entry.color)).toEqual(
-      paletteColors('sequential', theme, 2),
+      paletteColors('sequential', tokens, 2),
     )
   })
 
@@ -282,7 +282,7 @@ describe('buildScatterOption', () => {
 
   it('paints a group in its palette color, translucent enough to overlap', () => {
     const option = build({ seriesColumn: 'region' })
-    const [eu] = paletteColors('categorical', theme, 2)
+    const [eu] = paletteColors('categorical', tokens, 2)
 
     expect(option.series[0].itemStyle).toMatchObject({
       color: eu,
@@ -300,7 +300,7 @@ describe('buildScatterOption', () => {
 
   it('leaves a hidden group out of the option', () => {
     const option = buildScatterOption(config({ seriesColumn: 'region' }), {
-      theme,
+      tokens,
       hiddenSeries: ['EU'],
     }) as any
 
@@ -348,7 +348,7 @@ describe('buildScatterOption', () => {
 
   it('prints an axis scale through the formatter it was given', () => {
     const option = buildScatterOption(config(), {
-      theme,
+      tokens,
       format: { x: (value: number) => `$${value}`, y: () => 'y' },
     }) as any
 
@@ -361,7 +361,7 @@ describe('buildScatterOption', () => {
       config({
         xAxis: { echartOptions: { axisLabel: { formatter: () => 'own' } } },
       }),
-      { theme, format: { x: (value: number) => `$${value}` } },
+      { tokens, format: { x: (value: number) => `$${value}` } },
     ) as any
 
     expect(option.xAxis.axisLabel.formatter(400)).toBe('own')
@@ -457,7 +457,7 @@ describe('point labels on a scatter', () => {
         labelColumn: 'account',
         showDataLabels: true,
       }),
-      { theme },
+      { tokens },
     ) as any
 
     expect(option.series[0].data[0].name).toBe('')
@@ -556,13 +556,13 @@ describe('reference lines on a scatter', () => {
     expect(label.formatter()).toBe('Target')
   })
 
-  it('takes its default ink from the theme and breaks a dashed rule up', () => {
+  it('takes its default ink from the tokens and breaks a dashed rule up', () => {
     const option = build({
       referenceLines: [{ value: 1500, dashed: true }, { value: 500 }],
     })
     const [dashed, solid] = entriesOf(option)
 
-    expect(dashed.lineStyle.color).toBe(theme.dataLabel)
+    expect(dashed.lineStyle.color).toBe(tokens.dataLabel)
     expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
     expect(solid.lineStyle.type).toBeUndefined()
   })
@@ -604,7 +604,7 @@ describe('reference lines on a scatter', () => {
 describe('reference lines against the rest of the scatter', () => {
   /** What the legend, the tooltip and `hiddenSeries` walk. Not `option.series`. */
   const groupNames = (overrides: Partial<ScatterChartConfig>) =>
-    buildScatterSeries(config(overrides), { theme }).map((entry) => entry.name)
+    buildScatterSeries(config(overrides), { tokens }).map((entry) => entry.name)
 
   it('keeps its host out of the legend and out of hiddenSeries', () => {
     const overrides = {
@@ -626,7 +626,7 @@ describe('reference lines against the rest of the scatter', () => {
   it('draws its lines while every group is hidden', () => {
     const option = buildScatterOption(
       config({ seriesColumn: 'region', referenceLines: [{ value: 1500 }] }),
-      { theme, hiddenSeries: ['EU', 'US'] },
+      { tokens, hiddenSeries: ['EU', 'US'] },
     ) as any
 
     expect(option.series.filter((entry: any) => !entry.markLine)).toEqual([])

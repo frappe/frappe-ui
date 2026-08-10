@@ -23,11 +23,16 @@
     <template #default>
       <div
         ref="plotEl"
-        class="h-full w-full"
+        class="h-full w-full rounded-2 focus-visible:focus-ring"
         dir="ltr"
         role="img"
         :aria-label="chartAriaLabel(title, subtitle)"
+        v-bind="plotAttrs"
       />
+
+      <!-- The tooltip hangs off the pointer, which a reader walking the plot
+           with the arrow keys has not got. This is the same reading in text. -->
+      <span class="sr-only" role="status">{{ reading }}</span>
 
       <ChartTooltip
         :open="tooltip.open"
@@ -74,10 +79,10 @@ import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   AxisChartConfig,
-  ChartDatapointEvent,
   ChartExposed,
-  ChartTooltipItem,
+  LineChartEmits,
   LineChartProps,
+  LineChartSlots,
 } from './types'
 
 registerChartModules([
@@ -95,20 +100,9 @@ const hiddenSeries = defineModel<string[]>('hiddenSeries', {
   default: () => [],
 })
 
-const emit = defineEmits<{
-  datapointClick: [event: ChartDatapointEvent]
-}>()
+const emit = defineEmits<LineChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<LineChartSlots>()
 
 const normalized = computed(() => normalizeAxisChartProps(props))
 const config = computed<AxisChartConfig>(() => ({
@@ -131,13 +125,15 @@ const {
   legendItems,
   toggleSeries,
   hoverSeries,
+  plotAttrs,
+  reading,
 } = useAxisChart({
   config: () => config.value,
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
   hiddenSeries,
-  onDatapointClick: (event) => emit('datapointClick', event),
+  onSelect: (event) => emit('select', event),
 })
 
 defineExpose<ChartExposed>({ chart: computed(() => chart.value) })

@@ -9,9 +9,9 @@ import type {
   AxisChartConfig,
   AxisChartProps,
 } from './types'
-import type { ChartTheme } from './theme'
+import type { ChartTokens } from './tokens'
 
-const theme: ChartTheme = {
+const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
   sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
   diverging: ['#001100', '#002200', '#003300'],
@@ -43,7 +43,7 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { theme, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
 }
 
 /** The plotted number of each point, whichever way the pairs are ordered. */
@@ -472,7 +472,7 @@ describe('normalized stacking with maxSeries', () => {
   it('takes the shares after the tail has collapsed, so they sum to 100', () => {
     const option = buildAxisChartOption(
       fromProps({ data: longRows, series: 'region', maxSeries: 3 }),
-      { theme },
+      { tokens },
     ) as any
     expect(option.series.map((s: any) => s.name)).toEqual([
       'East',
@@ -490,7 +490,7 @@ describe('normalized stacking with maxSeries', () => {
       series: 'region',
       maxSeries: 3,
     })
-    const option = buildAxisChartOption(config, { theme }) as any
+    const option = buildAxisChartOption(config, { tokens }) as any
     expect(option.yAxis.max).toBe(100)
     expect(config.series.at(-1)).toEqual({
       name: '__others__',

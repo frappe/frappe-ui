@@ -20,7 +20,18 @@
 
     <template #default>
       <div class="relative h-full w-full">
-        <div ref="plotEl" class="h-full w-full" dir="ltr" />
+        <div
+          ref="plotEl"
+          class="h-full w-full rounded-2 focus-visible:focus-ring"
+          dir="ltr"
+          role="img"
+          :aria-label="chartAriaLabel(title, subtitle)"
+          v-bind="plotAttrs"
+        />
+
+        <!-- The tooltip hangs off the pointer, which a reader walking the ring
+             with the arrow keys has not got. The same reading in text. -->
+        <span class="sr-only" role="status">{{ reading }}</span>
 
         <!-- HTML rather than an echarts graphic: swapping the readout on hover
              costs two spans instead of a `setOption` on the ring. -->
@@ -94,14 +105,20 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildDonutChartOption,
   buildDonutSlices,
   HALF_CENTER_Y,
 } from './donutChartOptions'
 import { formatLabel, formatPercent, formatValue } from './format'
-import { useChartTheme } from './theme'
-import { documentDir } from './utils'
+import { useChartTokens } from './tokens'
+import {
+  chartAriaLabel,
+  documentDir,
+  elementCenter,
+  plotReading,
+} from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -110,8 +127,9 @@ import type {
   ChartLegendItem,
   ChartTooltipItem,
   DonutChartConfig,
+  DonutChartEmits,
   DonutChartProps,
-  DonutSliceEvent,
+  DonutChartSlots,
 } from './types'
 
 // A pie is all a ring needs: no grid, no axes, and no tooltip component either
@@ -120,26 +138,9 @@ registerChartModules([PieSeries])
 
 const props = defineProps<DonutChartProps>()
 
-const emit = defineEmits<{
-  sliceClick: [event: DonutSliceEvent]
-}>()
+const emit = defineEmits<DonutChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  center?: (props: {
-    value: string
-    label: string
-    /** Only set while a slice is hovered. */
-    percent?: string
-  }) => unknown
-  tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<DonutChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 const hiddenSlices = ref<string[]>([])
@@ -179,11 +180,11 @@ const readoutStyle = computed(() =>
     : { transform: `translateY(${FULL_READOUT_DROP})` },
 )
 
-const { theme } = useChartTheme(plotEl)
+const { tokens } = useChartTokens(plotEl)
 
 const slices = computed(() =>
   buildDonutSlices(config.value, {
-    theme: theme.value,
+    tokens: tokens.value,
     hiddenSlices: hiddenSlices.value,
   }),
 )
@@ -200,7 +201,7 @@ const built = computed(() => {
   try {
     return {
       option: buildDonutChartOption(config.value, {
-        theme: theme.value,
+        tokens: tokens.value,
         hiddenSlices: hiddenSlices.value,
       }),
       error: null as string | null,
@@ -244,7 +245,7 @@ const { chart, dispatch } = useChart({
     click: (params: any) => {
       const slice = sliceByName.value.get(params.name)
       if (!slice) return
-      emit('sliceClick', {
+      emit('select', {
         name: slice.label,
         value: slice.value,
         percent: slice.percent,
@@ -309,6 +310,50 @@ const legendItems = computed<ChartLegendItem[]>(() =>
     hint: slice.hidden ? undefined : formatPercent(slice.percent),
   })),
 )
+
+// The ring is one tab stop and the arrow keys walk it: an echarts plot draws
+// into a single element, so there are no per-slice nodes to tab through.
+const reading = ref('')
+
+function readSlice(index: number) {
+  const slice = visibleSlices.value[index]
+  if (!slice) return
+  const center = elementCenter(plotEl.value)
+  if (center) {
+    pointer.x = center.x
+    pointer.y = center.y
+  }
+  hovered.value = slice.name
+  showTooltip(slice.name)
+  reading.value = plotReading(undefined, [
+    {
+      label: slice.label,
+      value: `${formatMeasure(slice.value)} ${formatPercent(slice.percent)}`,
+    },
+  ])
+}
+
+const { attrs: plotAttrs } = usePlotKeyboard({
+  marks: () => visibleSlices.value,
+  // A slice is its category, which is what the ring is cut by.
+  key: (slice) => slice.name,
+  move: readSlice,
+  activate: (index) => {
+    const slice = visibleSlices.value[index]
+    if (!slice) return
+    emit('select', {
+      name: slice.label,
+      value: slice.value,
+      percent: slice.percent,
+      rows: slice.rows,
+    })
+  },
+  clear: () => {
+    hovered.value = null
+    tooltip.open = false
+    reading.value = ''
+  },
+})
 
 function toggleSlice(name: string) {
   const hidden = hiddenSlices.value

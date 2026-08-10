@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'title',
-    description: '',
+    description: 'Heads the card. Left out, the chart draws no header row at all.',
     required: false,
     type: 'string'
   },
   {
     name: 'subtitle',
-    description: '',
+    description: 'A second line under the title, e.g. the period the numbers cover.',
     required: false,
     type: 'string'
   },
@@ -25,19 +25,19 @@
   },
   {
     name: 'loading',
-    description: '',
+    description: 'Draws the placeholder in place of the plot, for data still on its way.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'error',
-    description: '',
+    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
     required: false,
     type: 'string | null'
   },
   {
     name: 'data',
-    description: '',
+    description: 'The rows to plot. One row is one slice, before the "Others" grouping.',
     required: true,
     type: 'Record<string, any>[]'
   },
@@ -55,13 +55,13 @@
   },
   {
     name: 'maxSlices',
-    description: 'Slices past this many are summed into a single "Others" slice, named\n`OTHERS_KEY`.',
+    description: 'How many slices the ring holds, "Others" included. Past that the ring keeps\nthe largest `maxSlices - 1` and sums the tail into a single "Others" slice,\nnamed `OTHERS_KEY`. Defaults to 9 — a ring stops being readable long before\nthe palette runs out.',
     required: false,
     type: 'number'
   },
   {
     name: 'showInlineLabels',
-    description: '',
+    description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default: the legend says the same without the\nleader lines.',
     required: false,
     type: 'boolean'
   },
@@ -73,13 +73,13 @@
   },
   {
     name: 'variant',
-    description: '',
+    description: '`\'half\'` draws the ring as a semicircle; only the geometry changes.',
     required: false,
     type: 'DonutVariant'
   },
   {
     name: 'format',
-    description: '',
+    description: 'Prints every number the ring shows: the readout, the tooltip, the labels.',
     required: false,
     type: 'ChartValueFormatter'
   },
@@ -91,28 +91,13 @@
   },
   {
     name: 'echartOptions',
-    description: '',
+    description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,
     type: 'EchartOptionsOverride'
   }
 ]
 
   const slotsData = [
-  {
-    name: 'actions',
-    description: '',
-    type: 'any'
-  },
-  {
-    name: 'center',
-    description: '',
-    type: '{ value: string; label: string; percent?: string | undefined; }'
-  },
-  {
-    name: 'tooltip',
-    description: '',
-    type: '{ items: ChartTooltipItem[]; }'
-  },
   {
     name: 'loading',
     description: 'Replaces the whole placeholder, e.g. with a skeleton of the app\'s own.',
@@ -127,13 +112,28 @@
     name: 'empty',
     description: 'Replaces the "no data" line, e.g. with a hint about the filters.',
     type: 'any'
+  },
+  {
+    name: 'actions',
+    description: '',
+    type: 'any'
+  },
+  {
+    name: 'center',
+    description: 'Replaces the readout in the middle of the ring. Reads the total, or the\nhovered slice while one is hovered.',
+    type: '{ value: string; label: string; percent?: string | undefined; }'
+  },
+  {
+    name: 'tooltip',
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone.',
+    type: '{ items: ChartTooltipItem[]; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'sliceClick',
-    description: '',
+    name: 'select',
+    description: 'A slice was selected, by click or by Enter on the keyboard cursor. The\n"Others" slice carries every row it grouped, so a caller can drill into\nthe tail as well as into a named slice.',
     type: '[event: DonutSliceEvent]'
   }
 ]

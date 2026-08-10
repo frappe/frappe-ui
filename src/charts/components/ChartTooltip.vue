@@ -48,15 +48,13 @@
 import { computed, nextTick, ref, watch, type CSSProperties } from 'vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { formatPercent } from '../format'
-import type { ChartTooltipItem, ChartTooltipProps } from '../types'
+import type { ChartTooltipProps, ChartTooltipSlots } from '../types'
 
 const props = defineProps<ChartTooltipProps>()
 
 const portalTarget = usePortalTarget()
 
-defineSlots<{
-  default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-}>()
+defineSlots<ChartTooltipSlots>()
 
 const OFFSET = 12
 

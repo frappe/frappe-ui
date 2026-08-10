@@ -96,6 +96,27 @@ Landed so far:
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
 
+Changed since `1.0.0-beta.41`, the first beta that shipped the family:
+
+- **Breaking, silent:** the six mark emits are renamed to `select` —
+  `datapointClick` on `AreaChart`, `BarChart` and `LineChart`, `sliceClick` on
+  `DonutChart`, `stageClick` on `FunnelChart`, `cellClick` on `HeatmapChart`,
+  `linkClick` on `SankeyChart` and `pointClick` on `ScatterChart`. P1 names an
+  emit after the behavior, and the six now fire from the keyboard as well, so
+  "click" was false. A listener on an old name stops firing with no error —
+  see the [migration guide](https://frappeui.com/docs/migration#charts).
+  The payload types are unchanged.
+- **Breaking, loud:** `ChartTheme` is now `ChartTokens` and `useChartTheme` is
+  now `useChartTokens`, which returns `{ tokens }` rather than `{ theme }`.
+  `theme` means a color tone everywhere else in the library (P4), and these
+  are the resolved `--chart-*` values.
+- **Breaking, loud:** `formatValue`, `formatDate`, `formatLabel`,
+  `formatPercent`, `formatAxisValue`, `currentColorScheme` and
+  `resolveChartTheme` are no longer exported. They had no documented use, and
+  each format helper hardcodes `en-US`. Read the plot-area colors with
+  `useChartTokens`, which re-resolves on a theme flip; `currentColorScheme` was
+  the root `resolvedColorScheme` under another name.
+
 ### Calendar family — moved to `frappe-ui/experimental` (breaking)
 
 Calendar is not taken to bar at root for `1.0.0` (#1020, redirect of
@@ -1658,3 +1679,4 @@ names.
 | `FileUploader` slot prop `error`   | always `string \| null`, was `unknown` | **Changed** — silent; `.message` access renders nothing |
 | `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |
+| `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (re-exported from `frappe-ui/charts`) | **Removed** — loud; type import fails |
