@@ -1,4 +1,8 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
+import {
+  resolvedColorScheme,
+  type ResolvedColorScheme,
+} from '../composables/useColorScheme'
 import type { ChartPalette, ChartPaletteName } from './types'
 
 /**
@@ -21,7 +25,14 @@ export type ChartTheme = {
   cellGap: string
 }
 
-export type ColorScheme = 'light' | 'dark'
+/**
+ * The scheme a chart picks its fallback colors by. The package-root
+ * `resolvedColorScheme` is the one resolution of `data-theme`, the `dark` class
+ * and the OS setting; a chart has no `'system'` state to hold, because it reads
+ * what the document is painted in rather than what the user selected.
+ */
+export { resolvedColorScheme as currentColorScheme }
+export type { ResolvedColorScheme } from '../composables/useColorScheme'
 
 export const CHART_CATEGORICAL_LENGTH = 10
 export const CHART_SEQUENTIAL_LENGTH = 9
@@ -113,17 +124,17 @@ const DARK_DIVERGING = [
   '#a73b34',
 ]
 
-const FALLBACK_CATEGORICAL: Record<ColorScheme, string[]> = {
+const FALLBACK_CATEGORICAL: Record<ResolvedColorScheme, string[]> = {
   light: LIGHT_CATEGORICAL,
   dark: DARK_CATEGORICAL,
 }
 
-const FALLBACK_SEQUENTIAL: Record<ColorScheme, string[]> = {
+const FALLBACK_SEQUENTIAL: Record<ResolvedColorScheme, string[]> = {
   light: LIGHT_SEQUENTIAL,
   dark: DARK_SEQUENTIAL,
 }
 
-const FALLBACK_DIVERGING: Record<ColorScheme, string[]> = {
+const FALLBACK_DIVERGING: Record<ResolvedColorScheme, string[]> = {
   light: LIGHT_DIVERGING,
   dark: DARK_DIVERGING,
 }
@@ -146,7 +157,7 @@ const TOKENS = {
 } as const
 
 const FALLBACK_TOKENS: Record<
-  ColorScheme,
+  ResolvedColorScheme,
   Record<keyof typeof TOKENS, string>
 > = {
   light: {
@@ -170,26 +181,12 @@ const FALLBACK_TOKENS: Record<
   },
 }
 
-export function currentColorScheme(): ColorScheme {
-  if (typeof document === 'undefined') return 'light'
-  const root = document.documentElement
-  const attr = root.getAttribute('data-theme')
-  if (attr === 'dark') return 'dark'
-  if (attr === 'light') return 'light'
-  // Apps on Tailwind's class strategy, or with no explicit theme set at all.
-  if (root.classList.contains('dark')) return 'dark'
-  return typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
-}
-
 /**
  * Reads the color ramps and plot-area tokens as computed values. `el` scopes the
  * lookup so a subtree that redefines `--chart-*` wins over the document root.
  */
 export function resolveChartTheme(el?: HTMLElement | null): ChartTheme {
-  const scheme = currentColorScheme()
+  const scheme = resolvedColorScheme()
   const fallbacks = FALLBACK_TOKENS[scheme]
 
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {

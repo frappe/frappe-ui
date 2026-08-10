@@ -32,7 +32,7 @@ export {
   resolveChartTheme,
   useChartTheme,
   type ChartTheme,
-  type ColorScheme,
+  type ResolvedColorScheme,
 } from './theme'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,

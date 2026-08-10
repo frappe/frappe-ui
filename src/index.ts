@@ -130,7 +130,12 @@ export { default as useAxisChartOptions } from './components/Charts/axisChartOpt
 
 // Composables
 export { usePageMeta, type PageMeta } from './utils/pageMeta'
-export { useColorScheme, type ColorScheme } from './composables/useColorScheme'
+export {
+  useColorScheme,
+  resolvedColorScheme,
+  type ColorScheme,
+  type ResolvedColorScheme,
+} from './composables/useColorScheme'
 export {
   shellScrollContainer,
   useShellScrolled,

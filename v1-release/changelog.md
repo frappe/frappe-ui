@@ -1618,3 +1618,4 @@ names.
 | `FileUploader` slot prop `error`   | always `string \| null`, was `unknown` | **Changed** — silent; `.message` access renders nothing |
 | `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |
+| `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (re-exported from `frappe-ui/charts`) | **Removed** — loud; type import fails |
