@@ -22,7 +22,12 @@ import {
 } from '../shared/tabs/styles'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import type { BrowserTabBase } from '../shared/tabs/pillTypes'
-import type { TabButton, TabButtonsEmits, TabButtonsProps } from './types'
+import type {
+  TabButton,
+  TabButtonsEmits,
+  TabButtonsProps,
+  TabButtonValue,
+} from './types'
 
 defineOptions({
   name: 'TabButtons',
@@ -66,10 +71,20 @@ const resolvedButtons = computed(() => {
   })
 })
 
+// Selection state. A bound `modelValue` wins; otherwise the component holds
+// its own, so `RadioGroupRoot` is always controlled. Handing it `undefined`
+// would let reka fall back to its own uncontrolled state: the checked pill
+// would change text color while `props.modelValue` stayed `undefined`, so the
+// re-measure watcher below would never fire and the sliding indicator would
+// stay parked — or stay hidden, when nothing was checked at mount.
+const internalValue = ref<TabButtonValue | undefined>(props.modelValue)
+
 const model = computed({
-  get: () => props.modelValue,
+  get: () =>
+    props.modelValue !== undefined ? props.modelValue : internalValue.value,
   set: (value) => {
     if (value === undefined) return
+    internalValue.value = value
     emit('update:modelValue', value)
   },
 })
@@ -202,7 +217,9 @@ onBeforeUnmount(() => {
 
 watch(
   [
-    () => props.modelValue,
+    // `model`, not `props.modelValue`: an unbound component moves selection
+    // through `internalValue`, and the indicator has to follow that too.
+    model,
     () => props.variant,
     () => props.size,
     () => props.vertical,

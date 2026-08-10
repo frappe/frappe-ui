@@ -290,6 +290,11 @@ value input, not a panel switcher. The two share:
   [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md)
 - the `active: true` fallback and the label-as-value fallback are removed;
   `value` is required and the model is the single source of truth
+- with no `v-model`, `TabButtons` keeps internal state and still emits, the
+  same rule as `Tabs`. It never hands `RadioGroupRoot` an undefined model:
+  reka would then track selection privately, and the sliding indicator —
+  which measures the checked element rather than using an indicator
+  primitive — would have nothing to re-measure on
 
 ## Styling hooks
 

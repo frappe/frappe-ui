@@ -204,4 +204,36 @@ describe('<TabButtons />', () => {
       expect(ir.height, 'height').to.be.closeTo(br.height, 0.5)
     })
   })
+
+  it('slides the indicator without a bound model', () => {
+    // No `modelValue`: the component holds its own selection, so the sliding
+    // surface must still follow the click. Measuring off the prop alone
+    // leaves the indicator parked while the pill's text color moves.
+    cy.mount(TabButtons, {
+      props: {
+        options: [
+          { label: 'Day', value: 'day' },
+          { label: 'Week', value: 'week' },
+          { label: 'Month', value: 'month' },
+        ],
+      },
+    })
+
+    cy.contains('button', 'Month').click()
+    cy.contains('button', 'Month').should('have.attr', 'data-state', 'checked')
+
+    cy.contains('button', 'Month').should(($btn) => {
+      const indicator = document.querySelector<HTMLElement>(
+        '[data-slot="tab-indicator"]',
+      )
+      expect(indicator, 'indicator').to.exist
+      expect(getComputedStyle(indicator!).display, 'display').to.not.equal(
+        'none',
+      )
+      const ir = indicator!.getBoundingClientRect()
+      const br = $btn[0].getBoundingClientRect()
+      expect(ir.x, 'x').to.be.closeTo(br.x, 0.5)
+      expect(ir.width, 'width').to.be.closeTo(br.width, 0.5)
+    })
+  })
 })
