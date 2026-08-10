@@ -66,6 +66,13 @@ has to be to stay comparable. A line outside the range the plot covers is not
 drawn, because stretching the scale to fit a distant target would flatten the
 data it is meant to be read against; pin `yAxis.min` / `max` instead.
 
+## Hiding a series
+
+A chart with more than one series draws a legend under the plot. Press an entry
+to take that line out of the chart, or bind `v-model:hiddenSeries` to own that
+list yourself. It is described under
+[BarChart](/docs/charts/barchart#hiding-a-series).
+
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.

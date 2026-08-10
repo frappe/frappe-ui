@@ -29,4 +29,12 @@ chart-level alpha; a `seriesConfig` entry overrides it per series.
 
 <ComponentPreview name="Charts-AreaLatency" csr="true" self-layout />
 
+## Hiding a series
+
+A chart with more than one series draws a legend under the plot. Press an entry
+to take that band out of the chart. The stack closes over it, and a normalized
+stack re-takes its shares over the bands that are left. Bind
+`v-model:hiddenSeries` to own that list yourself;
+it is described under [BarChart](/docs/charts/barchart#hiding-a-series).
+
 <!-- @include: ./AreaChart.api.md -->
