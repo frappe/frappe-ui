@@ -6,8 +6,8 @@ type Move = { index: number; previous: number | null }
 
 /**
  * The composable behind a plot, with the marks under test's control and every
- * callback recorded. A scope stands in for the component: the count watcher
- * needs one to live in.
+ * callback recorded. A scope stands in for the component: the mark watcher
+ * needs one to live in. A mark names itself here, as an app's rows do.
  */
 function setup(count = 4) {
   const marks = ref(Array.from({ length: count }, (_, i) => `mark ${i}`))
@@ -131,6 +131,51 @@ describe('usePlotKeyboard', () => {
       { index: 0, previous: null },
       { index: 0, previous: 0 },
     ])
+  })
+
+  // A filter or a sort moves a mark along the list. The cursor is on a mark,
+  // not on a slot, so Enter still fires for the one that was read out.
+  it('follows its own mark when earlier ones go', async () => {
+    const plot = setup()
+    plot.focus()
+    plot.press('End')
+    plot.marks.value = ['mark 1', 'mark 2', 'mark 3']
+    await nextTick()
+    expect(plot.keyboard.index.value).toBe(2)
+  })
+
+  it('follows its own mark when one is inserted before it', async () => {
+    const plot = setup()
+    plot.focus()
+    plot.press('ArrowRight')
+    plot.marks.value = ['new', 'mark 0', 'mark 1', 'mark 2', 'mark 3']
+    await nextTick()
+    expect(plot.keyboard.index.value).toBe(2)
+  })
+
+  it('takes the name a chart gives a mark', async () => {
+    const rows = ref([{ id: 'a' }, { id: 'b' }, { id: 'c' }])
+    const scope = effectScope()
+    let keyboard!: PlotKeyboardReturn
+    scope.run(() => {
+      keyboard = usePlotKeyboard({
+        marks: () => rows.value,
+        key: (row) => row.id,
+        move: () => {},
+        activate: () => {},
+        clear: () => {},
+      })
+    })
+
+    keyboard.goTo(2)
+    // Rebuilt objects, same names: the cursor stays on c.
+    rows.value = [{ id: 'x' }, { id: 'b' }, { id: 'c' }]
+    await nextTick()
+    expect(keyboard.index.value).toBe(2)
+
+    rows.value = [{ id: 'c' }]
+    await nextTick()
+    expect(keyboard.index.value).toBe(0)
   })
 
   it('reads the mark again when a chart asks', () => {

@@ -384,6 +384,7 @@ function downplayPoint(index: number | null) {
 
 const keyboard = usePlotKeyboard({
   marks: () => walk.value,
+  key: (hit) => hit.point.row,
   move: (index, previous) => {
     downplayPoint(previous)
     readPoint(index)

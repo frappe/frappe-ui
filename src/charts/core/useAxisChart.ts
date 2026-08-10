@@ -379,6 +379,8 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   }
 
   const keyboard = usePlotKeyboard({
+    // A mark here is the app's own row, which names itself: a filter or a sort
+    // keeps the cursor on the row the reader was on.
     marks: () => rows.value,
     move: (index) => {
       cursorSeries.value = Math.min(

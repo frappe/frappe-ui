@@ -1,13 +1,20 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue'
 
-export type PlotKeyboardArgs = {
+export type PlotKeyboardArgs<T> = {
   /**
    * The marks the plot draws right now, in the order the arrows walk them.
    * None, and there is no tab stop. The list is what the cursor follows: a new
    * one, and the mark under the cursor is read again, so a plot that redraws
    * under a reader does not leave an old value standing.
    */
-  marks: () => readonly unknown[]
+  marks: () => readonly T[]
+  /**
+   * What names a mark across a redraw — the app's own row, usually. The cursor
+   * holds on to it, so a plot that filters, sorts or grows keeps the reader on
+   * the mark they were on rather than on the slot it used to sit in. Left out,
+   * the mark itself is the name; a name it cannot find falls back to the slot.
+   */
+  key?: (mark: T) => unknown
   /**
    * Puts the cursor on a mark: highlight it, open its tooltip, read it out.
    * `previous` is the mark the cursor came off, for the plot to downplay, and
@@ -55,7 +62,9 @@ export type PlotKeyboardReturn = {
  * what keeps a 400-point scatter from becoming 400 tab stops. Enter and Space
  * fire the same event a click does, so nothing is reachable by mouse alone.
  */
-export function usePlotKeyboard(args: PlotKeyboardArgs): PlotKeyboardReturn {
+export function usePlotKeyboard<T>(
+  args: PlotKeyboardArgs<T>,
+): PlotKeyboardReturn {
   const index = ref<number | null>(null)
 
   // A press on the plot focuses it too. Landing the cursor on the first mark
@@ -66,9 +75,16 @@ export function usePlotKeyboard(args: PlotKeyboardArgs): PlotKeyboardReturn {
   const marks = computed(() => args.marks())
   const count = computed(() => marks.value.length)
 
+  // What the cursor is on, as the plot names it. Kept beside the index so a
+  // redraw can put the cursor back on the same mark, wherever it has moved to.
+  let held: unknown
+
+  const keyOf = (mark: T) => (args.key ? args.key(mark) : mark)
+
   function place(next: number) {
     const previous = index.value
     index.value = next
+    held = keyOf(marks.value[next])
     args.move(next, previous)
   }
 
@@ -85,13 +101,20 @@ export function usePlotKeyboard(args: PlotKeyboardArgs): PlotKeyboardReturn {
 
   function refresh() {
     if (index.value === null) return
-    if (!count.value) leave()
-    else goTo(index.value)
+    if (!count.value) return leave()
+    // The same mark first, wherever the redraw has put it. Gone, and the cursor
+    // holds its place in the order instead.
+    const found =
+      held === undefined
+        ? -1
+        : marks.value.findIndex((mark) => keyOf(mark) === held)
+    goTo(found >= 0 ? found : index.value)
   }
 
   function leave() {
     const previous = index.value
     index.value = null
+    held = undefined
     fromPointer = false
     args.clear(previous)
   }

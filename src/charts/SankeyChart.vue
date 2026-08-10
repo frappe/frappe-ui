@@ -272,6 +272,7 @@ function downplayLink(index: number | null) {
 
 const keyboard = usePlotKeyboard({
   marks: () => graph.value.links,
+  key: (link) => link.row,
   move: (index, previous) => {
     downplayLink(previous)
     readLink(index)

@@ -269,6 +269,9 @@ function downplayCell(index: number | null) {
 
 const keyboard = usePlotKeyboard({
   marks: () => matrix.value.cells,
+  // The app's own row names the cell, so a grid that refilters keeps the
+  // cursor on the cell the reader was on.
+  key: (cell) => cell.row,
   move: (index, previous) => {
     downplayCell(previous)
     readCell(index)

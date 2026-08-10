@@ -335,6 +335,7 @@ function readSlice(index: number) {
 
 const { attrs: plotAttrs } = usePlotKeyboard({
   marks: () => visibleSlices.value,
+  key: (slice) => slice.name,
   move: readSlice,
   activate: (index) => {
     const slice = visibleSlices.value[index]
