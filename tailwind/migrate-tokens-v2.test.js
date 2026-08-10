@@ -344,6 +344,38 @@ describe('tokens v2 migration', () => {
     },
   )
 
+  // A read-only directory does not stop root, so the write never fails there.
+  it.skipIf(process.getuid?.() === 0)(
+    'ink-shift CLI rolls back earlier markers when a marker write fails',
+    () => {
+      const base = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
+      tempDirs.push(base)
+      const ok = path.join(base, 'ok')
+      const blocked = path.join(base, 'blocked')
+      fs.mkdirSync(ok)
+      fs.mkdirSync(blocked)
+      const fixture = path.join(ok, 'a.vue')
+      fs.writeFileSync(fixture, '<i class="text-ink-red-3"></i>')
+      // The second target cannot take a marker, so the run must undo the first.
+      fs.chmodSync(blocked, 0o555)
+      const script = fileURLToPath(new URL('./migrate-tokens-v2.js', import.meta.url))
+
+      const result = spawnSync(process.execPath, [script, '--ink-shift', ok, blocked], {
+        encoding: 'utf8',
+      })
+      fs.chmodSync(blocked, 0o755)
+      expect(result.status).toBe(1)
+      // No rewrite happened, so no marker may survive to refuse the retry.
+      expect(fs.existsSync(path.join(ok, INK_SHIFT_MARKER))).toBe(false)
+      expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-3')
+
+      // The retry runs and shifts exactly once.
+      const retry = spawnSync(process.execPath, [script, '--ink-shift', ok], { encoding: 'utf8' })
+      expect(retry.status).toBe(0)
+      expect(fs.readFileSync(fixture, 'utf8')).toContain('ink-red-2')
+    },
+  )
+
   it('ink-shift CLI shifts a file once when targets overlap', () => {
     const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-')))
     tempDirs.push(root)

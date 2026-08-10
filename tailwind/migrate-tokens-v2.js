@@ -807,7 +807,27 @@ function main() {
   // closed: the retry refuses instead of double-shifting the files that were
   // already rewritten. Recovery: restore with git, delete the marker, re-run.
   if (mode === 'ink-shift' && !dryRun) {
-    for (const dir of inkShiftMarkerDirs) writeInkShiftMarker(dir)
+    // All or nothing: a marker write that fails leaves no rewrite behind it,
+    // so the markers already written must go too. Keeping them would refuse a
+    // retry on targets that never shifted.
+    const written = []
+    try {
+      for (const dir of inkShiftMarkerDirs) {
+        writeInkShiftMarker(dir)
+        written.push(path.join(dir, INK_SHIFT_MARKER))
+      }
+    } catch (err) {
+      for (const file of written) {
+        try {
+          fs.unlinkSync(file)
+        } catch {
+          console.error(`   Could not remove ${file} — delete it before you re-run.`)
+        }
+      }
+      console.error(`\n✗  Could not write the ${INK_SHIFT_MARKER} marker: ${err.message}`)
+      console.error('   No file was rewritten. Fix the permission and re-run.\n')
+      process.exit(1)
+    }
     console.log(
       `Wrote ${INK_SHIFT_MARKER} in ${inkShiftMarkerDirs.join(', ')} — it blocks an accidental second run.\n`,
     )
