@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ChartCardProps } from '../types'
+import type { ChartCardProps, ChartCardSlots } from '../types'
 
 // 8px, the radius the library gives a bordered box. A chart card is one panel
 // among the panels an app puts on a page — a dashboard tiles them — so it takes
@@ -23,5 +23,5 @@ const SURFACE =
 
 withDefaults(defineProps<ChartCardProps>(), { card: true })
 
-defineSlots<{ default: () => unknown }>()
+defineSlots<ChartCardSlots>()
 </script>

@@ -40,16 +40,15 @@
 
 <script setup lang="ts">
 import Button from '#components/Button/Button.vue'
-import type { ChartLegendItem, ChartLegendProps } from '../types'
+import type {
+  ChartLegendEmits,
+  ChartLegendItem,
+  ChartLegendProps,
+} from '../types'
 
 defineProps<ChartLegendProps>()
 
-const emit = defineEmits<{
-  /** An entry was pressed: the named series' visibility flipped. */
-  change: [name: string]
-  /** The highlighted series, or null when the highlight clears. */
-  highlight: [name: string | null]
-}>()
+const emit = defineEmits<ChartLegendEmits>()
 
 // The visible text is the series label; the accessible name has to say what the
 // press does, since the toggle state alone doesn't read as an action.

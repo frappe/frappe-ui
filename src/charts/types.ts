@@ -576,11 +576,18 @@ export type ChartValueFormatter = (value: number) => string
 export type ChartCategoryFormatter = (value: any) => string
 
 export type ChartBaseProps = {
+  /** Heads the card. Left out, the chart draws no header row at all. */
   title?: string
+  /** A second line under the title, e.g. the period the numbers cover. */
   subtitle?: string
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
+  /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
+  /**
+   * Puts the chart in its error state and prints this message under it. A
+   * chart that fails to draw sets its own; this is for a failed request.
+   */
   error?: string | null
 }
 
@@ -656,6 +663,7 @@ export type SeriesStyle = {
 }
 
 export type AxisChartProps = ChartBaseProps & {
+  /** The rows to plot. One row is one position on the category axis. */
   data: Record<string, any>[]
   /** Column holding the category or time each point sits at. */
   x: string
@@ -676,7 +684,15 @@ export type AxisChartProps = ChartBaseProps & {
   maxSeries?: number
   /** Keyed by series identity: a `y` column, or a value of the `series` column. */
   seriesConfig?: Record<string, SeriesStyle>
+  /**
+   * Series the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSeries` to drive the legend from the app, or to keep what a
+   * reader hid across a reload. Left unbound, the legend owns it.
+   */
+  hiddenSeries?: string[]
+  /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
+  /** The primary value axis: its title, its range, and how a value prints. */
   yAxis?: ChartValueAxisOptions
   /** The second value axis. Only drawn when a series sits on `axis: 'y2'`. */
   y2Axis?: ChartValueAxisOptions
@@ -697,6 +713,7 @@ export type AxisChartProps = ChartBaseProps & {
    * annotations, not series: no legend entry, and no way to switch one off.
    */
   referenceLines?: ReferenceLine[]
+  /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -712,6 +729,7 @@ export type LineChartProps = AxisChartProps
 export type AreaChartProps = AxisChartProps
 
 export type DonutChartProps = ChartBaseProps & {
+  /** The rows to plot. One row is one slice, before the "Others" grouping. */
   data: Record<string, any>[]
   /** Row key holding the slice name. */
   category: string
@@ -724,23 +742,34 @@ export type DonutChartProps = ChartBaseProps & {
    * the palette runs out.
    */
   maxSlices?: number
+  /**
+   * Prints each slice's name and share beside the ring, and drops the readout
+   * in the middle. Off by default: the legend says the same without the
+   * leader lines.
+   */
   showInlineLabels?: boolean
   /** Caption under the total in the middle. Defaults to the `value` key. */
   centerLabel?: string
+  /** `'half'` draws the ring as a semicircle; only the geometry changes. */
   variant?: DonutVariant
+  /** Prints every number the ring shows: the readout, the tooltip, the labels. */
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
   palette?: ChartPalette
+  /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }
 
 export type FunnelChartProps = ChartBaseProps & {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
+  /** Row key holding the stage name. */
   category: string
+  /** Row key holding how many reached the stage. */
   value: string
   /** Prints each stage's share of the first stage. On by default. */
   showPercentages?: boolean
+  /** Prints every number the funnel shows: the stage values and the tooltip. */
   format?: ChartValueFormatter
   /** Defaults to `'sequential'` reversed, so color darkens as the funnel narrows. */
   palette?: ChartPalette
@@ -755,11 +784,23 @@ export type HeatmapChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude the cell is colored by. */
   value: string
+  /** Bottom of the color scale. Defaults to the smallest value in the data. */
   min?: number
+  /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
+  /**
+   * Prints each cell's value inside it. A label that would collide with its
+   * neighbour is dropped, so a grid too fine to carry numbers shows none.
+   */
   showValues?: boolean
+  /** Prints every number the grid shows: the cells, the scale ends, the tooltip. */
   format?: ChartValueFormatter
+  /**
+   * Ramp cells are colored from. Defaults to `'sequential'`, which is what a
+   * magnitude reads as; `'diverging'` is for signed data and centers on zero.
+   */
   palette?: HeatmapPalette
+  /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -776,9 +817,11 @@ export type SankeyChartProps = ChartBaseProps & {
   orient?: SankeyOrient
   /** Where a node sits along the flow. Defaults to `'justify'`. */
   nodeAlign?: SankeyNodeAlign
+  /** Prints every number the flow shows, i.e. what a band or node carries. */
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: nodes are unrelated categories. */
   palette?: ChartPalette
+  /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -793,6 +836,12 @@ export type ScatterChartProps = ChartBaseProps & {
   size?: string
   /** Grouping column: one series per distinct value. */
   series?: string
+  /**
+   * Groups the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
+   * legend owns it.
+   */
+  hiddenSeries?: string[]
   /** Row key holding the point's own name, which heads its tooltip. */
   label?: string
   /**
@@ -821,12 +870,14 @@ export type ScatterChartProps = ChartBaseProps & {
    * what prints it.
    */
   format?: ChartValueFormatter
+  /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }
 
 /** No `subtitle`: the card is one reading, and the caption row says what it compares against. */
 export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
   Pick<ChartCardProps, 'card'> & {
+    /** What the reading is, printed above the number. */
     title: string
     /** A string renders as given: the formatting props only apply to a number. */
     value: number | string | null
@@ -837,11 +888,15 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
      * tone that says which way the number moved.
      */
     color?: string
+    /** Printed before the number, e.g. a currency sign. */
     prefix?: string
+    /** Printed after the number, e.g. a unit. */
     suffix?: string
     /** Change against the comparison period. Sign drives the arrow. */
     delta?: number | null
+    /** Unit printed after the delta, e.g. `'%'`. */
     deltaSuffix?: string
+    /** What the delta is measured against, e.g. `'vs last month'`. */
     deltaCaption?: string
     /** Flips the delta colors, for metrics like churn or cost. */
     negativeIsBetter?: boolean
@@ -849,6 +904,7 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     precision?: number
     /** Shortens the value, `12300` -> `12.3K`. */
     compact?: boolean
+    /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
   }
 
@@ -867,7 +923,9 @@ export type ChartCardProps = {
 }
 
 export type ChartContainerProps = {
+  /** Heads the card. Left out, the container draws no header row at all. */
   title?: string
+  /** A second line under the title, e.g. the period the numbers cover. */
   subtitle?: string
   /** Value-axis title, drawn above the plot instead of inside it. */
   plotLabel?: string
@@ -875,10 +933,13 @@ export type ChartContainerProps = {
   plotLabelSecondary?: string
   /** Edge of the plot the value-axis titles head. Defaults to the top. */
   plotLabelPlacement?: PlotLabelPlacement
+  /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
   /** Non-empty switches the container into its error state. */
   error?: string | null
+  /** Draws the empty state: there is data, and it plots to nothing. */
   empty?: boolean
+  /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
 
@@ -888,11 +949,184 @@ export type ChartLegendProps = {
 }
 
 export type ChartTooltipProps = {
+  /**
+   * Draws the tooltip. It is measured before it is placed, so it flips at the
+   * viewport edge rather than running off it.
+   */
   open: boolean
-  /** Viewport coordinates of the pointer. */
+  /** Viewport x of the point the tooltip hangs off, i.e. the pointer. */
   x: number
+  /** Viewport y of the point the tooltip hangs off, i.e. the pointer. */
   y: number
+  /** Heads the tooltip, e.g. the category the readings below it belong to. */
   label?: string
+  /** One row per reading, in the order they should be read. */
   items: ChartTooltipItem[]
+  /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
+}
+
+// ---------------------------------------------------------------------------
+// Component emits and slots. Declared here beside the props so a consumer can
+// name a handler's payload or a slot's props — `(e: ChartDatapointEvent)` reads
+// as the family's own type rather than as an inline literal nobody can import.
+// ---------------------------------------------------------------------------
+
+/**
+ * The three states, forwarded by every chart. A slot replaces the whole state
+ * rather than a line inside it, so an app reaching one corner of the chrome
+ * does not have to rebuild the rest of it.
+ */
+export type ChartStateSlots = {
+  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
+  loading?: () => unknown
+  /** Replaces the message, e.g. to put a retry button beside it. */
+  error?: (props: { error?: string | null }) => unknown
+  /** Replaces the "no data" line, e.g. with a hint about the filters. */
+  empty?: () => unknown
+}
+
+/** Controls at the top right of the card, e.g. a period Select or a Dropdown. */
+export type ChartActionsSlot = {
+  actions?: () => unknown
+}
+
+export type AxisChartEmits = {
+  /**
+   * A mark was clicked. Carries the series it belongs to, its position along
+   * the category axis, and the row behind it.
+   */
+  datapointClick: [event: ChartDatapointEvent]
+}
+
+export type AxisChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds one entry per visible series at
+     * the hovered category, biggest first.
+     */
+    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  }
+
+export type BarChartEmits = AxisChartEmits
+export type BarChartSlots = AxisChartSlots
+export type LineChartEmits = AxisChartEmits
+export type LineChartSlots = AxisChartSlots
+export type AreaChartEmits = AxisChartEmits
+export type AreaChartSlots = AxisChartSlots
+
+export type DonutChartEmits = {
+  /**
+   * A slice was clicked. The "Others" slice carries every row it grouped, so a
+   * caller can drill into the tail as well as into a named slice.
+   */
+  sliceClick: [event: DonutSliceEvent]
+}
+
+export type DonutChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the readout in the middle of the ring. Reads the total, or the
+     * hovered slice while one is hovered.
+     */
+    center?: (props: {
+      value: string
+      label: string
+      /** Only set while a slice is hovered. */
+      percent?: string
+    }) => unknown
+    /** Replaces the tooltip body. `items` holds the hovered slice alone. */
+    tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+  }
+
+export type FunnelChartEmits = {
+  /**
+   * A stage was clicked. Carries its position in the funnel and the row behind
+   * it; the whole column is the hit area, not just the shape it draws.
+   */
+  stageClick: [event: FunnelStageEvent]
+}
+
+export type FunnelChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `stage` carries the two conversion rates the
+     * default body prints under the value.
+     */
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      stage?: FunnelStage
+    }) => unknown
+  }
+
+export type HeatmapChartEmits = {
+  /** A cell was clicked. Carries both its categories and the row behind it. */
+  cellClick: [event: HeatmapCellEvent]
+}
+
+export type HeatmapChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /** Replaces the tooltip body. `items` holds the hovered cell alone. */
+    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  }
+
+export type SankeyChartEmits = {
+  /**
+   * A band was clicked. Carries its two nodes and the row behind it. A node
+   * emits nothing: it stands for every row that passes through it, not one.
+   */
+  linkClick: [event: SankeyLinkEvent]
+}
+
+export type SankeyChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /** Replaces the tooltip body. `items` holds the hovered band or node alone. */
+    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  }
+
+export type ScatterChartEmits = {
+  /** A point was clicked. Carries both measures and the row behind it. */
+  pointClick: [event: ScatterPointEvent]
+}
+
+export type ScatterChartSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds the point's two measures, and
+     * its size when the chart draws one.
+     */
+    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  }
+
+/** No tooltip slot: a card with no plot has nothing to hover. */
+export type NumberCardSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /** Replaces `deltaCaption`, e.g. with a Dropdown that changes the period. */
+    caption?: (props: { caption?: string }) => unknown
+  }
+
+export type ChartCardSlots = {
+  /** The card's contents. The card supplies the surface and clips them. */
+  default: () => unknown
+}
+
+export type ChartContainerSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /** The plot itself, drawn into a box the container sizes and states. */
+    default: () => unknown
+    /** The row under the plot, e.g. a `ChartLegend` or a ramp scale. */
+    legend?: () => unknown
+  }
+
+export type ChartLegendEmits = {
+  /** An entry was pressed: the named series' visibility flipped. */
+  change: [name: string]
+  /** The highlighted series, or null when the highlight clears. */
+  highlight: [name: string | null]
+}
+
+export type ChartTooltipSlots = {
+  /** Replaces the whole tooltip body, headline row included. */
+  default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
 }

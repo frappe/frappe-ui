@@ -71,8 +71,9 @@ import type {
   ChartLegendItem,
   ChartTooltipItem,
   ScatterChartConfig,
+  ScatterChartEmits,
   ScatterChartProps,
-  ScatterPointEvent,
+  ScatterChartSlots,
 } from './types'
 
 // The grid carries both value axes and MarkLineComponent draws the reference
@@ -92,20 +93,9 @@ const hiddenSeries = defineModel<string[]>('hiddenSeries', {
   default: () => [],
 })
 
-const emit = defineEmits<{
-  pointClick: [event: ScatterPointEvent]
-}>()
+const emit = defineEmits<ScatterChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<ScatterChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 

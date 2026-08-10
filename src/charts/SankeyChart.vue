@@ -57,8 +57,9 @@ import type {
   ChartExposed,
   ChartTooltipItem,
   SankeyChartConfig,
+  SankeyChartEmits,
   SankeyChartProps,
-  SankeyLinkEvent,
+  SankeyChartSlots,
 } from './types'
 
 // The series is all a sankey needs: it lays itself out, so there is no grid and
@@ -67,20 +68,9 @@ registerChartModules([SankeySeries])
 
 const props = defineProps<SankeyChartProps>()
 
-const emit = defineEmits<{
-  linkClick: [event: SankeyLinkEvent]
-}>()
+const emit = defineEmits<SankeyChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<SankeyChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 

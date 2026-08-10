@@ -174,7 +174,7 @@ import { documentDir } from './utils'
 import { useId } from '#utils/useId'
 import Skeleton from '#components/Skeleton/Skeleton.vue'
 import ChartCard from './components/ChartCard.vue'
-import type { NumberCardProps } from './types'
+import type { NumberCardProps, NumberCardSlots } from './types'
 
 // No echarts, sparkline included: a page full of these should cost nothing but
 // HTML.
@@ -184,17 +184,7 @@ import type { NumberCardProps } from './types'
 // NumberCard forwards a definite `false` and the surface never draws.
 const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
-const slots = defineSlots<{
-  actions?: () => unknown
-  /** Replaces the skeleton, e.g. with a placeholder of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-  /** Replaces `deltaCaption`, e.g. with a Dropdown that changes the period. */
-  caption?: (props: { caption?: string }) => unknown
-}>()
+const slots = defineSlots<NumberCardSlots>()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())

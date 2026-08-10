@@ -79,9 +79,10 @@ import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   ChartExposed,
   ChartTooltipItem,
-  HeatmapCellEvent,
   HeatmapChartConfig,
+  HeatmapChartEmits,
   HeatmapChartProps,
+  HeatmapChartSlots,
 } from './types'
 
 // The continuous visual map only: a heatmap has no piecewise scale to draw, and
@@ -95,20 +96,9 @@ registerChartModules([
 
 const props = defineProps<HeatmapChartProps>()
 
-const emit = defineEmits<{
-  cellClick: [event: HeatmapCellEvent]
-}>()
+const emit = defineEmits<HeatmapChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<HeatmapChartSlots>()
 
 const plotEl = ref<HTMLElement>()
 

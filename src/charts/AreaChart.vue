@@ -73,11 +73,11 @@ import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
+  AreaChartEmits,
   AreaChartProps,
+  AreaChartSlots,
   AxisChartConfig,
-  ChartDatapointEvent,
   ChartExposed,
-  ChartTooltipItem,
 } from './types'
 
 registerChartModules([
@@ -95,20 +95,9 @@ const hiddenSeries = defineModel<string[]>('hiddenSeries', {
   default: () => [],
 })
 
-const emit = defineEmits<{
-  datapointClick: [event: ChartDatapointEvent]
-}>()
+const emit = defineEmits<AreaChartEmits>()
 
-defineSlots<{
-  actions?: () => unknown
-  tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<AreaChartSlots>()
 
 const normalized = computed(() => normalizeAxisChartProps(props))
 const config = computed<AxisChartConfig>(() => ({

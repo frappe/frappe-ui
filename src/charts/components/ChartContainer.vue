@@ -111,21 +111,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Skeleton from '#components/Skeleton/Skeleton.vue'
-import type { ChartContainerProps } from '../types'
+import type { ChartContainerProps, ChartContainerSlots } from '../types'
 
 const props = defineProps<ChartContainerProps>()
 
-defineSlots<{
-  default: () => unknown
-  actions?: () => unknown
-  legend?: () => unknown
-  /** Replaces the whole placeholder, e.g. with a skeleton of the app's own. */
-  loading?: () => unknown
-  /** Replaces the message, e.g. to put a retry button beside it. */
-  error?: (props: { error?: string | null }) => unknown
-  /** Replaces the "no data" line, e.g. with a hint about the filters. */
-  empty?: () => unknown
-}>()
+defineSlots<ChartContainerSlots>()
 
 const state = computed(() => {
   if (props.error) return 'error'
