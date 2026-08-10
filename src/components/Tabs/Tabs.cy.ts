@@ -827,4 +827,83 @@ describe('Tabs', () => {
       expect(ir.height, 'height').to.be.closeTo(tr.height, 1)
     })
   })
+
+  it('moves focus without navigating when arrowing over route triggers', () => {
+    // Automatic activation would select on arrow, but a route trigger only
+    // navigates on click or Enter — so the arrow would land on a tab that
+    // selects nothing and goes nowhere. Route mode uses manual activation:
+    // arrows move focus, Enter commits. This also matches the ARIA APG rule
+    // that activation with a significant side effect should be manual.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type('{rightarrow}')
+
+    // Focus moved to Sent, but Inbox stays selected and the route stands.
+    cy.focused().should('contain.text', 'Sent')
+    cy.contains('a[role=tab]', 'Inbox')
+      .should('have.attr', 'aria-selected', 'true')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/inbox')
+      })
+  })
+
+  it('does not let the keyboard select while nothing matches the route', () => {
+    // An all-route list on a URL matching no trigger: `selected` is
+    // undefined, which reka reads as uncontrolled and then drives its own
+    // selection. Space commits under manual activation without following the
+    // link, so it would flip `aria-selected` on a trigger whose Pill stays
+    // inactive, and it would stick until a route matched. The root hands reka
+    // a value no trigger carries instead.
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/inbox', component: { template: '<div />' } },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+            h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.get('[role=tab][aria-selected=true]').should('not.exist')
+
+    cy.contains('a[role=tab]', 'Inbox').focus().type(' ')
+
+    cy.get('[role=tab][aria-selected=true]')
+      .should('not.exist')
+      .then(() => {
+        expect(router.currentRoute.value.path).to.equal('/')
+      })
+  })
 })

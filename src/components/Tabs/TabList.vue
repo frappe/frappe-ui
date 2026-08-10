@@ -22,6 +22,16 @@ const root = inject(tabsRootKey, null)
 
 const orientation = computed(() => root?.orientation.value ?? 'horizontal')
 
+// Route mode decouples focus from selection: arrow keys move focus, Enter
+// commits. Automatic activation would select on arrow, but a route trigger
+// only navigates on click or Enter, so the arrow would land on a tab that
+// selects nothing and goes nowhere. The ARIA APG asks for manual activation
+// whenever activating a tab has a significant side effect — navigation is
+// one.
+const activationMode = computed<'automatic' | 'manual'>(() =>
+  root?.routeMode.value ? 'manual' : 'automatic',
+)
+
 provide(tabListKey, {
   variant: computed(() => props.variant),
   size: computed(() => props.size),
@@ -103,6 +113,7 @@ defineSlots<{
 
 <template>
   <TabsList
+    :activation-mode="activationMode"
     data-slot="tab-list"
     :data-variant="props.variant"
     :data-size="props.size"

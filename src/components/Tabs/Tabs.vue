@@ -201,9 +201,17 @@ const orientation = computed<'horizontal' | 'vertical'>(() =>
 
 provide(tabsRootKey, {
   selected,
+  routeMode,
   orientation,
   register,
 })
+
+// Handed to `TabsRoot` when nothing is selected. An undefined model reads as
+// "uncontrolled" to reka, which then drives its own selection: arrow keys
+// would flip `aria-selected` on a trigger whose `Pill` stays inactive,
+// because every part of this component reads `selected` instead. A value no
+// trigger carries keeps the root controlled and selects nothing.
+const NO_SELECTION = '__frappe-ui-tabs-none__'
 
 function onRekaUpdate(value: TabValue) {
   if (routeMode.value) {
@@ -237,7 +245,7 @@ const visibleTabs = computed(() =>
 
 <template>
   <TabsRoot
-    :model-value="selected"
+    :model-value="selected ?? NO_SELECTION"
     :orientation="orientation"
     :dir="dir"
     :class="

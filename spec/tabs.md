@@ -339,7 +339,14 @@ value input, not a panel switcher. The two share:
 - `Tabs` follows the tabs pattern via the underlying reka-ui primitives:
   `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-selected`,
   `aria-controls`
-- activation is automatic: arrow keys move focus and select
+- activation is automatic: arrow keys move focus and select. Route mode is
+  the one exception — it activates manually, so arrow keys move focus and
+  Enter commits. Selecting a route tab navigates, and the ARIA APG asks for
+  manual activation whenever activation has a significant side effect
+- the root never hands the reka primitive an undefined model. reka reads
+  that as uncontrolled and starts driving selection itself, which would flip
+  `aria-selected` onto a trigger the rest of the component still draws as
+  inactive. With nothing selected it receives a value no trigger carries
 - roving tabindex; disabled triggers are skipped
 - route mode renders links inside the tablist; the selected link carries
   `aria-selected`
