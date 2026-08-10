@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import ScatterChart from './ScatterChart.vue'
 import './style.css'
 
@@ -9,24 +9,42 @@ const data = [
   { account: 'Umbrella', spend: 700, revenue: 900, seats: 40, region: 'US' },
 ]
 
-function mountChart(props: Record<string, any> = {}) {
+/**
+ * Charts fill their container, so every case needs one with a size. Animation
+ * is off: a symbol grows from nothing, and until it has arrived it is too small
+ * to be hit.
+ */
+function mountChart(
+  props: Record<string, any> = {},
+  slots?: Record<string, (props?: any) => unknown>,
+) {
   return cy.mount(
     defineComponent({
       setup() {
         return () =>
           h('div', { style: 'width: 480px; height: 320px' }, [
-            h(ScatterChart, {
-              data,
-              x: 'spend',
-              y: 'revenue',
-              echartOptions: { animation: false },
-              ...props,
-            }),
+            h(
+              ScatterChart,
+              {
+                data,
+                x: 'spend',
+                y: 'revenue',
+                echartOptions: { animation: false },
+                ...props,
+              },
+              slots,
+            ),
           ])
       },
     }),
   )
 }
+
+/** The state the container is in, which an app can also style from CSS. */
+const container = () => cy.get('[data-slot="chart-container"]')
+
+/** The one tab stop the cloud takes: echarts draws no per-point DOM node. */
+const plot = () => cy.get('[data-slot="chart-plot"] [role="img"]')
 
 /** Symbols carry a translucent fill; nothing else in the plot is filled. */
 const points = () => cy.get('[data-slot="chart-plot"] svg path[fill-opacity]')
@@ -192,21 +210,38 @@ describe('ScatterChart', () => {
       )
     })
 
-    it('leaves the rule out of hiddenSeries', () => {
-      // The host series is not something the caller can name, so binding the
-      // model and hiding every group must not surface it.
-      const hidden: string[][] = []
-      mountChart({
-        series: 'region',
-        referenceLines: [{ value: 1000, label: 'Target' }],
-        'onUpdate:hiddenSeries': (next: string[]) => hidden.push(next),
-      })
-      cy.get('[data-slot="chart-legend"] button')
-        .first()
+    it('leaves the rule out of a bound hiddenSeries', () => {
+      // The host series the rule rides on is not something the caller can
+      // name, so a bound model that hides a group must not surface it.
+      const hidden = ref<string[]>(['EU'])
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 480px; height: 320px' }, [
+                h(ScatterChart, {
+                  data,
+                  x: 'spend',
+                  y: 'revenue',
+                  series: 'region',
+                  echartOptions: { animation: false },
+                  referenceLines: [{ value: 1000, label: 'Target' }],
+                  hiddenSeries: hidden.value,
+                  'onUpdate:hiddenSeries': (v: string[]) => (hidden.value = v),
+                }),
+              ])
+          },
+        }),
+      )
+
+      // The parent's value reaches the plot: EU starts out of it.
+      points().should('have.length', 2)
+      cy.get('[aria-label="Show EU"]').click()
+      points().should('have.length', data.length)
+      cy.get('[aria-label="Hide EU"]')
         .click()
-        .then(() => {
-          expect(hidden).to.deep.equal([['EU']])
-        })
+        .then(() => expect(hidden.value).to.deep.equal(['EU']))
+      points().should('have.length', 2)
     })
   })
 
@@ -222,5 +257,149 @@ describe('ScatterChart', () => {
       'aria-label',
       'Spend vs revenue, Top accounts',
     )
+  })
+
+  describe('states', () => {
+    it('holds the plot’s shape with a skeleton while loading', () => {
+      mountChart({ loading: true })
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('be.visible')
+      // Unmounting the plot would dispose the echarts instance behind it.
+      cy.get('[data-slot="chart-plot"]').should('exist')
+      container().should('have.attr', 'data-state', 'loading')
+    })
+
+    it('reports an error over the plot', () => {
+      mountChart({ error: 'boom' })
+      cy.contains('Could not render this chart').should('be.visible')
+      cy.contains('boom').should('be.visible')
+      container().should('have.attr', 'data-state', 'error')
+    })
+
+    it('says so when there is nothing to plot', () => {
+      mountChart({ data: [] })
+      cy.contains('No data to show').should('be.visible')
+      points().should('not.exist')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
+    it('reads as ready once the cloud is drawn', () => {
+      mountChart()
+      points().should('have.length', data.length)
+      container().should('have.attr', 'data-state', 'ready')
+    })
+
+    // An error outranks the rest: a stale skeleton over a failed query would
+    // read as data still on its way.
+    it('reports the error even while loading', () => {
+      mountChart({ loading: true, error: 'boom' })
+      container().should('have.attr', 'data-state', 'error')
+    })
+  })
+
+  // The chrome is the library's, so reaching one of its corners costs the app a
+  // slot rather than a chart of its own.
+  describe('slots', () => {
+    it('puts an app’s controls in the header', () => {
+      mountChart(
+        { title: 'Spend vs revenue' },
+        { actions: () => h('button', 'Week') },
+      )
+      cy.get('[data-slot="chart-header"]').should('contain.text', 'Week')
+    })
+
+    it('takes an app’s own placeholder in place of the skeleton', () => {
+      mountChart({ loading: true }, { loading: () => h('div', { id: 'own' }) })
+      cy.get('#own').should('exist')
+      cy.get('[data-slot="chart-loading"] .animate-pulse').should('not.exist')
+    })
+
+    it('puts an app’s retry button beside the error message', () => {
+      const retry = cy.spy().as('onRetry')
+      mountChart(
+        { error: 'boom' },
+        {
+          error: ({ error }: any) => [
+            h('span', `Failed: ${error}`),
+            h('button', { id: 'retry', onClick: retry }, 'Retry'),
+          ],
+        },
+      )
+
+      cy.contains('Failed: boom').should('be.visible')
+      cy.contains('Could not render this chart').should('not.exist')
+      cy.get('#retry').click()
+      cy.get('@onRetry').should('have.been.calledOnce')
+    })
+
+    it('takes an app’s own line in place of “No data to show”', () => {
+      mountChart({ data: [] }, { empty: () => h('span', 'Widen the filters') })
+      cy.contains('Widen the filters').should('be.visible')
+      cy.contains('No data to show').should('not.exist')
+    })
+
+    it('replaces the tooltip body with the app’s own', () => {
+      // Opened from the keyboard rather than a hover: the cursor lands on a
+      // known point, so the slot props are the first row's every run.
+      mountChart(
+        { label: 'account' },
+        { tooltip: ({ label }: any) => h('span', `point ${label}`) },
+      )
+      points().should('have.length', data.length)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('contain.text', 'point Acme')
+        .and('not.contain.text', 'Spend')
+    })
+  })
+
+  // echarts draws into one element, so the cloud takes a single tab stop and
+  // the arrow keys walk a cursor along it.
+  describe('keyboard', () => {
+    it('opens the tooltip on the first point and reads it out', () => {
+      mountChart({ label: 'account' })
+      points().should('have.length', data.length)
+      plot().should('have.attr', 'tabindex', '0')
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Acme')
+      cy.get('[role="status"]').should('not.have.text', '')
+    })
+
+    it('walks the points with an arrow key', () => {
+      mountChart({ label: 'account' })
+      points().should('have.length', data.length)
+      plot().focus()
+      plot().type('{rightarrow}')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Globex')
+    })
+
+    it('fires pointClick on Enter, for the point under the cursor', () => {
+      mountChart({ label: 'account', onPointClick: cy.spy().as('onClick') })
+      points().should('have.length', data.length)
+      plot().focus()
+      plot().type('{rightarrow}{enter}')
+      cy.get('@onClick').should('have.been.calledWithMatch', {
+        x: 900,
+        y: 2400,
+        label: 'Globex',
+        row: { account: 'Globex', spend: 900, revenue: 2400 },
+      })
+    })
+
+    it('clears the tooltip and the reading on blur', () => {
+      mountChart({ label: 'account' })
+      points().should('have.length', data.length)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('exist')
+      plot().blur()
+      cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      cy.get('[role="status"]').should('have.text', '')
+    })
+
+    // Nothing to walk, so the plot drops out of the tab order rather than
+    // taking a stop that does nothing.
+    it('takes no tab stop with nothing drawn', () => {
+      mountChart({ data: [] })
+      plot().should('not.have.attr', 'tabindex')
+    })
   })
 })

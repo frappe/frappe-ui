@@ -56,6 +56,12 @@ const bars = () => cy.get(`${MARKS} path[fill^="#"]`)
  */
 const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
+/** The state the container is in, which an app can also style from CSS. */
+const container = () => cy.get('[data-slot="chart-container"]')
+
+/** The one tab stop the plot takes: echarts draws no per-bar DOM node. */
+const plot = () => cy.get('[data-slot="chart-plot"] [role="img"]')
+
 describe('BarChart', () => {
   it('paints a bar per datapoint, and labels the categories', () => {
     mountChart()
@@ -402,18 +408,34 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-loading"] .animate-pulse').should('be.visible')
       // Unmounting the plot would dispose the echarts instance behind it.
       cy.get('[data-slot="chart-plot"]').should('exist')
+      container().should('have.attr', 'data-state', 'loading')
     })
 
     it('reports an error over the plot', () => {
       mountChart({ error: 'Query timed out' })
       cy.contains('Could not render this chart').should('be.visible')
       cy.contains('Query timed out').should('be.visible')
+      container().should('have.attr', 'data-state', 'error')
     })
 
     it('says so when there is nothing to plot', () => {
       mountChart({ data: [] })
       cy.contains('No data to show').should('be.visible')
       bars().should('not.exist')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
+    it('reads as ready once the bars are drawn', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      container().should('have.attr', 'data-state', 'ready')
+    })
+
+    // An error outranks the rest: a stale skeleton over a failed query would
+    // read as data still on its way.
+    it('reports the error even while loading', () => {
+      mountChart({ loading: true, error: 'Query timed out' })
+      container().should('have.attr', 'data-state', 'error')
     })
 
     // The chrome is the library's, so reaching one of its states costs the app
@@ -445,6 +467,106 @@ describe('BarChart', () => {
 
       cy.contains('Widen the filters').should('be.visible')
       cy.contains('No data to show').should('not.exist')
+    })
+  })
+
+  // The state slots are covered above, beside the states they replace; these
+  // are the two the chrome forwards outside them.
+  describe('slots', () => {
+    it('puts an app’s controls in the header', () => {
+      mountChart({ title: 'Revenue' }, { actions: () => h('button', 'Week') })
+      cy.get('[data-slot="chart-header"]').should('contain.text', 'Week')
+    })
+
+    it('replaces the tooltip body with the app’s own', () => {
+      // Opened from the keyboard rather than a hover: the cursor lands on a
+      // known category, so the slot props are January's every run.
+      mountChart({}, {
+        tooltip: ({ label, items }: any) =>
+          h('span', `at ${label}: ${items.length}`),
+      } as any)
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]')
+        .should('contain.text', 'at Jan: 2')
+        .and('not.contain.text', 'Sales')
+    })
+  })
+
+  // echarts draws into one element, so the plot takes a single tab stop and the
+  // arrow keys walk a cursor along it.
+  describe('keyboard', () => {
+    it('opens the tooltip on the first category and reads it out', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      plot().should('have.attr', 'tabindex', '0')
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Jan')
+      cy.get('[role="status"]').should('not.have.text', '')
+    })
+
+    it('walks the categories with an arrow key', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      plot().type('{rightarrow}')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Feb')
+    })
+
+    it('fires datapointClick on Enter, for the bar under the cursor', () => {
+      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      plot().type('{rightarrow}{enter}')
+      cy.get('@onClick').should('have.been.calledWithMatch', {
+        seriesName: 'sales',
+        dataIndex: 1,
+        value: 20,
+        row: { month: 'Feb', sales: 20 },
+      })
+    })
+
+    // Two dimensions to walk: left and right run along the categories, up and
+    // down pick which series inside one Enter fires for.
+    it('picks the series with up and down', () => {
+      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      plot().type('{downarrow}{enter}')
+      cy.get('@onClick').should('have.been.calledWithMatch', {
+        seriesName: 'refunds',
+        dataIndex: 0,
+        value: 4,
+      })
+    })
+
+    it('comes back up to the first series', () => {
+      mountChart({ onDatapointClick: cy.spy().as('onClick') })
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      plot().type('{downarrow}{uparrow}{enter}')
+      cy.get('@onClick').should('have.been.calledWithMatch', {
+        seriesName: 'sales',
+        dataIndex: 0,
+        value: 10,
+      })
+    })
+
+    it('clears the tooltip and the reading on blur', () => {
+      mountChart()
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('exist')
+      plot().blur()
+      cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      cy.get('[role="status"]').should('have.text', '')
+    })
+
+    // Nothing to walk, so the plot drops out of the tab order rather than
+    // taking a stop that does nothing.
+    it('takes no tab stop with nothing drawn', () => {
+      mountChart({ data: [] })
+      plot().should('not.have.attr', 'tabindex')
     })
   })
 

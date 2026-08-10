@@ -166,6 +166,42 @@ describe('NumberCard', () => {
       cy.get('#own').should('exist')
       cy.get('.animate-pulse').should('not.exist')
     })
+
+    it('takes an app’s own line in place of “No data”', () => {
+      mountCard({ value: null }, { empty: () => h('span', 'Nothing yet') })
+
+      card().should('contain.text', 'Nothing yet').and('not.contain.text', '—')
+    })
+  })
+
+  // The card has no plot, so it has no tooltip slot; these are the other two it
+  // forwards outside the states.
+  describe('slots', () => {
+    it('puts an app’s controls beside the title', () => {
+      mountCard({}, { actions: () => h('button', 'Week') })
+      card().should('contain.text', 'Week').and('contain.text', '12,300')
+    })
+
+    it('replaces the delta caption with the app’s own', () => {
+      mountCard(
+        { delta: 12.5, deltaSuffix: '%', deltaCaption: 'vs last month' },
+        {
+          caption: ({ caption }: any) => h('button', `${caption} ▾`),
+        } as any,
+      )
+
+      card()
+        .should('contain.text', 'vs last month ▾')
+        // The delta itself is the card's, not the slot's.
+        .and('contain.text', '12.5%')
+    })
+
+    // The row is drawn for the slot alone: a card with no delta and no caption
+    // still has somewhere to put a period picker.
+    it('opens the caption row for a card with no delta', () => {
+      mountCard({}, { caption: () => h('span', 'Rolling 7 days') })
+      card().should('contain.text', 'Rolling 7 days')
+    })
   })
 
   describe('color', () => {
