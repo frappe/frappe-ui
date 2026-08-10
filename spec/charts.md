@@ -101,7 +101,16 @@ between them — the `palette` prop, `ChartPalette`, `paletteColors` — never a
 ramp itself.
 
 The slot vocabulary is P6's: `actions`, `loading`, `error` and `empty` come from
-the shared list, and the family adds two region slots for parts only a chart
-has, `legend` and `tooltip`. `ChartLegend` emits behavior names per P1:
+the shared list, and the family adds four slots for parts only a chart has.
+`legend` and `tooltip` are regions of the chrome, on the container and on every
+plot that draws one. The other two belong to one component each, because only
+one component has the part:
+
+- `center` on `DonutChart` — the readout in the hole of the ring, which reads
+  the total until a slice is hovered.
+- `caption` on `NumberCard` — the line beside the delta, so an app whose reader
+  can change the comparison period puts its own control there.
+
+`ChartLegend` emits behavior names per P1:
 `change` when an entry flips a series' visibility, `highlight` when the
 highlighted series changes (`null` clears it) — not `toggle` or `hover`.
