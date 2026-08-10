@@ -4,16 +4,21 @@ import type {
   NodeType,
   Schema,
 } from '@tiptap/pm/model'
-import { Plugin, PluginKey, type Transaction } from '@tiptap/pm/state'
+import {
+  Plugin,
+  PluginKey,
+  type EditorState,
+  type Transaction,
+} from '@tiptap/pm/state'
 import { canJoin } from '@tiptap/pm/transform'
+
+const listTypeCache = new WeakMap<Schema, Set<NodeType>>()
 
 /**
  * Every list node TipTap ships declares `group: 'block list'`, so reading the
  * group covers a consumer's own list node too, with no list of names to keep
  * in sync.
  */
-const listTypeCache = new WeakMap<Schema, Set<NodeType>>()
-
 function listTypesIn(schema: Schema): Set<NodeType> {
   // A schema is fixed for the life of an editor, so resolve it once instead of
   // on every doc-changing transaction.
@@ -85,6 +90,37 @@ function joinAdjacentListsIn(tr: Transaction, schema: Schema): boolean {
   const positions = joinablePositions(tr.doc, schema)
   for (const pos of positions) tr.join(pos)
   return positions.length > 0
+}
+
+/**
+ * Whether these transactions carry a remote collaboration update.
+ *
+ * Collaboration is a consumer-supplied extension (`@tiptap/extension-collaboration`
+ * brings y-prosemirror), so its plugin key cannot be imported here. Find it on
+ * the live state instead: y-prosemirror tags every remote application with the
+ * meta of its `y-sync` plugin.
+ */
+function isRemoteChange(
+  transactions: readonly Transaction[],
+  state: EditorState,
+): boolean {
+  const syncKey = state.plugins.find((plugin) =>
+    ((plugin.spec.key as PluginKey | undefined)?.key ?? '').startsWith(
+      'y-sync',
+    ),
+  )?.spec.key as PluginKey | undefined
+  if (!syncKey) return false
+  return transactions.some((transaction) => {
+    if (transaction.getMeta(syncKey)) return true
+    // Another plugin appending to the same dispatch (TrailingNode does, on any
+    // structural change) produces a transaction that carries no sync meta of
+    // its own. ProseMirror tags it with the root transaction that caused it,
+    // so ask that one — otherwise the guard would depend on plugin order.
+    const root = transaction.getMeta('appendedTransaction') as
+      | Transaction
+      | undefined
+    return Boolean(root?.getMeta(syncKey))
+  })
 }
 
 declare module '@tiptap/core' {
@@ -167,6 +203,12 @@ export const ListJoin = Extension.create({
           if (!transactions.some((transaction) => transaction.docChanged)) {
             return null
           }
+          // A remote peer's edit arrives as a local transaction. That peer runs
+          // this same plugin, and its join replicates on its own — joining here
+          // as well means two peers moving the same nodes concurrently, which
+          // is a duplicate-content shape rather than a converging one.
+          if (isRemoteChange(transactions, newState)) return null
+
           const tr = newState.tr
           return joinAdjacentListsIn(tr, newState.schema) ? tr : null
         },

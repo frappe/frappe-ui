@@ -2,12 +2,19 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest'
-import { Editor } from '@tiptap/core'
+import { Editor, Extension } from '@tiptap/core'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { OrderedList } from '@tiptap/extension-list'
 import { ref, nextTick, createApp, defineComponent } from 'vue'
 import { RichTextKit } from '../../kits'
 import { StarterKit } from '../../extensions'
 import { useEditor } from '../../useEditor'
+import { ListJoin } from './list-join'
+
+const listItemJSON = (text: string) => ({
+  type: 'listItem',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+})
 
 /** Mount `useEditor` the way a consumer does, without rendering EditorContent. */
 function mountUseEditor(
@@ -220,6 +227,46 @@ describe('ListJoin', () => {
     // external content write, would push an empty transaction at consumers.
     mountUseEditor(ref('<ol><li><p>a</p></li></ol>'), { onTransaction })
     expect(onTransaction).not.toHaveBeenCalled()
+  })
+
+  it('leaves a remote collaboration change to the peer that made it', () => {
+    // Stand-in for y-prosemirror's plugin: the real one is pulled in by a
+    // consumer's Collaboration extension, so it cannot be imported here.
+    const ySyncKey = new PluginKey('y-sync')
+    const YSync = Extension.create({
+      name: 'ySyncStandIn',
+      addProseMirrorPlugins: () => [new Plugin({ key: ySyncKey })],
+    })
+    const editor = new Editor({
+      extensions: [StarterKit.configure({ listJoin: false }), ListJoin, YSync],
+      content: '<p>x</p>',
+    })
+
+    // Apply a split-list document the way a remote peer's update arrives.
+    const remote = editor.state.tr
+    remote.replaceWith(
+      0,
+      editor.state.doc.content.size,
+      editor.schema.nodeFromJSON({
+        type: 'doc',
+        content: [
+          { type: 'orderedList', content: [listItemJSON('a')] },
+          { type: 'orderedList', content: [listItemJSON('b')] },
+        ],
+      }).content,
+    )
+    editor.view.dispatch(remote.setMeta(ySyncKey, { isChangeOrigin: true }))
+
+    // Untouched: that peer's own join replicates on its own.
+    expect(
+      editor.getJSON().content!.filter((n) => n.type === 'orderedList'),
+    ).toHaveLength(2)
+
+    // A local edit still joins.
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'z')
+    expect(
+      editor.getJSON().content!.filter((n) => n.type === 'orderedList'),
+    ).toHaveLength(1)
   })
 
   it('can be turned off through the kit', () => {
