@@ -56,7 +56,9 @@
  * no weight merges. Like the color migration, there is no sentinel that can
  * tell whether the shift already ran (`ink-red-5` is a valid name on both
  * sides), so --ink-shift MUST run exactly once per codebase — a second run
- * would double-shift. Old `ink-<family>-1` (the neutral-white step) has no
+ * would double-shift. A real run writes a `.tokens-v2-ink-shift` marker file
+ * in the working directory and refuses to run again while it exists.
+ * Old `ink-<family>-1` (the neutral-white step) has no
  * automatic destination (the new `-1` is a light tint, not white); it is
  * flagged for manual attention, never rewritten.
  */
@@ -371,6 +373,25 @@ export const INK_SHIFT_FLAGGED_TOKENS = CHROMATIC_INK_FAMILIES.map(
   (f) => `ink-${f}-1`,
 )
 
+// `ink-red-5` is a valid name before and after the shift, so file content
+// cannot reveal a prior run. A marker file in the working directory is the
+// only guard against a silent double-shift.
+export const INK_SHIFT_MARKER = '.tokens-v2-ink-shift'
+
+export function readInkShiftMarker(dir) {
+  const file = path.join(dir, INK_SHIFT_MARKER)
+  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null
+}
+
+export function writeInkShiftMarker(dir) {
+  fs.writeFileSync(
+    path.join(dir, INK_SHIFT_MARKER),
+    `The ink scale shift (tokens-v2 --ink-shift, #1016) ran here on ${new Date().toISOString()}.\n` +
+      'A second run would double-shift every chromatic ink token.\n' +
+      'Delete this file only to re-run the shift on purpose.\n',
+  )
+}
+
 function prefix(category, renames) {
   return Object.fromEntries(
     Object.entries(renames).map(([from, to]) => [
@@ -633,8 +654,20 @@ function main() {
   const { pre, post, likelyMigrated } = detectMigrationState(files)
   const mode = getMigrationMode({ likelyMigrated }, { force, radiusOnly, inkShift })
   if (mode === 'ink-shift') {
-    console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
-    console.warn('   There is no sentinel to detect a prior run — a second run double-shifts.\n')
+    const marker = readInkShiftMarker(process.cwd())
+    if (marker !== null && !dryRun) {
+      console.error(`\n✗  ${INK_SHIFT_MARKER} found: --ink-shift already ran in this directory.`)
+      console.error('   A second run would double-shift every chromatic ink token.')
+      console.error(`   Delete ${INK_SHIFT_MARKER} only to re-run the shift on purpose.\n`)
+      process.exit(1)
+    }
+    if (marker !== null) {
+      console.warn(`\n⚠  ${INK_SHIFT_MARKER} found: --ink-shift already ran here.`)
+      console.warn('   A real run would double-shift and will refuse to start.\n')
+    } else {
+      console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
+      console.warn(`   A ${INK_SHIFT_MARKER} marker file will record this run.\n`)
+    }
   }
   if (likelyMigrated && !radiusOnly && !inkShift) {
     console.warn('\n⚠  This codebase looks already or partially migrated to espresso v2.')
@@ -690,6 +723,11 @@ function main() {
     for (const f of allFlagged) {
       console.log(`  ${f.file}:L${f.line}  ${f.token}`)
     }
+  }
+
+  if (mode === 'ink-shift' && !dryRun) {
+    writeInkShiftMarker(process.cwd())
+    console.log(`\nWrote ${INK_SHIFT_MARKER} — it blocks an accidental second run.`)
   }
 }
 

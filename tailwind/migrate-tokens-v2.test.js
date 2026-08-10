@@ -5,7 +5,10 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   detectMigrationState,
   getMigrationMode,
+  INK_SHIFT_MARKER,
   migrateTokens,
+  readInkShiftMarker,
+  writeInkShiftMarker,
 } from './migrate-tokens-v2.js'
 
 const tempDirs = []
@@ -245,6 +248,16 @@ describe('tokens v2 migration', () => {
     expect(result.migrated).toBe(input)
     expect(result.merges).toEqual([])
     expect(result.flagged).toEqual([])
+  })
+
+  it('ink-shift marker round-trips: absent, written, read back', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tokens-v2-'))
+    tempDirs.push(dir)
+
+    expect(readInkShiftMarker(dir)).toBe(null)
+    writeInkShiftMarker(dir)
+    expect(fs.existsSync(path.join(dir, INK_SHIFT_MARKER))).toBe(true)
+    expect(readInkShiftMarker(dir)).toContain('double-shift')
   })
 
   it('getMigrationMode selects ink-shift regardless of migration state', () => {
