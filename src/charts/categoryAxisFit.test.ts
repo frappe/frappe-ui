@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
-import { estimateTextWidth } from './format'
+import { estimateTextWidth, formatValue } from './format'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
@@ -26,8 +26,23 @@ const tokens: ChartTokens = {
 
 /** The plot width every case measures against, unless it says otherwise. */
 const WIDTH = 600
-/** `width - 2 * EDGE_PAD - VALUE_AXIS_RESERVE`: the room the categories share. */
-const PLOT = WIDTH - 4 - 44
+/** The value every row carries, which is what the value axis has to print. */
+const VALUE = 1
+/** What one value axis takes: the widest tick it prints, and its margin. */
+const valueAxis = (...ends: number[]) =>
+  Math.ceil(
+    Math.max(
+      ...ends.map((end) =>
+        estimateTextWidth(formatValue(end, 1, true), AXIS_LABEL_FONT_SIZE),
+      ),
+    ),
+  ) + 8
+/**
+ * `width - 2 * EDGE_PAD - the value axis`: the room the categories share. Every
+ * case plots the same one-digit value, so the column it prints is one number
+ * here rather than a term in each expectation.
+ */
+const PLOT = WIDTH - 4 - valueAxis(VALUE)
 /** Clear air a flat label keeps either side of it. */
 const GAP = 8
 
@@ -40,7 +55,7 @@ function build(
   const width = measured ?? undefined
   const config: AxisChartConfig = {
     type: 'bar',
-    data: categories.map((month, i) => ({ month, sales: i })),
+    data: categories.map((month) => ({ month, sales: VALUE })),
     xAxis: { key: 'month', type: 'category' },
     series: [{ name: 'sales' }],
     ...overrides,
@@ -110,12 +125,14 @@ describe('crowded category labels', () => {
     expect(labelsOf(build(repeat(8, 20), { dir: 'rtl' })).rotate).toBe(-45)
   })
 
-  it('shortens the cap as the categories crowd in', () => {
+  it('keeps the whole tilt budget however crowded the axis is', () => {
     const crowded = labelsOf(build(repeat(60, 16)))
     expect(crowded.rotate).toBe(45)
-    // The room beside the leading tick is its half slot plus the column the
-    // value axis holds open, and at 60 categories that half slot is nothing.
-    expect(crowded.width).toBe(58)
+    // Two tilted labels run parallel, so a long one reaches further down rather
+    // than into its neighbour, and echarts holds open the room the leading one
+    // needs past the plot. Crowding costs the axis nothing it could have said.
+    expect(crowded.width).toBe(88)
+    expect(labelsOf(build(repeat(8, 20))).width).toBe(88)
     // Whatever still collides at that spacing is thinned out, as before.
     expect(crowded.hideOverlap).toBe(true)
     expect(crowded.showMaxLabel).toBe(true)
@@ -131,9 +148,9 @@ describe('long category labels with room around them', () => {
   it('shortens them where they stand rather than tilting the axis', () => {
     const axisLabel = labelsOf(build(repeat(3, 40)))
     expect(axisLabel.rotate).toBeUndefined()
-    // A slot of its own is worth more than a diagonal: 176px of text flat
+    // A slot of its own is worth more than a diagonal: 185px of text flat
     // against the 88px a tilted label could carry.
-    expect(axisLabel.width).toBe(176)
+    expect(axisLabel.width).toBe(185)
     expect(axisLabel.formatter(label(40))).toMatch(/^n+…n+$/)
   })
 
@@ -157,7 +174,7 @@ describe('the slot a label is measured against', () => {
   it('gives a bar chart one slot per category', () => {
     const chars = widestFlat(PLOT / 4)
     expect(labelsOf(build(repeat(4, chars))).width).toBeUndefined()
-    expect(labelsOf(build(repeat(4, chars + 1))).width).toBe(130)
+    expect(labelsOf(build(repeat(4, chars + 1))).width).toBe(137)
   })
 
   it('measures a line chart between its ticks, there being no slot', () => {
@@ -166,16 +183,37 @@ describe('the slot a label is measured against', () => {
     const line = { type: 'line' as const }
     const chars = widestFlat(PLOT / 3)
     expect(labelsOf(build(repeat(4, chars), line)).width).toBeUndefined()
-    expect(labelsOf(build(repeat(4, chars))).width).toBe(130)
+    expect(labelsOf(build(repeat(4, chars))).width).toBe(137)
   })
 
   it('takes a second value axis out of the room first', () => {
     const dual = {
       series: [{ name: 'sales' }, { name: 'rate', axis: 'y2' as const }],
     }
+    // Long enough to be capped either way, so the two caps are the comparison.
+    const long = repeat(4, 60)
+    const one = labelsOf(build(long)).width
+    const two = labelsOf(build(long, dual)).width
+    expect(one).toBe(Math.floor(PLOT / 4 - GAP))
+    expect(two).toBe(
+      Math.floor((WIDTH - 4 - valueAxis(VALUE) - valueAxis(0)) / 4 - GAP),
+    )
+    expect(two).toBeLessThan(one)
+  })
+
+  it('reads the value axis off the numbers it will print', () => {
+    // Millions print a wider tick than single digits, and the categories divide
+    // up what is left — so the same labels have less room beside the larger
+    // series. A constant would have read both charts the same.
     const chars = widestFlat(PLOT / 4)
     expect(labelsOf(build(repeat(4, chars))).width).toBeUndefined()
-    expect(labelsOf(build(repeat(4, chars), dual)).width).toBe(119)
+
+    const millions = {
+      data: repeat(4, chars).map((month) => ({ month, sales: 12_345_678 })),
+    }
+    expect(labelsOf(build(repeat(4, chars), millions)).width).toBe(
+      Math.floor((WIDTH - 4 - valueAxis(0, 12_345_678)) / 4 - GAP),
+    )
   })
 
   it('measures the label the caller formats, not the raw value', () => {
@@ -247,6 +285,8 @@ describe('category labels measured without a DOM', () => {
     ).toBeGreaterThan(slot)
 
     expect(labelsOf(build(repeat(5, chars))).width).toBeUndefined()
-    expect(labelsOf(build(repeat(5, chars + 1))).width).toBe(102)
+    expect(labelsOf(build(repeat(5, chars + 1))).width).toBe(
+      Math.floor(slot - GAP),
+    )
   })
 })

@@ -54,22 +54,14 @@ const TILT_SIN = Math.sin((TILT_ANGLE * Math.PI) / 180)
 /** Clear air either side of a flat label, under which two of them read as one. */
 const CATEGORY_LABEL_GAP = 8
 /**
- * How far past its tick a tilted label may reach. It is one number for two
- * budgets, because at 45° a label reaches exactly as far below its tick as it
- * does to the side: the plot keeps its height (the grid reserves this much for
- * the labels) and the leading label stays inside the canvas.
+ * How far below its tick a tilted label may reach, which is how much plot height
+ * the axis is allowed to spend on saying more.
  */
 const TILTED_LABEL_EXTENT = 72
 /** A label's own line box, which turns into reach of its own once rotated. */
 const LABEL_LINE_HEIGHT = 13
-/**
- * What one value axis takes out of the chart before the categories divide up
- * what is left: a compact tick — `1.2M`, `450` — and its `axisLabel.margin`.
- * The ticks are echarts' to pick, so this is an estimate, and it rounds up:
- * reading the plot wider than it is would leave labels flat that do not fit,
- * which is the failure the measuring is here to prevent.
- */
-const VALUE_AXIS_RESERVE = 44
+/** The gap every axis here keeps between a label and the plot. */
+const AXIS_LABEL_MARGIN = 8
 
 const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 
@@ -287,7 +279,7 @@ export function buildXAxis(
       // neighbour instead. Not for time axes: their end is a round tick, not a
       // datapoint, so labelling it says nothing about where the series stops.
       ...(type === 'category' ? { showMaxLabel: true } : {}),
-      margin: 8,
+      margin: AXIS_LABEL_MARGIN,
       color: tokens.axisLabel,
       fontSize: AXIS_LABEL_FONT_SIZE,
       // The formatter does the shortening (echarts only ellipsises the end),
@@ -394,7 +386,7 @@ function categoryLabelFit(
     return { rotate: 0 }
 
   const flat = Math.floor(slot - CATEGORY_LABEL_GAP)
-  const tilted = tiltedLabelWidth(slot)
+  const tilted = tiltedLabelWidth()
   if (flat >= tilted) return { rotate: 0, labelWidth: flat }
 
   return {
@@ -419,8 +411,7 @@ function categorySlotWidth(
 ) {
   if (!opts.width) return undefined
 
-  const valueAxes = hasSecondaryValueAxis(config) ? 2 : 1
-  const plot = opts.width - 2 * EDGE_PAD - valueAxes * VALUE_AXIS_RESERVE
+  const plot = opts.width - 2 * EDGE_PAD - valueAxisReserve(config)
   // `boundaryGap` gives every category a slot of its own to sit in the middle
   // of; without it they sit on the dividers, so what has to hold a label is
   // the distance between two ticks.
@@ -461,17 +452,73 @@ function fitsFlat(
 }
 
 /**
- * How much text a tilted label may carry: whichever is smaller of the standing
- * budget and the room beside the leading tick, which is its half slot plus the
- * column the value axis holds open. Both bound the same diagonal, so one
- * division converts either of them into a width.
+ * How much text a tilted label may carry: the standing budget, turned into a
+ * width along the diagonal it runs on.
+ *
+ * A second bound used to shorten it on a crowded axis — the room beside the
+ * leading tick, so that one label would not overhang the canvas. echarts holds
+ * that room open itself now (see `buildAxisGrid`), and length is all a tilted
+ * label costs: two of them run parallel, so a long one reaches further down
+ * rather than into its neighbour. Crowding no longer decides what a tilt can
+ * say, which is why this takes no slot.
  */
-function tiltedLabelWidth(slot: number) {
-  const reach = Math.min(
-    TILTED_LABEL_EXTENT,
-    EDGE_PAD + VALUE_AXIS_RESERVE + slot / 2,
+function tiltedLabelWidth() {
+  return Math.floor(
+    (TILTED_LABEL_EXTENT - LABEL_LINE_HEIGHT * TILT_SIN) / TILT_SIN,
   )
-  return Math.floor((reach - LABEL_LINE_HEIGHT * TILT_SIN) / TILT_SIN)
+}
+
+/**
+ * What the value axes take out of the width before the categories divide up
+ * what is left: the widest tick each of them prints, and its margin.
+ *
+ * The ticks are echarts' to pick, so this prints the ends of the scale the way
+ * the axis will and measures those. `formatValue` compresses a magnitude to a
+ * few characters — `1.2M`, `450` — so a round tick between two ends is no wider
+ * than the wider end. What is left is a layout decision and nothing more:
+ * echarts reserves the room the labels actually need, so a few pixels out here
+ * costs a tilt that could have stayed flat, never a clipped label.
+ */
+function valueAxisReserve(config: AxisChartBaseConfig): number {
+  if (!hasSecondaryValueAxis(config))
+    return tickColumnWidth(config, config.series, config.yAxis)
+
+  const onY2 = (series: AxisChartSeriesConfig) => series.axis === 'y2'
+  return (
+    tickColumnWidth(config, config.series.filter((s) => !onY2(s)), config.yAxis) +
+    tickColumnWidth(config, config.series.filter(onY2), config.y2Axis)
+  )
+}
+
+/** The widest tick one value axis prints, from what it is asked to plot. */
+function tickColumnWidth(
+  config: AxisChartBaseConfig,
+  series: AxisChartSeriesConfig[],
+  axisConfig: ChartYAxisConfig | undefined,
+): number {
+  let low = Infinity
+  let high = -Infinity
+  for (const row of config.data ?? []) {
+    for (const one of series) {
+      const value = toNumber(row[one.name])
+      if (value === null) continue
+      if (value < low) low = value
+      if (value > high) high = value
+    }
+  }
+
+  // An axis told where to start or stop prints ticks between those, whatever the
+  // rows hold. An axis with nothing numeric to plot still draws, and prints 0.
+  const ends = [
+    axisConfig?.min ?? (low === Infinity ? 0 : low),
+    axisConfig?.max ?? (high === -Infinity ? 0 : high),
+  ]
+  const widest = Math.max(
+    ...ends.map((value) =>
+      estimateTextWidth(formatValue(value, 1, true), AXIS_LABEL_FONT_SIZE),
+    ),
+  )
+  return Math.ceil(widest) + AXIS_LABEL_MARGIN
 }
 
 function categoryLabelWidth(width?: number) {
@@ -567,7 +614,7 @@ export function buildValueAxis(
       // A value axis is read by its extremes, so the top (or right-hand) end of
       // the scale keeps its label even in a short plot.
       showMaxLabel: true,
-      margin: 8,
+      margin: AXIS_LABEL_MARGIN,
       color: tokens.axisLabel,
       fontSize: AXIS_LABEL_FONT_SIZE,
       formatter: (value: number) => formatValue(value, 1, true),
