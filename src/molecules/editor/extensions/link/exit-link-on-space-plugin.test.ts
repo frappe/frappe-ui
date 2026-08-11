@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest'
-import { Editor, type Extensions } from '@tiptap/core'
+import { Editor, Extension, type Extensions } from '@tiptap/core'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -184,6 +185,28 @@ describe('exitLinkOnSpacePlugin', () => {
     )
   })
 
+  it('leaves a remote collaboration change to the peer that made it', () => {
+    // Stand-in for y-prosemirror's plugin: the real one is pulled in by a
+    // consumer's Collaboration extension, so it cannot be imported here.
+    const ySyncKey = new PluginKey('y-sync')
+    const YSync = Extension.create({
+      name: 'ySyncStandIn',
+      addProseMirrorPlugins: () => [new Plugin({ key: ySyncKey })],
+    })
+    const editor = editorWith(
+      '<p>see <a href="https://example.com">docs</a></p>',
+      [YSync],
+    )
+    cursorAtLinkEnd(editor, 'docs')
+
+    // That peer runs this same plugin; its result replicates on its own.
+    editor.view.dispatch(editor.state.tr.insertText(' ').setMeta(ySyncKey, {}))
+
+    expect(inlineHTML(editor)).toBe(
+      'see <a href="https://example.com">docs </a>',
+    )
+  })
+
   it('undoes the space and the mark change as one step', () => {
     const editor = editorWith(
       '<p>see <a href="https://example.com">docs</a></p>',
@@ -200,6 +223,9 @@ describe('exitLinkOnSpacePlugin', () => {
   })
 
   it('stays out of the way when the editor is not editable', () => {
+    // A read-only user cannot type, so this drives the guard through
+    // `view.dispatch` instead: it pins the guard rather than the user path,
+    // which matters for a programmatic write into a read-only editor.
     const editor = editorWith('<p><a href="https://example.com">docs</a></p>')
     editor.setEditable(false)
     cursorAtLinkEnd(editor, 'docs')

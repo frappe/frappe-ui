@@ -6,6 +6,7 @@ import {
 } from '@tiptap/core'
 import type { MarkType, ResolvedPos } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { isRemoteChange } from '#molecules/editor/extensions/shared/collaboration'
 
 /**
  * Options for {@link exitLinkOnSpacePlugin}.
@@ -45,6 +46,13 @@ export function exitLinkOnSpacePlugin(
       }
 
       if (!transactions.some((transaction) => transaction.docChanged)) {
+        return null
+      }
+
+      // A remote peer's space is that peer's link to end: it runs this same
+      // plugin and the result replicates. Ending it here too would push a local
+      // rewrite into their typing.
+      if (isRemoteChange(transactions, newState)) {
         return null
       }
 
