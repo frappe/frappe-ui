@@ -2,10 +2,11 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest'
-import { Editor } from '@tiptap/core'
+import { Editor, type Extensions } from '@tiptap/core'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
+import { UndoRedo } from '@tiptap/extensions'
 import { LinkExtension } from './link-extension'
 
 const openEditors: Editor[] = []
@@ -15,9 +16,9 @@ afterEach(() => {
   while (openEditors.length) openEditors.pop()?.destroy()
 })
 
-function editorWith(content: string) {
+function editorWith(content: string, extensions: Extensions = []) {
   const editor = new Editor({
-    extensions: [Document, Paragraph, Text, LinkExtension],
+    extensions: [Document, Paragraph, Text, LinkExtension, ...extensions],
     content,
   })
   openEditors.push(editor)
@@ -132,6 +133,69 @@ describe('exitLinkOnSpacePlugin', () => {
 
     expect(inlineHTML(editor)).toBe(
       'see <a href="https://example.com/a">https://example.com/a</a> then',
+    )
+  })
+
+  it('leaves a trailing space outside a link applied over it', () => {
+    // A mark-only change: no text moves, so the plugin has to read the changed
+    // range off the AddMarkStep itself.
+    const editor = editorWith('<p>see docs tail</p>')
+
+    editor
+      .chain()
+      .setTextSelection({ from: 5, to: 10 }) // "docs "
+      .setLink({ href: 'https://example.com' })
+      .setTextSelection(10)
+      .run()
+
+    expect(inlineHTML(editor)).toBe(
+      'see <a href="https://example.com">docs</a> tail',
+    )
+  })
+
+  it('keeps a link whose text is only whitespace', () => {
+    // Ending the link would delete it outright, which is not this plugin's job.
+    const editor = editorWith('<p>a b</p>')
+
+    editor
+      .chain()
+      .setTextSelection({ from: 2, to: 3 })
+      .setLink({ href: 'https://example.com' })
+      .setTextSelection(3)
+      .run()
+
+    expect(inlineHTML(editor)).toBe('a<a href="https://example.com"> </a>b')
+  })
+
+  it('ignores a change made elsewhere in the document', () => {
+    // A collaborator's keystroke (or an undo) must not rewrite marks the user
+    // never touched, even with the cursor resting after an already-linked space.
+    const editor = editorWith(
+      '<p>see <a href="https://example.com">docs </a>tail</p>',
+    )
+    editor.commands.setTextSelection(10) // just after the linked space
+
+    const tr = editor.state.tr.insertText('Z', 1, 1)
+    tr.setSelection(editor.state.selection.map(tr.doc, tr.mapping))
+    editor.view.dispatch(tr)
+
+    expect(inlineHTML(editor)).toBe(
+      'Zsee <a href="https://example.com">docs </a>tail',
+    )
+  })
+
+  it('undoes the space and the mark change as one step', () => {
+    const editor = editorWith(
+      '<p>see <a href="https://example.com">docs</a></p>',
+      [UndoRedo],
+    )
+    cursorAtLinkEnd(editor, 'docs')
+    type(editor, ' ')
+
+    editor.commands.undo()
+
+    expect(inlineHTML(editor)).toBe(
+      'see <a href="https://example.com">docs</a>',
     )
   })
 

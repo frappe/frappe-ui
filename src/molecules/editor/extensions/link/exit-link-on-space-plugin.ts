@@ -1,4 +1,9 @@
-import type { Editor } from '@tiptap/core'
+import {
+  combineTransactionSteps,
+  getChangedRanges,
+  getMarkRange,
+  type Editor,
+} from '@tiptap/core'
 import type { MarkType, ResolvedPos } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 
@@ -34,7 +39,7 @@ export function exitLinkOnSpacePlugin(
 ): Plugin {
   return new Plugin({
     key: new PluginKey('exitLinkOnSpace'),
-    appendTransaction: (transactions, _oldState, newState) => {
+    appendTransaction: (transactions, oldState, newState) => {
       if (!options.editor.isEditable) {
         return null
       }
@@ -51,6 +56,21 @@ export function exitLinkOnSpacePlugin(
 
       const range = linkedTrailingSpace(selection.$from, options.type)
       if (!range) {
+        return null
+      }
+
+      // The whitespace has to be part of what just changed. Otherwise an edit
+      // anywhere else — a collaborator's keystroke, an undo — would rewrite
+      // marks the user never touched, just because the cursor happened to be
+      // resting after an already-linked space.
+      const changes = getChangedRanges(
+        combineTransactionSteps(oldState.doc, [...transactions]),
+      )
+      const justWritten = changes.some(
+        ({ newRange }) =>
+          newRange.to >= range.from && newRange.from <= range.to,
+      )
+      if (!justWritten) {
         return null
       }
 
@@ -90,5 +110,13 @@ function linkedTrailingSpace(
     return null
   }
 
-  return { from: $pos.pos - trailing, to: $pos.pos }
+  const from = $pos.pos - trailing
+  const linkRange = getMarkRange($pos, type)
+  if (linkRange && from <= linkRange.from) {
+    // The link is whitespace all the way down, so ending it here would delete
+    // it outright. Ending a link is this plugin's job; removing one is not.
+    return null
+  }
+
+  return { from, to: $pos.pos }
 }
