@@ -42,6 +42,17 @@ right beside the volume and fullscreen buttons. The controls previously used
 `ink-*` color tokens, which flip with the theme and dimmed them into the video
 in dark mode; they now use the fixed white scale in both themes.
 
+### Editor — media toolbar matches the design's button style
+
+The actions over a selected image, video, or embed shared one 65%-black pill
+with icons dimmed to 60% white. Each action is now its own 28px button on the
+`black-overlay-300` fill the design specifies, `rounded-4`, with a full-white
+16px icon, 4px apart and 10px in from the media's top-right corner. The caption
+toggle keeps its visible label — it is the only clue that media can be
+captioned — in the same button style. The resize grip moved to the same
+`black-overlay` / `white-overlay` tokens it was approximating with raw
+`black/65` and `white/50`.
+
 ### Editor — fullscreen video fills the screen (fix)
 
 Fullscreen stretched the container to the viewport, but the video kept its

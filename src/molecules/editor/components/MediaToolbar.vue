@@ -12,6 +12,22 @@ const props = defineProps<{
   showCaption: boolean
 }>()
 
+/**
+ * Media chrome buttons, per the design (espresso-2.0, node 31403-45433): each
+ * action is its OWN 28px button — `black-overlay-300` (the 36% black the frame
+ * specifies), `rounded-4` (8px), a 16px white icon — spaced 4px apart, 10px in
+ * from the media's top-right corner. They used to share one 65%-black pill,
+ * which drew a single slab over the picture and dimmed its icons to 60% white.
+ *
+ * Fixed white/black scales rather than `ink-*` / `surface-*` tokens: the row is
+ * painted over the media, so it holds one appearance in both themes.
+ */
+const BUTTON =
+  'flex h-7 items-center justify-center rounded-4 text-white transition-colors'
+/** Resting / hover / pressed fills follow the design's subtle-button ramp. */
+const REST = 'bg-black-overlay-300 hover:bg-black-overlay-400'
+const PRESSED = 'bg-black-overlay-500 hover:bg-black-overlay-500'
+
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
   (e: 'set-align', align: MediaAlign): void
@@ -79,16 +95,16 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="absolute top-2 right-2 z-20 max-w-[calc(100%-1rem)] flex-wrap justify-end items-center bg-black/65 px-1.5 py-1 gap-2 rounded-4"
+    class="absolute top-2.5 right-2.5 z-20 max-w-[calc(100%-1.25rem)] flex-wrap items-center justify-end gap-1"
     :class="isVisible ? 'flex' : 'hidden'"
   >
     <!-- The caption toggle carries a visible word, not just an icon: it is the
-         only way to discover that images can be captioned at all. -->
-    <Tooltip :text="captionLabel" class="h-5">
+         only way to discover that images can be captioned at all. It keeps the
+         button style and takes the width the label needs. -->
+    <Tooltip :text="captionLabel" class="flex h-7">
       <button
         type="button"
-        class="flex items-center gap-1 text-p-xs hover:text-white"
-        :class="showCaption ? 'text-white' : 'text-white/60'"
+        :class="[BUTTON, showCaption ? PRESSED : REST, 'gap-1 px-2 text-p-xs']"
         :aria-label="captionLabel"
         :aria-pressed="showCaption"
         @click.stop="emit('toggle-caption')"
@@ -98,14 +114,15 @@ onUnmounted(() => {
       </button>
     </Tooltip>
 
-    <Tooltip :text="replaceLabel" class="h-5">
+    <Tooltip :text="replaceLabel" class="flex h-7">
       <button
         type="button"
+        :class="[BUTTON, REST, 'w-7']"
         :aria-label="replaceLabel"
         @click.stop="emit('replace')"
       >
         <span
-          class="size-4 text-white/60 hover:text-white"
+          class="size-4"
           :class="mediaType === 'embed' ? 'lucide-link' : 'lucide-refresh-cw'"
         />
       </button>
@@ -115,14 +132,15 @@ onUnmounted(() => {
       v-for="align in alignOptions"
       :key="align.value"
       :text="align.label"
-      class="h-5"
+      class="flex h-7"
     >
       <button
         type="button"
-        class="hover:text-white"
-        :class="
-          node.attrs.align === align.value ? 'text-white' : 'text-white/60'
-        "
+        :class="[
+          BUTTON,
+          node.attrs.align === align.value ? PRESSED : REST,
+          'w-7',
+        ]"
         :aria-label="align.label"
         :aria-pressed="node.attrs.align === align.value"
         @click.stop="emit('set-align', align.value)"
@@ -134,8 +152,7 @@ onUnmounted(() => {
     <button
       v-if="isVideo"
       type="button"
-      class="hover:text-white"
-      :class="showVideoOptions ? 'text-white' : 'text-white/60'"
+      :class="[BUTTON, showVideoOptions ? PRESSED : REST, 'w-7']"
       aria-label="Video options"
       @click.stop="toggleVideoOptions"
     >

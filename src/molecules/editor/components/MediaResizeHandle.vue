@@ -45,7 +45,7 @@ const edges = ['left', 'right'] as const
       @keydown="emit('resize-keydown', $event)"
     >
       <span
-        class="pointer-events-none h-full w-1 rounded-full bg-black/65 ring-1 ring-white/50"
+        class="pointer-events-none h-full w-1 rounded-full bg-black-overlay-600 ring-1 ring-white-overlay-500"
       />
     </button>
   </template>
@@ -61,7 +61,7 @@ const edges = ['left', 'right'] as const
     @keydown="emit('resize-keydown', $event)"
   >
     <span
-      class="pointer-events-none flex size-[18px] items-center justify-center rounded-[5px] bg-black/65 text-white ring-1 ring-white/50"
+      class="pointer-events-none flex size-[18px] items-center justify-center rounded-2 bg-black-overlay-600 text-white ring-1 ring-white-overlay-500"
     >
       <span class="lucide-move-diagonal-2 size-3" aria-hidden="true" />
     </span>
