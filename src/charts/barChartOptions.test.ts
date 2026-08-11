@@ -588,7 +588,7 @@ describe('bar chart option escape hatches', () => {
       echartOptions: { grid: { left: 40 }, animation: false },
     })
     expect(option.grid.left).toBe(40)
-    expect(option.grid.containLabel).toBe(true)
+    expect(option.grid.outerBoundsContain).toBe('all')
     expect(option.animation).toBe(false)
   })
 

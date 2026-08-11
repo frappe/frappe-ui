@@ -332,7 +332,7 @@ describe('line chart option escape hatches', () => {
       series: [{ name: 'sales', echartOptions: { symbolSize: 10 } }],
     })
     expect(option.grid.left).toBe(40)
-    expect(option.grid.containLabel).toBe(true)
+    expect(option.grid.outerBoundsContain).toBe('all')
     expect(option.animation).toBe(false)
     expect(option.xAxis.inverse).toBe(true)
     expect(option.yAxis.splitLine.show).toBe(false)

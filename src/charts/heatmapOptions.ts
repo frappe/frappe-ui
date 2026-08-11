@@ -238,7 +238,10 @@ export function buildHeatmapOption(
       bottom: 0,
       left: 0,
       right: 4,
-      containLabel: true,
+      // See `buildAxisGrid`: echarts reserves the room the labels and the axis
+      // names need, on both dimensions, inside the rect above.
+      outerBoundsMode: 'same',
+      outerBoundsContain: 'all',
     },
     xAxis: {
       type: 'category',

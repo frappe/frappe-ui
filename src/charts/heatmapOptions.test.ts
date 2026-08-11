@@ -409,6 +409,6 @@ describe('hoverCellColor', () => {
     const option = build({ echartOptions: { grid: { top: 40 } } })
 
     expect(option.grid.top).toBe(40)
-    expect(option.grid.containLabel).toBe(true)
+    expect(option.grid.outerBoundsContain).toBe('all')
   })
 })
