@@ -134,6 +134,9 @@ function onTrackPointerUp() {
 </script>
 
 <template>
+  <!-- `MediaResizeHandle`'s `raised` offset is derived from this bar's
+       `bottom-2` plus its ~32px height, so the corner grip clears the
+       fullscreen button. Move either and re-check that offset. -->
   <div
     v-if="videoEl && !hidden"
     class="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-4 bg-black/65 px-2 py-1.5 transition-opacity"

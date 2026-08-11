@@ -80,6 +80,25 @@ function onResizeStart(event: PointerEvent): void {
   startResize(event)
 }
 
+function resizeBy(delta: number): void {
+  selectIframe()
+  const current = (props.node.attrs.width as number | null) ?? 640
+  const width = Math.max(MIN_WIDTH, current + delta)
+  const height = Math.round(width * aspectRatio.value)
+  props.updateAttributes({ width, height, aspectRatio: height / width })
+}
+
+// The arrow keys the handle claims must not reach `handleKeydown` on the
+// wrapper, which reads Up/Down as "move the caret out of the node".
+function onResizeKeydown(event: KeyboardEvent): void {
+  const shrink = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+  const grow = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+  if (!shrink && !grow) return
+  event.preventDefault()
+  event.stopPropagation()
+  resizeBy(shrink ? -20 : 20)
+}
+
 function setAlignment(align: IframeAlign): void {
   props.updateAttributes({ align })
 }
@@ -195,6 +214,7 @@ function commitCaption(event: Event): void {
           v-if="selected && isEditable"
           label="Resize embed"
           @resize-start="onResizeStart"
+          @resize-keydown="onResizeKeydown"
         />
 
         <!-- Placeholder while no src is set -->
