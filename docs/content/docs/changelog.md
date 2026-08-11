@@ -42,8 +42,17 @@ right beside the volume and fullscreen buttons. The controls previously used
 `ink-*` color tokens, which flip with the theme and dimmed them into the video
 in dark mode; they now use the fixed white scale in both themes.
 
-No API change for either — the handles and controls are internal to the media
-and iframe node views.
+### Editor — fullscreen video fills the screen (fix)
+
+Fullscreen stretched the container to the viewport, but the video kept its
+committed pixel size: it sat small at the top of the screen with the playback
+bar pinned directly under it and a black slab filling everything below. The
+video is now centered and scaled to fit the screen, the controls run along the
+bottom of it, and the editing chrome — toolbar, resize handles, caption — is
+not rendered in fullscreen, where none of it is actionable.
+
+No API change for any of these — the handles and controls are internal to the
+media and iframe node views.
 
 ### Data fetching (v2) — stale responses no longer write the shared stores (fix)
 

@@ -32,6 +32,11 @@ const props = defineProps<{
   videoEl: HTMLVideoElement | null
   /** Hidden entirely while true (e.g. during a resize drag). */
   hidden?: boolean
+  /**
+   * The media is the fullscreen element: the row spans the screen instead of a
+   * media box, so it drops the rounded corner and takes more breathing room.
+   */
+  fullscreen?: boolean
 }>()
 
 const playing = ref(false)
@@ -165,12 +170,13 @@ function onTrackPointerUp() {
 <template>
   <div
     v-if="videoEl && !hidden"
-    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 rounded-b-4 bg-gradient-to-t from-black/70 via-black/35 to-transparent px-3.5 pt-10 pb-3 text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
-    :class="
+    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 bg-gradient-to-t from-black/70 via-black/35 to-transparent text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
+    :class="[
+      fullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-10 pb-3',
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
-        : 'opacity-100'
-    "
+        : 'opacity-100',
+    ]"
     @click.stop
     @pointerdown.stop
   >

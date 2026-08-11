@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, toRaw } from 'vue'
+import { ref, computed, watch, toRaw, onMounted, onBeforeUnmount } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import Button from '#components/Button/Button.vue'
 import { ErrorMessage } from '#components/ErrorMessage'
@@ -52,6 +52,30 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const isEditable = useNodeViewEditable(editor)
 
 const isVideo = computed(() => props.node.type.name === 'video')
+
+/**
+ * Whether THIS media is the fullscreen element.
+ *
+ * The browser stretches the fullscreen element to the viewport with UA
+ * `!important` rules, but everything inside it kept the committed pixel size:
+ * the video stayed small at the top, its playback bar pinned under it, with a
+ * black slab filling the rest of the screen. In fullscreen the media is
+ * centered in the black field and the controls run along the bottom of the
+ * screen — and the editing chrome (toolbar, resize handles, caption) is not
+ * rendered at all, since none of it is actionable there.
+ */
+const isFullscreen = ref(false)
+
+function syncFullscreen(): void {
+  isFullscreen.value =
+    containerRef.value !== null &&
+    document.fullscreenElement === containerRef.value
+}
+
+onMounted(() => document.addEventListener('fullscreenchange', syncFullscreen))
+onBeforeUnmount(() =>
+  document.removeEventListener('fullscreenchange', syncFullscreen),
+)
 const isUploaded = computed(() => Boolean(props.node.attrs.src))
 const localEntry = computed(() => getLocalFile(props.node.attrs.uploadId))
 const fileContent = computed(() => localEntry.value?.b64)
@@ -94,11 +118,22 @@ const showCaption = computed(() => {
   if (props.node.attrs.caption) return true
   return isEditable.value && isFreshInsert.value
 })
+// The caption belongs to the document, not to the fullscreen viewer, and it
+// would otherwise sit under the video in the black field.
 const showCaptionText = computed(() =>
-  Boolean(!isEditable.value && props.node.attrs.caption && !hasError.value),
+  Boolean(
+    !isEditable.value &&
+    props.node.attrs.caption &&
+    !hasError.value &&
+    !isFullscreen.value,
+  ),
 )
 const showCaptionField = computed(
-  () => isEditable.value && !hasError.value && showCaption.value,
+  () =>
+    isEditable.value &&
+    !hasError.value &&
+    showCaption.value &&
+    !isFullscreen.value,
 )
 
 // Re-sync the input when the caption attr changes elsewhere (collab, undo, a
@@ -275,13 +310,20 @@ function setVideoOptions(options: {
     <div
       ref="containerRef"
       class="group relative isolate overflow-hidden not-prose rounded-4"
-      :class="containerClasses(node.attrs, selected)"
+      :class="
+        isFullscreen
+          ? 'flex items-center justify-center bg-black'
+          : containerClasses(node.attrs, selected)
+      "
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
     >
       <div
         v-if="isUploaded || fileContent || node.attrs.loading"
         class="relative"
+        :class="
+          isFullscreen && 'flex h-full w-full items-center justify-center'
+        "
       >
         <img
           v-if="!isVideo"
@@ -308,7 +350,15 @@ function setVideoOptions(options: {
           v-else-if="isVideo"
           ref="mediaRef"
           class="rounded-4"
-          :class="!isUploaded && 'opacity-40'"
+          :class="[
+            !isUploaded && 'opacity-40',
+            // Fill the screen (aspect preserved) rather than staying at the
+            // committed size the width/height attributes carry. `!outline-none`
+            // drops the selected-node outline from `style.css`, which would
+            // otherwise frame the video mid-screen.
+            isFullscreen &&
+              'size-full rounded-none object-contain !outline-none',
+          ]"
           :src="node.attrs.src || fileContent"
           :width="node.attrs.width"
           :height="node.attrs.height"
@@ -323,10 +373,11 @@ function setVideoOptions(options: {
           v-if="isVideo && isUploaded"
           :video-el="mediaRef as HTMLVideoElement | null"
           :hidden="isResizing"
+          :fullscreen="isFullscreen"
         />
 
         <MediaToolbar
-          v-if="isUploaded"
+          v-if="isUploaded && !isFullscreen"
           :node="node"
           :media-type="isVideo ? 'video' : 'image'"
           :is-editable="isEditable"
@@ -341,7 +392,7 @@ function setVideoOptions(options: {
         <!-- A video's playback bar owns the bottom of the frame, so it keeps
              the edge pills; everything else gets the corner grip. -->
         <MediaResizeHandle
-          v-if="selected && isEditable && isUploaded"
+          v-if="selected && isEditable && isUploaded && !isFullscreen"
           label="Resize media"
           :placement="isVideo ? 'edges' : 'corner'"
           @resize-start="startResizeFromHandle"
