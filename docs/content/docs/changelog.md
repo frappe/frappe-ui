@@ -15,18 +15,20 @@ Two concurrent writes to one document could leave `docStore`, `listStore`
 (and every view bound to them) on the response that settled last instead of
 the newest one, while `data` already held the fresh response (#1017).
 
-The gate lives in the stores. Every request takes a dispatch version; the
-response's store writes carry it, and the stores reject a write for a
-document that a later-dispatched request has already written. One freshness
-domain covers every writer — the `docs` side channel, the `useDoctype` /
-`useList` / `useDoc` hooks, and any mix of instances or paths writing the
-same document. A version is recorded only when a mutating write lands: a
-newer request that failed wrote nothing on the server, so it does not make
-the older success stale, and a read (GET) is admitted on its version but
-records nothing — the server may answer a later reload before an earlier
-save commits, and the save must still land. A delete records a fresh
-version when it settles — a delete is terminal — so no in-flight write or
-reload, whatever its dispatch order, can re-create a deleted document.
+The gate lives in the stores. Every request takes a monotonic sequence
+number when it is dispatched; the response's store writes carry it, and the
+stores reject a write for a document that a later-dispatched request has
+already written. A sequence, not a timestamp — clocks move and two responses
+can share a millisecond. One freshness domain covers every writer — the
+`docs` side channel, the `useDoctype` / `useList` / `useDoc` hooks, and any
+mix of instances or paths writing the same document. A sequence is recorded
+only when a mutating write lands: a newer request that failed wrote nothing
+on the server, so it does not make the older success stale, and a read (GET)
+is admitted on its sequence but records nothing — the server may answer a
+later reload before an earlier save commits, and the save must still land. A
+delete seals the document when it settles — a delete is terminal — so no
+in-flight write or reload, whatever its dispatch order, can re-create a
+deleted document.
 One accepted limitation: the gate orders by dispatch time, so a read
 dispatched after a save, handled by the server before the save committed
 and answered after it, is admitted and republishes the pre-save value —
@@ -36,7 +38,7 @@ resolving that needs server-side sequencing, which this design trades away.
 newer same-key submit of the same instance already outran — the store gate
 protects the stores, this skip only avoids re-running hook side effects
 with a stale response. `useDoc`'s write members and `useNewDoc` skip their
-hooks the same way, but their store writes stay outside that skip: only the
+hooks the same way. No store write is inside any of those skips: only the
 store gate decides them. It compares per document and knows whether the
 newer request landed, so an overtaken insert of a different document still
 lands, and an older success is kept when the newer submit failed.

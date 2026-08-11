@@ -39,15 +39,14 @@ export function useNewDoc<T extends object>(
     },
     immediate: false,
     ...options,
-    // The store write lives here, not in `submit()`'s `.then`: this hook
-    // runs inside `useCall`'s `runWithWriteVersion` window, so the write
-    // carries the POST's dispatch stamp and records. In the `.then` it ran
-    // after the window closed — unversioned, always admitted, never
-    // recording — the one store write outside the gate (#1017). Matters
-    // when the caller supplies `name`: a stale earlier-dispatched response
-    // for the same document must not overwrite the insert.
-    onStoreWrite(created: DocResponse) {
-      docStore.setDoc({ doctype, ...created })
+    // The store write lives here, not in `submit()`'s `.then`: this hook is
+    // handed the POST's stamp, so the write records. In the `.then` there is
+    // no stamp to hand it — it would have to claim `LOCAL_WRITE` and never
+    // record, the one store write outside the gate (#1017). Matters when the
+    // caller supplies `name`: a stale earlier-dispatched response for the
+    // same document must not overwrite the insert.
+    onStoreWrite(created: DocResponse, stamp) {
+      docStore.setDoc({ doctype, ...created }, stamp)
     },
   })
 

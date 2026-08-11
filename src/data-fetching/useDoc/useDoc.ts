@@ -8,6 +8,7 @@ import {
 } from 'vue'
 import { UseFetchOptions, AfterFetchContext } from '@vueuse/core'
 import { getDispatchStamp, useFrappeFetch } from '../useFrappeFetch'
+import { LOCAL_WRITE } from '../writeGate'
 import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
@@ -89,18 +90,18 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
           doctype,
           name: String(ctx.data.data.name),
         }
-        // Versioned with the request's dispatch stamp, so a reload that an
-        // in-between write has overtaken cannot put the older doc back
-        // (#1017). The stamp's `record` is false for this GET: a read is
-        // admitted on its version but must not record — the server may
-        // answer it before an earlier-dispatched save commits, and recording
-        // here would gate that save's response out for good.
-        let stamp = getDispatchStamp(ctx.response)
+        // Stamped with the request's sequence, so a reload that an in-between
+        // write has overtaken cannot put the older doc back (#1017). The
+        // stamp's `record` is false for this GET: a read is admitted on its
+        // sequence but must not record — the server may answer it before an
+        // earlier-dispatched save commits, and recording here would gate that
+        // save's response out for good.
+        let stamp = getDispatchStamp(ctx.response) ?? LOCAL_WRITE
         docStore.setDoc(doc, stamp)
         if (transform) {
           doc = transform(doc)
         }
-        listStore.updateRow(doctype, ctx.data.data, stamp?.version)
+        listStore.updateRow(doctype, ctx.data.data, stamp)
         triggerSuccessCallbacks(doc)
       }
       return ctx
@@ -146,12 +147,12 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     baseUrl,
     immediate: false,
     refetch: false,
-    onStoreWrite(data) {
+    onStoreWrite(data, stamp) {
       // Store the untransformed doc; the `doc` computed applies `transform` on
       // read. Transforming here too would run it twice (a bug for any
       // non-idempotent transform). Mirrors afterFetch.
-      docStore.setDoc({ ...data, doctype })
-      listStore.updateRow(doctype, data)
+      docStore.setDoc({ ...data, doctype }, stamp)
+      listStore.updateRow(doctype, data, stamp)
     },
   })
 

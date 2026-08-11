@@ -5,6 +5,7 @@
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useDoctype } from '../index'
 import { docStore } from '../docStore'
+import { LOCAL_WRITE } from '../writeGate'
 
 interface User {
   name: string
@@ -133,8 +134,8 @@ describe('useDoctype concurrency', () => {
   })
 
   it('deletes two documents at once and removes both from the doc store', async () => {
-    await docStore.setDoc({ doctype: 'User', name: 'slow-user' })
-    await docStore.setDoc({ doctype: 'User', name: 'quick-user' })
+    await docStore.setDoc({ doctype: 'User', name: 'slow-user' }, LOCAL_WRITE)
+    await docStore.setDoc({ doctype: 'User', name: 'quick-user' }, LOCAL_WRITE)
 
     let user = useDoctype<User>('User', { baseUrl })
 
@@ -256,7 +257,7 @@ describe('useDoctype submit outcome', () => {
   })
 
   it('rejects a failed delete and leaves the document in the store', async () => {
-    await docStore.setDoc({ doctype: 'User', name: 'quick-fail' })
+    await docStore.setDoc({ doctype: 'User', name: 'quick-fail' }, LOCAL_WRITE)
 
     let user = useDoctype<User>('User', { baseUrl })
 
@@ -277,11 +278,14 @@ describe('useDoctype submit outcome', () => {
 // that writes on settle leaves the store on the stale document.
 describe('useDoctype stale store writes', () => {
   it('does not let a stale docs-channel response overwrite the doc store', async () => {
-    await docStore.setDoc({
-      doctype: 'User',
-      name: 'user1',
-      email: 'old@example.com',
-    })
+    await docStore.setDoc(
+      {
+        doctype: 'User',
+        name: 'user1',
+        email: 'old@example.com',
+      },
+      LOCAL_WRITE,
+    )
     let user = useDoctype<User>('User', { baseUrl })
 
     // `update_email` answers with a `docs` array, which `useFrappeFetch`
@@ -305,11 +309,14 @@ describe('useDoctype stale store writes', () => {
   })
 
   it('does not let a stale setValue success overwrite the doc store', async () => {
-    await docStore.setDoc({
-      doctype: 'User',
-      name: 'user1',
-      email: 'old@example.com',
-    })
+    await docStore.setDoc(
+      {
+        doctype: 'User',
+        name: 'user1',
+        email: 'old@example.com',
+      },
+      LOCAL_WRITE,
+    )
     let user = useDoctype<User>('User', { baseUrl })
 
     let [slow, quick] = await Promise.all([

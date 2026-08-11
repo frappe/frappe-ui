@@ -4,6 +4,7 @@
 import { computed, watchSyncEffect } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { docStore } from './docStore'
+import { LOCAL_WRITE } from './writeGate'
 import { idbStore } from './idbStore'
 
 const DOCTYPE = 'User'
@@ -76,7 +77,9 @@ describe('docStore', () => {
     // Regression: before the fix this rejects. Assigning docRef.value synchronously
     // re-enters getDoc, which (lastFetched unset) saw the entry as stale, evicted
     // the ref it had just created, and the reader dereferenced undefined.
-    await expect(docStore.setDoc({ ...record })).resolves.toBeUndefined()
+    await expect(
+      docStore.setDoc({ ...record }, LOCAL_WRITE),
+    ).resolves.toBeUndefined()
 
     expect(doc.value).toMatchObject(record)
     // The IDB copy setDoc wrote must survive — no spurious stale-reload eviction.
@@ -87,7 +90,7 @@ describe('docStore', () => {
   it('stale access: getDoc never returns undefined (no self-eviction under its caller)', async () => {
     const name = 'user2'
     const record = { doctype: DOCTYPE, name }
-    await docStore.setDoc({ ...record })
+    await docStore.setDoc({ ...record }, LOCAL_WRITE)
 
     makeStale(name)
 
@@ -111,7 +114,7 @@ describe('docStore', () => {
     const { doc, seen, stop } = subscribeLikeUseDoc(name)
     expect(doc.value).toBe(null)
 
-    await docStore.setDoc({ ...fresh })
+    await docStore.setDoc({ ...fresh }, LOCAL_WRITE)
     expect(doc.value).toMatchObject(fresh)
 
     cachedRead.resolve(stale)
@@ -127,7 +130,7 @@ describe('docStore', () => {
 
   it('concurrent reads of one stale key hit IDB once', async () => {
     const name = 'user4'
-    await docStore.setDoc({ doctype: DOCTYPE, name })
+    await docStore.setDoc({ doctype: DOCTYPE, name }, LOCAL_WRITE)
     makeStale(name)
 
     const getSpy = vi.spyOn(idbStore, 'get')
@@ -147,7 +150,7 @@ describe('docStore', () => {
     const write = defer<void>()
     const setSpy = vi.spyOn(idbStore, 'set').mockReturnValue(write.promise)
 
-    const pending = docStore.setDoc({ ...record })
+    const pending = docStore.setDoc({ ...record }, LOCAL_WRITE)
     // Readers see the new value even while the write is in flight — and even if
     // it never lands. Matches setDocs, which already assigns before writing.
     expect(docStore.getDoc(DOCTYPE, name).value).toMatchObject(record)

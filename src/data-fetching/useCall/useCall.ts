@@ -5,13 +5,34 @@ import {
   getDispatchStamp,
   useFrappeFetch,
 } from '../useFrappeFetch'
-import { docStore } from '../docStore'
+import { LOCAL_WRITE, type WriteStamp } from '../writeGate'
 import { unrefObject, makeGetParams, normalizeCacheKey } from '../utils'
 import { idbStore } from '../idbStore'
 import { BasicParams, UseCallOptions } from './types'
 
+/**
+ * `onStoreWrite` is internal — deliberately not on `UseCallOptions`, so it
+ * stays off the documented surface (ADR-0012) while `useDoc`, `useList`,
+ * `useDoctype` and `useNewDoc` write the shared stores through it.
+ *
+ * It exists because it is the only hook handed the response's `WriteStamp`,
+ * and `docStore`/`listStore` will not take a write without one. That is the
+ * seam: store writes can only be made from here, and the consumer-facing
+ * `onSuccess` cannot reach the stores even by accident.
+ *
+ * Unlike `onSuccess`, it is never gated by a caller's newest-wins rule — the
+ * gate decides per document, which is finer and better informed than any
+ * per-instance or per-target check a composable can make.
+ */
+export type StoreWritingCallOptions<
+  TResponse,
+  TParams extends BasicParams,
+> = UseCallOptions<TResponse, TParams> & {
+  onStoreWrite?: (data: TResponse, stamp: WriteStamp) => void
+}
+
 export function useCall<TResponse, TParams extends BasicParams = undefined>(
-  options: UseCallOptions<TResponse, TParams>,
+  options: StoreWritingCallOptions<TResponse, TParams>,
 ) {
   const {
     url,
@@ -27,6 +48,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     beforeSubmit,
     onSuccess,
     onError,
+    onStoreWrite,
   } = options
 
   let submitParams = ref<TParams | null | undefined>(null)
@@ -72,8 +94,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     // response is `{ data: TResponse }`), so the seed value has to be
     // wrapped the same way — an unwrapped `initialData` would read as
     // `undefined` on that `.data` lookup and fall through to `null`.
-    initialData:
-      initialData !== undefined ? { data: initialData } : undefined,
+    initialData: initialData !== undefined ? { data: initialData } : undefined,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data) {
         if (transform) {
@@ -88,19 +109,26 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
           idbStore.set(normalizedCacheKey, ctx.data.data)
         }
 
+        if (onStoreWrite) {
+          try {
+            // The stamp is handed over, not made ambient. An ambient stamp
+            // only covers writes made before the hook's first `await` — a
+            // rule the hook has to remember, and the store cannot check.
+            // A parameter travels with the write wherever it goes.
+            // A response that never went through the wrapped fetch has no
+            // dispatch order to place it in: `LOCAL_WRITE`.
+            onStoreWrite(
+              ctx.data.data,
+              getDispatchStamp(ctx.response) ?? LOCAL_WRITE,
+            )
+          } catch (e) {
+            console.error('Error in onStoreWrite hook:', e)
+          }
+        }
+
         if (onSuccess) {
           try {
-            // The hook runs under this response's dispatch stamp, so store
-            // writes made from it (`useDoc`, `useDoctype`, `useList` write
-            // their stores here) are dropped when a later-dispatched request
-            // has already written the same document (#1017). The stamp also
-            // says whether the write records (mutating request) or is only
-            // admitted (GET) — see `runWithWriteVersion`. The stamp is
-            // ambient and synchronous: hooks must write the stores before
-            // any `await`.
-            docStore.runWithWriteVersion(getDispatchStamp(ctx.response), () =>
-              onSuccess(ctx.data!.data),
-            )
+            onSuccess(ctx.data.data)
           } catch (e) {
             console.error('Error in onSuccess hook:', e)
           }

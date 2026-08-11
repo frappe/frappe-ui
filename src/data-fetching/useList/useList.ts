@@ -200,9 +200,14 @@ export function useList<T extends { name: string }>(
     method: 'PUT',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(data) {
-      docStore.setDoc({ doctype, ...data })
-      listStore.updateRow(doctype, data)
+    onStoreWrite(data, _params, stamp) {
+      docStore.setDoc({ doctype, ...data }, stamp)
+      listStore.updateRow(doctype, data, stamp)
+    },
+    onSuccess() {
+      // Gated per target: a stale same-row save must not trigger a refetch
+      // with an answer a newer save has already replaced. The store writes
+      // above are not part of that decision.
       if (refetch) execute()
     },
   })
@@ -224,10 +229,12 @@ export function useList<T extends { name: string }>(
     method: 'DELETE',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(_data, { name }) {
-      if (refetch) execute()
+    onStoreWrite(_data, { name }) {
       docStore.removeDoc(doctype, name)
       listStore.removeRow(doctype, name)
+    },
+    onSuccess() {
+      if (refetch) execute()
     },
   })
 
