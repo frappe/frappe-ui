@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue'
+import { computed, useSlots, useAttrs } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -20,6 +20,14 @@ const emit = defineEmits<SliderEmits>()
 /** The current slider value (controlled). */
 const model = defineModel<SliderValue>()
 const slots = useSlots()
+
+const attrs = useAttrs()
+
+const attrsWithoutClassStyle = computed(() => {
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  )
+})
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -137,12 +145,11 @@ const hasLabeling = computed(() => {
       :step="props.step"
       :disabled="props.disabled"
       :aria-disabled="props.disabled || undefined"
-      :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :aria-invalid="hasError || undefined"
       data-slot="control"
-      v-bind="dataAttrs"
+      v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
       @value-commit="onValueCommit"
     >
       <SliderTrack :class="trackClasses">
@@ -160,6 +167,7 @@ const hasLabeling = computed(() => {
         v-for="(_, i) in sliderValue"
         :key="`slider-thumb-${i}`"
         :class="thumbClasses"
+        :aria-labelledby="labelledBy"
       />
     </SliderRoot>
     <InputDescription

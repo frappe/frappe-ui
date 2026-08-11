@@ -72,7 +72,7 @@ export function useNewDoc<T extends object>(
       // winning write; each caller resolves with the doc it created.
       // `doctype` is merged the same way `onSuccess` merges it for the
       // store, so the resolved doc keeps the shape callers had before.
-      return { doctype, ...response } as T
+      return { doctype, ...response, name: String(response.name) } as T
     })
   }
 
