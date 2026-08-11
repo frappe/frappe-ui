@@ -10,7 +10,10 @@ import {
 } from '#molecules/editor/extensions/shared/media-upload-state'
 import { pickFiles } from '#molecules/editor/extensions/shared/file-picker'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
-import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
+import {
+  useNodeViewResize,
+  type ResizeEdge,
+} from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import MediaToolbar from './MediaToolbar.vue'
 import MediaResizeHandle from './MediaResizeHandle.vue'
@@ -163,9 +166,9 @@ function onMediaClick() {
   if (isEditable.value) selectMedia()
 }
 
-function startResizeFromHandle(event: PointerEvent) {
+function startResizeFromHandle(event: PointerEvent, edge: ResizeEdge) {
   selectMedia()
-  startResize(event)
+  startResize(event, edge)
 }
 
 function resizeBy(delta: number) {
@@ -335,10 +338,12 @@ function setVideoOptions(options: {
           @set-video-options="setVideoOptions"
         />
 
+        <!-- A video's playback bar owns the bottom of the frame, so it keeps
+             the edge pills; everything else gets the corner grip. -->
         <MediaResizeHandle
           v-if="selected && isEditable && isUploaded"
           label="Resize media"
-          :raised="isVideo"
+          :placement="isVideo ? 'edges' : 'corner'"
           @resize-start="startResizeFromHandle"
           @resize-keydown="onResizeKeydown"
         />

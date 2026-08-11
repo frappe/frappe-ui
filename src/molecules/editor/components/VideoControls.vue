@@ -1,9 +1,14 @@
 <script setup lang="ts">
 /**
  * Custom video controls for the media node view, replacing the native
- * `controls` attribute so the player matches the design system (same dark
- * pill language as MediaToolbar). Play/pause, scrubbable progress, time,
- * mute, and fullscreen.
+ * `controls` attribute so the player matches the design system. Play/pause,
+ * scrubbable progress, time, mute, and fullscreen.
+ *
+ * The row sits on a gradient that fades into the footage rather than in a
+ * floating dark pill: a pill draws a hard edge across the picture and has to
+ * pick a background dark enough for white icons on ANY frame, which means it
+ * is heavier than it needs to be over most of them. The gradient carries the
+ * contrast where the controls are and disappears into the image above.
  *
  * The host passes the live `<video>` element; this component only attaches
  * listeners and drives it imperatively — it never owns playback state.
@@ -134,12 +139,9 @@ function onTrackPointerUp() {
 </script>
 
 <template>
-  <!-- `MediaResizeHandle`'s `raised` offset is derived from this bar's
-       `bottom-2` plus its ~32px height, so the corner grip clears the
-       fullscreen button. Move either and re-check that offset. -->
   <div
     v-if="videoEl && !hidden"
-    class="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-4 bg-black/65 px-2 py-1.5 transition-opacity"
+    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 rounded-b-4 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-3 pt-10 pb-2.5 transition-opacity"
     :class="
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'

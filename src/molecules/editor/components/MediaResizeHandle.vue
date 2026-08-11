@@ -1,45 +1,69 @@
 <script setup lang="ts">
 /**
- * Corner resize handle for media / embed node views.
+ * Resize handle(s) for media / embed node views, in two placements.
  *
- * A single grip in the bottom-right corner — the direction every OS window and
- * image editor already trains people to reach for. It replaces the pair of
- * vertical pills that used to sit centered on the left and right edges: those
- * were easy to miss, covered the middle of the media where the click lands for
- * selecting it, and answered a drag downward with nothing at all.
+ * - `corner` (default) — one grip in the bottom-right corner carrying the
+ *   diagonal resize glyph, the affordance every OS window and image editor
+ *   already trains people for. Used by images and embeds.
+ * - `edges` — the pair of vertical pills on the left and right edges. Videos
+ *   keep these: their playback bar owns the bottom of the frame, so a corner
+ *   grip either sits on the controls or hovers awkwardly above them.
  *
- * The button is a 32px hit target with the small visible grip pinned to its
- * bottom-right corner, so the target is comfortable without the chrome being
- * heavy. Keyboard resize (arrow keys) is forwarded to the host node view.
+ * Both report which edge started the drag so `useNodeViewResize` can pick the
+ * matching drag math (a corner reads both axes; an edge reads X and inverts
+ * for the left one).
  */
-defineProps<{
-  /** Accessible label, e.g. "Resize media" / "Resize embed". */
-  label: string
-  /**
-   * Lift the handle clear of a bottom control bar. The video playback controls
-   * sit at `bottom-2` and stand ~32px tall; without this the grip lands on
-   * their fullscreen button.
-   */
-  raised?: boolean
-}>()
+import type { ResizeEdge } from '#molecules/editor/composables/useNodeViewResize'
+
+withDefaults(
+  defineProps<{
+    /** Accessible label, e.g. "Resize media" / "Resize embed". */
+    label: string
+    placement?: 'corner' | 'edges'
+  }>(),
+  { placement: 'corner' },
+)
 
 const emit = defineEmits<{
-  (e: 'resize-start', event: PointerEvent): void
+  (e: 'resize-start', event: PointerEvent, edge: ResizeEdge): void
   (e: 'resize-keydown', event: KeyboardEvent): void
 }>()
+
+const edges = ['left', 'right'] as const
 </script>
 
 <template>
+  <template v-if="placement === 'edges'">
+    <button
+      v-for="edge in edges"
+      :key="edge"
+      type="button"
+      class="absolute top-1/2 z-30 flex h-8 max-h-[50%] w-4 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center bg-transparent"
+      :class="edge === 'left' ? 'left-0' : 'right-0'"
+      :aria-label="`${label} from ${edge} edge`"
+      @pointerdown.prevent="emit('resize-start', $event, edge)"
+      @keydown="emit('resize-keydown', $event)"
+    >
+      <span
+        class="pointer-events-none h-full w-1 rounded-full bg-black/65 ring-1 ring-white/50"
+      />
+    </button>
+  </template>
+
+  <!-- The button is a 32px hit target; the grip it paints sits in the very
+       corner, so the chrome stays light while the target stays comfortable. -->
   <button
+    v-else
     type="button"
-    class="absolute right-0 z-30 flex size-8 cursor-nwse-resize touch-none items-end justify-end bg-transparent p-1.5"
-    :class="raised ? 'bottom-9' : 'bottom-0'"
+    class="absolute right-0 bottom-0 z-30 flex size-8 cursor-nwse-resize touch-none items-end justify-end bg-transparent p-1"
     :aria-label="label"
-    @pointerdown.prevent="emit('resize-start', $event)"
+    @pointerdown.prevent="emit('resize-start', $event, 'corner')"
     @keydown="emit('resize-keydown', $event)"
   >
     <span
-      class="pointer-events-none size-3 rounded-[3px] bg-black/65 ring-1 ring-white/50"
-    />
+      class="pointer-events-none flex size-[18px] items-center justify-center rounded-[5px] bg-black/65 text-white ring-1 ring-white/50"
+    >
+      <span class="lucide-move-diagonal-2 size-3" aria-hidden="true" />
+    </span>
   </button>
 </template>

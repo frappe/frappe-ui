@@ -4,7 +4,10 @@ import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
 import MediaResizeHandle from '#molecules/editor/components/MediaResizeHandle.vue'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
-import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
+import {
+  useNodeViewResize,
+  type ResizeEdge,
+} from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import { IFRAME_SANDBOX } from './iframe-allowlist'
 import { openIframeInsertDialog } from './iframeInsertDialogController'
@@ -75,9 +78,9 @@ function selectIframe(): void {
   editor.commands.setNodeSelection(pos)
 }
 
-function onResizeStart(event: PointerEvent): void {
+function onResizeStart(event: PointerEvent, edge: ResizeEdge): void {
   selectIframe()
-  startResize(event)
+  startResize(event, edge)
 }
 
 function resizeBy(delta: number): void {

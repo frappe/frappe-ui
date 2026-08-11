@@ -216,6 +216,34 @@ describe('useNodeViewResize', () => {
     unmount()
   })
 
+  it('reads X alone from an edge pill, and inverts it for the left one', () => {
+    // Videos keep the edge pills (their playback bar owns the bottom of the
+    // frame), so the X-only math has to survive alongside the corner's.
+    const el = makeEl(200, 100)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    expect(document.body.style.cursor).toBe('ew-resize')
+    // Vertical travel is ignored; +100 across is +100 wide.
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 300 }),
+    )
+    expect(el.style.width).toBe('300px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+
+    // Dragging the LEFT pill outward moves the pointer left but grows the node.
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'left')
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: -50 }))
+    expect(el.style.width).toBe('250px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
   it('no-ops startResize when the editor is not editable', () => {
     const onCommit = vi.fn()
     const { api, unmount } = mountResize(makeEditor(false), {

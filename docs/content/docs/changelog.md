@@ -9,21 +9,34 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
-### Editor — media and embeds resize from a bottom-right corner handle
+### Editor — images and embeds resize from a bottom-right corner handle
 
 Selecting an image, video, or embed used to reveal two vertical pills centered
 on its left and right edges. They sat in the middle of the media, were easy to
-miss, and only answered horizontal drags. A selected node now shows a single
-grip in its bottom-right corner — the affordance every OS window and image
-editor already uses — with a 32px hit target around it.
+miss, and only answered horizontal drags. A selected image or embed now shows a
+single grip in its bottom-right corner, carrying the diagonal resize glyph —
+the affordance every OS window and image editor already uses — with a 32px hit
+target around it.
 
 The drag reads both axes: the pointer's travel is projected onto the
 aspect-locked diagonal, so dragging down grows the media (an edge handle could
 not) and a diagonal drag keeps the corner under the cursor. Media stays
 ratio-locked, as before. Keyboard resize on a focused handle now takes Up/Down
-alongside Left/Right.
+alongside Left/Right, and the embed's handle answers the arrow keys at all for
+the first time — they used to move the caret out of the node instead.
 
-No API change — the handles are internal to the media and iframe node views.
+Videos keep the edge pills. Their playback bar owns the bottom of the frame, so
+a corner grip there either sits on the controls or hovers above them.
+
+### Editor — video controls sit on a gradient instead of a floating pill
+
+The playback row was a dark pill inset from the video's edges. It drew a hard
+rectangle across the picture and had to stay dark enough for white icons on any
+frame. It now spans the full width of the video on a gradient that fades up
+into the footage, so the contrast is only where the controls are.
+
+No API change for either — the handles and controls are internal to the media
+and iframe node views.
 
 ### Data fetching (v2) — stale responses no longer write the shared stores (fix)
 
