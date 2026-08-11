@@ -1,10 +1,15 @@
 /**
  * Aspect-ratio-locked resize-drag for media / embed node views.
  *
- * Behavior preserved from `MediaNodeView.vue` + `IframeNodeView.vue`:
- * - `startResize` (on the handle's `pointerdown`) records the start X and the
- *   element's current `offsetWidth`, locks the aspect ratio, and registers
- *   `mousemove` / `mouseup` listeners on `window` plus an `ew-resize` body cursor.
+ * The drag math follows the handle that started it (`MediaResizeHandle.vue`):
+ * a corner grip reads BOTH axes — the pointer's travel projected onto the
+ * aspect-locked diagonal, the width that puts the corner as close to the
+ * cursor as the ratio lock allows — while an edge pill reads X alone and
+ * inverts it for the left edge.
+ *
+ * - `startResize` (on the handle's `pointerdown`) records the start point and
+ *   the element's current `offsetWidth`, locks the aspect ratio, and registers
+ *   `mousemove` / `mouseup` listeners on `window` plus the matching body cursor.
  * - `mousemove` applies temporary inline `width`/`height` to the element for
  *   live visual feedback, clamping width between `minWidth` and the editor's
  *   content width (minus `maxWidthPadding`).
@@ -59,8 +64,8 @@ export interface ResizeArgs {
   maxWidthPadding?: number
 }
 
-/** Which edge the drag started from; a left-edge drag inverts the delta. */
-export type ResizeEdge = 'left' | 'right'
+/** Which handle started the drag; each one has its own delta math. */
+export type ResizeEdge = 'left' | 'right' | 'corner'
 
 export function useNodeViewResize(
   editor: Editor,
@@ -74,13 +79,14 @@ export function useNodeViewResize(
   const maxWidthPadding = args.maxWidthPadding ?? 0
 
   let startDragX = 0
+  let startDragY = 0
   let startWidth = 0
   let aspectRatio = 1
-  let dragDirection = 1
+  let dragFrom: ResizeEdge = 'corner'
 
   function startResize(
     event: PointerEvent | MouseEvent,
-    edge: ResizeEdge = 'right',
+    edge: ResizeEdge = 'corner',
   ): void {
     if (!editor.isEditable) return
     const el = args.mediaEl()
@@ -88,6 +94,7 @@ export function useNodeViewResize(
 
     isResizing.value = true
     startDragX = event.clientX
+    startDragY = event.clientY
     startWidth = el.offsetWidth
     // Lock the ratio to the element's painted box so the drag preserves the
     // exact shape on screen. Falls back to the supplied aspect only when the
@@ -97,14 +104,12 @@ export function useNodeViewResize(
     // mid-drag — it became "wide" while dragging, then snapped back on release.
     const renderedAspect = el.offsetWidth ? el.offsetHeight / el.offsetWidth : 0
     aspectRatio = renderedAspect || args.getAspectRatio() || 1
-    // Dragging the LEFT handle outward moves the pointer left (negative
-    // clientX delta) but should grow the node — invert the delta.
-    dragDirection = edge === 'left' ? -1 : 1
+    dragFrom = edge
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
     window.addEventListener('pointercancel', stopResize)
-    document.body.style.cursor = 'ew-resize'
+    document.body.style.cursor = edge === 'corner' ? 'nwse-resize' : 'ew-resize'
   }
 
   function handleResize(event: PointerEvent): void {
@@ -113,10 +118,32 @@ export function useNodeViewResize(
     if (!el) return
 
     const editorWidth = editor.view.dom.clientWidth
-    const deltaX = (event.clientX - startDragX) * dragDirection
+    const deltaX = event.clientX - startDragX
+    const deltaY = event.clientY - startDragY
+    // A corner can only travel along the line (1, aspectRatio) — the ratio is
+    // locked — so project the pointer's travel onto it instead of reading X
+    // alone. Dragging straight down grows the media (an edge pill cannot), and
+    // on a diagonal drag the corner lands as near the cursor as the lock
+    // permits rather than racing ahead of it on one axis.
+    //
+    // The gain per axis is therefore the aspect ratio's, not 1:1, and on tall
+    // media a purely horizontal drag is slow: measured on a 1:2 portrait,
+    // 150px right grows the width 30px, where 150px down grows the height
+    // 120px and a diagonal tracks the pointer outright. That is the cost of
+    // keeping the grip under the cursor — boosting the horizontal gain would
+    // send it sliding away from the pointer down the locked diagonal — and the
+    // gestures a corner invites are the ones that pay well.
+    //
+    // An edge pill has no vertical gesture to read, and dragging the LEFT one
+    // outward moves the pointer left (negative delta) while growing the node,
+    // so its delta is inverted.
+    const deltaWidth =
+      dragFrom === 'corner'
+        ? (deltaX + deltaY * aspectRatio) / (1 + aspectRatio * aspectRatio)
+        : deltaX * (dragFrom === 'left' ? -1 : 1)
     const newWidth = Math.max(
       minWidth,
-      Math.min(startWidth + deltaX, editorWidth - maxWidthPadding),
+      Math.min(startWidth + deltaWidth, editorWidth - maxWidthPadding),
     )
     const newHeight = newWidth * aspectRatio
 

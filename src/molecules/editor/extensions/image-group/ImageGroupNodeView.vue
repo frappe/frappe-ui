@@ -5,7 +5,7 @@
     <div
       class="group/gallery relative isolate w-full not-prose my-2 rounded-4"
       :class="{
-        'ring-2 ring-outline-gray-3 ring-offset-2': selected && isEditable,
+        [SELECTED_MEDIA_RING]: selected && isEditable,
         'cursor-pointer': isEditable && !selected,
       }"
       @click="onContainerClick"
@@ -114,6 +114,7 @@ import type { NodeViewProps } from '@tiptap/vue-3'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
 import ImageViewerModal from '#molecules/editor/components/ImageViewerModal.vue'
+import { SELECTED_MEDIA_RING } from '#molecules/editor/components/media-node-view-utils'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import ImageGroupUploadDialog from './ImageGroupUploadDialog.vue'
 import { ALLOWED_COLUMNS, clampColumns } from './image-group-utils'

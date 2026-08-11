@@ -2,9 +2,13 @@
 import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
-import MediaResizeHandles from '#molecules/editor/components/MediaResizeHandles.vue'
+import MediaResizeHandle from '#molecules/editor/components/MediaResizeHandle.vue'
+import { SELECTED_MEDIA_RING } from '#molecules/editor/components/media-node-view-utils'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
-import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
+import {
+  useNodeViewResize,
+  type ResizeEdge,
+} from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import { IFRAME_SANDBOX } from './iframe-allowlist'
 import { openIframeInsertDialog } from './iframeInsertDialogController'
@@ -75,9 +79,28 @@ function selectIframe(): void {
   editor.commands.setNodeSelection(pos)
 }
 
-function onResizeStart(event: PointerEvent, edge: 'left' | 'right'): void {
+function onResizeStart(event: PointerEvent, edge: ResizeEdge): void {
   selectIframe()
   startResize(event, edge)
+}
+
+function resizeBy(delta: number): void {
+  selectIframe()
+  const current = (props.node.attrs.width as number | null) ?? 640
+  const width = Math.max(MIN_WIDTH, current + delta)
+  const height = Math.round(width * aspectRatio.value)
+  props.updateAttributes({ width, height, aspectRatio: height / width })
+}
+
+// The arrow keys the handle claims must not reach `handleKeydown` on the
+// wrapper, which reads Up/Down as "move the caret out of the node".
+function onResizeKeydown(event: KeyboardEvent): void {
+  const shrink = event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+  const grow = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+  if (!shrink && !grow) return
+  event.preventDefault()
+  event.stopPropagation()
+  resizeBy(shrink ? -20 : 20)
 }
 
 function setAlignment(align: IframeAlign): void {
@@ -142,7 +165,7 @@ function commitCaption(event: Event): void {
       ref="containerRef"
       class="relative isolate my-6 block max-w-full overflow-hidden rounded-4 not-prose focus:outline-none"
       :class="[
-        { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
+        { [SELECTED_MEDIA_RING]: selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
         node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
         node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
@@ -191,10 +214,11 @@ function commitCaption(event: Event): void {
           @replace="changeEmbedLink"
         />
 
-        <MediaResizeHandles
+        <MediaResizeHandle
           v-if="selected && isEditable"
           label="Resize embed"
           @resize-start="onResizeStart"
+          @resize-keydown="onResizeKeydown"
         />
 
         <!-- Placeholder while no src is set -->

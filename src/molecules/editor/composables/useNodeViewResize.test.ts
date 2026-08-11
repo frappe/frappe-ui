@@ -61,7 +61,7 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     expect(api.isResizing.value).toBe(true)
 
     // jsdom has no PointerEvent constructor; type string is all that matters.
@@ -84,7 +84,7 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     unmount()
 
     expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
@@ -103,7 +103,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).not.toHaveBeenCalled()
@@ -120,7 +120,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).toHaveBeenCalledWith({ width: 200, height: 100 })
@@ -140,8 +140,11 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    // Dragging the corner along the 1:3 diagonal: +100 across, +300 down.
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 300 }),
+    )
 
     expect(el.style.width).toBe('300px')
     expect(el.style.height).toBe('900px')
@@ -160,12 +163,119 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 50 }),
+    )
 
+    // Projected onto the locked 2:1 diagonal: (100 + 50*0.5) / (1 + 0.25) = 100.
     // newWidth = max(50, 0 + 100) = 100; height = 100 * 0.5 = 50.
     expect(el.style.width).toBe('100px')
     expect(el.style.height).toBe('50px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('resizes from a vertical-only drag (corner handle, not an edge)', () => {
+    // The old left/right edge handles read clientX alone, so a straight-down
+    // drag did nothing. The corner handle answers both axes.
+    const el = makeEl(200, 100)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 0, clientY: 100 }),
+    )
+
+    // deltaWidth = (0 + 100*0.5) / 1.25 = 40 → 240 wide, 120 tall.
+    expect(el.style.width).toBe('240px')
+    expect(el.style.height).toBe('120px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('trades horizontal gain for keeping the grip under the cursor on tall media', () => {
+    // A 1:2 portrait. The corner is locked to the line (1, 2), so a purely
+    // horizontal drag only buys a fifth of its travel — deliberately: any more
+    // and the grip slides away from the pointer down the diagonal. Dragging
+    // down, which is what a corner invites on a tall image, pays four times as
+    // well.
+    const el = makeEl(240, 480)
+    const args = {
+      mediaEl: () => el,
+      getAspectRatio: () => 2,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    }
+
+    const across = mountResize(makeEditor(), args)
+    across.api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 150, clientY: 0 }),
+    )
+    expect(el.style.width).toBe('270px') // 240 + 150/5
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    across.unmount()
+
+    el.style.width = ''
+    el.style.height = ''
+    const down = mountResize(makeEditor(), args)
+    down.api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 0, clientY: 150 }),
+    )
+    expect(el.style.width).toBe('300px') // 240 + 150*2/5
+    expect(el.style.height).toBe('600px') // the drag's own 120px of height
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    down.unmount()
+  })
+
+  it('shows the corner resize cursor for the duration of the drag', () => {
+    const el = makeEl()
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 1,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    expect(document.body.style.cursor).toBe('nwse-resize')
+
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    expect(document.body.style.cursor).toBe('')
+    unmount()
+  })
+
+  it('reads X alone from an edge pill, and inverts it for the left one', () => {
+    // Videos keep the edge pills (their playback bar owns the bottom of the
+    // frame), so the X-only math has to survive alongside the corner's.
+    const el = makeEl(200, 100)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    expect(document.body.style.cursor).toBe('ew-resize')
+    // Vertical travel is ignored; +100 across is +100 wide.
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 300 }),
+    )
+    expect(el.style.width).toBe('300px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+
+    // Dragging the LEFT pill outward moves the pointer left but grows the node.
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'left')
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: -50 }))
+    expect(el.style.width).toBe('250px')
     window.dispatchEvent(new MouseEvent('pointerup'))
     unmount()
   })
@@ -179,7 +289,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     expect(api.isResizing.value).toBe(false)
     unmount()
   })

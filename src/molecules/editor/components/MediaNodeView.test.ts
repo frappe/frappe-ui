@@ -103,9 +103,17 @@ describe('media node view caption field', () => {
     )
     await settle()
 
-    // Legacy alt does not open the caption field, so open it as a user would.
-    const toggle = ctx.root.querySelector(
-      'button[aria-pressed="false"][aria-label*="caption"]',
+    // Legacy alt does not open the caption field, so open it as a user would:
+    // through the media menu, which portals out of the editor root.
+    const trigger = ctx.root.querySelector(
+      'button[aria-label="Media options"]',
+    ) as HTMLButtonElement
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    trigger.click()
+    await settle()
+
+    const toggle = document.body.querySelector(
+      'button[role="switch"]',
     ) as HTMLButtonElement
     toggle.click()
     await settle()
