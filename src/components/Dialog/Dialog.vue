@@ -2,7 +2,7 @@
   <DialogRoot v-model:open="isOpen">
     <DialogPortal :to="portalTarget">
       <DialogOverlay
-        class="fixed inset-0 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"
+        class="fixed inset-0 z-50 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"
         :data-dialog="props.title"
         @after-leave="$emit('after-leave')"
       />
@@ -18,7 +18,7 @@
         Keeping the content out of the overlay restores click-to-focus.
       -->
       <div
-        class="fixed inset-0 overflow-y-auto dialog-scroll-container"
+        class="fixed inset-0 z-50 overflow-y-auto dialog-scroll-container"
         :class="{ 'pointer-events-none': !isOpen }"
       >
         <div
