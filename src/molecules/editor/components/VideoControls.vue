@@ -10,6 +10,11 @@
  * is heavier than it needs to be over most of them. The gradient carries the
  * contrast where the controls are and disappears into the image above.
  *
+ * Colors here are the fixed white scale, not `ink-*` tokens: the row always
+ * sits over footage, so it wants the same color in both themes. The tokens
+ * flip with the theme — `text-ink-gray-2` reads as a light gray in light mode
+ * and a dark one in dark mode, which dimmed these controls into the video.
+ *
  * The host passes the live `<video>` element; this component only attaches
  * listeners and drives it imperatively — it never owns playback state.
  */
@@ -153,7 +158,7 @@ function onTrackPointerUp() {
     <Tooltip :text="playing ? 'Pause' : 'Play'" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-base"
+        class="text-white/70 hover:text-white"
         :aria-label="playing ? 'Pause' : 'Play'"
         @click="togglePlay"
       >
@@ -161,7 +166,7 @@ function onTrackPointerUp() {
       </button>
     </Tooltip>
 
-    <span class="text-xs tabular-nums text-ink-gray-2 select-none">
+    <span class="text-xs tabular-nums text-white/80 select-none">
       {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
     </span>
 
@@ -189,7 +194,7 @@ function onTrackPointerUp() {
     <Tooltip :text="muted ? 'Unmute' : 'Mute'" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-base"
+        class="text-white/70 hover:text-white"
         :aria-label="muted ? 'Unmute' : 'Mute'"
         @click="toggleMute"
       >
@@ -202,7 +207,7 @@ function onTrackPointerUp() {
     <Tooltip text="Fullscreen" class="h-5">
       <button
         type="button"
-        class="text-ink-gray-2 hover:text-ink-base"
+        class="text-white/70 hover:text-white"
         aria-label="Fullscreen"
         @click="toggleFullscreen"
       >
