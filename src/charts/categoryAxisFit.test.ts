@@ -216,6 +216,23 @@ describe('the slot a label is measured against', () => {
     )
   })
 
+  it('reads the tick the value axis is told to print', () => {
+    // A currency or a spelled-out number holds open several times the width of
+    // the compact tick the axis would print itself, and the categories only get
+    // what is left.
+    const wide = label(12)
+    const formatted = {
+      yAxis: { echartOptions: { axisLabel: { formatter: () => wide } } },
+    }
+    const chars = widestFlat(PLOT / 4)
+    expect(labelsOf(build(repeat(4, chars))).width).toBeUndefined()
+
+    const column = Math.ceil(estimateTextWidth(wide, AXIS_LABEL_FONT_SIZE)) + 8
+    expect(labelsOf(build(repeat(4, chars), formatted)).width).toBe(
+      Math.floor((WIDTH - 4 - column) / 4 - GAP),
+    )
+  })
+
   it('measures the label the caller formats, not the raw value', () => {
     const long = repeat(8, 20)
     expect(labelsOf(build(long)).rotate).toBe(45)

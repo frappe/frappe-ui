@@ -513,12 +513,27 @@ function tickColumnWidth(
     axisConfig?.min ?? (low === Infinity ? 0 : low),
     axisConfig?.max ?? (high === -Infinity ? 0 : high),
   ]
+  const tick = drawnTick(axisConfig)
   const widest = Math.max(
-    ...ends.map((value) =>
-      estimateTextWidth(formatValue(value, 1, true), AXIS_LABEL_FONT_SIZE),
-    ),
+    ...ends.map((value) => estimateTextWidth(tick(value), AXIS_LABEL_FONT_SIZE)),
   )
   return Math.ceil(widest) + AXIS_LABEL_MARGIN
+}
+
+/**
+ * The text a value-axis tick actually prints. An axis `format` reaches echarts as
+ * an `axisLabel.formatter` (see `applyAxisFormatters`) and wins over the compact
+ * number the axis would print itself, so it is what the column has to be read
+ * from: a currency that spells out `₹ 1,234,567.00` holds open several times the
+ * width of `1.2M`, and the categories only get what is left. Same rule as
+ * `drawnLabel` on the other axis.
+ */
+function drawnTick(axisConfig: ChartYAxisConfig | undefined) {
+  const formatter = axisConfig?.echartOptions?.axisLabel?.formatter
+  if (typeof formatter !== 'function') {
+    return (value: number) => formatValue(value, 1, true)
+  }
+  return (value: number) => String(formatter(value) ?? '')
 }
 
 function categoryLabelWidth(width?: number) {
