@@ -42,16 +42,21 @@ right beside the volume and fullscreen buttons. The controls previously used
 `ink-*` color tokens, which flip with the theme and dimmed them into the video
 in dark mode; they now use the fixed white scale in both themes.
 
-### Editor — media toolbar matches the design's button style
+### Editor — media actions live in a single menu
 
-The actions over a selected image, video, or embed shared one 65%-black pill
-with icons dimmed to 60% white. Each action is now its own 28px button on the
-`black-overlay-300` fill the design specifies, `rounded-4`, with a full-white
-16px icon, 4px apart and 10px in from the media's top-right corner. The caption
-toggle keeps its visible label — it is the only clue that media can be
-captioned — in the same button style. The resize grip moved to the same
-`black-overlay` / `white-overlay` tokens it was approximating with raw
-`black/65` and `white/50`.
+Selecting an image, video, or embed used to paint a row of six buttons across
+its top-right corner — caption, three alignments, replace, and (on video) a
+playback dropdown — sharing one 65%-black pill. It was a slab of chrome over
+every selected image, most of it rarely used, and it grew with each action
+added.
+
+There is now one 28px `⋯` button there instead, on the `black-overlay-300`
+fill the design specifies (espresso-2.0, node 31403-45433) with `rounded-4` and
+a full-white 16px icon. It opens a menu holding the same actions, grouped: a
+caption switch, Align (left/center/right, with the current one marked), the
+video-only Playback switches (autoplay, loop, muted), and replace. The resize
+grip moved to the same `black-overlay` / `white-overlay` tokens it was
+approximating with raw `black/65` and `white/50`.
 
 ### Editor — fullscreen video fills the screen (fix)
 
