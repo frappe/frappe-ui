@@ -35,6 +35,13 @@ rectangle across the picture and had to stay dark enough for white icons on any
 frame. It now spans the full width of the video on a gradient that fades up
 into the footage, so the contrast is only where the controls are.
 
+The row itself was restyled to read as a player rather than a toolbar: solid
+play/pause and volume glyphs, a seek bar that runs the width of the video with
+a round thumb marking the playhead, and the elapsed/total time moved to the
+right beside the volume and fullscreen buttons. The controls previously used
+`ink-*` color tokens, which flip with the theme and dimmed them into the video
+in dark mode; they now use the fixed white scale in both themes.
+
 No API change for either — the handles and controls are internal to the media
 and iframe node views.
 
