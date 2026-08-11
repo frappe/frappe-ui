@@ -14,6 +14,7 @@
  * for the left one).
  */
 import type { ResizeEdge } from '#molecules/editor/composables/useNodeViewResize'
+import { MEDIA_CHROME_BUTTON } from './media-node-view-utils'
 
 withDefaults(
   defineProps<{
@@ -50,20 +51,19 @@ const edges = ['left', 'right'] as const
     </button>
   </template>
 
-  <!-- The button is a 32px hit target; the grip it paints sits in the very
-       corner, so the chrome stays light while the target stays comfortable. -->
+  <!-- Same button as the actions menu in the opposite corner, mirrored across
+       the media: one control style, one inset, whichever corner you reach for. -->
   <button
     v-else
     type="button"
-    class="absolute right-0 bottom-0 z-30 flex size-8 cursor-nwse-resize touch-none items-end justify-end bg-transparent p-1"
+    :class="[
+      MEDIA_CHROME_BUTTON,
+      'absolute right-2.5 bottom-2.5 z-30 cursor-nwse-resize touch-none',
+    ]"
     :aria-label="label"
     @pointerdown.prevent="emit('resize-start', $event, 'corner')"
     @keydown="emit('resize-keydown', $event)"
   >
-    <span
-      class="pointer-events-none flex size-[18px] items-center justify-center rounded-2 bg-black-overlay-600 text-white ring-1 ring-white-overlay-500"
-    >
-      <span class="lucide-move-diagonal-2 size-3" aria-hidden="true" />
-    </span>
+    <span class="lucide-move-diagonal-2 size-4" aria-hidden="true" />
   </button>
 </template>

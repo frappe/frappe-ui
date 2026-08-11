@@ -4,6 +4,7 @@ import {
   containerClasses,
   aspectRatioFrom,
   heightOverWidth,
+  SELECTED_MEDIA_RING,
 } from './media-node-view-utils'
 
 describe('wrapperClasses', () => {
@@ -21,9 +22,7 @@ describe('wrapperClasses', () => {
 describe('containerClasses', () => {
   it('centers by default and toggles the selected ring', () => {
     const classes = containerClasses({ align: null }, true)
-    expect(classes).toContainEqual({
-      'ring-2 ring-outline-gray-3 ring-offset-2': true,
-    })
+    expect(classes).toContainEqual({ [SELECTED_MEDIA_RING]: true })
     expect(classes).toContain('mx-auto')
   })
 

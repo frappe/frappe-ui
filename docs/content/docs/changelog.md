@@ -15,8 +15,9 @@ Selecting an image, video, or embed used to reveal two vertical pills centered
 on its left and right edges. They sat in the middle of the media, were easy to
 miss, and only answered horizontal drags. A selected image or embed now shows a
 single grip in its bottom-right corner, carrying the diagonal resize glyph —
-the affordance every OS window and image editor already uses — with a 32px hit
-target around it.
+the affordance every OS window and image editor already uses. It wears the same
+28px button as the actions menu in the opposite corner, mirrored across the
+media.
 
 The drag reads both axes: the pointer's travel is projected onto the
 aspect-locked diagonal, so dragging down grows the media (an edge handle could
@@ -33,7 +34,9 @@ a corner grip there either sits on the controls or hovers above them.
 The playback row was a dark pill inset from the video's edges. It drew a hard
 rectangle across the picture and had to stay dark enough for white icons on any
 frame. It now spans the full width of the video on a gradient that fades up
-into the footage, so the contrast is only where the controls are.
+into the footage, so the contrast is only where the controls are. The gradient
+follows an eased ramp to a lighter peak rather than a straight two-stop fade,
+which left a visible edge where the band ended.
 
 The row itself was restyled to read as a player rather than a toolbar: solid
 play/pause and volume glyphs, a seek bar that runs the width of the video with
@@ -55,8 +58,16 @@ fill the design specifies (espresso-2.0, node 31403-45433) with `rounded-4` and
 a full-white 16px icon. It opens a menu holding the same actions, grouped: a
 caption switch, Align (left/center/right, with the current one marked), the
 video-only Playback switches (autoplay, loop, muted), and replace. The resize
-grip moved to the same `black-overlay` / `white-overlay` tokens it was
-approximating with raw `black/65` and `white/50`.
+grip in the opposite corner is the same button, so the media carries one
+control style instead of the raw `black/65` and `white/50` it approximated.
+
+### Editor — selected media no longer wears a white halo in dark mode (fix)
+
+The ring around a selected image, video, embed, or gallery is drawn with a 2px
+offset, and Tailwind's default offset color is a hard `#fff`. On a white page
+that gap is invisible; in dark mode it was a bright white band around every
+selected node. The offset now takes `--surface-base`, the page background in
+both themes.
 
 ### Editor — fullscreen video fills the screen (fix)
 

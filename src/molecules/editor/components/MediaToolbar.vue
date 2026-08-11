@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import type { Node } from '@tiptap/pm/model'
 import Dropdown from '#components/Dropdown/Dropdown.vue'
 import type { DropdownOptions } from '#components/Dropdown/types'
-import type { MediaAlign } from './media-node-view-utils'
+import { MEDIA_CHROME_BUTTON, type MediaAlign } from './media-node-view-utils'
 
 const props = defineProps<{
   node: Node
@@ -14,20 +14,14 @@ const props = defineProps<{
 }>()
 
 /**
- * Media chrome, per the design (espresso-2.0, node 31403-45433): a single 28px
- * button in `black-overlay-300` (the 36% black the frame specifies) with
- * `rounded-4` (8px) and a 16px white icon, 10px in from the top-right corner.
+ * Media chrome, per the design (espresso-2.0, node 31403-45433): a single
+ * `MEDIA_CHROME_BUTTON` 10px in from the top-right corner, with every action
+ * in the menu behind it.
  *
- * Every action lives in the menu behind it. They used to sit in the frame as
- * six buttons sharing one 65%-black pill — a slab of chrome across the top of
- * every selected image, most of it rarely used.
- *
- * Fixed white/black scales rather than `ink-*` / `surface-*` tokens: the button
- * is painted over the media, so it holds one appearance in both themes.
+ * They used to sit in the frame as six buttons sharing one 65%-black pill — a
+ * slab of chrome across the top of every selected image, most of it rarely
+ * used.
  */
-const BUTTON =
-  'flex size-7 items-center justify-center rounded-4 bg-black-overlay-300 text-white transition-colors hover:bg-black-overlay-400 data-[state=open]:bg-black-overlay-500'
-
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
   (e: 'set-align', align: MediaAlign): void
@@ -134,7 +128,7 @@ const options = computed<DropdownOptions>(() => [
       <template #trigger>
         <button
           type="button"
-          :class="BUTTON"
+          :class="MEDIA_CHROME_BUTTON"
           aria-label="Media options"
           @click.stop
           @pointerdown.stop

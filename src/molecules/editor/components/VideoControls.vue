@@ -165,14 +165,27 @@ function onTrackPointerMove(event: PointerEvent) {
 function onTrackPointerUp() {
   scrubbing.value = false
 }
+
+/**
+ * The scrim under the row. A two-stop `black/70 → transparent` ramp reads as a
+ * hard wash: alpha falls off linearly while the eye tracks it roughly as a
+ * square, so the top of the band stays visible as an edge and the bottom sits
+ * heavier than it needs to. These stops trace an ease-out curve to a lower
+ * peak instead, so the scrim only ever gets dark right under the controls and
+ * has faded to nothing well before its top edge. The icons carry their own
+ * drop shadow, which is what keeps them legible over a bright frame.
+ */
+const SCRIM =
+  'linear-gradient(to top, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0.40) 20%, rgb(0 0 0 / 0.22) 45%, rgb(0 0 0 / 0.09) 70%, rgb(0 0 0 / 0) 100%)'
 </script>
 
 <template>
   <div
     v-if="videoEl && !hidden"
-    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 bg-gradient-to-t from-black/70 via-black/35 to-transparent text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
+    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
+    :style="{ backgroundImage: SCRIM }"
     :class="[
-      fullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-10 pb-3',
+      fullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
         : 'opacity-100',

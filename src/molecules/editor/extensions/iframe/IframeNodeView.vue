@@ -3,6 +3,7 @@ import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
 import MediaResizeHandle from '#molecules/editor/components/MediaResizeHandle.vue'
+import { SELECTED_MEDIA_RING } from '#molecules/editor/components/media-node-view-utils'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import {
   useNodeViewResize,
@@ -164,7 +165,7 @@ function commitCaption(event: Event): void {
       ref="containerRef"
       class="relative isolate my-6 block max-w-full overflow-hidden rounded-4 not-prose focus:outline-none"
       :class="[
-        { 'ring-2 ring-outline-gray-3 ring-offset-2': selected },
+        { [SELECTED_MEDIA_RING]: selected },
         node.attrs.align === 'center' ? 'mx-auto' : '',
         node.attrs.align === 'right' ? 'ml-auto mr-0' : '',
         node.attrs.align === 'left' ? 'mr-auto ml-0' : '',
