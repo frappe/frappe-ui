@@ -1001,6 +1001,7 @@ See the [Tabs](./components/tabs) component page for the full API.
 | `label` implied the value                   | `value` is required on every trigger                                       |
 | `as="div"`                                  | removed — compose and style the container directly                         |
 | `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#tab-label` in shorthand mode |
+| `#prefix` / `#suffix` alongside `:tabs`     | `#tab-prefix` / `#tab-suffix` — every shorthand slot carries the `tab-` prefix (`#tab-prefix`, `#tab-label`, `#tab-suffix`, `#tab-panel`); composed `TabTrigger` keeps plain `#prefix` / `#suffix`. An unknown slot name renders nothing, nothing throws |
 | extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
 | `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot keeps the same name       |
 | `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
@@ -1075,6 +1076,8 @@ and aligns its vocabulary with the Tabs family. See the
 | Before                                      | After                                       |
 | ------------------------------------------- | ------------------------------------------- |
 | `type="ghost"`                              | `variant="ghost"`                           |
+| `direction="right"`                         | `side="right"` — the same prop name on `TabList` |
+| `TabButtonsType` / `TabButtonsDirection` types | `TabsVariant` / `TabsSide`, shared with the Tabs family |
 | `:buttons="items"` (deprecated)             | `:options="items"`                          |
 | `{ label: 'Day' }` (label as value)         | `value` is required on every option         |
 | `{ active: true }` fallback                 | the `v-model` is the single source of truth |
