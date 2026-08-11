@@ -11,8 +11,9 @@ import { idbStore } from '../idbStore'
 import { BasicParams, UseCallOptions } from './types'
 
 /**
- * `onStoreWrite` is internal — deliberately not on `UseCallOptions`, so it
- * stays off the documented surface (ADR-0012) while `useDoc`, `useList`,
+ * `onStoreWrite` is internal. It is deliberately not on `UseCallOptions`, and
+ * `index.ts` re-exports `useCall` narrowed to `UseCallOptions`, so the seam is
+ * unreachable from the package (ADR-0012) while `useDoc`, `useList`,
  * `useDoctype` and `useNewDoc` write the shared stores through it.
  *
  * It exists because it is the only hook handed the response's `WriteStamp`,

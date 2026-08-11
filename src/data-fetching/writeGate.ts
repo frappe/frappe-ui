@@ -97,11 +97,14 @@ class WriteGate {
    * moment — dispatched before or after the delete — must have been committed
    * by the server before the delete to have succeeded, so its response is
    * dead data and must not re-create the document. Anything dispatched after
-   * this point takes a higher number and is admitted again. `max` keeps the
-   * record moving forward only.
+   * this point takes a higher number and is admitted again.
+   *
+   * A plain assignment, not a `max`: every number in `applied` was minted by
+   * an earlier `next` or `seal`, so a fresh `++counter` already outranks all
+   * of them. The record moves forward because the counter does.
    */
   seal(key: DocKey) {
-    this.applied.set(key, Math.max(this.applied.get(key) ?? 0, ++this.counter))
+    this.applied.set(key, ++this.counter)
   }
 
   clear() {
