@@ -22,6 +22,9 @@
  * which a mask cannot fill. The expand arrows are an outline, so they stay a
  * lucide icon.
  *
+ * The playhead runs off a frame loop rather than `timeupdate`, which only fires
+ * about four times a second and walks the thumb across the track in steps.
+ *
  * The host passes the live `<video>` element; this component only attaches
  * listeners and drives it imperatively — it never owns playback state.
  */
@@ -85,7 +88,12 @@ function bind(el: HTMLVideoElement) {
   on('play', () => (playing.value = true))
   on('pause', () => (playing.value = false))
   on('ended', () => (playing.value = false))
-  on('timeupdate', () => (currentTime.value = el.currentTime))
+  // The playhead is driven per frame while playing (see `follow`); `timeupdate`
+  // covers the paused states — a seek from the keyboard, a loop restarting, a
+  // reload restoring a position.
+  on('timeupdate', () => {
+    if (!playing.value) currentTime.value = el.currentTime
+  })
   on('loadedmetadata', () => (duration.value = el.duration || 0))
   on('durationchange', () => (duration.value = el.duration || 0))
   on('volumechange', () => (muted.value = el.muted))
@@ -106,7 +114,35 @@ watch(
   { immediate: true },
 )
 
+/**
+ * `timeupdate` fires about four times a second, which walks the playhead
+ * across the track in visible steps. While the video plays we read
+ * `currentTime` once a frame instead, so the fill and the thumb move with the
+ * footage. The loop is only alive during playback, and the browser already
+ * parks `requestAnimationFrame` in a background tab.
+ */
+let frame = 0
+
+function follow() {
+  frame = requestAnimationFrame(follow)
+  const el = props.videoEl
+  if (el && !scrubbing.value) currentTime.value = el.currentTime
+}
+
+// Immediate, because a video that autoplays is already playing by the time
+// this watcher is set up, and nothing would start the loop for it.
+watch(
+  playing,
+  (isPlaying) => {
+    cancelAnimationFrame(frame)
+    frame = isPlaying ? requestAnimationFrame(follow) : 0
+  },
+  { immediate: true },
+)
+
 onBeforeUnmount(() => {
+  cancelAnimationFrame(frame)
+  clearTimeout(glideTimer)
   if (props.videoEl) unbind(props.videoEl)
 })
 
@@ -145,8 +181,41 @@ function timeFromPointer(event: PointerEvent): number {
   return ratio * duration.value
 }
 
+/**
+ * A tap somewhere else on the track is a jump, so the thumb glides there
+ * instead of teleporting. Only while paused: during playback the thumb is
+ * already being driven every frame, and a transition would leave it trailing
+ * the real position for the length of the glide and then snap.
+ */
+const gliding = ref(false)
+let glideTimer: ReturnType<typeof setTimeout> | undefined
+
+/** Matches the `duration-200` on the fill and the thumb. */
+const GLIDE_MS = 200
+
+function glide() {
+  if (playing.value) return
+  gliding.value = true
+  clearTimeout(glideTimer)
+  glideTimer = setTimeout(() => (gliding.value = false), GLIDE_MS)
+}
+
+/** A drag has to track the pointer, so the first move ends the glide. */
+function endGlide() {
+  if (!gliding.value) return
+  clearTimeout(glideTimer)
+  gliding.value = false
+}
+
+/**
+ * `pointerdown` is prevented (in the template) because the node view wrapper is
+ * `draggable` — ProseMirror makes it so — and the browser answers a press-and-
+ * move inside it by starting a native drag, which fires `pointercancel` and
+ * dropped the scrub on the first pixel of movement.
+ */
 function onTrackPointerDown(event: PointerEvent) {
   if (!props.videoEl || !duration.value) return
+  glide()
   scrubbing.value = true
   try {
     trackRef.value?.setPointerCapture(event.pointerId)
@@ -154,12 +223,25 @@ function onTrackPointerDown(event: PointerEvent) {
     // Inactive pointer id (synthetic events, some pen edge cases) — scrubbing
     // still works through the track's own move/up handlers.
   }
-  props.videoEl.currentTime = timeFromPointer(event)
+  seekTo(timeFromPointer(event))
 }
 
 function onTrackPointerMove(event: PointerEvent) {
   if (!scrubbing.value || !props.videoEl) return
-  props.videoEl.currentTime = timeFromPointer(event)
+  endGlide()
+  seekTo(timeFromPointer(event))
+}
+
+/**
+ * The thumb follows the pointer directly rather than waiting for the video to
+ * report back: neither `timeupdate` (paused only) nor the frame loop (skipped
+ * while scrubbing) speaks during a drag, and a seek on a long video can take
+ * long enough to make the thumb feel stuck to the footage.
+ */
+function seekTo(time: number) {
+  if (!props.videoEl) return
+  currentTime.value = time
+  props.videoEl.currentTime = time
 }
 
 function onTrackPointerUp() {
@@ -192,6 +274,7 @@ const SCRIM =
     ]"
     @click.stop
     @pointerdown.stop
+    @dragstart.stop.prevent
   >
     <Tooltip :text="playing ? 'Pause' : 'Play'" class="flex h-5">
       <button
@@ -226,7 +309,7 @@ const SCRIM =
       :aria-valuemin="0"
       :aria-valuemax="Math.round(duration)"
       :aria-valuenow="Math.round(currentTime)"
-      @pointerdown="onTrackPointerDown"
+      @pointerdown.prevent="onTrackPointerDown"
       @pointermove="onTrackPointerMove"
       @pointerup="onTrackPointerUp"
       @pointercancel="onTrackPointerUp"
@@ -234,12 +317,18 @@ const SCRIM =
       <div class="h-[3px] w-full overflow-hidden rounded-full bg-white/30">
         <div
           class="h-full rounded-full bg-white"
+          :class="gliding && 'transition-[width] duration-200 ease-out'"
           :style="{ width: `${progress}%` }"
         />
       </div>
       <span
-        class="pointer-events-none absolute size-3.5 -translate-x-1/2 rounded-full bg-white transition-transform"
-        :class="scrubbing ? 'scale-125' : 'group-hover/track:scale-110'"
+        class="pointer-events-none absolute size-3.5 -translate-x-1/2 rounded-full bg-white"
+        :class="[
+          scrubbing ? 'scale-125' : 'group-hover/track:scale-110',
+          gliding
+            ? 'transition-[left,transform] duration-200 ease-out'
+            : 'transition-transform',
+        ]"
         :style="{ left: knobLeft }"
       />
     </div>

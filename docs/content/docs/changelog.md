@@ -45,6 +45,14 @@ right beside the volume and fullscreen buttons. The controls previously used
 `ink-*` color tokens, which flip with the theme and dimmed them into the video
 in dark mode; they now use the fixed white scale in both themes.
 
+The playhead moves with the footage. It used to be driven by `timeupdate`,
+which fires about four times a second and walked the thumb across the track in
+steps; while the video plays, the position is now read once a frame. A tap
+elsewhere on the track glides the thumb there instead of teleporting, and a
+drag tracks the pointer directly — which also fixes a scrub that stopped on
+the first pixel of movement, because the press-and-move started a native drag
+of the node view and the browser cancelled the pointer.
+
 ### Editor — media actions live in a single menu
 
 Selecting an image, video, or embed used to paint a row of six buttons across
