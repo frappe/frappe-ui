@@ -1,10 +1,14 @@
 /**
  * Aspect-ratio-locked resize-drag for media / embed node views.
  *
- * Behavior preserved from `MediaNodeView.vue` + `IframeNodeView.vue`:
- * - `startResize` (on the handle's `pointerdown`) records the start X and the
- *   element's current `offsetWidth`, locks the aspect ratio, and registers
- *   `mousemove` / `mouseup` listeners on `window` plus an `ew-resize` body cursor.
+ * Driven by the bottom-right corner handle (`MediaResizeHandle.vue`), so the
+ * drag reads BOTH axes: the pointer's travel is projected onto the
+ * aspect-locked diagonal, which is the width that puts the corner as close to
+ * the cursor as the ratio lock allows.
+ *
+ * - `startResize` (on the handle's `pointerdown`) records the start point and
+ *   the element's current `offsetWidth`, locks the aspect ratio, and registers
+ *   `mousemove` / `mouseup` listeners on `window` plus an `nwse-resize` body cursor.
  * - `mousemove` applies temporary inline `width`/`height` to the element for
  *   live visual feedback, clamping width between `minWidth` and the editor's
  *   content width (minus `maxWidthPadding`).
@@ -59,35 +63,30 @@ export interface ResizeArgs {
   maxWidthPadding?: number
 }
 
-/** Which edge the drag started from; a left-edge drag inverts the delta. */
-export type ResizeEdge = 'left' | 'right'
-
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
 ): {
   isResizing: Ref<boolean>
-  startResize: (event: PointerEvent | MouseEvent, edge?: ResizeEdge) => void
+  startResize: (event: PointerEvent | MouseEvent) => void
 } {
   const isResizing = ref(false)
   const minWidth = args.minWidth ?? 50
   const maxWidthPadding = args.maxWidthPadding ?? 0
 
   let startDragX = 0
+  let startDragY = 0
   let startWidth = 0
   let aspectRatio = 1
-  let dragDirection = 1
 
-  function startResize(
-    event: PointerEvent | MouseEvent,
-    edge: ResizeEdge = 'right',
-  ): void {
+  function startResize(event: PointerEvent | MouseEvent): void {
     if (!editor.isEditable) return
     const el = args.mediaEl()
     if (!el) return
 
     isResizing.value = true
     startDragX = event.clientX
+    startDragY = event.clientY
     startWidth = el.offsetWidth
     // Lock the ratio to the element's painted box so the drag preserves the
     // exact shape on screen. Falls back to the supplied aspect only when the
@@ -97,14 +96,11 @@ export function useNodeViewResize(
     // mid-drag — it became "wide" while dragging, then snapped back on release.
     const renderedAspect = el.offsetWidth ? el.offsetHeight / el.offsetWidth : 0
     aspectRatio = renderedAspect || args.getAspectRatio() || 1
-    // Dragging the LEFT handle outward moves the pointer left (negative
-    // clientX delta) but should grow the node — invert the delta.
-    dragDirection = edge === 'left' ? -1 : 1
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
     window.addEventListener('pointercancel', stopResize)
-    document.body.style.cursor = 'ew-resize'
+    document.body.style.cursor = 'nwse-resize'
   }
 
   function handleResize(event: PointerEvent): void {
@@ -113,10 +109,18 @@ export function useNodeViewResize(
     if (!el) return
 
     const editorWidth = editor.view.dom.clientWidth
-    const deltaX = (event.clientX - startDragX) * dragDirection
+    // The corner can only travel along the line (1, aspectRatio) — the ratio is
+    // locked — so project the pointer's travel onto it instead of reading X
+    // alone. Dragging straight down now grows the media (an edge handle could
+    // not), and on a diagonal drag the corner lands as near the cursor as the
+    // lock permits rather than racing ahead of it on one axis.
+    const deltaX = event.clientX - startDragX
+    const deltaY = event.clientY - startDragY
+    const deltaWidth =
+      (deltaX + deltaY * aspectRatio) / (1 + aspectRatio * aspectRatio)
     const newWidth = Math.max(
       minWidth,
-      Math.min(startWidth + deltaX, editorWidth - maxWidthPadding),
+      Math.min(startWidth + deltaWidth, editorWidth - maxWidthPadding),
     )
     const newHeight = newWidth * aspectRatio
 

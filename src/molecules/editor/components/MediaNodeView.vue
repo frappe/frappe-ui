@@ -13,7 +13,7 @@ import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEd
 import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import MediaToolbar from './MediaToolbar.vue'
-import MediaResizeHandles from './MediaResizeHandles.vue'
+import MediaResizeHandle from './MediaResizeHandle.vue'
 import VideoControls from './VideoControls.vue'
 import UploadProgressIndicator from './UploadProgressIndicator.vue'
 import {
@@ -163,9 +163,9 @@ function onMediaClick() {
   if (isEditable.value) selectMedia()
 }
 
-function startResizeFromHandle(event: PointerEvent, edge: 'left' | 'right') {
+function startResizeFromHandle(event: PointerEvent) {
   selectMedia()
-  startResize(event, edge)
+  startResize(event)
 }
 
 function resizeBy(delta: number) {
@@ -177,11 +177,13 @@ function resizeBy(delta: number) {
   props.updateAttributes({ width, height })
 }
 
+// Up/Down match what the corner handle now does with a vertical drag; the
+// media stays ratio-locked either way, so both axes drive the same width step.
 function onResizeKeydown(event: KeyboardEvent) {
-  if (event.key === 'ArrowLeft') {
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
     event.preventDefault()
     resizeBy(-20)
-  } else if (event.key === 'ArrowRight') {
+  } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
     event.preventDefault()
     resizeBy(20)
   }
@@ -333,9 +335,10 @@ function setVideoOptions(options: {
           @set-video-options="setVideoOptions"
         />
 
-        <MediaResizeHandles
+        <MediaResizeHandle
           v-if="selected && isEditable && isUploaded"
           label="Resize media"
+          :raised="isVideo"
           @resize-start="startResizeFromHandle"
           @resize-keydown="onResizeKeydown"
         />

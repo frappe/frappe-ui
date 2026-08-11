@@ -2,7 +2,7 @@
 import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
-import MediaResizeHandles from '#molecules/editor/components/MediaResizeHandles.vue'
+import MediaResizeHandle from '#molecules/editor/components/MediaResizeHandle.vue'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import { useNodeViewResize } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
@@ -75,9 +75,9 @@ function selectIframe(): void {
   editor.commands.setNodeSelection(pos)
 }
 
-function onResizeStart(event: PointerEvent, edge: 'left' | 'right'): void {
+function onResizeStart(event: PointerEvent): void {
   selectIframe()
-  startResize(event, edge)
+  startResize(event)
 }
 
 function setAlignment(align: IframeAlign): void {
@@ -191,7 +191,7 @@ function commitCaption(event: Event): void {
           @replace="changeEmbedLink"
         />
 
-        <MediaResizeHandles
+        <MediaResizeHandle
           v-if="selected && isEditable"
           label="Resize embed"
           @resize-start="onResizeStart"

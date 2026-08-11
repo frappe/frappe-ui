@@ -61,7 +61,7 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     expect(api.isResizing.value).toBe(true)
 
     // jsdom has no PointerEvent constructor; type string is all that matters.
@@ -84,7 +84,7 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     unmount()
 
     expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
@@ -103,7 +103,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).not.toHaveBeenCalled()
@@ -120,7 +120,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     window.dispatchEvent(new MouseEvent('pointerup'))
 
     expect(onCommit).toHaveBeenCalledWith({ width: 200, height: 100 })
@@ -140,8 +140,11 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    // Dragging the corner along the 1:3 diagonal: +100 across, +300 down.
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 300 }),
+    )
 
     expect(el.style.width).toBe('300px')
     expect(el.style.height).toBe('900px')
@@ -160,13 +163,56 @@ describe('useNodeViewResize', () => {
       onCommit: vi.fn(),
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100 }))
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 100, clientY: 50 }),
+    )
 
+    // Projected onto the locked 2:1 diagonal: (100 + 50*0.5) / (1 + 0.25) = 100.
     // newWidth = max(50, 0 + 100) = 100; height = 100 * 0.5 = 50.
     expect(el.style.width).toBe('100px')
     expect(el.style.height).toBe('50px')
     window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('resizes from a vertical-only drag (corner handle, not an edge)', () => {
+    // The old left/right edge handles read clientX alone, so a straight-down
+    // drag did nothing. The corner handle answers both axes.
+    const el = makeEl(200, 100)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 0, clientY: 100 }),
+    )
+
+    // deltaWidth = (0 + 100*0.5) / 1.25 = 40 → 240 wide, 120 tall.
+    expect(el.style.width).toBe('240px')
+    expect(el.style.height).toBe('120px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('shows the corner resize cursor for the duration of the drag', () => {
+    const el = makeEl()
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 1,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    expect(document.body.style.cursor).toBe('nwse-resize')
+
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    expect(document.body.style.cursor).toBe('')
     unmount()
   })
 
@@ -179,7 +225,7 @@ describe('useNodeViewResize', () => {
       onCommit,
     })
 
-    api.startResize({ clientX: 0 } as MouseEvent)
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
     expect(api.isResizing.value).toBe(false)
     unmount()
   })

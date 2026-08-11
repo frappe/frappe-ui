@@ -9,6 +9,22 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Editor — media and embeds resize from a bottom-right corner handle
+
+Selecting an image, video, or embed used to reveal two vertical pills centered
+on its left and right edges. They sat in the middle of the media, were easy to
+miss, and only answered horizontal drags. A selected node now shows a single
+grip in its bottom-right corner — the affordance every OS window and image
+editor already uses — with a 32px hit target around it.
+
+The drag reads both axes: the pointer's travel is projected onto the
+aspect-locked diagonal, so dragging down grows the media (an edge handle could
+not) and a diagonal drag keeps the corner under the cursor. Media stays
+ratio-locked, as before. Keyboard resize on a focused handle now takes Up/Down
+alongside Left/Right.
+
+No API change — the handles are internal to the media and iframe node views.
+
 ### Data fetching (v2) — stale responses no longer write the shared stores (fix)
 
 Two concurrent writes to one document could leave `docStore`, `listStore`
