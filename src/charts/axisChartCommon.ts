@@ -192,20 +192,20 @@ export function axisChartBase(
 
 /**
  * Chrome (title, legend, tooltip body) is Vue-rendered HTML around the plot, so
- * the grid only reserves room for its own axis labels. `containLabel` covers
- * those but not data labels, which sit past the end of a mark and would
- * otherwise be clipped by the plot edge — hence `labelGutter`.
+ * the grid only reserves room for its own axis labels and names. echarts does
+ * that reservation itself: it measures the labels it has already laid out and
+ * shrinks the plot until they fit the outer bounds. What it does not cover is
+ * data labels, which sit past the end of a mark and would otherwise be clipped
+ * by the plot edge — hence `labelGutter`.
  *
- * `containLabel` measures a label as the box its rotation gives it, so a tilted
- * category axis (see `categoryLabelFit`) takes its own height out of the plot
- * without the grid saying anything. What keeps that from eating the plot is the
- * cap on the label, not a number here.
+ * A label is measured as the box its rotation gives it, so a tilted category
+ * axis (see `categoryLabelFit`) takes its own height out of the plot without the
+ * grid saying anything. What keeps that from eating the plot is the cap on the
+ * label, not a number here.
  */
-// `containLabel` reserves against a DOM measurement of the same text in the
-// same font the plot renders it in (see measureText.ts), so the reservation is
-// the truth. What is left is rounding: echarts drops fractions at several
-// layout steps, and the widest label loses a px or two of glyph edge in rare
-// cases — this covers that, nothing more.
+// The air between the outermost label and the edge of the canvas. The bounds are
+// this rect rather than the canvas, so the pad is held open: echarts shrinks the
+// plot to keep the labels inside it and never spends the two pixels.
 const EDGE_PAD = 2
 
 export function buildAxisGrid(opts: {
@@ -223,7 +223,12 @@ export function buildAxisGrid(opts: {
     bottom: 0,
     left: EDGE_PAD + (isRTL ? endGutter : 0),
     right: (xAxisTitle && horizontal ? 24 : EDGE_PAD) + (isRTL ? 0 : endGutter),
-    containLabel: true,
+    // What `containLabel` did until echarts 6, plus the two things it never did:
+    // it reserves on both dimensions, so the label at either end of a horizontal
+    // axis stops overhanging the canvas, and `all` covers the axis name as well
+    // as the labels. `same` reads the bounds off the rect above.
+    outerBoundsMode: 'same',
+    outerBoundsContain: 'all',
   }
 }
 
