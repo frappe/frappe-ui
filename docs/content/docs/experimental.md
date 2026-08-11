@@ -40,6 +40,20 @@ import { Calendar } from 'frappe-ui/experimental'
 See the [Calendar page](/docs/experimental/calendar) for examples and the
 full API reference.
 
+## Charts (v1)
+
+The first chart family — `AxisChart`, `DonutChart`, `FunnelChart`,
+`NumberChart`, the raw `ECharts` wrapper, and `useAxisChartOptions`. Each one
+takes a single `config` object. Removed from root in `1.0.0`;
+[`frappe-ui/charts`](/docs/charts/overview) is the replacement and draws
+everything these did. Unstable — it will be removed once consumers migrate.
+
+```ts
+import { AxisChart } from 'frappe-ui/experimental'
+```
+
+See the [migration guide](/docs/migration) for the before/after.
+
 ## CodeEditor
 
 A CodeMirror 6 code field with syntax highlighting and an optional sanitized

@@ -89,6 +89,8 @@ Core set:
 
 - Calendar — moved from root to `frappe-ui/experimental` (#1020, P14). Parked
   as-is, API unchanged, until a redesigned calendar family replaces it.
+- Charts (v1) — moved from root to `frappe-ui/experimental` (#942, P14). Parked
+  as-is, API unchanged, while apps migrate to `frappe-ui/charts`.
 - Resource
 
 These can still exist in the package, but they are not part of the v1 stabilization contract.

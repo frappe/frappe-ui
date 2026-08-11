@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { EChartsOption, init } from 'echarts'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import debounce from '../../utils/debounce'
+import debounce from '#utils/debounce'
 
 const props = defineProps<{
   options: EChartsOption

@@ -205,7 +205,7 @@ export const recipeGroups: RecipeGroup[] = [
       'DesktopShell',
       'Sidebar',
       'PageHeader',
-      'AxisChart',
+      'AreaChart',
       'List',
       'Checkbox',
       'TabButtons',

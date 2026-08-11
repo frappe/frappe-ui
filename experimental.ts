@@ -22,6 +22,11 @@ export type {
 // here, unstable, with its public API unchanged, until a redesigned
 // calendar family replaces it. Migration is the import-path change only.
 export * from './experimental/Calendar'
+// v1 Charts family. Moved out of root (#942) — `frappe-ui/charts` is the
+// replacement family and covers everything these drew. Parked here,
+// unstable, as an interim import path while apps migrate. Migration is the
+// import-path change only.
+export * from './experimental/Charts'
 // ListView family. Moved out of root (#985) — `frappe-ui/list` is
 // composition-based by design (P3) and doesn't replicate ListView's
 // config-driven columns (resizable widths, per-column getLabel/prefix

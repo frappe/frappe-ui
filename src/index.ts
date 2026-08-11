@@ -120,13 +120,8 @@ export {
 /** @deprecated Use `Select` with `useColorScheme` instead. */
 export * from './components/ThemeSwitcher'
 
-// Charts
-export { default as AxisChart } from './components/Charts/AxisChart.vue'
-export { default as DonutChart } from './components/Charts/DonutChart.vue'
-export { default as ECharts } from './components/Charts/ECharts.vue'
-export { default as FunnelChart } from './components/Charts/FunnelChart.vue'
-export { default as NumberChart } from './components/Charts/NumberChart.vue'
-export { default as useAxisChartOptions } from './components/Charts/axisChartOptions'
+// v1 Charts family moved to `frappe-ui/experimental` (#942, P14) — parked
+// there, API unchanged, while apps migrate to `frappe-ui/charts`.
 
 // Composables
 export { usePageMeta, type PageMeta } from './utils/pageMeta'

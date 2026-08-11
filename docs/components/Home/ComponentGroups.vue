@@ -60,6 +60,8 @@ const componentGroups = {
     list: [
       "Charts",
     ],
+    // The chart family has its own docs section; it is not under /docs/components.
+    links: { Charts: "/docs/charts/overview" },
   },
 };
 </script>
@@ -85,7 +87,7 @@ const componentGroups = {
           <a
             v-for="x in components.list"
             :key="x"
-            :href='withBase("/docs/components/" + x.toLowerCase())'
+            :href='withBase(components.links?.[x] ?? "/docs/components/" + x.toLowerCase())'
           >
             <Badge size="lg" class="hover:bg-surface-gray-4">
               {{ x }}
