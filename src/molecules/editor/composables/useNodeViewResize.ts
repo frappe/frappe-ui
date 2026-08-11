@@ -126,6 +126,14 @@ export function useNodeViewResize(
     // on a diagonal drag the corner lands as near the cursor as the lock
     // permits rather than racing ahead of it on one axis.
     //
+    // The gain per axis is therefore the aspect ratio's, not 1:1, and on tall
+    // media a purely horizontal drag is slow: measured on a 1:2 portrait,
+    // 150px right grows the width 30px, where 150px down grows the height
+    // 120px and a diagonal tracks the pointer outright. That is the cost of
+    // keeping the grip under the cursor — boosting the horizontal gain would
+    // send it sliding away from the pointer down the locked diagonal — and the
+    // gestures a corner invites are the ones that pay well.
+    //
     // An edge pill has no vertical gesture to read, and dragging the LEFT one
     // outward moves the pointer left (negative delta) while growing the node,
     // so its delta is inverted.

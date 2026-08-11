@@ -199,6 +199,42 @@ describe('useNodeViewResize', () => {
     unmount()
   })
 
+  it('trades horizontal gain for keeping the grip under the cursor on tall media', () => {
+    // A 1:2 portrait. The corner is locked to the line (1, 2), so a purely
+    // horizontal drag only buys a fifth of its travel — deliberately: any more
+    // and the grip slides away from the pointer down the diagonal. Dragging
+    // down, which is what a corner invites on a tall image, pays four times as
+    // well.
+    const el = makeEl(240, 480)
+    const args = {
+      mediaEl: () => el,
+      getAspectRatio: () => 2,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    }
+
+    const across = mountResize(makeEditor(), args)
+    across.api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 150, clientY: 0 }),
+    )
+    expect(el.style.width).toBe('270px') // 240 + 150/5
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    across.unmount()
+
+    el.style.width = ''
+    el.style.height = ''
+    const down = mountResize(makeEditor(), args)
+    down.api.startResize({ clientX: 0, clientY: 0 } as MouseEvent)
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 0, clientY: 150 }),
+    )
+    expect(el.style.width).toBe('300px') // 240 + 150*2/5
+    expect(el.style.height).toBe('600px') // the drag's own 120px of height
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    down.unmount()
+  })
+
   it('shows the corner resize cursor for the duration of the drag', () => {
     const el = makeEl()
     const { api, unmount } = mountResize(makeEditor(), {
