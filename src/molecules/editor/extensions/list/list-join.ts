@@ -4,13 +4,9 @@ import type {
   NodeType,
   Schema,
 } from '@tiptap/pm/model'
-import {
-  Plugin,
-  PluginKey,
-  type EditorState,
-  type Transaction,
-} from '@tiptap/pm/state'
+import { Plugin, PluginKey, type Transaction } from '@tiptap/pm/state'
 import { canJoin } from '@tiptap/pm/transform'
+import { isRemoteChange } from '#molecules/editor/extensions/shared/collaboration'
 
 const listTypeCache = new WeakMap<Schema, Set<NodeType>>()
 
@@ -90,37 +86,6 @@ function joinAdjacentListsIn(tr: Transaction, schema: Schema): boolean {
   const positions = joinablePositions(tr.doc, schema)
   for (const pos of positions) tr.join(pos)
   return positions.length > 0
-}
-
-/**
- * Whether these transactions carry a remote collaboration update.
- *
- * Collaboration is a consumer-supplied extension (`@tiptap/extension-collaboration`
- * brings y-prosemirror), so its plugin key cannot be imported here. Find it on
- * the live state instead: y-prosemirror tags every remote application with the
- * meta of its `y-sync` plugin.
- */
-function isRemoteChange(
-  transactions: readonly Transaction[],
-  state: EditorState,
-): boolean {
-  const syncKey = state.plugins.find((plugin) =>
-    ((plugin.spec.key as PluginKey | undefined)?.key ?? '').startsWith(
-      'y-sync',
-    ),
-  )?.spec.key as PluginKey | undefined
-  if (!syncKey) return false
-  return transactions.some((transaction) => {
-    if (transaction.getMeta(syncKey)) return true
-    // Another plugin appending to the same dispatch (TrailingNode does, on any
-    // structural change) produces a transaction that carries no sync meta of
-    // its own. ProseMirror tags it with the root transaction that caused it,
-    // so ask that one — otherwise the guard would depend on plugin order.
-    const root = transaction.getMeta('appendedTransaction') as
-      | Transaction
-      | undefined
-    return Boolean(root?.getMeta(syncKey))
-  })
 }
 
 declare module '@tiptap/core' {
