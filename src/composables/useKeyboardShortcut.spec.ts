@@ -39,6 +39,45 @@ function mountWithShortcut(
   }
 }
 
+/**
+ * Mount a shortcut inside a `<KeepAlive>` and return a switch that swaps it
+ * for a sibling. Swapping it out deactivates it; swapping it back activates
+ * the same instance again, without a fresh setup().
+ */
+function mountKeptAlive(
+  config: KeyboardShortcutConfig | KeyboardShortcutConfig[],
+) {
+  const el = document.createElement('div')
+  document.body.appendChild(el)
+  const active = ref(true)
+  const WithShortcut = defineComponent({
+    setup() {
+      useKeyboardShortcut(config)
+    },
+    template: '<div/>',
+  })
+  const Sibling = defineComponent({ template: '<div/>' })
+  const app = createApp(
+    defineComponent({
+      setup: () => ({ active, WithShortcut, Sibling }),
+      template:
+        '<KeepAlive><component :is="active ? WithShortcut : Sibling" /></KeepAlive>',
+    }),
+  )
+  app.mount(el)
+  return {
+    /** Deactivate or reactivate the component holding the shortcut. */
+    async setActive(value: boolean) {
+      active.value = value
+      await nextTick()
+    },
+    unmount() {
+      app.unmount()
+      el.remove()
+    },
+  }
+}
+
 /** Dispatch a keydown on document with a given target. */
 function fireKey(
   init: KeyboardEventInit,
@@ -613,6 +652,65 @@ describe('useKeyboardShortcut — precedence', () => {
     b.unmount()
     a.unmount()
     warn.mockRestore()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// KeepAlive
+// ---------------------------------------------------------------------------
+
+describe('useKeyboardShortcut — deactivated inside <KeepAlive>', () => {
+  it('goes inert while deactivated, and comes back on activation', async () => {
+    const handler = vi.fn()
+    const kept = mountKeptAlive({
+      combo: 'Q',
+      description: 'Quit kept alive',
+      handler,
+    })
+    await nextTick()
+
+    fireKey({ key: 'q' })
+    expect(handler).toHaveBeenCalledOnce()
+
+    // A cached component still has its setup() state, but its keys belong to
+    // the screen the user left.
+    await kept.setActive(false)
+    handler.mockClear()
+    fireKey({ key: 'q' })
+    expect(handler).not.toHaveBeenCalled()
+
+    await kept.setActive(true)
+    fireKey({ key: 'q' })
+    expect(handler).toHaveBeenCalledOnce()
+
+    kept.unmount()
+  })
+
+  it('leaves the dialog groups while deactivated, and rejoins them once', async () => {
+    const description = 'Quit kept alive 4471'
+    const rows = () =>
+      getShortcutGroups()
+        .flatMap((group) => group.shortcuts)
+        .filter((shortcut) => shortcut.description === description)
+
+    const kept = mountKeptAlive({
+      combo: 'Q',
+      description,
+      handler: vi.fn(),
+    })
+    await nextTick()
+    expect(rows()).toHaveLength(1)
+
+    await kept.setActive(false)
+    expect(rows()).toHaveLength(0)
+
+    // Registering again must not leave a duplicate row behind.
+    await kept.setActive(true)
+    expect(rows()).toHaveLength(1)
+
+    kept.unmount()
+    await nextTick()
+    expect(rows()).toHaveLength(0)
   })
 })
 
