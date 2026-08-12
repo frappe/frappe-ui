@@ -504,9 +504,16 @@ function parseProperties(source, mask, range) {
     // `handler() { save() }` is a property too. Without this it reads as an
     // unnamed member, and the object is refused as if it spread another one.
     const method = named ? null : METHOD_HEAD.exec(body)
+    const shorthand = !named && !method && /^[A-Za-z_$][\w$]*$/.test(body)
     props.push({
-      name: named ? (named[2] ?? named[3]) : method ? (method[2] ?? method[3]) : null,
-      shorthand: !named && !method && /^[A-Za-z_$][\w$]*$/.test(body),
+      name: named
+        ? (named[2] ?? named[3])
+        : method
+          ? (method[2] ?? method[3])
+          : shorthand
+            ? body
+            : null,
+      shorthand,
       text: body,
       value: named ? body.slice(named[0].length).trim() : body,
       start,
@@ -646,6 +653,16 @@ function renameProperty(prop, name) {
   }
 }
 
+// `condition` reaches v1 as `enabled`. A shorthand carries the value in the
+// name, so renaming the name alone would point at a variable that does not
+// exist. It becomes `enabled: condition` instead.
+function renameConditionProperty(prop) {
+  if (prop.shorthand) {
+    return { start: prop.start, end: prop.end, text: `enabled: ${prop.text}` }
+  }
+  return renameProperty(prop, 'enabled')
+}
+
 function convertObject(source, mask, range, ctx) {
   const props = parseProperties(source, mask, range)
   const byName = new Map()
@@ -672,7 +689,7 @@ function convertObject(source, mask, range, ctx) {
         byName.has('group'))
     if (!isShortcutLike) return null
     return {
-      edits: [renameProperty(condition, 'enabled')],
+      edits: [renameConditionProperty(condition)],
       change: {
         line: lineAt(source, condition.start),
         from: 'condition:',
@@ -768,7 +785,7 @@ function convertObject(source, mask, range, ctx) {
     edits.push({ start, end, text: '' })
   }
 
-  if (condition) edits.push(renameProperty(condition, 'enabled'))
+  if (condition) edits.push(renameConditionProperty(condition))
 
   return {
     edits,
@@ -869,10 +886,23 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   }
 
   // `key:` finds a registration; `condition:` finds an object built by
-  // spreading one, which still needs the `enabled` rename.
-  for (const pattern of [/\bkey\s*:/g, /\bcondition\s*:/g]) {
+  // spreading one, which still needs the `enabled` rename. A quoted name
+  // counts: `{ 'key': 's' }` is the same object.
+  //
+  // The scan lands on the colon, never on the name, because a quoted name is
+  // masked as a string and the mask is what tells code from prose.
+  for (const pattern of [
+    /(?:\bkey\b|['"]key['"])\s*:/g,
+    /(?:\bcondition\b|['"]condition['"])\s*:/g,
+    // A shorthand `condition`, which carries its value in the name.
+    /\bcondition\s*(?=[,}])/g,
+  ]) {
     let m
-    while ((m = pattern.exec(content))) visit(m.index)
+    while ((m = pattern.exec(content))) {
+      const at = m.index + m[0].length - 1
+      if (mask[at]) continue
+      visit(at)
+    }
   }
 
   // A deleted member is flagged wherever it appears, comments included: the

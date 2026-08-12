@@ -257,6 +257,33 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
+  it('converts an object whose key name is quoted', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ 'key': 's', ctrl: true, description: 'Save', handler: save }"),
+    )
+
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+    expect(refusals).toEqual([])
+  })
+
+  it('renames a shorthand condition into enabled with its value', () => {
+    // A shorthand carries the value in the name, so renaming the name alone
+    // would point at a variable that does not exist.
+    const { migrated } = migrateShortcuts(
+      inCall("{ key: 's', ctrl: true, description: 'Save', condition, handler }"),
+    )
+
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', enabled: condition, handler }")
+  })
+
+  it('leaves a destructured condition alone', () => {
+    const source = 'const { condition, handler } = props\n'
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+  })
+
   it('leaves an object built inside a handler body alone', () => {
     // `{ key: 'a' }` here is an analytics payload, not a shortcut. Only the
     // object the call receives directly counts as one on position alone.
