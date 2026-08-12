@@ -2579,6 +2579,10 @@ useKeyboardShortcut([
 the flag always meant `Mod`. Modifiers are written in one order:
 `Mod+Ctrl+Alt+Shift+<Key>`.
 
+`description`, `group`, `handler`, `onHold`, `onRelease`, `preventDefault`,
+`allowInInput` and `allowInDialog` keep their names and their defaults. The
+codemod passes them through.
+
 The codemod exits non-zero when it refused a site, on a dry run too. A clean
 exit means a clean run. Re-running it is safe: a converted object has no `key`
 field left to convert, and a refusal repeats until you fix it.
