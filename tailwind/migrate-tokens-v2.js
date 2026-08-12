@@ -793,7 +793,8 @@ function main() {
     if (marker) {
       console.warn(`\n⚠  ${marker} found: --ink-shift already ran on this target.`)
       console.warn('   A real run would double-shift and will refuse to start.')
-      console.warn(`   Target directories that do not contain ${marker}.\n`)
+      console.warn('   If the marker sits in a vendored copy outside node_modules, targeting')
+      console.warn(`   any ancestor of it finds it again — target directories that do not contain ${marker}.\n`)
     } else {
       console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
       console.warn(
