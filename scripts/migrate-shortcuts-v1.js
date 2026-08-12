@@ -477,12 +477,50 @@ function buildMask(source, ranges) {
 // is a name and nothing else, so the whole span opens up.
 const TEMPLATE_TAG = /<\/?([A-Za-z][\w.-]*)/dg
 
-// A bound attribute value and a mustache hold a JS expression, so each one is
-// lexed in turn. A reference migrates; a string literal inside it does not.
-const TEMPLATE_EXPRESSIONS = [
-  /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)')/dg,
-  /\{\{([\s\S]*?)\}\}/dg,
-]
+// A bound attribute value holds a JS expression. HTML ends the value at the
+// matching quote, so the quote is a reliable boundary.
+const TEMPLATE_BINDING = /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)')/dg
+
+// A mustache also holds a JS expression, but `}}` is not a reliable boundary:
+// `{{ fn({ a: { b: 1 }}) + X }}` closes at the inner `}}` under a regex, and
+// everything after it stays hidden, so `X` never migrates. So the end is found
+// by walking the expression: the first `}}` at brace depth zero, outside a
+// string or a comment.
+function mustacheRanges(text, offset) {
+  const spans = []
+  let i = 0
+  while (i < text.length - 1) {
+    if (text[i] !== '{' || text[i + 1] !== '{') {
+      i++
+      continue
+    }
+    const start = i + 2
+    const rest = text.slice(start)
+    const restMask = maskLiterals(rest)
+    let depth = 0
+    let end = -1
+    for (let j = 0; j < rest.length - 1; j++) {
+      if (restMask[j]) continue
+      const c = rest[j]
+      if (c === '{') depth++
+      else if (c === '}') {
+        if (depth === 0 && rest[j + 1] === '}' && !restMask[j + 1]) {
+          end = j
+          break
+        }
+        depth--
+      }
+    }
+    // No close: this `{{` is prose, not a mustache.
+    if (end === -1) {
+      i = start
+      continue
+    }
+    spans.push([offset + start, offset + start + end])
+    i = start + end + 2
+  }
+  return spans
+}
 
 // Every group of every match, as absolute spans.
 function* matchedGroups(text, offset, pattern) {
@@ -530,11 +568,13 @@ function buildRenameMask(source, ranges, ext) {
     for (const [start, end] of matchedGroups(text, from, TEMPLATE_TAG)) {
       for (let i = start; i < end; i++) mask[i] = 0
     }
-    for (const pattern of TEMPLATE_EXPRESSIONS) {
-      for (const [start, end] of matchedGroups(text, from, pattern)) {
-        const sub = maskLiterals(source.slice(start, end))
-        for (let i = 0; i < sub.length; i++) mask[start + i] = sub[i]
-      }
+    const expressions = [
+      ...matchedGroups(text, from, TEMPLATE_BINDING),
+      ...mustacheRanges(text, from),
+    ]
+    for (const [start, end] of expressions) {
+      const sub = maskLiterals(source.slice(start, end))
+      for (let i = 0; i < sub.length; i++) mask[start + i] = sub[i]
     }
   }
   return mask

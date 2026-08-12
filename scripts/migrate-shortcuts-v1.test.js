@@ -558,6 +558,42 @@ import { KeyboardShortcutsModal } from 'frappe-ui'
     expect(migrated).toContain('{{ KeyboardShortcutsDialog.name }}')
   })
 
+  it('reads a mustache to its real end, past a nested brace and a quoted }}', () => {
+    // `}}` closes the mustache only at brace depth zero, outside a string.
+    // Stopping at the first one hides the rest of the expression, and a
+    // reference in there keeps a name its import no longer has.
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <span>{{ fn({ a: { b: 1 }}) + KeyboardShortcutsModal.name }}</span>
+  <span>{{ '}}' + KeyboardShortcutsModal.name }}</span>
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('{{ fn({ a: { b: 1 }}) + KeyboardShortcutsDialog.name }}')
+    expect(migrated).toContain(`{{ '}}' + KeyboardShortcutsDialog.name }}`)
+    expect(migrated).not.toContain('KeyboardShortcutsModal')
+  })
+
+  it('leaves an unclosed {{ in prose alone', () => {
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <p>Write {{ to open a mustache. KeyboardShortcutsModal is a component.</p>
+  <KeyboardShortcutsModal v-model:open="open" />
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('KeyboardShortcutsModal is a component.')
+    expect(migrated).toContain('<KeyboardShortcutsDialog v-model:open="open" />')
+  })
+
   it('renames a component tag in a template that has a script block', () => {
     const source = `<script setup>
 const title = 'KeyboardShortcutsModal'
