@@ -263,6 +263,23 @@ describe('Slider', () => {
       attrs: { class: 'sm:w-64' },
     })
     cy.get('#sl-variant-w').should('not.have.class', 'w-full')
+
+    cy.mount(Slider, {
+      props: { id: 'sl-arbitrary-w', modelValue: [25] },
+      attrs: { class: 'data-[open]:w-64' },
+    })
+    cy.get('#sl-arbitrary-w').should('not.have.class', 'w-full')
+  })
+
+  it('names the thumb from a #label slot', () => {
+    cy.mount(Slider, {
+      props: { modelValue: [25] },
+      slots: { label: () => h('span', 'Volume') },
+    })
+    cy.get('[role="slider"]').then(($thumb) => {
+      const labelledBy = $thumb.attr('aria-labelledby')!
+      cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
+    })
   })
 
   it('keeps its own w-full when the caller class has no width', () => {
@@ -277,6 +294,13 @@ describe('Slider', () => {
       attrs: { class: 'mt-4' },
     })
     cy.get('#sl-bare-mt').should('have.class', 'w-full')
+
+    // `max-w-*` bounds `w-full` rather than replacing it, so both belong.
+    cy.mount(Slider, {
+      props: { id: 'sl-maxw', modelValue: [25] },
+      attrs: { class: 'max-w-md' },
+    })
+    cy.get('#sl-maxw').should('have.class', 'w-full')
   })
 
   it('keeps a caller aria-invalid and aria-errormessage when there is no error', () => {

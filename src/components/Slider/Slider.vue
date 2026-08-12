@@ -42,10 +42,13 @@ const callerAria = computed(() => {
 // not a rule — but two width utilities in one class list are decided by
 // stylesheet order, not by which one the caller wrote, and there is no class
 // merger here. So drop ours when the caller brings their own, on whichever
-// element the caller's class lands on. The optional `variant:` prefixes count
-// `sm:w-64` too.
+// element the caller's class lands on. Token-split and strip variant prefixes
+// the way `Avatar.vue` does, so `sm:w-64` and `data-[open]:w-64` both count.
+// `min-w-*` and `max-w-*` deliberately do not: those pair with `w-full`.
 const hasCallerWidth = computed(() => {
-  return /(^|\s)(?:[a-z0-9-]+:)*!?w-/.test(normalizeClass(attrs.class))
+  return normalizeClass(attrs.class)
+    .split(/\s+/)
+    .some((token) => /^!?-?w-/.test(token.slice(token.lastIndexOf(':') + 1)))
 })
 
 // What is left to fall through to the control: class and style are placed by
@@ -92,7 +95,12 @@ const {
 
 /** A caller's `aria-labelledby` wins over the id generated from `label`. */
 const thumbLabelledBy = computed(() => {
-  return (attrs['aria-labelledby'] as string | undefined) ?? labelledBy.value
+  const caller = attrs['aria-labelledby'] as string | undefined
+  if (caller) return caller
+  // `useInputLabeling` only sees the `label` prop, but the label element also
+  // renders for a `#label` slot. Without this the slot leaves the thumb
+  // unnamed while a `<label>` carrying the name sits right above it.
+  return labelledBy.value ?? (slots.label ? labelId.value : undefined)
 })
 
 // The `error` prop wins, but with no error a caller's own value has to survive
