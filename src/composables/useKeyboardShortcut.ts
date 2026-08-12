@@ -419,9 +419,9 @@ function warnOnCollision(live: Registration[]) {
 /** One row in `KeyboardShortcutsDialog`. */
 export interface KeyboardShortcutEntry {
   /** The combo of the first registration with this description. */
-  combo: string
+  combo: KeyboardShortcutCombo
   /** Combos of the later registrations that share the description. */
-  altCombos: string[]
+  altCombos: KeyboardShortcutCombo[]
   description: string
   group: string
 }
