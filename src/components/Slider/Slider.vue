@@ -277,8 +277,8 @@ const onValueCommit = (value: SliderValue) => {
     <SliderRoot
       :id="inputId"
       v-model="sliderValue"
-      :class="[rootClasses, hasLabeling ? null : (attrs.class as any)]"
-      :style="hasLabeling ? null : (attrs.style as any)"
+      :class="[rootClasses, hasLabeling ? null : normalizeClass(attrs.class)]"
+      :style="hasLabeling ? null : (attrs.style as StyleValue)"
       :max="props.max"
       :min="props.min"
       :step="props.step"
