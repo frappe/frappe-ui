@@ -1,5 +1,6 @@
 import Badge from './Badge.vue'
 import { h } from 'vue'
+import { _resetResolvePropValue } from '../../utils/resolvePropValue'
 
 describe('<Badge />', () => {
   it('renders default badge', () => {
@@ -288,5 +289,85 @@ describe('<Badge />', () => {
       },
     })
     cy.get('[data-cy="prefix-icon"]').parent().should('have.class', 'size-3')
+  })
+
+  // A value outside a prop's union used to reach a raw table lookup. For
+  // `theme` that was the first of two chained lookups, so the second one read
+  // a property of `undefined` and threw `TypeError: Cannot read properties of
+  // undefined (reading 'subtle')` mid-render — the badge vanished and the
+  // error took the parent render with it. `theme="orange"` (a removed alias,
+  // still live in consumer apps) is the case that made this reachable.
+  describe('unsupported prop values', () => {
+    beforeEach(() => {
+      _resetResolvePropValue()
+    })
+
+    it('falls back to the default theme instead of throwing', () => {
+      cy.mount(Badge, {
+        props: { theme: 'orange' as any, label: 'Orange' },
+      })
+
+      // Renders at all — this is the regression guard.
+      cy.get('.inline-flex.rounded-full').should('have.text', 'Orange')
+      // ...wearing the default gray subtle classes.
+      cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
+      cy.get('.inline-flex.rounded-full').should(
+        'have.class',
+        'bg-surface-gray-2',
+      )
+    })
+
+    it('warns in dev, naming the component, prop and value', () => {
+      cy.window().then((win) => {
+        cy.spy(win.console, 'warn').as('consoleWarn')
+      })
+      cy.mount(Badge, { props: { theme: 'orange' as any, label: 'Orange' } })
+
+      cy.get('@consoleWarn').should(
+        'have.been.calledWithMatch',
+        /Badge\.theme="orange" is not a supported value.*falling back to "gray".*gray, blue, green, amber, red, violet/,
+      )
+    })
+
+    it('warns once per offending value, not once per render', () => {
+      cy.window().then((win) => {
+        cy.spy(win.console, 'warn').as('consoleWarn')
+      })
+      cy.mount(Badge, { props: { theme: 'orange' as any, label: 'A' } })
+      cy.mount(Badge, { props: { theme: 'orange' as any, label: 'B' } })
+
+      cy.get('@consoleWarn').should('have.been.calledOnce')
+    })
+
+    it('falls back to the default variant', () => {
+      cy.mount(Badge, {
+        props: { variant: 'bogus' as any, label: 'Variant' },
+      })
+      cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-gray-6')
+      cy.get('.inline-flex.rounded-full').should(
+        'have.class',
+        'bg-surface-gray-2',
+      )
+    })
+
+    it('falls back to the default size', () => {
+      cy.mount(Badge, {
+        props: { size: 'bogus' as any, label: 'Size' },
+      })
+      cy.get('.inline-flex.rounded-full').should('have.class', 'h-5')
+      cy.get('.inline-flex.rounded-full').should('have.class', 'text-xs')
+    })
+
+    it('still renders every supported theme unchanged', () => {
+      cy.mount(Badge, { props: { theme: 'amber', label: 'Amber' } })
+      cy.get('.inline-flex.rounded-full').should(
+        'have.class',
+        'text-ink-amber-7',
+      )
+      cy.get('.inline-flex.rounded-full').should(
+        'have.class',
+        'bg-surface-amber-2',
+      )
+    })
   })
 })

@@ -952,16 +952,29 @@ If the alert was really a promotional card in a sidebar, use the new
 | ----------------- | ---------------- |
 | `theme="orange"`  | `theme="amber"`  |
 
-Unlike the `Alert` row above, this break is **loud**. `Badge` looks its theme
-up in a class map, so a value that is not in the map throws while rendering:
+How the break shows up depends on whether the call site is typed:
+
+- **TypeScript: loud.** `vue-tsc` rejects the value, because the `theme` prop
+  union no longer accepts the string. You get a compile error, not a surprise
+  in production.
+- **JavaScript and bound values: silent.** The badge renders in the default
+  `gray` theme and logs a one-time dev-mode warning naming the component, the
+  prop and the value. Production logs nothing.
 
 ```
-TypeError: Cannot read properties of undefined (reading 'subtle')
+[frappe-ui] Badge.theme="orange" is not a supported value — falling back to
+"gray". Supported: gray, blue, green, amber, red, violet.
 ```
 
-The badge does not render at all, and the error takes the parent render down
-with it. TypeScript call sites fail earlier, at `vue-tsc`, because the `theme`
-prop union no longer accepts the string.
+A missed site is therefore a grey badge, not a broken page. `Badge` used to
+index a class map by theme and then index the result again by variant, so an
+unknown theme threw `TypeError: Cannot read properties of undefined` mid-render
+and took the parent render with it. All three of `theme`, `variant` and `size`
+now fall back to their defaults instead.
+
+Do not rely on the fallback. It is a safety net for the upgrade, not a
+supported way to pass a colour — a grey badge where a coloured one belongs is
+still a bug, and the dev warning is the only thing that will tell you.
 
 ```vue
 <!-- Before -->
@@ -972,7 +985,7 @@ prop union no longer accepts the string.
 ```
 
 Check bound themes too, not only literal attributes. A status-to-theme map or
-a computed that returns `'orange'` throws the same way, and neither `vue-tsc`
+a computed that returns `'orange'` degrades the same way, and neither `vue-tsc`
 nor a grep for `theme="orange"` finds it:
 
 ```ts
@@ -983,11 +996,11 @@ const themeByStatus = { open: 'orange', closed: 'green' }
 const themeByStatus = { open: 'amber', closed: 'green' }
 ```
 
-The worst shape is `orange` as a **fallback**, because then every caller that
-omits a theme crashes, not just the ones that ask for orange:
+Watch for `orange` as a **fallback**, which affects more sites than it looks —
+every caller that omits a theme lands on it:
 
 ```vue
-<!-- Before — crashes whenever `badge.theme` is undefined -->
+<!-- Before — every caller without `badge.theme` renders grey -->
 <Badge :theme="badge.theme ?? 'orange'" />
 
 <!-- After -->

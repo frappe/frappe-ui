@@ -9,19 +9,37 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
-### Badge — `theme="orange"` removed (breaking, loud)
+### Badge — `theme="orange"` removed (breaking; loud in TS, silent in JS)
 
 `orange` was a deprecated alias that resolved to `amber`, so `theme="amber"`
 renders exactly what `theme="orange"` used to. ADR-0008 keeps nothing
 deprecated in `1.0.0`, and the alias was never on the removal list, so no
 earlier census counted it (found by #1054).
 
-**Loud break:** `Badge` indexes a class map by theme, so an unknown value
-throws `TypeError: Cannot read properties of undefined (reading 'subtle')`
-while rendering. The badge does not appear, and the error takes the parent
-render with it. TypeScript call sites fail earlier, at `vue-tsc`. Check bound
-themes as well as literal attributes — a status-to-theme map that yields
-`'orange'` throws the same way and no grep for `theme="orange"` finds it.
+TypeScript call sites fail at `vue-tsc`, because the `theme` union no longer
+accepts the string. JavaScript call sites and bound values render the default
+`gray` theme and log a one-time dev-mode warning naming the component, prop and
+value. Check bound themes as well as literal attributes — a status-to-theme map
+that yields `'orange'`, or an `?? 'orange'` default, goes grey and no grep for
+`theme="orange"` finds it.
+
+### Badge — an unsupported `theme`, `variant` or `size` no longer crashes (fix)
+
+`Badge` indexed a class map by theme and then indexed that result by variant.
+A theme outside the union made the second lookup read a property of
+`undefined`, throwing `TypeError: Cannot read properties of undefined (reading
+'subtle')` mid-render — the badge vanished and the error took the parent render
+with it, so one stale colour name in a status map could blank a page.
+
+All three axes now fall back to the prop's default (`gray` / `subtle` / `md`)
+and warn once per offending value in dev. `variant` and `size` never threw —
+they ended their lookup chains and rendered untinted or unsized — but they were
+silently wrong, and now report themselves too.
+
+The public types are unchanged: `theme` still accepts only the six supported
+values, so TypeScript keeps rejecting anything else at compile time. The
+fallback is a runtime net for JS call sites and bound values, not a widening of
+the API.
 
 ### Editor — images and embeds resize from a bottom-right corner handle
 
@@ -1790,4 +1808,4 @@ names.
 | `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |
 | `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (re-exported from `frappe-ui/charts`) | **Removed** — loud; type import fails |
-| `Badge theme="orange"`             | `theme="amber"`                      | **Removed in 1.0.0** (ADR-0008) — loud; throws while rendering |
+| `Badge theme="orange"`             | `theme="amber"`                      | **Removed in 1.0.0** (ADR-0008) — loud in TS (compile error); silent in JS (renders gray, dev-only warning) |

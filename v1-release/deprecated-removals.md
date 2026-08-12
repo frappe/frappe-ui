@@ -50,9 +50,11 @@ Three rows sit outside it and are the easy ones to miss:
   `@deprecated` tag at all — only a line comment in `Badge.vue` — so no
   mechanical scan could see it, and it reached the list late via the
   cross-family vocabulary pass ([#1054](https://github.com/frappe/frappe-ui/issues/1054))
-  rather than the sweep. Unlike the other value removal, this one breaks
-  **loudly**: `Badge` indexes a class map by theme, so an unknown value
-  throws during render.
+  rather than the sweep. Removing it exposed a second bug: `Badge` chained two
+  raw table lookups, so an unknown theme threw mid-render and blanked the
+  parent. `Badge` now degrades an unsupported `theme`, `variant` or `size` to
+  the prop's default and warns in dev, so the removal breaks **loudly in
+  TypeScript** (compile error) and **silently in JavaScript** (gray badge).
 
 The TextEditor rows are one deletion each in `src/index.ts`, but seven
 `@deprecated` names behind them (`default`, `TextEditor`,
