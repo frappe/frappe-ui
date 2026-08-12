@@ -134,6 +134,21 @@ describe('<KeyboardShortcut />', () => {
     ).toBe(false)
   })
 
+  it('leaves the chips unlabelled, since the root role replaces them', () => {
+    // A per-key label is unreachable behind the root `role="img"`, and the
+    // ones the chips carried were the glyph, not the word: `↵`, not `Enter`.
+    for (const props of [
+      { combo: 'Mod+Shift+Alt+Enter' },
+      { combo: 'Mod+Shift+Alt+Enter', bg: true },
+    ]) {
+      const host = render(props)
+      expect(host.querySelectorAll('[data-slot=key] [role=img]').length).toBe(0)
+      expect(host.querySelectorAll('[data-slot=key] [aria-label]').length).toBe(
+        0,
+      )
+    }
+  })
+
   it('takes no role without a combo, so the fallback slot stays readable', () => {
     const host = render({})
     const root = host.querySelector('[data-slot=keyboard-shortcut]')

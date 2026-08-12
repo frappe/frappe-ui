@@ -16,13 +16,7 @@
         data-slot="key"
         :data-key-type="part.type"
       >
-        <span
-          v-if="bgIconFor(part)"
-          :class="bgIconFor(part)"
-          class="size-3"
-          role="img"
-          :aria-label="part.display"
-        />
+        <span v-if="bgIconFor(part)" :class="bgIconFor(part)" class="size-3" />
         <template v-else>{{ part.display }}</template>
       </kbd>
     </template>
@@ -33,34 +27,24 @@
           data-slot="key"
           :data-key-type="part.type"
         >
-          <span class="lucide-command size-3" role="img" aria-label="Command" />
+          <span class="lucide-command size-3" />
         </span>
         <span
           v-else-if="part.type === 'shift'"
           data-slot="key"
           :data-key-type="part.type"
         >
-          <span
-            class="lucide-arrow-big-up size-3"
-            role="img"
-            aria-label="Shift"
-          />
+          <span class="lucide-arrow-big-up size-3" />
         </span>
         <span
           v-else-if="part.type === 'alt'"
           data-slot="key"
           :data-key-type="part.type"
         >
-          <span class="lucide-option size-3" role="img" aria-label="Option" />
+          <span class="lucide-option size-3" />
         </span>
         <span v-else data-slot="key" :data-key-type="part.type">
-          <span
-            v-if="iconFor(part)"
-            :class="iconFor(part)"
-            class="size-3"
-            role="img"
-            :aria-label="part.display"
-          />
+          <span v-if="iconFor(part)" :class="iconFor(part)" class="size-3" />
           <span v-else class="leading-none uppercase">{{ part.display }}</span>
         </span>
         <span
