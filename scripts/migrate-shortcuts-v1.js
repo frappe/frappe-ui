@@ -820,8 +820,13 @@ export function keyToComboPart(key, { hasShift, prefix = '' } = {}) {
     }
     if (key in SHIFTED_CHARS) {
       const nearMiss = NEAR_MISS_NAMES[key] ? ` ${NEAR_MISS_NAMES[key]}` : ''
+      // The name already carries the Shift the site holds, so the prefix must
+      // give its own up: `{ key: '>', shift: true }` is `Shift+Period`, never
+      // `Shift+Shift+Period`. Shift is last in the modifier order, so dropping
+      // it from the prefix keeps the rest in order.
+      const held = hasShift ? prefix.replace('Shift+', '') : prefix
       return {
-        refusal: `key '${key}' is a shifted character. v1 matches the physical key, which is named \`${SHIFTED_CHARS[key]}\`. Write ${write(SHIFTED_CHARS[key])} by hand.${nearMiss}`,
+        refusal: `key '${key}' is a shifted character. v1 matches the physical key, which is named \`${SHIFTED_CHARS[key]}\`. Write \`combo: '${held}${SHIFTED_CHARS[key]}'\` by hand.${nearMiss}`,
       }
     }
   }

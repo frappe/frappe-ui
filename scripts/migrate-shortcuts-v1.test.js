@@ -108,6 +108,20 @@ describe('combo building', () => {
     expect(buildCombo({ key: '?' }).refusal).toContain("`combo: 'Shift+Slash'`")
   })
 
+  it('never doubles Shift when the site already holds it', () => {
+    // The v1 name of a shifted character carries its own Shift. Helpdesk
+    // writes `{ key: '>', shift: true }`, and `Shift+Shift+Period` is not a
+    // combo v1 parses.
+    for (const [key] of Object.entries(SHIFTED_CHARS)) {
+      expect(buildCombo({ key, shift: true }).refusal).not.toContain('Shift+Shift')
+      expect(buildCombo({ key, shift: true, ctrl: true }).refusal).not.toContain('Shift+Shift')
+    }
+    expect(buildCombo({ key: '>', shift: true }).refusal).toContain("`combo: 'Shift+Period'`")
+    expect(buildCombo({ key: '?', ctrl: true, shift: true }).refusal).toContain(
+      "`combo: 'Mod+Shift+Slash'`",
+    )
+  })
+
   it('tells an author who edited key instead of writing combo', () => {
     // A refusal names a v1 key name. Putting that name back in `key` leaves a
     // v0 config that never fired, so the run says what to write instead.
