@@ -782,8 +782,8 @@ function main() {
       inkShiftMarkerDirs
         .map((d) => findInkShiftMarkerBelow(d, { roots: inkShiftMarkerDirs }))
         .find(Boolean)
-    // Both branches print this. Two copies is what drifted apart over the last
-    // two review rounds, so keep one source and let each branch pick a writer.
+    // Both branches print this. Keep one source and let each pass its writer;
+    // two copies drift.
     const printVendoredHint = (write) => {
       write('   If the marker sits in a vendored copy outside node_modules, targeting')
       write(`   any ancestor of it finds it again — target directories that do not contain ${marker}.\n`)
