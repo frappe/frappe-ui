@@ -264,6 +264,32 @@ describe('Rating', () => {
       })
     })
 
+    it('names and describes from the slots alone', () => {
+      // The slots render the same elements the props do, so the references
+      // have to follow what renders rather than what the props say.
+      cy.mount(Rating, {
+        slots: {
+          label: () => h('span', 'Quality'),
+          description: () => h('span', 'Pick a rating.'),
+        },
+      })
+      cy.get('[role="radiogroup"]').then(($el) => {
+        cy.get(`#${$el.attr('aria-labelledby')}`).should('contain.text', 'Quality')
+        cy.get(`#${$el.attr('aria-describedby')}`).should('contain.text', 'Pick a rating.')
+      })
+    })
+
+    it('drops aria-required in slider mode, keeps it for the radiogroup', () => {
+      // The ARIA role table lists aria-required for radiogroup but not for
+      // slider, so a half-step Rating fails aria-allowed-attr if it sets one.
+      cy.mount(Rating, { props: { label: 'Quality', required: true } })
+      cy.get('[role="radiogroup"]').should('have.attr', 'aria-required', 'true')
+
+      cy.mount(Rating, { props: { label: 'Quality', required: true, step: 0.5 } })
+      cy.get('[role="slider"]').should('not.have.attr', 'aria-required')
+      cy.get('[role="slider"]').should('have.attr', 'data-required', 'true')
+    })
+
     it('renders error state and suppresses description', () => {
       cy.mount(Rating, {
         props: {

@@ -65,4 +65,21 @@ describe('Avatar', () => {
       .and('have.class', 'text-ink-blue-7')
   })
 
+
+  it('keeps the size enum when the class only sizes at a breakpoint', () => {
+    // Tailwind emits variant utilities after the base ones, so `sm:size-16`
+    // wins at `sm` on its own. Dropping the enum for it left the avatar
+    // unsized below `sm`, and this root is inline-block.
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc', size: 'md' },
+      attrs: { class: 'sm:size-16' },
+    })
+    cy.get('[data-cy="avatar"]').should('have.class', 'w-6')
+
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar-plain', label: 'Abc', size: 'md' },
+      attrs: { class: 'size-16' },
+    })
+    cy.get('[data-cy="avatar-plain"]').should('not.have.class', 'w-6')
+  })
 })

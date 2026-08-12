@@ -133,6 +133,20 @@ describe('Textinput', () => {
   })
 
   describe('shared labeling contract', () => {
+    it('describes the input from a #description slot alone', () => {
+      // The slot renders the same element the prop does. Keying the reference
+      // off the prop left the paragraph pointed at by nothing.
+      cy.mount(TextInput, {
+        props: { label: 'Email' },
+        slots: { description: () => h('span', 'We never share your email.') },
+      })
+      cy.get('input')
+        .invoke('attr', 'aria-describedby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'We never share')
+        })
+    })
+
     it('renders label, description, and links them via aria-describedby', () => {
       cy.mount(TextInput, {
         props: {
