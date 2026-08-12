@@ -787,7 +787,7 @@ function main() {
       console.error('   A second run would double-shift every chromatic ink token.')
       console.error('   Delete the marker only to re-run the shift on purpose.')
       console.error('   If the marker sits in a vendored copy outside node_modules, targeting')
-      console.error('   its package root finds it again — target the directories you own instead.\n')
+      console.error(`   any ancestor of it finds it again — target directories that do not contain ${marker}.\n`)
       process.exit(1)
     }
     if (marker) {
