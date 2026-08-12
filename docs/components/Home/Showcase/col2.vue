@@ -149,7 +149,7 @@ const resetState = () => {
         <label class="w-full">Status</label>
 
         <Badge theme="blue" class="rounded-1"> Stable</Badge>
-        <Badge theme="orange" class="rounded-1"> Moderate</Badge>
+        <Badge theme="amber" class="rounded-1"> Moderate</Badge>
       </div>
     </div>
 

@@ -30,10 +30,11 @@ exported today**, except the rows marked done.
 | ~~TextEditor extension barrels~~  | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | extensions from `frappe-ui/editor`                              | —                                                                                                                  |
 | ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
 | ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
+| ~~`Badge theme="orange"`~~ | removed in [#1069](https://github.com/frappe/frappe-ui/issues/1069) | `theme="amber"` | — |
 
-Twelve of the thirteen rows come from the one
+Twelve of the fourteen rows come from the one
 `// Deprecated component compatibility` block in `src/index.ts` (lines 103–132).
-Two rows sit outside it and are the easy ones to miss:
+Three rows sit outside it and are the easy ones to miss:
 
 - **`FormControl type="autocomplete"`** is a value in a prop union, not an
   export, so it does not appear in that block. It went at the same time as
@@ -44,6 +45,14 @@ Two rows sit outside it and are the easy ones to miss:
   `src/index.ts` with no `@deprecated` JSDoc, even though it warned on mount —
   so ADR-0008's mechanical rule missed the largest removal on the list. It
   carried the marker into the deprecated block before being deleted.
+- **`Badge theme="orange"`** is the same shape as the `FormControl` row: a
+  value in a prop union, aliased to `amber` in the component. It carried no
+  `@deprecated` tag at all — only a line comment in `Badge.vue` — so no
+  mechanical scan could see it, and it reached the list late via the
+  cross-family vocabulary pass ([#1054](https://github.com/frappe/frappe-ui/issues/1054))
+  rather than the sweep. Unlike the other value removal, this one breaks
+  **loudly**: `Badge` indexes a class map by theme, so an unknown value
+  throws during render.
 
 The TextEditor rows are one deletion each in `src/index.ts`, but seven
 `@deprecated` names behind them (`default`, `TextEditor`,

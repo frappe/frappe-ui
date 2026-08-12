@@ -64,16 +64,6 @@ describe('<Badge />', () => {
     cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-7')
     cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
 
-    // Orange (deprecated alias for amber)
-    cy.mount(Badge, {
-      props: {
-        theme: 'orange',
-        label: 'Orange',
-      },
-    })
-    cy.get('.inline-flex.rounded-full').should('have.class', 'text-ink-amber-7')
-    cy.get('.inline-flex.rounded-full').should('have.class', 'bg-surface-amber-2')
-
     // Red
     cy.mount(Badge, {
       props: {

@@ -5,7 +5,7 @@ import { Badge, MultiSelect } from 'frappe-ui'
 type Tag = {
   label: string
   value: string
-  theme: 'gray' | 'blue' | 'green' | 'orange' | 'red'
+  theme: 'gray' | 'blue' | 'green' | 'amber' | 'red'
 }
 
 const tags = ref<string[]>(['bug', 'p0'])
@@ -15,7 +15,7 @@ const tagOptions: Tag[] = [
   { label: 'Feature', value: 'feature', theme: 'blue' },
   { label: 'Enhancement', value: 'enhancement', theme: 'green' },
   { label: 'P0', value: 'p0', theme: 'red' },
-  { label: 'P1', value: 'p1', theme: 'orange' },
+  { label: 'P1', value: 'p1', theme: 'amber' },
   { label: 'P2', value: 'p2', theme: 'gray' },
   { label: 'Frontend', value: 'frontend', theme: 'blue' },
   { label: 'Backend', value: 'backend', theme: 'gray' },

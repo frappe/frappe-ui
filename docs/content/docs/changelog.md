@@ -9,6 +9,20 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Badge — `theme="orange"` removed (breaking, loud)
+
+`orange` was a deprecated alias that resolved to `amber`, so `theme="amber"`
+renders exactly what `theme="orange"` used to. ADR-0008 keeps nothing
+deprecated in `1.0.0`, and the alias was never on the removal list, so no
+earlier census counted it (found by #1054).
+
+**Loud break:** `Badge` indexes a class map by theme, so an unknown value
+throws `TypeError: Cannot read properties of undefined (reading 'subtle')`
+while rendering. The badge does not appear, and the error takes the parent
+render with it. TypeScript call sites fail earlier, at `vue-tsc`. Check bound
+themes as well as literal attributes — a status-to-theme map that yields
+`'orange'` throws the same way and no grep for `theme="orange"` finds it.
+
 ### Editor — images and embeds resize from a bottom-right corner handle
 
 Selecting an image, video, or embed used to reveal two vertical pills centered
@@ -1776,3 +1790,4 @@ names.
 | `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed** — silent; now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed** — import fails |
 | `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (re-exported from `frappe-ui/charts`) | **Removed** — loud; type import fails |
+| `Badge theme="orange"`             | `theme="amber"`                      | **Removed in 1.0.0** (ADR-0008) — loud; throws while rendering |

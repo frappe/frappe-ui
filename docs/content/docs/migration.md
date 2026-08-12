@@ -943,6 +943,64 @@ const primaryAction = {
 If the alert was really a promotional card in a sidebar, use the new
 [`SidebarCard`](./components/sidebar) component instead.
 
+## Badge
+
+`theme="orange"` is removed. It was a deprecated alias that resolved to
+`amber`, so the replacement renders the same badge it always did.
+
+| Before            | After            |
+| ----------------- | ---------------- |
+| `theme="orange"`  | `theme="amber"`  |
+
+Unlike the `Alert` row above, this break is **loud**. `Badge` looks its theme
+up in a class map, so a value that is not in the map throws while rendering:
+
+```
+TypeError: Cannot read properties of undefined (reading 'subtle')
+```
+
+The badge does not render at all, and the error takes the parent render down
+with it. TypeScript call sites fail earlier, at `vue-tsc`, because the `theme`
+prop union no longer accepts the string.
+
+```vue
+<!-- Before -->
+<Badge theme="orange" label="In Progress" />
+
+<!-- After -->
+<Badge theme="amber" label="In Progress" />
+```
+
+Check bound themes too, not only literal attributes. A status-to-theme map or
+a computed that returns `'orange'` throws the same way, and neither `vue-tsc`
+nor a grep for `theme="orange"` finds it:
+
+```ts
+// Before
+const themeByStatus = { open: 'orange', closed: 'green' }
+
+// After
+const themeByStatus = { open: 'amber', closed: 'green' }
+```
+
+The worst shape is `orange` as a **fallback**, because then every caller that
+omits a theme crashes, not just the ones that ask for orange:
+
+```vue
+<!-- Before — crashes whenever `badge.theme` is undefined -->
+<Badge :theme="badge.theme ?? 'orange'" />
+
+<!-- After -->
+<Badge :theme="badge.theme ?? 'amber'" />
+```
+
+If your app keeps its own colour vocabulary and cannot rename `orange` at the
+source, translate at the boundary instead of passing it through:
+
+```ts
+const badgeTheme = tone === 'orange' ? 'amber' : tone
+```
+
 ## Sidebar
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /

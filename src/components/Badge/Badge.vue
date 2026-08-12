@@ -31,9 +31,6 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   variant: 'subtle',
 })
 
-// `orange` is kept as a deprecated alias for `amber`
-const theme = computed(() => (props.theme === 'orange' ? 'amber' : props.theme))
-
 const classes = computed(() => {
   // The semantic scale (Figma export → tailwind/generated/colors.json) is
   // consistent across all themes — gray is the only exception (`-7` is its
@@ -79,7 +76,7 @@ const classes = computed(() => {
       outline: 'text-ink-violet-7 border border-outline-violet-3',
       ghost: 'text-ink-violet-7',
     },
-  }[theme.value]
+  }[props.theme]
 
   const variantClasses = themeClasses[props.variant]
 

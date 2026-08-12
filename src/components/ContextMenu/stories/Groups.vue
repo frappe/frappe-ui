@@ -74,7 +74,7 @@ const actions: ContextMenuOptions = [
       class="w-72 cursor-default select-none rounded-7 border border-outline-gray-2 bg-surface-base p-4 shadow-sm"
     >
       <div class="mb-3 flex items-start justify-between gap-2">
-        <Badge theme="orange" label="In Progress" />
+        <Badge theme="amber" label="In Progress" />
         <span class="text-p-sm text-ink-gray-4">Due Friday</span>
       </div>
       <p class="mb-2 text-sm-medium text-ink-gray-8">

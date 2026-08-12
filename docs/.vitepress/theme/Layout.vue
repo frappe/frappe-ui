@@ -61,7 +61,7 @@ onBeforeUnmount(() =>
           <Badge
             v-if="devBranch"
             :title="`git branch: ${devBranch}`"
-            theme="orange"
+            theme="amber"
             variant="outline"
             class="hidden md:flex"
           >
@@ -90,7 +90,7 @@ onBeforeUnmount(() =>
           <Badge
             v-if="devBranch"
             :title="`git branch: ${devBranch}`"
-            theme="orange"
+            theme="amber"
             variant="outline"
             class="hidden md:flex"
           >
