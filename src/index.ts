@@ -106,15 +106,19 @@ export * from './components/Tabs'
 // Command and keyboard surfaces
 export * from './components/CommandPalette'
 export * from './components/KeyboardShortcut'
-export * from './components/KeyboardShortcutsModal'
+export * from './components/KeyboardShortcutsDialog'
 export {
-  formatShortcutLabel,
-  getActiveShortcuts,
-  useShortcut,
-  type ActiveShortcut,
-  type RegisteredShortcut,
-  type ShortcutConfig,
-} from './composables/useShortcut'
+  useKeyboardShortcut,
+  type HoldKeyboardShortcutConfig,
+  type KeyboardShortcutCodedKey,
+  type KeyboardShortcutCombo,
+  type KeyboardShortcutConfig,
+  type KeyboardShortcutEntry,
+  type KeyboardShortcutGroup,
+  type KeyboardShortcutKey,
+  type KeyboardShortcutNamedKey,
+  type PressKeyboardShortcutConfig,
+} from './composables/useKeyboardShortcut'
 
 // Deprecated component compatibility
 /** @deprecated Use `Select` with `useColorScheme` instead. */

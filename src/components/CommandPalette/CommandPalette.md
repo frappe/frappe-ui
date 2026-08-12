@@ -27,7 +27,7 @@ props, the same as `CommandPaletteItem`.
 ## Opening it
 
 `Mod+K` opens the palette from anywhere on the page (registered internally via
-[`useShortcut`](../other/composables.md#useshortcut)) — no wiring needed. Open
-it programmatically with `v-model:open`.
+[`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut)). No
+wiring needed. Open it programmatically with `v-model:open`.
 
 <!-- @include: ./CommandPalette.api.md -->
