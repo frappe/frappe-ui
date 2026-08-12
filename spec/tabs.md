@@ -375,8 +375,10 @@ value input, not a panel switcher. The two share:
   own component, or the routed items arrived after mount — whether they came
   through `tabs` or through a `v-for` over a resource in composed mode
 - every focusable trigger carries `focus-visible:focus-ring` (P12), and no
-  track may clip it. The subtle track has 1px of padding, so it cannot use
-  `overflow-hidden` — the active pill's shadow spills a little instead
+  track may clip it. The subtle track has 1px of padding, so `overflow-hidden`
+  on the track would cut the outer half of the ring — it never sets it. The
+  active pill's shadow is clipped one layer down instead, by a layer that
+  holds the indicator and nothing else
 - the root never hands the reka primitive an undefined model. reka reads
   that as uncontrolled and starts driving selection itself, which would flip
   `aria-selected` onto a trigger the rest of the component still draws as
@@ -401,6 +403,18 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
   `#suffix` slot covers trailing content
 
 ## Changelog
+
+### 2026-08-12 (shadow clip)
+
+- **The pill indicator carries its own clip layer.** The track cannot clip its
+  shadow: with 1px of padding, `overflow-hidden` on the track also cuts the
+  outer half of a focused trigger's ring, which is why it was set (2026-08-10,
+  track containment) and then taken back off. The indicator now sits in an
+  `absolute inset-0 overflow-hidden` layer rounded like the track, so
+  `shadow-base` stops at the track edge while the ring, which belongs to the
+  trigger outside that layer, still paints in full. `TabList` and
+  `TabButtons`, both orientations. The layer sets no `data-slot` — it is
+  presentational and must stay restructurable (P10).
 
 ### 2026-08-10 (iconRight removed)
 

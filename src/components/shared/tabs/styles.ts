@@ -77,8 +77,9 @@ export function tabIndicatorSurfaceClasses(
 }
 
 /**
- * Track radius, one step outside the trigger radius: 8px at sm, 10px at md
- * (subtle) or 12px (`rounded-5`, ghost md). The track and the indicator's
+ * Track radius, one step outside the trigger radius: 8px at sm, 10px at md.
+ * Subtle md keeps its literal (a deliberate Figma override) where ghost md
+ * uses `rounded-5`; both land on 10px today. The track and the indicator's
  * clip layer both read it here, so the clip can't drift off the track's own
  * rounded box.
  */
