@@ -113,11 +113,12 @@ const attrsWithoutClassStyle = computed(() => {
 })
 
 const inputClasses = computed(() => {
+  // Each min-height fits one full line: line-height + py-1.5 + borders.
   let sizeClasses = {
-    sm: 'text-p-base rounded-4 min-h-7',
-    md: 'text-p-lg rounded-4 min-h-8',
-    lg: 'text-p-2xl rounded-5 min-h-10',
-    xl: 'text-p-3xl rounded-5 min-h-10',
+    sm: 'text-p-base rounded-4 min-h-9',
+    md: 'text-p-lg rounded-4 min-h-10',
+    lg: 'text-p-2xl rounded-5 min-h-11',
+    xl: 'text-p-3xl rounded-5 min-h-11',
   }[props.size]
 
   let paddingClasses = {
