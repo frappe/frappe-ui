@@ -10,18 +10,22 @@ import {
 const open = ref(false)
 
 // The default slot receives the grouped, enabled shortcuts, so an app can
-// render its own help surface without reading the registry itself.
+// render its own help surface without reading the registry itself. Both rows
+// have an empty handler, so both set `preventDefault: false` and leave the
+// docs page they run in alone.
 useKeyboardShortcut([
   {
     combo: 'Mod+Alt+N',
     description: 'New page',
     group: 'Pages',
+    preventDefault: false,
     handler: () => {},
   },
   {
     combo: 'Mod+Alt+D',
     description: 'Duplicate page',
     group: 'Pages',
+    preventDefault: false,
     handler: () => {},
   },
 ])

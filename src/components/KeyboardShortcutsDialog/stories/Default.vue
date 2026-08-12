@@ -8,6 +8,10 @@ const readOnly = ref(false)
 // Every registration lists itself in the dialog. `enabled: false` makes a
 // shortcut inert and hides its row, so read-only mode drops the editing group.
 // "Redo" is registered twice and renders as one row with two combos.
+//
+// This story runs inside the docs page, not in a frame. Every row below has an
+// empty handler, so each one keeps `preventDefault: false` and leaves the
+// browser's own Save, Undo and Zoom shortcuts working for the reader.
 useKeyboardShortcut([
   {
     combo: 'Mod+Shift+Slash',
@@ -20,6 +24,7 @@ useKeyboardShortcut([
     combo: 'Mod+S',
     description: 'Save',
     group: 'General',
+    preventDefault: false,
     handler: () => {},
   },
   {
@@ -27,6 +32,7 @@ useKeyboardShortcut([
     description: 'Undo',
     group: 'Editing',
     enabled: () => !readOnly.value,
+    preventDefault: false,
     handler: () => {},
   },
   {
@@ -34,6 +40,7 @@ useKeyboardShortcut([
     description: 'Redo',
     group: 'Editing',
     enabled: () => !readOnly.value,
+    preventDefault: false,
     handler: () => {},
   },
   {
@@ -41,18 +48,21 @@ useKeyboardShortcut([
     description: 'Redo',
     group: 'Editing',
     enabled: () => !readOnly.value,
+    preventDefault: false,
     handler: () => {},
   },
   {
     combo: 'Mod+Equal',
     description: 'Zoom in',
     group: 'View',
+    preventDefault: false,
     handler: () => {},
   },
   {
     combo: 'Mod+Minus',
     description: 'Zoom out',
     group: 'View',
+    preventDefault: false,
     handler: () => {},
   },
 ])
