@@ -5,6 +5,7 @@ import { ref } from 'vue'
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useCall, useDoc } from '../index'
 import { docStore } from '../docStore'
+import { LOCAL_WRITE } from '../writeGate'
 
 describe('useDoc', () => {
   it('it returns expected object', async () => {
@@ -363,7 +364,7 @@ describe('useDoc concurrency', () => {
   })
 
   it('runs two delete submits at once and gives each its own response', async () => {
-    await docStore.setDoc({ doctype: 'User', name: 'user1' })
+    await docStore.setDoc({ doctype: 'User', name: 'user1' }, LOCAL_WRITE)
     const user = useDoc<User>({
       baseUrl,
       doctype: 'User',

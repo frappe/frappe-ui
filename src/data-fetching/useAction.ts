@@ -1,5 +1,6 @@
 import { computed, effectScope, ref, Ref } from 'vue'
 import { useCall } from './useCall/useCall'
+import type { WriteStamp } from './writeGate'
 
 export interface UseActionOptions<TResponse, TParams> {
   method: 'POST' | 'PUT' | 'DELETE'
@@ -15,6 +16,20 @@ export interface UseActionOptions<TResponse, TParams> {
   key?: (params: TParams) => string
   /** Return a message to reject the submit before any request is sent. */
   validate?: (params: TParams) => string | void
+  /**
+   * Where a submit writes the shared stores — `useCall`'s internal seam,
+   * carrying this response's `WriteStamp`, which `docStore`/`listStore`
+   * require.
+   *
+   * Fires for EVERY successful submit, never filtered by the per-target check
+   * below. `key` happens to be the document name for every action today, so
+   * filtering store writes on it would agree with the gate by coincidence;
+   * key `setValue` by anything finer later (`name/fieldname`, say) and two
+   * saves to one document stop sharing a target, and the check would start
+   * dropping writes the store would have kept. Freshness of a store write is
+   * the store's decision, not this instance's.
+   */
+  onStoreWrite?: (data: TResponse, params: TParams, stamp: WriteStamp) => void
   onSuccess?: (data: TResponse, params: TParams) => void
   onError?: (error: Error, params: TParams) => void
 }
@@ -57,11 +72,11 @@ export interface UseActionOptions<TResponse, TParams> {
  * holds the older submit's value in that case. Submits with different keys
  * (or no key) are independent writes, and every one of them fires its hooks.
  *
- * This gate only decides which hooks fire, and only within this instance.
- * Store freshness does not depend on it: every store write carries its
- * request's dispatch version and `docStore`/`listStore` reject a write that a
- * later-dispatched request has overtaken, across instances and across the
- * docs side channel (#1017).
+ * This gate only decides which CONSUMER hooks fire, and only within this
+ * instance. Store writes go through `onStoreWrite`, which it never filters:
+ * every store write carries its request's sequence number and
+ * `docStore`/`listStore` reject the ones a later-dispatched request has
+ * overtaken, across instances and across the docs side channel (#1017).
  */
 export function useAction<TResponse, TParams extends Record<string, any>>(
   options: UseActionOptions<TResponse, TParams>,
@@ -139,9 +154,7 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
     // conflict on — two keyless submits (two inserts) are always independent
     // writes, and gating them would drop the first one's hook.
     let isFreshForTarget = () =>
-      target != null
-        ? sequence > (lastWrittenByTarget.get(target) ?? 0)
-        : true
+      target != null ? sequence > (lastWrittenByTarget.get(target) ?? 0) : true
     startPending(target)
 
     // Detached so the per-submit call is not tied to whichever component
@@ -156,9 +169,14 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
           baseUrl,
           immediate: false,
           refetch: false,
-          // Gated: this is where `useDoctype` and `useList` write the shared
-          // stores, and a stale same-target submit must not hand them its
-          // response.
+          // Ungated, and the only route to the shared stores from here.
+          onStoreWrite: options.onStoreWrite
+            ? (response, stamp) =>
+                options.onStoreWrite!(response, params, stamp)
+            : undefined,
+          // Gated: a stale same-target submit must not re-run a consumer's
+          // side effects (for `useList`, a needless refetch) with an answer
+          // a newer submit has already replaced.
           // Always wrapped, even without a consumer hook: a success must be
           // recorded either way, or it could not make older answers stale.
           onSuccess: (response) => {

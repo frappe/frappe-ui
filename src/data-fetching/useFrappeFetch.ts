@@ -1,6 +1,7 @@
 import { createFetch } from '@vueuse/core'
-import { docStore, type DispatchStamp } from './docStore'
+import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
+import { LOCAL_WRITE, writeGate, type DispatchStamp } from './writeGate'
 
 export class FrappeResponseError extends Error {
   title: string
@@ -36,17 +37,11 @@ export class FrappeResponseError extends Error {
   }
 }
 
-// Every request takes a dispatch version from `docStore` when it is
-// dispatched, carried on its Response. The stores gate their writes on it: a
-// document is written only if no later-dispatched request has written it
-// already — without this, two concurrent writes to one document leave the
-// store on whichever response settled last (#1017). The bookkeeping lives in
-// `docStore`, so the docs side channel below and every store-writing hook
-// share one freshness domain.
-// `record` is whether the request mutates the server (anything but GET): only
-// mutating responses record their version in the store, a read is admitted on
-// its version but must not make an earlier-dispatched save stale.
-export type { DispatchStamp } from './docStore'
+// This is where a request takes its sequence number: every request stamped on
+// dispatch, the stamp carried on its Response, and the stores gate their
+// writes on it. See `writeGate` for the rule — this module is only the place
+// the number is minted and the place it is read back off the response.
+export type { DispatchStamp } from './writeGate'
 
 const dispatchStamps = new WeakMap<Response, DispatchStamp>()
 
@@ -67,10 +62,15 @@ export const useFrappeFetch = createFetch({
     // Wrapping the global fetch is required for vitest, and stamps each
     // response with its request's dispatch version.
     fetch: (input, init) => {
-      const version = docStore.nextWriteVersion()
-      const record = (init?.method ?? 'GET').toUpperCase() !== 'GET'
+      // The sequence is taken here, before the request goes out — dispatch
+      // order, not settle order, is what the gate compares. `record` is the
+      // one place the mutating/read rule is decided, so no other module has
+      // to re-derive it from a method string.
+      const stamp = writeGate.next(
+        (init?.method ?? 'GET').toUpperCase() !== 'GET',
+      )
       return fetch(input, init).then((response) => {
-        dispatchStamps.set(response, { version, record })
+        dispatchStamps.set(response, stamp)
         return response
       })
     },
@@ -90,21 +90,15 @@ export const useFrappeFetch = createFetch({
         console.groupEnd()
       }
       if (responseData.docs) {
-        // A missing stamp means the response did not come from the wrapped
-        // fetch; treat it as the newest, and as recording. Unreachable today
-        // — every call site goes through the wrapped fetch — and it answers
-        // "no stamp" differently from `admitsWrite`, which treats an
-        // unstamped write as admitted-and-never-recording. Kept as the safer
-        // default for a docs payload (a mutation, in practice) if the fetch
-        // wrapper is ever bypassed. The stores gate per document. `setDocs`
-        // runs synchronously up to its IDB write, so its records are in
-        // place when `updateRows` checks them.
-        let stamp = getDispatchStamp(ctx.response) ?? {
-          version: docStore.nextWriteVersion(),
-          record: true,
-        }
+        // A response with no stamp did not come from the wrapped fetch above,
+        // so there is no dispatch order to place it in: `LOCAL_WRITE` — the
+        // one answer every store write gives to "no stamp". Unreachable
+        // today; every call site goes through the wrapped fetch. Both stores
+        // get the same stamp, so the docs and the rows of one response are
+        // gated as one write per document.
+        let stamp = getDispatchStamp(ctx.response) ?? LOCAL_WRITE
         docStore.setDocs(responseData.docs, stamp)
-        listStore.updateRows(responseData.docs, stamp.version)
+        listStore.updateRows(responseData.docs, stamp)
       }
       return ctx
     },

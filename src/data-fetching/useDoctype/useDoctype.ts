@@ -61,7 +61,7 @@ function useDelete(doctype: string, options: UseDoctypeOptions = {}) {
     method: 'DELETE',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(_data, { name }) {
+    onStoreWrite(_data, { name }) {
       docStore.removeDoc(doctype, name)
       listStore.removeRow(doctype, name)
     },
@@ -150,9 +150,9 @@ function useSetValue<T extends Record<string, any>>(
     method: 'PUT',
     baseUrl,
     key: ({ name }) => name,
-    onSuccess(data) {
-      docStore.setDoc({ doctype, ...data })
-      listStore.updateRow(doctype, data)
+    onStoreWrite(data, _params, stamp) {
+      docStore.setDoc({ doctype, ...data }, stamp)
+      listStore.updateRow(doctype, data, stamp)
     },
   })
 

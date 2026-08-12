@@ -8,10 +8,14 @@ import {
   unref,
   watch,
 } from 'vue'
-import { canUseCachedFallback, useCall } from './useCall/useCall'
+import {
+  canUseCachedFallback,
+  useCall,
+  type StoreWritingCallOptions,
+} from './useCall/useCall'
 import { idbStore } from './idbStore'
 import { makeGetParams, normalizeCacheKey, unrefObject } from './utils'
-import { BasicParams, UseCallOptions } from './useCall/types'
+import { BasicParams } from './useCall/types'
 
 /**
  * A `useCall`-shaped object whose every `submit()` runs its own request.
@@ -36,7 +40,7 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  *
  * Store writes do NOT follow that rule — they go through `onStoreWrite`,
  * which fires for every successful submit. `docStore`/`listStore` gate
- * themselves: every write carries its request's dispatch version, and the
+ * themselves: every write carries its request's sequence number, and the
  * stores reject a write for a document a later-dispatched request has
  * already written (#1017). That gate is per document and knows whether the
  * newer request actually landed, which this instance-wide rule does not: it
@@ -50,20 +54,14 @@ import { BasicParams, UseCallOptions } from './useCall/types'
  * One default differs from `useCall`: `immediate` is `false` here, because
  * every consumer is a write member that must only fire on `submit()`.
  */
-// `onStoreWrite` is internal: `useDoc` and `useNewDoc` use it to write the
-// shared stores. It is not part of the public call options, because the
-// stores decide freshness for it and a consumer callback cannot.
-type IsolatedCallOptions<
-  TResponse,
-  TParams extends BasicParams,
-> = UseCallOptions<TResponse, TParams> & {
-  onStoreWrite?: (data: TResponse) => void
-}
-
+// Options are `useCall`'s, including its internal `onStoreWrite` seam, which
+// this composable passes straight through: `useDoc` and `useNewDoc` use it to
+// write the shared stores, and it carries the response's `WriteStamp` because
+// the stores will not take a write without one.
 export function useIsolatedCall<
   TResponse,
   TParams extends BasicParams = undefined,
->(options: IsolatedCallOptions<TResponse, TParams>) {
+>(options: StoreWritingCallOptions<TResponse, TParams>) {
   const {
     url,
     method = 'GET',
@@ -154,8 +152,9 @@ export function useIsolatedCall<
     // happened to call submit, and stopped below so its watchers and
     // computeds do not pile up one set per submit.
     let scope = effectScope(true)
-    let call: ReturnType<typeof useCall<TResponse, Record<string, any>>> | null =
-      null
+    let call: ReturnType<
+      typeof useCall<TResponse, Record<string, any>>
+    > | null = null
     try {
       call = scope.run(() =>
         useCall<TResponse, Record<string, any>>({
@@ -166,13 +165,12 @@ export function useIsolatedCall<
           refetch: false,
           staleOnError,
           transform,
+          // Passed straight through, ungated: store writes run for every
+          // successful submit, carrying this request's stamp, and the stores
+          // reject the stale ones per document — a finer and better-informed
+          // rule than the newest-started gate below.
+          onStoreWrite,
           onSuccess: (data: TResponse) => {
-            // Store writes run for every successful submit. They carry this
-            // request's dispatch stamp (this hook runs inside `useCall`'s
-            // write-version window), and the stores reject the stale ones
-            // per document — a finer and better-informed rule than the
-            // newest-started gate below.
-            onStoreWrite?.(data)
             // The consumer hooks and the cache write are shared side
             // effects, so they keep the newest-wins gate that `data` and
             // `error` use: a stale response must not overwrite a fresher
