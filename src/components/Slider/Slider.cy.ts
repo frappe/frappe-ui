@@ -240,6 +240,18 @@ describe('Slider', () => {
       attrs: { class: 'my-bare-slider' },
     })
     cy.get('#sl-bare').should('have.class', 'my-bare-slider')
+
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [25] },
+      attrs: { class: 'my-styled-slider', style: 'margin-top: 4px' },
+    })
+    cy.get('.my-styled-slider').should('have.css', 'margin-top', '4px')
+
+    cy.mount(Slider, {
+      props: { id: 'sl-bare-style', modelValue: [25] },
+      attrs: { style: 'margin-top: 4px' },
+    })
+    cy.get('#sl-bare-style').should('have.css', 'margin-top', '4px')
   })
 
   it('drops its own w-full when the caller sets a width', () => {
