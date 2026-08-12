@@ -4,6 +4,8 @@
     :class="!bg ? 'text-ink-gray-5 text-sm' : ''"
     :aria-label="ariaLabel"
     role="note"
+    data-slot="keyboard-shortcut"
+    :data-variant="bg ? 'bg' : 'plain'"
     v-bind="$attrs"
   >
     <template v-if="bg && parsedParts.length">
@@ -11,6 +13,8 @@
         v-for="(part, idx) in parsedParts"
         :key="idx + '-' + part.raw"
         class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-4 bg-surface-gray-2 px-1.5 text-xs-medium text-ink-gray-7"
+        data-slot="key"
+        :data-key-type="part.type"
       >
         <span
           v-if="bgIconFor(part)"
@@ -24,20 +28,32 @@
     </template>
     <template v-else-if="parsedParts.length">
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
-        <span v-if="part.type === 'cmd'">
+        <span
+          v-if="part.type === 'cmd'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
           <span class="lucide-command size-3" role="img" aria-label="Command" />
         </span>
-        <span v-else-if="part.type === 'shift'">
+        <span
+          v-else-if="part.type === 'shift'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
           <span
             class="lucide-arrow-big-up size-3"
             role="img"
             aria-label="Shift"
           />
         </span>
-        <span v-else-if="part.type === 'alt'">
+        <span
+          v-else-if="part.type === 'alt'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
           <span class="lucide-option size-3" role="img" aria-label="Option" />
         </span>
-        <span v-else>
+        <span v-else data-slot="key" :data-key-type="part.type">
           <span
             v-if="iconFor(part)"
             :class="iconFor(part)"
@@ -51,6 +67,7 @@
           v-if="idx < parsedParts.length - 1 && showPlus"
           class="font-mono text-[10px] leading-none opacity-60"
           aria-hidden="true"
+          data-slot="separator"
           >+</span
         >
       </template>
@@ -60,7 +77,7 @@
     </template>
   </span>
   <template v-if="uniqueAltCombos.length">
-    <span class="inline-flex items-center gap-1.5">
+    <span class="inline-flex items-center gap-1.5" data-slot="alt-combos">
       <template
         v-for="(altCombo, i) in uniqueAltCombos"
         :key="'alt-' + i + altCombo"
@@ -148,6 +165,29 @@ function parseCombo(raw?: string): Part[] {
     pagedown: 'PgDn',
     home: 'Home',
     end: 'End',
+    // Named keys the shortcut grammar uses for digits and punctuation, so a
+    // combo reads the same in `useKeyboardShortcut` and on screen.
+    digit0: '0',
+    digit1: '1',
+    digit2: '2',
+    digit3: '3',
+    digit4: '4',
+    digit5: '5',
+    digit6: '6',
+    digit7: '7',
+    digit8: '8',
+    digit9: '9',
+    minus: '-',
+    equal: '=',
+    slash: '/',
+    backslash: '\\',
+    backtick: '`',
+    comma: ',',
+    period: '.',
+    semicolon: ';',
+    quote: "'",
+    bracketleft: '[',
+    bracketright: ']',
   }
 
   const result: Part[] = raw
