@@ -516,6 +516,16 @@ useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
     expect(refusals).toEqual([])
   })
 
+  it('reads the plural and camelCase context names too', () => {
+    const source = `const a = { bindings: [{ key: 'k', ctrl: true, handler: open }] }
+const b = { keyBindings: [{ key: 'j', ctrl: true, handler: down }] }
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain("combo: 'Mod+K'")
+    expect(migrated).toContain("combo: 'Mod+J'")
+  })
+
   it('leaves a key inside a string or a comment alone', () => {
     const source = "// { key: 's', ctrl: true, description: 'Save' }\nconst s = \"key: 's'\"\n"
 

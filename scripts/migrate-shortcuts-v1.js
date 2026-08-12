@@ -254,7 +254,8 @@ const MODIFIER_PROPS = ['ctrl', 'alt', 'shift']
 
 // A `keys: { ... }` or `shortcut: { ... }` property holds a shortcut even
 // when the object carries nothing but `key` and `description`.
-const CONTEXT_PROPERTY = /(?:^|[^\w$])(?:keys|key_bindings|shortcut|shortcuts|binding)\s*:\s*$/
+const CONTEXT_PROPERTY =
+  /(?:^|[^\w$])(?:keys|key_bindings|keyBindings|shortcuts?|bindings?)\s*:\s*$/
 
 // The same name applies to every object in a `shortcuts: [ ... ]` array, so
 // the search walks out of one enclosing array before it reads the name.
