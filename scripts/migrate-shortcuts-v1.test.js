@@ -1,0 +1,472 @@
+import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterEach, describe, expect, it } from 'vitest'
+import {
+  buildCombo,
+  importBindings,
+  keyToComboPart,
+  migrateShortcuts,
+  PUNCTUATION_NAMES,
+} from './migrate-shortcuts-v1.js'
+
+const SCRIPT = fileURLToPath(new URL('./migrate-shortcuts-v1.js', import.meta.url))
+
+const tempDirs = []
+
+afterEach(() => {
+  for (const dir of tempDirs.splice(0)) fs.rmSync(dir, { recursive: true, force: true })
+})
+
+function tempDir(files) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'shortcuts-v1-'))
+  tempDirs.push(dir)
+  for (const [name, content] of Object.entries(files)) {
+    fs.writeFileSync(path.join(dir, name), content)
+  }
+  return dir
+}
+
+function run(args) {
+  return spawnSync(process.execPath, [SCRIPT, ...args], { encoding: 'utf8' })
+}
+
+// A registration wrapped in the call, which is how every app writes one.
+const inCall = (object) => `import { useShortcut } from 'frappe-ui'\nuseShortcut([\n  ${object},\n])\n`
+
+describe('combo building', () => {
+  it('collapses key + ctrl into a Mod combo', () => {
+    expect(buildCombo({ key: 's', ctrl: true })).toEqual({ combo: 'Mod+S', digit: undefined })
+  })
+
+  it('writes modifiers in the fixed Mod+Ctrl+Alt+Shift order', () => {
+    expect(buildCombo({ key: 'h', shift: true, ctrl: true, alt: true }).combo).toBe(
+      'Mod+Alt+Shift+H',
+    )
+  })
+
+  it('never emits Ctrl, because v0 ctrl matched ctrlKey || metaKey', () => {
+    expect(buildCombo({ key: 'z', ctrl: true }).combo).not.toContain('Ctrl')
+  })
+
+  it('maps a digit onto its physical key name', () => {
+    expect(buildCombo({ key: '1', ctrl: true, shift: true })).toEqual({
+      combo: 'Mod+Shift+Digit1',
+      digit: true,
+    })
+  })
+
+  it('canonicalises a named key written in any case', () => {
+    expect(keyToComboPart('escape').part).toBe('Escape')
+    expect(keyToComboPart('ArrowUp').part).toBe('ArrowUp')
+    expect(keyToComboPart(' ').part).toBe('Space')
+  })
+
+  it('refuses every punctuation key and names its replacement', () => {
+    for (const [key, name] of Object.entries(PUNCTUATION_NAMES)) {
+      const result = keyToComboPart(key)
+      expect(result.part).toBeUndefined()
+      expect(result.refusal).toContain(name)
+    }
+  })
+
+  it('never produces Mod++ for the plus key', () => {
+    // The whole reason this codemod exists: 'Mod++' splits into
+    // ['Mod', '', ''] and silently never fires.
+    const result = buildCombo({ key: '+', ctrl: true })
+    expect(result.combo).toBeUndefined()
+    expect(result.refusal).toContain('Plus')
+  })
+
+  it('refuses an uppercase letter that carries no shift flag', () => {
+    expect(buildCombo({ key: 'S', ctrl: true }).refusal).toContain('Shift+S')
+    expect(buildCombo({ key: 'S', ctrl: true, shift: true }).combo).toBe('Mod+Shift+S')
+  })
+
+  it('refuses a key it has no v1 spelling for', () => {
+    expect(keyToComboPart('Meta').refusal).toContain('no known v1 spelling')
+  })
+})
+
+describe('object rewriting', () => {
+  it('rewrites the four v0 fields into one combo', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ key: 's', ctrl: true, description: 'Save', group: 'View', handler: onSave }"),
+    )
+
+    expect(migrated).toContain(
+      "{ combo: 'Mod+S', description: 'Save', group: 'View', handler: onSave }",
+    )
+    expect(refusals).toEqual([])
+  })
+
+  it('renames condition to enabled', () => {
+    const { migrated } = migrateShortcuts(
+      inCall(
+        "{ key: 'z', ctrl: true, shift: true, description: 'Redo', condition: notReadOnly, handler: redo }",
+      ),
+    )
+
+    expect(migrated).toContain(
+      "{ combo: 'Mod+Shift+Z', description: 'Redo', enabled: notReadOnly, handler: redo }",
+    )
+  })
+
+  it('deletes triggeredOn and keeps the hold callbacks', () => {
+    const source = `import { useShortcut } from "frappe-ui"
+useShortcut([
+	{
+		key: "l",
+		ctrl: true,
+		shift: true,
+		triggeredOn: "hold",
+		description: "Highlight Blocks with Client Scripts",
+		group: "View",
+		onHold: () => { store.highlight = true },
+		onRelease: () => { store.highlight = false },
+	},
+])
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain('\t\tcombo: "Mod+Shift+L",\n\t\tdescription:')
+    expect(migrated).not.toContain('triggeredOn')
+    expect(migrated).toContain('onRelease: () => { store.highlight = false },')
+  })
+
+  it('keeps the surrounding formatting of a multi-line object', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut([
+  {
+    key: 'f',
+    ctrl: true,
+    description: 'Find',
+    handler: () => {
+      open.value = true
+    },
+  },
+])
+`
+    const { migrated } = migrateShortcuts(source)
+
+    const expected = source
+      .replaceAll('useShortcut', 'useKeyboardShortcut')
+      .replace("    key: 'f',\n    ctrl: true,\n", "    combo: 'Mod+F',\n")
+    expect(migrated).toBe(expected)
+  })
+
+  it('drops a trailing modifier without leaving a dangling comma', () => {
+    const { migrated } = migrateShortcuts(
+      inCall("{ description: 'Redo', key: 'z', ctrl: true, shift: true }"),
+    )
+
+    expect(migrated).toContain("{ description: 'Redo', combo: 'Mod+Shift+Z' }")
+  })
+
+  it('reports a punctuation site with its file line and leaves the source alone', () => {
+    const source = inCall("{ key: '+', ctrl: true, description: 'Zoom in', handler: zoomIn }")
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toContain("key: '+', ctrl: true")
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(3)
+    expect(refusals[0].message).toContain('`Plus`')
+  })
+
+  it('marks a digit conversion so a shifted digit gets a second look', () => {
+    const { changes } = migrateShortcuts(
+      inCall("{ key: '1', ctrl: true, shift: true, description: 'Format as number' }"),
+    )
+
+    expect(changes).toEqual([
+      { line: 3, from: "key: '1'", to: "combo: 'Mod+Shift+Digit1'", digit: true },
+    ])
+  })
+
+  it('refuses a key that is not a plain string', () => {
+    const { refusals } = migrateShortcuts(inCall('{ key: keyName, description: "Dynamic" }'))
+
+    expect(refusals[0].message).toContain('not a plain string')
+  })
+
+  it('refuses a modifier that is not a literal boolean', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ key: 's', ctrl: isMac, description: 'Save' }"),
+    )
+
+    expect(migrated).toContain('ctrl: isMac')
+    expect(refusals[0].message).toContain('not a literal boolean')
+  })
+
+  it('refuses hold mode that also carries a handler', () => {
+    const { refusals } = migrateShortcuts(
+      inCall(
+        "{ key: 'l', triggeredOn: 'hold', description: 'Hold', handler: a, onHold: b, onRelease: c }",
+      ),
+    )
+
+    expect(refusals[0].message).toContain('Decide which callback stays')
+  })
+
+  it('refuses hold callbacks that v0 never fired', () => {
+    const { refusals } = migrateShortcuts(
+      inCall("{ key: 'l', description: 'Hold', onHold: a, onRelease: b }"),
+    )
+
+    expect(refusals[0].message).toContain('never fired in v0')
+  })
+
+  it('renames condition on an object built by spreading a v0 config', () => {
+    const source = `export function commandShortcuts() {
+	return commands.all.value.map((command) => ({
+		...command.keys!,
+		group: command.group,
+		condition: command.condition,
+		handler: command.action,
+	}))
+}
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain('enabled: command.condition,')
+    expect(refusals).toEqual([])
+  })
+
+  it('converts a keys: { ... } object that carries no other config field', () => {
+    const { migrated } = migrateShortcuts(
+      'commands.register({\n\tkeys: { key: "p", ctrl: true, description: "Preview" },\n})\n',
+      { ext: '.ts' },
+    )
+
+    expect(migrated).toContain('keys: { combo: "Mod+P", description: "Preview" }')
+  })
+
+  it('refuses a type declaration of the v0 shape', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      'export type CommandKeys = {\n\tkey: string;\n\tctrl?: boolean;\n\tshift?: boolean;\n\tdescription: string;\n};\n',
+      { ext: '.ts' },
+    )
+
+    expect(migrated).toContain('key: string;')
+    expect(refusals[0].message).toContain('KeyboardShortcutConfig')
+  })
+})
+
+describe('objects that are not shortcuts', () => {
+  it('leaves a fake keyboard event alone', () => {
+    // suite's own test builds events with the same four field names.
+    const source = "fire({ key: 'z', ctrl: true })\nfire({ key: '=', ctrl: true })\n"
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+  })
+
+  it('leaves a table column alone', () => {
+    const source = "const columns = [{ key: 'name', label: 'Name' }]\n"
+
+    expect(migrateShortcuts(source).migrated).toBe(source)
+  })
+
+  it('leaves a key inside a string or a comment alone', () => {
+    const source = "// { key: 's', ctrl: true, description: 'Save' }\nconst s = \"key: 's'\"\n"
+
+    expect(migrateShortcuts(source).migrated).toBe(source)
+  })
+
+  it('does not read a .vue template as JavaScript', () => {
+    const source = `<template>
+  <p>Don't press { or } here</p>
+</template>
+
+<script setup>
+import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+</script>
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("<p>Don't press { or } here</p>")
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+  })
+})
+
+describe('identifier renames', () => {
+  it('renames the members that moved', () => {
+    const source = `import { KeyboardShortcutsModal, useShortcut, type ShortcutConfig } from 'frappe-ui'
+const config: ShortcutConfig = { key: 's', description: 'Save' }
+useShortcut(config)
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain(
+      "import { KeyboardShortcutsDialog, useKeyboardShortcut, type KeyboardShortcutConfig } from 'frappe-ui'",
+    )
+    expect(migrated).toContain('const config: KeyboardShortcutConfig')
+    expect(migrated).toContain('useKeyboardShortcut(config)')
+  })
+
+  it('renames the tag in a template, where global registration hides the import', () => {
+    const { migrated } = migrateShortcuts(
+      '<template>\n  <KeyboardShortcutsModal v-model:open="open" />\n  <keyboard-shortcuts-modal />\n</template>\n',
+      { ext: '.vue' },
+    )
+
+    expect(migrated).toContain('<KeyboardShortcutsDialog v-model:open="open" />')
+    expect(migrated).toContain('<keyboard-shortcuts-dialog />')
+  })
+
+  it("leaves an app's own useShortcut fork alone and says so", () => {
+    const source = `import { useShortcut } from '@/composables/useShortcut'
+useShortcut({ key: 's', description: 'Save', handler: save })
+`
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toContain("import { useShortcut } from '@/composables/useShortcut'")
+    expect(refusals[0].message).toContain("comes from '@/composables/useShortcut'")
+  })
+
+  it('leaves a locally declared useShortcut alone', () => {
+    const source = 'export function useShortcut(configs) {\n  return configs\n}\n'
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toBe(source)
+    expect(refusals[0].message).toContain('declared in this file')
+  })
+
+  it("does not touch an app's own useKeyboardShortcuts composable", () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+export function useKeyboardShortcuts() {
+  useShortcut({ key: 'd', ctrl: true, description: 'Toggle microphone', handler: toggle })
+}
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain('export function useKeyboardShortcuts() {')
+    expect(migrated).toContain("import { useKeyboardShortcut } from 'frappe-ui'")
+  })
+
+  it('reads the module each name is imported from', () => {
+    const bindings = importBindings(
+      "import { a, b as c } from 'frappe-ui'\nimport d from './d'\nimport * as e from 'vue'\n",
+    )
+
+    expect(bindings.get('a')).toBe('frappe-ui')
+    expect(bindings.get('c')).toBe('frappe-ui')
+    expect(bindings.get('d')).toBe('./d')
+    expect(bindings.get('e')).toBe('vue')
+  })
+})
+
+describe('hard stops', () => {
+  it('refuses a deleted export instead of rewriting it', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      "import { formatShortcutLabel, getActiveShortcuts } from 'frappe-ui'\n",
+    )
+
+    expect(migrated).toContain('formatShortcutLabel')
+    expect(refusals.map((r) => r.message)).toEqual([
+      expect.stringContaining('`formatShortcutLabel` is deleted'),
+      expect.stringContaining('`getActiveShortcuts` is deleted'),
+    ])
+  })
+
+  it('refuses a destructured return, which v1 no longer gives', () => {
+    const { refusals } = migrateShortcuts(
+      "const { activeShortcuts } = useShortcut({ key: 's', description: 'Save' })\n",
+    )
+
+    expect(refusals.some((r) => r.message.includes('returns void in v1'))).toBe(true)
+  })
+
+  it('reports a hand-rolled hold rather than folding it', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut([{ key: ' ', description: 'Hold for move mode', handler: startMove }])
+useEventListener(document, 'keyup', (e) => { if (e.key === ' ') endMove() })
+`
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toContain("combo: 'Space'")
+    expect(migrated).toContain("useEventListener(document, 'keyup'")
+    expect(refusals.some((r) => r.message.includes('hand-rolled hold'))).toBe(true)
+  })
+
+  it('reports a barrel mock keyed on the old export name', () => {
+    const source = `import { vi } from 'vitest'
+vi.mock('frappe-ui', () => ({ useShortcut: (configs) => registered.push(configs) }))
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain('useKeyboardShortcut: (configs)')
+    expect(refusals.some((r) => r.message.includes("mocks the 'frappe-ui' barrel"))).toBe(true)
+  })
+})
+
+describe('cli', () => {
+  it('exits non-zero and writes nothing extra when a site is refused', () => {
+    const dir = tempDir({
+      'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: '+', ctrl: true, description: 'Zoom in' }])\n",
+    })
+    const result = run([dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('1 sites need a decision')
+    expect(result.stdout).toContain('`Plus`')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toContain("key: '+'")
+  })
+
+  it('exits zero on a clean run and writes the file', () => {
+    const dir = tempDir({
+      'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: 's', ctrl: true, description: 'Save' }])\n",
+    })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toContain("{ combo: 'Mod+S'")
+  })
+
+  it('still exits non-zero on a dry run that found a refusal', () => {
+    const dir = tempDir({
+      'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: '=', description: 'Zoom' }])\n",
+    })
+    const result = run(['--dry-run', dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('[dry-run]')
+  })
+
+  it('writes nothing on a dry run', () => {
+    const before = "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: 's', ctrl: true, description: 'Save' }])\n"
+    const dir = tempDir({ 'a.js': before })
+    run(['--dry-run', dir])
+
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('lists every digit it converted', () => {
+    const dir = tempDir({
+      'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: '1', ctrl: true, shift: true, description: 'Format' }])\n",
+    })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Digit keys converted')
+    expect(result.stdout).toContain("combo: 'Mod+Shift+Digit1'")
+  })
+
+  it('refuses an invalid path', () => {
+    const result = run([path.join(os.tmpdir(), 'shortcuts-v1-does-not-exist')])
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('Invalid path')
+  })
+
+  it('prints the usage line with no target', () => {
+    expect(run([]).status).toBe(1)
+    expect(run(['--help']).stdout).toContain('Usage: shortcuts-v1')
+  })
+})
