@@ -13,6 +13,34 @@ time, some of them get promoted to the public API and others get removed.
 > **not** import this subpath from product apps or third-party code — pin to a
 > public entry point instead.
 
+## Parked or incubating
+
+An export lands here for one of two reasons, and the reason tells you which way
+it is likely to move:
+
+- **Parked** — it was public in v0, left the root export in `1.0.0`, and sits
+  here as an interim import path. It still works. It leaves by being deleted
+  once apps migrate, not by being promoted.
+- **Incubating** — it was never public. It leaves by being promoted to the root
+  export, or by being dropped.
+
+| Export | State | Waiting on |
+| --- | --- | --- |
+| [`Accordion`](#accordion) | Incubating | Its API settling |
+| [`Calendar`](#calendar) | Parked | A redesigned calendar family |
+| [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
+| [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
+| [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
+| [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
+| [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
+| [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
+| [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
+| [Input labeling](#useinputlabeling) | Incubating | Its API settling |
+
+A component that is **removed** rather than parked is a third case: it has no
+import path at all and needs a replacement. Those are on the
+[Legacy components](/docs/components/legacy) page.
+
 ## Accordion
 
 Stacks sections of content behind labelled headers that expand and collapse.
@@ -67,6 +95,20 @@ import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
 See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
 variants, and the labeling contract.
 
+## FloatingWindow
+
+A panel that docks, floats, or collapses to a bottom-right tray, for
+composer-style windows. `v-model:mode` holds the state (`docked` | `floating` |
+`minimized`); `storageKey` persists the mode and geometry across sessions, and
+`minimizable: false` drops the tray state. The `#header`, `#actions`, and
+`#footer` slots replace or extend the title bar and pin a region below the
+scrollable body. `useFloatingWindow` is the headless half — pass it the panel
+and drag-handle refs to build your own chrome.
+
+```ts
+import { FloatingWindow, useFloatingWindow } from 'frappe-ui/experimental'
+```
+
 ## ListView
 
 A config-driven data table: resizable columns, per-column `getLabel`/`prefix`
@@ -95,6 +137,23 @@ import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
 
 See the [Editor migration section](/docs/migration#editor) for the
 before/after.
+
+## Sprite icons
+
+The sprite-based `Icon`, `IconPicker`, and `spritePlugin`, moved out of
+`frappe-ui/icons` in `1.0.0`. They draw from a 468 KB SVG sprite that
+`spritePlugin` injects into `<body>`. `lucide-*` classes — and the root
+[`Icon`](/docs/components/icon) component, which wraps one — are the canonical
+way to render icons, so this trio is parked only while apps migrate, and it
+will be removed. Nothing about the components changed; only the subpath did.
+
+```ts
+// Root `frappe-ui` exports a different `Icon` — alias one if you import both.
+import { Icon as SpriteIcon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
+```
+
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, …) stay on
+`frappe-ui/icons`.
 
 ## MultiEmailInput
 
