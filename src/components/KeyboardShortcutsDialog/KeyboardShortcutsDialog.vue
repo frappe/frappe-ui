@@ -13,14 +13,13 @@
         >
           {{ title }}
         </h3>
-        <TextInput
-          v-if="shouldShowSearch"
-          v-model="searchQuery"
-          type="text"
-          class="w-fit ml-2"
-          placeholder="Search shortcuts"
-          data-slot="search"
-        />
+        <div v-if="shouldShowSearch" class="w-fit ml-2" data-slot="search">
+          <TextInput
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search shortcuts"
+          />
+        </div>
       </div>
     </template>
     <template #default>

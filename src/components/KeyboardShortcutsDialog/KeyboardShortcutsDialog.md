@@ -61,7 +61,7 @@ for a class prop:
 | --------------- | ---------------------------------------------------------- |
 | `header`        | title row                                                  |
 | `title`         | dialog title                                               |
-| `search`        | search input, when shown                                   |
+| `search`        | the search field, when shown                               |
 | `empty`         | the empty message; `data-state` is `empty` or `no-results` |
 | `groups`        | the grid of groups                                         |
 | `group`         | one group column                                           |
