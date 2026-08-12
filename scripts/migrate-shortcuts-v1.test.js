@@ -235,6 +235,23 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
+  it('leaves a menu item shaped { condition, handler } alone', () => {
+    // Same two fields, no config-only name, no shortcut position. Rewriting
+    // `condition` here would break the menu and report a clean run.
+    const source = `const items = [\n\t{ label: 'Delete', condition: canDelete, handler: remove },\n]\n`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+  })
+
+  it('renames condition inside a useShortcut call even with no other config field', () => {
+    const source = 'useShortcut([{ ...base, condition: canEdit, handler: edit }])\n'
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain('enabled: canEdit')
+  })
+
   it('converts a keys: { ... } object that carries no other config field', () => {
     const { migrated } = migrateShortcuts(
       'commands.register({\n\tkeys: { key: "p", ctrl: true, description: "Preview" },\n})\n',

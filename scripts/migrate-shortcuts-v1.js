@@ -623,9 +623,18 @@ function convertObject(source, mask, range, ctx) {
 
   // Pass two: an object built by spreading a v0 config still carries
   // `condition`, which v1 spells `enabled`.
+  //
+  // `condition` next to `handler` is not evidence on its own — a menu item, a
+  // route rule and a command entry all share that shape. So the object must
+  // also carry a config-only name, or sit where only a shortcut sits.
   if (!keyProp) {
     const isShortcutLike =
-      condition && ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
+      condition &&
+      ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n)) &&
+      (ctx.insideCall ||
+        ctx.contextProperty ||
+        byName.has('description') ||
+        byName.has('group'))
     if (!isShortcutLike) return null
     return {
       edits: [renameProperty(condition, 'enabled')],
