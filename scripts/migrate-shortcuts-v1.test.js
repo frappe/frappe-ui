@@ -495,6 +495,17 @@ useShortcut(bindings)
     expect(migrated).toContain("{ key: 's', ctrl: true, handler: save }")
   })
 
+  it('does not read a section comment as the property above an object', () => {
+    const source = `const items = [
+  // shortcuts:
+  { key: 'delete', handler: del },
+]
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+  })
+
   it('says nothing about a menu entry in a file it did not rename', () => {
     const source = "const items = [{ key: 'delete', label: 'Delete', handler: onDelete }]\n"
     const { migrated, notes } = migrateShortcuts(source, { ext: '.js' })

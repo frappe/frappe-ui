@@ -262,11 +262,21 @@ const CONTEXT_PROPERTY =
 function underContextProperty(source, mask, from, limit) {
   let at = from
   for (let level = 0; level < 2; level++) {
-    if (CONTEXT_PROPERTY.test(source.slice(Math.max(limit, at - 40), at))) return true
+    if (CONTEXT_PROPERTY.test(codeBefore(source, mask, at, limit))) return true
     at = enclosingArray(source, mask, at, limit)
     if (at < 0) return false
   }
   return false
+}
+
+// The code that runs up to this position, with a string and a comment blanked
+// out. A section comment `// shortcuts:` above an object is prose, not the
+// property the object sits under.
+function codeBefore(source, mask, at, limit) {
+  const from = Math.max(limit, at - 40)
+  let text = ''
+  for (let i = from; i < at; i++) text += mask[i] ? ' ' : source[i]
+  return text
 }
 
 // The index of the `[` that holds this position, or -1 when the nearest open
