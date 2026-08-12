@@ -14,9 +14,9 @@
   },
   {
     name: 'paddingTop',
-    description: 'CSS value for top padding when position is top (default: "5vh").',
+    description: 'Top padding while the dialog sits at the top of the screen. Takes the\nsame values as `Dialog`\'s own prop (default: "5vh").',
     required: false,
-    type: 'string',
+    type: 'string | number',
     default: '"5vh"'
   },
   {

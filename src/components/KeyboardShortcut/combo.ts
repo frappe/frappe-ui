@@ -58,11 +58,15 @@ const KEY_DISPLAY: Record<string, string> = {
 }
 
 /**
- * Spoken names for the glyphs a part can display. A screen reader reads a
- * lone `[` as nothing useful, so every punctuation glyph gets a word.
+ * Spoken names for the glyphs and abbreviations a part can display. A screen
+ * reader reads a lone `[` as nothing useful, and reads `PgDn` as written, so
+ * every glyph and every shortened name gets a word.
  */
 const WORD_BY_DISPLAY: Record<string, string> = {
   '⌘': 'Command',
+  Esc: 'Escape',
+  PgUp: 'Page Up',
+  PgDn: 'Page Down',
   Shift: 'Shift',
   '⌥': 'Option',
   Alt: 'Alt',

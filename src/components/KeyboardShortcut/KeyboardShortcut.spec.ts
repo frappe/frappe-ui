@@ -100,6 +100,12 @@ describe('parseCombo', () => {
     expect(spellOut(parseCombo('Mod+Slash', false))).toBe('Control + Slash')
     expect(spellOut(parseCombo('Mod+Digit1', false))).toBe('Control + 1')
   })
+
+  it('spells the shortened key names in full', () => {
+    expect(spellOut(parseCombo('Escape', false))).toBe('Escape')
+    expect(spellOut(parseCombo('PageUp', false))).toBe('Page Up')
+    expect(spellOut(parseCombo('PageDown', false))).toBe('Page Down')
+  })
 })
 
 describe('<KeyboardShortcut />', () => {
