@@ -470,16 +470,60 @@ function buildMask(source, ranges) {
   return mask
 }
 
-// A second mask, for the identifier rename only. It hides strings, template
-// text, comments and regexes inside script code, so a module specifier like
-// './useShortcut' or a name quoted in prose is never rewritten. A .vue
-// template stays readable, because a component tag lives there and the file
-// may never import the name.
-function buildRenameMask(source, ranges) {
-  const mask = new Uint8Array(source.length)
+// A .vue template is markup, not code. Exactly three places in it can name a
+// component or a binding, and a rename anywhere else changes prose, a class
+// list or a plain attribute value. The `d` flag gives each group's offsets.
+const TEMPLATE_ELIGIBLE = [
+  // The tag: `<KeyboardShortcutsModal`, `</keyboard-shortcuts-modal`.
+  /<\/?([A-Za-z][\w.-]*)/dg,
+  // A bound attribute value: `:is="X"`, `v-if="X"`, `@click="X()"`.
+  /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)')/dg,
+  // A mustache.
+  /\{\{([\s\S]*?)\}\}/dg,
+]
+
+// The parts of the file that are not `<script>`.
+function outsideScript(source, ranges) {
+  const outside = []
+  let cursor = 0
+  for (const [from, to] of ranges) {
+    if (from > cursor) outside.push([cursor, from])
+    cursor = Math.max(cursor, to)
+  }
+  if (cursor < source.length) outside.push([cursor, source.length])
+  return outside
+}
+
+// A second mask, for the identifier rename only.
+//
+// Inside script code it hides strings, comments and regexes, so a module
+// specifier like './useShortcut' or a name quoted in prose is never rewritten.
+//
+// A .vue template starts fully hidden, and only a tag, a bound attribute value
+// and a mustache are opened up. A component tag still renames when global
+// registration hides the import, and `class="useShortcut"` stays as it is.
+function buildRenameMask(source, ranges, ext) {
+  if (ext !== '.vue') return maskLiterals(source)
+
+  const mask = new Uint8Array(source.length).fill(MASK_LITERAL)
   for (const [from, to] of ranges) {
     const sub = maskLiterals(source.slice(from, to))
     for (let i = 0; i < sub.length; i++) mask[from + i] = sub[i]
+  }
+
+  for (const [from, to] of outsideScript(source, ranges)) {
+    const text = source.slice(from, to)
+    for (const pattern of TEMPLATE_ELIGIBLE) {
+      pattern.lastIndex = 0
+      let m
+      while ((m = pattern.exec(text))) {
+        for (let group = 1; group < m.length; group++) {
+          const span = m.indices[group]
+          if (!span) continue
+          for (let i = from + span[0]; i < from + span[1]; i++) mask[i] = 0
+        }
+      }
+    }
   }
   return mask
 }
@@ -1060,7 +1104,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     return true
   })
 
-  const renameMask = buildRenameMask(content, ranges)
+  const renameMask = buildRenameMask(content, ranges, ext)
 
   if (renameable.length > 0) {
     const identifier = new RegExp(`\\b(${renameable.join('|')})\\b`, 'g')
@@ -1083,7 +1127,8 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const tag = new RegExp(`(</?)(${Object.keys(TAG_RENAMES).join('|')})\\b`, 'g')
   let t
   while ((t = tag.exec(content))) {
-    if (renameMask[t.index]) continue
+    // The mask opens the tag name, not the `<` in front of it.
+    if (renameMask[t.index + t[1].length]) continue
     edits.push({
       start: t.index + t[1].length,
       end: t.index + t[0].length,
@@ -1233,7 +1278,7 @@ function main() {
   }
 
   if (allNotes.length > 0) {
-    console.log('\n⚠ Read these — the file is migrated, but the code may want a rewrite:')
+    console.log('\n⚠ Read these — they do not fail the run:')
     for (const n of allNotes) console.log(`  ${n.file}:L${n.line}  ${n.message}`)
   }
 

@@ -502,6 +502,41 @@ useShortcut({ key: 's', description: 'Save', handler: save })
     expect(migrated).toContain('useKeyboardShortcut({ combo:')
   })
 
+  it('leaves template prose and plain attribute values alone', () => {
+    const source = `<script setup>
+import { useShortcut, KeyboardShortcutsModal } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+</script>
+
+<template>
+  <div class="useShortcut" data-test="KeyboardShortcutsModal">useShortcut</div>
+  <KeyboardShortcutsModal v-model:open="open" />
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('class="useShortcut" data-test="KeyboardShortcutsModal"')
+    expect(migrated).toContain('>useShortcut</div>')
+    expect(migrated).toContain('<KeyboardShortcutsDialog v-model:open="open" />')
+    expect(migrated).toContain("import { useKeyboardShortcut, KeyboardShortcutsDialog }")
+  })
+
+  it('renames a bound attribute value and a mustache in a template', () => {
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <component :is="KeyboardShortcutsModal" />
+  <span>{{ KeyboardShortcutsModal.name }}</span>
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain(':is="KeyboardShortcutsDialog"')
+    expect(migrated).toContain('{{ KeyboardShortcutsDialog.name }}')
+  })
+
   it('renames a component tag in a template that has a script block', () => {
     const source = `<script setup>
 const title = 'KeyboardShortcutsModal'

@@ -2649,8 +2649,7 @@ Each of these exits the run non-zero. Fix them by hand.
 
 ### What it lists without failing the run
 
-The file is migrated and correct. Read these and decide if the code wants a
-rewrite.
+None of these fails the run. Read them and decide if the code wants a rewrite.
 
 - **Every digit it converted.** See above.
 - **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
@@ -2669,6 +2668,11 @@ barrel, or does not bind it at all. A fork imported from your own module, or
 declared in the same file, keeps its name and is reported instead. crm, lms
 and suite each ship a local `useKeyboardShortcuts`, one character from the new
 name; those are untouched.
+
+A rename also stays inside code. A name in a string, a module specifier or a
+comment keeps its spelling. In a `.vue` template only three places rename: the
+tag, a bound attribute value such as `:is="..."`, and a mustache. So
+`class="useShortcut"` and template prose stay as they are.
 
 ## KeyboardShortcut
 
