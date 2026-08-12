@@ -28,10 +28,10 @@ export function tabTrackClasses(opts: {
     case 'subtle':
       // Shipped v1 geometry (overrides Figma): 1px padding at both sizes,
       // 10px radius at md.
-      // No `overflow-hidden`: with 1px of padding it also clipped the outer
-      // half of a focused trigger's 2px ring, and a clipped focus ring is a
-      // worse defect than the active pill's shadow spilling a pixel or two
-      // past the track edge.
+      // No `overflow-hidden` on the track itself: with 1px of padding it also
+      // clips the outer half of a focused trigger's 2px ring. The indicator's
+      // shadow is clipped one layer down instead — see
+      // `tabIndicatorClipClasses`.
       return [
         'bg-surface-gray-2',
         isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-[10px] p-px',
@@ -71,6 +71,35 @@ export function tabIndicatorSurfaceClasses(
       ? 'bg-surface-gray-2'
       : 'bg-surface-elevation-3 shadow-base',
     tabRadiusClasses(variant, size),
+  ]
+}
+
+/**
+ * Track radius, one step outside the trigger radius: 8px at sm, 10px at md
+ * (subtle) or 12px (`rounded-5`, ghost md).
+ */
+export function tabTrackRadiusClasses(
+  variant: TabsVariant,
+  size: TabsSize,
+): string {
+  if (size === 'sm') return 'rounded-4'
+  return variant === 'ghost' ? 'rounded-5' : 'rounded-[10px]'
+}
+
+/**
+ * Clip layer for the sliding pill indicator (subtle/ghost). The track can't
+ * carry `overflow-hidden` itself — it would clip the outer half of a focused
+ * trigger's 2px ring too. A layer that holds only the indicator keeps both:
+ * the active pill's shadow stops at the track edge, the ring still paints.
+ * Matches the track's own box, so the shadow is cut on the same rounded rect.
+ */
+export function tabIndicatorClipClasses(
+  variant: TabsVariant,
+  size: TabsSize,
+): string[] {
+  return [
+    'pointer-events-none absolute inset-0 overflow-hidden',
+    tabTrackRadiusClasses(variant, size),
   ]
 }
 
