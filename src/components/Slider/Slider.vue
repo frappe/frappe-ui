@@ -23,16 +23,16 @@ const slots = useSlots()
 
 const attrs = useAttrs()
 
-// `role="slider"` sits on the thumb, not the root, so a caller's naming
-// attributes have to be re-routed there — on the root they name a container
-// that no assistive technology reports as the control.
-const NAMING_ATTRS = ['aria-label', 'aria-labelledby']
+// `role="slider"` sits on the thumb, not the root, so the whole ARIA contract
+// has to be re-routed there — on the root it describes a container that no
+// assistive technology reports as the control.
+const ARIA_ATTRS = ['aria-label', 'aria-labelledby', 'aria-describedby']
 
 const attrsWithoutClassStyle = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(
       ([key]) =>
-        key !== 'class' && key !== 'style' && !NAMING_ATTRS.includes(key),
+        key !== 'class' && key !== 'style' && !ARIA_ATTRS.includes(key),
     ),
   )
 })
@@ -74,6 +74,17 @@ const {
 /** A caller's `aria-labelledby` wins over the id generated from `label`. */
 const thumbLabelledBy = computed(() => {
   return (attrs['aria-labelledby'] as string | undefined) ?? labelledBy.value
+})
+
+// Merged, not replaced: a caller's `aria-describedby` must not drop the
+// generated description and error ids.
+const thumbDescribedBy = computed(() => {
+  const ids = [
+    describedBy.value,
+    attrs['aria-describedby'] as string | undefined,
+  ]
+  const merged = ids.filter(Boolean).join(' ')
+  return merged || undefined
 })
 
 const isBidirectional = computed(() => props.min < 0 && props.max > 0)
@@ -160,9 +171,6 @@ const hasLabeling = computed(() => {
       :step="props.step"
       :disabled="props.disabled"
       :aria-disabled="props.disabled || undefined"
-      :aria-describedby="describedBy"
-      :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-invalid="hasError || undefined"
       data-slot="control"
       v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
       @value-commit="onValueCommit"
@@ -184,6 +192,9 @@ const hasLabeling = computed(() => {
         :class="thumbClasses"
         :aria-label="thumbLabel"
         :aria-labelledby="thumbLabelledBy"
+        :aria-describedby="thumbDescribedBy"
+        :aria-errormessage="hasError ? errorMessageId : undefined"
+        :aria-invalid="hasError || undefined"
       />
     </SliderRoot>
     <InputDescription

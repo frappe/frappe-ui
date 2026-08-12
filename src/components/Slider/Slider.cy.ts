@@ -87,24 +87,47 @@ describe('Slider', () => {
   })
 
   it('routes a caller aria-labelledby to the thumb, not the root', () => {
-    cy.mount(
-      {
-        components: { Slider },
-        template: `
-          <div>
-            <span id="ext-label">Volume</span>
-            <Slider id="sl-aria-labelledby" :model-value="[25]" aria-labelledby="ext-label" />
-          </div>
-        `,
-      },
-      {},
-    )
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('span', { id: 'ext-label' }, 'Volume'),
+          h(Slider, {
+            id: 'sl-aria-labelledby',
+            modelValue: [25],
+            'aria-labelledby': 'ext-label',
+          }),
+        ]),
+    })
     cy.get('[role="slider"]').should(
       'have.attr',
       'aria-labelledby',
       'ext-label',
     )
     cy.get('#sl-aria-labelledby').should('not.have.attr', 'aria-labelledby')
+  })
+
+  it('merges a caller aria-describedby with the generated ids on the thumb', () => {
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('span', { id: 'ext-hint' }, 'External hint'),
+          h(Slider, {
+            id: 'sl-aria-describedby',
+            label: 'Volume',
+            description: 'Adjust volume.',
+            modelValue: [25],
+            'aria-describedby': 'ext-hint',
+          }),
+        ]),
+    })
+    // The caller's id must not replace the generated description id.
+    cy.get('[role="slider"]').then(($thumb) => {
+      const describedBy = $thumb.attr('aria-describedby')!
+      expect(describedBy).to.contain('ext-hint')
+      const generated = describedBy.split(' ').filter((id) => id !== 'ext-hint')
+      expect(generated).to.have.length(1)
+      cy.get(`#${generated[0]}`).should('contain.text', 'Adjust volume.')
+    })
   })
 
   it('forwards disabled to aria-disabled and SliderRoot', () => {
@@ -126,13 +149,18 @@ describe('Slider', () => {
           const labelledBy = $thumb.attr('aria-labelledby')!
           cy.get(`#${labelledBy}`).should('contain.text', 'Volume')
         })
+      // Both halves of the contract sit on the thumb: it is the element that
+      // carries role="slider", so the root is never reported as the control.
       cy.get('[role="slider"]')
-        .parents('[aria-describedby]')
         .first()
-        .then(($root) => {
-          const describedBy = $root.attr('aria-describedby')!
+        .then(($thumb) => {
+          const describedBy = $thumb.attr('aria-describedby')!
           cy.get(`#${describedBy}`).should('contain.text', 'Adjust volume.')
         })
+      cy.get('[role="slider"]')
+        .first()
+        .parents('[aria-describedby]')
+        .should('not.exist')
     })
 
     it('renders error state', () => {
