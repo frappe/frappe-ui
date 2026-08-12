@@ -25,7 +25,7 @@
       :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-required="props.required || undefined"
+      :aria-required="!isSliderMode && props.required ? true : undefined"
       :aria-invalid="hasError || undefined"
       :aria-disabled="isDisabled || undefined"
       :aria-orientation="isSliderMode ? 'horizontal' : undefined"
