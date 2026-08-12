@@ -947,7 +947,16 @@ function convertObject(source, mask, range, ctx) {
   }
 
   const hasSignal = props.some((p) => p.name && CONFIG_SIGNALS.has(p.name))
-  if (!hasSignal && !ctx.insideCall && !ctx.contextProperty) return null
+  if (!hasSignal && !ctx.insideCall && !ctx.contextProperty) {
+    // A `handler` or a `condition` beside the `key` and nothing else. It reads
+    // as a menu entry, so the object stays as it is. It may also be a
+    // registration that carries no `description`, and the call in the file
+    // still renames, which would leave v1 a config with no `combo`. So the
+    // site is named. The caller prints it only when the file also renamed
+    // something, because that is the only shape that breaks.
+    const shared = byName.has('handler') || condition
+    return shared ? { skipped: { line } } : null
+  }
 
   if (condition && byName.has('enabled')) return refuseDoubleEnabled()
 
@@ -1103,6 +1112,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const refusals = []
   const notes = []
   const edits = []
+  const skipped = []
 
   const ranges = scriptRanges(content, ext)
   const mask = buildMask(content, ranges)
@@ -1127,6 +1137,10 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const contextProperty = underContextProperty(content, mask, object.start, range[0])
     const result = convertObject(content, mask, object, { insideCall, contextProperty })
     if (!result) return
+    if (result.skipped) {
+      skipped.push(result.skipped)
+      return
+    }
     refusals.push(...(result.refusals ?? []))
     notes.push(...(result.notes ?? []))
     if (result.edits) {
@@ -1268,6 +1282,21 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
       text: TAG_RENAMES[t[2]],
     })
     renames.push({ line: lineAt(content, t.index), from: t[2], to: TAG_RENAMES[t[2]] })
+  }
+
+  // A `key` object the run walked away from, in a file whose call it renamed.
+  // If that object is a registration, v1 now gets a config with no `combo`,
+  // and it throws on the first keypress. Only a human can say which it is, so
+  // this is a note: refusing here would block the file on a menu entry nobody
+  // can edit into evidence.
+  if (renames.length > 0) {
+    for (const site of skipped) {
+      notes.push({
+        line: site.line,
+        message:
+          'this object has a `key` and a `handler` or a `condition`, and nothing that only a shortcut carries. It reads as a menu entry, so it was left as it is. A registration in this file was renamed, so check this is not one: v1 throws on a config with no `combo`.',
+      })
+    }
   }
 
   edits.sort((a, b) => a.start - b.start || a.end - b.end)

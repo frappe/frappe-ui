@@ -471,6 +471,41 @@ const rules = [{ key: 'home', condition: isAdmin, handler: go }]
     expect(refusals).toEqual([])
   })
 
+  it('names an object it walked away from when the file also renamed', () => {
+    // The call renames, so a registration left with `key` would reach v1 with
+    // no `combo` and throw. The run says so instead of exiting in silence.
+    const source = `import { useShortcut } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, handler: save }]
+useShortcut(bindings)
+`
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(refusals).toEqual([])
+    expect(notes).toHaveLength(1)
+    expect(notes[0].line).toBe(2)
+    expect(notes[0].message).toContain('v1 throws on a config with no `combo`')
+    expect(migrated).toContain("{ key: 's', ctrl: true, handler: save }")
+  })
+
+  it('says nothing about a menu entry in a file it did not rename', () => {
+    const source = "const items = [{ key: 'delete', label: 'Delete', handler: onDelete }]\n"
+    const { migrated, notes } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(migrated).toBe(source)
+    expect(notes).toEqual([])
+  })
+
+  it('says nothing about a table column beside a real shortcut', () => {
+    // No `handler` and no `condition`, so it never read as a shortcut.
+    const source = `import { useShortcut } from 'frappe-ui'
+const columns = [{ key: 'name', label: 'Name' }]
+useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+`
+    const { notes } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(notes).toEqual([])
+  })
+
   it('takes a shortcut under a shortcuts: [ ... ] property', () => {
     // The property names what the array holds, so each object in it is a
     // shortcut even with no `description`.

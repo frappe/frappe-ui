@@ -2601,9 +2601,10 @@ beside a `key`, and `{ key: 'delete', label: 'Delete', handler: del }` is a
 menu id, not a shortcut. So the codemod leaves it alone.
 
 The cost is a registration that carries nothing but `key` and `handler` and
-sits away from its call. The codemod does not take it, and does not name it.
-v0 made `description` mandatory, so this shape is rare. Grep for `key:` once
-after the run if your app has one.
+sits away from its call. The codemod does not take it. v0 made `description`
+mandatory, so this shape is rare, but it lists every object it walked away
+from when the same file had a rename. Read that list: v1 throws on a config
+with no `combo`.
 
 ### Punctuation keys are never converted
 
@@ -2673,6 +2674,10 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
 - **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
   `'spacebar'`. v0 compared `event.key`, which never reports those, so the
   shortcut never fired. The combo does fire, so the shortcut is live now.
+- **An object with a `key` it walked away from**, in a file where it renamed
+  something. It carries a `handler` or a `condition` and nothing that only a
+  shortcut carries, so it reads as a menu entry. Check it is not a
+  registration: v1 throws on a config with no `combo`.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
   `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
   pair may fold into one registration. Only you can say which half is which.
