@@ -320,6 +320,37 @@ useShortcut(config)
     expect(migrated).toContain('<keyboard-shortcuts-dialog />')
   })
 
+  it('leaves the name alone inside a string, a comment and a module specifier', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+import { legacy } from './useShortcut'
+// useShortcut used to live here
+const label = 'useShortcut'
+useShortcut({ key: 's', description: 'Save', handler: save })
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain("from './useShortcut'")
+    expect(migrated).toContain('// useShortcut used to live here')
+    expect(migrated).toContain("const label = 'useShortcut'")
+    expect(migrated).toContain("import { useKeyboardShortcut } from 'frappe-ui'")
+    expect(migrated).toContain('useKeyboardShortcut({ combo:')
+  })
+
+  it('renames a component tag in a template that has a script block', () => {
+    const source = `<script setup>
+const title = 'KeyboardShortcutsModal'
+</script>
+
+<template>
+  <KeyboardShortcutsModal v-model:open="open" />
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('<KeyboardShortcutsDialog v-model:open="open" />')
+    expect(migrated).toContain("const title = 'KeyboardShortcutsModal'")
+  })
+
   it("leaves an app's own useShortcut fork alone and says so", () => {
     const source = `import { useShortcut } from '@/composables/useShortcut'
 useShortcut({ key: 's', description: 'Save', handler: save })

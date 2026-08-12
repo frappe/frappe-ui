@@ -401,6 +401,20 @@ function buildMask(source, ranges) {
   return mask
 }
 
+// A second mask, for the identifier rename only. It hides strings, template
+// text, comments and regexes inside script code, so a module specifier like
+// './useShortcut' or a name quoted in prose is never rewritten. A .vue
+// template stays readable, because a component tag lives there and the file
+// may never import the name.
+function buildRenameMask(source, ranges) {
+  const mask = new Uint8Array(source.length)
+  for (const [from, to] of ranges) {
+    const sub = maskLiterals(source.slice(from, to))
+    for (let i = 0; i < sub.length; i++) mask[from + i] = sub[i]
+  }
+  return mask
+}
+
 function lineAt(content, offset) {
   let line = 1
   for (let i = 0; i < offset; i++) if (content[i] === '\n') line++
@@ -867,10 +881,13 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     return true
   })
 
+  const renameMask = buildRenameMask(content, ranges)
+
   if (renameable.length > 0) {
     const identifier = new RegExp(`\\b(${renameable.join('|')})\\b`, 'g')
     let id
     while ((id = identifier.exec(content))) {
+      if (renameMask[id.index]) continue
       edits.push({
         start: id.index,
         end: id.index + id[1].length,
@@ -887,6 +904,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const tag = new RegExp(`(</?)(${Object.keys(TAG_RENAMES).join('|')})\\b`, 'g')
   let t
   while ((t = tag.exec(content))) {
+    if (renameMask[t.index]) continue
     edits.push({
       start: t.index + t[1].length,
       end: t.index + t[0].length,
