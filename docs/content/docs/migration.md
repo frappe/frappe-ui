@@ -2583,6 +2583,11 @@ The codemod exits non-zero when it refused a site, on a dry run too. A clean
 exit means a clean run. Re-running it is safe: a converted object has no `key`
 field left to convert, and a refusal repeats until you fix it.
 
+A file with a refused site stays exactly as it was, even when its other
+shortcuts converted. Half a migration puts a renamed call beside a config with
+no `combo`, and v1 throws on the first keypress. Fix the sites the run names,
+then run again and take the whole file at once.
+
 The codemod does not reflow the code it edits. Run your formatter after it.
 
 ### Punctuation keys are never converted

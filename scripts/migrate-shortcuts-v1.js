@@ -25,6 +25,10 @@
  * exits non-zero. Every unconverted site is listed, and any unconverted site
  * makes the whole run exit non-zero — a clean exit means a clean run.
  *
+ * A file with a refused site is left exactly as it was, even when its other
+ * shortcuts converted. Half a migration puts a renamed call beside a config
+ * with no `combo`, and v1 throws on the first keypress.
+ *
  * WHAT IT CONVERTS AUTOMATICALLY
  *
  *   { key: 's', ctrl: true }              -> { combo: 'Mod+S' }
@@ -1029,6 +1033,7 @@ function main() {
   }
 
   let filesChanged = 0
+  let filesLeftAlone = 0
   let totalCombos = 0
   let totalRenames = 0
   const allDigits = []
@@ -1048,6 +1053,16 @@ function main() {
     const changeCount = changes.length + renames.length
     if (changeCount === 0) continue
 
+    // A refusal means part of this file is still v0. Writing the rest would
+    // leave a renamed call beside a config that has no `combo`, and v1 throws
+    // on the first keypress. So the file is left as it was: fix the sites the
+    // run names, then run again and take the whole file at once.
+    if (refusals.length > 0) {
+      filesLeftAlone++
+      console.log(`${file} (${changeCount} pending, left alone)`)
+      continue
+    }
+
     filesChanged++
     totalCombos += changes.length
     totalRenames += renames.length
@@ -1064,6 +1079,9 @@ function main() {
     `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${filesChanged} files, ` +
       `${totalCombos} shortcut properties rewritten, ${totalRenames} identifier renames`,
   )
+  if (filesLeftAlone > 0) {
+    console.log(`${filesLeftAlone} files left alone, because a site in each was refused`)
+  }
 
   if (allDigits.length > 0) {
     console.log('\n⚠ Digit keys converted — v1 matches these on the physical key:')
@@ -1079,7 +1097,8 @@ function main() {
   if (allRefusals.length > 0) {
     console.log(`\n✗ Not converted — ${allRefusals.length} sites need a decision:`)
     for (const f of allRefusals) console.log(`  ${f.file}:L${f.line}  ${f.message}`)
-    console.log(`\n  Guide: ${GUIDE}`)
+    console.log('\n  Every file named above is unchanged. Fix these, then run again.')
+    console.log(`  Guide: ${GUIDE}`)
     process.exit(1)
   }
 }

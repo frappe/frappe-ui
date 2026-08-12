@@ -496,16 +496,33 @@ vi.mock('frappe-ui', () => ({ useShortcut: (configs) => registered.push(configs)
 })
 
 describe('cli', () => {
-  it('exits non-zero and writes nothing extra when a site is refused', () => {
-    const dir = tempDir({
-      'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: '+', ctrl: true, description: 'Zoom in' }])\n",
-    })
+  it('exits non-zero and leaves a refused file byte-identical', () => {
+    const before =
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: '+', ctrl: true, description: 'Zoom in' }])\n"
+    const dir = tempDir({ 'a.js': before })
     const result = run([dir])
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('1 sites need a decision')
     expect(result.stdout).toContain('`Shift+Equal`')
-    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toContain("key: '+'")
+    // Half a migration renames the call and leaves a config with no `combo`,
+    // which throws on the first keypress. So nothing is written.
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('leaves a file alone when one site refuses and the rest convert', () => {
+    const before = `import { useShortcut } from 'frappe-ui'
+useShortcut([
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+  { key: '+', ctrl: true, description: 'Zoom in', handler: zoom },
+])
+`
+    const dir = tempDir({ 'a.js': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('left alone')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
   })
 
   it('exits zero on a clean run and writes the file', () => {
