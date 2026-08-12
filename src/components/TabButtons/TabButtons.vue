@@ -14,6 +14,7 @@ import Pill from '../shared/tabs/Pill.vue'
 import { NativeAnchor, NativeButton } from '../shared/nativeElements'
 import {
   browserTabCardClasses,
+  tabIndicatorClipClasses,
   tabIndicatorMotionClasses,
   tabIndicatorSurfaceClasses,
   tabRadiusClasses,
@@ -240,6 +241,11 @@ const browserCardBase = computed<BrowserTabBase>(() =>
   props.vertical ? props.side : 'default',
 )
 
+// Layer that clips the pill indicator's shadow to the track's rounded box.
+const indicatorClipClasses = computed(() =>
+  tabIndicatorClipClasses(props.variant, props.size),
+)
+
 const indicatorClasses = computed(() => [
   'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none',
   indicatorAnimated.value &&
@@ -307,8 +313,18 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
     v-bind="$attrs"
   >
     <div ref="trackRef" data-slot="tab-buttons" :class="rootClasses">
+      <!-- Presentational clip layer, deliberately without a `data-slot`: it
+           carries no contract, it only stops the indicator's shadow at the
+           track edge. -->
+      <div v-if="pillTrack" aria-hidden="true" :class="indicatorClipClasses">
+        <div
+          data-slot="tab-indicator"
+          :class="indicatorClasses"
+          :style="indicatorStyle"
+        />
+      </div>
       <div
-        v-if="hasIndicator"
+        v-else-if="hasIndicator"
         aria-hidden="true"
         data-slot="tab-indicator"
         :class="indicatorClasses"

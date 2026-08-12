@@ -3,6 +3,7 @@ import { computed, inject, provide } from 'vue'
 import { TabsIndicator, TabsList } from 'reka-ui'
 import {
   browserTabCardClasses,
+  tabIndicatorClipClasses,
   tabIndicatorInsetClasses,
   tabIndicatorMotionClasses,
   tabIndicatorSurfaceClasses,
@@ -65,6 +66,11 @@ const indicatorClasses = computed(() =>
     : 'left-0 bottom-0 h-px w-[--reka-tabs-indicator-size] translate-x-[--reka-tabs-indicator-position] translate-y-px transition-[width,transform]',
 )
 
+// Layer that clips the pill indicator's shadow to the track's rounded box.
+const indicatorClipClasses = computed(() =>
+  tabIndicatorClipClasses(props.variant, props.size),
+)
+
 // Sliding active-pill surface for subtle/ghost: rides behind the triggers,
 // which never paint an active background themselves, and carries the
 // background + shadow between selections.
@@ -118,13 +124,16 @@ defineSlots<{
       <div class="size-full bg-[var(--outline-gray-8)]" />
     </TabsIndicator>
 
-    <TabsIndicator
-      v-if="pillTrack"
-      aria-hidden="true"
-      data-slot="tab-indicator"
-      class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
-      :class="[pillIndicatorClasses, tabIndicatorMotionClasses]"
-    />
+    <!-- Presentational clip layer, deliberately without a `data-slot`: it
+         carries no contract, it only stops the indicator's shadow at the
+         track edge. -->
+    <div v-if="pillTrack" aria-hidden="true" :class="indicatorClipClasses">
+      <TabsIndicator
+        data-slot="tab-indicator"
+        class="pointer-events-none absolute -z-10 motion-reduce:transition-none"
+        :class="[pillIndicatorClasses, tabIndicatorMotionClasses]"
+      />
+    </div>
 
     <TabsIndicator
       v-if="browserTrack"

@@ -39,6 +39,40 @@ describe('<TabButtons />', () => {
     cy.get('[data-slot="tab-button"]').should('have.length', 2)
   })
 
+  it('clips the pill indicator so its shadow stops at the track', () => {
+    cy.mount(TabButtons, {
+      props: {
+        options: [
+          { label: 'Day', value: 'day' },
+          { label: 'Week', value: 'week' },
+        ],
+        modelValue: 'day',
+        variant: 'subtle',
+      },
+    })
+
+    // The track can't clip: it would cut a focused trigger's ring too. The
+    // layer holding the indicator does it instead.
+    cy.get('[data-slot="tab-buttons"]').should(
+      'not.have.css',
+      'overflow',
+      'hidden',
+    )
+    cy.get('[data-slot="tab-indicator"]')
+      .parent()
+      .should('have.css', 'overflow', 'hidden')
+
+    // Square corners would clip the edges and leave the corners bleeding,
+    // which is the bug. The layer has to round like the track.
+    cy.get('[data-slot="tab-buttons"]').then(($track) => {
+      const radius = getComputedStyle($track[0]).borderRadius
+      expect(radius, 'track radius').not.to.equal('0px')
+      cy.get('[data-slot="tab-indicator"]')
+        .parent()
+        .should('have.css', 'border-radius', radius)
+    })
+  })
+
   it('does not double-call button click handlers', () => {
     const onClick = cy.spy().as('onClick')
 

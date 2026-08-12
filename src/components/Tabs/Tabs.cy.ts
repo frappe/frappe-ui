@@ -37,8 +37,13 @@ describe('Tabs', () => {
       slots: {
         'tab-prefix': ({ tab }: { tab: (typeof items)[number] }) =>
           h('span', `[${tab.value}`),
-        'tab-label': ({ tab, selected }: { tab: (typeof items)[number]; selected: boolean }) =>
-          h('span', `${tab.label}${selected ? '*' : ''}`),
+        'tab-label': ({
+          tab,
+          selected,
+        }: {
+          tab: (typeof items)[number]
+          selected: boolean
+        }) => h('span', `${tab.label}${selected ? '*' : ''}`),
         'tab-suffix': () => h('span', ']'),
         'tab-panel': ({ tab }: { tab: (typeof items)[number] }) =>
           h('div', `${tab.label} content`),
@@ -55,6 +60,31 @@ describe('Tabs', () => {
     // must be able to target both with one selector (P10).
     cy.mount(Tabs, { props: { tabs: items, variant: 'subtle' } })
     cy.get('[data-slot="tab-list"] [data-slot="tab-indicator"]').should('exist')
+  })
+
+  it('clips the pill indicator so its shadow stops at the track', () => {
+    cy.mount(Tabs, { props: { tabs: items, variant: 'subtle' } })
+
+    // The track can't clip: it would cut a focused trigger's ring too. The
+    // layer holding the indicator does it instead.
+    cy.get('[data-slot="tab-list"]').should(
+      'not.have.css',
+      'overflow',
+      'hidden',
+    )
+    cy.get('[data-slot="tab-indicator"]')
+      .parent()
+      .should('have.css', 'overflow', 'hidden')
+
+    // Square corners would clip the edges and leave the corners bleeding,
+    // which is the bug. The layer has to round like the track.
+    cy.get('[data-slot="tab-list"]').then(($track) => {
+      const radius = getComputedStyle($track[0]).borderRadius
+      expect(radius, 'track radius').not.to.equal('0px')
+      cy.get('[data-slot="tab-indicator"]')
+        .parent()
+        .should('have.css', 'border-radius', radius)
+    })
   })
 
   it('renders vertically', () => {
@@ -292,9 +322,7 @@ describe('Tabs', () => {
         {
           path: '/settings/billing',
           component: { template: '<router-view />' },
-          children: [
-            { path: 'history', component: { template: '<div />' } },
-          ],
+          children: [{ path: 'history', component: { template: '<div />' } }],
         },
       ],
     })
@@ -358,7 +386,11 @@ describe('Tabs', () => {
           },
           () => [
             h(TabList, { variant: 'underline' }, () => [
-              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, {
+                value: 'inbox',
+                label: 'Inbox',
+                route: '/inbox',
+              }),
               h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
             ]),
           ],
@@ -802,6 +834,33 @@ describe('Tabs', () => {
     })
   }
 
+  it('slides the subtle pill onto the selected trigger', () => {
+    // The pill sits in a clip layer, so reka positions it from a containing
+    // block that is not the tablist. The layer's box matches the tablist's
+    // padding box, but a drift there would be invisible without this.
+    cy.mount(Tabs, { props: { tabs: shiftTabs, variant: 'subtle' } })
+
+    cy.get('[role=tab]').eq(2).click()
+    cy.get('[role=tab]').eq(2).should('have.attr', 'aria-selected', 'true')
+
+    // Retries until the 200ms slide settles. The indicator covers the
+    // trigger's box (reka measures integer offsets, so allow 1px).
+    cy.get('[role=tablist]').should(($list) => {
+      const indicator = $list[0].querySelector<HTMLElement>(
+        '[data-slot="tab-indicator"]',
+      )
+      expect(indicator, 'indicator').to.exist
+      const ir = indicator!.getBoundingClientRect()
+      const tr = $list[0]
+        .querySelectorAll<HTMLElement>('[role=tab]')[2]
+        .getBoundingClientRect()
+      expect(ir.x, 'x').to.be.closeTo(tr.x, 1)
+      expect(ir.width, 'width').to.be.closeTo(tr.width, 1)
+      expect(ir.y, 'y').to.be.closeTo(tr.y, 1)
+      expect(ir.height, 'height').to.be.closeTo(tr.height, 1)
+    })
+  })
+
   it('slides the browser-tab indicator card onto the selected trigger', () => {
     cy.mount(Tabs, {
       props: { tabs: shiftTabs, variant: 'browser-tab' },
@@ -966,9 +1025,10 @@ describe('Tabs', () => {
       })
 
     cy.get('[data-slot="tab-list"]').should(($list) => {
-      expect(getComputedStyle($list[0]).overflow, 'track overflow').to.not.equal(
-        'hidden',
-      )
+      expect(
+        getComputedStyle($list[0]).overflow,
+        'track overflow',
+      ).to.not.equal('hidden')
     })
   })
 
@@ -994,7 +1054,11 @@ describe('Tabs', () => {
           { modelValue: 'inbox', 'onUpdate:modelValue': onUpdate },
           () => [
             h(TabList, { variant: 'underline' }, () => [
-              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, {
+                value: 'inbox',
+                label: 'Inbox',
+                route: '/inbox',
+              }),
               h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
             ]),
           ],
@@ -1208,7 +1272,11 @@ describe('Tabs', () => {
           },
           () => [
             h(TabList, { variant: 'underline' }, () => [
-              h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+              h(TabTrigger, {
+                value: 'inbox',
+                label: 'Inbox',
+                route: '/inbox',
+              }),
               h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
             ]),
           ],
@@ -1238,9 +1306,10 @@ describe('Tabs', () => {
     })
 
     cy.get('[data-slot="tab-list"]').should(($list) => {
-      expect(getComputedStyle($list[0]).borderRightWidth, 'right rail').to.not.equal(
-        '0px',
-      )
+      expect(
+        getComputedStyle($list[0]).borderRightWidth,
+        'right rail',
+      ).to.not.equal('0px')
     })
   })
 })
