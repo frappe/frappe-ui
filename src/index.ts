@@ -110,13 +110,11 @@ export * from './components/KeyboardShortcutsDialog'
 export {
   useKeyboardShortcut,
   type HoldKeyboardShortcutConfig,
-  type KeyboardShortcutCodedKey,
   type KeyboardShortcutCombo,
   type KeyboardShortcutConfig,
   type KeyboardShortcutEntry,
   type KeyboardShortcutGroup,
   type KeyboardShortcutKey,
-  type KeyboardShortcutNamedKey,
   type PressKeyboardShortcutConfig,
 } from './composables/useKeyboardShortcut'
 

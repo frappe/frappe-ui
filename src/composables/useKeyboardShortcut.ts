@@ -102,10 +102,14 @@ const KEYS_BY_EVENT_CODE = {
   BracketRight: 'BracketRight',
 } as const
 
+// Which table a key sits in is an internal detail: an app names a key with
+// `KeyboardShortcutKey`, or a whole combo with `KeyboardShortcutCombo`. Both
+// halves stay module-internal so the split is free to move after 1.0.0 (P13).
+
 /** A key name matched against `event.key`. */
-export type KeyboardShortcutNamedKey = keyof typeof KEYS_BY_EVENT_KEY
+type KeyboardShortcutNamedKey = keyof typeof KEYS_BY_EVENT_KEY
 /** A key name matched against `event.code`. */
-export type KeyboardShortcutCodedKey = keyof typeof KEYS_BY_EVENT_CODE
+type KeyboardShortcutCodedKey = keyof typeof KEYS_BY_EVENT_CODE
 /** Every key name a combo accepts. */
 export type KeyboardShortcutKey =
   | KeyboardShortcutNamedKey
