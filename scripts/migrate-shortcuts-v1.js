@@ -363,7 +363,10 @@ function maskLiterals(source) {
       lastSignificant = '`'
       continue
     }
-    if (c === '/' && regexCanStart(lastSignificant)) {
+    if (
+      c === '/' &&
+      (regexCanStart(lastSignificant) || REGEX_AFTER_KEYWORD.has(wordBefore(source, i)))
+    ) {
       let j = i + 1
       let inClass = false
       let closed = false
@@ -399,6 +402,35 @@ function maskLiterals(source) {
 // After one of these, a `/` opens a regex literal rather than dividing.
 function regexCanStart(prev) {
   return prev === '' || '(,=:[!&|?{};+-*%~^<>'.includes(prev)
+}
+
+// A keyword can precede a regex too. Missing one lexes the regex body as code,
+// so a quote inside it opens a run that masks the rest of the object and the
+// site is dropped in silence.
+const REGEX_AFTER_KEYWORD = new Set([
+  'return',
+  'typeof',
+  'instanceof',
+  'case',
+  'in',
+  'of',
+  'do',
+  'else',
+  'yield',
+  'await',
+  'delete',
+  'void',
+  'throw',
+  'new',
+])
+
+// The word that ends just before `index`, ignoring whitespace.
+function wordBefore(source, index) {
+  let j = index - 1
+  while (j >= 0 && /\s/.test(source[j])) j--
+  const end = j + 1
+  while (j >= 0 && /[\w$]/.test(source[j])) j--
+  return source.slice(j + 1, end)
 }
 
 // A .vue file's <template> is HTML: an apostrophe in prose and an unbalanced

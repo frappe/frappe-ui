@@ -257,6 +257,19 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
+  it('converts an object whose handler holds a regex after a keyword', () => {
+    // A quote inside the regex used to open a string run that masked the rest
+    // of the object, and the site was dropped with no refusal.
+    const source = inCall(
+      "{ key: 's', ctrl: true, description: 'S', handler: () => { if (a) return /'/.test(v); save() } }",
+    )
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("combo: 'Mod+S'")
+    expect(migrated).toContain("return /'/.test(v)")
+  })
+
   it('converts an object whose properties carry trailing comments', () => {
     const source = `import { useShortcut } from 'frappe-ui'
 useShortcut([
