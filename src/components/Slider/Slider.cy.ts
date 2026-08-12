@@ -77,6 +77,36 @@ describe('Slider', () => {
     cy.get('[role="slider"]').should('not.have.attr', 'aria-label')
   })
 
+  it('routes a caller aria-label to the thumb, not the root', () => {
+    cy.mount(Slider, {
+      props: { id: 'sl-aria-label', modelValue: [25] },
+      attrs: { 'aria-label': 'Volume' },
+    })
+    cy.get('[role="slider"]').should('have.attr', 'aria-label', 'Volume')
+    cy.get('#sl-aria-label').should('not.have.attr', 'aria-label')
+  })
+
+  it('routes a caller aria-labelledby to the thumb, not the root', () => {
+    cy.mount(
+      {
+        components: { Slider },
+        template: `
+          <div>
+            <span id="ext-label">Volume</span>
+            <Slider id="sl-aria-labelledby" :model-value="[25]" aria-labelledby="ext-label" />
+          </div>
+        `,
+      },
+      {},
+    )
+    cy.get('[role="slider"]').should(
+      'have.attr',
+      'aria-labelledby',
+      'ext-label',
+    )
+    cy.get('#sl-aria-labelledby').should('not.have.attr', 'aria-labelledby')
+  })
+
   it('forwards disabled to aria-disabled and SliderRoot', () => {
     cy.mount(Slider, {
       props: { id: 'sl-disabled', modelValue: [25], disabled: true },

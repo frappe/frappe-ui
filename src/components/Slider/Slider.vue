@@ -23,11 +23,21 @@ const slots = useSlots()
 
 const attrs = useAttrs()
 
+// `role="slider"` sits on the thumb, not the root, so a caller's naming
+// attributes have to be re-routed there — on the root they name a container
+// that no assistive technology reports as the control.
+const NAMING_ATTRS = ['aria-label', 'aria-labelledby']
+
 const attrsWithoutClassStyle = computed(() => {
   return Object.fromEntries(
-    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+    Object.entries(attrs).filter(
+      ([key]) =>
+        key !== 'class' && key !== 'style' && !NAMING_ATTRS.includes(key),
+    ),
   )
 })
+
+const thumbLabel = computed(() => attrs['aria-label'] as string | undefined)
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -59,6 +69,11 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
+})
+
+/** A caller's `aria-labelledby` wins over the id generated from `label`. */
+const thumbLabelledBy = computed(() => {
+  return (attrs['aria-labelledby'] as string | undefined) ?? labelledBy.value
 })
 
 const isBidirectional = computed(() => props.min < 0 && props.max > 0)
@@ -167,7 +182,8 @@ const hasLabeling = computed(() => {
         v-for="(_, i) in sliderValue"
         :key="`slider-thumb-${i}`"
         :class="thumbClasses"
-        :aria-labelledby="labelledBy"
+        :aria-label="thumbLabel"
+        :aria-labelledby="thumbLabelledBy"
       />
     </SliderRoot>
     <InputDescription
