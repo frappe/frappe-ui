@@ -875,6 +875,15 @@ useShortcut([{ key: 's', ctrl: true, description: 'Save', handler: save }])
     expect(migrated).toContain('function formatShortcutLabel(config) {')
   })
 
+  it('leaves a barrel mock alone when the file holds no v0 name', () => {
+    const source = `import { KeyboardShortcutsDialog } from 'frappe-ui'
+vi.mock('frappe-ui', () => ({ KeyboardShortcutsDialog }))
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+  })
+
   it('refuses a destructured return, which v1 no longer gives', () => {
     const { refusals } = migrateShortcuts(
       "const { activeShortcuts } = useShortcut({ key: 's', description: 'Save' })\n",

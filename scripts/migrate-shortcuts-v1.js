@@ -1248,7 +1248,11 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   let b
   while ((b = barrelMock.exec(content))) {
     if (renameMask[b.index]) continue
-    if (firstUnmasked(content, /\buseShortcut\b|\bKeyboardShortcut/g, renameMask) < 0) continue
+    // Only a v0 name counts. `KeyboardShortcutsDialog` is the v1 name, and a
+    // test that mocks the barrel and mounts the dialog has nothing to fix, so
+    // a refusal on it could never be cleared.
+    const v0Names = new RegExp(`\\b(?:${Object.keys(IDENTIFIER_RENAMES).join('|')})\\b`, 'g')
+    if (firstUnmasked(content, v0Names, renameMask) < 0) continue
     refusals.push({
       line: lineAt(content, b.index),
       message:
