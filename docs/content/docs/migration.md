@@ -20,6 +20,13 @@ or visual regressions.
 v1 requires **Node `>=20.19.0`** (`package.json` `engines`); this is a breaking
 bump from the 0.1.x line (Node 18).
 
+v1 also depends on **`@vueuse/core` `^14.1.0`**, up from `^10.4.1` in the 0.1.x
+line. VueUse 14 requires Vue `^3.5.0`, which v1 already requires. If your app
+depends on `@vueuse/core` directly, move it to `^14` as well. Two major ranges
+in one app install two copies of the library, and a `resolve.dedupe` entry for
+`@vueuse/core` then collapses them onto whichever copy wins. That breaks the
+components which expect the newer one.
+
 ## Dialog
 
 The `options` blob is flattened into top-level props. See the
