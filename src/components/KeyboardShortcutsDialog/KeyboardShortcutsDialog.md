@@ -22,6 +22,10 @@ The dialog reads `enabled` each time it opens, and again whenever a shortcut
 registers or unregisters. A getter that reads untracked state, such as
 `document.activeElement`, is correct on every open.
 
+Above `searchThreshold` rows a search field appears. It matches the text a row
+draws as well as the name behind it, so a row for `Mod+Slash` answers to both
+`/` and `slash`. The query clears when the dialog closes.
+
 ## Open it from a shortcut
 
 ```vue

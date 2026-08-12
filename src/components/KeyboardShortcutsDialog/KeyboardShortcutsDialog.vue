@@ -91,10 +91,16 @@
 import { computed, ref, watch } from 'vue'
 import {
   getShortcutGroups,
+  type KeyboardShortcutEntry,
   type KeyboardShortcutGroup,
 } from '../../composables/useKeyboardShortcut'
 import Dialog from '../Dialog/Dialog.vue'
 import KeyboardShortcut from '../KeyboardShortcut/KeyboardShortcut.vue'
+import {
+  displayText,
+  isMacPlatform,
+  parseCombo,
+} from '../KeyboardShortcut/combo'
 import TextInput from '../TextInput/TextInput.vue'
 import type { KeyboardShortcutsDialogProps } from './types'
 
@@ -144,6 +150,19 @@ const shouldShowSearch = computed(
   () => shortcutCount.value > props.searchThreshold,
 )
 
+const isMac = isMacPlatform()
+
+// A row for `Mod+Slash` draws `Ctrl /`, so a reader who sees `/` types `/`.
+// Searching the raw combo alone would answer "No shortcuts match your search".
+// The row matches on what it shows as well as on the name behind it.
+function searchTextFor(shortcut: KeyboardShortcutEntry): string {
+  const combos = [shortcut.combo, ...shortcut.altCombos]
+  const shown = combos.map((combo) =>
+    displayText(parseCombo(combo, isMac)),
+  )
+  return [shortcut.description, ...combos, ...shown].join(' ').toLowerCase()
+}
+
 const filteredGroups = computed<KeyboardShortcutGroup[]>(() => {
   if (!shouldShowSearch.value || !searchQuery.value) return groups.value
 
@@ -155,15 +174,9 @@ const filteredGroups = computed<KeyboardShortcutGroup[]>(() => {
       matches.push(group)
       continue
     }
-    const shortcuts = group.shortcuts.filter((shortcut) => {
-      const combos = [shortcut.combo, ...shortcut.altCombos]
-        .join(' ')
-        .toLowerCase()
-      return (
-        shortcut.description.toLowerCase().includes(query) ||
-        combos.includes(query)
-      )
-    })
+    const shortcuts = group.shortcuts.filter((shortcut) =>
+      searchTextFor(shortcut).includes(query),
+    )
     if (shortcuts.length) matches.push({ name: group.name, shortcuts })
   }
 

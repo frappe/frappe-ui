@@ -115,4 +115,38 @@ describe('<KeyboardShortcutsDialog />', () => {
 
     dialog.unmount()
   })
+
+  it('searches what the row draws, not only the combo name', async () => {
+    const extra: KeyboardShortcutConfig[] = [
+      {
+        combo: 'Mod+Slash',
+        description: 'Toggle the sidebar',
+        preventDefault: false,
+        handler: () => {},
+      },
+    ]
+    const dialog = mountDialog(() => true, extra, { searchThreshold: 1 })
+    await dialog.setOpen(true)
+
+    const input = dialog.search()!
+    async function type(value: string) {
+      input.value = value
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      await nextTick()
+    }
+
+    // The row draws `Ctrl /`. A reader who sees `/` types `/`.
+    await type('/')
+    expect(dialog.rows()).toContain('Toggle the sidebar')
+    expect(dialog.rows()).not.toContain('Open command palette')
+
+    // The name behind the glyph still matches.
+    await type('slash')
+    expect(dialog.rows()).toContain('Toggle the sidebar')
+
+    await type('zzz')
+    expect(dialog.rows()).toContain('No shortcuts match your search')
+
+    dialog.unmount()
+  })
 })
