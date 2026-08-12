@@ -37,13 +37,23 @@ Use one or the other.
 
 `required` is the one exception to that routing. The ARIA role table does not
 list `aria-required` for `slider`, so setting it fails the `aria-allowed-attr`
-audit rule and screen readers ignore it. The asterisk and `data-required` carry
-the state instead.
+audit rule and screen readers ignore it. The state is announced from inside the
+label instead, as `sr-only` text next to the asterisk. The asterisk itself is
+`aria-hidden`, and `data-required` is a styling hook.
+
+That has a consequence: `required` is announced only while the name comes from
+the label. A caller `aria-label` replaces the label as the name, so the thumb
+then announces the name without "(required)". Set `required` with `label`, or
+put the word in the `aria-label` yourself.
 
 A range renders one thumb per value. When a name is set, each thumb is qualified
 with it ("Price minimum", "Price maximum", or "Stops value 2 of 3" past two
 thumbs) so the endpoints are told apart. An unnamed range keeps the plain
 "Minimum"/"Maximum" names.
+
+Any other `aria-*` you set is copied to every thumb, so a range gets one shared
+value for all of them. `aria-valuetext` on a range is announced identically at
+both endpoints.
 
 ## value-commit
 

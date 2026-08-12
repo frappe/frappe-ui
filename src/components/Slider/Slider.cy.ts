@@ -278,6 +278,9 @@ describe('Slider', () => {
       attrs: { class: 'w-64' },
     })
     cy.get('.w-64').should('not.have.class', 'w-full')
+    // The control still fills that wrapper. Without the `hasLabeling` half of
+    // the guard it falls back to `width: auto`, which is zero in a flex parent.
+    cy.get('.w-64 [data-slot="control"]').should('have.class', 'w-full')
 
     cy.mount(Slider, {
       props: { id: 'sl-bare-w', modelValue: [25] },
