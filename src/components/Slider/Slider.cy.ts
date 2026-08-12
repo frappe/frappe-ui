@@ -252,6 +252,17 @@ describe('Slider', () => {
     })
     cy.get('#sl-hidden').should('have.attr', 'aria-hidden', 'true')
     cy.get('[role="slider"]').should('not.have.attr', 'aria-hidden')
+    // reka keeps `tabindex="0"` on every thumb, so hiding the root alone would
+    // leave focus landing inside a subtree screen readers cannot see.
+    cy.get('#sl-hidden').should('have.attr', 'inert')
+    cy.get('[role="slider"]').then(($thumb) => {
+      $thumb[0].focus()
+      cy.document().then((doc) => {
+        expect(doc.activeElement, 'inert keeps focus out').to.not.equal(
+          $thumb[0],
+        )
+      })
+    })
   })
 
   it('forwards class and style to the rendered root', () => {

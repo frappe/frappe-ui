@@ -56,7 +56,9 @@ thumbs) so the endpoints are told apart. An unnamed range keeps the plain
 Any other `aria-*` you set is copied to every thumb, so a range gets one shared
 value for all of them. `aria-valuetext` on a range is announced identically at
 both endpoints. `aria-hidden` is the exception and stays on the root, because it
-hides a subtree rather than describing the control.
+hides a subtree rather than describing the control. It also makes the control
+`inert`: the thumbs stay in the tab order otherwise, which puts keyboard focus
+inside a subtree a screen reader cannot see.
 
 ## value-commit
 

@@ -37,6 +37,16 @@ defineOptions({
 // widget in the accessibility tree, which is the axe `aria-hidden-focus`
 // violation, and the caller's actual intent never reaches the root.
 const rootOnlyAria = new Set(['aria-hidden'])
+
+// Hiding the root is only half of it. reka gives every thumb `tabindex="0"`
+// unless the slider is disabled (`SliderThumbImpl`), so `aria-hidden` alone
+// leaves keyboard focus landing inside a subtree that assistive technology
+// cannot see — the second clause of axe's `aria-hidden-focus`. `inert` takes
+// them out of the tab order, which is what the caller asked for.
+const isHiddenFromAria = computed(() => {
+  const value = attrs['aria-hidden']
+  return value === '' || value === true || value === 'true'
+})
 const isAriaKey = (key: string) => key.startsWith('aria-')
 const isThumbAria = (key: string) => isAriaKey(key) && !rootOnlyAria.has(key)
 
@@ -295,6 +305,7 @@ const onValueCommit = (value: SliderValue) => {
       :step="props.step"
       :disabled="props.disabled"
       data-slot="control"
+      :inert="isHiddenFromAria || undefined"
       v-bind="{ ...dataAttrs, ...rootAttrs }"
       @value-commit="onValueCommit"
     >
