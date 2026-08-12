@@ -326,7 +326,7 @@ type DatePickerEmits = {
 }
 ```
 
-Slots: `target`, `prefix`, `suffix` (all with `{ togglePopover, isOpen, displayLabel, inputValue }`).
+Slots: `trigger`, `prefix`, `suffix` (all with `{ open, toggle, displayLabel, inputValue }`).
 
 Exposed: `open(): void`
 
@@ -476,7 +476,7 @@ type TimePickerEmits = {
 }
 ```
 
-Slots: `prefix`, `suffix` (suffix exposes `{ togglePopover, isOpen }`).
+Slots: `prefix`, `suffix` (suffix exposes `{ open, toggle }`).
 
 ---
 
