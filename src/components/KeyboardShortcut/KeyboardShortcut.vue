@@ -75,23 +75,20 @@
     <template v-else>
       <slot></slot>
     </template>
-  </span>
-  <template v-if="uniqueAltCombos.length">
-    <span class="inline-flex items-center gap-1.5" data-slot="alt-combos">
+    <span
+      v-if="uniqueAltCombos.length"
+      class="ms-1 inline-flex items-center gap-1.5"
+      data-slot="alt-combos"
+    >
       <template
         v-for="(altCombo, i) in uniqueAltCombos"
         :key="'alt-' + i + altCombo"
       >
         <span class="text-xs text-ink-gray-4" aria-hidden="true">/</span>
-        <KeyboardShortcut
-          :combo="altCombo"
-          :bg="bg"
-          :show-plus="showPlus"
-          :aria-label="'Alternative shortcut ' + altCombo"
-        />
+        <KeyboardShortcut :combo="altCombo" :bg="bg" :show-plus="showPlus" />
       </template>
     </span>
-  </template>
+  </span>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
@@ -148,8 +145,7 @@ function parseCombo(raw?: string): Part[] {
     space: 'Space',
     ' ': 'Space',
     tab: 'Tab',
-    plus: '+', // alias used by toCombo to avoid delimiter collision
-    '=': '+', // equals key displayed as + (Ctrl+= fires without Shift, avoids browser zoom)
+    plus: '+', // the keypad +; the typed + is Shift+Equal
     backspace: '⌫',
     delete: '⌦',
     del: '⌦',
@@ -231,27 +227,35 @@ const uniqueAltCombos = computed<string[]>(() => {
   })
 })
 
+const wordMap: Record<string, string> = {
+  '⌘': 'Command',
+  Shift: 'Shift',
+  '⌥': 'Option',
+  Alt: 'Alt',
+  Ctrl: 'Control',
+  Win: 'Windows',
+  '↵': 'Enter',
+  '⌫': 'Backspace',
+  '⌦': 'Delete',
+  '↑': 'Up Arrow',
+  '↓': 'Down Arrow',
+  '←': 'Left Arrow',
+  '→': 'Right Arrow',
+}
+
+function spellOut(parts: Part[]): string {
+  return parts.map((p) => wordMap[p.display] || p.display).join(' + ')
+}
+
+// The root is a labelled `role="note"`, so its label replaces everything
+// inside it. Name the alternatives here or they are never announced.
 const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
-  const wordMap: Record<string, string> = {
-    '⌘': 'Command',
-    Shift: 'Shift',
-    '⌥': 'Option',
-    Alt: 'Alt',
-    Ctrl: 'Control',
-    Win: 'Windows',
-    '↵': 'Enter',
-    '⌫': 'Backspace',
-    '⌦': 'Delete',
-    '↑': 'Up Arrow',
-    '↓': 'Down Arrow',
-    '←': 'Left Arrow',
-    '→': 'Right Arrow',
-  }
-  const seq = parsedParts.value
-    .map((p) => wordMap[p.display] || p.display)
-    .join(' + ')
-  return 'Shortcut ' + seq
+  const sequences = [
+    spellOut(parsedParts.value),
+    ...uniqueAltCombos.value.map((combo) => spellOut(parseCombo(combo))),
+  ]
+  return 'Shortcut ' + sequences.join(', or ')
 })
 
 defineOptions({ name: 'KeyboardShortcut' })

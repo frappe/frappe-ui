@@ -42,4 +42,48 @@ describe('<KeyboardShortcut />', () => {
     })
     cy.contains('Custom fallback').should('exist')
   })
+
+  it('carries the documented styling hooks', () => {
+    cy.mount(KeyboardShortcut, { props: { combo: 'Mod+Shift+K' } })
+    cy.get('[data-slot=keyboard-shortcut]')
+      .should('have.attr', 'data-variant', 'plain')
+      .find('[data-slot=key]')
+      .should('have.length', 3)
+    cy.get('[data-slot=key][data-key-type=shift]').should('exist')
+    cy.get('[data-slot=keyboard-shortcut] [data-slot=separator]').should(
+      'have.length',
+      2,
+    )
+
+    cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K', bg: true } })
+    cy.get('[data-slot=keyboard-shortcut]').should(
+      'have.attr',
+      'data-variant',
+      'bg',
+    )
+  })
+
+  it('renders the key names a shortcut combo uses', () => {
+    cy.mount(KeyboardShortcut, { props: { combo: 'Digit1' } })
+    cy.get('[data-slot=key]').should('contain.text', '1')
+
+    cy.mount(KeyboardShortcut, { props: { combo: 'Slash' } })
+    cy.get('[data-slot=key]').should('contain.text', '/')
+
+    cy.mount(KeyboardShortcut, { props: { combo: 'Backtick' } })
+    cy.get('[data-slot=key]').should('contain.text', '`')
+  })
+
+  it('nests the alternative combos inside the root and names them', () => {
+    cy.mount(KeyboardShortcut, {
+      props: { combo: 'Mod+Backspace', altCombos: ['Delete'] },
+    })
+    cy.get('[data-slot=keyboard-shortcut] [data-slot=alt-combos]').should(
+      'exist',
+    )
+    cy.get('[data-slot=keyboard-shortcut]')
+      .first()
+      .invoke('attr', 'aria-label')
+      .should('contain', ', or Delete')
+  })
 })
