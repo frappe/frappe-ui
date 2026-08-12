@@ -26,15 +26,17 @@ a word, so those are the ones that reach production. Each is marked.
 replacement needs explaining. If your build already names the file and the
 line, the changelog is the faster read.
 
-Only the Tailwind token renames have a codemod (`tokens-v2`, see
-[Tokens](#tokens)). Every component, prop and slot rename is a hand edit.
+Two changes have a codemod: the Tailwind token renames (`tokens-v2`, see
+[Tokens](#tokens)) and the shortcut config (`shortcuts-v1`, see
+[Keyboard shortcuts](#keyboard-shortcuts)). Every other component, prop and
+slot rename is a hand edit.
 
 ### Sections
 
 - **Overlays** — [Dialog](#dialog) · [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) · [CommandPalette](#commandpalette)
 - **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
-- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [KeyboardShortcut](#keyboardshortcut) · [Divider](#divider)
+- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Keyboard shortcuts](#keyboard-shortcuts) · [KeyboardShortcut](#keyboardshortcut) · [Divider](#divider)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
@@ -2533,6 +2535,114 @@ and yours never updates.
 `keydown` listener on `window`). Delete any app-level listener you added on
 top of it.
 
+## Keyboard shortcuts
+
+A shortcut config loses its `key` + `ctrl` + `shift` + `alt` fields and gains
+one `combo` string. Run the codemod from the app you are migrating:
+
+```sh
+npx --package frappe-ui@beta shortcuts-v1 --dry-run .
+```
+
+Review the output, then run it without `--dry-run`:
+
+```sh
+npx --package frappe-ui@beta shortcuts-v1 .
+```
+
+```js
+// Before
+useShortcut([
+  { key: 's', ctrl: true, description: 'Save', group: 'View', handler: onSave },
+  { key: 'z', ctrl: true, shift: true, description: 'Redo', condition: notReadOnly, handler: redo },
+])
+
+// After
+useKeyboardShortcut([
+  { combo: 'Mod+S', description: 'Save', group: 'View', handler: onSave },
+  { combo: 'Mod+Shift+Z', description: 'Redo', enabled: notReadOnly, handler: redo },
+])
+```
+
+| Before | After |
+| --- | --- |
+| `useShortcut` | `useKeyboardShortcut` |
+| `KeyboardShortcutsModal` | `KeyboardShortcutsDialog` |
+| `ShortcutConfig` | `KeyboardShortcutConfig` |
+| `key` + `ctrl` / `shift` / `alt` | `combo` |
+| `condition` | `enabled` |
+| `triggeredOn: 'hold'` | deleted; `onHold` / `onRelease` select hold mode |
+| `getActiveShortcuts` | deleted |
+| `formatShortcutLabel` | deleted |
+
+`ctrl: true` becomes `Mod`, never `Ctrl`. v0 matched `ctrlKey || metaKey`, so
+the flag always meant `Mod`. Modifiers are written in one order:
+`Mod+Ctrl+Alt+Shift+<Key>`.
+
+The codemod exits non-zero when it refused a site, on a dry run too. A clean
+exit means a clean run. Re-running it is safe: a converted object has no `key`
+field left to convert, and a refusal repeats until you fix it.
+
+The codemod does not reflow the code it edits. Run your formatter after it.
+
+### Punctuation keys are never converted
+
+This is the reason to run a codemod instead of a grep. `+` is both the combo
+separator and a key, so `{ key: '+', ctrl: true }` written by hand becomes
+`'Mod++'`, which splits into `['Mod', '', '']` and never fires. Nothing
+reports it.
+
+So the codemod stops on the site and prints the named key to use:
+
+```
+✗ Not converted — 3 sites need a decision:
+  src/sheets/useShortcuts.js:L96  key '+' is punctuation. Write the named key `Plus`
+  src/sheets/useShortcuts.js:L95  key '=' is punctuation. Write the named key `Equal`
+  src/Commands/index.ts:L196      key '?' is a shifted character. Write `Shift+Slash`
+```
+
+The named keys are `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`,
+`Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft` and
+`BracketRight`.
+
+### Digits convert, and get listed
+
+`{ key: '1', ctrl: true, shift: true }` becomes `{ combo: 'Mod+Shift+Digit1' }`.
+v1 matches a digit on `KeyboardEvent.code`, so a shifted digit (`!`, `@`, ...)
+resolves to the same combo. That is a behaviour change, so the codemod lists
+every digit it touched under "Digit keys converted". Read each one.
+
+### What it reports but never rewrites
+
+Each of these exits the run non-zero. Fix them by hand.
+
+- **Punctuation and shifted characters.** See above.
+- **An uppercase key with no `shift: true`.** v0 read `{ key: 'S' }` as
+  shift-produced and fired it on Shift+S only. Write `Shift+S`.
+- **A `key` that is not a plain string**, and a modifier flag that is not a
+  literal `true` / `false`. v1 has no conditional modifier.
+- **A type declaration of the v0 shape.** Import `KeyboardShortcutConfig`.
+- **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted. Render
+  `<KeyboardShortcut :combo="..." />` for the first. For the second, read the
+  registry from the `<KeyboardShortcutsDialog>` default slot.
+- **A destructured `useShortcut(...)` return.** v1 returns void; cleanup
+  already runs on unmount.
+- **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both. v1 selects
+  hold mode from `onHold` / `onRelease` alone, so decide which callback stays.
+- **A hand-rolled hold**: a registration plus your own `keyup` listener. Only
+  you can say which half is `onHold` and which is `onRelease`.
+- **A `vi.mock('frappe-ui', ...)` keyed on `useShortcut`.** The codemod renames
+  the mock key, but the captured configs still carry `key` / `ctrl`, so the
+  assertions move with the registrations.
+
+### It never renames your own composable
+
+`useShortcut` is rewritten only where the file imports it from the `frappe-ui`
+barrel, or does not bind it at all. A fork imported from your own module, or
+declared in the same file, keeps its name and is reported instead. crm, lms
+and suite each ship a local `useKeyboardShortcuts`, one character from the new
+name; those are untouched.
+
 ## KeyboardShortcut
 
 The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
@@ -2660,9 +2770,11 @@ the token vocabulary moved: removed radius aliases and the shifted ink scales
 emit no CSS at all, with no build or type error. Run the
 [token codemod](#tokens) before you audit anything by hand.
 
-**Do I have to run the codemod?** Yes, if you use Tailwind utilities from the
-frappe-ui preset. It is the only mechanical step in this guide — every
-component, prop and slot rename is a hand edit.
+**Do I have to run the codemods?** Run `tokens-v2` if you use Tailwind
+utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
+keyboard shortcuts — it also catches the punctuation keys that a hand
+migration breaks in silence. These two are the mechanical steps in this
+guide; every component, prop and slot rename is a hand edit.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
