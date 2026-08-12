@@ -786,7 +786,8 @@ function main() {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
       console.error('   Delete the marker only to re-run the shift on purpose.')
-      console.error('   If the marker sits under a vendored package, run the codemod per package root instead.\n')
+      console.error('   If the marker sits in a vendored copy outside node_modules, targeting')
+      console.error('   its package root finds it again — target the directories you own instead.\n')
       process.exit(1)
     }
     if (marker) {
