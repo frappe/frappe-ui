@@ -32,10 +32,18 @@ defineOptions({
 // has to be re-routed there — on the root they describe a container that no
 // assistive technology reports as the control. `aria-valuetext` is the one
 // that would otherwise be silently dropped.
+// `aria-hidden` is the exception: it scopes to a subtree rather than to a role.
+// On the thumb it marks a `tabindex="0"` element hidden while leaving the
+// widget in the accessibility tree, which is the axe `aria-hidden-focus`
+// violation, and the caller's actual intent never reaches the root.
+const rootOnlyAria = new Set(['aria-hidden'])
 const isAriaKey = (key: string) => key.startsWith('aria-')
+const isThumbAria = (key: string) => isAriaKey(key) && !rootOnlyAria.has(key)
 
 const callerAria = computed(() => {
-  return Object.fromEntries(Object.entries(attrs).filter(([k]) => isAriaKey(k)))
+  return Object.fromEntries(
+    Object.entries(attrs).filter(([k]) => isThumbAria(k)),
+  )
 })
 
 // A slider has no intrinsic width, so it carries `w-full`. That is a default,
@@ -56,11 +64,12 @@ const hasCallerWidth = computed(() => {
 })
 
 // What is left to fall through to the control: class and style are placed by
-// hand, and `aria-*` goes to the thumb.
+// hand, and the thumb-scoped `aria-*` goes to the thumb. `aria-hidden` stays
+// here.
 const rootAttrs = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(
-      ([key]) => key !== 'class' && key !== 'style' && !isAriaKey(key),
+      ([key]) => key !== 'class' && key !== 'style' && !isThumbAria(key),
     ),
   )
 })

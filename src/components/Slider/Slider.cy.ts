@@ -242,6 +242,18 @@ describe('Slider', () => {
     cy.get('#sl-valuetext').should('not.have.attr', 'aria-valuetext')
   })
 
+  it('keeps aria-hidden on the root, not the thumb', () => {
+    // It hides a subtree rather than describing the control. On the thumb it
+    // marks a focusable element hidden and leaves the widget in the tree,
+    // which is the axe `aria-hidden-focus` violation.
+    cy.mount(Slider, {
+      props: { id: 'sl-hidden', modelValue: [25] },
+      attrs: { 'aria-hidden': 'true' },
+    })
+    cy.get('#sl-hidden').should('have.attr', 'aria-hidden', 'true')
+    cy.get('[role="slider"]').should('not.have.attr', 'aria-hidden')
+  })
+
   it('forwards class and style to the rendered root', () => {
     // With a label the wrapper is the root; without one the control is.
     cy.mount(Slider, {

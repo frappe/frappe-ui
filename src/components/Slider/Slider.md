@@ -42,9 +42,11 @@ label instead, as `sr-only` text next to the asterisk. The asterisk itself is
 `aria-hidden`, and `data-required` is a styling hook.
 
 That has a consequence: `required` is announced only while the name comes from
-the label. A caller `aria-label` replaces the label as the name, so the thumb
-then announces the name without "(required)". Set `required` with `label`, or
-put the word in the `aria-label` yourself.
+the rendered label. A caller `aria-label` or `aria-labelledby` replaces it as
+the name, so the thumb then announces the name without "(required)". A `#label`
+slot replaces the whole label body, asterisk included, so nothing renders it at
+all — the slot receives `{ required }` for that. In each of the three cases,
+render or word the required state yourself.
 
 A range renders one thumb per value. When a name is set, each thumb is qualified
 with it ("Price minimum", "Price maximum", or "Stops value 2 of 3" past two
@@ -53,7 +55,8 @@ thumbs) so the endpoints are told apart. An unnamed range keeps the plain
 
 Any other `aria-*` you set is copied to every thumb, so a range gets one shared
 value for all of them. `aria-valuetext` on a range is announced identically at
-both endpoints.
+both endpoints. `aria-hidden` is the exception and stays on the root, because it
+hides a subtree rather than describing the control.
 
 ## value-commit
 
