@@ -2,6 +2,16 @@
 
 A date and event view for schedules, with Month, Week, and Day modes.
 
+> **Parked** — `Calendar` left the root export in `1.0.0` and now ships from
+> [`frappe-ui/experimental`](/docs/experimental) with its public API unchanged.
+> It stays there, exempt from the deprecation policy, until a redesigned
+> calendar family replaces it.
+
+```ts
+import { Calendar } from 'frappe-ui/experimental'
+import type { CalendarEvent, CalendarConfig } from 'frappe-ui/experimental'
+```
+
 ## Default
 
 <ComponentPreview name="Calendar-Examples" csr="true" />
