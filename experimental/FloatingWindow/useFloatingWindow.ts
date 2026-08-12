@@ -78,7 +78,6 @@ export function useFloatingWindow(
         right: `${EDGE_MARGIN}px`,
         bottom: `${EDGE_MARGIN}px`,
         width: `${TRAY_WIDTH}px`,
-        zIndex: 50,
       }
     return {
       position: 'fixed',
@@ -86,7 +85,6 @@ export function useFloatingWindow(
       top: `${y.value}px`,
       width: `${width.value}px`,
       height: `${height.value}px`,
-      zIndex: 50,
     }
   })
 

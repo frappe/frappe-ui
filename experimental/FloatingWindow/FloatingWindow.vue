@@ -285,19 +285,3 @@ function onResizeKey(event: KeyboardEvent) {
 watch(mode, (value) => (modeModel.value = value), { immediate: true })
 watch(modeModel, (value) => value !== mode.value && setMode(value))
 </script>
-
-<!--
-  Global, intentionally unscoped. While a window is detached it's fixed at
-  z-index 50; reka-ui teleports popovers (dropdowns, autocompletes, menus) to
-  <body> and copies their content z-index (which is `auto` for most
-  components) onto the positioning wrapper, so they render *behind* the window
-  and become unclickable. Lift the popover layer to the app's popover z (100,
-  matching NestedPopover). `!important` is required to beat reka's inline
-  `z-index: auto`. Scoped to `.has-floating-window` so it only applies while a
-  window is open; docked windows are in normal flow and need no override.
--->
-<style>
-body.has-floating-window [data-reka-popper-content-wrapper] {
-  z-index: 100 !important;
-}
-</style>
