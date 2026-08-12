@@ -2675,6 +2675,62 @@ rendered `<span>` as plain HTML attributes, so `shortcut="Mod+K"` renders an
 empty chip and `ctrl shift` renders the key with no modifier glyphs. Only a
 type-check names the call sites.
 
+### `combo` takes the key names the composable fires on
+
+The display used to accept a second, looser vocabulary. It is gone: a chip for
+a combo that can never fire is the failure this family exists to remove. An
+unknown token renders as written, so `<KeyboardShortcut combo="Cmd+K" />` draws
+the word "Cmd" next to the K.
+
+This is a **silent break**. `combo` stays typed `string`, because callers
+compute it, so no type-check names the call sites. The chip warns once per
+token in development and says nothing in production.
+
+| Before | After |
+| --- | --- |
+| `Cmd`, `Command`, `⌘`, `Meta` | `Mod` |
+| `Control` | `Ctrl` |
+| `Option`, `Opt`, `⌥` | `Alt` |
+| `⇧` | `Shift` |
+| `Win`, `Windows` | nothing; the grammar has no Windows key |
+| `Esc` | `Escape` |
+| `Return` | `Enter` |
+| `Del` | `Delete` |
+| `Up`, `Down`, `Left`, `Right` | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| `=` | `Equal` |
+| `F13` and above | nothing; the grammar stops at `F12` |
+
+```vue
+<!-- Before -->
+<KeyboardShortcut combo="Cmd+K" />
+<KeyboardShortcut combo="Ctrl+Esc" />
+<KeyboardShortcut combo="Option+Up" />
+
+<!-- After -->
+<KeyboardShortcut combo="Mod+K" />
+<KeyboardShortcut combo="Ctrl+Escape" />
+<KeyboardShortcut combo="Alt+ArrowUp" />
+```
+
+Grep every `combo` on the component, including bound values. `Mod`, `Ctrl`,
+`Alt`, `Shift`, the letters, and the names in the table's right column are the
+whole vocabulary. The composable's grammar is the same one, listed under
+[`useKeyboardShortcut`](#punctuation-and-digits-take-a-key-name).
+
+### `useIcons` now reaches `bg` mode
+
+`bg` chips ignored the prop and always drew an icon for the arrow, Enter,
+Backspace and Delete keys. `:use-icons="false"` now drops those icons in both
+modes and draws the glyph instead. The default is `true`, so a chip that never
+set the prop is unchanged.
+
+### The root's `role` is `img`
+
+`role="note"` on the root becomes `role="img"` when `combo` is set, and no role
+at all without one. A labelled `img` replaces its subtree, so a screen reader
+reads "Shortcut Control + Backspace" once instead of meeting every chip. Update
+any test or stylesheet that selects `[role='note']`.
+
 ### `matchesShortcut` is no longer exported
 
 `import { matchesShortcut } from 'frappe-ui'` fails at the build. Its own doc

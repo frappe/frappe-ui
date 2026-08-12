@@ -57,12 +57,44 @@ part.
 
 Migration: [`KeyboardShortcutsModal`](/docs/migration#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog).
 
-### KeyboardShortcut — `data-slot` hooks, and the new key names render
+### KeyboardShortcut — one combo vocabulary, and `data-slot` hooks (breaking, silent)
 
 The root, each key, the `+` separators and the alternative combos carry a
-`data-slot`; the root also carries `data-variant`. Style through those instead
+`data-slot`; the root also carries `data-bg`. Style through those instead
 of a class prop (P10). The parser also reads the key names a combo uses, so
 `Digit1` renders `1` and `Slash` renders `/`.
+
+`combo` now reads the one grammar `useKeyboardShortcut` fires on. The older
+display-only spellings are gone, because a chip for a combo that can never fire
+is the failure this family exists to remove. An unknown token renders as
+written and warns once in development. **Silent break:** `combo` stays typed
+`string`, because callers compute it, so no type-check names the call sites and
+production logs nothing.
+
+| Gone | Write |
+| --- | --- |
+| `Cmd`, `Command`, `⌘`, `Meta` | `Mod` |
+| `Control` | `Ctrl` |
+| `Option`, `Opt`, `⌥` | `Alt` |
+| `⇧` | `Shift` |
+| `Win`, `Windows` | nothing; the grammar has no Windows key |
+| `Esc` | `Escape` |
+| `Return` | `Enter` |
+| `Del` | `Delete` |
+| `Up`, `Down`, `Left`, `Right` | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| `=` | `Equal` |
+| `F13` and above | nothing; the grammar stops at `F12` |
+
+The root's `role` is now `img` when `combo` is set, and absent otherwise. It
+was always `note`. A labelled `img` replaces its subtree, so a screen reader
+meets each key once instead of once per chip.
+
+`useIcons` also reaches `bg` mode, where it used to be ignored.
+`:use-icons="false"` now drops the arrow, Enter, Backspace and Delete icons in
+both modes. The default is `true`, so a chip that never set the prop draws what
+it drew before.
+
+Migration: [`KeyboardShortcut`](/docs/migration#keyboardshortcut).
 
 ### Badge — `theme="orange"` removed (breaking; loud in TS, silent in JS)
 
