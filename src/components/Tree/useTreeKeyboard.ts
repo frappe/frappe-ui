@@ -102,7 +102,7 @@ export function useTreeKeyboard(options: KeyboardOptions) {
         toggle(current.node)
         break
       default:
-        if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.key.length === 1) {
           typeaheadSearch(e.key)
         }
     }

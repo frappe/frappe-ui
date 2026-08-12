@@ -142,7 +142,9 @@ describe('Tree', () => {
     cy.focused().should('contain', 'Root')
     cy.focused().trigger('keydown', { key: 'ArrowDown', metaKey: true })
     cy.focused().should('contain', 'Root')
-    cy.focused().trigger('keydown', { key: 'Home', ctrlKey: true })
+    // Ctrl+End, not Ctrl+Home: focus starts on the first row, so an unguarded
+    // Home would land back on Root and the assertion could never fail.
+    cy.focused().trigger('keydown', { key: 'End', ctrlKey: true })
     cy.focused().should('contain', 'Root')
   })
 
