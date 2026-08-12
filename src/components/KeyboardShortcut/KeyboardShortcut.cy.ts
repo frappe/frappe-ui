@@ -45,10 +45,11 @@ describe('<KeyboardShortcut />', () => {
 
   it('carries the documented styling hooks', () => {
     cy.mount(KeyboardShortcut, { props: { combo: 'Mod+Shift+K' } })
-    cy.get('[data-slot=keyboard-shortcut]')
-      .should('not.have.attr', 'data-bg')
-      .find('[data-slot=key]')
-      .should('have.length', 3)
+    cy.get('[data-slot=keyboard-shortcut]').should('not.have.attr', 'data-bg')
+    cy.get('[data-slot=keyboard-shortcut] [data-slot=key]').should(
+      'have.length',
+      3,
+    )
     cy.get('[data-slot=key][data-key-type=shift]').should('exist')
     cy.get('[data-slot=keyboard-shortcut] [data-slot=separator]').should(
       'have.length',
