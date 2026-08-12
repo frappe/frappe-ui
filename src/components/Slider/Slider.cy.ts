@@ -30,6 +30,21 @@ describe('Slider', () => {
     cy.contains('slot description').should('exist')
   })
 
+  it('describes the thumb from a #description slot alone', () => {
+    // Slot without the prop. With both set, the prop already supplies the id
+    // and this branch is never reached.
+    cy.mount(Slider, {
+      props: { label: 'Volume' },
+      slots: { description: () => h('span', 'slot description') },
+    })
+
+    cy.get('[role="slider"]')
+      .invoke('attr', 'aria-describedby')
+      .then((id) => {
+        cy.get(`#${id}`).should('contain.text', 'slot description')
+      })
+  })
+
   it('renders one thumb for a single value', () => {
     cy.mount(Slider, {
       props: {

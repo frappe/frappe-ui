@@ -83,7 +83,6 @@ const {
   labelledBy,
   descriptionId,
   errorMessageId,
-  describedBy,
   hasError,
   errorLines,
   showDescription,
@@ -137,8 +136,14 @@ const thumbInvalid = computed(() => {
 // Merged, not replaced: a caller's `aria-describedby` must not drop the
 // generated description and error ids.
 const thumbDescribedBy = computed(() => {
+  // Built from what actually renders, not from `describedBy`: that one only
+  // sees the `description` prop, while `InputDescription` renders for the slot
+  // too — the same hole the `#label` slot had. Order matches `describedBy`.
   const ids = [
-    describedBy.value,
+    showDescription.value || slots.description
+      ? descriptionId.value
+      : undefined,
+    hasError.value ? errorMessageId.value : undefined,
     attrs['aria-describedby'] as string | undefined,
   ]
   const merged = ids.filter(Boolean).join(' ')
