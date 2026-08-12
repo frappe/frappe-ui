@@ -1353,17 +1353,20 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     renames.push({ line: lineAt(content, t.index), from: t[2], to: TAG_RENAMES[t[2]] })
   }
 
-  // A `key` object the run walked away from, in a file whose call it renamed.
-  // If that object is a registration, v1 now gets a config with no `combo`,
-  // and it throws on the first keypress. Only a human can say which it is, so
-  // this is a note: refusing here would block the file on a menu entry nobody
-  // can edit into evidence.
-  if (renames.length > 0) {
+  // A `key` object the run walked away from, in a file it changed. If that
+  // object is a registration, v1 now gets a config with no `combo`, and it
+  // throws on the first keypress. A converted site is the same evidence as a
+  // rename: a config module that never names `useShortcut` is written with one
+  // `combo` beside one `key`, and the call that reads it renames elsewhere.
+  //
+  // Only a human can say which it is, so this is a note: refusing here would
+  // block the file on a menu entry nobody can edit into evidence.
+  if (renames.length > 0 || changes.length > 0) {
     for (const site of skipped) {
       notes.push({
         line: site.line,
         message:
-          'this object has a `key` and a `handler` or a `condition`, and nothing that only a shortcut carries. It reads as a menu entry, so it was left as it is. A registration in this file was renamed, so check this is not one: v1 throws on a config with no `combo`.',
+          'this object has a `key` and a `handler` or a `condition`, and nothing that only a shortcut carries. It reads as a menu entry, so it was left as it is. The run changed this file, so check this is not a registration: v1 throws on a config with no `combo`.',
       })
     }
   }

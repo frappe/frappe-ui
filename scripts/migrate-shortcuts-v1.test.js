@@ -519,6 +519,23 @@ useShortcut(bindings)
     expect(migrated).toContain("{ key: 's', ctrl: true, handler: save }")
   })
 
+  it('names a walked-away object in a file it converted but never renamed', () => {
+    // A config module names no frappe-ui member, so there is no rename to
+    // gate on. The call that reads it renames in another file, and v1 gets a
+    // config with no `combo`.
+    const source = `export const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+  { key: 'd', ctrl: true, handler: remove },
+]
+`
+    const { migrated, notes, renames } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(renames).toEqual([])
+    expect(migrated).toContain("combo: 'Mod+S'")
+    expect(notes).toHaveLength(1)
+    expect(notes[0].line).toBe(3)
+  })
+
   it('does not read a section comment as the property above an object', () => {
     const source = `const items = [
   // shortcuts:
