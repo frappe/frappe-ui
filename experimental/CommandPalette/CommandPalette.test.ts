@@ -90,6 +90,26 @@ function labels() {
   return items().map((el) => el.textContent?.trim())
 }
 
+function input() {
+  return document.querySelector(
+    '[data-slot="command-palette-input"] input',
+  ) as HTMLInputElement
+}
+
+/** Reka defers its highlight work by a tick of its own. */
+async function flush() {
+  await nextTick()
+  await nextTick()
+  await nextTick()
+}
+
+/** Reka listens for the navigation keys on the filter field. */
+function press(key: string) {
+  input().dispatchEvent(
+    new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+  )
+}
+
 describe('CommandPalette', () => {
   it('renders every part with its data-slot hook', async () => {
     mount()
@@ -194,10 +214,10 @@ describe('CommandPalette', () => {
 
   it('marks the item under the pointer with data-state="active"', async () => {
     mount()
-    await nextTick()
+    await flush()
     const item = items()[1]
     item.dispatchEvent(new Event('pointermove', { bubbles: true }))
-    await nextTick()
+    await flush()
     expect(item.getAttribute('data-state')).toBe('active')
     expect(items()[0].getAttribute('data-state')).toBeNull()
   })
@@ -219,9 +239,11 @@ describe('CommandPalette', () => {
     document.body.appendChild(host)
     app = createApp(Harness)
     app.mount(host)
-    await nextTick()
+    await flush()
     const item = items()[0]
     expect(item.getAttribute('data-disabled')).toBe('')
+    // A disabled row is left out of the keyboard's collection, so the
+    // highlight-the-first-item pass skips it.
     expect(item.getAttribute('data-state')).toBeNull()
   })
 
@@ -248,15 +270,65 @@ describe('CommandPalette', () => {
     expect(item.getAttribute('href')).toBe('/docs')
   })
 
+  it('puts the keyboard on the first item when it opens', async () => {
+    mount()
+    await flush()
+    expect(items()[0].getAttribute('data-state')).toBe('active')
+  })
+
+  it('moves the active item with the arrow keys', async () => {
+    mount()
+    await flush()
+    press('ArrowDown')
+    await flush()
+    expect(items()[1].getAttribute('data-state')).toBe('active')
+    press('ArrowDown')
+    await flush()
+    expect(items()[2].getAttribute('data-state')).toBe('active')
+    press('ArrowUp')
+    await flush()
+    expect(items()[1].getAttribute('data-state')).toBe('active')
+  })
+
+  it('keeps the focus in the field while the keyboard walks the list', async () => {
+    mount()
+    await flush()
+    press('ArrowDown')
+    await flush()
+    expect(document.activeElement).toBe(input())
+  })
+
+  it('picks the active item with Enter and closes', async () => {
+    const onSelect = vi.fn()
+    const onUpdateOpen = vi.fn()
+    mount({ onSelect, onUpdateOpen })
+    await flush()
+    press('ArrowDown')
+    await flush()
+    press('Enter')
+    await flush()
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect.mock.calls[0][0]).toBe('settings')
+    expect(onUpdateOpen).toHaveBeenCalledWith(false)
+  })
+
+  it('re-aims the keyboard at the first match while typing', async () => {
+    const { query } = mount()
+    await flush()
+    press('ArrowDown')
+    await flush()
+    query.value = 'new'
+    await flush()
+    expect(labels()).toEqual(['New taskMod+N'])
+    expect(items()[0].getAttribute('data-state')).toBe('active')
+  })
+
   it('writes the typed text back through `update:query`', async () => {
     const { query } = mount()
     await nextTick()
-    const input = document.querySelector(
-      '[data-slot="command-palette-input"] input',
-    ) as HTMLInputElement
-    expect(input.placeholder).toBe('Search commands')
-    input.value = 'set'
-    input.dispatchEvent(new Event('input'))
+    expect(input().placeholder).toBe('Search commands')
+    input().value = 'set'
+    input().dispatchEvent(new Event('input'))
     await nextTick()
     expect(query.value).toBe('set')
   })

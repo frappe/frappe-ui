@@ -149,13 +149,18 @@ function onHighlight(
   activeValue.value = payload?.value
 }
 
-// Put the keyboard on the first item when the palette opens, so Enter always
-// has a target. Reka does this for every keystroke, but not for opening.
-watch(open, async (isOpen) => {
-  if (!isOpen) return
-  await nextTick()
-  listbox.value?.highlightFirstItem()
-})
+// Put the keyboard on the first item, so Enter always has a target. Reka does
+// this while the user types in the field, but not when the palette opens and
+// not when the app writes `query` itself.
+watch(
+  [open, query],
+  async () => {
+    if (!open.value) return
+    await nextTick()
+    listbox.value?.highlightFirstItem()
+  },
+  { immediate: true },
+)
 
 const slotProps = computed<CommandPaletteSlotProps>(() => ({
   query: query.value,
