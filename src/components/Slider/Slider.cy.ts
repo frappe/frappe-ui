@@ -130,6 +130,56 @@ describe('Slider', () => {
     })
   })
 
+  it('names each thumb of a range distinctly', () => {
+    cy.mount(Slider, {
+      props: { label: 'Price', modelValue: [20, 80] },
+    })
+    cy.get('[role="slider"]').should('have.length', 2)
+    cy.get('[role="slider"]')
+      .first()
+      .should('have.attr', 'aria-label', 'Price minimum')
+      // aria-labelledby would beat aria-label, so it must not be set here.
+      .and('not.have.attr', 'aria-labelledby')
+    cy.get('[role="slider"]')
+      .last()
+      .should('have.attr', 'aria-label', 'Price maximum')
+  })
+
+  it('keeps the plain name on a single thumb', () => {
+    cy.mount(Slider, { props: { label: 'Volume', modelValue: [25] } })
+    cy.get('[role="slider"]')
+      .should('not.have.attr', 'aria-label')
+      .and('have.attr', 'aria-labelledby')
+  })
+
+  it('routes any other caller aria-* to the thumb', () => {
+    cy.mount(Slider, {
+      props: { id: 'sl-valuetext', modelValue: [25] },
+      attrs: { 'aria-valuetext': '25 percent' },
+    })
+    cy.get('[role="slider"]').should(
+      'have.attr',
+      'aria-valuetext',
+      '25 percent',
+    )
+    cy.get('#sl-valuetext').should('not.have.attr', 'aria-valuetext')
+  })
+
+  it('forwards class and style to the rendered root', () => {
+    // With a label the wrapper is the root; without one the control is.
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [25] },
+      attrs: { class: 'my-slider' },
+    })
+    cy.get('.my-slider').should('exist')
+
+    cy.mount(Slider, {
+      props: { id: 'sl-bare', modelValue: [25] },
+      attrs: { class: 'my-bare-slider' },
+    })
+    cy.get('#sl-bare').should('have.class', 'my-bare-slider')
+  })
+
   it('forwards disabled to aria-disabled and SliderRoot', () => {
     cy.mount(Slider, {
       props: { id: 'sl-disabled', modelValue: [25], disabled: true },

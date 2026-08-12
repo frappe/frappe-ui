@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useSlots, useAttrs } from 'vue'
+import type { StyleValue } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -23,21 +24,27 @@ const slots = useSlots()
 
 const attrs = useAttrs()
 
-// `role="slider"` sits on the thumb, not the root, so the whole ARIA contract
-// has to be re-routed there — on the root it describes a container that no
-// assistive technology reports as the control.
-const ARIA_ATTRS = ['aria-label', 'aria-labelledby', 'aria-describedby']
+defineOptions({
+  inheritAttrs: false,
+})
+
+// `role="slider"` sits on the thumb, not the root, so every caller `aria-*`
+// has to be re-routed there — on the root they describe a container that no
+// assistive technology reports as the control. `aria-valuetext` is the one
+// that would otherwise be silently dropped.
+const isAriaKey = (key: string) => key.startsWith('aria-')
+
+const callerAria = computed(() => {
+  return Object.fromEntries(Object.entries(attrs).filter(([k]) => isAriaKey(k)))
+})
 
 const attrsWithoutClassStyle = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(
-      ([key]) =>
-        key !== 'class' && key !== 'style' && !ARIA_ATTRS.includes(key),
+      ([key]) => key !== 'class' && key !== 'style' && !isAriaKey(key),
     ),
   )
 })
-
-const thumbLabel = computed(() => attrs['aria-label'] as string | undefined)
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -86,6 +93,30 @@ const thumbDescribedBy = computed(() => {
   const merged = ids.filter(Boolean).join(' ')
   return merged || undefined
 })
+
+// A range slider renders one `role="slider"` per value. They need distinct
+// names, or assistive technology announces two identical controls. Only the
+// multi-thumb case is qualified — a single thumb keeps the plain name.
+const isRange = computed(() => sliderValue.value.length > 1)
+
+const baseName = computed(() => {
+  return (attrs['aria-label'] as string | undefined) ?? props.label
+})
+
+function thumbNameFor(index: number): string | undefined {
+  if (!isRange.value) return attrs['aria-label'] as string | undefined
+  const part =
+    sliderValue.value.length === 2
+      ? ['minimum', 'maximum'][index]
+      : `value ${index + 1}`
+  return baseName.value ? `${baseName.value} ${part}` : part
+}
+
+// `aria-labelledby` beats `aria-label`, so the generated reference has to drop
+// away on a range — otherwise the per-thumb name never wins.
+function thumbLabelledByFor(index: number): string | undefined {
+  return thumbNameFor(index) ? undefined : thumbLabelledBy.value
+}
 
 const isBidirectional = computed(() => props.min < 0 && props.max > 0)
 
@@ -150,7 +181,11 @@ const hasLabeling = computed(() => {
 </script>
 
 <template>
-  <LabelingWrapper :enabled="hasLabeling" wrapper-class="space-y-1.5 w-full">
+  <LabelingWrapper
+    :enabled="hasLabeling"
+    :wrapper-class="['space-y-1.5 w-full', attrs.class]"
+    :wrapper-style="attrs.style as StyleValue"
+  >
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
@@ -165,7 +200,8 @@ const hasLabeling = computed(() => {
     <SliderRoot
       :id="inputId"
       v-model="sliderValue"
-      :class="rootClasses"
+      :class="[rootClasses, hasLabeling ? null : (attrs.class as any)]"
+      :style="hasLabeling ? null : (attrs.style as any)"
       :max="props.max"
       :min="props.min"
       :step="props.step"
@@ -190,8 +226,9 @@ const hasLabeling = computed(() => {
         v-for="(_, i) in sliderValue"
         :key="`slider-thumb-${i}`"
         :class="thumbClasses"
-        :aria-label="thumbLabel"
-        :aria-labelledby="thumbLabelledBy"
+        v-bind="callerAria"
+        :aria-label="thumbNameFor(i)"
+        :aria-labelledby="thumbLabelledByFor(i)"
         :aria-describedby="thumbDescribedBy"
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-invalid="hasError || undefined"
