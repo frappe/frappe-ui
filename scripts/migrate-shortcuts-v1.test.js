@@ -602,6 +602,26 @@ import { KeyboardShortcutsModal } from 'frappe-ui'
     expect(migrated).toContain('{{ KeyboardShortcutsDialog.name }}')
   })
 
+  it('renames every form of a bound attribute, and no plain one', () => {
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <component v-bind:is="KeyboardShortcutsModal" />
+  <component :is=KeyboardShortcutsModal />
+  <div v-if="show && KeyboardShortcutsModal">x</div>
+  <div class=KeyboardShortcutsModal data-x="KeyboardShortcutsModal">y</div>
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('v-bind:is="KeyboardShortcutsDialog"')
+    expect(migrated).toContain(':is=KeyboardShortcutsDialog')
+    expect(migrated).toContain('v-if="show && KeyboardShortcutsDialog"')
+    expect(migrated).toContain('class=KeyboardShortcutsModal data-x="KeyboardShortcutsModal"')
+  })
+
   it('reads a mustache to its real end, past a nested brace and a quoted }}', () => {
     // `}}` closes the mustache only at brace depth zero, outside a string.
     // Stopping at the first one hides the rest of the expression, and a

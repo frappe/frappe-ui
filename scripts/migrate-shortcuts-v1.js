@@ -531,8 +531,13 @@ function buildMask(source, ranges) {
 const TEMPLATE_TAG = /<\/?([A-Za-z][\w.-]*)/dg
 
 // A bound attribute value holds a JS expression. HTML ends the value at the
-// matching quote, so the quote is a reliable boundary.
-const TEMPLATE_BINDING = /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)')/dg
+// matching quote, so the quote is a reliable boundary. An unquoted value ends
+// at the first space or `>`.
+//
+// The name covers every form: `:is`, `v-bind:is`, `v-if`, `@click`, `v-on:click`
+// and a dynamic argument such as `:[prop]`.
+const TEMPLATE_BINDING =
+  /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'`=<>]+))/dg
 
 // A mustache also holds a JS expression, but `}}` is not a reliable boundary:
 // `{{ fn({ a: { b: 1 }}) + X }}` closes at the inner `}}` under a regex, and
