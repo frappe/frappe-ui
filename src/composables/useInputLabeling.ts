@@ -56,6 +56,14 @@ interface UseInputLabelingOptions {
   disabled?: () => boolean | undefined
   /** State token override for `data-state` (e.g. `'checked'`). */
   state?: () => string | undefined
+  /**
+   * Whether a `#label` slot is filled. The label element renders for the slot
+   * as well as for the prop, so without this `labelledBy` points at nothing
+   * and the control is left unnamed with a `<label>` sitting right above it.
+   */
+  hasLabelSlot?: () => boolean
+  /** Same for a `#description` slot and `describedBy`. */
+  hasDescriptionSlot?: () => boolean
 }
 
 export function useInputLabeling(
@@ -88,15 +96,22 @@ export function useInputLabeling(
     return Boolean(props.description) && !hasError.value
   })
 
+  // Both of these follow what actually renders, not what the props say. A
+  // `#label` or `#description` slot renders the same element the prop does, so
+  // keying off the prop alone paints an element that nothing points at.
+  const rendersDescription = computed(() => {
+    return showDescription.value || Boolean(options.hasDescriptionSlot?.())
+  })
+
   const describedBy = computed(() => {
     const ids: string[] = []
-    if (showDescription.value) ids.push(descriptionId.value)
+    if (rendersDescription.value) ids.push(descriptionId.value)
     if (hasError.value) ids.push(errorMessageId.value)
     return ids.length ? ids.join(' ') : undefined
   })
 
   const labelledBy = computed(() => {
-    return props.label ? labelId.value : undefined
+    return props.label || options.hasLabelSlot?.() ? labelId.value : undefined
   })
 
   const dataAttrs = computed(() => {

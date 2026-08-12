@@ -104,6 +104,8 @@ const {
   size: () => props.size,
   disabled: () => props.disabled,
   state: () => (model.value ? 'checked' : 'unchecked'),
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const switchClasses = computed(() => {

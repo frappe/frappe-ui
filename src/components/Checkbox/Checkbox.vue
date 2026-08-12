@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useAttrs, watchEffect } from 'vue'
+import { computed, ref, useAttrs, watchEffect, useSlots } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
@@ -90,6 +90,8 @@ defineSlots<{
   description?: () => any
 }>()
 
+const slots = useSlots()
+
 const {
   inputId,
   labelId,
@@ -109,6 +111,8 @@ const {
       : checked.value
         ? 'checked'
         : 'unchecked',
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const labelClasses = computed(() => {

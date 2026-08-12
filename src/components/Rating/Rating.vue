@@ -186,6 +186,8 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => isDisabled.value,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const sizeClass = computed(
