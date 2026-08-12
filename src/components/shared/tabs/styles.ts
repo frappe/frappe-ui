@@ -34,12 +34,14 @@ export function tabTrackClasses(opts: {
       // `tabIndicatorClipClasses`.
       return [
         'bg-surface-gray-2',
-        isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-[10px] p-px',
+        isSm ? 'gap-1 p-px' : 'gap-1.5 p-px',
+        tabTrackRadiusClasses(variant, size),
       ]
     case 'ghost':
       return [
         'bg-surface-base',
-        isSm ? 'gap-1 rounded-4 p-px' : 'gap-1.5 rounded-5 p-0.5',
+        isSm ? 'gap-1 p-px' : 'gap-1.5 p-0.5',
+        tabTrackRadiusClasses(variant, size),
       ]
     case 'underline':
       return vertical
@@ -76,7 +78,9 @@ export function tabIndicatorSurfaceClasses(
 
 /**
  * Track radius, one step outside the trigger radius: 8px at sm, 10px at md
- * (subtle) or 12px (`rounded-5`, ghost md).
+ * (subtle) or 12px (`rounded-5`, ghost md). The track and the indicator's
+ * clip layer both read it here, so the clip can't drift off the track's own
+ * rounded box.
  */
 export function tabTrackRadiusClasses(
   variant: TabsVariant,
