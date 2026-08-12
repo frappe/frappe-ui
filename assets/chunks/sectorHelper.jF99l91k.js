@@ -1,0 +1,1 @@
+import{bE as i,c5 as o,cF as s}from"./useChart.DdI8R1Al.js";function d(e,a,n){var r=e.get("borderRadius");if(r==null)return n?{cornerRadius:0}:null;i(r)||(r=[r,r,r,r]);var t=Math.abs(a.r||0-a.r0||0);return{cornerRadius:o(r,function(u){return s(u,t)})}}export{d as g};
