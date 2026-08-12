@@ -1093,12 +1093,16 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
 
 // ---------- CLI ----------
 
+const OPTIONS = new Set(['--dry-run', '--help', '-h'])
 const EXTENSIONS = new Set(['.vue', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'])
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'cache', 'coverage'])
 
 function* walk(target) {
   if (fs.statSync(target).isFile()) {
-    yield target
+    // The allowlist applies to a named file too. Rewriting a .json or a .md
+    // that happens to hold a `key:` is never what the author asked for.
+    if (EXTENSIONS.has(path.extname(target))) yield target
+    else console.error(`Skipped ${target}: not a source file`)
     return
   }
   for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
@@ -1118,8 +1122,17 @@ function main() {
     console.log(USAGE)
     return
   }
+  // An option this script does not know is a stop, not a shrug. `--dryrun`
+  // used to fall through as a target-less flag and the run wrote every file.
+  const unknown = args.filter((a) => a.startsWith('-') && !OPTIONS.has(a))
+  if (unknown.length > 0) {
+    console.error(`Unknown option: ${unknown.join(' ')}`)
+    console.error(USAGE)
+    process.exit(1)
+  }
+
   const dryRun = args.includes('--dry-run')
-  const targets = args.filter((a) => !a.startsWith('--'))
+  const targets = args.filter((a) => !a.startsWith('-'))
 
   if (targets.length === 0) {
     console.error(USAGE)

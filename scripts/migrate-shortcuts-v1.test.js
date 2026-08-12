@@ -614,6 +614,27 @@ useShortcut([
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
   })
 
+  it('rejects an unknown option instead of writing files', () => {
+    const before =
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: 's', ctrl: true, description: 'Save' }])\n"
+    const dir = tempDir({ 'a.js': before })
+    // A mistyped safety flag must never fall through to a real run.
+    const result = run(['--dryrun', dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('Unknown option: --dryrun')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('skips a named file that is not a source file', () => {
+    const dir = tempDir({ 'notes.md': "useShortcut([{ key: 's' }])\n" })
+    const result = run([path.join(dir, 'notes.md')])
+
+    expect(result.status).toBe(0)
+    expect(result.stderr).toContain('not a source file')
+    expect(fs.readFileSync(path.join(dir, 'notes.md'), 'utf8')).toContain('useShortcut')
+  })
+
   it('exits zero on a clean run and writes the file', () => {
     const dir = tempDir({
       'a.js': "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: 's', ctrl: true, description: 'Save' }])\n",
