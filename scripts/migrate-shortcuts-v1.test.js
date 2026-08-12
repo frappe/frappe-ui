@@ -846,6 +846,35 @@ describe('hard stops', () => {
     ])
   })
 
+  it('names a deleted member once, however often it appears', () => {
+    const source = `import { getActiveShortcuts } from 'frappe-ui'
+const a = getActiveShortcuts()
+const b = getActiveShortcuts()
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+  })
+
+  it("leaves an app's own formatShortcutLabel out of it", () => {
+    // The name is gone from frappe-ui, not from the app. A refusal here can
+    // never be cleared, and it would hold the whole file back.
+    const source = `import { useShortcut } from 'frappe-ui'
+function formatShortcutLabel(config) {
+  return config.key
+}
+interface RegisteredShortcut {
+  key: string
+}
+useShortcut([{ key: 's', ctrl: true, description: 'Save', handler: save }])
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("combo: 'Mod+S'")
+    expect(migrated).toContain('function formatShortcutLabel(config) {')
+  })
+
   it('refuses a destructured return, which v1 no longer gives', () => {
     const { refusals } = migrateShortcuts(
       "const { activeShortcuts } = useShortcut({ key: 's', description: 'Save' })\n",

@@ -1130,6 +1130,19 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const ranges = scriptRanges(content, ext)
   const mask = buildMask(content, ranges)
   const renameMask = buildRenameMask(content, ranges, ext)
+
+  // A frappe-ui name stays frappe-ui's. A name this file imports from
+  // somewhere else, or declares itself, belongs to the app, and nothing here
+  // touches it or names it.
+  //
+  // Both reads run on the mask. A commented-out import is not an import, and a
+  // name written in prose is not a declaration.
+  const bindings = importBindings(content, renameMask)
+  const appOwns = (name) => {
+    const module = bindings.get(name)
+    if (module) return !BARREL.test(module)
+    return declaresLocally(content, name, renameMask)
+  }
   const callRanges = shortcutCallRanges(content, mask)
 
   const seen = new Set()
@@ -1184,9 +1197,17 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
 
   // A deleted member is flagged wherever it appears, comments included: the
   // name is gone from the package, so a stale mention is worth the noise.
+  //
+  // A name the app owns is not that name. An app's own `formatShortcutLabel`
+  // or `RegisteredShortcut` keeps working, and a refusal on it can never be
+  // cleared, so the file could never migrate. One line per name is enough: a
+  // type used twenty times says the same thing twenty times.
   const deleted = new RegExp(`\\b(${Object.keys(DELETED_MEMBERS).join('|')})\\b`, 'g')
+  const flagged = new Set()
   let d
   while ((d = deleted.exec(content))) {
+    if (flagged.has(d[1]) || appOwns(d[1])) continue
+    flagged.add(d[1])
     refusals.push({ line: lineAt(content, d.index), message: DELETED_MEMBERS[d[1]] })
   }
 
@@ -1235,12 +1256,6 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     })
   }
 
-  // A rename stays inside the frappe-ui barrel. A name this file imports from
-  // somewhere else, or declares itself, belongs to the app.
-  //
-  // Both reads run on the mask. A commented-out import is not an import, and a
-  // name written in prose is not a declaration, so neither refuses the file.
-  const bindings = importBindings(content, renameMask)
   const renames = []
   const nameLine = (name) => {
     const at = firstUnmasked(content, new RegExp(`\\b${name}\\b`, 'g'), renameMask)
