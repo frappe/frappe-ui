@@ -215,7 +215,7 @@ function remove(id: number) {
 
 const THEME_DEFAULT_ICON: Record<DialogTheme, string> = {
   red: 'lucide-alert-triangle',
-  yellow: 'lucide-alert-triangle',
+  amber: 'lucide-alert-triangle',
   blue: 'lucide-info',
   green: 'lucide-check-circle',
 }
@@ -224,8 +224,8 @@ type ButtonTheme = NonNullable<ButtonProps['theme']>
 
 function themeToButtonTheme(theme?: DialogTheme): ButtonTheme | undefined {
   if (!theme) return undefined
-  // Button doesn't have `yellow`; fall back to default solid (no theme).
-  if (theme === 'yellow') return undefined
+  // Button doesn't have `amber`; fall back to default solid (no theme).
+  if (theme === 'amber') return undefined
   return theme as ButtonTheme
 }
 

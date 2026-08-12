@@ -36,7 +36,7 @@ The `options` blob is flattened into top-level props. See the
 | `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
-| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'yellow' }"`    |
+| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`     |
 | `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
@@ -72,12 +72,28 @@ open) and wrap your app root in `<FrappeUIProvider>`.
 <Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
 
 <!-- After -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" ... />
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" ... />
 ```
 
 `appearance` is dropped silently — Vue accepts the unknown key with no error,
-so the icon renders with no tone. Map `warning → yellow`, `info → blue`,
+so the icon renders with no tone. Map `warning → amber`, `info → blue`,
 `danger → red`, `success → green`.
+
+### `theme: 'yellow'` → `theme: 'amber'`
+
+The warning tone is `amber`, matching `Alert`, `SidebarCard`, `Badge` and
+`Avatar`. `Dialog` was the last component spelling it `yellow`, and it already
+rendered that value with the amber tokens — only the word changes, not the
+color.
+
+| Before                     | After                     |
+| -------------------------- | ------------------------- |
+| `:icon="{ theme: 'yellow' }"` | `:icon="{ theme: 'amber' }"` |
+| `dialog.confirm({ theme: 'yellow' })` | `dialog.confirm({ theme: 'amber' })` |
+
+This is a **silent break** for JavaScript call sites: `yellow` is no longer a
+key in the tone maps, so the icon renders with no tone and nothing throws.
+TypeScript call sites get a union error.
 
 ### A template ref no longer exposes `close()`
 

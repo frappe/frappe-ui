@@ -14,7 +14,7 @@ export type DialogSize =
   | '6xl'
   | '7xl'
 
-export type DialogTheme = 'yellow' | 'blue' | 'red' | 'green'
+export type DialogTheme = 'amber' | 'blue' | 'red' | 'green'
 
 export type DialogPosition = 'center' | 'top'
 

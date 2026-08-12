@@ -274,7 +274,7 @@ const dialogIconBgClasses = computed(() => {
   const theme = iconTheme.value
   if (!theme) return 'bg-surface-gray-2'
   const map: Record<DialogTheme, string> = {
-    yellow: 'bg-surface-amber-2',
+    amber: 'bg-surface-amber-2',
     blue: 'bg-surface-blue-2',
     red: 'bg-surface-red-2',
     green: 'bg-surface-green-2',
@@ -286,7 +286,7 @@ const dialogIconClasses = computed(() => {
   const theme = iconTheme.value
   if (!theme) return 'text-ink-gray-5'
   const map: Record<DialogTheme, string> = {
-    yellow: 'text-ink-amber-5',
+    amber: 'text-ink-amber-5',
     blue: 'text-ink-blue-5',
     red: 'text-ink-red-7',
     green: 'text-ink-green-5',
