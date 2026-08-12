@@ -399,6 +399,14 @@ describe('Slider', () => {
         props: { label: 'Volume', error: 'Required' },
       })
       cy.contains('Required').should('exist')
+      // The error state reaches the thumb, not the root: `role="slider"` is
+      // what assistive technology reports as the control.
+      cy.get('[role="slider"]').should('have.attr', 'aria-invalid', 'true')
+      cy.get('[role="slider"]')
+        .invoke('attr', 'aria-errormessage')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'Required')
+        })
     })
 
     it('renders the canonical data-* hooks on the control', () => {
