@@ -635,6 +635,29 @@ useShortcut([
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
   })
 
+  it('is safe to run twice', () => {
+    // The guide says re-running is safe, so the second pass must change
+    // nothing and still exit zero.
+    const dir = tempDir({
+      'a.js': `import { KeyboardShortcutsModal, useShortcut } from 'frappe-ui'
+useShortcut([
+  { key: 's', ctrl: true, description: 'Save', condition: ready, handler: save },
+  { key: 'Escape', description: 'Close', handler: close },
+])
+`,
+    })
+    const first = run([dir])
+    const afterFirst = fs.readFileSync(path.join(dir, 'a.js'), 'utf8')
+    const second = run([dir])
+
+    expect(first.status).toBe(0)
+    expect(second.status).toBe(0)
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(afterFirst)
+    expect(afterFirst).toContain("combo: 'Mod+S'")
+    expect(afterFirst).toContain('enabled: ready')
+    expect(afterFirst).toContain('KeyboardShortcutsDialog')
+  })
+
   it('rejects an unknown option instead of writing files', () => {
     const before =
       "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ key: 's', ctrl: true, description: 'Save' }])\n"
