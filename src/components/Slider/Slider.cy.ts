@@ -341,6 +341,32 @@ describe('Slider', () => {
     })
     cy.get('#sl-disabled').should('have.attr', 'aria-disabled', 'true')
     cy.get('#sl-disabled').should('have.attr', 'data-disabled', '')
+    // reka leaves the thumb without one, and the thumb is the control.
+    cy.get('[role="slider"]').should('have.attr', 'aria-disabled', 'true')
+  })
+
+  it('lets a caller aria-label beat the label prop', () => {
+    // Without this the generated `aria-labelledby` wins the name order and the
+    // override does nothing.
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [25] },
+      attrs: { 'aria-label': 'Custom' },
+    })
+    cy.get('[role="slider"]').should('have.attr', 'aria-label', 'Custom')
+    cy.get('[role="slider"]').should('not.have.attr', 'aria-labelledby')
+  })
+
+  it('qualifies a caller aria-label that beats the label prop on a range', () => {
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [20, 80] },
+      attrs: { 'aria-label': 'Custom' },
+    })
+    cy.get('[role="slider"]')
+      .first()
+      .should('have.attr', 'aria-label', 'Custom minimum')
+    cy.get('[role="slider"]')
+      .last()
+      .should('have.attr', 'aria-label', 'Custom maximum')
   })
 
   describe('shared labeling contract', () => {

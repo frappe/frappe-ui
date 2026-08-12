@@ -97,10 +97,22 @@ const {
 const thumbLabelledBy = computed(() => {
   const caller = attrs['aria-labelledby'] as string | undefined
   if (caller) return caller
+  // A caller's `aria-label` is an explicit override, so the generated
+  // reference has to step aside — it would win the name order otherwise and
+  // the override would do nothing.
+  if (attrs['aria-label']) return undefined
   // `useInputLabeling` only sees the `label` prop, but the label element also
   // renders for a `#label` slot. Without this the slot leaves the thumb
   // unnamed while a `<label>` carrying the name sits right above it.
   return labelledBy.value ?? (slots.label ? labelId.value : undefined)
+})
+
+// reka puts `aria-disabled` on the root but not on the thumb, so without this
+// the element carrying `role="slider"` announces no disabled state. Caller
+// values survive when the prop is not set, same as the error attributes.
+const thumbDisabled = computed(() => {
+  if (props.disabled) return true
+  return (attrs['aria-disabled'] as string | boolean | undefined) || undefined
 })
 
 // The `error` prop wins, but with no error a caller's own value has to survive
@@ -264,7 +276,6 @@ const onValueCommit = (value: SliderValue) => {
       :min="props.min"
       :step="props.step"
       :disabled="props.disabled"
-      :aria-disabled="props.disabled || undefined"
       data-slot="control"
       v-bind="{ ...dataAttrs, ...rootAttrs }"
       @value-commit="onValueCommit"
@@ -299,6 +310,7 @@ const onValueCommit = (value: SliderValue) => {
           :aria-describedby="thumbDescribedBy"
           :aria-errormessage="thumbErrorMessage"
           :aria-invalid="thumbInvalid"
+          :aria-disabled="thumbDisabled"
         />
       </template>
     </SliderRoot>
