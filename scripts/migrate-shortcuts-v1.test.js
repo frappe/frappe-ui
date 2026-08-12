@@ -307,6 +307,15 @@ useShortcut([
     expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', enabled: condition, handler }")
   })
 
+  it('refuses an object that carries both condition and enabled', () => {
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ key: 's', description: 'Save', condition: a, enabled: b, handler: h }"),
+    )
+
+    expect(migrated).toContain('condition: a, enabled: b')
+    expect(refusals[0].message).toContain('would write `enabled` twice')
+  })
+
   it('leaves a destructured condition alone', () => {
     const source = 'const { condition, handler } = props\n'
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })

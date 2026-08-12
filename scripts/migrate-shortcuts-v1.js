@@ -717,6 +717,18 @@ function convertObject(source, mask, range, ctx) {
   const keyProp = byName.get('key')
   const condition = byName.get('condition')
 
+  // Renaming `condition` on an object that already has `enabled` writes the
+  // name twice. The later one wins in silence, and the file no longer lints.
+  const refuseDoubleEnabled = () => ({
+    refusals: [
+      {
+        line: lineAt(source, condition.start),
+        message:
+          'this object carries `condition` and `enabled`. Renaming `condition` would write `enabled` twice — merge them by hand.',
+      },
+    ],
+  })
+
   // Pass two: an object built by spreading a v0 config still carries
   // `condition`, which v1 spells `enabled`.
   //
@@ -732,6 +744,7 @@ function convertObject(source, mask, range, ctx) {
         byName.has('description') ||
         byName.has('group'))
     if (!isShortcutLike) return null
+    if (byName.has('enabled')) return refuseDoubleEnabled()
     return {
       edits: [renameConditionProperty(condition)],
       change: {
@@ -756,6 +769,8 @@ function convertObject(source, mask, range, ctx) {
 
   const hasSignal = props.some((p) => p.name && CONFIG_SIGNALS.has(p.name))
   if (!hasSignal && !ctx.insideCall && !ctx.contextProperty) return null
+
+  if (condition && byName.has('enabled')) return refuseDoubleEnabled()
 
   if (props.some((p) => p.name === null && !p.shorthand)) {
     return refuse(
