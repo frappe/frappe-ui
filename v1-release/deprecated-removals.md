@@ -5,9 +5,11 @@ The work list for
 `@deprecated` ships in `1.0.0`, so everything below is deleted before the tag
 rather than carried through `1.x`.
 
-This covers whole exports — components, composables, and the one prop value that
-pulls a component in with it. Member-level removals (individual props, slots,
-and emits on components that survive) go in the published migration guide,
+This covers whole exports — components, composables — plus deprecated **prop
+values**, whether or not they pull an export out with them. A prop value is not
+an export, so no scan of `src/index.ts` finds one; keeping them here is what
+makes them countable. Member-level removals (individual props, slots, and emits
+on components that survive) go in the published migration guide,
 [`docs/content/docs/migration.md`](../docs/content/docs/migration.md).
 
 ## The list
@@ -32,7 +34,7 @@ exported today**, except the rows marked done.
 | ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
 | ~~`Badge theme="orange"`~~ | removed in [#1069](https://github.com/frappe/frappe-ui/issues/1069) | `theme="amber"` | — |
 
-Twelve of the fourteen rows come from the one
+Eleven of the fourteen rows come from the one
 `// Deprecated component compatibility` block in `src/index.ts` (lines 103–132).
 Three rows sit outside it and are the easy ones to miss:
 

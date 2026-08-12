@@ -49,6 +49,9 @@ The only two axes used to color components — there is intentionally **no** sem
 - **variant** — visual style: `solid | outline | subtle | ghost` (Button, Badge)
 - **theme** — color tone, by color name: `yellow | blue | red | green | amber | …` (Button, Badge, Alert, Dialog; the Alert/SidebarCard palette is `gray | blue | green | amber | red`)
 
+Badge themes are `gray | blue | green | amber | red | violet`.
+_Avoid_ (Badge): `orange` — an alias for `amber`, removed in `1.0.0` (ADR-0008)
+
 A legacy `appearance` (`warning | info | danger | success`) maps to `theme` color names.
 
 **theme** means color tone and nothing else. It is the library's most-used
