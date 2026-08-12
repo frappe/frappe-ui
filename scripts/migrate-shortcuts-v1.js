@@ -1316,8 +1316,6 @@ function main() {
     })
 
     for (const refusal of refusals) allRefusals.push({ file, ...refusal })
-    for (const note of notes) allNotes.push({ file, ...note })
-    for (const change of changes) if (change.digit) allDigits.push({ file, ...change })
 
     const changeCount = changes.length + renames.length
     if (changeCount === 0) continue
@@ -1331,6 +1329,11 @@ function main() {
       console.log(`${file} (${changeCount} pending, left alone)`)
       continue
     }
+
+    // A digit and a note describe a file the run took. A refused file is
+    // unchanged, so listing its sites here would name work nobody did.
+    for (const note of notes) allNotes.push({ file, ...note })
+    for (const change of changes) if (change.digit) allDigits.push({ file, ...change })
 
     filesChanged++
     totalCombos += changes.length

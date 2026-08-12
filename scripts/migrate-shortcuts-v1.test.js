@@ -764,6 +764,24 @@ useShortcut([
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
   })
 
+  it('lists no digit and no note for a file it left alone', () => {
+    // The run says every file named is unchanged. So the summary above it
+    // must not name work in one of those files as done.
+    const before = `import { useShortcut } from 'frappe-ui'
+useShortcut([
+  { key: '1', ctrl: true, description: 'First', handler: first },
+  { key: '+', ctrl: true, description: 'Zoom in', handler: zoom },
+])
+`
+    const dir = tempDir({ 'a.js': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('left alone')
+    expect(result.stdout).not.toContain('Digit keys converted')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
   it('is safe to run twice', () => {
     // The guide says re-running is safe, so the second pass must change
     // nothing and still exit zero.
