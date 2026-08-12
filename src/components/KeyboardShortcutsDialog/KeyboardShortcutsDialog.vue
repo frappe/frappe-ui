@@ -14,10 +14,13 @@
           {{ title }}
         </h3>
         <div v-if="shouldShowSearch" class="w-fit ml-2" data-slot="search">
+          <!-- A placeholder disappears as soon as the field has text, so the
+               field carries its own name as well (P5). -->
           <TextInput
             v-model="searchQuery"
             type="text"
             placeholder="Search shortcuts"
+            aria-label="Search shortcuts"
           />
         </div>
       </div>
@@ -119,7 +122,13 @@ const searchQuery = ref('')
 const openCount = ref(0)
 
 watch(open, (isOpen) => {
-  if (isOpen) openCount.value++
+  if (isOpen) {
+    openCount.value++
+    return
+  }
+  // The dialog reopens on the full list. A query left over from the last
+  // visit hides most of it, and the reader has no idea why.
+  searchQuery.value = ''
 })
 
 const groups = computed(() => {
