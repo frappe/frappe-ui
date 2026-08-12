@@ -48,8 +48,9 @@
  * A `key` property alone means nothing — table columns and `v-for` rows use
  * it too. An object is treated as a shortcut when it has a `key` string and
  * either a v0-only property (`ctrl`, `handler`, `condition`, ...), or a
- * position that says so: inside a `useShortcut(...)` call, or as the value of
- * a `keys:` / `shortcut:` property.
+ * position that says so: an object the `useShortcut(...)` call receives
+ * directly, or the value of a `keys:` / `shortcut:` property. An object built
+ * deeper inside the call, in a handler body, is not one.
  *
  * WHAT IT REFUSES
  *
@@ -807,6 +808,22 @@ function shortcutCallRanges(source, mask) {
   return ranges
 }
 
+// True when the call receives this object directly: as the argument itself, or
+// as an element of the array or object the call receives. Anything deeper
+// belongs to a handler body, where `{ key: 'a' }` is an analytics payload and
+// not a shortcut.
+function isDirectArgument(source, mask, open, objectStart) {
+  let depth = 0
+  for (let i = open + 1; i < objectStart; i++) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === '(' || c === '[' || c === '{') depth++
+    else if (c === ')' || c === ']' || c === '}') depth--
+    if (depth < 0) return false
+  }
+  return depth <= 1
+}
+
 /**
  * Rewrites one file's contents.
  *
@@ -834,7 +851,10 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     seen.add(object.start)
 
     const insideCall = callRanges.some(
-      ([s, e]) => object.start > s && object.end <= e + 1,
+      ([s, e]) =>
+        object.start > s &&
+        object.end <= e + 1 &&
+        isDirectArgument(content, mask, s, object.start),
     )
     const contextProperty = CONTEXT_PROPERTY.test(
       content.slice(Math.max(range[0], object.start - 40), object.start),

@@ -257,6 +257,28 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
+  it('leaves an object built inside a handler body alone', () => {
+    // `{ key: 'a' }` here is an analytics payload, not a shortcut. Only the
+    // object the call receives directly counts as one on position alone.
+    const source = inCall(
+      "{ key: 's', ctrl: true, description: 'Save', handler: () => track('e', { key: 'a' }) }",
+    )
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toContain("combo: 'Mod+S'")
+    expect(migrated).toContain("track('e', { key: 'a' })")
+    expect(refusals).toEqual([])
+  })
+
+  it('does not refuse an unrelated nested object with a non-string key', () => {
+    const source = inCall(
+      "{ key: 's', ctrl: true, description: 'Save', handler: () => cache.set({ key: id }) }",
+    )
+    const { refusals } = migrateShortcuts(source)
+
+    expect(refusals).toEqual([])
+  })
+
   it('leaves a menu item shaped { condition, handler } alone', () => {
     // Same two fields, no config-only name, no shortcut position. Rewriting
     // `condition` here would break the menu and report a clean run.
