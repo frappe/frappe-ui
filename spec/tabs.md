@@ -310,7 +310,10 @@ value input, not a panel switcher. The two share:
 - `data-slot="tab-prefix"`, `data-slot="tab-suffix"` on the trigger regions
 - `data-slot="tab-indicator"` on the sliding indicator, in `TabList` and in
   `TabButtons`. The two are pixel-identical at the same variant, so indicator
-  CSS must reach both with one selector
+  CSS must reach both with one selector. On `subtle` and `ghost` the indicator
+  paints inside a layer clipped to the track, so anything a consumer adds
+  through this hook that reaches past the track edge — a larger shadow, an
+  outline, a scale — is cut there. See the 2026-08-12 changelog entry
 - `TabButtons` names its track `data-slot="tab-buttons"` and its shells
   `data-slot="tab-button"`. The track and shell names differ from `TabList`
   because the roles differ (radiogroup, not tablist); the shared parts —
