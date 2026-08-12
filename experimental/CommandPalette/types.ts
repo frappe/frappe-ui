@@ -1,14 +1,11 @@
+import type { AcceptableValue } from 'reka-ui'
 import type { Component } from 'vue'
 
 /**
  * A value a `CommandPaletteItem` can carry. The palette hands it back
  * untouched in `select`, so most apps pass their own command object.
  */
-export type CommandPaletteValue =
-  | string
-  | number
-  | boolean
-  | Record<string, any>
+export type CommandPaletteValue = AcceptableValue
 
 /**
  * The event `CommandPalette` and `CommandPaletteItem` emit on `select`.

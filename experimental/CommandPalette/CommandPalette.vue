@@ -44,7 +44,15 @@ import {
   ListboxRoot,
   VisuallyHidden,
 } from 'reka-ui'
-import { computed, markRaw, nextTick, ref, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  ref,
+  shallowRef,
+  triggerRef,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import Dialog from '../../src/components/Dialog/Dialog.vue'
 import {
   provideCommandPaletteContext,
@@ -82,15 +90,19 @@ const listbox = useTemplateRef<{ highlightFirstItem: () => void }>('listbox')
 const activeValue = ref<CommandPaletteValue | undefined>()
 const selectedValue = ref<CommandPaletteValue | undefined>()
 
-const items = ref(new Map<symbol, CommandPaletteItemRegistration>())
+// `shallowRef` + `triggerRef`, so the registrations keep their `ComputedRef`
+// shape instead of being unwrapped by a deep `ref`.
+const items = shallowRef(new Map<symbol, CommandPaletteItemRegistration>())
 
 function registerItem(
   id: symbol,
   registration: CommandPaletteItemRegistration,
 ) {
-  items.value.set(id, markRaw(registration))
+  items.value.set(id, registration)
+  triggerRef(items)
   return () => {
     items.value.delete(id)
+    triggerRef(items)
   }
 }
 
@@ -131,7 +143,9 @@ function reset() {
   selectedValue.value = undefined
 }
 
-function onHighlight(payload: { value: CommandPaletteValue } | undefined) {
+function onHighlight(
+  payload: { ref: HTMLElement; value: CommandPaletteValue } | undefined,
+) {
   activeValue.value = payload?.value
 }
 
