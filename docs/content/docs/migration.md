@@ -2594,8 +2594,9 @@ The codemod does not reflow the code it edits. Run your formatter after it.
 
 This is the reason to run a codemod instead of a grep. `+` is both the combo
 separator and a key, so `{ key: '+', ctrl: true }` written by hand becomes
-`'Mod++'`, which splits into `['Mod', '', '']` and never fires. Nothing
-reports it.
+`'Mod++'`, which splits into `['Mod', '', '']` and never fires. Nothing fails:
+the build passes, the types pass, and you get one dev-console warning that a
+production build drops.
 
 So the codemod stops on the site and prints the named key to use:
 
@@ -2635,7 +2636,9 @@ Each of these exits the run non-zero. Fix them by hand.
 - **A type declaration of the v0 shape.** Import `KeyboardShortcutConfig`.
 - **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted. Render
   `<KeyboardShortcut :combo="..." />` for the first. For the second, read the
-  registry from the `<KeyboardShortcutsDialog>` default slot.
+  registry from the `<KeyboardShortcutsDialog>` default slot. Their types,
+  `ActiveShortcut` and `RegisteredShortcut`, go with them. The codemod names
+  all four wherever they appear, comments included.
 - **A destructured `useShortcut(...)` return.** v1 returns void; cleanup
   already runs on unmount.
 - **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both. v1 selects

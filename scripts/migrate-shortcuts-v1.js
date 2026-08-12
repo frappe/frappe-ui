@@ -16,7 +16,8 @@
  *
  * `+` is both the combo separator and a key. A hand migration turns
  * `{ key: '+', ctrl: true }` into `'Mod++'`, which splits into
- * `['Mod', '', '']` and never fires. Nothing reports it. It is the same
+ * `['Mod', '', '']` and never fires. Nothing fails: the build passes and v1
+ * warns once in the dev console, which a production build drops. It is the same
  * silent-break class as v0's `ctrl` flag, which matched `ctrlKey || metaKey`
  * and so always meant `Mod`.
  *
