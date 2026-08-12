@@ -31,7 +31,7 @@
                 <slot name="suffix" v-bind="triggerSlotProps">
                   <LucideChevronDown
                     class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="togglePopover"
+                    @mousedown.prevent="toggle"
                   />
                 </slot>
               </template>
@@ -148,8 +148,10 @@ const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
 
 interface TriggerSlotProps {
-  togglePopover: () => void
-  isOpen: boolean
+  /** Flips the popover open state. */
+  toggle: () => void
+  /** Whether the popover is currently open. */
+  open: boolean
   displayLabel: string
   inputValue: string
 }
@@ -169,7 +171,7 @@ const anchorEl = computed(() => {
   return textInputRef.value?.inputElement ?? undefined
 })
 
-function togglePopover() {
+function toggle() {
   open.value = !open.value
 }
 
@@ -221,8 +223,8 @@ function onArrowDown() {
 }
 
 const triggerSlotProps = computed<TriggerSlotProps>(() => ({
-  togglePopover,
-  isOpen: open.value,
+  toggle,
+  open: open.value,
   displayLabel: props.displayLabel,
   inputValue: inputValue.value,
 }))

@@ -128,8 +128,10 @@ export type DateTimePickerEmits = DatePickerEmits
 
 /** Props bound to the trigger / prefix / suffix slots on all three pickers. */
 export interface DatePickerTriggerSlotProps {
-  togglePopover: () => void
-  isOpen: boolean
+  /** Flips the popover open state. */
+  toggle: () => void
+  /** Whether the popover is currently open. */
+  open: boolean
   displayLabel: string
   inputValue: string
 }

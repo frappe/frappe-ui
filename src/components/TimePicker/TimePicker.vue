@@ -37,7 +37,7 @@
           <template #suffix>
             <slot
               name="suffix"
-              v-bind="{ togglePopover, isOpen }"
+              v-bind="{ toggle: togglePopover, open: isOpen }"
             >
               <span
                 class="lucide-chevron-down size-4 cursor-pointer"
@@ -146,7 +146,7 @@ defineSlots<{
    * Rendered inside the trigger input, after the typed value. Defaults to a
    * chevron-down that toggles the popover.
    */
-  suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
+  suffix?: (props: { toggle: () => void; open: boolean }) => any
 }>()
 
 defineOptions({ inheritAttrs: false })

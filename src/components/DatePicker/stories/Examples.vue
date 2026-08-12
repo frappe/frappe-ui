@@ -135,10 +135,10 @@ const rowCls =
     <div class="flex flex-col gap-1.5">
       <span class="text-sm text-ink-gray-7">Task card affordance</span>
       <DatePicker v-model="dueDate" format="MMM D">
-        <template #trigger="{ togglePopover, displayLabel }">
+        <template #trigger="{ toggle, displayLabel }">
           <Button
             :variant="dueDate ? 'subtle' : 'ghost'"
-            @click="togglePopover"
+            @click="toggle"
           >
             <template #prefix>
               <span class="lucide-calendar-plus size-4" />
