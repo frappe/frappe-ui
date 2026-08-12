@@ -262,6 +262,27 @@ useShortcut([
     expect(refusals[0].message).toContain('never fired in v0')
   })
 
+  it("refuses hold callbacks under triggeredOn: 'press' too", () => {
+    // v0 gated the callback on 'hold' alone, so 'press' is the same dead
+    // callback as no `triggeredOn` at all.
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ key: 'l', triggeredOn: 'press', description: 'Hold', onHold: a }"),
+    )
+
+    expect(refusals[0].message).toContain('never fired in v0')
+    expect(migrated).toContain("key: 'l'")
+  })
+
+  it("keeps triggeredOn: 'press' with a handler, and drops the property", () => {
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ key: 'l', triggeredOn: 'press', description: 'Go', handler: go }"),
+    )
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("combo: 'L'")
+    expect(migrated).not.toContain('triggeredOn')
+  })
+
   it('renames condition on an object built by spreading a v0 config', () => {
     const source = `export function commandShortcuts() {
 	return commands.all.value.map((command) => ({

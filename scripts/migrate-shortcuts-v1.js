@@ -238,6 +238,12 @@ const CONFIG_SIGNALS = new Set([
 ])
 
 const HOLD_CALLBACKS = ['onHold', 'onRelease']
+
+// v0 fired `onHold` and `onRelease` only under `triggeredOn: 'hold'`. v1 reads
+// the callback itself as the request for hold mode, so a callback that was
+// dead in v0 starts firing. That is a behaviour change, so the site is refused.
+const DEAD_HOLD_CALLBACK =
+  "`onHold`/`onRelease` without `triggeredOn: 'hold'` never fired in v0, and does fire in v1. Delete the callback, or keep it on purpose."
 const MODIFIER_PROPS = ['ctrl', 'alt', 'shift']
 
 // A `keys: { ... }` or `shortcut: { ... }` property holds a shortcut even
@@ -927,11 +933,13 @@ function convertObject(source, mask, range, ctx) {
         "`triggeredOn: 'hold'` with no `onHold` or `onRelease` has nothing to select hold mode in v1. Add the callback, or drop the hold mode.",
       )
     }
+    // `triggeredOn: 'press'` is the same dead callback as a missing
+    // `triggeredOn`. v0 gated `onHold` and `onRelease` on 'hold' alone, so
+    // here they never fired.
+    if (mode.value !== 'hold' && hasHoldCallback) return refuse(DEAD_HOLD_CALLBACK)
     drops.push(triggeredOn.index)
   } else if (hasHoldCallback) {
-    return refuse(
-      "`onHold`/`onRelease` without `triggeredOn: 'hold'` never fired in v0, and does fire in v1. Delete the callback, or keep it on purpose.",
-    )
+    return refuse(DEAD_HOLD_CALLBACK)
   }
 
   const { combo, refusal, digit, revived } = buildCombo({ key: literal.value, ...flags })
