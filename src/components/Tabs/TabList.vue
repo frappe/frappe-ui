@@ -124,12 +124,10 @@ defineSlots<{
       <div class="size-full bg-[var(--outline-gray-8)]" />
     </TabsIndicator>
 
-    <div
-      v-if="pillTrack"
-      aria-hidden="true"
-      data-slot="tab-indicator-clip"
-      :class="indicatorClipClasses"
-    >
+    <!-- Presentational clip layer, deliberately without a `data-slot`: it
+         carries no contract, it only stops the indicator's shadow at the
+         track edge. -->
+    <div v-if="pillTrack" aria-hidden="true" :class="indicatorClipClasses">
       <TabsIndicator
         data-slot="tab-indicator"
         class="pointer-events-none absolute -z-10 motion-reduce:transition-none"

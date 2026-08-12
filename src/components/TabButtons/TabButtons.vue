@@ -313,12 +313,10 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
     v-bind="$attrs"
   >
     <div ref="trackRef" data-slot="tab-buttons" :class="rootClasses">
-      <div
-        v-if="pillTrack"
-        aria-hidden="true"
-        data-slot="tab-indicator-clip"
-        :class="indicatorClipClasses"
-      >
+      <!-- Presentational clip layer, deliberately without a `data-slot`: it
+           carries no contract, it only stops the indicator's shadow at the
+           track edge. -->
+      <div v-if="pillTrack" aria-hidden="true" :class="indicatorClipClasses">
         <div
           data-slot="tab-indicator"
           :class="indicatorClasses"
