@@ -777,6 +777,21 @@ useShortcut({ key: 's', description: 'Save', handler: save })
     expect(refusals[0].message).toContain('declared in this file')
   })
 
+  it("leaves an app's own ShortcutConfig type alone", () => {
+    // A type is the only way an app declares one of its own, so a rename here
+    // splits the app: the declaration moves and every consumer is refused.
+    for (const source of [
+      'export interface ShortcutConfig {\n  key: string\n  label: string\n}\n',
+      'export type ShortcutConfig = { key: string; label: string }\n',
+      'export enum ShortcutConfig {\n  Save = 1,\n}\n',
+    ]) {
+      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(migrated).toBe(source)
+      expect(refusals[0].message).toContain('declared in this file')
+    }
+  })
+
   it('ignores a commented-out import and a name written in prose', () => {
     // A comment is not an import and not a declaration, so neither one may
     // read the file as a fork and hold the migration back.

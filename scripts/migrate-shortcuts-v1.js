@@ -317,8 +317,14 @@ export function importBindings(source, mask) {
 }
 
 // A name declared in this file is this file's own, whatever it is called.
+//
+// `interface`, `type` and `enum` belong here as much as `function` does.
+// `ShortcutConfig` is a type, so a type declaration is the only way an app
+// declares one of its own.
+const DECLARATION_KEYWORDS = 'function|const|let|var|class|interface|type|enum'
+
 function declaresLocally(source, name, mask) {
-  const declaration = new RegExp(`\\b(?:function|const|let|var|class)\\s+${name}\\b`, 'g')
+  const declaration = new RegExp(`\\b(?:${DECLARATION_KEYWORDS})\\s+${name}\\b`, 'g')
   return firstUnmasked(source, declaration, mask) >= 0
 }
 
