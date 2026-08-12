@@ -163,14 +163,19 @@ const keyIconMap: Record<string, string> = {
   '⌦': 'lucide-arrow-big-right-dash',
 }
 
+// Own keys only: a plain lookup walks the prototype, so an unknown token like
+// `constructor` would resolve to a function and be bound as a class.
+const iconNameFor = (display: string): string | null =>
+  Object.hasOwn(keyIconMap, display) ? keyIconMap[display] : null
+
 function iconFor(part: ComboPart): string | null {
   if (!props.useIcons) return null
   if (['cmd', 'shift', 'alt'].includes(part.type)) return null
-  return keyIconMap[part.display] || null
+  return iconNameFor(part.display)
 }
 
 function bgIconFor(part: ComboPart): string | null {
   if (part.type === 'cmd') return 'lucide-command'
-  return keyIconMap[part.display] || null
+  return iconNameFor(part.display)
 }
 </script>

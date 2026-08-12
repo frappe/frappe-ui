@@ -57,7 +57,10 @@ const KEY_DISPLAY: Record<string, string> = {
   bracketright: ']',
 }
 
-/** Spoken names for the glyphs a part can display. */
+/**
+ * Spoken names for the glyphs a part can display. A screen reader reads a
+ * lone `[` as nothing useful, so every punctuation glyph gets a word.
+ */
 const WORD_BY_DISPLAY: Record<string, string> = {
   '⌘': 'Command',
   Shift: 'Shift',
@@ -71,6 +74,18 @@ const WORD_BY_DISPLAY: Record<string, string> = {
   '↓': 'Down Arrow',
   '←': 'Left Arrow',
   '→': 'Right Arrow',
+  '+': 'Plus',
+  '-': 'Minus',
+  '=': 'Equal',
+  '/': 'Slash',
+  '\\': 'Backslash',
+  '`': 'Backtick',
+  ',': 'Comma',
+  '.': 'Period',
+  ';': 'Semicolon',
+  "'": 'Quote',
+  '[': 'Bracket Left',
+  ']': 'Bracket Right',
 }
 
 const isLetter = (lower: string) => /^[a-z]$/.test(lower)
@@ -95,42 +110,63 @@ export function _resetComboWarnings() {
   warned.clear()
 }
 
+function parsePart(original: string, raw: string, isMac: boolean): ComboPart {
+  const lower = original.toLowerCase()
+
+  if (MODIFIERS.includes(lower)) {
+    if (lower === 'shift')
+      return { raw: original, type: 'shift', display: 'Shift' }
+    if (lower === 'alt')
+      return { raw: original, type: 'alt', display: isMac ? '⌥' : 'Alt' }
+    if (lower === 'ctrl' || !isMac)
+      return { raw: original, type: 'ctrl', display: 'Ctrl' }
+    return { raw: original, type: 'cmd', display: '⌘' }
+  }
+
+  // A plain lookup walks the prototype, so `combo="constructor"` would render
+  // a function body. Only own keys count.
+  if (Object.hasOwn(KEY_DISPLAY, lower)) {
+    return { raw: original, type: 'key', display: KEY_DISPLAY[lower] }
+  }
+  if (isLetter(lower) || isFunctionKey(lower)) {
+    return { raw: original, type: 'key', display: lower.toUpperCase() }
+  }
+
+  warnUnknownToken(original, raw)
+  return { raw: original, type: 'key', display: original }
+}
+
 export function parseCombo(
   raw: string | undefined,
   isMac: boolean,
 ): ComboPart[] {
   if (!raw) return []
 
-  return raw
+  const parts = raw
     .split('+')
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((original) => {
-      const lower = original.toLowerCase()
+    .map((original) => parsePart(original, raw, isMac))
 
-      if (MODIFIERS.includes(lower)) {
-        if (lower === 'shift')
-          return { raw: original, type: 'shift', display: 'Shift' }
-        if (lower === 'alt')
-          return { raw: original, type: 'alt', display: isMac ? '⌥' : 'Alt' }
-        if (lower === 'ctrl' || !isMac)
-          return { raw: original, type: 'ctrl', display: 'Ctrl' }
-        return { raw: original, type: 'cmd', display: '⌘' }
-      }
-
-      if (KEY_DISPLAY[lower]) {
-        return { raw: original, type: 'key', display: KEY_DISPLAY[lower] }
-      }
-      if (isLetter(lower) || isFunctionKey(lower)) {
-        return { raw: original, type: 'key', display: lower.toUpperCase() }
-      }
-
-      warnUnknownToken(original, raw)
-      return { raw: original, type: 'key', display: original }
-    })
+  // `Mod` and `Ctrl` are one modifier off macOS, so `Mod+Ctrl+K` would draw
+  // two Ctrl chips for a key the user presses once. The composable collapses
+  // them the same way.
+  const seenModifiers = new Set<string>()
+  return parts.filter((part) => {
+    if (part.type === 'key') return true
+    if (seenModifiers.has(part.type)) return false
+    seenModifiers.add(part.type)
+    return true
+  })
 }
 
 /** Spells a parsed combo for an `aria-label`. */
 export function spellOut(parts: ComboPart[]): string {
-  return parts.map((p) => WORD_BY_DISPLAY[p.display] ?? p.display).join(' + ')
+  return parts
+    .map((p) =>
+      Object.hasOwn(WORD_BY_DISPLAY, p.display)
+        ? WORD_BY_DISPLAY[p.display]
+        : p.display,
+    )
+    .join(' + ')
 }

@@ -27,14 +27,30 @@ afterEach(() => {
 
 describe('parseCombo', () => {
   it('reads every modifier the grammar defines', () => {
-    expect(
-      parseCombo('Mod+Ctrl+Alt+Shift+K', false).map((p) => p.type),
-    ).toEqual(['ctrl', 'ctrl', 'alt', 'shift', 'key'])
+    expect(parseCombo('Mod+Ctrl+Alt+Shift+K', true).map((p) => p.type)).toEqual(
+      ['cmd', 'ctrl', 'alt', 'shift', 'key'],
+    )
     expect(parseCombo('Mod+K', true).map((p) => p.display)).toEqual(['⌘', 'K'])
     expect(parseCombo('Mod+K', false).map((p) => p.display)).toEqual([
       'Ctrl',
       'K',
     ])
+  })
+
+  it('collapses Mod and Ctrl into one chip off macOS', () => {
+    expect(
+      parseCombo('Mod+Ctrl+Alt+Shift+K', false).map((p) => p.display),
+    ).toEqual(['Ctrl', 'Alt', 'Shift', 'K'])
+    expect(spellOut(parseCombo('Mod+Ctrl+K', false))).toBe('Control + K')
+  })
+
+  it('ignores inherited object properties', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(parseCombo('constructor', false).map((p) => p.display)).toEqual([
+      'constructor',
+    ])
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(spellOut(parseCombo('toString', false))).toBe('toString')
   })
 
   it('reads the key names the combo grammar defines', () => {
@@ -74,10 +90,15 @@ describe('parseCombo', () => {
     expect(warn).toHaveBeenCalledTimes(6)
   })
 
-  it('spells a combo for an aria-label', () => {
+  it('spells a combo for an aria-label, punctuation included', () => {
     expect(spellOut(parseCombo('Mod+Shift+ArrowUp', true))).toBe(
       'Command + Shift + Up Arrow',
     )
+    expect(spellOut(parseCombo('Mod+BracketLeft', false))).toBe(
+      'Control + Bracket Left',
+    )
+    expect(spellOut(parseCombo('Mod+Slash', false))).toBe('Control + Slash')
+    expect(spellOut(parseCombo('Mod+Digit1', false))).toBe('Control + 1')
   })
 })
 
