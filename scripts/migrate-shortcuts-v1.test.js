@@ -1112,3 +1112,125 @@ useShortcut([
     expect(run(['--help']).stdout).toContain('Usage: shortcuts-v1')
   })
 })
+
+// One file shaped like a page an app really ships: a script block, a table, a
+// context menu, a typed config array, two registrations and a template that
+// names the component three ways. A synthetic one-line fixture hides the
+// shapes that break a codemod.
+describe('a real-shaped page', () => {
+  const before = `<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { KeyboardShortcutsModal, useShortcut, type ShortcutConfig } from 'frappe-ui'
+import { useDocuments } from './useDocuments'
+
+const { remove, save } = useDocuments()
+const showShortcuts = ref(false)
+const selected = ref<string | null>(null)
+
+// The table. \`key\` is a column id here.
+const columns = [
+  { key: 'name', label: 'Name', width: '2fr' },
+  { key: 'modified', label: 'Last modified', width: '1fr' },
+]
+
+// The context menu. \`key\` is a menu id here.
+const menu = computed(() => [
+  { key: 'delete', label: 'Delete', condition: () => !!selected.value, handler: remove },
+])
+
+const shortcuts: ShortcutConfig[] = [
+  { key: 's', ctrl: true, description: 'Save the document', group: 'Document', handler: save },
+  {
+    key: 'k',
+    ctrl: true,
+    description: 'Open the palette',
+    condition: () => !showShortcuts.value,
+    handler: () => (palette.value = true),
+  },
+]
+
+useShortcut(shortcuts)
+useShortcut({
+  key: 'Escape',
+  description: 'Close the dialog',
+  handler: () => (showShortcuts.value = false),
+})
+</script>
+
+<template>
+  <div class="useShortcut-grid">
+    <p>Press / to see every useShortcut binding.</p>
+    <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+    <KeyboardShortcutsModal v-model:open="showShortcuts" />
+    <component :is="KeyboardShortcutsModal" v-if="false" />
+    <span>{{ \`\${menu.length} items\` }}</span>
+  </div>
+</template>
+`
+
+  const after = `<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { KeyboardShortcutsDialog, useKeyboardShortcut, type KeyboardShortcutConfig } from 'frappe-ui'
+import { useDocuments } from './useDocuments'
+
+const { remove, save } = useDocuments()
+const showShortcuts = ref(false)
+const selected = ref<string | null>(null)
+
+// The table. \`key\` is a column id here.
+const columns = [
+  { key: 'name', label: 'Name', width: '2fr' },
+  { key: 'modified', label: 'Last modified', width: '1fr' },
+]
+
+// The context menu. \`key\` is a menu id here.
+const menu = computed(() => [
+  { key: 'delete', label: 'Delete', condition: () => !!selected.value, handler: remove },
+])
+
+const shortcuts: KeyboardShortcutConfig[] = [
+  { combo: 'Mod+S', description: 'Save the document', group: 'Document', handler: save },
+  {
+    combo: 'Mod+K',
+    description: 'Open the palette',
+    enabled: () => !showShortcuts.value,
+    handler: () => (palette.value = true),
+  },
+]
+
+useKeyboardShortcut(shortcuts)
+useKeyboardShortcut({
+  combo: 'Escape',
+  description: 'Close the dialog',
+  handler: () => (showShortcuts.value = false),
+})
+</script>
+
+<template>
+  <div class="useShortcut-grid">
+    <p>Press / to see every useShortcut binding.</p>
+    <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+    <KeyboardShortcutsDialog v-model:open="showShortcuts" />
+    <component :is="KeyboardShortcutsDialog" v-if="false" />
+    <span>{{ \`\${menu.length} items\` }}</span>
+  </div>
+</template>
+`
+
+  it('migrates the whole file and leaves the rest of it alone', () => {
+    const dir = tempDir({ 'DocumentList.vue': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(fs.readFileSync(path.join(dir, 'DocumentList.vue'), 'utf8')).toBe(after)
+  })
+
+  it('names the menu entry it walked away from, and nothing else', () => {
+    const dir = tempDir({ 'DocumentList.vue': before })
+    const result = run([dir])
+
+    expect(result.stdout).toContain('DocumentList.vue:L18')
+    expect(result.stdout).not.toContain(':L11')
+    expect(result.stdout).not.toContain(':L12')
+  })
+})
