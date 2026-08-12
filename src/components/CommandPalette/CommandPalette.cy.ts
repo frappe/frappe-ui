@@ -66,7 +66,7 @@ describe('CommandPalette', () => {
     cy.get('[role=dialog]').should('not.exist')
   })
 
-  it('updates search-query while typing', () => {
+  it('updates query while typing', () => {
     cy.mount(Harness(true))
     cy.get('input[placeholder="Search"]').type('inb')
     cy.get('input[placeholder="Search"]').should('have.value', 'inb')
