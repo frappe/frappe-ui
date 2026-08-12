@@ -108,6 +108,10 @@ auto-repeats. `onRelease` runs when the key goes up, or when a modifier the
 combo needs goes up. Releasing a modifier the combo does not name changes
 nothing.
 
+**Known limit.** `onRelease` fires on `keyup` only. A window that loses focus
+gets no `keyup`, so a combo held through a ⌘-Tab or an Alt-Tab stays held until
+the user presses and releases it again.
+
 Three call sites drive this shape: builder's highlight-blocks overlay and its
 Space pan mode, and suite's Space push-to-talk in meet.
 
