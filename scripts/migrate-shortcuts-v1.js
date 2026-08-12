@@ -227,13 +227,19 @@ export const DELETED_MEMBERS = {
 // `fire({ key: 'z', ctrl: true })` — and rewriting one of those to a combo
 // breaks the test. v0's type made `description` mandatory, so every real
 // registration carries one of the names below.
+//
+// `handler` and `condition` are not here either. They are shared vocabulary: a
+// context-menu entry like `{ key: 'delete', label: 'Delete', handler: del }`
+// carries both beside a `key` that is also a real key name, and rewriting it
+// to `combo: 'Delete'` breaks the menu with no refusal. So neither name is
+// evidence on its own, and an object that carries nothing else is left alone
+// unless it sits in a `useShortcut(...)` call or under a `shortcuts:` key.
+// Pass two holds the same line.
 const CONFIG_SIGNALS = new Set([
   'description',
   'group',
-  'handler',
   'onHold',
   'onRelease',
-  'condition',
   'triggeredOn',
 ])
 
@@ -249,6 +255,34 @@ const MODIFIER_PROPS = ['ctrl', 'alt', 'shift']
 // A `keys: { ... }` or `shortcut: { ... }` property holds a shortcut even
 // when the object carries nothing but `key` and `description`.
 const CONTEXT_PROPERTY = /(?:^|[^\w$])(?:keys|key_bindings|shortcut|shortcuts|binding)\s*:\s*$/
+
+// The same name applies to every object in a `shortcuts: [ ... ]` array, so
+// the search walks out of one enclosing array before it reads the name.
+function underContextProperty(source, mask, from, limit) {
+  let at = from
+  for (let level = 0; level < 2; level++) {
+    if (CONTEXT_PROPERTY.test(source.slice(Math.max(limit, at - 40), at))) return true
+    at = enclosingArray(source, mask, at, limit)
+    if (at < 0) return false
+  }
+  return false
+}
+
+// The index of the `[` that holds this position, or -1 when the nearest open
+// bracket is an object or a call instead.
+function enclosingArray(source, mask, from, limit) {
+  let depth = 0
+  for (let i = from - 1; i >= limit; i--) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === ']' || c === '}' || c === ')') depth++
+    else if (c === '[' || c === '{' || c === '(') {
+      if (depth === 0) return c === '[' ? i : -1
+      depth--
+    }
+  }
+  return -1
+}
 
 // ---------- IMPORT BINDINGS ----------
 
@@ -1069,9 +1103,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
         object.end <= e + 1 &&
         isDirectArgument(content, mask, s, object.start),
     )
-    const contextProperty = CONTEXT_PROPERTY.test(
-      content.slice(Math.max(range[0], object.start - 40), object.start),
-    )
+    const contextProperty = underContextProperty(content, mask, object.start, range[0])
     const result = convertObject(content, mask, object, { insideCall, contextProperty })
     if (!result) return
     refusals.push(...(result.refusals ?? []))

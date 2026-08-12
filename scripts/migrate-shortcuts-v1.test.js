@@ -458,6 +458,29 @@ describe('objects that are not shortcuts', () => {
     expect(migrateShortcuts(source).migrated).toBe(source)
   })
 
+  it('leaves a menu entry whose key is also a key name alone', () => {
+    // `handler` and `condition` are shared vocabulary. A context-menu entry
+    // and a route rule both carry them beside a `key`, so neither name is
+    // evidence, and `key: 'delete'` must not become `combo: 'Delete'`.
+    const source = `const items = [{ key: 'delete', label: 'Delete', handler: onDelete }]
+const rules = [{ key: 'home', condition: isAdmin, handler: go }]
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+  })
+
+  it('takes a shortcut under a shortcuts: [ ... ] property', () => {
+    // The property names what the array holds, so each object in it is a
+    // shortcut even with no `description`.
+    const source = "const cfg = { shortcuts: [{ key: 'k', ctrl: true, handler: open }] }\n"
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain("combo: 'Mod+K'")
+    expect(refusals).toEqual([])
+  })
+
   it('leaves a key inside a string or a comment alone', () => {
     const source = "// { key: 's', ctrl: true, description: 'Save' }\nconst s = \"key: 's'\"\n"
 

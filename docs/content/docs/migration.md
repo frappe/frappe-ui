@@ -2590,6 +2590,21 @@ then run again and take the whole file at once.
 
 The codemod does not reflow the code it edits. Run your formatter after it.
 
+### What it reads as a shortcut
+
+An object with a `key` string converts when it also carries `description`,
+`group`, `onHold`, `onRelease` or `triggeredOn`, or when it sits in a
+`useShortcut(...)` call or under a `shortcuts:` or `keys:` property.
+
+`handler` and `condition` are not evidence. A context-menu entry carries both
+beside a `key`, and `{ key: 'delete', label: 'Delete', handler: del }` is a
+menu id, not a shortcut. So the codemod leaves it alone.
+
+The cost is a registration that carries nothing but `key` and `handler` and
+sits away from its call. The codemod does not take it, and does not name it.
+v0 made `description` mandatory, so this shape is rare. Grep for `key:` once
+after the run if your app has one.
+
 ### Punctuation keys are never converted
 
 This is the reason to run a codemod instead of a grep. `+` is both the combo
