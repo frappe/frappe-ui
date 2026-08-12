@@ -2671,8 +2671,10 @@ name; those are untouched.
 
 A rename also stays inside code. A name in a string, a module specifier or a
 comment keeps its spelling. In a `.vue` template only three places rename: the
-tag, a bound attribute value such as `:is="..."`, and a mustache. So
-`class="useShortcut"` and template prose stay as they are.
+tag, a bound attribute value such as `:is="..."`, and a mustache. A bound value
+and a mustache hold an expression, so a reference in one migrates and a quoted
+string in one does not. `class="useShortcut"`, `{{ 'useShortcut' }}` and
+template prose all stay as they are.
 
 ## KeyboardShortcut
 

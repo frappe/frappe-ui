@@ -473,14 +473,28 @@ function buildMask(source, ranges) {
 // A .vue template is markup, not code. Exactly three places in it can name a
 // component or a binding, and a rename anywhere else changes prose, a class
 // list or a plain attribute value. The `d` flag gives each group's offsets.
-const TEMPLATE_ELIGIBLE = [
-  // The tag: `<KeyboardShortcutsModal`, `</keyboard-shortcuts-modal`.
-  /<\/?([A-Za-z][\w.-]*)/dg,
-  // A bound attribute value: `:is="X"`, `v-if="X"`, `@click="X()"`.
+// The tag: `<KeyboardShortcutsModal`, `</keyboard-shortcuts-modal`. A tag name
+// is a name and nothing else, so the whole span opens up.
+const TEMPLATE_TAG = /<\/?([A-Za-z][\w.-]*)/dg
+
+// A bound attribute value and a mustache hold a JS expression, so each one is
+// lexed in turn. A reference migrates; a string literal inside it does not.
+const TEMPLATE_EXPRESSIONS = [
   /(?:^|\s)(?::|@|v-)[\w:.\-[\]]*\s*=\s*(?:"([^"]*)"|'([^']*)')/dg,
-  // A mustache.
   /\{\{([\s\S]*?)\}\}/dg,
 ]
+
+// Every group of every match, as absolute spans.
+function* matchedGroups(text, offset, pattern) {
+  pattern.lastIndex = 0
+  let m
+  while ((m = pattern.exec(text))) {
+    for (let group = 1; group < m.length; group++) {
+      const span = m.indices[group]
+      if (span) yield [offset + span[0], offset + span[1]]
+    }
+  }
+}
 
 // The parts of the file that are not `<script>`.
 function outsideScript(source, ranges) {
@@ -513,15 +527,13 @@ function buildRenameMask(source, ranges, ext) {
 
   for (const [from, to] of outsideScript(source, ranges)) {
     const text = source.slice(from, to)
-    for (const pattern of TEMPLATE_ELIGIBLE) {
-      pattern.lastIndex = 0
-      let m
-      while ((m = pattern.exec(text))) {
-        for (let group = 1; group < m.length; group++) {
-          const span = m.indices[group]
-          if (!span) continue
-          for (let i = from + span[0]; i < from + span[1]; i++) mask[i] = 0
-        }
+    for (const [start, end] of matchedGroups(text, from, TEMPLATE_TAG)) {
+      for (let i = start; i < end; i++) mask[i] = 0
+    }
+    for (const pattern of TEMPLATE_EXPRESSIONS) {
+      for (const [start, end] of matchedGroups(text, from, pattern)) {
+        const sub = maskLiterals(source.slice(start, end))
+        for (let i = 0; i < sub.length; i++) mask[start + i] = sub[i]
       }
     }
   }

@@ -537,6 +537,27 @@ import { KeyboardShortcutsModal } from 'frappe-ui'
     expect(migrated).toContain('{{ KeyboardShortcutsDialog.name }}')
   })
 
+  it('leaves a string literal inside a template expression alone', () => {
+    // A mustache holds an expression, so a reference migrates. A quoted string
+    // inside it is output the user reads, and it does not.
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <span>{{ 'KeyboardShortcutsModal' }}</span>
+  <span :title="'useShortcut'">{{ label || 'useShortcut' }}</span>
+  <span>{{ KeyboardShortcutsModal.name }}</span>
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain("{{ 'KeyboardShortcutsModal' }}")
+    expect(migrated).toContain(`:title="'useShortcut'"`)
+    expect(migrated).toContain("{{ label || 'useShortcut' }}")
+    expect(migrated).toContain('{{ KeyboardShortcutsDialog.name }}')
+  })
+
   it('renames a component tag in a template that has a script block', () => {
     const source = `<script setup>
 const title = 'KeyboardShortcutsModal'
