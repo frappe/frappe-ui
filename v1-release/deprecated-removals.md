@@ -5,9 +5,11 @@ The work list for
 `@deprecated` ships in `1.0.0`, so everything below is deleted before the tag
 rather than carried through `1.x`.
 
-This covers whole exports — components, composables, and the one prop value that
-pulls a component in with it. Member-level removals (individual props, slots,
-and emits on components that survive) go in the published migration guide,
+This covers whole exports — components, composables — plus deprecated **prop
+values**, whether or not they pull an export out with them. A prop value is not
+an export, so no scan of `src/index.ts` finds one; keeping them here is what
+makes them countable. Member-level removals (individual props, slots, and emits
+on components that survive) go in the published migration guide,
 [`docs/content/docs/migration.md`](../docs/content/docs/migration.md).
 
 ## The list
@@ -30,10 +32,11 @@ exported today**, except the rows marked done.
 | ~~TextEditor extension barrels~~  | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | extensions from `frappe-ui/editor`                              | —                                                                                                                  |
 | ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
 | ~~`Autocomplete` (whole barrel)~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` (single) / `MultiSelect` (multiple) | — |
+| ~~`Badge theme="orange"`~~ | removed in [#1069](https://github.com/frappe/frappe-ui/issues/1069) | `theme="amber"` | — |
 
-Twelve of the thirteen rows come from the one
+Eleven of the fourteen rows come from the one
 `// Deprecated component compatibility` block in `src/index.ts` (lines 103–132).
-Two rows sit outside it and are the easy ones to miss:
+Three rows sit outside it and are the easy ones to miss:
 
 - **`FormControl type="autocomplete"`** is a value in a prop union, not an
   export, so it does not appear in that block. It went at the same time as
@@ -44,6 +47,16 @@ Two rows sit outside it and are the easy ones to miss:
   `src/index.ts` with no `@deprecated` JSDoc, even though it warned on mount —
   so ADR-0008's mechanical rule missed the largest removal on the list. It
   carried the marker into the deprecated block before being deleted.
+- **`Badge theme="orange"`** is the same shape as the `FormControl` row: a
+  value in a prop union, aliased to `amber` in the component. It carried no
+  `@deprecated` tag at all — only a line comment in `Badge.vue` — so no
+  mechanical scan could see it, and it reached the list late via the
+  cross-family vocabulary pass ([#1054](https://github.com/frappe/frappe-ui/issues/1054))
+  rather than the sweep. Removing it exposed a second bug: `Badge` chained two
+  raw table lookups, so an unknown theme threw mid-render and blanked the
+  parent. `Badge` now degrades an unsupported `theme`, `variant` or `size` to
+  the prop's default and warns in dev, so the removal breaks **loudly in
+  TypeScript** (compile error) and **silently in JavaScript** (gray badge).
 
 The TextEditor rows are one deletion each in `src/index.ts`, but seven
 `@deprecated` names behind them (`default`, `TextEditor`,

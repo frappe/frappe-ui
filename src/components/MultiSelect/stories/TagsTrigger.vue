@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Badge, MultiSelect } from 'frappe-ui'
+import { Badge, MultiSelect, type BadgeProps } from 'frappe-ui'
 
 type Tag = {
   label: string
   value: string
-  theme: 'gray' | 'blue' | 'green' | 'orange' | 'red'
+  // Derived from Badge, never hand-written. A copied union is how the
+  // deprecated `orange` theme outlived the ADR-0008 sweep: nothing failed when
+  // the real union changed. Note `tsconfig.app.json` excludes `stories/**`, so
+  // this does not fail CI today — it fails in the editor, and it fails the
+  // moment stories join the type-check program.
+  theme: BadgeProps['theme']
 }
 
 const tags = ref<string[]>(['bug', 'p0'])
@@ -15,7 +20,7 @@ const tagOptions: Tag[] = [
   { label: 'Feature', value: 'feature', theme: 'blue' },
   { label: 'Enhancement', value: 'enhancement', theme: 'green' },
   { label: 'P0', value: 'p0', theme: 'red' },
-  { label: 'P1', value: 'p1', theme: 'orange' },
+  { label: 'P1', value: 'p1', theme: 'amber' },
   { label: 'P2', value: 'p2', theme: 'gray' },
   { label: 'Frontend', value: 'frontend', theme: 'blue' },
   { label: 'Backend', value: 'backend', theme: 'gray' },

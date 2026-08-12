@@ -53,6 +53,9 @@ The warning tone is **`amber`** everywhere. No exported component accepts
 `theme="yellow"` — Dialog was the last one and moved to `amber` (#1054).
 _Avoid_: `yellow`
 
+Badge themes are `gray | blue | green | amber | red | violet`.
+_Avoid_ (Badge): `orange` — an alias for `amber`, removed in `1.0.0` (ADR-0008)
+
 A legacy `appearance` (`warning | info | danger | success`) maps to `theme` color names.
 
 **theme** means color tone and nothing else. It is the library's most-used
