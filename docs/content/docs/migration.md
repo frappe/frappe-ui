@@ -15,10 +15,51 @@ After each pass, `grep` for the old prop or slot name to catch anything missed,
 then test the flows you touched. Type-checking won't catch focus, slot renames,
 or visual regressions.
 
+## What this guide covers
+
+Every **silent break** has a before/after here: old code that still runs, still
+type-checks, and behaves differently. Vue drops an unknown prop or slot without
+a word, so those are the ones that reach production. Each is marked.
+
+**Loud breaks** — an import that stops resolving, a type that no longer exists
+— are listed in the [changelog](/docs/changelog) and only appear here when the
+replacement needs explaining. If your build already names the file and the
+line, the changelog is the faster read.
+
+Only the Tailwind token renames have a codemod (`tokens-v2`, see
+[Tokens](#tokens)). Every component, prop and slot rename is a hand edit.
+
+### Sections
+
+- **Overlays** — [Dialog](#dialog) · [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) · [CommandPalette](#commandpalette)
+- **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
+- **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
+- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [KeyboardShortcut](#keyboardshortcut) · [Divider](#divider)
+- **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
+- **Editor and charts** — [Editor](#editor) · [Charts](#charts)
+- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
+- **Moved, not removed** — these four families changed an import path and
+  nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
+  [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
+  [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
+  [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). The v0
+  `TextEditor` family moved the same way — see [Editor](#editor).
+- **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
+
 ## Requirements
 
-v1 requires **Node `>=20.19.0`** (`package.json` `engines`); this is a breaking
-bump from the 0.1.x line (Node 18).
+v1 requires **Node `>=20.19.0`** (`package.json` `engines`). The 0.1.x line
+declared no `engines` field at all, so this is a new floor rather than a raised
+one — a Node 18 image that built v0 fine now fails to install.
+
+Vue and vue-router are unchanged: `vue >=3.5.0` and `vue-router ^4.1.6`
+(`package.json` `peerDependencies`). An app already on v0 needs no Vue bump.
+
+Tailwind stays on **v3**. `frappe-ui/tailwind` is a v3 preset and frappe-ui
+declares no `tailwindcss` peer dependency, so a v4 project installs cleanly and
+then fails at build time. See the
+[Tailwind page](/docs/foundations/tailwind).
 
 ## Dialog
 
@@ -39,6 +80,14 @@ The `options` blob is flattened into top-level props. See the
 | `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'yellow' }"`    |
 | `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
+
+Most of this table is **silent**: Vue drops an unknown prop or slot with no
+error, so the dialog renders with no title, no actions, or an empty body, and a
+leftover `:disable-outside-click-to-close` quietly becomes dismissible. Two
+rows are loud instead — `onClick: (close) => close()` throws
+`TypeError: close is not a function`, and a template-ref `.close()` throws the
+same way. `v-model` itself still works (`modelValue` is kept as a second
+binding), but `open` is canonical and wins when both are bound.
 
 ```vue
 <!-- Before -->
@@ -420,7 +469,14 @@ site renders a popover with no trigger, or an empty one. Check every
 | `transition="default"`                            | built-in motion — delete the prop                                                                   |
 | `PopoverPlacement` type                           | `PopoverSide` + `PopoverAlign`                                                                      |
 | `PopoverLegacySlotProps` type                     | `PopoverSlotProps`                                                                                  |
-| `NestedPopover`                                   | `Popover` — it never nested, and it was the last `@popperjs/core` consumer                          |
+| `NestedPopover`                                   | `Popover` — **loud**: the import fails, so the build names every call site. It never nested, and it was the last `@popperjs/core` consumer |
+
+Two more changes have no prop to grep for. v0 always set the panel's
+`min-width` to the trigger's width; v1 does it only under `matchTriggerWidth`,
+so a panel that leaned on that now shrinks to its content. And the panel no
+longer teleports into a `#frappeui-popper-root` div — reka portals it to
+`body`, or to the host's portal target. Delete any CSS or
+`document.querySelector` aimed at that id; nothing creates it now.
 
 ### Trigger and content slots
 
@@ -789,6 +845,9 @@ representation yourself is a few lines of `FileReader.readAsDataURL`.
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
 
+This is a **silent break**: `handler` is dropped as an unknown key, so the
+action button still renders and does nothing on click.
+
 ## ListView — moved to `frappe-ui/experimental`
 
 `ListView` is not core v1 surface. It moves out of the root export to
@@ -862,6 +921,21 @@ flat and name the columns of your rows, so a `config` object becomes props:
 <AreaChart :data="rows" x="week" y="balance" />
 ```
 
+The port is not a pure rename. Four `config` keys have no same-named prop, so a
+rename-only port drops them **silently** — no build error, no type error, just a
+chart that scales or draws differently:
+
+| v0 `config` key               | `frappe-ui/charts` prop                                            |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `yAxis.yMin` / `yAxis.yMax`   | `yAxis.min` / `yAxis.max`                                          |
+| `y2Axis.yMin` / `y2Axis.yMax` | `y2Axis.min` / `y2Axis.max`                                        |
+| `swapXY`                      | `horizontal` (`BarChart` only — a horizontal bar has no `y2` axis) |
+| `colors`                      | `palette`, or `seriesConfig[key].color`                            |
+
+Combo charts survive the port: `seriesConfig[key].type` takes
+`'bar' | 'line' | 'area'`, and `seriesConfig[key].axis: 'y2'` moves one series
+to the second value axis, configured with the chart-level `y2Axis` prop.
+
 ## Sprite icons — moved to `frappe-ui/experimental`
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1
@@ -899,6 +973,8 @@ component page for the full API.
 | `theme="yellow"`             | `theme="amber"`                                  |
 | `theme` default `'blue'`     | default `'gray'`                                 |
 | `variant="subtle" / "outline"` | nothing — one container look, layout is content-driven |
+| `type="warning"`             | nothing — `theme` colors the status icon and the row action |
+| default slot (body text)     | `description` prop, or the `#description` slot   |
 | `dismissible` default `true` | default `false` — pass `dismissible` to keep the × |
 | `#icon` slot                 | `#prefix` slot                                   |
 | `#footer` slot               | `primaryAction` / `secondaryAction` props, or `#actions` slot |
@@ -962,6 +1038,13 @@ for the full API.
 | `SidebarItem.isActive`                     | `SidebarItem.active`                              |
 | `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
 
+Every removal here is a **silent break**. A dropped prop (`header`, `sections`,
+`items`, `isActive`) becomes a fall-through attribute on the component's root
+element, and content passed to the removed `#sidebar-item` slot is discarded —
+no build error, no type error, no warning. The sidebar renders as an empty
+frame. Grep for `:header=`, `:sections=`, `:items=`, `#sidebar-item` and
+`isActive` on these five components after upgrading.
+
 ```vue
 <!-- Before -->
 <Sidebar
@@ -994,6 +1077,11 @@ The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
 `TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index.
 See the [Tabs](./components/tabs) component page for the full API.
 
+There is no codemod for the Tabs family. `tokens-v2` rewrites Tailwind token
+names only — it never touches a component, prop, or slot name. Every rename
+below is a hand edit, and most of them fail silently, so grep for the old name
+rather than waiting for the build to tell you.
+
 | Before                                      | After                                                                      |
 | ------------------------------------------- | -------------------------------------------------------------------------- |
 | `v-model="tabIndex"` (index)                | `v-model="tab"` (trigger `value`)                                          |
@@ -1001,14 +1089,14 @@ See the [Tabs](./components/tabs) component page for the full API.
 | `label` implied the value                   | `value` is required on every trigger                                       |
 | `as="div"`                                  | removed — compose and style the container directly                         |
 | `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#tab-label` in shorthand mode |
-| `#prefix` / `#suffix` alongside `:tabs`     | `#tab-prefix` / `#tab-suffix` — every shorthand slot carries the `tab-` prefix (`#tab-prefix`, `#tab-label`, `#tab-suffix`, `#tab-panel`); composed `TabTrigger` keeps plain `#prefix` / `#suffix`. An unknown slot name renders nothing, nothing throws |
+| `#prefix` / `#label` / `#suffix` / `#panel` alongside `:tabs` | `#tab-prefix` / `#tab-label` / `#tab-suffix` / `#tab-panel` — every shorthand slot carries the `tab-` prefix; composed `TabTrigger` keeps plain `#prefix` / `#suffix`. An unknown slot name renders nothing, nothing throws |
 | extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
-| `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot keeps the same name       |
+| `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot is `#tab-panel`, back on its v0 name (it was briefly `#panel` in the betas) |
 | `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
 | stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
 | `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
 | built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |
-| `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` — the icon silently stops rendering, nothing throws   |
+| `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` on a composed `TabTrigger`, `<template #tab-suffix>` in shorthand mode — the icon silently stops rendering, nothing throws |
 
 ```vue
 <!-- Before -->
@@ -1084,6 +1172,15 @@ and aligns its vocabulary with the Tabs family. See the
 | boolean `value` / `modelValue`              | `string \| number` only                     |
 | wrapper divs / raw CSS for equal-width tabs | `fluid` prop                                |
 | `iconRight` on an option                    | `<template #suffix>` — silent, nothing throws |
+| `hideLabel: true` on an option              | `icon` alone — the option is icon-only and `label` becomes its accessible name |
+| `theme` / `variant` / `size` / `loading` on an option | removed — options no longer forward `Button` props. Use `Button` directly for per-tab theming or a spinner |
+| `tooltip` on an option                      | still `tooltip`, but it renders as the native `title` attribute, not a floating `Tooltip` |
+
+Every prop rename here is a **silent break**: an unknown prop lands in `$attrs`
+and is spread onto the radiogroup root, so a `TabButtons` still on `:buttons`
+renders an empty track with no build error, type error, or warning. As with
+Tabs, there is no codemod — grep for `:buttons`, `type=`, `direction=` and
+`hideLabel`.
 
 ## Data fetching (useDoctype / useList)
 
@@ -1092,9 +1189,11 @@ The write methods on `useDoctype` (`insert`, `delete`, `setValue`,
 used to share one request between all their submits. Each one now sends its own
 request, so the shared-request members are gone.
 
-Nothing fails to build, so grep for these by hand. The app keeps rendering and
-then throws the first time the removed member is read — usually the first time
-someone deletes a row.
+Nothing fails to build, so grep for these by hand. There are two failure modes,
+and one of them is quiet. Calling a removed method throws (`delete.execute()`,
+`insert.reset()`), and so does dotting into one (`delete.params.name`). A
+removed *data* member reads as `undefined` instead: `runMethod.isFetching` is
+always falsy, so a spinner silently never shows and nothing says why.
 
 | Before                                              | After                        |
 | --------------------------------------------------- | ---------------------------- |
@@ -1177,6 +1276,25 @@ More changes you will not see at build time:
   `useList`. They used to ignore it and hit the current origin. `setValue`
   already honoured it, so all three write methods now agree. `useDoctype` was
   never affected.
+- A stale `setValue` or `delete` on the same row no longer writes the shared
+  document and list stores, and no longer triggers `useList`'s auto-refetch.
+  Every request carries a dispatch number, and a store rejects a write that a
+  later-dispatched request already made. Submits with different keys, and
+  keyless submits such as inserts, stay independent and all of their hooks
+  still fire. Nothing to change — this is here so you can drop the workarounds.
+
+### `useDoc` writes and `useNewDoc`
+
+`useDoc`'s `setValue`, `delete` and every `methods:` entry, and all of
+`useNewDoc`, held one shared request too. Each submit now sends its own. They
+keep the full `useCall` surface — same members, same types — so there is
+nothing to rename.
+
+One silent behavior change: **a second submit no longer cancels the first.**
+Both requests reach the server. If you relied on the abort to drop a superseded
+save, debounce or guard the call site yourself. `data` and `error` follow the
+same newest-wins rule as `useDoctype` above, and `loading` stays `true` until
+every submit settles.
 
 ## Data fetching (exports)
 
@@ -1243,6 +1361,12 @@ set `expanded: false` to collapse one (v0 used `defaultCollapsed`). The
 | `#label`                                         | `#item-label`                                                   |
 | `#icon`                                          | built-in chevron; override via `#item`                          |
 
+Nothing here fails loudly. `:node` and `:options` become fall-through
+attributes, and content passed to the old `#node` / `#label` / `#icon` slots is
+discarded — the default row renders in its place. Only the now-required `nodes`
+prop warns, and only in dev; a production build renders an empty tree. Grep for
+`:node=`, `:options=`, `#node`, `#label` and `#icon` on `Tree` specifically.
+
 ```vue
 <!-- Before -->
 <Tree :node="root" node-key="name" :options="{ defaultCollapsed: false }">
@@ -1289,14 +1413,15 @@ individually against [lucide.dev](https://lucide.dev/icons) since a few
 differ or were renamed.
 
 **Breaking, silent:** every icon-name prop across the library (`Button.icon`
-/ `iconLeft` / `iconRight`, `Dialog.icon`, `Dropdown`/`ContextMenu` item
-`icon`, `TabButtons` options `icon` / `iconLeft`, the `Icon`
-component's `name` prop) used to render a bare feather-style name (e.g.
-`"edit"`, `"chevron-down"`) via `FeatherIcon`. That fallback is gone: an
-unrecognized string now renders nothing. No build or type error — the icon
-silently disappears. A dev-mode console warning names the component, the
-prop, and the offending value once per (component, prop). Prefix the name
-with `lucide-`:
+/ `iconLeft` / `iconRight`, `Dialog.icon`, `Alert.icon`, `SidebarCard.icon`,
+`Dropdown`/`ContextMenu` item `icon`, `TabButtons` options `icon` /
+`iconLeft`, `TabTrigger.icon` / `iconLeft`, the `Icon` component's `name`
+prop) used to render a bare feather-style name (e.g. `"edit"`,
+`"chevron-down"`) via `FeatherIcon`. That fallback is gone: only a `lucide-*`
+string, an emoji or symbol glyph, or a `Component` renders. Any other string
+renders nothing. No build or type error — the icon silently disappears. A
+dev-mode console warning names the component, the prop, and the offending
+value once per (component, prop). Prefix the name with `lucide-`:
 
 ```vue
 <!-- Before -->
@@ -1381,8 +1506,11 @@ toast.success('Saved')
 </script>
 ```
 
-`<ToastProvider>` (mount once near your app root) and `toast.success()` /
-`toast.error()` / `toast.info()` / plain `toast()` are unchanged.
+`<ToastProvider>` (mount once near your app root) is unchanged. The current
+API is plain `toast()` plus `toast.success()` / `toast.error()` /
+`toast.warning()` / `toast.info()`. v0's `toast.create()`, `toast.remove()`
+and `toast.removeAll()` still work, but warn once in dev — move them to
+`toast(...)` and `toast.dismiss(...)`.
 
 ## Tokens
 
@@ -1436,7 +1564,14 @@ shadow-status
 surface-alert-button-default / -info / -success / -warning / -error
 ink-alert-button-default / -info / -success / -warning / -error
 surface-alpha-gray-2-overlay
+surface-alpha-red-1 … surface-alpha-red-7
+outline-alpha-red-2 / -3 / -4
 ```
+
+The codemod reports only some of these: the dead text sizes, the
+`text-*-black` styles, and the two alpha-red families. It has no rule for
+`shadow-status`, `--elevation-status`, the `alert-button` tokens, or
+`surface-alpha-gray-2-overlay` — grep for those five by hand.
 
 If your build used any of these, replace them with the nearest step on the
 regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` →
@@ -1463,10 +1598,12 @@ aliases.
 | `rounded-xl` | `rounded-7` | 16 |
 | `rounded-2xl` | `rounded-8` | 20 |
 
-The same map applies to directional and corner forms (`rounded-t-lg` →
-`rounded-t-6`, `rounded-tl-sm` → `rounded-tl-1`) and to variant prefixes
-(`hover:rounded-2xl` → `hover:rounded-8`). Pixel values are identical — the
-migration changes vocabulary, not rendering.
+The same map applies to every directional and corner form (`rounded-t-lg` →
+`rounded-t-6`, `rounded-tl-sm` → `rounded-tl-1`), to the logical sides
+(`rounded-ss-md` → `rounded-ss-5`, and the same for `s`, `e`, `se`, `es`,
+`ee`), to the bare directional aliases (`rounded-t` → `rounded-t-4`), and to
+variant prefixes (`hover:rounded-2xl` → `hover:rounded-8`). Pixel values are
+identical — the migration changes vocabulary, not rendering.
 
 The codemod handles all of these. One caveat: the bare word `rounded` is
 plain English, so the codemod only rewrites it inside quoted strings and
@@ -1515,6 +1652,11 @@ Add `--dry-run` first to review the renames before they apply:
 npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
 ```
 
+`--ink-shift` cannot be combined with `--force` or `--radius-only`; the run
+exits with an error rather than hiding which renames applied. A dry run is not
+a safety probe either: it only warns when it finds a run-once marker, while a
+real run refuses outright.
+
 This mode runs only the ink shift — no color renames, no typography, no
 radius renames. Run it exactly once per codebase. There is no way to detect
 a prior run from file content (`ink-red-5` is a valid name before and
@@ -1556,15 +1698,32 @@ The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
 (`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
 `TextEditorContent`, `createEditorButton`) are removed from top-level
-`frappe-ui` in `1.0.0` — nothing editor-related is exported from root. See the
+`frappe-ui` in `1.0.0`, and so are the v0 extension helpers `ImageExtension`
+and `createSuggestionExtension` with their types `SetImageOptions`,
+`BaseSuggestionItem` and `CreateSuggestionExtensionOptions` — nothing
+editor-related is exported from root. See the
 [Editor](./molecules/editor) page for the full API and recipes.
 
-Not migrated yet? The v0 family is parked, unchanged, in
+Not migrated yet? All eleven v0 names are parked, unchanged, in
 `frappe-ui/experimental` as an interim import path. It is unstable — no
 deprecation window — and will be removed once consumers migrate:
 
 ```ts
-import { TextEditor } from 'frappe-ui/experimental'
+import {
+  TextEditor,
+  TextEditorBubbleMenu,
+  TextEditorFixedMenu,
+  TextEditorFloatingMenu,
+  TextEditorContent,
+  createEditorButton,
+  ImageExtension,
+  createSuggestionExtension,
+} from 'frappe-ui/experimental'
+import type {
+  SetImageOptions,
+  BaseSuggestionItem,
+  CreateSuggestionExtensionOptions,
+} from 'frappe-ui/experimental'
 ```
 
 ```ts
@@ -1670,6 +1829,34 @@ Delete the manual imports; there is nothing to add back:
 
 The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
 package`) until the lines are gone.
+
+## `frappe-ui/code-editor` (removed)
+
+The subpath is gone. `CodeEditor`, `CodePreview` and `loadLanguage` move to
+`frappe-ui/experimental` (P14 — no stability promise). The components are
+unchanged; one import line changes per file. The build fails loudly until it
+does:
+
+```ts
+// Before
+import { CodeEditor, CodePreview, loadLanguage } from 'frappe-ui/code-editor'
+
+// After
+import { CodeEditor, CodePreview, loadLanguage } from 'frappe-ui/experimental'
+```
+
+The types move with them: `CodeLanguage`, `CodeEditorProps`, `CodeEditorEmits`
+and `CodePreviewProps`.
+
+## `hljs-theme.css` and `tailwind/tokens.js` (removed)
+
+Two exports with no importers left are gone. Both breaks are loud — the
+specifier stops resolving.
+
+| Removed                        | Replacement                                                     |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
+| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind`, the preset, imported directly              |
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 
@@ -1874,13 +2061,19 @@ for the common "POST to a whitelisted method" case. `request`, `createCall` and
 | ------------------------------- | -------------------------------------------- |
 | `import { request }`            | `import { frappeRequest }`                   |
 | `createCall(options)`           | wrap `call` yourself, or use `frappeRequest` |
-| `import initSocket`             | your own `io(...)` connection                |
+| `import { initSocket }`         | your own `io(...)` connection                |
 | `app.use(FrappeUI, { config })` | `setConfig(key, value)` per entry            |
 | `app.use(FrappeUI, { call })`   | `import { call }` where you need it          |
 | `this.$resources` (implicit)    | `app.use(FrappeUI, { resources: true })`     |
 
 The first three are build failures — your bundler or type-check names them. The
-rest are the silent ones.
+last three fail at runtime instead: a dropped `config` is applied nowhere, and
+reading `this.$call` or `this.$resources` throws with the fix in the message.
+
+`frappeRequest` is not a drop-in for `request`. Check three things at each call
+site you swap: the method defaults to `POST`, not `GET`; a URL that is not a
+path is prefixed with `/api/method/`; and it resolves with the response body's
+`message`, not the whole body. The shape you get back changes with no error.
 
 ### `call` now honours `setConfig`
 
@@ -1926,9 +2119,9 @@ that isn't one, it was never read and can be deleted.
 ### `$resources` is opt-in
 
 The plugin used to install the v1 resources Options API mixin by default, so
-`this.$resources`, `$getResource`, `$getDoc`, `$getListResource` and
-`$refetchResource` existed in any app that called `app.use(FrappeUI)`. It now
-installs only when asked:
+`this.$resources`, `$getResource`, `$getDocumentResource`, `$getDoc`,
+`$getListResource` and `$refetchResource` existed in any app that called
+`app.use(FrappeUI)`. It now installs only when asked:
 
 ```js
 app.use(FrappeUI, { resources: true })
@@ -1941,8 +2134,11 @@ component's options.
 
 You will not have to work this out from a blank screen. A component that
 declares `resources` without the option throws on creation, naming itself and
-the fix, and reading `this.$resources` throws too. Both throw in production
-builds as well as dev — this is a break that has no quiet failure mode.
+the fix. Vue routes that throw through its own error handling, which rethrows
+in dev and only logs in production, so the read is guarded too: reading
+`this.$resources` throws at the access in every build, straight into your own
+code. `resourcesPlugin` is still exported if you would rather install it
+directly.
 
 ### `initSocket` is gone
 
@@ -1970,6 +2166,97 @@ returning `undefined` and crashing in whatever realtime handler reads it next.
 Assigning your own replaces the guard. The same applies to `$call`, the other
 global the plugin used to install — import `call` from `frappe-ui` instead.
 
+## Composables and directives renamed
+
+Three groups of root exports changed names. All of them fail at the import, so
+the build lists every call site — but one of them has a quiet second half, and
+that is the one to read.
+
+### `useTheme` → `useColorScheme`
+
+`theme` means color tone everywhere else in the library (`theme="blue"` on a
+Button), so the light/dark composable gives the word back.
+
+| Before              | After                                            |
+| ------------------- | ------------------------------------------------ |
+| `useTheme()`        | `useColorScheme()`                               |
+| `Theme` type        | `ColorScheme` type                               |
+| `currentTheme`      | `colorScheme` — read-only                        |
+| `setTheme(t)`       | `setColorScheme(t)`                              |
+| `toggleTheme()`     | `toggleColorScheme()`                            |
+| `getSystemTheme()`  | `resolvedColorScheme()`, imported from the root  |
+| `initializeTheme()` | removed — `useColorScheme()` initializes itself  |
+
+The read-only `colorScheme` is the quiet part. The ref was only a third of the
+state; the `data-theme` attribute and the `theme` key in `localStorage` are the
+other two. Assigning to the old writable ref moved the ref and left the
+document and the stored value behind, so the app desynced with no error.
+
+```js
+// Before — moved the ref, desynced the page
+const { currentTheme } = useTheme()
+currentTheme.value = 'dark'
+
+// After
+const { setColorScheme } = useColorScheme()
+setColorScheme('dark')
+```
+
+The `data-theme` attribute and the `theme` localStorage key keep their names,
+so app CSS targeting `[data-theme='dark']` and saved user preferences still
+work.
+
+### Scroll container: nine members become two
+
+`useScrollContainer` published nine members for the two things apps do: read
+the shell's scroll element, and know whether it has been scrolled.
+
+| Before                                                  | After                                     |
+| -------------------------------------------------------- | ------------------------------------------ |
+| `activeScrollContainer`                                 | `shellScrollContainer`                    |
+| `getScrollContainer()`                                  | `shellScrollContainer.value`              |
+| `useScrollContainer().isScrolled`                       | `useShellScrolled({ threshold })`         |
+| `scrollTo(options)` / `scrollToTop()`                   | call them on `shellScrollContainer.value` |
+| `registerScrollContainer` / `unregisterScrollContainer` | removed — internal to the two shells      |
+| `UseScrollContainer` / `UseScrollContainerOptions`      | removed                                   |
+
+`useShellScrolled()` returns the boolean ref directly, not an object:
+
+```js
+// Before
+const { isScrolled } = useScrollContainer({ threshold: 12 })
+
+// After
+const isScrolled = useShellScrolled({ threshold: 12 })
+```
+
+The `shell` prefix is load-bearing: both resolve only while a `DesktopShell` or
+a `MobileShell` is mounted. Without one, `useShellScrolled` stays `false` and
+warns once in development.
+
+### Directives: `vFocus` and `vOnOutsideClick`
+
+`<script setup>` auto-registers a directive only when the imported binding is
+spelled `vFoo`, so the old names had to be aliased at every call site.
+
+| Before                    | After                   |
+| ------------------------- | ------------------------ |
+| `focusDirective`          | `vFocus`                |
+| `onOutsideClickDirective` | `vOnOutsideClick`       |
+| `visibilityDirective`     | removed, no replacement |
+
+```vue
+<!-- Before -->
+<script setup>
+import { onOutsideClickDirective as vOnOutsideClick } from 'frappe-ui'
+</script>
+
+<!-- After -->
+<script setup>
+import { vOnOutsideClick } from 'frappe-ui'
+</script>
+```
+
 ## useCall: a throwing `beforeSubmit` now cancels the submit
 
 Previously a `beforeSubmit` hook that threw was caught and logged, and the
@@ -1983,6 +2270,12 @@ hook that returns normally is unaffected — it still cannot stop the request.
 
 `beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
 awaited, only the type said otherwise.
+
+`error` is untouched by a cancelled submit. The throw reaches you only through
+the rejected `submit()`, so `error` still holds the last *request's* error — an
+app that renders failures from `error` alone renders nothing when a hook
+cancels. This covers every place `beforeSubmit` is accepted: `useCall`,
+`useNewDoc`, and each entry in `useDoc`'s `methods:`.
 
 ## pageMetaPlugin (removed)
 
@@ -2036,8 +2329,9 @@ with no error, so the palette just never opens.
 <CommandPalette v-model:open="open" :groups="groups" @select="onSelect" />
 ```
 
-`Mod+K` now opens the palette on its own (registered internally via
-`useShortcut`) — delete any app-level keydown listener that toggled it.
+`Mod+K` is registered internally through `useShortcut` (v0 used its own
+`keydown` listener on `window`). Delete any app-level listener you added on
+top of it.
 
 ## KeyboardShortcut
 
@@ -2048,6 +2342,17 @@ The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
 | ------------------------------------------ | ----------------------------- |
 | `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
 | `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
+
+Both are **silent breaks** at runtime: the removed props fall through onto the
+rendered `<span>` as plain HTML attributes, so `shortcut="Mod+K"` renders an
+empty chip and `ctrl shift` renders the key with no modifier glyphs. Only a
+type-check names the call sites.
+
+### `matchesShortcut` is no longer exported
+
+`import { matchesShortcut } from 'frappe-ui'` fails at the build. Its own doc
+comment said it was exported for unit tests only. Register a shortcut with
+`useShortcut` instead of matching a `KeyboardEvent` by hand.
 
 ## PageHeaderMobile family: slot names
 
@@ -2088,12 +2393,23 @@ Grep for `#left`, `#right`, and `#icon` on these two components specifically —
 other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
 `#right` slots that are unaffected.
 
+### `FrappeUIProviderProps` is deleted
+
+The type was exported but never wired to the component, so it described props
+`FrappeUIProvider` did not accept. It is removed in `1.0.0` with no
+replacement. This one is **loud** — `import type { FrappeUIProviderProps } from
+'frappe-ui'` fails the type-check. `FrappeUIProvider` itself is unchanged and
+still exported.
+
 ## Charts
 
-Only for apps already on `frappe-ui/charts` from `1.0.0-beta.41` or later. The
-family is new in v1, so an app coming from v0 has nothing to migrate here.
+Only for apps already on `frappe-ui/charts` from `1.0.0-beta.42` or later — the
+subpath did not exist before that. The family is new in v1, so an app coming
+from v0 has nothing to migrate here; the older `config`-object family is covered
+by the "Charts (v1)" section above.
 
-The six mark emits are renamed to `select`. This is a **silent break**: Vue
+Eight charts renamed their mark emit to `select`, collapsing six old names into
+one. This is a **silent break**: Vue
 attaches a listener for an emit the component no longer declares as a plain
 attribute, so the handler stops firing with no error and no warning. The
 payload is unchanged, so only the name moves.
@@ -2130,15 +2446,23 @@ functions and `h()` props.
 
 The rest of the family's breaks are loud — the build or the type-check reports
 them. `ChartTheme` is `ChartTokens`, `useChartTheme` is `useChartTokens` and it
-returns `{ tokens }` instead of `{ theme }`. `formatValue`, `formatDate`,
+returns `{ tokens }` instead of `{ theme }`, and the `ColorScheme` type this
+subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 `formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
 `resolveChartTheme` are no longer exported.
 
 ## FAQ
 
-**Will my CSS break?** Where structure changed, components expose `data-*` hooks
-(`data-slot`, `data-state`, `data-size`, `data-variant`). Audit selectors that
-targeted tags or classes.
+**Will my CSS break?** In two ways. Where component structure changed,
+components expose `data-*` hooks (`data-slot`, `data-state`, `data-size`,
+`data-variant`) — audit selectors that targeted tags or classes. Separately,
+the token vocabulary moved: removed radius aliases and the shifted ink scales
+emit no CSS at all, with no build or type error. Run the
+[token codemod](#tokens) before you audit anything by hand.
+
+**Do I have to run the codemod?** Yes, if you use Tailwind utilities from the
+frappe-ui preset. It is the only mechanical step in this guide — every
+component, prop and slot rename is a hand edit.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
