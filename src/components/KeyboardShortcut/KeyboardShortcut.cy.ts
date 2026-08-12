@@ -78,9 +78,12 @@ describe('<KeyboardShortcut />', () => {
 
   it('takes no role without a combo, so the fallback slot stays readable', () => {
     cy.mount(KeyboardShortcut, { slots: { default: 'Custom fallback' } })
-    cy.get('[data-slot=keyboard-shortcut]')
-      .should('not.have.attr', 'role')
-      .should('contain.text', 'Custom fallback')
+    // A negative attribute assertion yields undefined, so it ends the chain.
+    cy.get('[data-slot=keyboard-shortcut]').should('not.have.attr', 'role')
+    cy.get('[data-slot=keyboard-shortcut]').should(
+      'contain.text',
+      'Custom fallback',
+    )
   })
 
   it('drops the non-modifier icons when useIcons is false, in both modes', () => {
