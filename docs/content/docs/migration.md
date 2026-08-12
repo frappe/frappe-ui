@@ -144,6 +144,36 @@ throwing. TypeScript callers get a compile error instead. `#target` is the
 one slot case — content in a leftover `<template #target>` silently stops
 rendering.
 
+### Trigger slot props
+
+`#trigger`, `#prefix` and `#suffix` receive `{ open, toggle }` — the same two
+names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+`MultiSelect` hand out. `TimePicker`'s `#suffix` follows.
+
+| Before          | After    |
+| --------------- | -------- |
+| `isOpen`        | `open`   |
+| `togglePopover` | `toggle` |
+
+`displayLabel` and `inputValue` are unchanged, and `#actions` already used
+`close` — that stays too.
+
+This is a **silent break**: a destructured `isOpen` becomes `undefined`, so a
+class bound to it stops applying with no error, and `togglePopover()` throws
+`togglePopover is not a function` only if you call it.
+
+```vue
+<!-- Before -->
+<template #trigger="{ togglePopover, isOpen }">
+  <Button :class="isOpen && 'ring-2'" label="Pick a date" @click="togglePopover" />
+</template>
+
+<!-- After -->
+<template #trigger="{ toggle, open }">
+  <Button :class="open && 'ring-2'" label="Pick a date" @click="toggle" />
+</template>
+```
+
 Behavior changes that apply even if you don't touch your code:
 
 - `DateRangePicker` emits a `[from, to]` tuple. Update handlers that called
