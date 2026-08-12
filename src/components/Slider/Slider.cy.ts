@@ -208,9 +208,10 @@ describe('Slider', () => {
 
   it('keeps the plain name on a single thumb', () => {
     cy.mount(Slider, { props: { label: 'Volume', modelValue: [25] } })
-    cy.get('[role="slider"]')
-      .should('not.have.attr', 'aria-label')
-      .and('have.attr', 'aria-labelledby')
+    // Two chains, not one: `not.have.attr` yields `undefined`, so anything
+    // chained after it asserts on nothing.
+    cy.get('[role="slider"]').should('not.have.attr', 'aria-label')
+    cy.get('[role="slider"]').should('have.attr', 'aria-labelledby')
   })
 
   it('routes any other caller aria-* to the thumb', () => {
