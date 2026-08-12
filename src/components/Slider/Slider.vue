@@ -114,13 +114,6 @@ const thumbDisabled = computed(() => {
   return (attrs['aria-disabled'] as string | boolean | undefined) || undefined
 })
 
-// The `required` prop promises `aria-required` on the control, and the thumb
-// is now the only element that carries the aria set.
-const thumbRequired = computed(() => {
-  if (props.required) return true
-  return (attrs['aria-required'] as string | boolean | undefined) || undefined
-})
-
 // The `error` prop wins, but with no error a caller's own value has to survive
 // rather than be deleted by the explicit binding.
 const thumbErrorMessage = computed(() => {
@@ -323,7 +316,6 @@ const onValueCommit = (value: SliderValue) => {
           :aria-errormessage="thumbErrorMessage"
           :aria-invalid="thumbInvalid"
           :aria-disabled="thumbDisabled"
-          :aria-required="thumbRequired"
         />
       </template>
     </SliderRoot>

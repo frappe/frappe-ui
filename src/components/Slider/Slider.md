@@ -35,6 +35,11 @@ The accessible name lands on the thumb, which is the element carrying
 derived from `label`, so the visible label and the announced name can differ.
 Use one or the other.
 
+`required` is the one exception to that routing. The ARIA role table does not
+list `aria-required` for `slider`, so setting it fails the `aria-allowed-attr`
+audit rule and screen readers ignore it. The asterisk and `data-required` carry
+the state instead.
+
 A range renders one thumb per value. When a name is set, each thumb is qualified
 with it ("Price minimum", "Price maximum", or "Stops value 2 of 3" past two
 thumbs) so the endpoints are told apart. An unnamed range keeps the plain

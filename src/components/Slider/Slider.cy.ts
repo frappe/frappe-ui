@@ -424,6 +424,25 @@ describe('Slider', () => {
         })
     })
 
+    it('describes the thumb from both a #description slot and an error', () => {
+      // The branch that a `??` fallback next to `describedBy` would miss: the
+      // error id is already there, so the description id has to be added on
+      // the condition `InputDescription` actually renders on.
+      cy.mount(Slider, {
+        props: { label: 'Volume', error: 'Required' },
+        slots: { description: () => h('span', 'slot description') },
+      })
+
+      cy.get('[role="slider"]')
+        .invoke('attr', 'aria-describedby')
+        .then((ids) => {
+          const [descriptionId, errorId] = String(ids).split(' ')
+          expect(errorId, 'both ids are referenced').to.be.a('string')
+          cy.get(`#${descriptionId}`).should('contain.text', 'slot description')
+          cy.get(`#${errorId}`).should('contain.text', 'Required')
+        })
+    })
+
     it('renders the canonical data-* hooks on the control', () => {
       cy.mount(Slider, {
         props: {
@@ -438,9 +457,10 @@ describe('Slider', () => {
       cy.get('#sl-data').should('have.attr', 'data-size', 'md')
       cy.get('#sl-data').should('have.attr', 'data-state', 'valid')
       cy.get('#sl-data').should('have.attr', 'data-required', 'true')
-      // The prop doc promises `aria-required` on the control, and the thumb is
-      // the element that carries the aria set.
-      cy.get('[role="slider"]').should('have.attr', 'aria-required', 'true')
+      // `aria-required` is not in the ARIA role table for `slider`, so it must
+      // not be set: axe reports `aria-allowed-attr` on it. `data-required` and
+      // the asterisk carry the state instead.
+      cy.get('[role="slider"]').should('not.have.attr', 'aria-required')
     })
 
     it('flips data-state to invalid when error is set', () => {
