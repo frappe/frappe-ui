@@ -158,6 +158,10 @@ names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
 `displayLabel` and `inputValue` are unchanged, and `#actions` already used
 `close` — that stays too.
 
+`toggle` also takes `Popover`'s signature, `(flag?: boolean | Event) => void`:
+a bare call flips, a boolean sets, and a DOM event is ignored. `togglePopover`
+only ever flipped, so nothing that worked before behaves differently.
+
 This is a **silent break**: a destructured `isOpen` becomes `undefined`, so a
 class bound to it stops applying with no error, and `togglePopover()` throws
 `togglePopover is not a function` only if you call it.

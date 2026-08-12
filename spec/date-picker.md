@@ -327,6 +327,8 @@ type DatePickerEmits = {
 ```
 
 Slots: `trigger`, `prefix`, `suffix` (all with `{ open, toggle, displayLabel, inputValue }`).
+`toggle` carries `Popover`'s signature, `(flag?: boolean | Event) => void`: a bare
+call flips, a boolean sets, a DOM event is ignored. One name, one meaning.
 
 Exposed: `open(): void`
 
@@ -476,7 +478,8 @@ type TimePickerEmits = {
 }
 ```
 
-Slots: `prefix`, `suffix` (suffix exposes `{ open, toggle }`).
+Slots: `prefix`, `suffix` (suffix exposes `{ open, toggle }`, with `toggle` the
+same `(flag?: boolean | Event) => void` as on the date pickers and `Popover`).
 
 ---
 

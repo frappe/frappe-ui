@@ -148,8 +148,8 @@ const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
 
 interface TriggerSlotProps {
-  /** Flips the popover open state. */
-  toggle: () => void
+  /** Flips the popover open state, or sets it when passed a boolean. */
+  toggle: (flag?: boolean | Event) => void
   /** Whether the popover is currently open. */
   open: boolean
   displayLabel: string
@@ -171,8 +171,12 @@ const anchorEl = computed(() => {
   return textInputRef.value?.inputElement ?? undefined
 })
 
-function toggle() {
-  open.value = !open.value
+// Same signature and semantics as `Popover`'s `toggle` slot prop: a bare call
+// flips, a boolean sets, and a DOM event (from `@click="toggle"`) is ignored so
+// the handler argument does not read as `true`.
+function toggle(flag?: boolean | Event) {
+  if (flag instanceof Event) flag = undefined
+  open.value = flag ?? !open.value
 }
 
 function closePopover() {
