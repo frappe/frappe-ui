@@ -336,7 +336,8 @@ These apply identically to `ContextMenu`, which shares the option shape
 
 ### Custom rows
 
-`Select` and `MultiSelect` lost `#option`, and `Combobox` lost `render`. They
+`Select` and `MultiSelect` lost `#option`; `Combobox` and `MultiSelect` lost
+`render` and `slotName`. They
 were the same idea — hand the whole row to the consumer. All three are replaced
 by region slots on a row the component owns.
 
