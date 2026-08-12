@@ -117,6 +117,33 @@ row, actions footer. Not an API term; it's the thing Dialog's `bare` removes.
 > Dialog's full API — props, slots, ARIA, the imperative `dialog.confirm/danger/prompt`
 > namespace, and `PromptField` — is specified in [`spec/dialog.md`](./spec/dialog.md).
 
+### Keyboard shortcuts
+
+Vocabulary for `useKeyboardShortcut`, `KeyboardShortcutsDialog` and
+`KeyboardShortcut`; the API is specified in [`spec/shortcuts.md`](./spec/shortcuts.md).
+
+**combo**:
+The whole key combination as one string, written `Mod+Ctrl+Alt+Shift+<Key>`
+with the modifiers in that order. The single word for "which keys" across the
+composable, the dialog and the `KeyboardShortcut` component. Typed as a
+template-literal union, so the compiler checks it.
+_Avoid_: `shortcut`, `keys`, `binding`, `accelerator`, and separate `key` +
+`ctrl` + `shift` + `alt` fields
+
+**Mod**:
+The platform's primary modifier: Cmd on macOS, Ctrl elsewhere. `Ctrl` in a
+combo means Control on every platform, including macOS.
+_Avoid_: `Cmd`, `Meta`, `Command`, `CtrlOrCmd` (in a combo)
+
+**key** (in a combo):
+One named key, never the character it types: `A`, `Digit1`, `Slash`, `Escape`,
+`ArrowUp`. Punctuation has to be named because `+` is the separator.
+_Avoid_: raw characters (`/`, `?`, `+`), `Key1`, `Num1`
+
+_Avoid_ (family-wide): `shortcut` as a prop or option name, `condition` (it is
+`enabled`), `triggeredOn` (the callbacks pick the mode), `KeyboardShortcutsModal`,
+`formatShortcutLabel`, `getActiveShortcuts`
+
 ## Editor family
 
 Vocabulary for the editor; the API is specified in [`spec/editor.md`](./spec/editor.md).

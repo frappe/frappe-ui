@@ -9,6 +9,61 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `useShortcut` renamed to `useKeyboardShortcut`, config reshaped (breaking; loud in TS, silent in JS)
+
+The import fails to resolve, so the rename itself is loud. The config is the
+silent half: 14 fields become 10 and Vue drops the ones that left without a
+word.
+
+`key` + `ctrl` + `shift` + `alt` collapse into one `combo` string, written
+`Mod+Ctrl+Alt+Shift+<Key>`. `ctrl` never meant Control — it matched
+`ctrlKey || metaKey` — so it was already `Mod`. `condition` becomes `enabled`
+and takes a ref, a getter or a boolean. `triggeredOn` goes: `onHold` selects
+hold mode, and a hold registration takes no `handler`, which ends the old
+surprise where `triggeredOn: 'hold'` fired `handler` too.
+
+Punctuation and digits now use a key name (`Mod+Slash`, `Mod+Shift+Digit1`),
+because `+` is the separator and `'Mod++'` splits into empty parts. Digits and
+punctuation match `event.code`, so a shifted character still resolves; letters
+and named keys match `event.key`. The old US-layout heuristic is deleted.
+
+TypeScript rejects an unknown combo at compile time. A JavaScript call site
+that still passes the v0 shape logs one dev warning and never fires.
+
+Migration: [`useShortcut`](/docs/migration#useshortcut-is-now-usekeyboardshortcut).
+
+### Shortcut precedence is now last-registered-wins (breaking, silent)
+
+Two shortcuts on one combo used to run whichever the registry reached first.
+The last registration that is **enabled at the time of the keypress** now
+wins. `enabled` is resolved before precedence, so two registrations with
+mutually exclusive guards both keep working — the pattern suite's slides app
+uses on seven combos.
+
+A real collision, two live shortcuts on one keypress, logs one dev warning per
+combo naming the shadowed shortcut and the active one.
+
+### `formatShortcutLabel` and `getActiveShortcuts` removed (breaking, loud)
+
+Neither had a consumer in ten apps, and `formatShortcutLabel` was unused inside
+the library too. The registry read is now internal.
+`KeyboardShortcutsDialog`'s new default slot hands out the same data.
+
+### `KeyboardShortcutsModal` renamed to `KeyboardShortcutsDialog` (breaking, loud)
+
+The library calls every modal a dialog. Props are unchanged. The component
+gains a default slot carrying the grouped shortcuts, and a `data-slot` on every
+part.
+
+Migration: [`KeyboardShortcutsModal`](/docs/migration#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog).
+
+### KeyboardShortcut — `data-slot` hooks, and the new key names render
+
+The root, each key, the `+` separators and the alternative combos carry a
+`data-slot`; the root also carries `data-variant`. Style through those instead
+of a class prop (P10). The parser also reads the key names a combo uses, so
+`Digit1` renders `1` and `Slash` renders `/`.
+
 ### Badge — `theme="orange"` removed (breaking; loud in TS, silent in JS)
 
 `orange` was a deprecated alias that resolved to `amber`, so `theme="amber"`

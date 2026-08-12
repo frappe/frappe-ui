@@ -201,6 +201,18 @@ const parseCache = new Map<string, ParsedCombo | null>()
 
 /** @internal Exported for unit tests only. */
 export function parseCombo(combo: string): ParsedCombo | null {
+  // A JavaScript call site can hand us anything, including the v0 config that
+  // had no `combo` at all. Warn rather than throw from a global listener.
+  if (typeof combo !== 'string') {
+    warnOnce(
+      'combo:missing',
+      `A shortcut was registered without a combo, so it will never fire. ` +
+        `Replace the v0 key/ctrl/shift/alt fields with one combo string, ` +
+        `e.g. { key: 's', ctrl: true } becomes { combo: 'Mod+S' }.`,
+    )
+    return null
+  }
+
   const cached = parseCache.get(combo)
   if (cached !== undefined) return cached
 

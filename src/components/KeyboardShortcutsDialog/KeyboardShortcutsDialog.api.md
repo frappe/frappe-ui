@@ -35,6 +35,14 @@
   }
 ]
 
+  const slotsData = [
+  {
+    name: 'default',
+    description: 'Replaces the default grid. Receives the grouped, enabled shortcuts.',
+    type: '{ groups: KeyboardShortcutGroup[]; }'
+  }
+]
+
   const emitsData = [
   {
     name: 'update:open',
@@ -46,6 +54,8 @@
 
 ## API Reference
 
-<PropsTable name="KeyboardShortcutsModal" :data="propsData"/>
+<PropsTable name="KeyboardShortcutsDialog" :data="propsData"/>
+
+<SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>

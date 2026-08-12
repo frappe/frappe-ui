@@ -145,6 +145,19 @@ describe('matchesCombo — modifiers', () => {
     expect(matchesCombo(makeEvent({ key: 's', ...MOD }), 'mod+s')).toBe(true)
   })
 
+  it('never matches a v0 config that carries no combo, and warns once', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const legacy = { key: 's', ctrl: true } as unknown as { combo: string }
+    expect(matchesCombo(makeEvent({ key: 's', ...MOD }), legacy.combo)).toBe(
+      false,
+    )
+    expect(matchesCombo(makeEvent({ key: 's', ...MOD }), legacy.combo)).toBe(
+      false,
+    )
+    expect(warn).toHaveBeenCalledTimes(1)
+    warn.mockRestore()
+  })
+
   it('never matches an invalid combo, and warns once', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     expect(matchesCombo(makeEvent({ key: '+', ...MOD }), 'Mod++')).toBe(false)

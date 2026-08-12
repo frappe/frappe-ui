@@ -27,6 +27,9 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
 - [`dropdown.md`](./dropdown.md) — the action menu
 - [`item-list-row.md`](./item-list-row.md) — the row shell both families use
+- [`shortcuts.md`](./shortcuts.md) — `useKeyboardShortcut`,
+  `KeyboardShortcutsDialog`, `KeyboardShortcut`: the combo grammar, precedence,
+  and the registry the three share
 - [`charts.md`](./charts.md) — the conventions the chart family
   (`frappe-ui/charts`) is built on, the rule that decides what enters it, and
   the plot/chrome split. The API itself is documented on the docs site. The
