@@ -1,4 +1,5 @@
 import { defineComponent, h, ref } from 'vue'
+import Dialog from '#components/Dialog/Dialog.vue'
 import FloatingWindow from './FloatingWindow.vue'
 import type { WindowMode } from './types'
 
@@ -278,7 +279,9 @@ describe('FloatingWindow', () => {
         clientX: 800,
         clientY: 700,
       })
-      cy.get('body').trigger('pointercancel', { eventConstructor: 'PointerEvent' })
+      cy.get('body').trigger('pointercancel', {
+        eventConstructor: 'PointerEvent',
+      })
       // Move after cancel must be a no-op (listener torn down).
       cy.get('body').trigger('pointermove', {
         eventConstructor: 'PointerEvent',
@@ -322,6 +325,65 @@ describe('FloatingWindow', () => {
         expect(r.height).to.be.closeTo(550, 1)
         expect(r.left).to.be.closeTo(START_X - 40, 1)
         expect(r.top).to.be.closeTo(START_Y - 30, 1)
+      })
+    })
+  })
+
+  describe('layering', () => {
+    // The point of dropping the fixed z-index: an overlay opened over the
+    // window has to paint above it. Neither sets a z-index now, so paint order
+    // is document order, and the window has to come first.
+    //
+    // Not a hit test: reka puts `pointer-events: none` outside a modal dialog,
+    // so `elementFromPoint` misses the window whatever the paint order is.
+    it('sits before a dialog in document order, so the dialog paints above', () => {
+      cy.mount(
+        defineComponent({
+          setup() {
+            const mode = ref<WindowMode>('floating')
+            const open = ref(false)
+            return { mode, open }
+          },
+          render() {
+            return [
+              h(
+                'button',
+                { 'data-cy': 'open-dialog', onClick: () => (this.open = true) },
+                'Open',
+              ),
+              h(
+                FloatingWindow,
+                {
+                  title: 'Messages',
+                  mode: this.mode,
+                  'onUpdate:mode': (value: WindowMode) => (this.mode = value),
+                },
+                { default: () => h('div', 'Conversation') },
+              ),
+              h(Dialog, {
+                modelValue: this.open,
+                'onUpdate:modelValue': (value: boolean) => (this.open = value),
+                options: { title: 'Confirm' },
+              }),
+            ]
+          },
+        }),
+      )
+
+      cy.get('.floating-window').should('be.visible')
+      cy.get('[data-cy=open-dialog]').click()
+      cy.get('[role=dialog]').should('be.visible')
+
+      cy.get('.floating-window').then(($win) => {
+        const win = $win[0]
+        const dialog = Cypress.$('[role=dialog]')[0]
+        expect(
+          win.compareDocumentPosition(dialog) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+          'the dialog must come after the window',
+        ).to.be.greaterThan(0)
+        // A z-index on either would decide it instead of document order.
+        expect(getComputedStyle(win).zIndex).to.equal('auto')
       })
     })
   })

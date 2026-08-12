@@ -21,6 +21,12 @@ const DEFAULT_HEIGHT = 520
 const MIN_WIDTH = 380
 const MIN_HEIGHT = 300
 
+/**
+ * Set on `<body>` while a window is detached. The library reads it nowhere: it
+ * is the hook an app styles against, and it matters more now that the window
+ * sets no z-index of its own. An app that must paint the window above its own
+ * stacking contexts scopes an `isolation` or z-index rule to this class.
+ */
 const BODY_CLASS = 'has-floating-window'
 let activeDocker: (() => void) | null = null
 

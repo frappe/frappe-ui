@@ -10,6 +10,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import { computed, onMounted, ref, watch } from 'vue'
+import { usePortalTarget } from '#composables/usePortalTarget'
 import Icon from './Icon.vue'
 
 export interface IconPickerProps {
@@ -31,6 +32,8 @@ const props = withDefaults(defineProps<IconPickerProps>(), {
 })
 
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'input'])
+
+const portalTarget = usePortalTarget()
 
 const searchTerm = ref(getLabel(props.modelValue || ''))
 const internalModelValue = ref(props.modelValue)
@@ -180,7 +183,7 @@ defineExpose({
           <Icon name="chevron-down" class="h-4 w-4 text-ink-gray-5" />
         </ComboboxTrigger>
       </ComboboxAnchor>
-      <ComboboxPortal>
+      <ComboboxPortal :to="portalTarget">
         <ComboboxContent
           class="z-10 w-60 mt-1 bg-surface-elevation-2 overflow-hidden rounded-6 shadow-2xl"
           position="popper"
