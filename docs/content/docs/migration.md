@@ -2627,8 +2627,9 @@ every digit it touched under "Digit keys converted". Read each one.
 Each of these exits the run non-zero. Fix them by hand.
 
 - **Punctuation and shifted characters.** See above.
-- **An uppercase key with no `shift: true`.** v0 read `{ key: 'S' }` as
-  shift-produced and fired it on Shift+S only. Write `Shift+S`.
+- **An uppercase key with no `shift: true`.** v0 matched the letter either way
+  and ignored Shift, so `{ key: 'S' }` fired on `s` and on Shift+S. v1 is
+  exact. Write `S`, or `Shift+S`, or register both.
 - **A `key` that is not a plain string**, and a modifier flag that is not a
   literal `true` / `false`. v1 has no conditional modifier.
 - **A type declaration of the v0 shape.** Import `KeyboardShortcutConfig`.
@@ -2649,6 +2650,9 @@ The file is migrated and correct. Read these and decide if the code wants a
 rewrite.
 
 - **Every digit it converted.** See above.
+- **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
+  `'spacebar'`. v0 compared `event.key`, which never reports those, so the
+  shortcut never fired. The combo does fire, so the shortcut is live now.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
   `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
   pair may fold into one registration. Only you can say which half is which.

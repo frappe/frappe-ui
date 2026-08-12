@@ -55,7 +55,7 @@
  * WHAT IT REFUSES
  *
  * - punctuation keys (it prints the named key to use)
- * - an uppercase letter with no `shift: true` (v0 fired it on Shift+<letter>)
+ * - an uppercase letter with no `shift: true` (v0 fired it both ways)
  * - a `key` that is not a plain string
  * - a modifier flag that is not a literal `true` / `false`
  * - a type declaration of the v0 shape (use `KeyboardShortcutConfig`)
@@ -73,6 +73,8 @@
  * WHAT IT NOTES, WITHOUT FAILING THE RUN
  *
  * - a digit key, because v1 matches it on the physical key.
+ * - a v0 spelling that never matched, such as 'esc' or 'up'. v0 compared
+ *   `event.key`, which never reports those, so the combo is live now.
  * - a possible hand-rolled hold: a registration plus a manual `keyup`
  *   listener. Only a human can say which half becomes `onHold` and which
  *   `onRelease`. The migrated file is correct either way, and an unrelated
@@ -184,6 +186,12 @@ for (const [from, to] of [
 ]) {
   NAMED_KEY_BY_LOWER.set(from, to)
 }
+
+// v0 compared `config.key` to `event.key` with no alias table, and the browser
+// never reports these spellings. So a shortcut written this way never fired.
+// Normalising it makes a dead shortcut live, which is a behaviour change and
+// gets a note. `' '` is not here: `event.key` really does report it.
+const DEAD_V0_SPELLINGS = new Set(['esc', 'del', 'spacebar', 'up', 'down', 'left', 'right'])
 
 // ---------- IDENTIFIER RENAMES ----------
 
@@ -601,10 +609,11 @@ export function keyToComboPart(key, { hasShift } = {}) {
     if (/[a-z]/.test(key)) return { part: key.toUpperCase() }
     if (/[A-Z]/.test(key)) {
       if (hasShift) return { part: key }
-      // v0 read an uppercase config key as shift-produced and fired it on
-      // Shift+<letter>. Lowering the case silently widens the match.
+      // v0 compared the letter case-insensitively, and skipped its Shift check
+      // for an uppercase key, so `{ key: 'S' }` fired on S and on Shift+S
+      // alike. v1 matches exactly, and no single combo covers both.
       return {
-        refusal: `key '${key}' is uppercase with no \`shift: true\`. v0 fired it on Shift+${key} only. Write \`Shift+${key}\` if that is what you meant, or lowercase the key.`,
+        refusal: `key '${key}' is uppercase with no \`shift: true\`. v0 matched the letter either way and ignored Shift, so it fired on ${key.toLowerCase()} and on Shift+${key}. v1 is exact: write \`${key}\` for the plain key, \`Shift+${key}\` for the shifted one, or register both.`,
       }
     }
     if (/[0-9]/.test(key)) return { part: `Digit${key}`, digit: true }
@@ -622,7 +631,7 @@ export function keyToComboPart(key, { hasShift } = {}) {
   }
 
   const named = NAMED_KEY_BY_LOWER.get(key.toLowerCase())
-  if (named) return { part: named }
+  if (named) return { part: named, revived: DEAD_V0_SPELLINGS.has(key.toLowerCase()) }
 
   return {
     refusal: `key '${key}' has no known v1 spelling. Take the name from the combo reference in the migration guide.`,
@@ -639,11 +648,11 @@ export function buildCombo({ key, ctrl, alt, shift }) {
   if (alt) held.add('Alt')
   if (shift) held.add('Shift')
 
-  const { part, refusal, digit } = keyToComboPart(key, { hasShift: !!shift })
+  const { part, refusal, digit, revived } = keyToComboPart(key, { hasShift: !!shift })
   if (refusal) return { refusal }
 
   const modifiers = MODIFIER_ORDER.filter((m) => held.has(m))
-  return { combo: [...modifiers, part].join('+'), digit }
+  return { combo: [...modifiers, part].join('+'), digit, revived }
 }
 
 // ---------- REWRITING ----------
@@ -828,8 +837,17 @@ function convertObject(source, mask, range, ctx) {
     )
   }
 
-  const { combo, refusal, digit } = buildCombo({ key: literal.value, ...flags })
+  const { combo, refusal, digit, revived } = buildCombo({ key: literal.value, ...flags })
   if (refusal) return refuse(refusal)
+
+  const notes = revived
+    ? [
+        {
+          line,
+          message: `key '${literal.value}' never matched in v0: it compared \`event.key\`, which never reports that spelling. The combo '${combo}' does fire, so this shortcut is live now.`,
+        },
+      ]
+    : []
 
   const edits = [
     {
@@ -855,6 +873,7 @@ function convertObject(source, mask, range, ctx) {
       digit: !!digit,
     },
     refusals: [],
+    notes,
   }
 }
 
@@ -938,6 +957,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const result = convertObject(content, mask, object, { insideCall, contextProperty })
     if (!result) return
     refusals.push(...(result.refusals ?? []))
+    notes.push(...(result.notes ?? []))
     if (result.edits) {
       edits.push(...result.edits)
       changes.push(result.change)

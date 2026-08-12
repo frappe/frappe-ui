@@ -95,8 +95,29 @@ describe('combo building', () => {
   })
 
   it('refuses an uppercase letter that carries no shift flag', () => {
-    expect(buildCombo({ key: 'S', ctrl: true }).refusal).toContain('Shift+S')
+    // v0's matchesShortcut compared the letter case-insensitively and skipped
+    // its Shift check for an uppercase key, so it fired both ways.
+    const { refusal } = buildCombo({ key: 'S', ctrl: true })
+    expect(refusal).toContain('fired on s and on Shift+S')
+    expect(refusal).toContain('register both')
     expect(buildCombo({ key: 'S', ctrl: true, shift: true }).combo).toBe('Mod+Shift+S')
+  })
+
+  it('notes a v0 key spelling that never matched', () => {
+    const { notes, migrated } = migrateShortcuts(
+      inCall("{ key: 'esc', description: 'Close', handler: close }"),
+    )
+
+    expect(migrated).toContain("combo: 'Escape'")
+    expect(notes[0].message).toContain('never matched in v0')
+  })
+
+  it('does not note a space key, which event.key really reports', () => {
+    const { notes } = migrateShortcuts(
+      inCall("{ key: ' ', description: 'Pan', handler: pan }"),
+    )
+
+    expect(notes).toEqual([])
   })
 
   it('refuses a key it has no v1 spelling for', () => {
