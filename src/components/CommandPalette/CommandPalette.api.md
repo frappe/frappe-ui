@@ -20,8 +20,8 @@
     default: 'false'
   },
   {
-    name: 'searchQuery',
-    description: '',
+    name: 'query',
+    description: 'The search text. Filter `groups` against it. Cleared when the palette closes.',
     required: false,
     type: 'string',
     default: '""'
@@ -35,14 +35,14 @@
     type: '[value: boolean]'
   },
   {
+    name: 'update:query',
+    description: 'Fired when the query changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'select',
     description: '',
     type: '[item: CommandPaletteItemData]'
-  },
-  {
-    name: 'update:searchQuery',
-    description: 'Fired when the search query changes.',
-    type: '[value: string]'
   }
 ]
 

@@ -4,7 +4,7 @@
     size="xl"
     position="top"
     bare
-    @after-leave="searchQuery = ''"
+    @after-leave="query = ''"
   >
     <template #default>
       <div>
@@ -16,7 +16,7 @@
             <ComboboxInput
               placeholder="Search"
               class="w-full border-none bg-transparent py-3 pl-11.5 pr-4.5 text-base text-ink-gray-8 placeholder-ink-gray-4 focus:ring-0"
-              v-model="searchQuery"
+              v-model="query"
               autocomplete="off"
             />
           </div>
@@ -81,7 +81,8 @@ const emit = defineEmits<{
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
-const searchQuery = defineModel<string>('searchQuery', { default: '' })
+/** The search text. Filter `groups` against it. Cleared when the palette closes. */
+const query = defineModel<string>('query', { default: '' })
 
 function select(item: CommandPaletteItemData | null) {
   if (!item) return

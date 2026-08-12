@@ -40,7 +40,7 @@ function select(item) {
     </p>
     <CommandPalette
       v-model:open="open"
-      v-model:search-query="searchQuery"
+      v-model:query="searchQuery"
       :groups="groups"
       @select="select"
     />

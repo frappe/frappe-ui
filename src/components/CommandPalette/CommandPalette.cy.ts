@@ -28,8 +28,8 @@ const Harness = (initialOpen: boolean, onSelect?: (item: unknown) => void) =>
         h(CommandPalette, {
           open: open.value,
           'onUpdate:open': (v: boolean) => (open.value = v),
-          searchQuery: searchQuery.value,
-          'onUpdate:searchQuery': (v: string) => (searchQuery.value = v),
+          query: searchQuery.value,
+          'onUpdate:query': (v: string) => (searchQuery.value = v),
           groups,
           onSelect,
         })

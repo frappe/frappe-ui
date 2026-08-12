@@ -2048,16 +2048,23 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
 with no error, so the palette just never opens.
 
-| Before                  | After                    |
-| ------------------------ | ------------------------ |
-| `v-model:show="show"`    | `v-model:open="open"`    |
+`searchQuery` is renamed to `query`, the name `Combobox` and `MultiSelect`
+already use for the same controlled search text. Same silent break: the
+unknown `searchQuery` prop is accepted, so the palette holds its own query
+and yours never updates.
+
+| Before                          | After                    |
+| -------------------------------- | ------------------------ |
+| `v-model:show="show"`            | `v-model:open="open"`    |
+| `v-model:search-query="q"`       | `v-model:query="q"`      |
+| `@update:searchQuery="onSearch"` | `@update:query="onSearch"` |
 
 ```vue
 <!-- Before -->
-<CommandPalette v-model:show="show" :groups="groups" @select="onSelect" />
+<CommandPalette v-model:show="show" v-model:search-query="q" :groups="groups" @select="onSelect" />
 
 <!-- After -->
-<CommandPalette v-model:open="open" :groups="groups" @select="onSelect" />
+<CommandPalette v-model:open="open" v-model:query="q" :groups="groups" @select="onSelect" />
 ```
 
 `Mod+K` now opens the palette on its own (registered internally via
