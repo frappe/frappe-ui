@@ -1505,8 +1505,10 @@ linked external package never blocks a target the run would not rewrite. Run
 the codemod on each real package root directly, so every migrated tree gets
 its own marker. If the refusal names a marker inside a vendored dependency
 (for example `vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is
-already shifted — run the codemod per package root and leave the vendored
-marker alone.
+already shifted — leave its marker alone and target the directories that do
+not contain it. Pointing at the app root will not help: the search walks the
+whole subtree, so any ancestor of the vendored copy finds the same marker and
+refuses again. Target `src/` and your other own trees instead.
 
 The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
