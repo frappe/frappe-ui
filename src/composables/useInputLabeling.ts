@@ -30,8 +30,10 @@ export interface InputLabelingProps {
   error?: string | FrappeUIError
 
   /**
-   * Marks the field as required. Renders an asterisk next to the label and
-   * forwards `required` / `aria-required` to the underlying control.
+   * Marks the field as required. Renders an asterisk next to the label, with
+   * `sr-only` text that announces it, and forwards `required` /
+   * `aria-required` to the underlying control where its role allows it —
+   * `slider` does not, so Slider and a half-step Rating set neither.
    */
   required?: boolean
 

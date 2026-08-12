@@ -142,7 +142,7 @@
   },
   {
     name: 'required',
-    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    description: 'Marks the field as required. Renders an asterisk next to the label, with\n`sr-only` text that announces it, and forwards `required` /\n`aria-required` to the underlying control where its role allows it —\n`slider` does not, so Slider and a half-step Rating set neither.',
     required: false,
     type: 'boolean'
   },
@@ -184,11 +184,6 @@
     type: '[]'
   },
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -196,6 +191,16 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
+    type: '[value: string]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
     type: '[value: string]'
   },
   {
@@ -207,11 +212,6 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
-  },
-  {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
   }
 ]
 </script>
