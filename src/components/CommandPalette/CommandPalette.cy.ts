@@ -28,8 +28,8 @@ const Harness = (initialOpen: boolean, onSelect?: (item: unknown) => void) =>
         h(CommandPalette, {
           open: open.value,
           'onUpdate:open': (v: boolean) => (open.value = v),
-          searchQuery: searchQuery.value,
-          'onUpdate:searchQuery': (v: string) => (searchQuery.value = v),
+          query: searchQuery.value,
+          'onUpdate:query': (v: string) => (searchQuery.value = v),
           groups,
           onSelect,
         })
@@ -66,7 +66,7 @@ describe('CommandPalette', () => {
     cy.get('[role=dialog]').should('not.exist')
   })
 
-  it('updates search-query while typing', () => {
+  it('updates query while typing', () => {
     cy.mount(Harness(true))
     cy.get('input[placeholder="Search"]').type('inb')
     cy.get('input[placeholder="Search"]').should('have.value', 'inb')

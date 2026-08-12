@@ -741,7 +741,7 @@ const spaceActions = [
       </div>
     </DesktopShell>
 
-    <SettingsDialog v-model="showSettings" v-model:tab="settingsTab" size="5xl">
+    <SettingsDialog v-model:open="showSettings" v-model:tab="settingsTab" size="5xl">
       <SettingsSidebar>
         <SettingsNavGroup label="User settings">
           <SettingsNavItem value="profile">

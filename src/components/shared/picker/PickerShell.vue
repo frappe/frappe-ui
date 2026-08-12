@@ -31,7 +31,7 @@
                 <slot name="suffix" v-bind="triggerSlotProps">
                   <LucideChevronDown
                     class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="togglePopover"
+                    @mousedown.prevent="toggle"
                   />
                 </slot>
               </template>
@@ -148,8 +148,10 @@ const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
 
 interface TriggerSlotProps {
-  togglePopover: () => void
-  isOpen: boolean
+  /** Flips the popover open state, or sets it when passed a boolean. */
+  toggle: (flag?: boolean | Event) => void
+  /** Whether the popover is currently open. */
+  open: boolean
   displayLabel: string
   inputValue: string
 }
@@ -169,8 +171,12 @@ const anchorEl = computed(() => {
   return textInputRef.value?.inputElement ?? undefined
 })
 
-function togglePopover() {
-  open.value = !open.value
+// Same signature and semantics as `Popover`'s `toggle` slot prop: a bare call
+// flips, a boolean sets, and a DOM event (from `@click="toggle"`) is ignored so
+// the handler argument does not read as `true`.
+function toggle(flag?: boolean | Event) {
+  if (flag instanceof Event) flag = undefined
+  open.value = flag ?? !open.value
 }
 
 function closePopover() {
@@ -221,8 +227,8 @@ function onArrowDown() {
 }
 
 const triggerSlotProps = computed<TriggerSlotProps>(() => ({
-  togglePopover,
-  isOpen: open.value,
+  toggle,
+  open: open.value,
   displayLabel: props.displayLabel,
   inputValue: inputValue.value,
 }))

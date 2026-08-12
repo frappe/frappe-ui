@@ -1,6 +1,9 @@
 import { h } from 'vue'
 import DatePicker from './DatePicker.vue'
-import type { DatePickerActionsSlotProps } from './types'
+import type {
+  DatePickerActionsSlotProps,
+  DatePickerTriggerSlotProps,
+} from './types'
 
 // Slot factory used by tests that need a sidebar Clear button.
 // The new #actions slot renders to the left of the calendar; consumers
@@ -232,6 +235,71 @@ describe('DatePicker', () => {
     cy.get('input').click()
     cy.get('input').clear().type('2025-06-25{enter}')
     cy.get('input').should('have.value', '2025-06-15')
+  })
+
+  describe('#trigger slot props', () => {
+    // These two names are the public contract, so a rename here is a silent
+    // break in consumer templates. Popover carries the same test
+    // (Popover.cy.ts, "exposes reactive open state to the #trigger slot").
+    it('exposes open and toggle to the #trigger slot', () => {
+      cy.mount(DatePicker, {
+        props: { modelValue: '2025-06-15' },
+        slots: {
+          trigger: ({ open, toggle }: DatePickerTriggerSlotProps) =>
+            h(
+              'button',
+              {
+                'data-cy': 'trigger',
+                class: open ? 'is-open' : 'is-closed',
+                onClick: () => toggle(),
+              },
+              open ? 'Close' : 'Open',
+            ),
+        },
+      })
+
+      cy.get('[data-cy="trigger"]')
+        .should('have.class', 'is-closed')
+        .and('have.text', 'Open')
+      cy.get('[role=dialog]').should('not.exist')
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[data-cy="trigger"]')
+        .should('have.class', 'is-open')
+        .and('have.text', 'Close')
+    })
+
+    it('toggle sets the open state when passed a boolean', () => {
+      // Same signature as Popover's `toggle`: a boolean sets, so `toggle(true)`
+      // on an open picker is a no-op rather than a close. Called directly
+      // because a `#trigger` click is not auto-wired here — the slot owns it.
+      let toggle: DatePickerTriggerSlotProps['toggle'] | null = null
+
+      cy.mount(DatePicker, {
+        props: { modelValue: '2025-06-15' },
+        slots: {
+          trigger: (props: DatePickerTriggerSlotProps) => {
+            toggle = props.toggle
+            return h('button', { 'data-cy': 'trigger' }, 'Open')
+          },
+        },
+      })
+
+      cy.then(() => toggle?.(true))
+      cy.get('[role=dialog]').should('exist')
+
+      // A flip would close it here. Setting must be idempotent.
+      cy.then(() => toggle?.(true))
+      cy.get('[role=dialog]').should('exist')
+
+      cy.then(() => toggle?.(false))
+      cy.get('[role=dialog]').should('not.exist')
+
+      // A bare call still flips.
+      cy.then(() => toggle?.())
+      cy.get('[role=dialog]').should('exist')
+    })
   })
 
   describe('keyboard navigation', () => {

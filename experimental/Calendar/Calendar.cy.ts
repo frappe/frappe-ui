@@ -142,6 +142,19 @@ describe('Calendar', () => {
     cy.contains('button', 'Today').should('not.exist')
   })
 
+  // The default header binds DatePicker's `#trigger` slot prop `toggle`. The
+  // picker's slot props are a public contract, so a rename there breaks this
+  // button silently — nothing throws, the month picker just stops opening.
+  it('opens the month picker from the default header', () => {
+    cy.mount(Calendar, { props: { events: [] } })
+
+    cy.get('[role=dialog]').should('not.exist')
+    // The month/year button is the header's first control.
+    cy.get('button').first().click()
+    cy.get('[role=dialog]').should('exist')
+    cy.get('[aria-label=cycle-calendar-view]').should('exist')
+  })
+
   it('renders the #event-popover-content slot inside the event popover', () => {
     cy.mount(Calendar, {
       props: { events },

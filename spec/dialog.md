@@ -28,7 +28,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Chrome control | `bare: boolean` (default `false`); replaces the legacy `#body` slot |
 | Close button | `showCloseButton: boolean` (default `true`); independent of header |
 | Size scale | All 11 sizes kept (`xs` → `7xl`); maps to Tailwind `max-w-*` |
-| Color vocabulary | `theme` with color names (`'yellow' \| 'blue' \| 'red' \| 'green'`). No semantic axis. (`Alert.theme` uses its own palette: `gray \| blue \| green \| amber \| red`.) |
+| Color vocabulary | `theme` with color names (`'amber' \| 'blue' \| 'red' \| 'green'`). No semantic axis. (`Alert.theme` uses its own palette: `gray \| blue \| green \| amber \| red`.) |
 | Slots | Canonical only: `#default`, `#title`, `#actions`. Legacy slots were removed (ADR-0008). |
 | Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
 | Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
@@ -42,7 +42,7 @@ type DialogSize =
   | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl'
 
-type DialogTheme = 'yellow' | 'blue' | 'red' | 'green'
+type DialogTheme = 'amber' | 'blue' | 'red' | 'green'
 
 type DialogPosition = 'center' | 'top'
 
@@ -291,7 +291,7 @@ When `theme` is set without an explicit `icon`, the helper uses these defaults (
 | `theme` | Default icon | Confirm button color |
 |---|---|---|
 | `red` | `lucide-alert-triangle` | red solid |
-| `yellow` | `lucide-alert-triangle` | default solid (Button doesn't have a `yellow` theme — icon theme is honored, button falls back) |
+| `amber` | `lucide-alert-triangle` | default solid (Button doesn't have an `amber` theme — icon theme is honored, button falls back) |
 | `blue` | `lucide-info` | blue solid |
 | `green` | `lucide-check-circle` | green solid |
 | *(unset)* | none | default solid |
@@ -391,7 +391,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 |---|---|
 | `options` blob prop | Flat top-level props |
 | `disableOutsideClickToClose` | `dismissible` (inverted) |
-| `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'yellow' \| 'blue' \| 'red' \| 'green' }` |
+| `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'amber' \| 'blue' \| 'red' \| 'green' }` |
 | `#body-content`, `#body-main` slots | `#default` |
 | `#body-title` slot | `#title` |
 | `#body-header` slot | (no replacement — use `#title` for extras) |
@@ -403,6 +403,23 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 `<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe — only the first mounted host renders the stack, whether the extra host is nested or a sibling; the others warn in dev. When the rendering host unmounts, the claim hands over to the next mounted host, so the stack never loses its renderer.
 
 ## Migration notes
+
+### From `theme: 'yellow'` to `theme: 'amber'`
+
+`DialogTheme`'s warning tone is `amber`, not `yellow`. The rest of the library
+already spells it that way — `Alert` and `SidebarCard` (`StatusTheme`), `Badge`
+and `Avatar` — and `Dialog` itself rendered `yellow` with the `amber` tokens
+(`bg-surface-amber-2` / `text-ink-amber-5`), so only the word changes.
+
+```vue
+<!-- before -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" />
+
+<!-- after -->
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" />
+```
+
+The same applies to the `theme` argument of `dialog.confirm` / `dialog.danger`.
 
 ### From `options` blob to flat props
 

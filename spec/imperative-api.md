@@ -237,7 +237,7 @@ rule.
 (`builder/.../MoreStylesPanel.vue:179`).
 
 **`open` is always a verb here.** The boolean lives on `v-model:open` and on
-slot props as `isOpen`. Nothing handed back through a ref is ever a boolean
+slot props as `open`. Nothing handed back through a ref is ever a boolean
 named `open`. This fixes §1.1 and costs nothing — no component does that today.
 
 `focus(options?)` takes the standard `FocusOptions`, so

@@ -25,13 +25,13 @@
             @update:modelValue="(val) => onMonthYearChange(val)"
             :clearable="false"
           >
-            <template #trigger="{ togglePopover }">
+            <template #trigger="{ toggle }">
               <Button
                 variant="ghost"
                 class="text-lg-medium text-ink-gray-7"
                 :label="currentMonthYear"
                 iconRight="lucide-chevron-down"
-                @click="togglePopover"
+                @click="toggle"
               />
             </template>
           </DatePicker>

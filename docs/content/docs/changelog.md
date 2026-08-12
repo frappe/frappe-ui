@@ -199,6 +199,60 @@ Changed since `1.0.0-beta.41`, the first beta that shipped the family:
   `useChartTokens`, which re-resolves on a theme flip; `currentColorScheme` was
   the root `resolvedColorScheme` under another name.
 
+### DatePicker family — trigger slot props renamed to `open` / `toggle` (breaking, silent)
+
+`#trigger`, `#prefix` and `#suffix` on `DatePicker`, `DateRangePicker`,
+`DateTimePicker` and `TimePicker` now receive `{ open, toggle }` instead of
+`{ isOpen, togglePopover }` (#1054). `Popover`, `HoverCard`, `Dropdown`,
+`Select`, `Combobox` and `MultiSelect` all name the boolean `open`, and
+`Popover`'s trigger slot already names the flip `toggle`. `isOpen` is on
+`CONTEXT.md`'s avoid list for a public API, and `togglePopover` named the
+mechanism rather than the behavior (P1). The same
+components already gave `#actions` a `close()`, so one component shipped two
+vocabularies for one concept. `displayLabel` and `inputValue` are unchanged.
+
+**Silent break:** a destructured `isOpen` becomes `undefined`, so a class
+bound to it stops applying with no error; `togglePopover()` throws only if you
+call it. Grep for both names. See the
+[migration guide](/docs/migration#trigger-slot-props).
+
+### SettingsDialog — open state moves to `v-model:open` (breaking, silent)
+
+`v-model` → `v-model:open`, and `update:modelValue` → `update:open` (#1054).
+`CONTEXT.md` says the visibility of an overlay is `open`, "always bound via
+`v-model:open`", and lists bare `v-model` for visibility among the names to
+avoid. `Dialog`'s dual binding is a documented carve-out for `Dialog` alone,
+which P2 says new components do not inherit. `v-model:tab` is unchanged.
+
+**Silent break:** Vue accepts the unknown `modelValue` prop with no error, so
+the dialog never opens. See the
+[migration guide](/docs/migration#settingsdialog).
+
+### CommandPalette — `searchQuery` renamed to `query` (breaking, silent)
+
+`v-model:searchQuery` → `v-model:query`, and `update:searchQuery` →
+`update:query` (#1054). `Combobox` and `MultiSelect` already bind the
+controlled search text as `v-model:query`; one concept gets one name (P1).
+
+**Silent break:** the unknown `searchQuery` prop is accepted, so the palette
+holds its own query and your binding never updates. See the
+[migration guide](/docs/migration#commandpalette).
+
+### Dialog — `theme: 'yellow'` renamed to `'amber'` (breaking, silent)
+
+`DialogTheme` held the library's last `yellow` (#1054). `Alert`, `SidebarCard`,
+`Badge` and `Avatar` all spell the warning tone `amber`, and `Dialog` already
+rendered `yellow` with the amber tokens (`bg-surface-amber-2`,
+`text-ink-amber-5`), so the value name disagreed with the token it resolved to.
+Applies to `icon.theme` and to the `theme` argument of `dialog.confirm` /
+`dialog.danger`. Only the word changes, not the color.
+
+**Silent break** for JavaScript call sites: `yellow` is no longer a key in the
+tone maps, so the icon renders untinted and nothing throws. TypeScript call
+sites get a union error. This also corrects the `warning → yellow` mapping
+given in the `icon.appearance` entry below. See the
+[migration guide](/docs/migration#dialog).
+
 ### Charts (v1) family — moved to `frappe-ui/experimental` (breaking)
 
 The first chart family is not taken to bar at root for `1.0.0` (#942).
@@ -674,7 +728,7 @@ and `Rating` exports `RatingEmits`.
   independent of the auto-header).
 - Canonical slots `#default`, `#title`, `#actions` (scoped with
   `{ close, actions }`). The legacy `#body*` slots are removed — see below.
-- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`,
+- `icon.theme` (`amber | blue | red | green`) replaces `icon.appearance`,
   which is removed — see below.
 - Auto-header no longer renders an "Untitled" fallback.
 
@@ -711,7 +765,7 @@ aliased and nothing warns.
   dialog silently becomes dismissible. Use `dismissible`.
 - **Breaking, silent:** `icon.appearance` and `DialogIconAppearance` are gone;
   only `icon.theme` remains. An `appearance` key is dropped, so the icon
-  renders with no tone. Map `warning → yellow`, `info → blue`, `danger → red`,
+  renders with no tone. Map `warning → amber`, `info → blue`, `danger → red`,
   `success → green`.
 - **Breaking, silent:** the legacy `#body`, `#body-content`, `#body-main`,
   `#body-title` and `#body-header` slots are gone. Vue drops an unknown named

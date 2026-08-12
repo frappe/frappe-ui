@@ -27,7 +27,7 @@
     default: 'true'
   },
   {
-    name: 'modelValue',
+    name: 'open',
     description: 'Controls whether the dialog is open.',
     required: false,
     type: 'boolean',
@@ -61,8 +61,8 @@
 
   const settingsDialogEmits = [
   {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
     type: '[value: boolean]'
   },
   {

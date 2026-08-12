@@ -1,6 +1,9 @@
 import { h } from 'vue'
 import DateTimePicker from './DateTimePicker.vue'
-import type { DateTimePickerActionsSlotProps } from './types'
+import type {
+  DateTimePickerActionsSlotProps,
+  DatePickerTriggerSlotProps,
+} from './types'
 
 const clearSlot = {
   actions: (props: DateTimePickerActionsSlotProps) =>
@@ -178,5 +181,36 @@ describe('DateTimePicker', () => {
     // Split view: scrollable year list beside a scrollable month list.
     cy.get('[role=listbox][aria-label="Select year"]').should('exist')
     cy.get('[role=listbox][aria-label="Select month"]').should('exist')
+  })
+
+  // `open` and `toggle` are the public slot contract, so a rename here is a
+  // silent break in consumer templates. Popover carries the same test.
+  it('exposes open and toggle to the #trigger slot', () => {
+    cy.mount(DateTimePicker, {
+      props: { modelValue: '2025-06-15 10:30:00' },
+      slots: {
+        trigger: ({ open, toggle }: DatePickerTriggerSlotProps) =>
+          h(
+            'button',
+            {
+              'data-cy': 'trigger',
+              class: open ? 'is-open' : 'is-closed',
+              onClick: () => toggle(),
+            },
+            open ? 'Close' : 'Open',
+          ),
+      },
+    })
+
+    cy.get('[data-cy="trigger"]')
+      .should('have.class', 'is-closed')
+      .and('have.text', 'Open')
+    cy.get('[role=dialog]').should('not.exist')
+
+    cy.get('[data-cy="trigger"]').click()
+    cy.get('[role=dialog]').should('exist')
+    cy.get('[data-cy="trigger"]')
+      .should('have.class', 'is-open')
+      .and('have.text', 'Close')
   })
 })

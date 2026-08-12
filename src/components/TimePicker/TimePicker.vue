@@ -37,7 +37,7 @@
           <template #suffix>
             <slot
               name="suffix"
-              v-bind="{ togglePopover, isOpen }"
+              v-bind="{ toggle: togglePopover, open: isOpen }"
             >
               <span
                 class="lucide-chevron-down size-4 cursor-pointer"
@@ -146,7 +146,10 @@ defineSlots<{
    * Rendered inside the trigger input, after the typed value. Defaults to a
    * chevron-down that toggles the popover.
    */
-  suffix?: (props: { togglePopover: () => void; isOpen: boolean }) => any
+  suffix?: (props: {
+    toggle: (flag?: boolean | Event) => void
+    open: boolean
+  }) => any
 }>()
 
 defineOptions({ inheritAttrs: false })
@@ -380,8 +383,11 @@ function selectOption(value: string) {
 
 // ── Popover + keyboard wiring ──
 
-function togglePopover() {
-  isOpen.value = !isOpen.value
+// Bound out as the `toggle` slot prop, so it carries `Popover`'s signature: a
+// bare call flips, a boolean sets, a DOM event is ignored.
+function togglePopover(flag?: boolean | Event) {
+  if (flag instanceof Event) flag = undefined
+  isOpen.value = flag ?? !isOpen.value
 }
 
 function onClickInput() {

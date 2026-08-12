@@ -84,7 +84,7 @@ The `options` blob is flattened into top-level props. See the
 | `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
-| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'yellow' }"`    |
+| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`     |
 | `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
@@ -128,12 +128,28 @@ open) and wrap your app root in `<FrappeUIProvider>`.
 <Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
 
 <!-- After -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" ... />
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" ... />
 ```
 
 `appearance` is dropped silently — Vue accepts the unknown key with no error,
-so the icon renders with no tone. Map `warning → yellow`, `info → blue`,
+so the icon renders with no tone. Map `warning → amber`, `info → blue`,
 `danger → red`, `success → green`.
+
+### `theme: 'yellow'` → `theme: 'amber'`
+
+The warning tone is `amber`, matching `Alert`, `SidebarCard`, `Badge` and
+`Avatar`. `Dialog` was the last component spelling it `yellow`, and it already
+rendered that value with the amber tokens — only the word changes, not the
+color.
+
+| Before                     | After                     |
+| -------------------------- | ------------------------- |
+| `:icon="{ theme: 'yellow' }"` | `:icon="{ theme: 'amber' }"` |
+| `dialog.confirm({ theme: 'yellow' })` | `dialog.confirm({ theme: 'amber' })` |
+
+This is a **silent break** for JavaScript call sites: `yellow` is no longer a
+key in the tone maps, so the icon renders with no tone and nothing throws.
+TypeScript call sites get a union error.
 
 ### A template ref no longer exposes `close()`
 
@@ -184,6 +200,40 @@ longer in the component's types lands as an inert extra attribute (or, for
 throwing. TypeScript callers get a compile error instead. `#target` is the
 one slot case — content in a leftover `<template #target>` silently stops
 rendering.
+
+### Trigger slot props
+
+`#trigger`, `#prefix` and `#suffix` receive `{ open, toggle }` — the same two
+names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+`MultiSelect` hand out. `TimePicker`'s `#suffix` follows.
+
+| Before          | After    |
+| --------------- | -------- |
+| `isOpen`        | `open`   |
+| `togglePopover` | `toggle` |
+
+`displayLabel` and `inputValue` are unchanged, and `#actions` already used
+`close` — that stays too.
+
+`toggle` also takes `Popover`'s signature, `(flag?: boolean | Event) => void`:
+a bare call flips, a boolean sets, and a DOM event is ignored. `togglePopover`
+only ever flipped, so nothing that worked before behaves differently.
+
+This is a **silent break**: a destructured `isOpen` becomes `undefined`, so a
+class bound to it stops applying with no error, and `togglePopover()` throws
+`togglePopover is not a function` only if you call it.
+
+```vue
+<!-- Before -->
+<template #trigger="{ togglePopover, isOpen }">
+  <Button :class="isOpen && 'ring-2'" label="Pick a date" @click="togglePopover" />
+</template>
+
+<!-- After -->
+<template #trigger="{ toggle, open }">
+  <Button :class="open && 'ring-2'" label="Pick a date" @click="toggle" />
+</template>
+```
 
 Behavior changes that apply even if you don't touch your code:
 
@@ -1110,6 +1160,30 @@ frame. Grep for `:header=`, `:sections=`, `:items=`, `#sidebar-item` and
 `Sidebar` no longer wraps the middle list in a scroll container or applies any
 padding — that's app-owned now (see the component page's Collapse section for
 the full composition contract).
+
+## SettingsDialog
+
+Open state moves from the unnamed `v-model` to `v-model:open`, the name every
+other overlay in the library uses.
+
+This is a **silent break**: Vue accepts the unknown `modelValue` prop with no
+error, so the dialog just never opens.
+
+| Before                          | After                                |
+| ------------------------------- | ------------------------------------ |
+| `v-model="showSettings"`        | `v-model:open="showSettings"`        |
+| `@update:modelValue="onToggle"` | `@update:open="onToggle"`            |
+
+```vue
+<!-- Before -->
+<SettingsDialog v-model="showSettings" v-model:tab="tab">…</SettingsDialog>
+
+<!-- After -->
+<SettingsDialog v-model:open="showSettings" v-model:tab="tab">…</SettingsDialog>
+```
+
+`v-model:tab` is unchanged. Unlike `Dialog`, `SettingsDialog` has no legacy
+unnamed-`v-model` binding to keep — `open` is the only visibility channel.
 
 ## Tabs
 
@@ -2363,16 +2437,23 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
 with no error, so the palette just never opens.
 
-| Before                  | After                    |
-| ------------------------ | ------------------------ |
-| `v-model:show="show"`    | `v-model:open="open"`    |
+`searchQuery` is renamed to `query`, the name `Combobox` and `MultiSelect`
+already use for the same controlled search text. Same silent break: the
+unknown `searchQuery` prop is accepted, so the palette holds its own query
+and yours never updates.
+
+| Before                          | After                    |
+| -------------------------------- | ------------------------ |
+| `v-model:show="show"`            | `v-model:open="open"`    |
+| `v-model:search-query="q"`       | `v-model:query="q"`      |
+| `@update:searchQuery="onSearch"` | `@update:query="onSearch"` |
 
 ```vue
 <!-- Before -->
-<CommandPalette v-model:show="show" :groups="groups" @select="onSelect" />
+<CommandPalette v-model:show="show" v-model:search-query="q" :groups="groups" @select="onSelect" />
 
 <!-- After -->
-<CommandPalette v-model:open="open" :groups="groups" @select="onSelect" />
+<CommandPalette v-model:open="open" v-model:query="q" :groups="groups" @select="onSelect" />
 ```
 
 `Mod+K` is registered internally through `useShortcut` (v0 used its own

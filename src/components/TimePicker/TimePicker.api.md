@@ -173,7 +173,7 @@
   {
     name: 'suffix',
     description: 'Rendered inside the trigger input, after the typed value. Defaults to a\nchevron-down that toggles the popover.',
-    type: '{ togglePopover: () => void; isOpen: boolean; }'
+    type: '{ toggle: (flag?: boolean | Event | undefined) => void; open: boolean; }'
   }
 ]
 
@@ -182,6 +182,11 @@
     name: 'open',
     description: 'Fired when the component opens.',
     type: '[]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
   },
   {
     name: 'update:open',
@@ -194,16 +199,6 @@
     type: '[value: string]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
-    type: '[value: string]'
-  },
-  {
     name: 'input-invalid',
     description: '',
     type: '[input: string]'
@@ -212,6 +207,11 @@
     name: 'invalid-change',
     description: '',
     type: '[invalid: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   }
 ]
 </script>
