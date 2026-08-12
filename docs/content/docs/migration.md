@@ -6,8 +6,9 @@ pageClass: migration-page
 
 A guide for moving an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section opens with a before/after table. For
-the full change list see the [changelog](/docs/changelog); for the rationale
-behind each API see the
+the full change list see the
+[changelog](/docs/changelog);
+for the rationale behind each API see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
 After each pass, `grep` for the old prop or slot name to catch anything missed,
@@ -20,54 +21,32 @@ Every **silent break** has a before/after here: old code that still runs, still
 type-checks, and behaves differently. Vue drops an unknown prop or slot without
 a word, so those are the ones that reach production. Each is marked.
 
-**Loud breaks** — an import that stops resolving, a type that no longer exists —
-are listed in the [changelog](/docs/changelog) and only appear here when the
-replacement needs explaining. If your build already names the file and the line,
-the changelog is the faster read.
+**Loud breaks** — an import that stops resolving, a type that no longer exists
+— are listed in the [changelog](/docs/changelog) and only appear here when the
+replacement needs explaining. If your build already names the file and the
+line, the changelog is the faster read.
 
 Only the Tailwind token renames have a codemod (`tokens-v2`, see
 [Tokens](#tokens)). Every component, prop and slot rename is a hand edit.
 
 ### Sections
 
-- **Overlays** — [Dialog](#dialog) ·
-  [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) ·
-  [CommandPalette](#commandpalette)
-- **Pickers and selection** —
-  [DatePicker / TimePicker](#datepicker-timepicker-family) ·
-  [MonthPicker](#monthpicker) ·
-  [Selection family](#selection-family-dropdown-select-combobox-multiselect) ·
-  [Autocomplete](#autocomplete-removed) ·
-  [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
+- **Overlays** — [Dialog](#dialog) · [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) · [CommandPalette](#commandpalette)
+- **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
-- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) ·
-  [TabButtons](#tabbuttons) ·
-  [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
-- **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) ·
-  [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog)
-  · [KeyboardShortcut](#keyboardshortcut)
-- **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) ·
-  [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
+- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
+- **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [KeyboardShortcut](#keyboardshortcut)
+- **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
-- **Data and transport** —
-  [useDoctype / useList](#data-fetching-usedoctype-uselist) ·
-  [Data-fetching exports](#data-fetching-exports) ·
-  [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) ·
-  [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) ·
-  [Composables and directives](#composables-and-directives-renamed) ·
-  [pageMetaPlugin](#pagemetaplugin-removed)
-- **Tokens and CSS** — [Tokens](#tokens) ·
-  [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) ·
-  [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
+- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these four families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
   [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
   [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
   [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). The v0
   `TextEditor` family moved the same way — see [Editor](#editor).
-- **Removed subpaths** —
-  [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) ·
-  [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
+- **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
 
 ## Requirements
 
@@ -80,7 +59,8 @@ Vue and vue-router are unchanged: `vue >=3.5.0` and `vue-router ^4.1.6`
 
 Tailwind stays on **v3**. `frappe-ui/tailwind` is a v3 preset and frappe-ui
 declares no `tailwindcss` peer dependency, so a v4 project installs cleanly and
-then fails at build time. See the [Tailwind page](/docs/foundations/tailwind).
+then fails at build time. See the
+[Tailwind page](/docs/foundations/tailwind).
 
 v1 also depends on **`@vueuse/core` `^14.1.0`**, up from `^10.4.1` in the 0.1.x
 line. VueUse 14 requires Vue `^3.5.0`, which v1 already requires. If your app
@@ -94,25 +74,25 @@ components which expect the newer one.
 The `options` blob is flattened into top-level props. See the
 [Dialog](./components/dialog) component page for the full API.
 
-| Before                                | After                                       |
-| ------------------------------------- | ------------------------------------------- |
-| `v-model="show"`                      | `v-model:open="show"`                       |
-| `:options="{ title, size, actions }"` | `title` / `size` / `:actions`               |
-| `disableOutsideClickToClose`          | `:dismissible="false"`                      |
-| `<template #body-content>`            | default slot                                |
-| `<template #body-main>`               | default slot                                |
-| `<template #body-title>`              | `<template #title>`                         |
+| Before                                | After                            |
+| ------------------------------------- | -------------------------------- |
+| `v-model="show"`                      | `v-model:open="show"`            |
+| `:options="{ title, size, actions }"` | `title` / `size` / `:actions`    |
+| `disableOutsideClickToClose`          | `:dismissible="false"`           |
+| `<template #body-content>`            | default slot                     |
+| `<template #body-main>`               | default slot                     |
+| `<template #body-title>`              | `<template #title>`              |
 | `<template #body-header>`             | `<template #title>` (no direct replacement) |
-| `<template #body>`                    | `bare` prop + default slot                  |
-| `onClick: (close) => …`               | `onClick: ({ close }) => …`                 |
-| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`                |
-| `dialogRef.close()`                   | `v-model:open` / `close` slot prop          |
-| manual focus hacks / `v-focus`        | `autofocus` attr on a descendant            |
+| `<template #body>`                    | `bare` prop + default slot       |
+| `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
+| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`     |
+| `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
+| manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
 Most of this table is **silent**: Vue drops an unknown prop or slot with no
 error, so the dialog renders with no title, no actions, or an empty body, and a
-leftover `:disable-outside-click-to-close` quietly becomes dismissible. Two rows
-are loud instead — `onClick: (close) => close()` throws
+leftover `:disable-outside-click-to-close` quietly becomes dismissible. Two
+rows are loud instead — `onClick: (close) => close()` throws
 `TypeError: close is not a function`, and a template-ref `.close()` throws the
 same way. `v-model` itself still works (`modelValue` is kept as a second
 binding), but `open` is canonical and wins when both are bound.
@@ -152,8 +132,8 @@ open) and wrap your app root in `<FrappeUIProvider>`.
 <Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" ... />
 ```
 
-`appearance` is dropped silently — Vue accepts the unknown key with no error, so
-the icon renders with no tone. Map `warning → amber`, `info → blue`,
+`appearance` is dropped silently — Vue accepts the unknown key with no error,
+so the icon renders with no tone. Map `warning → amber`, `info → blue`,
 `danger → red`, `success → green`.
 
 ### `theme: 'yellow'` → `theme: 'amber'`
@@ -163,9 +143,9 @@ The warning tone is `amber`, matching `Alert`, `SidebarCard`, `Badge` and
 rendered that value with the amber tokens — only the word changes, not the
 color.
 
-| Before                                | After                                |
-| ------------------------------------- | ------------------------------------ |
-| `:icon="{ theme: 'yellow' }"`         | `:icon="{ theme: 'amber' }"`         |
+| Before                     | After                     |
+| -------------------------- | ------------------------- |
+| `:icon="{ theme: 'yellow' }"` | `:icon="{ theme: 'amber' }"` |
 | `dialog.confirm({ theme: 'yellow' })` | `dialog.confirm({ theme: 'amber' })` |
 
 This is a **silent break** for JavaScript call sites: `yellow` is no longer a
@@ -188,44 +168,45 @@ show.value = false
 </script>
 ```
 
-`Dialog` exposes nothing on its template ref (ADR-0012); calling `.close()` now
-throws. Drive `open` through `v-model:open`, or use the `close` slot prop from
-inside `#default` / `#actions`.
+`Dialog` exposes nothing on its template ref (ADR-0012); calling `.close()`
+now throws. Drive `open` through `v-model:open`, or use the `close` slot prop
+from inside `#default` / `#actions`.
 
 ## DatePicker / TimePicker family
 
 Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
 share the popover-trigger vocabulary. Every removed prop and slot below is
-deleted, not aliased — and nothing warns at the tag: an unknown prop lands as an
-inert attribute, a renamed slot stops rendering. `grep` for each old name after
-upgrading.
+deleted, not aliased — and nothing warns at the tag: an unknown prop lands as
+an inert attribute, a renamed slot stops rendering. `grep` for each old name
+after upgrading.
 
-| Before                                                                         | After                               |
-| ------------------------------------------------------------------------------ | ----------------------------------- |
-| `:value` prop                                                                  | `v-model`                           |
-| `placement="bottom-start"`                                                     | `side` + `align` + `offset`         |
-| `:autoClose`                                                                   | `:keepOpen` (inverted)              |
-| `allowCustom` / picker-level `readonly`                                        | `typeable`                          |
-| `inputClass`                                                                   | `class`                             |
-| `minTime`/`maxTime` (TimePicker), `minDateTime`/`maxDateTime` (DateTimePicker) | `min` / `max`                       |
-| `#target` (DatePicker, DateRangePicker, DateTimePicker)                        | `#trigger` — TimePicker has neither |
-| `TimePicker.scrollMode`                                                        | nothing — list is always centered   |
-| `TimePicker.use12Hour`                                                         | `format="h:mm A"`                   |
+| Before                                   | After                        |
+| ----------------------------------------- | --------------------------- |
+| `:value` prop                             | `v-model`                    |
+| `placement="bottom-start"`                | `side` + `align` + `offset`  |
+| `:autoClose`                              | `:keepOpen` (inverted)       |
+| `allowCustom` / picker-level `readonly`   | `typeable`                   |
+| `inputClass`                              | `class`                      |
+| `minTime`/`maxTime` (TimePicker), `minDateTime`/`maxDateTime` (DateTimePicker) | `min` / `max` |
+| `#target` (DatePicker, DateRangePicker, DateTimePicker) | `#trigger` — TimePicker has neither |
+| `TimePicker.scrollMode`                   | nothing — list is always centered |
+| `TimePicker.use12Hour`                    | `format="h:mm A"`            |
 
-`@change` still fires alongside `@update:modelValue` — it wasn't deprecated and
-doesn't need replacing.
+`@change` still fires alongside `@update:modelValue` — it wasn't deprecated
+and doesn't need replacing.
 
-Most of the table above is a **silent break**: an old prop name that's no longer
-in the component's types lands as an inert extra attribute (or, for `min`/`max`
-aliases, the constraint just stops being enforced) instead of throwing.
-TypeScript callers get a compile error instead. `#target` is the one slot case —
-content in a leftover `<template #target>` silently stops rendering.
+Most of the table above is a **silent break**: an old prop name that's no
+longer in the component's types lands as an inert extra attribute (or, for
+`min`/`max` aliases, the constraint just stops being enforced) instead of
+throwing. TypeScript callers get a compile error instead. `#target` is the
+one slot case — content in a leftover `<template #target>` silently stops
+rendering.
 
 ### Trigger slot props
 
 `#trigger`, `#prefix` and `#suffix` receive `{ open, toggle }` — the same two
-names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and `MultiSelect`
-hand out. `TimePicker`'s `#suffix` follows.
+names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
+`MultiSelect` hand out. `TimePicker`'s `#suffix` follows.
 
 | Before          | After    |
 | --------------- | -------- |
@@ -235,8 +216,8 @@ hand out. `TimePicker`'s `#suffix` follows.
 `displayLabel` and `inputValue` are unchanged, and `#actions` already used
 `close` — that stays too.
 
-`toggle` also takes `Popover`'s signature, `(flag?: boolean | Event) => void`: a
-bare call flips, a boolean sets, and a DOM event is ignored. `togglePopover`
+`toggle` also takes `Popover`'s signature, `(flag?: boolean | Event) => void`:
+a bare call flips, a boolean sets, and a DOM event is ignored. `togglePopover`
 only ever flipped, so nothing that worked before behaves differently.
 
 This is a **silent break**: a destructured `isOpen` becomes `undefined`, so a
@@ -246,11 +227,7 @@ class bound to it stops applying with no error, and `togglePopover()` throws
 ```vue
 <!-- Before -->
 <template #trigger="{ togglePopover, isOpen }">
-  <Button
-    :class="isOpen && 'ring-2'"
-    label="Pick a date"
-    @click="togglePopover"
-  />
+  <Button :class="isOpen && 'ring-2'" label="Pick a date" @click="togglePopover" />
 </template>
 
 <!-- After -->
@@ -273,18 +250,18 @@ Behavior changes that apply even if you don't touch your code:
 - `DateRangePicker.clearable` now defaults to `true`, and nothing on
   `DateRangePicker` reads it — emptying the input always clears the range.
   `DatePicker` and `DateTimePicker` still honour `:clearable="false"`.
-- `useDatePicker` and its helpers (`getDate`, `getDatesAfter`, `getDaysInMonth`,
-  `isLeapYear`) are deleted — the import fails. Nothing in the picker components
-  used them; drop the import.
+- `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
+  `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
+  the picker components used them; drop the import.
 
 ## MonthPicker
 
 `MonthPicker` is deleted — the import fails.
 
-Its model was one string holding **both** parts, `"<Month> <Year>"` (for example
-`"January 2026"`), written by a popover that toggled between a month grid and a
-year grid. Nothing in v1 reproduces that, so pick the replacement that matches
-what your code reads off the value:
+Its model was one string holding **both** parts, `"<Month> <Year>"` (for
+example `"January 2026"`), written by a popover that toggled between a month
+grid and a year grid. Nothing in v1 reproduces that, so pick the replacement
+that matches what your code reads off the value:
 
 - Month **and** year: use `DatePicker` and format the value yourself, or pair
   two `Select`s.
@@ -312,18 +289,18 @@ what your code reads off the value:
 Upgrade all three pickers together. They share an option shape and a slot
 vocabulary, and most apps use more than one.
 
-Nothing here was deleted for an alias — the removed props, option keys and slot
-props are gone outright. Most fail quietly; see each subsection.
+Nothing here was deleted for an alias — the removed props, option keys and
+slot props are gone outright. Most fail quietly; see each subsection.
 
 ### Shared
 
-| Before                      | After                                        |
-| --------------------------- | -------------------------------------------- |
-| Dropdown `{ group, items }` | `{ group, options }`                         |
-| `#option` slot              | `#item-label`, plus `#item-prefix` for icons |
-| `option` item slot prop     | `item`                                       |
-| `clearAll` slot prop        | `clear`                                      |
-| chevron / trailing content  | `#suffix` slot (replaces the chevron)        |
+| Before                                  | After                                        |
+| --------------------------------------- | -------------------------------------------- |
+| Dropdown `{ group, items }`             | `{ group, options }`                         |
+| `#option` slot                          | `#item-label`, plus `#item-prefix` for icons |
+| `option` item slot prop                 | `item`                                       |
+| `clearAll` slot prop                    | `clear`                                      |
+| chevron / trailing content              | `#suffix` slot (replaces the chevron)        |
 
 Option values are `string | number` everywhere. `Select` no longer accepts
 `bigint` or object values.
@@ -358,11 +335,11 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 
 ### Dropdown and ContextMenu
 
-| Before                                     | After                                                                                                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `placement` prop, `DropdownPlacement` type | `align`                                                                                                       |
-| `{ group, items }`                         | `{ group, options }`                                                                                          |
-| `component:` option rows                   | `slots: { item: fn }`                                                                                         |
+| Before                                     | After                            |
+| ------------------------------------------ | -------------------------------- |
+| `placement` prop, `DropdownPlacement` type | `align`                          |
+| `{ group, items }`                         | `{ group, options }`             |
+| `component:` option rows                   | `slots: { item: fn }`            |
 | `DropdownExposed` type                     | nothing — it described a template ref surface that never existed; use `v-model:open` or the `close` slot prop |
 
 All three behavioral removals are silent in plain-JS apps — the old code still
@@ -390,14 +367,10 @@ and is dropped, leaving the rest of the menu intact:
 
 ```ts
 // Before
-const actions = [
-  { group: 'Edit', items: [{ label: 'Rename', onClick: rename }] },
-]
+const actions = [{ group: 'Edit', items: [{ label: 'Rename', onClick: rename }] }]
 
 // After
-const actions = [
-  { group: 'Edit', options: [{ label: 'Rename', onClick: rename }] },
-]
+const actions = [{ group: 'Edit', options: [{ label: 'Rename', onClick: rename }] }]
 ```
 
 **A `component:` row renders as a plain action row** using its `label`, which
@@ -422,8 +395,9 @@ These apply identically to `ContextMenu`, which shares the option shape
 ### Custom rows
 
 `Select` and `MultiSelect` lost `#option`; `Combobox` and `MultiSelect` lost
-`render` and `slotName`. They were the same idea — hand the whole row to the
-consumer. All three are replaced by region slots on a row the component owns.
+`render` and `slotName`. They
+were the same idea — hand the whole row to the consumer. All three are replaced
+by region slots on a row the component owns.
 
 ```vue
 <!-- Before: one slot for the whole label area -->
@@ -499,8 +473,8 @@ built-in `Create "…"` row. It is gone. It could not do anything a custom row
 cannot, and it hardcoded the row — no way to change the label, add an icon, or
 say when it appears.
 
-Build the row instead. It commits on click and on Enter, because Enter picks the
-highlighted row:
+Build the row instead. It commits on click and on Enter, because Enter picks
+the highlighted row:
 
 ```vue
 <script setup>
@@ -551,40 +525,40 @@ For the removed `Autocomplete`, see
 
 The v0 `Popover` API is **removed** in `1.0.0`. Nothing is aliased and nothing
 warns — Vue drops an unknown prop or slot without complaining, so a missed call
-site renders a popover with no trigger, or an empty one. Check every `<Popover>`
-in your app.
+site renders a popover with no trigger, or an empty one. Check every
+`<Popover>` in your app.
 
-| Before                                            | After                                                                                                                                      |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `#target` slot                                    | `#trigger` — reka wires the click, so drop your own click handler                                                                          |
-| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                                                                 |
-| `#body-main` slot                                 | `#default`                                                                                                                                 |
-| `togglePopover` / `updatePosition` slot props     | `toggle` (`updatePosition` is gone — reka repositions on its own)                                                                          |
-| `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`)                                         |
-| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                                                                    |
-| `update:show` emit                                | `update:open`                                                                                                                              |
-| `hideOnBlur`                                      | `dismissible`                                                                                                                              |
-| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                                                        |
-| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                                                        |
-| `popoverClass`                                    | `data-slot` CSS hooks                                                                                                                      |
-| `transition="default"`                            | built-in motion — delete the prop                                                                                                          |
-| `PopoverPlacement` type                           | `PopoverSide` + `PopoverAlign`                                                                                                             |
-| `PopoverLegacySlotProps` type                     | `PopoverSlotProps`                                                                                                                         |
+| Before                                            | After                                                                                              |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `#target` slot                                    | `#trigger` — reka wires the click, so drop your own click handler                                  |
+| `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                          |
+| `#body-main` slot                                 | `#default`                                                                                          |
+| `togglePopover` / `updatePosition` slot props     | `toggle` (`updatePosition` is gone — reka repositions on its own)                                   |
+| `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
+| `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
+| `update:show` emit                                | `update:open`                                                                                       |
+| `hideOnBlur`                                      | `dismissible`                                                                                       |
+| `matchTargetWidth`                                | `matchTriggerWidth`                                                                                 |
+| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | the [`HoverCard`](./components/hovercard) component                                                |
+| `popoverClass`                                    | `data-slot` CSS hooks                                                                               |
+| `transition="default"`                            | built-in motion — delete the prop                                                                   |
+| `PopoverPlacement` type                           | `PopoverSide` + `PopoverAlign`                                                                      |
+| `PopoverLegacySlotProps` type                     | `PopoverSlotProps`                                                                                  |
 | `NestedPopover`                                   | `Popover` — **loud**: the import fails, so the build names every call site. It never nested, and it was the last `@popperjs/core` consumer |
 
-Two more changes have no prop to grep for. v0 always set the panel's `min-width`
-to the trigger's width; v1 does it only under `matchTriggerWidth`, so a panel
-that leaned on that now shrinks to its content. And the panel no longer
-teleports into a `#frappeui-popper-root` div — reka portals it to `body`, or to
-the host's portal target. Delete any CSS or `document.querySelector` aimed at
-that id; nothing creates it now.
+Two more changes have no prop to grep for. v0 always set the panel's
+`min-width` to the trigger's width; v1 does it only under `matchTriggerWidth`,
+so a panel that leaned on that now shrinks to its content. And the panel no
+longer teleports into a `#frappeui-popper-root` div — reka portals it to
+`body`, or to the host's portal target. Delete any CSS or
+`document.querySelector` aimed at that id; nothing creates it now.
 
 ### Trigger and content slots
 
-`#target` did not wire anything — you called `togglePopover` yourself.
-`#trigger` renders through reka's `PopoverTrigger` as-child, which brings the
-click handler, keyboard support and `aria-expanded` with it. **Keeping your
-click handler makes the popover toggle twice and stay shut.**
+`#target` did not wire anything — you called `togglePopover` yourself. `#trigger`
+renders through reka's `PopoverTrigger` as-child, which brings the click handler,
+keyboard support and `aria-expanded` with it. **Keeping your click handler makes
+the popover toggle twice and stay shut.**
 
 ```vue
 <!-- Before -->
@@ -626,8 +600,8 @@ click handler makes the popover toggle twice and stay shut.**
 ### Driving the popover yourself
 
 If your trigger needs custom timing (a delayed open, a drag that must not open
-it), bind `open` and accept only closes, so the trigger's own toggle cannot open
-it behind your back:
+it), bind `open` and accept only closes, so the trigger's own toggle cannot
+open it behind your back:
 
 ```vue
 <Popover :open="isOpen" @update:open="(value) => !value && (isOpen = false)">
@@ -641,12 +615,12 @@ it behind your back:
 
 `#trigger` and `#default` receive `{ open, close, toggle }`.
 
-| Before                    | After                             |
-| ------------------------- | --------------------------------- |
-| `isOpen`                  | `open`                            |
-| `open` (a method to call) | `toggle`, or nothing — see below  |
-| `togglePopover`           | `toggle`                          |
-| `updatePosition`          | gone; reka repositions on its own |
+| Before                     | After                                    |
+| -------------------------- | ---------------------------------------- |
+| `isOpen`                   | `open`                                   |
+| `open` (a method to call)  | `toggle`, or nothing — see below         |
+| `togglePopover`            | `toggle`                                 |
+| `updatePosition`           | gone; reka repositions on its own        |
 
 `open` is now the boolean state, which is what it already means on `Dropdown`,
 `Select`, `MultiSelect`, `HoverCard` and `Sidebar`. It used to be a method on
@@ -679,16 +653,16 @@ those attributes now go nowhere. Move them onto the element inside `#trigger`.
 
 ### Hover panels
 
-Hover-driven panels move to the [`HoverCard`](./components/hovercard) component,
-which keeps `hoverDelay` / `leaveDelay` in seconds.
+Hover-driven panels move to the [`HoverCard`](./components/hovercard)
+component, which keeps `hoverDelay` / `leaveDelay` in seconds.
 
 ### Tooltip
 
 | Before              | After                                                      |
 | ------------------- | ---------------------------------------------------------- |
 | `placement="right"` | `side="right"`                                             |
-| `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble |
-| `#body`             | `#content` (add `bare` if the content owns its surface)    |
+| `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
+| `#body`             | `#content` (add `bare` if the content owns its surface)     |
 
 All three are silent — the tooltip keeps working, it just points the wrong way,
 loses the styling, or comes up empty. `arrowClass` was documented as the arrow's
@@ -753,16 +727,16 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 `Slider`. All share the labeling contract (`label` / `description` / `error` /
 `required`).
 
-| Before                             | After                                                              |
-| ---------------------------------- | ------------------------------------------------------------------ |
-| `<Input>` (removed)                | `TextInput` / `Textarea` / `Select` / `Checkbox`, or `FormControl` |
-| `Rating` `:rating_from`            | `:max`                                                             |
-| `Rating` `:readonly`               | `:disabled`                                                        |
-| `Switch` `@change`                 | `@update:modelValue`                                               |
-| `Switch.labelClasses`              | `data-*` styling hooks                                             |
-| `Checkbox.padding`                 | `padded`                                                           |
-| `Password` `:value` prop (removed) | `v-model`                                                          |
-| `TextInput` / `Textarea` ref `.el` | ref `.inputElement`                                                |
+| Before                                     | After                  |
+| ------------------------------------------ | ---------------------- |
+| `<Input>` (removed)                        | `TextInput` / `Textarea` / `Select` / `Checkbox`, or `FormControl` |
+| `Rating` `:rating_from`                    | `:max`                 |
+| `Rating` `:readonly`                       | `:disabled`            |
+| `Switch` `@change`                         | `@update:modelValue`   |
+| `Switch.labelClasses`                      | `data-*` styling hooks |
+| `Checkbox.padding`                         | `padded`               |
+| `Password` `:value` prop (removed)         | `v-model`              |
+| `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
 The five rows below `<Input>` are **removed**, not aliased. The old names are
 silently ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a
@@ -778,15 +752,15 @@ warning. Grep the tag, not the import: `grep -rn '<Input\b' src`.
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
 
-`CircularProgressBar` is deleted — the import fails. Use `Progress` for a linear
-bar, or render the arc yourself; there is no circular variant in v1.
+`CircularProgressBar` is deleted — the import fails. Use `Progress` for a
+linear bar, or render the arc yourself; there is no circular variant in v1.
 
 ### Password — `value` prop removed
 
-`value` was a deprecated alternate way to set the password, seeding `v-model` on
-mount. It's gone. `:value` now falls through as a plain HTML attribute on the
-native `<input>` instead of seeding the model — the field still renders, so
-nothing throws or warns.
+`value` was a deprecated alternate way to set the password, seeding
+`v-model` on mount. It's gone. `:value` now falls through as a plain HTML
+attribute on the native `<input>` instead of seeding the model — the field
+still renders, so nothing throws or warns.
 
 ```vue
 <!-- Before -->
@@ -807,9 +781,9 @@ keyboard focus, and read `inputElement` for the native element itself (a
 computed, so it can't be reassigned). `Password` gains the same pair — it
 previously exposed nothing.
 
-This fails late rather than at build time: `ref.value.el` is `undefined`, so the
-next access — `ref.value.el.focus()` — throws at runtime, far from the upgrade.
-A typed ref catches it as a build error instead.
+This fails late rather than at build time: `ref.value.el` is `undefined`, so
+the next access — `ref.value.el.focus()` — throws at runtime, far from the
+upgrade. A typed ref catches it as a build error instead.
 
 ```vue
 <!-- Before -->
@@ -829,22 +803,22 @@ function focusIt() {
 </script>
 ```
 
-`Duration` already exposed `focus()`; it now takes the same `options?` parameter
-as the rest of the family.
+`Duration` already exposed `focus()`; it now takes the same `options?`
+parameter as the rest of the family.
 
 ## FileUploader
 
-`FileUploader` reached structural bar in `1.0.0`: TypeScript, flat props, and a
-security fix to the default it shares with `useFileUpload` /
+`FileUploader` reached structural bar in `1.0.0`: TypeScript, flat props, and
+a security fix to the default it shares with `useFileUpload` /
 `FileUploadHandler`.
 
 ### Uploads default to private
 
-`useFileUpload()` and `FileUploadHandler` now resolve an upload with no stated
-`private` / `is_private` to **private**, not public. Coming from v0,
+`useFileUpload()` and `FileUploadHandler` now resolve an upload with no
+stated `private` / `is_private` to **private**, not public. Coming from v0,
 `FileUploader` flips with them: it had no `private` prop at all and inherited
-the public default. It has uploaded private by default since `v1.0.0-beta.21`,
-so only pre-beta.21 upgrades see the component change.
+the public default. It has uploaded private by default since
+`v1.0.0-beta.21`, so only pre-beta.21 upgrades see the component change.
 
 ```ts
 // Same call, before and after — the result changes:
@@ -859,23 +833,23 @@ await useFileUpload().upload(file, { private: true }) // private
 
 If your app serves an uploaded file with no session — an avatar in an email
 digest, an image embedded on a public page — audit every call that omits
-`private` / `is_private` before upgrading. A file that flips to private returns
-`403` to a session-less request instead of the image.
+`private` / `is_private` before upgrading. A file that flips to private
+returns `403` to a session-less request instead of the image.
 
 ### `uploadArgs` → flat props
 
 The single `uploadArgs` object prop is gone. Its commonly-used fields are now
 flat props on the component:
 
-| Before (`uploadArgs`)    | After            |
-| ------------------------ | ---------------- |
-| `private` / `is_private` | `private`        |
-| `folder`                 | `folder`         |
-| `doctype`                | `doctype`        |
-| `docname`                | `docname`        |
-| `fieldname`              | `fieldname`      |
-| `upload_endpoint`        | `uploadEndpoint` |
-| `optimize`               | `optimize`       |
+| Before (`uploadArgs`)      | After                       |
+| --------------------------- | ---------------------------- |
+| `private` / `is_private`    | `private`                    |
+| `folder`                    | `folder`                     |
+| `doctype`                   | `doctype`                    |
+| `docname`                   | `docname`                    |
+| `fieldname`                 | `fieldname`                  |
+| `upload_endpoint`           | `uploadEndpoint`             |
+| `optimize`                  | `optimize`                   |
 
 ```vue
 <!-- Before -->
@@ -888,22 +862,23 @@ flat props on the component:
 This is silent: `uploadArgs` isn't a recognized prop anymore, so Vue passes it
 through as an inert HTML attribute on the root element. Nothing throws — the
 options it carried just stop applying, and (combined with the default flip
-above) a `uploadArgs="{ private: false }"` override that used to make an upload
-public silently starts uploading private instead. `grep` every `<FileUploader>`
-for `uploadArgs=` / `:upload-args=` and move each field to its flat prop.
+above) a `uploadArgs="{ private: false }"` override that used to make an
+upload public silently starts uploading private instead. `grep` every
+`<FileUploader>` for `uploadArgs=` / `:upload-args=` and move each field to
+its flat prop.
 
 `file_url`, `method`, `type`, `params`, `max_width` / `max_height`, and upload
-cancellation (`signal`) have no flat-prop equivalent — they had no measured use
-on the component. Use
-[`useFileUpload()`](./other/utilities#usefileupload-fileuploadhandler) directly
-for those.
+cancellation (`signal`) have no flat-prop equivalent — they had no measured
+use on the component. Use
+[`useFileUpload()`](./other/utilities#usefileupload-fileuploadhandler)
+directly for those.
 
 ### Template ref — `inputRef` removed
 
 `FileUploader` hands back nothing through a template ref, per
 [ADR-0012](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0012-template-ref-surface.md).
-`inputRef()` (a function, despite the name) is gone with nothing in its place —
-the `openFileSelector` slot prop already covers what it opened.
+`inputRef()` (a function, despite the name) is gone with nothing in its
+place — the `openFileSelector` slot prop already covers what it opened.
 
 ```vue
 <!-- Before -->
@@ -920,10 +895,11 @@ uploader.value.inputRef().click()
 
 ### Default slot's `error` prop — always a string
 
-The default slot's `error` prop is `string | null`, no longer `unknown`. Upload
-failures were always normalized to a message string; validation failures (a
-`validateFile` prop returning an `Error`) were not, so `error` could previously
-be an `Error` object too. Both paths normalize to a message string now.
+The default slot's `error` prop is `string | null`, no longer `unknown`.
+Upload failures were always normalized to a message string; validation
+failures (a `validateFile` prop returning an `Error`) were not, so `error`
+could previously be an `Error` object too. Both paths normalize to a message
+string now.
 
 ```vue
 <!-- Before: had to guard against error being a string or an Error -->
@@ -937,21 +913,22 @@ be an `Error` object too. Both paths normalize to a message string now.
 </template>
 ```
 
-This is silent: a slot that only ever did `error.message` (assuming the `Error`
-shape) now renders `undefined` instead of the validation message.
+This is silent: a slot that only ever did `error.message` (assuming the
+`Error` shape) now renders `undefined` instead of the validation message.
 
-`failure` also fires for validation now. A `validateFile` that returns a message
-or throws emits `failure` with that value; v0 only wrote it to the slot's
-`error`. An existing `@failure` handler starts seeing validation rejections
-alongside upload errors.
+`failure` also fires for validation now. A `validateFile` that returns a
+message or throws emits `failure` with that value; v0 only wrote it to the
+slot's `error`. An existing `@failure` handler starts seeing validation
+rejections alongside upload errors.
 
 ### `fileToBase64` and the size-limit helpers — no longer exported
 
-`fileToBase64` is no longer exported from `frappe-ui`; the import fails at build
-time. There were no external call sites at the v1 sweep. Computing a file's
-base64 representation yourself is a few lines of `FileReader.readAsDataURL`. The
-size-limit helpers (`formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage`)
-were only ever exported during the `1.0.0` betas and are internal now.
+`fileToBase64` is no longer exported from `frappe-ui`; the import fails at
+build time. There were no external call sites at the v1 sweep. Computing a
+file's base64 representation yourself is a few lines of
+`FileReader.readAsDataURL`. The size-limit helpers (`formatBytes`,
+`getMaxFileSize`, `fileSizeLimitMessage`) were only ever exported during the
+`1.0.0` betas and are internal now.
 
 ## Divider
 
@@ -966,8 +943,8 @@ action button still renders and does nothing on click.
 
 `ListView` is not core v1 surface. It moves out of the root export to
 `frappe-ui/experimental` (P14 — no stability promise) and stays there until
-`frappe-ui/list` reaches full functional parity. The import fails at the root;
-switch the subpath:
+`frappe-ui/list` reaches full functional parity. The import fails at the
+root; switch the subpath:
 
 ```ts
 // Before
@@ -985,9 +962,9 @@ the component itself changed — only where it's imported from.
 ## Calendar — moved to `frappe-ui/experimental`
 
 `Calendar` is not core v1 surface. It moves out of the root export to
-`frappe-ui/experimental` (P14 — no stability promise) and parks there, API
-unchanged, until a redesigned calendar family replaces it. The import fails at
-the root; switch the subpath:
+`frappe-ui/experimental` (P14 — no stability promise) and parks there,
+API unchanged, until a redesigned calendar family replaces it. The import
+fails at the root; switch the subpath:
 
 ```ts
 // Before
@@ -997,11 +974,11 @@ import { Calendar, CalendarColorMap } from 'frappe-ui'
 import { Calendar, CalendarColorMap } from 'frappe-ui/experimental'
 ```
 
-Every other name in the family moves the same way: `CalendarActiveEvent` and the
-types `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
+Every other name in the family moves the same way: `CalendarActiveEvent`
+and the types `CalendarActions`, `CalendarCellClickData`, `CalendarConfig`,
 `CalendarEvent`, `CalendarMode`, `CalendarPublicProps`, `CalendarTimeFormat`,
-`GroupedCalendarEvents`. Nothing about the component itself changed — only where
-it's imported from.
+`GroupedCalendarEvents`. Nothing about the component itself changed — only
+where it's imported from.
 
 ## Charts (v1) — moved to `frappe-ui/experimental`
 
@@ -1020,21 +997,16 @@ import { AxisChart, DonutChart, NumberChart } from 'frappe-ui/experimental'
 ```
 
 Nothing about the components changed — only where they're imported from. Apps
-that spread `content` from `frappe-ui/tailwind` keep their styles automatically.
+that spread `content` from `frappe-ui/tailwind` keep their styles
+automatically.
 
-For new code, use [`frappe-ui/charts`](/docs/charts/overview) instead. It is the
-replacement family and draws everything the old one did. Its props are flat and
-name the columns of your rows, so a `config` object becomes props:
+For new code, use [`frappe-ui/charts`](/docs/charts/overview) instead. It is
+the replacement family and draws everything the old one did. Its props are
+flat and name the columns of your rows, so a `config` object becomes props:
 
 ```vue
 <!-- Before -->
-<AxisChart
-  :config="{
-    data: rows,
-    xAxis: { key: 'week' },
-    series: [{ name: 'balance', type: 'area' }],
-  }"
-/>
+<AxisChart :config="{ data: rows, xAxis: { key: 'week' }, series: [{ name: 'balance', type: 'area' }] }" />
 
 <!-- After -->
 <AreaChart :data="rows" x="week" y="balance" />
@@ -1058,8 +1030,8 @@ to the second value axis, configured with the chart-level `y2Axis` prop.
 ## Sprite icons — moved to `frappe-ui/experimental`
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` are not core v1
-surface. They move from `frappe-ui/icons` to `frappe-ui/experimental` (P14 — no
-stability promise). The old import fails; switch the subpath:
+surface. They move from `frappe-ui/icons` to `frappe-ui/experimental`
+(P14 — no stability promise). The old import fails; switch the subpath:
 
 ```ts
 // Before
@@ -1069,13 +1041,14 @@ import { Icon, IconPicker, spritePlugin } from 'frappe-ui/icons'
 import { Icon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
 ```
 
-Nothing about the components changed — only where they're imported from. Apps
-that spread `content` from `frappe-ui/tailwind` keep `IconPicker` styles
-automatically — no Tailwind change needed. Note that root `frappe-ui` exports a
-different `Icon`; alias one if you import both, e.g.
-`import { Icon as SpriteIcon } from 'frappe-ui/experimental'`. The named SFC
-icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on `frappe-ui/icons`. For new
-code, use `lucide-*` classes — they are the canonical way to render icons.
+Nothing about the components changed — only where they're imported from.
+Apps that spread `content` from `frappe-ui/tailwind` keep `IconPicker`
+styles automatically — no Tailwind change needed. Note that root
+`frappe-ui` exports a different `Icon`; alias one if you import both,
+e.g. `import { Icon as SpriteIcon } from 'frappe-ui/experimental'`.
+The named SFC icons (`CircleCheckIcon`, `HelpIcon`, ...) stay on
+`frappe-ui/icons`. For new code, use `lucide-*` classes — they are the
+canonical way to render icons.
 
 ## Alert
 
@@ -1085,22 +1058,22 @@ content-driven: a description or a second action switches it to the banner
 layout; there is no `variant` prop. See the [Alert](./components/alert)
 component page for the full API.
 
-| Before                         | After                                                              |
-| ------------------------------ | ------------------------------------------------------------------ |
-| unnamed `v-model` (visibility) | `v-if` + `@dismiss` — the parent owns hiding                       |
-| `theme="yellow"`               | `theme="amber"`                                                    |
-| `theme` default `'blue'`       | default `'gray'`                                                   |
-| `variant="subtle" / "outline"` | nothing — one container look, layout is content-driven             |
-| `type="warning"`               | nothing — `theme` colors the status icon and the row action        |
-| default slot (body text)       | `description` prop, or the `#description` slot                     |
-| `dismissible` default `true`   | default `false` — pass `dismissible` to keep the ×                 |
-| `#icon` slot                   | `#prefix` slot                                                     |
-| `#footer` slot                 | `primaryAction` / `secondaryAction` props, or `#actions` slot      |
-| hand-rolled icon               | the theme shows a status icon on its own; `:icon="false"` opts out |
+| Before                       | After                                            |
+| ---------------------------- | ------------------------------------------------ |
+| unnamed `v-model` (visibility) | `v-if` + `@dismiss` — the parent owns hiding   |
+| `theme="yellow"`             | `theme="amber"`                                  |
+| `theme` default `'blue'`     | default `'gray'`                                 |
+| `variant="subtle" / "outline"` | nothing — one container look, layout is content-driven |
+| `type="warning"`             | nothing — `theme` colors the status icon and the row action |
+| default slot (body text)     | `description` prop, or the `#description` slot   |
+| `dismissible` default `true` | default `false` — pass `dismissible` to keep the × |
+| `#icon` slot                 | `#prefix` slot                                   |
+| `#footer` slot               | `primaryAction` / `secondaryAction` props, or `#actions` slot |
+| hand-rolled icon             | the theme shows a status icon on its own; `:icon="false"` opts out |
 
 Every row is a **silent break**: Vue drops the unknown prop or slot with no
-error. The old `v-model` is the one to check first — a dismissed alert now stays
-on screen until the parent hides it:
+error. The old `v-model` is the one to check first — a dismissed alert now
+stays on screen until the parent hides it:
 
 ```vue
 <!-- Before -->
@@ -1121,8 +1094,8 @@ on screen until the parent hides it:
 />
 ```
 
-An action is `ButtonProps` plus an `onClick` that receives `{ dismiss }` — call
-`context.dismiss()` to emit the alert's `dismiss` event:
+An action is `ButtonProps` plus an `onClick` that receives `{ dismiss }` —
+call `context.dismiss()` to emit the alert's `dismiss` event:
 
 ```ts
 const primaryAction = {
@@ -1139,18 +1112,18 @@ If the alert was really a promotional card in a sidebar, use the new
 
 ## Badge
 
-`theme="orange"` is removed. It was a deprecated alias that resolved to `amber`,
-so the replacement renders the same badge it always did.
+`theme="orange"` is removed. It was a deprecated alias that resolved to
+`amber`, so the replacement renders the same badge it always did.
 
-| Before           | After           |
-| ---------------- | --------------- |
-| `theme="orange"` | `theme="amber"` |
+| Before            | After            |
+| ----------------- | ---------------- |
+| `theme="orange"`  | `theme="amber"`  |
 
 How the break shows up depends on whether the call site is typed:
 
 - **TypeScript: loud.** `vue-tsc` rejects the value, because the `theme` prop
-  union no longer accepts the string. You get a compile error, not a surprise in
-  production.
+  union no longer accepts the string. You get a compile error, not a surprise
+  in production.
 - **JavaScript and bound values: silent.** The badge renders in the default
   `gray` theme and logs a one-time dev-mode warning naming the component, the
   prop and the value. Production logs nothing.
@@ -1166,9 +1139,9 @@ unknown theme threw `TypeError: Cannot read properties of undefined` mid-render
 and took the parent render with it. All three of `theme`, `variant` and `size`
 now fall back to their defaults instead.
 
-Do not rely on the fallback. It is a safety net for the upgrade, not a supported
-way to pass a colour — a grey badge where a coloured one belongs is still a bug,
-and the dev warning is the only thing that will tell you.
+Do not rely on the fallback. It is a safety net for the upgrade, not a
+supported way to pass a colour — a grey badge where a coloured one belongs is
+still a bug, and the dev warning is the only thing that will tell you.
 
 ```vue
 <!-- Before -->
@@ -1178,8 +1151,8 @@ and the dev warning is the only thing that will tell you.
 <Badge theme="amber" label="In Progress" />
 ```
 
-Check bound themes too, not only literal attributes. A status-to-theme map or a
-computed that returns `'orange'` degrades the same way, and neither `vue-tsc`
+Check bound themes too, not only literal attributes. A status-to-theme map or
+a computed that returns `'orange'` degrades the same way, and neither `vue-tsc`
 nor a grep for `theme="orange"` finds it:
 
 ```ts
@@ -1212,20 +1185,20 @@ const badgeTheme = tone === 'orange' ? 'amber' : tone
 
 `Sidebar` is a bare frame — compose `SidebarHeader` / `SidebarSection` /
 `SidebarLabel` / `SidebarItem` in its default slot instead of passing
-config-object props. See the [Sidebar](./components/sidebar) component page for
-the full API.
+config-object props. See the [Sidebar](./components/sidebar) component page
+for the full API.
 
-| Before                                     | After                                                                  |
-| ------------------------------------------ | ---------------------------------------------------------------------- |
-| `:header="{ title, subtitle, menuItems }"` | `<SidebarHeader :title :subtitle :menu-items />` as a child            |
+| Before                                    | After                                             |
+| ------------------------------------------ | -------------------------------------------------- |
+| `:header="{ title, subtitle, menuItems }"` | `<SidebarHeader :title :subtitle :menu-items />` as a child |
 | `:sections="[{ label, items }]"`           | `<SidebarLabel>` + `<SidebarItem>` (or `<SidebarSection>`) as children |
-| `<template #header-logo>`                  | `<SidebarHeader>`'s `#prefix` slot                                     |
-| `<template #footer-items>`                 | plain markup in the default slot                                       |
-| `<SidebarSection :items="rows">`           | `<SidebarSection>` with `<SidebarItem>` children                       |
-| `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed                     |
-| `item.condition`                           | `v-if` on the composed `<SidebarItem>`                                 |
-| `SidebarItem.isActive`                     | `SidebarItem.active`                                                   |
-| `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                                         |
+| `<template #header-logo>`                  | `<SidebarHeader>`'s `#prefix` slot                |
+| `<template #footer-items>`                 | plain markup in the default slot                  |
+| `<SidebarSection :items="rows">`           | `<SidebarSection>` with `<SidebarItem>` children  |
+| `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed |
+| `item.condition`                           | `v-if` on the composed `<SidebarItem>`            |
+| `SidebarItem.isActive`                     | `SidebarItem.active`                              |
+| `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
 
 Every removal here is a **silent break**. A dropped prop (`header`, `sections`,
 `items`, `isActive`) becomes a fall-through attribute on the component's root
@@ -1239,10 +1212,7 @@ frame. Grep for `:header=`, `:sections=`, `:items=`, `#sidebar-item` and
 <Sidebar
   :header="{ title: 'Frappe CRM', subtitle: 'crm.frappe.io', menuItems }"
   :sections="[
-    {
-      label: '',
-      items: [{ label: 'Leads', to: '/leads', icon: 'lucide-user-plus' }],
-    },
+    { label: '', items: [{ label: 'Leads', to: '/leads', icon: 'lucide-user-plus' }] },
     { label: 'Views', collapsible: true, items: viewItems },
   ]"
 />
@@ -1271,10 +1241,10 @@ other overlay in the library uses.
 This is a **silent break**: Vue accepts the unknown `modelValue` prop with no
 error, so the dialog just never opens.
 
-| Before                          | After                         |
-| ------------------------------- | ----------------------------- |
-| `v-model="showSettings"`        | `v-model:open="showSettings"` |
-| `@update:modelValue="onToggle"` | `@update:open="onToggle"`     |
+| Before                          | After                                |
+| ------------------------------- | ------------------------------------ |
+| `v-model="showSettings"`        | `v-model:open="showSettings"`        |
+| `@update:modelValue="onToggle"` | `@update:open="onToggle"`            |
 
 ```vue
 <!-- Before -->
@@ -1290,29 +1260,29 @@ unnamed-`v-model` binding to keep — `open` is the only visibility channel.
 ## Tabs
 
 The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
-`TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index. See
-the [Tabs](./components/tabs) component page for the full API.
+`TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index.
+See the [Tabs](./components/tabs) component page for the full API.
 
 There is no codemod for the Tabs family. `tokens-v2` rewrites Tailwind token
 names only — it never touches a component, prop, or slot name. Every rename
 below is a hand edit, and most of them fail silently, so grep for the old name
 rather than waiting for the build to tell you.
 
-| Before                                                        | After                                                                                                                                                                                                                       |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `v-model="tabIndex"` (index)                                  | `v-model="tab"` (trigger `value`)                                                                                                                                                                                           |
-| `:tabs="[{ label, icon }]"` (required)                        | `<TabTrigger>` children; the `tabs` shorthand stays for generated sets                                                                                                                                                      |
-| `label` implied the value                                     | `value` is required on every trigger                                                                                                                                                                                        |
-| `as="div"`                                                    | removed — compose and style the container directly                                                                                                                                                                          |
-| `<template #tab-item="{ tab, selected }">`                    | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#tab-label` in shorthand mode                                                                                               |
+| Before                                      | After                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `v-model="tabIndex"` (index)                | `v-model="tab"` (trigger `value`)                                          |
+| `:tabs="[{ label, icon }]"` (required)      | `<TabTrigger>` children; the `tabs` shorthand stays for generated sets     |
+| `label` implied the value                   | `value` is required on every trigger                                       |
+| `as="div"`                                  | removed — compose and style the container directly                         |
+| `<template #tab-item="{ tab, selected }">`  | `TabTrigger` props (`icon`, `iconLeft`, `route`) and slots (`#prefix`, default, `#suffix`), or `#tab-label` in shorthand mode |
 | `#prefix` / `#label` / `#suffix` / `#panel` alongside `:tabs` | `#tab-prefix` / `#tab-label` / `#tab-suffix` / `#tab-panel` — every shorthand slot carries the `tab-` prefix; composed `TabTrigger` keeps plain `#prefix` / `#suffix`. An unknown slot name renders nothing, nothing throws |
-| extra fields on a `tabs` item (`{ value, content }`)          | `data: { content }`, read as `tab.data.content` — extra keys are now a type error                                                                                                                                           |
-| `<template #tab-panel="{ tab }">`                             | `<TabPanel :value>` children; the shorthand slot is `#tab-panel`, back on its v0 name (it was briefly `#panel` in the betas)                                                                                                |
-| `Tab.route` string + hand-rolled route sync                   | `route: RouteLocationRaw` on the trigger; selection derives from the route                                                                                                                                                  |
-| stale-index clamps for conditional tabs                       | built in: a stale model falls back to the first visible trigger and emits                                                                                                                                                   |
-| `[&_[role='tablist']]:px-4` class blobs                       | `<TabList class="px-4">` — the app owns the element                                                                                                                                                                         |
-| built-in flex and overflow defaults                           | none — see Scrolling below; the tabs stop scrolling and overflow instead                                                                                                                                                    |
-| `iconRight` on a trigger or a `tabs` item                     | `<template #suffix>` on a composed `TabTrigger`, `<template #tab-suffix>` in shorthand mode — the icon silently stops rendering, nothing throws                                                                             |
+| extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
+| `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot is `#tab-panel`, back on its v0 name (it was briefly `#panel` in the betas) |
+| `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
+| stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
+| `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
+| built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |
+| `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` on a composed `TabTrigger`, `<template #tab-suffix>` in shorthand mode — the icon silently stops rendering, nothing throws |
 
 ```vue
 <!-- Before -->
@@ -1341,14 +1311,14 @@ parity with `TabButtons`: `underline`, `subtle`, `ghost`, `browser-tab`.
 
 ### Scrolling
 
-v0 shipped layout defaults: the root was `flex flex-1 overflow-hidden flex-col`,
-the tablist `overflow-x-auto`, and every panel `flex flex-col overflow-auto`. v1
-sets none of them, because they broke as often as they helped — a `Tabs` that
-force-grows to fill its parent is wrong everywhere the tabs are not the whole
-screen.
+v0 shipped layout defaults: the root was `flex flex-1 overflow-hidden
+flex-col`, the tablist `overflow-x-auto`, and every panel `flex flex-col
+overflow-auto`. v1 sets none of them, because they broke as often as they
+helped — a `Tabs` that force-grows to fill its parent is wrong everywhere the
+tabs are not the whole screen.
 
-Nothing throws. Inside a height-constrained container the panel stops scrolling
-and overflows instead. Check any call site that relied on it.
+Nothing throws. Inside a height-constrained container the panel stops
+scrolling and overflows instead. Check any call site that relied on it.
 
 In composed mode the app owns the elements, so put the classes back where you
 want them:
@@ -1377,20 +1347,20 @@ through their `data-slot` hooks:
 and aligns its vocabulary with the Tabs family. See the
 [TabButtons](./components/tabbuttons) component page for the full API.
 
-| Before                                                | After                                                                                                      |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `type="ghost"`                                        | `variant="ghost"`                                                                                          |
-| `direction="right"`                                   | `side="right"` — the same prop name on `TabList`                                                           |
-| `TabButtonsType` / `TabButtonsDirection` types        | `TabsVariant` / `TabsSide`, shared with the Tabs family                                                    |
-| `:buttons="items"` (deprecated)                       | `:options="items"`                                                                                         |
-| `{ label: 'Day' }` (label as value)                   | `value` is required on every option                                                                        |
-| `{ active: true }` fallback                           | the `v-model` is the single source of truth                                                                |
-| boolean `value` / `modelValue`                        | `string \| number` only                                                                                    |
-| wrapper divs / raw CSS for equal-width tabs           | `fluid` prop                                                                                               |
-| `iconRight` on an option                              | `<template #suffix>` — silent, nothing throws                                                              |
-| `hideLabel: true` on an option                        | `icon` alone — the option is icon-only and `label` becomes its accessible name                             |
+| Before                                      | After                                       |
+| ------------------------------------------- | ------------------------------------------- |
+| `type="ghost"`                              | `variant="ghost"`                           |
+| `direction="right"`                         | `side="right"` — the same prop name on `TabList` |
+| `TabButtonsType` / `TabButtonsDirection` types | `TabsVariant` / `TabsSide`, shared with the Tabs family |
+| `:buttons="items"` (deprecated)             | `:options="items"`                          |
+| `{ label: 'Day' }` (label as value)         | `value` is required on every option         |
+| `{ active: true }` fallback                 | the `v-model` is the single source of truth |
+| boolean `value` / `modelValue`              | `string \| number` only                     |
+| wrapper divs / raw CSS for equal-width tabs | `fluid` prop                                |
+| `iconRight` on an option                    | `<template #suffix>` — silent, nothing throws |
+| `hideLabel: true` on an option              | `icon` alone — the option is icon-only and `label` becomes its accessible name |
 | `theme` / `variant` / `size` / `loading` on an option | removed — options no longer forward `Button` props. Use `Button` directly for per-tab theming or a spinner |
-| `tooltip` on an option                                | still `tooltip`, but it renders as the native `title` attribute, not a floating `Tooltip`                  |
+| `tooltip` on an option                      | still `tooltip`, but it renders as the native `title` attribute, not a floating `Tooltip` |
 
 Every prop rename here is a **silent break**: an unknown prop lands in `$attrs`
 and is spread onto the radiogroup root, so a `TabButtons` still on `:buttons`
@@ -1408,7 +1378,7 @@ request, so the shared-request members are gone.
 Nothing fails to build, so grep for these by hand. There are two failure modes,
 and one of them is quiet. Calling a removed method throws (`delete.execute()`,
 `insert.reset()`), and so does dotting into one (`delete.params.name`). A
-removed _data_ member reads as `undefined` instead: `runMethod.isFetching` is
+removed *data* member reads as `undefined` instead: `runMethod.isFetching` is
 always falsy, so a spinner silently never shows and nothing says why.
 
 | Before                                              | After                        |
@@ -1421,8 +1391,8 @@ always falsy, so a spinner silently never shows and nothing says why.
 | `setValue.promise`                                  | `await setValue.submit(...)` |
 | `delete.url`                                        | removed, no replacement      |
 
-All eight now have the same five members: `submit()`, `data`, `error`, `loading`
-and `isLoading()`.
+All eight now have the same five members: `submit()`, `data`, `error`,
+`loading` and `isLoading()`.
 
 `isLoading()` takes whatever identifies one submit:
 
@@ -1439,16 +1409,16 @@ every write method reads the same way.
 
 More changes you will not see at build time:
 
-- `submit()` now resolves with its own response. Code that fired two submits and
-  read the result of the first was receiving the second one's data, or `null`.
-  If you queued submits to work around that, you can drop the queue.
+- `submit()` now resolves with its own response. Code that fired two submits
+  and read the result of the first was receiving the second one's data, or
+  `null`. If you queued submits to work around that, you can drop the queue.
 - `data` and `error` belong to the submit that started last, not the one that
-  answered last. A slow submit that comes back after a newer one writes nothing
-  and clears nothing. It still answers its own caller with its own outcome —
-  resolving with its response, or rejecting with its error.
+  answered last. A slow submit that comes back after a newer one writes
+  nothing and clears nothing. It still answers its own caller with its own
+  outcome — resolving with its response, or rejecting with its error.
 - **`data` is no longer reset to `null` when a submit fails.** It used to be,
-  because the shared request cleared it on any not-ok response. It now keeps the
-  last successful response.
+  because the shared request cleared it on any not-ok response. It now keeps
+  the last successful response.
 
   ```js
   await todos.setValue.submit({ name: 'TODO-1', status: 'Done' })
@@ -1459,16 +1429,16 @@ More changes you will not see at build time:
   ```
 
   Test `error`, not `data`, to tell a failed submit from a successful one.
-  `if (!todos.setValue.data)` used to mean "the last save failed" and no longer
-  does.
+  `if (!todos.setValue.data)` used to mean "the last save failed" and no
+  longer does.
 
-- `error` is no longer cleared when a submit starts. It used to be, which erased
-  the error of a sibling submit still in flight. It now stands until the newest
-  submit settles. To blank an error banner while a retry runs, hide it on
-  `loading` yourself.
+- `error` is no longer cleared when a submit starts. It used to be, which
+  erased the error of a sibling submit still in flight. It now stands until
+  the newest submit settles. To blank an error banner while a retry runs, hide
+  it on `loading` yourself.
 - **`submit()` rejects on any failure.** It resolves with the response, or
-  rejects with the error. A failed `validate` already rejected; a failed request
-  used to resolve with `null`. Both reject now.
+  rejects with the error. A failed `validate` already rejected; a failed
+  request used to resolve with `null`. Both reject now.
 
   ```js
   // Before
@@ -1483,11 +1453,11 @@ More changes you will not see at build time:
   }
   ```
 
-  `null` no longer means "it failed". A server that answers with `null` resolves
-  with `null`, like any other response. Every `if (!result)` check after a
-  `submit()` has to become a `try` / `catch` or a `.catch()`, and an unawaited
-  `submit()` now needs a `.catch()` or it becomes an unhandled rejection.
-
+  `null` no longer means "it failed". A server that answers with `null`
+  resolves with `null`, like any other response. Every `if (!result)` check
+  after a `submit()` has to become a `try` / `catch` or a `.catch()`, and an
+  unawaited `submit()` now needs a `.catch()` or it becomes an unhandled
+  rejection.
 - `useList`'s `insert` and `delete` now send to the `baseUrl` you passed to
   `useList`. They used to ignore it and hit the current origin. `setValue`
   already honoured it, so all three write methods now agree. `useDoctype` was
@@ -1496,15 +1466,15 @@ More changes you will not see at build time:
   document and list stores, and no longer triggers `useList`'s auto-refetch.
   Every request carries a dispatch number, and a store rejects a write that a
   later-dispatched request already made. Submits with different keys, and
-  keyless submits such as inserts, stay independent and all of their hooks still
-  fire. Nothing to change — this is here so you can drop the workarounds.
+  keyless submits such as inserts, stay independent and all of their hooks
+  still fire. Nothing to change — this is here so you can drop the workarounds.
 
 ### `useDoc` writes and `useNewDoc`
 
 `useDoc`'s `setValue`, `delete` and every `methods:` entry, and all of
 `useNewDoc`, held one shared request too. Each submit now sends its own. They
-keep the full `useCall` surface — same members, same types — so there is nothing
-to rename.
+keep the full `useCall` surface — same members, same types — so there is
+nothing to rename.
 
 One silent behavior change: **a second submit no longer cancels the first.**
 Both requests reach the server. If you relied on the abort to drop a superseded
@@ -1516,8 +1486,8 @@ every submit settles.
 
 `useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
 `useCall`, `useDoc` and `useList` are built on: it sets the Frappe headers and
-parses the response, and leaves the URL, the params and the caching to you. Pick
-the composable that matches what you are fetching.
+parses the response, and leaves the URL, the params and the caching to you.
+Pick the composable that matches what you are fetching.
 
 | Before                                   | After                       |
 | ---------------------------------------- | --------------------------- |
@@ -1608,12 +1578,13 @@ cancelled.
 
 The single recommended way to pass an icon anywhere in the library is a
 `lucide-*` string (rendered via the Tailwind mask plugin) or a `Component`
-escape hatch (P11). `FeatherIcon` is removed per ADR-0008 — it shipped
-`@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
+escape hatch (P11). `FeatherIcon` is removed per
+ADR-0008 — it
+shipped `@deprecated` in code, so nothing marked deprecated ships in `1.0.0`.
 
 **Breaking, loud:** `import { FeatherIcon } from 'frappe-ui'` and
-`<FeatherIcon>` fail at the import. Replace a direct usage with the `lucide-*`
-class form:
+`<FeatherIcon>` fail at the import. Replace a direct usage with the
+`lucide-*` class form:
 
 ```vue
 <!-- Before -->
@@ -1624,19 +1595,19 @@ class form:
 
 Feather and lucide share most icon names, so `<FeatherIcon name="x">` →
 `<span class="lucide-x">` is usually a direct rename — check each name
-individually against [lucide.dev](https://lucide.dev/icons) since a few differ
-or were renamed.
+individually against [lucide.dev](https://lucide.dev/icons) since a few
+differ or were renamed.
 
-**Breaking, silent:** every icon-name prop across the library (`Button.icon` /
-`iconLeft` / `iconRight`, `Dialog.icon`, `Alert.icon`, `SidebarCard.icon`,
-`Dropdown`/`ContextMenu` item `icon`, `TabButtons` options `icon` / `iconLeft`,
-`TabTrigger.icon` / `iconLeft`, the `Icon` component's `name` prop) used to
-render a bare feather-style name (e.g. `"edit"`, `"chevron-down"`) via
-`FeatherIcon`. That fallback is gone: only a `lucide-*` string, an emoji or
-symbol glyph, or a `Component` renders. Any other string renders nothing. No
-build or type error — the icon silently disappears. A dev-mode console warning
-names the component, the prop, and the offending value once per (component,
-prop). Prefix the name with `lucide-`:
+**Breaking, silent:** every icon-name prop across the library (`Button.icon`
+/ `iconLeft` / `iconRight`, `Dialog.icon`, `Alert.icon`, `SidebarCard.icon`,
+`Dropdown`/`ContextMenu` item `icon`, `TabButtons` options `icon` /
+`iconLeft`, `TabTrigger.icon` / `iconLeft`, the `Icon` component's `name`
+prop) used to render a bare feather-style name (e.g. `"edit"`,
+`"chevron-down"`) via `FeatherIcon`. That fallback is gone: only a `lucide-*`
+string, an emoji or symbol glyph, or a `Component` renders. Any other string
+renders nothing. No build or type error — the icon silently disappears. A
+dev-mode console warning names the component, the prop, and the offending
+value once per (component, prop). Prefix the name with `lucide-`:
 
 ```vue
 <!-- Before -->
@@ -1657,14 +1628,15 @@ const options = [{ label: 'Edit', icon: 'lucide-pen' }]
 
 ## Card, ListItem, standalone `<Toast>` (removed)
 
-Three unmaintained wrappers are gone in v1, per ADR-0008 — each shipped
-`@deprecated` in code and had zero call sites left across our census of
-downstream apps.
+Three unmaintained wrappers are gone in v1, per
+ADR-0008 — each
+shipped `@deprecated` in code and had zero call sites left across our
+census of downstream apps.
 
-**`Card`** wrapped a title/subtitle/actions layout with a manual loading state.
-There's no drop-in replacement; rebuild the layout with plain markup, using
-[`LoadingText`](./components/loadingtext) or [`Skeleton`](./components/skeleton)
-for the loading state:
+**`Card`** wrapped a title/subtitle/actions layout with a manual loading
+state. There's no drop-in replacement; rebuild the layout with plain
+markup, using [`LoadingText`](./components/loadingtext) or
+[`Skeleton`](./components/skeleton) for the loading state:
 
 ```vue
 <!-- Before -->
@@ -1685,8 +1657,8 @@ for the loading state:
 </div>
 ```
 
-**`ListItem`** rendered a title/subtitle/actions row. Same story — no drop-in
-replacement, rebuild with plain markup:
+**`ListItem`** rendered a title/subtitle/actions row. Same story — no
+drop-in replacement, rebuild with plain markup:
 
 ```vue
 <!-- Before -->
@@ -1704,9 +1676,10 @@ replacement, rebuild with plain markup:
 </div>
 ```
 
-**Standalone `<Toast>`** — `import { Toast } from 'frappe-ui'` and `<Toast>`
-fail at the import. This only removes the raw `ToastRoot`-based component; the
-imperative API is unaffected and is what you almost certainly want:
+**Standalone `<Toast>`** — `import { Toast } from 'frappe-ui'` and
+`<Toast>` fail at the import. This only removes the raw `ToastRoot`-based
+component; the imperative API is unaffected and is what you almost
+certainly want:
 
 ```vue
 <!-- Before -->
@@ -1719,11 +1692,11 @@ toast.success('Saved')
 </script>
 ```
 
-`<ToastProvider>` (mount once near your app root) is unchanged. The current API
-is plain `toast()` plus `toast.success()` / `toast.error()` / `toast.warning()`
-/ `toast.info()`. v0's `toast.create()`, `toast.remove()` and
-`toast.removeAll()` still work, but warn once in dev — move them to `toast(...)`
-and `toast.dismiss(...)`.
+`<ToastProvider>` (mount once near your app root) is unchanged. The current
+API is plain `toast()` plus `toast.success()` / `toast.error()` /
+`toast.warning()` / `toast.info()`. v0's `toast.create()`, `toast.remove()`
+and `toast.removeAll()` still work, but warn once in dev — move them to
+`toast(...)` and `toast.dismiss(...)`.
 
 ## Tokens
 
@@ -1741,31 +1714,33 @@ npx --package frappe-ui@beta tokens-v2 .
 
 The codemod renames espresso color tokens like `bg-surface-white` to
 `bg-surface-base`, merges static text size + weight class pairs (for example
-`text-base font-medium` to `text-base-medium`), and renames the removed radius
-aliases (`rounded-md` → `rounded-5`, see below). Run it once per codebase; the
-token migration is not idempotent because some v2 names overlap with v0 names.
-The radius renames are idempotent and also run on already-migrated codebases.
+`text-base font-medium` to `text-base-medium`), and renames the removed
+radius aliases (`rounded-md` → `rounded-5`, see below). Run it once per
+codebase; the token migration is not idempotent because some v2 names overlap
+with v0 names. The radius renames are idempotent and also run on
+already-migrated codebases.
 
-In every mode, the codemod stays inside the directories you give it. A symlink
-whose real path leaves the target — a file or a directory — is skipped and
-listed at the end of the run. Run the codemod on each real package root, so a
-shared package linked into several apps is migrated once.
+In every mode, the codemod stays inside the directories you give it. A
+symlink whose real path leaves the target — a file or a directory — is
+skipped and listed at the end of the run. Run the codemod on each real
+package root, so a shared package linked into several apps is migrated once.
 
 After upgrading to `frappe-ui@1.0.0-beta.11`, run the codemod again. Apps that
 already ran it will only get the typography correction (`text-lg` → `text-md`,
-`text-xl` → `text-lg`, ...) and the radius renames. Apps that still have pre-v2
-color tokens can pass `--force`, but review the output carefully because color
-tokens may double-shift.
+`text-xl` → `text-lg`, ...) and the radius renames. Apps that still have
+pre-v2 color tokens can pass `--force`, but review the output carefully
+because color tokens may double-shift.
 
 Already ran the typography correction too? Pass `--radius-only`. It performs
-only the radius renames (safe to repeat) and reports removed tokens — it never
-touches color or text-size names, so nothing can double-shift.
+only the radius renames (safe to repeat) and reports removed tokens — it
+never touches color or text-size names, so nothing can double-shift.
 
 ### Unused tokens and utilities removed
 
 A pre-`1.0.0` audit (#940) removed the token names below — all had zero call
-sites across frappe-ui and every consumer app. Each is a **silent** break: the
-class or `--*` variable just stops applying, with no build or type error.
+sites across frappe-ui and every consumer app. Each is a **silent** break:
+the class or `--*` variable just stops applying, with no build or type
+error.
 
 ```
 text-tiny
@@ -1779,73 +1754,73 @@ surface-alpha-red-1 … surface-alpha-red-7
 outline-alpha-red-2 / -3 / -4
 ```
 
-The codemod reports only some of these: the dead text sizes, the `text-*-black`
-styles, and the two alpha-red families. It has no rule for `shadow-status`,
-`--elevation-status`, the `alert-button` tokens, or
+The codemod reports only some of these: the dead text sizes, the
+`text-*-black` styles, and the two alpha-red families. It has no rule for
+`shadow-status`, `--elevation-status`, the `alert-button` tokens, or
 `surface-alpha-gray-2-overlay` — grep for those five by hand.
 
 If your build used any of these, replace them with the nearest step on the
-regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` → `shadow-sm`,
-`surface-alert-button-error` → `surface-red-2` (or whichever `variant`+`theme`
-pairing the design calls for).
+regular scale — e.g. `text-16xl` → `text-12xl`, `shadow-status` →
+`shadow-sm`, `surface-alert-button-error` → `surface-red-2` (or whichever
+`variant`+`theme` pairing the design calls for).
 
 ### Radius aliases removed
 
 The named radius aliases are removed in `1.0.0`. Numbered tokens are the only
-radius vocabulary now
-([ADR-0006](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0006-numbered-radius-tokens.md)).
+radius vocabulary now ([ADR-0006](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0006-numbered-radius-tokens.md)).
 `rounded-none` and `rounded-full` are kept.
 
-This is a **silent** break. The preset replaces Tailwind's `borderRadius` scale,
-so an unmigrated `rounded-md` emits no CSS at all — no build error, no type
-error, just square corners. Run the codemod, then grep for leftover aliases.
+This is a **silent** break. The preset replaces Tailwind's `borderRadius`
+scale, so an unmigrated `rounded-md` emits no CSS at all — no build error, no
+type error, just square corners. Run the codemod, then grep for leftover
+aliases.
 
-| Before        | After       | px  |
-| ------------- | ----------- | --- |
-| `rounded`     | `rounded-4` | 8   |
-| `rounded-sm`  | `rounded-1` | 4   |
-| `rounded-md`  | `rounded-5` | 10  |
-| `rounded-lg`  | `rounded-6` | 12  |
-| `rounded-xl`  | `rounded-7` | 16  |
-| `rounded-2xl` | `rounded-8` | 20  |
+| Before | After | px |
+|---|---|---|
+| `rounded` | `rounded-4` | 8 |
+| `rounded-sm` | `rounded-1` | 4 |
+| `rounded-md` | `rounded-5` | 10 |
+| `rounded-lg` | `rounded-6` | 12 |
+| `rounded-xl` | `rounded-7` | 16 |
+| `rounded-2xl` | `rounded-8` | 20 |
 
 The same map applies to every directional and corner form (`rounded-t-lg` →
 `rounded-t-6`, `rounded-tl-sm` → `rounded-tl-1`), to the logical sides
-(`rounded-ss-md` → `rounded-ss-5`, and the same for `s`, `e`, `se`, `es`, `ee`),
-to the bare directional aliases (`rounded-t` → `rounded-t-4`), and to variant
-prefixes (`hover:rounded-2xl` → `hover:rounded-8`). Pixel values are identical —
-the migration changes vocabulary, not rendering.
+(`rounded-ss-md` → `rounded-ss-5`, and the same for `s`, `e`, `se`, `es`,
+`ee`), to the bare directional aliases (`rounded-t` → `rounded-t-4`), and to
+variant prefixes (`hover:rounded-2xl` → `hover:rounded-8`). Pixel values are
+identical — the migration changes vocabulary, not rendering.
 
-The codemod handles all of these. One caveat: the bare word `rounded` is plain
-English, so the codemod only rewrites it inside quoted strings and `@apply`
-rules. A class list inside a multi-line template literal can be missed — grep
-for bare `rounded` after running it.
+The codemod handles all of these. One caveat: the bare word `rounded` is
+plain English, so the codemod only rewrites it inside quoted strings and
+`@apply` rules. A class list inside a multi-line template literal can be
+missed — grep for bare `rounded` after running it.
 
-The alias CSS variables go away with the aliases. Hand-written CSS that reads
-`var(--radius-sm)` / `var(--radius-md)` / `var(--radius-lg)` /
-`var(--radius-xl)` / `var(--radius-2xl)` resolves to nothing — the same silent
-break. The codemod only rewrites `rounded-*` classes, so grep for
+The alias CSS variables go away with the aliases. Hand-written CSS that
+reads `var(--radius-sm)` / `var(--radius-md)` / `var(--radius-lg)` /
+`var(--radius-xl)` / `var(--radius-2xl)` resolves to nothing — the same
+silent break. The codemod only rewrites `rounded-*` classes, so grep for
 `--radius-(sm|md|lg|xl|2xl)` and switch to the numbered variables
 (`var(--radius-5)` for the old `--radius-md`, same map as above).
 
 ### `text-*-black` styles removed
 
-The `text-<size>-black` / `text-p-<size>-black` style classes are removed — zero
-usage anywhere, and the Figma weights behind them were corrupt export data. This
-is also a **silent** break: the class stops emitting CSS.
+The `text-<size>-black` / `text-p-<size>-black` style classes are removed —
+zero usage anywhere, and the Figma weights behind them were corrupt export
+data. This is also a **silent** break: the class stops emitting CSS.
 
 The codemod no longer merges `font-extrabold` (or `font-black`) onto a
-`text-*-black` class. It flags the pair under "needs manual attention" instead.
-If you need weight 800, keep `font-extrabold`; there is no
+`text-*-black` class. It flags the pair under "needs manual attention"
+instead. If you need weight 800, keep `font-extrabold`; there is no
 letter-spacing-corrected style class for it.
 
 ### Ink chromatic scales shift one level
 
-The updated espresso v2 tokens shift every chromatic ink scale down one level:
-the new `ink-red-1` is the old `ink-red-2`, and so on for all 11 chromatic
-families. The scales now end at `-9`. `ink-gray` keeps its own 9-step scale and
-does not shift. This is a **silent** break: every `ink-<family>-N` site renders
-one shade off after the token update.
+The updated espresso v2 tokens shift every chromatic ink scale down one
+level: the new `ink-red-1` is the old `ink-red-2`, and so on for all 11
+chromatic families. The scales now end at `-9`. `ink-gray` keeps its own
+9-step scale and does not shift. This is a **silent** break: every
+`ink-<family>-N` site renders one shade off after the token update.
 
 Run the codemod once with `--ink-shift`:
 
@@ -1864,44 +1839,44 @@ npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
 ```
 
 `--ink-shift` cannot be combined with `--force` or `--radius-only`; the run
-exits with an error rather than hiding which renames applied. A dry run is not a
-safety probe either: it only warns when it finds a run-once marker, while a real
-run refuses outright.
+exits with an error rather than hiding which renames applied. A dry run is not
+a safety probe either: it only warns when it finds a run-once marker, while a
+real run refuses outright.
 
-This mode runs only the ink shift — no color renames, no typography, no radius
-renames. Run it exactly once per codebase. There is no way to detect a prior run
-from file content (`ink-red-5` is a valid name before and after), so a second
-run double-shifts. To guard against that, `--ink-shift` takes directory targets
-only, and a real run writes a `.tokens-v2-ink-shift` marker file in each target
-directory. It refuses to run again while a marker exists in the target, an
-ancestor, or anywhere in the target subtree. The marker is written before the
-first file rewrite, so an interrupted run refuses to retry instead of
-double-shifting; restore the tree with git, delete the marker, and re-run.
-Commit the marker with the migration — on a fresh clone without it the guard is
-gone, and a teammate's re-run double-shifts. Delete it only to re-run the shift
-on purpose.
+This mode runs only the ink shift — no color renames, no typography, no
+radius renames. Run it exactly once per codebase. There is no way to detect
+a prior run from file content (`ink-red-5` is a valid name before and
+after), so a second run double-shifts. To guard against that, `--ink-shift`
+takes directory targets only, and a real run writes a `.tokens-v2-ink-shift`
+marker file in each target directory. It refuses to run again while a marker
+exists in the target, an ancestor, or anywhere in the target subtree. The
+marker is written before the first file rewrite, so an interrupted run
+refuses to retry instead of double-shifting; restore the tree with git,
+delete the marker, and re-run. Commit the marker with the migration — on a
+fresh clone without it the guard is gone, and a teammate's re-run
+double-shifts. Delete it only to re-run the shift on purpose.
 
 Each marker is created exclusively, so two runs on the same directory cannot
-both start: the second stops before it rewrites anything. For nested targets (a
-repo root and one of its subdirectories) the run searches again after it claims
-its markers, and stops if another run claimed an overlapping tree. Both runs can
-stop this way. Neither has rewritten a file at that point, so re-run whichever
-tree is still unshifted.
+both start: the second stops before it rewrites anything. For nested targets
+(a repo root and one of its subdirectories) the run searches again after it
+claims its markers, and stops if another run claimed an overlapping tree.
+Both runs can stop this way. Neither has rewritten a file at that point, so
+re-run whichever tree is still unshifted.
 
-The marker search follows the same symlink rule as the run: a marker in a linked
-external package never blocks a target the run would not rewrite. Run the
-codemod on each real package root directly, so every migrated tree gets its own
-marker. If the refusal names a marker inside a vendored dependency (for example
-`vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is already shifted —
-leave its marker alone and target the directories that do not contain it.
-Pointing at the app root will not help: the search walks the whole subtree, so
-any ancestor of the vendored copy finds the same marker and refuses again.
-Target `src/` and your other own trees instead.
+The marker search follows the same symlink rule as the run: a marker in a
+linked external package never blocks a target the run would not rewrite. Run
+the codemod on each real package root directly, so every migrated tree gets
+its own marker. If the refusal names a marker inside a vendored dependency
+(for example `vendor/frappe-ui/.tokens-v2-ink-shift`), that dependency is
+already shifted — leave its marker alone and target the directories that do
+not contain it. Pointing at the app root will not help: the search walks the
+whole subtree, so any ancestor of the vendored copy finds the same marker and
+refuses again. Target `src/` and your other own trees instead.
 
-The old `ink-<family>-1` step was white. The new `-1` is a light tint, so these
-sites have no automatic destination. The codemod flags them under "needs manual
-attention". The usual fix is `text-white` (or the literal CSS color `white` in
-hand-written CSS).
+The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
+these sites have no automatic destination. The codemod flags them under
+"needs manual attention". The usual fix is `text-white` (or the literal CSS
+color `white` in hand-written CSS).
 
 ## Editor
 
@@ -1911,11 +1886,11 @@ The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
 moves to the `frappe-ui/editor` subpath; `TextEditor` and its siblings
 (`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
 `TextEditorContent`, `createEditorButton`) are removed from top-level
-`frappe-ui` in `1.0.0`, and so are the v0 extension helpers `ImageExtension` and
-`createSuggestionExtension` with their types `SetImageOptions`,
+`frappe-ui` in `1.0.0`, and so are the v0 extension helpers `ImageExtension`
+and `createSuggestionExtension` with their types `SetImageOptions`,
 `BaseSuggestionItem` and `CreateSuggestionExtensionOptions` — nothing
-editor-related is exported from root. See the [Editor](./molecules/editor) page
-for the full API and recipes.
+editor-related is exported from root. See the
+[Editor](./molecules/editor) page for the full API and recipes.
 
 Not migrated yet? All eleven v0 names are parked, unchanged, in
 `frappe-ui/experimental` as an interim import path. It is unstable — no
@@ -2040,9 +2015,8 @@ Delete the manual imports; there is nothing to add back:
 /* After: nothing — the CSS ships with the subpath import */
 ```
 
-The build fails loudly
-(`Missing "./list-style.css" specifier in "frappe-ui" package`) until the lines
-are gone.
+The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
+package`) until the lines are gone.
 
 ## `frappe-ui/code-editor` (removed)
 
@@ -2068,30 +2042,30 @@ Two exports with no importers left are gone. Both breaks are loud — the
 specifier stops resolving.
 
 | Removed                        | Replacement                                                     |
-| ------------------------------ | --------------------------------------------------------------- |
-| `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting |
-| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind`, the preset, imported directly             |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
+| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind`, the preset, imported directly              |
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 
-Both subpaths are gone in v1. frappe-ui is a UI library; the members that know
-about doctypes, onboarding flows, or billing moved to `@framework/ui` (the `ui/`
-package in the [frappe repo](https://github.com/frappe/frappe)). Every break
-here is loud — the import path stops resolving.
+Both subpaths are gone in v1. frappe-ui is a UI library; the members that
+know about doctypes, onboarding flows, or billing moved to `@framework/ui`
+(the `ui/` package in the [frappe repo](https://github.com/frappe/frappe)).
+Every break here is loud — the import path stops resolving.
 
-| Before (`frappe-ui/frappe`)                                                                                | After                                                       |
-| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `useTelemetry`, `telemetryPlugin`                                                                          | `@framework/ui`                                             |
-| `useOnboarding`, `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`, `showHelpModal`, `minimize` | `@framework/ui`                                             |
-| `TrialBanner`, `SignupBanner`                                                                              | `@framework/ui`                                             |
-| `DataImport`                                                                                               | `@framework/ui`                                             |
-| `Link`, `LinkProps`, `LinkEmits`, `LinkExposed`, `LinkOption`                                              | `@framework/ui` (superset, see below)                       |
-| `Filter`                                                                                                   | `@framework/ui` (superset, see below)                       |
-| `OnboardingSteps`, `HelpCenter`, `showHelpCenter`                                                          | removed — they live on inside `@framework/ui`'s `HelpModal` |
-| `frappe-ui/drive`, `frappe-ui/drive/*`                                                                     | removed, no replacement                                     |
+| Before (`frappe-ui/frappe`)     | After                              |
+| ------------------------------- | ---------------------------------- |
+| `useTelemetry`, `telemetryPlugin` | `@framework/ui`                  |
+| `useOnboarding`, `GettingStartedBanner`, `IntermediateStepModal`, `HelpModal`, `showHelpModal`, `minimize` | `@framework/ui` |
+| `TrialBanner`, `SignupBanner`   | `@framework/ui`                    |
+| `DataImport`                    | `@framework/ui`                    |
+| `Link`, `LinkProps`, `LinkEmits`, `LinkExposed`, `LinkOption` | `@framework/ui` (superset, see below) |
+| `Filter`                        | `@framework/ui` (superset, see below) |
+| `OnboardingSteps`, `HelpCenter`, `showHelpCenter` | removed — they live on inside `@framework/ui`'s `HelpModal` |
+| `frappe-ui/drive`, `frappe-ui/drive/*` | removed, no replacement     |
 
-`@framework/ui` peer-depends on `frappe-ui`, so add it as a dependency if your
-app does not carry it yet, then change the import path:
+`@framework/ui` peer-depends on `frappe-ui`, so add it as a dependency if
+your app does not carry it yet, then change the import path:
 
 ```js
 // Before
@@ -2101,18 +2075,19 @@ import { useTelemetry, TrialBanner } from 'frappe-ui/frappe'
 import { useTelemetry, TrialBanner } from '@framework/ui'
 ```
 
-Two replacements are supersets of what they replace — existing call sites work
-unchanged:
+Two replacements are supersets of what they replace — existing call sites
+work unchanged:
 
-- `Link` adds `redirectable` / `editable` props and `redirect` / `edit` emits.
-- `Filter` adds a `useFilters` composable, `parseFilters` / `serializeFilters`,
-  and an operator registry.
+- `Link` adds `redirectable` / `editable` props and `redirect` / `edit`
+  emits.
+- `Filter` adds a `useFilters` composable, `parseFilters` /
+  `serializeFilters`, and an operator registry.
 
-The drive components were removed because the drive app already owns the live
-copy of all six; nothing imported the subpath.
+The drive components were removed because the drive app already owns the
+live copy of all six; nothing imported the subpath.
 
-Finally, drop the stale Tailwind glob. The `frappe/` directory no longer ships,
-so this line in `tailwind.config.js` scans nothing:
+Finally, drop the stale Tailwind glob. The `frappe/` directory no longer
+ships, so this line in `tailwind.config.js` scans nothing:
 
 ```js
 // Delete this line
@@ -2120,8 +2095,8 @@ so this line in `tailwind.config.js` scans nothing:
 ```
 
 Better: replace the hand-copied list with the
-[`content` export](/docs/foundations/tailwind#the-content-export), which tracks
-the library's source directories for you.
+[`content` export](/docs/foundations/tailwind#the-content-export), which
+tracks the library's source directories for you.
 
 ## Autocomplete (removed)
 
@@ -2129,10 +2104,10 @@ the library's source directories for you.
 `multiple` boolean; v1 splits them: [`Combobox`](./components/combobox) for
 single, [`MultiSelect`](./components/multiselect) for multiple.
 
-The import fails, so your build tells you where every call site is. Three things
-inside those call sites change quietly instead, and each has a before/after
-below: the **v-model payload**, the **group key**, and the **`open` slot prop**,
-which was a function and is now a boolean.
+The import fails, so your build tells you where every call site is. Three
+things inside those call sites change quietly instead, and each has a
+before/after below: the **v-model payload**, the **group key**, and the
+**`open` slot prop**, which was a function and is now a boolean.
 
 Sweep your codebase:
 
@@ -2142,19 +2117,19 @@ grep -rln ':multiple' src --include='*.vue'         # these become MultiSelect
 grep -rn 'items:' src --include='*.vue'             # grouped options — see below
 ```
 
-| Before (`Autocomplete`)                                                   | After                                                                                                                         |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `:multiple="false"` (default)                                             | use `Combobox`                                                                                                                |
-| `:multiple="true"`                                                        | use `MultiSelect`                                                                                                             |
-| `v-model` (option or value)                                               | `v-model` (value / value array)                                                                                               |
-| `@change`                                                                 | `@update:modelValue` (`@update:selectedOption` for the option)                                                                |
-| grouped `{ group, items }`                                                | grouped `{ group, options }`                                                                                                  |
-| `placement` (string)                                                      | `side` + `align`                                                                                                              |
-| `:showFooter`                                                             | `#footer` slot (MultiSelect has built-in)                                                                                     |
-| `:bodyClasses`                                                            | `data-slot` CSS                                                                                                               |
-| `:maxOptions`                                                             | no equivalent                                                                                                                 |
-| `#target="{ togglePopover }"`                                             | `#trigger`, with no click handler (`open` is now a boolean)                                                                   |
-| `#prefix` / `#suffix`                                                     | same (`#suffix` now replaces chevron)                                                                                         |
+| Before (`Autocomplete`)           | After                                     |
+| --------------------------------- | ----------------------------------------- |
+| `:multiple="false"` (default)     | use `Combobox`                            |
+| `:multiple="true"`                | use `MultiSelect`                         |
+| `v-model` (option or value)       | `v-model` (value / value array)           |
+| `@change`                         | `@update:modelValue` (`@update:selectedOption` for the option) |
+| grouped `{ group, items }`        | grouped `{ group, options }`              |
+| `placement` (string)              | `side` + `align`                          |
+| `:showFooter`                     | `#footer` slot (MultiSelect has built-in) |
+| `:bodyClasses`                    | `data-slot` CSS                           |
+| `:maxOptions`                     | no equivalent                             |
+| `#target="{ togglePopover }"`     | `#trigger`, with no click handler (`open` is now a boolean) |
+| `#prefix` / `#suffix`             | same (`#suffix` now replaces chevron)     |
 | `#item-prefix` / `#item-suffix` slot props `{ active, selected, option }` | `{ item, query, selected }` — `option` is renamed and `active` is gone, so a carried-over `option.label` throws during render |
 
 ### The v-model payload inverts
@@ -2170,11 +2145,7 @@ is `(string | number)[]`. Code that reads `country.value` off the model gets
 <!-- country === { label: 'India', value: 'in' } -->
 
 <!-- After -->
-<Combobox
-  v-model="country"
-  :options="countries"
-  @update:model-value="onChange"
-/>
+<Combobox v-model="country" :options="countries" @update:model-value="onChange" />
 <!-- country === 'in' -->
 ```
 
@@ -2192,10 +2163,10 @@ beyond the value? Listen to `@update:selectedOption`, which carries it:
 ### Grouped options: `items` → `options`
 
 The key holding a group's children is now `options`, matching the top-level
-prop. `Combobox` and `MultiSelect` throw and name the group if they find the old
-key, so this one is caught the first time the picker opens — but only then, not
-at build time. `Dropdown` and `ContextMenu` share the rename and fail the other
-way: the group is dropped in silence (see
+prop. `Combobox` and `MultiSelect` throw and name the group if they find the
+old key, so this one is caught the first time the picker opens — but only then,
+not at build time. `Dropdown` and `ContextMenu` share the rename and fail the
+other way: the group is dropped in silence (see
 [Dropdown and ContextMenu](#dropdown-and-contextmenu)).
 
 ```vue
@@ -2211,10 +2182,10 @@ way: the group is dropped in silence (see
 The slot is renamed, and the wiring inside it changes. `Autocomplete` handed
 `#target` a `togglePopover` function you had to call yourself. `Combobox` and
 `MultiSelect` attach the open toggle to the `#trigger` element for you, so the
-handler is not just unnecessary — a `togglePopover()` carried through the rename
-throws `togglePopover is not a function` on every click. The popover still
-opens, because the component's own handler already ran, so this reads as "works,
-but noisy" until someone looks at the console.
+handler is not just unnecessary — a `togglePopover()` carried through the
+rename throws `togglePopover is not a function` on every click. The popover
+still opens, because the component's own handler already ran, so this reads as
+"works, but noisy" until someone looks at the console.
 
 ```vue
 <!-- Before -->
@@ -2233,32 +2204,31 @@ but noisy" until someone looks at the console.
 ```
 
 **`open` changed from a function to a boolean, and that part is silent.** On
-`#target` it was the function that opened the popover, so anything reading it as
-a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading a
+`#target` it was the function that opened the popover, so anything reading it
+as a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading a
 function object and was **always truthy**. On `#trigger` it is the real open
 state, so those expressions start doing what they always looked like they did.
 
 `Combobox`'s `#trigger` receives
 `{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`.
-`MultiSelect`'s receives
-`{ open, disabled, query, selectedOptions, clear, setOpen }` — plural, and with
-no `displayValue`. Use `setOpen` for a trigger that has to open the popover from
-somewhere other than its own click.
+`MultiSelect`'s receives `{ open, disabled, query, selectedOptions, clear,
+setOpen }` — plural, and with no `displayValue`. Use `setOpen` for a trigger
+that has to open the popover from somewhere other than its own click.
 
 ### The trigger shape changed — pass `trigger="button"` to keep v0's
 
 `Autocomplete` rendered a button showing the selection, with the search box
-inside the popover. `Combobox` defaults to `trigger="input"` — the trigger _is_
-the search field. Pass `trigger="button"` to keep the old shape.
+inside the popover. `Combobox` defaults to `trigger="input"` — the trigger
+_is_ the search field. Pass `trigger="button"` to keep the old shape.
 
 ## FormControl `type="autocomplete"` (removed)
 
 **This one is silent.** `FormControl` is a dispatcher: with the `autocomplete`
 case gone, the type falls through to `TextInput` and is still forwarded as an
 html input type. The result is `<input type="autocomplete">`, which every
-browser renders as a plain text box — a picker that turned into a text field. No
-runtime error, and no build error in plain JS; TypeScript callers do get one,
-because `'autocomplete'` is no longer in the `type` union. A dev-only
+browser renders as a plain text box — a picker that turned into a text field.
+No runtime error, and no build error in plain JS; TypeScript callers do get
+one, because `'autocomplete'` is no longer in the `type` union. A dev-only
 `console.error` names it.
 
 ```vue
@@ -2358,8 +2328,8 @@ component's options.
 
 You will not have to work this out from a blank screen. A component that
 declares `resources` without the option throws on creation, naming itself and
-the fix. Vue routes that throw through its own error handling, which rethrows in
-dev and only logs in production, so the read is guarded too: reading
+the fix. Vue routes that throw through its own error handling, which rethrows
+in dev and only logs in production, so the read is guarded too: reading
 `this.$resources` throws at the access in every build, straight into your own
 code. `resourcesPlugin` is still exported if you would rather install it
 directly.
@@ -2401,20 +2371,20 @@ that is the one to read.
 `theme` means color tone everywhere else in the library (`theme="blue"` on a
 Button), so the light/dark composable gives the word back.
 
-| Before              | After                                           |
-| ------------------- | ----------------------------------------------- |
-| `useTheme()`        | `useColorScheme()`                              |
-| `Theme` type        | `ColorScheme` type                              |
-| `currentTheme`      | `colorScheme` — read-only                       |
-| `setTheme(t)`       | `setColorScheme(t)`                             |
-| `toggleTheme()`     | `toggleColorScheme()`                           |
-| `getSystemTheme()`  | `resolvedColorScheme()`, imported from the root |
-| `initializeTheme()` | removed — `useColorScheme()` initializes itself |
+| Before              | After                                            |
+| ------------------- | ------------------------------------------------ |
+| `useTheme()`        | `useColorScheme()`                               |
+| `Theme` type        | `ColorScheme` type                               |
+| `currentTheme`      | `colorScheme` — read-only                        |
+| `setTheme(t)`       | `setColorScheme(t)`                              |
+| `toggleTheme()`     | `toggleColorScheme()`                            |
+| `getSystemTheme()`  | `resolvedColorScheme()`, imported from the root  |
+| `initializeTheme()` | removed — `useColorScheme()` initializes itself  |
 
 The read-only `colorScheme` is the quiet part. The ref was only a third of the
 state; the `data-theme` attribute and the `theme` key in `localStorage` are the
-other two. Assigning to the old writable ref moved the ref and left the document
-and the stored value behind, so the app desynced with no error.
+other two. Assigning to the old writable ref moved the ref and left the
+document and the stored value behind, so the app desynced with no error.
 
 ```js
 // Before — moved the ref, desynced the page
@@ -2426,16 +2396,17 @@ const { setColorScheme } = useColorScheme()
 setColorScheme('dark')
 ```
 
-The `data-theme` attribute and the `theme` localStorage key keep their names, so
-app CSS targeting `[data-theme='dark']` and saved user preferences still work.
+The `data-theme` attribute and the `theme` localStorage key keep their names,
+so app CSS targeting `[data-theme='dark']` and saved user preferences still
+work.
 
 ### Scroll container: nine members become two
 
-`useScrollContainer` published nine members for the two things apps do: read the
-shell's scroll element, and know whether it has been scrolled.
+`useScrollContainer` published nine members for the two things apps do: read
+the shell's scroll element, and know whether it has been scrolled.
 
 | Before                                                  | After                                     |
-| ------------------------------------------------------- | ----------------------------------------- |
+| -------------------------------------------------------- | ------------------------------------------ |
 | `activeScrollContainer`                                 | `shellScrollContainer`                    |
 | `getScrollContainer()`                                  | `shellScrollContainer.value`              |
 | `useScrollContainer().isScrolled`                       | `useShellScrolled({ threshold })`         |
@@ -2463,7 +2434,7 @@ warns once in development.
 spelled `vFoo`, so the old names had to be aliased at every call site.
 
 | Before                    | After                   |
-| ------------------------- | ----------------------- |
+| ------------------------- | ------------------------ |
 | `focusDirective`          | `vFocus`                |
 | `onOutsideClickDirective` | `vOnOutsideClick`       |
 | `visibilityDirective`     | removed, no replacement |
@@ -2486,16 +2457,16 @@ Previously a `beforeSubmit` hook that threw was caught and logged, and the
 request was **sent anyway**. Now the throw propagates: the request is not sent
 and `submit()` rejects with the hook's error.
 
-This is a silent behavior change. If one of your `beforeSubmit` hooks can throw,
-the submit it used to let through now stops. Either handle the rejection at the
-call site or make the hook non-throwing to keep the old behavior. A hook that
-returns normally is unaffected — it still cannot stop the request.
+This is a silent behavior change. If one of your `beforeSubmit` hooks can
+throw, the submit it used to let through now stops. Either handle the rejection
+at the call site or make the hook non-throwing to keep the old behavior. A
+hook that returns normally is unaffected — it still cannot stop the request.
 
 `beforeSubmit` may now be async (`() => void | Promise<void>`); it was always
 awaited, only the type said otherwise.
 
 `error` is untouched by a cancelled submit. The throw reaches you only through
-the rejected `submit()`, so `error` still holds the last _request's_ error — an
+the rejected `submit()`, so `error` still holds the last *request's* error — an
 app that renders failures from `error` alone renders nothing when a hook
 cancels. This covers every place `beforeSubmit` is accepted: `useCall`,
 `useNewDoc`, and each entry in `useDoc`'s `methods:`.
@@ -2503,14 +2474,15 @@ cancels. This covers every place `beforeSubmit` is accepted: `useCall`,
 ## pageMetaPlugin (removed)
 
 `pageMetaPlugin` and the global mixin it installed are gone. A `pageMeta()`
-component option still compiles — it's a plain, unread object key — but nothing
-calls it anymore, so `document.title` and the favicon stop updating. This is a
-**silent break**: no error, no warning, the page just stops retitling itself.
+component option still compiles — it's a plain, unread object key — but
+nothing calls it anymore, so `document.title` and the favicon stop updating.
+This is a **silent break**: no error, no warning, the page just stops
+retitling itself.
 
-| Before                                   | After                                                |
-| ---------------------------------------- | ---------------------------------------------------- |
-| `app.use(pageMetaPlugin)`                | delete — nothing to install                          |
-| `pageMeta() { return { title, emoji } }` | `usePageMeta(() => ({ title, emoji }))` in `setup()` |
+| Before                                    | After                                   |
+| ------------------------------------------ | ---------------------------------------- |
+| `app.use(pageMetaPlugin)`                  | delete — nothing to install              |
+| `pageMeta() { return { title, emoji } }`   | `usePageMeta(() => ({ title, emoji }))` in `setup()` |
 
 ```vue
 <!-- Before -->
@@ -2536,41 +2508,31 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 ## CommandPalette
 
 `show` is renamed to `open`, matching the rest of the library's overlay
-vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop with
-no error, so the palette just never opens.
+vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
+with no error, so the palette just never opens.
 
 `searchQuery` is renamed to `query`, the name `Combobox` and `MultiSelect`
-already use for the same controlled search text. Same silent break: the unknown
-`searchQuery` prop is accepted, so the palette holds its own query and yours
-never updates.
+already use for the same controlled search text. Same silent break: the
+unknown `searchQuery` prop is accepted, so the palette holds its own query
+and yours never updates.
 
-| Before                           | After                      |
-| -------------------------------- | -------------------------- |
-| `v-model:show="show"`            | `v-model:open="open"`      |
-| `v-model:search-query="q"`       | `v-model:query="q"`        |
+| Before                          | After                    |
+| -------------------------------- | ------------------------ |
+| `v-model:show="show"`            | `v-model:open="open"`    |
+| `v-model:search-query="q"`       | `v-model:query="q"`      |
 | `@update:searchQuery="onSearch"` | `@update:query="onSearch"` |
 
 ```vue
 <!-- Before -->
-<CommandPalette
-  v-model:show="show"
-  v-model:search-query="q"
-  :groups="groups"
-  @select="onSelect"
-/>
+<CommandPalette v-model:show="show" v-model:search-query="q" :groups="groups" @select="onSelect" />
 
 <!-- After -->
-<CommandPalette
-  v-model:open="open"
-  v-model:query="q"
-  :groups="groups"
-  @select="onSelect"
-/>
+<CommandPalette v-model:open="open" v-model:query="q" :groups="groups" @select="onSelect" />
 ```
 
 `Mod+K` is registered internally through `useKeyboardShortcut` (v0 used its own
-`keydown` listener on `window`). Delete any app-level listener you added on top
-of it.
+`keydown` listener on `window`). Delete any app-level listener you added on
+top of it.
 
 ## `useShortcut` is now `useKeyboardShortcut`
 
@@ -2578,37 +2540,27 @@ The import fails to resolve, so your build names every call site. The **config
 inside it is a silent break**: 14 fields become 10, and the ones that left are
 dropped without a word.
 
-| Before                                         | After                                 |
-| ---------------------------------------------- | ------------------------------------- |
-| `useShortcut(...)`                             | `useKeyboardShortcut(...)`            |
-| `key: 's', ctrl: true`                         | `combo: 'Mod+S'`                      |
-| `key: 'z', ctrl: true, shift: true`            | `combo: 'Mod+Shift+Z'`                |
-| `key: 'ArrowUp'`                               | `combo: 'ArrowUp'`                    |
-| `key: '/'`                                     | `combo: 'Slash'`                      |
-| `key: '?'`                                     | `combo: 'Shift+Slash'`                |
-| `key: ' '`                                     | `combo: 'Space'`                      |
-| `condition: () => canEdit.value`               | `enabled: () => canEdit.value`        |
-| `triggeredOn: 'hold'`                          | delete it; `onHold` selects hold mode |
-| `const { activeShortcuts } = useShortcut(...)` | returns `void`                        |
+| Before | After |
+| --- | --- |
+| `useShortcut(...)` | `useKeyboardShortcut(...)` |
+| `key: 's', ctrl: true` | `combo: 'Mod+S'` |
+| `key: 'z', ctrl: true, shift: true` | `combo: 'Mod+Shift+Z'` |
+| `key: 'ArrowUp'` | `combo: 'ArrowUp'` |
+| `key: '/'` | `combo: 'Slash'` |
+| `key: '?'` | `combo: 'Shift+Slash'` |
+| `key: ' '` | `combo: 'Space'` |
+| `condition: () => canEdit.value` | `enabled: () => canEdit.value` |
+| `triggeredOn: 'hold'` | delete it; `onHold` selects hold mode |
+| `const { activeShortcuts } = useShortcut(...)` | returns `void` |
+| `ShortcutConfig` | `KeyboardShortcutConfig` |
+| `RegisteredShortcut`, `ActiveShortcut` | gone; see below |
 
 ```js
 // Before
 useShortcut([
   { key: 's', ctrl: true, description: 'Save', group: 'View', handler: onSave },
-  {
-    key: 'z',
-    ctrl: true,
-    description: 'Undo',
-    condition: notReadOnly,
-    handler: undo,
-  },
-  {
-    key: 'y',
-    ctrl: true,
-    description: 'Redo',
-    condition: notReadOnly,
-    handler: redo,
-  },
+  { key: 'z', ctrl: true, description: 'Undo', condition: notReadOnly, handler: undo },
+  { key: 'y', ctrl: true, description: 'Redo', condition: notReadOnly, handler: redo },
 ])
 
 // After
@@ -2619,34 +2571,34 @@ useKeyboardShortcut([
 ])
 ```
 
-`ctrl` never meant Control. It matched `ctrlKey || metaKey`, so it already meant
-`Mod`: Cmd on macOS, Ctrl elsewhere. Write `Ctrl` only where you mean Control on
-a Mac too.
+`ctrl` never meant Control. It matched `ctrlKey || metaKey`, so it already
+meant `Mod`: Cmd on macOS, Ctrl elsewhere. Write `Ctrl` only where you mean
+Control on a Mac too.
 
 ### Punctuation and digits take a key name
 
 `+` separates the parts of a combo, so it cannot also be a key. Name the key
 instead:
 
-| Before           | After                                                   |
-| ---------------- | ------------------------------------------------------- |
-| `key: '+'`       | `combo: 'Shift+Equal'` (or `'Plus'` for the keypad key) |
-| `key: '='`       | `combo: 'Equal'`                                        |
-| `key: '-'`       | `combo: 'Minus'`                                        |
-| `key: '/'`       | `combo: 'Slash'`                                        |
-| `key: '\\'`      | `combo: 'Backslash'`                                    |
-| the backtick key | `combo: 'Backtick'`                                     |
-| `key: '1'`       | `combo: 'Digit1'`                                       |
-| `key: '!'`       | `combo: 'Shift+Digit1'`                                 |
+| Before | After |
+| --- | --- |
+| `key: '+'` | `combo: 'Shift+Equal'` (or `'Plus'` for the keypad key) |
+| `key: '='` | `combo: 'Equal'` |
+| `key: '-'` | `combo: 'Minus'` |
+| `key: '/'` | `combo: 'Slash'` |
+| `key: '\\'` | `combo: 'Backslash'` |
+| the backtick key | `combo: 'Backtick'` |
+| `key: '1'` | `combo: 'Digit1'` |
+| `key: '!'` | `combo: 'Shift+Digit1'` |
 
 Digits and punctuation now match `event.code`, so `Mod+Shift+Digit1` fires on
 ⌘⇧1 and on ⌘⇧! alike. A punctuation name means the physical key position, as
 labelled on a US layout, so `Mod+Slash` fires on the same key everywhere.
-Letters and named keys still match `event.key`. The old US-layout heuristic that
-let `?` match without declaring Shift is gone: declare the Shift.
+Letters and named keys still match `event.key`. The old US-layout heuristic
+that let `?` match without declaring Shift is gone: declare the Shift.
 
-TypeScript rejects an unknown combo. A JavaScript call site still passing the v0
-shape logs one dev warning and never fires.
+TypeScript rejects an unknown combo. A JavaScript call site still passing the
+v0 shape logs one dev warning and never fires.
 
 ### Hold shortcuts
 
@@ -2662,8 +2614,8 @@ shape logs one dev warning and never fires.
 A hold registration takes no `handler`. `triggeredOn: 'hold'` used to fire
 `handler` **and** `onHold`; if you relied on that, move the work into `onHold`.
 
-A v0 shortcut that paired a plain `handler` with your own `keyup` listener folds
-into `onHold` / `onRelease` too. Delete the listener.
+A v0 shortcut that paired a plain `handler` with your own `keyup` listener
+folds into `onHold` / `onRelease` too. Delete the listener.
 
 ### `enabled` also hides the shortcut
 
@@ -2673,8 +2625,8 @@ It is now specified and tested, so read-only modes keep working.
 
 ### Precedence changed
 
-Two shortcuts on one combo used to run whichever the registry reached first. The
-last registration that is enabled **at the time of the keypress** now wins.
+Two shortcuts on one combo used to run whichever the registry reached first.
+The last registration that is enabled **at the time of the keypress** now wins.
 `enabled` is resolved first, so a pair with mutually exclusive guards still
 works unchanged. A real collision warns once per combo in development.
 
@@ -2684,16 +2636,21 @@ Both imports fail at the build. Neither had a consumer. To render a combo, use
 `<KeyboardShortcut :combo="combo" />`. To read the registry, use
 `KeyboardShortcutsDialog`'s default slot.
 
+The types they used, `RegisteredShortcut` and `ActiveShortcut`, are gone with
+them. The dialog's slot gives `KeyboardShortcutGroup` and
+`KeyboardShortcutEntry` instead. An entry carries `combo`, `altCombos`,
+`description` and `group`.
+
 ## `KeyboardShortcutsModal` is now `KeyboardShortcutsDialog`
 
 The import fails to resolve, and Vue logs an unknown-component warning for a
 globally registered `<KeyboardShortcutsModal>`. Props are unchanged.
 
-| Before                                               | After                                                 |
-| ---------------------------------------------------- | ----------------------------------------------------- |
+| Before | After |
+| --- | --- |
 | `import { KeyboardShortcutsModal } from 'frappe-ui'` | `import { KeyboardShortcutsDialog } from 'frappe-ui'` |
-| `<KeyboardShortcutsModal v-model:open="open" />`     | `<KeyboardShortcutsDialog v-model:open="open" />`     |
-| `KeyboardShortcutsModalProps`                        | `KeyboardShortcutsDialogProps`                        |
+| `<KeyboardShortcutsModal v-model:open="open" />` | `<KeyboardShortcutsDialog v-model:open="open" />` |
+| `KeyboardShortcutsModalProps` | `KeyboardShortcutsDialogProps` |
 
 Two dialog behaviors are worth knowing before you diff its output:
 
@@ -2705,12 +2662,12 @@ Two dialog behaviors are worth knowing before you diff its output:
 
 ## KeyboardShortcut
 
-The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` / `alt`
-boolean props, are removed. Use `combo` — a string like `"Mod+Shift+K"`.
+The deprecated `shortcut` prop, and the unused `meta` / `ctrl` / `shift` /
+`alt` boolean props, are removed. Use `combo` — a string like `"Mod+Shift+K"`.
 
-| Before                                              | After                                      |
-| --------------------------------------------------- | ------------------------------------------ |
-| `<KeyboardShortcut shortcut="Mod+K" />`             | `<KeyboardShortcut combo="Mod+K" />`       |
+| Before                                   | After                        |
+| ------------------------------------------ | ----------------------------- |
+| `<KeyboardShortcut shortcut="Mod+K" />`    | `<KeyboardShortcut combo="Mod+K" />` |
 | `<KeyboardShortcut ctrl shift>K</KeyboardShortcut>` | `<KeyboardShortcut combo="Mod+Shift+K" />` |
 
 Both are **silent breaks** at runtime: the removed props fall through onto the
@@ -2726,18 +2683,18 @@ comment said it was exported for unit tests only. Register a shortcut with
 
 ## PageHeaderMobile family: slot names
 
-`PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon` are
-renamed to the shared `#prefix`/`#suffix` vocabulary (see
+`PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`
+are renamed to the shared `#prefix`/`#suffix` vocabulary (see
 [PHILOSOPHY.md P6](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md)).
 This is a **silent break**: Vue drops content passed to an unknown slot name
-with no error or warning — the back button, title icon, or trailing action just
-stops rendering.
+with no error or warning — the back button, title icon, or trailing action
+just stops rendering.
 
-| Before                          | After     |
-| ------------------------------- | --------- |
-| `PageHeaderMobile` `#left`      | `#prefix` |
-| `PageHeaderMobile` `#right`     | `#suffix` |
-| `PageHeaderMobileTitle` `#icon` | `#prefix` |
+| Before                                | After                             |
+| -------------------------------------- | ---------------------------------- |
+| `PageHeaderMobile` `#left`             | `#prefix`                          |
+| `PageHeaderMobile` `#right`            | `#suffix`                          |
+| `PageHeaderMobileTitle` `#icon`        | `#prefix`                          |
 
 ```vue
 <!-- Before -->
@@ -2766,9 +2723,10 @@ other components (e.g. `ListView`'s footer) have their own unrelated `#left`/
 ### `FrappeUIProviderProps` is deleted
 
 The type was exported but never wired to the component, so it described props
-`FrappeUIProvider` did not accept. It is removed in `1.0.0` with no replacement.
-This one is **loud** — `import type { FrappeUIProviderProps } from 'frappe-ui'`
-fails the type-check. `FrappeUIProvider` itself is unchanged and still exported.
+`FrappeUIProvider` did not accept. It is removed in `1.0.0` with no
+replacement. This one is **loud** — `import type { FrappeUIProviderProps } from
+'frappe-ui'` fails the type-check. `FrappeUIProvider` itself is unchanged and
+still exported.
 
 ## Charts
 
@@ -2778,52 +2736,36 @@ from v0 has nothing to migrate here; the older `config`-object family is covered
 by the "Charts (v1)" section above.
 
 Eight charts renamed their mark emit to `select`, collapsing six old names into
-one. This is a **silent break**: Vue attaches a listener for an emit the
-component no longer declares as a plain attribute, so the handler stops firing
-with no error and no warning. The payload is unchanged, so only the name moves.
+one. This is a **silent break**: Vue
+attaches a listener for an emit the component no longer declares as a plain
+attribute, so the handler stops firing with no error and no warning. The
+payload is unchanged, so only the name moves.
 
-| Before                         | After     |
-| ------------------------------ | --------- |
-| `AreaChart` `@datapoint-click` | `@select` |
-| `BarChart` `@datapoint-click`  | `@select` |
-| `LineChart` `@datapoint-click` | `@select` |
-| `DonutChart` `@slice-click`    | `@select` |
-| `FunnelChart` `@stage-click`   | `@select` |
-| `HeatmapChart` `@cell-click`   | `@select` |
-| `SankeyChart` `@link-click`    | `@select` |
-| `ScatterChart` `@point-click`  | `@select` |
+| Before                            | After                     |
+| --------------------------------- | ------------------------- |
+| `AreaChart` `@datapoint-click`    | `@select`                 |
+| `BarChart` `@datapoint-click`     | `@select`                 |
+| `LineChart` `@datapoint-click`    | `@select`                 |
+| `DonutChart` `@slice-click`       | `@select`                 |
+| `FunnelChart` `@stage-click`      | `@select`                 |
+| `HeatmapChart` `@cell-click`      | `@select`                 |
+| `SankeyChart` `@link-click`       | `@select`                 |
+| `ScatterChart` `@point-click`     | `@select`                 |
 
 ```vue
 <!-- Before -->
 <BarChart :data="rows" x="warehouse" :y="['picked']" @datapoint-click="open" />
-<DonutChart
-  :data="rows"
-  category="channel"
-  value="sessions"
-  @slice-click="open"
-/>
-<SankeyChart
-  :data="rows"
-  source="from"
-  target="to"
-  value="amount"
-  @link-click="open"
-/>
+<DonutChart :data="rows" category="channel" value="sessions" @slice-click="open" />
+<SankeyChart :data="rows" source="from" target="to" value="amount" @link-click="open" />
 
 <!-- After -->
 <BarChart :data="rows" x="warehouse" :y="['picked']" @select="open" />
 <DonutChart :data="rows" category="channel" value="sessions" @select="open" />
-<SankeyChart
-  :data="rows"
-  source="from"
-  target="to"
-  value="amount"
-  @select="open"
-/>
+<SankeyChart :data="rows" source="from" target="to" value="amount" @select="open" />
 ```
 
-`select` also fires on Enter and Space over the plot's keyboard cursor, which is
-why the old names had to go — they described the mouse, not the behavior.
+`select` also fires on Enter and Space over the plot's keyboard cursor, which
+is why the old names had to go — they described the mouse, not the behavior.
 
 Grep for `datapoint-click`, `slice-click`, `stage-click`, `cell-click`,
 `link-click` and `point-click`, and for the camelCase spellings in render
@@ -2840,10 +2782,10 @@ subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 
 **Will my CSS break?** In two ways. Where component structure changed,
 components expose `data-*` hooks (`data-slot`, `data-state`, `data-size`,
-`data-variant`) — audit selectors that targeted tags or classes. Separately, the
-token vocabulary moved: removed radius aliases and the shifted ink scales emit
-no CSS at all, with no build or type error. Run the [token codemod](#tokens)
-before you audit anything by hand.
+`data-variant`) — audit selectors that targeted tags or classes. Separately,
+the token vocabulary moved: removed radius aliases and the shifted ink scales
+emit no CSS at all, with no build or type error. Run the
+[token codemod](#tokens) before you audit anything by hand.
 
 **Do I have to run the codemod?** Yes, if you use Tailwind utilities from the
 frappe-ui preset. It is the only mechanical step in this guide — every

@@ -21,7 +21,7 @@
   },
   {
     name: 'searchThreshold',
-    description: 'Minimum number of shortcuts that must be registered before the search\ninput is shown (default: 20).',
+    description: 'The search input appears once the number of rows passes this count.\nRows, not registrations: shortcuts that merge count once (default: 20).',
     required: false,
     type: 'number',
     default: '20'

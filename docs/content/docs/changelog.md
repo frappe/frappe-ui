@@ -449,7 +449,7 @@ recomputes `hasPreviousPage` after restoring `start`.
 (`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
 error, so the palette just never opens — grep for `CommandPalette` and
 `v-model:show` after upgrading. `Mod+K` now opens the palette on its own
-(registered internally via `useShortcut`); delete any app-level keydown
+(registered internally via `useKeyboardShortcut`); delete any app-level keydown
 listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
 gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
 `string | Component` (lucide class strings, emoji, or a component) instead of
@@ -469,14 +469,16 @@ directory with a `types.ts`, a docs page, and a Cypress test.
 `matchesShortcut` is removed from the `frappe-ui` package export. Its own
 doc comment already said "exported for unit tests only" — it was never
 meant to be public API (Rule 9). Loud break (import error) for anyone who
-imported it directly; no signal of any real consumer doing so.
+imported it directly; no signal of any real consumer doing so. The composable
+itself is now `useKeyboardShortcut`, further up this release.
 
 ### KeyboardShortcutsModal / useShortcut — brought to bar
 
 `KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously
 only unit-tested). `useShortcut` gained a short entry on the
-[composables page](/docs/other/composables); its API was
-already stable and is unchanged.
+[composables page](/docs/other/composables). Both were renamed later in this
+release, to `KeyboardShortcutsDialog` and `useKeyboardShortcut`. Read the
+entries at the top of this release for the API that ships.
 
 ### SettingsDialog — `SettingsBody`'s exposed type
 

@@ -148,6 +148,9 @@ never fire. The names are `Digit0`–`Digit9`, `Plus`, `Minus`, `Equal`, `Slash`
 `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`,
 `BracketLeft`, `BracketRight`.
 
+`Plus` is the keypad `+`. A normal keyboard types `+` with Shift, so ⌘+ is
+`Mod+Shift+Equal`.
+
 Letters, function keys and named keys (`Escape`, `Enter`, `Space`, `ArrowUp`, …)
 match `event.key`. Digits and punctuation match `event.code`, so
 `Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike. The full grammar is in
@@ -186,8 +189,10 @@ useKeyboardShortcut({
 
 ### Two shortcuts on one combo
 
-The last registration wins. In development the library warns once per combo,
-naming the shadowed shortcut and the active one.
+The last registration that is **enabled at the time of the keypress** wins.
+`enabled` is resolved before precedence, so two registrations with mutually
+exclusive guards both keep working. In development the library warns once per
+combo, naming the shadowed shortcut and the active one.
 
 ### Showing them to the user
 

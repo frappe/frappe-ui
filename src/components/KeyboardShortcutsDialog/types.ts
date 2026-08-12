@@ -4,8 +4,8 @@ export interface KeyboardShortcutsDialogProps {
   /** CSS value for top padding when position is top (default: "5vh"). */
   paddingTop?: string
   /**
-   * Minimum number of shortcuts that must be registered before the search
-   * input is shown (default: 20).
+   * The search input appears once the number of rows passes this count.
+   * Rows, not registrations: shortcuts that merge count once (default: 20).
    */
   searchThreshold?: number
 }
