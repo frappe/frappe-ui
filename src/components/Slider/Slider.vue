@@ -39,16 +39,20 @@ const callerAria = computed(() => {
 })
 
 // A slider has no intrinsic width, so it carries `w-full`. That is a default,
-// not a rule — but two width utilities in one class list are decided by
-// stylesheet order, not by which one the caller wrote, and there is no class
-// merger here. So drop ours when the caller brings their own, on whichever
-// element the caller's class lands on. Token-split and strip variant prefixes
-// the way `Avatar.vue` does, so `sm:w-64` and `data-[open]:w-64` both count.
-// `min-w-*` and `max-w-*` deliberately do not: those pair with `w-full`.
+// not a rule — but two unprefixed width utilities in one class list are decided
+// by stylesheet order, not by which one the caller wrote, and there is no class
+// merger here. So drop ours when the caller brings their own.
+//
+// Prefixed tokens are excluded on purpose. Tailwind emits variant utilities
+// after the base ones, so `w-full sm:w-64` already resolves the caller's way at
+// `sm` without our help. Dropping `w-full` for them instead leaves `width:auto`
+// everywhere the variant does not apply, which collapses the slider to zero
+// inside a flex parent. `min-w-*` and `max-w-*` are excluded too: those pair
+// with `w-full` rather than replace it.
 const hasCallerWidth = computed(() => {
   return normalizeClass(attrs.class)
     .split(/\s+/)
-    .some((token) => /^!?-?w-/.test(token.slice(token.lastIndexOf(':') + 1)))
+    .some((token) => !token.includes(':') && /^!?-?w-/.test(token))
 })
 
 // What is left to fall through to the control: class and style are placed by

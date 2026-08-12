@@ -284,18 +284,23 @@ describe('Slider', () => {
       attrs: { class: 'w-64' },
     })
     cy.get('#sl-bare-w').should('not.have.class', 'w-full')
+  })
 
+  it('keeps its own w-full against a prefixed caller width', () => {
+    // Tailwind emits variant utilities after the base ones, so `sm:w-64` wins
+    // at `sm` on its own. Dropping `w-full` for it would leave `width: auto`
+    // below `sm`, which is zero inside a flex parent.
     cy.mount(Slider, {
       props: { id: 'sl-variant-w', modelValue: [25] },
       attrs: { class: 'sm:w-64' },
     })
-    cy.get('#sl-variant-w').should('not.have.class', 'w-full')
+    cy.get('#sl-variant-w').should('have.class', 'w-full')
 
     cy.mount(Slider, {
       props: { id: 'sl-arbitrary-w', modelValue: [25] },
       attrs: { class: 'data-[open]:w-64' },
     })
-    cy.get('#sl-arbitrary-w').should('not.have.class', 'w-full')
+    cy.get('#sl-arbitrary-w').should('have.class', 'w-full')
   })
 
   it('names the thumb from a #label slot', () => {
