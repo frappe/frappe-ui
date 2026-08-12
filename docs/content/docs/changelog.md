@@ -672,7 +672,7 @@ and `Rating` exports `RatingEmits`.
   independent of the auto-header).
 - Canonical slots `#default`, `#title`, `#actions` (scoped with
   `{ close, actions }`). The legacy `#body*` slots are removed — see below.
-- `icon.theme` (`yellow | blue | red | green`) replaces `icon.appearance`,
+- `icon.theme` (`amber | blue | red | green`) replaces `icon.appearance`,
   which is removed — see below.
 - Auto-header no longer renders an "Untitled" fallback.
 
@@ -709,7 +709,7 @@ aliased and nothing warns.
   dialog silently becomes dismissible. Use `dismissible`.
 - **Breaking, silent:** `icon.appearance` and `DialogIconAppearance` are gone;
   only `icon.theme` remains. An `appearance` key is dropped, so the icon
-  renders with no tone. Map `warning → yellow`, `info → blue`, `danger → red`,
+  renders with no tone. Map `warning → amber`, `info → blue`, `danger → red`,
   `success → green`.
 - **Breaking, silent:** the legacy `#body`, `#body-content`, `#body-main`,
   `#body-title` and `#body-header` slots are gone. Vue drops an unknown named
