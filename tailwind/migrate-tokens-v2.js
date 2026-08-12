@@ -782,15 +782,23 @@ function main() {
       inkShiftMarkerDirs
         .map((d) => findInkShiftMarkerBelow(d, { roots: inkShiftMarkerDirs }))
         .find(Boolean)
+    // Both branches print this. Keep one source and let each pass its writer;
+    // two copies drift.
+    const printVendoredHint = (write) => {
+      write('   If the marker sits in a vendored copy outside node_modules, targeting')
+      write(`   any ancestor of it finds it again — target directories that do not contain ${marker}.\n`)
+    }
     if (marker && !dryRun) {
       console.error(`\n✗  ${marker} found: --ink-shift already ran on this target.`)
       console.error('   A second run would double-shift every chromatic ink token.')
-      console.error('   Delete the marker only to re-run the shift on purpose.\n')
+      console.error('   Delete the marker only to re-run the shift on purpose.')
+      printVendoredHint(console.error)
       process.exit(1)
     }
     if (marker) {
       console.warn(`\n⚠  ${marker} found: --ink-shift already ran on this target.`)
-      console.warn('   A real run would double-shift and will refuse to start.\n')
+      console.warn('   A real run would double-shift and will refuse to start.')
+      printVendoredHint(console.warn)
     } else {
       console.warn('\n⚠  Ink scale shift (#1016): this must run exactly once per codebase.')
       console.warn(
