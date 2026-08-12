@@ -252,6 +252,23 @@ useShortcut([
     expect(migrated).toContain('enabled: canEdit')
   })
 
+  it('reads a method shorthand as the property it is', () => {
+    const source = `useShortcut({\n\tkey: 's',\n\tctrl: true,\n\tdescription: 'Save',\n\thandler() {\n\t\tsave()\n\t},\n})\n`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain("combo: 'Mod+S'")
+    expect(migrated).toContain('handler() {')
+    expect(refusals).toEqual([])
+  })
+
+  it('renames a condition method shorthand without eating its body', () => {
+    const source = `useShortcut({\n\tkey: 's',\n\tdescription: 'Save',\n\tcondition() {\n\t\treturn ready\n\t},\n\thandler: save,\n})\n`
+    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain('enabled() {')
+    expect(migrated).toContain('return ready')
+  })
+
   it('converts a keys: { ... } object that carries no other config field', () => {
     const { migrated } = migrateShortcuts(
       'commands.register({\n\tkeys: { key: "p", ctrl: true, description: "Preview" },\n})\n',

@@ -458,6 +458,12 @@ function enclosingObject(source, mask, offset, limit) {
   return null
 }
 
+// The name at the head of a property: `handler:`, `'handler':`, and the method
+// shorthands `handler()`, `async handler()`, `*handler()`.
+const METHOD_HEAD = /^(?:async\s+)?\*?\s*(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*\(/
+const PROPERTY_NAME_SPAN =
+  /^(?:async\s+)?\*?\s*(?:(['"])[A-Za-z_$][\w$]*\1|[A-Za-z_$][\w$]*)/
+
 // Splits an object literal into its top-level properties, keeping the exact
 // source range of each so a rewrite preserves the file's formatting.
 function parseProperties(source, mask, range) {
@@ -473,9 +479,12 @@ function parseProperties(source, mask, range) {
     const end = from + text.trimEnd().length
     const body = source.slice(start, end)
     const named = /^(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*:/.exec(body)
+    // `handler() { save() }` is a property too. Without this it reads as an
+    // unnamed member, and the object is refused as if it spread another one.
+    const method = named ? null : METHOD_HEAD.exec(body)
     props.push({
-      name: named ? (named[2] ?? named[3]) : null,
-      shorthand: !named && /^[A-Za-z_$][\w$]*$/.test(body),
+      name: named ? (named[2] ?? named[3]) : method ? (method[2] ?? method[3]) : null,
+      shorthand: !named && !method && /^[A-Za-z_$][\w$]*$/.test(body),
       text: body,
       value: named ? body.slice(named[0].length).trim() : body,
       start,
@@ -603,10 +612,13 @@ function groupRuns(indices) {
   return runs
 }
 
+// Replaces the name only, so `condition: fn` and `condition() { ... }` both
+// keep their value untouched.
 function renameProperty(prop, name) {
+  const span = PROPERTY_NAME_SPAN.exec(prop.text)
   return {
     start: prop.start,
-    end: prop.start + prop.text.indexOf(':'),
+    end: prop.start + (span ? span[0].length : prop.text.indexOf(':')),
     text: name,
   }
 }
