@@ -26,7 +26,6 @@ Two cross-cutting conventions to know before reading anything else:
 - [Badge](https://ui.frappe.io/docs/components/badge): status pill; same `variant` + `theme` axes as Button.
 - [Breadcrumbs](https://ui.frappe.io/docs/components/breadcrumbs): page-header trail; takes `items: { label, route }[]`.
 - [Button](https://ui.frappe.io/docs/components/button): primary trigger element; supports `route`/`link` for nav, `icon`/`iconLeft`/`iconRight`, `loading`, `disabled`.
-- [Calendar](https://ui.frappe.io/docs/experimental/calendar): month/week calendar view (experimental).
 - [Charts](https://ui.frappe.io/docs/charts/overview): chart family (line, bar, etc.); one page per chart under `/docs/charts`.
 - [Checkbox](https://ui.frappe.io/docs/components/checkbox): boolean input; standard labeling contract.
 - [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`.
@@ -34,11 +33,12 @@ Two cross-cutting conventions to know before reading anything else:
 - [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissible`/`bare`. Imperative API: `dialog.confirm`, `dialog.alert`, `dialog.prompt`.
 - [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
+- [Editor](https://ui.frappe.io/docs/molecules/editor): TipTap-based rich editor, from the `frappe-ui/editor` subpath (heavy, and not SSR-safe — use only when needed).
 - [ErrorMessage](https://ui.frappe.io/docs/components/errormessage): inline error display.
 - [FileUploader](https://ui.frappe.io/docs/components/fileuploader): Frappe-native file upload with progress.
 - [FormControl](https://ui.frappe.io/docs/components/formcontrol): the default labeled-field wrapper; pick `type` to render text/textarea/select/checkbox/combobox with the shared `label`/`description`/`error`/`required` contract.
 - [ItemListRow](https://ui.frappe.io/docs/components/itemlistrow): single-row list item primitive.
-- [ListView](https://ui.frappe.io/docs/components/listview): table/grid list with selection, sorting, virtualization.
+- [List](https://ui.frappe.io/docs/molecules/list): the list primitive, from the `frappe-ui/list` subpath; `List` + `ListRow`/`ListCell`, feed or table mode.
 - [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `string[]`.
 - [Password](https://ui.frappe.io/docs/components/password): masked input with show/hide.
 - [Popover](https://ui.frappe.io/docs/components/popover): anchored floating panel; `v-model:open`, `#target` + `#body` slots.
@@ -50,20 +50,27 @@ Two cross-cutting conventions to know before reading anything else:
 - [Switch](https://ui.frappe.io/docs/components/switch): boolean toggle for settings.
 - [Tabs](https://ui.frappe.io/docs/components/tabs): full content tabs and inline TabButtons.
 - [Textarea](https://ui.frappe.io/docs/components/textarea): multi-line text input.
-- [TextEditor](https://ui.frappe.io/docs/components/texteditor): TipTap-based rich editor (heavy — use only when needed).
 - [TextInput](https://ui.frappe.io/docs/components/textinput): single-line text input.
 - [TimePicker](https://ui.frappe.io/docs/components/timepicker): time input.
 - [Toast](https://ui.frappe.io/docs/components/toast): imperative notifications: `toast.success/error/info`.
 - [Tooltip](https://ui.frappe.io/docs/components/tooltip): hover hint; not for actionable content (use Popover/Dropdown).
 - [Tree](https://ui.frappe.io/docs/components/tree): hierarchical list.
 
-## Design system
+## Foundations
 
-- [Background color tokens](https://ui.frappe.io/docs/design-system/background-color): `bg-surface-*` semantic surface tokens.
-- [Text color tokens](https://ui.frappe.io/docs/design-system/text): `text-ink-*` semantic foreground tokens.
-- [Border color tokens](https://ui.frappe.io/docs/design-system/border-color): `border-outline-*` semantic border tokens.
-- [Border radius](https://ui.frappe.io/docs/design-system/border-radius): radius scale.
-- [Drop shadow](https://ui.frappe.io/docs/design-system/drop-shadow): shadow scale.
+- [Tailwind setup](https://ui.frappe.io/docs/foundations/tailwind): wiring the preset into an app.
+- [Base colors](https://ui.frappe.io/docs/foundations/colors/base): the raw color scales.
+- [Semantic colors](https://ui.frappe.io/docs/foundations/colors/semantic): `bg-surface-*`, `text-ink-*`, `border-outline-*` tokens.
+- [Chart colors](https://ui.frappe.io/docs/foundations/colors/charts): the categorical chart palette.
+- [Typography](https://ui.frappe.io/docs/foundations/typography): the type scale.
+- [Radius](https://ui.frappe.io/docs/foundations/radius): radius scale.
+- [Elevation](https://ui.frappe.io/docs/foundations/elevation): shadow scale.
+- [Focus ring](https://ui.frappe.io/docs/foundations/focus-ring): the shared focus treatment.
+
+## Experimental and legacy
+
+- [Experimental](https://ui.frappe.io/docs/experimental): everything on the `frappe-ui/experimental` subpath — parked v0 families (`Calendar`, `ListView`, v1 charts, v0 `TextEditor`, sprite icons) and incubating exports. Unstable: no deprecation promise. Do not import it from product apps.
+- [Legacy components](https://ui.frappe.io/docs/components/legacy): what was removed in v1 and the replacement for each, plus which families were parked rather than removed.
 
 ## Data fetching
 
