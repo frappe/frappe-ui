@@ -63,9 +63,11 @@ sites get a one-time dev warning, and the shortcut never fires.
 | Digits, punctuation                | `event.code`    |
 
 Digits and punctuation read the physical key, so a shifted character still
-resolves: `Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike, and `Mod+Slash`
-fires wherever `/` sits on the layout. This is the rule editors use, and the
-rule Frappe Sheets already used before the library had one.
+resolves: `Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike. A punctuation name
+means the physical key position, as labelled on a US layout, so `Mod+Slash`
+fires on the same key everywhere even where that key types another character.
+This is the rule editors use, and the rule Frappe Sheets already used before the
+library had one.
 
 Letters read the character, so `Mod+S` follows the user's layout rather than the
 physical US position of the S key.

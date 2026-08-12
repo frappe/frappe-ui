@@ -107,7 +107,7 @@ describe('matchesCombo — digits and punctuation read event.code', () => {
     ).toBe(true)
   })
 
-  it('matches punctuation wherever the layout puts the character', () => {
+  it('matches punctuation by key position, not by the character it types', () => {
     expect(
       matchesCombo(makeEvent({ key: '-', code: 'Slash', ...MOD }), 'Mod+Slash'),
     ).toBe(true)
