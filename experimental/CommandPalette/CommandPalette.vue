@@ -87,8 +87,10 @@ const query = defineModel<string>('query', { default: '' })
 
 const listbox = useTemplateRef<{ highlightFirstItem: () => void }>('listbox')
 
-const activeValue = ref<CommandPaletteValue | undefined>()
-const selectedValue = ref<CommandPaletteValue | undefined>()
+// `shallowRef`, so an object value comes back out of the slot props as the
+// object the caller passed in and not a reactive proxy of it.
+const activeValue = shallowRef<CommandPaletteValue | undefined>()
+const selectedValue = shallowRef<CommandPaletteValue | undefined>()
 
 // `shallowRef` + `triggerRef`, so the registrations keep their `ComputedRef`
 // shape instead of being unwrapped by a deep `ref`.
@@ -172,7 +174,6 @@ provideCommandPaletteContext({
   query,
   filterable: computed(() => props.filterable),
   activeValue,
-  selectedValue,
   empty,
   matches,
   registerItem,

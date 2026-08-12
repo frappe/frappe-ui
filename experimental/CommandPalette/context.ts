@@ -20,8 +20,6 @@ export interface CommandPaletteContext {
   filterable: ComputedRef<boolean>
   /** The value of the item the keyboard is on. */
   activeValue: Ref<CommandPaletteValue | undefined>
-  /** The value the listbox holds, so an item can report `selected`. */
-  selectedValue: Ref<CommandPaletteValue | undefined>
   /** True while the filter hides every item. */
   empty: ComputedRef<boolean>
   /** Whether `text` plus `keywords` pass the current query. */

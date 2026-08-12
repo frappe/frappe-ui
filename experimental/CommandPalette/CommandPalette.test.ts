@@ -323,6 +323,37 @@ describe('CommandPalette', () => {
     expect(items()[0].getAttribute('data-state')).toBe('active')
   })
 
+  it('marks the active row when the values are objects', async () => {
+    // Regression: comparing the highlight against a copy of the value made
+    // `data-state` never appear for object values, because a `ref` wraps an
+    // object in a reactive proxy. The highlight is read off the element now.
+    const rows = [{ title: 'One' }, { title: 'Two' }]
+    const onSelect = vi.fn()
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(CommandPalette, { open: true, onSelect }, () => [
+            h(CommandPaletteInput),
+            ...rows.map((row) =>
+              h(CommandPaletteItem, { value: row }, () => row.title),
+            ),
+          ])
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+    expect(items()[0].getAttribute('data-state')).toBe('active')
+    press('ArrowDown')
+    await flush()
+    expect(items()[1].getAttribute('data-state')).toBe('active')
+    press('Enter')
+    await flush()
+    expect(onSelect.mock.calls[0][0]).toBe(rows[1])
+  })
+
   it('writes the typed text back through `update:query`', async () => {
     const { query } = mount()
     await nextTick()

@@ -1,6 +1,7 @@
 <template>
   <div v-if="visible" class="px-2.5">
     <ListboxItem
+      ref="item"
       :value="value"
       :disabled="disabled"
       as-child
@@ -31,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListboxItem } from 'reka-ui'
+import { ListboxItem, injectListboxRootContext } from 'reka-ui'
 import {
   computed,
   onMounted,
@@ -107,12 +108,19 @@ const unregister = palette?.registerItem(id, {
 
 onUnmounted(() => unregister?.())
 
-const active = computed(
-  () => palette != null && palette.activeValue.value === props.value,
-)
+// Read the highlight off the listbox's own element, not off a copy of the
+// value. A caller that rebuilds its item objects on every render would break
+// a value comparison; the element does not move.
+const listbox = injectListboxRootContext(null)
+const item = useTemplateRef<{ $el: HTMLElement }>('item')
+
+const active = computed(() => {
+  const el = item.value?.$el
+  return !!el && listbox?.highlightedElement.value === el
+})
 
 const selected = computed(
-  () => palette != null && palette.selectedValue.value === props.value,
+  () => listbox != null && listbox.modelValue.value === props.value,
 )
 
 // One attribute, so `active` wins: it is the row the palette highlights.
