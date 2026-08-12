@@ -2596,14 +2596,19 @@ So the codemod stops on the site and prints the named key to use:
 
 ```
 ✗ Not converted — 3 sites need a decision:
-  src/sheets/useShortcuts.js:L96  key '+' is punctuation. Write the named key `Plus`
   src/sheets/useShortcuts.js:L95  key '=' is punctuation. Write the named key `Equal`
+  src/sheets/useShortcuts.js:L96  key '+' is a shifted character. Write `Shift+Equal`
   src/Commands/index.ts:L196      key '?' is a shifted character. Write `Shift+Slash`
 ```
 
 The named keys are `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`,
 `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft` and
 `BracketRight`.
+
+`Plus` is the keypad `+`. One name, one physical key. The `+` a normal
+keyboard types needs Shift, so `{ key: '+', ctrl: true }` becomes
+`'Mod+Shift+Equal'`. The codemod says so on the line, because `Mod+Plus`
+would bind a key the user never presses and report a clean run.
 
 ### Digits convert, and get listed
 

@@ -92,8 +92,11 @@ const GUIDE = 'https://ui.frappe.io/docs/migration#keyboard-shortcuts'
 
 // Punctuation is never rewritten. These are the names the combo should use,
 // printed with each refusal so the fix is a copy-paste.
+//
+// `+` is not here. v1 names `Plus` for the keypad `+`, one name per physical
+// key, so the `+` a normal keyboard types is `Shift+Equal`. It sits in
+// SHIFTED_CHARS below. See spec/shortcuts.md, "Key names".
 export const PUNCTUATION_NAMES = {
-  '+': 'Plus',
   '-': 'Minus',
   '=': 'Equal',
   '/': 'Slash',
@@ -112,6 +115,7 @@ export const PUNCTUATION_NAMES = {
 // unshifted key and adds `Shift`. Printed as a hint; still a refusal, because
 // adding `Shift` changes which events match.
 export const SHIFTED_CHARS = {
+  '+': 'Shift+Equal',
   '~': 'Shift+Backtick',
   '!': 'Shift+Digit1',
   '@': 'Shift+Digit2',
@@ -132,6 +136,12 @@ export const SHIFTED_CHARS = {
   '<': 'Shift+Comma',
   '>': 'Shift+Period',
   '?': 'Shift+Slash',
+}
+
+// A v1 key name that reads like the character but names a different physical
+// key. Printed with the refusal, so nobody reaches for the wrong one.
+const NEAR_MISS_NAMES = {
+  '+': '`Plus` is the keypad `+`, a different physical key.',
 }
 
 // Keys that keep matching on `KeyboardEvent.key`. v0 compared them
@@ -548,8 +558,9 @@ export function keyToComboPart(key, { hasShift } = {}) {
       }
     }
     if (key in SHIFTED_CHARS) {
+      const nearMiss = NEAR_MISS_NAMES[key] ? ` ${NEAR_MISS_NAMES[key]}` : ''
       return {
-        refusal: `key '${key}' is a shifted character. v1 matches the physical key, so write \`${SHIFTED_CHARS[key]}\`.`,
+        refusal: `key '${key}' is a shifted character. v1 matches the physical key, so write \`${SHIFTED_CHARS[key]}\`.${nearMiss}`,
       }
     }
   }

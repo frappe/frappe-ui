@@ -10,6 +10,7 @@ import {
   keyToComboPart,
   migrateShortcuts,
   PUNCTUATION_NAMES,
+  SHIFTED_CHARS,
 } from './migrate-shortcuts-v1.js'
 
 const SCRIPT = fileURLToPath(new URL('./migrate-shortcuts-v1.js', import.meta.url))
@@ -72,12 +73,25 @@ describe('combo building', () => {
     }
   })
 
-  it('never produces Mod++ for the plus key', () => {
+  it('never produces Mod++ for the plus key, and never points at Plus', () => {
     // The whole reason this codemod exists: 'Mod++' splits into
     // ['Mod', '', ''] and silently never fires.
+    //
+    // `Plus` is the keypad `+` in the v1 grammar (spec/shortcuts.md). The `+` a
+    // normal keyboard types is Shift+Equal, so naming `Plus` here would bind
+    // the wrong physical key just as silently.
     const result = buildCombo({ key: '+', ctrl: true })
     expect(result.combo).toBeUndefined()
-    expect(result.refusal).toContain('Plus')
+    expect(result.refusal).toContain('`Shift+Equal`')
+    expect(result.refusal).toContain('keypad')
+  })
+
+  it('refuses every shifted character with its unshifted key name', () => {
+    for (const [key, name] of Object.entries(SHIFTED_CHARS)) {
+      const result = keyToComboPart(key)
+      expect(result.part).toBeUndefined()
+      expect(result.refusal).toContain(name)
+    }
   })
 
   it('refuses an uppercase letter that carries no shift flag', () => {
@@ -173,7 +187,15 @@ useShortcut([
     expect(migrated).toContain("key: '+', ctrl: true")
     expect(refusals).toHaveLength(1)
     expect(refusals[0].line).toBe(3)
-    expect(refusals[0].message).toContain('`Plus`')
+    expect(refusals[0].message).toContain('`Shift+Equal`')
+  })
+
+  it('reports an unshifted punctuation site with its named key', () => {
+    const source = inCall("{ key: '-', ctrl: true, description: 'Zoom out', handler: zoomOut }")
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(migrated).toContain("key: '-', ctrl: true")
+    expect(refusals[0].message).toContain('`Minus`')
   })
 
   it('marks a digit conversion so a shifted digit gets a second look', () => {
@@ -482,7 +504,7 @@ describe('cli', () => {
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('1 sites need a decision')
-    expect(result.stdout).toContain('`Plus`')
+    expect(result.stdout).toContain('`Shift+Equal`')
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toContain("key: '+'")
   })
 
