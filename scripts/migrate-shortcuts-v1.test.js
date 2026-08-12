@@ -257,6 +257,24 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
+  it('converts an object whose properties carry trailing comments', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut([
+  {
+    key: 's', // save the file
+    ctrl: true, // Cmd on macOS
+    description: 'Save',
+    handler: save,
+  },
+])
+`
+    const { migrated, refusals } = migrateShortcuts(source)
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("combo: 'Mod+S', // save the file")
+    expect(migrated).not.toContain('ctrl: true')
+  })
+
   it('converts an object whose key name is quoted', () => {
     const { migrated, refusals } = migrateShortcuts(
       inCall("{ 'key': 's', ctrl: true, description: 'Save', handler: save }"),

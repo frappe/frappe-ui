@@ -272,6 +272,12 @@ function declaresLocally(source, name) {
 
 // ---------- LEXING ----------
 
+// Mask values. Everything non-zero is "not code". Comments carry their own
+// value, because a property may start or end with one and the property name
+// still has to be readable.
+const MASK_LITERAL = 1
+const MASK_COMMENT = 2
+
 // Marks every character inside a string, a template literal, a comment or a
 // regex literal. Object scanning reads this mask, so a brace or a `key:`
 // inside a string never counts.
@@ -280,8 +286,8 @@ function maskLiterals(source) {
   let i = 0
   let lastSignificant = ''
 
-  const markRange = (from, to) => {
-    for (let j = from; j < to && j < mask.length; j++) mask[j] = 1
+  const markRange = (from, to, value = MASK_LITERAL) => {
+    for (let j = from; j < to && j < mask.length; j++) mask[j] = value
   }
 
   while (i < source.length) {
@@ -291,14 +297,14 @@ function maskLiterals(source) {
     if (c === '/' && next === '/') {
       const end = source.indexOf('\n', i)
       const stop = end === -1 ? source.length : end
-      markRange(i, stop)
+      markRange(i, stop, MASK_COMMENT)
       i = stop
       continue
     }
     if (c === '/' && next === '*') {
       const end = source.indexOf('*/', i + 2)
       const stop = end === -1 ? source.length : end + 2
-      markRange(i, stop)
+      markRange(i, stop, MASK_COMMENT)
       i = stop
       continue
     }
@@ -494,11 +500,17 @@ function parseProperties(source, mask, range) {
   let depth = 0
   let segStart = inner[0]
 
+  // A comment sits inside the segment a comma split off, so `key: 's', // save`
+  // leaves the next segment starting at `//`. Skipping comments as well as
+  // whitespace keeps the property name at the head, where the parser reads it.
+  const skippable = (index) => /\s/.test(source[index]) || mask[index] === MASK_COMMENT
+
   const push = (from, to, commaEnd) => {
-    const text = source.slice(from, to)
-    if (!text.trim()) return
-    const start = from + (text.length - text.trimStart().length)
-    const end = from + text.trimEnd().length
+    let start = from
+    let end = to
+    while (start < end && skippable(start)) start++
+    while (end > start && skippable(end - 1)) end--
+    if (start >= end) return
     const body = source.slice(start, end)
     const named = /^(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*:/.exec(body)
     // `handler() { save() }` is a property too. Without this it reads as an
