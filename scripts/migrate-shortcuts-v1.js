@@ -791,7 +791,16 @@ const TYPE_DECLARATION = /\b(?:ctrl|shift|alt)\s*\??\s*:\s*boolean\b/
 // ---------- COMBO BUILDING ----------
 
 // Returns a combo part or a refusal — never a guess.
-export function keyToComboPart(key, { hasShift } = {}) {
+//
+// `prefix` is the modifier run this site holds, such as `Mod+`. A refusal
+// names the key on its own and then the whole combo, because an author who
+// pastes the key alone loses the modifiers and binds the bare key.
+export function keyToComboPart(key, { hasShift, prefix = '' } = {}) {
+  // The whole property to write, modifiers and all. Naming the key on its own
+  // reads as an edit to `key`, and `key: 'Slash'` is still a v0 config: it
+  // never fired, and the next run refuses it again.
+  const write = (combo) => `\`combo: '${prefix}${combo}'\``
+
   if (key.length === 1) {
     if (/[a-z]/.test(key)) return { part: key.toUpperCase() }
     if (/[A-Z]/.test(key)) {
@@ -800,19 +809,19 @@ export function keyToComboPart(key, { hasShift } = {}) {
       // for an uppercase key, so `{ key: 'S' }` fired on S and on Shift+S
       // alike. v1 matches exactly, and no single combo covers both.
       return {
-        refusal: `key '${key}' is uppercase with no \`shift: true\`. v0 matched the letter either way and ignored Shift, so it fired on ${key.toLowerCase()} and on Shift+${key}. v1 is exact: write \`${key}\` for the plain key, \`Shift+${key}\` for the shifted one, or register both.`,
+        refusal: `key '${key}' is uppercase with no \`shift: true\`. v0 matched the letter either way and ignored Shift, so it fired on ${key.toLowerCase()} and on Shift+${key}. v1 is exact. Write ${write(key)} for the plain key, ${write(`Shift+${key}`)} for the shifted one, or register both.`,
       }
     }
     if (/[0-9]/.test(key)) return { part: `Digit${key}`, digit: true }
     if (key in PUNCTUATION_NAMES) {
       return {
-        refusal: `key '${key}' is punctuation. Write the named key \`${PUNCTUATION_NAMES[key]}\` — '${key}' would collide with the combo separator or with the keyboard layout.`,
+        refusal: `key '${key}' is punctuation. '${key}' would collide with the combo separator or with the keyboard layout, so v1 names the key \`${PUNCTUATION_NAMES[key]}\`. Write ${write(PUNCTUATION_NAMES[key])} by hand.`,
       }
     }
     if (key in SHIFTED_CHARS) {
       const nearMiss = NEAR_MISS_NAMES[key] ? ` ${NEAR_MISS_NAMES[key]}` : ''
       return {
-        refusal: `key '${key}' is a shifted character. v1 matches the physical key, so write \`${SHIFTED_CHARS[key]}\`.${nearMiss}`,
+        refusal: `key '${key}' is a shifted character. v1 matches the physical key, which is named \`${SHIFTED_CHARS[key]}\`. Write ${write(SHIFTED_CHARS[key])} by hand.${nearMiss}`,
       }
     }
   }
@@ -820,10 +829,23 @@ export function keyToComboPart(key, { hasShift } = {}) {
   const named = NAMED_KEY_BY_LOWER.get(key.toLowerCase())
   if (named) return { part: named, revived: DEAD_V0_SPELLINGS.has(key.toLowerCase()) }
 
+  // A v1 key name in a v0 `key` field lands here, because v0 compared
+  // `event.key` and never saw that spelling.
+  const v1Name = key in PUNCTUATION_VALUES || SHIFTED_VALUES.has(key)
+  const hint = v1Name
+    ? ` \`${key}\` is a v1 key name, so write ${write(key)} instead of a \`key\`.`
+    : ''
   return {
-    refusal: `key '${key}' has no known v1 spelling. Take the name from the combo reference in the migration guide.`,
+    refusal: `key '${key}' has no known v1 spelling. Take the name from the combo reference in the migration guide.${hint}`,
   }
 }
+
+// Every v1 key name the refusals above name, so a second run can tell an
+// author who edited `key` instead of writing `combo` what went wrong.
+const PUNCTUATION_VALUES = Object.fromEntries(
+  Object.values(PUNCTUATION_NAMES).map((name) => [name, true]),
+)
+const SHIFTED_VALUES = new Set(Object.values(SHIFTED_CHARS).map((c) => c.split('+').pop()))
 
 // Modifier order is fixed, so one combo has exactly one spelling.
 const MODIFIER_ORDER = ['Mod', 'Ctrl', 'Alt', 'Shift']
@@ -835,10 +857,15 @@ export function buildCombo({ key, ctrl, alt, shift }) {
   if (alt) held.add('Alt')
   if (shift) held.add('Shift')
 
-  const { part, refusal, digit, revived } = keyToComboPart(key, { hasShift: !!shift })
+  const modifiers = MODIFIER_ORDER.filter((m) => held.has(m))
+  const prefix = modifiers.length > 0 ? `${modifiers.join('+')}+` : ''
+
+  const { part, refusal, digit, revived } = keyToComboPart(key, {
+    hasShift: !!shift,
+    prefix,
+  })
   if (refusal) return { refusal }
 
-  const modifiers = MODIFIER_ORDER.filter((m) => held.has(m))
   return { combo: [...modifiers, part].join('+'), digit, revived }
 }
 

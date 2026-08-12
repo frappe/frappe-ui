@@ -2618,23 +2618,27 @@ separator and a key, so `{ key: '+', ctrl: true }` written by hand becomes
 the build passes, the types pass, and you get one dev-console warning that a
 production build drops.
 
-So the codemod stops on the site and prints the named key to use:
+So the codemod stops on the site and prints the whole `combo` to write:
 
 ```
 ✗ Not converted — 3 sites need a decision:
-  src/sheets/useShortcuts.js:L95  key '=' is punctuation. Write the named key `Equal`
-  src/sheets/useShortcuts.js:L96  key '+' is a shifted character. Write `Shift+Equal`
-  src/Commands/index.ts:L196      key '?' is a shifted character. Write `Shift+Slash`
+  src/sheets/useShortcuts.js:L95  key '=' is punctuation ... Write `combo: 'Mod+Equal'` by hand.
+  src/sheets/useShortcuts.js:L96  key '+' is a shifted character ... Write `combo: 'Mod+Shift+Equal'` by hand.
+  src/Commands/index.ts:L196      key '?' is a shifted character ... Write `combo: 'Mod+Shift+Slash'` by hand.
 ```
 
 The named keys are `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`,
 `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft` and
 `BracketRight`.
 
-`Plus` is the keypad `+`. One name, one physical key. The `+` a normal
-keyboard types needs Shift, so `{ key: '+', ctrl: true }` becomes
-`'Mod+Shift+Equal'`. The codemod says so on the line, because `Mod+Plus`
-would bind a key the user never presses and report a clean run.
+`Plus` is the keypad `+`, the key whose `event.code` is `NumpadAdd`. One
+name, one physical key. The `+` a normal keyboard types needs Shift, so
+`{ key: '+', ctrl: true }` becomes `'Mod+Shift+Equal'`. The codemod writes
+that whole combo on the line, because `Mod+Plus` would bind a key the user
+never presses and report a clean run.
+
+Write the `combo` the line gives you. Putting a v1 key name back in `key`
+leaves a v0 config, which never fired, and the next run refuses it again.
 
 ### Digits convert, and get listed
 

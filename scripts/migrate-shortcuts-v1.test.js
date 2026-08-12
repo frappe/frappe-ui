@@ -94,6 +94,30 @@ describe('combo building', () => {
     }
   })
 
+  it('writes the whole property in a refusal, modifiers included', () => {
+    // An author who pastes the key alone loses the modifiers and binds the
+    // bare key. That is silent, and the next run exits clean.
+    expect(buildCombo({ key: '?', ctrl: true }).refusal).toContain("`combo: 'Mod+Shift+Slash'`")
+    expect(buildCombo({ key: '+', ctrl: true }).refusal).toContain("`combo: 'Mod+Shift+Equal'`")
+    expect(buildCombo({ key: '=', ctrl: true, shift: true }).refusal).toContain(
+      "`combo: 'Mod+Shift+Equal'`",
+    )
+    const upper = buildCombo({ key: 'S', ctrl: true }).refusal
+    expect(upper).toContain("`combo: 'Mod+S'`")
+    expect(upper).toContain("`combo: 'Mod+Shift+S'`")
+    expect(buildCombo({ key: '?' }).refusal).toContain("`combo: 'Shift+Slash'`")
+  })
+
+  it('tells an author who edited key instead of writing combo', () => {
+    // A refusal names a v1 key name. Putting that name back in `key` leaves a
+    // v0 config that never fired, so the run says what to write instead.
+    const { refusal } = buildCombo({ key: 'Slash', ctrl: true })
+
+    expect(refusal).toContain('`Slash` is a v1 key name')
+    expect(refusal).toContain("`combo: 'Mod+Slash'`")
+    expect(buildCombo({ key: 'wat' }).refusal).not.toContain('v1 key name')
+  })
+
   it('refuses an uppercase letter that carries no shift flag', () => {
     // v0's matchesShortcut compared the letter case-insensitively and skipped
     // its Shift check for an uppercase key, so it fired both ways.
