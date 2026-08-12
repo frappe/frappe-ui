@@ -596,6 +596,45 @@ useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
     expect(notes[0].message).toContain("write `combo: 'Mod+K'`")
   })
 
+  it('says nothing about a Combobox custom option', () => {
+    // Real shape, from src/components/Combobox/stories/MemberPicker.vue. It
+    // carries `key`, `description` and `condition`, which is the whole v0
+    // vocabulary, and it is an option.
+    const source = `const options = [
+  ...members,
+  {
+    type: 'custom' as const,
+    key: 'invite',
+    label: 'Invite new member',
+    description: 'Send an invite to this address',
+    slot: 'invite',
+    condition: () => true,
+    onClick: ({ query }: { query: string }) => invite(query),
+  },
+]
+`
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(notes).toEqual([])
+    expect(refusals).toEqual([])
+  })
+
+  it('says nothing about a Combobox option group', () => {
+    // Real shape, from src/components/Combobox/utils.ts.
+    const source = `groups.push({
+  key: 'ungrouped',
+  group: '',
+  hideLabel: true,
+  options: pendingUngrouped,
+})
+`
+    const { migrated, notes } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(notes).toEqual([])
+  })
+
   it('leaves a key inside a string or a comment alone', () => {
     const source = "// { key: 's', ctrl: true, description: 'Save' }\nconst s = \"key: 's'\"\n"
 
@@ -1037,6 +1076,39 @@ useShortcut([
     expect(result.stdout).toContain('left alone')
     expect(result.stdout).not.toContain('Digit keys converted')
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('migrates the one file that imports the real composable, in an app that forks it', () => {
+    // The shape of helpdesk desk/src: the app exports a `useShortcut` of its
+    // own, most pages use that one, and a single page imports frappe-ui's.
+    const fork = `export interface ShortcutBinding {
+  key: string
+  meta?: boolean
+  description: string
+}
+export function useShortcut(binding: ShortcutBinding, cb: () => void) {
+  return { binding, cb }
+}
+`
+    const page = `<script setup lang="ts">
+import { useShortcut } from '@/composables/shortcuts'
+useShortcut({ key: 'n', meta: true, description: 'New ticket' }, create)
+</script>
+`
+    const palette = `<script setup lang="ts">
+import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 'k', ctrl: true, description: 'Open the palette', handler: open })
+</script>
+`
+    const dir = tempDir({ 'shortcuts.ts': fork, 'Ticket.vue': page, 'Palette.vue': palette })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(fs.readFileSync(path.join(dir, 'shortcuts.ts'), 'utf8')).toBe(fork)
+    expect(fs.readFileSync(path.join(dir, 'Ticket.vue'), 'utf8')).toBe(page)
+    expect(fs.readFileSync(path.join(dir, 'Palette.vue'), 'utf8')).toContain(
+      "useKeyboardShortcut({ combo: 'Mod+K', description: 'Open the palette', handler: open })",
+    )
   })
 
   it('is safe to run twice', () => {
