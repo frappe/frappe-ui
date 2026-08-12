@@ -11,7 +11,11 @@ export {
 } from './src/components/InputLabeling'
 export { useInputLabeling } from './src/composables/useInputLabeling'
 export type { FrappeUIError } from './src/composables/useInputLabeling'
-export { CodeEditor, CodePreview, loadLanguage } from './experimental/CodeEditor'
+export {
+  CodeEditor,
+  CodePreview,
+  loadLanguage,
+} from './experimental/CodeEditor'
 export type {
   CodeLanguage,
   CodeEditorProps,
@@ -27,6 +31,10 @@ export * from './experimental/Calendar'
 // unstable, as an interim import path while apps migrate. Migration is the
 // import-path change only.
 export * from './experimental/Charts'
+// CommandPalette family. The root `CommandPalette` was removed in `1.0.0` and
+// rebuilt here as six composable parts. Unstable: the parts stay here until
+// gameplan, helpdesk and this repo's docs site all run on them.
+export * from './experimental/CommandPalette'
 // ListView family. Moved out of root (#985) — `frappe-ui/list` is
 // composition-based by design (P3) and doesn't replicate ListView's
 // config-driven columns (resizable widths, per-column getLabel/prefix

@@ -81,7 +81,6 @@ const OPTIMIZE_DEPS_INCLUDE = [
   'vue-router',
   '@vueuse/core',
   'reka-ui',
-  '@headlessui/vue',
   '@floating-ui/vue',
   '@popperjs/core',
   'tippy.js',
