@@ -110,18 +110,19 @@ describe('Textarea', () => {
 
   describe('sizes', () => {
     const sizes = [
-      { size: 'sm', fontClass: 'text-base', px: 14 },
-      { size: 'md', fontClass: 'text-lg', px: 16 },
-      { size: 'lg', fontClass: 'text-2xl', px: 18 },
-      { size: 'xl', fontClass: 'text-3xl', px: 20 },
+      { size: 'sm', fontClass: 'text-p-base', minHClass: 'min-h-7', px: 14 },
+      { size: 'md', fontClass: 'text-p-lg', minHClass: 'min-h-8', px: 16 },
+      { size: 'lg', fontClass: 'text-p-2xl', minHClass: 'min-h-10', px: 18 },
+      { size: 'xl', fontClass: 'text-p-3xl', minHClass: 'min-h-10', px: 20 },
     ] as const
 
-    sizes.forEach(({ size, fontClass, px }) => {
-      it(`size="${size}" applies ${fontClass} and renders at ${px}px`, () => {
+    sizes.forEach(({ size, fontClass, minHClass, px }) => {
+      it(`size="${size}" applies ${fontClass}, ${minHClass}, and renders at ${px}px`, () => {
         cy.mount(Textarea, { props: { size } })
 
         cy.get('textarea')
           .should('have.class', fontClass)
+          .and('have.class', minHClass)
           .and('have.css', 'font-size', `${px}px`)
       })
     })
