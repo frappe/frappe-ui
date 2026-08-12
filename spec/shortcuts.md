@@ -127,8 +127,13 @@ useKeyboardShortcut({
 ```
 
 Suite's read-only mode depends on both halves. It reads a `MaybeRefOrGetter`, so
-a ref, a getter or a plain boolean all work, and it is resolved on every
-keypress rather than cached.
+a ref, a getter or a plain boolean all work.
+
+The two halves read it at different moments. A keypress resolves it every time.
+The dialog resolves it when it opens, and again on every register or
+unregister. A getter that reads state Vue cannot track, such as
+`document.activeElement`, is therefore correct on each open, not live while the
+dialog stays open.
 
 ## Precedence
 

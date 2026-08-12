@@ -18,6 +18,10 @@ Two rules shape what the dialog shows:
   combo is the row's combo; the rest render after a `/` as alternatives. Undo
   and Redo above are three registrations and two rows.
 
+The dialog reads `enabled` each time it opens, and again whenever a shortcut
+registers or unregisters. A getter that reads untracked state, such as
+`document.activeElement`, is correct on every open.
+
 ## Open it from a shortcut
 
 ```vue

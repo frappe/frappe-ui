@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   getShortcutGroups,
   type KeyboardShortcutGroup,
@@ -112,7 +112,20 @@ defineSlots<{
 
 const searchQuery = ref('')
 
-const groups = computed(() => getShortcutGroups())
+// An `enabled` getter may read state Vue does not track, such as
+// `document.activeElement`. A plain computed would answer from its cache and
+// show a stale list on the second open, because the registry did not change.
+// Reading this counter makes every open re-ask each getter.
+const openCount = ref(0)
+
+watch(open, (isOpen) => {
+  if (isOpen) openCount.value++
+})
+
+const groups = computed(() => {
+  openCount.value
+  return getShortcutGroups()
+})
 
 const shortcutCount = computed(() =>
   groups.value.reduce((total, group) => total + group.shortcuts.length, 0),
