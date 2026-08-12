@@ -75,6 +75,16 @@ describe('Tabs', () => {
     cy.get('[data-slot="tab-indicator"]')
       .parent()
       .should('have.css', 'overflow', 'hidden')
+
+    // Square corners would clip the edges and leave the corners bleeding,
+    // which is the bug. The layer has to round like the track.
+    cy.get('[data-slot="tab-list"]').then(($track) => {
+      const radius = getComputedStyle($track[0]).borderRadius
+      expect(radius, 'track radius').not.to.equal('0px')
+      cy.get('[data-slot="tab-indicator"]')
+        .parent()
+        .should('have.css', 'border-radius', radius)
+    })
   })
 
   it('renders vertically', () => {
@@ -823,6 +833,33 @@ describe('Tabs', () => {
       })
     })
   }
+
+  it('slides the subtle pill onto the selected trigger', () => {
+    // The pill sits in a clip layer, so reka positions it from a containing
+    // block that is not the tablist. The layer's box matches the tablist's
+    // padding box, but a drift there would be invisible without this.
+    cy.mount(Tabs, { props: { tabs: shiftTabs, variant: 'subtle' } })
+
+    cy.get('[role=tab]').eq(2).click()
+    cy.get('[role=tab]').eq(2).should('have.attr', 'aria-selected', 'true')
+
+    // Retries until the 200ms slide settles. The indicator covers the
+    // trigger's box (reka measures integer offsets, so allow 1px).
+    cy.get('[role=tablist]').should(($list) => {
+      const indicator = $list[0].querySelector<HTMLElement>(
+        '[data-slot="tab-indicator"]',
+      )
+      expect(indicator, 'indicator').to.exist
+      const ir = indicator!.getBoundingClientRect()
+      const tr = $list[0]
+        .querySelectorAll<HTMLElement>('[role=tab]')[2]
+        .getBoundingClientRect()
+      expect(ir.x, 'x').to.be.closeTo(tr.x, 1)
+      expect(ir.width, 'width').to.be.closeTo(tr.width, 1)
+      expect(ir.y, 'y').to.be.closeTo(tr.y, 1)
+      expect(ir.height, 'height').to.be.closeTo(tr.height, 1)
+    })
+  })
 
   it('slides the browser-tab indicator card onto the selected trigger', () => {
     cy.mount(Tabs, {
