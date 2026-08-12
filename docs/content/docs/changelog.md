@@ -16,8 +16,8 @@ silent half: 14 fields become 10 and Vue drops the ones that left without a
 word.
 
 `key` + `ctrl` + `shift` + `alt` collapse into one `combo` string, written
-`Mod+Ctrl+Alt+Shift+<Key>`. `ctrl` never meant Control — it matched
-`ctrlKey || metaKey` — so it was already `Mod`. `condition` becomes `enabled`
+`Mod+Ctrl+Alt+Shift+<Key>`. `ctrl` never meant Control. It matched
+`ctrlKey || metaKey`, so it already meant `Mod`. `condition` becomes `enabled`
 and takes a ref, a getter or a boolean. `triggeredOn` goes: `onHold` selects
 hold mode, and a hold registration takes no `handler`, which ends the old
 surprise where `triggeredOn: 'hold'` fired `handler` too.
@@ -37,8 +37,8 @@ Migration: [`useShortcut`](/docs/migration#useshortcut-is-now-usekeyboardshortcu
 Two shortcuts on one combo used to run whichever the registry reached first.
 The last registration that is **enabled at the time of the keypress** now
 wins. `enabled` is resolved before precedence, so two registrations with
-mutually exclusive guards both keep working — the pattern suite's slides app
-uses on seven combos.
+mutually exclusive guards both keep working. Suite's slides app uses that
+pattern on seven combos.
 
 A real collision, two live shortcuts on one keypress, logs one dev warning per
 combo naming the shadowed shortcut and the active one.

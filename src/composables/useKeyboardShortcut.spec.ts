@@ -17,7 +17,9 @@ import {
 // ---------------------------------------------------------------------------
 
 /** Mount a component that registers shortcuts and return unmount(). */
-function mountWithShortcut(config: KeyboardShortcutConfig | KeyboardShortcutConfig[]) {
+function mountWithShortcut(
+  config: KeyboardShortcutConfig | KeyboardShortcutConfig[],
+) {
   const el = document.createElement('div')
   document.body.appendChild(el)
   const app = createApp(
@@ -98,7 +100,10 @@ describe('matchesCombo — digits and punctuation read event.code', () => {
       ),
     ).toBe(true)
     expect(
-      matchesCombo(makeEvent({ key: '1', code: 'Digit1', ...MOD }), 'Mod+Digit1'),
+      matchesCombo(
+        makeEvent({ key: '1', code: 'Digit1', ...MOD }),
+        'Mod+Digit1',
+      ),
     ).toBe(true)
   })
 
@@ -112,9 +117,9 @@ describe('matchesCombo — digits and punctuation read event.code', () => {
   })
 
   it('maps Backtick to the Backquote code', () => {
-    expect(matchesCombo(makeEvent({ key: '`', code: 'Backquote' }), 'Backtick')).toBe(
-      true,
-    )
+    expect(
+      matchesCombo(makeEvent({ key: '`', code: 'Backquote' }), 'Backtick'),
+    ).toBe(true)
   })
 })
 
@@ -606,14 +611,24 @@ describe('getShortcutGroups', () => {
   it('merges shortcuts that share a description into one row with altCombos', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { unmount } = mountWithShortcut([
-      { combo: 'Mod+Z', description: 'Undo', group: 'Editing', handler: vi.fn() },
+      {
+        combo: 'Mod+Z',
+        description: 'Undo',
+        group: 'Editing',
+        handler: vi.fn(),
+      },
       {
         combo: 'Mod+Shift+Z',
         description: 'Redo',
         group: 'Editing',
         handler: vi.fn(),
       },
-      { combo: 'Mod+Y', description: 'Redo', group: 'Editing', handler: vi.fn() },
+      {
+        combo: 'Mod+Y',
+        description: 'Redo',
+        group: 'Editing',
+        handler: vi.fn(),
+      },
     ])
     await nextTick()
 

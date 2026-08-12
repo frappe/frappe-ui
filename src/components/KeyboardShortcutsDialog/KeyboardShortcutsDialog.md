@@ -42,7 +42,7 @@ useKeyboardShortcut({
 ```
 
 `Mod+Shift+Slash` is the `?` most apps use. The combo names the physical key,
-not the character it types — see
+not the character it types. See
 [the combo grammar](https://github.com/frappe/frappe-ui/blob/main/spec/shortcuts.md).
 
 ## A custom help surface
@@ -54,20 +54,20 @@ layout. The library exports no registry reader; this slot is the way in.
 
 ## Styling hooks
 
-Every part carries a `data-slot` (P10). Target them from CSS instead of
-reaching for a class prop:
+Every part carries a `data-slot` (P10). Target them from CSS instead of reaching
+for a class prop:
 
-| `data-slot` | Element |
-| --- | --- |
-| `header` | title row |
-| `title` | dialog title |
-| `search` | search input, when shown |
-| `empty` | the empty message; `data-state` is `empty` or `no-results` |
-| `groups` | the grid of groups |
-| `group` | one group column |
-| `group-title` | a group heading |
-| `shortcut` | one row |
-| `description` | the row label |
-| `shortcut-keys` | the row's `KeyboardShortcut` |
+| `data-slot`     | Element                                                    |
+| --------------- | ---------------------------------------------------------- |
+| `header`        | title row                                                  |
+| `title`         | dialog title                                               |
+| `search`        | search input, when shown                                   |
+| `empty`         | the empty message; `data-state` is `empty` or `no-results` |
+| `groups`        | the grid of groups                                         |
+| `group`         | one group column                                           |
+| `group-title`   | a group heading                                            |
+| `shortcut`      | one row                                                    |
+| `description`   | the row label                                              |
+| `shortcut-keys` | the row's `KeyboardShortcut`                               |
 
 <!-- @include: ./KeyboardShortcutsDialog.api.md -->

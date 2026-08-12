@@ -98,16 +98,20 @@ describe('<KeyboardShortcutsDialog />', () => {
 
   it('replaces the grid through the default slot, which gets the groups', () => {
     cy.mount(
-      Harness([shortcut(1, 'Editing')], {}, {
-        default: ({ groups }: { groups: KeyboardShortcutGroup[] }) =>
-          h(
-            'div',
-            { 'data-testid': 'custom' },
-            groups.map((group) =>
-              h('p', `${group.name}: ${group.shortcuts.length}`),
+      Harness(
+        [shortcut(1, 'Editing')],
+        {},
+        {
+          default: ({ groups }: { groups: KeyboardShortcutGroup[] }) =>
+            h(
+              'div',
+              { 'data-testid': 'custom' },
+              groups.map((group) =>
+                h('p', `${group.name}: ${group.shortcuts.length}`),
+              ),
             ),
-          ),
-      }),
+        },
+      ),
     )
     cy.get('[data-testid=custom]').should('contain.text', 'Editing: 1')
     cy.get('[data-slot=groups]').should('not.exist')

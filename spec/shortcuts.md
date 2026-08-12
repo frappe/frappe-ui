@@ -5,8 +5,8 @@ The public API for `useKeyboardShortcut`, `KeyboardShortcutsDialog` and
 [`CONTEXT.md`](../CONTEXT.md#keyboard-shortcuts).
 
 The family has one registry. `useKeyboardShortcut` writes to it,
-`KeyboardShortcutsDialog` reads it, and nothing else can: the library exports
-no registry reader. An app that wants its own help surface uses the dialog's
+`KeyboardShortcutsDialog` reads it, and nothing else can: the library exports no
+registry reader. An app that wants its own help surface uses the dialog's
 default slot.
 
 ## The combo
@@ -19,12 +19,12 @@ Mod+Ctrl+Alt+Shift+<Key>
 
 Modifiers come in that order. `+` separates the parts.
 
-| Modifier | Means |
-| --- | --- |
-| `Mod` | Cmd on macOS, Ctrl everywhere else |
-| `Ctrl` | Control on every platform |
-| `Alt` | Alt, Option on macOS |
-| `Shift` | Shift |
+| Modifier | Means                              |
+| -------- | ---------------------------------- |
+| `Mod`    | Cmd on macOS, Ctrl everywhere else |
+| `Ctrl`   | Control on every platform          |
+| `Alt`    | Alt, Option on macOS               |
+| `Shift`  | Shift                              |
 
 `Mod` exists because almost every shortcut wants the platform's primary
 modifier. `Ctrl` exists for the few that mean Control on a Mac too.
@@ -36,18 +36,17 @@ Matching is exact. A modifier the combo does not name must not be held, so
 
 A key is named, never written as the character it types:
 
-| Kind | Names |
-| --- | --- |
-| Letters | `A`–`Z` |
-| Digits | `Digit0`–`Digit9` |
-| Function keys | `F1`–`F12` |
-| Named keys | `Escape`, `Enter`, `Tab`, `Space`, `Backspace`, `Delete`, `Insert`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown` |
-| Punctuation | `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight` |
+| Kind          | Names                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Letters       | `A`–`Z`                                                                                                                                                    |
+| Digits        | `Digit0`–`Digit9`                                                                                                                                          |
+| Function keys | `F1`–`F12`                                                                                                                                                 |
+| Named keys    | `Escape`, `Enter`, `Tab`, `Space`, `Backspace`, `Delete`, `Insert`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown` |
+| Punctuation   | `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight`                         |
 
-Punctuation must be named because the separator is the `+` character.
-`'Mod++'` splits into `['Mod', '', '']`, matches nothing, and fails silently.
-There is no escape syntax and no second separator: one grammar, one spelling
-per key.
+Punctuation must be named because the separator is the `+` character. `'Mod++'`
+splits into `['Mod', '', '']`, matches nothing, and fails silently. There is no
+escape syntax and no second separator: one grammar, one spelling per key.
 
 `Plus` is the keypad `+`. The `+` a normal keyboard types with Shift is
 `Shift+Equal`, so ⌘+ is `Mod+Shift+Equal`.
@@ -58,22 +57,22 @@ sites get a one-time dev warning, and the shortcut never fires.
 
 ### `event.key` or `event.code`
 
-| Kind | Matched against |
-| --- | --- |
-| Letters, function keys, named keys | `event.key` |
-| Digits, punctuation | `event.code` |
+| Kind                               | Matched against |
+| ---------------------------------- | --------------- |
+| Letters, function keys, named keys | `event.key`     |
+| Digits, punctuation                | `event.code`    |
 
 Digits and punctuation read the physical key, so a shifted character still
 resolves: `Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike, and `Mod+Slash`
 fires wherever `/` sits on the layout. This is the rule editors use, and the
 rule Frappe Sheets already used before the library had one.
 
-Letters read the character, so `Mod+S` follows the user's layout rather than
-the physical US position of the S key.
+Letters read the character, so `Mod+S` follows the user's layout rather than the
+physical US position of the S key.
 
 **Known limit.** macOS rewrites `event.key` when Option is held (⌥S reports
-`ß`), so an `Alt+<letter>` combo can miss on macOS. Use `Alt` with a digit,
-a punctuation name or a named key when the shortcut has to work there.
+`ß`), so an `Alt+<letter>` combo can miss on macOS. Use `Alt` with a digit, a
+punctuation name or a named key when the shortcut has to work there.
 
 ## The config
 
@@ -81,14 +80,14 @@ a punctuation name or a named key when the shortcut has to work there.
 interface KeyboardShortcutConfig {
   combo: KeyboardShortcutCombo
   description: string
-  group?: string                       // default 'General'
+  group?: string // default 'General'
   handler?: (e: KeyboardEvent) => void
   onHold?: (e: KeyboardEvent) => void
   onRelease?: (e: KeyboardEvent) => void
-  enabled?: MaybeRefOrGetter<boolean>  // default true
-  preventDefault?: boolean             // default true
-  allowInInput?: boolean               // default false
-  allowInDialog?: boolean              // default false
+  enabled?: MaybeRefOrGetter<boolean> // default true
+  preventDefault?: boolean // default true
+  allowInInput?: boolean // default false
+  allowInDialog?: boolean // default false
 }
 ```
 
@@ -112,8 +111,8 @@ Space pan mode, and suite's Space push-to-talk in meet.
 
 ### `enabled` does two jobs
 
-While `enabled` is `false` the shortcut is **inert and hidden from the
-dialog**. A shortcut the user cannot press is not advertised.
+While `enabled` is `false` the shortcut is **inert and hidden from the dialog**.
+A shortcut the user cannot press is not advertised.
 
 ```ts
 useKeyboardShortcut({
@@ -125,14 +124,14 @@ useKeyboardShortcut({
 })
 ```
 
-Suite's read-only mode depends on both halves. It reads a `MaybeRefOrGetter`,
-so a ref, a getter or a plain boolean all work, and it is resolved on every
+Suite's read-only mode depends on both halves. It reads a `MaybeRefOrGetter`, so
+a ref, a getter or a plain boolean all work, and it is resolved on every
 keypress rather than cached.
 
 ## Precedence
 
-**The last registration that is enabled at the time of the keypress wins.**
-One match fires; the rest do not.
+**The last registration that is enabled at the time of the keypress wins.** One
+match fires; the rest do not.
 
 `enabled` is resolved first, so two registrations on one combo with mutually
 exclusive guards both keep working. Suite's slides app pairs seven combos this
@@ -153,29 +152,28 @@ only known then.
 
 ## Guards
 
-| Option | Default | Effect |
-| --- | --- | --- |
-| `allowInInput` | `false` | Fire while an `<input>`, `<textarea>` or contenteditable has focus |
-| `allowInDialog` | `false` | Fire while focus is inside a `[role="dialog"]` element |
-| `preventDefault` | `true` | Call `preventDefault()` on the matched event |
+| Option           | Default | Effect                                                             |
+| ---------------- | ------- | ------------------------------------------------------------------ |
+| `allowInInput`   | `false` | Fire while an `<input>`, `<textarea>` or contenteditable has focus |
+| `allowInDialog`  | `false` | Fire while focus is inside a `[role="dialog"]` element             |
+| `preventDefault` | `true`  | Call `preventDefault()` on the matched event                       |
 
-A dialog owns its own focus trap, so page-level shortcuts stay quiet inside
-one. A help shortcut that has to answer from within a dialog opts in.
+A dialog owns its own focus trap, so page-level shortcuts stay quiet inside one.
+A help shortcut that has to answer from within a dialog opts in.
 
 ## The dialog
 
 `KeyboardShortcutsDialog` lists every enabled shortcut, grouped by `group` and
 searchable once the count passes `searchThreshold` (default 20).
 
-**Shortcuts that share a group and a description merge into one row.** The
-first registration supplies the row's combo; the rest become `altCombos` and
-render after a `/`. Suite registers `Mod+Shift+Z` and `Mod+Y`, both described
-"Redo", and gets one row.
+**Shortcuts that share a group and a description merge into one row.** The first
+registration supplies the row's combo; the rest become `altCombos` and render
+after a `/`. Suite registers `Mod+Shift+Z` and `Mod+Y`, both described "Redo",
+and gets one row.
 
-The default slot receives `{ groups }`, where a group is
-`{ name, shortcuts }` and a shortcut is
-`{ combo, altCombos, description, group }`. Passing the slot replaces the whole
-grid, and the title row and search stay.
+The default slot receives `{ groups }`, where a group is `{ name, shortcuts }`
+and a shortcut is `{ combo, altCombos, description, group }`. Passing the slot
+replaces the whole grid, and the title row and search stay.
 
 ## Styling hooks
 
@@ -192,5 +190,5 @@ element also carries `data-state="empty"` or `data-state="no-results"`.
 ## What the family does not export
 
 `formatShortcutLabel` and `getActiveShortcuts` are removed, with zero consumers
-across ten apps. `KeyboardShortcut` renders a combo, and the dialog's slot
-reads the registry, so neither had a job left.
+across ten apps. `KeyboardShortcut` renders a combo, and the dialog's slot reads
+the registry, so neither had a job left.

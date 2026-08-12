@@ -191,10 +191,9 @@ const isMac =
     /Mac OS X|Macintosh/i.test(navigator.userAgent))
 
 const KEY_BY_LOWERCASE_NAME = new Map<string, KeyboardShortcutKey>(
-  [
-    ...Object.keys(KEYS_BY_EVENT_KEY),
-    ...Object.keys(KEYS_BY_EVENT_CODE),
-  ].map((name) => [name.toLowerCase(), name as KeyboardShortcutKey]),
+  [...Object.keys(KEYS_BY_EVENT_KEY), ...Object.keys(KEYS_BY_EVENT_CODE)].map(
+    (name) => [name.toLowerCase(), name as KeyboardShortcutKey],
+  ),
 )
 
 const parseCache = new Map<string, ParsedCombo | null>()
@@ -292,7 +291,7 @@ function isStillHeld(e: KeyboardEvent, parsed: ParsedCombo): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Dev warnings — once per key, per page load
+// Dev warnings, once per key per page load
 // ---------------------------------------------------------------------------
 
 const warned = new Set<string>()
@@ -414,7 +413,7 @@ function warnOnCollision(live: Registration[]) {
 }
 
 // ---------------------------------------------------------------------------
-// The dialog's view of the registry — module-internal, not a public export
+// The dialog's view of the registry: module-internal, not a public export
 // ---------------------------------------------------------------------------
 
 /** One row in `KeyboardShortcutsDialog`. */
