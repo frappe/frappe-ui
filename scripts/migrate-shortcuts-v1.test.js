@@ -622,6 +622,39 @@ import { KeyboardShortcutsModal } from 'frappe-ui'
     expect(migrated).toContain('class=KeyboardShortcutsModal data-x="KeyboardShortcutsModal"')
   })
 
+  it('lexes a string, a comment and a regex inside a ${ } interpolation', () => {
+    // A brace inside one of these is not a brace. Counting braces alone ends
+    // the interpolation early, and the rest of the file is read in the wrong
+    // mode, so a site after it converts wrongly or goes missing.
+    const source = `const a = \`\${ map['}'] }\`
+const b = \`\${ /* } */ x }\`
+const c = \`\${ /}/.test(x) }\`
+const d = \`\${ \`\${ y['}'] }\` }\`
+import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', description: 'Save', handler: save })
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("useKeyboardShortcut({ combo: 'S'")
+    expect(migrated).toContain(`const a = \`\${ map['}'] }\``)
+  })
+
+  it('reads a mustache past a }} inside an interpolated string', () => {
+    const source = `<script setup>
+import { KeyboardShortcutsModal } from 'frappe-ui'
+</script>
+
+<template>
+  <span>{{ \`\${ map['}}'] }\` + KeyboardShortcutsModal.name }}</span>
+</template>
+`
+    const { migrated } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(migrated).toContain('KeyboardShortcutsDialog.name')
+    expect(migrated).not.toContain('KeyboardShortcutsModal')
+  })
+
   it('reads a mustache to its real end, past a nested brace and a quoted }}', () => {
     // `}}` closes the mustache only at brace depth zero, outside a string.
     // Stopping at the first one hides the rest of the expression, and a

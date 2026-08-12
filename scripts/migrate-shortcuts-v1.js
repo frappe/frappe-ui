@@ -348,8 +348,37 @@ function maskLiterals(source) {
   let i = 0
   let lastSignificant = ''
 
+  // One entry per `${ ... }` this position sits inside, holding the brace
+  // depth reached in the expression. The expression is code, so the main loop
+  // reads it, and a string, a comment or a regex in there is masked like any
+  // other. Naive brace counting cannot do that: `${ a['}'] }` ends at the
+  // quoted brace and everything after it is lexed in the wrong mode.
+  const interpolations = []
+
   const markRange = (from, to, value = MASK_LITERAL) => {
     for (let j = from; j < to && j < mask.length; j++) mask[j] = value
+  }
+
+  // Marks the text of a template literal. Stops at the closing backtick, or
+  // at a `${`, where code starts again.
+  const maskTemplateText = (from) => {
+    let j = from
+    while (j < source.length) {
+      if (source[j] === '\\') {
+        mask[j] = MASK_LITERAL
+        if (j + 1 < source.length) mask[j + 1] = MASK_LITERAL
+        j += 2
+        continue
+      }
+      mask[j] = MASK_LITERAL
+      if (source[j] === '`') return { at: j + 1, open: false }
+      if (source[j] === '$' && source[j + 1] === '{') {
+        mask[j + 1] = MASK_LITERAL
+        return { at: j + 2, open: true }
+      }
+      j++
+    }
+    return { at: j, open: false }
   }
 
   while (i < source.length) {
@@ -388,41 +417,11 @@ function maskLiterals(source) {
     if (c === '`') {
       // A template literal holds live code in `${ ... }`, so the mask covers
       // the text runs and leaves the expressions readable.
-      mask[i] = 1
-      i++
-      while (i < source.length) {
-        if (source[i] === '\\') {
-          mask[i] = 1
-          if (i + 1 < source.length) mask[i + 1] = 1
-          i += 2
-          continue
-        }
-        if (source[i] === '`') {
-          mask[i] = 1
-          i++
-          break
-        }
-        if (source[i] === '$' && source[i + 1] === '{') {
-          mask[i] = 1
-          mask[i + 1] = 1
-          i += 2
-          let depth = 1
-          while (i < source.length) {
-            if (source[i] === '{') depth++
-            else if (source[i] === '}') depth--
-            if (depth === 0) {
-              mask[i] = 1
-              i++
-              break
-            }
-            i++
-          }
-          continue
-        }
-        mask[i] = 1
-        i++
-      }
-      lastSignificant = '`'
+      mask[i] = MASK_LITERAL
+      const run = maskTemplateText(i + 1)
+      i = run.at
+      if (run.open) interpolations.push(0)
+      lastSignificant = run.open ? '{' : '`'
       continue
     }
     if (
@@ -454,6 +453,22 @@ function maskLiterals(source) {
         continue
       }
     }
+    // The `}` that closes the innermost `${ ... }`. Text mode starts again.
+    if (interpolations.length > 0 && (c === '{' || c === '}')) {
+      const top = interpolations.length - 1
+      if (c === '{') interpolations[top]++
+      else if (interpolations[top] > 0) interpolations[top]--
+      else {
+        mask[i] = MASK_LITERAL
+        interpolations.pop()
+        const run = maskTemplateText(i + 1)
+        i = run.at
+        if (run.open) interpolations.push(0)
+        lastSignificant = run.open ? '{' : '`'
+        continue
+      }
+    }
+
     if (!/\s/.test(c)) lastSignificant = c
     i++
   }
