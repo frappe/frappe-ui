@@ -96,7 +96,7 @@ export default defineComponent({
         blue: 'text-ink-base bg-surface-blue-6 hover:bg-surface-blue-7 active:bg-surface-blue-8',
         green:
           'text-ink-base bg-surface-green-7 hover:bg-surface-green-8 active:bg-surface-green-9',
-        red: 'text-ink-red-9 bg-surface-red-7 hover:bg-surface-red-8 active:bg-surface-red-9',
+        red: 'text-ink-base dark:text-ink-red-9 bg-surface-red-7 hover:bg-surface-red-8 active:bg-surface-red-9',
       }[props.theme]
 
       const subtleClasses = {
