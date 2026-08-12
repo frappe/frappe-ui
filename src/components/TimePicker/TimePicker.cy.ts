@@ -1,4 +1,12 @@
+import { h } from 'vue'
 import TimePicker from './TimePicker.vue'
+
+// TimePicker declares its `#suffix` slot props inline rather than in `types.ts`,
+// so the shape is mirrored here.
+type SuffixSlotProps = {
+  open: boolean
+  toggle: (flag?: boolean | Event) => void
+}
 
 describe('TimePicker', () => {
   it('renders', () => {
@@ -240,5 +248,71 @@ describe('TimePicker', () => {
     cy.get('input').click()
     cy.get('input').type('3:07pm{enter}')
     cy.get('input').should('have.value', '03:07 PM')
+  })
+
+  describe('#suffix slot props', () => {
+    // TimePicker has no `#trigger`; `#suffix` is where it hands out the same
+    // two names as the date pickers and Popover. A rename here is silent.
+    it('exposes open and toggle to the #suffix slot', () => {
+      cy.mount(TimePicker, {
+        props: { modelValue: '10:00:00' },
+        slots: {
+          suffix: ({ open, toggle }: SuffixSlotProps) =>
+            h(
+              'button',
+              {
+                'data-cy': 'suffix',
+                class: open ? 'is-open' : 'is-closed',
+                onMousedown: (e: MouseEvent) => {
+                  e.preventDefault()
+                  toggle()
+                },
+              },
+              open ? 'Close' : 'Open',
+            ),
+        },
+      })
+
+      cy.get('[data-cy="suffix"]')
+        .should('have.class', 'is-closed')
+        .and('have.text', 'Open')
+      cy.get('[role=dialog]').should('not.exist')
+
+      cy.get('[data-cy="suffix"]').click()
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[data-cy="suffix"]')
+        .should('have.class', 'is-open')
+        .and('have.text', 'Close')
+    })
+
+    it('toggle sets the open state when passed a boolean', () => {
+      // Same signature as Popover's `toggle`: a boolean sets, a bare call
+      // flips. Called directly, since a click also dismisses the popover.
+      let toggle: SuffixSlotProps['toggle'] | null = null
+
+      cy.mount(TimePicker, {
+        props: { modelValue: '10:00:00' },
+        slots: {
+          suffix: (props: SuffixSlotProps) => {
+            toggle = props.toggle
+            return h('span', { 'data-cy': 'suffix' })
+          },
+        },
+      })
+
+      cy.then(() => toggle?.(true))
+      cy.get('[role=dialog]').should('exist')
+
+      // A flip would close it here. Setting must be idempotent.
+      cy.then(() => toggle?.(true))
+      cy.get('[role=dialog]').should('exist')
+
+      cy.then(() => toggle?.(false))
+      cy.get('[role=dialog]').should('not.exist')
+
+      // A bare call still flips.
+      cy.then(() => toggle?.())
+      cy.get('[role=dialog]').should('exist')
+    })
   })
 })
