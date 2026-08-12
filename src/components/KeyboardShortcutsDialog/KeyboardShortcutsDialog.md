@@ -1,173 +1,73 @@
-# KeyboardShortcutsModal & useShortcut
+# KeyboardShortcutsDialog
 
-A composable + modal pair for registering, managing, and displaying keyboard
-shortcuts across an application.
+A dialog that lists every shortcut registered with
+[`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut), grouped
+and searchable. Mount it once, near the app root. It reads the registry itself,
+so it needs no props.
 
-## useShortcut
+## Default
 
-Register one or more keyboard shortcuts inside a component. Shortcuts are
-automatically removed when the component unmounts (or is deactivated in a
-`<KeepAlive>` tree).
+<ComponentPreview name="KeyboardShortcutsDialog-Default" />
 
-### Basic usage
+Two rules shape what the dialog shows:
 
-```ts
-import { useShortcut } from 'frappe-ui'
+- A shortcut whose `enabled` is `false` is inert **and** hidden. A shortcut the
+  user cannot press is not advertised. Toggle read-only mode in the preview
+  above to watch the Editing group leave.
+- Shortcuts that share a group and a description merge into one row. The first
+  combo is the row's combo; the rest render after a `/` as alternatives. Undo
+  and Redo above are three registrations and two rows.
 
-useShortcut({
-  key: 's',
-  ctrl: true,
-  description: 'Save document',
-  group: 'General',
-  handler: () => save(),
-})
-```
-
-### Multiple shortcuts at once
-
-```ts
-useShortcut([
-  {
-    key: 'z',
-    ctrl: true,
-    description: 'Undo',
-    group: 'Edit',
-    handler: () => undo(),
-  },
-  {
-    key: 'z',
-    ctrl: true,
-    shift: true,
-    description: 'Redo',
-    group: 'Edit',
-    handler: () => redo(),
-  },
-])
-```
-
-### Conditional shortcut
-
-```ts
-useShortcut({
-  key: 'Delete',
-  description: 'Delete selected block',
-  group: 'Canvas',
-  condition: () => !!selectedBlock.value,
-  handler: () => deleteBlock(selectedBlock.value),
-})
-```
-
-### Hold-to-activate mode
-
-```ts
-useShortcut({
-  key: ' ',
-  description: 'Hold for move mode',
-  group: 'Tools',
-  triggeredOn: 'hold',
-  onHold: () => (mode.value = 'move'),
-  onRelease: () => (mode.value = 'select'),
-})
-```
-
-### ShortcutConfig options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `key` | `string` | — | Key to listen for (e.g. `"s"`, `"Escape"`, `"ArrowUp"`) |
-| `ctrl` | `boolean` | `false` | Require Ctrl (or ⌘ on Mac) |
-| `shift` | `boolean` | `false` | Require Shift |
-| `description` | `string` | — | Human-readable label shown in the shortcuts modal |
-| `group` | `string` | `"General"` | Group name used to categorise shortcuts |
-| `triggeredOn` | `"press" \| "hold"` | `"press"` | When to fire the handler |
-| `handler` | `(e) => void` | — | Called on keydown when the shortcut matches |
-| `onHold` | `(e) => void` | — | Called on first keydown while held (`triggeredOn: "hold"`) |
-| `onRelease` | `(e) => void` | — | Called on keyup when the held combo is released |
-| `preventDefault` | `boolean` | `true` | Prevent the browser's default action |
-| `allowInInput` | `boolean` | `false` | Allow the shortcut to fire inside inputs / textareas |
-| `allowInDialog` | `boolean` | `false` | Allow the shortcut to fire when focus is inside a `[role="dialog"]` element. Set to `true` for shortcuts that are intentionally scoped to a dialog (e.g. an Escape handler or ? help shortcut) |
-| `condition` | `() => boolean` | — | Shortcut only fires when this returns `true` |
-
----
-
-## KeyboardShortcutsModal
-
-A dialog that lists all currently active shortcuts, grouped and searchable.
-Reads its data from the global `useShortcut` registry automatically.
-
-### Mount once in your app root
+## Open it from a shortcut
 
 ```vue
-<template>
-  <KeyboardShortcutsModal v-model:open="shortcutsModalOpen" />
-</template>
-
 <script setup lang="ts">
-import { KeyboardShortcutsModal } from 'frappe-ui'
+import { KeyboardShortcutsDialog, useKeyboardShortcut } from 'frappe-ui'
 import { ref } from 'vue'
 
-const shortcutsModalOpen = ref(false)
+const open = ref(false)
 
-function openShortcuts() {
-  shortcutsModalOpen.value = true
-}
-</script>
-```
-
-### Open via keyboard shortcut
-
-```ts
-import { useShortcut, KeyboardShortcutsModal } from 'frappe-ui'
-import { ref } from 'vue'
-
-const shortcutsModalOpen = ref(false)
-
-useShortcut({
-  key: '?',
+useKeyboardShortcut({
+  combo: 'Mod+Shift+Slash',
   description: 'Show keyboard shortcuts',
   group: 'General',
   allowInDialog: true,
-  handler: () => {
-    shortcutsModalOpen.value = true
-  },
+  handler: () => (open.value = true),
 })
+</script>
+
+<template>
+  <KeyboardShortcutsDialog v-model:open="open" />
+</template>
 ```
 
-### Props
+`Mod+Shift+Slash` is the `?` most apps use. The combo names the physical key,
+not the character it types — see
+[the combo grammar](https://github.com/frappe/frappe-ui/blob/main/spec/shortcuts.md).
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `open` | `boolean` | `false` | Controls dialog visibility — use with `v-model:open` |
-| `title` | `string` | `"Keyboard Shortcuts"` | Dialog title |
-| `paddingTop` | `string` | `"5vh"` | Top padding when dialog position is `top` |
-| `searchThreshold` | `number` | `20` | Show the search input when this many shortcuts are registered |
+## A custom help surface
 
----
+<ComponentPreview name="KeyboardShortcutsDialog-CustomLayout" />
 
-## getActiveShortcuts
+The default slot receives the grouped shortcuts, so an app can render its own
+layout. The library exports no registry reader; this slot is the way in.
 
-Lower-level helper that returns a computed list of all currently registered
-shortcuts whose conditions are met. Duplicate registrations with the same
-group + description + modifiers are merged into a single entry with multiple
-`keys`. This is what `KeyboardShortcutsModal` consumes internally.
+## Styling hooks
 
-```ts
-import { getActiveShortcuts } from 'frappe-ui'
+Every part carries a `data-slot` (P10). Target them from CSS instead of
+reaching for a class prop:
 
-const shortcuts = getActiveShortcuts()
-// shortcuts.value → ActiveShortcut[]
-```
+| `data-slot` | Element |
+| --- | --- |
+| `header` | title row |
+| `title` | dialog title |
+| `search` | search input, when shown |
+| `empty` | the empty message; `data-state` is `empty` or `no-results` |
+| `groups` | the grid of groups |
+| `group` | one group column |
+| `group-title` | a group heading |
+| `shortcut` | one row |
+| `description` | the row label |
+| `shortcut-keys` | the row's `KeyboardShortcut` |
 
----
-
-## formatShortcutLabel
-
-Returns a short human-readable string for a shortcut (e.g. `"⌘ S"` on Mac or
-`"Ctrl + S"` on Windows).
-
-```ts
-import { formatShortcutLabel } from 'frappe-ui'
-
-const label = formatShortcutLabel({ key: 's', ctrl: true })
-// → "⌘ S" (macOS) or "Ctrl + S" (Windows/Linux)
-```
+<!-- @include: ./KeyboardShortcutsDialog.api.md -->

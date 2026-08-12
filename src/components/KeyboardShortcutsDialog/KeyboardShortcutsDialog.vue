@@ -6,9 +6,10 @@
     :padding-top="paddingTop"
   >
     <template #title>
-      <div class="flex items-center pr-2">
+      <div class="flex items-center pr-2" data-slot="header">
         <h3
           class="shrink-0 text-3xl-semibold leading-6 text-ink-gray-9 flex-1"
+          data-slot="title"
         >
           {{ title }}
         </h3>
@@ -18,54 +19,68 @@
           type="text"
           class="w-fit ml-2"
           placeholder="Search shortcuts"
+          data-slot="search"
         />
       </div>
     </template>
     <template #default>
-      <div
-        v-if="!activeShortcuts.length"
-        class="h-[20vh] py-8 text-center text-sm text-ink-gray-5"
-      >
-        No keyboard shortcuts available on this page.
-      </div>
-      <div
-        v-else-if="shouldShowSearch && !hasVisibleShortcuts"
-        class="h-[20vh] py-8 text-center text-sm text-ink-gray-5"
-      >
-        No shortcuts match your search.
-      </div>
-      <div
-        v-else
-        class="grid max-h-[70vh] grid-cols-1 gap-8 gap-x-6 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3"
-      >
+      <slot :groups="filteredGroups">
         <div
-          v-for="(shortcuts, group) in filteredGroupedShortcuts"
-          :key="group"
-          class="space-y-1"
+          v-if="!groups.length"
+          class="h-[20vh] py-8 text-center text-sm text-ink-gray-5"
+          data-slot="empty"
+          data-state="empty"
         >
-          <h3 class="mb-3 text-base-medium tracking-wide text-ink-gray-8">
-            {{ group }}
-          </h3>
+          No keyboard shortcuts available on this page.
+        </div>
+        <div
+          v-else-if="!filteredGroups.length"
+          class="h-[20vh] py-8 text-center text-sm text-ink-gray-5"
+          data-slot="empty"
+          data-state="no-results"
+        >
+          No shortcuts match your search.
+        </div>
+        <div
+          v-else
+          class="grid max-h-[70vh] grid-cols-1 gap-8 gap-x-6 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3"
+          data-slot="groups"
+        >
           <div
-            v-for="shortcut in shortcuts"
-            :key="shortcut.id.toString()"
-            class="grid grid-cols-[1fr_auto] items-start gap-3 rounded-4 py-0.5"
+            v-for="group in filteredGroups"
+            :key="group.name"
+            class="space-y-1"
+            data-slot="group"
           >
-            <span class="text-p-base text-ink-gray-6">
-              {{ shortcut.description }}
-            </span>
-            <div class="flex shrink-0 items-center gap-1.5">
-              <KeyboardShortcut
-                :combo="toCombo(shortcut, shortcut.keys[0])"
-                :alt-combos="
-                  shortcut.keys.slice(1).map((k) => toCombo(shortcut, k))
-                "
-                bg
-              />
+            <h3
+              class="mb-3 text-base-medium tracking-wide text-ink-gray-8"
+              data-slot="group-title"
+            >
+              {{ group.name }}
+            </h3>
+            <div
+              v-for="shortcut in group.shortcuts"
+              :key="shortcut.description"
+              class="grid grid-cols-[1fr_auto] items-start gap-3 rounded-4 py-0.5"
+              data-slot="shortcut"
+            >
+              <span class="text-p-base text-ink-gray-6" data-slot="description">
+                {{ shortcut.description }}
+              </span>
+              <div
+                class="flex shrink-0 items-center gap-1.5"
+                data-slot="shortcut-keys"
+              >
+                <KeyboardShortcut
+                  :combo="shortcut.combo"
+                  :alt-combos="shortcut.altCombos"
+                  bg
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </slot>
     </template>
   </Dialog>
 </template>
@@ -73,88 +88,64 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import {
-  getActiveShortcuts,
-  type ActiveShortcut,
-} from '../../composables/useShortcut'
+  getShortcutGroups,
+  type KeyboardShortcutGroup,
+} from '../../composables/useKeyboardShortcut'
 import Dialog from '../Dialog/Dialog.vue'
 import KeyboardShortcut from '../KeyboardShortcut/KeyboardShortcut.vue'
 import TextInput from '../TextInput/TextInput.vue'
-import type { KeyboardShortcutsModalProps } from './types'
+import type { KeyboardShortcutsDialogProps } from './types'
 
-defineOptions({ name: 'KeyboardShortcutsModal' })
+defineOptions({ name: 'KeyboardShortcutsDialog' })
 
 const open = defineModel<boolean>('open', { default: false })
 
-const props = withDefaults(defineProps<KeyboardShortcutsModalProps>(), {
+const props = withDefaults(defineProps<KeyboardShortcutsDialogProps>(), {
   title: 'Keyboard Shortcuts',
   paddingTop: '5vh',
   searchThreshold: 20,
 })
 
+defineSlots<{
+  /** Replaces the default grid. Receives the grouped, enabled shortcuts. */
+  default?: (props: { groups: KeyboardShortcutGroup[] }) => any
+}>()
+
 const searchQuery = ref('')
-const activeShortcuts = getActiveShortcuts()
 
-/**
- * Converts a shortcut's modifiers and one of its keys into a combo string
- * that <KeyboardShortcut combo="..."> understands, e.g. "Mod+Shift+K".
- */
-function toCombo(
-  shortcut: { ctrl?: boolean; shift?: boolean; alt?: boolean },
-  key: string,
-): string {
-  const parts: string[] = []
-  if (shortcut.ctrl) parts.push('Mod')
-  if (shortcut.shift) parts.push('Shift')
-  if (shortcut.alt) parts.push('Alt')
-  // Normalise special keys so they survive parseCombo's split('+') delimiter.
-  const normalised = key === ' ' ? 'Space' : key === '+' ? 'Plus' : key
-  parts.push(normalised)
-  return parts.join('+')
-}
+const groups = computed(() => getShortcutGroups())
 
-const groupedShortcuts = computed(() => {
-  const groups: Record<string, ActiveShortcut[]> = {}
-  for (const shortcut of activeShortcuts.value) {
-    if (!groups[shortcut.group]) groups[shortcut.group] = []
-    groups[shortcut.group].push(shortcut)
-  }
-  return groups
-})
+const shortcutCount = computed(() =>
+  groups.value.reduce((total, group) => total + group.shortcuts.length, 0),
+)
 
 const shouldShowSearch = computed(
-  () => activeShortcuts.value.length > props.searchThreshold,
+  () => shortcutCount.value > props.searchThreshold,
 )
 
-const filteredGroupedShortcuts = computed(() => {
-  if (!shouldShowSearch.value || !searchQuery.value)
-    return groupedShortcuts.value
+const filteredGroups = computed<KeyboardShortcutGroup[]>(() => {
+  if (!shouldShowSearch.value || !searchQuery.value) return groups.value
 
   const query = searchQuery.value.toLowerCase()
-  const filtered: Record<string, ActiveShortcut[]> = {}
+  const matches: KeyboardShortcutGroup[] = []
 
-  for (const [group, shortcuts] of Object.entries(groupedShortcuts.value)) {
-    const groupMatches = group.toLowerCase().includes(query)
-    const matchingShortcuts = groupMatches
-      ? shortcuts
-      : shortcuts.filter((shortcut) => {
-          // Search by description or by any key in any of the combo variants
-          const comboText = shortcut.keys
-            .map((k) => toCombo(shortcut, k))
-            .join(' ')
-            .toLowerCase()
-          return (
-            shortcut.description.toLowerCase().includes(query) ||
-            comboText.includes(query)
-          )
-        })
-
-    if (matchingShortcuts.length) filtered[group] = matchingShortcuts
+  for (const group of groups.value) {
+    if (group.name.toLowerCase().includes(query)) {
+      matches.push(group)
+      continue
+    }
+    const shortcuts = group.shortcuts.filter((shortcut) => {
+      const combos = [shortcut.combo, ...shortcut.altCombos]
+        .join(' ')
+        .toLowerCase()
+      return (
+        shortcut.description.toLowerCase().includes(query) ||
+        combos.includes(query)
+      )
+    })
+    if (shortcuts.length) matches.push({ name: group.name, shortcuts })
   }
 
-  return filtered
+  return matches
 })
-
-const hasVisibleShortcuts = computed(
-  () => Object.keys(filteredGroupedShortcuts.value).length > 0,
-)
 </script>

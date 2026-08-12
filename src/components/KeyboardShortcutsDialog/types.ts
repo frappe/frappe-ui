@@ -1,4 +1,4 @@
-export interface KeyboardShortcutsModalProps {
+export interface KeyboardShortcutsDialogProps {
   /** Dialog title (default: "Keyboard Shortcuts"). */
   title?: string
   /** CSS value for top padding when position is top (default: "5vh"). */

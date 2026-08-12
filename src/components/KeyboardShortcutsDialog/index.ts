@@ -1,2 +1,2 @@
-export { default as KeyboardShortcutsModal } from './KeyboardShortcutsModal.vue'
-export type { KeyboardShortcutsModalProps } from './types'
+export { default as KeyboardShortcutsDialog } from './KeyboardShortcutsDialog.vue'
+export type { KeyboardShortcutsDialogProps } from './types'
