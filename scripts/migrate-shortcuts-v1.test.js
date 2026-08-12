@@ -648,6 +648,22 @@ useShortcut({ key: 's', description: 'Save', handler: save })
     expect(refusals[0].message).toContain('declared in this file')
   })
 
+  it('ignores a commented-out import and a name written in prose', () => {
+    // A comment is not an import and not a declaration, so neither one may
+    // read the file as a fork and hold the migration back.
+    const source = `// import { useShortcut } from './old'
+// export function KeyboardShortcutsModal() {}
+import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', description: 'Save', handler: save })
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("import { useKeyboardShortcut } from 'frappe-ui'")
+    expect(migrated).toContain("combo: 'S'")
+    expect(migrated).toContain("// import { useShortcut } from './old'")
+  })
+
   it("does not touch an app's own useKeyboardShortcuts composable", () => {
     const source = `import { useShortcut } from 'frappe-ui'
 export function useKeyboardShortcuts() {

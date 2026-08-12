@@ -257,11 +257,12 @@ const BARREL = /^frappe-ui(?:\/|$)/
 // Maps each imported local name to the module it came from, so a rename can
 // stay inside the frappe-ui barrel. An app's own `useShortcut` fork keeps its
 // name and gets reported instead.
-export function importBindings(source) {
+export function importBindings(source, mask) {
   const bindings = new Map()
   const statement = /\bimport\b([^;]*?)\bfrom\s*(['"])([^'"]+)\2/g
   let m
   while ((m = statement.exec(source))) {
+    if (mask?.[m.index]) continue
     const [, clause, , module] = m
     const named = /\{([\s\S]*?)\}/.exec(clause)
     const specifiers = []
@@ -281,8 +282,20 @@ export function importBindings(source) {
 }
 
 // A name declared in this file is this file's own, whatever it is called.
-function declaresLocally(source, name) {
-  return new RegExp(`\\b(?:function|const|let|var|class)\\s+${name}\\b`).test(source)
+function declaresLocally(source, name, mask) {
+  const declaration = new RegExp(`\\b(?:function|const|let|var|class)\\s+${name}\\b`, 'g')
+  return firstUnmasked(source, declaration, mask) >= 0
+}
+
+// The first match that is real code. A name inside a comment or a string is
+// prose about the code, not the code, so it does not count.
+function firstUnmasked(source, pattern, mask) {
+  pattern.lastIndex = 0
+  let m
+  while ((m = pattern.exec(source))) {
+    if (!mask?.[m.index]) return m.index
+  }
+  return -1
 }
 
 // ---------- LEXING ----------
@@ -1127,12 +1140,15 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     }
   }
 
+  const renameMask = buildRenameMask(content, ranges, ext)
+
   // A barrel mock keyed on the old export name. The rename fixes the key, but
   // the captured configs still carry `key`/`ctrl`, so the assertions move too.
   const barrelMock = /\b(?:vi|jest)\.mock\(\s*['"]frappe-ui['"]/g
   let b
   while ((b = barrelMock.exec(content))) {
-    if (!/\buseShortcut\b|\bKeyboardShortcut/.test(content)) continue
+    if (renameMask[b.index]) continue
+    if (firstUnmasked(content, /\buseShortcut\b|\bKeyboardShortcut/g, renameMask) < 0) continue
     refusals.push({
       line: lineAt(content, b.index),
       message:
@@ -1142,29 +1158,34 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
 
   // A rename stays inside the frappe-ui barrel. A name this file imports from
   // somewhere else, or declares itself, belongs to the app.
-  const bindings = importBindings(content)
+  //
+  // Both reads run on the mask. A commented-out import is not an import, and a
+  // name written in prose is not a declaration, so neither refuses the file.
+  const bindings = importBindings(content, renameMask)
   const renames = []
+  const nameLine = (name) => {
+    const at = firstUnmasked(content, new RegExp(`\\b${name}\\b`, 'g'), renameMask)
+    return lineAt(content, Math.max(0, at))
+  }
   const renameable = Object.keys(IDENTIFIER_RENAMES).filter((name) => {
     const module = bindings.get(name)
     if (module) {
       if (BARREL.test(module)) return true
       refusals.push({
-        line: lineAt(content, content.indexOf(name)),
+        line: nameLine(name),
         message: `\`${name}\` here comes from '${module}', not the frappe-ui barrel. It was left alone — rename it yourself if it is a fork.`,
       })
       return false
     }
-    if (declaresLocally(content, name)) {
+    if (declaresLocally(content, name, renameMask)) {
       refusals.push({
-        line: lineAt(content, content.indexOf(name)),
+        line: nameLine(name),
         message: `\`${name}\` is declared in this file, so it is the app's own. It was left alone.`,
       })
       return false
     }
     return true
   })
-
-  const renameMask = buildRenameMask(content, ranges, ext)
 
   if (renameable.length > 0) {
     const identifier = new RegExp(`\\b(${renameable.join('|')})\\b`, 'g')
