@@ -283,6 +283,14 @@ useShortcut([
     expect(migrated).not.toContain('triggeredOn')
   })
 
+  it('names a spread and a computed property name apart', () => {
+    const spread = migrateShortcuts(inCall("{ ...base, key: 's', description: 'Save' }"))
+    const computed = migrateShortcuts(inCall("{ key: 's', description: 'Save', [Keys.SAVE]: y }"))
+
+    expect(spread.refusals[0].message).toContain('spreads another object')
+    expect(computed.refusals[0].message).toContain('computed property name')
+  })
+
   it('renames condition on an object built by spreading a v0 config', () => {
     const source = `export function commandShortcuts() {
 	return commands.all.value.map((command) => ({

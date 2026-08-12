@@ -961,9 +961,15 @@ function convertObject(source, mask, range, ctx) {
 
   if (condition && byName.has('enabled')) return refuseDoubleEnabled()
 
-  if (props.some((p) => p.name === null && !p.shorthand)) {
+  // A property with no readable name. A spread and a computed name both land
+  // here, and each needs its own words: the reader has to find the thing the
+  // message names.
+  const unreadable = props.find((p) => p.name === null && !p.shorthand)
+  if (unreadable) {
     return refuse(
-      'the shortcut object spreads another object, so its `key` and modifiers cannot be read here. Convert it by hand.',
+      unreadable.text.startsWith('[')
+        ? 'the shortcut object has a computed property name, so the run cannot tell what it holds. Convert it by hand.'
+        : 'the shortcut object spreads another object, so its `key` and modifiers cannot be read here. Convert it by hand.',
     )
   }
 
