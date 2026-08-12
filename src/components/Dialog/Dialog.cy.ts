@@ -1,6 +1,7 @@
 import { ref, h, defineComponent } from 'vue'
 import Dialog from './Dialog.vue'
 import Button from '../Button/Button.vue'
+import Dropdown from '../Dropdown/Dropdown.vue'
 
 describe('Dialog', () => {
   // ---- Canonical v1 surface --------------------------------------------------
@@ -515,9 +516,7 @@ describe('Dialog', () => {
     cy.contains('button', 'Save').click()
     cy.contains('button', 'Save').find('[role="status"]').should('exist')
     cy.then(() => resolveClick())
-    cy.contains('button', 'Save')
-      .find('[role="status"]')
-      .should('not.exist')
+    cy.contains('button', 'Save').find('[role="status"]').should('not.exist')
   })
 
   it('falls back to Reka default focus when nothing is marked', () => {
@@ -530,5 +529,47 @@ describe('Dialog', () => {
     // inside the dialog (not on the body or a sibling).
     cy.get('[role=dialog]').should('exist')
     cy.focused().closest('[role=dialog]').should('exist')
+  })
+
+  it('pins both layers at z-50, below the z-100 floating family', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Stacking', message: 'Layer check.' },
+    })
+
+    // z-50 clears app chrome like the z-10 sticky ListGroup header (#1051)
+    // while staying under the z-[100] menus and popovers, which portal to the
+    // same target and must open above a dialog.
+    cy.get('.dialog-overlay').should('have.css', 'z-index', '50')
+    cy.get('.dialog-scroll-container').should('have.css', 'z-index', '50')
+  })
+
+  it('keeps a dropdown opened inside it above the dialog layers', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'With a menu' },
+      slots: {
+        default: () =>
+          h(
+            Dropdown,
+            { options: [{ label: 'Rename' }, { label: 'Delete' }] },
+            { default: () => h('button', 'Open dropdown') },
+          ),
+      },
+    })
+
+    cy.contains('button', 'Open dropdown').click()
+    // Reka copies the content's z-index onto its fixed floating wrapper at
+    // mount, so the menu only clears the z-50 dialog because `menuClasses`
+    // carries z-[100]. Hit-test rather than trust paint order.
+    cy.get('.menu-content').should(($menu) => {
+      const r = $menu[0].getBoundingClientRect()
+      const hit = document.elementFromPoint(
+        Math.round(r.left + r.width / 2),
+        Math.round(r.top + r.height / 2),
+      )
+      expect(
+        $menu[0].contains(hit),
+        'menu is the topmost element at its centre',
+      ).to.be.true
+    })
   })
 })

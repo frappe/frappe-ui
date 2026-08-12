@@ -132,6 +132,22 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
   })
 
+  it('lets the browser keep modified arrow keys', () => {
+    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.get('[role="treeitem"]').first().focus()
+    cy.focused().should('contain', 'Root')
+    // A modified key must not preventDefault — the tree focus must not move
+    // (the browser would handle Alt/Cmd+Arrow, Ctrl+Home/End itself).
+    cy.focused().trigger('keydown', { key: 'ArrowDown', altKey: true })
+    cy.focused().should('contain', 'Root')
+    cy.focused().trigger('keydown', { key: 'ArrowDown', metaKey: true })
+    cy.focused().should('contain', 'Root')
+    // Ctrl+End, not Ctrl+Home: focus starts on the first row, so an unguarded
+    // Home would land back on Root and the assertion could never fail.
+    cy.focused().trigger('keydown', { key: 'End', ctrlKey: true })
+    cy.focused().should('contain', 'Root')
+  })
+
   it('renders custom item-label and item-prefix/item-suffix slots', () => {
     cy.mount(Tree, {
       props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
