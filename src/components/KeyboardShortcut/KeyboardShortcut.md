@@ -23,6 +23,17 @@ usually compute it, so the check happens at runtime: an unknown token renders as
 written and warns once in development. Write `Mod+K`, not `cmd+k`. Import
 `KeyboardShortcutCombo` to get the compile-time check where the value is known.
 
+## What a screen reader hears
+
+A chip is a picture of a key. The root is a labelled `role="img"` that spells
+the whole sequence, for example "Shortcut Control + Backspace, or Delete". That
+role replaces its subtree, so a reader meets each key once instead of once per
+chip. With no `combo` the root takes no role, and the default slot reads
+normally.
+
+`useIcons` controls the non-modifier icons, arrows and Enter and Backspace, in
+both `bg` and plain mode. Modifier glyphs stay icons.
+
 ## Styling hooks
 
 The root carries `data-slot="keyboard-shortcut"`, and `data-bg="true"` when `bg`

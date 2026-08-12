@@ -92,6 +92,23 @@ const WORD_BY_DISPLAY: Record<string, string> = {
   ']': 'Bracket Right',
 }
 
+/**
+ * True on an Apple platform, where `Mod` draws ⌘ instead of Ctrl. Both the
+ * chip and the dialog's search read this, so they agree on what a row shows.
+ */
+export function isMacPlatform(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const platform =
+    (navigator as any).userAgentData?.platform || navigator.platform || ''
+  if (/Mac|iPod|iPhone|iPad/i.test(platform)) return true
+  return /Mac OS X|Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)
+}
+
+/** The text a parsed combo draws, e.g. `Ctrl /` for `Mod+Slash`. */
+export function displayText(parts: ComboPart[]): string {
+  return parts.map((part) => part.display).join(' ')
+}
+
 const isLetter = (lower: string) => /^[a-z]$/.test(lower)
 const isFunctionKey = (lower: string) => /^f([1-9]|1[0-2])$/.test(lower)
 

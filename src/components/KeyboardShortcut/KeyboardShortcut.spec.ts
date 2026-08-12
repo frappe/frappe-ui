@@ -118,17 +118,44 @@ describe('<KeyboardShortcut />', () => {
     expect(keys(render({ combo: 'Slash', bg: true }))).toEqual(['/'])
   })
 
-  it('hides the alternatives from assistive tech and names them once', () => {
+  it('names the alternatives once, on a role that replaces the subtree', () => {
     const host = render({ combo: 'Mod+Backspace', altCombos: ['Delete'] })
     const root = host.querySelector('[data-slot=keyboard-shortcut]')
     expect(root?.getAttribute('aria-label')).toBe(
       'Shortcut Control + Backspace, or Delete',
     )
+    // `note` is not a role whose children are presentational, so a reader met
+    // every chip a second time. `img` is, which is what the label assumes.
+    expect(root?.getAttribute('role')).toBe('img')
     expect(
       host
         .querySelector('[data-slot=keyboard-shortcut] [data-slot=alt-combos]')
-        ?.getAttribute('aria-hidden'),
-    ).toBe('true')
+        ?.hasAttribute('aria-hidden'),
+    ).toBe(false)
+  })
+
+  it('takes no role without a combo, so the fallback slot stays readable', () => {
+    const host = render({})
+    const root = host.querySelector('[data-slot=keyboard-shortcut]')
+    expect(root?.hasAttribute('role')).toBe(false)
+    expect(root?.hasAttribute('aria-label')).toBe(false)
+  })
+
+  it('honours useIcons in bg mode, for the keys the prop names', () => {
+    const withIcons = render({ combo: 'Mod+Enter', bg: true, useIcons: true })
+    expect(
+      withIcons.querySelector('[data-slot=key] .lucide-corner-down-left'),
+    ).not.toBe(null)
+
+    const withoutIcons = render({
+      combo: 'Mod+Enter',
+      bg: true,
+      useIcons: false,
+    })
+    expect(
+      withoutIcons.querySelector('[data-slot=key] .lucide-corner-down-left'),
+    ).toBe(null)
+    expect(keys(withoutIcons)).toEqual(['Ctrl', '↵'])
   })
 
   it('marks the bg variant with data-bg', () => {

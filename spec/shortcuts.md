@@ -173,6 +173,10 @@ A help shortcut that has to answer from within a dialog opts in.
 `KeyboardShortcutsDialog` lists every enabled shortcut, grouped by `group` and
 searchable once the count passes `searchThreshold` (default 20).
 
+**The search reads the row, not only the combo behind it.** A row for
+`Mod+Slash` draws `Ctrl /`, so both `/` and `slash` find it. The query clears
+when the dialog closes.
+
 **Shortcuts that share a group and a description merge into one row.** The first
 registration supplies the row's combo; the rest become `altCombos` and render
 after a `/`. Suite registers `Mod+Shift+Z` and `Mod+Y`, both described "Redo",
@@ -193,6 +197,18 @@ element also carries `data-state="empty"` or `data-state="no-results"`.
 `KeyboardShortcut`: `keyboard-shortcut` on the root, with `data-bg="true"` when
 `bg` is set; `key` on each key, with `data-key-type`; `separator` on the `+`
 glyphs; `alt-combos` on the alternatives, inside the root.
+
+## How a screen reader meets a chip
+
+A chip is a picture of a key, so `KeyboardShortcut` labels its root
+`role="img"` and spells the whole sequence there: "Shortcut Control +
+Backspace, or Delete". A labelled `img` replaces its subtree, so a reader in
+browse mode meets each key once, not once per chip. Without a `combo` the root
+carries no label and no role, and the fallback slot reads normally.
+
+`useIcons` covers the non-modifier keys, arrows and Enter and Backspace, in
+both `bg` and plain mode. A modifier glyph is not one of them and stays an
+icon.
 
 ## Where the combo is checked
 

@@ -3,7 +3,7 @@
     class="inline-flex items-center gap-0.5"
     :class="!bg ? 'text-ink-gray-5 text-sm' : ''"
     :aria-label="ariaLabel"
-    role="note"
+    :role="ariaLabel ? 'img' : undefined"
     data-slot="keyboard-shortcut"
     :data-bg="bg ? 'true' : undefined"
     v-bind="$attrs"
@@ -75,13 +75,12 @@
     <template v-else>
       <slot></slot>
     </template>
-    <!-- The root label already spells the alternatives, so hide the nested
-         notes and let a screen reader meet each alternative once. -->
+    <!-- The root label already spells the alternatives. A labelled `role="img"`
+         replaces its whole subtree, so these chips need no `aria-hidden`. -->
     <span
       v-if="uniqueAltCombos.length"
       class="ms-1 inline-flex items-center gap-1.5"
       data-slot="alt-combos"
-      :aria-hidden="ariaLabel ? 'true' : undefined"
     >
       <template
         v-for="(altCombo, i) in uniqueAltCombos"
@@ -95,16 +94,10 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import { parseCombo, spellOut, type ComboPart } from './combo'
+import { isMacPlatform, parseCombo, spellOut, type ComboPart } from './combo'
 import type { KeyboardShortcutProps } from './types'
 
-const isMac = computed(() => {
-  if (typeof navigator === 'undefined') return false
-  const p =
-    (navigator as any).userAgentData?.platform || navigator.platform || ''
-  if (/Mac|iPod|iPhone|iPad/i.test(p)) return true
-  return /Mac OS X|Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)
-})
+const isMac = computed(() => isMacPlatform())
 
 const props = withDefaults(defineProps<KeyboardShortcutProps>(), {
   showPlus: true,
@@ -135,8 +128,10 @@ const uniqueAltCombos = computed<string[]>(() => {
   })
 })
 
-// The root is a labelled `role="note"`, so its label replaces everything
-// inside it. Name the alternatives here or they are never announced.
+// A labelled `role="img"` replaces everything inside it, so the chips are not
+// read a second time. Name the alternatives here or they are never announced.
+// Without a combo the root has no label, so it takes no role and the fallback
+// slot stays readable.
 const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
   const sequences = [
@@ -174,8 +169,12 @@ function iconFor(part: ComboPart): string | null {
   return iconNameFor(part.display)
 }
 
+// `useIcons` covers the non-modifier keys, the same set `iconFor` covers in
+// plain mode. A modifier glyph is not one of them, so ⌘ stays an icon either
+// way and the two modes agree.
 function bgIconFor(part: ComboPart): string | null {
   if (part.type === 'cmd') return 'lucide-command'
+  if (!props.useIcons) return null
   return iconNameFor(part.display)
 }
 </script>

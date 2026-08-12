@@ -3,7 +3,7 @@ import KeyboardShortcut from './KeyboardShortcut.vue'
 describe('<KeyboardShortcut />', () => {
   it('renders a combo as separate keys', () => {
     cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K' } })
-    cy.get('[role="note"]').should('exist')
+    cy.get('[role="img"]').should('exist')
     cy.contains('K').should('exist')
   })
 
@@ -31,7 +31,8 @@ describe('<KeyboardShortcut />', () => {
 
   it('sets an aria-label describing the shortcut', () => {
     cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K' } })
-    cy.get('[role="note"]')
+    cy.get('[role="img"]')
+      .first()
       .invoke('attr', 'aria-label')
       .should('match', /Shortcut/)
   })
@@ -75,13 +76,39 @@ describe('<KeyboardShortcut />', () => {
     cy.get('[data-slot=key]').should('contain.text', '`')
   })
 
+  it('takes no role without a combo, so the fallback slot stays readable', () => {
+    cy.mount(KeyboardShortcut, { slots: { default: 'Custom fallback' } })
+    cy.get('[data-slot=keyboard-shortcut]')
+      .should('not.have.attr', 'role')
+      .should('contain.text', 'Custom fallback')
+  })
+
+  it('drops the non-modifier icons when useIcons is false, in both modes', () => {
+    cy.mount(KeyboardShortcut, {
+      props: { combo: 'Mod+Enter', bg: true, useIcons: false },
+    })
+    cy.get('[data-slot=key]').last().should('contain.text', '\u21b5')
+    cy.get('[data-slot=key] .lucide-corner-down-left').should('not.exist')
+    // A modifier glyph is not one of the keys the prop names, so it stays.
+    cy.get('[data-slot=key] .lucide-command, [data-slot=key]')
+      .first()
+      .should('exist')
+
+    cy.mount(KeyboardShortcut, {
+      props: { combo: 'Mod+Enter', bg: true, useIcons: true },
+    })
+    cy.get('[data-slot=key] .lucide-corner-down-left').should('exist')
+  })
+
   it('nests the alternative combos inside the root and names them', () => {
     cy.mount(KeyboardShortcut, {
       props: { combo: 'Mod+Backspace', altCombos: ['Delete'] },
     })
-    cy.get('[data-slot=keyboard-shortcut] [data-slot=alt-combos]')
-      .should('exist')
-      .and('have.attr', 'aria-hidden', 'true')
+    // A labelled `role="img"` already hides the subtree, so the alternatives
+    // need no `aria-hidden` of their own.
+    cy.get('[data-slot=keyboard-shortcut] [data-slot=alt-combos]').should(
+      'exist',
+    )
     cy.get('[data-slot=keyboard-shortcut]')
       .first()
       .invoke('attr', 'aria-label')
