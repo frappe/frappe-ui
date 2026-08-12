@@ -17,7 +17,7 @@ export interface SettingsDialogProps {
 
 export interface SettingsDialogEmits {
   /** Fired when the dialog is opened or closed. */
-  'update:modelValue': [value: boolean]
+  'update:open': [value: boolean]
 }
 
 /**

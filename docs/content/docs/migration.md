@@ -988,6 +988,30 @@ for the full API.
 padding — that's app-owned now (see the component page's Collapse section for
 the full composition contract).
 
+## SettingsDialog
+
+Open state moves from the unnamed `v-model` to `v-model:open`, the name every
+other overlay in the library uses.
+
+This is a **silent break**: Vue accepts the unknown `modelValue` prop with no
+error, so the dialog just never opens.
+
+| Before                          | After                                |
+| ------------------------------- | ------------------------------------ |
+| `v-model="showSettings"`        | `v-model:open="showSettings"`        |
+| `@update:modelValue="onToggle"` | `@update:open="onToggle"`            |
+
+```vue
+<!-- Before -->
+<SettingsDialog v-model="showSettings" v-model:tab="tab">…</SettingsDialog>
+
+<!-- After -->
+<SettingsDialog v-model:open="showSettings" v-model:tab="tab">…</SettingsDialog>
+```
+
+`v-model:tab` is unchanged. Unlike `Dialog`, `SettingsDialog` has no legacy
+unnamed-`v-model` binding to keep — `open` is the only visibility channel.
+
 ## Tabs
 
 The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,

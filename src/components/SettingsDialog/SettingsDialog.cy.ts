@@ -19,16 +19,16 @@ const tabs = [
 // reka-ui Tabs owns selection, the consumer only binds `tab` and supplies a
 // matching `value` on each nav item and panel.
 const Harness = defineComponent({
-  props: { modelValue: { type: Boolean, default: true } },
-  emits: ['update:modelValue'],
+  props: { open: { type: Boolean, default: true } },
+  emits: ['update:open'],
   setup(props, { emit }) {
     const active = ref(tabs[0].value)
     return () =>
       h(
         SettingsDialog,
         {
-          modelValue: props.modelValue,
-          'onUpdate:modelValue': (v: boolean) => emit('update:modelValue', v),
+          open: props.open,
+          'onUpdate:open': (v: boolean) => emit('update:open', v),
           tab: active.value,
           'onUpdate:tab': (v: string) => (active.value = v),
         },
@@ -57,11 +57,11 @@ const Harness = defineComponent({
 })
 
 describe('SettingsDialog', () => {
-  it('does not render while closed; renders when open (v-model)', () => {
-    cy.mount(Harness, { props: { modelValue: false } })
+  it('does not render while closed; renders when open (v-model:open)', () => {
+    cy.mount(Harness, { props: { open: false } })
     cy.get('[role=dialog]').should('not.exist')
 
-    cy.mount(Harness, { props: { modelValue: true } })
+    cy.mount(Harness, { props: { open: true } })
     cy.get('[role=dialog]').should('exist')
   })
 
@@ -114,10 +114,10 @@ describe('SettingsDialog', () => {
     cy.get('[role=tabpanel]').should('have.text', 'General content')
   })
 
-  it('emits update:modelValue when the dialog is closed', () => {
+  it('emits update:open when the dialog is closed', () => {
     const onUpdate = cy.spy().as('onUpdate')
     cy.mount(Harness, {
-      props: { modelValue: true, 'onUpdate:modelValue': onUpdate },
+      props: { open: true, 'onUpdate:open': onUpdate },
     })
     cy.get('[role=dialog]').should('exist')
     cy.get('body').type('{esc}')

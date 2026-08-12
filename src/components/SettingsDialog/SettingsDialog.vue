@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="modelValue" :size="size" bare>
+  <Dialog v-model:open="open" :size="size" bare>
     <!--
       TabsRoot wires the sidebar (TabsList) to the panels (TabsContent): roving
       arrow-key focus, aria-selected/aria-controls, and one visible panel at a
@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<SettingsDialogProps>(), {
 })
 
 /** Controls whether the dialog is open. */
-const modelValue = defineModel<boolean>({ default: false })
+const open = defineModel<boolean>('open', { default: false })
 
 /**
  * The selected tab — pairs with SettingsNavItem `:value` and SettingsPanel
@@ -69,7 +69,7 @@ useEventListener(
     if (!props.shortcut) return
     if (e.code === 'Comma' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
-      modelValue.value = !modelValue.value
+      open.value = !open.value
     }
   },
 )

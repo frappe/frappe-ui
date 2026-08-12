@@ -62,7 +62,7 @@ const activeTab = ref(tabs[0].value)
 
 <template>
   <Button @click="open = true">Open settings</Button>
-  <SettingsDialog v-model="open" v-model:tab="activeTab">
+  <SettingsDialog v-model:open="open" v-model:tab="activeTab">
     <SettingsSidebar>
       <SettingsNavGroup
         v-for="group in groups"

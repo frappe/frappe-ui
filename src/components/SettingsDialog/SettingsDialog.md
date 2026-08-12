@@ -13,7 +13,7 @@ It's a [reka-ui Tabs](https://reka-ui.com/docs/components/tabs) set, so you get
 Instead of tracking an `active` flag, give each nav item and panel a matching
 `value`.
 
-- **`SettingsDialog`** — wraps `Dialog`; owns open state (`v-model`), the
+- **`SettingsDialog`** — wraps `Dialog`; owns open state (`v-model:open`), the
   selected tab (`v-model:tab`), and the `Cmd/Ctrl+Shift+,` shortcut. Full-screen
   on mobile, centered panel on desktop.
 - **`SettingsSidebar`** / **`SettingsNavGroup`** / **`SettingsNavItem`** — the
