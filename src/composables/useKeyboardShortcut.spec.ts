@@ -173,6 +173,84 @@ describe('matchesCombo — modifiers', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Mod resolves on the same platform check the chip draws with
+// ---------------------------------------------------------------------------
+
+/**
+ * Load a fresh composable and a fresh display module against a stubbed
+ * `navigator`. Both read the platform at import time or on first parse, so the
+ * stub has to be in place before the module graph is built.
+ */
+async function loadOnPlatform(navigatorStub: Record<string, unknown>) {
+  vi.resetModules()
+  vi.stubGlobal('navigator', navigatorStub)
+  const composable = await import('./useKeyboardShortcut')
+  const display = await import('../components/KeyboardShortcut/combo')
+  return { composable, display }
+}
+
+describe('Mod resolves on one platform check, shared with the chip', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  // Two checks disagreeing means the chip draws ⌘ for a combo that fires on
+  // Ctrl. These are the inputs that told them apart.
+  const disagreements = [
+    {
+      name: 'navigator.platform names a Mac the userAgent does not',
+      navigator: {
+        platform: 'MacIntel',
+        userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+      },
+    },
+    {
+      name: 'the userAgent names an iPhone',
+      navigator: {
+        platform: '',
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1',
+      },
+    },
+  ]
+
+  for (const platform of disagreements) {
+    it(`fires Mod on Meta when ${platform.name}`, async () => {
+      const { composable, display } = await loadOnPlatform(platform.navigator)
+
+      expect(display.isMacPlatform()).toBe(true)
+      expect(
+        composable.matchesCombo(
+          makeEvent({ key: 's', metaKey: true }),
+          'Mod+S',
+        ),
+      ).toBe(true)
+      expect(
+        composable.matchesCombo(
+          makeEvent({ key: 's', ctrlKey: true }),
+          'Mod+S',
+        ),
+      ).toBe(false)
+    })
+  }
+
+  it('fires Mod on Ctrl off an Apple platform', async () => {
+    const { composable, display } = await loadOnPlatform({
+      platform: 'Win32',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    })
+
+    expect(display.isMacPlatform()).toBe(false)
+    expect(
+      composable.matchesCombo(makeEvent({ key: 's', ctrlKey: true }), 'Mod+S'),
+    ).toBe(true)
+    expect(
+      composable.matchesCombo(makeEvent({ key: 's', metaKey: true }), 'Mod+S'),
+    ).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Global handler
 // ---------------------------------------------------------------------------
 

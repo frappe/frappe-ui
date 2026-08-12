@@ -6,6 +6,7 @@ import {
   toValue,
   type MaybeRefOrGetter,
 } from 'vue'
+import { isMacPlatform } from '../components/KeyboardShortcut/combo'
 
 // ---------------------------------------------------------------------------
 // Key vocabulary
@@ -186,14 +187,6 @@ interface ParsedCombo {
   key: KeyboardShortcutKey
 }
 
-const isMac =
-  typeof navigator !== 'undefined' &&
-  (/Mac|iPod|iPhone|iPad/i.test(
-    (navigator as Navigator & { userAgentData?: { platform?: string } })
-      .userAgentData?.platform ?? '',
-  ) ||
-    /Mac OS X|Macintosh/i.test(navigator.userAgent))
-
 const KEY_BY_LOWERCASE_NAME = new Map<string, KeyboardShortcutKey>(
   [...Object.keys(KEYS_BY_EVENT_KEY), ...Object.keys(KEYS_BY_EVENT_CODE)].map(
     (name) => [name.toLowerCase(), name as KeyboardShortcutKey],
@@ -231,7 +224,8 @@ export function parseCombo(combo: string): ParsedCombo | null {
     for (const modifier of parts) {
       switch (modifier.toLowerCase()) {
         case 'mod':
-          if (isMac) parsed.meta = true
+          // The chip reads the same check, so what a row draws is what fires.
+          if (isMacPlatform()) parsed.meta = true
           else parsed.ctrl = true
           break
         case 'ctrl':
