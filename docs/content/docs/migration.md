@@ -2712,10 +2712,14 @@ token in development and says nothing in production.
 <KeyboardShortcut combo="Alt+ArrowUp" />
 ```
 
-Grep every `combo` on the component, including bound values. `Mod`, `Ctrl`,
-`Alt`, `Shift`, the letters, and the names in the table's right column are the
-whole vocabulary. The composable's grammar is the same one, listed under
-[`useKeyboardShortcut`](#punctuation-and-digits-take-a-key-name).
+Grep every `combo` on the component, including bound values. The whole
+vocabulary is `Mod`, `Ctrl`, `Alt` and `Shift`, a letter, `F1` to `F12`, and
+these key names: `Escape`, `Enter`, `Space`, `Tab`, `Insert`, `Backspace`,
+`Delete`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`,
+`PageUp`, `PageDown`, `Digit0` to `Digit9`, `Plus`, `Minus`, `Equal`, `Slash`,
+`Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`,
+`BracketLeft`, `BracketRight`. `useKeyboardShortcut` reads the same grammar,
+so a combo you register is a combo you can draw.
 
 ### `useIcons` now reaches `bg` mode
 
