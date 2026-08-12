@@ -151,9 +151,10 @@ from inside `#default` / `#actions`.
 ## DatePicker / TimePicker family
 
 Covers `DatePicker`, `DateRangePicker`, `DateTimePicker`, and `TimePicker`. They
-share the popover-trigger vocabulary. Removed members are deleted, not
-aliased — a call site that still uses one breaks at the tag rather than
-warning; `grep` for each old name after upgrading.
+share the popover-trigger vocabulary. Every removed prop and slot below is
+deleted, not aliased — and nothing warns at the tag: an unknown prop lands as
+an inert attribute, a renamed slot stops rendering. `grep` for each old name
+after upgrading.
 
 | Before                                   | After                        |
 | ----------------------------------------- | --------------------------- |
@@ -162,10 +163,10 @@ warning; `grep` for each old name after upgrading.
 | `:autoClose`                              | `:keepOpen` (inverted)       |
 | `allowCustom` / picker-level `readonly`   | `typeable`                   |
 | `inputClass`                              | `class`                      |
-| `minDate`/`maxDate`/`minTime`/`maxTime`   | `min` / `max`                |
-| `#target`                                 | `#trigger`                   |
+| `minTime`/`maxTime` (TimePicker), `minDateTime`/`maxDateTime` (DateTimePicker) | `min` / `max` |
+| `#target` (DatePicker, DateRangePicker, DateTimePicker) | `#trigger` — TimePicker has neither |
 | `TimePicker.scrollMode`                   | nothing — list is always centered |
-| `TimePicker` template ref `.selectAll()` / `.blurInput()` | nothing — dead, no callers |
+| `TimePicker.use12Hour`                    | `format="h:mm A"`            |
 
 `@change` still fires alongside `@update:modelValue` — it wasn't deprecated
 and doesn't need replacing.
@@ -181,23 +182,37 @@ Behavior changes that apply even if you don't touch your code:
 
 - `DateRangePicker` emits a `[from, to]` tuple. Update handlers that called
   `.split(',')` on the value.
+- `DateRangePicker.modelValue` is `string[]` on the way in too. A stored v0
+  `"from,to"` string is read positionally, so the picker silently opens with
+  nothing selected. Convert stored values with `.split(',')` before binding.
 - `DateTimePicker` no longer auto-closes on date click. Close from
   `@update:modelValue` or add an `#actions` Apply button.
 - The popover footer and auto Clear button were removed. Render an explicit
   Clear inside `#actions` if you relied on it.
-- `DateRangePicker.clearable` now defaults to `true`. Pass `:clearable="false"`
-  to opt out.
+- `DateRangePicker.clearable` now defaults to `true`, and nothing on
+  `DateRangePicker` reads it — emptying the input always clears the range.
+  `DatePicker` and `DateTimePicker` still honour `:clearable="false"`.
 - `useDatePicker` and its helpers (`getDate`, `getDatesAfter`,
   `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
   the picker components used them; drop the import.
 
 ## MonthPicker
 
-`MonthPicker` is deleted — the import fails. Use `Select` with month options:
+`MonthPicker` is deleted — the import fails.
+
+Its model was one string holding **both** parts, `"<Month> <Year>"` (for
+example `"January 2026"`), written by a popover that toggled between a month
+grid and a year grid. Nothing in v1 reproduces that, so pick the replacement
+that matches what your code reads off the value:
+
+- Month **and** year: use `DatePicker` and format the value yourself, or pair
+  two `Select`s.
+- Month only: use `Select` with month options.
 
 ```vue
 <!-- Before -->
 <MonthPicker v-model="month" />
+<!-- month === 'January 2026' -->
 
 <!-- After -->
 <Select
@@ -208,6 +223,7 @@ Behavior changes that apply even if you don't touch your code:
     // ...
   ]"
 />
+<!-- month === '01' — the year is no longer part of the value -->
 ```
 
 ## Selection family (Dropdown / Select / Combobox / MultiSelect)
@@ -215,8 +231,8 @@ Behavior changes that apply even if you don't touch your code:
 Upgrade all three pickers together. They share an option shape and a slot
 vocabulary, and most apps use more than one.
 
-Removed members are deleted, not aliased — a call site that still uses one
-breaks at the tag rather than warning.
+Nothing here was deleted for an alias — the removed props, option keys and
+slot props are gone outright. Most fail quietly; see each subsection.
 
 ### Shared
 
@@ -225,7 +241,7 @@ breaks at the tag rather than warning.
 | Dropdown `{ group, items }`             | `{ group, options }`                         |
 | `#option` slot                          | `#item-label`, plus `#item-prefix` for icons |
 | `option` item slot prop                 | `item`                                       |
-| `clearSelection` / `clearAll` slot prop | `clear`                                      |
+| `clearAll` slot prop                    | `clear`                                      |
 | chevron / trailing content              | `#suffix` slot (replaces the chevron)        |
 
 Option values are `string | number` everywhere. `Select` no longer accepts
@@ -247,7 +263,6 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | `input` emit                                                        | `@update:query`                            |
 | `render` on options                                                 | `slots`                                    |
 | `placement`, `ComboboxPlacement`                                    | `side` + `align`                           |
-| `createOption`                                                      | `type: 'custom'` option + `condition`      |
 | `allowCustomValue`                                                  | `type: 'custom'` option + `condition`      |
 | `reset()` on a template ref                                         | `clear()`                                  |
 | `SimpleOption`, `GroupedOption`, `SelectableOption`, `CustomOption` | the `Combobox`-prefixed names              |
@@ -271,8 +286,9 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 
 All three behavioral removals are silent in plain-JS apps — the old code still
 runs and renders wrong instead of failing — so check each one. TypeScript
-callers get errors instead: the removed keys stay in the types as `never`. A
-dev-mode console warning also fires when `items` or `component` reaches the
+callers get errors instead: `items` and `component` stay in the option types as
+`never`, and `placement` is gone from `DropdownProps` altogether. A dev-mode
+console warning also fires when `placement`, `items` or `component` reaches the
 menu at runtime.
 
 **`placement` is ignored now.** The menu falls back to `align="start"`, so a
@@ -288,8 +304,8 @@ right-aligned menu quietly moves left:
 <Dropdown :options="options" align="center" />
 ```
 
-**A `{ group, items }` entry renders an empty menu** — the group resolves to
-zero options:
+**A `{ group, items }` entry disappears** — the group resolves to zero options
+and is dropped, leaving the rest of the menu intact:
 
 ```ts
 // Before
@@ -654,7 +670,7 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 
 | Before                                     | After                  |
 | ------------------------------------------ | ---------------------- |
-| `<Input>` (removed)                        | `<TextInput>` or `FormControl` |
+| `<Input>` (removed)                        | `TextInput` / `Textarea` / `Select` / `Checkbox`, or `FormControl` |
 | `Rating` `:rating_from`                    | `:max`                 |
 | `Rating` `:readonly`                       | `:disabled`            |
 | `Switch` `@change`                         | `@update:modelValue`   |
@@ -663,14 +679,22 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Password` `:value` prop (removed)         | `v-model`              |
 | `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
 
-The first five rows are **removed**, not aliased. The old names are silently
-ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a `:readonly`
-Rating becomes interactive, a `Switch` `@change` handler never fires, and
-`labelClasses` / `Checkbox.padding` stop styling anything. Nothing breaks at
-build time, so grep for these names when upgrading.
+The five rows below `<Input>` are **removed**, not aliased. The old names are
+silently ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a
+`:readonly` Rating becomes interactive, a `Switch` `@change` handler never
+fires, and `labelClasses` / `Checkbox.padding` stop styling anything. Nothing
+breaks at build time, so grep for these names when upgrading.
+
+`<Input>` is different: the import fails, so importing call sites break loudly.
+Apps that register components globally get no import error — the tag just fails
+to resolve and renders nothing, with a dev-only "Failed to resolve component"
+warning. Grep the tag, not the import: `grep -rn '<Input\b' src`.
 
 `Slider` no longer hardcodes `aria-label="Volume"`. Pass `label` explicitly so
 the control is announced correctly.
+
+`CircularProgressBar` is deleted — the import fails. Use `Progress` for a
+linear bar, or render the arc yourself; there is no circular variant in v1.
 
 ### Password — `value` prop removed
 
@@ -698,8 +722,9 @@ keyboard focus, and read `inputElement` for the native element itself (a
 computed, so it can't be reassigned). `Password` gains the same pair — it
 previously exposed nothing.
 
-This is silent for plain JS: `ref.value.el` becomes `undefined` at runtime
-instead of throwing. A typed ref catches it as a build-time error instead.
+This fails late rather than at build time: `ref.value.el` is `undefined`, so
+the next access — `ref.value.el.focus()` — throws at runtime, far from the
+upgrade. A typed ref catches it as a build error instead.
 
 ```vue
 <!-- Before -->
@@ -731,10 +756,10 @@ a security fix to the default it shares with `useFileUpload` /
 ### Uploads default to private
 
 `useFileUpload()` and `FileUploadHandler` now resolve an upload with no
-stated `private` / `is_private` to **private**, not public. `FileUploader`
-itself is unaffected — it has uploaded private by default since
-`v1.0.0-beta.21`; this only changes the two lower-level primitives, called
-directly.
+stated `private` / `is_private` to **private**, not public. Coming from v0,
+`FileUploader` flips with them: it had no `private` prop at all and inherited
+the public default. It has uploaded private by default since
+`v1.0.0-beta.21`, so only pre-beta.21 upgrades see the component change.
 
 ```ts
 // Same call, before and after — the result changes:
@@ -832,12 +857,19 @@ string now.
 This is silent: a slot that only ever did `error.message` (assuming the
 `Error` shape) now renders `undefined` instead of the validation message.
 
+`failure` also fires for validation now. A `validateFile` that returns a
+message or throws emits `failure` with that value; v0 only wrote it to the
+slot's `error`. An existing `@failure` handler starts seeing validation
+rejections alongside upload errors.
+
 ### `fileToBase64` and the size-limit helpers — no longer exported
 
-`fileToBase64`, `formatBytes`, `getMaxFileSize`, and `fileSizeLimitMessage`
-are no longer exported from `frappe-ui`; the import fails at build time.
-There were no external call sites at the v1 sweep. Computing a file's base64
-representation yourself is a few lines of `FileReader.readAsDataURL`.
+`fileToBase64` is no longer exported from `frappe-ui`; the import fails at
+build time. There were no external call sites at the v1 sweep. Computing a
+file's base64 representation yourself is a few lines of
+`FileReader.readAsDataURL`. The size-limit helpers (`formatBytes`,
+`getMaxFileSize`, `fileSizeLimitMessage`) were only ever exported during the
+`1.0.0` betas and are internal now.
 
 ## Divider
 
@@ -1941,7 +1973,8 @@ grep -rn 'items:' src --include='*.vue'             # grouped options — see be
 | `:bodyClasses`                    | `data-slot` CSS                           |
 | `:maxOptions`                     | no equivalent                             |
 | `#target="{ togglePopover }"`     | `#trigger`, with no click handler (`open` is now a boolean) |
-| `#prefix` / `#suffix` / `#item-*` | same (`#suffix` now replaces chevron)     |
+| `#prefix` / `#suffix`             | same (`#suffix` now replaces chevron)     |
+| `#item-prefix` / `#item-suffix` slot props `{ active, selected, option }` | `{ item, query, selected }` — `option` is renamed and `active` is gone, so a carried-over `option.label` throws during render |
 
 ### The v-model payload inverts
 
@@ -1974,9 +2007,11 @@ beyond the value? Listen to `@update:selectedOption`, which carries it:
 ### Grouped options: `items` → `options`
 
 The key holding a group's children is now `options`, matching the top-level
-prop. Both components throw and name the group if they find the old key, so
-this one is caught the first time the picker opens — but only then, not at
-build time.
+prop. `Combobox` and `MultiSelect` throw and name the group if they find the
+old key, so this one is caught the first time the picker opens — but only then,
+not at build time. `Dropdown` and `ContextMenu` share the rename and fail the
+other way: the group is dropped in silence (see
+[Dropdown and ContextMenu](#dropdown-and-contextmenu)).
 
 ```vue
 <!-- Before -->
@@ -2018,12 +2053,13 @@ as a value — `v-if="open"`, `:class="{ 'rotate-180': open }"` — was reading 
 function object and was **always truthy**. On `#trigger` it is the real open
 state, so those expressions start doing what they always looked like they did.
 
-`#trigger` receives
-`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`. Use
-`setOpen` for a trigger that has to open the popover from somewhere other than
-its own click.
+`Combobox`'s `#trigger` receives
+`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`.
+`MultiSelect`'s receives `{ open, disabled, query, selectedOptions, clear,
+setOpen }` — plural, and with no `displayValue`. Use `setOpen` for a trigger
+that has to open the popover from somewhere other than its own click.
 
-### The default trigger is `trigger="button"`
+### The trigger shape changed — pass `trigger="button"` to keep v0's
 
 `Autocomplete` rendered a button showing the selection, with the search box
 inside the popover. `Combobox` defaults to `trigger="input"` — the trigger
@@ -2034,8 +2070,10 @@ _is_ the search field. Pass `trigger="button"` to keep the old shape.
 **This one is silent.** `FormControl` is a dispatcher: with the `autocomplete`
 case gone, the type falls through to `TextInput` and is still forwarded as an
 html input type. The result is `<input type="autocomplete">`, which every
-browser renders as a plain text box. No build error, no runtime error — just a
-picker that turned into a text field. A dev-only `console.error` names it.
+browser renders as a plain text box — a picker that turned into a text field.
+No runtime error, and no build error in plain JS; TypeScript callers do get
+one, because `'autocomplete'` is no longer in the `type` union. A dev-only
+`console.error` names it.
 
 ```vue
 <!-- Before -->
