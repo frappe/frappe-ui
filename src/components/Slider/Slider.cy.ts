@@ -130,19 +130,80 @@ describe('Slider', () => {
     })
   })
 
-  it('names each thumb of a range distinctly', () => {
-    cy.mount(Slider, {
-      props: { label: 'Price', modelValue: [20, 80] },
-    })
+  // Reads the accessible name the way assistive technology does: follow
+  // `aria-labelledby` if present, otherwise take `aria-label`.
+  function accessibleName($el: JQuery<HTMLElement>): string {
+    const ids = $el.attr('aria-labelledby')
+    if (!ids) return $el.attr('aria-label') ?? ''
+    return ids
+      .split(' ')
+      .map((id) => Cypress.$(`#${id}`).text().trim())
+      .join(' ')
+  }
+
+  it('names each thumb of a range distinctly, from the label prop', () => {
+    cy.mount(Slider, { props: { label: 'Price', modelValue: [20, 80] } })
     cy.get('[role="slider"]').should('have.length', 2)
     cy.get('[role="slider"]')
       .first()
-      .should('have.attr', 'aria-label', 'Price minimum')
-      // aria-labelledby would beat aria-label, so it must not be set here.
+      .then(($t) => expect(accessibleName($t)).to.equal('Price minimum'))
+    cy.get('[role="slider"]')
+      .last()
+      .then(($t) => expect(accessibleName($t)).to.equal('Price maximum'))
+  })
+
+  it('keeps a referenced label on both thumbs of a range', () => {
+    // The regression this guards: qualifying with `aria-label` silently drops
+    // the caller's reference, because `aria-labelledby` wins.
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('span', { id: 'ext-range-label' }, 'Budget'),
+          h(Slider, {
+            modelValue: [20, 80],
+            'aria-labelledby': 'ext-range-label',
+          }),
+        ]),
+    })
+    cy.get('[role="slider"]')
+      .first()
+      .then(($t) => expect(accessibleName($t)).to.equal('Budget minimum'))
+    cy.get('[role="slider"]')
+      .last()
+      .then(($t) => expect(accessibleName($t)).to.equal('Budget maximum'))
+  })
+
+  it('qualifies a caller aria-label on a range', () => {
+    cy.mount(Slider, {
+      props: { modelValue: [20, 80] },
+      attrs: { 'aria-label': 'Budget' },
+    })
+    cy.get('[role="slider"]')
+      .first()
+      .should('have.attr', 'aria-label', 'Budget minimum')
+    cy.get('[role="slider"]')
+      .last()
+      .should('have.attr', 'aria-label', 'Budget maximum')
+  })
+
+  it('leaves an unnamed range to reka own qualifiers', () => {
+    cy.mount(Slider, { props: { modelValue: [20, 80] } })
+    cy.get('[role="slider"]').should('have.length', 2)
+    cy.get('[role="slider"]')
+      .first()
+      .should('have.attr', 'aria-label', 'Minimum')
       .and('not.have.attr', 'aria-labelledby')
     cy.get('[role="slider"]')
       .last()
-      .should('have.attr', 'aria-label', 'Price maximum')
+      .should('have.attr', 'aria-label', 'Maximum')
+  })
+
+  it('names each thumb past two by position', () => {
+    cy.mount(Slider, { props: { label: 'Stops', modelValue: [10, 50, 90] } })
+    cy.get('[role="slider"]').should('have.length', 3)
+    cy.get('[role="slider"]')
+      .eq(2)
+      .then(($t) => expect(accessibleName($t)).to.equal('Stops value 3 of 3'))
   })
 
   it('keeps the plain name on a single thumb', () => {
@@ -178,6 +239,22 @@ describe('Slider', () => {
       attrs: { class: 'my-bare-slider' },
     })
     cy.get('#sl-bare').should('have.class', 'my-bare-slider')
+  })
+
+  it('drops its own w-full when the caller sets a width', () => {
+    // Two width utilities in one list are decided by stylesheet order, so the
+    // caller only wins if ours is not there at all.
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [25] },
+      attrs: { class: 'w-64' },
+    })
+    cy.get('.w-64').should('not.have.class', 'w-full')
+
+    cy.mount(Slider, {
+      props: { label: 'Volume', modelValue: [25] },
+      attrs: { class: 'mt-4' },
+    })
+    cy.get('.mt-4').should('have.class', 'w-full')
   })
 
   it('forwards disabled to aria-disabled and SliderRoot', () => {

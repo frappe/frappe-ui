@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots, useAttrs } from 'vue'
+import { computed, normalizeClass, useSlots, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
@@ -38,7 +38,17 @@ const callerAria = computed(() => {
   return Object.fromEntries(Object.entries(attrs).filter(([k]) => isAriaKey(k)))
 })
 
-const attrsWithoutClassStyle = computed(() => {
+// A slider has no intrinsic width, so the wrapper carries `w-full`. That is a
+// default, not a rule — but two width utilities in one class list are decided
+// by stylesheet order, not by which one the caller wrote, and there is no class
+// merger here. So drop ours when the caller brings their own.
+const hasCallerWidth = computed(() => {
+  return /(^|\s)!?w-/.test(normalizeClass(attrs.class))
+})
+
+// What is left to fall through to the control: class and style are placed by
+// hand, and `aria-*` goes to the thumb.
+const rootAttrs = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(
       ([key]) => key !== 'class' && key !== 'style' && !isAriaKey(key),
@@ -94,28 +104,46 @@ const thumbDescribedBy = computed(() => {
   return merged || undefined
 })
 
-// A range slider renders one `role="slider"` per value. They need distinct
-// names, or assistive technology announces two identical controls. Only the
-// multi-thumb case is qualified — a single thumb keeps the plain name.
+// A range slider renders one `role="slider"` per value. Unnamed, reka already
+// tells them apart ("Minimum"/"Maximum", or "Value N of M" past two — see
+// `getLabel` in reka-ui). A name of ours overrides that and lands on every
+// thumb at once, so it has to carry the qualifier itself. Same wording as
+// reka's, so a user never meets two vocabularies.
 const isRange = computed(() => sliderValue.value.length > 1)
 
-const baseName = computed(() => {
-  return (attrs['aria-label'] as string | undefined) ?? props.label
-})
-
-function thumbNameFor(index: number): string | undefined {
-  if (!isRange.value) return attrs['aria-label'] as string | undefined
-  const part =
-    sliderValue.value.length === 2
-      ? ['minimum', 'maximum'][index]
-      : `value ${index + 1}`
-  return baseName.value ? `${baseName.value} ${part}` : part
+function thumbPart(index: number): string {
+  const count = sliderValue.value.length
+  return count === 2
+    ? ['minimum', 'maximum'][index]
+    : `value ${index + 1} of ${count}`
 }
 
-// `aria-labelledby` beats `aria-label`, so the generated reference has to drop
-// away on a range — otherwise the per-thumb name never wins.
+function thumbPartId(index: number): string {
+  return `${inputId.value}-thumb-${index}`
+}
+
+// The qualifier has to reach the name the same way the name arrives. Against a
+// referenced label there is no string to append to — the text lives in an
+// element we do not own — so append a second id instead: `aria-labelledby`
+// takes a list and concatenates it. Reading the referenced element's text
+// would work in a browser and break in SSR.
 function thumbLabelledByFor(index: number): string | undefined {
-  return thumbNameFor(index) ? undefined : thumbLabelledBy.value
+  if (!thumbLabelledBy.value) return undefined
+  return isRange.value
+    ? `${thumbLabelledBy.value} ${thumbPartId(index)}`
+    : thumbLabelledBy.value
+}
+
+function thumbNameFor(index: number): string | undefined {
+  const callerLabel = attrs['aria-label'] as string | undefined
+  if (!isRange.value) return callerLabel
+  // A referenced name is qualified through `aria-labelledby`, which beats
+  // `aria-label`, so setting one here would only delete the reference.
+  if (thumbLabelledBy.value) return undefined
+  // Nothing names this slider, so leave reka's own "Minimum"/"Maximum" in
+  // place rather than restate it.
+  if (!callerLabel) return undefined
+  return `${callerLabel} ${thumbPart(index)}`
 }
 
 const isBidirectional = computed(() => props.min < 0 && props.max > 0)
@@ -183,7 +211,11 @@ const hasLabeling = computed(() => {
 <template>
   <LabelingWrapper
     :enabled="hasLabeling"
-    :wrapper-class="['space-y-1.5 w-full', attrs.class]"
+    :wrapper-class="[
+      'space-y-1.5',
+      hasCallerWidth ? null : 'w-full',
+      attrs.class,
+    ]"
     :wrapper-style="attrs.style as StyleValue"
   >
     <InputLabel
@@ -208,7 +240,7 @@ const hasLabeling = computed(() => {
       :disabled="props.disabled"
       :aria-disabled="props.disabled || undefined"
       data-slot="control"
-      v-bind="{ ...dataAttrs, ...attrsWithoutClassStyle }"
+      v-bind="{ ...dataAttrs, ...rootAttrs }"
       @value-commit="onValueCommit"
     >
       <SliderTrack :class="trackClasses">
@@ -222,17 +254,27 @@ const hasLabeling = computed(() => {
         />
       </SliderTrack>
 
-      <SliderThumb
-        v-for="(_, i) in sliderValue"
-        :key="`slider-thumb-${i}`"
-        :class="thumbClasses"
-        v-bind="callerAria"
-        :aria-label="thumbNameFor(i)"
-        :aria-labelledby="thumbLabelledByFor(i)"
-        :aria-describedby="thumbDescribedBy"
-        :aria-errormessage="hasError ? errorMessageId : undefined"
-        :aria-invalid="hasError || undefined"
-      />
+      <template v-for="(_, i) in sliderValue" :key="`slider-thumb-${i}`">
+        <!-- The second half of a range thumb's referenced name. Rendered only
+             when the name comes from an id, which is the one case the string
+             qualifier cannot reach. -->
+        <span
+          v-if="isRange && thumbLabelledBy"
+          :id="thumbPartId(i)"
+          class="sr-only"
+        >
+          {{ thumbPart(i) }}
+        </span>
+        <SliderThumb
+          :class="thumbClasses"
+          v-bind="callerAria"
+          :aria-label="thumbNameFor(i)"
+          :aria-labelledby="thumbLabelledByFor(i)"
+          :aria-describedby="thumbDescribedBy"
+          :aria-errormessage="hasError ? errorMessageId : undefined"
+          :aria-invalid="hasError || undefined"
+        />
+      </template>
     </SliderRoot>
     <InputDescription
       v-if="showDescription || $slots.description"
