@@ -82,6 +82,11 @@ on.
   [`frappe-ui/experimental`](/docs/experimental#charts-v1).
   [`frappe-ui/charts`](../charts/overview) is the replacement family and
   draws everything these did.
+- **`CommandPalette`, `CommandPaletteItem`** — import from
+  [`frappe-ui/experimental`](/docs/experimental#commandpalette). The family is
+  rebuilt there as six composable parts, so this is a rewrite and not only an
+  import-path change; see the
+  [CommandPalette migration section](../migration#commandpalette).
 - **`Icon`, `IconPicker`, `spritePlugin`** (the sprite icon trio) — import
   from [`frappe-ui/experimental`](/docs/experimental#sprite-icons).
   `lucide-*` classes and the root [`Icon`](./icon) component are the

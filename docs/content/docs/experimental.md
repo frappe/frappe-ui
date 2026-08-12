@@ -30,6 +30,7 @@ it is likely to move:
 | [`Calendar`](#calendar) | Parked | A redesigned calendar family |
 | [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
 | [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
+| [`CommandPalette`](#commandpalette) | Parked | gameplan, helpdesk and this site running on it |
 | [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
@@ -94,6 +95,27 @@ import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
 
 See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
 variants, and the labeling contract.
+
+## CommandPalette
+
+A searchable list of commands in a dialog. The root `CommandPalette` was
+removed in `1.0.0` and rebuilt here as six composable parts, so an app writes
+the rows it needs instead of feeding one `groups` shape. `filterable` (default
+`true`) turns the client filter off for server search.
+
+```ts
+import {
+  CommandPalette,
+  CommandPaletteInput,
+  CommandPaletteGroup,
+  CommandPaletteItem,
+  CommandPaletteEmpty,
+  CommandPaletteFooter,
+} from 'frappe-ui/experimental'
+```
+
+See the [CommandPalette page](/docs/experimental/commandpalette) for filtering,
+server search, link items and the styling hooks.
 
 ## FloatingWindow
 

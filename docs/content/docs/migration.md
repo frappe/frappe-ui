@@ -2509,32 +2509,124 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 
 ## CommandPalette
 
-`show` is renamed to `open`, matching the rest of the library's overlay
-vocabulary. This is a **silent break**: Vue accepts the unknown `show` prop
-with no error, so the palette just never opens.
+`CommandPalette` and `CommandPaletteItem` leave the root export. The family is
+rebuilt as six composable parts in `frappe-ui/experimental`, where it stays
+until gameplan, helpdesk and this site all run on it (P14 — no stability
+promise).
 
-`searchQuery` is renamed to `query`, the name `Combobox` and `MultiSelect`
-already use for the same controlled search text. Same silent break: the
-unknown `searchQuery` prop is accepted, so the palette holds its own query
-and yours never updates.
+The root import fails to resolve, so your build names every call site.
 
-| Before                          | After                    |
-| -------------------------------- | ------------------------ |
-| `v-model:show="show"`            | `v-model:open="open"`    |
-| `v-model:search-query="q"`       | `v-model:query="q"`      |
-| `@update:searchQuery="onSearch"` | `@update:query="onSearch"` |
+```ts
+// Before
+import { CommandPalette, CommandPaletteItem } from 'frappe-ui'
+
+// After
+import {
+  CommandPalette,
+  CommandPaletteInput,
+  CommandPaletteGroup,
+  CommandPaletteItem,
+  CommandPaletteEmpty,
+  CommandPaletteFooter,
+} from 'frappe-ui/experimental'
+```
+
+### The `groups` prop becomes markup
+
+`groups` is gone. Write the rows as parts, so a group renders whatever it needs
+without a per-group `component` escape hatch.
 
 ```vue
 <!-- Before -->
-<CommandPalette v-model:show="show" v-model:search-query="q" :groups="groups" @select="onSelect" />
+<CommandPalette
+  v-model:open="open"
+  v-model:query="q"
+  :groups="groups"
+  @select="onSelect"
+/>
 
 <!-- After -->
-<CommandPalette v-model:open="open" v-model:query="q" :groups="groups" @select="onSelect" />
+<CommandPalette v-model:open="open" v-model:query="q" @select="onSelect">
+  <CommandPaletteInput placeholder="Search" />
+
+  <CommandPaletteGroup
+    v-for="group in groups"
+    :key="group.title"
+    :title="group.hideTitle ? undefined : group.title"
+  >
+    <CommandPaletteItem
+      v-for="item in group.items"
+      :key="item.name"
+      :value="item"
+      :disabled="item.disabled"
+    >
+      <template v-if="item.icon" #prefix>
+        <span :class="[item.icon, 'mr-3 size-4']" />
+      </template>
+      {{ item.title }}
+      <template v-if="item.description" #suffix>{{ item.description }}</template>
+    </CommandPaletteItem>
+  </CommandPaletteGroup>
+
+  <CommandPaletteEmpty />
+</CommandPalette>
 ```
 
-`Mod+K` is registered internally through `useKeyboardShortcut` (v0 used its own
-`keydown` listener on `window`). Delete any app-level listener you added on
-top of it.
+| Before                | After                                        |
+| --------------------- | -------------------------------------------- |
+| `:groups="groups"`    | `CommandPaletteGroup` + `CommandPaletteItem` |
+| `group.title`         | `:title` on `CommandPaletteGroup`            |
+| `group.hideTitle`     | leave `title` out                            |
+| `group.component`     | write the row in the item's slots            |
+| `item.icon`           | `#prefix` on `CommandPaletteItem`            |
+| `item.description`    | `#suffix` on `CommandPaletteItem`            |
+| `item.disabled`       | `:disabled` on `CommandPaletteItem`          |
+| `@select="fn"`        | `@select="(value, event) => fn(value)"`      |
+
+`select` now carries two arguments: the item's `value`, and the click that
+picked it. Call `event.preventDefault()` to keep the palette open.
+
+### Filtering is included
+
+The old palette filtered nothing; it rendered `groups` as given. The new one
+filters against the query by default, so a call site that never filtered starts
+narrowing its list. That is usually the fix, not a break.
+
+Set `:filterable="false"` when a server search already decided what matches,
+then refetch on `update:query` yourself. It is the same word `Combobox` and
+`MultiSelect` use.
+
+An item filters on the text of its default slot. `#prefix` and `#suffix` are
+left out, so a trailing shortcut hint never becomes searchable.
+
+### `Mod+K` moves to the caller
+
+The palette registered `Mod+K` itself and carried
+`enabled: () => !document.activeElement?.closest('.ProseMirror')`, hardcoding
+knowledge of the rich-text editor. Both are gone. Register the shortcut where
+the app knows the answer:
+
+```js
+useKeyboardShortcut({
+  combo: 'Mod+K',
+  description: 'Open command palette',
+  handler: () => (open.value = true),
+})
+```
+
+### If you are on `1.0.0-beta` or older
+
+Two earlier renames land in the same move. `show` became `open` and
+`searchQuery` became `query`, both **silent breaks**: Vue accepts the unknown
+prop, so the palette never opens and your query binding never updates. Suite's
+`SheetEditor` still binds `v-model:show` and `v-model:searchQuery`, so its
+palette does not open today.
+
+| Before                           | After                      |
+| -------------------------------- | -------------------------- |
+| `v-model:show="show"`            | `v-model:open="open"`      |
+| `v-model:search-query="q"`       | `v-model:query="q"`        |
+| `@update:searchQuery="onSearch"` | `@update:query="onSearch"` |
 
 ## `useShortcut` is now `useKeyboardShortcut`
 

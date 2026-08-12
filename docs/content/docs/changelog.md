@@ -9,6 +9,39 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
+
+`CommandPalette` and `CommandPaletteItem` leave the root export. The family is
+rebuilt as six composable parts — `CommandPalette`, `CommandPaletteInput`,
+`CommandPaletteGroup`, `CommandPaletteItem`, `CommandPaletteEmpty` and
+`CommandPaletteFooter` — in `frappe-ui/experimental` (P14 — no stability
+promise). It stays there until gameplan, helpdesk and this site all run on it.
+
+Four apps forked the old palette rather than use it, because it had one shape
+and no filtering. The parts fit all four.
+
+- **Breaking, loud:** `import { CommandPalette } from 'frappe-ui'` fails to
+  resolve.
+- **Breaking:** the `groups` prop is gone. Groups and items are markup now, so
+  a group renders whatever it needs without a `component` escape hatch.
+- **Breaking:** `select` carries the value and the click that picked it. Call
+  `event.preventDefault()` to keep the palette open.
+- **Behavior change:** the palette filters against the query. The old one
+  rendered `groups` as given and left filtering to the caller. `filterable`
+  (default `true`) turns it off for server search, the same word `Combobox` and
+  `MultiSelect` use (ADR-0009).
+- **Breaking:** `Mod+K` moves to the caller. The old component registered it
+  itself and skipped it whenever a rich-text editor had focus, hardcoding
+  knowledge of the editor into the palette.
+- Every part stamps `data-slot`. An item stamps `data-state="active"` or
+  `data-state="selected"` and `data-disabled`, and hands `active`, `selected`
+  and `disabled` to its slots.
+- `@headlessui/vue` leaves `dependencies` with it. The palette was its last
+  import in the library.
+
+Before/after for each break is in the
+[migration guide](/docs/migration#commandpalette).
+
 ### `useShortcut` renamed to `useKeyboardShortcut`, config reshaped (breaking; loud in TS, silent in JS)
 
 The import fails to resolve, so the rename itself is loud. The config is the
