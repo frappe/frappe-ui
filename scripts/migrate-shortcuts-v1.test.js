@@ -329,7 +329,10 @@ useShortcut([
     expect(computed.refusals[0].message).toContain('computed property name')
   })
 
-  it('renames condition on an object built by spreading a v0 config', () => {
+  it('leaves a spread-built object alone, because nothing proves it is a config', () => {
+    // The map returns into a plain function, so no call and no annotation
+    // reaches it. `condition` beside a callback is shared vocabulary, so a
+    // rename here is a guess.
     const source = `export function commandShortcuts() {
 	return commands.all.value.map((command) => ({
 		...command.keys!,
@@ -339,9 +342,22 @@ useShortcut([
 	}))
 }
 `
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toBe(source)
+    expect(notes).toEqual([])
+    expect(refusals).toEqual([])
+  })
+
+  it('renames condition on a spread-built object under a v0 annotation', () => {
+    const source = `import type { ShortcutConfig } from 'frappe-ui'
+const bindings: ShortcutConfig[] = [
+	{ ...base, condition: canEdit, handler: edit },
+]
+`
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
-    expect(migrated).toContain('enabled: command.condition,')
+    expect(migrated).toContain('enabled: canEdit')
     expect(refusals).toEqual([])
   })
 
@@ -445,14 +461,15 @@ useShortcut([
   })
 
   it('renames condition inside a useShortcut call even with no other config field', () => {
-    const source = 'useShortcut([{ ...base, condition: canEdit, handler: edit }])\n'
+    const source =
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ ...base, condition: canEdit, handler: edit }])\n"
     const { migrated } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(migrated).toContain('enabled: canEdit')
   })
 
   it('reads a method shorthand as the property it is', () => {
-    const source = `useShortcut({\n\tkey: 's',\n\tctrl: true,\n\tdescription: 'Save',\n\thandler() {\n\t\tsave()\n\t},\n})\n`
+    const source = `import { useShortcut } from 'frappe-ui'\nuseShortcut({\n\tkey: 's',\n\tctrl: true,\n\tdescription: 'Save',\n\thandler() {\n\t\tsave()\n\t},\n})\n`
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(migrated).toContain("combo: 'Mod+S'")
@@ -461,30 +478,31 @@ useShortcut([
   })
 
   it('renames a condition method shorthand without eating its body', () => {
-    const source = `useShortcut({\n\tkey: 's',\n\tdescription: 'Save',\n\tcondition() {\n\t\treturn ready\n\t},\n\thandler: save,\n})\n`
+    const source = `import { useShortcut } from 'frappe-ui'\nuseShortcut({\n\tkey: 's',\n\tdescription: 'Save',\n\tcondition() {\n\t\treturn ready\n\t},\n\thandler: save,\n})\n`
     const { migrated } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(migrated).toContain('enabled() {')
     expect(migrated).toContain('return ready')
   })
 
-  it('converts a keys: { ... } object that carries no other config field', () => {
-    const { migrated } = migrateShortcuts(
-      'commands.register({\n\tkeys: { key: "p", ctrl: true, description: "Preview" },\n})\n',
-      { ext: '.ts' },
-    )
+  it('names a keys: { ... } object it cannot prove, and leaves it as it is', () => {
+    const source = 'commands.register({\n\tkeys: { key: "p", ctrl: true, description: "Preview" },\n})\n'
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
-    expect(migrated).toContain('keys: { combo: "Mod+P", description: "Preview" }')
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+    expect(notes[0].message).toContain('write `combo: \'Mod+P\'`')
   })
 
-  it('refuses a type declaration of the v0 shape', () => {
-    const { migrated, refusals } = migrateShortcuts(
-      'export type CommandKeys = {\n\tkey: string;\n\tctrl?: boolean;\n\tshift?: boolean;\n\tdescription: string;\n};\n',
-      { ext: '.ts' },
-    )
+  it('leaves a type declaration of the v0 shape alone', () => {
+    // A declaration is not a config. The app may own this type, and a rewrite
+    // of a type body would move a shape the app still uses.
+    const source =
+      'export type CommandKeys = {\n\tkey: string;\n\tctrl?: boolean;\n\tshift?: boolean;\n\tdescription: string;\n};\n'
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
-    expect(migrated).toContain('key: string;')
-    expect(refusals[0].message).toContain('KeyboardShortcutConfig')
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
   })
 })
 
@@ -529,14 +547,13 @@ useShortcut(bindings)
     expect(refusals).toEqual([])
     expect(notes).toHaveLength(1)
     expect(notes[0].line).toBe(2)
-    expect(notes[0].message).toContain('v1 throws on a config with no `combo`')
+    expect(notes[0].message).toContain("write `combo: 'Mod+S'`")
     expect(migrated).toContain("{ key: 's', ctrl: true, handler: save }")
   })
 
-  it('names a walked-away object in a file it converted but never renamed', () => {
-    // A config module names no frappe-ui member, so there is no rename to
-    // gate on. The call that reads it renames in another file, and v1 gets a
-    // config with no `combo`.
+  it('names every object in a config module it cannot prove', () => {
+    // A config module names no frappe-ui member and carries no annotation, so
+    // nothing here is proven. The run names both rows and writes no file.
     const source = `export const bindings = [
   { key: 's', ctrl: true, description: 'Save', handler: save },
   { key: 'd', ctrl: true, handler: remove },
@@ -545,20 +562,8 @@ useShortcut(bindings)
     const { migrated, notes, renames } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(renames).toEqual([])
-    expect(migrated).toContain("combo: 'Mod+S'")
-    expect(notes).toHaveLength(1)
-    expect(notes[0].line).toBe(3)
-  })
-
-  it('does not read a section comment as the property above an object', () => {
-    const source = `const items = [
-  // shortcuts:
-  { key: 'delete', handler: del },
-]
-`
-    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
-
     expect(migrated).toBe(source)
+    expect(notes.map((n) => n.line)).toEqual([2, 3])
   })
 
   it('says nothing about a menu entry in a file it did not rename', () => {
@@ -580,24 +585,15 @@ useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
     expect(notes).toEqual([])
   })
 
-  it('takes a shortcut under a shortcuts: [ ... ] property', () => {
-    // The property names what the array holds, so each object in it is a
-    // shortcut even with no `description`.
+  it('names a shortcuts: [ ... ] array instead of rewriting it', () => {
+    // A property name is not proof. An app is free to call its own array
+    // `shortcuts` and hand it to its own composable.
     const source = "const cfg = { shortcuts: [{ key: 'k', ctrl: true, handler: open }] }\n"
-    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
-    expect(migrated).toContain("combo: 'Mod+K'")
+    expect(migrated).toBe(source)
     expect(refusals).toEqual([])
-  })
-
-  it('reads the plural and camelCase context names too', () => {
-    const source = `const a = { bindings: [{ key: 'k', ctrl: true, handler: open }] }
-const b = { keyBindings: [{ key: 'j', ctrl: true, handler: down }] }
-`
-    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
-
-    expect(migrated).toContain("combo: 'Mod+K'")
-    expect(migrated).toContain("combo: 'Mod+J'")
+    expect(notes[0].message).toContain("write `combo: 'Mod+K'`")
   })
 
   it('leaves a key inside a string or a comment alone', () => {
@@ -826,35 +822,47 @@ const title = 'KeyboardShortcutsModal'
   })
 
   it("leaves an app's own useShortcut fork alone and says so", () => {
-    const source = `import { useShortcut } from '@/composables/useShortcut'
+    // Real shape, from helpdesk desk/src/composables/shortcuts.ts, which
+    // exports a `useShortcut` of its own.
+    const source = `import { useShortcut } from '@/composables/shortcuts'
 useShortcut({ key: 's', description: 'Save', handler: save })
 `
-    const { migrated, refusals } = migrateShortcuts(source)
+    const { migrated, notes, refusals } = migrateShortcuts(source)
 
-    expect(migrated).toContain("import { useShortcut } from '@/composables/useShortcut'")
-    expect(refusals[0].message).toContain("comes from '@/composables/useShortcut'")
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+    expect(notes[0].message).toContain("comes from '@/composables/shortcuts'")
   })
 
   it('leaves a locally declared useShortcut alone', () => {
-    const source = 'export function useShortcut(configs) {\n  return configs\n}\n'
-    const { migrated, refusals } = migrateShortcuts(source)
+    const source = `export interface ShortcutBinding {
+  key: string
+  meta?: boolean
+}
+export function useShortcut(binding: ShortcutBinding, cb: () => void) {
+  return { binding, cb }
+}
+`
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(migrated).toBe(source)
-    expect(refusals[0].message).toContain('declared in this file')
+    expect(refusals).toEqual([])
+    expect(notes[0].message).toContain('declared in this file')
   })
 
   it("leaves an app's own ShortcutConfig type alone", () => {
     // A type is the only way an app declares one of its own, so a rename here
-    // splits the app: the declaration moves and every consumer is refused.
+    // splits the app: the declaration moves and every consumer breaks.
     for (const source of [
       'export interface ShortcutConfig {\n  key: string\n  label: string\n}\n',
       'export type ShortcutConfig = { key: string; label: string }\n',
       'export enum ShortcutConfig {\n  Save = 1,\n}\n',
     ]) {
-      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+      const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
       expect(migrated).toBe(source)
-      expect(refusals[0].message).toContain('declared in this file')
+      expect(refusals).toEqual([])
+      expect(notes[0].message).toContain('declared in this file')
     }
   })
 
@@ -952,7 +960,7 @@ vi.mock('frappe-ui', () => ({ KeyboardShortcutsDialog }))
 
   it('refuses a destructured return, which v1 no longer gives', () => {
     const { refusals } = migrateShortcuts(
-      "const { activeShortcuts } = useShortcut({ key: 's', description: 'Save' })\n",
+      "import { useShortcut } from 'frappe-ui'\nconst { activeShortcuts } = useShortcut({ key: 's', description: 'Save' })\n",
     )
 
     expect(refusals.some((r) => r.message.includes('returns void in v1'))).toBe(true)
@@ -1239,12 +1247,12 @@ useKeyboardShortcut({
     expect(fs.readFileSync(path.join(dir, 'DocumentList.vue'), 'utf8')).toBe(after)
   })
 
-  it('names the menu entry it walked away from, and nothing else', () => {
+  it('says nothing about the table, the menu or the template', () => {
+    // Every other object on the page is an option or a row. The run proves
+    // the two it converts and stays quiet about the rest.
     const dir = tempDir({ 'DocumentList.vue': before })
     const result = run([dir])
 
-    expect(result.stdout).toContain('DocumentList.vue:L18')
-    expect(result.stdout).not.toContain(':L11')
-    expect(result.stdout).not.toContain(':L12')
+    expect(result.stdout).not.toContain(':L')
   })
 })

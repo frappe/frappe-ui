@@ -219,28 +219,36 @@ export const DELETED_MEMBERS = {
   RegisteredShortcut: '`RegisteredShortcut` is deleted together with `getActiveShortcuts`.',
 }
 
-// A property only a shortcut config carries. One of these next to a `key`
-// string tells a registration apart from a table column or a `v-for` row.
-//
-// `ctrl` / `shift` / `alt` are deliberately NOT in this set. A fake keyboard
-// event carries the same four fields — suite's own test writes
-// `fire({ key: 'z', ctrl: true })` — and rewriting one of those to a combo
-// breaks the test. v0's type made `description` mandatory, so every real
-// registration carries one of the names below.
-//
-// `handler` and `condition` are not here either. They are shared vocabulary: a
-// context-menu entry like `{ key: 'delete', label: 'Delete', handler: del }`
-// carries both beside a `key` that is also a real key name, and rewriting it
-// to `combo: 'Delete'` breaks the menu with no refusal. So neither name is
-// evidence on its own, and an object that carries nothing else is left alone
-// unless it sits in a `useShortcut(...)` call or under a `shortcuts:` key.
-// Pass two holds the same line.
-const CONFIG_SIGNALS = new Set([
+// A name that reads like a shortcut config. None of these proves one, and
+// nothing here decides a rewrite: they decide whether the run mentions a site
+// it could not prove. A note costs a line of output. A rewrite costs the app.
+const NOTE_SIGNALS = new Set([
   'description',
-  'group',
   'onHold',
   'onRelease',
   'triggeredOn',
+])
+
+// A name a shortcut config never carries, and frappe-ui's option types do.
+// `ComboboxGroupedOption` is `{ key, group, hideLabel, options }` and
+// `ComboboxCustomOption` is `{ key, label, description, onClick, condition }`.
+// One of these means the object is an option or a menu row, so the run says
+// nothing at all about it.
+const OPTION_SIGNALS = new Set([
+  'label',
+  'value',
+  'options',
+  'items',
+  'onClick',
+  'slot',
+  'slots',
+  'icon',
+  'hideLabel',
+  'type',
+  'component',
+  'route',
+  'to',
+  'children',
 ])
 
 const HOLD_CALLBACKS = ['onHold', 'onRelease']
@@ -251,49 +259,6 @@ const HOLD_CALLBACKS = ['onHold', 'onRelease']
 const DEAD_HOLD_CALLBACK =
   "`onHold`/`onRelease` without `triggeredOn: 'hold'` never fired in v0, and does fire in v1. Delete the callback, or keep it on purpose."
 const MODIFIER_PROPS = ['ctrl', 'alt', 'shift']
-
-// A `keys: { ... }` or `shortcut: { ... }` property holds a shortcut even
-// when the object carries nothing but `key` and `description`.
-const CONTEXT_PROPERTY =
-  /(?:^|[^\w$])(?:keys|key_bindings|keyBindings|shortcuts?|bindings?)\s*:\s*$/
-
-// The same name applies to every object in a `shortcuts: [ ... ]` array, so
-// the search walks out of one enclosing array before it reads the name.
-function underContextProperty(source, mask, from, limit) {
-  let at = from
-  for (let level = 0; level < 2; level++) {
-    if (CONTEXT_PROPERTY.test(codeBefore(source, mask, at, limit))) return true
-    at = enclosingArray(source, mask, at, limit)
-    if (at < 0) return false
-  }
-  return false
-}
-
-// The code that runs up to this position, with a string and a comment blanked
-// out. A section comment `// shortcuts:` above an object is prose, not the
-// property the object sits under.
-function codeBefore(source, mask, at, limit) {
-  const from = Math.max(limit, at - 40)
-  let text = ''
-  for (let i = from; i < at; i++) text += mask[i] ? ' ' : source[i]
-  return text
-}
-
-// The index of the `[` that holds this position, or -1 when the nearest open
-// bracket is an object or a call instead.
-function enclosingArray(source, mask, from, limit) {
-  let depth = 0
-  for (let i = from - 1; i >= limit; i--) {
-    if (mask[i]) continue
-    const c = source[i]
-    if (c === ']' || c === '}' || c === ')') depth++
-    else if (c === '[' || c === '{' || c === '(') {
-      if (depth === 0) return c === '[' ? i : -1
-      depth--
-    }
-  }
-  return -1
-}
 
 // ---------- IMPORT BINDINGS ----------
 
@@ -783,11 +748,6 @@ function readStringLiteral(text) {
   return { quote: m[1], value: m[2].replace(/\\(.)/g, '$1') }
 }
 
-// A `type`/`interface` body describing the v0 shape, not a registration. A
-// modifier typed as `boolean` next to a `key` is what makes it unambiguous —
-// `{ key: string }` on its own belongs to plenty of unrelated types.
-const TYPE_DECLARATION = /\b(?:ctrl|shift|alt)\s*\??\s*:\s*boolean\b/
-
 // ---------- COMBO BUILDING ----------
 
 // Returns a combo part or a refusal — never a guess.
@@ -957,21 +917,26 @@ function convertObject(source, mask, range, ctx) {
     ],
   })
 
+  const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
+  const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
+
   // Pass two: an object built by spreading a v0 config still carries
   // `condition`, which v1 spells `enabled`.
-  //
-  // `condition` next to `handler` is not evidence on its own — a menu item, a
-  // route rule and a command entry all share that shape. So the object must
-  // also carry a config-only name, or sit where only a shortcut sits.
   if (!keyProp) {
-    const isShortcutLike =
-      condition &&
-      ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n)) &&
-      (ctx.insideCall ||
-        ctx.contextProperty ||
-        byName.has('description') ||
-        byName.has('group'))
-    if (!isShortcutLike) return null
+    if (!condition || !hasCallback) return null
+    if (!ctx.proven) {
+      // `condition` beside a callback is the shape of a command entry and of a
+      // `ComboboxCustomOption` as much as of a config, so it is never rewritten
+      // here. It is worth a line when the object also carries a v0-only name.
+      if (isOption || !byName.has('description')) return null
+      return {
+        note: {
+          line: lineAt(source, condition.start),
+          message:
+            'this object carries `condition` beside a callback. If it is a shortcut config, v1 spells that `enabled`. The run cannot prove what this is, so it left it as it is.',
+        },
+      }
+    }
     if (byName.has('enabled')) return refuseDoubleEnabled()
     return {
       edits: [renameConditionProperty(condition)],
@@ -987,24 +952,32 @@ function convertObject(source, mask, range, ctx) {
   const line = lineAt(source, keyProp.start)
   const refuse = (message) => ({ refusals: [{ line, message }] })
 
-  // The type check comes before the gate below: a type body has no `handler`
-  // and sits in no call, so the gate would skip it in silence.
-  if (TYPE_DECLARATION.test(source.slice(range.start, range.end))) {
-    return refuse(
-      'this declares the v0 shortcut shape as a type. v1 ships `KeyboardShortcutConfig` — import that, or replace `key`/`ctrl`/`shift`/`alt` with `combo: string` by hand.',
-    )
-  }
+  // Nothing proves this object is a config, so nothing here rewrites it. The
+  // run says what it would have written and moves on.
+  if (!ctx.proven) {
+    if (isOption) return null
+    const literal = readStringLiteral(keyProp.value)
+    if (!literal) return null
 
-  const hasSignal = props.some((p) => p.name && CONFIG_SIGNALS.has(p.name))
-  if (!hasSignal && !ctx.insideCall && !ctx.contextProperty) {
-    // A `handler` or a `condition` beside the `key` and nothing else. It reads
-    // as a menu entry, so the object stays as it is. It may also be a
-    // registration that carries no `description`, and the call in the file
-    // still renames, which would leave v1 a config with no `combo`. So the
-    // site is named. The caller prints it only when the file also renamed
-    // something, because that is the only shape that breaks.
-    const shared = byName.has('handler') || condition
-    return shared ? { skipped: { line } } : null
+    const flags = {}
+    for (const name of MODIFIER_PROPS) {
+      if (byName.get(name)?.value.trim() === 'true') flags[name] = true
+    }
+    const held = MODIFIER_PROPS.some((name) => flags[name])
+    const reads =
+      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) ||
+      ((hasCallback || condition) && held)
+    if (!reads) return null
+
+    const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
+    return {
+      note: {
+        line,
+        message: `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and it carries no \`ShortcutConfig\` annotation, so it was left as it is. ${
+          combo ? `If it is a shortcut, write \`combo: '${combo}'\`.` : refusal
+        }`,
+      },
+    }
   }
 
   if (condition && byName.has('enabled')) return refuseDoubleEnabled()
@@ -1113,37 +1086,82 @@ function convertObject(source, mask, range, ctx) {
   }
 }
 
-// Argument ranges of every useShortcut / useKeyboardShortcut call. An object
-// inside one is a shortcut even without a telltale property.
-function shortcutCallRanges(source, mask) {
-  const ranges = []
-  const call = /\b(?:useShortcut|useKeyboardShortcut)\s*\(/g
-  let m
-  while ((m = call.exec(source))) {
-    if (mask[m.index]) continue
-    const open = m.index + m[0].length - 1
-    let depth = 0
-    for (let i = open; i < source.length; i++) {
-      if (mask[i]) continue
-      const c = source[i]
-      if (c === '(' || c === '{' || c === '[') depth++
-      else if (c === ')' || c === '}' || c === ']') {
-        depth--
-        if (depth === 0) {
-          ranges.push([open, i])
-          break
-        }
-      }
+// The span a bracket opens, from the bracket to its match.
+function balancedRange(source, mask, open) {
+  let depth = 0
+  for (let i = open; i < source.length; i++) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === '(' || c === '{' || c === '[') depth++
+    else if (c === ')' || c === '}' || c === ']') {
+      depth--
+      if (depth === 0) return [open, i]
     }
   }
+  return null
+}
+
+// Where a v0 config is certain, and the only place anything is rewritten.
+//
+// Certainty has two sources, and both resolve through this file's imports:
+//
+//  - the argument list of a `useShortcut(...)` call whose name this file
+//    imports from frappe-ui, and
+//  - the value of a declaration annotated with a frappe-ui config type,
+//    `const shortcuts: ShortcutConfig[] = [ ... ]`.
+//
+// A field name is never a source. `key`, `group`, `description`, `handler` and
+// `condition` are frappe-ui's own option vocabulary as much as the shortcut
+// vocabulary: `ComboboxCustomOption` carries `key`, `description` and
+// `condition` together, and `ComboboxGroupedOption` carries `key` and `group`.
+// Reading one as proof rewrites a Combobox option into a shortcut and reports
+// a clean run. Everything the run cannot prove becomes a note.
+//
+// `maxDepth` is how deep inside the span an object may sit and still be the
+// thing the span is about: one level for a call, because the argument may be
+// an array, and none for an annotated value, because the array is the value.
+function provenRanges(source, mask, bindings) {
+  const ranges = []
+
+  const callNames = CALL_NAMES.filter((name) => fromBarrel(bindings, name))
+  if (callNames.length > 0) {
+    const call = new RegExp(`\\b(?:${callNames.join('|')})\\s*\\(`, 'g')
+    let m
+    while ((m = call.exec(source))) {
+      if (mask[m.index]) continue
+      const span = balancedRange(source, mask, m.index + m[0].length - 1)
+      if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 1 })
+    }
+  }
+
+  const typeNames = CONFIG_TYPES.filter((name) => fromBarrel(bindings, name))
+  if (typeNames.length > 0) {
+    const annotated = new RegExp(`:\\s*(?:${typeNames.join('|')})(?:\\s*\\[\\s*\\])?\\s*=`, 'g')
+    let t
+    while ((t = annotated.exec(source))) {
+      if (mask[t.index]) continue
+      let at = t.index + t[0].length
+      while (at < source.length && (mask[at] || /\s/.test(source[at]))) at++
+      if (source[at] !== '[' && source[at] !== '{') continue
+      const span = balancedRange(source, mask, at)
+      if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 0 })
+    }
+  }
+
   return ranges
 }
 
-// True when the call receives this object directly: as the argument itself, or
-// as an element of the array or object the call receives. Anything deeper
-// belongs to a handler body, where `{ key: 'a' }` is an analytics payload and
-// not a shortcut.
-function isDirectArgument(source, mask, open, objectStart) {
+const CALL_NAMES = ['useShortcut', 'useKeyboardShortcut']
+const CONFIG_TYPES = ['ShortcutConfig', 'KeyboardShortcutConfig']
+
+function fromBarrel(bindings, name) {
+  const module = bindings.get(name)
+  return !!module && BARREL.test(module)
+}
+
+// True when the span holds this object directly, and not somewhere inside a
+// callback body, where `{ key: 'a' }` is an analytics payload.
+function holdsDirectly(source, mask, { open, maxDepth }, objectStart) {
   let depth = 0
   for (let i = open + 1; i < objectStart; i++) {
     if (mask[i]) continue
@@ -1152,7 +1170,7 @@ function isDirectArgument(source, mask, open, objectStart) {
     else if (c === ')' || c === ']' || c === '}') depth--
     if (depth < 0) return false
   }
-  return depth <= 1
+  return depth <= maxDepth
 }
 
 /**
@@ -1167,7 +1185,6 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const refusals = []
   const notes = []
   const edits = []
-  const skipped = []
 
   const ranges = scriptRanges(content, ext)
   const mask = buildMask(content, ranges)
@@ -1185,7 +1202,12 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (module) return !BARREL.test(module)
     return declaresLocally(content, name, renameMask)
   }
-  const callRanges = shortcutCallRanges(content, mask)
+  const proven = provenRanges(content, mask, bindings)
+
+  // The app's own `useShortcut`. Four of the apps we care about ship one, and
+  // helpdesk's takes `(binding, callback)`, not a config. None of its objects
+  // is ours, so the run says one line and touches nothing.
+  const forked = CALL_NAMES.some((name) => appOwns(name))
 
   const seen = new Set()
   const visit = (offset) => {
@@ -1196,17 +1218,16 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
 
-    const insideCall = callRanges.some(
-      ([s, e]) =>
-        object.start > s &&
-        object.end <= e + 1 &&
-        isDirectArgument(content, mask, s, object.start),
+    const isProven = proven.some(
+      (span) =>
+        object.start > span.open &&
+        object.end <= span.end + 1 &&
+        holdsDirectly(content, mask, span, object.start),
     )
-    const contextProperty = underContextProperty(content, mask, object.start, range[0])
-    const result = convertObject(content, mask, object, { insideCall, contextProperty })
+    const result = convertObject(content, mask, object, { proven: isProven })
     if (!result) return
-    if (result.skipped) {
-      skipped.push(result.skipped)
+    if (result.note) {
+      notes.push(result.note)
       return
     }
     refusals.push(...(result.refusals ?? []))
@@ -1223,17 +1244,19 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   //
   // The scan lands on the colon, never on the name, because a quoted name is
   // masked as a string and the mask is what tells code from prose.
-  for (const pattern of [
-    /(?:\bkey\b|['"]key['"])\s*:/g,
-    /(?:\bcondition\b|['"]condition['"])\s*:/g,
-    // A shorthand `condition`, which carries its value in the name.
-    /\bcondition\s*(?=[,}])/g,
-  ]) {
-    let m
-    while ((m = pattern.exec(content))) {
-      const at = m.index + m[0].length - 1
-      if (mask[at]) continue
-      visit(at)
+  if (!forked) {
+    for (const pattern of [
+      /(?:\bkey\b|['"]key['"])\s*:/g,
+      /(?:\bcondition\b|['"]condition['"])\s*:/g,
+      // A shorthand `condition`, which carries its value in the name.
+      /\bcondition\s*(?=[,}])/g,
+    ]) {
+      let m
+      while ((m = pattern.exec(content))) {
+        const at = m.index + m[0].length - 1
+        if (mask[at]) continue
+        visit(at)
+      }
     }
   }
 
@@ -1253,8 +1276,13 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     refusals.push({ line: lineAt(content, d.index), message: DELETED_MEMBERS[d[1]] })
   }
 
-  const destructured =
-    /(?:const|let|var)\s*\{[^}]*\}\s*=\s*(?:useShortcut|useKeyboardShortcut)\s*\(/g
+  // Only a call this file imports from frappe-ui. An app's own `useShortcut`
+  // may well return something, and that is the app's business.
+  const ourCalls = CALL_NAMES.filter((name) => fromBarrel(bindings, name))
+  const destructured = new RegExp(
+    `(?:const|let|var)\\s*\\{[^}]*\\}\\s*=\\s*(?:${ourCalls.join('|') || '(?!)'})\\s*\\(`,
+    'g',
+  )
   let r
   while ((r = destructured.exec(content))) {
     if (renameMask[r.index]) continue
@@ -1272,7 +1300,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   // keeps working, so the migrated file is correct either way. It is also a
   // guess: an unrelated `keyup` listener in the same file matches too, and no
   // edit would ever clear it.
-  if (callRanges.length > 0) {
+  if (proven.length > 0) {
     const keyup = /['"`]keyup['"`]/g
     let k
     while ((k = keyup.exec(content))) {
@@ -1307,20 +1335,24 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const at = firstUnmasked(content, new RegExp(`\\b${name}\\b`, 'g'), renameMask)
     return lineAt(content, Math.max(0, at))
   }
+  // A name the app owns is a note, never a refusal. Nothing the author can
+  // write clears it: the fork is the app's and it keeps working. Helpdesk
+  // imports its own `useShortcut` in ten files, and a refusal in each one
+  // would hold every one of them back for good.
   const renameable = Object.keys(IDENTIFIER_RENAMES).filter((name) => {
     const module = bindings.get(name)
     if (module) {
       if (BARREL.test(module)) return true
-      refusals.push({
+      notes.push({
         line: nameLine(name),
-        message: `\`${name}\` here comes from '${module}', not the frappe-ui barrel. It was left alone — rename it yourself if it is a fork.`,
+        message: `\`${name}\` here comes from '${module}', not frappe-ui. It is the app's own, so nothing in this file was touched.`,
       })
       return false
     }
     if (declaresLocally(content, name, renameMask)) {
-      refusals.push({
+      notes.push({
         line: nameLine(name),
-        message: `\`${name}\` is declared in this file, so it is the app's own. It was left alone.`,
+        message: `\`${name}\` is declared in this file, so it is the app's own. Nothing here was touched.`,
       })
       return false
     }
@@ -1356,24 +1388,6 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
       text: TAG_RENAMES[t[2]],
     })
     renames.push({ line: lineAt(content, t.index), from: t[2], to: TAG_RENAMES[t[2]] })
-  }
-
-  // A `key` object the run walked away from, in a file it changed. If that
-  // object is a registration, v1 now gets a config with no `combo`, and it
-  // throws on the first keypress. A converted site is the same evidence as a
-  // rename: a config module that never names `useShortcut` is written with one
-  // `combo` beside one `key`, and the call that reads it renames elsewhere.
-  //
-  // Only a human can say which it is, so this is a note: refusing here would
-  // block the file on a menu entry nobody can edit into evidence.
-  if (renames.length > 0 || changes.length > 0) {
-    for (const site of skipped) {
-      notes.push({
-        line: site.line,
-        message:
-          'this object has a `key` and a `handler` or a `condition`, and nothing that only a shortcut carries. It reads as a menu entry, so it was left as it is. The run changed this file, so check this is not a registration: v1 throws on a config with no `combo`.',
-      })
-    }
   }
 
   edits.sort((a, b) => a.start - b.start || a.end - b.end)
@@ -1473,7 +1487,11 @@ function main() {
       ext: path.extname(file),
     })
 
+    // A note is advice about a site the run did not touch, so it carries over
+    // whatever happened to the file. The interesting one lands in a file with
+    // no change at all: an app's own fork, or a config array nothing proves.
     for (const refusal of refusals) allRefusals.push({ file, ...refusal })
+    for (const note of notes) allNotes.push({ file, ...note })
 
     const changeCount = changes.length + renames.length
     if (changeCount === 0) continue
@@ -1488,9 +1506,8 @@ function main() {
       continue
     }
 
-    // A digit and a note describe a file the run took. A refused file is
-    // unchanged, so listing its sites here would name work nobody did.
-    for (const note of notes) allNotes.push({ file, ...note })
+    // A digit describes a conversion the run made. A refused file is
+    // unchanged, so listing its digits would name work nobody did.
     for (const change of changes) if (change.digit) allDigits.push({ file, ...change })
 
     filesChanged++

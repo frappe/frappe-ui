@@ -2594,21 +2594,42 @@ then run again and take the whole file at once.
 
 The codemod does not reflow the code it edits. Run your formatter after it.
 
-### What it reads as a shortcut
+### What it rewrites
 
-An object with a `key` string converts when it also carries `description`,
-`group`, `onHold`, `onRelease` or `triggeredOn`, or when it sits in a
-`useShortcut(...)` call or under a `shortcuts:` or `keys:` property.
+The codemod rewrites an object in two places only:
 
-`handler` and `condition` are not evidence. A context-menu entry carries both
-beside a `key`, and `{ key: 'delete', label: 'Delete', handler: del }` is a
-menu id, not a shortcut. So the codemod leaves it alone.
+- Inside a `useShortcut(...)` or `useKeyboardShortcut(...)` call, where the
+  name is imported from `frappe-ui` in the same file.
+- Inside an array or object literal annotated `ShortcutConfig` or
+  `KeyboardShortcutConfig`, where that type is imported from `frappe-ui`.
 
-The cost is a registration that carries nothing but `key` and `handler` and
-sits away from its call. The codemod does not take it. v0 made `description`
-mandatory, so this shape is rare, but it lists every object it walked away
-from in a file it changed. Read that list: v1 throws on a config with no
-`combo`.
+Both places name frappe-ui. Nothing else does.
+
+```ts
+import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+
+// Rewritten: the call is frappe-ui's.
+useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+
+// Rewritten: the annotation is frappe-ui's.
+const bindings: ShortcutConfig[] = [
+  { key: 'k', ctrl: true, description: 'Palette', handler: open },
+]
+
+// Left alone: nothing here says frappe-ui.
+const menu = [{ key: 'delete', label: 'Delete', condition: canDelete, handler: remove }]
+```
+
+Field names alone are never evidence. `key`, `description`, `condition`,
+`group` and `handler` are frappe-ui's own option vocabulary too: a
+`ComboboxCustomOption` is `{ type, key, label, description, condition,
+onClick }` and a `ComboboxGroupedOption` is `{ key, group, hideLabel,
+options }`. An app that hands a config array to its own composable, or builds
+one with `.map()`, writes the same names for something else.
+
+The cost is a registration written away from its call and with no annotation.
+The codemod does not rewrite it. It names it instead, with the `combo` to
+write. See "What it lists without failing the run".
 
 ### Punctuation keys are never converted
 
@@ -2657,7 +2678,6 @@ Each of these exits the run non-zero. Fix them by hand.
   exact. Write `S`, or `Shift+S`, or register both.
 - **A `key` that is not a plain string**, and a modifier flag that is not a
   literal `true` / `false`. v1 has no conditional modifier.
-- **A type declaration of the v0 shape.** Import `KeyboardShortcutConfig`.
 - **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted. Render
   `<KeyboardShortcut :combo="..." />` for the first. For the second, read the
   registry from the `<KeyboardShortcutsDialog>` default slot. Their types,
@@ -2682,10 +2702,12 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
 - **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
   `'spacebar'`. v0 compared `event.key`, which never reports those, so the
   shortcut never fired. The combo does fire, so the shortcut is live now.
-- **An object with a `key` it walked away from**, in a file it changed. It
-  carries a `handler` or a `condition` and nothing that only a shortcut
-  carries, so it reads as a menu entry. Check it is not a registration: v1
-  throws on a config with no `combo`.
+- **An object that reads like a config, in a place the run cannot prove.** The
+  line gives the `combo` to write. Take it if the object is a registration: v1
+  throws on a config with no `combo`. An object that carries an option-only
+  name, such as `label`, `options`, `onClick` or `type`, is never listed.
+- **Your own `useShortcut` or `ShortcutConfig`**, imported from your module or
+  declared in the file. Nothing in that file is touched.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
   `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
   pair may fold into one registration. Only you can say which half is which.
@@ -2694,11 +2716,13 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
 
 ### It never renames your own composable
 
-`useShortcut` is rewritten only where the file imports it from the `frappe-ui`
-barrel, or does not bind it at all. A fork imported from your own module, or
-declared in the same file, keeps its name and is reported instead. crm, lms
-and suite each ship a local `useKeyboardShortcuts`, one character from the new
-name; those are untouched.
+`useShortcut` is renamed only where the file imports it from the `frappe-ui`
+barrel. A fork imported from your own module, or declared in the same file,
+keeps its name, and the run says so and moves on. helpdesk ships a
+`useShortcut` of its own in `composables/shortcuts.ts`; every page that uses
+that one is left as it is. crm, lms and suite each ship a local
+`useKeyboardShortcuts`, one character from the new name; those are untouched
+too.
 
 A rename also stays inside code. A name in a string, a module specifier or a
 comment keeps its spelling. In a `.vue` template only three places rename: the
