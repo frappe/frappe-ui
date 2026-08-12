@@ -415,6 +415,9 @@ describe('Slider', () => {
       cy.get('#sl-data').should('have.attr', 'data-size', 'md')
       cy.get('#sl-data').should('have.attr', 'data-state', 'valid')
       cy.get('#sl-data').should('have.attr', 'data-required', 'true')
+      // The prop doc promises `aria-required` on the control, and the thumb is
+      // the element that carries the aria set.
+      cy.get('[role="slider"]').should('have.attr', 'aria-required', 'true')
     })
 
     it('flips data-state to invalid when error is set', () => {
