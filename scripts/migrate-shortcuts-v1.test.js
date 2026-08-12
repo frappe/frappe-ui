@@ -676,6 +676,7 @@ useShortcut({ key: 's', description: 'Save', handler: save })
     // read the file as a fork and hold the migration back.
     const source = `// import { useShortcut } from './old'
 // export function KeyboardShortcutsModal() {}
+// const { unbind } = useShortcut({ key: 'x' })
 import { useShortcut } from 'frappe-ui'
 useShortcut({ key: 's', description: 'Save', handler: save })
 `

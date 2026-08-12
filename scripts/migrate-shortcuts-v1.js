@@ -1086,6 +1086,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
 
   const ranges = scriptRanges(content, ext)
   const mask = buildMask(content, ranges)
+  const renameMask = buildRenameMask(content, ranges, ext)
   const callRanges = shortcutCallRanges(content, mask)
 
   const seen = new Set()
@@ -1146,6 +1147,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     /(?:const|let|var)\s*\{[^}]*\}\s*=\s*(?:useShortcut|useKeyboardShortcut)\s*\(/g
   let r
   while ((r = destructured.exec(content))) {
+    if (renameMask[r.index]) continue
     refusals.push({
       line: lineAt(content, r.index),
       message:
@@ -1171,8 +1173,6 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
       })
     }
   }
-
-  const renameMask = buildRenameMask(content, ranges, ext)
 
   // A barrel mock keyed on the old export name. The rename fixes the key, but
   // the captured configs still carry `key`/`ctrl`, so the assertions move too.
