@@ -46,7 +46,7 @@ describe('<KeyboardShortcut />', () => {
   it('carries the documented styling hooks', () => {
     cy.mount(KeyboardShortcut, { props: { combo: 'Mod+Shift+K' } })
     cy.get('[data-slot=keyboard-shortcut]')
-      .should('have.attr', 'data-variant', 'plain')
+      .should('not.have.attr', 'data-bg')
       .find('[data-slot=key]')
       .should('have.length', 3)
     cy.get('[data-slot=key][data-key-type=shift]').should('exist')
@@ -58,8 +58,8 @@ describe('<KeyboardShortcut />', () => {
     cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K', bg: true } })
     cy.get('[data-slot=keyboard-shortcut]').should(
       'have.attr',
-      'data-variant',
-      'bg',
+      'data-bg',
+      'true',
     )
   })
 
@@ -78,9 +78,9 @@ describe('<KeyboardShortcut />', () => {
     cy.mount(KeyboardShortcut, {
       props: { combo: 'Mod+Backspace', altCombos: ['Delete'] },
     })
-    cy.get('[data-slot=keyboard-shortcut] [data-slot=alt-combos]').should(
-      'exist',
-    )
+    cy.get('[data-slot=keyboard-shortcut] [data-slot=alt-combos]')
+      .should('exist')
+      .and('have.attr', 'aria-hidden', 'true')
     cy.get('[data-slot=keyboard-shortcut]')
       .first()
       .invoke('attr', 'aria-label')

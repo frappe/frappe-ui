@@ -185,9 +185,29 @@ Per P10, every part carries a `data-slot`.
 `group`, `group-title`, `shortcut`, `description`, `shortcut-keys`. The empty
 element also carries `data-state="empty"` or `data-state="no-results"`.
 
-`KeyboardShortcut`: `keyboard-shortcut` on the root, with
-`data-variant="bg" | "plain"`; `key` on each key, with `data-key-type`;
-`separator` on the `+` glyphs; `alt-combos` on the alternatives.
+`KeyboardShortcut`: `keyboard-shortcut` on the root, with `data-bg="true"` when
+`bg` is set; `key` on each key, with `data-key-type`; `separator` on the `+`
+glyphs; `alt-combos` on the alternatives, inside the root.
+
+## Where the combo is checked
+
+Both the composable and the display read one grammar. They check it at different
+times, on purpose.
+
+| Surface               | `combo` type            | Check                                   |
+| --------------------- | ----------------------- | --------------------------------------- |
+| `useKeyboardShortcut` | `KeyboardShortcutCombo` | Compile time, plus a dev warning in JS  |
+| `KeyboardShortcut`    | `string`                | Runtime: renders as written, warns once |
+
+The config is strictly typed because a bad combo there fires nothing and says
+nothing. The display prop takes `string` because callers compute it: crm binds
+`:combo="_combo"` from a computed value. A union there would force a cast at
+every call site of a component that only draws keys.
+
+The display accepts no second vocabulary. `cmd`, `meta`, `option`, `esc` and
+`del` are gone, because a chip for a combo that can never fire is the silent
+failure this family exists to remove. Apps that want the compile-time check
+import `KeyboardShortcutCombo` and type their own value.
 
 ## What the family does not export
 

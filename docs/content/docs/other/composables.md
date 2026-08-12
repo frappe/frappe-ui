@@ -153,7 +153,9 @@ never fire. The names are `Digit0`–`Digit9`, `Plus`, `Minus`, `Equal`, `Slash`
 
 Letters, function keys and named keys (`Escape`, `Enter`, `Space`, `ArrowUp`, …)
 match `event.key`. Digits and punctuation match `event.code`, so
-`Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike. The full grammar is in
+`Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike. A punctuation name means the
+physical key position, as labelled on a US layout, so `Mod+Slash` fires on the
+same key everywhere. The full grammar is in
 [`spec/shortcuts.md`](https://github.com/frappe/frappe-ui/blob/main/spec/shortcuts.md).
 
 TypeScript checks the combo: an unknown key name or a stray character fails to
