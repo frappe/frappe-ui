@@ -63,8 +63,13 @@ const fallbackThemeClasses = computed(() => {
 // Let a consumer size the avatar with a Tailwind utility (`class="size-16"`)
 // instead of the `size` prop enum. When a sizing utility is present we drop the
 // enum's `w-*/h-*` so the two don't both land on the root and fight; the class
-// (applied via inheritAttrs) then wins on its own. Handles responsive/variant
-// prefixes like `sm:size-16`.
+// (applied via inheritAttrs) then wins on its own.
+//
+// Unprefixed tokens only. Tailwind emits variant utilities after the base ones,
+// so `size-8 sm:size-16` already resolves the consumer's way at `sm`. Dropping
+// the enum for a prefixed token instead leaves the avatar unsized everywhere
+// the variant does not apply, and this root is `inline-block`, so it collapses
+// to its content: an image-only avatar becomes 0x0.
 const attrs = useAttrs()
 const hasSizeOverride = computed(() => {
   const cls = Array.isArray(attrs.class)
@@ -72,12 +77,13 @@ const hasSizeOverride = computed(() => {
     : typeof attrs.class === 'string'
       ? attrs.class
       : ''
-  return cls.split(/\s+/).some((token) => {
-    const base = token.includes(':')
-      ? token.slice(token.lastIndexOf(':') + 1)
-      : token
-    return /^-?(size|w|h|min-w|max-w|min-h|max-h)-/.test(base)
-  })
+  return cls
+    .split(/\s+/)
+    .some(
+      (token) =>
+        !token.includes(':') &&
+        /^-?(size|w|h|min-w|max-w|min-h|max-h)-/.test(token),
+    )
 })
 
 const shapeClasses = computed(() => {
