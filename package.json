@@ -101,7 +101,7 @@
     "icons",
     "tailwind",
     "vitepress",
-    "scripts",
+    "scripts/migrate-shortcuts-v1.js",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"
