@@ -2629,11 +2629,21 @@ Each of these exits the run non-zero. Fix them by hand.
   already runs on unmount.
 - **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both. v1 selects
   hold mode from `onHold` / `onRelease` alone, so decide which callback stays.
-- **A hand-rolled hold**: a registration plus your own `keyup` listener. Only
-  you can say which half is `onHold` and which is `onRelease`.
 - **A `vi.mock('frappe-ui', ...)` keyed on `useShortcut`.** The codemod renames
   the mock key, but the captured configs still carry `key` / `ctrl`, so the
   assertions move with the registrations.
+
+### What it lists without failing the run
+
+The file is migrated and correct. Read these and decide if the code wants a
+rewrite.
+
+- **Every digit it converted.** See above.
+- **A possible hand-rolled hold**: a shortcut registration and a manual
+  `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
+  pair may fold into one registration. Only you can say which half is which.
+  This is a guess: an unrelated `keyup` listener matches too, and no edit
+  would clear it, so it never fails the run.
 
 ### It never renames your own composable
 

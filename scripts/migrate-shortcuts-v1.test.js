@@ -448,16 +448,18 @@ describe('hard stops', () => {
     expect(refusals.some((r) => r.message.includes('returns void in v1'))).toBe(true)
   })
 
-  it('reports a hand-rolled hold rather than folding it', () => {
+  it('notes a hand-rolled hold rather than folding it, and does not fail the run', () => {
     const source = `import { useShortcut } from 'frappe-ui'
 useShortcut([{ key: ' ', description: 'Hold for move mode', handler: startMove }])
 useEventListener(document, 'keyup', (e) => { if (e.key === ' ') endMove() })
 `
-    const { migrated, refusals } = migrateShortcuts(source)
+    const { migrated, refusals, notes } = migrateShortcuts(source)
 
     expect(migrated).toContain("combo: 'Space'")
     expect(migrated).toContain("useEventListener(document, 'keyup'")
-    expect(refusals.some((r) => r.message.includes('hand-rolled hold'))).toBe(true)
+    expect(notes.some((n) => n.message.includes('hand-rolled hold'))).toBe(true)
+    // No edit clears an unrelated `keyup` listener, so it must not exit non-zero.
+    expect(refusals).toEqual([])
   })
 
   it('reports a barrel mock keyed on the old export name', () => {

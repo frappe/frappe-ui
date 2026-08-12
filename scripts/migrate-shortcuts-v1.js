@@ -61,11 +61,18 @@
  *
  * WHAT IT REPORTS BUT NEVER TOUCHES
  *
- * - a hand-rolled hold: a registration plus a manual `keyup` listener. Only a
- *   human can say which half becomes `onHold` and which `onRelease`.
  * - a `vi.mock('frappe-ui', ...)` keyed on `useShortcut`. The rename fixes the
  *   key, but the captured configs still carry `key` / `ctrl`, so the
- *   assertions around it need reading.
+ *   assertions around it need reading. This one is a refusal.
+ *
+ * WHAT IT NOTES, WITHOUT FAILING THE RUN
+ *
+ * - a digit key, because v1 matches it on the physical key.
+ * - a possible hand-rolled hold: a registration plus a manual `keyup`
+ *   listener. Only a human can say which half becomes `onHold` and which
+ *   `onRelease`. The migrated file is correct either way, and an unrelated
+ *   `keyup` listener in the same file matches too, so no edit could clear a
+ *   refusal here.
  *
  * An app's own composable is never renamed. `useShortcut` is rewritten only
  * where the file imports it from the `frappe-ui` barrel, or does not bind it
@@ -788,12 +795,14 @@ function shortcutCallRanges(source, mask) {
 /**
  * Rewrites one file's contents.
  *
- * Returns `{ migrated, changes, renames, refusals }`. `refusals` is what makes
- * a run exit non-zero; each entry names a line and says what to write instead.
+ * Returns `{ migrated, changes, renames, refusals, notes }`. `refusals` is what
+ * makes a run exit non-zero; each entry names a line and says what to write
+ * instead. `notes` are printed and do not fail the run.
  */
 export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const changes = []
   const refusals = []
+  const notes = []
   const edits = []
 
   const ranges = scriptRanges(content, ext)
@@ -850,17 +859,21 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     })
   }
 
-  // A manual keyup listener beside a registration is a hand-rolled hold. Only
-  // a human can say which half is `onHold` and which is `onRelease`, so the
-  // codemod names the line and stops.
+  // A manual keyup listener beside a registration may be a hand-rolled hold.
+  // Only a human can say which half is `onHold` and which is `onRelease`.
+  //
+  // This is a note, not a refusal. The registration converts, the listener
+  // keeps working, so the migrated file is correct either way. It is also a
+  // guess: an unrelated `keyup` listener in the same file matches too, and no
+  // edit would ever clear it.
   if (callRanges.length > 0) {
     const keyup = /['"`]keyup['"`]/g
     let k
     while ((k = keyup.exec(content))) {
-      refusals.push({
+      notes.push({
         line: lineAt(content, k.index),
         message:
-          'a manual `keyup` listener next to a shortcut registration is a hand-rolled hold. v1 has `onHold`/`onRelease` — fold the pair by hand.',
+          'a manual `keyup` listener sits beside a shortcut registration. If it is a hand-rolled hold, v1 has `onHold`/`onRelease` — fold the pair by hand.',
       })
     }
   }
@@ -950,6 +963,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     changes: changes.sort(byLine),
     renames: renames.sort(byLine),
     refusals: refusals.sort(byLine),
+    notes: notes.sort(byLine),
   }
 }
 
@@ -1007,15 +1021,17 @@ function main() {
   let totalCombos = 0
   let totalRenames = 0
   const allDigits = []
+  const allNotes = []
   const allRefusals = []
 
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8')
-    const { migrated, changes, renames, refusals } = migrateShortcuts(content, {
+    const { migrated, changes, renames, refusals, notes } = migrateShortcuts(content, {
       ext: path.extname(file),
     })
 
     for (const refusal of refusals) allRefusals.push({ file, ...refusal })
+    for (const note of notes) allNotes.push({ file, ...note })
     for (const change of changes) if (change.digit) allDigits.push({ file, ...change })
 
     const changeCount = changes.length + renames.length
@@ -1042,6 +1058,11 @@ function main() {
     console.log('\n⚠ Digit keys converted — v1 matches these on the physical key:')
     for (const d of allDigits) console.log(`  ${d.file}:L${d.line}  ${d.to}`)
     console.log('  A shifted digit now resolves too. Check each one still reads right.')
+  }
+
+  if (allNotes.length > 0) {
+    console.log('\n⚠ Read these — the file is migrated, but the code may want a rewrite:')
+    for (const n of allNotes) console.log(`  ${n.file}:L${n.line}  ${n.message}`)
   }
 
   if (allRefusals.length > 0) {
