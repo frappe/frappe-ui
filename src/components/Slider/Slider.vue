@@ -38,12 +38,14 @@ const callerAria = computed(() => {
   return Object.fromEntries(Object.entries(attrs).filter(([k]) => isAriaKey(k)))
 })
 
-// A slider has no intrinsic width, so the wrapper carries `w-full`. That is a
-// default, not a rule — but two width utilities in one class list are decided
-// by stylesheet order, not by which one the caller wrote, and there is no class
-// merger here. So drop ours when the caller brings their own.
+// A slider has no intrinsic width, so it carries `w-full`. That is a default,
+// not a rule — but two width utilities in one class list are decided by
+// stylesheet order, not by which one the caller wrote, and there is no class
+// merger here. So drop ours when the caller brings their own, on whichever
+// element the caller's class lands on. The optional `variant:` prefixes count
+// `sm:w-64` too.
 const hasCallerWidth = computed(() => {
-  return /(^|\s)!?w-/.test(normalizeClass(attrs.class))
+  return /(^|\s)(?:[a-z0-9-]+:)*!?w-/.test(normalizeClass(attrs.class))
 })
 
 // What is left to fall through to the control: class and style are placed by
@@ -91,6 +93,18 @@ const {
 /** A caller's `aria-labelledby` wins over the id generated from `label`. */
 const thumbLabelledBy = computed(() => {
   return (attrs['aria-labelledby'] as string | undefined) ?? labelledBy.value
+})
+
+// The `error` prop wins, but with no error a caller's own value has to survive
+// rather than be deleted by the explicit binding.
+const thumbErrorMessage = computed(() => {
+  if (hasError.value) return errorMessageId.value
+  return attrs['aria-errormessage'] as string | undefined
+})
+
+const thumbInvalid = computed(() => {
+  if (hasError.value) return true
+  return (attrs['aria-invalid'] as string | boolean | undefined) || undefined
 })
 
 // Merged, not replaced: a caller's `aria-describedby` must not drop the
@@ -146,6 +160,17 @@ function thumbNameFor(index: number): string | undefined {
   return `${callerLabel} ${thumbPart(index)}`
 }
 
+// Declared before `rootClasses`, which reads it.
+const hasLabeling = computed(() => {
+  return Boolean(
+    props.label ||
+    slots.label ||
+    showDescription.value ||
+    slots.description ||
+    hasError.value,
+  )
+})
+
 const isBidirectional = computed(() => props.min < 0 && props.max > 0)
 
 const bidirectionalRangeStyles = computed(() => {
@@ -178,8 +203,11 @@ const rangeClasses = computed(() => {
 
 const rootClasses = computed(() => {
   return [
-    'relative flex w-full select-none touch-none items-center',
+    'relative flex select-none touch-none items-center',
     props.size === 'md' ? 'h-5' : 'h-4',
+    // With labeling the wrapper takes the caller's class, so the control fills
+    // it. Without, the caller's class lands here and a width of theirs wins.
+    hasLabeling.value || !hasCallerWidth.value ? 'w-full' : null,
   ]
 })
 
@@ -196,16 +224,6 @@ const thumbClasses = computed(() => {
 const onValueCommit = (value: SliderValue) => {
   emit('value-commit', value)
 }
-
-const hasLabeling = computed(() => {
-  return Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
-  )
-})
 </script>
 
 <template>
@@ -271,8 +289,8 @@ const hasLabeling = computed(() => {
           :aria-label="thumbNameFor(i)"
           :aria-labelledby="thumbLabelledByFor(i)"
           :aria-describedby="thumbDescribedBy"
-          :aria-errormessage="hasError ? errorMessageId : undefined"
-          :aria-invalid="hasError || undefined"
+          :aria-errormessage="thumbErrorMessage"
+          :aria-invalid="thumbInvalid"
         />
       </template>
     </SliderRoot>

@@ -244,7 +244,8 @@ describe('Slider', () => {
 
   it('drops its own w-full when the caller sets a width', () => {
     // Two width utilities in one list are decided by stylesheet order, so the
-    // caller only wins if ours is not there at all.
+    // caller only wins if ours is not there at all. Both branches place the
+    // caller's class on a different element, so both need the guard.
     cy.mount(Slider, {
       props: { label: 'Volume', modelValue: [25] },
       attrs: { class: 'w-64' },
@@ -252,10 +253,50 @@ describe('Slider', () => {
     cy.get('.w-64').should('not.have.class', 'w-full')
 
     cy.mount(Slider, {
+      props: { id: 'sl-bare-w', modelValue: [25] },
+      attrs: { class: 'w-64' },
+    })
+    cy.get('#sl-bare-w').should('not.have.class', 'w-full')
+
+    cy.mount(Slider, {
+      props: { id: 'sl-variant-w', modelValue: [25] },
+      attrs: { class: 'sm:w-64' },
+    })
+    cy.get('#sl-variant-w').should('not.have.class', 'w-full')
+  })
+
+  it('keeps its own w-full when the caller class has no width', () => {
+    cy.mount(Slider, {
       props: { label: 'Volume', modelValue: [25] },
       attrs: { class: 'mt-4' },
     })
     cy.get('.mt-4').should('have.class', 'w-full')
+
+    cy.mount(Slider, {
+      props: { id: 'sl-bare-mt', modelValue: [25] },
+      attrs: { class: 'mt-4' },
+    })
+    cy.get('#sl-bare-mt').should('have.class', 'w-full')
+  })
+
+  it('keeps a caller aria-invalid and aria-errormessage when there is no error', () => {
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('span', { id: 'ext-err' }, 'Out of range'),
+          h(Slider, {
+            modelValue: [25],
+            'aria-invalid': 'true',
+            'aria-errormessage': 'ext-err',
+          }),
+        ]),
+    })
+    cy.get('[role="slider"]').should('have.attr', 'aria-invalid', 'true')
+    cy.get('[role="slider"]').should(
+      'have.attr',
+      'aria-errormessage',
+      'ext-err',
+    )
   })
 
   it('forwards disabled to aria-disabled and SliderRoot', () => {
