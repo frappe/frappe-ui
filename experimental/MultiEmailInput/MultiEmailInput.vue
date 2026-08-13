@@ -31,6 +31,7 @@ import {
   LabelingWrapper,
 } from '../../src/components/InputLabeling'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
+import { usePortalTarget } from '../../src/composables/usePortalTarget'
 import {
   inputFontSizeClasses,
   isValidEmail,
@@ -61,12 +62,15 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
-  portalTo: 'body',
 })
 
 const emit = defineEmits<MultiEmailInputEmits>()
 const slots = useSlots()
 const attrs = useAttrs()
+
+// `portalTo` stays undefaulted on purpose: a `'body'` default outranks the
+// host's target and silently defeats embedding.
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const model = defineModel<string[]>({ default: () => [] })
 
@@ -353,7 +357,7 @@ defineSlots<MultiEmailInputSlots>()
         </TagsInputRoot>
       </ComboboxAnchor>
 
-      <ComboboxPortal :to="portalTo">
+      <ComboboxPortal :to="portalTarget">
         <ComboboxContent
           data-slot="content"
           :data-size="size"

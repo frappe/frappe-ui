@@ -105,6 +105,11 @@ composer-style windows. `v-model:mode` holds the state (`docked` | `floating` |
 scrollable body. `useFloatingWindow` is the headless half — pass it the panel
 and drag-handle refs to build your own chrome.
 
+A detached window sits at `z-index: 40`, above page chrome and below every
+dialog. It was `50` before, which tied with `Dialog`. If your app has chrome in
+that band, scope a rule to the `has-floating-window` class, set on `<body>`
+while a window is detached.
+
 ```ts
 import { FloatingWindow, useFloatingWindow } from 'frappe-ui/experimental'
 ```

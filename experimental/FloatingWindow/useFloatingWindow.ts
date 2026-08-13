@@ -29,8 +29,9 @@ const MIN_HEIGHT = 300
  * came down to document order — and a dialog the app renders before the window
  * loses that tie and is unreachable.
  *
- * Popover surfaces are unaffected: every one in this library carries `z-[100]`
- * on its reka content, which reka copies onto the teleported wrapper.
+ * Popover surfaces sit above both: reka copies a content's z-index onto the
+ * teleported wrapper, and every reka content in the library carries `z-[100]`.
+ * `IconPicker` was the one exception, at `z-10`, and is corrected here.
  */
 const Z_INDEX = 40
 

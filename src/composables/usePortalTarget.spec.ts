@@ -211,10 +211,11 @@ describe('no component teleports past the host target', () => {
       }
     }
 
-    // A broken scan would find nothing and pass. There were 20 teleporting
-    // tags when this landed, so a collapse to near-zero means the walk broke,
-    // not that the components changed.
-    expect(scanned).toBeGreaterThan(15)
+    // A broken scan would find nothing and pass. There are 24 teleporting tags
+    // across both roots (19 in `src`, 5 in `experimental`), so a drop means the
+    // walk broke, not that the components changed. Kept close to the real count
+    // so losing one root fails here instead of passing quietly.
+    expect(scanned).toBeGreaterThan(20)
 
     // Call usePortalTarget() and bind its result, so an embedding host can
     // redirect the overlay. See spec/portal-target.md.
