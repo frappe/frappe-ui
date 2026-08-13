@@ -13,16 +13,19 @@ const open = ref(false)
 // render its own help surface without reading the registry itself. Both rows
 // have an empty handler, so both set `preventDefault: false` and leave the
 // docs page they run in alone.
+//
+// Alt pairs with a digit here, not a letter: macOS rewrites `event.key` while
+// Option is held, so an `Alt+<letter>` combo can miss there.
 useKeyboardShortcut([
   {
-    combo: 'Mod+Alt+N',
+    combo: 'Mod+Alt+Digit1',
     description: 'New page',
     group: 'Pages',
     preventDefault: false,
     handler: () => {},
   },
   {
-    combo: 'Mod+Alt+D',
+    combo: 'Mod+Alt+Digit2',
     description: 'Duplicate page',
     group: 'Pages',
     preventDefault: false,
