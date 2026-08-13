@@ -2731,7 +2731,9 @@ Each of these exits the run non-zero. Fix them by hand.
 - **A destructured `useShortcut(...)` return.** v1 returns void; cleanup
   already runs on unmount.
 - **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both. v1 selects
-  hold mode from `onHold` / `onRelease` alone, so decide which callback stays.
+  hold mode from `onHold` / `onRelease` alone. To keep the hold, delete the
+  `handler`. To keep the press, delete `triggeredOn: 'hold'` and the hold
+  callbacks with it.
 - **`onHold` or `onRelease` without `triggeredOn: 'hold'`.** v0 gated both on
   `'hold'`, so the callback never fired. In v1 the callback itself selects hold
   mode, so it starts firing. Delete it, or add `triggeredOn: 'hold'` to keep it

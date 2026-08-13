@@ -289,7 +289,7 @@ useShortcut([
       ),
     )
 
-    expect(refusals[0].message).toContain('Decide which callback stays')
+    expect(refusals[0].message).toContain('To keep the hold, delete the `handler`')
   })
 
   it('refuses hold callbacks that v0 never fired', () => {
@@ -456,6 +456,41 @@ useShortcut({ key: 'Meta', ctrl: true, handler: h })
     )
 
     expect(guide).toContain('### Combo reference')
+  })
+
+  it('names both edits when a hold mode sits next to a handler', () => {
+    // "Decide which callback stays" clears only one way round. Keeping the
+    // handler leaves `triggeredOn: 'hold'` behind and the same refusal comes
+    // back, and with no hold callback there is no second callback to choose.
+    const both = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, triggeredOn: 'hold', handler: h, onHold: g })
+`
+    const { refusals } = migrateShortcuts(both, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('delete the `handler`')
+    expect(refusals[0].message).toContain("delete `triggeredOn: 'hold'`")
+
+    // Both edits the message names reach a clean run.
+    const keptHold = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, triggeredOn: 'hold', onHold: g })
+`
+    const keptHandler = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, handler: h })
+`
+
+    expect(migrateShortcuts(keptHold, { ext: '.ts' }).refusals).toEqual([])
+    expect(migrateShortcuts(keptHandler, { ext: '.ts' }).refusals).toEqual([])
+  })
+
+  it('names an edit for a triggeredOn it cannot read', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, triggeredOn: mode, handler: h })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('Write the literal')
   })
 
   it('names the edit that keeps a dead hold callback', () => {

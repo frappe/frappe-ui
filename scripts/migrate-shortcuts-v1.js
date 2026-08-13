@@ -1063,12 +1063,12 @@ function convertObject(source, mask, range, ctx) {
     const mode = readStringLiteral(triggeredOn.value)
     if (!mode || (mode.value !== 'hold' && mode.value !== 'press')) {
       return refuse(
-        `\`triggeredOn: ${triggeredOn.value}\` is not a literal 'press' or 'hold', so hold mode cannot be resolved.`,
+        `\`triggeredOn: ${triggeredOn.value}\` is not a literal 'press' or 'hold', so hold mode cannot be resolved. Write the literal this resolves to and run again.`,
       )
     }
     if (mode.value === 'hold' && hasHandler) {
       return refuse(
-        "`triggeredOn: 'hold'` next to a `handler` fired both in v0. v1 selects hold mode from `onHold`/`onRelease` alone. Decide which callback stays.",
+        "`triggeredOn: 'hold'` next to a `handler` fired both in v0. v1 selects hold mode from `onHold`/`onRelease` alone. To keep the hold, delete the `handler`. To keep the press, delete `triggeredOn: 'hold'` and the hold callbacks with it.",
       )
     }
     if (mode.value === 'hold' && !hasHoldCallback) {
