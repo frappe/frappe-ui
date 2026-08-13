@@ -56,7 +56,6 @@ watch(query, (text) => {
       v-model:open="open"
       v-model:query="query"
       :filterable="false"
-      @select="open = false"
     >
       <CommandPaletteInput placeholder="Search documents" />
 
