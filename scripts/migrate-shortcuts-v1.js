@@ -61,6 +61,11 @@
  * left in a file the run wrote — so an object that cannot be read in full is
  * refused, and never passed over.
  *
+ * In a .vue file that means the `<script>` blocks and the two places a template
+ * holds code, a bound attribute value and a mustache. The renames already reach
+ * a template, so a config left in one would be a v0 site in a file the run
+ * wrote. Prose, a class list and a plain attribute are not code, and stay out.
+ *
  * WHAT IT REFUSES
  *
  * - punctuation keys (it prints the named key to use)
@@ -70,7 +75,6 @@
  * - a spread or a computed name on an object a call or an annotation proves is
  *   a config. Either one can hold a `key` this cannot read.
  * - a modifier flag that is not a literal `true` / `false`
- * - a type declaration of the v0 shape (use `KeyboardShortcutConfig`)
  * - `formatShortcutLabel` and `getActiveShortcuts`, deleted from the package
  * - a destructured `useShortcut(...)` return; v1 returns void
  * - `triggeredOn: 'hold'` next to a `handler`, and `onHold`/`onRelease` with
@@ -542,6 +546,18 @@ export function scriptRanges(source, ext) {
   return ranges
 }
 
+// The JS expressions a .vue template holds: a bound attribute value and a
+// mustache. Prose, class lists and plain attributes are not code and stay out.
+function templateExpressions(source, scripts, ext) {
+  if (ext !== '.vue') return []
+  const spans = []
+  for (const [from, to] of outsideScript(source, scripts)) {
+    const text = source.slice(from, to)
+    spans.push(...matchedGroups(text, from, TEMPLATE_BINDING), ...mustacheRanges(text, from))
+  }
+  return spans
+}
+
 // Everything outside a script range stays masked, so it is never scanned.
 function buildMask(source, ranges) {
   const mask = new Uint8Array(source.length).fill(1)
@@ -763,6 +779,7 @@ const OBJECT_KEYWORDS = new Set([
   // `export default { ... }` is an options object, and a Vue SFC's whole
   // component is written that way.
   'default',
+  'throw',
 ])
 
 // True when this `{` opens an object literal, and not a block.
@@ -787,7 +804,9 @@ function opensObjectLiteral(source, mask, at) {
   // `{` covers a JSX prop, `cfg={{ key: 's' }}`, and a template interpolation,
   // `${ { key: 's' } }`. A brace opening a brace is one of those two: a block
   // whose first statement is a bare block holds nothing anyone writes.
-  if ('([{,:=?&|!+-*/%<>^~'.includes(c)) return true
+  // `.` is the tail of a spread, `{ ...{ key: 's' } }`. No other `.` can sit in
+  // front of a brace.
+  if ('([{,:=?&|!+-*/%<>^~.'.includes(c)) return true
   if (!/[A-Za-z0-9_$]/.test(c)) return false
   let start = i
   while (start >= 0 && /[A-Za-z0-9_$]/.test(source[start])) start--
@@ -796,14 +815,66 @@ function opensObjectLiteral(source, mask, at) {
 
 // `type Legacy = { key: 's', handler: () => void }` is a shape, not a config.
 // Its property values are types, so `key: 's'` there is a string-literal type
-// and not a key, and no `combo` could ever be written over it. The declaration
-// is what says so, because a type and a value read the same from the inside.
-function inTypeDeclaration(source, mask, objectStart) {
-  const at = codeBefore(source, mask, objectStart)
-  if (source[at] !== '=' || source[at - 1] === '=') return false
-  let from = at
-  while (from > 0 && source[from - 1] !== '\n' && source[from - 1] !== ';') from--
-  return /\btype\s+[A-Za-z_$][\w$]*\s*(?:<.*>\s*)?$/.test(source.slice(from, at))
+// and not a key, and no `combo` could ever be written over it — a refusal on
+// one could never be cleared. A type and a value read the same from the inside,
+// so the declaration around them is what tells them apart, and every brace it
+// covers is a shape: `type Map = { save: { key: 's' } }` nests them, and
+// `type Either = null | { key: 's' }` puts one behind an operator.
+const TYPE_DECLARATION = /\b(?:type|interface)\s+[A-Za-z_$][\w$]*/g
+
+// True while a line continues the one before it, which is how a type written
+// over several lines stays one declaration:
+//
+//   type Combo =
+//     | { key: 's' }
+//     | { key: 'a' }
+//
+// A statement never opens with `|`, and a line that ends on `=` never closes a
+// declaration.
+const CONTINUES_BEFORE = /[=|&,(<+.:?]$/
+const CONTINUES_AFTER = /^(?:[|&,)\]>+.:?[]|extends\b)/
+
+// The spans a file gives to type declarations. Every brace inside one is a
+// shape, whatever its depth.
+function typeRanges(source, mask, from, to) {
+  const spans = []
+  TYPE_DECLARATION.lastIndex = from
+  let match
+  while ((match = TYPE_DECLARATION.exec(source)) && match.index < to) {
+    if (mask[match.index]) continue
+    // A statement head, and not `const type = ...` or `.interface`.
+    const before = codeBefore(source, mask, match.index)
+    if (before >= 0 && /[A-Za-z0-9_$.]/.test(source[before])) {
+      const word = /[A-Za-z_$][\w$]*$/.exec(source.slice(0, before + 1))?.[0]
+      if (!word || !['export', 'declare'].includes(word)) continue
+    }
+
+    const end = typeDeclarationEnd(source, mask, match.index + match[0].length, to)
+    if (end > match.index) spans.push([match.index, end])
+    TYPE_DECLARATION.lastIndex = end
+  }
+  return spans
+}
+
+// Where a declaration stops: a `;`, or a line ending outside every bracket that
+// nothing carries on from.
+function typeDeclarationEnd(source, mask, at, to) {
+  let depth = 0
+  for (let i = at; i < to; i++) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === '{' || c === '[' || c === '(') depth++
+    else if (c === '}' || c === ']' || c === ')') depth--
+    else if (c === ';' && depth <= 0) return i
+    else if (c === '\n' && depth <= 0) {
+      const line = source.slice(0, i).replace(/\s+$/, '')
+      const next = codeAfter(source, mask, i)
+      if (CONTINUES_BEFORE.test(line) || CONTINUES_AFTER.test(source.slice(next, next + 8)))
+        continue
+      return i
+    }
+  }
+  return to
 }
 
 // `const { key, ctrl } = config` and `({ key, handler }) => ...` are binding
@@ -1540,9 +1611,17 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const unproven = []
   const edits = []
 
-  const ranges = scriptRanges(content, ext)
+  const scripts = scriptRanges(content, ext)
+  // A .vue template holds code in exactly two places, a bound attribute and a
+  // mustache, and a config written in one used to be passed over while the
+  // renames around it still wrote the file — the v0 config beside a renamed
+  // call the refusals exist to stop. Both places are JS expressions, so both
+  // are read like script.
+  const ranges = [...scripts, ...templateExpressions(content, scripts, ext)].sort(
+    (a, b) => a[0] - b[0],
+  )
   const mask = buildMask(content, ranges)
-  const renameMask = buildRenameMask(content, ranges, ext)
+  const renameMask = buildRenameMask(content, scripts, ext)
 
   // A frappe-ui name stays frappe-ui's. A name this file imports from
   // somewhere else, or declares itself, belongs to the app, and nothing here
@@ -1581,7 +1660,6 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
     if (isBindingPattern(content, mask, object)) return
-    if (inTypeDeclaration(content, mask, object.start)) return
 
     // `>=`, not `>`: an annotated value's span opens on the literal itself, so
     // `const config: ShortcutConfig = { ... }` has the object starting exactly
@@ -1633,8 +1711,10 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   // So nothing is recognised on the way in. Every object is opened, and an
   // object that cannot be read in full is refused rather than passed over.
   for (const [from, to] of ranges) {
+    const types = typeRanges(content, mask, from, to)
     for (let i = from; i < to; i++) {
       if (mask[i] || content[i] !== '{') continue
+      if (types.some(([open, close]) => i >= open && i < close)) continue
       if (!opensObjectLiteral(content, mask, i)) continue
       visit(i + 1)
     }

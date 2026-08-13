@@ -1023,6 +1023,11 @@ useShortcut({ combo: 'Mod+K', handler: open })
         '.js',
         "const msg = `x ${ { key: 's', ctrl: true, description: 'Save', handler: save } } y`",
       ],
+      ['.js', "const o = { ...{ key: 's', ctrl: true, description: 'Save', handler: save } }"],
+      [
+        '.js',
+        "function f() { throw { key: 's', ctrl: true, description: 'Save', handler: save } }",
+      ],
     ]
 
     for (const [ext, line] of cases) {
@@ -1034,6 +1039,59 @@ useShortcut({ combo: 'Mod+K', handler: open })
     }
   })
 
+  it('reads a config that follows a type declaration', () => {
+    // A declaration ends, and the code under it is code again. Getting the end
+    // wrong would swallow the config below it, silently.
+    const heads = [
+      "type Legacy = { key: 's', handler: () => void }",
+      "type Combo =\n\t| { key: 's', handler: () => void }\n\t| { key: 'a', handler: () => void }",
+      "interface Registry { save: { key: 's', handler: () => void } }",
+      "type OneLine = { key: 's', handler: () => void };",
+    ]
+
+    for (const head of heads) {
+      const source = `import { useShortcut } from 'frappe-ui'\n${head}\nconst cfg = { key: 's', ctrl: true, description: 'Save', handler: save }\nuseShortcut({ combo: 'Mod+K', handler: open })\n`
+      const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect({ head, count: refusals.length }).toEqual({ head, count: 1 })
+      expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+    }
+  })
+
+  it('finds a config in a .vue template, where the renames already reach', () => {
+    // A bound attribute and a mustache hold JS. Passing over one wrote the
+    // file around a v0 config, which is the half migration refusals exist to
+    // stop. Prose and a plain attribute are not code and stay untouched.
+    const template = (body) =>
+      `<template>\n\t${body}\n\t<p class="key">It's a brace { in prose.</p>\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\nuseShortcut({ combo: 'Mod+K', handler: open })\n</script>\n`
+
+    for (const body of [
+      `<Modal :shortcuts="[{ key: 's', ctrl: true, handler: save }]" />`,
+      `<div>{{ describe({ key: 's', ctrl: true, handler: save }) }}</div>`,
+      `<button @click="register({ key: 's', ctrl: true, handler: save })">go</button>`,
+    ]) {
+      const { refusals } = migrateShortcuts(template(body), { ext: '.vue' })
+
+      expect({ body, count: refusals.length }).toEqual({ body, count: 1 })
+      expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+    }
+
+    // A list column carries a `key` and no callback, so it is not a config.
+    const columns = template(`<ListView :columns="[{ key: 'name', label: 'Name' }]" />`)
+    const { refusals, notes, migrated } = migrateShortcuts(columns, { ext: '.vue' })
+
+    expect({ refusals, notes }).toEqual({ refusals: [], notes: [] })
+    expect(migrated).toContain(`{ key: 'name', label: 'Name' }`)
+  })
+
+  it('converts a config a template binding proves', () => {
+    const source = `<template>\n\t<button @click="useShortcut({ key: 's', ctrl: true, handler: save })">go</button>\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\n</script>\n`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain(`useKeyboardShortcut({ combo: 'Mod+S', handler: save })`)
+  })
+
   it('says nothing about a type declaration or a destructure it cannot migrate', () => {
     // Neither carries a value, so neither is a config, and a refusal on either
     // could never be cleared. Each file below renames, so silence here is the
@@ -1041,6 +1099,14 @@ useShortcut({ combo: 'Mod+K', handler: open })
     const sources = [
       'type Legacy = { key: string, handler: () => void }',
       "type SaveOnly = { key: 's', ctrl: true, handler: () => void }",
+      // Every brace a declaration covers is a shape, however deep it sits and
+      // whatever operator stands in front of it.
+      "type Map = { save: { key: 's', ctrl: true, handler: () => void } }",
+      "type Either = null | { key: 's', ctrl: true, handler: () => void }",
+      "type List = { key: 's', ctrl: true, handler: () => void }[]",
+      "export type Saved = { key: 's', ctrl: true, handler: () => void }",
+      "interface Registry { save: { key: 's', ctrl: true, handler: () => void } }",
+      "type Combo =\n\t| { key: 's', handler: () => void }\n\t| { key: 'a', handler: () => void }",
       'function register({ key, handler }: ShortcutLike) { bind(key, handler) }',
       'for (const { key, handler } of list) { bind(key, handler) }',
       'const [{ key, handler }] = rows',
