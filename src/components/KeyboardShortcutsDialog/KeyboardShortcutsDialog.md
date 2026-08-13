@@ -2,8 +2,9 @@
 
 A dialog that lists every shortcut registered with
 [`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut), grouped
-and searchable. Mount it once, near the app root. It reads the registry itself,
-so it needs no props.
+and searchable. Mount it once near the app root, and bind `v-model:open`,
+because the dialog has no trigger of its own. Its rows come from the registry,
+so it takes no content props.
 
 ## Default
 
