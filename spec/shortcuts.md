@@ -210,6 +210,22 @@ element also carries `data-state="empty"` or `data-state="no-results"`.
 `bg` is set; `key` on each key, with `data-key-type`; `separator` on the `+`
 glyphs; `alt-combos` on the alternatives, inside the root.
 
+### `bg` is not the `variant` axis
+
+`bg` picks a template branch. In `bg` mode each key is a `<kbd>` chip with its
+own geometry and type scale: `h-6`, `min-w-[1.5rem]`, `px-1.5`, `rounded-4`,
+`bg-surface-gray-2` and `text-xs-medium`. Plain mode sets only
+`text-ink-gray-5 text-sm` on the root and draws each key as a bare `<span>`,
+with a `+` between them.
+
+The house `variant` axis, `solid | subtle | outline | ghost` on `Badge`,
+changes how one shape is filled. `bg` changes the shape: height, minimum
+width, padding, radius, element and type scale. `variant="subtle"` against
+`variant="ghost"` would promise a swap of skin that this component does not
+make.
+
+The choice is deliberate. `bg` and `data-bg` stay as they are at 1.0.0.
+
 ## How a screen reader meets a chip
 
 A chip is a picture of a key, so `KeyboardShortcut` labels its root
