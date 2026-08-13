@@ -118,7 +118,7 @@
   },
   {
     name: 'label',
-    description: 'Text the client filter matches. It defaults to the item\'s own rendered\ntext, so set it only when the default slot draws more than the label.',
+    description: 'Text the client filter matches. It defaults to the item\'s own rendered\ntext, so set it only when the default slot draws more than the label.\nAn item that draws no text at all has to set it, or the filter can never\nnarrow it away.',
     required: false,
     type: 'string'
   },

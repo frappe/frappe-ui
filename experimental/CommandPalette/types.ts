@@ -66,6 +66,8 @@ export interface CommandPaletteItemProps {
   /**
    * Text the client filter matches. It defaults to the item's own rendered
    * text, so set it only when the default slot draws more than the label.
+   * An item that draws no text at all has to set it, or the filter can never
+   * narrow it away.
    */
   label?: string
   /** Extra words the client filter matches, on top of the label. */

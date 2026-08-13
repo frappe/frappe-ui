@@ -90,7 +90,16 @@ function readRenderedText() {
   if (text) renderedText.value = text
 }
 
-onMounted(readRenderedText)
+onMounted(() => {
+  readRenderedText()
+  // An item with no text of its own and no `label` has nothing to match, so
+  // the filter can never narrow it away and it sits under every query.
+  if (import.meta.env.DEV && palette?.filterable.value && !filterText.value) {
+    console.warn(
+      '[frappe-ui] CommandPaletteItem draws no text, so the filter always keeps it. Give it a `label`.',
+    )
+  }
+})
 onUpdated(readRenderedText)
 
 const filterText = computed(() => props.label ?? renderedText.value)

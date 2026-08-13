@@ -429,6 +429,44 @@ describe('CommandPalette', () => {
     expect(labels()).toEqual(['Settings'])
   })
 
+  it('warns about an item the filter can never narrow away', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    // Reka warns about the dialog description here too, so read ours only.
+    const ours = () =>
+      warn.mock.calls
+        .flat()
+        .filter((arg) => String(arg).startsWith('[frappe-ui]'))
+
+    mount()
+    await flush()
+    expect(ours()).toEqual([])
+    app?.unmount()
+    document.body.innerHTML = ''
+
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(CommandPalette, { open: true }, () => [
+            h(CommandPaletteList, () => [
+              // An icon and nothing else, so there is no text to match.
+              h(CommandPaletteItem, { value: 'inbox' }, () =>
+                h('span', { class: 'lucide-inbox' }),
+              ),
+            ]),
+          ])
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+    expect(ours()).toEqual([
+      '[frappe-ui] CommandPaletteItem draws no text, so the filter always keeps it. Give it a `label`.',
+    ])
+    warn.mockRestore()
+  })
+
   it('leaves no row marked selected when the handler keeps it open', async () => {
     // `preventDefault` is how a handler keeps the palette open, and it is also
     // how reka is told not to record the pick, so no row can end up selected
