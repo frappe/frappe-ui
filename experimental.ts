@@ -32,7 +32,7 @@ export * from './experimental/Calendar'
 // import-path change only.
 export * from './experimental/Charts'
 // CommandPalette family. The root `CommandPalette` was removed in `1.0.0` and
-// rebuilt here as six composable parts. Unstable: the parts stay here until
+// rebuilt here as seven composable parts. Unstable: the parts stay here until
 // gameplan, helpdesk and this repo's docs site all run on them.
 export * from './experimental/CommandPalette'
 // ListView family. Moved out of root (#985) — `frappe-ui/list` is

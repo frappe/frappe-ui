@@ -39,7 +39,7 @@ function glob(pattern) {
 // - `experimental/Charts` (the v1 chart family, a supported root surface
 //   until #942, parked while apps migrate to `frappe-ui/charts`)
 // - `experimental/CommandPalette` (a supported root surface until its removal
-//   in `1.0.0`; the six-part family here is where its consumers port to)
+//   in `1.0.0`; the seven-part family here is where its consumers port to)
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:

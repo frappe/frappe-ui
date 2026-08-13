@@ -105,7 +105,8 @@ export * from './components/Tabs'
 
 // Command and keyboard surfaces
 // CommandPalette left the root export in `1.0.0` (P14). It is rebuilt as a
-// six-part family in `frappe-ui/experimental`, where the API can still change.
+// seven-part family in `frappe-ui/experimental`, where the API can still
+// change.
 export * from './components/KeyboardShortcut'
 export * from './components/KeyboardShortcutsDialog'
 export {
