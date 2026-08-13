@@ -307,10 +307,22 @@ describe('CommandPalette', () => {
     mount()
     await flush()
     const item = items()[1]
+
+    // `pointermove` and nothing else. Reka binds no mouse event, so the wrong
+    // name is a silent no-op: the row never moves and an assertion about the
+    // highlight reads the row that was already there.
+    item.dispatchEvent(new Event('mouseover', { bubbles: true }))
+    await flush()
+    expect(item.getAttribute('data-state')).toBeNull()
+    expect(items()[0].getAttribute('data-state')).toBe('active')
+
     item.dispatchEvent(new Event('pointermove', { bubbles: true }))
     await flush()
     expect(item.getAttribute('data-state')).toBe('active')
     expect(items()[0].getAttribute('data-state')).toBeNull()
+    // Reka highlights on hover with focus off, so the caret stays where the
+    // user is typing while the pointer roams.
+    expect(document.activeElement).toBe(input())
   })
 
   it('renders a disabled item with data-disabled and no data-state', async () => {

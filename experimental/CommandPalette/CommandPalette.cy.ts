@@ -6,9 +6,10 @@ import CommandPaletteItem from './CommandPaletteItem.vue'
 import CommandPaletteList from './CommandPaletteList.vue'
 
 // Only what jsdom cannot answer lives here: scrolling, the column that keeps
-// the field and the footer out of the rows' way, and the focus the dialog's
-// focus scope hands out. The filter, the keyboard order and the data hooks are
-// covered in CommandPalette.test.ts.
+// the field and the footer out of the rows' way, and the focus and pointer
+// paths a real browser drives. The filter, the keyboard order and the data
+// hooks are covered in CommandPalette.test.ts, which pins the same pointer
+// event, because a wrong event name here fails in CI and nowhere else.
 
 const LIST = '[data-slot=command-palette-list]'
 const ITEM = '[data-slot=command-palette-item]'
@@ -139,11 +140,25 @@ describe('CommandPalette', () => {
     // be the filter field, or typing would go nowhere.
     cy.get(`${INPUT} input`).should('be.focused')
 
-    // Hover rather than the arrow keys: `.type()` focuses its own subject
-    // first, so a key press cannot show that the focus stayed. A hover moves
-    // the highlight and touches nothing else, so this fails if a row takes it.
-    cy.get(ITEM).eq(3).trigger('mouseover')
+    // `.type()` focuses its own subject first, so this cannot show that the
+    // focus was still in the field before the keys. What it does show is that
+    // walking the list never hands the focus to a row, which is what
+    // `ListboxFilter` turns off and what would stop the user typing. The
+    // highlight assertion is here so a no-op key press cannot pass this.
+    press('downArrow', 3)
     cy.get(`${ITEM}[data-state=active]`).should('have.text', 'Row 4')
+    cy.get(`${INPUT} input`).should('be.focused')
+  })
+
+  it('moves the highlight to the row under the pointer', () => {
+    // `pointermove` is the only event reka binds on a row. `mouseover` and
+    // `mouseenter` are silent no-ops, and a highlight assertion after one of
+    // them reads the row that was already highlighted. Reka ignores the event
+    // object itself, so the default constructor is enough.
+    cy.get(ITEM).eq(3).trigger('pointermove')
+    cy.get(`${ITEM}[data-state=active]`).should('have.text', 'Row 4')
+    // Reka highlights on hover with focus off, so the pointer never takes the
+    // caret away from the field.
     cy.get(`${INPUT} input`).should('be.focused')
   })
 })
