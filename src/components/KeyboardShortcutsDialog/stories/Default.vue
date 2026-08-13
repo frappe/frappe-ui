@@ -75,6 +75,8 @@ useKeyboardShortcut([
       :label="readOnly ? 'Leave read-only mode' : 'Enter read-only mode'"
       @click="readOnly = !readOnly"
     />
-    <KeyboardShortcutsDialog v-model:open="open" />
+    <!-- A story has far fewer rows than the default `searchThreshold` of 20.
+         Lower it so the search field shows here. -->
+    <KeyboardShortcutsDialog v-model:open="open" :search-threshold="3" />
   </div>
 </template>

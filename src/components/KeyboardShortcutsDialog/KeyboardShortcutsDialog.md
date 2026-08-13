@@ -24,7 +24,8 @@ registers or unregisters. A getter that reads untracked state, such as
 
 Above `searchThreshold` rows a search field appears. It matches the text a row
 draws as well as the name behind it, so a row for `Mod+Slash` answers to both
-`/` and `slash`. The query clears when the dialog closes.
+`/` and `slash`. The query clears when the dialog closes. The preview above lowers
+`searchThreshold` to 3, because it has too few rows to pass the default of 20.
 
 ## Open it from a shortcut
 
