@@ -58,7 +58,7 @@ export const recipeGroups: RecipeGroup[] = [
       'List',
       'PageHeader',
       'SettingsDialog',
-      'KeyboardShortcutsModal',
+      'KeyboardShortcutsDialog',
     ],
     desktop: desktop(
       'discussions-desktop',

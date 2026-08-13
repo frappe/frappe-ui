@@ -14,14 +14,14 @@
   },
   {
     name: 'paddingTop',
-    description: 'CSS value for top padding when position is top (default: "5vh").',
+    description: 'Top padding while the dialog sits at the top of the screen. Takes the\nsame values as `Dialog`\'s own prop (default: "5vh").',
     required: false,
-    type: 'string',
+    type: 'string | number',
     default: '"5vh"'
   },
   {
     name: 'searchThreshold',
-    description: 'Minimum number of shortcuts that must be registered before the search\ninput is shown (default: 20).',
+    description: 'The search input appears once the number of rows passes this count.\nRows, not registrations: shortcuts that merge count once (default: 20).',
     required: false,
     type: 'number',
     default: '20'
@@ -32,6 +32,14 @@
     required: false,
     type: 'boolean',
     default: 'false'
+  }
+]
+
+  const slotsData = [
+  {
+    name: 'default',
+    description: 'Replaces the default grid. Receives the grouped, enabled shortcuts the search leaves.',
+    type: '{ groups: KeyboardShortcutGroup[]; }'
   }
 ]
 
@@ -46,6 +54,8 @@
 
 ## API Reference
 
-<PropsTable name="KeyboardShortcutsModal" :data="propsData"/>
+<PropsTable name="KeyboardShortcutsDialog" :data="propsData"/>
+
+<SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>

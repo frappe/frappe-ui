@@ -7,6 +7,6 @@ export interface KeyboardShortcutProps {
   showPlus?: boolean
   /** Alternative equivalent combos, rendered after a `/` separator (display only). */
   altCombos?: string[]
-  /** Render icons for certain non-modifier keys (arrows, enter, backspace). */
+  /** Render icons for the arrow, Enter, Backspace and Delete keys. */
   useIcons?: boolean
 }

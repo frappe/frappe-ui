@@ -9,6 +9,96 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `useShortcut` renamed to `useKeyboardShortcut`, config reshaped (breaking; loud in TS, silent in JS)
+
+The import fails to resolve, so the rename itself is loud. The config is the
+silent half: 14 fields become 10 and Vue drops the ones that left without a
+word.
+
+`key` + `ctrl` + `shift` + `alt` collapse into one `combo` string, written
+`Mod+Ctrl+Alt+Shift+<Key>`. `ctrl` never meant Control. It matched
+`ctrlKey || metaKey`, so `{ key: 's', ctrl: true }` fired on ⌘S, on ⌃S and on
+Win+S alike. `Mod+S` compares every modifier exactly, so only ⌘S fires on macOS
+and only Ctrl+S elsewhere. Those two extra trigger paths stop. `condition`
+becomes `enabled`
+and takes a ref, a getter or a boolean. `triggeredOn` goes: `onHold` selects
+hold mode, and a hold registration takes no `handler`, which ends the old
+surprise where `triggeredOn: 'hold'` fired `handler` too.
+
+Punctuation and digits now use a key name (`Mod+Slash`, `Mod+Shift+Digit1`),
+because `+` is the separator and `'Mod++'` splits into empty parts. Digits and
+punctuation match `event.code`, so a shifted character still resolves; letters
+and named keys match `event.key`. The old US-layout heuristic is deleted.
+
+TypeScript rejects an unknown combo at compile time. A JavaScript call site
+that still passes the v0 shape logs one dev warning and never fires.
+
+Migration: [`useShortcut`](/docs/migration#useshortcut-is-now-usekeyboardshortcut).
+
+### Shortcut precedence is now last-registered-wins (breaking, silent)
+
+Two shortcuts on one combo used to run whichever the registry reached first.
+The last registration that is **enabled at the time of the keypress** now
+wins. `enabled` is resolved before precedence, so two registrations with
+mutually exclusive guards both keep working. Suite's slides app uses that
+pattern on seven combos.
+
+A real collision, two live shortcuts on one keypress, logs one dev warning per
+combo naming the shadowed shortcut and the active one.
+
+### `formatShortcutLabel` and `getActiveShortcuts` removed (breaking, loud)
+
+Neither had a consumer in ten apps, and `formatShortcutLabel` was unused inside
+the library too. The registry read is now internal.
+`KeyboardShortcutsDialog`'s new default slot hands out the same data.
+
+### `KeyboardShortcutsModal` renamed to `KeyboardShortcutsDialog` (breaking, loud)
+
+The library calls every modal a dialog. Props are unchanged. The component
+gains a default slot carrying the grouped shortcuts, and a `data-slot` on every
+part.
+
+Migration: [`KeyboardShortcutsModal`](/docs/migration#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog).
+
+### KeyboardShortcut — one combo vocabulary, and `data-slot` hooks (breaking, silent)
+
+The root, each key, the `+` separators and the alternative combos carry a
+`data-slot`; the root also carries `data-bg` when `bg` is set. Style through
+those instead of a class prop (P10). The parser also reads the key names a
+combo uses, so `Digit1` renders `1` and `Slash` renders `/`.
+
+`combo` now reads the one grammar `useKeyboardShortcut` fires on. The older
+display-only spellings are gone, because a chip for a combo that can never fire
+is the failure this family exists to remove. An unknown token renders as
+written and warns once in development. **Silent break:** `combo` stays typed
+`string`, because callers compute it, so no type-check names the call sites and
+production logs nothing.
+
+| Gone | Write |
+| --- | --- |
+| `Cmd`, `Command`, `⌘`, `Meta` | `Mod` |
+| `Control` | `Ctrl` |
+| `Option`, `Opt`, `⌥` | `Alt` |
+| `⇧` | `Shift` |
+| `Win`, `Windows` | nothing; the grammar has no Windows key |
+| `Esc` | `Escape` |
+| `Return` | `Enter` |
+| `Del` | `Delete` |
+| `Up`, `Down`, `Left`, `Right` | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| `=` | `Equal` |
+| `F13` and above | nothing; the grammar stops at `F12` |
+
+The root's `role` is now `img` when `combo` is set, and absent otherwise. It
+was always `note`. A labelled `img` replaces its subtree, so a screen reader
+meets each key once instead of once per chip.
+
+`useIcons` also reaches `bg` mode, where it used to be ignored.
+`:use-icons="false"` now drops the arrow, Enter, Backspace and Delete icons in
+both modes. The default is `true`, so a chip that never set the prop draws what
+it drew before.
+
+Migration: [`KeyboardShortcut`](/docs/migration#keyboardshortcut).
+
 ### Badge — `theme="orange"` removed (breaking; loud in TS, silent in JS)
 
 `orange` was a deprecated alias that resolved to `amber`, so `theme="amber"`
@@ -394,7 +484,7 @@ recomputes `hasPreviousPage` after restoring `start`.
 (`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
 error, so the palette just never opens — grep for `CommandPalette` and
 `v-model:show` after upgrading. `Mod+K` now opens the palette on its own
-(registered internally via `useShortcut`); delete any app-level keydown
+(registered internally via `useKeyboardShortcut`); delete any app-level keydown
 listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
 gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
 `string | Component` (lucide class strings, emoji, or a component) instead of
@@ -414,14 +504,16 @@ directory with a `types.ts`, a docs page, and a Cypress test.
 `matchesShortcut` is removed from the `frappe-ui` package export. Its own
 doc comment already said "exported for unit tests only" — it was never
 meant to be public API (Rule 9). Loud break (import error) for anyone who
-imported it directly; no signal of any real consumer doing so.
+imported it directly; no signal of any real consumer doing so. The composable
+itself is now `useKeyboardShortcut`, further up this release.
 
 ### KeyboardShortcutsModal / useShortcut — brought to bar
 
 `KeyboardShortcutsModal` gained a `types.ts` and a Cypress test (previously
 only unit-tested). `useShortcut` gained a short entry on the
-[composables page](/docs/other/composables); its API was
-already stable and is unchanged.
+[composables page](/docs/other/composables). Both were renamed later in this
+release, to `KeyboardShortcutsDialog` and `useKeyboardShortcut`. Read the
+entries at the top of this release for the API that ships.
 
 ### SettingsDialog — `SettingsBody`'s exposed type
 
