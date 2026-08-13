@@ -17,7 +17,10 @@ A combo is one string:
 Mod+Ctrl+Alt+Shift+<Key>
 ```
 
-Modifiers come in that order. `+` separates the parts.
+That order is the canonical spelling: write `Mod+Shift+K`, not `Shift+Mod+K`.
+`+` separates the parts. The `KeyboardShortcutCombo` type enforces the order at
+a typed call site. The matcher accepts any order, so a combo from a computed
+value or a JavaScript call site still fires, and the chip still draws it.
 
 | Modifier | Means                              |
 | -------- | ---------------------------------- |

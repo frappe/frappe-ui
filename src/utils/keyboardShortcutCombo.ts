@@ -14,8 +14,10 @@
 // ---------------------------------------------------------------------------
 // Key vocabulary
 //
-// A combo is `Mod+Ctrl+Alt+Shift+<Key>`, in that order. Punctuation uses a
-// name, never the character, because `+` is the separator.
+// A combo is `Mod+Ctrl+Alt+Shift+<Key>`. That order is the canonical spelling
+// and `KeyboardShortcutCombo` enforces it at a typed call site, but both
+// parsers below read the modifiers in any order. Punctuation uses a name,
+// never the character, because `+` is the separator.
 //
 // Letters, function keys and named keys match `event.key`. Digits and
 // punctuation match `event.code`, so `Mod+Shift+Digit1` fires on both the

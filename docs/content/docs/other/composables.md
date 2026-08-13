@@ -133,7 +133,8 @@ Pass an array to register several at once.
 
 ### The combo
 
-A combo is `Mod+Ctrl+Alt+Shift+<Key>`, with the modifiers in that order.
+A combo is `Mod+Ctrl+Alt+Shift+<Key>`. That order is the canonical spelling and
+the type enforces it, but the matcher accepts the modifiers in any order.
 
 | Modifier | Means |
 | --- | --- |
