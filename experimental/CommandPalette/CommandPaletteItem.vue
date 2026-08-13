@@ -1,34 +1,34 @@
 <template>
-  <div v-if="visible" class="px-2.5">
-    <ListboxItem
-      ref="item"
-      :value="value"
-      :disabled="disabled"
-      as-child
-      @select="onSelect"
+  <!-- No wrapper element: a listbox owns options and groups, nothing else. -->
+  <ListboxItem
+    v-if="visible"
+    ref="item"
+    :value="value"
+    :disabled="disabled"
+    as-child
+    @select="onSelect"
+  >
+    <component
+      :is="as"
+      data-slot="command-palette-item"
+      :data-state="state"
+      :data-disabled="disabled ? '' : undefined"
+      class="mx-2.5 flex min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
+      v-bind="$attrs"
     >
-      <component
-        :is="as"
-        data-slot="command-palette-item"
-        :data-state="state"
-        :data-disabled="disabled ? '' : undefined"
-        class="flex w-full min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
-        v-bind="$attrs"
+      <slot name="prefix" v-bind="slotProps" />
+      <span
+        ref="labelEl"
+        data-slot="command-palette-item-label"
+        class="overflow-hidden text-ellipsis whitespace-nowrap"
       >
-        <slot name="prefix" v-bind="slotProps" />
-        <span
-          ref="labelEl"
-          data-slot="command-palette-item-label"
-          class="overflow-hidden text-ellipsis whitespace-nowrap"
-        >
-          <slot v-bind="slotProps" />
-        </span>
-        <span v-if="$slots.suffix" class="ml-auto whitespace-nowrap pl-2">
-          <slot name="suffix" v-bind="slotProps" />
-        </span>
-      </component>
-    </ListboxItem>
-  </div>
+        <slot v-bind="slotProps" />
+      </span>
+      <span v-if="$slots.suffix" class="ml-auto whitespace-nowrap pl-2">
+        <slot name="suffix" v-bind="slotProps" />
+      </span>
+    </component>
+  </ListboxItem>
 </template>
 
 <script setup lang="ts">

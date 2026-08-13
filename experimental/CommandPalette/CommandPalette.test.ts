@@ -354,6 +354,15 @@ describe('CommandPalette', () => {
     expect(onSelect.mock.calls[0][0]).toBe(rows[1])
   })
 
+  it('hangs each option straight off its group, with nothing in between', async () => {
+    // A listbox owns options and groups. A wrapper element between the two
+    // breaks that, so the row carries its own inset instead.
+    mount()
+    await nextTick()
+    const group = document.querySelector('[data-slot="command-palette-group"]')
+    expect(items()[0].parentElement).toBe(group)
+  })
+
   it('filters items that carry no `label` when it opens with a query', async () => {
     // Regression: the filter reads the label off the mounted element, so an
     // item that is hidden on its first render never gets measured and stays
