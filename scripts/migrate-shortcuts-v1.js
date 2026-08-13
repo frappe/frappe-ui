@@ -1251,8 +1251,14 @@ function provenRanges(source, mask, bindings) {
     // `raw`, `import * as ShortcutConfig` names a module, and neither ends in
     // `]` or `}`, so neither reaches an array further up the file. `as const`
     // on its own names no type and proves nothing.
+    //
+    // The `\b` after the name is load-bearing. Without it `ShortcutConfig`
+    // matches the head of the app's own `ShortcutConfigLike`, and a clause
+    // that proves nothing rewrites a stranger's object. The annotated form
+    // above needs no `\b`: the `=` it demands can never follow a name it only
+    // matched half of.
     const typed = new RegExp(
-      `(?:\\bas\\s+const\\s+)?\\b(?:satisfies|as)\\s+(?:readonly\\s+)?(?:${typeNames.join('|')})(?:\\s*\\[\\s*\\])?`,
+      `(?:\\bas\\s+const\\s+)?\\b(?:satisfies|as)\\s+(?:readonly\\s+)?(?:${typeNames.join('|')})\\b(?:\\s*\\[\\s*\\])?`,
       'g',
     )
     let s

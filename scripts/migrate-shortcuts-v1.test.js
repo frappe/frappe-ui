@@ -570,6 +570,24 @@ useShortcut(bindings)
     expect(refusals.some((r) => r.line === 2)).toBe(true)
   })
 
+  it('proves nothing from a satisfies clause naming a longer type', () => {
+    // The config type is a prefix of the app's own type name. The file does
+    // import the config type from the barrel, so the clause reads like a
+    // proof unless the type name is anchored at both ends.
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+import type { ShortcutConfigLike } from './types'
+const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+] satisfies ShortcutConfigLike[]
+useShortcut(bindings)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(migrated).toContain("{ key: 's', ctrl: true, description: 'Save', handler: save }")
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(4)
+  })
+
   it('proves nothing from a satisfies clause naming the app-s own type', () => {
     const source = `import { useShortcut } from 'frappe-ui'
 import type { ShortcutConfig } from './types'
