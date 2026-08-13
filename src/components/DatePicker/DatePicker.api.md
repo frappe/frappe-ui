@@ -129,7 +129,7 @@
   },
   {
     name: 'description',
-    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set. A `#description` slot is not: it renders\nbeside the error, and is referenced alongside it.',
     required: false,
     type: 'string'
   },
@@ -326,7 +326,7 @@
   },
   {
     name: 'description',
-    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set. A `#description` slot is not: it renders\nbeside the error, and is referenced alongside it.',
     required: false,
     type: 'string'
   },
@@ -523,7 +523,7 @@
   },
   {
     name: 'description',
-    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set. A `#description` slot is not: it renders\nbeside the error, and is referenced alongside it.',
     required: false,
     type: 'string'
   },

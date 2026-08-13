@@ -17,7 +17,8 @@ export interface InputLabelingProps {
 
   /**
    * Helper text rendered below the input.
-   * Hidden when `error` is set.
+   * Hidden when `error` is set. A `#description` slot is not: it renders
+   * beside the error, and is referenced alongside it.
    */
   description?: string
 

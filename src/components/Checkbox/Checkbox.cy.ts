@@ -197,6 +197,21 @@ describe('Checkbox', () => {
         .should('not.have.class', 'h-7')
         .and('have.class', 'py-1.5')
     })
+
+    it('grows the surface for a #description slot too', () => {
+      // The row height follows the same thing the wrapper does. Reading the
+      // prop alone kept the compact fixed height and the description
+      // overflowed it.
+      cy.mount(Checkbox, {
+        props: { label: 'abc', padded: true },
+        slots: { description: () => h('span', 'helper') },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
   })
 
   describe('size', () => {
