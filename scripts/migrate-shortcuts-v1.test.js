@@ -361,6 +361,63 @@ const bindings: ShortcutConfig[] = [
     expect(refusals).toEqual([])
   })
 
+  it('converts a single object literal under an annotation', () => {
+    // The annotated value is the object itself, so the span's opening bracket
+    // is the object's own `{`. A strict `>` here made the object miss its own
+    // proven range and fall to the unproven path.
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const config: ShortcutConfig = { key: 's', ctrl: true, description: 'Save', handler: save }
+useShortcut(config)
+`
+    const { migrated, refusals, notes } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(notes).toEqual([])
+    expect(migrated).toContain(
+      "const config: KeyboardShortcutConfig = { combo: 'Mod+S', description: 'Save', handler: save }",
+    )
+  })
+
+  it('converts an object literal under a satisfies clause', () => {
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const config = { key: 's', ctrl: true, description: 'Save', handler: save } satisfies ShortcutConfig
+useShortcut(config)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain(
+      "const config = { combo: 'Mod+S', description: 'Save', handler: save } satisfies KeyboardShortcutConfig",
+    )
+  })
+
+  it('converts an array under a satisfies clause', () => {
+    const source = `import { useShortcut, type KeyboardShortcutConfig } from 'frappe-ui'
+const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+] satisfies KeyboardShortcutConfig[]
+useShortcut(bindings)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+  })
+
+  it('proves nothing from a satisfies clause naming the app-s own type', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+import type { ShortcutConfig } from './types'
+const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+] satisfies ShortcutConfig[]
+useShortcut(bindings)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(4)
+  })
+
   it('converts an object whose handler holds a regex after a keyword', () => {
     // A quote inside the regex used to open a string run that masked the rest
     // of the object, and the site was dropped with no refusal.
@@ -614,6 +671,22 @@ useShortcut(bindings)
     expect(refusals[0].message).toContain("write `combo: 'Escape'`")
     expect(refusals[1].message).toContain("write `combo: 'J'`")
     expect(migrated).toContain("{ key: 'escape', handler: close }")
+    // The rows sit in an array, so the array is what takes the annotation.
+    expect(refusals[0].message).toContain('annotate the array `KeyboardShortcutConfig[]`')
+  })
+
+  it('asks for the annotation that compiles on a lone object', () => {
+    // `KeyboardShortcutConfig[]` on a single object is a type error, so the
+    // advice has to name the type for the shape the run actually found.
+    const source = `import { useShortcut } from 'frappe-ui'
+const config = { key: 'escape', description: 'Close', handler: close }
+useShortcut(config)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('annotate it `KeyboardShortcutConfig`')
+    expect(refusals[0].message).not.toContain('KeyboardShortcutConfig[]')
   })
 
   it('notes a modifier-less registration in a file with no other work', () => {
@@ -724,12 +797,17 @@ describe('identifier renames', () => {
 const config: ShortcutConfig = { key: 's', description: 'Save' }
 useShortcut(config)
 `
-    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
+    // The annotation proves the object, so the run converts it as well as
+    // renaming around it. Asserting the renames alone once hid a refusal here.
+    expect(refusals).toEqual([])
     expect(migrated).toContain(
       "import { KeyboardShortcutsDialog, useKeyboardShortcut, type KeyboardShortcutConfig } from 'frappe-ui'",
     )
-    expect(migrated).toContain('const config: KeyboardShortcutConfig')
+    expect(migrated).toContain(
+      "const config: KeyboardShortcutConfig = { combo: 'S', description: 'Save' }",
+    )
     expect(migrated).toContain('useKeyboardShortcut(config)')
   })
 

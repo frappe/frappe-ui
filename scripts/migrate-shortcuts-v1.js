@@ -1253,10 +1253,15 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
 
+    // `>=`, not `>`: an annotated value's span opens on the literal itself, so
+    // `const config: ShortcutConfig = { ... }` has the object starting exactly
+    // where its own span opens. A call span always opens on `(`, and an object
+    // always starts on `{`, so equality can never hand an object a call's
+    // range.
     const held = (spans) =>
       spans.some(
         (span) =>
-          object.start > span.open &&
+          object.start >= span.open &&
           object.end <= span.end + 1 &&
           holdsDirectly(content, mask, span, object.start),
       )
