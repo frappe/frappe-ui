@@ -30,6 +30,10 @@
         as="div"
         data-slot="command-palette-content"
         class="max-h-[60vh] overflow-y-auto overscroll-contain focus-visible:outline-none"
+        :style="{
+          scrollPaddingTop: `${stickyTop}px`,
+          scrollPaddingBottom: `${stickyBottom}px`,
+        }"
       >
         <slot v-bind="slotProps" />
       </ListboxContent>
@@ -122,6 +126,29 @@ const empty = computed(() => {
   return true
 })
 
+// `scrollIntoView` stops a row at the edge of the scroll region, and the field
+// and the footer pin themselves over those edges, so the row the keyboard
+// lands on can end up behind one of them. How tall they are is the caller's
+// business: a footer is free to run to two lines. So measure them and let
+// `scroll-padding` hold the row clear.
+const stickyTop = ref(0)
+const stickyBottom = ref(0)
+
+function registerSticky(edge: 'top' | 'bottom', element: HTMLElement) {
+  const height = edge === 'top' ? stickyTop : stickyBottom
+  const measure = () => (height.value = element.offsetHeight)
+  measure()
+  const observer =
+    typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+  // The border box, to match `offsetHeight`. The default content box misses a
+  // change of padding, which is how a caller usually makes a part taller.
+  observer?.observe(element, { box: 'border-box' })
+  return () => {
+    observer?.disconnect()
+    height.value = 0
+  }
+}
+
 /**
  * Ordinary substring matching, the same rule `Combobox` and `MultiSelect`
  * apply to their options.
@@ -177,6 +204,7 @@ provideCommandPaletteContext({
   empty,
   matches,
   registerItem,
+  registerSticky,
   groupHasVisibleItems,
   select,
 })

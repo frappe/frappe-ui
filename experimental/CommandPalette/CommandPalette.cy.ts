@@ -45,21 +45,51 @@ describe('CommandPalette', () => {
     cy.mount(Harness)
   })
 
-  it('scrolls the highlighted row into view as the keyboard walks down', () => {
+  it('scrolls the highlighted row clear of the footer on the way down', () => {
     cy.get(CONTENT).its('0.scrollTop').should('eq', 0)
 
     press('downArrow', 20)
 
-    // The list moved, and the row the keyboard is on sits inside the region
-    // rather than below its fold. `scrollIntoView` knows nothing about the
-    // sticky field and footer, so the row can still land behind them. That is
-    // a separate bug, and asserting it here would only lock in today's answer.
+    // The list moved, and the row the keyboard is on is whole: inside the
+    // region and above the footer that pins itself over the bottom edge.
     cy.get(CONTENT).its('0.scrollTop').should('be.greaterThan', 0)
     cy.get(`${ITEM}[data-state=active]`).should(($row) => {
       const row = $row[0].getBoundingClientRect()
       const region = Cypress.$(CONTENT)[0].getBoundingClientRect()
+      const footer = Cypress.$(FOOTER)[0].getBoundingClientRect()
       expect(row.top).to.be.at.least(region.top)
+      expect(row.bottom).to.be.at.most(footer.top)
+    })
+  })
+
+  it('scrolls the highlighted row clear of the field on the way back up', () => {
+    // The same trap at the other edge: `scrollIntoView` stops a row at the
+    // region's own edge, which the field sits over.
+    press('downArrow', 20)
+    cy.get(CONTENT).its('0.scrollTop').should('be.greaterThan', 0)
+
+    press('upArrow', 20)
+
+    cy.get(`${ITEM}[data-state=active]`).should(($row) => {
+      const row = $row[0].getBoundingClientRect()
+      const region = Cypress.$(CONTENT)[0].getBoundingClientRect()
+      const field = Cypress.$(INPUT)[0].getBoundingClientRect()
+      expect(row.top).to.be.at.least(field.bottom)
       expect(row.bottom).to.be.at.most(region.bottom)
+    })
+  })
+
+  it('follows a footer that grows after mount', () => {
+    // The heights are the caller's, so they are measured rather than assumed.
+    // A hardcoded inset would leave the row behind a two-line footer.
+    cy.get(FOOTER).invoke('css', 'padding-bottom', '40px')
+    press('downArrow', 20)
+
+    cy.get(`${ITEM}[data-state=active]`).should(($row) => {
+      const row = $row[0].getBoundingClientRect()
+      const footer = Cypress.$(FOOTER)[0].getBoundingClientRect()
+      expect(footer.height).to.be.greaterThan(40)
+      expect(row.bottom).to.be.at.most(footer.top)
     })
   })
 
