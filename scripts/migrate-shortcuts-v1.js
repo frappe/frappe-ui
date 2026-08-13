@@ -730,19 +730,83 @@ function insideArrayLiteral(source, mask, start, limit) {
   return false
 }
 
+// The first character of code in front of `at`, and the first behind it.
+// Comments and whitespace are neither.
+function codeBefore(source, mask, at) {
+  let i = at - 1
+  while (i >= 0 && (mask[i] === MASK_COMMENT || /\s/.test(source[i]))) i--
+  return i
+}
+
+function codeAfter(source, mask, at) {
+  let i = at
+  while (i < source.length && (mask[i] === MASK_COMMENT || /\s/.test(source[i]))) i++
+  return i
+}
+
+// A word that can stand in front of an object literal. `return { key: 's' }`
+// is a config; `else { ... }` and `class X { ... }` are blocks.
+const OBJECT_KEYWORDS = new Set([
+  'return',
+  'case',
+  'of',
+  'in',
+  'typeof',
+  'await',
+  'yield',
+  'as',
+  'satisfies',
+  'delete',
+  'void',
+  'new',
+  'instanceof',
+])
+
+// True when this `{` opens an object literal, and not a block.
+//
+// Every brace in the file reaches the scan, and most of them open code: a
+// function body, an `if` body, a class body, a bare statement block. Reading a
+// block's statements as properties refuses an object that never was one —
+// `handler: () => { isOpen.value = true }` is a registration, and its body is
+// not a config with an unreadable property in it.
+//
+// The character in front decides. An object literal is an expression, so it
+// follows what an expression follows: an open bracket, a comma, a colon, an
+// operator, or a keyword that takes one. A block follows a `)`, an arrow, a
+// `;`, another brace, or a name.
+function opensObjectLiteral(source, mask, at) {
+  const i = codeBefore(source, mask, at)
+  if (i < 0) return false
+  const c = source[i]
+  // An arrow body is a block. `() => ({ ... })` writes the object with a `(`
+  // in front of it, which is the form that reaches this as an expression.
+  if (c === '>' && source[i - 1] === '=') return false
+  if ('([,:=?&|!+-*/%<>^~'.includes(c)) return true
+  if (!/[A-Za-z0-9_$]/.test(c)) return false
+  let start = i
+  while (start >= 0 && /[A-Za-z0-9_$]/.test(source[start])) start--
+  return OBJECT_KEYWORDS.has(source.slice(start + 1, i + 1))
+}
+
 // `const { key, ctrl } = config` and `({ key, handler }) => ...` are binding
 // patterns, not objects. A pattern reads exactly like a config written in
-// shorthand, so its shape cannot tell it apart. What follows its closing brace
-// can: a pattern is assigned to, or it is a parameter list.
+// shorthand, so its shape cannot tell it apart. Its position can: a pattern is
+// assigned to, or it is a parameter.
 function isBindingPattern(source, mask, object) {
-  let at = object.end
-  while (at < source.length && (mask[at] === MASK_COMMENT || /\s/.test(source[at]))) at++
+  // A default value is not a pattern, whichever paren list it sits in:
+  // `function f(config = { key: 's' })` holds a config.
+  const before = codeBefore(source, mask, object.start)
+  if (source[before] === '=' && source[before - 1] !== '=') return false
+
+  let at = codeAfter(source, mask, object.end)
+  // `const [{ key }] = rows` closes its brackets before the `=`.
+  while (source[at] === ']' || source[at] === ')') at = codeAfter(source, mask, at + 1)
   if (source[at] === '=' && source[at + 1] !== '=' && source[at + 1] !== '>') return true
-  if (source[at] !== ')') return false
-  at++
-  while (at < source.length && (mask[at] === MASK_COMMENT || /\s/.test(source[at]))) at++
   // `({ key }) => ...` and `function f({ key }) { ... }`. A call argument,
   // `useShortcut({ key: 's' })`, is followed by neither.
+  at = codeAfter(source, mask, object.end)
+  if (source[at] !== ')') return false
+  at = codeAfter(source, mask, at + 1)
   return source.startsWith('=>', at) || source[at] === '{'
 }
 
@@ -1069,6 +1133,19 @@ function convertObject(source, mask, range, ctx) {
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
   const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
 
+  // One property written out with a value a config would carry. It is what
+  // separates a config the run cannot prove from the two shapes that read like
+  // one and never are: a binding pattern, `const { key, ctrl } = config`, whose
+  // names carry no values at all, and a type declaration,
+  // `type Legacy = { key: string }`, whose values are types. Neither can be
+  // migrated, and a refusal on either could never be cleared.
+  const hasWrittenValue = props.some(
+    (p) =>
+      p.name &&
+      !p.shorthand &&
+      (readStringLiteral(p.value) || p.value === 'true' || p.value === 'false'),
+  )
+
   // A property whose head names nothing the run can read: a spread, or a
   // computed name that is not a string literal. Either one can hold a `key`, a
   // modifier or a `combo`, so an object carrying one is never read in full.
@@ -1102,6 +1179,7 @@ function convertObject(source, mask, range, ctx) {
       // `ComboboxCustomOption` as much as of a config, so it is never rewritten
       // here. It is worth a line when the object also carries a v0-only name.
       if (isOption || !props.some((p) => p.name && NOTE_SIGNALS.has(p.name))) return null
+      if (!condition && !hasWrittenValue) return null
       const at = condition ?? unreadable
       return leaveAlone(
         lineAt(source, at.start),
@@ -1158,7 +1236,13 @@ function convertObject(source, mask, range, ctx) {
     // A `key` the run cannot read has no combo to print. The proven path
     // refuses it; here there is nothing to refuse, and silence is what leaves a
     // v0 config beside a renamed call, so the line says what is in the way.
+    //
+    // A `key` with no value beside it is a different object. `{ key, handler }`
+    // is a binding pattern as often as a config, and `{ key: string }` is a
+    // type — one written value is what tells them apart, and neither of those
+    // two has one.
     const literal = readStringLiteral(keyProp.value)
+    if (!literal && !hasWrittenValue) return null
     const { combo, refusal } = literal ? buildCombo({ key: literal.value, ...flags }) : {}
     const advice = !literal
       ? `${unreadableKey(keyProp)} Write the \`combo\` by hand.`
@@ -1532,6 +1616,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   for (const [from, to] of ranges) {
     for (let i = from; i < to; i++) {
       if (mask[i] || content[i] !== '{') continue
+      if (!opensObjectLiteral(content, mask, i)) continue
       visit(i + 1)
     }
   }

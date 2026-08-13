@@ -960,6 +960,72 @@ useShortcut({ combo: 'Mod+K', handler: open })
     expect(refusals[0].message).toContain('is not a plain string')
   })
 
+  it('converts a config whose handler body is a block', () => {
+    // A block is not an object. Reading its statements as properties refused
+    // the commonest registration there is.
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut({
+	key: 'k',
+	ctrl: true,
+	description: 'Open search',
+	handler: () => {
+		isOpen.value = true
+	},
+})
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("combo: 'Mod+K'")
+    expect(migrated).toContain('isOpen.value = true')
+  })
+
+  it('leaves the code inside a handler body alone', () => {
+    // `condition()` here is a call, not a property, and renaming it breaks the
+    // app it was migrating.
+    const source =
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut({ key: 's', handler: () => { handler(), condition() } })\n"
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain('handler(), condition()')
+  })
+
+  it('names a config written as a default parameter value', () => {
+    // `= { ... }` is a value, not a pattern. The call below renames, so the
+    // file would be written around this one.
+    const source = `import { useShortcut } from 'frappe-ui'
+function register(config = { key: 's', ctrl: true, handler: save }) {
+	useShortcut(config)
+}
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+  })
+
+  it('says nothing about a type declaration or a destructure it cannot migrate', () => {
+    // Neither carries a value, so neither is a config, and a refusal on either
+    // could never be cleared. Each file below renames, so silence here is the
+    // whole test.
+    const sources = [
+      'type Legacy = { key: string, handler: () => void }',
+      'function register({ key, handler }: ShortcutLike) { bind(key, handler) }',
+      'for (const { key, handler } of list) { bind(key, handler) }',
+      'const [{ key, handler }] = rows',
+      'const fn = ({ key, handler }: Cfg): void => { bind(key, handler) }',
+    ]
+
+    for (const line of sources) {
+      const source = `import { useShortcut } from 'frappe-ui'\n${line}\nuseShortcut({ combo: 'Mod+K', handler: open })\n`
+      const { refusals, notes } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect({ line, refusals, notes }).toEqual({ line, refusals: [], notes: [] })
+    }
+  })
+
   it('says nothing about a binding pattern that reads like a config', () => {
     // `const { key, ctrl } = config` is not an object, and no edit could ever
     // clear a refusal on one.
