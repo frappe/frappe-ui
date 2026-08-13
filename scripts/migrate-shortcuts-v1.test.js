@@ -712,6 +712,18 @@ useShortcut([
     expect(refusals[0].message).toContain('Delete `ctrl` with the `key`.')
   })
 
+  it('names a flag set to false on a site nothing proves', () => {
+    // The printed line is the whole product here: the run writes nothing on
+    // this object, so a name missing from it is a property left in the file.
+    const source = `import { useShortcut } from 'frappe-ui'
+const rows = [{ key: '=', ctrl: false, shift: true, handler: zoomIn }]
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals[0].message).toContain('Delete `ctrl` and `shift` with the `key`.')
+  })
+
   it('refuses an object that carries both key and combo', () => {
     // The author's own combo is the one a second `combo` hides, so the run
     // never writes one beside it.

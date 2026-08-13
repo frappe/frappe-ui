@@ -1139,8 +1139,12 @@ function convertObject(source, mask, range, ctx) {
     for (const name of MODIFIER_PROPS) {
       const value = byName.get(name)?.value.trim()
       if (value === undefined) continue
-      if (value === 'true') flags[name] = true
-      else if (value !== 'false') conditional ??= `${name}: ${value}`
+      // A flag set to `false` is not held, and it is still a property v1 has no
+      // name for. Recording it keeps it in the list of names to delete, which
+      // the converting path prints and this one used to leave out — on a site
+      // nothing proves, the printed line is the whole product.
+      if (value === 'true' || value === 'false') flags[name] = value === 'true'
+      else conditional ??= `${name}: ${value}`
     }
     // A `key` string beside a callback is as far as this goes without proof.
     // A modifier is not part of the test: `{ key: 'escape', handler: close }`
