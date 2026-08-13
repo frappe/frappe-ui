@@ -60,9 +60,9 @@ Migration: [`KeyboardShortcutsModal`](/docs/migration#keyboardshortcutsmodal-is-
 ### KeyboardShortcut — one combo vocabulary, and `data-slot` hooks (breaking, silent)
 
 The root, each key, the `+` separators and the alternative combos carry a
-`data-slot`; the root also carries `data-bg`. Style through those instead
-of a class prop (P10). The parser also reads the key names a combo uses, so
-`Digit1` renders `1` and `Slash` renders `/`.
+`data-slot`; the root also carries `data-bg` when `bg` is set. Style through
+those instead of a class prop (P10). The parser also reads the key names a
+combo uses, so `Digit1` renders `1` and `Slash` renders `/`.
 
 `combo` now reads the one grammar `useKeyboardShortcut` fires on. The older
 display-only spellings are gone, because a chip for a combo that can never fire

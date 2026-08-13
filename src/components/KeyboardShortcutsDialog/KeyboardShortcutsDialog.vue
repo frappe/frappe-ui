@@ -115,7 +115,7 @@ const props = withDefaults(defineProps<KeyboardShortcutsDialogProps>(), {
 })
 
 defineSlots<{
-  /** Replaces the default grid. Receives the grouped, enabled shortcuts. */
+  /** Replaces the default grid. Receives the grouped, enabled shortcuts the search leaves. */
   default?: (props: { groups: KeyboardShortcutGroup[] }) => any
 }>()
 

@@ -9,9 +9,9 @@ const readOnly = ref(false)
 // shortcut inert and hides its row, so read-only mode drops the editing group.
 // "Redo" is registered twice and renders as one row with two combos.
 //
-// This story runs inside the docs page, not in a frame. Every row below has an
-// empty handler, so each one keeps `preventDefault: false` and leaves the
-// browser's own Save, Undo and Zoom shortcuts working for the reader.
+// This story runs inside the docs page, not in a frame. Every row that does
+// nothing sets `preventDefault: false`, so the browser's own Save, Undo and
+// Zoom shortcuts keep working for the reader.
 useKeyboardShortcut([
   {
     combo: 'Mod+Shift+Slash',

@@ -38,7 +38,7 @@
   const slotsData = [
   {
     name: 'default',
-    description: 'Replaces the default grid. Receives the grouped, enabled shortcuts.',
+    description: 'Replaces the default grid. Receives the grouped, enabled shortcuts the search leaves.',
     type: '{ groups: KeyboardShortcutGroup[]; }'
   }
 ]
