@@ -2727,7 +2727,13 @@ Each of these exits the run non-zero. Fix them by hand.
   and ignored Shift, so `{ key: 'S' }` fired on `s` and on Shift+S. v1 is
   exact. Write `S`, or `Shift+S`, or register both.
 - **A `key` that is not a plain string**, and a modifier flag that is not a
-  literal `true` / `false`. v1 has no conditional modifier.
+  literal `true` / `false`. v1 has no conditional modifier. A shorthand
+  property counts: `{ key, ctrl }` holds its values somewhere else, so the
+  combo cannot be built from the object.
+- **A spread, or a computed name the run cannot read, on a config it proved.**
+  `{ ...base, handler: save }` and `{ [Keys.SAVE]: 's' }` can carry a `key` or
+  a modifier that never reaches the run. Write the properties out, or convert
+  the object by hand.
 - **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted. Render
   `<KeyboardShortcut :combo="..." />` for the first. For the second, read the
   registry from the `<KeyboardShortcutsDialog>` default slot. Their types,
