@@ -72,7 +72,17 @@ describe('Dropdown', () => {
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[role=menu]').should('exist')
 
-    cy.get('[role=menuitem]').eq(1).should('contain.text', 'Delete').click()
+    cy.get('[role=menuitem]')
+      .eq(1)
+      .should('contain.text', 'Delete')
+      .within(() => {
+        // Danger rows use the same ink as the ghost red Button; ink-red-5
+        // is too dim against the dark-mode menu surface.
+        cy.get('.text-ink-red-7').should('exist')
+        cy.get('.lucide-trash-2').should('have.class', 'text-ink-red-7')
+      })
+
+    cy.get('[role=menuitem]').eq(1).click()
 
     cy.get('[role=menu]').should('not.exist')
   })
