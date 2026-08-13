@@ -72,6 +72,18 @@
     type: 'number'
   },
   {
+    name: 'xFormat',
+    description: 'Prints the x categories, i.e. the axis under the grid and the tooltip head.\nGiven the value the row carried, so a date column can read as `Mar 2024`.\nDisplay only: two categories printing alike stay two categories.',
+    required: false,
+    type: 'HeatmapCategoryFormatter'
+  },
+  {
+    name: 'yFormat',
+    description: 'As `xFormat`, for the axis beside the grid.',
+    required: false,
+    type: 'HeatmapCategoryFormatter'
+  },
+  {
     name: 'showValues',
     description: 'Prints each cell\'s value inside it. A label that would collide with its\nneighbour is dropped, so a grid too fine to carry numbers shows none.',
     required: false,

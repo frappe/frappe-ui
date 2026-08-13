@@ -289,6 +289,15 @@ export type FunnelStageEvent = {
  */
 export type HeatmapPalette = 'sequential' | 'diverging' | string[]
 
+/**
+ * Prints one category of the grid. Takes the value as the row carried it, not
+ * the string it reads as: a date column arrives as a Date or an ISO string, and
+ * turning that into `Mar 2024` needs the value rather than its `String()`.
+ *
+ * Display only. Two categories printing alike stay two categories.
+ */
+export type HeatmapCategoryFormatter = (value: any) => string
+
 export type HeatmapChartConfig = {
   /** One row per cell. Rows with no numeric value leave their cell undrawn. */
   data: Record<string, any>[]
@@ -310,6 +319,10 @@ export type HeatmapChartConfig = {
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
+  /** Prints the x categories: the axis under the grid, and the tooltip head. */
+  xFormat?: HeatmapCategoryFormatter
+  /** Prints the y categories: the axis beside the grid, and the tooltip head. */
+  yFormat?: HeatmapCategoryFormatter
   /**
    * Prints each cell's value inside it. Labels that would collide with a
    * neighbour are dropped, so a grid too fine to carry numbers shows none.
@@ -339,6 +352,15 @@ export type HeatmapMatrix = {
   xCategories: string[]
   /** Rows, in the order the rows first mention them. Drawn top to bottom. */
   yCategories: string[]
+  /**
+   * The value each x category was registered from, parallel to `xCategories`.
+   * A category is identified by the string it reads as, so this is what a
+   * formatter is given: the same category always carries the first value seen
+   * for it, whatever the later rows spell it as.
+   */
+  xValues: any[]
+  /** As `xValues`, for the rows of the grid. */
+  yValues: any[]
   cells: HeatmapCell[]
   /** Bottom of the color scale, config or data. */
   min: number
@@ -802,6 +824,14 @@ export type HeatmapChartProps = ChartBaseProps & {
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
+  /**
+   * Prints the x categories, i.e. the axis under the grid and the tooltip head.
+   * Given the value the row carried, so a date column can read as `Mar 2024`.
+   * Display only: two categories printing alike stay two categories.
+   */
+  xFormat?: HeatmapCategoryFormatter
+  /** As `xFormat`, for the axis beside the grid. */
+  yFormat?: HeatmapCategoryFormatter
   /**
    * Prints each cell's value inside it. A label that would collide with its
    * neighbour is dropped, so a grid too fine to carry numbers shows none.

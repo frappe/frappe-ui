@@ -12,6 +12,7 @@ import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
   ChartValueFormatter,
+  HeatmapCategoryFormatter,
   HeatmapCell,
   HeatmapChartConfig,
   HeatmapMatrix,
@@ -85,18 +86,25 @@ export function buildHeatmapMatrix(
   const rows = config.data ?? []
   const xCategories: string[] = []
   const yCategories: string[] = []
+  const xValues: any[] = []
+  const yValues: any[] = []
   const xIndexes = new Map<string, number>()
   const yIndexes = new Map<string, number>()
 
   const index = (
     label: string,
+    value: any,
     categories: string[],
+    values: any[],
     indexes: Map<string, number>,
   ) => {
     const existing = indexes.get(label)
     if (existing !== undefined) return existing
     const next = categories.length
     categories.push(label)
+    // Kept beside the label so a formatter gets the value the row carried. The
+    // first row to name a category is the one that supplies it.
+    values.push(value)
     indexes.set(label, next)
     return next
   }
@@ -112,8 +120,8 @@ export function buildHeatmapMatrix(
     const y = categoryLabel(row[config.yColumn])
     // Categories are registered even when the value is missing: an hour with no
     // orders is still an hour, and dropping its column would close the gap.
-    const xIndex = index(x, xCategories, xIndexes)
-    const yIndex = index(y, yCategories, yIndexes)
+    const xIndex = index(x, row[config.xColumn], xCategories, xValues, xIndexes)
+    const yIndex = index(y, row[config.yColumn], yCategories, yValues, yIndexes)
 
     const value = toNumber(row[config.valueColumn])
     if (value === null) continue
@@ -139,7 +147,7 @@ export function buildHeatmapMatrix(
     color: rampColor(stops, span > 0 ? (cell.value - min) / span : 1),
   }))
 
-  return { xCategories, yCategories, cells, min, max, stops }
+  return { xCategories, yCategories, xValues, yValues, cells, min, max, stops }
 }
 
 /**
@@ -217,6 +225,40 @@ function categoryLabel(value: any) {
     : String(value)
 }
 
+/**
+ * How one category reads. The formatter is handed the value the row carried,
+ * because the string the category is keyed by has already lost a Date.
+ *
+ * A blank category prints as the blank marker whatever the formatter does with
+ * it: `(Blank)` says the rows named no category, and a formatter reading a date
+ * out of `undefined` would say something worse.
+ */
+export function heatmapCategoryLabel(
+  format: HeatmapCategoryFormatter | undefined,
+  value: any,
+  fallback: string,
+): string {
+  if (!format || fallback === BLANK_CATEGORY) return fallback
+  return format(value)
+}
+
+/**
+ * The `axisLabel` keys that print a category, or none when no formatter was
+ * given — echarts prints the category itself, which is what it already did.
+ */
+function categoryLabelFormatter(
+  format: HeatmapCategoryFormatter | undefined,
+  values: any[],
+) {
+  if (!format) return {}
+  return {
+    // echarts hands a category axis its label and its index. The index is what
+    // reaches the value behind it, the label being all the axis itself knows.
+    formatter: (label: string, index: number) =>
+      heatmapCategoryLabel(format, values[index], label),
+  }
+}
+
 export function buildHeatmapOption(
   config: HeatmapChartConfig,
   context: HeatmapOptionContext,
@@ -260,6 +302,7 @@ export function buildHeatmapOption(
         margin: 8,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
+        ...categoryLabelFormatter(config.xFormat, matrix.xValues),
       },
     },
     yAxis: {
@@ -278,6 +321,7 @@ export function buildHeatmapOption(
         margin: 8,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
+        ...categoryLabelFormatter(config.yFormat, matrix.yValues),
       },
     },
     // Hidden: the ramp is explained by an HTML scale next to the plot. This one

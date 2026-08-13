@@ -412,3 +412,70 @@ describe('hoverCellColor', () => {
     expect(option.grid.outerBoundsContain).toBe('all')
   })
 })
+
+describe('printing the categories', () => {
+  const months = [
+    { month: new Date('2024-03-01'), team: 'Sales', deals: 4 },
+    { month: new Date('2024-01-01'), team: 'Sales', deals: 7 },
+  ]
+  const monthName = (value: Date) =>
+    value.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
+
+  it('keeps the value each category was registered from', () => {
+    const built = matrix({ data: months, xColumn: 'month', yColumn: 'team' })
+
+    expect(built.xValues).toEqual([months[0].month, months[1].month])
+    expect(built.yValues).toEqual(['Sales'])
+  })
+
+  it('prints an axis label from the value, not from the string it reads as', () => {
+    const option = build({
+      data: months,
+      xColumn: 'month',
+      yColumn: 'team',
+      xFormat: monthName,
+    })
+    const printed = option.xAxis.axisLabel.formatter
+
+    // The category itself is a stringified Date; the formatter never sees it.
+    expect(printed(String(months[0].month), 0)).toBe('Mar')
+    expect(printed(String(months[1].month), 1)).toBe('Jan')
+  })
+
+  it('leaves echarts to print the category when no formatter is given', () => {
+    expect(build().xAxis.axisLabel.formatter).toBeUndefined()
+    expect(build().yAxis.axisLabel.formatter).toBeUndefined()
+  })
+
+  it('prints each axis through its own formatter', () => {
+    const option = build({
+      xFormat: (value: string) => `at ${value}`,
+      yFormat: (value: string) => `on ${value}`,
+    })
+
+    expect(option.xAxis.axisLabel.formatter('8am', 0)).toBe('at 8am')
+    expect(option.yAxis.axisLabel.formatter('Mon', 0)).toBe('on Mon')
+  })
+
+  it('leaves the blank marker alone, whatever the formatter would make of it', () => {
+    const option = build({
+      data: [{ day: 'Mon', hour: null, orders: 3 }],
+      xFormat: (value: any) => `hour ${value}`,
+    })
+
+    expect(option.xAxis.axisLabel.formatter('(Blank)', 0)).toBe('(Blank)')
+  })
+
+  it('does not merge two categories that print alike', () => {
+    const built = matrix({
+      data: [
+        { day: 'Mon', hour: new Date('2024-03-01'), orders: 1 },
+        { day: 'Mon', hour: new Date('2025-03-01'), orders: 2 },
+      ],
+      xFormat: monthName,
+    })
+
+    expect(built.xCategories).toHaveLength(2)
+    expect(built.cells).toHaveLength(2)
+  })
+})

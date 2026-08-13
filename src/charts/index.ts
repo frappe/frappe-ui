@@ -105,6 +105,7 @@ export type {
   EchartOptionsOverride,
   FunnelStage,
   FunnelStageEvent,
+  HeatmapCategoryFormatter,
   HeatmapCellEvent,
   HeatmapPalette,
   NumberCardSparkline,
