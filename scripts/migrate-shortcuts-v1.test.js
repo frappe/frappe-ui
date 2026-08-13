@@ -1058,6 +1058,70 @@ useShortcut({ combo: 'Mod+K', handler: open })
     }
   })
 
+  it('ends a type declaration on its code, never on a comment', () => {
+    // `type Id = string // the id of a shortcut.` ends its line on prose. Read
+    // as the tail of the declaration, the `.` carried the type over the blank
+    // line and over the registration below it, and a proven site went silent
+    // in a file the run wrote. Every character `CONTINUES_BEFORE` accepts is
+    // an ordinary way to end a sentence, so each one is listed here.
+    const tails = [
+      'the id of a shortcut.',
+      'the id, registered,',
+      'note:',
+      'really?',
+      'either a or b |',
+      'a set of them &',
+      'see (below',
+      'less than <',
+      'and more +',
+      'the id of a shortcut',
+    ]
+
+    for (const tail of tails) {
+      const source = `import { useShortcut } from 'frappe-ui'\n\ntype ShortcutId = string // ${tail}\n\nuseShortcut({ key: 's', ctrl: true, handler: save })\n`
+      const { migrated, changes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect({ tail, changes: changes.length, refusals: refusals.length }).toEqual({
+        tail,
+        changes: 1,
+        refusals: 0,
+      })
+      expect(migrated).toContain("combo: 'Mod+S'")
+    }
+  })
+
+  it('reads the code under a type declaration a block comment follows', () => {
+    // The controls for the tail above: a block comment on the same line, and a
+    // `;` that ends the declaration whatever follows it.
+    const heads = [
+      'type ShortcutId = string /* the id of a shortcut. */',
+      'type ShortcutId = string; // the id of a shortcut.',
+      "type Combo =\n\t| 'Mod+S' // save.\n\t| 'Mod+K' // search.",
+    ]
+
+    for (const head of heads) {
+      const source = `import { useShortcut } from 'frappe-ui'\n${head}\nuseShortcut({ key: 's', ctrl: true, handler: save })\n`
+      const { changes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect({ head, changes: changes.length, refusals: refusals.length }).toEqual({
+        head,
+        changes: 1,
+        refusals: 0,
+      })
+    }
+  })
+
+  it('keeps reading a type a comment sits inside', () => {
+    // A comment must not end a declaration either. The `=` is still the tail
+    // of the first line, so the union below it is one declaration and every
+    // brace in it stays a shape.
+    const source = `import { useShortcut } from 'frappe-ui'\ntype Combo =\n\t// the two we ship.\n\t| { key: 's', handler: () => void }\n\t| { key: 'a', handler: () => void }\n\nuseShortcut({ key: 's', ctrl: true, handler: save })\n`
+    const { changes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(0)
+    expect(changes).toHaveLength(1)
+  })
+
   it('finds a config in a .vue template, where the renames already reach', () => {
     // A bound attribute and a mustache hold JS. Passing over one wrote the
     // file around a v0 config, which is the half migration refusals exist to

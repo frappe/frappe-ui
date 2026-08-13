@@ -831,7 +831,14 @@ const TYPE_DECLARATION = /\b(?:type|interface)\s+[A-Za-z_$][\w$]*/g
 //
 // A statement never opens with `|`, and a line that ends on `=` never closes a
 // declaration.
-const CONTINUES_BEFORE = /[=|&,(<+.:?]$/
+//
+// Both read code, never a comment. `type Id = string // the id of a shortcut.`
+// ends its line on a `.` that belongs to prose, and reading it as the tail of
+// the declaration carried the type over the blank line and over the
+// registration below it — a proven site inside a `useShortcut(...)` call, left
+// on v0 in a file the run wrote. So the tail is the last code character, and
+// the head is the next code character.
+const CONTINUES_BEFORE = /[=|&,(<+.:?]/
 const CONTINUES_AFTER = /^(?:[|&,)\]>+.:?[]|extends\b)/
 
 // The spans a file gives to type declarations. Every brace inside one is a
@@ -867,10 +874,11 @@ function typeDeclarationEnd(source, mask, at, to) {
     else if (c === '}' || c === ']' || c === ')') depth--
     else if (c === ';' && depth <= 0) return i
     else if (c === '\n' && depth <= 0) {
-      const line = source.slice(0, i).replace(/\s+$/, '')
+      const tail = codeBefore(source, mask, i)
+      if (tail >= at && CONTINUES_BEFORE.test(source[tail])) continue
       const next = codeAfter(source, mask, i)
-      if (CONTINUES_BEFORE.test(line) || CONTINUES_AFTER.test(source.slice(next, next + 8)))
-        continue
+      const head = blankComments(source, mask, next, next + 8, source.slice(next, next + 8))
+      if (CONTINUES_AFTER.test(head)) continue
       return i
     }
   }
