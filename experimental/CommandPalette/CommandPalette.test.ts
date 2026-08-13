@@ -354,6 +354,40 @@ describe('CommandPalette', () => {
     expect(onSelect.mock.calls[0][0]).toBe(rows[1])
   })
 
+  it('filters items that carry no `label` when it opens with a query', async () => {
+    // Regression: the filter reads the label off the mounted element, so an
+    // item that is hidden on its first render never gets measured and stays
+    // hidden for as long as the query lasts.
+    mount({ query: 'sett' })
+    await flush()
+    expect(labels()).toEqual(['Settings'])
+  })
+
+  it('filters items that arrive after mount, with a query already set', async () => {
+    const rows = ref([{ value: 'inbox', title: 'Inbox' }])
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(CommandPalette, { open: true, query: 'sett' }, () => [
+            h(CommandPaletteInput),
+            ...rows.value.map((row) =>
+              h(CommandPaletteItem, { value: row.value }, () => row.title),
+            ),
+          ])
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+    expect(labels()).toEqual([])
+
+    rows.value = [...rows.value, { value: 'settings', title: 'Settings' }]
+    await flush()
+    expect(labels()).toEqual(['Settings'])
+  })
+
   it('writes the typed text back through `update:query`', async () => {
     const { query } = mount()
     await nextTick()
