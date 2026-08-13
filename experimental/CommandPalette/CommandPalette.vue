@@ -75,7 +75,10 @@ const open = defineModel<boolean>('open', { default: false })
 /** The search text. Cleared when the palette closes. */
 const query = defineModel<string>('query', { default: '' })
 
-const listbox = useTemplateRef<{ highlightFirstItem: () => void }>('listbox')
+const listbox = useTemplateRef<{
+  highlightFirstItem: () => void
+  highlightedElement: HTMLElement | null
+}>('listbox')
 
 // `shallowRef`, so an object value comes back out of the slot props as the
 // object the caller passed in and not a reactive proxy of it.
@@ -154,6 +157,28 @@ watch(
     listbox.value?.highlightFirstItem()
   },
   { immediate: true },
+)
+
+// Reka holds its highlight on the row it last had, even once the filter has
+// unmounted that row, so the field keeps an `aria-activedescendant` naming an
+// id that has left the document. Now that the empty state is a live region,
+// that is two answers at once for a screen reader.
+//
+// `changeHighlight` refuses a null and nothing else reka exposes lets go of
+// the highlight, so this writes the exposed `highlightedElement` ref, which is
+// what reka's own pointer-leave handler does. Post-flush, so the rows have
+// gone by the time it runs. The watch above puts the highlight back on the
+// first row as soon as the query matches something again.
+watch(
+  empty,
+  (isEmpty) => {
+    if (!isEmpty || !listbox.value) return
+    listbox.value.highlightedElement = null
+    // Reka only emits `highlight` from `changeHighlight`, so the palette's own
+    // active value has to be let go of here too.
+    activeValue.value = undefined
+  },
+  { flush: 'post' },
 )
 
 const slotProps = computed<CommandPaletteSlotProps>(() => ({

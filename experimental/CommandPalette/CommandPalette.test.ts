@@ -237,6 +237,27 @@ describe('CommandPalette', () => {
     expect(empty.textContent?.trim()).toBe('No results')
   })
 
+  it('lets go of the highlight when the filter empties the list', async () => {
+    // Reka keeps the highlight on a row the filter has unmounted, so the field
+    // goes on pointing `aria-activedescendant` at an id that has left the
+    // document. axe grades that critical, and the empty state is announcing at
+    // the same time.
+    const { query } = mount()
+    await flush()
+    expect(input().getAttribute('aria-activedescendant')).toBe(items()[0].id)
+
+    query.value = 'zzz'
+    await flush()
+    expect(items()).toEqual([])
+    expect(input().getAttribute('aria-activedescendant')).toBeNull()
+
+    // The ordinary path still works: narrowing to one row highlights it.
+    query.value = 'settings'
+    await flush()
+    expect(labels()).toEqual(['Settings'])
+    expect(input().getAttribute('aria-activedescendant')).toBe(items()[0].id)
+  })
+
   it('emits `select` with the value and closes', async () => {
     const onSelect = vi.fn()
     const onUpdateOpen = vi.fn()
