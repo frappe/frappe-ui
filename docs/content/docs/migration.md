@@ -26,8 +26,10 @@ a word, so those are the ones that reach production. Each is marked.
 replacement needs explaining. If your build already names the file and the
 line, the changelog is the faster read.
 
-Only the Tailwind token renames have a codemod (`tokens-v2`, see
-[Tokens](#tokens)). Every component, prop and slot rename is a hand edit.
+Two changes have a codemod: the Tailwind token renames (`tokens-v2`, see
+[Tokens](#tokens)) and the shortcut config (`shortcuts-v1`, see
+[The shortcuts codemod](#the-shortcuts-codemod)). Every other component, prop
+and slot rename is a hand edit.
 
 ### Sections
 
@@ -35,7 +37,7 @@ Only the Tailwind token renames have a codemod (`tokens-v2`, see
 - **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
 - **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
-- **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [KeyboardShortcut](#keyboardshortcut)
+- **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
@@ -2578,6 +2580,9 @@ trigger paths stop. Register `Ctrl+S` as well if you need Control+S on a Mac.
 The grammar has no token for the Windows key, so Win+S cannot come back. Write
 `Ctrl` only where you mean Control on a Mac too.
 
+A combo spells its modifiers in one order, `Mod+Ctrl+Alt+Shift+<Key>`, and a
+letter uppercase. The type accepts no other spelling.
+
 ### Punctuation and digits take a key name
 
 `+` separates the parts of a combo, so it cannot also be a key. Name the key
@@ -2597,6 +2602,7 @@ instead:
 Digits and punctuation now match `event.code`, so `Mod+Shift+Digit1` fires on
 ⌘⇧1 and on ⌘⇧! alike. A punctuation name means the physical key position, as
 labelled on a US layout, so `Mod+Slash` fires on the same key everywhere.
+`Plus` is the keypad `+` alone, the key whose `event.code` is `NumpadAdd`.
 Letters and named keys still match `event.key`. The old US-layout heuristic
 that let `?` match without declaring Shift is gone: declare the Shift.
 
@@ -2662,6 +2668,234 @@ Two dialog behaviors are worth knowing before you diff its output:
   row. v0 merged only when the modifiers matched too, so rows that used to be
   separate now join.
 - A disabled shortcut has no row at all.
+
+## The shortcuts codemod
+
+`shortcuts-v1` applies both changes above for you. Run it from the app you are
+migrating:
+
+```sh
+npx --package frappe-ui@beta shortcuts-v1 --dry-run .
+```
+
+Review the output, then run it without `--dry-run`:
+
+```sh
+npx --package frappe-ui@beta shortcuts-v1 .
+```
+
+It renames `useShortcut`, `KeyboardShortcutsModal` and `ShortcutConfig`, folds
+`key` and the modifier flags into one `combo`, and renames `condition` to
+`enabled`. `description`, `group`, `handler`, `onHold`, `onRelease`,
+`preventDefault`, `allowInInput` and `allowInDialog` keep their names and their
+defaults. The codemod passes them through.
+
+The codemod exits non-zero when it refused a site, on a dry run too. A clean
+exit means a clean run. Re-running it is safe: a converted object has no `key`
+field left to convert, and a refusal repeats until you fix it.
+
+A file with a refused site stays exactly as it was, even when its other
+shortcuts converted. Half a migration puts a renamed call beside a config with
+no `combo`, and v1 throws on the first keypress. Fix the sites the run names,
+then run again and take the whole file at once.
+
+The same rule decides an object the codemod cannot prove is a config. In a file
+it would otherwise write, that object is a refusal and the file stays as it
+was. In a file with nothing else to change, it is advice, and the run exits
+zero. A file the run names is never written, whichever the line was.
+
+The codemod does not reflow the code it edits. Run your formatter after it.
+
+### What it rewrites
+
+The codemod rewrites an object in two places only:
+
+- Inside a `useShortcut(...)` or `useKeyboardShortcut(...)` call, where the
+  name is imported from `frappe-ui` in the same file.
+- Inside an array or object literal typed `ShortcutConfig` or
+  `KeyboardShortcutConfig`, where that type is imported from `frappe-ui`. An
+  annotation, a `satisfies` clause and an `as` cast all count.
+
+Both places name frappe-ui. Nothing else does.
+
+```ts
+import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+
+// Rewritten: the call is frappe-ui's.
+useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+
+// Rewritten: the annotation is frappe-ui's.
+const bindings: ShortcutConfig[] = [
+  { key: 'k', ctrl: true, description: 'Palette', handler: open },
+]
+
+// Rewritten: a clause after the literal names the same type.
+const save = { key: 's', ctrl: true, description: 'Save', handler: onSave } satisfies ShortcutConfig
+
+// Left alone: nothing here says frappe-ui.
+const menu = [{ key: 'delete', label: 'Delete', condition: canDelete, handler: remove }]
+```
+
+Field names alone are never evidence. `key`, `description`, `condition`,
+`group` and `handler` are frappe-ui's own option vocabulary too: a
+`ComboboxCustomOption` is `{ type, key, label, description, condition,
+onClick }` and a `ComboboxGroupedOption` is `{ key, group, hideLabel,
+options }`. An app that hands a config array to its own composable, or builds
+one with `.map()`, writes the same names for something else.
+
+The cost is a registration written away from its call and with no annotation.
+The codemod does not rewrite it. It names it instead, with the `combo` to
+write.
+
+```ts
+import { useShortcut } from 'frappe-ui'
+
+// Refused: the call renames, so writing this file would leave the array on v0.
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }]
+useShortcut(bindings)
+```
+
+Clear that line in one of three ways: write the `combo` by hand, annotate the
+array with frappe-ui's config type so the next run can prove it, or migrate the
+whole file by hand and leave the run nothing to write.
+
+Both type names count as proof. Write `ShortcutConfig[]` while the app is still
+on v0, which is where the codemod runs, and `KeyboardShortcutConfig[]` once you
+have bumped. A lone object takes the same name without the `[]`. Each refused
+line names the type for its own shape.
+
+### Punctuation keys are never converted
+
+This is the reason to run a codemod instead of a grep. `+` is both the combo
+separator and a key, so `{ key: '+', ctrl: true }` written by hand becomes
+`'Mod++'`, which splits into `['Mod', '', '']` and never fires. Nothing fails:
+the build passes, the types pass, and you get one dev-console warning that a
+production build drops.
+
+So the codemod stops on the site and prints the whole `combo` to write, with
+the modifier flags to delete beside the `key`:
+
+```
+✗ Not converted — 3 sites need a decision:
+  src/sheets/useShortcuts.js:L95  key '=' is punctuation ... Write `combo: 'Mod+Equal'` by hand. Delete `ctrl` with the `key`.
+  src/sheets/useShortcuts.js:L96  key '+' is a shifted character ... Write `combo: 'Mod+Shift+Equal'` by hand. Delete `ctrl` with the `key`.
+  src/Commands/index.ts:L196      key '?' is a shifted character ... Write `combo: 'Mod+Shift+Slash'` by hand. Delete `ctrl` with the `key`.
+```
+
+The combo carries the modifiers. A `ctrl: true` left beside a hand-written
+`combo` reaches v1 as an excess property, and no later run mentions it: with
+no `key` there is nothing left to refuse.
+
+The name each key takes is in
+[Punctuation and digits take a key name](#punctuation-and-digits-take-a-key-name).
+`Plus` is the trap: it is the keypad key alone, so `{ key: '+', ctrl: true }`
+becomes `'Mod+Shift+Equal'`. The codemod writes that whole combo on the line,
+because `Mod+Plus` would bind a key the user never presses and report a clean
+run.
+
+Write the `combo` the line gives you.
+
+### Combo reference
+
+Every key name a `combo` can hold is listed under
+[`combo` takes the key names the composable fires on](#combo-takes-the-key-names-the-composable-fires-on).
+A refused line points here when it cannot build the name for you.
+
+Take the name into `combo`, never back into `key`. `key` is the v0 field, and
+v0 compared it to `KeyboardEvent.key`, which reports none of those spellings. A
+v1 name left in `key` is still a v0 config, and the next run refuses it again.
+
+### Digits convert, and get listed
+
+`{ key: '1', ctrl: true, shift: true }` becomes `{ combo: 'Mod+Shift+Digit1' }`.
+A shifted digit (`!`, `@`, ...) now resolves to the same combo. That is a
+behaviour change, so the codemod lists every digit it touched under "Digit keys
+converted". Read each one.
+
+### What it reports but never rewrites
+
+Each of these exits the run non-zero. Fix them by hand.
+
+- **Punctuation and shifted characters.** See above.
+- **An uppercase key with no `shift: true`.** v0 matched the letter either way
+  and ignored Shift, so `{ key: 'S' }` fired on `s` and on Shift+S. v1 is
+  exact. Write `S`, or `Shift+S`, or register both.
+- **A `key` that is not a plain string**, and a modifier flag that is not a
+  literal `true` / `false`. v1 has no conditional modifier. A shorthand
+  property counts: `{ key, ctrl }` holds its values somewhere else, so the
+  combo cannot be built from the object.
+- **A spread, or a computed name the run cannot read, on a config it proved.**
+  `{ ...base, handler: save }` and `{ [Keys.SAVE]: 's' }` can carry a `key` or
+  a modifier that never reaches the run. Write the properties out, or convert
+  the object by hand.
+- **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted, and
+  their `ActiveShortcut` and `RegisteredShortcut` types go with them. See
+  [`formatShortcutLabel` and `getActiveShortcuts` are gone](#formatshortcutlabel-and-getactiveshortcuts-are-gone)
+  for what replaces each one. The codemod names all four wherever they appear,
+  comments included.
+- **A destructured `useShortcut(...)` return.** v1 returns void; cleanup
+  already runs on unmount.
+- **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both and v1 will not,
+  so the run cannot pick a side. To keep the hold, delete the `handler`. To
+  keep the press, delete `triggeredOn: 'hold'` and the hold callbacks with it.
+  See [Hold shortcuts](#hold-shortcuts).
+- **`onHold` or `onRelease` without `triggeredOn: 'hold'`.** v0 gated both on
+  `'hold'`, so the callback never fired. In v1 the callback itself selects hold
+  mode, so it starts firing. Delete it, or add `triggeredOn: 'hold'` to keep it
+  on purpose — the next run converts that pair.
+- **A `vi.mock('frappe-ui', ...)` keyed on `useShortcut`.** The file is left
+  alone: the captured configs carry `key` / `ctrl` and the assertions read
+  them. Rename the mock key, write the combos and move the assertions by hand.
+- **An object that reads like a config, where the run cannot prove it, in a
+  file it would otherwise write.** A `key` string beside a `handler` or a
+  `condition` is enough to name it, with or without a modifier. See "What it
+  rewrites".
+
+### What it lists without failing the run
+
+None of these fails the run. Read them and decide if the code wants a rewrite.
+
+- **Every digit it converted.** See above.
+- **A v0 key spelling that never matched**, such as `'esc'`, `'up'`,
+  `'spacebar'` or `'space'`. v0 compared `event.key`, which never reports
+  those, so the shortcut never fired. The combo does fire, so the shortcut is
+  live now. `'space'` is on the list because `event.key` gives `' '` for the
+  space bar; `Space` is that key's `event.code`.
+- **An object that reads like a config, in a place the run cannot prove, in a
+  file with nothing else to change.** The line gives the `combo` to write. Take
+  it if the object is a registration: v1 throws on a config with no `combo`. An
+  object that carries an option-only name, such as `label`, `options`,
+  `onClick` or `type`, is never listed, and neither is one your own composable
+  receives.
+- **Your own `useShortcut` or `ShortcutConfig`**, imported from your module or
+  declared in the file. That name is left as it is, and the rest of the file
+  still migrates.
+- **A possible hand-rolled hold**: a shortcut registration and a manual
+  `keyup` listener in the same file. The pair may fold into one registration,
+  as [Hold shortcuts](#hold-shortcuts) describes. Only you can say which half
+  is which. This is a guess: an unrelated `keyup` listener matches too, and no
+  edit would clear it, so it never fails the run.
+
+### It never renames your own composable
+
+`useShortcut` is renamed only where the file imports it from the `frappe-ui`
+barrel. A fork imported from your own module, or declared in the same file,
+keeps its name, and the run says so and moves on. helpdesk ships a
+`useShortcut` of its own in `composables/shortcuts.ts`; every page that uses
+that one is left as it is. crm, lms and suite each ship a local
+`useKeyboardShortcuts`, one character from the new name; those are untouched
+too.
+
+A fork silences its own calls, not the whole file. A `useKeyboardShortcut(...)`
+imported from `frappe-ui` a few lines below your own `useShortcut` still
+converts, and the objects your composable receives are still left alone.
+
+A rename also stays inside code. A name in a string, a module specifier or a
+comment keeps its spelling. In a `.vue` template only three places rename: the
+tag, a bound attribute value such as `:is="..."`, and a mustache. A bound value
+and a mustache hold an expression, so a reference in one migrates and a quoted
+string in one does not. `class="useShortcut"`, `{{ 'useShortcut' }}` and
+template prose all stay as they are.
 
 ## KeyboardShortcut
 
@@ -2850,9 +3084,11 @@ the token vocabulary moved: removed radius aliases and the shifted ink scales
 emit no CSS at all, with no build or type error. Run the
 [token codemod](#tokens) before you audit anything by hand.
 
-**Do I have to run the codemod?** Yes, if you use Tailwind utilities from the
-frappe-ui preset. It is the only mechanical step in this guide — every
-component, prop and slot rename is a hand edit.
+**Do I have to run the codemods?** Run `tokens-v2` if you use Tailwind
+utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
+keyboard shortcuts — it also catches the punctuation keys that a hand
+migration breaks in silence. These two are the mechanical steps in this
+guide; every component, prop and slot rename is a hand edit.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
