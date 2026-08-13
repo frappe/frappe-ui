@@ -1053,6 +1053,16 @@ function convertObject(source, mask, range, ctx) {
 
   if (condition && byName.has('enabled')) return refuseDoubleEnabled()
 
+  // The same door for `key` beside `combo`. Writing the combo would write the
+  // name twice, and the author's own combo is the one the later property
+  // hides — the refusals ask for a `combo` by hand, so a half-done edit lands
+  // here as often as a hand-written combo does.
+  if (byName.has('combo')) {
+    return refuse(
+      'this object carries `key` and `combo`. Converting the `key` would write `combo` twice — keep the combo you want and delete the `key` and its modifiers by hand.',
+    )
+  }
+
   // A property with no readable name. A spread and a computed name both land
   // here, and each needs its own words: the reader has to find the thing the
   // message names.

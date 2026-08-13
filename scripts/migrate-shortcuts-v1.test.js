@@ -687,6 +687,17 @@ useShortcut([
     expect(refusals[0].message).toContain('would write `enabled` twice')
   })
 
+  it('refuses an object that carries both key and combo', () => {
+    // The author's own combo is the one a second `combo` hides, so the run
+    // never writes one beside it.
+    const { migrated, refusals } = migrateShortcuts(
+      inCall("{ combo: 'Mod+Shift+K', key: 'k', ctrl: true, handler: open }"),
+    )
+
+    expect(migrated).toContain("{ combo: 'Mod+Shift+K', key: 'k', ctrl: true, handler: open }")
+    expect(refusals[0].message).toContain('would write `combo` twice')
+  })
+
   it('leaves a destructured condition alone', () => {
     const source = 'const { condition, handler } = props\n'
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
