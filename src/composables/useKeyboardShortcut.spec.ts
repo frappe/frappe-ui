@@ -5,6 +5,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, nextTick, ref } from 'vue'
 import {
+  _resetComboWarnings,
+  parseCombo as parseComboForDisplay,
+} from '../components/KeyboardShortcut/combo'
+import {
+  _keyboardShortcutKeyNames,
   _resetKeyboardShortcutWarnings,
   getShortcutGroups,
   matchesCombo,
@@ -832,5 +837,34 @@ describe('getShortcutGroups', () => {
     expect(cuts).toHaveLength(2)
 
     unmount()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The key vocabulary and the display grammar stay in step
+// ---------------------------------------------------------------------------
+
+describe('every key that fires is a key that draws', () => {
+  it('draws every key name in the vocabulary, none as a raw token', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    _resetComboWarnings()
+
+    // `KeyboardShortcut` warns and prints the token as written when it meets a
+    // name its own table misses, so one warning here means the two tables have
+    // drifted: the key fires but the chip cannot draw it.
+    for (const key of _keyboardShortcutKeyNames) {
+      const parts = parseComboForDisplay(`Mod+Shift+${key}`, false)
+      expect(
+        parts.map((p) => p.type),
+        key,
+      ).toEqual(['ctrl', 'shift', 'key'])
+    }
+
+    expect(
+      warn.mock.calls.map(([message]) => message),
+      'key names the display grammar does not know',
+    ).toEqual([])
+
+    warn.mockRestore()
   })
 })

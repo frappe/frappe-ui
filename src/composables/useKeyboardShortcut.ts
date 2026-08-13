@@ -116,6 +116,16 @@ export type KeyboardShortcutKey =
   | KeyboardShortcutNamedKey
   | KeyboardShortcutCodedKey
 
+/**
+ * @internal Exported for unit tests only: every key name a combo accepts, so a
+ * test can walk them through the display grammar in
+ * `components/KeyboardShortcut/combo.ts` and catch the two tables drifting.
+ */
+export const _keyboardShortcutKeyNames = [
+  ...Object.keys(KEYS_BY_EVENT_KEY),
+  ...Object.keys(KEYS_BY_EVENT_CODE),
+] as KeyboardShortcutKey[]
+
 type ModPrefix = '' | 'Mod+'
 type CtrlPrefix = '' | 'Ctrl+'
 type AltPrefix = '' | 'Alt+'
