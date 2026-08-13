@@ -39,7 +39,7 @@ Frappe UI is built on top of the following amazing projects &ndash;
 
 - [Vue 3](https://vuejs.org)
 - [TailwindCSS](https://tailwindcss.com)
-- [Headless UI](https://headlessui.com)
+- [Reka UI](https://reka-ui.com)
 - [PopperJS](https://popper.js.org/)
 - [TipTap](https://tiptap.dev)
 - [Feather Icons](https://feathericons.com)

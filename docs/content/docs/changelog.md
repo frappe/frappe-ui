@@ -9,6 +9,42 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
+
+`CommandPalette` and `CommandPaletteItem` leave the root export. The family is
+rebuilt as seven composable parts — `CommandPalette`, `CommandPaletteInput`,
+`CommandPaletteList`, `CommandPaletteGroup`, `CommandPaletteItem`,
+`CommandPaletteEmpty` and `CommandPaletteFooter` — in `frappe-ui/experimental`
+(P14 — no stability promise). It stays there until gameplan, helpdesk and this
+site all run on it.
+
+Four apps forked the old palette rather than use it, because it had one shape
+and no filtering. The parts fit all four.
+
+- **Breaking, loud:** `import { CommandPalette } from 'frappe-ui'` fails to
+  resolve.
+- **Breaking:** the `groups` prop is gone. Groups and items are markup now, so
+  a group renders whatever it needs without a `component` escape hatch.
+- **Breaking:** `select` carries the value and the click that picked it. Call
+  `event.preventDefault()` to keep the palette open.
+- **Behavior change:** the palette filters against the query. The old one
+  rendered `groups` as given and left filtering to the caller. `filterable`
+  (default `true`) turns it off for server search, the same word `Combobox` and
+  `MultiSelect` use (ADR-0009).
+- **Breaking:** `Mod+K` moves to the caller. The old component registered it
+  itself and skipped it whenever a rich-text editor had focus, hardcoding
+  knowledge of the editor into the palette.
+- Every part stamps `data-slot`. An item stamps `data-state="active"` and
+  `data-disabled`, and hands `active` and `disabled` to its slots.
+- Rows go inside `CommandPaletteList`, the only part that scrolls. A list may
+  own rows and groups and nothing else, so the field, the empty state and the
+  footer are its siblings.
+- `@headlessui/vue` leaves `dependencies` with it. The palette was its last
+  import in the library.
+
+Before/after for each break is in the
+[migration guide](/docs/migration#commandpalette).
+
 ### `useShortcut` renamed to `useKeyboardShortcut`, config reshaped (breaking; loud in TS, silent in JS)
 
 The import fails to resolve, so the rename itself is loud. The config is the
@@ -350,16 +386,6 @@ which P2 says new components do not inherit. `v-model:tab` is unchanged.
 the dialog never opens. See the
 [migration guide](/docs/migration#settingsdialog).
 
-### CommandPalette — `searchQuery` renamed to `query` (breaking, silent)
-
-`v-model:searchQuery` → `v-model:query`, and `update:searchQuery` →
-`update:query` (#1054). `Combobox` and `MultiSelect` already bind the
-controlled search text as `v-model:query`; one concept gets one name (P1).
-
-**Silent break:** the unknown `searchQuery` prop is accepted, so the palette
-holds its own query and your binding never updates. See the
-[migration guide](/docs/migration#commandpalette).
-
 ### Dialog — `theme: 'yellow'` renamed to `'amber'` (breaking, silent)
 
 `DialogTheme` held the library's last `yellow` (#1054). `Alert`, `SidebarCard`,
@@ -477,18 +503,6 @@ pages as one request, then restores it. `hasPreviousPage` was computed
 while `start` was still `0` and never recomputed after the restore, so it
 stayed `false` even when `start` was back above `0`. `reload()` now
 recomputes `hasPreviousPage` after restoring `start`.
-
-### CommandPalette — `show` renamed to `open` (breaking, silent)
-
-`show` → `open`, matching the rest of the library's overlay vocabulary
-(`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
-error, so the palette just never opens — grep for `CommandPalette` and
-`v-model:show` after upgrading. `Mod+K` now opens the palette on its own
-(registered internally via `useKeyboardShortcut`); delete any app-level keydown
-listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
-gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
-`string | Component` (lucide class strings, emoji, or a component) instead of
-components only.
 
 ### KeyboardShortcut — deprecated `shortcut` and unused modifier props removed (breaking)
 

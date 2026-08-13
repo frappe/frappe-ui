@@ -24,7 +24,7 @@ In 2019, I began building [Frappe Books](https://github.com/frappe/books) which 
 ### Under the Hood
 
 - [TailwindCSS](https://github.com/tailwindlabs/tailwindcss): Utility first CSS Framework to build design system based UI.
-- [Headless UI](https://github.com/tailwindlabs/headlessui): Unstyled and accessible UI components.
+- [Reka UI](https://github.com/unovue/reka-ui): Unstyled and accessible UI primitives.
 - [TipTap](https://github.com/ueberdosis/tiptap): ProseMirror based rich-text editor with a Vue API.
 - [dayjs](https://github.com/iamkun/dayjs): Minimal javascript library for working with dates.
 
