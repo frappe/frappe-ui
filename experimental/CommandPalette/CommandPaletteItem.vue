@@ -98,6 +98,10 @@ const filterText = computed(() => props.label ?? renderedText.value)
 const visible = computed(() => {
   if (!palette) return true
   if (!palette.filterable.value) return true
+  // Nothing to filter on yet. The label is measured off the mounted element,
+  // so an item that opens with a query already typed has to render once
+  // before it can know its own text. Hiding it first would keep it hidden.
+  if (!filterText.value) return true
   return palette.matches(filterText.value, props.keywords ?? [])
 })
 
