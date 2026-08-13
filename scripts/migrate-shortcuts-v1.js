@@ -1450,7 +1450,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     refusals.push({
       line: lineAt(content, b.index),
       message:
-        "this mocks the 'frappe-ui' barrel. The mock key is renamed, but the captured configs still carry `key`/`ctrl` — update the assertions with the registrations.",
+        "this mocks the 'frappe-ui' barrel. The file is left alone, because the captured configs carry `key`/`ctrl` and the assertions read them. Migrate it by hand: rename the mock key, write the combos, and move the assertions with them.",
     })
   }
 

@@ -1381,6 +1381,10 @@ vi.mock('frappe-ui', () => ({ useShortcut: (configs) => registered.push(configs)
 
     expect(migrated).toContain('useKeyboardShortcut: (configs)')
     expect(refusals.some((r) => r.message.includes("mocks the 'frappe-ui' barrel"))).toBe(true)
+    // A refused file is never written, so the message must not tell the author
+    // the mock key was renamed for them.
+    expect(refusals[0].message).not.toContain('The mock key is renamed')
+    expect(refusals[0].message).toContain('left alone')
   })
 })
 
