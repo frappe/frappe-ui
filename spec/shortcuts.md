@@ -45,7 +45,8 @@ A key is named, never written as the character it types:
 | Punctuation   | `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight`                         |
 
 Punctuation must be named because the separator is the `+` character. `'Mod++'`
-splits into `['Mod', '', '']`, matches nothing, and fails silently. There is no
+splits into `['Mod', '', '']` and matches nothing. Both halves warn about the
+empty parts in development, so it fails loudly rather than silently. There is no
 escape syntax and no second separator: one grammar, one spelling per key.
 
 `Plus` is the keypad `+`. The `+` a normal keyboard types with Shift is
