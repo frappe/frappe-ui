@@ -44,6 +44,13 @@ const CELL_RADIUS = 2
 const BLANK_CATEGORY = '(Blank)'
 
 /**
+ * How far an axis holds its labels off the grid, in px. Exported because the
+ * ramp scale beside the plot is held off the axis line by the same gap, and two
+ * copies of the number would drift.
+ */
+export const AXIS_LABEL_MARGIN = 8
+
+/**
  * How much OKLCH lightness a hovered cell gains. Enough to separate it from its
  * neighbours, small enough that it still reads as its own value on the ramp.
  */
@@ -299,7 +306,7 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
         ...categoryLabelFormatter(config.xFormat, matrix.xValues),
@@ -318,7 +325,7 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
         ...categoryLabelFormatter(config.yFormat, matrix.yValues),

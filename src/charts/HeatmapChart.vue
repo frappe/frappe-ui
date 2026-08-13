@@ -19,14 +19,63 @@
     <template v-if="$slots.empty" #empty><slot name="empty" /></template>
 
     <template #default>
-      <div
-        ref="plotEl"
-        class="h-full w-full rounded-2 focus-visible:focus-ring"
-        dir="ltr"
-        role="img"
-        :aria-label="chartAriaLabel(title, subtitle)"
-        v-bind="plotAttrs"
-      />
+      <!-- The scale stands beside the plot rather than under it: a continuous
+           ramp is a scale, and a grid's own scale reads down the side of it the
+           way the value axis of an axis chart does. It sits after the plot, and
+           before it in RTL, so it lands opposite the category axis either way.
+           -->
+      <div class="flex h-full w-full" :class="{ 'flex-row-reverse': isRTL }">
+        <div
+          ref="plotEl"
+          class="min-w-0 flex-1 rounded-2 focus-visible:focus-ring"
+          dir="ltr"
+          role="img"
+          :aria-label="chartAriaLabel(title, subtitle)"
+          v-bind="plotAttrs"
+        />
+
+        <!--
+          The ends line up with the grid's own furniture: the foot of the ramp
+          on the axis line, `min` in the row of x-axis labels reading as one of
+          them. Both come out of `xLabelRowHeight` — the one thing about the
+          plot that CSS cannot know, because echarts decides how much room the
+          x labels need and reserves it inside the plot box.
+        -->
+        <!--
+          `text-2xs` is `AXIS_LABEL_FONT_SIZE` as a class: 11px, and tight,
+          because these are single-line micro-labels rather than paragraphs.
+          `min` sits in the row of x-axis labels and reads as one of them, so
+          the 12px caption token it used to take read as a mistake rather than
+          as a difference in rank — and its 1.6 line-height made the label box
+          taller than the row echarts had reserved for it.
+        -->
+        <div class="ms-2 flex shrink-0 flex-col items-center justify-end">
+          <span class="text-2xs tabular-nums text-ink-gray-5">
+            {{ scale.max }}
+          </span>
+          <!-- Grows into the room it has and stops: a ramp as tall as the card
+               reads as a second column of data rather than as a key to one. -->
+          <span
+            class="mt-2 max-h-20 w-2 flex-1 rounded-1"
+            :style="{ backgroundImage: scale.gradient }"
+          />
+          <!-- Holds the whole label row below the axis line, so `min` starts
+               where an x-axis label starts. -->
+          <span
+            class="text-2xs tabular-nums text-ink-gray-5"
+            :style="{
+              marginTop: `${AXIS_LABEL_MARGIN}px`,
+              // Its own height until the plot has been laid out once, so the
+              // first frame reads as a label rather than as a collapsed box.
+              height: xLabelRowHeight
+                ? `${Math.max(xLabelRowHeight - AXIS_LABEL_MARGIN, 0)}px`
+                : undefined,
+            }"
+          >
+            {{ scale.min }}
+          </span>
+        </div>
+      </div>
 
       <!-- The tooltip hangs off the pointer, which a reader walking the grid
            with the arrow keys has not got. The same reading in text. -->
@@ -46,22 +95,6 @@
       </ChartTooltip>
     </template>
 
-    <!-- A continuous ramp has no entries to switch on and off, so the scale
-         itself stands in for the legend. -->
-    <template #legend>
-      <div class="flex items-center justify-end gap-2">
-        <span class="text-p-xs tabular-nums text-ink-gray-5">
-          {{ scale.min }}
-        </span>
-        <span
-          class="h-2 w-20 rounded-1"
-          :style="{ backgroundImage: scale.gradient }"
-        />
-        <span class="text-p-xs tabular-nums text-ink-gray-5">
-          {{ scale.max }}
-        </span>
-      </div>
-    </template>
   </ChartContainer>
 </template>
 
@@ -73,6 +106,7 @@ import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
+  AXIS_LABEL_MARGIN,
   buildHeatmapMatrix,
   buildHeatmapOption,
   heatmapCategoryLabel,
@@ -110,6 +144,7 @@ defineSlots<HeatmapChartSlots>()
 const plotEl = ref<HTMLElement>()
 
 const dir = computed(() => props.dir ?? documentDir())
+const isRTL = computed(() => dir.value === 'rtl')
 
 const config = computed<HeatmapChartConfig>(() => ({
   data: props.data,
@@ -166,10 +201,40 @@ const tooltip = reactive({
   items: [] as ChartTooltipItem[],
 })
 
+/**
+ * How much of the plot box sits below the axis line: the row echarts reserved
+ * for the x-axis labels, in px.
+ *
+ * The scale beside the plot is DOM and the grid is canvas, so the one number
+ * that ties them together has to be read off the laid-out chart — echarts sizes
+ * that row from the labels themselves, and it changes with the text, the font
+ * and the width. Read after every render, because all three can change without
+ * the data doing so.
+ */
+const xLabelRowHeight = ref(0)
+
+function measureXLabelRow() {
+  const grid = (chart.value as any)
+    ?.getModel?.()
+    ?.getComponent?.('grid', 0)
+    ?.coordinateSystem?.getRect?.()
+  if (!grid || !chart.value) return
+
+  const below = chart.value.getHeight() - (grid.y + grid.height)
+  // Guarded against a re-render loop: the scale's width comes from its labels,
+  // so writing this on every frame would re-lay the plot that produced it.
+  if (Number.isFinite(below) && Math.abs(below - xLabelRowHeight.value) > 0.5) {
+    xLabelRowHeight.value = below
+  }
+}
+
 const { chart, dispatch } = useChart({
   container: plotEl,
   option: () => built.value.option,
   events: {
+    // Fires once the plot has finished laying out, which is the first moment
+    // the grid rect means anything, and again after every resize and re-render.
+    finished: () => measureXLabelRow(),
     mouseover: (params: any) => showTooltip(params.dataIndex),
     mouseout: () => (tooltip.open = false),
     click: (params: any) => {
@@ -323,14 +388,13 @@ const plotAttrs = keyboard.attrs
 /** The ramp scale in the chrome, painted from the stops the cells came from. */
 const scale = computed(() => {
   const { min, max, stops } = matrix.value
-  const sampled = sampleRamp(stops)
-  // The labels swap sides with the flex row in RTL, so the ramp has to swap
-  // with them — otherwise the low end would sit against the high label.
-  const towards = dir.value === 'rtl' ? 'left' : 'right'
   return {
     min: shorten(min),
     max: shorten(max),
-    gradient: `linear-gradient(to ${towards}, ${sampled.join(', ')})`,
+    // Upright, low end at the foot. The labels sit above and below the ramp
+    // rather than either side of it, so this reads the same in both directions
+    // and RTL has nothing to flip.
+    gradient: `linear-gradient(to top, ${sampleRamp(stops).join(', ')})`,
   }
 })
 

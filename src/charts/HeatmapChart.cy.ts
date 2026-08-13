@@ -67,12 +67,14 @@ describe('HeatmapChart', () => {
     })
   })
 
-  it('stands the scale in for a legend, ends labelled', () => {
+  it('stands the scale beside the plot, ends labelled', () => {
     mountChart()
     cy.get('[data-slot="chart-container"]')
       .should('contain.text', '2')
       .and('contain.text', '8')
-    cy.get('[data-slot="chart-legend"] button').should('not.exist')
+    // A continuous ramp has no entries to switch on and off, so the scale
+    // stands in for the legend and the legend row is never drawn at all.
+    cy.get('[data-slot="chart-legend"]').should('not.exist')
   })
 
   it('takes the ends of the scale from the props', () => {
