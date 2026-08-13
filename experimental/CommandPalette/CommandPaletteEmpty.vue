@@ -1,10 +1,20 @@
 <template>
-  <div
-    v-if="empty"
-    data-slot="command-palette-empty"
-    class="px-4.5 py-8 text-center text-base text-ink-gray-6"
-  >
-    <slot v-bind="slotProps">No results for "{{ slotProps.query }}"</slot>
+  <!--
+    The region is mounted whether or not it holds a message. The focus never
+    leaves the field, and the message is not a row the keyboard can reach, so
+    a screen reader only hears it as a live region. A region that appears
+    together with its first message is announced by some readers and not by
+    others.
+  -->
+  <div role="status">
+    <div
+      v-if="empty"
+      v-bind="$attrs"
+      data-slot="command-palette-empty"
+      class="px-4.5 py-8 text-center text-base text-ink-gray-6"
+    >
+      <slot v-bind="slotProps">No results for "{{ slotProps.query }}"</slot>
+    </div>
   </div>
 </template>
 
@@ -13,7 +23,7 @@ import { computed } from 'vue'
 import { useCommandPaletteContext } from './context'
 import type { CommandPaletteEmptySlotProps } from './types'
 
-defineOptions({ name: 'CommandPaletteEmpty' })
+defineOptions({ name: 'CommandPaletteEmpty', inheritAttrs: false })
 
 defineSlots<{
   /** The message. Receives the query so it can quote what the user typed. */

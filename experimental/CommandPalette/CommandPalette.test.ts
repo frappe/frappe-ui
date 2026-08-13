@@ -209,6 +209,9 @@ describe('CommandPalette', () => {
     ) as HTMLElement
     expect(empty).not.toBeNull()
     expect(empty.textContent).toContain('zzz')
+    // The message is not a row and the focus stays in the field, so a live
+    // region is the only way it reaches a screen reader.
+    expect(empty.closest('[role="status"]')).not.toBeNull()
   })
 
   it('emits `select` with the value and closes', async () => {
