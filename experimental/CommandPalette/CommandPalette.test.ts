@@ -429,6 +429,48 @@ describe('CommandPalette', () => {
     expect(labels()).toEqual(['Settings'])
   })
 
+  it('leaves no row marked selected when the handler keeps it open', async () => {
+    // `preventDefault` is how a handler keeps the palette open, and it is also
+    // how reka is told not to record the pick, so no row can end up selected
+    // while the palette is on screen. `active` is the only row state there is.
+    const rows = [{ title: 'One' }, { title: 'Two' }]
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(
+            CommandPalette,
+            {
+              open: true,
+              onSelect: (_v: any, e: CustomEvent) => e.preventDefault(),
+            },
+            () => [
+              h(CommandPaletteInput),
+              h(CommandPaletteList, () =>
+                rows.map((row) =>
+                  h(CommandPaletteItem, { value: row }, () => row.title),
+                ),
+              ),
+            ],
+          )
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+    items()[1].click()
+    await flush()
+    expect(items().map((item) => item.getAttribute('aria-selected'))).toEqual([
+      'false',
+      'false',
+    ])
+    expect(items().map((item) => item.getAttribute('data-state'))).toEqual([
+      'active',
+      null,
+    ])
+  })
+
   it('writes the typed text back through `update:query`', async () => {
     const { query } = mount()
     await nextTick()

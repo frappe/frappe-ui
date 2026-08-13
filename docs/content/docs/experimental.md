@@ -30,7 +30,7 @@ it is likely to move:
 | [`Calendar`](#calendar) | Parked | A redesigned calendar family |
 | [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
 | [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
-| [`CommandPalette`](#commandpalette) | Parked | gameplan, helpdesk and this site running on it |
+| [`CommandPalette`](#commandpalette) | Incubating | gameplan, helpdesk and this site running on it |
 | [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |

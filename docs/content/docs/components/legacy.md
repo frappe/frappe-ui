@@ -53,6 +53,12 @@ entry says otherwise. Most have a before/after in the
   and [`Combobox`](./combobox).
 - **`GridLayout`** — depend on `grid-layout-plus` directly. It was a thin
   passthrough with no docs page and no tests.
+- **`CommandPalette`, `CommandPaletteItem`** — use the rebuilt family on
+  [`frappe-ui/experimental`](/docs/experimental#commandpalette). The names carry
+  over but the API does not: you compose the parts and write the rows instead of
+  passing one `groups` shape, and the palette no longer registers `Mod+K` for
+  you. It is a rewrite, not an import-path change. See the
+  [CommandPalette migration section](../migration#commandpalette).
 
 ## Parked in `frappe-ui/experimental`
 
@@ -82,11 +88,6 @@ on.
   [`frappe-ui/experimental`](/docs/experimental#charts-v1).
   [`frappe-ui/charts`](../charts/overview) is the replacement family and
   draws everything these did.
-- **`CommandPalette`, `CommandPaletteItem`** — import from
-  [`frappe-ui/experimental`](/docs/experimental#commandpalette). The family is
-  rebuilt there as six composable parts, so this is a rewrite and not only an
-  import-path change; see the
-  [CommandPalette migration section](../migration#commandpalette).
 - **`Icon`, `IconPicker`, `spritePlugin`** (the sprite icon trio) — import
   from [`frappe-ui/experimental`](/docs/experimental#sprite-icons).
   `lucide-*` classes and the root [`Icon`](./icon) component are the

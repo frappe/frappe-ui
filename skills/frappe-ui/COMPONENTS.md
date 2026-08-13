@@ -141,7 +141,7 @@ Chart family built on ECharts: `BarChart`, `LineChart`, `AreaChart`, `DonutChart
 TipTap-based rich text: `Editor` + `EditorFixedMenu` + `RichTextKit`. Heavy, and not SSR-safe.
 
 ### `CommandPalette` (`frappe-ui/experimental`)
-Cmd-K palette, seven parts: `CommandPalette` + `CommandPaletteInput` + `CommandPaletteList` + `CommandPaletteGroup` + `CommandPaletteItem` + `CommandPaletteEmpty` + `CommandPaletteFooter`. It owns the dialog, the query, the keyboard and the filter; you write the rows. Groups and items go inside `CommandPaletteList`; the field, the empty state and the footer are its siblings. `filterable` (default `true`) turns the client filter off for server search. Register `Mod+K` yourself with `useKeyboardShortcut`.
+Cmd-K palette, seven parts: `CommandPalette` + `CommandPaletteInput` + `CommandPaletteList` + `CommandPaletteGroup` + `CommandPaletteItem` + `CommandPaletteEmpty` + `CommandPaletteFooter`. It owns the dialog, the query, the keyboard and the filter; you write the rows. Groups and items go inside `CommandPaletteList`; the field, the empty state and the footer are its siblings. `filterable` (default `true`) turns the client filter off for server search. Register `Mod+K` yourself with `useKeyboardShortcut({ combo: 'Mod+K', allowInInput: true, handler })` — `allowInInput` is off by default, so without it the palette stops opening as soon as a field has focus.
 
 ## Layout
 

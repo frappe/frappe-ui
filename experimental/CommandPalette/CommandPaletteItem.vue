@@ -11,7 +11,7 @@
     <component
       :is="as"
       data-slot="command-palette-item"
-      :data-state="state"
+      :data-state="active ? 'active' : undefined"
       :data-disabled="disabled ? '' : undefined"
       class="mx-2.5 flex min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
       v-bind="$attrs"
@@ -118,25 +118,16 @@ onUnmounted(() => unregister?.())
 const listbox = injectListboxRootContext(null)
 const item = useTemplateRef<{ $el: HTMLElement }>('item')
 
+// The one row state a palette has. There is no lasting selection to draw: a
+// pick closes the palette, and a handler that keeps it open does so by
+// preventing the event, which is also how reka is told not to record the pick.
 const active = computed(() => {
   const el = item.value?.$el
   return !!el && listbox?.highlightedElement.value === el
 })
 
-const selected = computed(
-  () => listbox != null && listbox.modelValue.value === props.value,
-)
-
-// One attribute, so `active` wins: it is the row the palette highlights.
-const state = computed(() => {
-  if (active.value) return 'active'
-  if (selected.value) return 'selected'
-  return undefined
-})
-
 const slotProps = computed<CommandPaletteItemSlotProps>(() => ({
   active: active.value,
-  selected: selected.value,
   disabled: props.disabled ?? false,
 }))
 

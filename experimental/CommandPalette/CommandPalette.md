@@ -118,8 +118,11 @@ function select(value, event) {
 ## Styling hooks
 
 Every part stamps `data-slot`. An item adds `data-state="active"` while the
-keyboard or the pointer is on it, `data-state="selected"` while it holds the
-palette's value, and `data-disabled` when it cannot be picked. Items also hand
-`active`, `selected` and `disabled` to every one of their slots.
+keyboard or the pointer is on it, and `data-disabled` when it cannot be picked.
+Items hand `active` and `disabled` to every one of their slots.
+
+There is no selected state. A pick closes the palette, and a pick that keeps it
+open does so by preventing the event, which is the same signal that tells the
+list not to record the row.
 
 <!-- @include: ./CommandPalette.api.md -->

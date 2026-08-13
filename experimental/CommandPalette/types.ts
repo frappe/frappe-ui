@@ -90,8 +90,6 @@ export interface CommandPaletteItemEmits {
 export interface CommandPaletteItemSlotProps {
   /** Whether the keyboard or the pointer is on this item. */
   active: boolean
-  /** Whether this item holds the palette's current value. */
-  selected: boolean
   /** Whether the item cannot be picked. */
   disabled: boolean
 }

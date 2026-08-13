@@ -34,9 +34,8 @@ and no filtering. The parts fit all four.
 - **Breaking:** `Mod+K` moves to the caller. The old component registered it
   itself and skipped it whenever a rich-text editor had focus, hardcoding
   knowledge of the editor into the palette.
-- Every part stamps `data-slot`. An item stamps `data-state="active"` or
-  `data-state="selected"` and `data-disabled`, and hands `active`, `selected`
-  and `disabled` to its slots.
+- Every part stamps `data-slot`. An item stamps `data-state="active"` and
+  `data-disabled`, and hands `active` and `disabled` to its slots.
 - Rows go inside `CommandPaletteList`, the only part that scrolls. A list may
   own rows and groups and nothing else, so the field, the empty state and the
   footer are its siblings.

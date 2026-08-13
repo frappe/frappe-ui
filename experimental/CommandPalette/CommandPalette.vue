@@ -80,6 +80,8 @@ const listbox = useTemplateRef<{ highlightFirstItem: () => void }>('listbox')
 // `shallowRef`, so an object value comes back out of the slot props as the
 // object the caller passed in and not a reactive proxy of it.
 const activeValue = shallowRef<CommandPaletteValue | undefined>()
+// Reka records the pick in the instant before the palette closes. Bound here
+// so `reset` clears it with the query, and the next open starts clean.
 const selectedValue = shallowRef<CommandPaletteValue | undefined>()
 
 // `shallowRef` + `triggerRef`, so the registrations keep their `ComputedRef`
