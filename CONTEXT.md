@@ -125,8 +125,10 @@ Vocabulary for `useKeyboardShortcut`, `KeyboardShortcutsDialog` and
 **combo**:
 The whole key combination as one string, written `Mod+Ctrl+Alt+Shift+<Key>`
 with the modifiers in that order. The single word for "which keys" across the
-composable, the dialog and the `KeyboardShortcut` component. Typed as a
-template-literal union, so the compiler checks it.
+composable, the dialog and the `KeyboardShortcut` component. The composable
+types it as a template-literal union, so the compiler checks it.
+`KeyboardShortcut`'s prop stays `string`, because callers compute it, and warns
+at runtime instead.
 _Avoid_: `shortcut`, `keys`, `binding`, `accelerator`, and separate `key` +
 `ctrl` + `shift` + `alt` fields
 
