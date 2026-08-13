@@ -796,11 +796,48 @@ describe('useKeyboardShortcut — precedence', () => {
     expect(warn).toHaveBeenCalledTimes(1)
     const message = warn.mock.calls[0][0] as string
     expect(message).toContain('Duplicate shortcut Mod+Shift+P')
-    expect(message).toContain(
-      '"Toggle canvas dark mode" (registered first, now shadowed)',
-    )
+    expect(message).toContain('2 shortcuts are live on this keypress')
     expect(message).toContain('"Delete page" (active)')
+    expect(message).toContain('"Toggle canvas dark mode" (shadowed)')
 
+    b.unmount()
+    a.unmount()
+    warn.mockRestore()
+  })
+
+  it('names every registration when three or more are live', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    // Suite's slides app hits this: a shared composable and the page that uses
+    // it both register the arrow keys, on top of a third registration.
+    const a = mountWithShortcut({
+      combo: 'ArrowUp',
+      description: 'Move element',
+      handler: vi.fn(),
+    })
+    const b = mountWithShortcut({
+      combo: 'ArrowUp',
+      description: 'Previous slide',
+      handler: vi.fn(),
+    })
+    const c = mountWithShortcut({
+      combo: 'ArrowUp',
+      description: 'Scroll thumbnails',
+      handler: vi.fn(),
+    })
+    await nextTick()
+
+    fireKey({ key: 'ArrowUp' })
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    const message = warn.mock.calls[0][0] as string
+    expect(message).toContain('Duplicate shortcut ArrowUp')
+    expect(message).toContain('3 shortcuts are live on this keypress')
+    // The middle registration is the one the old message dropped.
+    expect(message).toContain('"Scroll thumbnails" (active)')
+    expect(message).toContain('"Previous slide" (shadowed)')
+    expect(message).toContain('"Move element" (shadowed)')
+
+    c.unmount()
     b.unmount()
     a.unmount()
     warn.mockRestore()

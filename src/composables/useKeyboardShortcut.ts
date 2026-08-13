@@ -173,15 +173,19 @@ function attachGlobalListener() {
 // Whether two registrations on one combo really collide depends on their
 // guards, which only resolve at match time. Apps pair one combo with opposite
 // `enabled` guards on purpose, so a registration-time warning would cry wolf.
-// `live` is ordered last-registered first.
+// `live` is ordered last-registered first, so the message lists the active
+// shortcut first and the earliest registration last. Three or more can be live
+// at once, so every one is named. Naming only the ends hides the middle.
 function warnOnCollision(live: Registration[]) {
-  const active = live[0].config
-  const shadowed = live[live.length - 1].config
+  const { combo } = live[0].config
+  const lines = live.map(
+    ({ config }, i) =>
+      `  "${config.description}" (${i === 0 ? 'active' : 'shadowed'})`,
+  )
   warnOnce(
-    `duplicate:${active.combo}`,
-    `Duplicate shortcut ${active.combo}:\n` +
-      `  "${shadowed.description}" (registered first, now shadowed)\n` +
-      `  "${active.description}" (active)`,
+    `duplicate:${combo}`,
+    `Duplicate shortcut ${combo}. ${live.length} shortcuts are live on ` +
+      `this keypress:\n${lines.join('\n')}`,
   )
 }
 

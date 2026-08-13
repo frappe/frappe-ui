@@ -161,14 +161,19 @@ exclusive guards both keep working. Suite's slides app pairs seven combos this
 way: `ArrowUp` moves an element in edit mode, and changes the slide when edit
 mode is off.
 
-A collision is two shortcuts that are live on the same keypress. It warns once
-per combo per page load, in development only:
+A collision is two or more shortcuts that are live on the same keypress. It
+warns once per combo per page load, in development only:
 
 ```
-[frappe-ui] Duplicate shortcut Mod+Shift+D:
-  "Toggle canvas dark mode" (registered first, now shadowed)
+[frappe-ui] Duplicate shortcut Mod+Shift+D. 3 shortcuts are live on this keypress:
   "Delete Page" (active)
+  "Rename Page" (shadowed)
+  "Toggle canvas dark mode" (shadowed)
 ```
+
+The warning names every live registration, so none is missed. The active one
+comes first. The rest follow in reverse registration order, so the earliest
+registration is last.
 
 The warning fires on the keypress, not at registration, because guard state is
 only known then.
