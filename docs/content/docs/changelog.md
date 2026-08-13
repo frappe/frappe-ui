@@ -515,18 +515,6 @@ while `start` was still `0` and never recomputed after the restore, so it
 stayed `false` even when `start` was back above `0`. `reload()` now
 recomputes `hasPreviousPage` after restoring `start`.
 
-### CommandPalette — `show` renamed to `open` (breaking, silent)
-
-`show` → `open`, matching the rest of the library's overlay vocabulary
-(`CONTEXT.md`). **Silent break:** Vue accepts the unknown `show` prop with no
-error, so the palette just never opens — grep for `CommandPalette` and
-`v-model:show` after upgrading. `Mod+K` now opens the palette on its own
-(registered internally via `useKeyboardShortcut`); delete any app-level keydown
-listener that toggled it. `CommandPalette` and `CommandPaletteItem` also
-gained `types.ts`, docs, stories, and a Cypress test; item icons now accept
-`string | Component` (lucide class strings, emoji, or a component) instead of
-components only.
-
 ### KeyboardShortcut — deprecated `shortcut` and unused modifier props removed (breaking)
 
 Per ADR-0008, the deprecated `shortcut` prop (superseded by `combo`) is
