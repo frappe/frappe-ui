@@ -1072,6 +1072,10 @@ useKeyboardShortcut([{ key: 's', ctrl: true, description: 'Save', handler: save 
     expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
     expect(migrated).toContain("useShortcut({ key: 'n', description: 'New ticket' }, create)")
     expect(notes.some((n) => n.message.includes("comes from './composables/shortcuts'"))).toBe(true)
+    // The note is about the name, not the file. This file was written.
+    expect(notes.some((n) => n.message.includes('nothing in this file was touched'))).toBe(
+      false,
+    )
   })
 
   it("says nothing about an object the app's own composable receives", () => {

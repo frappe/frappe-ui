@@ -1468,14 +1468,14 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
       if (BARREL.test(module)) return true
       notes.push({
         line: nameLine(name),
-        message: `\`${name}\` here comes from '${module}', not frappe-ui. It is the app's own, so nothing in this file was touched.`,
+        message: `\`${name}\` here comes from '${module}', not frappe-ui. It is the app's own, so this run left it as it is. The rest of the file still migrates.`,
       })
       return false
     }
     if (declaresLocally(content, name, renameMask)) {
       notes.push({
         line: nameLine(name),
-        message: `\`${name}\` is declared in this file, so it is the app's own. Nothing here was touched.`,
+        message: `\`${name}\` is declared in this file, so it is the app's own. This run left it as it is. The rest of the file still migrates.`,
       })
       return false
     }

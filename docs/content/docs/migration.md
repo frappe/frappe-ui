@@ -2736,7 +2736,8 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
   `onClick` or `type`, is never listed, and neither is one your own composable
   receives.
 - **Your own `useShortcut` or `ShortcutConfig`**, imported from your module or
-  declared in the file. Nothing in that file is touched.
+  declared in the file. That name is left as it is, and the rest of the file
+  still migrates.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
   `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
   pair may fold into one registration. Only you can say which half is which.
