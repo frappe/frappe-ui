@@ -89,20 +89,19 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   variant: () => props.variant,
   disabled: () => props.disabled,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const hasLabeling = computed(() => {
   return Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
+    props.label || slots.label || rendersDescription.value || hasError.value,
   )
 })
 

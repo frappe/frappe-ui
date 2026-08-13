@@ -1,4 +1,4 @@
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import Radio from './Radio.vue'
 import RadioGroup from './RadioGroup.vue'
 
@@ -269,6 +269,56 @@ describe('Radio', () => {
         },
       ])
       expectCentredOnFirstLine()
+    })
+  })
+
+  describe('shared labeling contract', () => {
+    it('tracks a #description slot that toggles', () => {
+      // `useSlots()` returns an object Vue mutates in place and does not
+      // track, so a `computed` reading it caches. Without an invalidation the
+      // reference is wrong in both directions: added, the paragraph renders
+      // and nothing points at it; removed, the reference outlives it.
+      cy.mount(
+        defineComponent({
+          setup() {
+            return { show: ref(false) }
+          },
+          render() {
+            return [
+              h(
+                'button',
+                {
+                  'data-cy': 'toggle',
+                  onClick: () => (this.show = !this.show),
+                },
+                'toggle',
+              ),
+              h(
+                RadioGroup,
+                { label: 'Plan', options: [{ value: 'a', label: 'A' }] },
+                this.show
+                  ? { description: () => h('span', 'Helper text.') }
+                  : {},
+              ),
+            ]
+          },
+        }),
+      )
+
+      cy.get('[role="radiogroup"]').should('not.have.attr', 'aria-describedby')
+
+      cy.get('[data-cy=toggle]').click()
+      cy.get('[role="radiogroup"]')
+        .invoke('attr', 'aria-describedby')
+        .then((id) => {
+          expect(id, 'slot added, reference set').to.be.a('string')
+          cy.get(`#${id}`).should('contain.text', 'Helper text.')
+        })
+
+      cy.get('[data-cy=toggle]').click()
+      // The dangling half: a reference kept past its element fails
+      // `aria-valid-attr-value`.
+      cy.get('[role="radiogroup"]').should('not.have.attr', 'aria-describedby')
     })
   })
 

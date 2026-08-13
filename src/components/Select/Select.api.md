@@ -91,7 +91,7 @@
   },
   {
     name: 'description',
-    description: 'Helper text rendered below the input.\nHidden when `error` is set.',
+    description: 'Helper text rendered below the input.\nHidden when `error` is set. A `#description` slot is not: it renders\nbeside the error, and is referenced alongside it.',
     required: false,
     type: 'string'
   },
@@ -103,7 +103,7 @@
   },
   {
     name: 'required',
-    description: 'Marks the field as required. Renders an asterisk next to the label and\nforwards `required` / `aria-required` to the underlying control.',
+    description: 'Marks the field as required. Renders an asterisk next to the label, with\n`sr-only` text that announces it, and forwards `required` /\n`aria-required` to the underlying control where the control\'s role allows\nit. `data-required` is set either way.',
     required: false,
     type: 'boolean'
   },

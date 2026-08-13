@@ -25,7 +25,7 @@
       :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-errormessage="hasError ? errorMessageId : undefined"
-      :aria-required="props.required || undefined"
+      :aria-required="!isSliderMode && props.required ? true : undefined"
       :aria-invalid="hasError || undefined"
       :aria-disabled="isDisabled || undefined"
       :aria-orientation="isSliderMode ? 'horizontal' : undefined"
@@ -182,10 +182,13 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => isDisabled.value,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const sizeClass = computed(
@@ -379,11 +382,7 @@ function onKeydown(e: KeyboardEvent) {
 
 const hasLabeling = computed(() => {
   return Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
+    props.label || slots.label || rendersDescription.value || hasError.value,
   )
 })
 </script>

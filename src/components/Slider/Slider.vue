@@ -104,15 +104,19 @@ const {
   inputId,
   labelId,
   labelledBy,
+  describedBy,
   descriptionId,
   errorMessageId,
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 /** A caller's `aria-labelledby` wins over the id generated from `label`. */
@@ -123,10 +127,7 @@ const thumbLabelledBy = computed(() => {
   // reference has to step aside — it would win the name order otherwise and
   // the override would do nothing.
   if (attrs['aria-label']) return undefined
-  // `useInputLabeling` only sees the `label` prop, but the label element also
-  // renders for a `#label` slot. Without this the slot leaves the thumb
-  // unnamed while a `<label>` carrying the name sits right above it.
-  return labelledBy.value ?? (slots.label ? labelId.value : undefined)
+  return labelledBy.value
 })
 
 // reka puts `aria-disabled` on the root but not on the thumb, so without this
@@ -152,14 +153,8 @@ const thumbInvalid = computed(() => {
 // Merged, not replaced: a caller's `aria-describedby` must not drop the
 // generated description and error ids.
 const thumbDescribedBy = computed(() => {
-  // Built from what actually renders, not from `describedBy`: that one only
-  // sees the `description` prop, while `InputDescription` renders for the slot
-  // too — the same hole the `#label` slot had. Order matches `describedBy`.
   const ids = [
-    showDescription.value || slots.description
-      ? descriptionId.value
-      : undefined,
-    hasError.value ? errorMessageId.value : undefined,
+    describedBy.value,
     attrs['aria-describedby'] as string | undefined,
   ]
   const merged = ids.filter(Boolean).join(' ')
@@ -211,11 +206,7 @@ function thumbNameFor(index: number): string | undefined {
 // Declared before `rootClasses`, which reads it.
 const hasLabeling = computed(() => {
   return Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
+    props.label || slots.label || rendersDescription.value || hasError.value,
   )
 })
 

@@ -21,7 +21,7 @@
       :required="props.required"
       :orientation="props.orientation"
       :loop="props.loop"
-      :aria-labelledby="props.label || $slots.label ? labelId : undefined"
+      :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-invalid="hasError || undefined"
       :aria-errormessage="hasError ? errorMessageId : undefined"
@@ -87,6 +87,7 @@ const {
   labelId,
   descriptionId,
   errorMessageId,
+  labelledBy,
   describedBy,
   hasError,
   errorLines,
@@ -95,6 +96,8 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 // The group owns the layout so options never have to space themselves. Padded

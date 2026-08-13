@@ -38,7 +38,10 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
+    <div
+      v-if="showDescription || hasError || $slots.description"
+      class="ps-[1.35rem] mt-1"
+    >
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"
@@ -53,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useAttrs, watchEffect } from 'vue'
+import { computed, ref, useAttrs, watchEffect, useSlots } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
@@ -90,6 +93,8 @@ defineSlots<{
   description?: () => any
 }>()
 
+const slots = useSlots()
+
 const {
   inputId,
   labelId,
@@ -99,6 +104,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
@@ -109,6 +115,8 @@ const {
       : checked.value
         ? 'checked'
         : 'unchecked',
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const labelClasses = computed(() => {
@@ -125,7 +133,7 @@ const containerClasses = computed(() => {
   if (!props.padded) return undefined
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
-  const hasDetail = showDescription.value || hasError.value
+  const hasDetail = rendersDescription.value || hasError.value
   const sizeClass = hasDetail
     ? props.size === 'md'
       ? 'px-3 py-2'

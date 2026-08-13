@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, onBeforeUpdate, shallowRef } from 'vue'
 import { useId } from '../utils/useId'
 import type { InputSize, InputVariant, ToggleSize } from './inputTypes'
 
@@ -17,7 +17,8 @@ export interface InputLabelingProps {
 
   /**
    * Helper text rendered below the input.
-   * Hidden when `error` is set.
+   * Hidden when `error` is set. A `#description` slot is not: it renders
+   * beside the error, and is referenced alongside it.
    */
   description?: string
 
@@ -30,8 +31,10 @@ export interface InputLabelingProps {
   error?: string | FrappeUIError
 
   /**
-   * Marks the field as required. Renders an asterisk next to the label and
-   * forwards `required` / `aria-required` to the underlying control.
+   * Marks the field as required. Renders an asterisk next to the label, with
+   * `sr-only` text that announces it, and forwards `required` /
+   * `aria-required` to the underlying control where the control's role allows
+   * it. `data-required` is set either way.
    */
   required?: boolean
 
@@ -56,6 +59,14 @@ interface UseInputLabelingOptions {
   disabled?: () => boolean | undefined
   /** State token override for `data-state` (e.g. `'checked'`). */
   state?: () => string | undefined
+  /**
+   * Whether a `#label` slot is filled. The label element renders for the slot
+   * as well as for the prop, so without this `labelledBy` points at nothing
+   * and the control is left unnamed with a `<label>` sitting right above it.
+   */
+  hasLabelSlot?: () => boolean
+  /** Same for a `#description` slot and `describedBy`. */
+  hasDescriptionSlot?: () => boolean
 }
 
 export function useInputLabeling(
@@ -88,15 +99,38 @@ export function useInputLabeling(
     return Boolean(props.description) && !hasError.value
   })
 
+  // `useSlots()` returns `instance.slots`, which Vue mutates in place and does
+  // not track. A `computed` reading it caches on first evaluation and never
+  // re-runs, so a slot behind a `v-if` leaves the reference wrong in both
+  // directions: added, the element renders and nothing points at it; removed,
+  // the reference outlives its element and dangles.
+  //
+  // Slot content only ever changes as part of a re-render, and `beforeUpdate`
+  // runs after `updateSlots` and before the render function, so bumping here is
+  // the invalidation those two computeds are missing.
+  const slotTick = shallowRef(0)
+  onBeforeUpdate(() => {
+    slotTick.value++
+  })
+
+  // Both of these follow what actually renders, not what the props say. A
+  // `#label` or `#description` slot renders the same element the prop does, so
+  // keying off the prop alone paints an element that nothing points at.
+  const rendersDescription = computed(() => {
+    slotTick.value
+    return showDescription.value || Boolean(options.hasDescriptionSlot?.())
+  })
+
   const describedBy = computed(() => {
     const ids: string[] = []
-    if (showDescription.value) ids.push(descriptionId.value)
+    if (rendersDescription.value) ids.push(descriptionId.value)
     if (hasError.value) ids.push(errorMessageId.value)
     return ids.length ? ids.join(' ') : undefined
   })
 
   const labelledBy = computed(() => {
-    return props.label ? labelId.value : undefined
+    slotTick.value
+    return props.label || options.hasLabelSlot?.() ? labelId.value : undefined
   })
 
   const dataAttrs = computed(() => {
@@ -126,6 +160,7 @@ export function useInputLabeling(
     hasError,
     errorLines,
     showDescription,
+    rendersDescription,
     dataAttrs,
   }
 }

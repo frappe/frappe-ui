@@ -99,11 +99,14 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
   state: () => (model.value ? 'checked' : 'unchecked'),
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 const switchClasses = computed(() => {
@@ -225,8 +228,7 @@ const containerClasses = computed(() => {
   // area — including the corners — drives the control's hover state too.
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
-  const hasDetail =
-    showDescription.value || hasError.value || !!slots.description
+  const hasDetail = rendersDescription.value || hasError.value
   const sizeClass = hasDetail
     ? props.size === 'md'
       ? 'px-3 py-2'

@@ -45,6 +45,25 @@ describe('Slider', () => {
       })
   })
 
+  it('names and describes the control from the slots alone', () => {
+    // reka renders a div for the root, so a native `label for=` never names it.
+    // Without the slot getters the slots left it anonymous.
+    cy.mount(Slider, {
+      props: { modelValue: [25] },
+      slots: {
+        label: () => h('span', 'Volume'),
+        description: () => h('span', 'Adjust it.'),
+      },
+    })
+    cy.get('[role="slider"]').then(($el) => {
+      cy.get(`#${$el.attr('aria-labelledby')}`).should('contain.text', 'Volume')
+      cy.get(`#${$el.attr('aria-describedby')}`).should(
+        'contain.text',
+        'Adjust it.',
+      )
+    })
+  })
+
   it('renders one thumb for a single value', () => {
     cy.mount(Slider, {
       props: {

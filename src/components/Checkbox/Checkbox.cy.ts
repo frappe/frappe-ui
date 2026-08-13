@@ -70,6 +70,21 @@ describe('Checkbox', () => {
   })
 
   describe('shared labeling contract', () => {
+    it('describes the input from a #description slot alone', () => {
+      // The wrapper around the description is its own `v-if` here, so it has to
+      // count the slot too. Without that, `aria-describedby` names an id that
+      // never mounts.
+      cy.mount(Checkbox, {
+        props: { label: 'Accept' },
+        slots: { description: () => h('span', 'Required to continue.') },
+      })
+      cy.get('input')
+        .invoke('attr', 'aria-describedby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'Required to continue.')
+        })
+    })
+
     it('wires aria-describedby and aria-errormessage', () => {
       cy.mount(Checkbox, {
         props: { label: 'Accept', description: 'Required to continue.' },
@@ -175,6 +190,21 @@ describe('Checkbox', () => {
     it('grows the surface when a description is present', () => {
       cy.mount(Checkbox, {
         props: { label: 'abc', description: 'helper', padded: true },
+      })
+      cy.get('[data-slot="control"]')
+        .parent()
+        .parent()
+        .should('not.have.class', 'h-7')
+        .and('have.class', 'py-1.5')
+    })
+
+    it('grows the surface for a #description slot too', () => {
+      // The row height follows the same thing the wrapper does. Reading the
+      // prop alone kept the compact fixed height and the description
+      // overflowed it.
+      cy.mount(Checkbox, {
+        props: { label: 'abc', padded: true },
+        slots: { description: () => h('span', 'helper') },
       })
       cy.get('[data-slot="control"]')
         .parent()
