@@ -1,11 +1,15 @@
 <template>
   <!--
-    Teleport to <body> in every detached mode so the panel escapes any host
-    layout's overflow/stacking contexts. `disabled` keeps it in-flow while
+    Teleport out of the host layout in every detached mode so the panel escapes
+    its overflow and stacking contexts. `disabled` keeps it in-flow while
     docked. Teleport moves the node without remounting, so content inside (an
     editor, a form) never loses focus or state.
+
+    The target is the host's, not `body`: layering here is body order, and an
+    overlay resolving a host target would otherwise land before the window and
+    paint under it.
   -->
-  <Teleport to="body" :disabled="isDocked">
+  <Teleport :to="portalTarget ?? 'body'" :disabled="isDocked">
     <div
       ref="panel"
       v-bind="$attrs"
@@ -129,6 +133,7 @@ import LucideX from '~icons/lucide/x'
 import LucideMinus from '~icons/lucide/minus'
 import LucideMaximize2 from '~icons/lucide/maximize-2'
 import { Button } from '#components/Button'
+import { usePortalTarget } from '#composables/usePortalTarget'
 import { useFloatingWindow } from './useFloatingWindow'
 import type { ResizeDir, WindowMode } from './types'
 
@@ -189,6 +194,8 @@ defineSlots<{
     minimize: () => void
   }) => any
 }>()
+
+const portalTarget = usePortalTarget()
 
 const panel = ref<HTMLElement | null>(null)
 const handle = ref<HTMLElement | null>(null)
@@ -285,19 +292,3 @@ function onResizeKey(event: KeyboardEvent) {
 watch(mode, (value) => (modeModel.value = value), { immediate: true })
 watch(modeModel, (value) => value !== mode.value && setMode(value))
 </script>
-
-<!--
-  Global, intentionally unscoped. While a window is detached it's fixed at
-  z-index 50; reka-ui teleports popovers (dropdowns, autocompletes, menus) to
-  <body> and copies their content z-index (which is `auto` for most
-  components) onto the positioning wrapper, so they render *behind* the window
-  and become unclickable. Lift the popover layer to the app's popover z (100,
-  matching NestedPopover). `!important` is required to beat reka's inline
-  `z-index: auto`. Scoped to `.has-floating-window` so it only applies while a
-  window is open; docked windows are in normal flow and need no override.
--->
-<style>
-body.has-floating-window [data-reka-popper-content-wrapper] {
-  z-index: 100 !important;
-}
-</style>

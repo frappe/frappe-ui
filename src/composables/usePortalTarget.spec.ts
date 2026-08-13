@@ -171,7 +171,10 @@ describe('no component teleports past the host target', () => {
   // Read with fs, not import.meta.glob: a `?raw` glob puts every .vue file in
   // the module graph as a one-statement string module, and v8 coverage then
   // attributes that to the component's own path. It cost 14 points.
-  const SRC = join(process.cwd(), 'src')
+  // `experimental/` too: it ships in the same package and its components
+  // teleport for the same reason. Scanning `src/` alone let FloatingWindow
+  // hardcode `body` and go unnoticed.
+  const ROOTS = ['src', 'experimental'].map((dir) => join(process.cwd(), dir))
 
   function vueFiles(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -181,6 +184,7 @@ describe('no component teleports past the host target', () => {
     })
   }
 
+  const SCRIPT_BLOCK = /<script\b[^>]*>[\s\S]*?<\/script>/g
   const TELEPORTING_TAG = /<([A-Z]\w*Portal|Teleport)\b[^>]*>/g
   const BOUND_TARGET = /(?::|v-bind:)to=/
   const LITERAL_BODY = /(?::|v-bind:)to="\s*'body'\s*"|(?<!:)\bto="body"/
@@ -189,13 +193,15 @@ describe('no component teleports past the host target', () => {
     const offenders: string[] = []
     let scanned = 0
 
-    for (const file of vueFiles(SRC)) {
+    for (const file of ROOTS.flatMap(vueFiles)) {
       if (/\.(story|playground)\.vue$/.test(file)) continue
-      const path = relative(SRC, file)
+      const path = relative(process.cwd(), file)
 
-      for (const [tag, name] of readFileSync(file, 'utf8').matchAll(
-        TELEPORTING_TAG,
-      )) {
+      // Drop <script> blocks first. A comment that names `<Teleport>` in prose
+      // is not a teleport, and scanning it reads as an unbound one.
+      const markup = readFileSync(file, 'utf8').replace(SCRIPT_BLOCK, '')
+
+      for (const [tag, name] of markup.matchAll(TELEPORTING_TAG)) {
         scanned++
         if (!BOUND_TARGET.test(tag)) {
           offenders.push(`${path}: <${name}> has no :to binding`)
@@ -205,10 +211,11 @@ describe('no component teleports past the host target', () => {
       }
     }
 
-    // A broken scan would find nothing and pass. There were 20 teleporting
-    // tags when this landed, so a collapse to near-zero means the walk broke,
-    // not that the components changed.
-    expect(scanned).toBeGreaterThan(15)
+    // A broken scan would find nothing and pass. There are 24 teleporting tags
+    // across both roots (19 in `src`, 5 in `experimental`), so a drop means the
+    // walk broke, not that the components changed. Kept close to the real count
+    // so losing one root fails here instead of passing quietly.
+    expect(scanned).toBeGreaterThan(20)
 
     // Call usePortalTarget() and bind its result, so an embedding host can
     // redirect the overlay. See spec/portal-target.md.
