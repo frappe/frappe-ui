@@ -31,8 +31,9 @@ role replaces its subtree, so a reader meets each key once instead of once per
 chip. With no `combo` the root takes no role, and the default slot reads
 normally.
 
-`useIcons` controls the non-modifier icons, arrows and Enter and Backspace, in
-both `bg` and plain mode. Modifier glyphs stay icons.
+`useIcons` controls the icons on the arrow, Enter, Backspace and Delete keys, in
+both `bg` and plain mode. ⌘ stays an icon in both modes. Plain mode draws Shift
+and Alt as icons, `bg` mode draws them as text.
 
 ## Styling hooks
 

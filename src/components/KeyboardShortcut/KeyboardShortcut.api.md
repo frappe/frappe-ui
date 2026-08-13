@@ -33,7 +33,7 @@
   },
   {
     name: 'useIcons',
-    description: 'Render icons for certain non-modifier keys (arrows, enter, backspace).',
+    description: 'Render icons for the arrow, Enter, Backspace and Delete keys.',
     required: false,
     type: 'boolean',
     default: 'true'

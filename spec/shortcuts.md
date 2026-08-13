@@ -210,9 +210,9 @@ Backspace, or Delete". A labelled `img` replaces its subtree, so a reader in
 browse mode meets each key once, not once per chip. Without a `combo` the root
 carries no label and no role, and the fallback slot reads normally.
 
-`useIcons` covers the non-modifier keys, arrows and Enter and Backspace, in
-both `bg` and plain mode. A modifier glyph is not one of them and stays an
-icon.
+`useIcons` covers the arrow, Enter, Backspace and Delete keys, in both `bg` and
+plain mode. ⌘ stays an icon in both modes. Plain mode draws Shift and Alt as
+icons, `bg` mode draws them as text.
 
 ## Where the combo is checked
 
