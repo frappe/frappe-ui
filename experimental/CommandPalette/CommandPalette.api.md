@@ -86,7 +86,7 @@
 
   const commandPaletteGroupProps = [
   {
-    name: 'title',
+    name: 'label',
     description: 'Heading above the group\'s items. Leave it out to group without a heading.',
     required: false,
     type: 'string'

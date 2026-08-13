@@ -57,7 +57,7 @@ export interface CommandPaletteInputProps {
 
 export interface CommandPaletteGroupProps {
   /** Heading above the group's items. Leave it out to group without a heading. */
-  title?: string
+  label?: string
 }
 
 export interface CommandPaletteItemProps {

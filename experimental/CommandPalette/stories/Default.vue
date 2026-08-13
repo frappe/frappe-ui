@@ -61,7 +61,7 @@ function select(value: CommandPaletteValue) {
     <CommandPalette v-model:open="open" @select="select">
       <CommandPaletteInput placeholder="Search commands" />
 
-      <CommandPaletteGroup title="Pages">
+      <CommandPaletteGroup label="Pages">
         <CommandPaletteItem
           v-for="page in pages"
           :key="page.name"
@@ -75,7 +75,7 @@ function select(value: CommandPaletteValue) {
         </CommandPaletteItem>
       </CommandPaletteGroup>
 
-      <CommandPaletteGroup title="Actions">
+      <CommandPaletteGroup label="Actions">
         <CommandPaletteItem
           v-for="action in actions"
           :key="action.name"

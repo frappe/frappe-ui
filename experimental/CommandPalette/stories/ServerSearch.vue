@@ -67,7 +67,7 @@ watch(query, (text) => {
         Searching…
       </div>
 
-      <CommandPaletteGroup v-else title="Documents">
+      <CommandPaletteGroup v-else label="Documents">
         <CommandPaletteItem v-for="row in results" :key="row.name" :value="row">
           {{ row.title }}
           <template #suffix>

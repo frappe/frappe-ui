@@ -44,7 +44,7 @@ function select(value: CommandPaletteValue, event: CommandPaletteSelectEvent) {
     <CommandPalette v-model:open="open" @select="select">
       <CommandPaletteInput placeholder="Search documentation" />
 
-      <CommandPaletteGroup title="Components">
+      <CommandPaletteGroup label="Components">
         <CommandPaletteItem
           v-for="page in docs"
           :key="page.link"

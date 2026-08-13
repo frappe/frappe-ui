@@ -49,7 +49,7 @@ function mount(options: MountOptions = {}) {
           },
           () => [
             h(CommandPaletteInput, { placeholder: 'Search commands' }),
-            h(CommandPaletteGroup, { title: 'Pages' }, () => [
+            h(CommandPaletteGroup, { label: 'Pages' }, () => [
               h(
                 CommandPaletteItem,
                 { value: 'inbox', keywords: ['mail'] },
@@ -57,7 +57,7 @@ function mount(options: MountOptions = {}) {
               ),
               h(CommandPaletteItem, { value: 'settings' }, () => 'Settings'),
             ]),
-            h(CommandPaletteGroup, { title: 'Actions' }, () => [
+            h(CommandPaletteGroup, { label: 'Actions' }, () => [
               h(
                 CommandPaletteItem,
                 { value: 'new-task', label: 'New task' },

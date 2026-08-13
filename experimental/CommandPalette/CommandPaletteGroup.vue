@@ -6,12 +6,12 @@
     class="mb-2 mt-4.5 first:mt-3"
   >
     <ListboxGroupLabel
-      v-if="title"
+      v-if="label"
       as="div"
-      data-slot="command-palette-group-title"
+      data-slot="command-palette-group-label"
       class="mb-2.5 px-4.5 text-base text-ink-gray-5"
     >
-      {{ title }}
+      {{ label }}
     </ListboxGroupLabel>
     <slot />
   </ListboxGroup>

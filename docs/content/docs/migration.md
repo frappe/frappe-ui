@@ -2552,7 +2552,7 @@ without a per-group `component` escape hatch.
   <CommandPaletteGroup
     v-for="group in groups"
     :key="group.title"
-    :title="group.hideTitle ? undefined : group.title"
+    :label="group.hideTitle ? undefined : group.title"
   >
     <CommandPaletteItem
       v-for="item in group.items"
@@ -2575,8 +2575,8 @@ without a per-group `component` escape hatch.
 | Before                | After                                        |
 | --------------------- | -------------------------------------------- |
 | `:groups="groups"`    | `CommandPaletteGroup` + `CommandPaletteItem` |
-| `group.title`         | `:title` on `CommandPaletteGroup`            |
-| `group.hideTitle`     | leave `title` out                            |
+| `group.title`         | `:label` on `CommandPaletteGroup`            |
+| `group.hideTitle`     | leave `label` out                            |
 | `group.component`     | write the row in the item's slots            |
 | `item.icon`           | `#prefix` on `CommandPaletteItem`            |
 | `item.description`    | `#suffix` on `CommandPaletteItem`            |
