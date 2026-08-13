@@ -218,6 +218,30 @@ describe('matchesCombo — modifiers', () => {
 })
 
 // ---------------------------------------------------------------------------
+// The test reset clears everything a warning sits behind
+// ---------------------------------------------------------------------------
+
+describe('_resetKeyboardShortcutWarnings — a fresh warning surface', () => {
+  it('warns again about a combo an earlier parse already refused', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    // A combo no other test parses, so the count below is this test's alone.
+    expect(parseComboForMatching('Mod+NotAKey')).toBeNull()
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    warn.mockClear()
+    _resetKeyboardShortcutWarnings()
+
+    // `parseComboForMatching` returns a cached verdict before it warns, so a
+    // parse cache the reset leaves behind swallows this second warning.
+    expect(parseComboForMatching('Mod+NotAKey')).toBeNull()
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    warn.mockRestore()
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Mod resolves on the same platform check the chip draws with
 // ---------------------------------------------------------------------------
 

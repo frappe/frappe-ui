@@ -176,9 +176,14 @@ export function warnOnce(key: string, message: string) {
   console.warn(`[frappe-ui] ${message}`)
 }
 
-/** Test-only: clear the dedup set so each test sees a fresh warning surface. */
+/**
+ * Test-only: clear the dedup set so each test sees a fresh warning surface.
+ * The parse cache goes with it. `parseComboForMatching` returns a cached
+ * verdict before it warns, so a cache left behind swallows the next warning.
+ */
 export function _resetKeyboardShortcutWarnings() {
   warnedMatchKeys.clear()
+  parseCache.clear()
 }
 
 const warnedDisplayTokens = new Set<string>()
