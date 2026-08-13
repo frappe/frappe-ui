@@ -535,20 +535,49 @@ const rules = [{ key: 'home', condition: isAdmin, handler: go }]
     expect(refusals).toEqual([])
   })
 
-  it('names an object it walked away from when the file also renamed', () => {
+  it('refuses an object it walked away from when the file also renamed', () => {
     // The call renames, so a registration left with `key` would reach v1 with
-    // no `combo` and throw. The run says so instead of exiting in silence.
+    // no `combo` and throw. A note would not stop the write, so it is a refusal.
     const source = `import { useShortcut } from 'frappe-ui'
 const bindings = [{ key: 's', ctrl: true, handler: save }]
 useShortcut(bindings)
 `
     const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.js' })
 
-    expect(refusals).toEqual([])
-    expect(notes).toHaveLength(1)
-    expect(notes[0].line).toBe(2)
-    expect(notes[0].message).toContain("write `combo: 'Mod+S'`")
+    expect(notes).toEqual([])
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(2)
+    expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+    expect(refusals[0].message).toContain('KeyboardShortcutConfig')
     expect(migrated).toContain("{ key: 's', ctrl: true, handler: save }")
+  })
+
+  it('refuses an object it walked away from beside a site it converted', () => {
+    // No rename here: the file already calls the v1 name. A converted site is
+    // the same evidence as a rename — the file is written, and this row would
+    // reach v1 with no `combo`.
+    const source = `import { useKeyboardShortcut } from 'frappe-ui'
+useKeyboardShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+const more = [{ key: 'd', ctrl: true, description: 'Delete', handler: remove }]
+`
+    const { changes, notes, refusals } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(changes).toHaveLength(1)
+    expect(notes).toEqual([])
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(3)
+    expect(refusals[0].message).toContain("write `combo: 'Mod+D'`")
+  })
+
+  it('refuses a walked-away object in a file that renames through an alias', () => {
+    const source = `import { useShortcut as useKb } from 'frappe-ui'
+useKb([{ key: 's', ctrl: true, description: 'Save', handler: save }])
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].line).toBe(2)
+    expect(migrated).toContain("{ key: 's', ctrl: true, description: 'Save', handler: save }")
   })
 
   it('names every object in a config module it cannot prove', () => {
@@ -1057,6 +1086,35 @@ useShortcut([
 
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('left alone')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('writes no half-migrated file when a config it cannot prove sits beside a rename', () => {
+    const before = `import { useShortcut } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }]
+useShortcut(bindings)
+`
+    const dir = tempDir({ 'a.js': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('left alone')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('exits zero on a config module it changed nothing in', () => {
+    // Nothing here renames and nothing converts, so the file is not written
+    // and the objects are advice, not a stop.
+    const before = `export const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+  { key: 'd', ctrl: true, handler: remove },
+]
+`
+    const dir = tempDir({ 'a.js': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('do not fail the run')
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
   })
 

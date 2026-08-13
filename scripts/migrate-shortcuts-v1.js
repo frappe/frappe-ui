@@ -81,6 +81,10 @@
  *   `onRelease`. The migrated file is correct either way, and an unrelated
  *   `keyup` listener in the same file matches too, so no edit could clear a
  *   refusal here.
+ * - an object that reads like a config in a place nothing proves, in a file
+ *   the run leaves alone. In a file the run would write, the same object is a
+ *   refusal: writing the rest would leave this one on v0 beside a renamed
+ *   call, which is the half migration this codemod exists to prevent.
  *
  * An app's own composable is never renamed. `useShortcut` is rewritten only
  * where the file imports it from the `frappe-ui` barrel, or does not bind it
@@ -930,6 +934,7 @@ function convertObject(source, mask, range, ctx) {
       // here. It is worth a line when the object also carries a v0-only name.
       if (isOption || !byName.has('description')) return null
       return {
+        unproven: true,
         note: {
           line: lineAt(source, condition.start),
           message:
@@ -971,6 +976,7 @@ function convertObject(source, mask, range, ctx) {
 
     const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
     return {
+      unproven: true,
       note: {
         line,
         message: `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and it carries no \`ShortcutConfig\` annotation, so it was left as it is. ${
@@ -1184,6 +1190,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const changes = []
   const refusals = []
   const notes = []
+  const unproven = []
   const edits = []
 
   const ranges = scriptRanges(content, ext)
@@ -1227,7 +1234,10 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const result = convertObject(content, mask, object, { proven: isProven })
     if (!result) return
     if (result.note) {
-      notes.push(result.note)
+      // An object the run could not prove. Whether it is advice or a stop
+      // depends on the rest of the file, which is only known at the end.
+      if (result.unproven) unproven.push(result.note)
+      else notes.push(result.note)
       return
     }
     refusals.push(...(result.refusals ?? []))
@@ -1388,6 +1398,28 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
       text: TAG_RENAMES[t[2]],
     })
     renames.push({ line: lineAt(content, t.index), from: t[2], to: TAG_RENAMES[t[2]] })
+  }
+
+  // An object the run walked away from is advice in a file it leaves alone,
+  // and a stop in a file it would write. A converted site counts as much as a
+  // rename: either one writes the file, and this object would reach v1 still
+  // carrying `key`, where the first keypress throws. A note does not stop the
+  // write, so in a file with other work it has to be a refusal.
+  //
+  // The refusal is dischargeable, both ways round. Write the `combo` by hand,
+  // or annotate the array `KeyboardShortcutConfig[]` from frappe-ui and let
+  // the next run convert it. Migrating the file by hand works too: with
+  // nothing left to change, the object is a note again and the run exits zero.
+  const willWrite = changes.length > 0 || renames.length > 0
+  for (const item of unproven) {
+    if (!willWrite) {
+      notes.push(item)
+      continue
+    }
+    refusals.push({
+      line: item.line,
+      message: `${item.message} The rest of this file does migrate, so writing it would leave this site on v0 beside a renamed call — v1 throws on the first keypress. Convert it by hand, or annotate it \`KeyboardShortcutConfig[]\` from frappe-ui so the next run can prove it.`,
+    })
   }
 
   edits.sort((a, b) => a.start - b.start || a.end - b.end)
