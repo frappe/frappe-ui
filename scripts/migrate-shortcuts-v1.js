@@ -1113,6 +1113,25 @@ function balancedRange(source, mask, open) {
   return null
 }
 
+// The argument list of every call to one of `names`. `maxDepth` is 1 because
+// the argument may be an array of configs.
+//
+// The names decide what the span means. From the frappe-ui barrel it proves a
+// config; from the app's own module it proves the opposite, and the run says
+// nothing about what that call receives.
+function callRanges(source, mask, names) {
+  const ranges = []
+  if (names.length === 0) return ranges
+  const call = new RegExp(`\\b(?:${names.join('|')})\\s*\\(`, 'g')
+  let m
+  while ((m = call.exec(source))) {
+    if (mask[m.index]) continue
+    const span = balancedRange(source, mask, m.index + m[0].length - 1)
+    if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 1 })
+  }
+  return ranges
+}
+
 // Where a v0 config is certain, and the only place anything is rewritten.
 //
 // Certainty has two sources, and both resolve through this file's imports:
@@ -1127,26 +1146,12 @@ function balancedRange(source, mask, open) {
 // vocabulary: `ComboboxCustomOption` carries `key`, `description` and
 // `condition` together, and `ComboboxGroupedOption` carries `key` and `group`.
 // Reading one as proof rewrites a Combobox option into a shortcut and reports
-// a clean run. Everything the run cannot prove becomes a note.
+// a clean run. Everything the run cannot prove becomes a note, and a refusal
+// where the file has other work.
 //
 // `maxDepth` is how deep inside the span an object may sit and still be the
 // thing the span is about: one level for a call, because the argument may be
 // an array, and none for an annotated value, because the array is the value.
-// The argument list of every call to one of `names`. `maxDepth` is 1 because
-// the argument may be an array of configs.
-function callRanges(source, mask, names) {
-  const ranges = []
-  if (names.length === 0) return ranges
-  const call = new RegExp(`\\b(?:${names.join('|')})\\s*\\(`, 'g')
-  let m
-  while ((m = call.exec(source))) {
-    if (mask[m.index]) continue
-    const span = balancedRange(source, mask, m.index + m[0].length - 1)
-    if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 1 })
-  }
-  return ranges
-}
-
 function provenRanges(source, mask, bindings) {
   const ranges = callRanges(
     source,
