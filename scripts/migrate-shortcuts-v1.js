@@ -553,10 +553,21 @@ function templateExpressions(source, scripts, ext) {
   const spans = []
   for (const [from, to] of outsideScript(source, scripts)) {
     const text = source.slice(from, to)
-    spans.push(...matchedGroups(text, from, TEMPLATE_BINDING), ...mustacheRanges(text, from))
+    for (const [start, end] of [
+      ...matchedGroups(text, from, TEMPLATE_BINDING),
+      ...mustacheRanges(text, from),
+    ]) {
+      spans.push([start, end, EXPRESSION])
+    }
   }
   return spans
 }
+
+// An expression range holds one expression and nothing else, so a `{` that
+// opens it opens an object: `:shortcut="{ key: 's' }"` has an attribute quote
+// in front of the brace, and a script range in the same place would have a
+// statement.
+const EXPRESSION = 'expression'
 
 // Everything outside a script range stays masked, so it is never scanned.
 function buildMask(source, ranges) {
@@ -794,8 +805,11 @@ const OBJECT_KEYWORDS = new Set([
 // follows what an expression follows: an open bracket, a comma, a colon, an
 // operator, or a keyword that takes one. A block follows a `)`, an arrow, a
 // `;`, another brace, or a name.
-function opensObjectLiteral(source, mask, at) {
+function opensObjectLiteral(source, mask, at, expressionStart = -1) {
   const i = codeBefore(source, mask, at)
+  // The head of an expression range, where nothing stands in front of the brace
+  // but the attribute quote that ends the range.
+  if (expressionStart >= 0 && i < expressionStart) return true
   if (i < 0) return false
   const c = source[i]
   // An arrow body is a block. `() => ({ ... })` writes the object with a `(`
@@ -1223,12 +1237,27 @@ function convertObject(source, mask, range, ctx) {
   // app still on v0, which exports `ShortcutConfig` and not the v1 name. Both
   // names count as proof, so the message leads with the one that resolves
   // today.
+  //
+  // A template expression carries no annotation, so the advice there is the
+  // move that makes one possible.
   const array = ctx.inArray ? '[]' : ''
-  const annotate = `${ctx.inArray ? 'annotate the array' : 'annotate it'} with frappe-ui's config type, \`ShortcutConfig${array}\` on v0 and \`KeyboardShortcutConfig${array}\` on v1`
+  const annotate = ctx.inTemplate
+    ? `move it into \`<script>\` and annotate it there with frappe-ui's config type, \`ShortcutConfig${array}\` on v0 and \`KeyboardShortcutConfig${array}\` on v1`
+    : `${ctx.inArray ? 'annotate the array' : 'annotate it'} with frappe-ui's config type, \`ShortcutConfig${array}\` on v0 and \`KeyboardShortcutConfig${array}\` on v1`
   const leaveAlone = (line, message) => ({ unproven: true, note: { line, message, annotate } })
 
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
   const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
+
+  // A modifier flag written out as `true` or `false`. Nothing but a keyboard
+  // shortcut carries `ctrl` beside a `key`, so a written flag is evidence in
+  // its own right: it speaks for `{ key: 's', ctrl: true }`, which has no
+  // callback to speak for it, and it outranks an option name, because an option
+  // row never carries one.
+  const hasModifier = MODIFIER_PROPS.some((name) => {
+    const value = byName.get(name)?.value.trim()
+    return value === 'true' || value === 'false'
+  })
 
   // One property written out with a value a config would carry. It is what
   // separates a config the run cannot prove from the two shapes that read like
@@ -1275,7 +1304,8 @@ function convertObject(source, mask, range, ctx) {
       // `condition` beside a callback is the shape of a command entry and of a
       // `ComboboxCustomOption` as much as of a config, so it is never rewritten
       // here. It is worth a line when the object also carries a v0-only name.
-      if (isOption || !props.some((p) => p.name && NOTE_SIGNALS.has(p.name))) return null
+      if (isOption && !hasModifier) return null
+      if (!hasModifier && !props.some((p) => p.name && NOTE_SIGNALS.has(p.name))) return null
       if (!condition && !hasWrittenValue) return null
       const at = condition ?? unreadable
       return leaveAlone(
@@ -1303,7 +1333,7 @@ function convertObject(source, mask, range, ctx) {
   // Nothing proves this object is a config, so nothing here rewrites it. The
   // run says what it would have written and moves on.
   if (!ctx.proven) {
-    if (isOption) return null
+    if (isOption && !hasModifier) return null
 
     // A modifier the run cannot read is a combo it cannot advertise. Reading
     // only `true` used to drop `ctrl: isMac` from the combo it printed, and an
@@ -1327,7 +1357,10 @@ function convertObject(source, mask, range, ctx) {
     // is, and staying silent about it is the one outcome with no recovery.
     // An option keeps the run quiet, and it is checked above.
     const reads =
-      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) || hasCallback || !!condition
+      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) ||
+      hasCallback ||
+      !!condition ||
+      hasModifier
     if (!reads) return null
 
     // A `key` the run cannot read has no combo to print. The proven path
@@ -1688,6 +1721,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const result = convertObject(content, mask, object, {
       proven: isProven,
       inArray: insideArrayLiteral(content, mask, object.start, range),
+      inTemplate: range[2] === EXPRESSION,
     })
     if (!result) return
     if (result.note) {
@@ -1718,12 +1752,13 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   //
   // So nothing is recognised on the way in. Every object is opened, and an
   // object that cannot be read in full is refused rather than passed over.
-  for (const [from, to] of ranges) {
+  for (const [from, to, kind] of ranges) {
     const types = typeRanges(content, mask, from, to)
+    const head = kind === EXPRESSION ? from : -1
     for (let i = from; i < to; i++) {
       if (mask[i] || content[i] !== '{') continue
       if (types.some(([open, close]) => i >= open && i < close)) continue
-      if (!opensObjectLiteral(content, mask, i)) continue
+      if (!opensObjectLiteral(content, mask, i, head)) continue
       visit(i + 1)
     }
   }

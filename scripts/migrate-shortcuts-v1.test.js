@@ -1148,6 +1148,44 @@ useShortcut({ combo: 'Mod+K', handler: open })
     expect(migrated).toContain(`{ key: 'name', label: 'Name' }`)
   })
 
+  it('reads a config that is the whole bound attribute value', () => {
+    // Nothing stands in front of this brace but the attribute quote, so the
+    // character before it said "a block" and the object was passed over while
+    // the renames still wrote the file. Every form a binding takes is listed:
+    // the two quotes, `v-bind`, a dynamic argument, and the multi-line form.
+    const bodies = [
+      `<Modal :shortcut="{ key: 's', ctrl: true, handler: save }" />`,
+      `<Modal :shortcut='{ key: "s", ctrl: true, handler: save }' />`,
+      `<Modal v-bind="{ key: 's', ctrl: true, handler: save }" />`,
+      `<Modal :[prop]="{ key: 's', ctrl: true, handler: save }" />`,
+      `<Modal\n\t\t:shortcut="{\n\t\t\tkey: 's',\n\t\t\tctrl: true,\n\t\t\thandler: save,\n\t\t}"\n\t/>`,
+    ]
+
+    for (const body of bodies) {
+      const source = `<template>\n\t${body}\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\nuseShortcut({ combo: 'Mod+K', handler: open })\n</script>\n`
+      const { refusals } = migrateShortcuts(source, { ext: '.vue' })
+
+      expect({ body, count: refusals.length }).toEqual({ body, count: 1 })
+      expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+    }
+
+    // A class binding is an object too, and its `key` is a class name.
+    const classes = `<template>\n\t<div :class="{ key: isActive }" />\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\nuseShortcut({ combo: 'Mod+K', handler: open })\n</script>\n`
+    const { refusals, notes } = migrateShortcuts(classes, { ext: '.vue' })
+
+    expect({ refusals, notes }).toEqual({ refusals: [], notes: [] })
+  })
+
+  it('names an escape a template expression can take', () => {
+    // A template expression carries no type annotation, so "annotate it" is
+    // advice nobody can follow there. The move that makes one possible is.
+    const source = `<template>\n\t<Dropdown :options="[{ key: 'edit', handler: onEdit }]" />\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\nuseShortcut({ combo: 'Mod+K', handler: open })\n</script>\n`
+    const { refusals } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('move it into `<script>` and annotate it there')
+  })
+
   it('converts a config a template binding proves', () => {
     const source = `<template>\n\t<button @click="useShortcut({ key: 's', ctrl: true, handler: save })">go</button>\n</template>\n\n<script setup>\nimport { useShortcut } from 'frappe-ui'\n</script>\n`
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.vue' })
