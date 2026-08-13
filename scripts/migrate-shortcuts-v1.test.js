@@ -127,7 +127,7 @@ describe('combo building', () => {
     // v0 config that never fired, so the run says what to write instead.
     const { refusal } = buildCombo({ key: 'Slash', ctrl: true })
 
-    expect(refusal).toContain('`Slash` is a v1 key name')
+    expect(refusal).toContain("key 'Slash' is already a v1 key name")
     expect(refusal).toContain("`combo: 'Mod+Slash'`")
     expect(buildCombo({ key: 'wat' }).refusal).not.toContain('v1 key name')
   })
@@ -426,6 +426,36 @@ useShortcut(bindings)
 
     expect(refusals).toEqual([])
     expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+  })
+
+  it('does not call a v1 key name an unknown spelling', () => {
+    // `Equal` is a v1 name in a v0 field. Saying it has no v1 spelling and
+    // then that it is a v1 name in the same breath tells the author nothing.
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 'Equal', ctrl: true, handler: h })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).not.toContain('has no known v1 spelling')
+    expect(refusals[0].message).toContain('is already a v1 key name')
+    expect(refusals[0].message).toContain("write `combo: 'Mod+Equal'`")
+  })
+
+  it('sends an unknown key to a reference the guide really has', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 'Meta', ctrl: true, handler: h })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals[0].message).toContain('combo reference')
+
+    const guide = fs.readFileSync(
+      fileURLToPath(new URL('../docs/content/docs/migration.md', import.meta.url)),
+      'utf8',
+    )
+
+    expect(guide).toContain('### Combo reference')
   })
 
   it('names the edit that keeps a dead hold callback', () => {

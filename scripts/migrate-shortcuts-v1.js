@@ -823,12 +823,13 @@ export function keyToComboPart(key, { hasShift, prefix = '' } = {}) {
 
   // A v1 key name in a v0 `key` field lands here, because v0 compared
   // `event.key` and never saw that spelling.
-  const v1Name = key in PUNCTUATION_VALUES || SHIFTED_VALUES.has(key)
-  const hint = v1Name
-    ? ` \`${key}\` is a v1 key name, so write ${write(key)} instead of a \`key\`.`
-    : ''
+  if (key in PUNCTUATION_VALUES || SHIFTED_VALUES.has(key)) {
+    return {
+      refusal: `key '${key}' is already a v1 key name, and v0 never matched it — this shortcut has not been firing. The name belongs in \`combo\`, so write ${write(key)} instead of a \`key\`.`,
+    }
+  }
   return {
-    refusal: `key '${key}' has no known v1 spelling. Take the name from the combo reference in the migration guide.${hint}`,
+    refusal: `key '${key}' has no known v1 spelling. Take the name from the combo reference in the migration guide.`,
   }
 }
 

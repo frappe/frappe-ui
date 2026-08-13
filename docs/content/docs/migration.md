@@ -2684,6 +2684,25 @@ never presses and report a clean run.
 Write the `combo` the line gives you. Putting a v1 key name back in `key`
 leaves a v0 config, which never fired, and the next run refuses it again.
 
+### Combo reference
+
+Every key name a `combo` can hold. A refused line points here when it cannot
+build the name for you.
+
+| Kind | Names |
+| --- | --- |
+| Modifiers | `Mod`, `Ctrl`, `Alt`, `Shift`, in that order |
+| Letters | `A` to `Z`, uppercase |
+| Digits | `Digit0` to `Digit9` |
+| Editing | `Escape`, `Enter`, `Tab`, `Backspace`, `Delete`, `Space`, `Insert` |
+| Navigation | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown` |
+| Function | `F1` to `F12` |
+| Punctuation | `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight` |
+
+`Mod` is Command on macOS and Control everywhere else. A name goes in `combo`,
+never back in `key`: `key` is the v0 field, and v0 compared it to
+`KeyboardEvent.key`, which reports none of these spellings.
+
 ### Digits convert, and get listed
 
 `{ key: '1', ctrl: true, shift: true }` becomes `{ combo: 'Mod+Shift+Digit1' }`.
