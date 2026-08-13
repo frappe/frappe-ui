@@ -40,7 +40,7 @@ useKeyboardShortcut({
   description: 'Show keyboard shortcuts',
   group: 'General',
   allowInDialog: true,
-  handler: () => (open.value = true),
+  handler: () => (open.value = !open.value),
 })
 </script>
 
@@ -48,6 +48,9 @@ useKeyboardShortcut({
   <KeyboardShortcutsDialog v-model:open="open" />
 </template>
 ```
+
+`allowInDialog: true` lets the combo answer while the dialog holds focus, so the
+same keys close it again. The handler toggles for that reason.
 
 `Mod+Shift+Slash` is the `?` most apps use. The combo names the physical key,
 not the character it types. See
