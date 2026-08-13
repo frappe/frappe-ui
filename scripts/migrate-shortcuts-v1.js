@@ -90,6 +90,9 @@
  * where the file imports it from the `frappe-ui` barrel, or does not bind it
  * at all. crm, lms and suite's meet app each ship a local
  * `useKeyboardShortcuts`, one character from the new name.
+ *
+ * A fork silences its own calls, not the file. A frappe-ui registration a few
+ * lines below one still converts.
  */
 
 import fs from 'fs'
@@ -1129,19 +1132,27 @@ function balancedRange(source, mask, open) {
 // `maxDepth` is how deep inside the span an object may sit and still be the
 // thing the span is about: one level for a call, because the argument may be
 // an array, and none for an annotated value, because the array is the value.
-function provenRanges(source, mask, bindings) {
+// The argument list of every call to one of `names`. `maxDepth` is 1 because
+// the argument may be an array of configs.
+function callRanges(source, mask, names) {
   const ranges = []
-
-  const callNames = CALL_NAMES.filter((name) => fromBarrel(bindings, name))
-  if (callNames.length > 0) {
-    const call = new RegExp(`\\b(?:${callNames.join('|')})\\s*\\(`, 'g')
-    let m
-    while ((m = call.exec(source))) {
-      if (mask[m.index]) continue
-      const span = balancedRange(source, mask, m.index + m[0].length - 1)
-      if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 1 })
-    }
+  if (names.length === 0) return ranges
+  const call = new RegExp(`\\b(?:${names.join('|')})\\s*\\(`, 'g')
+  let m
+  while ((m = call.exec(source))) {
+    if (mask[m.index]) continue
+    const span = balancedRange(source, mask, m.index + m[0].length - 1)
+    if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 1 })
   }
+  return ranges
+}
+
+function provenRanges(source, mask, bindings) {
+  const ranges = callRanges(
+    source,
+    mask,
+    CALL_NAMES.filter((name) => fromBarrel(bindings, name)),
+  )
 
   const typeNames = CONFIG_TYPES.filter((name) => fromBarrel(bindings, name))
   if (typeNames.length > 0) {
@@ -1215,9 +1226,18 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   const proven = provenRanges(content, mask, bindings)
 
   // The app's own `useShortcut`. Four of the apps we care about ship one, and
-  // helpdesk's takes `(binding, callback)`, not a config. None of its objects
-  // is ours, so the run says one line and touches nothing.
-  const forked = CALL_NAMES.some((name) => appOwns(name))
+  // helpdesk's takes `(binding, callback)`, not a config. An object that call
+  // receives is the app's, so the run says nothing about it — no edit in this
+  // file could ever clear a refusal on one.
+  //
+  // The scope is the name, not the file. A fork imported beside frappe-ui's
+  // own call used to silence object scanning for the whole file, so a provable
+  // registration a few lines down was left on v0 with nothing printed.
+  const owned = callRanges(
+    content,
+    mask,
+    CALL_NAMES.filter((name) => appOwns(name)),
+  )
 
   const seen = new Set()
   const visit = (offset) => {
@@ -1228,12 +1248,17 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
 
-    const isProven = proven.some(
-      (span) =>
-        object.start > span.open &&
-        object.end <= span.end + 1 &&
-        holdsDirectly(content, mask, span, object.start),
-    )
+    const held = (spans) =>
+      spans.some(
+        (span) =>
+          object.start > span.open &&
+          object.end <= span.end + 1 &&
+          holdsDirectly(content, mask, span, object.start),
+      )
+
+    if (held(owned)) return
+
+    const isProven = held(proven)
     const result = convertObject(content, mask, object, { proven: isProven })
     if (!result) return
     if (result.note) {
@@ -1257,19 +1282,17 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   //
   // The scan lands on the colon, never on the name, because a quoted name is
   // masked as a string and the mask is what tells code from prose.
-  if (!forked) {
-    for (const pattern of [
-      /(?:\bkey\b|['"]key['"])\s*:/g,
-      /(?:\bcondition\b|['"]condition['"])\s*:/g,
-      // A shorthand `condition`, which carries its value in the name.
-      /\bcondition\s*(?=[,}])/g,
-    ]) {
-      let m
-      while ((m = pattern.exec(content))) {
-        const at = m.index + m[0].length - 1
-        if (mask[at]) continue
-        visit(at)
-      }
+  for (const pattern of [
+    /(?:\bkey\b|['"]key['"])\s*:/g,
+    /(?:\bcondition\b|['"]condition['"])\s*:/g,
+    // A shorthand `condition`, which carries its value in the name.
+    /\bcondition\s*(?=[,}])/g,
+  ]) {
+    let m
+    while ((m = pattern.exec(content))) {
+      const at = m.index + m[0].length - 1
+      if (mask[at]) continue
+      visit(at)
     }
   }
 

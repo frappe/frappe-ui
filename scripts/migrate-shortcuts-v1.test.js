@@ -932,6 +932,36 @@ useShortcut({ key: 's', description: 'Save', handler: save })
     expect(notes[0].message).toContain("comes from '@/composables/shortcuts'")
   })
 
+  it("converts frappe-ui's own call in a file that also imports a fork", () => {
+    // One forked import used to disable object scanning for the whole file, so
+    // a provable frappe-ui registration beside it was left on v0 in silence.
+    const source = `import { useShortcut } from './composables/shortcuts'
+import { useKeyboardShortcut } from 'frappe-ui'
+
+useShortcut({ key: 'n', description: 'New ticket' }, create)
+useKeyboardShortcut([{ key: 's', ctrl: true, description: 'Save', handler: save }])
+`
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+    expect(migrated).toContain("useShortcut({ key: 'n', description: 'New ticket' }, create)")
+    expect(notes.some((n) => n.message.includes("comes from './composables/shortcuts'"))).toBe(true)
+  })
+
+  it("says nothing about an object the app's own composable receives", () => {
+    // The fork's config is the app's. It is not frappe-ui's shape, and no edit
+    // in this file would ever clear a refusal on it.
+    const source = `import { useShortcut } from '@/composables/shortcuts'
+import { KeyboardShortcutsModal } from 'frappe-ui'
+useShortcut({ key: 'n', description: 'New ticket', handler: create })
+`
+    const { notes, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(notes).toHaveLength(1)
+  })
+
   it('leaves a locally declared useShortcut alone', () => {
     const source = `export interface ShortcutBinding {
   key: string
@@ -1197,6 +1227,26 @@ useShortcut({ key: 'k', ctrl: true, description: 'Open the palette', handler: op
     expect(fs.readFileSync(path.join(dir, 'Palette.vue'), 'utf8')).toContain(
       "useKeyboardShortcut({ combo: 'Mod+K', description: 'Open the palette', handler: open })",
     )
+  })
+
+  it('migrates the frappe-ui half of a file that also uses the fork', () => {
+    const before = `<script setup lang="ts">
+import { useShortcut } from '@/composables/shortcuts'
+import { useKeyboardShortcut } from 'frappe-ui'
+
+useShortcut({ key: 'n', meta: true, description: 'New ticket' }, create)
+useKeyboardShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
+</script>
+`
+    const dir = tempDir({ 'Ticket.vue': before })
+    const result = run([dir])
+    const after = fs.readFileSync(path.join(dir, 'Ticket.vue'), 'utf8')
+
+    expect(result.status).toBe(0)
+    expect(after).toContain(
+      "useKeyboardShortcut({ combo: 'Mod+S', description: 'Save', handler: save })",
+    )
+    expect(after).toContain("useShortcut({ key: 'n', meta: true, description: 'New ticket' }, create)")
   })
 
   it('is safe to run twice', () => {
