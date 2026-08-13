@@ -864,6 +864,21 @@ const UNMAPPED_V1_NAMES = new Set(['Plus'])
 // Modifier order is fixed, so one combo has exactly one spelling.
 const MODIFIER_ORDER = ['Mod', 'Ctrl', 'Alt', 'Shift']
 
+// The combo carries the modifiers, so the v0 flags beside the key go with it.
+// An author who writes the `combo` the refusal names and leaves `ctrl: true`
+// behind hears nothing on the next run — with no `key`, the object is not a
+// config the run reads — and the flag reaches v1 as an excess property. A
+// refusal that names the property to write has to name the ones to delete.
+//
+// A flag set to `false` counts: it is the same excess property, and the
+// converting path deletes it too.
+function flagsToDrop(flags) {
+  const names = MODIFIER_PROPS.filter((name) => flags[name] !== undefined).map((n) => `\`${n}\``)
+  if (names.length === 0) return ''
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`
+  return ` Delete ${list} with the \`key\`.`
+}
+
 export function buildCombo({ key, ctrl, alt, shift }) {
   const held = new Set()
   // v0's `ctrl` matched `ctrlKey || metaKey`, so it always meant Mod.
@@ -878,7 +893,7 @@ export function buildCombo({ key, ctrl, alt, shift }) {
     hasShift: !!shift,
     prefix,
   })
-  if (refusal) return { refusal }
+  if (refusal) return { refusal: `${refusal}${flagsToDrop({ ctrl, alt, shift })}` }
 
   return { combo: [...modifiers, part].join('+'), digit, revived }
 }

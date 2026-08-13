@@ -108,6 +108,19 @@ describe('combo building', () => {
     expect(buildCombo({ key: '?' }).refusal).toContain("`combo: 'Shift+Slash'`")
   })
 
+  it('names the modifier flags to delete beside the combo it asks for', () => {
+    // The combo carries the modifiers. An author who writes it and leaves
+    // `ctrl: true` behind hears nothing on the next run — with no `key` there
+    // is nothing left to refuse — and the flag reaches v1.
+    expect(buildCombo({ key: '=', ctrl: true }).refusal).toContain('Delete `ctrl` with the `key`.')
+    // A flag set to `false` is as much an excess property in v1, and the
+    // successful path deletes it too.
+    expect(buildCombo({ key: '=', ctrl: true, alt: false, shift: true }).refusal).toContain(
+      'Delete `ctrl`, `alt` and `shift` with the `key`.',
+    )
+    expect(buildCombo({ key: '=' }).refusal).not.toContain('Delete')
+  })
+
   it('never doubles Shift when the site already holds it', () => {
     // The v1 name of a shifted character carries its own Shift. Helpdesk
     // writes `{ key: '>', shift: true }`, and `Shift+Shift+Period` is not a
@@ -685,6 +698,15 @@ useShortcut([
 
     expect(migrated).toContain('condition: a, enabled: b')
     expect(refusals[0].message).toContain('would write `enabled` twice')
+  })
+
+  it('names the flags to delete on a refused site', () => {
+    const { refusals } = migrateShortcuts(
+      inCall("{ key: '=', ctrl: true, description: 'Zoom in', handler: zoomIn }"),
+    )
+
+    expect(refusals[0].message).toContain("Write `combo: 'Mod+Equal'` by hand.")
+    expect(refusals[0].message).toContain('Delete `ctrl` with the `key`.')
   })
 
   it('refuses an object that carries both key and combo', () => {

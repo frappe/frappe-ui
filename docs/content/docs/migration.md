@@ -2665,14 +2665,19 @@ separator and a key, so `{ key: '+', ctrl: true }` written by hand becomes
 the build passes, the types pass, and you get one dev-console warning that a
 production build drops.
 
-So the codemod stops on the site and prints the whole `combo` to write:
+So the codemod stops on the site and prints the whole `combo` to write, with
+the modifier flags to delete beside the `key`:
 
 ```
 ✗ Not converted — 3 sites need a decision:
-  src/sheets/useShortcuts.js:L95  key '=' is punctuation ... Write `combo: 'Mod+Equal'` by hand.
-  src/sheets/useShortcuts.js:L96  key '+' is a shifted character ... Write `combo: 'Mod+Shift+Equal'` by hand.
-  src/Commands/index.ts:L196      key '?' is a shifted character ... Write `combo: 'Mod+Shift+Slash'` by hand.
+  src/sheets/useShortcuts.js:L95  key '=' is punctuation ... Write `combo: 'Mod+Equal'` by hand. Delete `ctrl` with the `key`.
+  src/sheets/useShortcuts.js:L96  key '+' is a shifted character ... Write `combo: 'Mod+Shift+Equal'` by hand. Delete `ctrl` with the `key`.
+  src/Commands/index.ts:L196      key '?' is a shifted character ... Write `combo: 'Mod+Shift+Slash'` by hand. Delete `ctrl` with the `key`.
 ```
+
+The combo carries the modifiers. A `ctrl: true` left beside a hand-written
+`combo` reaches v1 as an excess property, and no later run mentions it: with
+no `key` there is nothing left to refuse.
 
 The named keys are `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`,
 `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft` and
