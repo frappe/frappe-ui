@@ -38,7 +38,10 @@
         </template>
       </InputLabel>
     </div>
-    <div v-if="showDescription || hasError" class="ps-[1.35rem] mt-1">
+    <div
+      v-if="showDescription || hasError || $slots.description"
+      class="ps-[1.35rem] mt-1"
+    >
       <InputDescription
         v-if="showDescription || $slots.description"
         :id="descriptionId"

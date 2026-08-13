@@ -70,6 +70,21 @@ describe('Checkbox', () => {
   })
 
   describe('shared labeling contract', () => {
+    it('describes the input from a #description slot alone', () => {
+      // The wrapper around the description is its own `v-if` here, so it has to
+      // count the slot too. Without that, `aria-describedby` names an id that
+      // never mounts.
+      cy.mount(Checkbox, {
+        props: { label: 'Accept' },
+        slots: { description: () => h('span', 'Required to continue.') },
+      })
+      cy.get('input')
+        .invoke('attr', 'aria-describedby')
+        .then((id) => {
+          cy.get(`#${id}`).should('contain.text', 'Required to continue.')
+        })
+    })
+
     it('wires aria-describedby and aria-errormessage', () => {
       cy.mount(Checkbox, {
         props: { label: 'Accept', description: 'Required to continue.' },
