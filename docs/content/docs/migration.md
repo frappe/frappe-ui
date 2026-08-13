@@ -2592,6 +2592,11 @@ shortcuts converted. Half a migration puts a renamed call beside a config with
 no `combo`, and v1 throws on the first keypress. Fix the sites the run names,
 then run again and take the whole file at once.
 
+The same rule decides an object the codemod cannot prove is a config. In a file
+it would otherwise write, that object is a refusal and the file stays as it
+was. In a file with nothing else to change, it is advice, and the run exits
+zero. A file the run names is never written, whichever the line was.
+
 The codemod does not reflow the code it edits. Run your formatter after it.
 
 ### What it rewrites
@@ -2629,7 +2634,19 @@ one with `.map()`, writes the same names for something else.
 
 The cost is a registration written away from its call and with no annotation.
 The codemod does not rewrite it. It names it instead, with the `combo` to
-write. See "What it lists without failing the run".
+write.
+
+```ts
+import { useShortcut } from 'frappe-ui'
+
+// Refused: the call renames, so writing this file would leave the array on v0.
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }]
+useShortcut(bindings)
+```
+
+Clear that line in one of three ways: write the `combo` by hand, annotate the
+array `KeyboardShortcutConfig[]` from `frappe-ui` so the next run can prove it,
+or migrate the whole file by hand and leave the run nothing to write.
 
 ### Punctuation keys are never converted
 
@@ -2693,6 +2710,10 @@ Each of these exits the run non-zero. Fix them by hand.
 - **A `vi.mock('frappe-ui', ...)` keyed on `useShortcut`.** The codemod renames
   the mock key, but the captured configs still carry `key` / `ctrl`, so the
   assertions move with the registrations.
+- **An object that reads like a config, where the run cannot prove it, in a
+  file it would otherwise write.** A `key` string beside a `handler` or a
+  `condition` is enough to name it, with or without a modifier. See "What it
+  rewrites".
 
 ### What it lists without failing the run
 
@@ -2702,10 +2723,12 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
 - **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
   `'spacebar'`. v0 compared `event.key`, which never reports those, so the
   shortcut never fired. The combo does fire, so the shortcut is live now.
-- **An object that reads like a config, in a place the run cannot prove.** The
-  line gives the `combo` to write. Take it if the object is a registration: v1
-  throws on a config with no `combo`. An object that carries an option-only
-  name, such as `label`, `options`, `onClick` or `type`, is never listed.
+- **An object that reads like a config, in a place the run cannot prove, in a
+  file with nothing else to change.** The line gives the `combo` to write. Take
+  it if the object is a registration: v1 throws on a config with no `combo`. An
+  object that carries an option-only name, such as `label`, `options`,
+  `onClick` or `type`, is never listed, and neither is one your own composable
+  receives.
 - **Your own `useShortcut` or `ShortcutConfig`**, imported from your module or
   declared in the file. Nothing in that file is touched.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
@@ -2723,6 +2746,10 @@ keeps its name, and the run says so and moves on. helpdesk ships a
 that one is left as it is. crm, lms and suite each ship a local
 `useKeyboardShortcuts`, one character from the new name; those are untouched
 too.
+
+A fork silences its own calls, not the whole file. A `useKeyboardShortcut(...)`
+imported from `frappe-ui` a few lines below your own `useShortcut` still
+converts, and the objects your composable receives are still left alone.
 
 A rename also stays inside code. A name in a string, a module specifier or a
 comment keeps its spelling. In a `.vue` template only three places rename: the
