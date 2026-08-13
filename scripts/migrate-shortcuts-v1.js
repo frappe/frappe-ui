@@ -2028,8 +2028,10 @@ function main() {
     // A note is advice about a site the run did not touch, so it carries over
     // whatever happened to the file. The interesting one lands in a file with
     // no change at all: an app's own fork, or a config array nothing proves.
+    // A refused file is the one exception: it is unchanged, so listing its
+    // notes would name work nobody did.
     for (const refusal of refusals) allRefusals.push({ file, ...refusal })
-    for (const note of notes) allNotes.push({ file, ...note })
+    if (refusals.length === 0) for (const note of notes) allNotes.push({ file, ...note })
 
     const changeCount = changes.length + renames.length
     if (changeCount === 0) continue

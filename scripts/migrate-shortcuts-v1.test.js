@@ -2048,6 +2048,7 @@ useShortcut(bindings)
     const before = `import { useShortcut } from 'frappe-ui'
 useShortcut([
   { key: '1', ctrl: true, description: 'First', handler: first },
+  { key: 'esc', description: 'Close', handler: close },
   { key: '+', ctrl: true, description: 'Zoom in', handler: zoom },
 ])
 `
@@ -2057,7 +2058,26 @@ useShortcut([
     expect(result.status).toBe(1)
     expect(result.stdout).toContain('left alone')
     expect(result.stdout).not.toContain('Digit keys converted')
+    // The `esc` site would earn a revival note in a file the run writes. Here
+    // it never fires, because the file is left as it was.
+    expect(result.stdout).not.toContain('do not fail the run')
+    expect(result.stdout).not.toContain('live now')
     expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toBe(before)
+  })
+
+  it('lists the revival note for a file it wrote', () => {
+    // The same `esc` site, in a file with nothing to refuse. The run writes it,
+    // so the shortcut does fire now and the note has to say so.
+    const before = `import { useShortcut } from 'frappe-ui'
+useShortcut([{ key: 'esc', description: 'Close', handler: close }])
+`
+    const dir = tempDir({ 'a.js': before })
+    const result = run([dir])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('do not fail the run')
+    expect(result.stdout).toContain('live now')
+    expect(fs.readFileSync(path.join(dir, 'a.js'), 'utf8')).toContain("combo: 'Escape'")
   })
 
   it('migrates the one file that imports the real composable, in an app that forks it', () => {
