@@ -1181,9 +1181,10 @@ function callRanges(source, mask, names) {
 //
 //  - the argument list of a `useShortcut(...)` call whose name this file
 //    imports from frappe-ui, and
-//  - a literal typed with a frappe-ui config type, either by annotation,
-//    `const shortcuts: ShortcutConfig[] = [ ... ]`, or by a `satisfies`
-//    clause, `const shortcuts = [ ... ] satisfies ShortcutConfig[]`.
+//  - a literal typed with a frappe-ui config type, by an annotation,
+//    `const shortcuts: ShortcutConfig[] = [ ... ]`, or by a clause that
+//    follows it, `[ ... ] satisfies ShortcutConfig[]` and `[ ... ] as
+//    ShortcutConfig[]`.
 //
 // A field name is never a source. `key`, `group`, `description`, `handler` and
 // `condition` are frappe-ui's own option vocabulary as much as the shortcut
@@ -1216,15 +1217,20 @@ function provenRanges(source, mask, bindings) {
       if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 0 })
     }
 
-    // `const shortcuts = [ ... ] satisfies KeyboardShortcutConfig[]`. The type
-    // is the same proof; only its position moves, so the literal is read
-    // backwards from the clause.
-    const satisfied = new RegExp(
-      `\\bsatisfies\\s+(?:${typeNames.join('|')})(?:\\s*\\[\\s*\\])?`,
+    // `const shortcuts = [ ... ] satisfies KeyboardShortcutConfig[]`, and the
+    // `as` cast that spells the same thing. The type is the same proof; only
+    // its position moves, so the literal is read backwards from the clause.
+    //
+    // A literal has to sit in front of it. `raw as ShortcutConfig[]` types
+    // `raw`, `import * as ShortcutConfig` names a module, and neither ends in
+    // `]` or `}`, so neither reaches an array further up the file. `as const`
+    // on its own names no type and proves nothing.
+    const typed = new RegExp(
+      `(?:\\bas\\s+const\\s+)?\\b(?:satisfies|as)\\s+(?:readonly\\s+)?(?:${typeNames.join('|')})(?:\\s*\\[\\s*\\])?`,
       'g',
     )
     let s
-    while ((s = satisfied.exec(source))) {
+    while ((s = typed.exec(source))) {
       if (mask[s.index]) continue
       let at = s.index - 1
       while (at >= 0 && (mask[at] || /\s/.test(source[at]))) at--

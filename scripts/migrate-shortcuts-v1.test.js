@@ -404,6 +404,53 @@ useShortcut(bindings)
     expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
   })
 
+  it('converts an array under as const satisfies readonly', () => {
+    const source = `import { useShortcut, type KeyboardShortcutConfig } from 'frappe-ui'
+const bindings = [
+  { key: 's', ctrl: true, description: 'Save', handler: save },
+] as const satisfies readonly KeyboardShortcutConfig[]
+useShortcut(bindings)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+  })
+
+  it('converts a literal cast to the config type', () => {
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }] as ShortcutConfig[]
+useShortcut(bindings)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+  })
+
+  it('proves nothing from as const alone', () => {
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }] as const
+useShortcut(bindings)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+  })
+
+  it('proves nothing from a cast that has no literal in front of it', () => {
+    // The clause types the expression it follows. `raw as ShortcutConfig[]`
+    // types `raw`, and must not reach back to an unrelated array above it.
+    const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }]
+const typed = raw as ShortcutConfig[]
+useShortcut(bindings)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals.some((r) => r.line === 2)).toBe(true)
+  })
+
   it('proves nothing from a satisfies clause naming the app-s own type', () => {
     const source = `import { useShortcut } from 'frappe-ui'
 import type { ShortcutConfig } from './types'

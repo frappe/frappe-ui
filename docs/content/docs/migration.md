@@ -2607,7 +2607,7 @@ The codemod rewrites an object in two places only:
   name is imported from `frappe-ui` in the same file.
 - Inside an array or object literal typed `ShortcutConfig` or
   `KeyboardShortcutConfig`, where that type is imported from `frappe-ui`. An
-  annotation and a `satisfies` clause both count.
+  annotation, a `satisfies` clause and an `as` cast all count.
 
 Both places name frappe-ui. Nothing else does.
 
@@ -2622,7 +2622,7 @@ const bindings: ShortcutConfig[] = [
   { key: 'k', ctrl: true, description: 'Palette', handler: open },
 ]
 
-// Rewritten: a `satisfies` clause names the same type.
+// Rewritten: a clause after the literal names the same type.
 const save = { key: 's', ctrl: true, description: 'Save', handler: onSave } satisfies ShortcutConfig
 
 // Left alone: nothing here says frappe-ui.
