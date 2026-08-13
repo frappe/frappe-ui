@@ -132,6 +132,32 @@ describe('combo building', () => {
     expect(buildCombo({ key: 'wat' }).refusal).not.toContain('v1 key name')
   })
 
+  it('recognises every punctuation name the combo reference lists', () => {
+    // The reference is the "Punctuation" row of the combo table in
+    // docs/content/docs/migration.md. `Plus` is on it and no v0 character
+    // maps to it, so it used to fall through to "no known v1 spelling" —
+    // advice that sent the reader to a table that does list the name.
+    const reference = [
+      'Plus',
+      'Minus',
+      'Equal',
+      'Slash',
+      'Backslash',
+      'Backtick',
+      'Comma',
+      'Period',
+      'Semicolon',
+      'Quote',
+      'BracketLeft',
+      'BracketRight',
+    ]
+
+    for (const name of reference) {
+      expect(keyToComboPart(name).refusal).toContain('already a v1 key name')
+    }
+    expect(buildCombo({ key: 'Plus', ctrl: true }).refusal).toContain("`combo: 'Mod+Plus'`")
+  })
+
   it('refuses an uppercase letter that carries no shift flag', () => {
     // v0's matchesShortcut compared the letter case-insensitively and skipped
     // its Shift check for an uppercase key, so it fired both ways.

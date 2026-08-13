@@ -837,7 +837,7 @@ export function keyToComboPart(key, { hasShift, prefix = '' } = {}) {
 
   // A v1 key name in a v0 `key` field lands here, because v0 compared
   // `event.key` and never saw that spelling.
-  if (key in PUNCTUATION_VALUES || SHIFTED_VALUES.has(key)) {
+  if (key in PUNCTUATION_VALUES || SHIFTED_VALUES.has(key) || UNMAPPED_V1_NAMES.has(key)) {
     return {
       refusal: `key '${key}' is already a v1 key name, and v0 never matched it — this shortcut has not been firing. The name belongs in \`combo\`, so write ${write(key)} instead of a \`key\`.`,
     }
@@ -853,6 +853,13 @@ const PUNCTUATION_VALUES = Object.fromEntries(
   Object.values(PUNCTUATION_NAMES).map((name) => [name, true]),
 )
 const SHIFTED_VALUES = new Set(Object.values(SHIFTED_CHARS).map((c) => c.split('+').pop()))
+
+// A v1 key name the two tables above cannot produce, because no character a
+// keyboard types maps to it. `Plus` is the keypad `+`; a normal `+` is
+// `Shift+Equal`. It is still on the combo reference, so an author can read it
+// there and put it back in `key` — and then the run has to know the name, or
+// it sends them to the reference for a name the reference already lists.
+const UNMAPPED_V1_NAMES = new Set(['Plus'])
 
 // Modifier order is fixed, so one combo has exactly one spelling.
 const MODIFIER_ORDER = ['Mod', 'Ctrl', 'Alt', 'Shift']
