@@ -200,7 +200,20 @@ for (const [from, to] of [
 // never reports these spellings. So a shortcut written this way never fired.
 // Normalising it makes a dead shortcut live, which is a behaviour change and
 // gets a note. `' '` is not here: `event.key` really does report it.
-const DEAD_V0_SPELLINGS = new Set(['esc', 'del', 'spacebar', 'up', 'down', 'left', 'right'])
+//
+// `space` is the one word in NAMED_KEYS that `event.key` never reports — it is
+// the space bar's `event.code`, and `event.key` gives `' '`. Every other name
+// in that list is a real `event.key` value, checked key by key in a browser.
+const DEAD_V0_SPELLINGS = new Set([
+  'esc',
+  'del',
+  'space',
+  'spacebar',
+  'up',
+  'down',
+  'left',
+  'right',
+])
 
 // ---------- IDENTIFIER RENAMES ----------
 

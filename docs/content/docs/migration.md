@@ -2751,9 +2751,11 @@ Each of these exits the run non-zero. Fix them by hand.
 None of these fails the run. Read them and decide if the code wants a rewrite.
 
 - **Every digit it converted.** See above.
-- **A v0 key spelling that never matched**, such as `'esc'`, `'up'` or
-  `'spacebar'`. v0 compared `event.key`, which never reports those, so the
-  shortcut never fired. The combo does fire, so the shortcut is live now.
+- **A v0 key spelling that never matched**, such as `'esc'`, `'up'`,
+  `'spacebar'` or `'space'`. v0 compared `event.key`, which never reports
+  those, so the shortcut never fired. The combo does fire, so the shortcut is
+  live now. `'space'` is on the list because `event.key` gives `' '` for the
+  space bar; `Space` is that key's `event.code`.
 - **An object that reads like a config, in a place the run cannot prove, in a
   file with nothing else to change.** The line gives the `combo` to write. Take
   it if the object is a registration: v1 throws on a config with no `combo`. An

@@ -158,6 +158,20 @@ describe('combo building', () => {
     expect(notes).toEqual([])
   })
 
+  it('notes the word Space, which event.key never reports', () => {
+    // `event.key` reports ' ' for the space bar; 'Space' is its `event.code`.
+    // v0 compared `event.key`, so both spellings of the word never matched.
+    for (const spelling of ['Space', 'space']) {
+      const { notes, migrated } = migrateShortcuts(
+        inCall(`{ key: '${spelling}', ctrl: true, description: 'Pan', handler: pan }`),
+      )
+
+      expect(migrated).toContain("combo: 'Mod+Space'")
+      expect(notes).toHaveLength(1)
+      expect(notes[0].message).toContain('never matched in v0')
+    }
+  })
+
   it('refuses a key it has no v1 spelling for', () => {
     expect(keyToComboPart('Meta').refusal).toContain('no known v1 spelling')
   })
