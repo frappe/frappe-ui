@@ -386,16 +386,6 @@ which P2 says new components do not inherit. `v-model:tab` is unchanged.
 the dialog never opens. See the
 [migration guide](/docs/migration#settingsdialog).
 
-### CommandPalette — `searchQuery` renamed to `query` (breaking, silent)
-
-`v-model:searchQuery` → `v-model:query`, and `update:searchQuery` →
-`update:query` (#1054). `Combobox` and `MultiSelect` already bind the
-controlled search text as `v-model:query`; one concept gets one name (P1).
-
-**Silent break:** the unknown `searchQuery` prop is accepted, so the palette
-holds its own query and your binding never updates. See the
-[migration guide](/docs/migration#commandpalette).
-
 ### Dialog — `theme: 'yellow'` renamed to `'amber'` (breaking, silent)
 
 `DialogTheme` held the library's last `yellow` (#1054). `Alert`, `SidebarCard`,
