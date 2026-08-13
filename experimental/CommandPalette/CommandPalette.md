@@ -35,6 +35,9 @@ editor:
 useKeyboardShortcut({
   combo: 'Mod+K',
   description: 'Open command palette',
+  // Guards are off by default, so without this the shortcut dies as soon as
+  // any field has focus.
+  allowInInput: true,
   handler: () => (open.value = true),
 })
 ```

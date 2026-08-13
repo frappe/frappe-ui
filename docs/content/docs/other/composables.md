@@ -124,6 +124,7 @@ useKeyboardShortcut({
   combo: 'Mod+K',
   description: 'Open command palette',
   group: 'General',
+  allowInInput: true,
   handler: () => open(),
 })
 </script>

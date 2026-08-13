@@ -2610,9 +2610,14 @@ the app knows the answer:
 useKeyboardShortcut({
   combo: 'Mod+K',
   description: 'Open command palette',
+  allowInInput: true,
   handler: () => (open.value = true),
 })
 ```
+
+Keep `allowInInput: true`. The old palette set it, and `useKeyboardShortcut`
+defaults it to `false`, so leaving it out gives you a `Mod+K` that stops
+working the moment a field has focus.
 
 ### If you are on `1.0.0-beta` or older
 
