@@ -153,7 +153,7 @@ export function getMenuIconColor(item: {
   theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-5' : 'text-ink-gray-6'
+  return item.theme === 'red' ? 'text-ink-red-7' : 'text-ink-gray-6'
 }
 
 export function getMenuTextColor(item: {
@@ -161,7 +161,7 @@ export function getMenuTextColor(item: {
   theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-5' : 'text-ink-gray-7'
+  return item.theme === 'red' ? 'text-ink-red-7' : 'text-ink-gray-7'
 }
 
 export function getMenuBackgroundColor(item: { theme?: MenuTheme }) {
