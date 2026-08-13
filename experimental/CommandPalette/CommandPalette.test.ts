@@ -27,6 +27,7 @@ afterEach(() => {
 
 interface MountOptions {
   query?: string
+  title?: string
   filterable?: boolean
   onSelect?: (value: any, event: CustomEvent) => void
   onUpdateOpen?: (value: boolean) => void
@@ -43,6 +44,7 @@ function mount(options: MountOptions = {}) {
           {
             open: true,
             query: query.value,
+            title: options.title,
             filterable: options.filterable,
             'onUpdate:query': (value: string) => (query.value = value),
             'onUpdate:open': options.onUpdateOpen,
@@ -235,6 +237,24 @@ describe('CommandPalette', () => {
       '[data-slot="command-palette-empty"]',
     ) as HTMLElement
     expect(empty.textContent?.trim()).toBe('No results')
+  })
+
+  it('names the listbox with the dialog title', async () => {
+    // Without a name the listbox is an unlabelled control. The title is the
+    // caller's own string and already names the dialog, so it names both.
+    mount()
+    await flush()
+    expect(
+      document.querySelector('[role="listbox"]')?.getAttribute('aria-label'),
+    ).toBe('Command palette')
+    app?.unmount()
+    document.body.innerHTML = ''
+
+    mount({ title: 'Jump to' })
+    await flush()
+    expect(
+      document.querySelector('[role="listbox"]')?.getAttribute('aria-label'),
+    ).toBe('Jump to')
   })
 
   it('lets go of the highlight when the filter empties the list', async () => {

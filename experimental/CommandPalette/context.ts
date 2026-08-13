@@ -16,6 +16,8 @@ export interface CommandPaletteItemRegistration {
 export interface CommandPaletteContext {
   /** The palette's `query` model. `CommandPaletteInput` writes to it. */
   query: Ref<string>
+  /** The dialog's heading. `CommandPaletteList` names the listbox with it. */
+  title: ComputedRef<string>
   /** Whether the client filter runs (ADR-0009). */
   filterable: ComputedRef<boolean>
   /** The value of the item the keyboard is on. */

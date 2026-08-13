@@ -14,7 +14,7 @@
   },
   {
     name: 'title',
-    description: 'The dialog\'s accessible name. It is read by screen readers and never\ndrawn, because the palette\'s shell has no header.',
+    description: 'The dialog\'s accessible name, and the list\'s. It is read by screen readers\nand never drawn, because the palette\'s shell has no header.',
     required: false,
     type: 'string',
     default: '"Command palette"'

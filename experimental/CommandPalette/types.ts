@@ -27,8 +27,8 @@ export interface CommandPaletteProps {
    */
   filterable?: boolean
   /**
-   * The dialog's accessible name. It is read by screen readers and never
-   * drawn, because the palette's shell has no header.
+   * The dialog's accessible name, and the list's. It is read by screen readers
+   * and never drawn, because the palette's shell has no header.
    */
   title?: string
 }

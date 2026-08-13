@@ -189,6 +189,7 @@ const slotProps = computed<CommandPaletteSlotProps>(() => ({
 
 provideCommandPaletteContext({
   query,
+  title: computed(() => props.title),
   filterable: computed(() => props.filterable),
   activeValue,
   empty,

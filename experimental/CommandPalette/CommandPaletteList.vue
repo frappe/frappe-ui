@@ -2,6 +2,7 @@
   <ListboxContent
     as="div"
     data-slot="command-palette-list"
+    :aria-label="palette?.title.value"
     class="min-h-0 overflow-y-auto overscroll-contain focus-visible:outline-none"
   >
     <slot />
