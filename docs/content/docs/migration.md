@@ -2605,8 +2605,9 @@ The codemod rewrites an object in two places only:
 
 - Inside a `useShortcut(...)` or `useKeyboardShortcut(...)` call, where the
   name is imported from `frappe-ui` in the same file.
-- Inside an array or object literal annotated `ShortcutConfig` or
-  `KeyboardShortcutConfig`, where that type is imported from `frappe-ui`.
+- Inside an array or object literal typed `ShortcutConfig` or
+  `KeyboardShortcutConfig`, where that type is imported from `frappe-ui`. An
+  annotation and a `satisfies` clause both count.
 
 Both places name frappe-ui. Nothing else does.
 
@@ -2620,6 +2621,9 @@ useShortcut({ key: 's', ctrl: true, description: 'Save', handler: save })
 const bindings: ShortcutConfig[] = [
   { key: 'k', ctrl: true, description: 'Palette', handler: open },
 ]
+
+// Rewritten: a `satisfies` clause names the same type.
+const save = { key: 's', ctrl: true, description: 'Save', handler: onSave } satisfies ShortcutConfig
 
 // Left alone: nothing here says frappe-ui.
 const menu = [{ key: 'delete', label: 'Delete', condition: canDelete, handler: remove }]
@@ -2646,7 +2650,9 @@ useShortcut(bindings)
 
 Clear that line in one of three ways: write the `combo` by hand, annotate the
 array `KeyboardShortcutConfig[]` from `frappe-ui` so the next run can prove it,
-or migrate the whole file by hand and leave the run nothing to write.
+or migrate the whole file by hand and leave the run nothing to write. A lone
+object takes `KeyboardShortcutConfig`, without the `[]`. Each refused line
+names the type for its own shape.
 
 ### Punctuation keys are never converted
 

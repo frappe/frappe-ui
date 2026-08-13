@@ -1139,6 +1139,23 @@ function balancedRange(source, mask, open) {
   return null
 }
 
+// The span a bracket closes, from the bracket back to its match. A `satisfies`
+// clause names its type after the literal, so the only way to the literal is
+// backwards.
+function balancedRangeBefore(source, mask, close) {
+  let depth = 0
+  for (let i = close; i >= 0; i--) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === ')' || c === '}' || c === ']') depth++
+    else if (c === '(' || c === '{' || c === '[') {
+      depth--
+      if (depth === 0) return [i, close]
+    }
+  }
+  return null
+}
+
 // The argument list of every call to one of `names`. `maxDepth` is 1 because
 // the argument may be an array of configs.
 //
@@ -1164,8 +1181,9 @@ function callRanges(source, mask, names) {
 //
 //  - the argument list of a `useShortcut(...)` call whose name this file
 //    imports from frappe-ui, and
-//  - the value of a declaration annotated with a frappe-ui config type,
-//    `const shortcuts: ShortcutConfig[] = [ ... ]`.
+//  - a literal typed with a frappe-ui config type, either by annotation,
+//    `const shortcuts: ShortcutConfig[] = [ ... ]`, or by a `satisfies`
+//    clause, `const shortcuts = [ ... ] satisfies ShortcutConfig[]`.
 //
 // A field name is never a source. `key`, `group`, `description`, `handler` and
 // `condition` are frappe-ui's own option vocabulary as much as the shortcut
@@ -1195,6 +1213,23 @@ function provenRanges(source, mask, bindings) {
       while (at < source.length && (mask[at] || /\s/.test(source[at]))) at++
       if (source[at] !== '[' && source[at] !== '{') continue
       const span = balancedRange(source, mask, at)
+      if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 0 })
+    }
+
+    // `const shortcuts = [ ... ] satisfies KeyboardShortcutConfig[]`. The type
+    // is the same proof; only its position moves, so the literal is read
+    // backwards from the clause.
+    const satisfied = new RegExp(
+      `\\bsatisfies\\s+(?:${typeNames.join('|')})(?:\\s*\\[\\s*\\])?`,
+      'g',
+    )
+    let s
+    while ((s = satisfied.exec(source))) {
+      if (mask[s.index]) continue
+      let at = s.index - 1
+      while (at >= 0 && (mask[at] || /\s/.test(source[at]))) at--
+      if (source[at] !== ']' && source[at] !== '}') continue
+      const span = balancedRangeBefore(source, mask, at)
       if (span) ranges.push({ open: span[0], end: span[1], maxDepth: 0 })
     }
   }
