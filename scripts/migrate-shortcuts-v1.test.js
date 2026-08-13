@@ -595,6 +595,36 @@ useKb([{ key: 's', ctrl: true, description: 'Save', handler: save }])
     expect(notes.map((n) => n.line)).toEqual([2, 3])
   })
 
+  it('names a modifier-less registration it walked away from', () => {
+    // `{ key: 'escape', handler: close }` carries no modifier and no
+    // config-only name. Saying nothing about it is the worst outcome: the call
+    // renames, the file is written, and this row reaches v1 with no `combo`.
+    const source = `import { useShortcut } from 'frappe-ui'
+
+const bindings = [
+  { key: 'escape', handler: close },
+  { key: 'j', handler: next },
+]
+
+useShortcut(bindings)
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(refusals.map((r) => r.line)).toEqual([4, 5])
+    expect(refusals[0].message).toContain("write `combo: 'Escape'`")
+    expect(refusals[1].message).toContain("write `combo: 'J'`")
+    expect(migrated).toContain("{ key: 'escape', handler: close }")
+  })
+
+  it('notes a modifier-less registration in a file with no other work', () => {
+    const source = "export const bindings = [{ key: 'escape', handler: close }]\n"
+    const { migrated, notes, refusals } = migrateShortcuts(source, { ext: '.js' })
+
+    expect(migrated).toBe(source)
+    expect(refusals).toEqual([])
+    expect(notes[0].message).toContain("write `combo: 'Escape'`")
+  })
+
   it('says nothing about a menu entry in a file it did not rename', () => {
     const source = "const items = [{ key: 'delete', label: 'Delete', handler: onDelete }]\n"
     const { migrated, notes } = migrateShortcuts(source, { ext: '.js' })

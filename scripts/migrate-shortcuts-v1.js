@@ -968,10 +968,13 @@ function convertObject(source, mask, range, ctx) {
     for (const name of MODIFIER_PROPS) {
       if (byName.get(name)?.value.trim() === 'true') flags[name] = true
     }
-    const held = MODIFIER_PROPS.some((name) => flags[name])
+    // A `key` string beside a callback is as far as this goes without proof.
+    // A modifier is not part of the test: `{ key: 'escape', handler: close }`
+    // is a registration as often as `{ key: 's', ctrl: true, handler: save }`
+    // is, and staying silent about it is the one outcome with no recovery.
+    // An option keeps the run quiet, and it is checked above.
     const reads =
-      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) ||
-      ((hasCallback || condition) && held)
+      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) || hasCallback || !!condition
     if (!reads) return null
 
     const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
