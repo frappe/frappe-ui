@@ -183,15 +183,24 @@ export function _resetKeyboardShortcutWarnings() {
 
 const warnedDisplayTokens = new Set<string>()
 
-function warnUnknownToken(token: string, combo: string) {
+/**
+ * Warns about one part the matching half would refuse. `slot` is where the part
+ * sits: every part but the last is a modifier, and the last one is the key.
+ */
+function warnBadPart(part: string, combo: string, slot: 'modifier' | 'key') {
   if (import.meta.env.PROD) return
-  if (warnedDisplayTokens.has(token)) return
-  warnedDisplayTokens.add(token)
+  // Deduped per slot, not per token: `Shift` is a name the grammar knows, and
+  // it is only wrong in the key slot.
+  const dedupKey = `${slot}:${part.toLowerCase()}`
+  if (warnedDisplayTokens.has(dedupKey)) return
+  warnedDisplayTokens.add(dedupKey)
+  const named = part === '' ? 'An empty part' : `"${part}"`
+  const wanted = slot === 'key' ? 'a key name' : 'a modifier'
   console.warn(
-    `[frappe-ui] "${token}" in the combo "${combo}" is not a key name ` +
-      `KeyboardShortcut knows, so it renders as written. Write the modifiers ` +
-      `as Mod+Ctrl+Alt+Shift and name the key (e.g. "Mod+Shift+K", ` +
-      `"Mod+Slash", "Mod+Shift+Digit1").`,
+    `[frappe-ui] ${named} in the combo "${combo}" is not ${wanted} ` +
+      `KeyboardShortcut knows, so it renders as written and the combo never ` +
+      `fires. Write the modifiers as Mod+Ctrl+Alt+Shift and name the key ` +
+      `(e.g. "Mod+Shift+K", "Mod+Slash", "Mod+Shift+Digit1").`,
   )
 }
 
@@ -411,10 +420,28 @@ export function displayText(parts: ComboPart[]): string {
 const isLetter = (lower: string) => /^[a-z]$/.test(lower)
 const isFunctionKey = (lower: string) => /^f([1-9]|1[0-2])$/.test(lower)
 
-function parsePart(original: string, raw: string, isMac: boolean): ComboPart {
-  const lower = original.toLowerCase()
+// A plain lookup walks the prototype, so `combo="constructor"` would render a
+// function body. Only own keys count.
+const isKeyName = (lower: string) =>
+  Object.hasOwn(KEY_DISPLAY, lower) || isLetter(lower) || isFunctionKey(lower)
 
-  if (MODIFIERS.includes(lower)) {
+function parsePart(
+  original: string,
+  raw: string,
+  isMac: boolean,
+  slot: 'modifier' | 'key',
+): ComboPart {
+  const lower = original.toLowerCase()
+  const isModifier = MODIFIERS.includes(lower)
+
+  // The grammar is modifiers first, one key last. A part in the wrong slot is
+  // a part the matching half refuses, so it warns here too: `Mod+Shift` drew
+  // ⌘ ⇧ and fired on nothing.
+  if (slot === 'key' ? !isKeyName(lower) : !isModifier) {
+    warnBadPart(original, raw, slot)
+  }
+
+  if (isModifier) {
     if (lower === 'shift')
       return { raw: original, type: 'shift', display: 'Shift' }
     if (lower === 'alt')
@@ -424,8 +451,6 @@ function parsePart(original: string, raw: string, isMac: boolean): ComboPart {
     return { raw: original, type: 'cmd', display: '⌘' }
   }
 
-  // A plain lookup walks the prototype, so `combo="constructor"` would render
-  // a function body. Only own keys count.
   if (Object.hasOwn(KEY_DISPLAY, lower)) {
     return { raw: original, type: 'key', display: KEY_DISPLAY[lower] }
   }
@@ -433,7 +458,6 @@ function parsePart(original: string, raw: string, isMac: boolean): ComboPart {
     return { raw: original, type: 'key', display: lower.toUpperCase() }
   }
 
-  warnUnknownToken(original, raw)
   return { raw: original, type: 'key', display: original }
 }
 
@@ -443,11 +467,14 @@ export function parseCombo(
 ): ComboPart[] {
   if (!raw) return []
 
-  const parts = raw
-    .split('+')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((original) => parsePart(original, raw, isMac))
+  // Empty parts are kept, not filtered out: `Mod++K` splits into
+  // `['Mod', '', 'K']`, and dropping the empty part drew ⌘ K for a combo the
+  // matching half refuses.
+  const originals = raw.split('+').map((part) => part.trim())
+  const keyIndex = originals.length - 1
+  const parts = originals.map((original, index) =>
+    parsePart(original, raw, isMac, index === keyIndex ? 'key' : 'modifier'),
+  )
 
   // `Mod` and `Ctrl` are one modifier off macOS, so `Mod+Ctrl+K` would draw
   // two Ctrl chips for a key the user presses once. The matching half collapses

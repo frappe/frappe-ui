@@ -10,6 +10,7 @@ import {
   _resetKeyboardShortcutWarnings,
   matchesCombo,
   parseCombo as parseComboForDisplay,
+  parseComboForMatching,
 } from '../utils/keyboardShortcutCombo'
 import {
   getShortcutGroups,
@@ -953,5 +954,112 @@ describe('every key that fires is a key that draws', () => {
     ).toEqual([])
 
     warn.mockRestore()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The two halves reach the same verdict on a malformed combo
+//
+// The test above walks well-formed combos through both halves. This one walks
+// malformed ones. A combo the matcher refuses must not draw a silent chip:
+// downstream apps bind `:combo` from a computed value with no registration
+// behind it, so the chip is the only thing that can warn.
+// ---------------------------------------------------------------------------
+
+type Verdict = 'accept' | 'warn'
+
+/** What the matching half decides. `null` is the verdict it warns about. */
+function matchingVerdict(combo: string): Verdict {
+  return parseComboForMatching(combo) ? 'accept' : 'warn'
+}
+
+/** What the display half decides, plus how many chips it would draw. */
+function displayVerdict(
+  combo: string,
+  isMac: boolean,
+): { verdict: Verdict; chips: number } {
+  _resetComboWarnings()
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const chips = parseComboForDisplay(combo, isMac).length
+  const verdict: Verdict = warn.mock.calls.length ? 'warn' : 'accept'
+  warn.mockRestore()
+  return { verdict, chips }
+}
+
+/** Every row is `[combo, the verdict both halves must reach]`. */
+const COMBO_VERDICTS: [combo: string, expected: Verdict][] = [
+  // Well formed.
+  ['Mod+K', 'accept'],
+  ['mod+shift+digit1', 'accept'],
+  [' Mod + K ', 'accept'],
+  ['Mod+Mod+K', 'accept'],
+  ['Mod+Ctrl+Mod+K', 'accept'],
+  ['Shift+Mod+K', 'accept'],
+  ['Space', 'accept'],
+  // Empty part, in every position.
+  ['Mod++K', 'warn'],
+  ['Mod+K+', 'warn'],
+  ['+K', 'warn'],
+  ['Mod+', 'warn'],
+  ['Mod+ +K', 'warn'],
+  // Separators only.
+  ['+', 'warn'],
+  ['++', 'warn'],
+  ['   ', 'warn'],
+  // No key at all.
+  ['Mod', 'warn'],
+  ['Mod+Shift', 'warn'],
+  ['Shift+Mod', 'warn'],
+  ['K+Mod', 'warn'],
+  // A key where a modifier belongs.
+  ['K+L', 'warn'],
+  ['Mod+K+L', 'warn'],
+  // Names outside the grammar, including the v0 vocabulary.
+  ['cmd+K', 'warn'],
+  ['meta+K', 'warn'],
+  ['option+K', 'warn'],
+  ['Mod+Esc', 'warn'],
+  ['Mod+Del', 'warn'],
+  ['Mod+Foo', 'warn'],
+  // Inherited object properties, in both slots.
+  ['constructor', 'warn'],
+  ['Mod+constructor', 'warn'],
+  ['toString+K', 'warn'],
+]
+
+describe('a combo the matcher refuses is a combo the chip warns about', () => {
+  it.each(COMBO_VERDICTS)(
+    'agrees on %j',
+    (combo: string, expected: Verdict) => {
+      const matching = matchingVerdict(combo)
+      const mac = displayVerdict(combo, true)
+      const pc = displayVerdict(combo, false)
+
+      expect(matching, 'matching half').toBe(expected)
+      expect(mac.verdict, 'display half on macOS').toBe(expected)
+      expect(pc.verdict, 'display half off macOS').toBe(expected)
+    },
+  )
+
+  it('never draws a chip the matcher refuses without warning', () => {
+    // The invariant behind the table: a drawn chip with no warning behind it
+    // is the silent failure this family exists to remove.
+    const silent = COMBO_VERDICTS.map(([combo]) => combo).filter((combo) => {
+      const { verdict, chips } = displayVerdict(combo, false)
+      return chips > 0 && verdict === 'accept' && matchingVerdict(combo) !== 'accept'
+    })
+    expect(silent, 'combos drawn as chips that can never fire').toEqual([])
+  })
+
+  it('draws nothing, and so warns about nothing, without a combo', () => {
+    // An absent or empty `combo` is not a malformed combo: the component draws
+    // its fallback slot instead of a chip, so there is nothing to warn about.
+    for (const combo of [undefined, '']) {
+      _resetComboWarnings()
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      expect(parseComboForDisplay(combo, false)).toEqual([])
+      expect(warn).not.toHaveBeenCalled()
+      warn.mockRestore()
+    }
   })
 })

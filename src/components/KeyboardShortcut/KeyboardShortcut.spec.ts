@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createApp, h } from 'vue'
+import { computed, createApp, h } from 'vue'
 import KeyboardShortcut from './KeyboardShortcut.vue'
 import {
   _resetComboWarnings,
@@ -84,6 +84,23 @@ describe('parseCombo', () => {
 
     parseCombo('cmd+J', false)
     expect(warn).toHaveBeenCalledTimes(1)
+  })
+
+  it('warns about an empty part instead of dropping it', () => {
+    // `Mod++K` is the plausible v0 fix-up for `key: '+'`. Dropping the empty
+    // part drew ⌘ K for a combo `useKeyboardShortcut` refuses.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    parseCombo('Mod++K', false)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('An empty part')
+  })
+
+  it('warns about a modifier where the key belongs', () => {
+    // `Mod+Shift` names no key, so it draws two chips and fires on nothing.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    parseCombo('Mod+Shift', false)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('"Shift"')
   })
 
   it('rejects the v0 aliases the display no longer accepts', () => {
@@ -197,6 +214,24 @@ describe('<KeyboardShortcut />', () => {
     expect(root?.getAttribute('role')).toBe('button')
     expect(root?.getAttribute('aria-label')).toBe('Open the palette')
     expect(root?.getAttribute('data-testid')).toBe('shortcut')
+  })
+
+  it('warns for a chip bound from a computed value, with no registration', () => {
+    // Downstream apps bind `:combo` from a computed value, so the chip is the
+    // only thing that can report a malformed combo. Before the fix this drew
+    // Ctrl K and said nothing, while the matching half refused the same combo.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    createApp({
+      setup: () => ({ combo: computed(() => 'Mod++K') }),
+      template: '<KeyboardShortcut :combo="combo" />',
+      components: { KeyboardShortcut },
+    }).mount(host)
+
+    expect(keys(host)).toEqual(['Ctrl', '', 'K'])
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toContain('An empty part')
   })
 
   it('marks the bg variant with data-bg', () => {
