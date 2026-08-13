@@ -822,6 +822,21 @@ useShortcut({ key: 's', ctrl: true, description: 'X', handler: h })
     expect(refusals[0].message).toContain('annotate the array')
   })
 
+  it('does not advertise a combo that drops a conditional modifier', () => {
+    // The proven path refuses `ctrl: isMac`. The unproven path read only
+    // modifiers spelled `true`, so it advised `combo: 'S'` and would have had
+    // the author delete the Mod without noticing.
+    const source = `import { useShortcut } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: isMac, description: 'Save', handler: save }]
+useShortcut(bindings)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).not.toContain("combo: 'S'")
+    expect(refusals[0].message).toContain('`ctrl: isMac` is not a literal boolean')
+  })
+
   it('names the type the app can import while it is still on v0', () => {
     // The codemod runs from the app being migrated, which still depends on
     // frappe-ui v0. `KeyboardShortcutConfig` is not exported there yet, so the

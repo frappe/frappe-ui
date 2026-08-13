@@ -110,7 +110,8 @@ const GUIDE = 'https://ui.frappe.io/docs/migration#keyboard-shortcuts'
 //
 // `+` is not here. v1 names `Plus` for the keypad `+`, one name per physical
 // key, so the `+` a normal keyboard types is `Shift+Equal`. It sits in
-// SHIFTED_CHARS below. See spec/shortcuts.md, "Key names".
+// SHIFTED_CHARS below. The whole set is the "Combo reference" table in
+// docs/content/docs/migration.md, which the refusals point at.
 export const PUNCTUATION_NAMES = {
   '-': 'Minus',
   '=': 'Equal',
@@ -997,9 +998,17 @@ function convertObject(source, mask, range, ctx) {
     const literal = readStringLiteral(keyProp.value)
     if (!literal) return null
 
+    // A modifier the run cannot read is a combo it cannot advertise. Reading
+    // only `true` used to drop `ctrl: isMac` from the combo it printed, and an
+    // author who copied that line lost the Mod without being told. The proven
+    // path refuses the same object, so this one says the same thing.
     const flags = {}
+    let conditional = null
     for (const name of MODIFIER_PROPS) {
-      if (byName.get(name)?.value.trim() === 'true') flags[name] = true
+      const value = byName.get(name)?.value.trim()
+      if (value === undefined) continue
+      if (value === 'true') flags[name] = true
+      else if (value !== 'false') conditional ??= `${name}: ${value}`
     }
     // A `key` string beside a callback is as far as this goes without proof.
     // A modifier is not part of the test: `{ key: 'escape', handler: close }`
@@ -1011,11 +1020,14 @@ function convertObject(source, mask, range, ctx) {
     if (!reads) return null
 
     const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
+    const advice = conditional
+      ? `\`${conditional}\` is not a literal boolean. v1 has no conditional modifier — build the combo string yourself.`
+      : combo
+        ? `If it is a shortcut, write \`combo: '${combo}'\`.`
+        : refusal
     return leaveAlone(
       line,
-      `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${
-        combo ? `If it is a shortcut, write \`combo: '${combo}'\`.` : refusal
-      }`,
+      `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${advice}`,
     )
   }
 
