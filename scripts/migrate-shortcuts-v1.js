@@ -1336,10 +1336,17 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   // keeps working, so the migrated file is correct either way. It is also a
   // guess: an unrelated `keyup` listener in the same file matches too, and no
   // edit would ever clear it.
-  if (proven.length > 0) {
+  //
+  // The pair is the same pair whether or not the run proved the config, so an
+  // object it walked away from counts as the registration too.
+  if (proven.length > 0 || unproven.length > 0) {
     const keyup = /['"`]keyup['"`]/g
+    const inScript = (at) => ranges.some(([from, to]) => at >= from && at < to)
     let k
     while ((k = keyup.exec(content))) {
+      // The event name is a string, so the mask covers it. A comment carries
+      // its own mask value, and prose about a listener is not a listener.
+      if (mask[k.index] === MASK_COMMENT || !inScript(k.index)) continue
       notes.push({
         line: lineAt(content, k.index),
         message:

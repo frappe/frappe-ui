@@ -1108,6 +1108,27 @@ useEventListener(document, 'keyup', (e) => { if (e.key === ' ') endMove() })
     expect(refusals).toEqual([])
   })
 
+  it('does not read keyup in a comment as a hand-rolled hold', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+// The old code attached a 'keyup' listener here.
+useShortcut([{ key: ' ', description: 'Hold for move mode', handler: startMove }])
+`
+    const { notes } = migrateShortcuts(source)
+
+    expect(notes.some((n) => n.message.includes('hand-rolled hold'))).toBe(false)
+  })
+
+  it('notes a hand-rolled hold beside a registration it could not prove', () => {
+    // An aliased import proves no range at all, and the pair is the same pair.
+    const source = `import { useShortcut as useKb } from 'frappe-ui'
+useKb([{ key: ' ', description: 'Hold for move mode', handler: startMove }])
+useEventListener(document, 'keyup', endMove)
+`
+    const { notes } = migrateShortcuts(source)
+
+    expect(notes.some((n) => n.message.includes('hand-rolled hold'))).toBe(true)
+  })
+
   it('reports a barrel mock keyed on the old export name', () => {
     const source = `import { vi } from 'vitest'
 vi.mock('frappe-ui', () => ({ useShortcut: (configs) => registered.push(configs) }))
