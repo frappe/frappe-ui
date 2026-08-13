@@ -6,6 +6,7 @@ import {
   CommandPaletteEmpty,
   CommandPaletteGroup,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteItem,
 } from '..'
 import type { CommandPaletteSelectEvent, CommandPaletteValue } from '..'
@@ -44,17 +45,19 @@ function select(value: CommandPaletteValue, event: CommandPaletteSelectEvent) {
     <CommandPalette v-model:open="open" @select="select">
       <CommandPaletteInput placeholder="Search documentation" />
 
-      <CommandPaletteGroup label="Components">
-        <CommandPaletteItem
-          v-for="page in docs"
-          :key="page.link"
-          as="a"
-          :href="page.link"
-          :value="page"
-        >
-          {{ page.text }}
-        </CommandPaletteItem>
-      </CommandPaletteGroup>
+      <CommandPaletteList>
+        <CommandPaletteGroup label="Components">
+          <CommandPaletteItem
+            v-for="page in docs"
+            :key="page.link"
+            as="a"
+            :href="page.link"
+            :value="page"
+          >
+            {{ page.text }}
+          </CommandPaletteItem>
+        </CommandPaletteGroup>
+      </CommandPaletteList>
 
       <CommandPaletteEmpty />
     </CommandPalette>

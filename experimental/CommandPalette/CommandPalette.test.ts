@@ -12,6 +12,7 @@ import CommandPaletteFooter from './CommandPaletteFooter.vue'
 import CommandPaletteGroup from './CommandPaletteGroup.vue'
 import CommandPaletteInput from './CommandPaletteInput.vue'
 import CommandPaletteItem from './CommandPaletteItem.vue'
+import CommandPaletteList from './CommandPaletteList.vue'
 
 // jsdom has no layout, so reka's scroll-the-highlight-into-view call throws.
 Element.prototype.scrollIntoView = vi.fn()
@@ -49,23 +50,25 @@ function mount(options: MountOptions = {}) {
           },
           () => [
             h(CommandPaletteInput, { placeholder: 'Search commands' }),
-            h(CommandPaletteGroup, { label: 'Pages' }, () => [
-              h(
-                CommandPaletteItem,
-                { value: 'inbox', keywords: ['mail'] },
-                () => 'Inbox',
-              ),
-              h(CommandPaletteItem, { value: 'settings' }, () => 'Settings'),
-            ]),
-            h(CommandPaletteGroup, { label: 'Actions' }, () => [
-              h(
-                CommandPaletteItem,
-                { value: 'new-task', label: 'New task' },
-                {
-                  default: () => 'New task',
-                  suffix: () => 'Mod+N',
-                },
-              ),
+            h(CommandPaletteList, () => [
+              h(CommandPaletteGroup, { label: 'Pages' }, () => [
+                h(
+                  CommandPaletteItem,
+                  { value: 'inbox', keywords: ['mail'] },
+                  () => 'Inbox',
+                ),
+                h(CommandPaletteItem, { value: 'settings' }, () => 'Settings'),
+              ]),
+              h(CommandPaletteGroup, { label: 'Actions' }, () => [
+                h(
+                  CommandPaletteItem,
+                  { value: 'new-task', label: 'New task' },
+                  {
+                    default: () => 'New task',
+                    suffix: () => 'Mod+N',
+                  },
+                ),
+              ]),
             ]),
             h(CommandPaletteEmpty),
             h(CommandPaletteFooter, () => 'Enter to run'),
@@ -117,6 +120,7 @@ describe('CommandPalette', () => {
     for (const slot of [
       'command-palette',
       'command-palette-input',
+      'command-palette-list',
       'command-palette-group',
       'command-palette-item',
       'command-palette-footer',
@@ -124,6 +128,26 @@ describe('CommandPalette', () => {
       expect(document.querySelector(`[data-slot="${slot}"]`)).not.toBeNull()
     }
     expect(labels()).toEqual(['Inbox', 'Settings', 'New taskMod+N'])
+  })
+
+  it('lets the listbox own groups and options only', async () => {
+    // A listbox may own `option` and `group` and nothing else, so the field,
+    // the empty state and the footer are its siblings, never its children.
+    mount()
+    await nextTick()
+    const listbox = document.querySelector('[role="listbox"]') as HTMLElement
+    expect(listbox.dataset.slot).toBe('command-palette-list')
+    const roles = Array.from(listbox.children).map((el) =>
+      el.getAttribute('role'),
+    )
+    expect(roles).toEqual(['group', 'group'])
+    for (const slot of [
+      'command-palette-input',
+      'command-palette-footer',
+      'command-palette-empty',
+    ]) {
+      expect(listbox.querySelector(`[data-slot="${slot}"]`)).toBeNull()
+    }
   })
 
   it('filters items against the query by default', async () => {
@@ -227,11 +251,13 @@ describe('CommandPalette', () => {
       setup() {
         return () =>
           h(CommandPalette, { open: true }, () => [
-            h(
-              CommandPaletteItem,
-              { value: 'x', disabled: true },
-              () => 'Disabled',
-            ),
+            h(CommandPaletteList, () => [
+              h(
+                CommandPaletteItem,
+                { value: 'x', disabled: true },
+                () => 'Disabled',
+              ),
+            ]),
           ])
       },
     })
@@ -252,11 +278,13 @@ describe('CommandPalette', () => {
       setup() {
         return () =>
           h(CommandPalette, { open: true }, () => [
-            h(
-              CommandPaletteItem,
-              { value: '/docs', as: 'a', href: '/docs' },
-              () => 'Docs',
-            ),
+            h(CommandPaletteList, () => [
+              h(
+                CommandPaletteItem,
+                { value: '/docs', as: 'a', href: '/docs' },
+                () => 'Docs',
+              ),
+            ]),
           ])
       },
     })
@@ -334,8 +362,10 @@ describe('CommandPalette', () => {
         return () =>
           h(CommandPalette, { open: true, onSelect }, () => [
             h(CommandPaletteInput),
-            ...rows.map((row) =>
-              h(CommandPaletteItem, { value: row }, () => row.title),
+            h(CommandPaletteList, () =>
+              rows.map((row) =>
+                h(CommandPaletteItem, { value: row }, () => row.title),
+              ),
             ),
           ])
       },
@@ -379,8 +409,10 @@ describe('CommandPalette', () => {
         return () =>
           h(CommandPalette, { open: true, query: 'sett' }, () => [
             h(CommandPaletteInput),
-            ...rows.value.map((row) =>
-              h(CommandPaletteItem, { value: row.value }, () => row.title),
+            h(CommandPaletteList, () =>
+              rows.value.map((row) =>
+                h(CommandPaletteItem, { value: row.value }, () => row.title),
+              ),
             ),
           ])
       },

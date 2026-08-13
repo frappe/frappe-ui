@@ -7,6 +7,7 @@ import {
   CommandPaletteFooter,
   CommandPaletteGroup,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteItem,
 } from '..'
 import type { CommandPaletteValue } from '..'
@@ -61,35 +62,37 @@ function select(value: CommandPaletteValue) {
     <CommandPalette v-model:open="open" @select="select">
       <CommandPaletteInput placeholder="Search commands" />
 
-      <CommandPaletteGroup label="Pages">
-        <CommandPaletteItem
-          v-for="page in pages"
-          :key="page.name"
-          :value="page"
-          :keywords="page.keywords"
-        >
-          <template #prefix>
-            <span :class="[page.icon, 'mr-3 size-4 text-ink-gray-7']" />
-          </template>
-          {{ page.title }}
-        </CommandPaletteItem>
-      </CommandPaletteGroup>
+      <CommandPaletteList>
+        <CommandPaletteGroup label="Pages">
+          <CommandPaletteItem
+            v-for="page in pages"
+            :key="page.name"
+            :value="page"
+            :keywords="page.keywords"
+          >
+            <template #prefix>
+              <span :class="[page.icon, 'mr-3 size-4 text-ink-gray-7']" />
+            </template>
+            {{ page.title }}
+          </CommandPaletteItem>
+        </CommandPaletteGroup>
 
-      <CommandPaletteGroup label="Actions">
-        <CommandPaletteItem
-          v-for="action in actions"
-          :key="action.name"
-          :value="action"
-        >
-          <template #prefix>
-            <span :class="[action.icon, 'mr-3 size-4 text-ink-gray-7']" />
-          </template>
-          {{ action.title }}
-          <template #suffix>
-            <KeyboardShortcut :combo="action.combo" />
-          </template>
-        </CommandPaletteItem>
-      </CommandPaletteGroup>
+        <CommandPaletteGroup label="Actions">
+          <CommandPaletteItem
+            v-for="action in actions"
+            :key="action.name"
+            :value="action"
+          >
+            <template #prefix>
+              <span :class="[action.icon, 'mr-3 size-4 text-ink-gray-7']" />
+            </template>
+            {{ action.title }}
+            <template #suffix>
+              <KeyboardShortcut :combo="action.combo" />
+            </template>
+          </CommandPaletteItem>
+        </CommandPaletteGroup>
+      </CommandPaletteList>
 
       <CommandPaletteEmpty v-slot="{ query }">
         Nothing matches "{{ query }}"

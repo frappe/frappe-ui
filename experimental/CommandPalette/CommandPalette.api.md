@@ -84,6 +84,14 @@
   }
 ]
 
+  const commandPaletteListSlots = [
+  {
+    name: 'default',
+    description: 'The palette\'s groups and items. This element is the listbox itself, and a\nlistbox owns options and groups only, so anything else belongs outside it.',
+    type: 'any'
+  }
+]
+
   const commandPaletteGroupProps = [
   {
     name: 'label',
@@ -193,6 +201,10 @@
 <PropsTable folder="CommandPalette" name="CommandPaletteInput" :data="commandPaletteInputProps"/>
 
 <SlotsTable :data="commandPaletteInputSlots"/>
+
+### CommandPaletteList
+
+<SlotsTable :data="commandPaletteListSlots"/>
 
 ### CommandPaletteGroup
 

@@ -2510,7 +2510,7 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 ## CommandPalette
 
 `CommandPalette` and `CommandPaletteItem` leave the root export. The family is
-rebuilt as six composable parts in `frappe-ui/experimental`, where it stays
+rebuilt as seven composable parts in `frappe-ui/experimental`, where it stays
 until gameplan, helpdesk and this site all run on it (P14 — no stability
 promise).
 
@@ -2524,6 +2524,7 @@ import { CommandPalette, CommandPaletteItem } from 'frappe-ui'
 import {
   CommandPalette,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteGroup,
   CommandPaletteItem,
   CommandPaletteEmpty,
@@ -2549,32 +2550,38 @@ without a per-group `component` escape hatch.
 <CommandPalette v-model:open="open" v-model:query="q" @select="onSelect">
   <CommandPaletteInput placeholder="Search" />
 
-  <CommandPaletteGroup
-    v-for="group in groups"
-    :key="group.title"
-    :label="group.hideTitle ? undefined : group.title"
-  >
-    <CommandPaletteItem
-      v-for="item in group.items"
-      :key="item.name"
-      :value="item"
-      :disabled="item.disabled"
+  <CommandPaletteList>
+    <CommandPaletteGroup
+      v-for="group in groups"
+      :key="group.title"
+      :label="group.hideTitle ? undefined : group.title"
     >
-      <template v-if="item.icon" #prefix>
-        <span :class="[item.icon, 'mr-3 size-4']" />
-      </template>
-      {{ item.title }}
-      <template v-if="item.description" #suffix>{{ item.description }}</template>
-    </CommandPaletteItem>
-  </CommandPaletteGroup>
+      <CommandPaletteItem
+        v-for="item in group.items"
+        :key="item.name"
+        :value="item"
+        :disabled="item.disabled"
+      >
+        <template v-if="item.icon" #prefix>
+          <span :class="[item.icon, 'mr-3 size-4']" />
+        </template>
+        {{ item.title }}
+        <template v-if="item.description" #suffix>{{ item.description }}</template>
+      </CommandPaletteItem>
+    </CommandPaletteGroup>
+  </CommandPaletteList>
 
   <CommandPaletteEmpty />
 </CommandPalette>
 ```
 
+`CommandPaletteList` is the list itself and the only part that scrolls. It may
+own rows and groups and nothing else, so the field, the empty state and the
+footer stay outside it.
+
 | Before                | After                                        |
 | --------------------- | -------------------------------------------- |
-| `:groups="groups"`    | `CommandPaletteGroup` + `CommandPaletteItem` |
+| `:groups="groups"`    | `CommandPaletteList` + `CommandPaletteGroup` + `CommandPaletteItem` |
 | `group.title`         | `:label` on `CommandPaletteGroup`            |
 | `group.hideTitle`     | leave `label` out                            |
 | `group.component`     | write the row in the item's slots            |

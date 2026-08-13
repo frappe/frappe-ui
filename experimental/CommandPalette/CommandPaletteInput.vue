@@ -1,8 +1,7 @@
 <template>
   <div
-    ref="root"
     data-slot="command-palette-input"
-    class="sticky top-0 z-10 flex items-center gap-3 border-b border-outline-gray-1 bg-surface-elevation-1 px-4.5 dark:border-outline-gray-2"
+    class="flex shrink-0 items-center gap-3 border-b border-outline-gray-1 px-4.5 dark:border-outline-gray-2"
   >
     <slot name="prefix">
       <span class="lucide-search size-4 shrink-0 text-ink-gray-6" />
@@ -22,7 +21,7 @@
 
 <script setup lang="ts">
 import { ListboxFilter } from 'reka-ui'
-import { computed, onMounted, onUnmounted, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useCommandPaletteContext } from './context'
 import type { CommandPaletteInputProps } from './types'
 
@@ -46,17 +45,6 @@ if (import.meta.env.DEV && !palette) {
     '[frappe-ui] CommandPaletteInput has to render inside a CommandPalette.',
   )
 }
-
-// The field sits over the top edge of the scroll region, so the palette has to
-// know how tall it is to keep a row from parking behind it.
-const root = useTemplateRef<HTMLElement>('root')
-let unregisterSticky: (() => void) | undefined
-
-onMounted(() => {
-  if (root.value) unregisterSticky = palette?.registerSticky('top', root.value)
-})
-
-onUnmounted(() => unregisterSticky?.())
 
 // Writes go through the palette's `query` model, so `v-model:query` on the
 // parent stays the single source of truth.

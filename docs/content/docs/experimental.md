@@ -99,7 +99,7 @@ variants, and the labeling contract.
 ## CommandPalette
 
 A searchable list of commands in a dialog. The root `CommandPalette` was
-removed in `1.0.0` and rebuilt here as six composable parts, so an app writes
+removed in `1.0.0` and rebuilt here as seven composable parts, so an app writes
 the rows it needs instead of feeding one `groups` shape. `filterable` (default
 `true`) turns the client filter off for server search.
 
@@ -107,6 +107,7 @@ the rows it needs instead of feeding one `groups` shape. `filterable` (default
 import {
   CommandPalette,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteGroup,
   CommandPaletteItem,
   CommandPaletteEmpty,

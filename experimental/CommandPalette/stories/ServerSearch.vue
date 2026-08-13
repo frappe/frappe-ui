@@ -6,6 +6,7 @@ import {
   CommandPaletteEmpty,
   CommandPaletteGroup,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteItem,
 } from '..'
 
@@ -59,7 +60,8 @@ watch(query, (text) => {
     >
       <CommandPaletteInput placeholder="Search documents" />
 
-      <!-- The default slot is open, so a loading row needs no extra part. -->
+      <!-- The palette's own slot is open, so a loading row needs no extra
+      part. It sits outside the list, which owns options and groups only. -->
       <div
         v-if="loading"
         class="px-4.5 py-8 text-center text-base text-ink-gray-5"
@@ -67,14 +69,20 @@ watch(query, (text) => {
         Searching…
       </div>
 
-      <CommandPaletteGroup v-else label="Documents">
-        <CommandPaletteItem v-for="row in results" :key="row.name" :value="row">
-          {{ row.title }}
-          <template #suffix>
-            <span class="text-ink-gray-5">{{ row.team }}</span>
-          </template>
-        </CommandPaletteItem>
-      </CommandPaletteGroup>
+      <CommandPaletteList v-else>
+        <CommandPaletteGroup label="Documents">
+          <CommandPaletteItem
+            v-for="row in results"
+            :key="row.name"
+            :value="row"
+          >
+            {{ row.title }}
+            <template #suffix>
+              <span class="text-ink-gray-5">{{ row.team }}</span>
+            </template>
+          </CommandPaletteItem>
+        </CommandPaletteGroup>
+      </CommandPaletteList>
 
       <CommandPaletteEmpty v-if="!loading" v-slot="{ query: text }">
         {{ text ? `No documents match "${text}"` : 'Type to search' }}

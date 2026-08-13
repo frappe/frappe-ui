@@ -1,10 +1,30 @@
 # CommandPalette
 
 A searchable list of commands in a dialog, opened with `Mod+K`. Compose
-`CommandPaletteInput`, `CommandPaletteGroup`, `CommandPaletteItem`,
-`CommandPaletteEmpty` and `CommandPaletteFooter` inside the `CommandPalette`
-root. The app writes the rows; the palette owns the dialog, the query, the
-keyboard and the filter.
+`CommandPaletteInput`, `CommandPaletteList`, `CommandPaletteGroup`,
+`CommandPaletteItem`, `CommandPaletteEmpty` and `CommandPaletteFooter` inside
+the `CommandPalette` root. The app writes the rows; the palette owns the dialog,
+the query, the keyboard and the filter.
+
+Groups and items go inside `CommandPaletteList`, which is the list itself and
+the only part that scrolls. The field, the empty state and the footer are its
+siblings: a list may own rows and groups and nothing else, and keeping them
+outside it is also what stops them scrolling away.
+
+```vue
+<CommandPalette v-model:open="open" @select="select">
+  <CommandPaletteInput placeholder="Search commands" />
+
+  <CommandPaletteList>
+    <CommandPaletteGroup label="Pages">
+      <CommandPaletteItem :value="page">Inbox</CommandPaletteItem>
+    </CommandPaletteGroup>
+  </CommandPaletteList>
+
+  <CommandPaletteEmpty>No matches</CommandPaletteEmpty>
+  <CommandPaletteFooter><KeyboardShortcut combo="Enter" /> to run</CommandPaletteFooter>
+</CommandPalette>
+```
 
 > **Experimental** — the family ships from
 > [`frappe-ui/experimental`](/docs/experimental) while its API settles, so it is
@@ -16,6 +36,7 @@ keyboard and the filter.
 import {
   CommandPalette,
   CommandPaletteInput,
+  CommandPaletteList,
   CommandPaletteGroup,
   CommandPaletteItem,
   CommandPaletteEmpty,

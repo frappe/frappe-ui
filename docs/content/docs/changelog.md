@@ -12,10 +12,11 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 
 `CommandPalette` and `CommandPaletteItem` leave the root export. The family is
-rebuilt as six composable parts — `CommandPalette`, `CommandPaletteInput`,
-`CommandPaletteGroup`, `CommandPaletteItem`, `CommandPaletteEmpty` and
-`CommandPaletteFooter` — in `frappe-ui/experimental` (P14 — no stability
-promise). It stays there until gameplan, helpdesk and this site all run on it.
+rebuilt as seven composable parts — `CommandPalette`, `CommandPaletteInput`,
+`CommandPaletteList`, `CommandPaletteGroup`, `CommandPaletteItem`,
+`CommandPaletteEmpty` and `CommandPaletteFooter` — in `frappe-ui/experimental`
+(P14 — no stability promise). It stays there until gameplan, helpdesk and this
+site all run on it.
 
 Four apps forked the old palette rather than use it, because it had one shape
 and no filtering. The parts fit all four.
@@ -36,6 +37,9 @@ and no filtering. The parts fit all four.
 - Every part stamps `data-slot`. An item stamps `data-state="active"` or
   `data-state="selected"` and `data-disabled`, and hands `active`, `selected`
   and `disabled` to its slots.
+- Rows go inside `CommandPaletteList`, the only part that scrolls. A list may
+  own rows and groups and nothing else, so the field, the empty state and the
+  footer are its siblings.
 - `@headlessui/vue` leaves `dependencies` with it. The palette was its last
   import in the library.
 

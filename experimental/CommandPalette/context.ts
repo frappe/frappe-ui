@@ -29,12 +29,6 @@ export interface CommandPaletteContext {
     id: symbol,
     registration: CommandPaletteItemRegistration,
   ) => () => void
-  /**
-   * Registers a part that pins itself over an edge of the scroll region. The
-   * palette keeps the keyboard's row clear of it. Returns the unregister
-   * function.
-   */
-  registerSticky: (edge: 'top' | 'bottom', element: HTMLElement) => () => void
   /** Whether any item of `groupId` is on screen. */
   groupHasVisibleItems: (groupId: symbol) => boolean
   /** Reports a pick to the palette, which emits `select` and closes. */
