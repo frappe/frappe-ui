@@ -65,7 +65,6 @@ describe('Avatar', () => {
       .and('have.class', 'text-ink-blue-7')
   })
 
-
   it('keeps the size enum when the class only sizes at a breakpoint', () => {
     // Tailwind emits variant utilities after the base ones, so `sm:size-16`
     // wins at `sm` on its own. Dropping the enum for it left the avatar

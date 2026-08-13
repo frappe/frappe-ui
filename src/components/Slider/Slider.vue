@@ -113,6 +113,8 @@ const {
 } = useInputLabeling(props, {
   size: () => props.size,
   disabled: () => props.disabled,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 /** A caller's `aria-labelledby` wins over the id generated from `label`. */

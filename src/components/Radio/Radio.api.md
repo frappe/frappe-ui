@@ -119,7 +119,7 @@
   },
   {
     name: 'required',
-    description: 'Marks the field as required. Renders an asterisk next to the label, with\n`sr-only` text that announces it, and forwards `required` /\n`aria-required` to the underlying control where its role allows it —\n`slider` does not, so Slider and a half-step Rating set neither.',
+    description: 'Marks the field as required. Renders an asterisk next to the label, with\n`sr-only` text that announces it, and forwards `required` /\n`aria-required` to the underlying control where the control\'s role allows\nit. `data-required` is set either way.',
     required: false,
     type: 'boolean'
   },

@@ -32,8 +32,8 @@ export interface InputLabelingProps {
   /**
    * Marks the field as required. Renders an asterisk next to the label, with
    * `sr-only` text that announces it, and forwards `required` /
-   * `aria-required` to the underlying control where its role allows it —
-   * `slider` does not, so Slider and a half-step Rating set neither.
+   * `aria-required` to the underlying control where the control's role allows
+   * it. `data-required` is set either way.
    */
   required?: boolean
 

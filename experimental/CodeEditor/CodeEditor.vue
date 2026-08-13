@@ -94,6 +94,8 @@ const {
   size: () => props.size,
   variant: () => props.variant,
   disabled: () => props.disabled,
+  hasLabelSlot: () => Boolean(slots.label),
+  hasDescriptionSlot: () => Boolean(slots.description),
 })
 
 // Render the labeling chrome (and its wrapping div) only when something needs
