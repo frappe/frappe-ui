@@ -1006,12 +1006,41 @@ useShortcut({ combo: 'Mod+K', handler: open })
     expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
   })
 
+  it('finds a config wherever an object can stand', () => {
+    // Three places an object opens that are not a plain value: the default
+    // export, a JSX prop, and a template interpolation. Each file below renames
+    // as well, so a miss here would write the file around a v0 config.
+    const cases = [
+      [
+        '.js',
+        "export default { key: 's', ctrl: true, description: 'Save', handler: save }",
+      ],
+      [
+        '.tsx',
+        "const el = <Registry cfg={{ key: 's', ctrl: true, description: 'Save', handler: save }} />",
+      ],
+      [
+        '.js',
+        "const msg = `x ${ { key: 's', ctrl: true, description: 'Save', handler: save } } y`",
+      ],
+    ]
+
+    for (const [ext, line] of cases) {
+      const source = `import { useShortcut } from 'frappe-ui'\n${line}\nuseShortcut({ combo: 'Mod+K', handler: open })\n`
+      const { refusals } = migrateShortcuts(source, { ext })
+
+      expect(refusals).toHaveLength(1)
+      expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+    }
+  })
+
   it('says nothing about a type declaration or a destructure it cannot migrate', () => {
     // Neither carries a value, so neither is a config, and a refusal on either
     // could never be cleared. Each file below renames, so silence here is the
     // whole test.
     const sources = [
       'type Legacy = { key: string, handler: () => void }',
+      "type SaveOnly = { key: 's', ctrl: true, handler: () => void }",
       'function register({ key, handler }: ShortcutLike) { bind(key, handler) }',
       'for (const { key, handler } of list) { bind(key, handler) }',
       'const [{ key, handler }] = rows',

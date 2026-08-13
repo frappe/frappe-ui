@@ -760,6 +760,9 @@ const OBJECT_KEYWORDS = new Set([
   'void',
   'new',
   'instanceof',
+  // `export default { ... }` is an options object, and a Vue SFC's whole
+  // component is written that way.
+  'default',
 ])
 
 // True when this `{` opens an object literal, and not a block.
@@ -781,11 +784,26 @@ function opensObjectLiteral(source, mask, at) {
   // An arrow body is a block. `() => ({ ... })` writes the object with a `(`
   // in front of it, which is the form that reaches this as an expression.
   if (c === '>' && source[i - 1] === '=') return false
-  if ('([,:=?&|!+-*/%<>^~'.includes(c)) return true
+  // `{` covers a JSX prop, `cfg={{ key: 's' }}`, and a template interpolation,
+  // `${ { key: 's' } }`. A brace opening a brace is one of those two: a block
+  // whose first statement is a bare block holds nothing anyone writes.
+  if ('([{,:=?&|!+-*/%<>^~'.includes(c)) return true
   if (!/[A-Za-z0-9_$]/.test(c)) return false
   let start = i
   while (start >= 0 && /[A-Za-z0-9_$]/.test(source[start])) start--
   return OBJECT_KEYWORDS.has(source.slice(start + 1, i + 1))
+}
+
+// `type Legacy = { key: 's', handler: () => void }` is a shape, not a config.
+// Its property values are types, so `key: 's'` there is a string-literal type
+// and not a key, and no `combo` could ever be written over it. The declaration
+// is what says so, because a type and a value read the same from the inside.
+function inTypeDeclaration(source, mask, objectStart) {
+  const at = codeBefore(source, mask, objectStart)
+  if (source[at] !== '=' || source[at - 1] === '=') return false
+  let from = at
+  while (from > 0 && source[from - 1] !== '\n' && source[from - 1] !== ';') from--
+  return /\btype\s+[A-Za-z_$][\w$]*\s*(?:<.*>\s*)?$/.test(source.slice(from, at))
 }
 
 // `const { key, ctrl } = config` and `({ key, handler }) => ...` are binding
@@ -1563,6 +1581,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
     if (isBindingPattern(content, mask, object)) return
+    if (inTypeDeclaration(content, mask, object.start)) return
 
     // `>=`, not `>`: an annotated value's span opens on the literal itself, so
     // `const config: ShortcutConfig = { ... }` has the object starting exactly
