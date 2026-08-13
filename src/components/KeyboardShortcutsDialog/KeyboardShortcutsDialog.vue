@@ -100,7 +100,7 @@ import {
   displayText,
   isMacPlatform,
   parseCombo,
-} from '../KeyboardShortcut/combo'
+} from '../../utils/keyboardShortcutCombo'
 import TextInput from '../TextInput/TextInput.vue'
 import type { KeyboardShortcutsDialogProps } from './types'
 

@@ -5,14 +5,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, nextTick, ref } from 'vue'
 import {
-  _resetComboWarnings,
-  parseCombo as parseComboForDisplay,
-} from '../components/KeyboardShortcut/combo'
-import {
   _keyboardShortcutKeyNames,
+  _resetComboWarnings,
   _resetKeyboardShortcutWarnings,
-  getShortcutGroups,
   matchesCombo,
+  parseCombo as parseComboForDisplay,
+} from '../utils/keyboardShortcutCombo'
+import {
+  getShortcutGroups,
   useKeyboardShortcut,
   type KeyboardShortcutConfig,
 } from './useKeyboardShortcut'
@@ -221,16 +221,14 @@ describe('matchesCombo — modifiers', () => {
 // ---------------------------------------------------------------------------
 
 /**
- * Load a fresh composable and a fresh display module against a stubbed
- * `navigator`. Both read the platform at import time or on first parse, so the
- * stub has to be in place before the module graph is built.
+ * Load a fresh grammar module against a stubbed `navigator`. It reads the
+ * platform on first parse and caches the result, so the stub has to be in place
+ * before the module graph is built.
  */
 async function loadOnPlatform(navigatorStub: Record<string, unknown>) {
   vi.resetModules()
   vi.stubGlobal('navigator', navigatorStub)
-  const composable = await import('./useKeyboardShortcut')
-  const display = await import('../components/KeyboardShortcut/combo')
-  return { composable, display }
+  return await import('../utils/keyboardShortcutCombo')
 }
 
 describe('Mod resolves on one platform check, shared with the chip', () => {
@@ -239,8 +237,9 @@ describe('Mod resolves on one platform check, shared with the chip', () => {
     vi.resetModules()
   })
 
-  // Two checks disagreeing means the chip draws ⌘ for a combo that fires on
-  // Ctrl. These are the inputs that told them apart.
+  // `isMacPlatform` is now the single check both halves read, so this guards
+  // the check itself: these are the inputs that told two checks apart when the
+  // matcher and the chip each had their own.
   const disagreements = [
     {
       name: 'navigator.platform names a Mac the userAgent does not',
@@ -260,36 +259,30 @@ describe('Mod resolves on one platform check, shared with the chip', () => {
 
   for (const platform of disagreements) {
     it(`fires Mod on Meta when ${platform.name}`, async () => {
-      const { composable, display } = await loadOnPlatform(platform.navigator)
+      const grammar = await loadOnPlatform(platform.navigator)
 
-      expect(display.isMacPlatform()).toBe(true)
+      expect(grammar.isMacPlatform()).toBe(true)
       expect(
-        composable.matchesCombo(
-          makeEvent({ key: 's', metaKey: true }),
-          'Mod+S',
-        ),
+        grammar.matchesCombo(makeEvent({ key: 's', metaKey: true }), 'Mod+S'),
       ).toBe(true)
       expect(
-        composable.matchesCombo(
-          makeEvent({ key: 's', ctrlKey: true }),
-          'Mod+S',
-        ),
+        grammar.matchesCombo(makeEvent({ key: 's', ctrlKey: true }), 'Mod+S'),
       ).toBe(false)
     })
   }
 
   it('fires Mod on Ctrl off an Apple platform', async () => {
-    const { composable, display } = await loadOnPlatform({
+    const grammar = await loadOnPlatform({
       platform: 'Win32',
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     })
 
-    expect(display.isMacPlatform()).toBe(false)
+    expect(grammar.isMacPlatform()).toBe(false)
     expect(
-      composable.matchesCombo(makeEvent({ key: 's', ctrlKey: true }), 'Mod+S'),
+      grammar.matchesCombo(makeEvent({ key: 's', ctrlKey: true }), 'Mod+S'),
     ).toBe(true)
     expect(
-      composable.matchesCombo(makeEvent({ key: 's', metaKey: true }), 'Mod+S'),
+      grammar.matchesCombo(makeEvent({ key: 's', metaKey: true }), 'Mod+S'),
     ).toBe(false)
   })
 })
@@ -941,9 +934,11 @@ describe('every key that fires is a key that draws', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     _resetComboWarnings()
 
-    // `KeyboardShortcut` warns and prints the token as written when it meets a
-    // name its own table misses, so one warning here means the two tables have
-    // drifted: the key fires but the chip cannot draw it.
+    // The matching tables and `KEY_DISPLAY` are still two tables, now in one
+    // file. The display half warns and prints the token as written when it
+    // meets a name `KEY_DISPLAY` and the letter/function-key rules both miss,
+    // so one warning here means they have drifted: the key fires but the chip
+    // cannot draw it.
     for (const key of _keyboardShortcutKeyNames) {
       const parts = parseComboForDisplay(`Mod+Shift+${key}`, false)
       expect(

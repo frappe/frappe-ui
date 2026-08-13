@@ -78,7 +78,12 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
-import { isMacPlatform, parseCombo, spellOut, type ComboPart } from './combo'
+import {
+  isMacPlatform,
+  parseCombo,
+  spellOut,
+  type ComboPart,
+} from '../../utils/keyboardShortcutCombo'
 import type { KeyboardShortcutProps } from './types'
 
 const isMac = computed(() => isMacPlatform())

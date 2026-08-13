@@ -2,7 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, h } from 'vue'
 import KeyboardShortcut from './KeyboardShortcut.vue'
-import { _resetComboWarnings, parseCombo, spellOut } from './combo'
+import {
+  _resetComboWarnings,
+  parseCombo,
+  spellOut,
+} from '../../utils/keyboardShortcutCombo'
 
 function render(props: Record<string, unknown>): HTMLElement {
   const host = document.createElement('div')
