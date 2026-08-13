@@ -1532,7 +1532,11 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     }
   }
 
-  const tag = new RegExp(`(</?)(${Object.keys(TAG_RENAMES).join('|')})\\b`, 'g')
+  // `\b` cannot end a kebab tag: it sits between the last letter and the next
+  // hyphen, so it would let `<keyboard-shortcuts-modal-legacy>` match and
+  // rename a tag the app owns. A tag name runs on through `[\w.-]`, so the
+  // name ends only where none of those follows.
+  const tag = new RegExp(`(</?)(${Object.keys(TAG_RENAMES).join('|')})(?![\\w.-])`, 'g')
   let t
   while ((t = tag.exec(content))) {
     // The mask opens the tag name, not the `<` in front of it.

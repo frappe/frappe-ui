@@ -1050,6 +1050,18 @@ useShortcut(config)
     expect(migrated).toContain('<keyboard-shortcuts-dialog />')
   })
 
+  it('leaves a longer tag that starts with the renamed one alone', () => {
+    // A kebab tag ends on a word boundary before its own hyphen, so `\b`
+    // alone does not end the name. The app owns this tag.
+    const { migrated, renames } = migrateShortcuts(
+      '<template>\n  <keyboard-shortcuts-modal-legacy />\n</template>\n',
+      { ext: '.vue' },
+    )
+
+    expect(migrated).toContain('<keyboard-shortcuts-modal-legacy />')
+    expect(renames).toEqual([])
+  })
+
   it('leaves the name alone inside a string, a comment and a module specifier', () => {
     const source = `import { useShortcut } from 'frappe-ui'
 import { legacy } from './useShortcut'
