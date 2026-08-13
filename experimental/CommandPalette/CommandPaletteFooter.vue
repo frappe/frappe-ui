@@ -21,6 +21,12 @@ defineSlots<{
 
 const palette = useCommandPaletteContext()
 
+if (import.meta.env.DEV && !palette) {
+  console.warn(
+    '[frappe-ui] CommandPaletteFooter has to render inside a CommandPalette.',
+  )
+}
+
 const slotProps = computed<CommandPaletteFooterSlotProps>(() => ({
   active: palette?.activeValue.value,
 }))

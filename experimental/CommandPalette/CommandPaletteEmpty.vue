@@ -22,6 +22,12 @@ defineSlots<{
 
 const palette = useCommandPaletteContext()
 
+if (import.meta.env.DEV && !palette) {
+  console.warn(
+    '[frappe-ui] CommandPaletteEmpty has to render inside a CommandPalette.',
+  )
+}
+
 const empty = computed(() => palette?.empty.value ?? false)
 
 const slotProps = computed<CommandPaletteEmptySlotProps>(() => ({

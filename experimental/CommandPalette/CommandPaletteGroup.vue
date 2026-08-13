@@ -37,6 +37,12 @@ defineSlots<{
 
 const palette = useCommandPaletteContext()
 
+if (import.meta.env.DEV && !palette) {
+  console.warn(
+    '[frappe-ui] CommandPaletteGroup has to render inside a CommandPalette.',
+  )
+}
+
 const id = Symbol('command-palette-group')
 
 provideCommandPaletteGroupContext({ id })
