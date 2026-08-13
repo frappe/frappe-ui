@@ -1,10 +1,10 @@
 # CommandPalette
 
-A searchable list of commands in a dialog, opened with `Mod+K`. Compose
-`CommandPaletteInput`, `CommandPaletteList`, `CommandPaletteGroup`,
-`CommandPaletteItem`, `CommandPaletteEmpty` and `CommandPaletteFooter` inside
-the `CommandPalette` root. The app writes the rows; the palette owns the dialog,
-the query, the keyboard and the filter.
+A searchable list of commands in a dialog. Compose `CommandPaletteInput`,
+`CommandPaletteList`, `CommandPaletteGroup`, `CommandPaletteItem`,
+`CommandPaletteEmpty` and `CommandPaletteFooter` inside the `CommandPalette`
+root. The app writes the rows; the palette owns the dialog, the query, the
+keyboard and the filter.
 
 Groups and items go inside `CommandPaletteList`, which is the list itself and
 the only part that scrolls. The field, the empty state and the footer are its

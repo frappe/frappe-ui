@@ -21,8 +21,8 @@ it is likely to move:
 - **Parked** — it was public in v0, left the root export in `1.0.0`, and sits
   here as an interim import path. It still works. It leaves by being deleted
   once apps migrate, not by being promoted.
-- **Incubating** — it was never public. It leaves by being promoted to the root
-  export, or by being dropped.
+- **Incubating** — this API was never public, even if the name was. It leaves
+  by being promoted to the root export, or by being dropped.
 
 | Export | State | Waiting on |
 | --- | --- | --- |
