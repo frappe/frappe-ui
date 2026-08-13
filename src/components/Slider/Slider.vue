@@ -110,6 +110,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
@@ -205,11 +206,7 @@ function thumbNameFor(index: number): string | undefined {
 // Declared before `rootClasses`, which reads it.
 const hasLabeling = computed(() => {
   return Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
+    props.label || slots.label || rendersDescription.value || hasError.value,
   )
 })
 

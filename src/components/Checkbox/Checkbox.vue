@@ -104,6 +104,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
@@ -132,8 +133,7 @@ const containerClasses = computed(() => {
   if (!props.padded) return undefined
   // A description or error makes the surface multi-line, so it grows with
   // vertical padding instead of the fixed compact height used for label-only rows.
-  const hasDetail =
-    showDescription.value || hasError.value || !!slots.description
+  const hasDetail = rendersDescription.value || hasError.value
   const sizeClass = hasDetail
     ? props.size === 'md'
       ? 'px-3 py-2'

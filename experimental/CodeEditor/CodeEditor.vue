@@ -89,6 +89,7 @@ const {
   hasError,
   errorLines,
   showDescription,
+  rendersDescription,
   dataAttrs,
 } = useInputLabeling(props, {
   size: () => props.size,
@@ -102,11 +103,7 @@ const {
 // it — otherwise the editor mounts bare, preserving the primitive's footprint.
 const hasLabeling = computed(() =>
   Boolean(
-    props.label ||
-    slots.label ||
-    showDescription.value ||
-    slots.description ||
-    hasError.value,
+    props.label || slots.label || rendersDescription.value || hasError.value,
   ),
 )
 

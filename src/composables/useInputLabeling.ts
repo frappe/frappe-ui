@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, onBeforeUpdate, shallowRef } from 'vue'
 import { useId } from '../utils/useId'
 import type { InputSize, InputVariant, ToggleSize } from './inputTypes'
 
@@ -99,10 +99,25 @@ export function useInputLabeling(
     return Boolean(props.description) && !hasError.value
   })
 
+  // `useSlots()` returns `instance.slots`, which Vue mutates in place and does
+  // not track. A `computed` reading it caches on first evaluation and never
+  // re-runs, so a slot behind a `v-if` leaves the reference wrong in both
+  // directions: added, the element renders and nothing points at it; removed,
+  // the reference outlives its element and dangles.
+  //
+  // Slot content only ever changes as part of a re-render, and `beforeUpdate`
+  // runs after `updateSlots` and before the render function, so bumping here is
+  // the invalidation those two computeds are missing.
+  const slotTick = shallowRef(0)
+  onBeforeUpdate(() => {
+    slotTick.value++
+  })
+
   // Both of these follow what actually renders, not what the props say. A
   // `#label` or `#description` slot renders the same element the prop does, so
   // keying off the prop alone paints an element that nothing points at.
   const rendersDescription = computed(() => {
+    slotTick.value
     return showDescription.value || Boolean(options.hasDescriptionSlot?.())
   })
 
@@ -114,6 +129,7 @@ export function useInputLabeling(
   })
 
   const labelledBy = computed(() => {
+    slotTick.value
     return props.label || options.hasLabelSlot?.() ? labelId.value : undefined
   })
 
@@ -144,6 +160,7 @@ export function useInputLabeling(
     hasError,
     errorLines,
     showDescription,
+    rendersDescription,
     dataAttrs,
   }
 }
