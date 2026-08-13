@@ -470,23 +470,69 @@ describe('CommandPalette', () => {
         .flat()
         .filter((arg) => String(arg).startsWith('[frappe-ui]'))
 
-    mount()
+    const { query } = mount()
+    await flush()
+    query.value = 'in'
     await flush()
     expect(ours()).toEqual([])
     app?.unmount()
     document.body.innerHTML = ''
 
+    // Text that arrives after the row is on screen is not the case the
+    // warning is for. The item reads it in `onUpdated` and filters fine.
+    const title = ref('')
+    const lateQuery = ref('')
+    const Late = defineComponent({
+      setup() {
+        return () =>
+          h(
+            CommandPalette,
+            {
+              open: true,
+              query: lateQuery.value,
+              'onUpdate:query': (value: string) => (lateQuery.value = value),
+            },
+            () => [
+              h(CommandPaletteList, () => [
+                h(CommandPaletteItem, { value: 'inbox' }, () => title.value),
+              ]),
+            ],
+          )
+      },
+    })
+    const lateHost = document.createElement('div')
+    document.body.appendChild(lateHost)
+    app = createApp(Late)
+    app.mount(lateHost)
+    await flush()
+    title.value = 'Inbox'
+    await flush()
+    lateQuery.value = 'in'
+    await flush()
+    expect(ours()).toEqual([])
+    app?.unmount()
+    document.body.innerHTML = ''
+
+    // An icon and nothing else, so there is nothing for a query to narrow.
+    const iconQuery = ref('')
     const Harness = defineComponent({
       setup() {
         return () =>
-          h(CommandPalette, { open: true }, () => [
-            h(CommandPaletteList, () => [
-              // An icon and nothing else, so there is no text to match.
-              h(CommandPaletteItem, { value: 'inbox' }, () =>
-                h('span', { class: 'lucide-inbox' }),
-              ),
-            ]),
-          ])
+          h(
+            CommandPalette,
+            {
+              open: true,
+              query: iconQuery.value,
+              'onUpdate:query': (value: string) => (iconQuery.value = value),
+            },
+            () => [
+              h(CommandPaletteList, () => [
+                h(CommandPaletteItem, { value: 'inbox' }, () =>
+                  h('span', { class: 'lucide-inbox' }),
+                ),
+              ]),
+            ],
+          )
       },
     })
     const host = document.createElement('div')
@@ -494,9 +540,19 @@ describe('CommandPalette', () => {
     app = createApp(Harness)
     app.mount(host)
     await flush()
+    // Nothing to answer yet, so nothing to warn about.
+    expect(ours()).toEqual([])
+
+    iconQuery.value = 'in'
+    await flush()
     expect(ours()).toEqual([
-      '[frappe-ui] CommandPaletteItem draws no text, so the filter always keeps it. Give it a `label`.',
+      '[frappe-ui] CommandPaletteItem draws no text, so the filter keeps it under every query. Give it a `label`.',
     ])
+
+    // Once, not once per keystroke.
+    iconQuery.value = 'inb'
+    await flush()
+    expect(ours()).toHaveLength(1)
     warn.mockRestore()
   })
 

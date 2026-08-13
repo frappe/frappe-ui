@@ -35,11 +35,13 @@
 import { ListboxItem, injectListboxRootContext } from 'reka-ui'
 import {
   computed,
+  nextTick,
   onMounted,
   onUnmounted,
   onUpdated,
   ref,
   useTemplateRef,
+  watch,
 } from 'vue'
 import {
   useCommandPaletteContext,
@@ -100,15 +102,32 @@ function readRenderedText() {
 
 onMounted(() => {
   readRenderedText()
-  // An item with no text of its own and no `label` has nothing to match, so
-  // the filter can never narrow it away and it sits under every query.
-  if (import.meta.env.DEV && palette?.filterable.value && !filterText.value) {
-    console.warn(
-      '[frappe-ui] CommandPaletteItem draws no text, so the filter always keeps it. Give it a `label`.',
-    )
-  }
+  if (import.meta.env.DEV) nextTick(warnIfNothingToMatch)
 })
-onUpdated(readRenderedText)
+
+onUpdated(() => {
+  readRenderedText()
+  if (import.meta.env.DEV) warnIfNothingToMatch()
+})
+
+// An item with no text of its own and no `label` has nothing to match, so the
+// filter can never narrow it away and it sits under every query.
+//
+// The check waits for a query. Text is read off the mounted element, and an
+// item whose slot fills a render later has none to read at first, so mount
+// time cannot tell an unfilterable row from one that is about to be fine. By
+// the time there is a query to answer, the text has arrived or it never will.
+let warned = false
+
+function warnIfNothingToMatch() {
+  if (warned) return
+  if (!palette?.filterable.value) return
+  if (!palette.query.value || filterText.value) return
+  warned = true
+  console.warn(
+    '[frappe-ui] CommandPaletteItem draws no text, so the filter keeps it under every query. Give it a `label`.',
+  )
+}
 
 const filterText = computed(() => props.label ?? renderedText.value)
 
@@ -121,6 +140,13 @@ const visible = computed(() => {
   if (!filterText.value) return true
   return palette.matches(filterText.value, props.keywords ?? [])
 })
+
+if (import.meta.env.DEV) {
+  watch(
+    () => palette?.query.value,
+    () => nextTick(warnIfNothingToMatch),
+  )
+}
 
 const unregister = palette?.registerItem(id, {
   groupId: group?.id ?? null,
