@@ -28,15 +28,16 @@ line, the changelog is the faster read.
 
 Two changes have a codemod: the Tailwind token renames (`tokens-v2`, see
 [Tokens](#tokens)) and the shortcut config (`shortcuts-v1`, see
-[Keyboard shortcuts](#keyboard-shortcuts)). Every other component, prop and
-slot rename is a hand edit.
+[The shortcuts codemod](#the-shortcuts-codemod)). Every other component, prop
+and slot rename is a hand edit.
 
 ### Sections
 
 - **Overlays** — [Dialog](#dialog) · [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) · [CommandPalette](#commandpalette)
 - **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
-- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Keyboard shortcuts](#keyboard-shortcuts) · [KeyboardShortcut](#keyboardshortcut) · [Divider](#divider)
+- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
+- **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
@@ -2531,14 +2532,147 @@ and yours never updates.
 <CommandPalette v-model:open="open" v-model:query="q" :groups="groups" @select="onSelect" />
 ```
 
-`Mod+K` is registered internally through `useShortcut` (v0 used its own
+`Mod+K` is registered internally through `useKeyboardShortcut` (v0 used its own
 `keydown` listener on `window`). Delete any app-level listener you added on
 top of it.
 
-## Keyboard shortcuts
+## `useShortcut` is now `useKeyboardShortcut`
 
-A shortcut config loses its `key` + `ctrl` + `shift` + `alt` fields and gains
-one `combo` string. Run the codemod from the app you are migrating:
+The import fails to resolve, so your build names every call site. The **config
+inside it is a silent break**: 14 fields become 10, and the ones that left are
+dropped without a word.
+
+| Before | After |
+| --- | --- |
+| `useShortcut(...)` | `useKeyboardShortcut(...)` |
+| `key: 's', ctrl: true` | `combo: 'Mod+S'` |
+| `key: 'z', ctrl: true, shift: true` | `combo: 'Mod+Shift+Z'` |
+| `key: 'ArrowUp'` | `combo: 'ArrowUp'` |
+| `key: '/'` | `combo: 'Slash'` |
+| `key: '?'` | `combo: 'Shift+Slash'` |
+| `key: ' '` | `combo: 'Space'` |
+| `condition: () => canEdit.value` | `enabled: () => canEdit.value` |
+| `triggeredOn: 'hold'` | delete it; `onHold` selects hold mode |
+| `const { activeShortcuts } = useShortcut(...)` | returns `void` |
+| `ShortcutConfig` | `KeyboardShortcutConfig` |
+| `RegisteredShortcut`, `ActiveShortcut` | gone; see below |
+
+```js
+// Before
+useShortcut([
+  { key: 's', ctrl: true, description: 'Save', group: 'View', handler: onSave },
+  { key: 'z', ctrl: true, description: 'Undo', condition: notReadOnly, handler: undo },
+  { key: 'y', ctrl: true, description: 'Redo', condition: notReadOnly, handler: redo },
+])
+
+// After
+useKeyboardShortcut([
+  { combo: 'Mod+S', description: 'Save', group: 'View', handler: onSave },
+  { combo: 'Mod+Z', description: 'Undo', enabled: notReadOnly, handler: undo },
+  { combo: 'Mod+Y', description: 'Redo', enabled: notReadOnly, handler: redo },
+])
+```
+
+`ctrl` never meant Control. It matched `ctrlKey || metaKey`, so
+`{ key: 's', ctrl: true }` fired on ⌘S, on ⌃S and on Win+S alike. `Mod+S`
+compares every modifier exactly: ⌘S on macOS, Ctrl+S elsewhere. Those two extra
+trigger paths stop. Register `Ctrl+S` as well if you need Control+S on a Mac.
+The grammar has no token for the Windows key, so Win+S cannot come back. Write
+`Ctrl` only where you mean Control on a Mac too.
+
+A combo spells its modifiers in one order, `Mod+Ctrl+Alt+Shift+<Key>`, and a
+letter uppercase. The type accepts no other spelling.
+
+### Punctuation and digits take a key name
+
+`+` separates the parts of a combo, so it cannot also be a key. Name the key
+instead:
+
+| Before | After |
+| --- | --- |
+| `key: '+'` | `combo: 'Shift+Equal'` (or `'Plus'` for the keypad key) |
+| `key: '='` | `combo: 'Equal'` |
+| `key: '-'` | `combo: 'Minus'` |
+| `key: '/'` | `combo: 'Slash'` |
+| `key: '\\'` | `combo: 'Backslash'` |
+| the backtick key | `combo: 'Backtick'` |
+| `key: '1'` | `combo: 'Digit1'` |
+| `key: '!'` | `combo: 'Shift+Digit1'` |
+
+Digits and punctuation now match `event.code`, so `Mod+Shift+Digit1` fires on
+⌘⇧1 and on ⌘⇧! alike. A punctuation name means the physical key position, as
+labelled on a US layout, so `Mod+Slash` fires on the same key everywhere.
+`Plus` is the keypad `+` alone, the key whose `event.code` is `NumpadAdd`.
+Letters and named keys still match `event.key`. The old US-layout heuristic
+that let `?` match without declaring Shift is gone: declare the Shift.
+
+TypeScript rejects an unknown combo. A JavaScript call site still passing the
+v0 shape logs one dev warning and never fires.
+
+### Hold shortcuts
+
+```ts
+// Before
+{ key: 'l', ctrl: true, shift: true, triggeredOn: 'hold',
+  description: 'Highlight blocks', onHold: on, onRelease: off }
+
+// After
+{ combo: 'Mod+Shift+L', description: 'Highlight blocks', onHold: on, onRelease: off }
+```
+
+A hold registration takes no `handler`. `triggeredOn: 'hold'` used to fire
+`handler` **and** `onHold`; if you relied on that, move the work into `onHold`.
+
+A v0 shortcut that paired a plain `handler` with your own `keyup` listener
+folds into `onHold` / `onRelease` too. Delete the listener.
+
+### `enabled` also hides the shortcut
+
+While `enabled` is `false` the shortcut is inert **and** absent from
+`KeyboardShortcutsDialog`. `condition` behaved this way already, undocumented.
+It is now specified and tested, so read-only modes keep working.
+
+### Precedence changed
+
+Two shortcuts on one combo used to run whichever the registry reached first.
+The last registration that is enabled **at the time of the keypress** now wins.
+`enabled` is resolved first, so a pair with mutually exclusive guards still
+works unchanged. A real collision warns once per combo in development.
+
+### `formatShortcutLabel` and `getActiveShortcuts` are gone
+
+Both imports fail at the build. Neither had a consumer. To render a combo, use
+`<KeyboardShortcut :combo="combo" />`. To read the registry, use
+`KeyboardShortcutsDialog`'s default slot.
+
+The types they used, `RegisteredShortcut` and `ActiveShortcut`, are gone with
+them. The dialog's slot gives `KeyboardShortcutGroup` and
+`KeyboardShortcutEntry` instead. An entry carries `combo`, `altCombos`,
+`description` and `group`.
+
+## `KeyboardShortcutsModal` is now `KeyboardShortcutsDialog`
+
+The import fails to resolve, and Vue logs an unknown-component warning for a
+globally registered `<KeyboardShortcutsModal>`. Props are unchanged.
+
+| Before | After |
+| --- | --- |
+| `import { KeyboardShortcutsModal } from 'frappe-ui'` | `import { KeyboardShortcutsDialog } from 'frappe-ui'` |
+| `<KeyboardShortcutsModal v-model:open="open" />` | `<KeyboardShortcutsDialog v-model:open="open" />` |
+| `KeyboardShortcutsModalProps` | `KeyboardShortcutsDialogProps` |
+
+Two dialog behaviors are worth knowing before you diff its output:
+
+- Shortcuts that share a group and a description merge into **one row**, with
+  the other combos after a `/`. `Mod+Shift+Z` and `Mod+Y`, both "Redo", are one
+  row. v0 merged only when the modifiers matched too, so rows that used to be
+  separate now join.
+- A disabled shortcut has no row at all.
+
+## The shortcuts codemod
+
+`shortcuts-v1` applies both changes above for you. Run it from the app you are
+migrating:
 
 ```sh
 npx --package frappe-ui@beta shortcuts-v1 --dry-run .
@@ -2550,38 +2684,11 @@ Review the output, then run it without `--dry-run`:
 npx --package frappe-ui@beta shortcuts-v1 .
 ```
 
-```js
-// Before
-useShortcut([
-  { key: 's', ctrl: true, description: 'Save', group: 'View', handler: onSave },
-  { key: 'z', ctrl: true, shift: true, description: 'Redo', condition: notReadOnly, handler: redo },
-])
-
-// After
-useKeyboardShortcut([
-  { combo: 'Mod+S', description: 'Save', group: 'View', handler: onSave },
-  { combo: 'Mod+Shift+Z', description: 'Redo', enabled: notReadOnly, handler: redo },
-])
-```
-
-| Before | After |
-| --- | --- |
-| `useShortcut` | `useKeyboardShortcut` |
-| `KeyboardShortcutsModal` | `KeyboardShortcutsDialog` |
-| `ShortcutConfig` | `KeyboardShortcutConfig` |
-| `key` + `ctrl` / `shift` / `alt` | `combo` |
-| `condition` | `enabled` |
-| `triggeredOn: 'hold'` | deleted; `onHold` / `onRelease` select hold mode |
-| `getActiveShortcuts` | deleted |
-| `formatShortcutLabel` | deleted |
-
-`ctrl: true` becomes `Mod`, never `Ctrl`. v0 matched `ctrlKey || metaKey`, so
-the flag always meant `Mod`. Modifiers are written in one order:
-`Mod+Ctrl+Alt+Shift+<Key>`.
-
-`description`, `group`, `handler`, `onHold`, `onRelease`, `preventDefault`,
-`allowInInput` and `allowInDialog` keep their names and their defaults. The
-codemod passes them through.
+It renames `useShortcut`, `KeyboardShortcutsModal` and `ShortcutConfig`, folds
+`key` and the modifier flags into one `combo`, and renames `condition` to
+`enabled`. `description`, `group`, `handler`, `onHold`, `onRelease`,
+`preventDefault`, `allowInInput` and `allowInDialog` keep their names and their
+defaults. The codemod passes them through.
 
 The codemod exits non-zero when it refused a site, on a dry run too. A clean
 exit means a clean run. Re-running it is safe: a converted object has no `key`
@@ -2679,44 +2786,31 @@ The combo carries the modifiers. A `ctrl: true` left beside a hand-written
 `combo` reaches v1 as an excess property, and no later run mentions it: with
 no `key` there is nothing left to refuse.
 
-The named keys are `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`,
-`Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft` and
-`BracketRight`.
+The name each key takes is in
+[Punctuation and digits take a key name](#punctuation-and-digits-take-a-key-name).
+`Plus` is the trap: it is the keypad key alone, so `{ key: '+', ctrl: true }`
+becomes `'Mod+Shift+Equal'`. The codemod writes that whole combo on the line,
+because `Mod+Plus` would bind a key the user never presses and report a clean
+run.
 
-`Plus` is the keypad `+`, the key whose `event.code` is `NumpadAdd`. One
-name, one physical key. The `+` a normal keyboard types needs Shift, so
-`{ key: '+', ctrl: true }` becomes `'Mod+Shift+Equal'`. The codemod writes
-that whole combo on the line, because `Mod+Plus` would bind a key the user
-never presses and report a clean run.
-
-Write the `combo` the line gives you. Putting a v1 key name back in `key`
-leaves a v0 config, which never fired, and the next run refuses it again.
+Write the `combo` the line gives you.
 
 ### Combo reference
 
-Every key name a `combo` can hold. A refused line points here when it cannot
-build the name for you.
+Every key name a `combo` can hold is listed under
+[`combo` takes the key names the composable fires on](#combo-takes-the-key-names-the-composable-fires-on).
+A refused line points here when it cannot build the name for you.
 
-| Kind | Names |
-| --- | --- |
-| Modifiers | `Mod`, `Ctrl`, `Alt`, `Shift`, in that order |
-| Letters | `A` to `Z`, uppercase |
-| Digits | `Digit0` to `Digit9` |
-| Editing | `Escape`, `Enter`, `Tab`, `Backspace`, `Delete`, `Space`, `Insert` |
-| Navigation | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`, `PageUp`, `PageDown` |
-| Function | `F1` to `F12` |
-| Punctuation | `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight` |
-
-`Mod` is Command on macOS and Control everywhere else. A name goes in `combo`,
-never back in `key`: `key` is the v0 field, and v0 compared it to
-`KeyboardEvent.key`, which reports none of these spellings.
+Take the name into `combo`, never back into `key`. `key` is the v0 field, and
+v0 compared it to `KeyboardEvent.key`, which reports none of those spellings. A
+v1 name left in `key` is still a v0 config, and the next run refuses it again.
 
 ### Digits convert, and get listed
 
 `{ key: '1', ctrl: true, shift: true }` becomes `{ combo: 'Mod+Shift+Digit1' }`.
-v1 matches a digit on `KeyboardEvent.code`, so a shifted digit (`!`, `@`, ...)
-resolves to the same combo. That is a behaviour change, so the codemod lists
-every digit it touched under "Digit keys converted". Read each one.
+A shifted digit (`!`, `@`, ...) now resolves to the same combo. That is a
+behaviour change, so the codemod lists every digit it touched under "Digit keys
+converted". Read each one.
 
 ### What it reports but never rewrites
 
@@ -2734,17 +2828,17 @@ Each of these exits the run non-zero. Fix them by hand.
   `{ ...base, handler: save }` and `{ [Keys.SAVE]: 's' }` can carry a `key` or
   a modifier that never reaches the run. Write the properties out, or convert
   the object by hand.
-- **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted. Render
-  `<KeyboardShortcut :combo="..." />` for the first. For the second, read the
-  registry from the `<KeyboardShortcutsDialog>` default slot. Their types,
-  `ActiveShortcut` and `RegisteredShortcut`, go with them. The codemod names
-  all four wherever they appear, comments included.
+- **`formatShortcutLabel` and `getActiveShortcuts`.** Both are deleted, and
+  their `ActiveShortcut` and `RegisteredShortcut` types go with them. See
+  [`formatShortcutLabel` and `getActiveShortcuts` are gone](#formatshortcutlabel-and-getactiveshortcuts-are-gone)
+  for what replaces each one. The codemod names all four wherever they appear,
+  comments included.
 - **A destructured `useShortcut(...)` return.** v1 returns void; cleanup
   already runs on unmount.
-- **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both. v1 selects
-  hold mode from `onHold` / `onRelease` alone. To keep the hold, delete the
-  `handler`. To keep the press, delete `triggeredOn: 'hold'` and the hold
-  callbacks with it.
+- **`triggeredOn: 'hold'` next to a `handler`.** v0 fired both and v1 will not,
+  so the run cannot pick a side. To keep the hold, delete the `handler`. To
+  keep the press, delete `triggeredOn: 'hold'` and the hold callbacks with it.
+  See [Hold shortcuts](#hold-shortcuts).
 - **`onHold` or `onRelease` without `triggeredOn: 'hold'`.** v0 gated both on
   `'hold'`, so the callback never fired. In v1 the callback itself selects hold
   mode, so it starts firing. Delete it, or add `triggeredOn: 'hold'` to keep it
@@ -2777,10 +2871,10 @@ None of these fails the run. Read them and decide if the code wants a rewrite.
   declared in the file. That name is left as it is, and the rest of the file
   still migrates.
 - **A possible hand-rolled hold**: a shortcut registration and a manual
-  `keyup` listener in the same file. v1 has `onHold` / `onRelease`, so the
-  pair may fold into one registration. Only you can say which half is which.
-  This is a guess: an unrelated `keyup` listener matches too, and no edit
-  would clear it, so it never fails the run.
+  `keyup` listener in the same file. The pair may fold into one registration,
+  as [Hold shortcuts](#hold-shortcuts) describes. Only you can say which half
+  is which. This is a guess: an unrelated `keyup` listener matches too, and no
+  edit would clear it, so it never fails the run.
 
 ### It never renames your own composable
 
@@ -2818,11 +2912,71 @@ rendered `<span>` as plain HTML attributes, so `shortcut="Mod+K"` renders an
 empty chip and `ctrl shift` renders the key with no modifier glyphs. Only a
 type-check names the call sites.
 
+### `combo` takes the key names the composable fires on
+
+The display used to accept a second, looser vocabulary. It is gone: a chip for
+a combo that can never fire is the failure this family exists to remove. An
+unknown token renders as written, so `<KeyboardShortcut combo="Cmd+K" />` draws
+the word "Cmd" next to the K.
+
+This is a **silent break**. `combo` stays typed `string`, because callers
+compute it, so no type-check names the call sites. The chip warns once per
+token in development and says nothing in production.
+
+| Before | After |
+| --- | --- |
+| `Cmd`, `Command`, `⌘`, `Meta` | `Mod` |
+| `Control` | `Ctrl` |
+| `Option`, `Opt`, `⌥` | `Alt` |
+| `⇧` | `Shift` |
+| `Win`, `Windows` | nothing; the grammar has no Windows key |
+| `Esc` | `Escape` |
+| `Return` | `Enter` |
+| `Del` | `Delete` |
+| `Up`, `Down`, `Left`, `Right` | `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| `=` | `Equal` |
+| `F13` and above | nothing; the grammar stops at `F12` |
+
+```vue
+<!-- Before -->
+<KeyboardShortcut combo="Cmd+K" />
+<KeyboardShortcut combo="Ctrl+Esc" />
+<KeyboardShortcut combo="Option+Up" />
+
+<!-- After -->
+<KeyboardShortcut combo="Mod+K" />
+<KeyboardShortcut combo="Ctrl+Escape" />
+<KeyboardShortcut combo="Alt+ArrowUp" />
+```
+
+Grep every `combo` on the component, including bound values. The whole
+vocabulary is `Mod`, `Ctrl`, `Alt` and `Shift`, a letter, `F1` to `F12`, and
+these key names: `Escape`, `Enter`, `Space`, `Tab`, `Insert`, `Backspace`,
+`Delete`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `Home`, `End`,
+`PageUp`, `PageDown`, `Digit0` to `Digit9`, `Plus`, `Minus`, `Equal`, `Slash`,
+`Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`,
+`BracketLeft`, `BracketRight`. `useKeyboardShortcut` reads the same grammar,
+so a combo you register is a combo you can draw.
+
+### `useIcons` now reaches `bg` mode
+
+`bg` chips ignored the prop and always drew an icon for the arrow, Enter,
+Backspace and Delete keys. `:use-icons="false"` now drops those icons in both
+modes and draws the glyph instead. The default is `true`, so a chip that never
+set the prop is unchanged.
+
+### The root's `role` is `img`
+
+`role="note"` on the root becomes `role="img"` when `combo` is set, and no role
+at all without one. A labelled `img` replaces its subtree, so a screen reader
+reads "Shortcut Control + Backspace" once instead of meeting every chip. Update
+any test or stylesheet that selects `[role='note']`.
+
 ### `matchesShortcut` is no longer exported
 
 `import { matchesShortcut } from 'frappe-ui'` fails at the build. Its own doc
 comment said it was exported for unit tests only. Register a shortcut with
-`useShortcut` instead of matching a `KeyboardEvent` by hand.
+`useKeyboardShortcut` instead of matching a `KeyboardEvent` by hand.
 
 ## PageHeaderMobile family: slot names
 

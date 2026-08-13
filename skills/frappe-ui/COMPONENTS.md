@@ -121,7 +121,7 @@ Horizontal/vertical rule. Prefer over `<hr class="..." />`.
 - `TabButtons` for inline segmented controls (filter switches).
 
 ### `KeyboardShortcut`
-Renders a kbd combo. `<KeyboardShortcut keys="cmd+k" />`.
+Renders a kbd combo. `<KeyboardShortcut combo="Mod+K" />`. Register the shortcut itself with `useKeyboardShortcut({ combo: 'Mod+K', description, handler })`, and list them all with `KeyboardShortcutsDialog`.
 
 ## Lists & data
 

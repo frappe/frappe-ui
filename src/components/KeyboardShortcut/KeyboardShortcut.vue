@@ -3,54 +3,54 @@
     class="inline-flex items-center gap-0.5"
     :class="!bg ? 'text-ink-gray-5 text-sm' : ''"
     :aria-label="ariaLabel"
-    role="note"
-    v-bind="$attrs"
+    :role="ariaLabel ? 'img' : undefined"
+    data-slot="keyboard-shortcut"
+    :data-bg="bg ? 'true' : undefined"
   >
     <template v-if="bg && parsedParts.length">
       <kbd
         v-for="(part, idx) in parsedParts"
         :key="idx + '-' + part.raw"
         class="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-4 bg-surface-gray-2 px-1.5 text-xs-medium text-ink-gray-7"
+        data-slot="key"
+        :data-key-type="part.type"
       >
-        <span
-          v-if="bgIconFor(part)"
-          :class="bgIconFor(part)"
-          class="size-3"
-          role="img"
-          :aria-label="part.display"
-        />
+        <span v-if="bgIconFor(part)" :class="bgIconFor(part)" class="size-3" />
         <template v-else>{{ part.display }}</template>
       </kbd>
     </template>
     <template v-else-if="parsedParts.length">
       <template v-for="(part, idx) in parsedParts" :key="idx + '-' + part.raw">
-        <span v-if="part.type === 'cmd'">
-          <span class="lucide-command size-3" role="img" aria-label="Command" />
+        <span
+          v-if="part.type === 'cmd'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
+          <span class="lucide-command size-3" />
         </span>
-        <span v-else-if="part.type === 'shift'">
-          <span
-            class="lucide-arrow-big-up size-3"
-            role="img"
-            aria-label="Shift"
-          />
+        <span
+          v-else-if="part.type === 'shift'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
+          <span class="lucide-arrow-big-up size-3" />
         </span>
-        <span v-else-if="part.type === 'alt'">
-          <span class="lucide-option size-3" role="img" aria-label="Option" />
+        <span
+          v-else-if="part.type === 'alt'"
+          data-slot="key"
+          :data-key-type="part.type"
+        >
+          <span class="lucide-option size-3" />
         </span>
-        <span v-else>
-          <span
-            v-if="iconFor(part)"
-            :class="iconFor(part)"
-            class="size-3"
-            role="img"
-            :aria-label="part.display"
-          />
+        <span v-else data-slot="key" :data-key-type="part.type">
+          <span v-if="iconFor(part)" :class="iconFor(part)" class="size-3" />
           <span v-else class="leading-none uppercase">{{ part.display }}</span>
         </span>
         <span
           v-if="idx < parsedParts.length - 1 && showPlus"
           class="font-mono text-[10px] leading-none opacity-60"
           aria-hidden="true"
+          data-slot="separator"
           >+</span
         >
       </template>
@@ -58,41 +58,34 @@
     <template v-else>
       <slot></slot>
     </template>
-  </span>
-  <template v-if="uniqueAltCombos.length">
-    <span class="inline-flex items-center gap-1.5">
+    <!-- The root label already spells the alternatives. A labelled `role="img"`
+         replaces its whole subtree, so these chips need no `aria-hidden`. -->
+    <span
+      v-if="uniqueAltCombos.length"
+      class="ms-1 inline-flex items-center gap-1.5"
+      data-slot="alt-combos"
+    >
       <template
         v-for="(altCombo, i) in uniqueAltCombos"
         :key="'alt-' + i + altCombo"
       >
         <span class="text-xs text-ink-gray-4" aria-hidden="true">/</span>
-        <KeyboardShortcut
-          :combo="altCombo"
-          :bg="bg"
-          :show-plus="showPlus"
-          :aria-label="'Alternative shortcut ' + altCombo"
-        />
+        <KeyboardShortcut :combo="altCombo" :bg="bg" :show-plus="showPlus" />
       </template>
     </span>
-  </template>
+  </span>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
+import {
+  isMacPlatform,
+  parseCombo,
+  spellOut,
+  type ComboPart,
+} from '../../utils/keyboardShortcutCombo'
 import type { KeyboardShortcutProps } from './types'
 
-const isMac = computed(() => {
-  if (typeof navigator === 'undefined') return false
-  const p =
-    (navigator as any).userAgentData?.platform || navigator.platform || ''
-  if (/Mac|iPod|iPhone|iPad/i.test(p)) return true
-  return /Mac OS X|Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)
-})
-
-interface Part {
-  raw: string
-  type: string // cmd|ctrl|shift|alt|key|win
-  display: string
-}
+const isMac = computed(() => isMacPlatform())
 
 const props = withDefaults(defineProps<KeyboardShortcutProps>(), {
   showPlus: true,
@@ -104,77 +97,9 @@ const showPlus = computed<boolean>(() => props.showPlus)
 
 const effectiveCombo = computed(() => props.combo)
 
-function parseCombo(raw?: string): Part[] {
-  if (!raw) return []
-  const aliasMap: Record<string, string> = {
-    mod: isMac.value ? 'cmd' : 'ctrl',
-    command: 'cmd',
-    cmd: 'cmd',
-    '⌘': 'cmd',
-    control: 'ctrl',
-    ctrl: 'ctrl',
-    option: 'alt',
-    opt: 'alt',
-    alt: 'alt',
-    '⌥': 'alt',
-    shift: 'shift',
-    '⇧': 'shift',
-    meta: isMac.value ? 'cmd' : 'win',
-    win: 'win',
-    windows: 'win',
-  }
-  const keyMap: Record<string, string> = {
-    esc: 'Esc',
-    escape: 'Esc',
-    enter: '↵',
-    return: '↵',
-    space: 'Space',
-    ' ': 'Space',
-    tab: 'Tab',
-    plus: '+', // alias used by toCombo to avoid delimiter collision
-    '=': '+',  // equals key displayed as + (Ctrl+= fires without Shift, avoids browser zoom)
-    backspace: '⌫',
-    delete: '⌦',
-    del: '⌦',
-    up: '↑',
-    arrowup: '↑',
-    down: '↓',
-    arrowdown: '↓',
-    left: '←',
-    arrowleft: '←',
-    right: '→',
-    arrowright: '→',
-    pageup: 'PgUp',
-    pagedown: 'PgDn',
-    home: 'Home',
-    end: 'End',
-  }
+const parse = (raw?: string) => parseCombo(raw, isMac.value)
 
-  const result: Part[] = raw
-    .split('+')
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((original) => {
-      const lower = original.toLowerCase()
-      const type = aliasMap[lower] || 'key'
-      let display = original
-      if (type !== 'key') {
-        if (type === 'cmd') display = '⌘'
-        else if (type === 'shift') display = 'Shift'
-        else if (type === 'alt') display = isMac.value ? '⌥' : 'Alt'
-        else if (type === 'ctrl') display = 'Ctrl'
-        else if (type === 'win') display = 'Win'
-      } else {
-        if (keyMap[lower]) display = keyMap[lower]
-        else if (/^[a-z]$/.test(lower)) display = lower.toUpperCase()
-        else if (/^f\d{1,2}$/i.test(original)) display = original.toUpperCase()
-      }
-      return { raw: original, type, display }
-    })
-  return result
-}
-
-const parsedParts = computed<Part[]>(() => parseCombo(effectiveCombo.value))
+const parsedParts = computed<ComboPart[]>(() => parse(effectiveCombo.value))
 
 const uniqueAltCombos = computed<string[]>(() => {
   if (!props.altCombos?.length) return []
@@ -182,7 +107,7 @@ const uniqueAltCombos = computed<string[]>(() => {
     parsedParts.value.map((p) => p.display).join('+'),
   ])
   return props.altCombos.filter((combo) => {
-    const key = parseCombo(combo)
+    const key = parse(combo)
       .map((p) => p.display)
       .join('+')
     if (seen.has(key)) return false
@@ -191,27 +116,17 @@ const uniqueAltCombos = computed<string[]>(() => {
   })
 })
 
+// A labelled `role="img"` replaces everything inside it, so the chips are not
+// read a second time. Name the alternatives here or they are never announced.
+// Without a combo the root has no label, so it takes no role and the fallback
+// slot stays readable.
 const ariaLabel = computed(() => {
   if (!parsedParts.value.length) return undefined
-  const wordMap: Record<string, string> = {
-    '⌘': 'Command',
-    Shift: 'Shift',
-    '⌥': 'Option',
-    Alt: 'Alt',
-    Ctrl: 'Control',
-    Win: 'Windows',
-    '↵': 'Enter',
-    '⌫': 'Backspace',
-    '⌦': 'Delete',
-    '↑': 'Up Arrow',
-    '↓': 'Down Arrow',
-    '←': 'Left Arrow',
-    '→': 'Right Arrow',
-  }
-  const seq = parsedParts.value
-    .map((p) => wordMap[p.display] || p.display)
-    .join(' + ')
-  return 'Shortcut ' + seq
+  const sequences = [
+    spellOut(parsedParts.value),
+    ...uniqueAltCombos.value.map((combo) => spellOut(parse(combo))),
+  ]
+  return 'Shortcut ' + sequences.join(', or ')
 })
 
 defineOptions({ name: 'KeyboardShortcut' })
@@ -231,14 +146,23 @@ const keyIconMap: Record<string, string> = {
   '⌦': 'lucide-arrow-big-right-dash',
 }
 
-function iconFor(part: Part): string | null {
+// Own keys only: a plain lookup walks the prototype, so an unknown token like
+// `constructor` would resolve to a function and be bound as a class.
+const iconNameFor = (display: string): string | null =>
+  Object.hasOwn(keyIconMap, display) ? keyIconMap[display] : null
+
+function iconFor(part: ComboPart): string | null {
   if (!props.useIcons) return null
   if (['cmd', 'shift', 'alt'].includes(part.type)) return null
-  return keyIconMap[part.display] || null
+  return iconNameFor(part.display)
 }
 
-function bgIconFor(part: Part): string | null {
+// `useIcons` covers the non-modifier keys, the same set `iconFor` covers in
+// plain mode. A modifier glyph is not one of them, so ⌘ stays an icon either
+// way and the two modes agree.
+function bgIconFor(part: ComboPart): string | null {
   if (part.type === 'cmd') return 'lucide-command'
-  return keyIconMap[part.display] || null
+  if (!props.useIcons) return null
+  return iconNameFor(part.display)
 }
 </script>

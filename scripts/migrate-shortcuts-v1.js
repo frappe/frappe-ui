@@ -116,7 +116,7 @@ import { fileURLToPath } from 'url'
 
 const USAGE = 'Usage: shortcuts-v1 [--dry-run] <dir-or-file...>'
 
-const GUIDE = 'https://ui.frappe.io/docs/migration#keyboard-shortcuts'
+const GUIDE = 'https://ui.frappe.io/docs/migration#the-shortcuts-codemod'
 
 // ---------- KEY VOCABULARY ----------
 

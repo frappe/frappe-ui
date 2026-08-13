@@ -67,7 +67,7 @@ import {
 } from '@headlessui/vue'
 import Dialog from '../Dialog/Dialog.vue'
 import CommandPaletteItem from './CommandPaletteItem.vue'
-import { useShortcut } from '../../composables/useShortcut'
+import { useKeyboardShortcut } from '../../composables/useKeyboardShortcut'
 import type { CommandPaletteItemData, CommandPaletteProps } from './types'
 
 defineOptions({ name: 'CommandPalette' })
@@ -93,12 +93,11 @@ function select(item: CommandPaletteItemData | null) {
 // Cmd/Ctrl+K opens the palette. Fires while a normal input is focused (so it
 // works from anywhere on the page), but not while the rich text editor has
 // focus — Mod+K is also its own shortcut there.
-useShortcut({
-  key: 'k',
-  ctrl: true,
+useKeyboardShortcut({
+  combo: 'Mod+K',
   description: 'Open command palette',
   allowInInput: true,
-  condition: () => !document.activeElement?.closest('.ProseMirror'),
+  enabled: () => !document.activeElement?.closest('.ProseMirror'),
   handler: () => {
     open.value = true
   },

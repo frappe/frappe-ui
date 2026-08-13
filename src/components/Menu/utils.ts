@@ -16,7 +16,7 @@ export type NormalizedMenuGroup = MenuGroupOption & {
 
 export const menuClasses = {
   content:
-    'menu-content min-w-40 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    'menu-content z-[100] min-w-40 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
   groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
@@ -153,7 +153,7 @@ export function getMenuIconColor(item: {
   theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-5' : 'text-ink-gray-6'
+  return item.theme === 'red' ? 'text-ink-red-7' : 'text-ink-gray-6'
 }
 
 export function getMenuTextColor(item: {
@@ -161,7 +161,7 @@ export function getMenuTextColor(item: {
   theme?: MenuTheme
 }) {
   if (item.disabled) return 'text-ink-gray-4'
-  return item.theme === 'red' ? 'text-ink-red-5' : 'text-ink-gray-7'
+  return item.theme === 'red' ? 'text-ink-red-7' : 'text-ink-gray-7'
 }
 
 export function getMenuBackgroundColor(item: { theme?: MenuTheme }) {

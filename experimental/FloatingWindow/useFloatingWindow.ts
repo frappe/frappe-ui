@@ -21,6 +21,25 @@ const DEFAULT_HEIGHT = 520
 const MIN_WIDTH = 380
 const MIN_HEIGHT = 300
 
+/**
+ * Where a detached window sits: above ordinary page chrome, which in this
+ * library tops out at `z-10` (`ListGroup`'s sticky header, `PageHeader`), and
+ * below every dialog, which sets `z-50` on both the overlay and the container
+ * holding the content. The old `50` tied with that, so which one painted on top
+ * came down to document order — and a dialog the app renders before the window
+ * loses that tie and is unreachable.
+ *
+ * Popover surfaces sit above both: reka copies a content's z-index onto the
+ * teleported wrapper, and every reka content in the library carries `z-[100]`.
+ * `IconPicker` was the one exception, at `z-10`, and is corrected here.
+ */
+const Z_INDEX = 40
+
+/**
+ * Set on `<body>` while a window is detached. The library reads it nowhere: it
+ * is the hook an app styles against. An app whose own chrome goes past `z-40`
+ * scopes an `isolation` or z-index rule to this class.
+ */
 const BODY_CLASS = 'has-floating-window'
 let activeDocker: (() => void) | null = null
 
@@ -75,18 +94,18 @@ export function useFloatingWindow(
     if (mode.value === 'minimized')
       return {
         position: 'fixed',
+        zIndex: Z_INDEX,
         right: `${EDGE_MARGIN}px`,
         bottom: `${EDGE_MARGIN}px`,
         width: `${TRAY_WIDTH}px`,
-        zIndex: 50,
       }
     return {
       position: 'fixed',
+      zIndex: Z_INDEX,
       left: `${x.value}px`,
       top: `${y.value}px`,
       width: `${width.value}px`,
       height: `${height.value}px`,
-      zIndex: 50,
     }
   })
 
