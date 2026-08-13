@@ -17,7 +17,10 @@ word.
 
 `key` + `ctrl` + `shift` + `alt` collapse into one `combo` string, written
 `Mod+Ctrl+Alt+Shift+<Key>`. `ctrl` never meant Control. It matched
-`ctrlKey || metaKey`, so it already meant `Mod`. `condition` becomes `enabled`
+`ctrlKey || metaKey`, so `{ key: 's', ctrl: true }` fired on ⌘S, on ⌃S and on
+Win+S alike. `Mod+S` compares every modifier exactly, so only ⌘S fires on macOS
+and only Ctrl+S elsewhere. Those two extra trigger paths stop. `condition`
+becomes `enabled`
 and takes a ref, a getter or a boolean. `triggeredOn` goes: `onHold` selects
 hold mode, and a hold registration takes no `handler`, which ends the old
 surprise where `triggeredOn: 'hold'` fired `handler` too.

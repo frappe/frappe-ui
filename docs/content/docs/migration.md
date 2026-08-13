@@ -2571,9 +2571,12 @@ useKeyboardShortcut([
 ])
 ```
 
-`ctrl` never meant Control. It matched `ctrlKey || metaKey`, so it already
-meant `Mod`: Cmd on macOS, Ctrl elsewhere. Write `Ctrl` only where you mean
-Control on a Mac too.
+`ctrl` never meant Control. It matched `ctrlKey || metaKey`, so
+`{ key: 's', ctrl: true }` fired on ⌘S, on ⌃S and on Win+S alike. `Mod+S`
+compares every modifier exactly: ⌘S on macOS, Ctrl+S elsewhere. Those two extra
+trigger paths stop. Register `Ctrl+S` as well if you need Control+S on a Mac.
+The grammar has no token for the Windows key, so Win+S cannot come back. Write
+`Ctrl` only where you mean Control on a Mac too.
 
 ### Punctuation and digits take a key name
 
