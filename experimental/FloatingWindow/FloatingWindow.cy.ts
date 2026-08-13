@@ -1,5 +1,6 @@
 import { defineComponent, h, ref } from 'vue'
 import Dialog from '#components/Dialog/Dialog.vue'
+import { portalTargetKey } from '#composables/usePortalTarget'
 import FloatingWindow from './FloatingWindow.vue'
 import type { WindowMode } from './types'
 
@@ -330,13 +331,18 @@ describe('FloatingWindow', () => {
   })
 
   describe('layering', () => {
-    // The point of dropping the fixed z-index: an overlay opened over the
-    // window has to paint above it. Neither sets a z-index now, so paint order
-    // is document order, and the window has to come first.
+    // A detached window sits above ordinary page chrome and below every dialog.
+    // The host target is provided here on purpose: without it both nodes land
+    // in `<body>` and the assertion holds against the old hardcoded
+    // `Teleport to="body"` too, so the test would pass while broken.
     //
     // Not a hit test: reka puts `pointer-events: none` outside a modal dialog,
     // so `elementFromPoint` misses the window whatever the paint order is.
-    it('sits before a dialog in document order, so the dialog paints above', () => {
+    it('paints under a dialog and over page chrome', () => {
+      const host = document.createElement('div')
+      document.body.appendChild(host)
+      cy.then(() => Cypress.once('test:after:run', () => host.remove()))
+
       cy.mount(
         defineComponent({
           setup() {
@@ -368,6 +374,7 @@ describe('FloatingWindow', () => {
             ]
           },
         }),
+        { global: { provide: { [portalTargetKey]: host } } },
       )
 
       cy.get('.floating-window').should('be.visible')
@@ -376,14 +383,23 @@ describe('FloatingWindow', () => {
 
       cy.get('.floating-window').then(($win) => {
         const win = $win[0]
-        const dialog = Cypress.$('[role=dialog]')[0]
+        // The portal fix itself: the window resolves the host target, so it
+        // shares a stacking context with anything else that resolves it.
+        expect(win.parentElement, 'teleported into the host target').to.equal(
+          host,
+        )
+
+        const winZ = Number(getComputedStyle(win).zIndex)
         expect(
-          win.compareDocumentPosition(dialog) &
-            Node.DOCUMENT_POSITION_FOLLOWING,
-          'the dialog must come after the window',
-        ).to.be.greaterThan(0)
-        // A z-index on either would decide it instead of document order.
-        expect(getComputedStyle(win).zIndex).to.equal('auto')
+          winZ,
+          'over page chrome, which tops out at z-10',
+        ).to.be.greaterThan(10)
+
+        const overlay = Cypress.$('.dialog-overlay')[0]
+        expect(
+          Number(getComputedStyle(overlay).zIndex),
+          'under the dialog overlay',
+        ).to.be.greaterThan(winZ)
       })
     })
   })
