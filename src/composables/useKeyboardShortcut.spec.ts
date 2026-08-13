@@ -557,6 +557,98 @@ describe('useKeyboardShortcut — hold mode', () => {
     expect(onRelease).toHaveBeenCalledOnce()
     unmount()
   })
+
+  it('releases a held combo when the component unmounts', async () => {
+    const onRelease = vi.fn()
+    const { unmount } = mountWithShortcut({
+      combo: 'Space',
+      description: 'Pan mode',
+      onHold: vi.fn(),
+      onRelease,
+    })
+    await nextTick()
+
+    fireKey({ key: ' ' })
+    expect(onRelease).not.toHaveBeenCalled()
+
+    // The keys never came up, so nothing else can switch pan mode off.
+    unmount()
+    expect(onRelease).toHaveBeenCalledOnce()
+    expect(onRelease).toHaveBeenCalledWith()
+
+    // A late keyup must not release it a second time.
+    fireKeyUp({ key: ' ' })
+    expect(onRelease).toHaveBeenCalledOnce()
+  })
+
+  it('releases a held combo when a <KeepAlive> deactivates it', async () => {
+    const onHold = vi.fn()
+    const onRelease = vi.fn()
+    const kept = mountKeptAlive({
+      combo: 'Space',
+      description: 'Pan mode',
+      onHold,
+      onRelease,
+    })
+    await nextTick()
+
+    fireKey({ key: ' ' })
+    expect(onHold).toHaveBeenCalledOnce()
+    expect(onRelease).not.toHaveBeenCalled()
+
+    await kept.setActive(false)
+    expect(onRelease).toHaveBeenCalledOnce()
+    expect(onRelease).toHaveBeenCalledWith()
+
+    // Coming back is a fresh hold, not a second release.
+    await kept.setActive(true)
+    expect(onRelease).toHaveBeenCalledOnce()
+    fireKey({ key: ' ' })
+    expect(onHold).toHaveBeenCalledTimes(2)
+
+    kept.unmount()
+    expect(onRelease).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not release a shortcut that was never held', async () => {
+    const onRelease = vi.fn()
+    const { unmount } = mountWithShortcut({
+      combo: 'Space',
+      description: 'Pan mode',
+      onHold: vi.fn(),
+      onRelease,
+    })
+    await nextTick()
+
+    unmount()
+    expect(onRelease).not.toHaveBeenCalled()
+  })
+
+  it('finishes the cleanup when onRelease throws', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const handler = vi.fn()
+    const { unmount } = mountWithShortcut([
+      {
+        combo: 'Space',
+        description: 'Pan mode',
+        onHold: vi.fn(),
+        onRelease: () => {
+          throw new Error('boom')
+        },
+      },
+      { combo: 'Q', description: 'Quit', handler },
+    ])
+    await nextTick()
+
+    fireKey({ key: ' ' })
+    unmount()
+    expect(error).toHaveBeenCalled()
+
+    // The second registration still went away.
+    fireKey({ key: 'q' })
+    expect(handler).not.toHaveBeenCalled()
+    error.mockRestore()
+  })
 })
 
 // ---------------------------------------------------------------------------

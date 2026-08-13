@@ -170,7 +170,7 @@ compile. In JavaScript it warns once and never fires.
 | `group` | `string` | `"General"` | Heading the shortcut is listed under |
 | `handler` | `(e) => void` | — | Runs on keydown. Press mode |
 | `onHold` | `(e) => void` | — | Runs once when the combo goes down. Hold mode |
-| `onRelease` | `(e) => void` | — | Runs when a held combo is released |
+| `onRelease` | `(e?) => void` | — | Runs when a held combo is released |
 | `enabled` | `MaybeRefOrGetter<boolean>` | `true` | While `false` the shortcut is inert **and** hidden from the dialog |
 | `preventDefault` | `boolean` | `true` | Call `preventDefault()` on the matched event |
 | `allowInInput` | `boolean` | `false` | Fire while an input, textarea or contenteditable has focus |
@@ -188,6 +188,12 @@ useKeyboardShortcut({
   onRelease: () => (highlight.value = false),
 })
 ```
+
+`onRelease` also runs when the component unmounts, or is deactivated inside a
+`<KeepAlive>`, while the combo is still down. Without it the highlight above
+would stay on, with no shortcut left to switch it off. A teardown carries no
+event, so `onRelease` gets none: its parameter is optional, and a callback that
+reads the event has to handle `undefined`.
 
 ### Two shortcuts on one combo
 

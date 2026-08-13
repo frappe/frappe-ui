@@ -173,8 +173,11 @@ export interface HoldKeyboardShortcutConfig extends KeyboardShortcutBase {
   handler?: never
   /** Runs once when the combo goes down. Its presence selects hold mode. */
   onHold: (e: KeyboardEvent) => void
-  /** Runs when the combo is released. */
-  onRelease?: (e: KeyboardEvent) => void
+  /**
+   * Runs when the combo is released. Also runs, with no event, when the
+   * component unmounts or is deactivated while the combo is still down.
+   */
+  onRelease?: (e?: KeyboardEvent) => void
 }
 
 /**
@@ -527,12 +530,34 @@ export function useKeyboardShortcut(
   }
 
   const remove = () => {
+    // A combo that is still down when the component goes away gets no `keyup`,
+    // so release it here. Whatever `onHold` switched on would stay on with no
+    // shortcut left to switch it off.
+    const released: KeyboardShortcutConfig[] = []
     for (const registration of owned) {
       const index = registrations.indexOf(registration)
       if (index !== -1) registrations.splice(index, 1)
-      heldShortcuts.delete(registration.id)
+      // `delete` reports whether the id was held, so each held shortcut
+      // releases once and one that was never held releases never.
+      if (heldShortcuts.delete(registration.id)) {
+        released.push(registration.config)
+      }
     }
     registryVersion.value++
+
+    // Last, and one callback at a time: a throwing `onRelease` must not leave a
+    // registration in the list or block the next release.
+    for (const config of released) {
+      try {
+        config.onRelease?.()
+      } catch (error) {
+        console.error(
+          `[frappe-ui] onRelease for "${config.description}" threw while the ` +
+            `shortcut was being removed.`,
+          error,
+        )
+      }
+    }
   }
 
   add()

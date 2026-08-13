@@ -85,7 +85,7 @@ interface KeyboardShortcutConfig {
   group?: string // default 'General'
   handler?: (e: KeyboardEvent) => void
   onHold?: (e: KeyboardEvent) => void
-  onRelease?: (e: KeyboardEvent) => void
+  onRelease?: (e?: KeyboardEvent) => void
   enabled?: MaybeRefOrGetter<boolean> // default true
   preventDefault?: boolean // default true
   allowInInput?: boolean // default false
@@ -108,9 +108,17 @@ auto-repeats. `onRelease` runs when the key goes up, or when a modifier the
 combo needs goes up. Releasing a modifier the combo does not name changes
 nothing.
 
-**Known limit.** `onRelease` fires on `keyup` only. A window that loses focus
-gets no `keyup`, so a combo held through a ⌘-Tab or an Alt-Tab stays held until
-the user presses and releases it again.
+`onRelease` also runs when the component unmounts, or is deactivated inside a
+`<KeepAlive>`, while the combo is still down. Without it, whatever `onHold`
+switched on would stay on with no shortcut left to switch it off. A teardown has
+no event to pass, so `onRelease` gets none: its parameter is optional, and a
+callback that reads the event has to handle `undefined`. It runs once per held
+registration, and never for one that was not held. An `onRelease` that throws is
+logged and does not stop the removal.
+
+**Known limit.** Apart from teardown, `onRelease` fires on `keyup` only. A
+window that loses focus gets no `keyup`, so a combo held through a ⌘-Tab or an
+Alt-Tab stays held until the user presses and releases it again.
 
 Three call sites drive this shape: builder's highlight-blocks overlay and its
 Space pan mode, and suite's Space push-to-talk in meet.
