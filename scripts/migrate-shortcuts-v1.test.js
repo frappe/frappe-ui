@@ -1269,6 +1269,29 @@ const rules = [{ key: 'home', condition: isAdmin, handler: go }]
     expect(refusals).toEqual([])
   })
 
+  it('reads a config with an option name on it, when a modifier is written', () => {
+    // An option name kept the run quiet whatever else the object carried, so a
+    // config with an `icon` on it was passed over in a file the run wrote. No
+    // option row carries `ctrl`, so a written modifier outranks the name.
+    const source = `import { useShortcut } from 'frappe-ui'
+const save = { key: 's', ctrl: true, icon: 'save', handler: onSave }
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain("write `combo: 'Mod+S'`")
+
+    // An option row with no modifier stays quiet.
+    const options = `import { useShortcut } from 'frappe-ui'
+const items = [{ key: 'edit', icon: 'pencil', label: 'Edit', onClick: go }]
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const quiet = migrateShortcuts(options, { ext: '.ts' })
+
+    expect({ refusals: quiet.refusals, notes: quiet.notes }).toEqual({ refusals: [], notes: [] })
+  })
+
   it('refuses an object it walked away from when the file also renamed', () => {
     // The call renames, so a registration left with `key` would reach v1 with
     // no `combo` and throw. A note would not stop the write, so it is a refusal.

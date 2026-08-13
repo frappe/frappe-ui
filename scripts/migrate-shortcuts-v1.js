@@ -1249,11 +1249,13 @@ function convertObject(source, mask, range, ctx) {
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
   const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
 
-  // A modifier flag written out as `true` or `false`. Nothing but a keyboard
-  // shortcut carries `ctrl` beside a `key`, so a written flag is evidence in
-  // its own right: it speaks for `{ key: 's', ctrl: true }`, which has no
-  // callback to speak for it, and it outranks an option name, because an option
-  // row never carries one.
+  // A modifier flag written out as `true` or `false`. It outranks an option
+  // name: `ComboboxCustomOption` carries `icon` and `onClick`, and never a
+  // `ctrl`, so an object with both is a config with an icon on it.
+  //
+  // It is not evidence on its own. `{ key: 'z', ctrl: true }` with no callback
+  // beside it is the fake keyboard event this suite and every app's suite
+  // builds, and nothing in the object tells the two apart.
   const hasModifier = MODIFIER_PROPS.some((name) => {
     const value = byName.get(name)?.value.trim()
     return value === 'true' || value === 'false'
@@ -1357,10 +1359,7 @@ function convertObject(source, mask, range, ctx) {
     // is, and staying silent about it is the one outcome with no recovery.
     // An option keeps the run quiet, and it is checked above.
     const reads =
-      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) ||
-      hasCallback ||
-      !!condition ||
-      hasModifier
+      props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) || hasCallback || !!condition
     if (!reads) return null
 
     // A `key` the run cannot read has no combo to print. The proven path
