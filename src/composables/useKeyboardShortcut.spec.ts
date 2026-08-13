@@ -643,6 +643,43 @@ describe('useKeyboardShortcut — hold mode', () => {
     expect(handler).not.toHaveBeenCalled()
     error.mockRestore()
   })
+
+  it('releases the other held shortcuts when onRelease throws on keyup', async () => {
+    // The release path on unmount already guards each callback. The keyup path
+    // must agree, or one throwing shortcut leaves every other held shortcut
+    // stuck down with no way back.
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onHold = vi.fn()
+    const onRelease = vi.fn()
+    const { unmount } = mountWithShortcut([
+      {
+        combo: 'Mod+Space',
+        description: 'Pan mode',
+        onHold: vi.fn(),
+        onRelease: () => {
+          throw new Error('boom')
+        },
+      },
+      { combo: 'Mod+L', description: 'Snap to grid', onHold, onRelease },
+    ])
+    await nextTick()
+
+    fireKey({ key: ' ', ...MOD })
+    fireKey({ key: 'l', ...MOD })
+    expect(onHold).toHaveBeenCalledOnce()
+
+    // One keyup ends both holds: the modifier they share goes up.
+    fireKeyUp({ key: 'Control' })
+    expect(error).toHaveBeenCalled()
+    expect(onRelease, 'the second hold was released too').toHaveBeenCalledOnce()
+
+    // And it is no longer stuck down, so it can be held again.
+    fireKey({ key: 'l', ...MOD })
+    expect(onHold).toHaveBeenCalledTimes(2)
+
+    unmount()
+    error.mockRestore()
+  })
 })
 
 // ---------------------------------------------------------------------------

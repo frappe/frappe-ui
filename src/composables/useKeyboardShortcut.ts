@@ -146,7 +146,17 @@ function globalKeyupHandler(e: KeyboardEvent) {
     const parsed = parseComboForMatching(config.combo)
     if (!parsed || isStillHeld(e, parsed)) continue
     heldShortcuts.delete(id)
-    config.onRelease?.(e)
+    // Guarded like the release path in `remove()`: a throwing `onRelease` must
+    // not escape the document listener and leave the other held shortcuts
+    // stuck down with nothing left to release them.
+    try {
+      config.onRelease?.(e)
+    } catch (error) {
+      console.error(
+        `[frappe-ui] onRelease for "${config.description}" threw on keyup.`,
+        error,
+      )
+    }
   }
 }
 
