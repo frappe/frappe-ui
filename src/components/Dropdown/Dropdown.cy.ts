@@ -78,7 +78,7 @@ describe('Dropdown', () => {
       .within(() => {
         // Danger rows use the same ink as the ghost red Button; ink-red-5
         // is too dim against the dark-mode menu surface.
-        cy.get('.text-ink-red-7').should('exist')
+        cy.contains('Delete').should('have.class', 'text-ink-red-7')
         cy.get('.lucide-trash-2').should('have.class', 'text-ink-red-7')
       })
 
