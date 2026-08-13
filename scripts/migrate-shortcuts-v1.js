@@ -264,7 +264,7 @@ const HOLD_CALLBACKS = ['onHold', 'onRelease']
 // the callback itself as the request for hold mode, so a callback that was
 // dead in v0 starts firing. That is a behaviour change, so the site is refused.
 const DEAD_HOLD_CALLBACK =
-  "`onHold`/`onRelease` without `triggeredOn: 'hold'` never fired in v0, and does fire in v1. Delete the callback, or keep it on purpose."
+  "`onHold`/`onRelease` without `triggeredOn: 'hold'` never fired in v0, and does fire in v1. Delete the callback, or add `triggeredOn: 'hold'` to keep it on purpose — the next run converts that pair."
 const MODIFIER_PROPS = ['ctrl', 'alt', 'shift']
 
 // ---------- IMPORT BINDINGS ----------

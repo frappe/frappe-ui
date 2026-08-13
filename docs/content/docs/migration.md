@@ -2712,7 +2712,8 @@ Each of these exits the run non-zero. Fix them by hand.
   hold mode from `onHold` / `onRelease` alone, so decide which callback stays.
 - **`onHold` or `onRelease` without `triggeredOn: 'hold'`.** v0 gated both on
   `'hold'`, so the callback never fired. In v1 the callback itself selects hold
-  mode, so it starts firing. Delete it, or keep it on purpose.
+  mode, so it starts firing. Delete it, or add `triggeredOn: 'hold'` to keep it
+  on purpose — the next run converts that pair.
 - **A `vi.mock('frappe-ui', ...)` keyed on `useShortcut`.** The codemod renames
   the mock key, but the captured configs still carry `key` / `ctrl`, so the
   assertions move with the registrations.

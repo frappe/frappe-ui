@@ -428,6 +428,26 @@ useShortcut(bindings)
     expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
   })
 
+  it('names the edit that keeps a dead hold callback', () => {
+    // "Keep it on purpose" is not an edit. `triggeredOn: 'hold'` is, and the
+    // next run converts the pair, so the message has to name it.
+    const source = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, onHold: hold })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain("add `triggeredOn: 'hold'`")
+
+    const kept = `import { useShortcut } from 'frappe-ui'
+useShortcut({ key: 's', ctrl: true, triggeredOn: 'hold', onHold: hold })
+`
+    const next = migrateShortcuts(kept, { ext: '.ts' })
+
+    expect(next.refusals).toEqual([])
+    expect(next.migrated).toContain("{ combo: 'Mod+S', onHold: hold }")
+  })
+
   it('proves nothing from as const alone', () => {
     const source = `import { useShortcut, type ShortcutConfig } from 'frappe-ui'
 const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }] as const
