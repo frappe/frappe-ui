@@ -214,6 +214,29 @@ describe('CommandPalette', () => {
     expect(empty.closest('[role="status"]')).not.toBeNull()
   })
 
+  it('does not quote an empty query in the default empty message', async () => {
+    // `empty` is true whenever nothing is on screen, which includes a palette
+    // that has been given no rows at all. Quoting the query gives `for ""`.
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(CommandPalette, { open: true }, () => [
+            h(CommandPaletteList, () => []),
+            h(CommandPaletteEmpty),
+          ])
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+    const empty = document.querySelector(
+      '[data-slot="command-palette-empty"]',
+    ) as HTMLElement
+    expect(empty.textContent?.trim()).toBe('No results')
+  })
+
   it('emits `select` with the value and closes', async () => {
     const onSelect = vi.fn()
     const onUpdateOpen = vi.fn()

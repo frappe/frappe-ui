@@ -46,7 +46,7 @@ export interface CommandPaletteSlotProps {
   query: string
   /** The value of the item the keyboard is on, or `undefined`. */
   active: CommandPaletteValue | undefined
-  /** Whether the filter hides every item. */
+  /** Whether no item is on screen, hidden by the query or never given. */
   empty: boolean
 }
 

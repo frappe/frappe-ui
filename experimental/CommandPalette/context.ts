@@ -20,7 +20,7 @@ export interface CommandPaletteContext {
   filterable: ComputedRef<boolean>
   /** The value of the item the keyboard is on. */
   activeValue: Ref<CommandPaletteValue | undefined>
-  /** True while the filter hides every item. */
+  /** True while no item is on screen, hidden by the query or never given. */
   empty: ComputedRef<boolean>
   /** Whether `text` plus `keywords` pass the current query. */
   matches: (text: string, keywords: string[]) => boolean

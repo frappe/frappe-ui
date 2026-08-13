@@ -13,7 +13,7 @@
       data-slot="command-palette-empty"
       class="px-4.5 py-8 text-center text-base text-ink-gray-6"
     >
-      <slot v-bind="slotProps">No results for "{{ slotProps.query }}"</slot>
+      <slot v-bind="slotProps">{{ message }}</slot>
     </div>
   </div>
 </template>
@@ -43,4 +43,12 @@ const empty = computed(() => palette?.empty.value ?? false)
 const slotProps = computed<CommandPaletteEmptySlotProps>(() => ({
   query: palette?.query.value ?? '',
 }))
+
+// A palette with no rows at all is empty too, so the default cannot assume
+// the query is what hid them and quote it back.
+const message = computed(() =>
+  slotProps.value.query
+    ? `No results for "${slotProps.value.query}"`
+    : 'No results',
+)
 </script>
