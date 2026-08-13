@@ -685,6 +685,26 @@ function enclosingObject(source, mask, offset, limit) {
   return null
 }
 
+// The literal that directly encloses an object: `[` when the object is a row
+// in an array, anything else when it stands on its own.
+//
+// The advice on an unproven object turns on this. `KeyboardShortcutConfig[]`
+// written over a lone object is a type error, so a refusal that asks for it
+// cannot be discharged.
+function insideArrayLiteral(source, mask, start, limit) {
+  let depth = 0
+  for (let i = start - 1; i >= limit[0]; i--) {
+    if (mask[i]) continue
+    const c = source[i]
+    if (c === '}' || c === ')' || c === ']') depth++
+    else if (c === '{' || c === '(' || c === '[') {
+      if (depth === 0) return c === '['
+      depth--
+    }
+  }
+  return false
+}
+
 // The name at the head of a property: `handler:`, `'handler':`, and the method
 // shorthands `handler()`, `async handler()`, `*handler()`.
 const METHOD_HEAD = /^(?:async\s+)?\*?\s*(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*\(/
@@ -985,7 +1005,13 @@ function convertObject(source, mask, range, ctx) {
       unproven: true,
       note: {
         line,
-        message: `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and it carries no \`ShortcutConfig\` annotation, so it was left as it is. ${
+        // The advice has to compile. An array takes `KeyboardShortcutConfig[]`
+        // and a lone object takes `KeyboardShortcutConfig`, and asking for the
+        // wrong one leaves a refusal nothing can clear.
+        annotate: ctx.inArray
+          ? 'annotate the array `KeyboardShortcutConfig[]`'
+          : 'annotate it `KeyboardShortcutConfig`',
+        message: `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${
           combo ? `If it is a shortcut, write \`combo: '${combo}'\`.` : refusal
         }`,
       },
@@ -1269,7 +1295,10 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     if (held(owned)) return
 
     const isProven = held(proven)
-    const result = convertObject(content, mask, object, { proven: isProven })
+    const result = convertObject(content, mask, object, {
+      proven: isProven,
+      inArray: insideArrayLiteral(content, mask, object.start, range),
+    })
     if (!result) return
     if (result.note) {
       // An object the run could not prove. Whether it is advice or a stop
@@ -1450,9 +1479,12 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
   // write, so in a file with other work it has to be a refusal.
   //
   // The refusal is dischargeable, both ways round. Write the `combo` by hand,
-  // or annotate the array `KeyboardShortcutConfig[]` from frappe-ui and let
-  // the next run convert it. Migrating the file by hand works too: with
-  // nothing left to change, the object is a note again and the run exits zero.
+  // or annotate the literal with frappe-ui's config type and let the next run
+  // convert it. Migrating the file by hand works too: with nothing left to
+  // change, the object is a note again and the run exits zero.
+  //
+  // The annotation the message asks for is the one that compiles on the shape
+  // the run found, which is why the note carries it.
   const willWrite = changes.length > 0 || renames.length > 0
   for (const item of unproven) {
     if (!willWrite) {
@@ -1461,7 +1493,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     }
     refusals.push({
       line: item.line,
-      message: `${item.message} The rest of this file does migrate, so writing it would leave this site on v0 beside a renamed call — v1 throws on the first keypress. Convert it by hand, or annotate it \`KeyboardShortcutConfig[]\` from frappe-ui so the next run can prove it.`,
+      message: `${item.message} The rest of this file does migrate, so writing it would leave this site on v0 beside a renamed call — v1 throws on the first keypress. Convert it by hand, or ${item.annotate} from frappe-ui so the next run can prove it.`,
     })
   }
 
