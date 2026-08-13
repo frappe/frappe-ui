@@ -523,6 +523,26 @@ useShortcut(bindings)
     expect(refusals).toHaveLength(1)
   })
 
+  it('reads a satisfies clause back through the script, not the template', () => {
+    // The clause is read backwards from the type. Everything outside a script
+    // range is masked, so unbalanced brackets in prose cannot swallow it.
+    const source = `<template>
+  <p>Unbalanced } braces { and ] brackets [ in prose</p>
+</template>
+
+<script setup lang="ts">
+import { useShortcut, type ShortcutConfig } from 'frappe-ui'
+const b = [{ key: 's', ctrl: true, description: 'Save', handler: save }] satisfies ShortcutConfig[]
+useShortcut(b)
+</script>
+`
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.vue' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain("{ combo: 'Mod+S', description: 'Save', handler: save }")
+    expect(migrated).toContain('Unbalanced } braces { and ] brackets [ in prose')
+  })
+
   it('proves nothing from a cast that has no literal in front of it', () => {
     // The clause types the expression it follows. `raw as ShortcutConfig[]`
     // types `raw`, and must not reach back to an unrelated array above it.
