@@ -769,7 +769,8 @@ useShortcut(bindings)
     expect(refusals[1].message).toContain("write `combo: 'J'`")
     expect(migrated).toContain("{ key: 'escape', handler: close }")
     // The rows sit in an array, so the array is what takes the annotation.
-    expect(refusals[0].message).toContain('annotate the array `KeyboardShortcutConfig[]`')
+    expect(refusals[0].message).toContain('annotate the array with')
+    expect(refusals[0].message).toContain('`KeyboardShortcutConfig[]` on v1')
   })
 
   it('names the annotation on a spread-built object it could not prove', () => {
@@ -786,6 +787,20 @@ useShortcut({ key: 's', ctrl: true, description: 'X', handler: h })
     expect(refusals[0].message).toContain('annotate the array')
   })
 
+  it('names the type the app can import while it is still on v0', () => {
+    // The codemod runs from the app being migrated, which still depends on
+    // frappe-ui v0. `KeyboardShortcutConfig` is not exported there yet, so the
+    // advice has to lead with the name that resolves today.
+    const source = `import { useShortcut } from 'frappe-ui'
+const bindings = [{ key: 's', ctrl: true, description: 'Save', handler: save }]
+useShortcut(bindings)
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals[0].message).toContain('`ShortcutConfig[]` on v0')
+    expect(refusals[0].message).toContain('`KeyboardShortcutConfig[]` on v1')
+  })
+
   it('asks for the annotation that compiles on a lone object', () => {
     // `KeyboardShortcutConfig[]` on a single object is a type error, so the
     // advice has to name the type for the shape the run actually found.
@@ -796,7 +811,8 @@ useShortcut(config)
     const { refusals } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(refusals).toHaveLength(1)
-    expect(refusals[0].message).toContain('annotate it `KeyboardShortcutConfig`')
+    expect(refusals[0].message).toContain('annotate it with')
+    expect(refusals[0].message).toContain('`KeyboardShortcutConfig` on v1')
     expect(refusals[0].message).not.toContain('KeyboardShortcutConfig[]')
   })
 

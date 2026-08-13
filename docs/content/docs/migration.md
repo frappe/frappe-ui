@@ -2649,10 +2649,13 @@ useShortcut(bindings)
 ```
 
 Clear that line in one of three ways: write the `combo` by hand, annotate the
-array `KeyboardShortcutConfig[]` from `frappe-ui` so the next run can prove it,
-or migrate the whole file by hand and leave the run nothing to write. A lone
-object takes `KeyboardShortcutConfig`, without the `[]`. Each refused line
-names the type for its own shape.
+array with frappe-ui's config type so the next run can prove it, or migrate the
+whole file by hand and leave the run nothing to write.
+
+Both names count as proof. Write `ShortcutConfig[]` while the app is still on
+v0, which is where the codemod runs, and `KeyboardShortcutConfig[]` once you
+have bumped. A lone object takes the same name without the `[]`. Each refused
+line names the type for its own shape.
 
 ### Punctuation keys are never converted
 

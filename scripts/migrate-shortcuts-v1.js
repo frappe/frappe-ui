@@ -946,11 +946,16 @@ function convertObject(source, mask, range, ctx) {
   })
 
   // Every object the run walks away from leaves by this door, so the advice
-  // cannot be forgotten on one of the paths. It has to compile: an array takes
-  // `ShortcutConfig[]` and a lone object takes `ShortcutConfig`.
-  const annotate = ctx.inArray
-    ? 'annotate the array `KeyboardShortcutConfig[]`'
-    : 'annotate it `KeyboardShortcutConfig`'
+  // cannot be forgotten on one of the paths.
+  //
+  // It has to compile where the author is standing. The shape decides the
+  // `[]`: an array takes `ShortcutConfig[]`, a lone object takes
+  // `ShortcutConfig`. The version decides the name: the codemod runs from an
+  // app still on v0, which exports `ShortcutConfig` and not the v1 name. Both
+  // names count as proof, so the message leads with the one that resolves
+  // today.
+  const array = ctx.inArray ? '[]' : ''
+  const annotate = `${ctx.inArray ? 'annotate the array' : 'annotate it'} with frappe-ui's config type, \`ShortcutConfig${array}\` on v0 and \`KeyboardShortcutConfig${array}\` on v1`
   const leaveAlone = (line, message) => ({ unproven: true, note: { line, message, annotate } })
 
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
@@ -1530,7 +1535,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     }
     refusals.push({
       line: item.line,
-      message: `${item.message} The rest of this file does migrate, so writing it would leave this site on v0 beside a renamed call — v1 throws on the first keypress. Convert it by hand, or ${item.annotate} from frappe-ui so the next run can prove it.`,
+      message: `${item.message} The rest of this file does migrate, so writing it would leave this site on v0 beside a renamed call — v1 throws on the first keypress. Convert it by hand, or ${item.annotate}, so the next run can prove it.`,
     })
   }
 
