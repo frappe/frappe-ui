@@ -730,15 +730,6 @@ function insideArrayLiteral(source, mask, start, limit) {
   return false
 }
 
-// Every spelling a property head can take, and the name inside it: bare
-// (`key:`), quoted (`'key':`, `"key":`), and computed over a literal
-// (`['key']:`, `["key"]:`, `` [`key`]: ``). All three name the same property,
-// so all three read the same here. A computed name that is not a literal —
-// `[Keys.SAVE]:` — names nothing this can read, and falls through to the
-// unreadable path in `convertObject`.
-const NAMED_HEAD =
-  /^(?:\[\s*(['"`])([A-Za-z_$][\w$]*)\1\s*\]|(['"])([A-Za-z_$][\w$]*)\3|([A-Za-z_$][\w$]*))\s*:/
-
 // `const { key, ctrl } = config` and `({ key, handler }) => ...` are binding
 // patterns, not objects. A pattern reads exactly like a config written in
 // shorthand, so its shape cannot tell it apart. What follows its closing brace
@@ -754,6 +745,15 @@ function isBindingPattern(source, mask, object) {
   // `useShortcut({ key: 's' })`, is followed by neither.
   return source.startsWith('=>', at) || source[at] === '{'
 }
+
+// A written property head, and the name inside it. Bare (`key:`), quoted
+// (`'key':`, `"key":`) and computed over a string literal (`['key']:`,
+// `["key"]:`, `` [`key`]: ``) all name the same property, so all of them read
+// the same here. A computed name that is not a literal — `[Keys.SAVE]:` —
+// names nothing this can read, and reaches the unreadable path in
+// `convertObject` instead.
+const NAMED_HEAD =
+  /^(?:\[\s*(['"`])([A-Za-z_$][\w$]*)\1\s*\]|(['"])([A-Za-z_$][\w$]*)\3|([A-Za-z_$][\w$]*))\s*:/
 
 // The name at the head of a property: `handler:`, `'handler':`, and the method
 // shorthands `handler()`, `async handler()`, `*handler()`.
