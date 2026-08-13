@@ -53,11 +53,22 @@
  * directly, or the value of a `keys:` / `shortcut:` property. An object built
  * deeper inside the call, in a handler body, is not one.
  *
+ * Every object in the file is read, whatever it is spelled like. Looking for
+ * the objects that carry a `key:` head instead only ever finds the spellings
+ * the search was taught, and JavaScript has more of them than that: `'key':`,
+ * `["key"]:`, a shorthand `key`, a comment between the name and its colon, a
+ * spread that hides the name altogether. Each of those, missed, is a v0 config
+ * left in a file the run wrote — so an object that cannot be read in full is
+ * refused, and never passed over.
+ *
  * WHAT IT REFUSES
  *
  * - punctuation keys (it prints the named key to use)
  * - an uppercase letter with no `shift: true` (v0 fired it both ways)
- * - a `key` that is not a plain string
+ * - a `key` that is not a plain string, a shorthand `key` included: the string
+ *   it holds is declared somewhere else
+ * - a spread or a computed name on an object a call or an annotation proves is
+ *   a config. Either one can hold a `key` this cannot read.
  * - a modifier flag that is not a literal `true` / `false`
  * - a type declaration of the v0 shape (use `KeyboardShortcutConfig`)
  * - `formatShortcutLabel` and `getActiveShortcuts`, deleted from the package
@@ -719,11 +730,53 @@ function insideArrayLiteral(source, mask, start, limit) {
   return false
 }
 
+// Every spelling a property head can take, and the name inside it: bare
+// (`key:`), quoted (`'key':`, `"key":`), and computed over a literal
+// (`['key']:`, `["key"]:`, `` [`key`]: ``). All three name the same property,
+// so all three read the same here. A computed name that is not a literal —
+// `[Keys.SAVE]:` — names nothing this can read, and falls through to the
+// unreadable path in `convertObject`.
+const NAMED_HEAD =
+  /^(?:\[\s*(['"`])([A-Za-z_$][\w$]*)\1\s*\]|(['"])([A-Za-z_$][\w$]*)\3|([A-Za-z_$][\w$]*))\s*:/
+
+// `const { key, ctrl } = config` and `({ key, handler }) => ...` are binding
+// patterns, not objects. A pattern reads exactly like a config written in
+// shorthand, so its shape cannot tell it apart. What follows its closing brace
+// can: a pattern is assigned to, or it is a parameter list.
+function isBindingPattern(source, mask, object) {
+  let at = object.end
+  while (at < source.length && (mask[at] === MASK_COMMENT || /\s/.test(source[at]))) at++
+  if (source[at] === '=' && source[at + 1] !== '=' && source[at + 1] !== '>') return true
+  if (source[at] !== ')') return false
+  at++
+  while (at < source.length && (mask[at] === MASK_COMMENT || /\s/.test(source[at]))) at++
+  // `({ key }) => ...` and `function f({ key }) { ... }`. A call argument,
+  // `useShortcut({ key: 's' })`, is followed by neither.
+  return source.startsWith('=>', at) || source[at] === '{'
+}
+
 // The name at the head of a property: `handler:`, `'handler':`, and the method
 // shorthands `handler()`, `async handler()`, `*handler()`.
 const METHOD_HEAD = /^(?:async\s+)?\*?\s*(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*\(/
 const PROPERTY_NAME_SPAN =
   /^(?:async\s+)?\*?\s*(?:(['"])[A-Za-z_$][\w$]*\1|[A-Za-z_$][\w$]*)/
+
+// The same text with every comment character replaced by a space, so a name,
+// a colon and a value read across one. Returns the text unchanged when there
+// is no comment in it, which is nearly every property.
+function blankComments(source, mask, start, end, text) {
+  let first = -1
+  for (let i = start; i < end; i++) {
+    if (mask[i] === MASK_COMMENT) {
+      first = i
+      break
+    }
+  }
+  if (first === -1) return text
+  const chars = text.split('')
+  for (let i = first; i < end; i++) if (mask[i] === MASK_COMMENT) chars[i - start] = ' '
+  return chars.join('')
+}
 
 // Splits an object literal into its top-level properties, keeping the exact
 // source range of each so a rewrite preserves the file's formatting.
@@ -745,22 +798,27 @@ function parseProperties(source, mask, range) {
     while (end > start && skippable(end - 1)) end--
     if (start >= end) return
     const body = source.slice(start, end)
-    const named = /^(?:(['"])([A-Za-z_$][\w$]*)\1|([A-Za-z_$][\w$]*))\s*:/.exec(body)
+    // A comment may sit anywhere inside a property, the gap between the name
+    // and its colon included: `key /* the one below */: 's'`. Blanking the
+    // comments leaves every other character where it was, so the head reads as
+    // a head and the ranges still point at the source.
+    const code = blankComments(source, mask, start, end, body)
+    const named = NAMED_HEAD.exec(code)
     // `handler() { save() }` is a property too. Without this it reads as an
     // unnamed member, and the object is refused as if it spread another one.
-    const method = named ? null : METHOD_HEAD.exec(body)
-    const shorthand = !named && !method && /^[A-Za-z_$][\w$]*$/.test(body)
+    const method = named ? null : METHOD_HEAD.exec(code)
+    const shorthand = !named && !method && /^[A-Za-z_$][\w$]*$/.test(code)
     props.push({
       name: named
-        ? (named[2] ?? named[3])
+        ? (named[2] ?? named[4] ?? named[5])
         : method
           ? (method[2] ?? method[3])
           : shorthand
-            ? body
+            ? code
             : null,
       shorthand,
       text: body,
-      value: named ? body.slice(named[0].length).trim() : body,
+      value: named ? code.slice(named[0].length).trim() : code,
       start,
       end,
       commaEnd: commaEnd ?? end,
@@ -959,6 +1017,20 @@ function renameConditionProperty(prop) {
   return renameProperty(prop, 'enabled')
 }
 
+// Why a property the combo needs cannot be read. A shorthand holds its value
+// in its name, so the value is not in the object at all, and naming it the way
+// a written property is named reads as a typo: `key: key is not a plain
+// string` sends the reader looking for a `key: key` that is not there.
+function unreadableShorthand(name) {
+  return `\`${name}\` is a shorthand property here, so the value it carries is declared elsewhere and this object does not hold it.`
+}
+
+function unreadableKey(prop) {
+  return prop.shorthand
+    ? unreadableShorthand('key')
+    : `\`key: ${prop.value}\` is not a plain string, so the combo cannot be built.`
+}
+
 function convertObject(source, mask, range, ctx) {
   const props = parseProperties(source, mask, range)
   const byName = new Map()
@@ -997,18 +1069,45 @@ function convertObject(source, mask, range, ctx) {
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
   const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
 
+  // A property whose head names nothing the run can read: a spread, or a
+  // computed name that is not a string literal. Either one can hold a `key`, a
+  // modifier or a `combo`, so an object carrying one is never read in full.
+  //
+  // On a proven object that ends it. This is a config, the run cannot read all
+  // of it, and writing the file around it is the half migration the refusals
+  // exist to stop — the spread's own `key` reaches v1 untouched, and the first
+  // keypress throws. The rename it might have made is not worth that.
+  const unreadable = props.find((p) => p.name === null && !p.shorthand)
+  if (ctx.proven && unreadable) {
+    return {
+      refusals: [
+        {
+          line: lineAt(source, unreadable.start),
+          message: unreadable.text.startsWith('[')
+            ? 'the shortcut object has a computed property name, so the run cannot tell what it holds. Convert it by hand.'
+            : unreadable.text.startsWith('...')
+              ? 'the shortcut object spreads another object, so its `key` and modifiers cannot be read here. Convert it by hand.'
+              : 'the shortcut object has a property whose name the run cannot read, so it cannot tell what it holds. Convert it by hand.',
+        },
+      ],
+    }
+  }
+
   // Pass two: an object built by spreading a v0 config still carries
   // `condition`, which v1 spells `enabled`.
   if (!keyProp) {
-    if (!condition || !hasCallback) return null
+    if (!hasCallback || (!condition && !unreadable)) return null
     if (!ctx.proven) {
       // `condition` beside a callback is the shape of a command entry and of a
       // `ComboboxCustomOption` as much as of a config, so it is never rewritten
       // here. It is worth a line when the object also carries a v0-only name.
-      if (isOption || !byName.has('description')) return null
+      if (isOption || !props.some((p) => p.name && NOTE_SIGNALS.has(p.name))) return null
+      const at = condition ?? unreadable
       return leaveAlone(
-        lineAt(source, condition.start),
-        'this object carries `condition` beside a callback. If it is a shortcut config, v1 spells that `enabled`. The run cannot prove what this is, so it left it as it is.',
+        lineAt(source, at.start),
+        condition
+          ? 'this object carries `condition` beside a callback. If it is a shortcut config, v1 spells that `enabled`. The run cannot prove what this is, so it left it as it is.'
+          : 'this object hides a property behind a spread or a computed name, so the run cannot tell whether a v0 `key` reaches it. It cannot prove what this is either, so it left it as it is.',
       )
     }
     if (byName.has('enabled')) return refuseDoubleEnabled()
@@ -1030,8 +1129,6 @@ function convertObject(source, mask, range, ctx) {
   // run says what it would have written and moves on.
   if (!ctx.proven) {
     if (isOption) return null
-    const literal = readStringLiteral(keyProp.value)
-    if (!literal) return null
 
     // A modifier the run cannot read is a combo it cannot advertise. Reading
     // only `true` used to drop `ctrl: isMac` from the combo it printed, and an
@@ -1054,12 +1151,18 @@ function convertObject(source, mask, range, ctx) {
       props.some((p) => p.name && NOTE_SIGNALS.has(p.name)) || hasCallback || !!condition
     if (!reads) return null
 
-    const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
-    const advice = conditional
-      ? `\`${conditional}\` is not a literal boolean. v1 has no conditional modifier — build the combo string yourself.`
-      : combo
-        ? `If it is a shortcut, write \`combo: '${combo}'\`.`
-        : refusal
+    // A `key` the run cannot read has no combo to print. The proven path
+    // refuses it; here there is nothing to refuse, and silence is what leaves a
+    // v0 config beside a renamed call, so the line says what is in the way.
+    const literal = readStringLiteral(keyProp.value)
+    const { combo, refusal } = literal ? buildCombo({ key: literal.value, ...flags }) : {}
+    const advice = !literal
+      ? `${unreadableKey(keyProp)} Write the \`combo\` by hand.`
+      : conditional
+        ? `\`${conditional}\` is not a literal boolean. v1 has no conditional modifier — build the combo string yourself.`
+        : combo
+          ? `If it is a shortcut, write \`combo: '${combo}'\`.`
+          : refusal
     return leaveAlone(
       line,
       `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${advice}`,
@@ -1078,24 +1181,8 @@ function convertObject(source, mask, range, ctx) {
     )
   }
 
-  // A property with no readable name. A spread and a computed name both land
-  // here, and each needs its own words: the reader has to find the thing the
-  // message names.
-  const unreadable = props.find((p) => p.name === null && !p.shorthand)
-  if (unreadable) {
-    return refuse(
-      unreadable.text.startsWith('[')
-        ? 'the shortcut object has a computed property name, so the run cannot tell what it holds. Convert it by hand.'
-        : 'the shortcut object spreads another object, so its `key` and modifiers cannot be read here. Convert it by hand.',
-    )
-  }
-
   const literal = readStringLiteral(keyProp.value)
-  if (!literal) {
-    return refuse(
-      `\`key: ${keyProp.value}\` is not a plain string, so the combo cannot be built. Convert it by hand.`,
-    )
-  }
+  if (!literal) return refuse(`${unreadableKey(keyProp)} Convert it by hand.`)
 
   // A modifier flag must be a literal boolean; anything else is a decision.
   const flags = {}
@@ -1106,7 +1193,9 @@ function convertObject(source, mask, range, ctx) {
     const value = prop.value.trim()
     if (value !== 'true' && value !== 'false') {
       return refuse(
-        `\`${name}: ${value}\` is not a literal boolean. v1 has no conditional modifier — build the combo string yourself.`,
+        prop.shorthand
+          ? `${unreadableShorthand(name)} v1 has no conditional modifier — build the combo string yourself.`
+          : `\`${name}: ${value}\` is not a literal boolean. v1 has no conditional modifier — build the combo string yourself.`,
       )
     }
     flags[name] = value === 'true'
@@ -1120,7 +1209,9 @@ function convertObject(source, mask, range, ctx) {
     const mode = readStringLiteral(triggeredOn.value)
     if (!mode || (mode.value !== 'hold' && mode.value !== 'press')) {
       return refuse(
-        `\`triggeredOn: ${triggeredOn.value}\` is not a literal 'press' or 'hold', so hold mode cannot be resolved. Write the literal this resolves to and run again.`,
+        triggeredOn.shorthand
+          ? `${unreadableShorthand('triggeredOn')} Hold mode cannot be resolved from here — write the literal it resolves to and run again.`
+          : `\`triggeredOn: ${triggeredOn.value}\` is not a literal 'press' or 'hold', so hold mode cannot be resolved. Write the literal this resolves to and run again.`,
       )
     }
     if (mode.value === 'hold' && hasHandler) {
@@ -1383,6 +1474,7 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     const object = enclosingObject(content, mask, offset, range)
     if (!object || seen.has(object.start)) return
     seen.add(object.start)
+    if (isBindingPattern(content, mask, object)) return
 
     // `>=`, not `>`: an annotated value's span opens on the literal itself, so
     // `const config: ShortcutConfig = { ... }` has the object starting exactly
@@ -1420,23 +1512,23 @@ export function migrateShortcuts(content, { ext = '.js' } = {}) {
     }
   }
 
-  // `key:` finds a registration; `condition:` finds an object built by
-  // spreading one, which still needs the `enabled` rename. A quoted name
-  // counts: `{ 'key': 's' }` is the same object.
+  // Every object literal in the file goes to `convertObject`, and the rules
+  // there say what it is.
   //
-  // The scan lands on the colon, never on the name, because a quoted name is
-  // masked as a string and the mask is what tells code from prose.
-  for (const pattern of [
-    /(?:\bkey\b|['"]key['"])\s*:/g,
-    /(?:\bcondition\b|['"]condition['"])\s*:/g,
-    // A shorthand `condition`, which carries its value in the name.
-    /\bcondition\s*(?=[,}])/g,
-  ]) {
-    let m
-    while ((m = pattern.exec(content))) {
-      const at = m.index + m[0].length - 1
-      if (mask[at]) continue
-      visit(at)
+  // Finding them used to be a search for the names a config carries: a `key:`
+  // head, then a `'key':` head, then a shorthand `condition`. A search like
+  // that only ever sees the spellings it was taught, and JavaScript has more of
+  // them than anyone lists in one sitting — a quoted name, a computed name, a
+  // shorthand, a comment between the name and its colon, a spread that hides
+  // the name altogether. Each one arrived as the same bug: an object the scan
+  // walked past, in a file the run still wrote.
+  //
+  // So nothing is recognised on the way in. Every object is opened, and an
+  // object that cannot be read in full is refused rather than passed over.
+  for (const [from, to] of ranges) {
+    for (let i = from; i < to; i++) {
+      if (mask[i] || content[i] !== '{') continue
+      visit(i + 1)
     }
   }
 

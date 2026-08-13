@@ -402,7 +402,10 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
-  it('renames condition on a spread-built object under a v0 annotation', () => {
+  it('refuses a spread-built object under a v0 annotation', () => {
+    // The annotation proves this is a config, and the spread hides the rest of
+    // it. Renaming `condition` and writing the file would send the spread's own
+    // `key` and modifiers to v1 untouched.
     const source = `import type { ShortcutConfig } from 'frappe-ui'
 const bindings: ShortcutConfig[] = [
 	{ ...base, condition: canEdit, handler: edit },
@@ -410,8 +413,8 @@ const bindings: ShortcutConfig[] = [
 `
     const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
-    expect(migrated).toContain('enabled: canEdit')
-    expect(refusals).toEqual([])
+    expect(migrated).not.toContain('enabled: canEdit')
+    expect(refusals[0].message).toContain('spreads another object')
   })
 
   it('converts a single object literal under an annotation', () => {
@@ -760,12 +763,24 @@ useShortcut([
     expect(refusals).toEqual([])
   })
 
-  it('renames condition inside a useShortcut call even with no other config field', () => {
+  it('renames condition inside a useShortcut call with no other config field', () => {
     const source =
-      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ ...base, condition: canEdit, handler: edit }])\n"
-    const { migrated } = migrateShortcuts(source, { ext: '.ts' })
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ combo: 'Mod+S', condition: canEdit, handler: edit }])\n"
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
 
     expect(migrated).toContain('enabled: canEdit')
+    expect(refusals).toEqual([])
+  })
+
+  it('refuses a spread inside a useShortcut call instead of renaming condition', () => {
+    const source =
+      "import { useShortcut } from 'frappe-ui'\nuseShortcut([{ ...base, condition: canEdit, handler: edit }])\n"
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    // The refusal is what keeps the file unwritten; the rename still counts as
+    // pending work, so `migrated` carries it.
+    expect(migrated).not.toContain('enabled: canEdit')
+    expect(refusals[0].message).toContain('spreads another object')
   })
 
   it('reads a method shorthand as the property it is', () => {
@@ -803,6 +818,150 @@ useShortcut([
 
     expect(migrated).toBe(source)
     expect(refusals).toEqual([])
+  })
+})
+
+// One `key`, written every way JavaScript lets a property be written. Each
+// spelling used to be found by its own pattern in the scan, and each new one
+// arrived as the same bug: an object nothing looked inside, in a file the run
+// still wrote. The rule these hold to is that a config the run cannot read in
+// full never leaves the file written — converted or refused, never silent.
+const PROPERTY_HEADS = {
+  'a plain name': (name, value) => `${name}: ${value}`,
+  'a single-quoted name': (name, value) => `'${name}': ${value}`,
+  'a double-quoted name': (name, value) => `"${name}": ${value}`,
+  'a computed name over a string': (name, value) => `['${name}']: ${value}`,
+  'a computed name over a double-quoted string': (name, value) => `["${name}"]: ${value}`,
+  'a computed name over a template literal': (name, value) => `[\`${name}\`]: ${value}`,
+  'a comment between the name and the colon': (name, value) => `${name} /* here */: ${value}`,
+  'a newline between the name and the colon': (name, value) => `${name}\n    : ${value}`,
+}
+
+describe('every spelling of a property head', () => {
+  for (const [spelling, head] of Object.entries(PROPERTY_HEADS)) {
+    it(`converts a key written with ${spelling}`, () => {
+      const source = inCall(`{ ${head('key', "'s'")}, ctrl: true, handler: save }`)
+      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals).toEqual([])
+      expect(migrated).toContain("combo: 'Mod+S'")
+      expect(migrated).not.toContain('ctrl')
+    })
+
+    it(`renames a condition written with ${spelling}`, () => {
+      const source = inCall(`{ key: 's', ${head('condition', 'ready')}, handler: save }`)
+      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals).toEqual([])
+      expect(migrated).toContain('enabled')
+      expect(migrated).not.toContain('condition')
+    })
+
+    it(`reads a modifier written with ${spelling}`, () => {
+      const source = inCall(`{ key: 's', ${head('shift', 'true')}, handler: save }`)
+      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals).toEqual([])
+      expect(migrated).toContain("combo: 'Shift+S'")
+    })
+
+    it(`reads a combo written with ${spelling}, and refuses the key beside it`, () => {
+      const source = inCall(`{ key: 's', ${head('combo', "'Mod+S'")}, handler: save }`)
+      const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals[0].message).toContain('carries `key` and `combo`')
+    })
+
+    it(`reads an enabled written with ${spelling}, and refuses the condition beside it`, () => {
+      const source = inCall(`{ key: 's', condition: ready, ${head('enabled', 'ready')} }`)
+      const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals[0].message).toContain('`condition` and `enabled`')
+    })
+
+    it(`reads a triggeredOn written with ${spelling}`, () => {
+      const source = inCall(`{ key: 's', ${head('triggeredOn', "'hold'")}, onHold: hold }`)
+      const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+      expect(refusals).toEqual([])
+      expect(migrated).toContain("combo: 'S'")
+      expect(migrated).not.toContain('triggeredOn')
+    })
+  }
+
+  it('refuses a shorthand key, and says where its value is', () => {
+    // The half migration this whole design exists to stop: the rename lands,
+    // the config stays on v0, and v1 throws on the first keypress.
+    const source = inCall('{ key, ctrl: true, handler: save }')
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('`key` is a shorthand property here')
+    expect(refusals[0].message).not.toContain('key: key')
+    expect(migrated).not.toContain('combo')
+  })
+
+  it('refuses a shorthand modifier and a shorthand triggeredOn', () => {
+    const shift = migrateShortcuts(inCall("{ key: 's', shift, handler: save }"), { ext: '.ts' })
+    const mode = migrateShortcuts(inCall("{ key: 's', triggeredOn, onHold: hold }"), { ext: '.ts' })
+
+    expect(shift.refusals[0].message).toContain('`shift` is a shorthand property here')
+    expect(mode.refusals[0].message).toContain('`triggeredOn` is a shorthand property here')
+  })
+
+  it('renames a shorthand condition into the name and the value it stands for', () => {
+    const source = inCall("{ key: 's', condition, handler: save }")
+    const { migrated, refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(migrated).toContain('enabled: condition')
+  })
+
+  it('refuses a computed name it cannot read on a proven object', () => {
+    const source = inCall("{ [Keys.SAVE]: 's', ctrl: true, handler: save }")
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals[0].message).toContain('computed property name')
+  })
+
+  it('names an unproven object that hides a property, in a file it would write', () => {
+    // Nothing proves the array, so nothing rewrites it. The rename below does
+    // write the file, and a spread that carries a v0 `key` would ride along.
+    const source = `import { useShortcut } from 'frappe-ui'
+const rows = [{ ...base, description: 'Save', handler: save }]
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('hides a property behind a spread or a computed name')
+  })
+
+  it('names an unproven object whose key it cannot read', () => {
+    const source = `import { useShortcut } from 'frappe-ui'
+const rows = [{ key: shortcutKey, ctrl: true, handler: save }]
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).toContain('is not a plain string')
+  })
+
+  it('says nothing about a binding pattern that reads like a config', () => {
+    // `const { key, ctrl } = config` is not an object, and no edit could ever
+    // clear a refusal on one.
+    const source = `import { useShortcut } from 'frappe-ui'
+function apply(config) {
+	const { key, ctrl, handler } = config
+	register(key, ctrl, handler)
+}
+useShortcut({ combo: 'Mod+K', handler: open })
+`
+    const { refusals, notes } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toEqual([])
+    expect(notes).toEqual([])
   })
 })
 
