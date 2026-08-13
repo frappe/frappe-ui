@@ -772,6 +772,20 @@ useShortcut(bindings)
     expect(refusals[0].message).toContain('annotate the array `KeyboardShortcutConfig[]`')
   })
 
+  it('names the annotation on a spread-built object it could not prove', () => {
+    // The second unproven path carries no `key`, so it built its own note.
+    // It has to carry the advice too, or the refusal reads "or undefined".
+    const source = `import { useShortcut } from 'frappe-ui'
+const rows = [{ ...base, description: 'Save', condition: canEdit, handler: edit }]
+useShortcut({ key: 's', ctrl: true, description: 'X', handler: h })
+`
+    const { refusals } = migrateShortcuts(source, { ext: '.ts' })
+
+    expect(refusals).toHaveLength(1)
+    expect(refusals[0].message).not.toContain('undefined')
+    expect(refusals[0].message).toContain('annotate the array')
+  })
+
   it('asks for the annotation that compiles on a lone object', () => {
     // `KeyboardShortcutConfig[]` on a single object is a type error, so the
     // advice has to name the type for the shape the run actually found.

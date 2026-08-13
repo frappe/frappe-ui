@@ -945,6 +945,14 @@ function convertObject(source, mask, range, ctx) {
     ],
   })
 
+  // Every object the run walks away from leaves by this door, so the advice
+  // cannot be forgotten on one of the paths. It has to compile: an array takes
+  // `ShortcutConfig[]` and a lone object takes `ShortcutConfig`.
+  const annotate = ctx.inArray
+    ? 'annotate the array `KeyboardShortcutConfig[]`'
+    : 'annotate it `KeyboardShortcutConfig`'
+  const leaveAlone = (line, message) => ({ unproven: true, note: { line, message, annotate } })
+
   const isOption = props.some((p) => p.name && OPTION_SIGNALS.has(p.name))
   const hasCallback = ['handler', ...HOLD_CALLBACKS].some((n) => byName.has(n))
 
@@ -957,14 +965,10 @@ function convertObject(source, mask, range, ctx) {
       // `ComboboxCustomOption` as much as of a config, so it is never rewritten
       // here. It is worth a line when the object also carries a v0-only name.
       if (isOption || !byName.has('description')) return null
-      return {
-        unproven: true,
-        note: {
-          line: lineAt(source, condition.start),
-          message:
-            'this object carries `condition` beside a callback. If it is a shortcut config, v1 spells that `enabled`. The run cannot prove what this is, so it left it as it is.',
-        },
-      }
+      return leaveAlone(
+        lineAt(source, condition.start),
+        'this object carries `condition` beside a callback. If it is a shortcut config, v1 spells that `enabled`. The run cannot prove what this is, so it left it as it is.',
+      )
     }
     if (byName.has('enabled')) return refuseDoubleEnabled()
     return {
@@ -1002,21 +1006,12 @@ function convertObject(source, mask, range, ctx) {
     if (!reads) return null
 
     const { combo, refusal } = buildCombo({ key: literal.value, ...flags })
-    return {
-      unproven: true,
-      note: {
-        line,
-        // The advice has to compile. An array takes `KeyboardShortcutConfig[]`
-        // and a lone object takes `KeyboardShortcutConfig`, and asking for the
-        // wrong one leaves a refusal nothing can clear.
-        annotate: ctx.inArray
-          ? 'annotate the array `KeyboardShortcutConfig[]`'
-          : 'annotate it `KeyboardShortcutConfig`',
-        message: `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${
-          combo ? `If it is a shortcut, write \`combo: '${combo}'\`.` : refusal
-        }`,
-      },
-    }
+    return leaveAlone(
+      line,
+      `this reads like a shortcut config, and the run cannot prove it is one. It is not in a \`useShortcut(...)\` call this file imports from frappe-ui, and no frappe-ui config annotation reaches it, so it was left as it is. ${
+        combo ? `If it is a shortcut, write \`combo: '${combo}'\`.` : refusal
+      }`,
+    )
   }
 
   if (condition && byName.has('enabled')) return refuseDoubleEnabled()
