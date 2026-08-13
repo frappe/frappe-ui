@@ -44,6 +44,7 @@ import {
 import {
   useCommandPaletteContext,
   useCommandPaletteGroupContext,
+  useCommandPaletteListContext,
 } from './context'
 import type {
   CommandPaletteItemEmits,
@@ -71,10 +72,17 @@ defineSlots<{
 
 const palette = useCommandPaletteContext()
 const group = useCommandPaletteGroupContext()
+const list = useCommandPaletteListContext()
 
 if (import.meta.env.DEV && !palette) {
   console.warn(
     '[frappe-ui] CommandPaletteItem has to render inside a CommandPalette.',
+  )
+} else if (import.meta.env.DEV && !list) {
+  // Reka builds the listbox from `CommandPaletteList`. Outside it there is no
+  // listbox at all, so the row draws and the arrow keys never reach it.
+  console.warn(
+    '[frappe-ui] CommandPaletteItem has to render inside a CommandPaletteList.',
   )
 }
 

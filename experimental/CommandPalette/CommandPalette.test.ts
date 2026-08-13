@@ -429,6 +429,36 @@ describe('CommandPalette', () => {
     expect(labels()).toEqual(['Settings'])
   })
 
+  it('warns when the rows are not inside a CommandPaletteList', async () => {
+    // Without the list there is no listbox: the rows draw, and then nothing
+    // else works. Nothing in the DOM says so, so the warning has to.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(CommandPalette, { open: true }, () => [
+            h(CommandPaletteGroup, { label: 'Pages' }, () => [
+              h(CommandPaletteItem, { value: 'inbox' }, () => 'Inbox'),
+            ]),
+          ])
+      },
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    app = createApp(Harness)
+    app.mount(host)
+    await flush()
+
+    expect(
+      warn.mock.calls.flat().filter((arg) => String(arg).startsWith('[frappe')),
+    ).toEqual([
+      '[frappe-ui] CommandPaletteGroup has to render inside a CommandPaletteList.',
+      '[frappe-ui] CommandPaletteItem has to render inside a CommandPaletteList.',
+    ])
+    expect(document.querySelector('[role="listbox"]')).toBeNull()
+    warn.mockRestore()
+  })
+
   it('warns about an item the filter can never narrow away', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     // Reka warns about the dialog description here too, so read ours only.

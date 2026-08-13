@@ -10,7 +10,10 @@
 
 <script setup lang="ts">
 import { ListboxContent } from 'reka-ui'
-import { useCommandPaletteContext } from './context'
+import {
+  provideCommandPaletteListContext,
+  useCommandPaletteContext,
+} from './context'
 
 defineOptions({ name: 'CommandPaletteList' })
 
@@ -29,4 +32,6 @@ if (import.meta.env.DEV && !palette) {
     '[frappe-ui] CommandPaletteList has to render inside a CommandPalette.',
   )
 }
+
+provideCommandPaletteListContext()
 </script>

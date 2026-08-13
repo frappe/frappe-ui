@@ -47,6 +47,13 @@ const commandPaletteGroupKey: InjectionKey<CommandPaletteGroupContext> = Symbol(
   'frappe-ui:command-palette-group',
 )
 
+// Marks the subtree reka renders as the listbox. It carries nothing: a part
+// only needs to know whether it is inside it, because outside it reka never
+// collects the row and the arrow keys have nothing to walk.
+const commandPaletteListKey: InjectionKey<true> = Symbol(
+  'frappe-ui:command-palette-list',
+)
+
 export function provideCommandPaletteContext(context: CommandPaletteContext) {
   provide(commandPaletteKey, context)
 }
@@ -63,4 +70,12 @@ export function provideCommandPaletteGroupContext(
 
 export function useCommandPaletteGroupContext() {
   return inject(commandPaletteGroupKey, null)
+}
+
+export function provideCommandPaletteListContext() {
+  provide(commandPaletteListKey, true)
+}
+
+export function useCommandPaletteListContext() {
+  return inject(commandPaletteListKey, null)
 }

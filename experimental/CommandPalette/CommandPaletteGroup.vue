@@ -23,6 +23,7 @@ import { computed } from 'vue'
 import {
   provideCommandPaletteGroupContext,
   useCommandPaletteContext,
+  useCommandPaletteListContext,
 } from './context'
 import type { CommandPaletteGroupProps } from './types'
 
@@ -36,10 +37,17 @@ defineSlots<{
 }>()
 
 const palette = useCommandPaletteContext()
+const list = useCommandPaletteListContext()
 
 if (import.meta.env.DEV && !palette) {
   console.warn(
     '[frappe-ui] CommandPaletteGroup has to render inside a CommandPalette.',
+  )
+} else if (import.meta.env.DEV && !list) {
+  // Reka builds the listbox from `CommandPaletteList`. Outside it there is no
+  // listbox at all, so the palette renders and then does nothing.
+  console.warn(
+    '[frappe-ui] CommandPaletteGroup has to render inside a CommandPaletteList.',
   )
 }
 
