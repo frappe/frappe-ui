@@ -6,7 +6,6 @@
     :role="ariaLabel ? 'img' : undefined"
     data-slot="keyboard-shortcut"
     :data-bg="bg ? 'true' : undefined"
-    v-bind="$attrs"
   >
     <template v-if="bg && parsedParts.length">
       <kbd

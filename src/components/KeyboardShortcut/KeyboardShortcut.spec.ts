@@ -177,6 +177,28 @@ describe('<KeyboardShortcut />', () => {
     expect(keys(withoutIcons)).toEqual(['Ctrl', '↵'])
   })
 
+  it('applies a caller class once, not once per bind', () => {
+    const host = render({ combo: 'Mod+K', class: 'px-1' })
+    const className =
+      host.querySelector('[data-slot=keyboard-shortcut]')?.className ?? ''
+    expect(className.split(/\s+/).filter((c) => c === 'px-1')).toEqual(['px-1'])
+  })
+
+  it('keeps the fallthrough override order for role and aria-label', () => {
+    // Auto-inherit runs after the template's own `role` and `aria-label`, so a
+    // caller value wins. Dropping the explicit `v-bind` must not change that.
+    const host = render({
+      combo: 'Mod+K',
+      role: 'button',
+      'aria-label': 'Open the palette',
+      'data-testid': 'shortcut',
+    })
+    const root = host.querySelector('[data-slot=keyboard-shortcut]')
+    expect(root?.getAttribute('role')).toBe('button')
+    expect(root?.getAttribute('aria-label')).toBe('Open the palette')
+    expect(root?.getAttribute('data-testid')).toBe('shortcut')
+  })
+
   it('marks the bg variant with data-bg', () => {
     const plain = render({ combo: 'Mod+K' })
     expect(
