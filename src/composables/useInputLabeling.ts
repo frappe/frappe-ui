@@ -1,5 +1,6 @@
-import { computed, onBeforeUpdate, shallowRef } from 'vue'
+import { computed } from 'vue'
 import { useId } from '../utils/useId'
+import { useSlotTick } from './useSlotTick'
 import type { InputSize, InputVariant, ToggleSize } from './inputTypes'
 
 /**
@@ -99,19 +100,10 @@ export function useInputLabeling(
     return Boolean(props.description) && !hasError.value
   })
 
-  // `useSlots()` returns `instance.slots`, which Vue mutates in place and does
-  // not track. A `computed` reading it caches on first evaluation and never
-  // re-runs, so a slot behind a `v-if` leaves the reference wrong in both
+  // Without this, a slot behind a `v-if` leaves the reference wrong in both
   // directions: added, the element renders and nothing points at it; removed,
   // the reference outlives its element and dangles.
-  //
-  // Slot content only ever changes as part of a re-render, and `beforeUpdate`
-  // runs after `updateSlots` and before the render function, so bumping here is
-  // the invalidation those two computeds are missing.
-  const slotTick = shallowRef(0)
-  onBeforeUpdate(() => {
-    slotTick.value++
-  })
+  const slotTick = useSlotTick()
 
   // Both of these follow what actually renders, not what the props say. A
   // `#label` or `#description` slot renders the same element the prop does, so
