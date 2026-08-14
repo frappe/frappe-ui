@@ -70,7 +70,7 @@ import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../../composables/usePortalTarget'
-import { useSlotTick } from '../../../composables/useSlotTick'
+import { useReactiveSlots } from '../../../composables/useReactiveSlots'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
 
@@ -134,14 +134,14 @@ const emit = defineEmits<{
   (e: 'requestFocus'): void
 }>()
 
-const slots = defineSlots<{
+defineSlots<{
   trigger?: (props: TriggerSlotProps) => any
   target?: (props: TriggerSlotProps) => any
   prefix?: (props: TriggerSlotProps) => any
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
 }>()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 defineOptions({ inheritAttrs: false })
 
@@ -169,7 +169,6 @@ const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
 const anchorEl = computed(() => {
-  slotTick.value
   if (slots.trigger || slots.target) return undefined
   return textInputRef.value?.inputElement ?? undefined
 })
@@ -236,10 +235,7 @@ const triggerSlotProps = computed<TriggerSlotProps>(() => ({
   inputValue: inputValue.value,
 }))
 
-const hasCustomTrigger = computed(() => {
-  slotTick.value
-  return !!(slots.trigger || slots.target)
-})
+const hasCustomTrigger = computed(() => !!(slots.trigger || slots.target))
 
 watch(open, (val, prev) => {
   if (val === prev) return

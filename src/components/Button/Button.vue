@@ -18,7 +18,7 @@ import { RouterLink } from 'vue-router'
 import Spinner from '../Spinner/Spinner.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { buttonProps, type ThemeVariant } from './types'
 
 export default defineComponent({
@@ -35,8 +35,11 @@ export default defineComponent({
     /** Content shown after the button label (right icon / custom content) */
     suffix: void
   }>,
-  setup(props, { attrs, slots }) {
-    const slotTick = useSlotTick()
+  setup(props, { attrs, slots: rawSlots }) {
+    // The computeds below read the slots, and the object Vue hands to `setup`
+    // is mutated in place and never tracked. `typeof rawSlots` keeps the
+    // typing `slots: Object as SlotsType<...>` above declares.
+    const slots = useReactiveSlots<typeof rawSlots>()
 
     watchEffect(() => {
       warnUnsupportedIconString('Button', 'icon', props.icon)
@@ -51,14 +54,11 @@ export default defineComponent({
     // group's skip-delay applies to this button instead of a private provider.
     const parentTooltipProvider = injectTooltipProviderContext(null)
 
-    // Re-reads the tick on every update, but its value is the slot function
+    // Re-reads the slots on every update, but its value is the slot function
     // itself, so it only propagates when the slot actually changes. Without
     // this gate the check below would materialize a throwaway vnode tree on
     // every render of every text button.
-    const defaultSlot = computed(() => {
-      slotTick.value
-      return slots.default
-    })
+    const defaultSlot = computed(() => slots.default)
 
     // Render as an icon button when the default slot is exactly one lucide-* icon.
     const hasLucideIconInDefaultSlot = computed(() => {
@@ -68,14 +68,12 @@ export default defineComponent({
       return typeof name === 'string' && name.startsWith('lucide-')
     })
 
-    const isIconButton = computed(() => {
-      slotTick.value
-      return (
+    const isIconButton = computed(
+      () =>
         Boolean(props.icon) ||
         Boolean(slots.icon) ||
-        hasLucideIconInDefaultSlot.value
-      )
-    })
+        hasLucideIconInDefaultSlot.value,
+    )
 
     const slotClasses = computed(
       () => ({ xs: 'h-3.5', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],

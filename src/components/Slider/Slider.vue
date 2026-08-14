@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, normalizeClass, useSlots, useAttrs } from 'vue'
+import { computed, normalizeClass, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -21,8 +21,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
 const emit = defineEmits<SliderEmits>()
 /** The current slider value (controlled). */
 const model = defineModel<SliderValue>()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 const attrs = useAttrs()
 
@@ -207,7 +206,6 @@ function thumbNameFor(index: number): string | undefined {
 
 // Declared before `rootClasses`, which reads it.
 const hasLabeling = computed(() => {
-  slotTick.value
   return Boolean(
     props.label || slots.label || rendersDescription.value || hasError.value,
   )

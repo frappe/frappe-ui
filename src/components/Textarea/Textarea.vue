@@ -46,11 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -70,8 +70,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 defineSlots<{
@@ -102,7 +101,6 @@ const {
 })
 
 const hasLabeling = computed(() => {
-  slotTick.value
   return Boolean(
     props.label || slots.label || rendersDescription.value || hasError.value,
   )

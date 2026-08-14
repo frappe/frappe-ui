@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
@@ -110,15 +110,12 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 })
 const emit = defineEmits<DatePickerEmits>()
 
-const slots = defineSlots<DatePickerSlots>()
-const slotTick = useSlotTick()
+defineSlots<DatePickerSlots>()
+const slots = useReactiveSlots()
 
 // Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
 // PopoverPanel inside PickerShell.
-const contentClass = computed(() => {
-  slotTick.value
-  return slots.actions ? 'w-fit' : 'w-56'
-})
+const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
