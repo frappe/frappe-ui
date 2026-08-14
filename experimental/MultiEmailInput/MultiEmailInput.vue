@@ -5,7 +5,6 @@ import {
   reactive,
   ref,
   useAttrs,
-  useSlots,
   watch,
 } from 'vue'
 import {
@@ -31,7 +30,7 @@ import {
   LabelingWrapper,
 } from '../../src/components/InputLabeling'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
-import { useSlotTick } from '../../src/composables/useSlotTick'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 import { usePortalTarget } from '../../src/composables/usePortalTarget'
 import {
   inputFontSizeClasses,
@@ -66,8 +65,7 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
 })
 
 const emit = defineEmits<MultiEmailInputEmits>()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 const attrs = useAttrs()
 
 // `portalTo` stays undefaulted on purpose: a `'body'` default outranks the
@@ -96,16 +94,15 @@ const {
   hasDescriptionSlot: () => Boolean(slots.description),
 })
 
-const hasLabeling = computed(() => {
-  slotTick.value
-  return Boolean(
+const hasLabeling = computed(() =>
+  Boolean(
     props.label ||
     props.description ||
     hasError.value ||
     slots.label ||
     slots.description,
-  )
-})
+  ),
+)
 
 const inputAriaAttrs = computed(() => ({
   'aria-invalid': hasError.value || undefined,

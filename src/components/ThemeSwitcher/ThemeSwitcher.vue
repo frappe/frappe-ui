@@ -69,8 +69,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useId, useSlots } from 'vue'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { computed, useId } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import {
   useColorScheme,
@@ -133,17 +133,12 @@ const selected = computed<ColorScheme>({
   },
 })
 
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 const headingId = useId()
-const showLabel = computed(() => {
-  slotTick.value
-  return Boolean(props.label || slots.label)
-})
-const showDescription = computed(() => {
-  slotTick.value
-  return Boolean(props.description || slots.description)
-})
+const showLabel = computed(() => Boolean(props.label || slots.label))
+const showDescription = computed(() =>
+  Boolean(props.description || slots.description),
+)
 const logoIsImage = computed(
   () => typeof props.logo === 'string' && props.logo.length > 0,
 )

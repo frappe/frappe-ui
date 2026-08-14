@@ -4,7 +4,6 @@ import {
   nextTick,
   ref,
   useAttrs,
-  useSlots,
   useTemplateRef,
   watch,
 } from 'vue'
@@ -21,7 +20,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -88,8 +87,7 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 const model = defineModel<ComboboxOptionValue | null>({ default: null })
 const open = defineModel<boolean>('open', { default: false })
@@ -123,7 +121,6 @@ const {
 })
 
 const hasLabeling = computed(() => {
-  slotTick.value
   return Boolean(
     props.label ||
     props.description ||
@@ -206,10 +203,9 @@ const typedQuery = computed(() => (hasTypedSinceOpen.value ? query.value : ''))
 // Button mode covers two paths: caller-provided `#trigger` slot, or the
 // built-in button trigger selected via `trigger="button"`. In both cases
 // the search input moves into the popover.
-const isButtonMode = computed(() => {
-  slotTick.value
-  return Boolean(slots.trigger) || props.trigger === 'button'
-})
+const isButtonMode = computed(
+  () => Boolean(slots.trigger) || props.trigger === 'button',
+)
 
 const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
   groups: normalizedGroups,

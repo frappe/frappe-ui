@@ -45,14 +45,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide, useSlots } from 'vue'
+import { computed, provide } from 'vue'
 // reka-ui's AcceptableValue omits `boolean`, but the runtime never touches the
 // declared type — the prop is untyped and values are compared with ohash's
 // isEqual — so a yes/no radio works. Cast at the boundary to keep it.
 import { RadioGroupRoot, type AcceptableValue } from 'reka-ui'
 import { useId } from '../../utils/useId'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -68,8 +68,7 @@ const props = withDefaults(defineProps<RadioGroupProps>(), {
 })
 
 const model = defineModel<RadioValue>()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 defineSlots<{
   /** The `<Radio>` options. */
@@ -106,7 +105,6 @@ const {
 // rows sit flush (the surface itself provides the separation); default rows get
 // a small gap.
 const rootClasses = computed(() => {
-  slotTick.value
   const stacked = props.orientation === 'vertical'
   const gap = props.padded ? '' : stacked ? 'gap-y-1.5' : 'gap-x-4'
   return [

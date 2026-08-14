@@ -129,10 +129,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, nextTick } from 'vue'
+import { computed, ref, useAttrs, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -148,8 +148,7 @@ const props = withDefaults(defineProps<RatingProps>(), {
 })
 
 const model = defineModel<number>({ default: 0 })
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 const attrs = useAttrs()
 
 const isDisabled = computed(() => props.disabled)
@@ -383,7 +382,6 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 const hasLabeling = computed(() => {
-  slotTick.value
   return Boolean(
     props.label || slots.label || rendersDescription.value || hasError.value,
   )

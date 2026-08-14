@@ -12,7 +12,7 @@ import Textarea from '../Textarea/Textarea.vue'
 /**
  * `useSlots()` returns `instance.slots`, which Vue mutates in place and does
  * not track. Every component here derives something from it inside a
- * `computed`, so without `useSlotTick()` the computed keeps whatever was
+ * `computed`, so without `useReactiveSlots()` the computed keeps whatever was
  * filled at mount — a slot behind a `v-if` never takes effect.
  *
  * Each case mounts with the slot empty, fills it, and empties it again.

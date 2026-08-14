@@ -46,13 +46,12 @@ import {
   onMounted,
   ref,
   useAttrs,
-  useSlots,
   watch,
 } from 'vue'
 import type { EditorView } from '@codemirror/view'
 import type { Compartment, Extension } from '@codemirror/state'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
-import { useSlotTick } from '../../src/composables/useSlotTick'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 import InputLabel from '../../src/components/InputLabeling/InputLabel.vue'
 import InputDescription from '../../src/components/InputLabeling/InputDescription.vue'
 import InputError from '../../src/components/InputLabeling/InputError.vue'
@@ -79,8 +78,7 @@ defineSlots<{
 }>()
 
 const attrs = useAttrs()
-const slots = useSlots()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 const {
   labelId,
@@ -103,12 +101,11 @@ const {
 
 // Render the labeling chrome (and its wrapping div) only when something needs
 // it — otherwise the editor mounts bare, preserving the primitive's footprint.
-const hasLabeling = computed(() => {
-  slotTick.value
-  return Boolean(
+const hasLabeling = computed(() =>
+  Boolean(
     props.label || slots.label || rendersDescription.value || hasError.value,
-  )
-})
+  ),
+)
 
 const el = ref<HTMLElement | null>(null)
 

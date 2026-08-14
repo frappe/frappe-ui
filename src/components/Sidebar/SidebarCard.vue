@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps } from '../shared/action'
@@ -27,8 +27,8 @@ const props = withDefaults(defineProps<SidebarCardProps>(), {
 
 const emit = defineEmits<SidebarCardEmits>()
 
-const slots = defineSlots<SidebarCardSlots>()
-const slotTick = useSlotTick()
+defineSlots<SidebarCardSlots>()
+const slots = useReactiveSlots()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
@@ -53,27 +53,19 @@ const { lucideIcon, componentIcon } = useStatusIcon({
   icons: lineStatusIcons,
 })
 
-const showPrefix = computed(() => {
-  slotTick.value
-  return Boolean(slots.prefix || lucideIcon.value || componentIcon.value)
-})
+const showPrefix = computed(() =>
+  Boolean(slots.prefix || lucideIcon.value || componentIcon.value),
+)
 
 const iconColorClass = computed(() => iconColorClasses[props.theme])
 
-const showTitle = computed(() => {
-  slotTick.value
-  return Boolean(props.title || slots.title)
-})
+const showTitle = computed(() => Boolean(props.title || slots.title))
 
-const showDescription = computed(() => {
-  slotTick.value
-  return Boolean(props.description || slots.description)
-})
+const showDescription = computed(() =>
+  Boolean(props.description || slots.description),
+)
 
-const showActions = computed(() => {
-  slotTick.value
-  return Boolean(slots.actions || props.action)
-})
+const showActions = computed(() => Boolean(slots.actions || props.action))
 
 function dismiss() {
   emit('dismiss')

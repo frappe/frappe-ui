@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watchEffect } from 'vue'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps } from '../shared/action'
@@ -16,8 +16,8 @@ const props = defineProps(alertProps)
 
 const emit = defineEmits<AlertEmits>()
 
-const slots = defineSlots<AlertSlots>()
-const slotTick = useSlotTick()
+defineSlots<AlertSlots>()
+const slots = useReactiveSlots()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
@@ -33,12 +33,11 @@ watchEffect(() => {
 // Row when the content fits one line; banner when a description or a second
 // action needs the stacked layout. There is no layout prop — the computed
 // result is stamped as `data-layout`.
-const layout = computed(() => {
-  slotTick.value
-  return props.description || slots.description || props.secondaryAction
+const layout = computed(() =>
+  props.description || slots.description || props.secondaryAction
     ? 'banner'
-    : 'row'
-})
+    : 'row',
+)
 
 // Urgent themes interrupt assistive tech; the rest announce politely.
 const role = computed(() =>
@@ -60,27 +59,21 @@ const { lucideIcon, componentIcon } = useStatusIcon({
   icons: solidStatusIcons,
 })
 
-const showPrefix = computed(() => {
-  slotTick.value
-  return Boolean(slots.prefix || lucideIcon.value || componentIcon.value)
-})
+const showPrefix = computed(() =>
+  Boolean(slots.prefix || lucideIcon.value || componentIcon.value),
+)
 
 const iconColorClass = computed(() => iconColorClasses[props.theme])
 
-const showTitle = computed(() => {
-  slotTick.value
-  return Boolean(props.title || slots.title)
-})
+const showTitle = computed(() => Boolean(props.title || slots.title))
 
-const showDescription = computed(() => {
-  slotTick.value
-  return Boolean(props.description || slots.description)
-})
+const showDescription = computed(() =>
+  Boolean(props.description || slots.description),
+)
 
-const showBannerActions = computed(() => {
-  slotTick.value
-  return Boolean(slots.actions || props.primaryAction || props.secondaryAction)
-})
+const showBannerActions = computed(() =>
+  Boolean(slots.actions || props.primaryAction || props.secondaryAction),
+)
 
 function dismiss() {
   emit('dismiss')

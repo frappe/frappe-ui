@@ -13,14 +13,14 @@ import Pill from '../shared/tabs/Pill.vue'
 import { NativeButton } from '../shared/nativeElements'
 import { tabRadiusClasses, tabShellClasses } from '../shared/tabs/styles'
 import { warnUnsupportedIconString } from '../../utils/iconString'
-import { useSlotTick } from '../../composables/useSlotTick'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { tabListKey, tabsRootKey } from './context'
 import type { BrowserTabBase } from '../shared/tabs/pillTypes'
 import type { TabTriggerProps, TabTriggerSlotProps } from './types'
 
 const props = defineProps<TabTriggerProps>()
 
-const slots = defineSlots<{
+defineSlots<{
   /** Leading content, after `iconLeft`. */
   prefix?: (props: TabTriggerSlotProps) => any
   /** Replaces the label region. */
@@ -28,7 +28,7 @@ const slots = defineSlots<{
   /** Trailing content (badges, counts). */
   suffix?: (props: TabTriggerSlotProps) => any
 }>()
-const slotTick = useSlotTick()
+const slots = useReactiveSlots()
 
 const root = inject(tabsRootKey, null)
 const list = inject(tabListKey, null)
@@ -86,10 +86,7 @@ const slotProps = computed<TabTriggerSlotProps>(() => ({
   disabled: !!props.disabled,
 }))
 
-const isIconOnly = computed(() => {
-  slotTick.value
-  return Boolean(props.icon) && !slots.default
-})
+const isIconOnly = computed(() => Boolean(props.icon) && !slots.default)
 
 const browserTabBase = computed<BrowserTabBase>(() => {
   if (variant.value !== 'browser-tab') return 'none'
