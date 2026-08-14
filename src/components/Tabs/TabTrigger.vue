@@ -20,7 +20,7 @@ import type { TabTriggerProps, TabTriggerSlotProps } from './types'
 
 const props = defineProps<TabTriggerProps>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Leading content, after `iconLeft`. */
   prefix?: (props: TabTriggerSlotProps) => any
   /** Replaces the label region. */
@@ -28,7 +28,7 @@ defineSlots<{
   /** Trailing content (badges, counts). */
   suffix?: (props: TabTriggerSlotProps) => any
 }>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const root = inject(tabsRootKey, null)
 const list = inject(tabListKey, null)

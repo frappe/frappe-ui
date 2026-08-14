@@ -134,14 +134,14 @@ const emit = defineEmits<{
   (e: 'requestFocus'): void
 }>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   trigger?: (props: TriggerSlotProps) => any
   target?: (props: TriggerSlotProps) => any
   prefix?: (props: TriggerSlotProps) => any
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
 }>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 defineOptions({ inheritAttrs: false })
 

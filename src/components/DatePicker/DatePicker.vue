@@ -111,7 +111,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 const emit = defineEmits<DatePickerEmits>()
 
 defineSlots<DatePickerSlots>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<DatePickerSlots>()
 
 // Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
 // PopoverPanel inside PickerShell.

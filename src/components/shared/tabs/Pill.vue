@@ -13,12 +13,12 @@ const props = withDefaults(defineProps<PillProps>(), {
   orientation: 'horizontal',
 })
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   prefix?: () => any
   default?: () => any
   suffix?: () => any
 }>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 // `icon` means icon-only intent (label, if provided, is rendered as
 // sr-only). `iconLeft` is an accent icon next to a visible label. Trailing

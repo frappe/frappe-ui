@@ -17,7 +17,7 @@ const props = defineProps(alertProps)
 const emit = defineEmits<AlertEmits>()
 
 defineSlots<AlertSlots>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<AlertSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
