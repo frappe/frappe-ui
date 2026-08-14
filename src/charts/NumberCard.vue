@@ -186,7 +186,7 @@ import type { NumberCardProps, NumberCardSlots } from './types'
 const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
 defineSlots<NumberCardSlots>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<NumberCardSlots>()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())

@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<SidebarCardProps>(), {
 const emit = defineEmits<SidebarCardEmits>()
 
 defineSlots<SidebarCardSlots>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<SidebarCardSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {
