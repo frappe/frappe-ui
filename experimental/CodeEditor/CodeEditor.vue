@@ -40,14 +40,7 @@
 // tree-shakes into its own async chunk — apps that never render a code field pay
 // no runtime cost (importing `frappe-ui/experimental` pulls in no editor code
 // until a field actually mounts).
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useAttrs,
-  watch,
-} from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue'
 import type { EditorView } from '@codemirror/view'
 import type { Compartment, Extension } from '@codemirror/state'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'

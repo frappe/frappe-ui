@@ -49,8 +49,10 @@ const cases: Case[] = [
     props: { title: 'Heads up', icon: false },
     slot: 'description',
     content: () => h('span', 'More detail'),
-    filled: () => cy.get('[data-layout]').should('have.attr', 'data-layout', 'banner'),
-    empty: () => cy.get('[data-layout]').should('have.attr', 'data-layout', 'row'),
+    filled: () =>
+      cy.get('[data-layout]').should('have.attr', 'data-layout', 'banner'),
+    empty: () =>
+      cy.get('[data-layout]').should('have.attr', 'data-layout', 'row'),
   },
   {
     name: 'SidebarCard gates its prefix region on #prefix',
@@ -222,7 +224,9 @@ describe('slot-derived computeds follow the slots', () => {
       },
     })
 
-    cy.mount(Harness, { props: { onRequestFocus: cy.spy().as('requestFocus') } })
+    cy.mount(Harness, {
+      props: { onRequestFocus: cy.spy().as('requestFocus') },
+    })
 
     // Default trigger: opening keeps focus on the TextInput for typing.
     cy.get('[data-cy="open"]').click()

@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  reactive,
-  ref,
-  useAttrs,
-  watch,
-} from 'vue'
+import { computed, nextTick, reactive, ref, useAttrs, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,

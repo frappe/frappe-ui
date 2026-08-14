@@ -281,7 +281,10 @@ describe('Textinput', () => {
           h('div', [
             h(
               'button',
-              { 'data-cy': 'toggle', onClick: () => (show.value = !show.value) },
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
               'Toggle',
             ),
             h(
