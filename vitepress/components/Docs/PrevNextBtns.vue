@@ -16,10 +16,12 @@ const { frontmatter, site } = useData()
 
 const visible = computed(() => frontmatter.value.nextprev ?? true)
 
-// `state.sidebarList` is declared as `SidebarSection[]`, but Sidebar.vue fills
-// it from `theme.sections ?? theme.sidebar`, and VitePress' own `sidebar` type
-// admits a flat list of links with no `items`. The cast is on that one
-// declaration being too narrow; the branch below is the runtime shape.
+// Through `defineDocsConfig` the declared `SidebarSection[]` is always right:
+// `sidebar` is required there and it writes both `sidebar` and `sections` from
+// that one value. The flat shape VitePress' own `sidebar` type admits is only
+// reachable by a consumer hand-writing raw `themeConfig`, which bypasses that
+// helper — Sidebar.vue forwards whatever it finds. This cast and branch cover
+// only that case.
 const entries = state.sidebarList as Array<SidebarSection | SidebarItem>
 
 const linkInfos = entries.reduce<SidebarItem[]>((acc, cur) => {
