@@ -489,6 +489,8 @@ the popover opens.`,required:!1,type:"string",default:'""'},{name:"hideSearch",d
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"script"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"}),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"<"),s("span",{class:"s_1uuh8p"},"template"),s("span",{class:"s_1zd9e2"},">")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"  <!-- The `as` casts on the two handlers below exist because these model")]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"       emits are declared twice; drop them when #1096 removes the duplicates. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"  <"),s("span",{class:"s_wac0bt"},"MultiSelect")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"    v-model"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"value"),s("span",{class:"s_w1p9wo"},'"')]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"    v-model:query"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"query"),s("span",{class:"s_w1p9wo"},'"')]),a(`
