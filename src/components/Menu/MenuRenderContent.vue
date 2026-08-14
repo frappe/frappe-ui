@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { defineComponent, type PropType, type VNode } from 'vue'
+import { defineComponent, type PropType, type VNodeChild } from 'vue'
 
 const RenderContent = defineComponent({
   name: 'MenuRenderContentRenderer',
   props: {
     content: {
-      type: [Object, Array] as PropType<VNode | VNode[]>,
+      type: [Object, Array, String, Number] as PropType<VNodeChild>,
       default: undefined,
     },
   },
@@ -15,7 +15,7 @@ const RenderContent = defineComponent({
 })
 
 defineProps<{
-  content?: VNode | VNode[]
+  content?: VNodeChild
 }>()
 </script>
 

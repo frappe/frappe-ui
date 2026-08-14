@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { cloneVNode, useAttrs, type VNode } from 'vue'
+import { cloneVNode, useAttrs, type VNodeChild } from 'vue'
 import { getFirstRenderableElement } from '../../utils/vnode'
 
 const props = defineProps<{
-  content?: VNode | VNode[]
+  content?: VNodeChild
 }>()
 
 const attrs = useAttrs()

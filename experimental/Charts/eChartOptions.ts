@@ -43,7 +43,9 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     },
     xAxis: xAxisOptions,
     yAxis: yAxisOptions,
-    series: [],
+    // Callers overwrite this with their own series list; a bare `[]` infers
+    // `never[]` and rejects every assignment.
+    series: [] as any[],
     tooltip: {
       show: true,
       trigger: 'axis',

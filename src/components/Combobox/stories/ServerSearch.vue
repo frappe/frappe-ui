@@ -148,8 +148,8 @@ function onOpen(isOpen: boolean) {
     placeholder="Search members…"
     empty-text="No members found"
     class="w-80"
-    @update:query="onQueryChange"
-    @update:open="onOpen"
+    @update:query="(q) => onQueryChange(q as string)"
+    @update:open="(isOpen) => onOpen(isOpen as boolean)"
   >
     <template #item-prefix="{ item }">
       <Avatar :image="(item as Member).image" :label="item.label" size="sm" />

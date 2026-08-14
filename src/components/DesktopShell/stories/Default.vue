@@ -34,20 +34,28 @@ const spaces = [
 
 // Long enough to overflow the content area: the point of the story is that
 // only this region scrolls while the rail, sidebar and header stay put.
-const posts = [
-  ['Design review: new onboarding flow', 'Priya Nair', 14, '2h'],
-  ['Consolidate icon sizes to a 4px grid', 'Sam Rivera', 32, '5h'],
-  ['Dark mode tokens are ready for review', 'Ana Costa', 21, '1d'],
-  ['Hero copy for the marketing site', 'Liam Fischer', 5, '1d'],
-  ['Illustration style guide, first draft', 'Mei Tanaka', 11, '2d'],
-  ['Accessibility audit findings', 'Noah Berg', 27, '4d'],
-  ['Retiring the old button variants', 'Ines Duarte', 9, '5d'],
-  ['Naming conventions for new components', 'Tomas Ruiz', 16, '1w'],
-  ['Figma library cleanup', 'Zara Ahmed', 4, '1w'],
-  ['Empty states we still need to design', 'Priya Nair', 6, '2w'],
-  ['Spacing scale: 4px or 8px base?', 'Sam Rivera', 19, '2w'],
-  ['Archive: 2023 brand refresh', 'Ana Costa', 2, '3w'],
-].map(([title, author, replies, time]) => ({ title, author, replies, time }))
+// Typed as a tuple so the destructured `author` is a string, not `string | number`.
+const posts = (
+  [
+    ['Design review: new onboarding flow', 'Priya Nair', 14, '2h'],
+    ['Consolidate icon sizes to a 4px grid', 'Sam Rivera', 32, '5h'],
+    ['Dark mode tokens are ready for review', 'Ana Costa', 21, '1d'],
+    ['Hero copy for the marketing site', 'Liam Fischer', 5, '1d'],
+    ['Illustration style guide, first draft', 'Mei Tanaka', 11, '2d'],
+    ['Accessibility audit findings', 'Noah Berg', 27, '4d'],
+    ['Retiring the old button variants', 'Ines Duarte', 9, '5d'],
+    ['Naming conventions for new components', 'Tomas Ruiz', 16, '1w'],
+    ['Figma library cleanup', 'Zara Ahmed', 4, '1w'],
+    ['Empty states we still need to design', 'Priya Nair', 6, '2w'],
+    ['Spacing scale: 4px or 8px base?', 'Sam Rivera', 19, '2w'],
+    ['Archive: 2023 brand refresh', 'Ana Costa', 2, '3w'],
+  ] as [string, string, number, string][]
+).map(([title, author, replies, time]) => ({
+  title,
+  author,
+  replies,
+  time,
+}))
 </script>
 
 <template>

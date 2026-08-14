@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion'
+import type {
+  SuggestionProps,
+  SuggestionKeyDownProps,
+} from '@tiptap/suggestion'
 import { createSuggestionRenderer } from './suggestion-renderer'
 
 // Every `new VueRenderer(...)` the renderer creates lands here so tests can
@@ -11,6 +14,7 @@ import { createSuggestionRenderer } from './suggestion-renderer'
 interface FakeRenderer {
   el: HTMLElement | null
   element: Element | null
+  props: Record<string, any>
   destroyed: boolean
   onKeyDownSpy: ReturnType<typeof vi.fn>
 }
@@ -74,7 +78,9 @@ function makeProps(overrides: Partial<SuggestionProps> = {}): SuggestionProps {
 }
 
 function keyDown(key: string): SuggestionKeyDownProps {
-  return { event: new KeyboardEvent('keydown', { key }) } as SuggestionKeyDownProps
+  return {
+    event: new KeyboardEvent('keydown', { key }),
+  } as SuggestionKeyDownProps
 }
 
 describe('createSuggestionRenderer', () => {
@@ -127,7 +133,9 @@ describe('createSuggestionRenderer', () => {
 
     expect(renderer.props.items).toEqual([{ label: 'a' }])
 
-    api.onUpdate(makeProps({ items: [{ label: 'b' }], loading: false } as never))
+    api.onUpdate(
+      makeProps({ items: [{ label: 'b' }], loading: false } as never),
+    )
 
     expect(renderer.props.items).toEqual([{ label: 'b' }])
   })

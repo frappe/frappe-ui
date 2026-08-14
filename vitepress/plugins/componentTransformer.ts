@@ -1,5 +1,7 @@
 import type { MarkdownEnv, MarkdownRenderer } from 'vitepress'
-import type StateCore from 'markdown-it/lib/rules_core/state_core'
+// `.mjs`: @types/markdown-it ships this declaration as `state_core.d.mts`,
+// which bundler resolution only reaches through the ESM specifier.
+import type StateCore from 'markdown-it/lib/rules_core/state_core.mjs'
 import { existsSync } from 'node:fs'
 import { dirname, isAbsolute, resolve } from 'node:path'
 import {

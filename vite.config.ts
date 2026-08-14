@@ -2,7 +2,9 @@ import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import istanbul from 'vite-plugin-istanbul'
-import { lucideIcons } from './vite/lucideIcons'
+// Through the entry, not the bare `.js` sub-plugin: `vite/index.d.ts` is the
+// only typed surface here, so a deep import lands on an untyped module.
+import { lucideIcons } from './vite/index.js'
 
 const coverageEnabled = process.env.COVERAGE === 'true'
 
@@ -10,7 +12,10 @@ export default defineConfig({
   plugins: [
     vue(),
     lucideIcons({
-      componentGlobs: ['src/components/**/*.vue', '!src/components/**/stories/*.vue'],
+      componentGlobs: [
+        'src/components/**/*.vue',
+        '!src/components/**/stories/*.vue',
+      ],
     }),
     coverageEnabled &&
       istanbul({

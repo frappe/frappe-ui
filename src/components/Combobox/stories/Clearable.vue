@@ -55,8 +55,10 @@ const fontSizePx: Record<string, number> = {
   '24': 16,
 }
 
-function getOptionValue(item: { value?: string; label: string }) {
-  return item.value ?? item.label
+// Matches both slot option shapes: a selectable option carries `value`, a
+// custom option carries only `label`.
+function getOptionValue(item: { value?: unknown; label: string }) {
+  return String(item.value ?? item.label)
 }
 
 function clear(key: string, event: Event) {

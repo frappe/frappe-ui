@@ -17,7 +17,9 @@ const status = ref('')
         description="Upgrade to keep enjoying features."
         :action="{
           label: 'Update now',
-          onClick: () => (status = 'Billing page opened'),
+          onClick: () => {
+            status = 'Billing page opened'
+          },
         }"
       />
     </div>
@@ -51,7 +53,9 @@ const status = ref('')
         description="Free up space or upgrade your plan."
         :action="{
           label: 'Manage storage',
-          onClick: () => (status = 'Storage settings opened'),
+          onClick: () => {
+            status = 'Storage settings opened'
+          },
         }"
       />
     </div>
@@ -63,7 +67,9 @@ const status = ref('')
         description="Update your card to avoid interruption."
         :action="{
           label: 'Fix billing',
-          onClick: () => (status = 'Card details opened'),
+          onClick: () => {
+            status = 'Card details opened'
+          },
         }"
       />
     </div>

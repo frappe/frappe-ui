@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Button, FileUploader } from 'frappe-ui'
+import { Button, FileUploader, type UploadedFile } from 'frappe-ui'
 
 const validateFileFunction = (file: File) => {
   // optional validation hook
 }
 
-const onSuccess = (file: File) => {
+const onSuccess = (file: UploadedFile) => {
   // upload success handler
 }
 </script>

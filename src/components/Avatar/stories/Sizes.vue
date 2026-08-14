@@ -2,7 +2,7 @@
 import { Avatar } from 'frappe-ui'
 
 const url = 'https://avatars.githubusercontent.com/u/499550?s=60&v=4'
-const sizes = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl']
+const sizes = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const
 </script>
 
 <template>

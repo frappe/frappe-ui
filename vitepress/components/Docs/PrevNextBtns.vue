@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
-import { isActiveLink } from './sidebarList'
+import { isActiveLink, type SidebarItem } from './sidebarList'
 
 import LucideLeft from '~icons/lucide/arrow-left'
 import LucideRight from '~icons/lucide/arrow-right'
@@ -12,8 +12,10 @@ const { frontmatter, site } = useData()
 
 const visible = computed(() => frontmatter.value.nextprev ?? true)
 
-const linkInfos = state.sidebarList?.reduce((acc, cur) => {
-  cur.items ? acc.push(...cur.items) : acc.push(cur)
+// A configured sidebar entry is either a section holding `items` or a bare
+// link; the flattened list holds only the links.
+const linkInfos = state.sidebarList.reduce<SidebarItem[]>((acc, cur) => {
+  cur.items ? acc.push(...cur.items) : acc.push(cur as unknown as SidebarItem)
   return acc
 }, [])
 

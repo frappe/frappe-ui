@@ -195,14 +195,27 @@ function methodError(method: string) {
   )
 }
 
-async function delayIfSlow(...names: Array<string | readonly string[]>) {
+async function delayIfSlow(
+  // msw path params are `string | readonly string[] | undefined`.
+  ...names: Array<string | readonly string[] | undefined>
+) {
   let isSlow = names.some((name) => String(name).startsWith('slow'))
   if (isSlow) {
     await delay(60)
   }
 }
 
-function getUsers(listParams) {
+interface ListParams {
+  start?: number
+  limit?: number
+  filters?: Record<string, [string, string]>
+  fields?: string[]
+  group_by?: string
+  order_by?: string
+  parent?: string
+}
+
+function getUsers(listParams: ListParams) {
   let { start = 0, limit = 20, filters = {} } = listParams
 
   return Array.from({ length: limit }, (_, i) => {
@@ -220,8 +233,8 @@ function getUsers(listParams) {
   })
 }
 
-function parseListParams(searchParams) {
-  let out = {}
+function parseListParams(searchParams: URLSearchParams): ListParams {
+  let out: Record<string, any> = {}
   for (let [key, value] of searchParams) {
     if (key === 'fields' || key === 'filters') {
       out[key] = JSON.parse(value)
