@@ -9,6 +9,10 @@
         :class="{ 'opacity-100': languageMenuOpen || props.selected }"
         contenteditable="false"
       >
+        <!-- `$event` on `@update:open` is `unknown`: Combobox declares that
+             emit twice, once via `defineModel('open')` and once in
+             `ComboboxEmits`, and the merge loses the type. Drop the cast when
+             #1096 removes the duplicate. -->
         <Combobox
           v-if="isEditable"
           v-model="selectedLanguage"
@@ -17,7 +21,7 @@
           variant="ghost"
           size="sm"
           placeholder="auto"
-          @update:open="languageMenuOpen = $event"
+          @update:open="languageMenuOpen = $event as boolean"
         />
         <span v-else class="select-none px-1 text-xs text-ink-gray-4">{{
           props.node.attrs.language || 'auto'

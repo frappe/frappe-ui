@@ -12,7 +12,7 @@ import {
 } from 'reka-ui'
 
 import { Dialog } from 'frappe-ui'
-import type { SidebarItem } from './sidebarList'
+import type { SidebarItem, SidebarSection } from './sidebarList'
 
 const open = defineModel<boolean>('open', { default: true })
 
@@ -22,7 +22,9 @@ const router = useRouter()
 const filterText = ref('')
 
 // Sidebar is supplied via themeConfig in the {text, items:[{text,link}]} shape.
-const sidebarList = theme.value.sidebar ?? []
+// `useData()` types themeConfig as `any`, and VitePress' own `Sidebar` type is
+// a union that does not describe what `defineDocsConfig` writes here.
+const sidebarList = (theme.value.sidebar ?? []) as SidebarSection[]
 const allItems = sidebarList.flatMap((section) =>
   section.items.map((item) => ({ ...item, section: section.text })),
 )

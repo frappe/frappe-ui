@@ -16,16 +16,13 @@ function deleteFile() {
   toast.promise(
     new Promise<{ id: string; name: string }>((resolve, reject) =>
       setTimeout(
-        () =>
-          willFail
-            ? reject(new Error('Network error'))
-            : resolve(file),
+        () => (willFail ? reject(new Error('Network error')) : resolve(file)),
         1500,
       ),
     ),
     {
       loading: `Deleting ${file.name}…`,
-      success: (deleted) => ({
+      success: (deleted: { id: string; name: string }) => ({
         message: `Deleted ${deleted.name}`,
         action: {
           label: 'Undo',

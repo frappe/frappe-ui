@@ -36,6 +36,30 @@ jobs:
           path: coverage/vitest
           if-no-files-found: ignore
 
+  type-check:
+    runs-on: ubuntu-latest
+    name: Type Check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Gates on zero errors, not on drift against the merge base. Scope is the
+      # shipped library: src, experimental, stories, mocks and the vitepress
+      # entry (tsconfig.app.json), plus the build and test configs
+      # (tsconfig.node.json). Cypress specs are the one project left out —
+      # `cy.mount()`'s component generics produce ~200 errors that are a
+      # cleanup of their own.
+      - name: Type-check the library
+        run: yarn type-check
+
   docs-tables:
     runs-on: ubuntu-latest
     name: API Tables

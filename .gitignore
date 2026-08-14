@@ -56,3 +56,6 @@ cypress/screenshots
 
 # Per-machine agent dev-server config.
 .claude/launch.json
+
+# Emitted by the composite tsconfig.node.json project on every type-check.
+*.tsbuildinfo

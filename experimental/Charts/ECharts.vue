@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EChartsOption, init } from 'echarts'
+import { EChartsOption, init, type ECharts } from 'echarts'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import debounce from '#utils/debounce'
 
@@ -12,7 +12,7 @@ const props = defineProps<{
   class?: string
 }>()
 
-let chart: echarts.ECharts
+let chart: ECharts
 const chartDiv = ref<HTMLDivElement>()
 
 const chartClass = computed(() => {

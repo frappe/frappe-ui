@@ -1,3 +1,4 @@
+import type { EChartsOption } from 'echarts'
 import { formatDate, formatLabel, formatValue, mergeDeep } from './helpers'
 import { AxisChartConfig } from './types'
 
@@ -43,7 +44,9 @@ export default function useEchartsOptions(config: AxisChartConfig) {
     },
     xAxis: xAxisOptions,
     yAxis: yAxisOptions,
-    series: [],
+    // Callers overwrite this with their own series list; a bare `[]` infers
+    // `never[]` and rejects every assignment.
+    series: [] as EChartsOption['series'],
     tooltip: {
       show: true,
       trigger: 'axis',

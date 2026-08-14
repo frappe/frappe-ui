@@ -14,25 +14,27 @@
   ],
   "exclude": [
     "src/**/*.cy.ts",
-    "src/**/*.story.vue",
-    "src/**/stories/**/*",
     "experimental/TextEditor/**/*",
-    "experimental/**/*.cy.ts",
-    "src/mocks/**/*"
+    "experimental/**/*.cy.ts"
   ],
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "ignoreDeprecations": "5.0",
     "types": ["vitest/globals", "unplugin-icons/types/vue", "node"],
+    // No `baseUrl`. It made every bare specifier resolve against the repo
+    // root first, so `import ... from 'vitepress'` and `from 'vite'` hit our
+    // own `vitepress/` and `vite/` directories instead of the npm packages —
+    // 38 phantom "has no exported member" errors. `paths` needs no `baseUrl`
+    // since TS 4.1; the entries below resolve relative to this file.
+    //
     // Mirrors the package.json `imports` map. The `imports` field drives
     // runtime/bundler resolution (Node, Vite, esbuild); `paths` is what
     // TypeScript uses to resolve the same `#` specifiers during type-check.
     "paths": {
-      "#components/*": ["src/components/*"],
-      "#molecules/*": ["src/molecules/*"],
-      "#composables/*": ["src/composables/*"],
-      "#utils/*": ["src/utils/*"]
+      "#components/*": ["./src/components/*"],
+      "#molecules/*": ["./src/molecules/*"],
+      "#composables/*": ["./src/composables/*"],
+      "#utils/*": ["./src/utils/*"]
     }
   }
 }
