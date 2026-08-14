@@ -11,8 +11,8 @@
       >
         <!-- `$event` on `@update:open` is `unknown`: Combobox declares that
              emit twice, once via `defineModel('open')` and once in
-             `ComboboxEmits`, and the merge loses the type. Cast until the
-             duplication is resolved. -->
+             `ComboboxEmits`, and the merge loses the type. Drop the cast when
+             #1096 removes the duplicate. -->
         <Combobox
           v-if="isEditable"
           v-model="selectedLanguage"

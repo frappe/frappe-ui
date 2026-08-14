@@ -187,6 +187,8 @@ function onOpen(isOpen: boolean) {
 </script>
 
 <template>
+  <!-- The `as` casts on the two handlers below exist because these model
+       emits are declared twice; drop them when #1096 removes the duplicates. -->
   <MultiSelect
     v-model="value"
     v-model:query="query"
