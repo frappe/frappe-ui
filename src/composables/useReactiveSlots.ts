@@ -12,9 +12,11 @@ import { useSlotTick } from './useSlotTick'
  * subscribes the caller to the slot tick on every read, so the deriving
  * `computed` re-runs when the slots change.
  *
- * Use it anywhere a component reads its own slots outside the template.
- * Reading `$slots` in the template is already correct — the render function
- * re-runs on its own — so this changes nothing there.
+ * Use it anywhere a component reads its own slots outside the template, and
+ * anywhere the object is handed on, as a prop or through `provide`. Reading
+ * `$slots` in your own template is already correct, because the render
+ * function re-runs on its own; a child reading the same object is not, because
+ * nothing re-renders the child when a slot toggles.
  */
 export function useReactiveSlots<T extends object = Slots>(): T {
   const slots = useSlots()

@@ -11,6 +11,7 @@ import { TabsRoot } from 'reka-ui'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
 import TabPanel from './TabPanel.vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { tabsRootKey, type TabTriggerRegistration } from './context'
 import type {
   TabItem,
@@ -28,7 +29,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
 
 const emit = defineEmits<TabsEmits>()
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   /** Composed mode: `TabList` / `TabPanel` children. */
   default?: () => any
   /** Shorthand mode: leading content in every generated trigger. */
@@ -40,6 +41,7 @@ const slots = defineSlots<{
   /** Shorthand mode: panel body for the selected tab. */
   'tab-panel'?: (props: { tab: TabItem }) => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 if (import.meta.env.DEV) {
   let warned = false
