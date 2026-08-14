@@ -3,6 +3,8 @@ import type { Component } from 'vue'
 import Alert from '../Alert/Alert.vue'
 import Button from '../Button/Button.vue'
 import Combobox from '../Combobox/Combobox.vue'
+import Dialog from '../Dialog/Dialog.vue'
+import Dropdown from '../Dropdown/Dropdown.vue'
 import PageHeaderMobile from '../PageHeader/PageHeaderMobile.vue'
 import PickerShell from './picker/PickerShell.vue'
 import Pill from './tabs/Pill.vue'
@@ -237,5 +239,77 @@ describe('slot-derived computeds follow the slots', () => {
     cy.get('[data-cy="toggle"]').click()
     cy.get('[data-cy="open"]').click()
     cy.get('@requestFocus').should('have.been.calledOnce')
+  })
+
+  // `showHeader` gates the whole header row, and its inverse gates the
+  // standalone close button. A `#title` behind a `v-if` left both wrong at
+  // once: no header, and a floating close button in its place.
+  it('Dialog brings in the header once #title fills', () => {
+    const Harness = defineComponent({
+      setup() {
+        const show = ref(false)
+
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              Dialog,
+              { modelValue: true },
+              show.value
+                ? { title: () => h('h3', { 'data-cy': 'mark' }, 'Confirm') }
+                : {},
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('[data-cy="mark"]').should('not.exist')
+
+    cy.get('[data-cy="toggle"]').click({ force: true })
+    cy.get('[data-cy="mark"]').should('exist')
+
+    cy.get('[data-cy="toggle"]').click({ force: true })
+    cy.get('[data-cy="mark"]').should('not.exist')
+  })
+
+  // Dropdown forwards its slots object to `MenuItemContent`, which builds four
+  // computeds off it. The chain is only as reactive as its source.
+  it('Dropdown renders #item-prefix added after mount', () => {
+    // The slot is toggled from a ref, not a button. The menu must stay open
+    // across the toggle — closing it remounts `MenuItemContent` and rebuilds
+    // its computeds, which passes either way — and any click outside the open
+    // menu dismisses it.
+    const show = ref(false)
+
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(
+            Dropdown,
+            { options: [{ label: 'Edit' }] },
+            show.value
+              ? { 'item-prefix': () => h('span', { 'data-cy': 'mark' }, '>') }
+              : {},
+          )
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('[aria-haspopup="menu"]').click()
+    cy.get('[data-cy="mark"]').should('not.exist')
+
+    cy.then(() => (show.value = true))
+    cy.get('[data-cy="mark"]').should('exist')
+
+    cy.then(() => (show.value = false))
+    cy.get('[data-cy="mark"]').should('not.exist')
   })
 })

@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, useSlots, watch } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import {
   ContextMenuContent,
   ContextMenuItem,
@@ -39,6 +39,7 @@ import Menu from '../Menu/Menu.vue'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
 import type { ContextMenuProps, ContextMenuSlots } from './types'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 
 const openModel = defineModel<boolean>('open', { default: false })
 
@@ -48,7 +49,7 @@ const props = withDefaults(defineProps<ContextMenuProps>(), {
 
 defineSlots<ContextMenuSlots>()
 
-const slots = useSlots()
+const slots = useReactiveSlots()
 
 const portalTarget = usePortalTarget()
 

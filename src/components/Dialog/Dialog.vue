@@ -159,11 +159,12 @@ import {
   DialogDescription,
   DialogClose,
 } from 'reka-ui'
-import { computed, reactive, ref, useSlots, watchEffect } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { Button } from '../Button'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import {
   warnUnsupportedIconString,
   isLucideIconString,
@@ -196,7 +197,7 @@ const slots = defineSlots<DialogSlots>()
 
 const portalTarget = usePortalTarget()
 
-const allSlots = useSlots()
+const allSlots = useReactiveSlots()
 
 const isDismissible = computed(() => props.dismissible !== false)
 
