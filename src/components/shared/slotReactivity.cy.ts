@@ -5,6 +5,7 @@ import Button from '../Button/Button.vue'
 import Combobox from '../Combobox/Combobox.vue'
 import Dialog from '../Dialog/Dialog.vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
+import ListView from '../../../experimental/ListView/ListView.vue'
 import PageHeaderMobile from '../PageHeader/PageHeaderMobile.vue'
 import PickerShell from './picker/PickerShell.vue'
 import Pill from './tabs/Pill.vue'
@@ -310,6 +311,52 @@ describe('slot-derived computeds follow the slots', () => {
     cy.get('[data-cy="mark"]').should('exist')
 
     cy.then(() => (show.value = false))
+    cy.get('[data-cy="mark"]').should('not.exist')
+  })
+
+  // ListView hands its slots to descendants through `provide`. `ListRow` reads
+  // `list.slots.cell` in its own template, and nothing re-renders it when the
+  // slot toggles: `ListRows` takes no props, so `shouldUpdateComponent` says
+  // no, and the provided computed's deps are rows/columns/options. The proxy
+  // puts the read inside `ListRow`'s render effect, where the tick reaches it.
+  it('ListView reaches descendants with #cell added after mount', () => {
+    const show = ref(false)
+    // Hoisted: fresh array literals per render would change the provided
+    // computed's deps and re-render the descendants anyway, which passes with
+    // the bug present. The slot toggle has to be the only thing that moves.
+    const columns = [{ label: 'Name', key: 'name' }]
+    const rows = [{ id: 1, name: 'John Doe' }]
+
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              ListView,
+              { class: 'h-[250px]', columns, rows, rowKey: 'id' },
+              show.value
+                ? { cell: () => h('span', { 'data-cy': 'mark' }, 'Custom') }
+                : {},
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('[data-cy="mark"]').should('not.exist')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('[data-cy="mark"]').should('exist')
+
+    cy.get('[data-cy="toggle"]').click()
     cy.get('[data-cy="mark"]').should('not.exist')
   })
 })
