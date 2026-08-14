@@ -173,7 +173,7 @@
     "highlight.js": "^11.11.1",
     "idb-keyval": "^6.2.0",
     "lowlight": "^3.3.0",
-    "lucide-static": "^1.16.0",
+    "lucide-static": "^1.31.0",
     "magic-string": "^0.30.21",
     "marked": "^15.0.12",
     "ora": "5.4.1",
