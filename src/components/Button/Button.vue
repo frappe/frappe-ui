@@ -19,6 +19,7 @@ import { RouterLink } from 'vue-router'
 import Spinner from '../Spinner/Spinner.vue'
 import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
+import { useSlotTick } from '../../composables/useSlotTick'
 import { buttonProps, type ThemeVariant } from './types'
 
 export default defineComponent({
@@ -36,6 +37,8 @@ export default defineComponent({
     suffix: void
   }>,
   setup(props, { attrs, slots, expose }) {
+    const slotTick = useSlotTick()
+
     watchEffect(() => {
       warnUnsupportedIconString('Button', 'icon', props.icon)
       warnUnsupportedIconString('Button', 'iconLeft', props.iconLeft)
@@ -51,18 +54,21 @@ export default defineComponent({
 
     // Render as an icon button when the default slot is exactly one lucide-* icon.
     const hasLucideIconInDefaultSlot = computed(() => {
+      slotTick.value
       const content = slots.default?.()
       if (!Array.isArray(content)) return false
       const name = (content[0]?.type as { name?: string })?.name
       return typeof name === 'string' && name.startsWith('lucide-')
     })
 
-    const isIconButton = computed(
-      () =>
+    const isIconButton = computed(() => {
+      slotTick.value
+      return (
         Boolean(props.icon) ||
         Boolean(slots.icon) ||
-        hasLucideIconInDefaultSlot.value,
-    )
+        hasLucideIconInDefaultSlot.value
+      )
+    })
 
     const slotClasses = computed(
       () => ({ xs: 'h-3.5', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],

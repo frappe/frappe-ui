@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
 import { computed, useSlots, useTemplateRef, type CSSProperties } from 'vue'
+import { useSlotTick } from '../../composables/useSlotTick'
 import PageHeaderBase from './PageHeaderBase.vue'
 import type { PageHeaderMobileProps } from './types'
 
@@ -52,8 +53,15 @@ defineSlots<{
 }>()
 
 const slots = useSlots()
-const hasPrefixSlot = computed(() => Boolean(slots.prefix))
-const hasSuffixSlot = computed(() => Boolean(slots.suffix))
+const slotTick = useSlotTick()
+const hasPrefixSlot = computed(() => {
+  slotTick.value
+  return Boolean(slots.prefix)
+})
+const hasSuffixSlot = computed(() => {
+  slotTick.value
+  return Boolean(slots.suffix)
+})
 
 // The title stays visually centered regardless of how wide the prefix/suffix
 // controls are: inset it symmetrically by the widest control.

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useSlotTick } from '../../../composables/useSlotTick'
 import { Icon } from '../../Icon'
 import { browserTabCardClasses, tabRadiusClasses } from './styles'
 import type { PillProps } from './pillTypes'
@@ -17,6 +18,7 @@ const slots = defineSlots<{
   default?: () => any
   suffix?: () => any
 }>()
+const slotTick = useSlotTick()
 
 // `icon` means icon-only intent (label, if provided, is rendered as
 // sr-only). `iconLeft` is an accent icon next to a visible label. Trailing
@@ -24,7 +26,10 @@ const slots = defineSlots<{
 // A default slot cancels icon-only intent: the caller is supplying visible
 // label content, so hiding it would drop what they passed. `TabTrigger` reads
 // the same rule for the `aria-label`/`title` it derives from `label`.
-const isIconOnly = computed(() => Boolean(props.icon) && !slots.default)
+const isIconOnly = computed(() => {
+  slotTick.value
+  return Boolean(props.icon) && !slots.default
+})
 
 const sizeClasses = computed(() => {
   const isSm = props.size === 'sm'

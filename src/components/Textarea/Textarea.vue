@@ -50,6 +50,7 @@ import { computed, ref, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useSlotTick } from '../../composables/useSlotTick'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -70,6 +71,7 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
+const slotTick = useSlotTick()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 defineSlots<{
@@ -100,6 +102,7 @@ const {
 })
 
 const hasLabeling = computed(() => {
+  slotTick.value
   return Boolean(
     props.label || slots.label || rendersDescription.value || hasError.value,
   )
