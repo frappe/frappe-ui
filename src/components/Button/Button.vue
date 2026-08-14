@@ -52,10 +52,18 @@ export default defineComponent({
     // group's skip-delay applies to this button instead of a private provider.
     const parentTooltipProvider = injectTooltipProviderContext(null)
 
+    // Re-reads the tick on every update, but its value is the slot function
+    // itself, so it only propagates when the slot actually changes. Without
+    // this gate the check below would materialize a throwaway vnode tree on
+    // every render of every text button.
+    const defaultSlot = computed(() => {
+      slotTick.value
+      return slots.default
+    })
+
     // Render as an icon button when the default slot is exactly one lucide-* icon.
     const hasLucideIconInDefaultSlot = computed(() => {
-      slotTick.value
-      const content = slots.default?.()
+      const content = defaultSlot.value?.()
       if (!Array.isArray(content)) return false
       const name = (content[0]?.type as { name?: string })?.name
       return typeof name === 'string' && name.startsWith('lucide-')
