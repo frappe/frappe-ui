@@ -8,7 +8,6 @@ export default {
     div.id = 'lucide-sprite'
     div.style.display = 'none'
     div.innerHTML = sprite
-
     document.body.prepend(div)
   },
 }
