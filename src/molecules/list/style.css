@@ -1,18 +1,15 @@
 /* Structural rules for the list family. Geometry only — colors and type live
  * in the components as semantic-token classes.
  *
- * `--list-columns` and `--list-gap` are public styling hooks: apps override
- * them with plain (responsive) classes on <List>. Every rule that sets a
- * hook default is wrapped in :where() so any consumer class wins on
- * specificity, regardless of stylesheet order. */
-
-:where([data-slot='list']) {
-  /* --list-columns-default carries the `columns` prop (inline style on the
-   * List). The indirection keeps --list-columns itself free for class
-   * overrides like `max-sm:list-cols-[auto_minmax(0,1fr)_auto]` (the
-   * tailwind preset's sugar over the var). */
-  --list-columns: var(--list-columns-default, auto minmax(0, 1fr) auto);
-}
+ * `--list-columns`, `--list-gap` and `--list-row-padding-x` are the public
+ * styling hooks: apps set them with plain (responsive) classes on <List>, or
+ * on any ancestor to theme every list in a subtree — custom properties
+ * inherit, and every hook default lives in a var() fallback at its use site,
+ * never as a declaration on an element (which would shadow inherited values).
+ * Every rule a consumer may override is wrapped in :where() so any consumer
+ * class wins on specificity, regardless of stylesheet order. Vars with a
+ * `--_list` prefix are internal carriers, not API — they can change in any
+ * release. */
 
 /* Attribute (not :where) specificity, so element-level resets — Tailwind
  * preflight's `button { padding: 0 }` for button rows — don't beat the
@@ -20,7 +17,16 @@
 [data-slot='list-row'],
 [data-slot='list-header'] {
   display: grid;
-  grid-template-columns: var(--list-columns);
+  /* --_list-columns-default carries the `columns` prop (inline style on the
+   * List). The indirection keeps --list-columns itself free for consumer
+   * overrides — a class on the List like
+   * `max-sm:list-cols-[auto_minmax(0,1fr)_auto]` (the tailwind preset's
+   * sugar over the var) or a value inherited from an ancestor — so a
+   * consumer value always beats the prop. */
+  grid-template-columns: var(
+    --list-columns,
+    var(--_list-columns-default, auto minmax(0, 1fr) auto)
+  );
   column-gap: var(--list-gap, 0.5rem);
   align-items: center;
   text-align: start;
@@ -32,7 +38,7 @@
  * padding. The checkbox itself is an overlay in the padding area. */
 [data-slot='list-row'] {
   padding-inline-start: calc(
-    var(--list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
+    var(--_list-checkbox-width, 0px) + var(--_list-row-pad, 0px)
   );
   padding-inline-end: var(--_list-row-pad, 0px);
 }
@@ -48,7 +54,7 @@
  * the padding-inline-start calc below. */
 :where([data-slot='list-header']) {
   padding-inline-start: calc(
-    var(--list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
+    var(--_list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
   );
   padding-inline-end: var(--list-row-padding-x, 0px);
 }
@@ -58,7 +64,7 @@
  * it groups. In :where() so consumer classes win. */
 :where([data-slot='list-group-header']) {
   padding-inline-start: calc(
-    var(--list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
+    var(--_list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
   );
   padding-inline-end: var(--list-row-padding-x, 0px);
 }
@@ -72,7 +78,7 @@
 }
 
 :where([data-slot='list-row']) {
-  height: var(--list-row-height, auto);
+  height: var(--_list-row-height, auto);
   /* padding animates the checkbox-column reveal; background-color fades the
    * hover surface (a transition-colors class here would clobber the padding
    * transition, so both live in one declaration). */

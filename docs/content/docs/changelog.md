@@ -9,6 +9,28 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `frappe-ui/list` — CSS styling-hook contract finalized (behavior change)
+
+The list family's public CSS hooks for v1 are exactly `--list-columns`,
+`--list-gap` and `--list-row-padding-x` (with the preset sugar
+`list-cols-[…]`, `list-gap-*`, `list-row-px-*`). Two observable changes while
+freezing them:
+
+- **Hooks now work from any ancestor.** `--list-columns` previously applied
+  only when set on the `List` element itself; a value inherited from a wrapper
+  was silently shadowed. All three hooks now resolve through `var()` fallbacks
+  at the use site, so one declaration on a wrapper themes every list in the
+  subtree — and a consumer class still beats the `columns` prop.
+- **Internal vars are renamed with a `--_list` prefix** and are explicitly not
+  API: `--list-columns-default` → `--_list-columns-default`,
+  `--list-checkbox-width` → `--_list-checkbox-width`, `--list-row-height` →
+  `--_list-row-height`. None was documented; anything targeting the old names
+  breaks. Row height is the `rowHeight` prop — overriding the var would desync
+  `virtual` windowing, so it is deliberately not a hook.
+
+The conventions behind this (and for every future component with CSS hooks)
+are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
+
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 
 `CommandPalette` and `CommandPaletteItem` leave the root export. The family is

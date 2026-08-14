@@ -80,9 +80,12 @@ composable, `useVirtualRows`, is exported for exotic cases.
 
 ## Styling hooks
 
-`--list-columns` and `--list-gap` (default `0.5rem`) are public hooks on the
-List — override them with plain classes, responsively if needed. People-style
-lists collapse to a feed on mobile with no dedicated API:
+`--list-columns`, `--list-gap` (default `0.5rem`) and `--list-row-padding-x` are
+the list's public CSS hooks. Set them with plain (responsive) classes on the
+`List` — or on any ancestor, to theme every list in a subtree. Their defaults
+live in `var()` fallbacks, so a consumer value always wins, even over the
+`columns` prop — which is how people-style lists collapse to a feed on mobile
+with no dedicated API:
 
 ```vue
 <List
@@ -93,12 +96,28 @@ lists collapse to a feed on mobile with no dedicated API:
 
 with `max-sm:hidden` on the numeric cells and the `ListHeader`.
 
-For `--list-gap` and `--list-row-padding-x` (the content inset shared by
-interactive rows — default `0.75rem` — and the column header, so setting it on
-the `List` aligns both), the frappe-ui Tailwind preset ships spacing-scale
-utilities — `list-gap-*` and `list-row-px-*` — so the usual authoring form is
-`max-sm:list-gap-3 sm:list-gap-4` rather than raw `[--list-gap:0.75rem]`
-properties. Both forms hit the same CSS vars.
+`--list-row-padding-x` is the inline content inset, and its default is
+asymmetric on purpose: interactive rows get `0.75rem` so the rounded hover
+surface clears their content, while the header and group headers sit flush at
+`0` — a header can't tell whether its sibling rows are interactive. Setting the
+hook gives both sides the same value. A column-mode list with clickable rows and
+a header should always set it (`list-row-px-3`) so the header labels stay
+aligned with the cell text below them.
+
+For `--list-gap` and `--list-row-padding-x`, the frappe-ui Tailwind preset ships
+spacing-scale utilities — `list-gap-*` and `list-row-px-*` — so the usual
+authoring form is `max-sm:list-gap-3 sm:list-gap-4` rather than raw
+`[--list-gap:0.75rem]` properties. `list-cols-[…]` is the same sugar for
+`--list-columns`, arbitrary values only — track templates have no meaningful
+scale. Both forms hit the same CSS vars.
+
+The prop/hook split follows one rule: knobs that drive behavior are props
+(`columns` also flips the divider default, `rowHeight` also feeds `virtual`
+windowing), knobs that are pure geometry are CSS hooks. Row height is
+deliberately a prop alone — a per-breakpoint height var would silently desync
+virtual windowing; in non-virtual lists, set responsive heights with height
+classes on the rows. Vars with a `--_list` prefix are internal carriers, not API
+— they can change in any release.
 
 Cells (and plain header cells) are flex containers with `items-center` — align
 content with justify utilities (`class="justify-end"` for numeric columns),
@@ -107,10 +126,11 @@ responsively if needed. For sortable numeric headers, use
 and the label stays flush with the column edge.
 
 Slots for CSS targeting:
-`data-slot="list | list-header | list-header-cell | list-row | list-cell | list-row-checkbox | list-divider"`.
-State: `data-state="selected"` (checkbox selection), `data-active` (+
-`aria-current`, the `v-model:active` row) and `data-interactive` on rows,
-`data-sort` on the active header cell.
+`data-slot="list | list-header | list-header-cell | list-header-checkbox | list-row | list-cell | list-row-checkbox | list-group | list-group-header | list-divider"`.
+Slots not listed here are internal and may change. State:
+`data-state="selected"` (checkbox selection), `data-active` (+ `aria-current`,
+the `v-model:active` row) and `data-interactive` on rows, `data-sort` on the
+active header cell.
 
 Accessibility follows header presence: `role="list"` / `"listitem"` without a
 `ListHeader`, `table` / `row` / `columnheader` / `cell` (plus `aria-sort`) with

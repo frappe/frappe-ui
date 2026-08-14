@@ -590,6 +590,147 @@ describe('List (column mode)', () => {
   })
 })
 
+describe('List (styling hooks)', () => {
+  // The v1 CSS-var contract (ADR-0017): --list-columns, --list-gap and
+  // --list-row-padding-x are the public hooks. Defaults live in var()
+  // fallbacks at the use sites, so a consumer value — a class on the List or
+  // a declaration inherited from any ancestor — always beats the built-in
+  // defaults AND the props.
+
+  it('lets a --list-columns class beat the columns prop', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['50px', '50px', '50px'],
+            // The tailwind arbitrary-property form consumers author
+            // (list-cols-[…] compiles to the same declaration).
+            class: '[--list-columns:60px_90px_120px]',
+          },
+          () => [feedRow('1')],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+        '60px 90px 120px',
+      )
+    })
+  })
+
+  it('applies hooks inherited from an ancestor, over props and defaults', () => {
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style:
+              '--list-columns: 70px 110px 130px; --list-gap: 20px; --list-row-padding-x: 24px',
+          },
+          [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListHeader, () => [
+                h(ListHeaderCell, () => 'A'),
+                h(ListHeaderCell, () => 'B'),
+                h(ListHeaderCell, () => 'C'),
+              ]),
+              feedRow('1', { onClick: () => {} }),
+            ]),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      const style = getComputedStyle($row[0])
+      expect(style.gridTemplateColumns).to.equal('70px 110px 130px')
+      expect(style.columnGap).to.equal('20px')
+    })
+    // One --list-row-padding-x value lands on both sides: the interactive
+    // row's content inset and the header's, so they can't drift.
+    cy.get('[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+  })
+
+  it('defaults the row inset to 12px and the header to flush until the hook is set', () => {
+    // The documented asymmetric default: interactive rows carry a 0.75rem
+    // hover-surface inset, the header can't know its rows are interactive and
+    // stays at 0 — the consumer aligns both by declaring the hook once.
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(ListHeaderCell, () => 'A'),
+            h(ListHeaderCell, () => 'B'),
+            h(ListHeaderCell, () => 'C'),
+          ]),
+          feedRow('1', { onClick: () => {} }),
+          feedRow('2'),
+        ]),
+    })
+    // Also pins the preflight escape: the interactive row is a <button>, and
+    // preflight's `button { padding: 0 }` must not eat the inset (the padding
+    // rule deliberately keeps attribute specificity instead of :where()).
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+  })
+
+  it('drives the preset sugar utilities through the same vars', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['minmax(0,1fr)', '10rem'],
+            // list-gap-4 → --list-gap: 1rem; list-row-px-3 → 0.75rem.
+            class: 'list-gap-4 list-row-px-3',
+          },
+          () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+            ]),
+            feedRow('1', { onClick: () => {} }),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]')
+      .should('have.css', 'column-gap', '16px')
+      .and('have.css', 'padding-inline-start', '12px')
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+  })
+
+  it('applies rowHeight to every row', () => {
+    cy.mount({
+      render: () => h(List, { rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+  })
+})
+
 describe('ListRows (virtual)', () => {
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
