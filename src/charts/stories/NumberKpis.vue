@@ -13,6 +13,7 @@ const cards: NumberCardProps[] = [
   {
     title: 'Net revenue',
     value: 220200,
+    target: 250000,
     prefix: '$',
     compact: true,
     delta: 5.1,

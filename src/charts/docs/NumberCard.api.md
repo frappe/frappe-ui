@@ -54,10 +54,22 @@
     type: 'string'
   },
   {
+    name: 'target',
+    description: 'What the reading is measured against, printed as a muted ` / target` in the value\'s own formatting.',
+    required: false,
+    type: 'number | string'
+  },
+  {
     name: 'delta',
     description: 'Change against the comparison period. Sign drives the arrow.',
     required: false,
     type: 'number | null'
+  },
+  {
+    name: 'deltaPrefix',
+    description: 'Unit printed before the delta, e.g. `\'$\'`.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'deltaSuffix',

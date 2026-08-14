@@ -48,13 +48,15 @@ export function formatCardValue(
  * `-3.1%` next to a down arrow would say it twice.
  */
 export function formatCardDelta(
-  config: Pick<NumberCardConfig, 'deltaSuffix'>,
+  config: Pick<NumberCardConfig, 'deltaPrefix' | 'deltaSuffix'>,
   delta: number | null | undefined,
 ): string {
   if (!isPresent(delta)) return ''
-  return `${formatValue(Math.abs(delta), undefined, true)}${
-    config.deltaSuffix ?? ''
-  }`
+  return `${config.deltaPrefix ?? ''}${formatValue(
+    Math.abs(delta),
+    undefined,
+    true,
+  )}${config.deltaSuffix ?? ''}`
 }
 
 function isPresent(value: number | null | undefined): value is number {
