@@ -9,6 +9,7 @@ export type {
   ContextMenuItemSlots,
   ContextMenuOption,
   ContextMenuOptions,
+  ContextMenuEmits,
   ContextMenuProps,
   ContextMenuSlotFn,
   ContextMenuSlotProps,
