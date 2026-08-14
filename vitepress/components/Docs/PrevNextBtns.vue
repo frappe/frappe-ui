@@ -2,7 +2,11 @@
 import { computed } from 'vue'
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
-import { isActiveLink, type SidebarItem } from './sidebarList'
+import {
+  isActiveLink,
+  type SidebarItem,
+  type SidebarSection,
+} from './sidebarList'
 
 import LucideLeft from '~icons/lucide/arrow-left'
 import LucideRight from '~icons/lucide/arrow-right'
@@ -12,10 +16,14 @@ const { frontmatter, site } = useData()
 
 const visible = computed(() => frontmatter.value.nextprev ?? true)
 
-// A configured sidebar entry is either a section holding `items` or a bare
-// link; the flattened list holds only the links.
-const linkInfos = state.sidebarList.reduce<SidebarItem[]>((acc, cur) => {
-  cur.items ? acc.push(...cur.items) : acc.push(cur as unknown as SidebarItem)
+// `state.sidebarList` is declared as `SidebarSection[]`, but Sidebar.vue fills
+// it from `theme.sections ?? theme.sidebar`, and VitePress' own `sidebar` type
+// admits a flat list of links with no `items`. The cast is on that one
+// declaration being too narrow; the branch below is the runtime shape.
+const entries = state.sidebarList as Array<SidebarSection | SidebarItem>
+
+const linkInfos = entries.reduce<SidebarItem[]>((acc, cur) => {
+  'items' in cur ? acc.push(...cur.items) : acc.push(cur)
   return acc
 }, [])
 
