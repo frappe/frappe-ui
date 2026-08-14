@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useSlotTick } from '../../composables/useSlotTick'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { SelectionExposed } from '../shared/selection/types'
@@ -64,6 +65,7 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const attrs = useAttrs()
 const slots = useSlots()
+const slotTick = useSlotTick()
 
 const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
 
@@ -104,6 +106,7 @@ const {
 })
 
 const hasLabeling = computed(() => {
+  slotTick.value
   return Boolean(
     props.label ||
     props.description ||

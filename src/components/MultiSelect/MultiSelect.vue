@@ -12,6 +12,7 @@ import Button from '../Button/Button.vue'
 import { LoadingIndicator } from '../LoadingIndicator'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useSlotTick } from '../../composables/useSlotTick'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -69,6 +70,7 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 const emit = defineEmits<MultiSelectEmits>()
 const attrs = useAttrs()
 const slots = useSlots()
+const slotTick = useSlotTick()
 
 const model = defineModel<Array<string | number>>({ default: () => [] })
 const open = defineModel<boolean>('open', { default: false })
@@ -102,6 +104,7 @@ const {
 })
 
 const hasLabeling = computed(() => {
+  slotTick.value
   return Boolean(
     props.label ||
     props.description ||

@@ -170,6 +170,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useSlotTick } from '../composables/useSlotTick'
 import {
   deltaDirection,
   deltaTone,
@@ -199,6 +200,7 @@ import type { NumberCardProps, NumberCardSlots } from './types'
 const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
 const slots = defineSlots<NumberCardSlots>()
+const slotTick = useSlotTick()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())
@@ -219,18 +221,23 @@ const toneClass = computed(
   () => TONE_CLASSES[deltaTone(props.delta, props.negativeIsBetter)],
 )
 const formattedDelta = computed(() => formatCardDelta(props, props.delta))
-const showEmptySlot = computed(() => isEmpty.value && Boolean(slots.empty))
+const showEmptySlot = computed(() => {
+  slotTick.value
+  return isEmpty.value && Boolean(slots.empty)
+})
 // Only over a reading. The em dash a card with no value prints is not a number
 // the color says anything about, and the loading skeleton is not one either.
 const valueStyle = computed(() =>
   props.color && !isEmpty.value ? { color: props.color } : undefined,
 )
-const showDeltaRow = computed(
-  () =>
+const showDeltaRow = computed(() => {
+  slotTick.value
+  return (
     Boolean(formattedDelta.value) ||
     Boolean(props.deltaCaption) ||
-    Boolean(slots.caption),
-)
+    Boolean(slots.caption)
+  )
+})
 
 // `preserveAspectRatio="none"` makes the horizontal unit meaningless — fine for
 // a line with no axis — so the geometry is computed once at any card width.

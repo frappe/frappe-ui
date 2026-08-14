@@ -69,6 +69,7 @@
 import { computed, useSlots } from 'vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useSlotTick } from '../../composables/useSlotTick'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -82,6 +83,7 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 
 const model = defineModel<boolean>({ default: false })
 const slots = useSlots()
+const slotTick = useSlotTick()
 
 defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
@@ -164,6 +166,7 @@ const switchLabelClasses = computed(() => {
 const controlPosition = computed(() => props.controlPosition ?? 'end')
 
 const switchGroupClasses = computed(() => {
+  slotTick.value
   const hasLabel = props.label || slots.label
   const hasDescription = props.description || slots.description
   if (!hasLabel && !hasDescription) return undefined
@@ -213,6 +216,7 @@ const errorIndentClasses = computed(() => {
 // so the total gap matches the other components (~4 px).
 // Settings-style rows (hasDescription) have no inner padding so keep mt-1.
 const errorSpacingClass = computed(() => {
+  slotTick.value
   const hasDescription = props.description || slots.description
   // A description sits tight under the label; error-only rows keep a small gap.
   if (hasDescription) return 'mt-0.5'

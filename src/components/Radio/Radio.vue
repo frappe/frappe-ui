@@ -33,6 +33,7 @@
 
 <script lang="ts" setup>
 import { computed, inject, useSlots } from 'vue'
+import { useSlotTick } from '../../composables/useSlotTick'
 // See RadioGroup.vue — AcceptableValue omits `boolean` at the type level only.
 import { RadioGroupItem, type AcceptableValue } from 'reka-ui'
 import { useId } from '../../utils/useId'
@@ -44,6 +45,7 @@ const props = withDefaults(defineProps<RadioProps>(), {
 })
 
 const slots = useSlots()
+const slotTick = useSlotTick()
 
 defineSlots<{
   /** Overrides the rendered label content. */
@@ -69,9 +71,10 @@ const fallbackId = useId()
 const inputId = computed(() => props.id ?? fallbackId)
 const labelId = computed(() => `${inputId.value}-label`)
 const descriptionId = computed(() => `${inputId.value}-description`)
-const hasDescription = computed(() =>
-  Boolean(props.description || slots.description),
-)
+const hasDescription = computed(() => {
+  slotTick.value
+  return Boolean(props.description || slots.description)
+})
 
 // The whole row is the control: reka-ui renders it as a `role="radio"` button,
 // so hover, focus and the click target cover the label and description without
