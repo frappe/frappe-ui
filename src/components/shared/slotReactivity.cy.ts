@@ -2,7 +2,9 @@ import { defineComponent, h, ref } from 'vue'
 import type { Component } from 'vue'
 import Alert from '../Alert/Alert.vue'
 import Button from '../Button/Button.vue'
+import Combobox from '../Combobox/Combobox.vue'
 import PageHeaderMobile from '../PageHeader/PageHeaderMobile.vue'
+import PickerShell from './picker/PickerShell.vue'
 import Pill from './tabs/Pill.vue'
 import SidebarCard from '../Sidebar/SidebarCard.vue'
 import Textarea from '../Textarea/Textarea.vue'
@@ -113,6 +115,23 @@ const cases: Case[] = [
     },
   },
   {
+    // Button mode moves the search input into the popover, so at rest there
+    // is no `role="combobox"` input to type into.
+    name: 'Combobox switches to button mode on #trigger',
+    component: Combobox,
+    props: { options: ['Apple', 'Mango'] },
+    slot: 'trigger',
+    content: () => h('button', { 'data-cy': 'mark' }, 'Pick'),
+    filled: () => {
+      cy.get('[data-cy="mark"]').should('exist')
+      cy.get('[role="combobox"]').should('not.exist')
+    },
+    empty: () => {
+      cy.get('[data-cy="mark"]').should('not.exist')
+      cy.get('[role="combobox"]').should('exist')
+    },
+  },
+  {
     name: 'PageHeaderMobile reserves the prefix inset on #prefix',
     component: PageHeaderMobile,
     props: { title: 'Inbox' },
@@ -161,4 +180,58 @@ describe('slot-derived computeds follow the slots', () => {
       c.empty()
     })
   }
+
+  // `hasCustomTrigger` is not observable in the DOM — the trigger itself
+  // renders from `$slots` in the template, which was always reactive. What it
+  // gates is the `requestFocus` emit: a custom trigger has no typing context,
+  // so focus should jump into the popover content on open.
+  it('PickerShell asks for content focus once #trigger fills', () => {
+    const Harness = defineComponent({
+      props: { onRequestFocus: { type: Function, required: true } },
+      setup(props) {
+        const show = ref(false)
+        const open = ref(false)
+
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              'button',
+              { 'data-cy': 'open', onClick: () => (open.value = !open.value) },
+              'Open',
+            ),
+            h(
+              PickerShell,
+              {
+                open: open.value,
+                'onUpdate:open': (v: boolean) => (open.value = v),
+                onRequestFocus: () => props.onRequestFocus(),
+              },
+              show.value
+                ? { trigger: () => h('button', { 'data-cy': 'mark' }, 'Pick') }
+                : {},
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness, { props: { onRequestFocus: cy.spy().as('requestFocus') } })
+
+    // Default trigger: opening keeps focus on the TextInput for typing.
+    cy.get('[data-cy="open"]').click()
+    cy.get('@requestFocus').should('not.have.been.called')
+    cy.get('[data-cy="open"]').click()
+
+    // Custom trigger added after mount.
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('[data-cy="open"]').click()
+    cy.get('@requestFocus').should('have.been.calledOnce')
+  })
 })
