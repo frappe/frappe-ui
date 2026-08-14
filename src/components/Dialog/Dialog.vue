@@ -193,11 +193,11 @@ const props = withDefaults(defineProps<DialogProps>(), {
 
 const emit = defineEmits<DialogEmits>()
 
-const slots = defineSlots<DialogSlots>()
+defineSlots<DialogSlots>()
 
 const portalTarget = usePortalTarget()
 
-const allSlots = useReactiveSlots()
+const slots = useReactiveSlots<DialogSlots>()
 
 const isDismissible = computed(() => props.dismissible !== false)
 
@@ -345,7 +345,7 @@ const isSingleActionFullWidth = computed(() => {
 // is title/slot-driven only — the close button lives independently.
 const showHeader = computed(() => {
   if (props.bare) return false
-  if (allSlots.title) return true
+  if (slots.title) return true
   if (props.title) return true
   return false
 })
