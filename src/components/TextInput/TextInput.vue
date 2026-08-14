@@ -76,6 +76,7 @@ import { computed, ref, useAttrs, useSlots } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useSlotTick } from '../../composables/useSlotTick'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -111,6 +112,11 @@ defineSlots<{
 
 const attrs = useAttrs()
 
+// The padding and the wrapper below are read off `slots`, which is not
+// reactive. See `useSlotTick`: a `#prefix` behind a `v-if` renders over the
+// text without this, because the input keeps its slot-less padding.
+const slotTick = useSlotTick()
+
 const attrsWithoutClassStyle = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
@@ -136,6 +142,7 @@ const {
 })
 
 const hasLabeling = computed(() => {
+  slotTick.value
   return Boolean(
     props.label ||
     props.description ||
@@ -167,6 +174,8 @@ const textColor = computed(() => {
 })
 
 const inputClasses = computed(() => {
+  slotTick.value
+
   let sizeClasses = {
     sm: 'text-base rounded-4 h-7',
     md: 'text-base rounded-4 h-8',
