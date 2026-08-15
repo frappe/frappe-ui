@@ -73,7 +73,7 @@ defineOptions({
 
 const openModel = defineModel<boolean>('open', { default: false })
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<DropdownSlots>()
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],

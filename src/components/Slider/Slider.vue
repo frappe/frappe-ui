@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<SliderProps>(), {
 const emit = defineEmits<SliderEmits>()
 /** The current slider value (controlled). */
 const model = defineModel<SliderValue>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const attrs = useAttrs()
 
@@ -85,7 +85,7 @@ const rootAttrs = computed(() => {
   )
 })
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */

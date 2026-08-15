@@ -94,9 +94,9 @@ const props = withDefaults(defineProps<TextInputProps>(), {
 })
 
 const emit = defineEmits<TextInputEmits>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Content rendered before the input (left side) */
   prefix?: () => any
 

@@ -58,7 +58,7 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
 })
 
 const emit = defineEmits<MultiEmailInputEmits>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<MultiEmailInputSlots>()
 const attrs = useAttrs()
 
 // `portalTo` stays undefaulted on purpose: a `'body'` default outranks the

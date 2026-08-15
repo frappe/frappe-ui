@@ -69,7 +69,12 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<MultiSelectEmits>()
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<MultiSelectSlots>()
+
+// `MultiSelectResults` dispatches on dynamic names (`item-${slot}`), which the
+// enumerated `MultiSelectSlots` cannot express. Same object, so reads still go
+// through the proxy.
+const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
 const model = defineModel<Array<string | number>>({ default: () => [] })
 const open = defineModel<boolean>('open', { default: false })
@@ -533,7 +538,7 @@ defineSlots<MultiSelectSlots>()
                 :hide-search="hideSearch"
                 :empty-text="emptyText"
                 :show-empty="showEmpty"
-                :slot-fns="slots"
+                :slot-fns="slotFns"
                 :all-options="allOptions"
               />
 

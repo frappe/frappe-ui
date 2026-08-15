@@ -148,12 +148,12 @@ const props = withDefaults(defineProps<RatingProps>(), {
 })
 
 const model = defineModel<number>({ default: 0 })
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const attrs = useAttrs()
 
 const isDisabled = computed(() => props.disabled)
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */

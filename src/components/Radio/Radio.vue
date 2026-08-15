@@ -44,9 +44,9 @@ const props = withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. */
   label?: () => any
   /** Overrides the rendered description content. */

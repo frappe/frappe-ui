@@ -70,10 +70,10 @@ const props = withDefaults(defineProps<TextareaProps>(), {
 
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
 

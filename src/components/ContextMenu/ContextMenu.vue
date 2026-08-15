@@ -49,7 +49,7 @@ const props = withDefaults(defineProps<ContextMenuProps>(), {
 
 defineSlots<ContextMenuSlots>()
 
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<ContextMenuSlots>()
 
 const portalTarget = usePortalTarget()
 

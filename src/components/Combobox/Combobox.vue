@@ -80,7 +80,12 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<ComboboxSlots>()
+
+// `ComboboxResults` dispatches on dynamic names (`item-${slot}`), which the
+// enumerated `ComboboxSlots` cannot express. Same object, so reads still go
+// through the proxy.
+const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
 const model = defineModel<ComboboxOptionValue | null>({ default: null })
 const open = defineModel<boolean>('open', { default: false })
@@ -729,7 +734,7 @@ defineSlots<ComboboxSlots>()
                   :loading="loading"
                   :empty-text="emptyText"
                   :show-empty="showEmpty"
-                  :slot-fns="slots"
+                  :slot-fns="slotFns"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
                 />
