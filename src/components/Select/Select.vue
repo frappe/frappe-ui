@@ -64,7 +64,7 @@ const props = withDefaults(defineProps<SelectProps>(), {
 const portalTarget = usePortalTarget(() => props.portalTo)
 
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<SelectSlots>()
 
 const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
 

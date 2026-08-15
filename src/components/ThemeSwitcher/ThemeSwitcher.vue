@@ -106,7 +106,7 @@ const emit = defineEmits<{
   'update:modelValue': [theme: ColorScheme]
 }>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the heading content. */
   label?: () => any
   /** Overrides the helper-text content. */
@@ -133,7 +133,7 @@ const selected = computed<ColorScheme>({
   },
 })
 
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const headingId = useId()
 const showLabel = computed(() => Boolean(props.label || slots.label))
 const showDescription = computed(() =>

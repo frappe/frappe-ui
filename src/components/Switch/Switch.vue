@@ -82,9 +82,9 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 })
 
 const model = defineModel<boolean>({ default: false })
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */

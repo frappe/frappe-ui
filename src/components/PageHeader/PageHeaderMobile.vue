@@ -43,7 +43,7 @@ import type { PageHeaderMobileProps } from './types'
 
 defineProps<PageHeaderMobileProps>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** A control leading the centered title — usually a `PageHeaderBackButton`. */
   prefix?: () => any
   /** The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`. */
@@ -52,7 +52,7 @@ defineSlots<{
   suffix?: () => any
 }>()
 
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const hasPrefixSlot = computed(() => Boolean(slots.prefix))
 const hasSuffixSlot = computed(() => Boolean(slots.suffix))
 

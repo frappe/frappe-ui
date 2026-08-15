@@ -63,7 +63,7 @@ const props = withDefaults(defineProps<CodeEditorProps>(), {
   size: 'md',
 })
 const emit = defineEmits<CodeEditorEmits>()
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
@@ -71,7 +71,7 @@ defineSlots<{
 }>()
 
 const attrs = useAttrs()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const {
   labelId,

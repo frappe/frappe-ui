@@ -68,9 +68,9 @@ const props = withDefaults(defineProps<RadioGroupProps>(), {
 })
 
 const model = defineModel<RadioValue>()
-const slots = useReactiveSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** The `<Radio>` options. */
   default?: () => any
   /** Overrides the rendered group heading. Receives `{ required }`. */
