@@ -13,7 +13,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 The list family's public CSS hooks for v1 are exactly `--list-columns`,
 `--list-gap` and `--list-row-padding-x` (with the preset sugar
-`list-cols-[…]`, `list-gap-*`, `list-row-px-*`). Two observable changes while
+`list-cols-[…]`, `list-gap-*`, `list-row-px-*`). The observable changes while
 freezing them:
 
 - **Hooks now work from any ancestor.** `--list-columns` previously applied
