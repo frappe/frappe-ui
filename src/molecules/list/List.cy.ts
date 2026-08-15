@@ -635,6 +635,7 @@ describe('List (styling hooks)', () => {
                 h(ListHeaderCell, () => 'C'),
               ]),
               feedRow('1', { onClick: () => {} }),
+              feedRow('2'),
             ]),
           ],
         ),
@@ -644,9 +645,14 @@ describe('List (styling hooks)', () => {
       expect(style.gridTemplateColumns).to.equal('70px 110px 130px')
       expect(style.columnGap).to.equal('20px')
     })
-    // One --list-row-padding-x value lands on both sides: the interactive
-    // row's content inset and the header's, so they can't drift.
-    cy.get('[data-slot=list-row]').should(
+    // One --list-row-padding-x value lands everywhere — interactive row,
+    // static row, and header — so none of them can drift.
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('div[data-slot=list-row]').should(
       'have.css',
       'padding-inline-start',
       '24px',
@@ -660,8 +666,9 @@ describe('List (styling hooks)', () => {
 
   it('defaults the row inset to 12px and the header to flush until the hook is set', () => {
     // The documented asymmetric default: interactive rows carry a 0.75rem
-    // hover-surface inset, the header can't know its rows are interactive and
-    // stays at 0 — the consumer aligns both by declaring the hook once.
+    // hover-surface inset; static rows and the header (which can't know
+    // whether its rows are interactive) stay flush at 0 — the consumer aligns
+    // everything by declaring the hook once.
     cy.mount({
       render: () =>
         h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
@@ -728,6 +735,47 @@ describe('List (styling hooks)', () => {
       render: () => h(List, { rowHeight: 48 }, () => [feedRow('1')]),
     })
     cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+  })
+
+  it('contains prop carriers to their own list; public hooks cross into nested lists', () => {
+    // The outer list's columns/selectable/rowHeight ride internal --_list-*
+    // carriers, which reset at every list root — a nested list that omits
+    // those props falls back to its own defaults instead of inheriting the
+    // outer geometry. Public hooks (--list-gap here) keep crossing by design.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-gap: 20px' }, [
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              selectable: true,
+              rowHeight: 64,
+            },
+            () => [
+              feedRow('1'),
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list] [data-slot=list] [data-slot=list-row]').should(
+      ($row) => {
+        const style = getComputedStyle($row[0])
+        // Feed template, not the outer 50px tracks.
+        expect(style.gridTemplateColumns).to.not.equal('50px 50px 50px')
+        // No leaked checkbox column (32px) and no hover inset inherited from
+        // the outer selectable list or its interactive host row.
+        expect(style.paddingInlineStart).to.equal('0px')
+        expect(style.paddingInlineEnd).to.equal('0px')
+        // Not the outer fixed rowHeight.
+        expect(style.height).to.not.equal('64px')
+        // The public hook crossed both list boundaries.
+        expect(style.columnGap).to.equal('20px')
+      },
+    )
   })
 })
 

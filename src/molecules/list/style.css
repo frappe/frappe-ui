@@ -11,6 +11,21 @@
  * `--_list` prefix are internal carriers, not API — they can change in any
  * release. */
 
+/* Internal carriers are per-list prop state, not theming: each list root
+ * severs their inheritance so an outer list's props (`columns`, `selectable`,
+ * `rowHeight`) never leak into a nested list that didn't set them itself.
+ * `initial` is the guaranteed-invalid value, so the use-site var() fallbacks
+ * behave as if the var were never set; the List's own inline style (its
+ * props) beats these zero-specificity declarations on the same element.
+ * Public hooks are deliberately absent here — crossing list boundaries is
+ * their purpose. (`--_list-row-pad` needs no reset: every row declares its
+ * own below, so it never inherits across elements at all.) */
+:where([data-slot='list']) {
+  --_list-columns-default: initial;
+  --_list-checkbox-width: initial;
+  --_list-row-height: initial;
+}
+
 /* Attribute (not :where) specificity, so element-level resets — Tailwind
  * preflight's `button { padding: 0 }` for button rows — don't beat the
  * padding below. `text-align: start` undoes the UA button centering. */
@@ -43,15 +58,14 @@
   padding-inline-end: var(--_list-row-pad, 0px);
 }
 
-/* The header inset comes from the *public* --list-row-padding-x hook (not the
- * private --_list-row-pad, which is only ever set on interactive rows and so
- * left the header flush-left beside padded rows). Defaults to 0 — the neutral
- * flush edge — because a header can't tell whether its rows are interactive
- * (0.75rem inset) or static (flush): the consumer declares the inset once on
- * the List, e.g. `list-row-px-3`, and it flows to both header and rows so they
- * can't drift. In :where() (zero specificity) so that class wins — and unlike a
- * raw `px-3`, the hook composes with the checkbox column instead of clobbering
- * the padding-inline-start calc below. */
+/* The header inset reads the *public* --list-row-padding-x hook with the same
+ * flush default as static rows; interactive rows differ only in their 0.75rem
+ * hover-surface fallback (a header can't tell whether its rows are
+ * interactive). The consumer declares the inset once on the List, e.g.
+ * `list-row-px-3`, and it flows to the header and every row — static and
+ * interactive alike — so they can't drift. In :where() (zero specificity) so
+ * that class wins — and unlike a raw `px-3`, the hook composes with the
+ * checkbox column instead of clobbering the padding-inline-start calc below. */
 :where([data-slot='list-header']) {
   padding-inline-start: calc(
     var(--_list-checkbox-width, 0px) + var(--list-row-padding-x, 0px)
@@ -78,6 +92,12 @@
 }
 
 :where([data-slot='list-row']) {
+  /* Base carrier: every row — static included — takes the public inset hook,
+   * defaulting to flush. The interactive rule below re-declares it with the
+   * 0.75rem hover-surface fallback (same zero specificity, later source order
+   * wins), so one --list-row-padding-x value lands on rows of both kinds and
+   * the header — and a row never inherits another row's pad. */
+  --_list-row-pad: var(--list-row-padding-x, 0px);
   height: var(--_list-row-height, auto);
   /* padding animates the checkbox-column reveal; background-color fades the
    * hover surface (a transition-colors class here would clobber the padding

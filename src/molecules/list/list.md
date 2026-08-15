@@ -13,13 +13,16 @@ Not to be confused with the config-driven `ListView` in `frappe-ui/experimental`
 
 The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
 content, and a right-aligned trailing cell. Rows with `to` render as
-RouterLinks, rows with a click listener as buttons. `selectable` reveals the
-animated checkbox column and switches row click from navigate to toggle;
-selected values surface through `v-model:selection`. When a `ListHeader` is
-present, a select-all checkbox appears in it automatically — checked when every
-row is selected, mixed when only some are, and toggling all rows on or off. It
-reasons over the full `ListRows` items, so it covers virtualized rows too.
-`ListRows` resolves each row's identity once and exposes it as the scoped
+RouterLinks, rows with a click listener as buttons — real interactive elements,
+so they can't nest a per-row action button (invalid HTML). For inline actions,
+keep the row static and put the button in a trailing cell, or narrow the
+interactive row with a width class and set the action beside it. `selectable`
+reveals the animated checkbox column and switches row click from navigate to
+toggle; selected values surface through `v-model:selection`. When a `ListHeader`
+is present, a select-all checkbox appears in it automatically — checked when
+every row is selected, mixed when only some are, and toggling all rows on or
+off. It reasons over the full `ListRows` items, so it covers virtualized rows
+too. `ListRows` resolves each row's identity once and exposes it as the scoped
 `value` prop. The identity defaults to the item's `name`/`id`; pass `row-key` (a
 field name or `(item, index) => key`) when the row should use a different field.
 
@@ -98,11 +101,11 @@ with `max-sm:hidden` on the numeric cells and the `ListHeader`.
 
 `--list-row-padding-x` is the inline content inset, and its default is
 asymmetric on purpose: interactive rows get `0.75rem` so the rounded hover
-surface clears their content, while the header and group headers sit flush at
-`0` — a header can't tell whether its sibling rows are interactive. Setting the
-hook gives both sides the same value. A column-mode list with clickable rows and
-a header should always set it (`list-row-px-3`) so the header labels stay
-aligned with the cell text below them.
+surface clears their content, while static rows, the header and group headers
+sit flush at `0` — a header can't tell whether its sibling rows are interactive.
+Setting the hook gives every row and the header the same value. A column-mode
+list with clickable rows and a header should always set it (`list-row-px-3`) so
+the header labels stay aligned with the cell text below them.
 
 For `--list-gap` and `--list-row-padding-x`, the frappe-ui Tailwind preset ships
 spacing-scale utilities — `list-gap-*` and `list-row-px-*` — so the usual
@@ -117,7 +120,8 @@ windowing), knobs that are pure geometry are CSS hooks. Row height is
 deliberately a prop alone — a per-breakpoint height var would silently desync
 virtual windowing; in non-virtual lists, set responsive heights with height
 classes on the rows. Vars with a `--_list` prefix are internal carriers, not API
-— they can change in any release.
+— they can change in any release, and they reset at every `List`, so a nested
+list never inherits an outer list's props.
 
 Cells (and plain header cells) are flex containers with `items-center` — align
 content with justify utilities (`class="justify-end"` for numeric columns),

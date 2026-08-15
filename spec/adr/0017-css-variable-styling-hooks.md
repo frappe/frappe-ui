@@ -38,15 +38,19 @@ section. Everything else is internal and carries a `--_<family>` prefix
    values, so this is what makes hooks settable on the component _or any
    ancestor_ — theming every list in a subtree is one declaration on a wrapper.
    It also permits per-context defaults: the same `--list-row-padding-x` falls
-   back to `0.75rem` on interactive rows and `0` on the header, and a consumer
-   value replaces both.
+   back to `0.75rem` on interactive rows and `0` on static rows and the header,
+   and a consumer value replaces all of them.
 
 3. **A prop that feeds a hook writes an internal `-default` carrier** (`columns`
    → `--_list-columns-default`), read as the hook's fallback:
    `var(--list-columns, var(--_list-columns-default, <built-in>))`. Props set
    inline styles, which beat any class; the indirection is what keeps a consumer
    class — `max-sm:list-cols-[…]` — winning over the prop, which is the whole
-   responsive story.
+   responsive story. Carriers are per-instance prop state, so the stylesheet
+   resets them to `initial` at every component root: an outer list's `columns`,
+   `selectable` or `rowHeight` must never leak into a nested list that omitted
+   the prop. Public hooks are exempt from the reset — crossing boundaries is
+   their purpose.
 
 4. **Structural rules a consumer may override are wrapped in `:where()`** (zero
    specificity) so any consumer class wins regardless of stylesheet order.
@@ -98,7 +102,17 @@ mobile). Rejected.
   `--_list-row-height`: the first two were always carriers, and row height is
   the `rowHeight` prop's job (rule 5), so none of the three is API.
 - Ancestor theming works uniformly for all three hooks, and reaches nested lists
-  in the subtree — inheritance is the feature, so that is by design.
+  in the subtree — inheritance is the feature, so that is by design. It also
+  means an outer hook value overrides a nested `List`'s own `columns` prop
+  (hooks beat props, wherever the hook comes from); the opt-out is
+  `[--list-columns:initial]` on the inner list. The `--_list-*` carriers, by
+  contrast, reset at each list root, so an outer list's props never leak into a
+  nested list.
+- `--list-row-padding-x` reaches every row: interactive rows re-declare the
+  carrier with their `0.75rem` fallback, static rows carry it at a flush `0`
+  default, and the header reads the hook directly — one declared value lands on
+  all of them.
 - `List.cy.ts` pins the contract: hook beats prop, ancestor values apply, the
-  dual row/header inset default, and preflight not eating button-row padding.
+  dual inset default across row kinds, carrier containment in nested lists, and
+  preflight not eating button-row padding.
 - Future families expose CSS knobs only through this shape.

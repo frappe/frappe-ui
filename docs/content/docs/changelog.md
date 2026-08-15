@@ -27,6 +27,15 @@ freezing them:
   `--_list-row-height`. None was documented; anything targeting the old names
   breaks. Row height is the `rowHeight` prop — overriding the var would desync
   `virtual` windowing, so it is deliberately not a hook.
+- **Internal carriers reset at every `List`.** A list nested inside another
+  list no longer inherits the outer list's `columns` template, checkbox inset,
+  or `rowHeight` when it doesn't set those props itself (pre-existing leak,
+  fixed while freezing).
+- **`--list-row-padding-x` now reaches static rows too.** Previously only
+  interactive rows and the header took the hook, so a static table with a
+  header drifted apart when it was set; now one declared value lands on every
+  row and the header. Unset defaults are unchanged (interactive rows
+  `0.75rem`, everything else flush).
 
 The conventions behind this (and for every future component with CSS hooks)
 are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
