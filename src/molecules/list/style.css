@@ -122,7 +122,10 @@
   bottom: 0;
   /* Row checkboxes sit inside the interactive row's hover inset; the header
    * has no such inset, so it anchors to its own content padding instead. Both
-   * land the 32px checkbox column in the same place so they align vertically. */
+   * anchors read the same hook, so a set --list-row-padding-x lands the 32px
+   * checkbox column in one place for rows and header alike. Unset, they carry
+   * the same 12px-vs-flush asymmetry as the labels around them — the drift
+   * `list-row-px-3` exists to resolve. */
   inset-inline-start: var(--_list-row-pad, 0px);
   display: flex;
   align-items: center;

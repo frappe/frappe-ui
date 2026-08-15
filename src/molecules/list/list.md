@@ -105,7 +105,9 @@ surface clears their content, while static rows, the header and group headers
 sit flush at `0` — a header can't tell whether its sibling rows are interactive.
 Setting the hook gives every row and the header the same value. A column-mode
 list with clickable rows and a header should always set it (`list-row-px-3`) so
-the header labels stay aligned with the cell text below them.
+the header labels stay aligned with the cell text below them. The checkbox
+column follows the same rule: in a `selectable` list with a header, the hook is
+also what lines the select-all checkbox up with the row checkboxes.
 
 For `--list-gap` and `--list-row-padding-x`, the frappe-ui Tailwind preset ships
 spacing-scale utilities — `list-gap-*` and `list-row-px-*` — so the usual
