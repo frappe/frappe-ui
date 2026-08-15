@@ -15,15 +15,12 @@ The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
 content, and a right-aligned trailing cell. Rows with `to` render as
 RouterLinks, rows with a click listener as buttons — real interactive elements,
 so a row is clickable _or_ carries inline action buttons, never both (nested
-interactive controls are invalid HTML). For a row that needs both, keep the row
-static: put the actions in a trailing cell and stretch the primary action over
-the row from another cell — a button with `absolute inset-0` (rows are
-`position: relative`) — layering the action buttons above it with `relative`.
-The Files recipe shows the pattern. `selectable` reveals the animated checkbox
-column and switches row click from navigate to toggle; selected values surface
-through `v-model:selection`. When a `ListHeader` is present, a select-all
-checkbox appears in it automatically — checked when every row is selected, mixed
-when only some are, and toggling all rows on or off. It reasons over the full
+interactive controls are invalid HTML); [row actions](#row-actions) shows how to
+combine them. `selectable` reveals the animated checkbox column and switches row
+click from navigate to toggle; selected values surface through
+`v-model:selection`. When a `ListHeader` is present, a select-all checkbox
+appears in it automatically — checked when every row is selected, mixed when
+only some are, and toggling all rows on or off. It reasons over the full
 `ListRows` items, so it covers virtualized rows too. `ListRows` resolves each
 row's identity once and exposes it as the scoped `value` prop. The identity
 defaults to the item's `name`/`id`; pass `row-key` (a field name or
@@ -34,6 +31,22 @@ construction, never render above the first row, and hide around a hovered row so
 the rounded hover surface floats free.
 
 <ComponentPreview name="List-Feed" />
+
+## Row actions
+
+A row that needs a whole-row click _and_ inline action buttons keeps the row
+static and stacks the two layers itself: a button with `absolute inset-0`
+stretched over the row (rows are `position: relative`) is the whole-row target,
+and every control that handles its own pointer events — action buttons, tooltip
+triggers — gets `relative`, lifting it above the overlay. Which cells they live
+in doesn't matter; DOM order does: the overlay first, the layered controls after
+it. And because those controls are the overlay's siblings, not its children,
+their clicks never reach it — no `stopPropagation`. A static row brings no hover
+surface or content inset of its own, so add the hover/active classes and
+`list-row-px-3` to keep the interactive look. The Files and Tasks recipes show
+the pattern at scale.
+
+<ComponentPreview name="List-RowActions" />
 
 ## Active row
 
