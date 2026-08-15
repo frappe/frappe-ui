@@ -14,17 +14,20 @@ Not to be confused with the config-driven `ListView` in `frappe-ui/experimental`
 The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
 content, and a right-aligned trailing cell. Rows with `to` render as
 RouterLinks, rows with a click listener as buttons — real interactive elements,
-so they can't nest a per-row action button (invalid HTML). For inline actions,
-keep the row static and put the button in a trailing cell, or narrow the
-interactive row with a width class and set the action beside it. `selectable`
-reveals the animated checkbox column and switches row click from navigate to
-toggle; selected values surface through `v-model:selection`. When a `ListHeader`
-is present, a select-all checkbox appears in it automatically — checked when
-every row is selected, mixed when only some are, and toggling all rows on or
-off. It reasons over the full `ListRows` items, so it covers virtualized rows
-too. `ListRows` resolves each row's identity once and exposes it as the scoped
-`value` prop. The identity defaults to the item's `name`/`id`; pass `row-key` (a
-field name or `(item, index) => key`) when the row should use a different field.
+so a row is clickable _or_ carries inline action buttons, never both (nested
+interactive controls are invalid HTML). For a row that needs both, keep the row
+static: put the actions in a trailing cell and stretch the primary action over
+the row from another cell — a button with `absolute inset-0` (rows are
+`position: relative`) — layering the action buttons above it with `relative`.
+The Files recipe shows the pattern. `selectable` reveals the animated checkbox
+column and switches row click from navigate to toggle; selected values surface
+through `v-model:selection`. When a `ListHeader` is present, a select-all
+checkbox appears in it automatically — checked when every row is selected, mixed
+when only some are, and toggling all rows on or off. It reasons over the full
+`ListRows` items, so it covers virtualized rows too. `ListRows` resolves each
+row's identity once and exposes it as the scoped `value` prop. The identity
+defaults to the item's `name`/`id`; pass `row-key` (a field name or
+`(item, index) => key`) when the row should use a different field.
 
 Dividers default to `inset`: they start at the content column (the text edge) by
 construction, never render above the first row, and hide around a hovered row so
