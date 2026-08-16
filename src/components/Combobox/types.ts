@@ -311,12 +311,6 @@ export interface ComboboxEmits {
   /** Fired when the committed value changes. */
   'update:modelValue': [value: ComboboxOptionValue | null]
 
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the query changes. */
-  'update:query': [value: string]
-
   /** Fired when the resolved selected option changes. */
   'update:selectedOption': [
     option: ComboboxSelectableOption | ComboboxCustomOption | null,
