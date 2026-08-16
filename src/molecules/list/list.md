@@ -43,8 +43,10 @@ in doesn't matter; DOM order does: the overlay first, the layered controls after
 it. And because those controls are the overlay's siblings, not its children,
 their clicks never reach it — no `stopPropagation`. A static row brings no hover
 surface or content inset of its own, so add the hover/active classes and
-`list-row-px-3` to keep the interactive look. The Files and Tasks recipes show
-the pattern at scale.
+`list-row-px-3` to keep the interactive look. One gap remains: dividers hide
+around a hovered row only for interactive rows, so here the hover surface keeps
+the rule at its top edge — live with it, or pass `divider="none"`. The Files and
+Tasks recipes show the pattern at scale.
 
 <ComponentPreview name="List-RowActions" />
 

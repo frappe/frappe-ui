@@ -88,10 +88,6 @@ function toggleStar(id: string) {
           <Button
             class="relative"
             variant="ghost"
-            icon="lucide-star"
-            :class="
-              starred.includes(doc.id) ? 'text-ink-gray-9' : 'text-ink-gray-4'
-            "
             :label="
               starred.includes(doc.id)
                 ? `Unstar ${doc.title}`
@@ -99,7 +95,23 @@ function toggleStar(id: string) {
             "
             :aria-pressed="starred.includes(doc.id)"
             @click="toggleStar(doc.id)"
-          />
+          >
+            <!-- Colour lives on an #icon-slot span: Button's ghost classes
+                 already set an ink colour on the button element, and without
+                 tailwind-merge the stylesheet order — not this template —
+                 would decide which class wins there. -->
+            <template #icon>
+              <span
+                class="lucide-star size-4"
+                :class="
+                  starred.includes(doc.id)
+                    ? 'text-ink-gray-9'
+                    : 'text-ink-gray-4'
+                "
+                aria-hidden="true"
+              />
+            </template>
+          </Button>
         </ListCell>
       </ListRow>
     </List>
