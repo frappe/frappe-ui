@@ -6,6 +6,7 @@ import {
   hoverCellColor,
   sampleRamp,
   HEATMAP_RAMP_SAMPLES,
+  type HeatmapOptionContext,
 } from './heatmapOptions'
 import { hexToOklch } from './colorMath'
 import type { ChartTokens } from './tokens'
@@ -56,8 +57,11 @@ function matrix(overrides: Partial<HeatmapChartConfig> = {}) {
   return buildHeatmapMatrix(config(overrides), { tokens })
 }
 
-function build(overrides: Partial<HeatmapChartConfig> = {}) {
-  return buildHeatmapOption(config(overrides), { tokens }) as any
+function build(
+  overrides: Partial<HeatmapChartConfig> = {},
+  context: Partial<HeatmapOptionContext> = {},
+) {
+  return buildHeatmapOption(config(overrides), { tokens, ...context }) as any
 }
 
 describe('buildHeatmapMatrix', () => {
@@ -410,5 +414,84 @@ describe('hoverCellColor', () => {
 
     expect(option.grid.top).toBe(40)
     expect(option.grid.outerBoundsContain).toBe('all')
+  })
+})
+
+describe('printing the categories', () => {
+  const months = [
+    { month: new Date('2024-03-01'), team: 'Sales', deals: 4 },
+    { month: new Date('2024-01-01'), team: 'Sales', deals: 7 },
+  ]
+  const monthName = (value: Date) =>
+    value.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
+
+  const byMonth = { data: months, xColumn: 'month', yColumn: 'team' }
+
+  it('keeps the value each category was registered from, keyed by its label', () => {
+    const built = matrix(byMonth)
+
+    expect([...built.xValues]).toEqual([
+      [String(months[0].month), months[0].month],
+      [String(months[1].month), months[1].month],
+    ])
+    expect([...built.yValues]).toEqual([['Sales', 'Sales']])
+  })
+
+  it('prints an axis label from the value, not from the string it reads as', () => {
+    const printed = build(byMonth, { xFormat: monthName }).xAxis.axisLabel
+      .formatter
+
+    // The category itself is a stringified Date. The formatter never sees it.
+    expect(printed(String(months[0].month))).toBe('Mar')
+    expect(printed(String(months[1].month))).toBe('Jan')
+  })
+
+  // Pins the label-keyed lookup: echarts numbers a category formatter's ticks
+  // from the visible extent, so position alone would slide under a `dataZoom`.
+  it('prints a category the axis asks for out of order', () => {
+    const printed = build(byMonth, { xFormat: monthName }).xAxis.axisLabel
+      .formatter
+
+    expect(printed(String(months[1].month))).toBe('Jan')
+    expect(printed(String(months[0].month))).toBe('Mar')
+  })
+
+  it('leaves echarts to print the category when no formatter is given', () => {
+    expect(build().xAxis.axisLabel.formatter).toBeUndefined()
+    expect(build().yAxis.axisLabel.formatter).toBeUndefined()
+  })
+
+  it('prints each axis through its own formatter', () => {
+    const option = build(
+      {},
+      {
+        xFormat: (value: string) => `at ${value}`,
+        yFormat: (value: string) => `on ${value}`,
+      },
+    )
+
+    expect(option.xAxis.axisLabel.formatter('8am')).toBe('at 8am')
+    expect(option.yAxis.axisLabel.formatter('Mon')).toBe('on Mon')
+  })
+
+  it('leaves the blank marker alone, whatever the formatter would make of it', () => {
+    const option = build(
+      { data: [{ day: 'Mon', hour: null, orders: 3 }] },
+      { xFormat: (value: any) => `hour ${value}` },
+    )
+
+    expect(option.xAxis.axisLabel.formatter('(Blank)')).toBe('(Blank)')
+  })
+
+  it('does not merge two categories that print alike', () => {
+    const built = matrix({
+      data: [
+        { day: 'Mon', hour: new Date('2024-03-01'), orders: 1 },
+        { day: 'Mon', hour: new Date('2025-03-01'), orders: 2 },
+      ],
+    })
+
+    expect(built.xCategories).toHaveLength(2)
+    expect(built.cells).toHaveLength(2)
   })
 })

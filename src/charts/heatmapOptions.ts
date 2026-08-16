@@ -1,6 +1,7 @@
 import type { EChartsCoreOption } from 'echarts/core'
 import {
   AXIS_LABEL_FONT_SIZE,
+  AXIS_LABEL_MARGIN,
   DATA_LABEL_FONT_SIZE,
   toNumber,
 } from './axisChartCommon'
@@ -10,6 +11,7 @@ import { CHART_FONT_FAMILY } from './measureText'
 import { chartColors, insideLabelColor, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
+  ChartCategoryFormatter,
   ChartPaletteName,
   ChartValueFormatter,
   HeatmapCell,
@@ -20,10 +22,18 @@ import type {
 // Plot, tooltip and the ramp scale in the chrome all read the same
 // `HeatmapMatrix`, so the scale in the corner can't disagree with the fills.
 
+/**
+ * Formatters travel beside the config rather than inside it, as they do for the
+ * axis charts (see `AxisChartFormatters`): the builder takes plain data.
+ */
 export type HeatmapOptionContext = {
   tokens: ChartTokens
   /** Prints the value inside a cell. Defaults to a shortened number. */
   format?: ChartValueFormatter
+  /** Prints the columns of the grid. Left out, echarts prints the category. */
+  xFormat?: ChartCategoryFormatter
+  /** Prints the rows of the grid. */
+  yFormat?: ChartCategoryFormatter
 }
 
 /**
@@ -83,23 +93,8 @@ export function buildHeatmapMatrix(
   { tokens }: HeatmapOptionContext,
 ): HeatmapMatrix {
   const rows = config.data ?? []
-  const xCategories: string[] = []
-  const yCategories: string[] = []
-  const xIndexes = new Map<string, number>()
-  const yIndexes = new Map<string, number>()
-
-  const index = (
-    label: string,
-    categories: string[],
-    indexes: Map<string, number>,
-  ) => {
-    const existing = indexes.get(label)
-    if (existing !== undefined) return existing
-    const next = categories.length
-    categories.push(label)
-    indexes.set(label, next)
-    return next
-  }
+  const x = categoryAxis()
+  const y = categoryAxis()
 
   // Keyed by coordinate, so two rows landing on the same cell leave one cell
   // rather than two stacked ones. The later row wins: a caller that pre-
@@ -108,12 +103,12 @@ export function buildHeatmapMatrix(
   const placed = new Map<string, Omit<HeatmapCell, 'color'>>()
 
   for (const row of rows) {
-    const x = categoryLabel(row[config.xColumn])
-    const y = categoryLabel(row[config.yColumn])
     // Categories are registered even when the value is missing: an hour with no
     // orders is still an hour, and dropping its column would close the gap.
-    const xIndex = index(x, xCategories, xIndexes)
-    const yIndex = index(y, yCategories, yIndexes)
+    const xIndex = x.register(row[config.xColumn])
+    const yIndex = y.register(row[config.yColumn])
+    const xLabel = x.labels[xIndex]
+    const yLabel = y.labels[yIndex]
 
     const value = toNumber(row[config.valueColumn])
     if (value === null) continue
@@ -121,10 +116,10 @@ export function buildHeatmapMatrix(
     const key = `${xIndex}:${yIndex}`
     if (import.meta.env.DEV && placed.has(key)) {
       console.warn(
-        `[frappe-ui] Two rows land on the heatmap cell x="${x}", y="${y}". The last one is drawn; pre-aggregate the data to choose yourself.`,
+        `[frappe-ui] Two rows land on the heatmap cell x="${xLabel}", y="${yLabel}". The last one is drawn; pre-aggregate the data to choose yourself.`,
       )
     }
-    placed.set(key, { x, y, xIndex, yIndex, value, row })
+    placed.set(key, { x: xLabel, y: yLabel, xIndex, yIndex, value, row })
   }
 
   const unsized = [...placed.values()]
@@ -139,7 +134,42 @@ export function buildHeatmapMatrix(
     color: rampColor(stops, span > 0 ? (cell.value - min) / span : 1),
   }))
 
-  return { xCategories, yCategories, cells, min, max, stops }
+  return {
+    xCategories: x.labels,
+    yCategories: y.labels,
+    xValues: x.values,
+    yValues: y.values,
+    cells,
+    min,
+    max,
+    stops,
+  }
+}
+
+/**
+ * One cut of the grid, collected as the rows are read.
+ *
+ * Values are keyed by label rather than held in a parallel array: the label is
+ * all an echarts axis-label formatter is handed. Its index counts from the
+ * visible extent, so a `dataZoom` would slide a positional lookup by one.
+ */
+function categoryAxis() {
+  const labels: string[] = []
+  const values = new Map<string, any>()
+  const indexes = new Map<string, number>()
+
+  return {
+    labels,
+    values,
+    register(value: any) {
+      const label = categoryLabel(value)
+      const existing = indexes.get(label)
+      if (existing !== undefined) return existing
+      indexes.set(label, labels.length)
+      values.set(label, value)
+      return labels.push(label) - 1
+    },
+  }
 }
 
 /**
@@ -217,11 +247,42 @@ function categoryLabel(value: any) {
     : String(value)
 }
 
+/**
+ * How one category reads. The formatter is handed the value the row carried,
+ * because the label the category is keyed by has already lost a Date.
+ *
+ * A blank category prints as the blank marker whatever the formatter does with
+ * it: `(Blank)` says the rows named no category, and a formatter reading a date
+ * out of `undefined` would say something worse.
+ */
+export function heatmapCategoryLabel(
+  format: ChartCategoryFormatter | undefined,
+  values: Map<string, any>,
+  label: string,
+): string {
+  if (!format || label === BLANK_CATEGORY) return label
+  return format(values.get(label))
+}
+
+/**
+ * The `axisLabel` keys that print a category, or none when no formatter was
+ * given — echarts then prints the category itself.
+ */
+function categoryLabelFormatter(
+  format: ChartCategoryFormatter | undefined,
+  values: Map<string, any>,
+) {
+  if (!format) return {}
+  return {
+    formatter: (label: string) => heatmapCategoryLabel(format, values, label),
+  }
+}
+
 export function buildHeatmapOption(
   config: HeatmapChartConfig,
   context: HeatmapOptionContext,
 ): EChartsCoreOption {
-  const { tokens, format } = context
+  const { tokens, format, xFormat, yFormat } = context
   const isRTL = config.dir === 'rtl'
   const matrix = buildHeatmapMatrix(config, context)
   const showValues = Boolean(config.showValues)
@@ -257,9 +318,10 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
+        ...categoryLabelFormatter(xFormat, matrix.xValues),
       },
     },
     yAxis: {
@@ -275,9 +337,10 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
+        ...categoryLabelFormatter(yFormat, matrix.yValues),
       },
     },
     // Hidden: the ramp is explained by an HTML scale next to the plot. This one

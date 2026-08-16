@@ -61,7 +61,7 @@ const TILTED_LABEL_EXTENT = 72
 /** A label's own line box, which turns into reach of its own once rotated. */
 const LABEL_LINE_HEIGHT = 13
 /** The gap every axis here keeps between a label and the plot. */
-const AXIS_LABEL_MARGIN = 8
+export const AXIS_LABEL_MARGIN = 8
 
 const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 

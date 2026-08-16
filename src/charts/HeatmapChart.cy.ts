@@ -49,6 +49,19 @@ const plot = () => cy.get('[data-slot="chart-plot"] [role="img"]')
 /** Cells carry a computed rgb() fill; nothing else in the plot is filled. */
 const cells = () => cy.get('[data-slot="chart-plot"] svg path[fill^="rgb"]')
 
+/** The scale is DOM beside a canvas grid, so checking the two agree means
+ *  measuring both. */
+const box = (selector: string) =>
+  cy.get(selector).then(($el) => $el[0].getBoundingClientRect())
+
+/** One x-axis label, as echarts drew it into the plot. */
+const axisLabel = (text: string) =>
+  cy
+    .get('[data-slot="chart-plot"] svg text')
+    .filter((_, el) => el.textContent === text)
+    .first()
+    .then(($el) => ($el[0] as unknown as SVGGraphicsElement).getBoundingClientRect())
+
 describe('HeatmapChart', () => {
   it('draws a cell per row, on axes taken from the data', () => {
     mountChart()
@@ -67,12 +80,47 @@ describe('HeatmapChart', () => {
     })
   })
 
-  it('stands the scale in for a legend, ends labelled', () => {
+  it('stands the scale beside the plot, ends labelled', () => {
     mountChart()
-    cy.get('[data-slot="chart-container"]')
+    // A continuous ramp has no entries to switch on and off, so the scale
+    // stands in for the legend.
+    cy.get('[data-slot="chart-legend"]').should('not.exist')
+    cy.get('[data-slot="chart-scale"]')
       .should('contain.text', '2')
       .and('contain.text', '8')
-    cy.get('[data-slot="chart-legend"] button').should('not.exist')
+
+    box('[data-slot="chart-scale"]').then((scale) => {
+      box('[data-slot="chart-plot"] [role="img"]').then((plot) => {
+        expect(scale.left, 'scale sits after the plot').to.be.at.least(
+          plot.right - 1,
+        )
+      })
+    })
+  })
+
+  it('lines the low end up with the row of x-axis labels', () => {
+    mountChart()
+    // `min` reads as one of the axis labels, so it starts where they start —
+    // which is a number only the laid-out chart knows.
+    axisLabel('9am').then((label) => {
+      box('[data-slot="chart-scale-min"]').then((min) => {
+        expect(min.top, 'min starts on the x-label row').to.be.closeTo(
+          label.top,
+          3,
+        )
+      })
+    })
+  })
+
+  it('stands the scale opposite the category axis in RTL', () => {
+    mountChart({ dir: 'rtl' })
+    box('[data-slot="chart-scale"]').then((scale) => {
+      box('[data-slot="chart-plot"] [role="img"]').then((plot) => {
+        expect(scale.right, 'scale sits before the plot').to.be.at.most(
+          plot.left + 1,
+        )
+      })
+    })
   })
 
   it('takes the ends of the scale from the props', () => {
@@ -80,6 +128,16 @@ describe('HeatmapChart', () => {
     cy.get('[data-slot="chart-container"]')
       .should('contain.text', '0')
       .and('contain.text', '10')
+  })
+
+  it('prints the categories through the axis formatters', () => {
+    mountChart({
+      xAxis: { format: (hour: string) => hour.toUpperCase() },
+      yAxis: { format: (day: string) => day.slice(0, 1) },
+    })
+    cy.get('[data-slot="chart-plot"] svg text')
+      .should('contain.text', '9AM')
+      .and('contain.text', 'M')
   })
 
   it('prints the values in the cells on request', () => {
