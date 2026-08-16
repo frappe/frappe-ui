@@ -289,6 +289,17 @@ export type FunnelStageEvent = {
  */
 export type HeatmapPalette = 'sequential' | 'diverging' | string[]
 
+/** One cut of the grid. Both are category axes, so both read the same way. */
+export type HeatmapAxisOptions = {
+  /**
+   * Prints each category. Takes the value the row carried, not the string it
+   * reads as: a date column arrives as a Date, and `Mar 2024` needs the value.
+   *
+   * Display only. Two categories printing alike stay two categories.
+   */
+  format?: ChartCategoryFormatter
+}
+
 export type HeatmapChartConfig = {
   /** One row per cell. Rows with no numeric value leave their cell undrawn. */
   data: Record<string, any>[]
@@ -339,6 +350,10 @@ export type HeatmapMatrix = {
   xCategories: string[]
   /** Rows, in the order the rows first mention them. Drawn top to bottom. */
   yCategories: string[]
+  /** The value each x category was first named by, keyed by the category. */
+  xValues: Map<string, any>
+  /** As `xValues`, for the rows of the grid. */
+  yValues: Map<string, any>
   cells: HeatmapCell[]
   /** Bottom of the color scale, config or data. */
   min: number
@@ -802,6 +817,10 @@ export type HeatmapChartProps = ChartBaseProps & {
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
+  /** The columns of the grid: the axis under it, and the tooltip head. */
+  xAxis?: HeatmapAxisOptions
+  /** The rows of the grid: the axis beside it, and the tooltip head. */
+  yAxis?: HeatmapAxisOptions
   /**
    * Prints each cell's value inside it. A label that would collide with its
    * neighbour is dropped, so a grid too fine to carry numbers shows none.

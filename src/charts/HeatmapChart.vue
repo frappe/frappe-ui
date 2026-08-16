@@ -75,6 +75,7 @@ import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildHeatmapMatrix,
   buildHeatmapOption,
+  heatmapCategoryLabel,
   sampleRamp,
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
@@ -138,6 +139,8 @@ const built = computed(() => {
       option: buildHeatmapOption(config.value, {
         tokens: tokens.value,
         format: props.format,
+        xFormat: props.xAxis?.format,
+        yFormat: props.yAxis?.format,
       }),
       error: null as string | null,
     }
@@ -193,6 +196,15 @@ const { chart, dispatch } = useChart({
   },
 })
 
+/** One category as its own axis prints it. */
+function printX(label: string) {
+  return heatmapCategoryLabel(props.xAxis?.format, matrix.value.xValues, label)
+}
+
+function printY(label: string) {
+  return heatmapCategoryLabel(props.yAxis?.format, matrix.value.yValues, label)
+}
+
 function showTooltip(dataIndex: number) {
   const cell = matrix.value.cells[dataIndex]
   if (!cell) {
@@ -201,8 +213,9 @@ function showTooltip(dataIndex: number) {
   }
 
   // The two categories head the tooltip, the way the x value heads an axis
-  // chart's; the measure is the one line under it.
-  tooltip.label = `${cell.y} · ${cell.x}`
+  // chart's. The measure is the one line under it. Printed the way the axes
+  // print them, or a reader meets two spellings of one category.
+  tooltip.label = `${printY(cell.y)} · ${printX(cell.x)}`
   tooltip.items = [
     {
       name: `${cell.yIndex}:${cell.xIndex}`,

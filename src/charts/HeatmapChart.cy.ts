@@ -82,6 +82,16 @@ describe('HeatmapChart', () => {
       .and('contain.text', '10')
   })
 
+  it('prints the categories through the axis formatters', () => {
+    mountChart({
+      xAxis: { format: (hour: string) => hour.toUpperCase() },
+      yAxis: { format: (day: string) => day.slice(0, 1) },
+    })
+    cy.get('[data-slot="chart-plot"] svg text')
+      .should('contain.text', '9AM')
+      .and('contain.text', 'M')
+  })
+
   it('prints the values in the cells on request', () => {
     mountChart({ showValues: true })
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '8')

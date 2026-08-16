@@ -72,6 +72,18 @@
     type: 'number'
   },
   {
+    name: 'xAxis',
+    description: 'The columns of the grid: the axis under it, and the tooltip head.',
+    required: false,
+    type: 'HeatmapAxisOptions'
+  },
+  {
+    name: 'yAxis',
+    description: 'The rows of the grid: the axis beside it, and the tooltip head.',
+    required: false,
+    type: 'HeatmapAxisOptions'
+  },
+  {
     name: 'showValues',
     description: 'Prints each cell\'s value inside it. A label that would collide with its\nneighbour is dropped, so a grid too fine to carry numbers shows none.',
     required: false,
