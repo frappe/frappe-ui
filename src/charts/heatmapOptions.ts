@@ -1,6 +1,7 @@
 import type { EChartsCoreOption } from 'echarts/core'
 import {
   AXIS_LABEL_FONT_SIZE,
+  AXIS_LABEL_MARGIN,
   DATA_LABEL_FONT_SIZE,
   toNumber,
 } from './axisChartCommon'
@@ -317,7 +318,7 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
         ...categoryLabelFormatter(xFormat, matrix.xValues),
@@ -336,7 +337,7 @@ export function buildHeatmapOption(
       axisTick: { show: false },
       axisLabel: {
         hideOverlap: true,
-        margin: 8,
+        margin: AXIS_LABEL_MARGIN,
         color: tokens.axisLabel,
         fontSize: AXIS_LABEL_FONT_SIZE,
         ...categoryLabelFormatter(yFormat, matrix.yValues),
