@@ -737,6 +737,46 @@ describe('List (styling hooks)', () => {
     cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
   })
 
+  it('lets an ancestor hook override a descendant List columns prop, with initial as the opt-out', () => {
+    // The sharp edge of ancestor theming: a wrapper's --list-columns beats a
+    // descendant List's own `columns` prop (hooks beat props, wherever the
+    // hook comes from). `[--list-columns:initial]` on a list severs the
+    // inherited value — initial is the guaranteed-invalid value, so the
+    // use-site fallback chain falls through to that list's own prop carrier.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-columns: 90px 90px 90px' }, [
+          h(List, { columns: ['50px', '50px', '50px'] }, () => [
+            feedRow('themed'),
+          ]),
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              class: '[--list-columns:initial]',
+            },
+            () => [feedRow('optout')],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list]')
+      .eq(0)
+      .find('[data-slot=list-row]')
+      .should(($row) => {
+        expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+          '90px 90px 90px',
+        )
+      })
+    cy.get('[data-slot=list]')
+      .eq(1)
+      .find('[data-slot=list-row]')
+      .should(($row) => {
+        expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+          '50px 50px 50px',
+        )
+      })
+  })
+
   it('contains prop carriers to their own list; public hooks cross into nested lists', () => {
     // The outer list's columns/selectable/rowHeight ride internal --_list-*
     // carriers, which reset at every list root — a nested list that omits

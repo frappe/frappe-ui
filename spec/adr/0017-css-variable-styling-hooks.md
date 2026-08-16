@@ -113,6 +113,7 @@ mobile). Rejected.
   default, and the header reads the hook directly — one declared value lands on
   all of them.
 - `List.cy.ts` pins the contract: hook beats prop, ancestor values apply, the
-  dual inset default across row kinds, carrier containment in nested lists, and
+  dual inset default across row kinds, carrier containment in nested lists, the
+  ancestor-hook-overrides-inner-prop rule with its `initial` opt-out, and
   preflight not eating button-row padding.
 - Future families expose CSS knobs only through this shape.

@@ -105,8 +105,10 @@ composable, `useVirtualRows`, is exported for exotic cases.
 the list's public CSS hooks. Set them with plain (responsive) classes on the
 `List` — or on any ancestor, to theme every list in a subtree. Their defaults
 live in `var()` fallbacks, so a consumer value always wins, even over the
-`columns` prop — which is how people-style lists collapse to a feed on mobile
-with no dedicated API:
+`columns` prop — a nested list's included: a wrapper's `--list-columns` reaches
+every list below it, and an inner list that should keep its own `columns` opts
+out with `[--list-columns:initial]`. Hook-beats-prop is how people-style lists
+collapse to a feed on mobile with no dedicated API:
 
 ```vue
 <List
