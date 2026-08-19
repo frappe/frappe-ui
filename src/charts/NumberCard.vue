@@ -144,7 +144,7 @@
           />
           <span
             v-if="formattedDelta"
-            class="text-sm-medium tabular-nums"
+            class="shrink-0 whitespace-nowrap text-sm-medium tabular-nums"
             :class="toneClass"
           >
             {{ formattedDelta }}
@@ -152,7 +152,13 @@
           <!-- The card states the comparison but does not own it: an app that
                lets the reader change the period puts its own Dropdown here. -->
           <slot name="caption" :caption="deltaCaption">
-            <span v-if="deltaCaption" class="truncate text-ink-gray-5">
+            <!-- Titled because it is the part that clips: a caption too long
+                 for the card is still readable on hover. -->
+            <span
+              v-if="deltaCaption"
+              :title="deltaCaption"
+              class="truncate text-ink-gray-5"
+            >
               {{ deltaCaption }}
             </span>
           </slot>
