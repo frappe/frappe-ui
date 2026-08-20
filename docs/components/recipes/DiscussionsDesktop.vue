@@ -666,7 +666,10 @@ const spaceActions = [
         <div class="mb-4 flex items-center justify-between">
           <TabButtons
             v-model="feedTab"
-            :options="[{ label: 'Unread' }, { label: 'All' }]"
+            :options="[
+              { label: 'Unread', value: 'Unread' },
+              { label: 'All', value: 'All' },
+            ]"
           />
           <span class="text-sm text-ink-gray-5">
             {{ visibleDiscussions.length }} discussions

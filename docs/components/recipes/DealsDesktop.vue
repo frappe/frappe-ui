@@ -502,7 +502,10 @@ onBeforeUnmount(() => {
         <div class="flex items-center gap-2">
           <TabButtons
             v-model="view"
-            :options="[{ label: 'Board' }, { label: 'List' }]"
+            :options="[
+              { label: 'Board', value: 'Board' },
+              { label: 'List', value: 'List' },
+            ]"
           />
           <Button label="Filter" icon-left="lucide-list-filter" />
           <Button label="Sort" icon-left="lucide-arrow-down-up" />
