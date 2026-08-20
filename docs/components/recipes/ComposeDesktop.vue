@@ -83,9 +83,11 @@ const toolbar = [
 // The inline screenshot is a bitmap, so it cannot follow the theme tokens the
 // rest of the page uses: the dark shot glares on a light page. Keep one file
 // per scheme and swap the path in the document when the theme flips.
+// `BASE_URL`, not a leading slash: the PR preview deploy serves the docs from
+// a subpath, where an absolute path would miss the image.
 const screenshot = {
-  light: '/recipes/compose-dashboard-light.png',
-  dark: '/recipes/compose-dashboard-dark.png',
+  light: `${import.meta.env.BASE_URL}recipes/compose-dashboard-light.png`,
+  dark: `${import.meta.env.BASE_URL}recipes/compose-dashboard-dark.png`,
 }
 const scheme = ref(resolvedColorScheme())
 
