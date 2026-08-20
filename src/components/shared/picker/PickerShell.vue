@@ -3,7 +3,6 @@
     <PopoverAnchor :reference="anchorEl" as-child>
       <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
-          <slot name="target" v-bind="triggerSlotProps">
             <TextInput
               ref="textInputRef"
               v-model="inputValue"
@@ -135,7 +134,6 @@ const emit = defineEmits<{
 
 const slots = defineSlots<{
   trigger?: (props: TriggerSlotProps) => any
-  target?: (props: TriggerSlotProps) => any
   prefix?: (props: TriggerSlotProps) => any
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
@@ -167,7 +165,7 @@ const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
 const anchorEl = computed(() => {
-  if (slots.trigger || slots.target) return undefined
+  if (slots.trigger) return undefined
   return textInputRef.value?.inputElement ?? undefined
 })
 
@@ -233,7 +231,7 @@ const triggerSlotProps = computed<TriggerSlotProps>(() => ({
   inputValue: inputValue.value,
 }))
 
-const hasCustomTrigger = computed(() => !!(slots.trigger || slots.target))
+const hasCustomTrigger = computed(() => !!slots.trigger)
 
 watch(open, (val, prev) => {
   if (val === prev) return

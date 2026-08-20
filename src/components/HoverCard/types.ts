@@ -44,6 +44,9 @@ export interface HoverCardProps {
    * surface.
    */
   arrow?: boolean
+
+  /** Controls the visibility of the hover card. */
+  open?: boolean
 }
 
 /** Slot props passed to the `#trigger` slot. */
