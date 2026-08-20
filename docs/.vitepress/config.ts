@@ -209,7 +209,9 @@ const config = defineDocsConfig({
     // Bootstrap data-theme before paint (VitePress only toggles the dark class).
     // `system` is a stored preference, not a paintable value: stamping it raw
     // matches no `[data-theme]` rule, so the page paints light while anything
-    // reading the OS setting sees dark.
+    // reading the OS setting sees dark. Resolve it here and store nothing: a
+    // first visit that wrote back the resolved value would pin the reader to
+    // that scheme, and this runs on every load anyway.
     [
       'script',
       {},
@@ -218,7 +220,6 @@ const config = defineDocsConfig({
       const stored = localStorage.getItem('theme')
       const theme = stored === 'light' || stored === 'dark' ? stored : preferredTheme
       document.documentElement.setAttribute('data-theme', theme)
-      if (!stored) localStorage.theme = theme
     })()`,
     ],
     // Open Graph / Twitter image + canonical URL.
