@@ -71,9 +71,15 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const model = defineModel<Array<string | number>>({ default: () => [] })
+/**
+ * Controls the popover visibility. Fires `update:open` when toggled.
+ */
 const open = defineModel<boolean>('open', { default: false })
-// Optional outside-in control of the search box. Unbound, `defineModel`
-// keeps the value local, so `v-model:query` is never required.
+/**
+ * Controls the search query. Fires `update:query` when the user types.
+ * Optional — the component owns the query when not bound, so `v-model:query`
+ * is never required.
+ */
 const query = defineModel<string>('query', { default: '' })
 // Bound, the query is the consumer's — the component never resets it (see the
 // open watcher at the bottom of this block).
