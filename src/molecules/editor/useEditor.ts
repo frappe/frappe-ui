@@ -53,12 +53,11 @@ export function useEditor(
     (extension) => extension.name === 'collaboration',
   )
   let applyingExternalUpdate = false
-  // The exact value last written OUT to `options.content` from `onUpdate`. The
-  // content watcher skips it so an internal edit doesn't bounce back through
-  // `setContent`. JSON's `getJSON()` returns a fresh object each edit, so
-  // reference-tracking the emitted value is the only cheap way to recognise our
-  // own write (and avoid resetting the selection on every keystroke in
-  // `format: 'json'`).
+  // The exact object last written OUT to `options.content` from `onUpdate`,
+  // in `format: 'json'` only. The content watcher skips it by identity so an
+  // internal edit doesn't bounce back through `setContent` and reset the
+  // selection on every keystroke. The string formats compare content instead,
+  // so they need nothing here.
   let lastEmitted: string | JSONContent | null | undefined
 
   const extensions = [UploadStorage, ...options.extensions]
@@ -88,7 +87,7 @@ export function useEditor(
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
         const value = serialize(tiptapEditor)
-        lastEmitted = value
+        if (format === 'json') lastEmitted = value
         options.content.value = value
       }
       options.onUpdate?.(tiptapEditor)
@@ -142,12 +141,13 @@ export function useEditor(
   if (!isCollaborationMode && options.content) {
     watch(options.content, (content) => {
       if (!editor.value) return
-      // Our own write bounced back through the ref — ignore it (covers JSON,
-      // whose fresh-object identity defeats the string checks below). Strings
-      // are left to those checks: they compare against what the editor holds
-      // right now, so an external update that restores an earlier value still
-      // applies, where matching `lastEmitted` by value would drop it.
-      if (typeof content !== 'string' && toRaw(content) === lastEmitted) return
+      // Our own JSON write bounced back through the ref — ignore it.
+      // `getJSON()` returns a fresh object each edit, so identity is the only
+      // cheap way to recognise it. HTML and markdown are left to the string
+      // checks below: they compare against what the editor holds right now, so
+      // an external update that restores an earlier value still applies, where
+      // matching `lastEmitted` by value would drop it.
+      if (format === 'json' && toRaw(content) === lastEmitted) return
       if (format === 'html' && editor.value.getHTML() === content) return
       if (format === 'markdown' && editor.value.getMarkdown() === content)
         return
