@@ -207,14 +207,18 @@ const config = defineDocsConfig({
       },
     ],
     // Bootstrap data-theme before paint (VitePress only toggles the dark class).
+    // `system` is a stored preference, not a paintable value: stamping it raw
+    // matches no `[data-theme]` rule, so the page paints light while anything
+    // reading the OS setting sees dark.
     [
       'script',
       {},
       `;(() => {
       const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      const theme = localStorage.getItem('theme') || preferredTheme
+      const stored = localStorage.getItem('theme')
+      const theme = stored === 'light' || stored === 'dark' ? stored : preferredTheme
       document.documentElement.setAttribute('data-theme', theme)
-      localStorage.theme = theme
+      if (!stored) localStorage.theme = theme
     })()`,
     ],
     // Open Graph / Twitter image + canonical URL.
