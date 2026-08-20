@@ -144,8 +144,9 @@ onMounted(() => {
 })
 onBeforeUnmount(() => themeObserver?.disconnect())
 
-// Only this screenshot's path is rewritten, so edits made to the draft survive
-// the swap, and an image the user inserted themselves is left alone.
+// Only this screenshot's path is rewritten, so the draft's text survives the
+// swap and an image the reader inserted is left alone. Re-setting the content
+// does drop the cursor and the undo history, which a demo can afford.
 watch(scheme, (to, from) => {
   content.value = content.value.replace(screenshot[from], screenshot[to])
 })
