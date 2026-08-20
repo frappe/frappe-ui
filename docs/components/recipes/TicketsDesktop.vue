@@ -382,7 +382,10 @@ const selection = ref([])
           <template v-else>
             <TabButtons
               v-model="filterTab"
-              :options="[{ label: 'Open' }, { label: 'All' }]"
+              :options="[
+                { label: 'Open', value: 'Open' },
+                { label: 'All', value: 'All' },
+              ]"
             />
             <Button label="Filter" icon-left="lucide-list-filter" />
             <Button

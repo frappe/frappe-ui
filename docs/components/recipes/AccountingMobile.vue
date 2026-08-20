@@ -206,7 +206,7 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
 
       <TabButtons
         v-model="flowTab"
-        class="w-full"
+        fluid
         :options="[
           { label: 'Incomings', value: 'incomings' },
           { label: 'Outgoings', value: 'outgoings' },

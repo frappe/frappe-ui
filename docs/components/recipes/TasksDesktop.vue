@@ -913,9 +913,9 @@ function addComment() {
             <TabButtons
               v-model="listTab"
               :options="[
-                { label: 'All' },
-                { label: 'Assigned to me' },
-                { label: 'Created by me' },
+                { label: 'All', value: 'All' },
+                { label: 'Assigned to me', value: 'Assigned to me' },
+                { label: 'Created by me', value: 'Created by me' },
               ]"
             />
 

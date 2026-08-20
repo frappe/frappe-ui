@@ -89,8 +89,12 @@ const columns = ref([
       <div class="flex items-center gap-2 px-4 py-3">
         <TabButtons
           v-model="view"
+          fluid
           class="flex-1"
-          :options="[{ label: 'Board' }, { label: 'List' }]"
+          :options="[
+            { label: 'Board', value: 'Board' },
+            { label: 'List', value: 'List' },
+          ]"
         />
         <Button icon="lucide-list-filter" label="Filter" />
         <Button icon="lucide-arrow-down-up" label="Sort" />

@@ -319,8 +319,11 @@ function addComment() {
         <div class="mb-3 px-4">
           <TabButtons
             v-model="filterTab"
-            class="w-full"
-            :options="[{ label: 'Open' }, { label: 'All' }]"
+            fluid
+            :options="[
+              { label: 'Open', value: 'Open' },
+              { label: 'All', value: 'All' },
+            ]"
           />
         </div>
 

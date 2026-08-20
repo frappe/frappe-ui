@@ -602,7 +602,7 @@ const showList = ref(true)
           >
             <TabButtons
               v-model="activeTab"
-              :options="mailTabs.map((tab) => ({ label: tab }))"
+              :options="mailTabs.map((tab) => ({ label: tab, value: tab }))"
             />
           </div>
 
