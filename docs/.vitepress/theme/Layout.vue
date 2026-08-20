@@ -26,9 +26,16 @@ const recipeDemo = computed(() =>
 // embedding iframes (same origin, different browsing context), so demos follow
 // live toggles too.
 function syncThemeFromStorage(e: StorageEvent) {
-  if (e.key === 'theme' && e.newValue) {
-    document.documentElement.setAttribute('data-theme', e.newValue)
-  }
+  if (e.key !== 'theme' || !e.newValue) return
+  // The stored value is a preference and can be `system`; only `light` and
+  // `dark` mean anything to the CSS, so resolve before stamping.
+  const resolved =
+    e.newValue === 'light' || e.newValue === 'dark'
+      ? e.newValue
+      : window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+  document.documentElement.setAttribute('data-theme', resolved)
 }
 onMounted(() => {
   if (recipeDemo.value) window.addEventListener('storage', syncThemeFromStorage)
