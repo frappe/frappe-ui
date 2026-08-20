@@ -147,7 +147,15 @@ export function useEditor(
       // checks below: they compare against what the editor holds right now, so
       // an external update that restores an earlier value still applies, where
       // matching `lastEmitted` by value would drop it.
-      if (format === 'json' && toRaw(content) === lastEmitted) return
+      // `lastEmitted` is only ever a `getJSON()` object, so the `undefined`
+      // check only rules out its initial value — without it, clearing an
+      // untouched editor with `undefined` would match and be skipped.
+      if (
+        format === 'json' &&
+        lastEmitted !== undefined &&
+        toRaw(content) === lastEmitted
+      )
+        return
       if (format === 'html' && editor.value.getHTML() === content) return
       if (format === 'markdown' && editor.value.getMarkdown() === content)
         return

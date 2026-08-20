@@ -292,6 +292,31 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(editor.commands.setContent).toHaveBeenCalledTimes(calls)
   })
 
+  it('clears an untouched JSON editor when content is set to undefined', async () => {
+    const { useEditor } = await import('./index')
+    const content = ref<any>({ type: 'doc', content: [{ type: 'paragraph' }] })
+
+    createApp(
+      defineComponent({
+        setup() {
+          useEditor({ content, format: 'json', extensions: [] })
+          return () => null
+        },
+      }),
+    ).mount(document.createElement('div'))
+
+    const editor = editors[0]
+
+    // Nothing has been typed, so no value has been emitted out yet. The bounce
+    // guard must not read that as "we wrote this ourselves".
+    content.value = undefined
+    await nextTick()
+
+    expect(editor.commands.setContent).toHaveBeenCalledWith('', {
+      emitUpdate: false,
+    })
+  })
+
   it('sets markdown contentType and warns when the Markdown extension is missing', async () => {
     const { useEditor } = await import('./index')
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
