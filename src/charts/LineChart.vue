@@ -52,7 +52,6 @@
       <ChartLegend
         :items="legendItems"
         @change="toggleSeries"
-        @highlight="hoverSeries"
       />
     </template>
   </ChartContainer>
@@ -124,7 +123,6 @@ const {
   tooltip,
   legendItems,
   toggleSeries,
-  hoverSeries,
   plotAttrs,
   reading,
 } = useAxisChart({
