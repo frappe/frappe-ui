@@ -40,7 +40,7 @@ Each rule states what to do and what to avoid — one canonical place, no separa
 6. **Use the input labeling contract.** Every control accepts `label`, `description`, `error`, `required` — use them, not placeholder-as-label or a separate `<label>`.
 7. **Slot vocabulary is fixed.** `#prefix`, `#suffix`, `#trigger`, `#empty`, `#header`, `#footer`, `#default`; per-item `#item-prefix` / `#item-suffix`. No `#icon-left` / `#avatar-right`.
 8. **Icons are CSS classes.** `<span class="lucide-<name> size-4" aria-hidden="true" />`; for icon props pass the string `"lucide-edit"`. Never import per-icon Vue components. See `COMPONENTS.md` → Icons.
-9. **Imperative for one-shot UI.** `dialog.confirm` / `alert` / `prompt`, `toast.success` / `error` / `info` — don't hand-mount `<Dialog>` to ask "are you sure?".
+9. **Imperative for one-shot UI.** `dialog.confirm` / `alert` / `prompt`, `toast.success` / `error` / `info` — don't hand-mount `<Dialog>` to ask "are you sure?". One action, one toast: related edits (fields in the same form) reuse a single toast via a stable `id`, they never stack. See `DESIGN.md` → Toasts.
 10. **API calls go through `useCall`** (or `useList` / `useDoc`). Never `fetch` / `axios`; don't reach for the legacy `createResource` family in new code. See `COMPONENTS.md` → Data & resources.
 11. **Style components via `data-slot` / `data-state`, not class injection.** No `triggerClass` / `contentClass` props — they don't exist by design. See `TOKENS.md` → Custom CSS hooks.
 12. **Bootstrapping from scratch?** Follow `SETUP.md` exactly — version pins (Tailwind v3, Vite 5), `exports` subpaths, `optimizeDeps.exclude: ['frappe-ui']`, `app.use(FrappeUI)`, and `vue-router` are all required and easy to miss.

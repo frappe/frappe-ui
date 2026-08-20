@@ -216,8 +216,26 @@ Never build your own confirm `<Dialog>`.
 ### Toasts
 
 `toast.success('Saved')` after writes, `toast.error(err.message)` for
-failures, `toast.info(...)` for neutral notices. Never for decisions — that's
+failures, `toast.info(...)` for neutral notices. Never for decisions, that is
 `dialog.confirm`.
+
+One action, one toast. If a user edits several related fields in the same
+form or record, reuse one toast instead of stacking a new one per field. Pass
+a stable `id` to replace the message in place:
+
+```ts
+const savedToast = 'contact-saved'
+
+function onFieldSave(field: string) {
+  toast.success(`${field} updated`, { id: savedToast })
+}
+```
+
+Better still, batch the writes and show one toast when they settle:
+`toast.success('Contact updated')`.
+
+Use separate toasts only for unrelated actions, or for a failure that the
+user must see next to the success it replaced.
 
 ### Loading states
 
