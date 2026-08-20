@@ -589,11 +589,16 @@ function goHome() {
       <!-- One flat, date-sorted list — no time-bucket group headers on mobile.
            Folders and files interleave, newest first. -->
       <List class="list-row-px-4">
+        <!-- A row is one interactive element, so a tappable row can't nest
+             the actions button (invalid HTML). The row stays static: the
+             content cell stretches an "open" button over it (rows are
+             `position: relative`) and the actions button layers above with
+             `relative`. `active:` restores the tap feedback a static row
+             doesn't get for free. -->
         <ListRow
           v-for="item in visibleItems"
           :key="item.id"
-          class="h-17"
-          @click="onRowClick(item)"
+          class="h-17 active:bg-surface-gray-2"
         >
           <ListCell>
             <!-- Leading type glyph — the row's `icon` is a lucide class
@@ -608,6 +613,11 @@ function goHome() {
             </div>
           </ListCell>
           <ListCell>
+            <button
+              class="absolute inset-0"
+              :aria-label="`Open ${item.name}`"
+              @click="onRowClick(item)"
+            />
             <div class="min-w-0 flex-1">
               <!-- Sized text in an inner span keeps its own line-height:
                    `leading-snug` + `truncate` on one element would shear off
@@ -623,15 +633,17 @@ function goHome() {
             </div>
           </ListCell>
           <ListCell class="justify-end">
-            <!-- `@click.stop` so opening the action sheet doesn't also drill
-                 into the folder / trigger the row tap. -->
+            <!-- `relative` lifts the button above the stretched open target;
+                 being its sibling (not child), a tap here opens the sheet
+                 without drilling into the item — no stopPropagation needed. -->
             <Button
+              class="relative"
               variant="ghost"
               icon="lucide-ellipsis"
               :label="
                 item.type === 'folder' ? 'Folder actions' : 'File actions'
               "
-              @click.stop="openActions(item)"
+              @click="openActions(item)"
             />
           </ListCell>
         </ListRow>

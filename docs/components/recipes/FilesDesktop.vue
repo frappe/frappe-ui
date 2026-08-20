@@ -649,12 +649,23 @@ const groups = computed(() => {
             :key="group.key"
             :label="group.label"
           >
+            <!-- A row is one interactive element, so a clickable row can't
+                 nest the actions button (invalid HTML). The row stays static
+                 and the name cell stretches an "open" button over it — rows
+                 are `position: relative` — while the actions cell layers its
+                 button above with `relative`. Hover/active classes restore the
+                 interactive look the static row doesn't get for free. -->
             <ListRow
               v-for="item in group.items"
               :key="item.id"
-              @click="onRowClick(item)"
+              class="active:bg-surface-gray-2 sm:rounded-[10px] sm:hover:bg-surface-gray-1"
             >
               <ListCell>
+                <button
+                  class="absolute inset-0"
+                  :aria-label="`Open ${item.name}`"
+                  @click="onRowClick(item)"
+                />
                 <span
                   :class="item.icon"
                   class="size-4 shrink-0 text-ink-gray-5"
@@ -693,7 +704,11 @@ const groups = computed(() => {
                     item.type === 'folder' ? folderActions : fileActions
                   "
                 >
+                  <!-- `relative` lifts the trigger above the stretched open
+                       button; being its sibling (not child), clicks here never
+                       reach it — no stopPropagation needed. -->
                   <Button
+                    class="relative"
                     variant="ghost"
                     icon="lucide-ellipsis"
                     :label="
