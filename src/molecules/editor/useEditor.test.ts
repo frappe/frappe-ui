@@ -223,6 +223,39 @@ describe('frappe-ui/editor minimal primitives', () => {
     })
   })
 
+  it('applies an external HTML write that restores an earlier emitted value', async () => {
+    const { useEditor } = await import('./index')
+    const content = ref('<p>Hello</p>')
+
+    createApp(
+      defineComponent({
+        setup() {
+          useEditor({ content, extensions: [] })
+          return () => null
+        },
+      }),
+    ).mount(document.createElement('div'))
+
+    const editor = editors[0]
+
+    // An internal edit flows out, so '<p>Internal</p>' is the last emitted value.
+    editor.content = '<p>Internal</p>'
+    editor.options.onUpdate({ editor })
+
+    content.value = '<p>External</p>'
+    await nextTick()
+    expect(editor.getHTML()).toBe('<p>External</p>')
+
+    // Back to the earlier value: it no longer matches what the editor holds, so
+    // it is an external write like any other.
+    content.value = '<p>Internal</p>'
+    await nextTick()
+    expect(editor.commands.setContent).toHaveBeenLastCalledWith(
+      '<p>Internal</p>',
+      { emitUpdate: false },
+    )
+  })
+
   it('binds JSON content bidirectionally without echoing external writes back', async () => {
     const { useEditor } = await import('./index')
     const initial = { type: 'doc', content: [] }
