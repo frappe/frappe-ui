@@ -45,13 +45,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide, useSlots } from 'vue'
+import { computed, provide } from 'vue'
 // reka-ui's AcceptableValue omits `boolean`, but the runtime never touches the
 // declared type — the prop is untyped and values are compared with ohash's
 // isEqual — so a yes/no radio works. Cast at the boundary to keep it.
 import { RadioGroupRoot, type AcceptableValue } from 'reka-ui'
 import { useId } from '../../utils/useId'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -67,9 +68,9 @@ const props = withDefaults(defineProps<RadioGroupProps>(), {
 })
 
 const model = defineModel<RadioValue>()
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** The `<Radio>` options. */
   default?: () => any
   /** Overrides the rendered group heading. Receives `{ required }`. */

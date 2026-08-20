@@ -129,9 +129,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, nextTick } from 'vue'
+import { computed, ref, useAttrs, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -147,12 +148,12 @@ const props = withDefaults(defineProps<RatingProps>(), {
 })
 
 const model = defineModel<number>({ default: 0 })
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const attrs = useAttrs()
 
 const isDisabled = computed(() => props.disabled)
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */

@@ -66,9 +66,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -81,9 +82,9 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 })
 
 const model = defineModel<boolean>({ default: false })
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */

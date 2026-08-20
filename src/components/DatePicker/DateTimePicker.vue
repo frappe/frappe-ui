@@ -94,6 +94,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
@@ -126,7 +127,8 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
 })
 const emit = defineEmits<DateTimePickerEmits>()
 
-const slots = defineSlots<DateTimePickerSlots>()
+defineSlots<DateTimePickerSlots>()
+const slots = useReactiveSlots<DateTimePickerSlots>()
 
 // Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
 // PopoverPanel inside PickerShell.

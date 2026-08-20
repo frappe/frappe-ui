@@ -21,6 +21,14 @@ A component that composes atoms into a higher-level control — e.g. `Link` (com
 `Combobox`). Follows the same design rules as atoms (P5 labeling, P10 styling, …). May
 live in `src/components/` or a domain dir (e.g. `frappe/` for Frappe-integrated controls).
 
+**slots (reading your own)**:
+A component that reads its own slots outside the template takes them from
+`useReactiveSlots()`, never `useSlots()`. Vue mutates `instance.slots` in place
+and does not track it, so a `computed` over `useSlots()` caches whichever slots
+were filled at mount. Reading `$slots` in your own template is already correct;
+handing the object to a child (as a prop, or through `provide`) is not, because
+the child re-reads it only when something else re-renders the child.
+
 ## Lifecycle & control
 
 **open**:

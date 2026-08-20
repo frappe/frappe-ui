@@ -36,13 +36,14 @@
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
-import { computed, useSlots, useTemplateRef, type CSSProperties } from 'vue'
+import { computed, useTemplateRef, type CSSProperties } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import PageHeaderBase from './PageHeaderBase.vue'
 import type { PageHeaderMobileProps } from './types'
 
 defineProps<PageHeaderMobileProps>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** A control leading the centered title — usually a `PageHeaderBackButton`. */
   prefix?: () => any
   /** The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`. */
@@ -51,7 +52,7 @@ defineSlots<{
   suffix?: () => any
 }>()
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const hasPrefixSlot = computed(() => Boolean(slots.prefix))
 const hasSuffixSlot = computed(() => Boolean(slots.suffix))
 

@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onScopeDispose, useAttrs, useSlots } from 'vue'
+import { computed, onScopeDispose, useAttrs } from 'vue'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -65,6 +65,7 @@ import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'
 import { menuClasses, normalizeMenuOptions, warnRemoved } from '../Menu/utils'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 
 defineOptions({
   inheritAttrs: false,
@@ -72,7 +73,7 @@ defineOptions({
 
 const openModel = defineModel<boolean>('open', { default: false })
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<DropdownSlots>()
 
 const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [],

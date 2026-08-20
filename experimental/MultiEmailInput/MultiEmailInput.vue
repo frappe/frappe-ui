@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  reactive,
-  ref,
-  useAttrs,
-  useSlots,
-  watch,
-} from 'vue'
+import { computed, nextTick, reactive, ref, useAttrs, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -31,6 +23,7 @@ import {
   LabelingWrapper,
 } from '../../src/components/InputLabeling'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 import { usePortalTarget } from '../../src/composables/usePortalTarget'
 import {
   inputFontSizeClasses,
@@ -65,7 +58,7 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
 })
 
 const emit = defineEmits<MultiEmailInputEmits>()
-const slots = useSlots()
+const slots = useReactiveSlots<MultiEmailInputSlots>()
 const attrs = useAttrs()
 
 // `portalTo` stays undefaulted on purpose: a `'body'` default outranks the

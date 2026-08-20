@@ -156,6 +156,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useReactiveSlots } from '../composables/useReactiveSlots'
 import {
   deltaDirection,
   deltaTone,
@@ -184,7 +185,8 @@ import type { NumberCardProps, NumberCardSlots } from './types'
 // NumberCard forwards a definite `false` and the surface never draws.
 const props = withDefaults(defineProps<NumberCardProps>(), { card: true })
 
-const slots = defineSlots<NumberCardSlots>()
+defineSlots<NumberCardSlots>()
+const slots = useReactiveSlots<NumberCardSlots>()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())
