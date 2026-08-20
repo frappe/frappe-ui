@@ -1,7 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useTextareaAutosize } from '@vueuse/core'
-import { Button, MobileShell, PageHeaderMobile } from 'frappe-ui'
+import {
+  Button,
+  MobileShell,
+  PageHeaderMobile,
+  resolvedColorScheme,
+} from 'frappe-ui'
 import {
   AlignCenter,
   AlignLeft,
@@ -74,12 +79,21 @@ const toolbar = [
   Redo,
 ]
 
+// The inline screenshot is a bitmap, so it cannot follow the theme tokens the
+// rest of the page uses: the dark shot glares on a light page. Keep one file
+// per scheme and swap the path in the document when the theme flips.
+const screenshot = {
+  light: '/recipes/compose-dashboard-light.png',
+  dark: '/recipes/compose-dashboard-dark.png',
+}
+const scheme = ref(resolvedColorScheme())
+
 const title = ref('Design review: new onboarding flow')
 const content = ref(`
   <p>I went through the latest onboarding prototype this morning and left inline comments in Figma. It is close to shippable. The new checklist makes the first run much clearer than the old three-step wizard, and the empty states no longer look broken when someone skips a step.</p>
   <p>Here is a walkthrough of what I saw, plus a few things we need to decide before this ships.</p>
-  <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="First-run screen with the new setup checklist" />
-  <p>The new first-run screen. The checklist on the right replaces the old modal wizard.</p>
+  <img src="${screenshot[scheme.value]}" alt="Subscription overview dashboard after the redesign" />
+  <p>The redesigned overview. Every card now reads from the one date range at the top.</p>
   <h2>What works well</h2>
   <ul>
     <li><p>The progress bar shows how many steps are left, so nobody feels stuck.</p></li>
@@ -113,6 +127,26 @@ const content = ref(`
   <blockquote><p>Let's timebox this to one more revision and ship it behind the <code>new_onboarding</code> flag next week.</p></blockquote>
   <p>Full comments are in the design channel. Add anything I missed before Friday.</p>
 `)
+
+// The docs shell sets `data-theme` on this demo's own <html>, in the iframe as
+// well, so the attribute is what the recipe follows.
+let themeObserver
+onMounted(() => {
+  themeObserver = new MutationObserver(() => {
+    scheme.value = resolvedColorScheme()
+  })
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  })
+})
+onBeforeUnmount(() => themeObserver?.disconnect())
+
+// Only this screenshot's path is rewritten, so edits made to the draft survive
+// the swap, and an image the user inserted themselves is left alone.
+watch(scheme, (to, from) => {
+  content.value = content.value.replace(screenshot[from], screenshot[to])
+})
 
 // Demo-only: turns dropped/pasted files into local object URLs. Real apps
 // return a persisted URL from their upload endpoint.
