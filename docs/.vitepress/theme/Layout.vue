@@ -25,24 +25,46 @@ const recipeDemo = computed(() =>
 // page's theme toggle only touches its own document. `storage` fires in the
 // embedding iframes (same origin, different browsing context), so demos follow
 // live toggles too.
-function syncThemeFromStorage(e: StorageEvent) {
-  if (e.key !== 'theme' || !e.newValue) return
-  // The stored value is a preference and can be `system`; only `light` and
-  // `dark` mean anything to the CSS, so resolve before stamping.
-  const resolved =
-    e.newValue === 'light' || e.newValue === 'dark'
-      ? e.newValue
-      : window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
+const osIsDark = () =>
+  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')
+
+// A preference of `system` is stored as `system` or not stored at all; only
+// `light` and `dark` mean anything to the CSS, so resolve before stamping.
+function applyTheme(preference: string | null) {
+  const resolved = preference ?? (osIsDark()?.matches ? 'dark' : 'light')
   document.documentElement.setAttribute('data-theme', resolved)
 }
+
+function storedTheme() {
+  const stored = localStorage.getItem('theme')
+  return stored === 'light' || stored === 'dark' ? stored : null
+}
+
+function syncThemeFromStorage(e: StorageEvent) {
+  if (e.key !== 'theme' || !e.newValue) return
+  applyTheme(
+    e.newValue === 'light' || e.newValue === 'dark' ? e.newValue : null,
+  )
+}
+
+// On `system` the parent repaints from its own media listener and writes no
+// storage, so nothing reaches the iframe. Watch the OS here too, and only
+// while no explicit preference is stored.
+function syncThemeFromOS() {
+  if (!storedTheme()) applyTheme(null)
+}
+
+let osQuery: MediaQueryList | null | undefined
 onMounted(() => {
-  if (recipeDemo.value) window.addEventListener('storage', syncThemeFromStorage)
+  if (!recipeDemo.value) return
+  window.addEventListener('storage', syncThemeFromStorage)
+  osQuery = osIsDark()
+  osQuery?.addEventListener('change', syncThemeFromOS)
 })
-onBeforeUnmount(() =>
-  window.removeEventListener('storage', syncThemeFromStorage),
-)
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', syncThemeFromStorage)
+  osQuery?.removeEventListener('change', syncThemeFromOS)
+})
 </script>
 
 <template>
