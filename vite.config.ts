@@ -35,6 +35,10 @@ export default defineConfig({
   resolve: {
     alias: {
       'tailwind.config.js': path.resolve(__dirname, 'tailwind.config.js'),
+      // The demo playground imports the library the way an app does, so demo
+      // code is copy-pastable. Deepest specifier first — Vite matches in order.
+      'frappe-ui/list': path.resolve(__dirname, 'src/molecules/list/index.ts'),
+      'frappe-ui': path.resolve(__dirname, 'src/index.ts'),
     },
   },
   optimizeDeps: {

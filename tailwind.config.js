@@ -31,6 +31,7 @@ export default {
   content: [
     './index.html',
     './App.vue',
+    './demo/**/*.{vue,js,ts}',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './experimental/**/*.{vue,js,ts,jsx,tsx}',
     './docs/**/*.{vue,js,ts,md}',
