@@ -1,5 +1,6 @@
 import { h } from 'vue'
 import DateRangePicker from './DateRangePicker.vue'
+import { dayjs } from '../../utils/dayjs'
 import type {
   DateRangePickerActionsSlotProps,
   DatePickerTriggerSlotProps,
@@ -288,6 +289,50 @@ describe('DateRangePicker', () => {
       const last = spy.lastCall.args[0]
       expect(last).to.deep.equal(['2025-06-10', '2025-06-15'])
     })
+  })
+
+  it('typed "last 7 days" commits a range', () => {
+    cy.mount(DateRangePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('last 7 days{enter}')
+    const from = dayjs().subtract(7, 'day').format('YYYY-MM-DD')
+    const to = dayjs().format('YYYY-MM-DD')
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal([from, to])
+    })
+  })
+
+  it('typed "may 4 to may 26" resolves in the current year', () => {
+    cy.mount(DateRangePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    const year = dayjs().year()
+    cy.get('input').click()
+    cy.get('input').type('may 4 to may 26{enter}')
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal([`${year}-05-04`, `${year}-05-26`])
+    })
+  })
+
+  it('naturalLanguage: false makes "tomorrow" revert like before', () => {
+    cy.mount(DateRangePicker, {
+      props: {
+        naturalLanguage: false,
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('tomorrow{enter}')
+    cy.get('input').should('have.value', '')
+    cy.get('@onUpdate').should('not.have.been.called')
   })
 
   // `open` and `toggle` are the public slot contract, so a rename here is a

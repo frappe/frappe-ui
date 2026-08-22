@@ -77,6 +77,13 @@
     default: 'true'
   },
   {
+    name: 'naturalLanguage',
+    description: 'Parses natural language typed into the input, like "tomorrow",\n"next friday", or "may 4" ("last 7 days" for ranges). A strict\n`format` match wins over the parser. Default: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
     name: 'disabled',
     description: 'Disables the trigger input and calendar interactions.',
     required: false,
@@ -178,6 +185,11 @@
 
   const datePickerEmits = [
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -185,11 +197,6 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
     type: '[value: string]'
   }
 ]
@@ -262,6 +269,13 @@
   {
     name: 'typeable',
     description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a date, but cannot type a date manually.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'naturalLanguage',
+    description: 'Parses natural language typed into the input, like "tomorrow",\n"next friday", or "may 4" ("last 7 days" for ranges). A strict\n`format` match wins over the parser. Default: `true`.',
     required: false,
     type: 'boolean',
     default: 'true'
@@ -375,6 +389,11 @@
 
   const dateRangePickerEmits = [
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: DateRangeValue]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -382,11 +401,6 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
-    type: '[value: DateRangeValue]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
     type: '[value: DateRangeValue]'
   }
 ]
@@ -459,6 +473,13 @@
   {
     name: 'typeable',
     description: 'Whether the trigger input accepts typed input. When `false` the user can\nstill open the popover and pick a date, but cannot type a date manually.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'naturalLanguage',
+    description: 'Parses natural language typed into the input, like "tomorrow",\n"next friday", or "may 4" ("last 7 days" for ranges). A strict\n`format` match wins over the parser. Default: `true`.',
     required: false,
     type: 'boolean',
     default: 'true'
@@ -572,6 +593,11 @@
 
   const dateTimePickerEmits = [
   {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -579,11 +605,6 @@
   {
     name: 'change',
     description: 'Fired after the value is committed.',
-    type: '[value: string]'
-  },
-  {
-    name: 'update:modelValue',
-    description: 'Fired when the model value changes.',
     type: '[value: string]'
   }
 ]

@@ -1,5 +1,6 @@
 import { h } from 'vue'
 import DatePicker from './DatePicker.vue'
+import { dayjs } from '../../utils/dayjs'
 import type {
   DatePickerActionsSlotProps,
   DatePickerTriggerSlotProps,
@@ -234,6 +235,39 @@ describe('DatePicker', () => {
     cy.get('input').should('have.value', '2025-06-15')
     cy.get('input').click()
     cy.get('input').clear().type('2025-06-25{enter}')
+    cy.get('input').should('have.value', '2025-06-15')
+  })
+
+  it('typed "tomorrow" resolves to tomorrow', () => {
+    cy.mount(DatePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
+    cy.get('input').click()
+    cy.get('input').type('tomorrow{enter}')
+    cy.get('input').should('have.value', tomorrow)
+    cy.get('@onUpdate').should('have.been.calledWith', tomorrow)
+  })
+
+  it('typed "may 4" resolves to May 4 of the current year', () => {
+    cy.mount(DatePicker, {
+      props: {
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    const may4 = `${dayjs().year()}-05-04`
+    cy.get('input').click()
+    cy.get('input').type('may 4{enter}')
+    cy.get('input').should('have.value', may4)
+    cy.get('@onUpdate').should('have.been.calledWith', may4)
+  })
+
+  it('typed garbage still reverts', () => {
+    cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+    cy.get('input').click()
+    cy.get('input').clear().type('not a date{enter}')
     cy.get('input').should('have.value', '2025-06-15')
   })
 

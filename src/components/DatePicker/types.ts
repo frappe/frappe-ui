@@ -50,6 +50,13 @@ export interface CommonDatePickerProps extends InputLabelingProps {
    */
   typeable?: boolean
 
+  /**
+   * Parses natural language typed into the input, like "tomorrow",
+   * "next friday", or "may 4" ("last 7 days" for ranges). A strict
+   * `format` match wins over the parser. Default: `true`.
+   */
+  naturalLanguage?: boolean
+
   /** Disables the trigger input and calendar interactions. */
   disabled?: boolean
 
