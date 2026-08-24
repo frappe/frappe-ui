@@ -96,7 +96,7 @@ const selected = computed(
         />
         <div
           v-else
-          class="flex size-6 items-center justify-center rounded-full bg-surface-blue-2 text-ink-blue-6"
+          class="flex size-6 items-center justify-center rounded-full bg-surface-gray-2 text-ink-gray-6"
         >
           <span class="lucide-user-plus size-3.5" />
         </div>
@@ -112,7 +112,7 @@ const selected = computed(
       </template>
 
       <template #item-invite="{ query }">
-        <span class="truncate text-ink-blue-6">
+        <span class="truncate">
           {{ query ? `Invite "${query}"` : 'Invite new member' }}
         </span>
       </template>
