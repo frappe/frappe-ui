@@ -130,8 +130,8 @@ describe('daySegments', () => {
       date: '2026-08-04',
       segFromTime: '10:00',
       segToTime: '11:00',
-      isStart: true,
-      isEnd: true,
+      segIsStart: true,
+      segIsEnd: true,
     })
   })
 
@@ -144,8 +144,8 @@ describe('daySegments', () => {
       date: '2026-08-04',
       segFromTime: '22:00',
       segToTime: '24:00',
-      isStart: true,
-      isEnd: false,
+      segIsStart: true,
+      segIsEnd: false,
       fromTime: '22:00',
       toTime: '02:00',
     })
@@ -153,17 +153,24 @@ describe('daySegments', () => {
       date: '2026-08-05',
       segFromTime: '00:00',
       segToTime: '02:00',
-      isStart: false,
-      isEnd: true,
+      segIsStart: false,
+      segIsEnd: true,
     })
   })
 
-  it('does not make a piece for the day an event ends at midnight', () => {
+  it('runs a midnight-ending event to the end of its last day', () => {
     const segs = daySegments(
       timed('a', '2026-08-04', '22:00', '2026-08-05', '00:00'),
     )
     expect(segs).toHaveLength(1)
-    expect(segs[0]).toMatchObject({ segFromTime: '22:00', segToTime: '00:00' })
+    expect(segs[0]).toMatchObject({ segFromTime: '22:00', segToTime: '24:00' })
+  })
+
+  it('keeps a same-day event ending at 00:00 as written', () => {
+    const [seg] = daySegments(
+      timed('a', '2026-08-04', '00:00', '2026-08-04', '00:00'),
+    )
+    expect(seg).toMatchObject({ segFromTime: '00:00', segToTime: '00:00' })
   })
 })
 

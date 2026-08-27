@@ -44,21 +44,21 @@ export interface CalendarEvent {
   endTime?: number
   hallNumber?: number
   idx?: number
-  /** Placement of one day's piece of an event; set by the views, not callers. */
-  segFromTime?: string
-  segToTime?: string
-  isStart?: boolean
-  isEnd?: boolean
   [key: string]: unknown
 }
 
-/** One day's piece of an event in the time grid. */
+/**
+ * One day's piece of an event in the time grid. The `seg*` fields place the
+ * piece; the views set them and strip them again before an event leaves
+ * through an emit.
+ */
 export interface CalendarDaySegment extends CalendarEvent {
   date: string
   segFromTime: string
   segToTime: string
-  isStart: boolean
-  isEnd: boolean
+  /** Whether this piece is the event's first / last day. */
+  segIsStart: boolean
+  segIsEnd: boolean
 }
 
 /** An event clipped to one row of days and packed into a lane. */

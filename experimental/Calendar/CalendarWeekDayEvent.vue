@@ -28,8 +28,8 @@
             active: activeEvent == (props.event?.id || props.event?.name),
             'rounded-l-none': bar && !bar.isStart,
             'rounded-r-none': bar && !bar.isEnd,
-            'rounded-b-none': !isAllDay && props.event.isEnd === false,
-            'rounded-t-none': !isAllDay && props.event.isStart === false,
+            'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
+            'rounded-t-none': !isAllDay && props.event.segIsStart === false,
           }"
           :style="innerStyle"
           @click.prevent="
@@ -81,7 +81,9 @@
             </div>
           </div>
           <div
-            v-if="config.isEditMode && !isAllDay && props.event.isEnd !== false"
+            v-if="
+              config.isEditMode && !isAllDay && props.event.segIsEnd !== false
+            "
             class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
             @mousedown="handleResizeMouseDown"
           />
@@ -224,9 +226,11 @@ const isAllDay = computed(() => isAllDayLike(props.event))
 
 /** Times that place this card: the day's clipped piece when there is one. */
 const placedFromTime = () =>
-  calendarEvent.value.segFromTime || calendarEvent.value.fromTime || '00:00'
+  String(
+    calendarEvent.value.segFromTime || calendarEvent.value.fromTime || '00:00',
+  )
 const placedToTime = () =>
-  calendarEvent.value.segToTime || calendarEvent.value.toTime || '00:00'
+  String(calendarEvent.value.segToTime || calendarEvent.value.toTime || '00:00')
 
 // ── Position styles ───────────────────────────────────────────────────────
 
@@ -313,10 +317,11 @@ const lineClampClass = computed(() => {
 
 // ── Resize ────────────────────────────────────────────────────────────────
 
+// Measured from where this piece starts on its day: for the tail of an
+// overnight event that is midnight, not the event's own start.
 function newEventEndTime(newHeight: string) {
   let newEndTime =
-    parseFloat(newHeight) / minuteHeight +
-    calculateMinutes(calendarEvent.value.fromTime || '00:00')
+    parseFloat(newHeight) / minuteHeight + calculateMinutes(placedFromTime())
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) newEndTime = 1440
   return convertMinutesToHours(newEndTime)

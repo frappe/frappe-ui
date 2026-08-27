@@ -13,14 +13,14 @@ function monthYear(offsetDays = 0) {
 
 const today = monthYear()
 
-/** A date `offsetDays` from today that still falls in today's month. */
-function withinMonth(offsetDays: number) {
-  const date = new Date()
-  const day = date.getDate()
-  const last = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  // Slide the window back when today is near the end of the month.
-  const shift = Math.max(0, day + offsetDays - last)
-  return monthYear(offsetDays - shift)
+/**
+ * A weekday (0 = Sunday) of the current week. Weeks run Sunday to Saturday,
+ * so a span over Monday to Wednesday sits inside one week row whatever day
+ * the suite runs on; the month grid pads with neighbouring months, so it
+ * shows those days whichever month they fall in.
+ */
+function thisWeek(weekday: number) {
+  return monthYear(weekday - new Date().getDay())
 }
 
 const events: CalendarEvent[] = [
@@ -92,8 +92,8 @@ describe('Calendar', () => {
           {
             id: 'EV-STAY',
             title: 'Offsite',
-            fromDate: withinMonth(0),
-            toDate: withinMonth(2),
+            fromDate: thisWeek(1),
+            toDate: thisWeek(3),
             isFullDay: true,
             color: 'cyan',
           },
@@ -101,14 +101,10 @@ describe('Calendar', () => {
       },
     })
 
-    // Bars of a full-day stay across its three days (possibly split by a
-    // week boundary), never a copy per day.
+    // One bar across the stay's three days, never a copy per day.
     cy.get('.event')
       .filter(':contains("Offsite")')
-      .should('have.length.within', 1, 2)
-    cy.get('.event')
-      .filter(':contains("Offsite")')
-      .first()
+      .should('have.length', 1)
       .then(($bar) => {
         const cell = $bar.closest('[data-week-row]')
         const cellWidth = cell.width()! / 7
@@ -123,16 +119,16 @@ describe('Calendar', () => {
           {
             id: 'EV-STAY',
             title: 'Offsite',
-            fromDate: today,
-            toDate: monthYear(1),
+            fromDate: thisWeek(1),
+            toDate: thisWeek(2),
             isFullDay: true,
             color: 'cyan',
           },
           {
             id: 'EV-NIGHT',
             title: 'Release night',
-            fromDate: today,
-            toDate: monthYear(1),
+            fromDate: thisWeek(1),
+            toDate: thisWeek(2),
             fromTime: '22:00',
             toTime: '02:00',
             color: 'violet',

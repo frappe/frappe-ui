@@ -95,17 +95,24 @@ export function isAllDayLike(event: CalendarEvent): boolean {
 export function daySegments(event: CalendarEvent): CalendarDaySegment[] {
   const { start, end } = eventDays(event)
   const count = daysBetween(start, end) + 1
+  // An event that stops at midnight on the day after its last occupied one
+  // runs to the end of that last day, not to its start.
+  const endsAtMidnight =
+    !event.isFullDay &&
+    (event.toDate || start) > end &&
+    isMidnight(event.toTime)
   const segments: CalendarDaySegment[] = []
   for (let i = 0; i < count; i++) {
-    const isStart = i === 0
-    const isEnd = i === count - 1
+    const segIsStart = i === 0
+    const segIsEnd = i === count - 1
     segments.push({
       ...event,
       date: addDays(start, i),
-      segFromTime: isStart ? event.fromTime || '00:00' : '00:00',
-      segToTime: isEnd ? event.toTime || '00:00' : '24:00',
-      isStart,
-      isEnd,
+      segFromTime: segIsStart ? event.fromTime || '00:00' : '00:00',
+      segToTime:
+        segIsEnd && !endsAtMidnight ? event.toTime || '00:00' : '24:00',
+      segIsStart,
+      segIsEnd,
     })
   }
   return segments
@@ -116,9 +123,10 @@ export function daySegments(event: CalendarEvent): CalendarDaySegment[] {
  * vertical slot on every day it covers. Bars are clipped to the row;
  * `isStart`/`isEnd` say whether the event actually begins or ends inside it.
  *
- * Longer bars are placed first, then earlier ones: a week-long stay takes
- * the top lane so the single-day events tuck in beneath it, which is how
- * the eye expects a spanning bar to read.
+ * Bars are placed in order of their first day, and among those starting on
+ * the same day the longer one goes first: a stay that begins on Monday takes
+ * the top lane before Monday's single-day events, so they tuck in beneath
+ * it, which is how the eye expects a spanning bar to read.
  */
 export function layoutRow(
   events: CalendarEvent[],
@@ -246,6 +254,6 @@ export function shiftEventMinutes(event: CalendarEvent, delta: number) {
  * and so on) before an event leaves the calendar through an emit.
  */
 export function stripPlacement(event: CalendarEvent): CalendarEvent {
-  const { segFromTime, segToTime, isStart, isEnd, ...rest } = event
+  const { segFromTime, segToTime, segIsStart, segIsEnd, ...rest } = event
   return rest
 }
