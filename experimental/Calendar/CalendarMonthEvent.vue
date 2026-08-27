@@ -45,7 +45,7 @@
           </div>
           <div class="min-w-0">
             <p
-              class="text-sm-medium text-ink-gray-8"
+              class="event-title text-sm-medium text-ink-gray-8"
               :class="[
                 wrap ? 'line-clamp-2 break-words' : 'truncate',
                 { italic: !props.event.title },

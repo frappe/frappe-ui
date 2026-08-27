@@ -59,7 +59,7 @@
               <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
                 <p
                   ref="eventTitleRef"
-                  class="text-sm-medium text-ink-gray-8"
+                  class="event-title text-sm-medium text-ink-gray-8"
                   :class="lineClampClass"
                 >
                   {{ props.event.title || '[No title]' }}
