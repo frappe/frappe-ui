@@ -46,8 +46,12 @@
           ]"
           @click="calendarActions.handleCellClick($event, date)"
         >
+          <!-- The today pill is a 25px box around the number, so it gets a
+               tighter inset that keeps its digits in the same column as the
+               bare numbers on the other days. -->
           <div
-            class="flex w-full shrink-0 items-center justify-end px-2 text-xs"
+            class="flex w-full shrink-0 items-center justify-end text-xs"
+            :class="isToday(date) ? 'px-[3px]' : 'px-2'"
             :style="{ height: `${HEADER_HEIGHT}px` }"
           >
             <div
