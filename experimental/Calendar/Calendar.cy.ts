@@ -145,12 +145,12 @@ describe('Calendar', () => {
   })
 
   it('names the month on its first day', () => {
-    // Today's own number is a bare pill, so on the 1st there is nothing to see.
-    if (new Date().getDate() === 1) return
+    // Pinned mid-month: today's own number is a bare pill, so on the 1st the
+    // label would not be there to find.
+    cy.clock(new Date(2026, 7, 15), ['Date'])
     cy.mount(Calendar, { props: { events: [] } })
 
-    const short = new Date().toLocaleString('en-US', { month: 'short' })
-    cy.get('[data-strip-date]').first().contains(`${short} 1`).should('exist')
+    cy.get('[data-strip-date]').first().contains('Aug 1').should('exist')
   })
 
   it('stacks the days on a narrow screen', () => {

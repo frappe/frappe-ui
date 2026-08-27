@@ -1,7 +1,6 @@
 import {
   nextTick,
   onBeforeUpdate,
-  onMounted,
   onScopeDispose,
   onUpdated,
   ref,
@@ -106,11 +105,20 @@ export function useStripScroll(
   watch(() => opts.target(), follow)
   if (opts.jump) watch(() => opts.jump!(), follow)
 
-  onMounted(() => {
-    scroller.value?.addEventListener('scroll', onScroll, { passive: true })
-    scrollToDate(opts.target() ?? new Date())
-    topDate.value = topRow()?.dataset.stripDate
-  })
+  // The scroller may not exist at mount — the narrow layout has none — and
+  // appear later when the viewport widens, so it is watched rather than read
+  // once.
+  watch(
+    scroller,
+    (el, previous) => {
+      previous?.removeEventListener('scroll', onScroll)
+      if (!el) return
+      el.addEventListener('scroll', onScroll, { passive: true })
+      scrollToDate(opts.target() ?? new Date())
+      topDate.value = topRow()?.dataset.stripDate
+    },
+    { immediate: true, flush: 'post' },
+  )
 
   onScopeDispose(() => {
     scroller.value?.removeEventListener('scroll', onScroll)

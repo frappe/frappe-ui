@@ -80,9 +80,9 @@
 
             <!-- Room for the lanes of bars laid over this column. -->
             <div
-              v-if="spanLanes(row, col)"
+              v-if="row.lanes[col]"
               class="shrink-0"
-              :style="{ height: `${spanLanes(row, col) * LANE_PITCH}px` }"
+              :style="{ height: `${row.lanes[col]! * LANE_PITCH}px` }"
             />
 
             <div
@@ -177,23 +177,28 @@ interface StripRow {
   bars: CalendarRowBar[]
   /** Single-day events per column. */
   days: CalendarEvent[][]
+  /** Lanes of bars each column has to leave room for. */
+  lanes: number[]
 }
 
 const rows = computed<StripRow[]>(() => {
   const spans = props.events.filter(isSpan)
-  return stripWeeks(props.currentMonth, props.currentYear).map((week) => ({
-    key: parseDate(week[0]!),
-    week,
-    bars: layoutRow(spans, week).bars,
-    days: week.map((date) => dayEvents(props.events, date)),
-  }))
+  return stripWeeks(props.currentMonth, props.currentYear).map((week) => {
+    const { bars } = layoutRow(spans, week)
+    return {
+      key: parseDate(week[0]!),
+      week,
+      bars,
+      days: week.map((date) => dayEvents(props.events, date)),
+      lanes: week.map((_, col) => {
+        const inColumn = barsInColumn(bars, col)
+        return inColumn.length
+          ? Math.max(...inColumn.map((bar) => bar.lane)) + 1
+          : 0
+      }),
+    }
+  })
 })
-
-/** Lanes of bars a column has to leave room for. */
-function spanLanes(row: StripRow, col: number) {
-  const bars = barsInColumn(row.bars, col)
-  return bars.length ? Math.max(...bars.map((bar) => bar.lane)) + 1 : 0
-}
 
 function barStyle(bar: CalendarRowBar) {
   const span = bar.endCol - bar.startCol + 1
