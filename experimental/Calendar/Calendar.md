@@ -64,6 +64,25 @@ emits — persist them and refresh your source of truth from there.
 `cyan`, `blue`, `orange`, `green`) with the CSS variables used per state, for
 building matching UI such as a color picker.
 
+## Month view
+
+The Month view is a strip of week rows covering the month in view, and it
+scrolls when the rows outgrow the calendar's height. The arrows, Today, and
+the month picker move the month and scroll the strip to their date.
+
+Each row is as tall as its busiest day needs. Multi-day events run as bars
+across the top of the row; single-day events sit beneath them in their
+cells with the title wrapping to a second line, so every event is shown —
+there is no "n more".
+
+Below the `sm` breakpoint the days stack instead: a row per day, a heading
+where each month begins, and a week strip above to keep your place. Clicking a date number in either layout
+opens that day in the Day view.
+
+`rangeChange` reports the strip's full extent for the Month view — the
+padding days of the first and last weeks included — so a data source that
+fetches by range has events for every cell.
+
 ## Config
 
 The `config` prop takes a partial `CalendarConfig`; unset keys use these

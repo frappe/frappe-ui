@@ -50,6 +50,10 @@ const events: CalendarEvent[] = [
 ]
 
 describe('Calendar', () => {
+  // Below the `sm` breakpoint the Month view stacks days instead of drawing
+  // week rows; the desktop specs want the rows.
+  beforeEach(() => cy.viewport(1024, 768))
+
   // Behavior 1: renders with default props
   it('renders the month view with the default header', () => {
     cy.mount(Calendar, { props: { events: [] } })
@@ -110,6 +114,65 @@ describe('Calendar', () => {
         const cellWidth = cell.width()! / 7
         expect($bar.width()!).to.be.greaterThan(cellWidth * 1.5)
       })
+  })
+
+  it('sizes a month row to its day and shows every event in it', () => {
+    const titles = [
+      'Standup',
+      'Design review',
+      'Interview',
+      'Team lunch',
+      'Retro',
+    ]
+    cy.mount(Calendar, {
+      props: {
+        events: titles.map((title, i) => ({
+          id: `EV-${i}`,
+          title,
+          fromDate: today,
+          toDate: today,
+          fromTime: `${9 + i}:00`,
+          toTime: `${10 + i}:00`,
+        })),
+      },
+    })
+
+    // Five events on one day: all five rendered, nothing folded behind a
+    // count.
+    for (const title of titles)
+      cy.contains('.event', title).should('be.visible')
+    cy.contains('more').should('not.exist')
+  })
+
+  it('names the month on its first day', () => {
+    // Today's own number is a bare pill, so on the 1st there is nothing to see.
+    if (new Date().getDate() === 1) return
+    cy.mount(Calendar, { props: { events: [] } })
+
+    const short = new Date().toLocaleString('en-US', { month: 'short' })
+    cy.get('[data-strip-date]').first().contains(`${short} 1`).should('exist')
+  })
+
+  it('stacks the days on a narrow screen', () => {
+    cy.viewport(390, 800)
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-STAY',
+            title: 'Offsite',
+            fromDate: thisWeek(1),
+            toDate: thisWeek(3),
+            isFullDay: true,
+          },
+        ],
+      },
+    })
+
+    // No week-row grid; a row per day, with a stay saying which day it is on.
+    cy.get('[data-week-row]').should('not.exist')
+    cy.contains('.event', 'Offsite').should('have.length.at.least', 1)
+    cy.contains('Day 1 of 3').should('exist')
   })
 
   it('puts a multi-day event in the all-day row and splits an overnight one', () => {

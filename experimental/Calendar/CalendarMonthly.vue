@@ -1,5 +1,19 @@
 <template>
-  <div class="flex flex-1 flex-col overflow-scroll">
+  <CalendarMonthStack
+    v-if="isNarrow"
+    :events="events"
+    :currentMonth="currentMonth"
+    :currentYear="currentYear"
+    :currentDate="currentDate"
+    :jumpDate="jumpDate"
+    :config="config"
+  >
+    <template #event-popover-content="slotProps">
+      <slot name="event-popover-content" v-bind="slotProps" />
+    </template>
+  </CalendarMonthStack>
+
+  <div v-else class="flex min-h-0 flex-1 flex-col">
     <!-- Day List -->
     <div class="grid w-full grid-cols-7">
       <span
@@ -11,102 +25,105 @@
     </div>
 
     <!--
-      Date Grid. Each week is a row of seven cells with the row's events laid
-      over it as bars: an event covering several days is one bar across them,
-      packed into a lane it keeps for the whole row, and a single-day event is
-      a one-column bar in the same lane system. The cells beneath take clicks
-      and drops, and show how many lanes did not fit.
+      The strip. One row per week of the month, each at least as tall as its
+      busiest day needs: a stay across several days is a bar in a lane at the
+      top of the row, single-day events flow beneath it in their cells. Rows
+      share whatever height is left over, and the strip scrolls once they
+      outgrow it.
     -->
     <div
-      class="grid w-full flex-1 border-outline-gray-1"
-      :class="[
-        weeks.length > 5 ? 'grid-rows-6' : 'grid-rows-5',
-        !config.noBorder && 'border-[0.5px]',
-      ]"
+      ref="scroller"
+      class="relative min-h-0 flex-1 overflow-y-auto border-outline-gray-1"
+      :class="!config.noBorder && 'border-[0.5px]'"
     >
-      <div
-        v-for="(week, weekIdx) in weeks"
-        :key="parseDate(week[0])"
-        :ref="(el) => weekIdx === 0 && (firstRow = el as HTMLElement)"
-        class="relative grid grid-cols-7"
-        :style="{ minHeight: `${rowMinHeight(weekIdx)}px` }"
-        data-week-row
-        @dragover.prevent
-        @dragenter.prevent
-        @drop="onDrop($event, week)"
-      >
+      <div class="flex min-h-full flex-col">
         <div
-          v-for="(date, col) in week"
-          :key="parseDate(date)"
-          class="flex flex-col overflow-hidden"
-          :class="[
-            config.noBorder ? 'border-l border-t border-0' : 'border-[0.5px]',
-            config.noBorder && col === 0 && 'border-l-0',
-            isWeekend(date, config) && 'bg-surface-gray-1',
-          ]"
-          @click="calendarActions.handleCellClick($event, date)"
+          v-for="row in rows"
+          :key="row.key"
+          class="relative grid flex-auto grid-cols-7 border-b border-outline-gray-1 last:border-b-0"
+          :data-strip-date="row.key"
+          data-week-row
+          @dragover.prevent
+          @dragenter.prevent
+          @drop="onDrop($event, row.week)"
         >
-          <!-- The today pill is a 25px box around the number, so it gets a
-               tighter inset that keeps its digits in the same column as the
-               bare numbers on the other days. -->
           <div
-            class="flex w-full shrink-0 items-center justify-end text-xs"
-            :class="isToday(date) ? 'px-[3px]' : 'px-2'"
-            :style="{ height: `${HEADER_HEIGHT}px` }"
+            v-for="(date, col) in row.week"
+            :key="parseDate(date)"
+            class="flex min-w-0 flex-col border-outline-gray-1"
+            :class="[
+              col > 0 && 'border-l',
+              isWeekend(date, config) && 'bg-surface-gray-1',
+            ]"
+            @click="calendarActions.handleCellClick($event, date)"
           >
+            <!-- The today pill is a 25px box around the number, so it gets a
+                 tighter inset that keeps its digits in the same column as the
+                 bare numbers on the other days. -->
             <div
-              class="cursor-pointer"
-              :class="[
-                !isCurrentMonth(date)
-                  ? 'text-ink-gray-4'
-                  : isToday(date)
+              class="flex shrink-0 items-center justify-end text-xs"
+              :class="isToday(date) ? 'px-[3px]' : 'px-2'"
+              :style="{ height: `${HEADER_HEIGHT}px` }"
+            >
+              <button
+                class="cursor-pointer whitespace-nowrap"
+                :class="[
+                  isToday(date)
                     ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded-4 size-[25px]'
                     : 'text-ink-gray-8',
-              ]"
-              @click.stop="
-                isCurrentMonth(date)
-                  ? calendarActions.updateActiveView('Day', date)
-                  : calendarActions.updateActiveView(
-                      'Day',
-                      date,
-                      isPreviousMonth(date),
-                      isNextMonth(date),
-                    )
-              "
+                ]"
+                @click.stop="openDay(date)"
+              >
+                {{ dayLabel(date) }}
+              </button>
+            </div>
+
+            <!-- Room for the lanes of bars laid over this column. -->
+            <div
+              v-if="spanLanes(row, col)"
+              class="shrink-0"
+              :style="{ height: `${spanLanes(row, col) * LANE_PITCH}px` }"
+            />
+
+            <div
+              v-if="row.days[col]!.length"
+              class="flex flex-col gap-1 px-0.5 pb-1.5"
             >
-              {{ date.getDate() }}
+              <CalendarMonthEvent
+                v-for="event in row.days[col]"
+                :key="event.id"
+                :event="event"
+                :date="date"
+                wrap
+                class="cursor-pointer"
+                :draggable="config.isEditMode"
+                @dragstart="onDragStart($event, event, row.week)"
+                @dragend="$event.target.style.opacity = '1'"
+              >
+                <template #event-popover-content="slotProps">
+                  <slot name="event-popover-content" v-bind="slotProps" />
+                </template>
+              </CalendarMonthEvent>
             </div>
           </div>
 
-          <button
-            v-if="hiddenCount(weekIdx, col)"
-            class="mx-1 w-fit rounded-1 px-1.5 text-base-medium text-ink-gray-6 hover:bg-surface-gray-1"
-            :style="{
-              marginTop: `${visibleLanes(weekIdx) * LANE_PITCH}px`,
-              height: `${MORE_HEIGHT}px`,
-            }"
-            @click.stop="emit('setCurrentDate', date)"
+          <CalendarMonthEvent
+            v-for="bar in row.bars"
+            :key="bar.event.id"
+            :event="bar.event"
+            :date="row.week[bar.startCol]!"
+            :bar="bar"
+            class="absolute cursor-pointer"
+            :style="barStyle(bar)"
+            :draggable="config.isEditMode"
+            @dragstart="onDragStart($event, bar.event, row.week)"
+            @dragend="$event.target.style.opacity = '1'"
           >
-            {{ hiddenCount(weekIdx, col) }} more
-          </button>
+            <template #event-popover-content="slotProps">
+              <slot name="event-popover-content" v-bind="slotProps" />
+            </template>
+          </CalendarMonthEvent>
         </div>
-
-        <CalendarMonthEvent
-          v-for="bar in visibleBars(weekIdx)"
-          :key="bar.event.id"
-          :event="bar.event"
-          :date="week[bar.startCol]"
-          :bar="bar"
-          class="absolute cursor-pointer"
-          :style="barStyle(bar)"
-          :draggable="config.isEditMode"
-          @dragstart="onDragStart($event, bar.event, week)"
-          @dragend="$event.target.style.opacity = '1'"
-        >
-          <template #event-popover-content="slotProps">
-            <slot name="event-popover-content" v-bind="slotProps" />
-          </template>
-        </CalendarMonthEvent>
       </div>
     </div>
   </div>
@@ -114,8 +131,8 @@
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import { useElementSize } from '@vueuse/core'
-import { daysList, parseDate, isWeekend } from './calendarUtils'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { daysList, isWeekend, parseDate } from './calendarUtils'
 import {
   LANE_HEIGHT,
   LANE_PITCH,
@@ -124,8 +141,11 @@ import {
   layoutRow,
   shiftEventDays,
 } from './eventSpan'
+import { dayEvents, isSpan, shortMonth, stripWeeks } from './monthStrip'
 import { useNow } from './composables/useNow'
+import { useStripScroll } from './composables/useStripScroll'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
+import CalendarMonthStack from './CalendarMonthStack.vue'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -135,71 +155,44 @@ import {
 
 const props = defineProps<{
   events: CalendarEvent[]
-  currentMonthDates: Date[]
   currentMonth: number
+  currentYear: number
+  /** The day navigation last landed on; the strip scrolls to its row. */
+  currentDate?: Date
+  /** Set by Today and the month picker; scrolls there even if it is the same day. */
+  jumpDate?: Date
   config: CalendarConfig
-}>()
-
-const emit = defineEmits<{
-  setCurrentDate: [date: Date]
 }>()
 
 /** The date-number strip at the top of every cell. */
 const HEADER_HEIGHT = 32
-/** The "n more" button that stands in for the lanes that did not fit. */
-const MORE_HEIGHT = 20
 
-/**
- * Lanes every row makes room for whatever the calendar's height. A row grows
- * past this when the grid has height to spare, and the outer scroll takes
- * over when it has too little.
- */
-const DEFAULT_LANES = 2
+// Seven columns do not survive a phone's width; the days stack instead.
+const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
 
-const weeks = computed(() => {
-  const dates = [...props.currentMonthDates]
-  const rows: Date[][] = []
-  while (dates.length) rows.push(dates.splice(0, 7))
-  return rows
+interface StripRow {
+  key: string
+  week: Date[]
+  /** Multi-day events, packed into lanes across the row. */
+  bars: CalendarRowBar[]
+  /** Single-day events per column. */
+  days: CalendarEvent[][]
+}
+
+const rows = computed<StripRow[]>(() => {
+  const spans = props.events.filter(isSpan)
+  return stripWeeks(props.currentMonth, props.currentYear).map((week) => ({
+    key: parseDate(week[0]!),
+    week,
+    bars: layoutRow(spans, week).bars,
+    days: week.map((date) => dayEvents(props.events, date)),
+  }))
 })
 
-const rows = computed(() =>
-  weeks.value.map((week) => layoutRow(props.events, week)),
-)
-
-// All rows share a height, so measuring the first is measuring every one.
-const firstRow = ref<HTMLElement | null>(null)
-const { height: rowHeight } = useElementSize(firstRow)
-
-function rowMinHeight(weekIdx: number) {
-  const laneCount = rows.value[weekIdx]?.laneCount ?? 0
-  const lanes = Math.min(laneCount, DEFAULT_LANES)
-  const more = laneCount > lanes ? MORE_HEIGHT : 0
-  return HEADER_HEIGHT + lanes * LANE_PITCH + more
-}
-
-/**
- * Lanes a row can show. When they all fit, every lane; otherwise as many as
- * leave room for the "n more" button beneath them. Before the first measure
- * the default allowance keeps the grid from flashing empty.
- */
-function visibleLanes(weekIdx: number) {
-  const laneCount = rows.value[weekIdx]?.laneCount ?? 0
-  if (!rowHeight.value) return Math.min(laneCount, DEFAULT_LANES)
-  const room = rowHeight.value - HEADER_HEIGHT
-  if (laneCount * LANE_PITCH <= room) return laneCount
-  return Math.max(0, Math.floor((room - MORE_HEIGHT) / LANE_PITCH))
-}
-
-function visibleBars(weekIdx: number) {
-  const visible = visibleLanes(weekIdx)
-  return rows.value[weekIdx]?.bars.filter((bar) => bar.lane < visible) ?? []
-}
-
-function hiddenCount(weekIdx: number, col: number) {
-  const visible = visibleLanes(weekIdx)
-  const bars = rows.value[weekIdx]?.bars ?? []
-  return barsInColumn(bars, col).filter((bar) => bar.lane >= visible).length
+/** Lanes of bars a column has to leave room for. */
+function spanLanes(row: StripRow, col: number) {
+  const bars = barsInColumn(row.bars, col)
+  return bars.length ? Math.max(...bars.map((bar) => bar.lane)) + 1 : 0
 }
 
 function barStyle(bar: CalendarRowBar) {
@@ -218,16 +211,12 @@ function isToday(date: Date) {
   return parseDate(date) === parseDate(now.value)
 }
 
-function isCurrentMonth(date: Date) {
-  return date.getMonth() === props.currentMonth
-}
-
-function isPreviousMonth(date: Date) {
-  return date.getMonth() === props.currentMonth - 1
-}
-
-function isNextMonth(date: Date) {
-  return date.getMonth() === props.currentMonth + 1
+/** The first of a month says which month, since the strip runs across them. */
+function dayLabel(date: Date) {
+  if (date.getDate() === 1 && !isToday(date)) {
+    return `${shortMonth(date)} 1`
+  }
+  return date.getDate()
 }
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)
@@ -236,11 +225,23 @@ if (!calendarActions) {
   throw new Error('CalendarMonthly must be rendered inside Calendar.')
 }
 
+function openDay(date: Date) {
+  calendarActions!.setCalendarDate(date)
+  calendarActions!.updateActiveView('Day', date)
+}
+
+const scroller = ref<HTMLElement | null>(null)
+
+useStripScroll(scroller, {
+  target: () => props.currentDate,
+  jump: () => props.jumpDate,
+})
+
 /** The day under a pointer, from its position across a week row. */
 function dateAtPointer(row: HTMLElement, clientX: number, week: Date[]) {
   const rect = row.getBoundingClientRect()
   const col = Math.floor(((clientX - rect.left) / rect.width) * 7)
-  return parseDate(week[Math.max(0, Math.min(6, col))])
+  return parseDate(week[Math.max(0, Math.min(6, col))]!)
 }
 
 // A drag carries the event and the day it was picked up on, so that a drop
@@ -265,7 +266,7 @@ const onDragStart = (
   event.dataTransfer.setData('calendarEventID', String(calendarEvent.id))
   event.dataTransfer.setData(
     'calendarGrabDate',
-    row ? dateAtPointer(row, event.clientX, week) : parseDate(week[0]),
+    row ? dateAtPointer(row, event.clientX, week) : parseDate(week[0]!),
   )
 }
 
@@ -287,6 +288,6 @@ const onDrop = (event: DragEvent, week: Date[]) => {
   const shift = daysBetween(grabDate, dropDate)
   if (!shift) return
   shiftEventDays(calendarEvent, shift)
-  calendarActions.updateEventState(calendarEvent)
+  calendarActions!.updateEventState(calendarEvent)
 }
 </script>

@@ -38,17 +38,25 @@
           :style="eventBorderStyle"
         />
         <div
-          class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+          class="relative flex h-full min-w-0 select-none items-start gap-2 overflow-hidden"
         >
           <div v-if="config.showIcon && eventIcon">
             <component :is="eventIcon" class="h-4 w-4 text-ink-gray-8" />
           </div>
-          <p
-            class="text-sm-medium truncate text-ink-gray-8"
-            :class="{ italic: !props.event.title }"
-          >
-            {{ props.event.title || '[No title]' }}
-          </p>
+          <div class="min-w-0">
+            <p
+              class="text-sm-medium text-ink-gray-8"
+              :class="[
+                wrap ? 'line-clamp-2 break-words' : 'truncate',
+                { italic: !props.event.title },
+              ]"
+            >
+              {{ props.event.title || '[No title]' }}
+            </p>
+            <p v-if="subtitle" class="event-subtitle mt-0.5 truncate text-xs">
+              {{ subtitle }}
+            </p>
+          </div>
         </div>
       </div>
     </template>
@@ -106,6 +114,14 @@ const props = defineProps<{
    * squared off, so a stay that began last week reads as continuing.
    */
   bar?: CalendarRowBar
+  /**
+   * Lets the title run to a second line instead of cutting it off. The
+   * Month strip sizes its rows to their content, so a pill there can afford
+   * to show its whole title.
+   */
+  wrap?: boolean
+  /** A second, quieter line under the title — a time, or "Day 2 of 3". */
+  subtitle?: string
 }>()
 
 defineOptions({ inheritAttrs: false })
