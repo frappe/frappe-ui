@@ -472,7 +472,6 @@ watch(currentDay, (newVal) => {
   setCalendarDate(target)
 })
 
-
 function increment() {
   incrementClickEvents[activeView.value]()
   syncSelectedMonth(currentYear.value, currentMonth.value)
@@ -489,8 +488,17 @@ const incrementClickEvents: Record<CalendarMode, () => void> = {
   Day: incrementDay,
 }
 
+// decrementMonth lands on the month's last day, which is right for stepping
+// back a day across a month edge but scrolls the Month strip to its bottom;
+// the Month view's own arrow lands on the first day, as the other arrow does.
+function decrementMonthView() {
+  decrementMonth()
+  date.value = findFirstDateOfMonth(currentMonth.value, currentYear.value)
+  week.value = findCurrentWeek(currentMonthDates.value[date.value])
+}
+
 const decrementClickEvents: Record<CalendarMode, () => void> = {
-  Month: decrementMonth,
+  Month: decrementMonthView,
   Week: decrementWeek,
   Day: decrementDay,
 }
