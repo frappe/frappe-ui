@@ -171,6 +171,8 @@ export interface CalendarActions {
     isPreviousMonth?: boolean,
     isNextMonth?: boolean,
   ) => void
+  /** Moves the calendar to a date, or to today when none is given. */
+  setCalendarDate: (date?: Date | string) => void
   props: CalendarPublicProps
 }
 

@@ -73,7 +73,6 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     const _color = color(props.event.color || 'green')
     return {
       '--bg': _color.bg,
-      '--text': _color.text,
       '--subtext': _color.subtext,
       '--text-active': _color.textActive,
       '--subtext-active': _color.subtextActive,

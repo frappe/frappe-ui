@@ -9,6 +9,25 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Calendar — the Month view is a continuous strip that shows every event
+
+The Month view no longer draws a fixed 5- or 6-row grid that hid whatever
+did not fit behind an "n more" button. Its week rows grow to fit their
+events and the view scrolls when they outgrow it, and titles wrap instead of
+truncating. Below the `sm` breakpoint the days stack in a list instead of a
+grid.
+
+- **Behavior change:** `rangeChange` for the `Month` view now reports the
+  grid's extent — the padding days of its first and last weeks included —
+  rather than the first to the last of the month.
+- Days outside the month in view are no longer dimmed; the first of each
+  month is labelled with its month instead (`Sep 1`).
+- Event titles in the Week and Day views are `ink-gray-8`, as in the Month
+  view, rather than the event colour's text shade; the colour stays on the
+  bar and background.
+- `CalendarActions` (the `CALENDAR_ACTIONS_KEY` injection) gains
+  `setCalendarDate`.
+
 ### Calendar — `toDate` is honored, so events span the days they cover (breaking, silent)
 
 An event's `toDate` was ignored: everything rendered on `fromDate`. It now

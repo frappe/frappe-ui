@@ -14,9 +14,6 @@
 .event {
   background-color: var(--bg);
 }
-.event .event-title {
-  color: var(--text);
-}
 .event .event-subtitle {
   color: var(--subtext);
 }
@@ -26,6 +23,8 @@
 .event.active {
   background-color: var(--bg-active);
 }
+/* A selected event may sit on a dark surface (violet, pink, cyan), where the
+   ink-gray-8 title the pills wear otherwise would vanish. */
 .event.active .event-title {
   color: var(--text-active, var(--ink-base));
 }

@@ -67,9 +67,10 @@
       v-if="activeView === 'Month'"
       :events="events"
       :currentMonth="currentMonth"
-      :currentMonthDates="currentMonthDates"
+      :currentYear="currentYear"
+      :currentDate="selectedDay"
+      :jumpDate="currentDate"
       :config="overrideConfig"
-      @setCurrentDate="(d) => updateCurrentDate(d)"
     >
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />
@@ -143,6 +144,7 @@ import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
+import { stripRange } from './monthStrip'
 import {
   ACTIVE_VIEW_KEY,
   CALENDAR_ACTIONS_KEY,
@@ -323,6 +325,7 @@ provide(CALENDAR_ACTIONS_KEY, {
   deleteEvent,
   handleCellClick,
   updateActiveView,
+  setCalendarDate,
   props,
 })
 
@@ -469,12 +472,6 @@ watch(currentDay, (newVal) => {
   setCalendarDate(target)
 })
 
-function updateCurrentDate(d: Date) {
-  activeView.value = 'Day'
-  date.value = findIndexOfDate(d)
-  week.value = findCurrentWeek(d)
-}
-
 function increment() {
   incrementClickEvents[activeView.value]()
   syncSelectedMonth(currentYear.value, currentMonth.value)
@@ -491,8 +488,17 @@ const incrementClickEvents: Record<CalendarMode, () => void> = {
   Day: incrementDay,
 }
 
+// decrementMonth lands on the month's last day, which is right for stepping
+// back a day across a month edge but scrolls the Month strip to its bottom;
+// the Month view's own arrow lands on the first day, as the other arrow does.
+function decrementMonthView() {
+  decrementMonth()
+  date.value = findFirstDateOfMonth(currentMonth.value, currentYear.value)
+  week.value = findCurrentWeek(currentMonthDates.value[date.value])
+}
+
 const decrementClickEvents: Record<CalendarMode, () => void> = {
-  Month: decrementMonth,
+  Month: decrementMonthView,
   Week: decrementWeek,
   Day: decrementDay,
 }
@@ -715,15 +721,11 @@ function getVisibleRange() {
     }
   }
 
-  const start = dayjs(
-    new Date(currentYear.value, currentMonth.value, 1),
-  ).startOf('day')
-  const end = dayjs(
-    new Date(currentYear.value, currentMonth.value + 1, 0),
-  ).endOf('day')
+  // The Month strip's first and last weeks reach into the neighbouring months.
+  const range = stripRange(currentMonth.value, currentYear.value)
   return {
-    startDate: start.format('YYYY-MM-DD'),
-    endDate: end.format('YYYY-MM-DD'),
+    startDate: dayjs(range.start).format('YYYY-MM-DD'),
+    endDate: dayjs(range.end).format('YYYY-MM-DD'),
   }
 }
 
