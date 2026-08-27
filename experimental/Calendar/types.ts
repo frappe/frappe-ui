@@ -21,9 +21,16 @@ export interface CalendarEvent {
   name?: string | number
   title?: string
   date?: string
+  /**
+   * First and last day, inclusive. An event whose `toDate` is later than
+   * its `fromDate` spans those days: the Month view draws it as one bar,
+   * the Week view puts it in the all-day row (or, for a timed event shorter
+   * than a day, splits it at midnight in the time grid).
+   */
   fromDate?: string
   toDate?: string
   fromTime?: string
+  /** A timed event ending at `00:00` on `toDate` stops as that day begins. */
   toTime?: string
   fromDateTime?: string
   toDateTime?: string
@@ -31,12 +38,40 @@ export interface CalendarEvent {
   venue?: string
   color?: string
   type?: string
+  /** Ignores the times and covers `fromDate`..`toDate` whole. */
   isFullDay?: boolean
   startTime?: number
   endTime?: number
   hallNumber?: number
   idx?: number
   [key: string]: unknown
+}
+
+/**
+ * One day's piece of an event in the time grid. The `seg*` fields place the
+ * piece; the views set them and strip them again before an event leaves
+ * through an emit.
+ */
+export interface CalendarDaySegment extends CalendarEvent {
+  date: string
+  segFromTime: string
+  segToTime: string
+  /** Whether this piece is the event's first / last day. */
+  segIsStart: boolean
+  segIsEnd: boolean
+}
+
+/** An event clipped to one row of days and packed into a lane. */
+export interface CalendarRowBar {
+  event: CalendarEvent
+  /** First and last column the bar covers, inclusive. */
+  startCol: number
+  endCol: number
+  /** Vertical slot; the same across every day of the row. */
+  lane: number
+  /** Whether the event begins / ends inside this row. */
+  isStart: boolean
+  isEnd: boolean
 }
 
 export interface CalendarConfig {

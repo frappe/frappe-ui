@@ -142,6 +142,7 @@ import CalendarDaily from './CalendarDaily.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
+import { stripPlacement } from './eventSpan'
 import {
   ACTIVE_VIEW_KEY,
   CALENDAR_ACTIONS_KEY,
@@ -334,6 +335,8 @@ function createNewEvent(event: CalendarEvent) {
 }
 
 function updateEventState(event: CalendarEvent) {
+  // A view may hand back one day's piece of the event; store the whole one.
+  event = stripPlacement(event)
   const eventID = event.id
   let eventIndex = events.value.findIndex((e) => e.id === eventID)
   event.fromDateTime = event.fromDate + ' ' + event.fromTime

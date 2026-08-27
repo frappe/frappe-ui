@@ -13,6 +13,16 @@ function monthYear(offsetDays = 0) {
 
 const today = monthYear()
 
+/**
+ * A weekday (0 = Sunday) of the current week. Weeks run Sunday to Saturday,
+ * so a span over Monday to Wednesday sits inside one week row whatever day
+ * the suite runs on; the month grid pads with neighbouring months, so it
+ * shows those days whichever month they fall in.
+ */
+function thisWeek(weekday: number) {
+  return monthYear(weekday - new Date().getDay())
+}
+
 const events: CalendarEvent[] = [
   {
     id: 'EV-001',
@@ -73,6 +83,75 @@ describe('Calendar', () => {
     cy.get('body').type('{del}')
     cy.get('@onDelete').should('have.been.calledWith', 'EV-001')
     cy.contains('Design review').should('not.exist')
+  })
+
+  it('draws a multi-day event as one bar in the month view', () => {
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-STAY',
+            title: 'Offsite',
+            fromDate: thisWeek(1),
+            toDate: thisWeek(3),
+            isFullDay: true,
+            color: 'cyan',
+          },
+        ],
+      },
+    })
+
+    // One bar across the stay's three days, never a copy per day.
+    cy.get('.event')
+      .filter(':contains("Offsite")')
+      .should('have.length', 1)
+      .then(($bar) => {
+        const cell = $bar.closest('[data-week-row]')
+        const cellWidth = cell.width()! / 7
+        expect($bar.width()!).to.be.greaterThan(cellWidth * 1.5)
+      })
+  })
+
+  it('puts a multi-day event in the all-day row and splits an overnight one', () => {
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-STAY',
+            title: 'Offsite',
+            fromDate: thisWeek(1),
+            toDate: thisWeek(2),
+            isFullDay: true,
+            color: 'cyan',
+          },
+          {
+            id: 'EV-NIGHT',
+            title: 'Release night',
+            fromDate: thisWeek(1),
+            toDate: thisWeek(2),
+            fromTime: '22:00',
+            toTime: '02:00',
+            color: 'violet',
+          },
+        ],
+        config: { defaultMode: 'Week' },
+      },
+    })
+
+    // The all-day row holds the stay as a bar spanning its days.
+    cy.get('[data-day-columns]')
+      .first()
+      .within(() => {
+        cy.contains('.event', 'Offsite').should('exist')
+      })
+    // The overnight event shows once per day in the time grid, each piece
+    // still labelled with the whole event's times.
+    cy.get('[data-time-grid] .event')
+      .filter(':contains("Release night")')
+      .should('have.length', 2)
+      .each(($piece) => {
+        expect($piece.text()).to.contain('10 pm - 2 am')
+      })
   })
 
   it('emits rangeChange with the visible range on mount', () => {

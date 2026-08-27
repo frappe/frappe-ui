@@ -126,6 +126,7 @@ import {
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
+import { eventDays } from './eventSpan'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
   CALENDAR_ACTIONS_KEY,
@@ -141,8 +142,8 @@ const props = defineProps<{
 const timedEvents = computed(
   () => useCalendarData(props.events).timedEvents.value,
 )
-const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value,
+const allDayEvents = computed(
+  () => useCalendarData(props.events).allDayEvents.value,
 )
 const gridRef = ref<HTMLElement | null>(null)
 const hourHeight = props.config.hourHeight
@@ -150,9 +151,14 @@ const minuteHeight = hourHeight / 60
 
 const showCollapsable = ref(false)
 const isCollapsed = ref(true)
-const dayFullDayEvents = computed(
-  () => fullDayEvents.value?.[parseDate(props.currentDate)] || [],
-)
+// Every all-day-row event covering this day, a multi-day one included.
+const dayFullDayEvents = computed(() => {
+  const day = parseDate(props.currentDate)
+  return allDayEvents.value.filter((event) => {
+    const { start, end } = eventDays(event)
+    return start <= day && day <= end
+  })
+})
 
 function updateFullDayEventsState() {
   // Show collapsible if more than 4 events

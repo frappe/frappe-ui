@@ -21,67 +21,73 @@
     -->
     <template #trigger>
       <div class="flex" :style="containerStyle">
-      <div
-        ref="eventRef"
-        class="event min-h-6 mx-px shadow rounded-4 transition-all duration-75 shrink-0"
-        :class="{
-          active: activeEvent == (props.event?.id || props.event?.name),
-        }"
-        :style="innerStyle"
-        @click.prevent="
-          handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
-        "
-        @dblclick.prevent="handleEventEdit($event)"
-        @mousedown="
-          handleRepositionMouseDown(
-            $event,
-            isPopoverOpen,
-            () => (isPopoverOpen = false),
-          )
-        "
-      >
-        <div class="flex gap-1.5 h-full p-[5px]">
-          <div
-            v-if="props.event.fromTime"
-            class="event-border h-full w-[2px] rounded-4 shrink-0"
-            :style="eventBorderStyle"
-          />
-          <div
-            class="relative flex h-full select-none items-start gap-2 overflow-hidden"
-          >
-            <div v-if="config.showIcon && eventIcon">
-              <component :is="eventIcon" class="h-4 w-4" />
-            </div>
-            <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
-              <p
-                ref="eventTitleRef"
-                class="text-sm-medium event-title"
-                :class="lineClampClass"
-              >
-                {{ props.event.title || '[No title]' }}
-              </p>
-              <p
-                ref="eventTimeRef"
-                v-if="!props.event.isFullDay"
-                class="text-xs event-subtitle"
-              >
-                {{
-                  formattedDuration(
-                    updatedEvent.fromTime || '',
-                    updatedEvent.toTime || '',
-                    config.timeFormat,
-                  )
-                }}
-              </p>
+        <div
+          ref="eventRef"
+          class="event min-h-6 mx-px shadow rounded-4 transition-all duration-75 shrink-0"
+          :class="{
+            active: activeEvent == (props.event?.id || props.event?.name),
+            'rounded-l-none': bar && !bar.isStart,
+            'rounded-r-none': bar && !bar.isEnd,
+            'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
+            'rounded-t-none': !isAllDay && props.event.segIsStart === false,
+          }"
+          :style="innerStyle"
+          @click.prevent="
+            handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
+          "
+          @dblclick.prevent="handleEventEdit($event)"
+          @mousedown="
+            handleRepositionMouseDown(
+              $event,
+              isPopoverOpen,
+              () => (isPopoverOpen = false),
+            )
+          "
+        >
+          <div class="flex gap-1.5 h-full p-[5px]">
+            <div
+              v-if="props.event.fromTime"
+              class="event-border h-full w-[2px] rounded-4 shrink-0"
+              :style="eventBorderStyle"
+            />
+            <div
+              class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+            >
+              <div v-if="config.showIcon && eventIcon">
+                <component :is="eventIcon" class="h-4 w-4" />
+              </div>
+              <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+                <p
+                  ref="eventTitleRef"
+                  class="text-sm-medium event-title"
+                  :class="lineClampClass"
+                >
+                  {{ props.event.title || '[No title]' }}
+                </p>
+                <p
+                  ref="eventTimeRef"
+                  v-if="!isAllDay"
+                  class="text-xs event-subtitle"
+                >
+                  {{
+                    formattedDuration(
+                      updatedEvent.fromTime || '',
+                      updatedEvent.toTime || '',
+                      config.timeFormat,
+                    )
+                  }}
+                </p>
+              </div>
             </div>
           </div>
+          <div
+            v-if="
+              config.isEditMode && !isAllDay && props.event.segIsEnd !== false
+            "
+            class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
+            @mousedown="handleResizeMouseDown"
+          />
         </div>
-        <div
-          v-if="config.isEditMode && !props.event.isFullDay"
-          class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
-          @mousedown="handleResizeMouseDown"
-        />
-      </div>
       </div>
     </template>
 
@@ -131,14 +137,33 @@ import {
   calculateMinutes,
   convertMinutesToHours,
   calculateDiff,
-  parseDate,
   formattedDuration,
 } from './calendarUtils'
-import { ACTIVE_VIEW_KEY, type CalendarEvent } from './types'
+import {
+  LANE_HEIGHT,
+  LANE_PITCH,
+  isAllDayLike,
+  shiftEventDays,
+  shiftEventMinutes,
+} from './eventSpan'
+import {
+  ACTIVE_VIEW_KEY,
+  type CalendarEvent,
+  type CalendarRowBar,
+} from './types'
 
 const props = defineProps<{
+  /**
+   * The event, or one day's piece of it: an overnight event arrives once per
+   * day with `segFromTime`/`segToTime` clipped to that day.
+   */
   event: CalendarEvent
   date: Date
+  /**
+   * Places the card as a bar across a row of day columns (the Week view's
+   * all-day row). Without it an all-day card sits in normal flow.
+   */
+  bar?: CalendarRowBar
 }>()
 
 const isPopoverOpen = ref(false)
@@ -193,27 +218,49 @@ const eventTimeRef = ref<HTMLElement | null>(null)
 const isResizing = ref(false)
 const isRepositioning = ref(false)
 const isEventUpdated = ref(false)
-const state = reactive({ xAxis: 0, yAxis: 0 })
+// Pixel offset of the card while dragged, and the move it stands for: whole
+// days sideways, minutes up or down. Both ends of the event follow together.
+const state = reactive({ xAxis: 0, yAxis: 0, dayShift: 0, minuteShift: 0 })
+
+const isAllDay = computed(() => isAllDayLike(props.event))
+
+/** Times that place this card: the day's clipped piece when there is one. */
+const placedFromTime = () =>
+  String(
+    calendarEvent.value.segFromTime || calendarEvent.value.fromTime || '00:00',
+  )
+const placedToTime = () =>
+  String(calendarEvent.value.segToTime || calendarEvent.value.toTime || '00:00')
 
 // ── Position styles ───────────────────────────────────────────────────────
 
 const containerStyle = computed<CSSProperties>(() => {
-  if (props.event.isFullDay) {
+  if (props.bar) {
+    const span = props.bar.endCol - props.bar.startCol + 1
+    return {
+      position: 'absolute',
+      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + 2px)`,
+      width: `calc(${(span / DAY_COLUMNS) * 100}% - 4px)`,
+      top: `${4 + props.bar.lane * LANE_PITCH}px`,
+      height: `${LANE_HEIGHT}px`,
+      transform: `translate(${state.xAxis}px, 0)`,
+      zIndex: isRepositioning.value ? 100 : 1,
+      transition: isRepositioning.value ? 'none' : 'all 0.1s ease',
+    }
+  }
+
+  if (isAllDay.value) {
     return {
       transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
       zIndex: isRepositioning.value ? 100 : (props.event.idx || 0) + 1,
     }
   }
 
-  const diff = calculateDiff(
-    calendarEvent.value.fromTime || '00:00',
-    calendarEvent.value.toTime || '00:00',
-  )
+  const diff = calculateDiff(placedFromTime(), placedToTime())
   let height = diff * minuteHeight
   if (height < heightThreshold) height = minimumHeight
 
-  const top =
-    calculateMinutes(calendarEvent.value.fromTime || '00:00') * minuteHeight
+  const top = calculateMinutes(placedFromTime()) * minuteHeight
   const hallNumber = calendarEvent.value.hallNumber || 0
 
   const width =
@@ -246,7 +293,7 @@ const innerStyle = computed(() => ({
 // ── Line clamp ────────────────────────────────────────────────────────────
 
 const lineClampClass = computed(() => {
-  if (props.event.isFullDay) return 'line-clamp-1'
+  if (isAllDay.value) return 'line-clamp-1'
   if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
   if (!props.event.fromTime && !props.event.toTime) return
 
@@ -270,10 +317,11 @@ const lineClampClass = computed(() => {
 
 // ── Resize ────────────────────────────────────────────────────────────────
 
+// Measured from where this piece starts on its day: for the tail of an
+// overnight event that is midnight, not the event's own start.
 function newEventEndTime(newHeight: string) {
   let newEndTime =
-    parseFloat(newHeight) / minuteHeight +
-    calculateMinutes(calendarEvent.value.fromTime || '00:00')
+    parseFloat(newHeight) / minuteHeight + calculateMinutes(placedFromTime())
   newEndTime = Math.floor(newEndTime)
   if (newEndTime > 1440) newEndTime = 1440
   return convertMinutesToHours(newEndTime)
@@ -295,8 +343,10 @@ function handleResizeMouseDown() {
     eventRef.value.style.height =
       Math.round(diffX / height15Min) * height15Min + 'px'
     eventRef.value.style.width = '100%'
-    updatedEvent.toTime = newEventEndTime(eventRef.value.style.height)
-    calendarEvent.value.toTime = newEventEndTime(eventRef.value.style.height)
+    const toTime = newEventEndTime(eventRef.value.style.height)
+    updatedEvent.toTime = toTime
+    calendarEvent.value.toTime = toTime
+    if (calendarEvent.value.segToTime) calendarEvent.value.segToTime = toTime
   }
 
   function stopResize() {
@@ -334,11 +384,17 @@ function handleRepositionMouseDown(
     if (!eventRef.value) return
 
     if (activeView.value === 'Week') handleHorizontalMovement(e.clientX, rect)
-    if (!props.event.isFullDay) handleVerticalMovement(e.clientY, prevY, rect)
+    if (!isAllDay.value) handleVerticalMovement(e.clientY, prevY, rect)
 
-    isEventUpdated.value =
-      calendarEvent.value.fromTime !== updatedEvent.fromTime ||
-      calendarEvent.value.toTime !== updatedEvent.toTime
+    // The subtitle previews where the event would land.
+    const preview = shiftEventMinutes(
+      { ...calendarEvent.value },
+      state.minuteShift,
+    )
+    updatedEvent.fromTime = preview.fromTime
+    updatedEvent.toTime = preview.toTime
+
+    isEventUpdated.value = state.dayShift !== 0 || state.minuteShift !== 0
   }
 
   function mouseup(e: MouseEvent) {
@@ -346,53 +402,50 @@ function handleRepositionMouseDown(
     isRepositioning.value = false
     if (!eventRef.value) return
 
-    if (calendarEvent.value.isFullDay && activeView.value === 'Week') {
-      eventRef.value.style.width = '90%'
-    }
-    if (calendarEvent.value.date !== updatedEvent.date)
-      isEventUpdated.value = true
-
     if (isEventUpdated.value) {
-      calendarEvent.value.date = updatedEvent.date
-      calendarEvent.value.fromDate = updatedEvent.date
-      calendarEvent.value.toDate = updatedEvent.date
-      calendarEvent.value.fromDateTime =
-        updatedEvent.date + ' ' + updatedEvent.fromTime
-      calendarEvent.value.toDateTime =
-        updatedEvent.date + ' ' + updatedEvent.toTime
-      calendarEvent.value.fromTime = updatedEvent.fromTime
-      calendarEvent.value.toTime = updatedEvent.toTime
+      if (state.minuteShift) {
+        shiftEventMinutes(calendarEvent.value, state.minuteShift)
+      }
+      if (state.dayShift) shiftEventDays(calendarEvent.value, state.dayShift)
       calendarActions.updateEventState(calendarEvent.value)
       isEventUpdated.value = false
-      state.xAxis = 0
-      state.yAxis = 0
     }
+    state.xAxis = 0
+    state.yAxis = 0
+    state.dayShift = 0
+    state.minuteShift = 0
 
     window.removeEventListener('mousemove', mousemove)
     window.removeEventListener('mouseup', mouseup)
   }
 }
 
+/** Number of day columns the card can move across sideways. */
+const DAY_COLUMNS = 7
+
+/** Width of one day column: the enclosing row's share, or the card's own. */
+function columnWidth(): number {
+  const row = eventRef.value?.closest(
+    '[data-day-columns]',
+  ) as HTMLElement | null
+  if (row) return row.clientWidth / DAY_COLUMNS
+  return eventRef.value?.clientWidth || 1
+}
+
+// Sideways movement is in whole days and stays inside the week: the card's
+// own column bounds how far left or right it can go. A bar's column is the
+// first day it shows in this row, so a stay that began last week can still
+// move right but not left past the row's edge.
 function handleHorizontalMovement(clientX: number, rect: DOMRect) {
-  const currentDate = new Date(props.event.date || props.date)
   if (!eventRef.value) return
-  if (props.event.isFullDay) eventRef.value.style.width = '100%'
+  const width = columnWidth()
+  let diff = Math.floor((clientX - rect.left) / width)
 
-  const eventWidth = eventRef.value.clientWidth
-  let diff = Math.floor((clientX - rect.left) / eventWidth)
+  const column = props.bar ? props.bar.startCol : new Date(props.date).getDay()
+  diff = Math.max(-column, Math.min(diff, DAY_COLUMNS - 1 - column))
 
-  const leftBoundary = currentDate.getDay()
-  const rightBoundary = 6 - currentDate.getDay()
-  diff = Math.max(-leftBoundary, Math.min(diff, rightBoundary))
-
-  state.xAxis = Math.ceil(diff * eventWidth)
-  updatedEvent.date = parseDate(
-    new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      currentDate.getDate() + diff,
-    ),
-  )
+  state.xAxis = Math.ceil(diff * width)
+  state.dayShift = diff
 }
 
 function handleVerticalMovement(clientY: number, prevY: number, rect: DOMRect) {
@@ -408,20 +461,6 @@ function handleVerticalMovement(clientY: number, prevY: number, rect: DOMRect) {
 
   diffY = Math.round(diffY / height15Min) * height15Min
   state.yAxis = diffY
-
-  updatedEvent.fromTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.fromTime || '00:00') +
-      Math.round(diffY / minuteHeight),
-  )
-  updatedEvent.toTime = convertMinutesToHours(
-    calculateMinutes(calendarEvent.value.toTime || '00:00') +
-      Math.round(diffY / minuteHeight),
-  )
-
-  for (const key of ['fromTime', 'toTime'] as const) {
-    const value = updatedEvent[key] || ''
-    if (value < '00:00:00') updatedEvent[key] = '00:00:00'
-    if (value > '24:00:00') updatedEvent[key] = '24:00:00'
-  }
+  state.minuteShift = Math.round(diffY / minuteHeight)
 }
 </script>
