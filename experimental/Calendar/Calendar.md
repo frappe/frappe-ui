@@ -45,6 +45,16 @@ Each entry in `events` is a `CalendarEvent`:
 }
 ```
 
+An event runs from `fromDate fromTime` to `toDate toTime`, dates inclusive.
+One whose `toDate` is later than its `fromDate` spans those days: the Month
+view draws it as a single bar across them, and the Week view puts it in the
+all-day row. A timed event that crosses midnight but is shorter than a day
+(an evening running late) stays in the time grid, cut at midnight into a
+piece per day. A timed event ending at `00:00` stops as that day begins, so
+it does not occupy it. Dragging a spanning event moves both ends together.
+
+`isFullDay` events ignore their times and cover `fromDate`..`toDate` whole.
+
 The calendar keeps an internal copy of `events` and refreshes it when the
 prop changes. Edits made inside the calendar (create, drag, resize, delete)
 mutate the copy and come back through the `create`, `update`, and `delete`

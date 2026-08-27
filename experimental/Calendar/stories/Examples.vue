@@ -87,6 +87,38 @@ const events = ref([
     color: 'amber',
     isFullDay: true,
   },
+  {
+    title: 'Offsite in Goa',
+    participant: 'Everyone',
+    id: '#offsite',
+    venue: 'Goa',
+    fromDate: currentMonthYear + '-09',
+    toDate: currentMonthYear + '-13',
+    color: 'cyan',
+    isFullDay: true,
+  },
+  {
+    title: 'Hackathon',
+    participant: 'Engineering',
+    id: '#hackathon',
+    venue: 'HQ',
+    fromDate: currentMonthYear + '-16',
+    toDate: currentMonthYear + '-17',
+    fromTime: '10:00',
+    toTime: '18:00',
+    color: 'orange',
+  },
+  {
+    title: 'Release night',
+    participant: 'Ops',
+    id: '#release',
+    venue: 'Online',
+    fromDate: currentMonthYear + '-21',
+    toDate: currentMonthYear + '-22',
+    fromTime: '22:00',
+    toTime: '02:00',
+    color: 'violet',
+  },
 ])
 </script>
 

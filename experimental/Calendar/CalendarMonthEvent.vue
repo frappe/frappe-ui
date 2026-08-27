@@ -16,9 +16,11 @@
     <template #trigger>
       <div
         v-bind="$attrs"
-        class="event flex gap-1.5 min-h-6 mx-px rounded-4 p-[5px] transition-all duration-75 w-full overflow-hidden"
+        class="event flex gap-1.5 min-h-6 rounded-4 p-[5px] transition-all duration-75 overflow-hidden"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
+          'rounded-l-none': bar && !bar.isStart,
+          'rounded-r-none': bar && !bar.isEnd,
         }"
         :style="eventBgStyle"
         @click.stop="
@@ -92,13 +94,18 @@ import NewEventModal from './NewEventModal.vue'
 import Popover from '#components/Popover/Popover.vue'
 import { useEventBase } from './useEventBase'
 import { computed, ref } from 'vue'
-import type { CalendarEvent } from './types'
+import type { CalendarEvent, CalendarRowBar } from './types'
 
 const isPopoverOpen = ref(false)
 
 const props = defineProps<{
   event: CalendarEvent
   date: Date
+  /**
+   * The bar this pill draws in a week row. A side the event runs past is
+   * squared off, so a stay that began last week reads as continuing.
+   */
+  bar?: CalendarRowBar
 }>()
 
 defineOptions({ inheritAttrs: false })

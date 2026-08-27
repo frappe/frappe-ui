@@ -20,7 +20,11 @@
       </div>
     </div>
 
-    <!-- Full day events -->
+    <!--
+      All-day row. Full-day events and timed ones of a day or more are packed
+      into lanes across the week, each a bar over the days it covers; the
+      seven cells beneath take clicks.
+    -->
     <div
       class="flex shrink-0 h-fit"
       :class="[config.noBorder ? 'border-b-[1px]' : 'border-[1px] border-t-0']"
@@ -48,46 +52,44 @@
           </div>
         </component>
       </div>
-      <div class="grid w-full grid-cols-7 overflow-hidden">
-        <template v-for="(date, idx) in weeklyDates">
-          <div
-            class="cell flex flex-col gap-1 py-1 w-full cursor-pointer"
-            :data-date-attr="date"
-            @click.prevent="
-              (e) => {
-                if (fullDayEvents[parseDate(date)]?.length > 1) {
-                  isCollapsed = false
-                }
-                calendarActions.handleCellClick(e, date, '', true)
-              }
-            "
-          >
-            <CalendarWeekDayEvent
-              v-for="(calendarEvent, idx) in !showCollapsable || !isCollapsed
-                ? fullDayEvents[parseDate(date)]
-                : fullDayEvents[parseDate(date)]?.slice(0, 2)"
-              :event="{ ...calendarEvent, idx }"
-              :key="calendarEvent.id"
-              :date="date"
-              @click.stop
-            >
-              <template #event-popover-content="slotProps">
-                <slot name="event-popover-content" v-bind="slotProps" />
-              </template>
-            </CalendarWeekDayEvent>
-            <Button
-              v-if="
-                showCollapsable &&
-                isCollapsed &&
-                fullDayEvents[parseDate(date)]?.length > 2
-              "
-              :label="fullDayEvents[parseDate(date)]?.length - 2 + ' more'"
-              variant="ghost"
-              class="w-fit text-sm !py-0.5 !h-5 !justify-start cursor-pointer"
-              @click.stop="isCollapsed = false"
-            />
-          </div>
-        </template>
+      <div
+        class="relative grid w-full grid-cols-7 overflow-hidden py-1"
+        :style="{ minHeight: `${allDayHeight}px` }"
+        data-day-columns="7"
+      >
+        <div
+          v-for="(date, col) in weeklyDates"
+          :key="parseDate(date)"
+          class="cell flex flex-col w-full cursor-pointer"
+          :data-date-attr="date"
+          @click.prevent="
+            (e) => {
+              if (hiddenCount(col)) isCollapsed = false
+              calendarActions.handleCellClick(e, date, '', true)
+            }
+          "
+        >
+          <Button
+            v-if="hiddenCount(col)"
+            :label="hiddenCount(col) + ' more'"
+            variant="ghost"
+            class="w-fit text-sm !py-0.5 !h-5 !justify-start cursor-pointer"
+            :style="{ marginTop: `${visibleLanes * LANE_PITCH}px` }"
+            @click.stop="isCollapsed = false"
+          />
+        </div>
+        <CalendarWeekDayEvent
+          v-for="bar in visibleBars"
+          :key="bar.event.id"
+          :event="bar.event"
+          :date="weeklyDates[bar.startCol]"
+          :bar="bar"
+          @click.stop
+        >
+          <template #event-popover-content="slotProps">
+            <slot name="event-popover-content" v-bind="slotProps" />
+          </template>
+        </CalendarWeekDayEvent>
       </div>
     </div>
 
@@ -113,7 +115,7 @@
             class="w-[calc(100%-4px)] h-px z-[2] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
             :style="currentTime"
           />
-          <div class="grid w-full grid-cols-7">
+          <div class="grid w-full grid-cols-7" data-day-columns="7">
             <!-- 7 Columns -->
             <div
               v-for="(date, idx) in weeklyDates"
@@ -147,9 +149,9 @@
 
               <!-- Calendar Events populations  -->
               <CalendarWeekDayEvent
-                v-for="(calendarEvent, idx) in timedEvents[parseDate(date)]"
+                v-for="calendarEvent in timedEvents[parseDate(date)]"
                 :event="calendarEvent"
-                :key="calendarEvent.id"
+                :key="`${calendarEvent.id}-${calendarEvent.date}`"
                 :date="date"
               >
                 <template #event-popover-content="slotProps">
@@ -167,7 +169,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, inject } from 'vue'
+import { ref, onMounted, computed, inject } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   twelveHoursFormat,
@@ -177,6 +179,7 @@ import {
   daysList,
   isWeekend,
 } from './calendarUtils'
+import { LANE_PITCH, barsInColumn, layoutRow } from './eventSpan'
 
 import { Button } from '#components/Button'
 import useCalendarData from './composables/useCalendarData'
@@ -186,7 +189,6 @@ import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
   type CalendarEvent,
-  type GroupedCalendarEvents,
 } from './types'
 
 const props = withDefaults(
@@ -201,7 +203,6 @@ const props = withDefaults(
 )
 
 const gridRef = ref<HTMLElement | null>(null)
-const showCollapsable = ref(false)
 const isCollapsed = ref(true)
 
 const hourHeight = props.config.hourHeight
@@ -213,8 +214,40 @@ const timeArray =
 const timedEvents = computed(
   () => useCalendarData(props.events).timedEvents.value,
 )
-const fullDayEvents = computed(
-  () => useCalendarData(props.events).fullDayEvents.value,
+const allDayEvents = computed(
+  () => useCalendarData(props.events).allDayEvents.value,
+)
+
+const allDayRow = computed(() =>
+  layoutRow(allDayEvents.value, props.weeklyDates),
+)
+
+/** Past three lanes the row folds to two, with a count of what is hidden. */
+const COLLAPSE_ABOVE = 3
+const COLLAPSED_LANES = 2
+/** Height of the "n more" button under the collapsed lanes. */
+const MORE_HEIGHT = 20
+
+const showCollapsable = computed(
+  () => allDayRow.value.laneCount > COLLAPSE_ABOVE,
+)
+const visibleLanes = computed(() =>
+  showCollapsable.value && isCollapsed.value
+    ? COLLAPSED_LANES
+    : allDayRow.value.laneCount,
+)
+const visibleBars = computed(() =>
+  allDayRow.value.bars.filter((bar) => bar.lane < visibleLanes.value),
+)
+const hiddenCount = (col: number) =>
+  barsInColumn(allDayRow.value.bars, col).filter(
+    (bar) => bar.lane >= visibleLanes.value,
+  ).length
+const allDayHeight = computed(
+  () =>
+    visibleLanes.value * LANE_PITCH +
+    (visibleLanes.value < allDayRow.value.laneCount ? MORE_HEIGHT : 0) +
+    8,
 )
 
 const now = useNow()
@@ -234,66 +267,9 @@ if (!calendarActions) {
   throw new Error('CalendarWeekly must be rendered inside Calendar.')
 }
 
-function getFullDayEventsInCurrentWeek(
-  eventsObject: GroupedCalendarEvents,
-  weeklyDates: Date[] = [],
-) {
-  let currentWeekEvents: GroupedCalendarEvents = {}
-  let weeklyFullDayEvents = Object.keys(eventsObject)
-  weeklyDates.forEach((date) => {
-    const parsedDate = parseDate(date)
-
-    if (weeklyFullDayEvents.includes(parsedDate)) {
-      currentWeekEvents[parsedDate] = eventsObject[parsedDate]
-    }
-  })
-  return currentWeekEvents
-}
-
-function getFullDayEventsCount(eventsObject: GroupedCalendarEvents) {
-  let lengthArray: number[] = []
-  Object.values(eventsObject).forEach((events) => {
-    lengthArray.push(events.length)
-  })
-  let maxEventsInWeek = Math.max(...lengthArray, 1)
-  return maxEventsInWeek
-}
-
-function setFullDayEventsHeight(
-  eventsObject: GroupedCalendarEvents,
-  weeklyDates: Date[] = [],
-) {
-  let currentWeekEvents = getFullDayEventsInCurrentWeek(
-    eventsObject,
-    weeklyDates,
-  )
-  let maxEvents = getFullDayEventsCount(currentWeekEvents)
-  if (maxEvents > 3) {
-    showCollapsable.value = true
-  } else {
-    showCollapsable.value = false
-  }
-}
-
 onMounted(() => {
-  // document.body.style.overflow = 'hidden'
-  setFullDayEventsHeight(fullDayEvents.value, props.weeklyDates)
   const currentHour = new Date().getHours()
   const scrollToHour = props.config.scrollToHour || currentHour
   gridRef.value?.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
 })
-
-watch(
-  () => fullDayEvents.value,
-  (newFullDayEvents) => {
-    setFullDayEventsHeight(newFullDayEvents, props.weeklyDates)
-  },
-)
-
-watch(
-  () => props.weeklyDates,
-  (newWeeklyDates) => {
-    setFullDayEventsHeight(fullDayEvents.value, newWeeklyDates)
-  },
-)
 </script>
