@@ -9,6 +9,26 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Calendar — `toDate` is honored, so events span the days they cover (breaking, silent)
+
+An event's `toDate` was ignored: everything rendered on `fromDate`. It now
+places the event on every day from `fromDate` to `toDate`, inclusive — as
+one bar across them in the Month view and the Week view's all-day row, or,
+for a timed event shorter than a day that crosses midnight, as a piece per
+day in the time grid. A timed event ending at `00:00` does not occupy that
+day.
+
+- **Breaking, silent:** an event passed with an *exclusive* end (`toDate`
+  set to the day after its last one, the way iCalendar stores all-day
+  spans) now shows one day too many. Send the inclusive last day instead.
+- **Behavior change:** dragging keeps an event's length. `update` emits
+  `toDate` shifted by the same days as `fromDate`, where it used to set
+  both to the drop day. A drag past midnight rolls `toDate` (or `fromDate`)
+  to the next day with a `00:00:00` time, where it used to clamp at
+  `24:00:00`.
+- Full-day events (`isFullDay`) cover `fromDate`..`toDate` whole; their
+  times are ignored.
+
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 
 `CommandPalette` and `CommandPaletteItem` leave the root export. The family is
