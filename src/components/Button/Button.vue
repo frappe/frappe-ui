@@ -3,7 +3,6 @@ import {
   computed,
   defineComponent,
   h,
-  ref,
   watchEffect,
   type Component,
   type SlotsType,
@@ -35,7 +34,7 @@ export default defineComponent({
     /** Content shown after the button label (right icon / custom content) */
     suffix: void
   }>,
-  setup(props, { attrs, slots, expose }) {
+  setup(props, { attrs, slots }) {
     watchEffect(() => {
       warnUnsupportedIconString('Button', 'icon', props.icon)
       warnUnsupportedIconString('Button', 'iconLeft', props.iconLeft)
@@ -230,9 +229,6 @@ export default defineComponent({
       ]
     })
 
-    const rootRef = ref()
-    expose({ rootRef })
-
     // The dynamic root: router link, external anchor, or native button. Using the
     // raw 'button' string (not <component :is>) sidesteps the historic recursion
     // with a globally-registered <Button> in consumer apps.
@@ -333,7 +329,6 @@ export default defineComponent({
         class: [attrClass, buttonClasses.value],
         'aria-label': props.label ?? restAttrs['aria-label'],
         'aria-busy': props.loading || undefined,
-        ref: rootRef,
       }
       const button =
         typeof is === 'string'

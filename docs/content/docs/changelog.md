@@ -92,6 +92,20 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### Button no longer hands back `rootRef` (breaking; loud in TS, silent in JS)
+
+`Button` exposed an untyped, writable template ref to its root element.
+ADR-0012 bans that: a template ref earns its place only when a parent's script
+needs it and no other surface reaches.
+
+- **Breaking:** `buttonRef.value.rootRef` is gone. In TypeScript it fails to
+  compile. In JavaScript it reads `undefined`, so guard for it.
+- What arrived through it was never one thing. Depending on props it was a
+  `<button>`, an `<a>`, or a vue-router component instance, and it could be
+  assigned through.
+- Nothing replaces it. If you need script control, ask for it: a typed
+  `focus(options?)` can ship in a `1.x` minor, and additions are cheap.
+
 ### DatePicker internals are no longer exported (breaking, loud)
 
 `src/components/DatePicker/index.ts` re-exported its whole `utils` module, so

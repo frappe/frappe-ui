@@ -51,8 +51,13 @@ If the call is **keep**, everything below has to be true.
 | 5 | At least one file under `stories/` | the export is not a component |
 | 6 | Audited against `PHILOSOPHY.md`, [recorded as below](#item-6-recording-the-audit) | never |
 | 7 | Zero `@deprecated` members ([ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md)) | never |
-| 8 | Every `defineExpose` member conforms to [`imperative-api.md`](./imperative-api.md) and is typed | the export has no `defineExpose` |
+| 8 | Every exposed member conforms to [`imperative-api.md`](./imperative-api.md) and is typed | the export exposes nothing |
 | 9 | A changelog line, and a migration before/after when the [break is silent](#item-9-silent-vs-loud-breaks) | nothing was removed or renamed |
+
+Item 8 counts `defineExpose` **and** setup-context `expose()`. Both reach the same
+surface, and a census that greps only for `defineExpose` misses the other: `Button`
+moved to `expose()` in `8b4aa3c43`, seven weeks before ADR-0012 was written, so its
+`rootRef` survived the sweep that should have caught it (#1094 item 3).
 
 An item is either **done** or **written down as N/A**. It is never skipped. If you find
 yourself wanting to skip one, you have hit the [out-of-session rule](#when-a-family-cannot-reach-bar-in-one-session).
