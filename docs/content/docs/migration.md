@@ -47,7 +47,7 @@ and slot rename is a hand edit.
   [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
   [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
   [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental) ·
-  [ThemeSwitcher](#themeswitcher-—-moved-to-frappe-ui-experimental), which
+  [ThemeSwitcher](#themeswitcher), which
   stays deprecated at its new path. The v0 `TextEditor` family moved the same
   way — see [Editor](#editor).
 - **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
@@ -3253,7 +3253,7 @@ toast('Heads up', { description: 'Set &lt;Button&gt; variant' })
 
 Descriptions that are components, VNodes or render functions are untouched.
 
-## TabButtons: `class` on an option → `data-value`
+## TabButtons: `class` on an option → `data-value` {#tabbuttons-class}
 
 `class` on a `TabButton` option object no longer applies. In JavaScript nothing
 warns and nothing fails: the tab simply loses its styling. Style the tab from
@@ -3303,7 +3303,7 @@ Two related names go with it:
 The composed `Tabs` family needs no change. You write the `<TabTrigger>`
 yourself there, so a class goes on the element directly.
 
-## ThemeSwitcher — moved to `frappe-ui/experimental`
+## ThemeSwitcher — moved to `frappe-ui/experimental` {#themeswitcher}
 
 `ThemeSwitcher` is not core v1 surface. It moves out of the root export to
 `frappe-ui/experimental` (P14 — no stability promise) and parks there, still
