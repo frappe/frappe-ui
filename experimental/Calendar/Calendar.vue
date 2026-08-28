@@ -1,5 +1,7 @@
 <template>
-  <div class="flex h-full flex-col overflow-hidden">
+  <!-- No overflow-hidden here: each view scrolls itself, and clipping at the
+       root only cut the focus outline off the header's buttons. -->
+  <div class="flex h-full flex-col">
     <slot
       name="header"
       v-bind="{
@@ -230,6 +232,27 @@ function syncSelectedMonth(year: number, month: number) {
   }
 }
 
+// Anything layered over the calendar owns the keyboard while it is up — a modal,
+// a dropdown, an event's own popover, the header's month picker. The shortcuts are
+// bare letters, so a press meant for the thing on top switched the view behind it,
+// and an arrow key moved the month under an open picker.
+//
+// Asked of the document rather than of the event's ancestors: an overlay is
+// portalled to <body>, a sibling of the calendar rather than a descendant, and a
+// press with nothing focused reports <body> itself as the target — `closest()`
+// from there would see neither.
+//
+// By role, which is what tells an overlay apart from the rest of the page: reka
+// gives dialogs and popovers `dialog`, menus `menu`, selects `listbox`, and each
+// is in the DOM only while open. Tooltips are `tooltip` and so are left out — one
+// showing under the pointer is not something the keyboard is talking to.
+const OVERLAY_SELECTOR =
+  '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]'
+
+function isOverlayOpen() {
+  return !!document.querySelector(OVERLAY_SELECTOR)
+}
+
 // shortcuts for changing the active view and navigating through the calendar
 onMounted(() => {
   if (!overrideConfig.enableShortcuts) return
@@ -239,6 +262,8 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
 function handleShortcuts(e: KeyboardEvent) {
+  if (isOverlayOpen()) return
+
   const target = e.target as HTMLElement | null
   if (
     target?.tagName === 'INPUT' ||
@@ -277,28 +302,31 @@ watch(activeView, (value) => {
   }
 })
 
-const parseEvents = computed(() => {
+/**
+ * A fresh internal copy of the events prop. A function rather than a computed
+ * on purpose: the views edit the copy in place (a drag shifts its dates), and
+ * `reloadEvents` must hand back the prop's values, not the edited objects a
+ * cached computed would return again.
+ */
+function parseEvents(): CalendarEvent[] {
   return (
     props.events?.map((event) => {
       const { fromDate, toDate, fromTime, toTime, ...rest } = event
-      const date = fromDate
-      const fromDateTime = fromDate + ' ' + fromTime
-      const toDateTime = toDate + ' ' + toTime
-
+      const timed = !!(fromTime && toTime)
       return {
         ...rest,
-        date,
-        fromDateTime,
-        toDateTime,
+        date: fromDate,
+        fromDateTime: fromDate + ' ' + fromTime,
+        toDateTime: toDate + ' ' + toTime,
         fromDate,
         toDate,
-        fromTime,
-        toTime,
+        fromTime: timed ? handleSeconds(fromTime) : fromTime,
+        toTime: timed ? handleSeconds(toTime) : toTime,
       }
     }) || []
   )
-})
-const events = ref<CalendarEvent[]>(parseEvents.value)
+}
+const events = ref<CalendarEvent[]>(parseEvents())
 
 watch(
   () => props.events,
@@ -307,15 +335,8 @@ watch(
 )
 
 function reloadEvents() {
-  events.value = parseEvents.value
+  events.value = parseEvents()
 }
-
-events.value.forEach((event) => {
-  if (!event.fromTime || !event.toTime) return
-
-  event.fromTime = handleSeconds(event.fromTime)
-  event.toTime = handleSeconds(event.toTime)
-})
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 

@@ -37,6 +37,14 @@
 .event:not(.active):hover {
   background-color: var(--bg-hover);
 }
+/* A draft: saved, but nothing sent. An outline in the event's colour rather
+   than a fill, so it reads as not yet real. */
+.event.event-draft:not(.active),
+.event.event-draft:not(.active):hover {
+  background-color: transparent;
+  outline: 1px dashed var(--border);
+  outline-offset: -1px;
+}
 .event:not(.active) .past,
 .event.past:not(.active) {
   opacity: 0.5;

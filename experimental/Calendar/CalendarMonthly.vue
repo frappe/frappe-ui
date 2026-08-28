@@ -96,9 +96,10 @@
                 :date="date"
                 wrap
                 class="cursor-pointer"
+                :class="draggingId === event.id && 'opacity-50'"
                 :draggable="config.isEditMode"
                 @dragstart="onDragStart($event, event, row.week)"
-                @dragend="$event.target.style.opacity = '1'"
+                @dragend="draggingId = null"
               >
                 <template #event-popover-content="slotProps">
                   <slot name="event-popover-content" v-bind="slotProps" />
@@ -114,10 +115,11 @@
             :date="row.week[bar.startCol]!"
             :bar="bar"
             class="absolute cursor-pointer"
+            :class="draggingId === bar.event.id && 'opacity-50'"
             :style="barStyle(bar)"
             :draggable="config.isEditMode"
             @dragstart="onDragStart($event, bar.event, row.week)"
-            @dragend="$event.target.style.opacity = '1'"
+            @dragend="draggingId = null"
           >
             <template #event-popover-content="slotProps">
               <slot name="event-popover-content" v-bind="slotProps" />
@@ -253,17 +255,21 @@ function dateAtPointer(row: HTMLElement, clientX: number, week: Date[]) {
 // moves the event by the distance dragged rather than snapping its start to
 // wherever it landed — grabbing the third day of a stay and moving it one
 // cell right should move the stay one day, not three.
+/**
+ * The event being dragged. A stay across several weeks is a bar per row, so
+ * the fade is keyed on the event rather than on the piece that was grabbed.
+ */
+const draggingId = ref<CalendarEvent['id'] | null>(null)
+
 const onDragStart = (
   event: DragEvent,
   calendarEvent: CalendarEvent,
   week: Date[],
 ) => {
   if (!calendarEvent.id) return
+  draggingId.value = calendarEvent.id
   const target = event.target as HTMLElement | null
-  if (target) {
-    target.style.opacity = '0.5'
-    target.style.cursor = 'move'
-  }
+  if (target) target.style.cursor = 'move'
   if (!event.dataTransfer) return
   const row = target?.closest('[data-week-row]') as HTMLElement | null
   event.dataTransfer.dropEffect = 'move'

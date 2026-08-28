@@ -111,10 +111,6 @@
         <!-- Grid -->
         <div class="relative z-0 flex w-full flex-col">
           <!-- time events => not full day events => overflow-scroll here -->
-          <div
-            class="w-[calc(100%-4px)] h-px z-[2] left-0.5 mt-[0.5px] bg-[#F79596] absolute"
-            :style="currentTime"
-          />
           <div class="grid w-full grid-cols-7" data-day-columns="7">
             <!-- 7 Columns -->
             <div
@@ -253,13 +249,6 @@ const allDayHeight = computed(
 const now = useNow()
 
 const isToday = (date: Date) => parseDate(date) === parseDate(now.value)
-
-const currentTime = computed(() => {
-  let hour = now.value.getHours()
-  let minutes = now.value.getMinutes()
-  let top = (hour * 60 + minutes) * minuteHeight + 'px'
-  return { top }
-})
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)
 

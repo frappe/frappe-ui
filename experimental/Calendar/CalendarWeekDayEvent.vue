@@ -30,6 +30,7 @@
             'rounded-r-none': bar && !bar.isEnd,
             'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
             'rounded-t-none': !isAllDay && props.event.segIsStart === false,
+            'event-draft': !!props.event.isDraft,
           }"
           :style="innerStyle"
           @click.prevent="
@@ -46,9 +47,8 @@
         >
           <div class="flex gap-1.5 h-full p-[5px]">
             <div
-              v-if="props.event.fromTime"
+              v-if="props.event.fromTime && !props.event.isDraft"
               class="event-border h-full w-[2px] rounded-4 shrink-0"
-              :style="eventBorderStyle"
             />
             <div
               class="relative flex h-full select-none items-start gap-2 overflow-hidden"
@@ -56,11 +56,28 @@
               <div v-if="config.showIcon && eventIcon">
                 <component :is="eventIcon" class="h-4 w-4" />
               </div>
-              <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+              <!-- A short event has one line's worth of height, so the time
+                   sits beside the title there instead of under it, where it
+                   would be cut off. -->
+              <div
+                class="flex min-w-0 overflow-hidden"
+                :class="
+                  isCompact
+                    ? 'items-baseline gap-1.5'
+                    : 'w-fit flex-col gap-0.5'
+                "
+              >
+                <!-- Declined: struck through and muted; the fill and bar stay,
+                     so the event still reads as the one you said no to. -->
                 <p
                   ref="eventTitleRef"
-                  class="event-title text-sm-medium text-ink-gray-8"
-                  :class="lineClampClass"
+                  class="event-title text-sm-medium"
+                  :class="[
+                    isCompact ? 'truncate' : lineClampClass,
+                    props.event.isDeclined
+                      ? 'line-through text-ink-gray-5'
+                      : 'text-ink-gray-8',
+                  ]"
                 >
                   {{ props.event.title || '[No title]' }}
                 </p>
@@ -68,6 +85,7 @@
                   ref="eventTimeRef"
                   v-if="!isAllDay"
                   class="text-xs event-subtitle"
+                  :class="isCompact && 'shrink-0 whitespace-nowrap'"
                 >
                   {{
                     formattedDuration(
@@ -177,7 +195,6 @@ const {
   eventIcons,
   showEventModal,
   eventBgStyle,
-  eventBorderStyle,
   preventClick,
   handleEventClick,
   handleEventEdit,
@@ -291,6 +308,19 @@ const innerStyle = computed(() => ({
 }))
 
 // ── Line clamp ────────────────────────────────────────────────────────────
+
+/**
+ * Whether the event's slot is too short for a title line and a time line:
+ * below the threshold the pill is held at its minimum height, which fits
+ * one line, so the two go side by side.
+ */
+const isCompact = computed(() => {
+  if (isAllDay.value) return false
+  return (
+    calculateDiff(placedFromTime(), placedToTime()) * minuteHeight <
+    heightThreshold
+  )
+})
 
 const lineClampClass = computed(() => {
   if (isAllDay.value) return 'line-clamp-1'

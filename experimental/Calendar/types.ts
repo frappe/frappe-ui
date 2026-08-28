@@ -40,6 +40,14 @@ export interface CalendarEvent {
   type?: string
   /** Ignores the times and covers `fromDate`..`toDate` whole. */
   isFullDay?: boolean
+  /** Saved but not sent: drawn as a dashed outline instead of a filled pill. */
+  isDraft?: boolean
+  /**
+   * The viewer said no. The title is struck through, and in the Week and Day
+   * views the event claims no room: overlapping events lay out as if it were
+   * not there and it sits full width beneath them.
+   */
+  isDeclined?: boolean
   startTime?: number
   endTime?: number
   hallNumber?: number
