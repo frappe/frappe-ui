@@ -56,11 +56,21 @@
               <div v-if="config.showIcon && eventIcon">
                 <component :is="eventIcon" class="h-4 w-4" />
               </div>
-              <div class="flex w-fit flex-col gap-0.5 overflow-hidden">
+              <!-- A short event has one line's worth of height, so the time
+                   sits beside the title there instead of under it, where it
+                   would be cut off. -->
+              <div
+                class="flex min-w-0 overflow-hidden"
+                :class="
+                  isCompact
+                    ? 'items-baseline gap-1.5'
+                    : 'w-fit flex-col gap-0.5'
+                "
+              >
                 <p
                   ref="eventTitleRef"
                   class="event-title text-sm-medium text-ink-gray-8"
-                  :class="lineClampClass"
+                  :class="isCompact ? 'truncate' : lineClampClass"
                 >
                   {{ props.event.title || '[No title]' }}
                 </p>
@@ -68,6 +78,7 @@
                   ref="eventTimeRef"
                   v-if="!isAllDay"
                   class="text-xs event-subtitle"
+                  :class="isCompact && 'shrink-0 whitespace-nowrap'"
                 >
                   {{
                     formattedDuration(
@@ -291,6 +302,19 @@ const innerStyle = computed(() => ({
 }))
 
 // ── Line clamp ────────────────────────────────────────────────────────────
+
+/**
+ * Whether the event's slot is too short for a title line and a time line:
+ * below the threshold the pill is held at its minimum height, which fits
+ * one line, so the two go side by side.
+ */
+const isCompact = computed(() => {
+  if (isAllDay.value) return false
+  return (
+    calculateDiff(placedFromTime(), placedToTime()) * minuteHeight <
+    heightThreshold
+  )
+})
 
 const lineClampClass = computed(() => {
   if (isAllDay.value) return 'line-clamp-1'
