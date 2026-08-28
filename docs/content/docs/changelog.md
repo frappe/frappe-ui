@@ -92,6 +92,22 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### DatePicker internals are no longer exported (breaking, loud)
+
+`src/components/DatePicker/index.ts` re-exported its whole `utils` module, so
+`months`, `monthStart`, `generateWeeks` and `getDateValue` reached the package
+root. P15 bans `export *` from an implementation module, and the line was an
+open channel: every helper a later commit added to `utils.ts` would have
+joined the public API unreviewed and frozen.
+
+- **Breaking, loud:** `import { months, getDateValue } from 'frappe-ui'` fails
+  to resolve. Nothing replaces them. `months` was a hardcoded English-only
+  `'Jan'..'Dec'` array with no i18n path, so freezing it would have been the
+  worse outcome. Copy what you need into your app, or use `dayjs` directly.
+
+The `DatePicker`, `DateTimePicker` and `DateRangePicker` components and their
+types are unchanged.
+
 ### ThemeSwitcher — moved to `frappe-ui/experimental` (breaking, loud)
 
 `ThemeSwitcher` is not taken to bar at root for `1.0.0` (#1094). It parks on
