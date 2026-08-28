@@ -3283,7 +3283,7 @@ const tabs = [
 </script>
 
 <template>
-  <TabButtons class="my-tabs" :buttons="tabs" v-model="tab" />
+  <TabButtons class="my-tabs" :options="tabs" v-model="tab" />
 </template>
 
 <style scoped>
