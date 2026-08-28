@@ -21,6 +21,7 @@
           active: activeEvent == (props.event?.id || props.event?.name),
           'rounded-l-none': bar && !bar.isStart,
           'rounded-r-none': bar && !bar.isEnd,
+          'event-draft': !!props.event.isDraft,
         }"
         :style="eventBgStyle"
         @click.stop="
@@ -33,9 +34,8 @@
         @dblclick.prevent="handleEventEdit($event)"
       >
         <div
-          v-if="props.event.fromTime"
+          v-if="props.event.fromTime && !props.event.isDraft"
           class="event-border w-[2px] rounded-4 shrink-0"
-          :style="eventBorderStyle"
         />
         <div
           class="relative flex h-full min-w-0 select-none items-start gap-2 overflow-hidden"
@@ -45,9 +45,12 @@
           </div>
           <div class="min-w-0">
             <p
-              class="event-title text-sm-medium text-ink-gray-8"
+              class="event-title text-sm-medium"
               :class="[
                 wrap ? 'line-clamp-2 break-words' : 'truncate',
+                props.event.isDeclined
+                  ? 'line-through text-ink-gray-5'
+                  : 'text-ink-gray-8',
                 { italic: !props.event.title },
               ]"
             >
@@ -134,7 +137,6 @@ const {
   eventIcons,
   showEventModal,
   eventBgStyle,
-  eventBorderStyle,
   handleEventClick,
   handleEventEdit,
   handleEventDelete,

@@ -78,12 +78,11 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
       '--subtext-active': _color.subtextActive,
       '--bg-hover': _color.bgHover,
       '--bg-active': _color.bgActive,
+      // On the root, not only the colour bar: a draft's dashed outline reads
+      // it there, and a draft has no bar.
+      '--border': _color.border,
+      '--border-active': _color.borderActive,
     }
-  })
-
-  const eventBorderStyle = computed(() => {
-    const _color = color(props.event.color || 'green')
-    return { '--border': _color.border, '--border-active': _color.borderActive }
   })
 
   // ── Delete shortcut ──────────────────────────────────────────────────────
@@ -163,7 +162,6 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     eventIcons: config.eventIcons,
     showEventModal,
     eventBgStyle,
-    eventBorderStyle,
     preventClick,
     handleEventClick,
     handleEventEdit,

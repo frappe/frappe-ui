@@ -159,6 +159,13 @@ export function handleSeconds(time: string): string {
 export function findOverlappingEventsCount(
   events: CalendarEvent[],
 ): CalendarEvent[] {
+  // A declined event claims no room: the others lay out as if it were not
+  // there, and it sits full width beneath them.
+  const declined = events
+    .filter((event) => event.isDeclined)
+    .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
+  events = events.filter((event) => !event.isDeclined)
+
   // Sort events based on start time
   events = events.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
 
@@ -188,6 +195,7 @@ export function findOverlappingEventsCount(
       })),
     )
     .flat()
+    .concat(declined)
 }
 
 // Helpers

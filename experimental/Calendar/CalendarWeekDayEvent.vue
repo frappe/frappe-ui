@@ -30,6 +30,7 @@
             'rounded-r-none': bar && !bar.isEnd,
             'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
             'rounded-t-none': !isAllDay && props.event.segIsStart === false,
+            'event-draft': !!props.event.isDraft,
           }"
           :style="innerStyle"
           @click.prevent="
@@ -46,9 +47,8 @@
         >
           <div class="flex gap-1.5 h-full p-[5px]">
             <div
-              v-if="props.event.fromTime"
+              v-if="props.event.fromTime && !props.event.isDraft"
               class="event-border h-full w-[2px] rounded-4 shrink-0"
-              :style="eventBorderStyle"
             />
             <div
               class="relative flex h-full select-none items-start gap-2 overflow-hidden"
@@ -67,10 +67,17 @@
                     : 'w-fit flex-col gap-0.5'
                 "
               >
+                <!-- Declined: struck through and muted; the fill and bar stay,
+                     so the event still reads as the one you said no to. -->
                 <p
                   ref="eventTitleRef"
-                  class="event-title text-sm-medium text-ink-gray-8"
-                  :class="isCompact ? 'truncate' : lineClampClass"
+                  class="event-title text-sm-medium"
+                  :class="[
+                    isCompact ? 'truncate' : lineClampClass,
+                    props.event.isDeclined
+                      ? 'line-through text-ink-gray-5'
+                      : 'text-ink-gray-8',
+                  ]"
                 >
                   {{ props.event.title || '[No title]' }}
                 </p>
@@ -188,7 +195,6 @@ const {
   eventIcons,
   showEventModal,
   eventBgStyle,
-  eventBorderStyle,
   preventClick,
   handleEventClick,
   handleEventEdit,
