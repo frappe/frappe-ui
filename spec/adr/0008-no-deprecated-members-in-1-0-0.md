@@ -29,6 +29,25 @@ The library-wide list of deprecated exports this applies to lives in
 [`v1-release/deprecated-removals.md`](../../v1-release/deprecated-removals.md).
 Member-level deprecations stay in each component's spec.
 
+### Scope: the frozen surface only
+
+This reaches every stable entry point. It does **not** reach
+`frappe-ui/experimental`.
+
+The reasoning above is entirely about the freeze: a deprecated member is
+locked in until the next major *because the `1.0.0` tag makes it so*.
+`frappe-ui/experimental` carries no stability promise (P14), so the tag freezes
+nothing there and the argument does not apply. A deprecated export may park
+there and stay deprecated.
+
+Parking is therefore a third outcome alongside "delete" and "take to bar", and
+it satisfies this ADR. `ThemeSwitcher` took it (#1094); the seven `@deprecated`
+v0 `TextEditor` re-exports in `experimental/TextEditor/index.ts` already sit on
+the same footing.
+
+What parking does not buy is permanence. An export parked in `experimental` is
+still on its way out, and removing it needs no major version.
+
 ## Consequences
 
 - The last free window to remove things closes at `1.0.0`. Anything not

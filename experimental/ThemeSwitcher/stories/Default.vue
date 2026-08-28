@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ThemeSwitcher } from 'frappe-ui'
+import { ThemeSwitcher } from '..'
 </script>
 
 <template>

@@ -27,7 +27,7 @@ exported today**, except the rows marked done.
 | ~~`ListItem`~~                    | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | list primitives from `frappe-ui/list`, or app-owned row markup | —                                                                                                                  |
 | ~~`MonthPicker` (whole barrel)~~  | removed in [#876](https://github.com/frappe/frappe-ui/issues/876)   | `Select`                                                        | —                                                                                                                  |
 | ~~`Toast` (the SFC)~~             | removed in [#983](https://github.com/frappe/frappe-ui/pull/983)                         | the imperative `toast(...)` API                                | —                                                                                                                  |
-| `ThemeSwitcher` (whole barrel)    | `src/components/ThemeSwitcher/`                                      | `Select` plus the `useColorScheme` composable                        | yes                                                                                                               |
+| ~~`ThemeSwitcher` (whole barrel)~~ | moved to `experimental/ThemeSwitcher/` in [#1094](https://github.com/frappe/frappe-ui/issues/1094) | `Select` plus the `useColorScheme` composable                        | yes, at its new path                                                                                              |
 | ~~TextEditor root exports~~       | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | the `frappe-ui/editor` subpath                                 | —                                                                                                                  |
 | ~~TextEditor extension barrels~~  | removed in [#884](https://github.com/frappe/frappe-ui/issues/884)    | extensions from `frappe-ui/editor`                              | —                                                                                                                  |
 | ~~`FormControl type="autocomplete"`~~ | removed in [#926](https://github.com/frappe/frappe-ui/issues/926) | `Combobox` | — |
@@ -74,8 +74,17 @@ Do not re-add these to the queue:
 
 ## Not in scope for ADR-0008
 
-Deprecated-sounding surfaces that ADR-0008 does **not** reach, because nothing
-in them is marked `@deprecated`:
+ADR-0008 reaches the stable entry points only. Anything parked in
+`frappe-ui/experimental` is outside it and may stay `@deprecated` there, since
+the tag freezes nothing on that subpath. That is why the `ThemeSwitcher` row
+above is struck through without a deletion, and why the seven `@deprecated` v0
+`TextEditor` re-exports in `experimental/TextEditor/index.ts` are not on this
+list. Parking is not permanence: both are still on their way out, and removing
+them needs no major version.
+
+The rest of this section is different. These are deprecated-sounding surfaces
+that ADR-0008 does **not** reach, because nothing in them is marked
+`@deprecated`:
 
 - **v1 resource APIs** (`src/resources/index.ts`) — still exported. The keep
   call is settled: [#886](https://github.com/frappe/frappe-ui/issues/886)

@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { ColorScheme } from '../../composables/useColorScheme'
+import type { ColorScheme } from '#composables/useColorScheme'
 
 export interface ThemeSwitcherProps {
   /** Selected theme. Falls back to the shared `useColorScheme` state when unbound. */

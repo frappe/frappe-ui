@@ -42,12 +42,14 @@ and slot rename is a hand edit.
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
-- **Moved, not removed** — these four families changed an import path and
+- **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
   [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
   [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
-  [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). The v0
-  `TextEditor` family moved the same way — see [Editor](#editor).
+  [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental) ·
+  [ThemeSwitcher](#themeswitcher-—-moved-to-frappe-ui-experimental), which
+  stays deprecated at its new path. The v0 `TextEditor` family moved the same
+  way — see [Editor](#editor).
 - **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
 
 ## Requirements
@@ -3178,6 +3180,66 @@ returns `{ tokens }` instead of `{ theme }`, and the `ColorScheme` type this
 subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 `formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
 `resolveChartTheme` are no longer exported.
+
+## ThemeSwitcher — moved to `frappe-ui/experimental`
+
+`ThemeSwitcher` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and parks there, still
+deprecated, while apps migrate. The import fails at the root; switch the
+subpath:
+
+```ts
+// Before
+import { ThemeSwitcher } from 'frappe-ui'
+
+// After
+import { ThemeSwitcher } from 'frappe-ui/experimental'
+```
+
+`ThemeSwitcherProps` moves the same way. Nothing about the component changed,
+only where it is imported from.
+
+### If you want off the deprecated component
+
+The replacement is behavioral, not visual. `ThemeSwitcher` renders a group of
+theme preview cards. `Select` bound to `useColorScheme` gives you the same
+control in a dropdown, so an app that wants the cards keeps its own markup:
+
+```vue
+<!-- Before -->
+<script setup>
+import { ThemeSwitcher } from 'frappe-ui'
+</script>
+
+<template>
+  <ThemeSwitcher />
+</template>
+```
+
+```vue
+<!-- After -->
+<script setup>
+import { Select, useColorScheme } from 'frappe-ui'
+
+const { colorScheme, setColorScheme } = useColorScheme()
+const options = [
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+  { label: 'System', value: 'system' },
+]
+</script>
+
+<template>
+  <Select
+    :model-value="colorScheme"
+    :options="options"
+    @update:model-value="setColorScheme"
+  />
+</template>
+```
+
+Moving the import is the smaller change and keeps the current UI. Take this
+rewrite only when you want off the deprecated component.
 
 ## FAQ
 

@@ -92,6 +92,23 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### ThemeSwitcher — moved to `frappe-ui/experimental` (breaking, loud)
+
+`ThemeSwitcher` is not taken to bar at root for `1.0.0` (#1094). It parks on
+`frappe-ui/experimental` (P14 — no stability promise), still deprecated, while
+apps migrate.
+
+- **Breaking, loud:** `import { ThemeSwitcher } from 'frappe-ui'` fails to
+  resolve. Import from `frappe-ui/experimental` instead: `ThemeSwitcher` and
+  the type `ThemeSwitcherProps`.
+- **The replacement is behavioral, not visual.** `ThemeSwitcher` renders a
+  reka-ui `RadioGroupRoot` of theme preview cards. `Select` bound to the
+  `useColorScheme` composable replaces the behavior, not the markup, so an app
+  that wants the cards rewrites them. Moving the import is the smaller change
+  and keeps the current UI.
+
+Before/after is in the [migration guide](/docs/migration#themeswitcher).
+
 ### `useShortcut` renamed to `useKeyboardShortcut`, config reshaped (breaking; loud in TS, silent in JS)
 
 The import fails to resolve, so the rename itself is loud. The config is the
@@ -1305,8 +1322,8 @@ fails, so the break is loud.
 `Pill` is no longer exported from the package entrypoint. It remains an
 internal `TabButtons` detail.
 
-`ThemeSwitcher` remains exported for v1 compatibility, but is deprecated. For
-new theme switchers, compose `Select` with the `useColorScheme` composable.
+`ThemeSwitcher` moved to `frappe-ui/experimental` and stays deprecated there.
+For new theme switchers, compose `Select` with the `useColorScheme` composable.
 
 ### Autocomplete — removed (breaking)
 
