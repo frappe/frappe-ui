@@ -1,5 +1,7 @@
 <template>
-  <div class="flex h-full flex-col overflow-hidden">
+  <!-- No overflow-hidden here: each view scrolls itself, and clipping at the
+       root only cut the focus outline off the header's buttons. -->
+  <div class="flex h-full flex-col">
     <slot
       name="header"
       v-bind="{
