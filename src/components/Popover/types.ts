@@ -1,3 +1,4 @@
+import type { PortalTarget } from '../../composables/usePortalTarget'
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
@@ -15,7 +16,7 @@ export interface PopoverProps {
   offset?: number
 
   /** Where to portal the content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 
   /** Padding in px kept from the viewport edge during collision handling. */
   collisionPadding?: number

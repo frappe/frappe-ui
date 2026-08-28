@@ -1,6 +1,7 @@
 import type { Component } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PopoverAlign, PopoverSide } from '../shared/selection/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type { PopoverAlign, PopoverSide }
 
@@ -66,7 +67,7 @@ export interface SelectProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 /**

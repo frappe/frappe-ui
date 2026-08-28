@@ -1,6 +1,7 @@
 import type { Component, VNodeChild } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import type { NormalizedMenuGroup } from './utils'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type MenuTheme = 'gray' | 'red'
 
@@ -146,7 +147,7 @@ export interface MenuProps {
   slotFns?: Record<string, ((props?: any) => any) | undefined>
 
   /** Portal target for submenu content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 
   /** Reka-ui primitives supplied by the wrapping menu component. */
   primitives: MenuPrimitives

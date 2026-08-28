@@ -1,5 +1,6 @@
 import type { Component, VNodeChild } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
 export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -133,7 +134,7 @@ export interface ComboboxProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 
   /** Replaces the results with a loading state. */
   loading?: boolean
