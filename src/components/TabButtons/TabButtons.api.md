@@ -58,12 +58,12 @@
   {
     name: 'prefix',
     description: '',
-    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
+    type: '{ button: { value: TabValue; visibleLabel: boolean; accessibleLabel: string | undefined; label?: str'
   },
   {
     name: 'suffix',
     description: '',
-    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
+    type: '{ button: { value: TabValue; visibleLabel: boolean; accessibleLabel: string | undefined; label?: str'
   }
 ]
 

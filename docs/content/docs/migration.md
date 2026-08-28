@@ -3181,6 +3181,56 @@ subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 `formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
 `resolveChartTheme` are no longer exported.
 
+## TabButtons: `class` on an option → `data-value`
+
+`class` on a `TabButton` option object no longer applies. In JavaScript nothing
+warns and nothing fails: the tab simply loses its styling. Style the tab from
+CSS through the new `data-value` hook instead.
+
+```vue
+<!-- Before -->
+<script setup>
+const tabs = [
+  { label: 'Open', value: 'open', class: 'text-red-600 font-bold' },
+  { label: 'Closed', value: 'closed' },
+]
+</script>
+
+<template>
+  <TabButtons :buttons="tabs" v-model="tab" />
+</template>
+```
+
+```vue
+<!-- After -->
+<script setup>
+const tabs = [
+  { label: 'Open', value: 'open' },
+  { label: 'Closed', value: 'closed' },
+]
+</script>
+
+<template>
+  <TabButtons class="my-tabs" :buttons="tabs" v-model="tab" />
+</template>
+
+<style scoped>
+.my-tabs :deep([data-slot='tab-button'][data-value='open']) {
+  color: var(--ink-red-3);
+  font-weight: 600;
+}
+</style>
+```
+
+Two related names go with it:
+
+- `NativeButtonClass` is no longer exported. The import fails.
+- `customClass` is gone from the `#prefix` and `#suffix` slot props. Destructuring
+  it fails; spreading it silently yields nothing.
+
+The composed `Tabs` family needs no change. You write the `<TabTrigger>`
+yourself there, so a class goes on the element directly.
+
 ## ThemeSwitcher — moved to `frappe-ui/experimental`
 
 `ThemeSwitcher` is not core v1 surface. It moves out of the root export to

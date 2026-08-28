@@ -92,6 +92,26 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### TabButtons: `class` on an option is replaced by `data-value` (breaking, silent in JS)
+
+P10 says customize through slots and `data-*` attributes, never class-name
+props. `class` on a `TabButton` option was the last per-item class field in the
+library, and it dragged two more names onto the frozen surface.
+
+- The tab button now renders `:data-value`, so CSS can address one tab:
+  `[data-slot="tab-button"][data-value="open"] { … }`. That capability did not
+  exist before — the rendered button carried `data-slot`, `data-state` and
+  `data-disabled`, but no per-value hook.
+- **Breaking, silent in JS:** `class` on an option object stops applying. A
+  JavaScript caller keeps compiling and loses the styling with no warning. See
+  the [migration guide](/docs/migration#tabbuttons-class) for the before/after.
+- **Breaking, loud:** the `NativeButtonClass` type is no longer exported.
+- **Breaking:** `customClass` leaves the `#prefix` and `#suffix` slot props.
+  Loud if you destructure it, silent if you spread.
+
+The composed `Tabs` family is unchanged. You write the `<TabTrigger>` there, so
+a class goes on the element directly.
+
 ### HoverCard's `side`, `align` and `portalTo` use our own vocabulary (breaking in TS)
 
 `HoverCard` typed these three off `reka-ui` rather than declaring them, so

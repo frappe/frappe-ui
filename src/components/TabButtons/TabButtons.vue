@@ -65,7 +65,6 @@ const resolvedButtons = computed(() => {
     return {
       ...button,
       value,
-      customClass: button.class,
       visibleLabel,
       accessibleLabel,
     }
@@ -342,6 +341,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           :is="tabElement(button)"
           v-bind="tabElementProps(button)"
           data-slot="tab-button"
+          :data-value="button.value"
           :data-state="checked ? 'checked' : 'unchecked'"
           :data-disabled="disabled ? '' : undefined"
           :aria-label="
@@ -359,7 +359,6 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
             tabRadiusClasses(variant, size, browserTabBase(checked)),
             vertical && 'w-full',
             fluid && 'flex-1 min-w-0',
-            button.customClass,
           ]"
           @click="button.onClick?.($event)"
         >
