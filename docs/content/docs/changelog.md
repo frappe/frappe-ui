@@ -92,6 +92,52 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### Toast: the compat shims are removed (breaking, one of them silent)
+
+`spec/toast.md` fixes the official API as sonner's namespace. These four
+surfaces were never part of it. They carried no `@deprecated` tag, only a
+runtime warning, so a tag-based scan could not see them.
+
+**Loud — the member disappears and the call throws:**
+
+- `toast.create({ message, … })` → `toast(message, { … })` or
+  `toast.message(…)`. Census: 7 sites, helpdesk 5 and suite 2. Suite's two are
+  local wrapper functions, so fixing them covers roughly 42 files downstream.
+- `toast.remove(id)` → `toast.dismiss(id)`. Census: 0 sites.
+- `toast.removeAll()` → `toast.dismiss()`. Census: 4 sites in suite (mail 3,
+  calendar 1). An earlier count said 0; that was wrong.
+
+**Silent, and this is the dangerous one:**
+
+- The legacy object form `toast({ title, text, … })` is gone. Nothing throws.
+  The object goes straight to sonner as the message, and sonner expects a
+  string, a component or a VNode — so the toast renders empty or wrong. Census
+  found no direct call sites in the surveyed apps, but a grep for `toast(` will
+  not find these; grep for the `title`, `text` and `message` keys.
+  Before/after in the [migration guide](/docs/migration#toast-legacy-object).
+
+`renderSafeHTML`, `dispatch` and the four semantic creators
+(`success`/`error`/`warning`/`info`) are unchanged.
+
+### Toast: `description` supports the same limited inline HTML as the message (breaking, silent)
+
+`description` rode inside the options object untouched, so sonner rendered it
+as text while the message was sanitized and rendered as HTML. It now goes
+through the same DOMPurify safelist (`a`, `em`, `strong`, `i`, `b`, `u`).
+
+- **Breaking, silent:** a description holding a `<` outside that safelist loses
+  those characters. `description: 'Set <Button> variant'` rendered literally
+  before; now DOMPurify strips `<Button>` and the user sees `Set  variant`. No
+  warning, no error.
+- Census across builder, crm, gameplan, helpdesk, insights and suite found no
+  toast `description` containing a `<`. The one hit was a Gameplan Cypress
+  fixture for a space description, not a toast.
+- Non-string descriptions (components, VNodes, render functions) pass through
+  untouched, as before.
+
+This lands before the tag on purpose. Doing it in a `1.x` would silently change
+rendered output for every existing caller.
+
 ### TabButtons: `class` on an option is replaced by `data-value` (breaking, silent in JS)
 
 P10 says customize through slots and `data-*` attributes, never class-name

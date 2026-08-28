@@ -176,15 +176,15 @@ toast.success('Saved', { duration: 5000 })
 
 Audit: ~6 callsites pass a numeric `duration`. Each needs `× 1000`.
 
-**HTML in messages is rendered as text.** 0.1.x ran `message` through DOMPurify with a small inline-tag safelist (`a`, `em`, `strong`, `i`, `b`, `u`). Sonner renders `title`/`description` as plain text. Audit found zero callsites using inline HTML in toast messages, so no app should be affected — but worth noting.
+**Limited inline HTML is supported, in the message and in `description`.** Both accept a string containing `a`, `em`, `strong`, `i`, `b` or `u`, sanitized with DOMPurify. Anything outside that safelist is stripped. Non-string values (components, VNodes, render functions) pass through untouched. This is intentional and driven by real app needs; it is not a leftover of 0.1.x. `description` joined the contract in #1094 item 6, so a description holding a `<` outside the safelist now loses those characters.
 
 ### Renamed / removed APIs
 
 | 0.1.x | v1 | Audited callsites |
 |---|---|---|
-| `toast.create({ message, ... })` | `toast(message, { ... })` or `toast.message(message, { ... })` | 5 (helpdesk) |
-| `toast.remove(id)` | `toast.dismiss(id)` | 0 |
-| `toast.removeAll()` | `toast.dismiss()` | 0 |
+| ~~`toast.create({ message, ... })`~~ removed in #1094 | `toast(message, { ... })` or `toast.message(message, { ... })` | 7: helpdesk 5, suite 2 (both wrappers) |
+| ~~`toast.remove(id)`~~ removed in #1094 | `toast.dismiss(id)` | 0 |
+| ~~`toast.removeAll()`~~ removed in #1094 | `toast.dismiss()` | 4 (suite: mail 3, calendar 1) |
 | `import { Toasts } from 'frappe-ui'`<br>`<Toasts />` | `<FrappeUIProvider>` wrap, **or** `import { ToastProvider } from 'frappe-ui'`; `<ToastProvider />` | 2 (crm, hrms) |
 | `<ToastProvider>` SFC | `import { ToastProvider } from 'frappe-ui'` (styled wrapper around sonner's `<Toaster>`) | 0 |
 | Options field: `message` | `title` | several (all `toast.create` callsites) |

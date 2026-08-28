@@ -3181,6 +3181,78 @@ subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 `formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
 `resolveChartTheme` are no longer exported.
 
+## Toast: the legacy object form is removed {#toast-legacy-object}
+
+`toast({ title, text })` no longer works, and **nothing tells you**. The object
+is handed to sonner as the message. Sonner expects a string, a component or a
+VNode, so the toast renders empty or wrong instead of throwing.
+
+```js
+// Before
+toast({ title: 'Saved', text: 'Your changes are live.', type: 'success' })
+
+// After
+toast.success('Saved', { description: 'Your changes are live.' })
+```
+
+`position` was already ignored per toast. Set it once on `<ToastProvider>`.
+
+```js
+// Before
+toast({ title: 'Copied', position: 'bottom-right' })
+
+// After — position is global
+toast('Copied')
+```
+
+A grep for `toast(` will not find these reliably. Grep for the keys instead:
+`title:`, `text:` and `message:` inside a `toast(` call.
+
+The three named shims go at the same time, and those fail loudly:
+
+```js
+toast.create({ message: 'Loading…' })  // → toast.message('Loading…')
+toast.remove(id)                        // → toast.dismiss(id)
+toast.removeAll()                       // → toast.dismiss()
+```
+
+`toast.create({ closable: false })` mapped to three sonner flags. Write them out:
+
+```js
+// Before
+toast.create({ message: 'Uploading…', closable: false })
+
+// After
+toast.message('Uploading…', {
+  duration: Infinity,
+  closeButton: false,
+  dismissible: false,
+})
+```
+
+`toast.create` also took `duration` in **seconds**, where sonner takes
+milliseconds, and treated `duration: 0` as "never dismiss". Multiply by 1000,
+and write `Infinity` where you meant persistent.
+
+## Toast: `description` now renders limited inline HTML {#toast-description-html}
+
+`description` is sanitized and rendered like the message, with the same
+safelist (`a`, `em`, `strong`, `i`, `b`, `u`). It used to render as plain text.
+
+**This is silent.** A description holding a `<` that is not one of those six
+tags loses those characters, with no warning:
+
+```js
+// Before — rendered literally: Set <Button> variant
+toast('Heads up', { description: 'Set <Button> variant' })
+
+// After — DOMPurify strips <Button>: Set  variant
+// Escape it, or drop the angle brackets:
+toast('Heads up', { description: 'Set &lt;Button&gt; variant' })
+```
+
+Descriptions that are components, VNodes or render functions are untouched.
+
 ## TabButtons: `class` on an option → `data-value`
 
 `class` on a `TabButton` option object no longer applies. In JavaScript nothing
