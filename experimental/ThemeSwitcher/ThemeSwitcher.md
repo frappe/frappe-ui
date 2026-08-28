@@ -5,6 +5,19 @@ appearance. Each option is a preview card depicting that mode, and selecting one
 drives the global `<html data-theme>` through [`useColorScheme`](#usecolorscheme), so a bare
 `<ThemeSwitcher />` switches the whole app with no wiring.
 
+> **Parked** — `ThemeSwitcher` left the root export in `1.0.0` and now ships
+> from [`frappe-ui/experimental`](/docs/experimental), exempt from the
+> deprecation policy. It stays deprecated: build the control from
+> [`useColorScheme`](#usecolorscheme) plus `Select` or `Dropdown` in new code.
+
+```ts
+import { ThemeSwitcher } from 'frappe-ui/experimental'
+import type { ThemeSwitcherProps } from 'frappe-ui/experimental'
+
+// The composable behind it stays on the root export:
+import { useColorScheme } from 'frappe-ui'
+```
+
 <ComponentPreview name="ThemeSwitcher-Default" layout="stacked" />
 
 ## Branding
