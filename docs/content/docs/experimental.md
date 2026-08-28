@@ -35,6 +35,7 @@ it is likely to move:
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
 | [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
+| [`ThemeSwitcher`](#themeswitcher) | Parked | Apps moving to `Select` plus `useColorScheme` |
 | [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
 | [Input labeling](#useinputlabeling) | Incubating | Its API settling |
 
@@ -165,6 +166,21 @@ import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
 
 See the [Editor migration section](/docs/migration#editor) for the
 before/after.
+
+## ThemeSwitcher
+
+`ThemeSwitcher`, moved out of the root export in `1.0.0`. It stays deprecated
+here: `Select` bound to the [`useColorScheme`](/docs/other/composables#usecolorscheme)
+composable is the replacement, and `useColorScheme` remains the stable
+primitive at the root. Parked only while apps migrate, and it will be removed.
+
+```ts
+import { ThemeSwitcher } from 'frappe-ui/experimental'
+```
+
+The replacement is behavioral, not visual. `ThemeSwitcher` renders a group of
+theme preview cards, so an app that wants the cards keeps its own markup. See
+the [migration guide](/docs/migration#themeswitcher) for the `Select` version.
 
 ## Sprite icons
 
