@@ -112,6 +112,9 @@ With `enableShortcuts` on: `m` / `w` / `d` switch views, `t` jumps to today,
 `←` / `→` navigate, and `Delete` removes the event whose popover is open
 (edit mode only).
 
+They stay out of the way of whatever is on top: nothing fires while a field has
+focus, or while a dialog, popover, menu or select is open anywhere on the page.
+
 ## Click handling
 
 By default, a single click on an event opens its detail popover and a double

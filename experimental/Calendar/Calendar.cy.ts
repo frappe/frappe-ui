@@ -264,6 +264,26 @@ describe('Calendar', () => {
     cy.contains('All day').should('not.exist')
   })
 
+  // Anything layered over the calendar owns the keyboard. The shortcuts are bare
+  // letters, so without this they reached straight through an open dialog and
+  // switched the view behind it.
+  it('ignores shortcuts while an overlay is open', () => {
+    cy.mount(Calendar, { props: { events: [] } })
+
+    // The month/year button is the header's first control; its picker is a dialog.
+    cy.get('button').first().click()
+    cy.get('[role=dialog]').should('exist')
+
+    cy.get('body').type('w')
+    cy.contains('All day').should('not.exist')
+
+    // Closed again, the same key does what it always did.
+    cy.get('body').type('{esc}')
+    cy.get('[role=dialog]').should('not.exist')
+    cy.get('body').type('w')
+    cy.contains('All day').should('exist')
+  })
+
   // Behavior 5: every documented slot renders
   it('renders the #header slot with its props', () => {
     cy.mount(Calendar, {

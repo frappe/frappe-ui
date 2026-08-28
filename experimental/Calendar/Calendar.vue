@@ -230,6 +230,27 @@ function syncSelectedMonth(year: number, month: number) {
   }
 }
 
+// Anything layered over the calendar owns the keyboard while it is up — a modal,
+// a dropdown, an event's own popover, the header's month picker. The shortcuts are
+// bare letters, so a press meant for the thing on top switched the view behind it,
+// and an arrow key moved the month under an open picker.
+//
+// Asked of the document rather than of the event's ancestors: an overlay is
+// portalled to <body>, a sibling of the calendar rather than a descendant, and a
+// press with nothing focused reports <body> itself as the target — `closest()`
+// from there would see neither.
+//
+// By role, which is what tells an overlay apart from the rest of the page: reka
+// gives dialogs and popovers `dialog`, menus `menu`, selects `listbox`, and each
+// is in the DOM only while open. Tooltips are `tooltip` and so are left out — one
+// showing under the pointer is not something the keyboard is talking to.
+const OVERLAY_SELECTOR =
+  '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]'
+
+function isOverlayOpen() {
+  return !!document.querySelector(OVERLAY_SELECTOR)
+}
+
 // shortcuts for changing the active view and navigating through the calendar
 onMounted(() => {
   if (!overrideConfig.enableShortcuts) return
@@ -239,6 +260,8 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleShortcuts)
 })
 function handleShortcuts(e: KeyboardEvent) {
+  if (isOverlayOpen()) return
+
   const target = e.target as HTMLElement | null
   if (
     target?.tagName === 'INPUT' ||
