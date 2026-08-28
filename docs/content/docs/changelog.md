@@ -92,6 +92,24 @@ and no filtering. The parts fit all four.
 Before/after for each break is in the
 [migration guide](/docs/migration#commandpalette).
 
+### HoverCard's `side`, `align` and `portalTo` use our own vocabulary (breaking in TS)
+
+`HoverCard` typed these three off `reka-ui` rather than declaring them, so
+`portalTo` accepted `null` and arbitrary objects while the other six overlays
+accepted `string | HTMLElement`. `:portal-to="document.querySelector('#panel')"`
+compiled against `HoverCard` and failed against `Popover`.
+
+- `side` is now `PopoverSide`, `align` is `PopoverAlign`, `portalTo` is
+  `PortalTarget` (`string | HTMLElement`), matching every other overlay.
+- **Breaking in TS:** passing `null` or an object to `portalTo` no longer
+  compiles. Pass a selector string or an element. Runtime behavior is
+  unchanged.
+- `side` and `align` are not a break. reka's `Side` and `Align` resolve to
+  exactly `PopoverSide` and `PopoverAlign` today.
+
+A widened type cannot be narrowed inside `1.x`, which is why this lands before
+the tag rather than after.
+
 ### Button no longer hands back `rootRef` (breaking; loud in TS, silent in JS)
 
 `Button` exposed an untyped, writable template ref to its root element.
