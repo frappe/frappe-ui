@@ -27,6 +27,9 @@ grid.
   bar and background.
 - `CalendarActions` (the `CALENDAR_ACTIONS_KEY` injection) gains
   `setCalendarDate`.
+- **Behavior change:** `reloadEvents()` on the template ref now re-reads the
+  `events` prop and discards edits made in the calendar since (a drag or
+  resize not yet persisted), where it used to hand the edited objects back.
 
 ### Calendar — `toDate` is honored, so events span the days they cover (breaking, silent)
 

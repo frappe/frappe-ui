@@ -300,28 +300,31 @@ watch(activeView, (value) => {
   }
 })
 
-const parseEvents = computed(() => {
+/**
+ * A fresh internal copy of the events prop. A function rather than a computed
+ * on purpose: the views edit the copy in place (a drag shifts its dates), and
+ * `reloadEvents` must hand back the prop's values, not the edited objects a
+ * cached computed would return again.
+ */
+function parseEvents(): CalendarEvent[] {
   return (
     props.events?.map((event) => {
       const { fromDate, toDate, fromTime, toTime, ...rest } = event
-      const date = fromDate
-      const fromDateTime = fromDate + ' ' + fromTime
-      const toDateTime = toDate + ' ' + toTime
-
+      const timed = !!(fromTime && toTime)
       return {
         ...rest,
-        date,
-        fromDateTime,
-        toDateTime,
+        date: fromDate,
+        fromDateTime: fromDate + ' ' + fromTime,
+        toDateTime: toDate + ' ' + toTime,
         fromDate,
         toDate,
-        fromTime,
-        toTime,
+        fromTime: timed ? handleSeconds(fromTime) : fromTime,
+        toTime: timed ? handleSeconds(toTime) : toTime,
       }
     }) || []
   )
-})
-const events = ref<CalendarEvent[]>(parseEvents.value)
+}
+const events = ref<CalendarEvent[]>(parseEvents())
 
 watch(
   () => props.events,
@@ -330,15 +333,8 @@ watch(
 )
 
 function reloadEvents() {
-  events.value = parseEvents.value
+  events.value = parseEvents()
 }
-
-events.value.forEach((event) => {
-  if (!event.fromTime || !event.toTime) return
-
-  event.fromTime = handleSeconds(event.fromTime)
-  event.toTime = handleSeconds(event.toTime)
-})
 
 const { showEventModal, newEvent, openNewEventModal } = useEventModal()
 
