@@ -160,7 +160,9 @@ export function findOverlappingEventsCount(
   events: CalendarEvent[],
 ): CalendarEvent[] {
   // A declined event claims no room: the others lay out as if it were not
-  // there, and it sits full width beneath them.
+  // there, and it sits full width beneath them. Grid events all carry the same
+  // z-index, so "beneath" is DOM order — the declined go first, before the
+  // events they underlie.
   const declined = events
     .filter((event) => event.isDeclined)
     .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
@@ -186,16 +188,17 @@ export function findOverlappingEventsCount(
   }
 
   // flattening halls and events
-  return result
-    .map((hall, idx) =>
-      hall.map((event, eventIdx) => ({
-        ...event,
-        hallNumber: idx,
-        idx: eventIdx,
-      })),
-    )
-    .flat()
-    .concat(declined)
+  return declined.concat(
+    result
+      .map((hall, idx) =>
+        hall.map((event, eventIdx) => ({
+          ...event,
+          hallNumber: idx,
+          idx: eventIdx,
+        })),
+      )
+      .flat(),
+  )
 }
 
 // Helpers
