@@ -176,7 +176,7 @@ toast.success('Saved', { duration: 5000 })
 
 Audit: ~6 callsites pass a numeric `duration`. Each needs `× 1000`.
 
-**Limited inline HTML is supported, in the message and in `description`.** Both accept a string containing `a`, `em`, `strong`, `i`, `b` or `u`, sanitized with DOMPurify. Anything outside that safelist is stripped. Non-string values (components, VNodes, render functions) pass through untouched. This is intentional and driven by real app needs; it is not a leftover of 0.1.x. `description` joined the contract in #1094 item 6, so a description holding a `<` outside the safelist now loses those characters.
+**Limited inline HTML is supported, in the message and in `description`.** Both accept a string containing `a`, `em`, `strong`, `i`, `b` or `u`, sanitized with DOMPurify. Anything outside that safelist is stripped. Non-string values (components, VNodes, render functions) pass through untouched. This holds for every creator that takes a plain message: `toast()`, `success`, `error`, `warning`, `info`, `message` and `loading`. `custom` takes a component rather than a message, so only its `description` is covered. `toast.promise` keys its strings by state instead of taking a message, and `success`/`error` may be async functions, so only its `description` is covered and the state strings render as vue-sonner renders them. This is intentional and driven by real app needs; it is not a leftover of 0.1.x. `description` joined the contract in #1094 item 6, so a description holding a `<` outside the safelist now loses those characters.
 
 ### Renamed / removed APIs
 

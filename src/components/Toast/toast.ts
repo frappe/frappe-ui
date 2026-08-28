@@ -18,10 +18,12 @@ function renderSafeHTML<T>(message: T): T | (() => VNode) {
   return () => h('span', { innerHTML: html })
 }
 
-// Item 6: `description` gets the same limited inline HTML as the message.
-// Sanitizing twice is harmless — `renderSafeHTML` returns non-strings
-// untouched, so an already-wrapped render function passes straight through.
-function withSafeDescription(data: SonnerData): SonnerData {
+// `description` gets the same limited inline HTML as the message. Sanitizing
+// twice is harmless — `renderSafeHTML` returns non-strings untouched, so an
+// already-wrapped render function passes straight through.
+function withSafeDescription<T extends { description?: unknown } | undefined>(
+  data: T,
+): T {
   if (!data || data.description == null) return data
   return { ...data, description: renderSafeHTML(data.description) }
 }
@@ -54,6 +56,10 @@ function toastFn(
   return sonnerToast(renderSafeHTML(message), withSafeDescription(options))
 }
 
+// Every creator that takes a plain message is wrapped. Anything left to
+// `Object.assign` from sonner's namespace would reach vue-sonner untouched and
+// silently opt out of the contract above — `message` in particular, which the
+// migration guide points `toast.create` callers at.
 export const toast = Object.assign(toastFn, sonnerToast, {
   success: (message: string | Component | VNode, data?: SonnerData) =>
     dispatch('success', message, data),
@@ -63,4 +69,19 @@ export const toast = Object.assign(toastFn, sonnerToast, {
     dispatch('warning', message, data),
   info: (message: string | Component | VNode, data?: SonnerData) =>
     dispatch('info', message, data),
+  message: (message: string | Component | VNode, data?: SonnerData) =>
+    sonnerToast.message(renderSafeHTML(message), withSafeDescription(data)),
+  loading: (message: string | Component | VNode, data?: SonnerData) =>
+    sonnerToast.loading(renderSafeHTML(message), withSafeDescription(data)),
+  // `custom` takes a component, not a message, so only the description applies.
+  custom: ((component: Parameters<typeof sonnerToast.custom>[0], data?: SonnerData) =>
+    sonnerToast.custom(component, withSafeDescription(data))) as typeof sonnerToast.custom,
+  // `promise` keys its strings by state rather than taking a message, and
+  // `success`/`error` may be async functions. Only `description` is covered;
+  // the state strings render as vue-sonner renders them.
+  promise: ((
+    promise: Parameters<typeof sonnerToast.promise>[0],
+    data?: Parameters<typeof sonnerToast.promise>[1],
+  ) =>
+    sonnerToast.promise(promise, withSafeDescription(data))) as typeof sonnerToast.promise,
 }) as typeof sonnerToast

@@ -134,6 +134,16 @@ through the same DOMPurify safelist (`a`, `em`, `strong`, `i`, `b`, `u`).
   fixture for a space description, not a toast.
 - Non-string descriptions (components, VNodes, render functions) pass through
   untouched, as before.
+- **Also breaking, silent:** `toast.message` and `toast.loading` now sanitize
+  and render their *message* as inline HTML too. They came off vue-sonner's
+  namespace untouched before, so `toast.message('<b>hi</b>')` printed the tags
+  literally and now renders bold. This makes them consistent with `toast()` and
+  the four semantic creators, and it is what the `toast.create` migration
+  advice above depends on.
+- `toast.custom` takes a component rather than a message, so only its
+  `description` is covered. `toast.promise` keys its strings by state and its
+  `success`/`error` may be async functions, so only its `description` is
+  covered; the state strings render as vue-sonner renders them.
 
 This lands before the tag on purpose. Doing it in a `1.x` would silently change
 rendered output for every existing caller.
