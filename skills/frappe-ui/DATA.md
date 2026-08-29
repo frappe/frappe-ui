@@ -24,9 +24,10 @@ No Frappe backend behind the app? See [SETUP.md](SETUP.md) → Prototyping again
 
 ```vue
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useCall, Skeleton, ErrorMessage } from 'frappe-ui'
 
+const userId = ref('Administrator')
 const user = useCall<User>({
   url: computed(() => `/api/v2/document/User/${userId.value}`),
   refetch: true,
@@ -74,6 +75,7 @@ const todos = useList<Todo>({ doctype: 'ToDo', fields: ['name', 'status'], filte
 ## `useDoc`
 
 ```ts
+const todoId = 'TODO-0001'
 const todo = useDoc<Todo>({ doctype: 'ToDo', name: todoId })
 await todo.setValue.submit({ status: 'Closed' })
 ```
@@ -106,6 +108,9 @@ await todos.runDocMethod.submit({ name: id, method: 'send_reminder' })
 
 ```vue
 <script setup>
+import { useRouter } from 'vue-router'
+import { useNewDoc, FormControl, Button } from 'frappe-ui'
+const router = useRouter()
 const todo = useNewDoc('ToDo', { status: 'Open' })
 const save = async () => router.push(`/todos/${(await todo.submit()).name}`)
 </script>

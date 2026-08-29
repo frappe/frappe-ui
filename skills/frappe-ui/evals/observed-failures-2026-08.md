@@ -1,5 +1,7 @@
 # Observed failures — blind eval, current skill
 
+*2026-08 audit of the pre-merge five-file layout. COMPONENTS.md, DESIGN.md and TOKENS.md have since merged into CORE.md, so the line anchors below no longer resolve.*
+
 Baseline: API-correctness clean in 4 of 10 cases. Every defect below was written
 by an agent that had the skill loaded and could NOT read library source. That is
 the condition the skill ships for.

@@ -1,5 +1,7 @@
 # Ground-truth defects in the frappe-ui skill
 
+*2026-08 audit of the pre-merge five-file layout. COMPONENTS.md, DESIGN.md and TOKENS.md have since merged into CORE.md, so the line anchors below no longer resolve.*
+
 Every item verified against library source. Apply every correction.
 
 

@@ -150,9 +150,63 @@ HARD LIMITS: read-only outside ${OUT}. Do not edit any file in ${REPO}. Do not r
   )
 ))
 
+// The rubric spec in CASES is the authority, not the grader output. Graders drop
+// real items and invent junk ones, so counting what they emitted measures the
+// grader, not the skill. Reconcile every emitted item against the expected
+// (case_id, rubric_id) pairs: an expected item nobody graded is a fail, and an
+// item outside the spec is discarded.
 const grades = graded.filter(Boolean).flatMap((g) => g.grades || [])
-const total = grades.flatMap((g) => g.items).length
-const passed = grades.flatMap((g) => g.items).filter((i) => i.pass).length
-log(`${RUN}: ${passed}/${total} rubric items passed across ${grades.length} cases`)
+const emitted = new Map(CASES.map((c) => [c.id, []]))
+const ungraded = []
+const junk = []
+const duplicates = []
+for (const g of grades) {
+  const items = g.items || []
+  const bucket = emitted.get(g.case_id)
+  if (!bucket) {
+    for (const item of items) junk.push(`${g.case_id}/${(item && item.rubric_id) || '(empty)'}`)
+    continue
+  }
+  for (const item of items) bucket.push(item)
+}
 
-return { run: RUN, grades, passed, total }
+let total = 0
+let passed = 0
+let apiCases = 0
+let apiPassed = 0
+for (const c of CASES) {
+  const expected = (c.rubric_graded || []).map((r) => r.id)
+  const kept = new Map()
+  for (const item of emitted.get(c.id) || []) {
+    const rid = item && item.rubric_id
+    if (!rid || expected.indexOf(rid) === -1) {
+      junk.push(`${c.id}/${rid || '(empty)'}`)
+      continue
+    }
+    if (kept.has(rid)) {
+      duplicates.push(`${c.id}/${rid}`)
+      continue
+    }
+    kept.set(rid, item)
+  }
+  for (const rid of expected) {
+    total += 1
+    const item = kept.get(rid)
+    if (!item) ungraded.push(`${c.id}/${rid}`)
+    else if (item.pass) passed += 1
+  }
+  if (expected.indexOf('api') !== -1) {
+    apiCases += 1
+    const apiItem = kept.get('api')
+    if (apiItem && apiItem.pass) apiPassed += 1
+  }
+}
+
+const percent = total ? Math.round((passed / total) * 100) : 0
+log(`${RUN}: strict: ${passed}/${total} (${percent}%) across ${CASES.length} cases`)
+for (const u of ungraded) log(`UNGRADED: ${u}`)
+if (junk.length) log(`junk/unknown rubric_ids: ${junk.length} (${junk.join(', ')})`)
+if (duplicates.length) log(`duplicate rubric_ids: ${duplicates.length} (${duplicates.join(', ')})`)
+log(`API-correct: ${apiPassed}/${apiCases} cases`)
+
+return { run: RUN, grades, passed, total, percent, ungraded, junk, duplicates, apiPassed, apiCases }

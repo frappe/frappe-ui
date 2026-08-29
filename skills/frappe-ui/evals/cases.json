@@ -146,7 +146,7 @@
       "id": "trigger-frappe-app-whole-screen",
       "bucket": "trigger",
       "expect_skill": true,
-      "intent": "Whole-screen design request inside a Frappe app with nothing named; must fire and must consult DESIGN.md rather than only the component catalog.",
+      "intent": "Whole-screen design request inside a Frappe app with nothing named; must fire and must consult CORE.md before writing shell markup.",
       "prompt": "I need a whole new screen in our Frappe app: a left sidebar with our sections, a header across the content, and a scrollable main area. Set the shell up for me.",
       "rubric": [
         {
@@ -157,7 +157,7 @@
         },
         {
           "id": "r2",
-          "check": "Did the agent read DESIGN.md (the whole-app/whole-screen reference) rather than only the component catalog?",
+          "check": "Did the agent read CORE.md (the component, page-anatomy and token reference) before writing the shell?",
           "severity": "critical",
           "source": "skills/frappe-ui/SKILL.md:53"
         },

@@ -30,7 +30,7 @@ def scan(path):
                 tools.append((b.get('name'), b.get('input') or {}))
     return first_user or '', tools
 
-SKILL_FILE = re.compile(r'skills/frappe-ui/(SKILL|COMPONENTS|TOKENS|DESIGN|SETUP)\.md')
+SKILL_FILE = re.compile(r'skills/frappe-ui/(SKILL|CORE|SETUP|DATA)\.md')
 
 def classify(tools):
     skill_tool = False
