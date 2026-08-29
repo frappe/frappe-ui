@@ -5,13 +5,13 @@ description: Build consistent Frappe-style user interfaces using the frappe-ui V
 
 # frappe-ui
 
-Build UIs that look and feel like Frappe products by composing **frappe-ui** components and styling with the library's **semantic Tailwind tokens**. Never hand-roll buttons, inputs, dialogs, dropdowns, etc. — pick the right component first.
+Build UIs that look and feel like Frappe products by composing **frappe-ui** components and styling with the library's **semantic Tailwind tokens**.
 
 ## Quick start
 
 ```vue
 <script setup>
-import { Button, Dialog, TextInput, FormControl } from 'frappe-ui'
+import { Button, Dialog, FormControl } from 'frappe-ui'
 import { ref } from 'vue'
 
 const open = ref(false)
@@ -19,7 +19,7 @@ const name = ref('')
 </script>
 
 <template>
-  <div class="p-4 bg-surface-base text-ink-gray-9">
+  <div class="p-4 bg-surface-base text-ink-gray-8">
     <Button variant="solid" theme="gray" @click="open = true">New Task</Button>
     <Dialog v-model:open="open" title="Create Task">
       <FormControl v-model="name" label="Title" required />
@@ -28,34 +28,43 @@ const name = ref('')
 </template>
 ```
 
-## Rules
+## Where to look
 
-Each rule states what to do and what to avoid — one canonical place, no separate anti-pattern list.
+Prop names, prop value types and slot names live in these files, not here. Open the one you need before you write markup.
 
-1. **Pick the component, don't build one.** Consult `COMPONENTS.md`; only fall back to raw HTML for layout (grids, flex). Never hand-roll `<button class="bg-blue-500 …">`.
-2. **Use the modern families.** App frame → `DesktopShell`/`MobileShell`; lists → `frappe-ui/list` (`List`/`ListRow`/…); rich text → `Editor` from `frappe-ui/editor`; scroll regions → `ScrollArea`. `ListView`, `ItemListRow`, and `TextEditor` are legacy — never in new code. `Autocomplete` is gone: use `Combobox` for one value, `MultiSelect` for several.
-3. **Semantic tokens, not raw colors.** `bg-surface-*`, `text-ink-*`, `border-outline-*` — never `bg-gray-100`, `text-gray-900`, `border-gray-300`. See `TOKENS.md`.
-4. **Color = `variant` + `theme`.** `variant` (`solid | outline | subtle | ghost`) + `theme` (`gray | blue | green | red | orange`). Never invent `intent` / `kind` / `severity` / `appearance`.
-5. **Two-way state via `v-model`.** Inputs `v-model`; overlays `v-model:open`; comboboxes `v-model` + `v-model:query`. Never `:value` + `@change`, never bare `v-model` on `<Dialog>`. Writes: `immediate: false` + `submit(params)`.
-6. **Use the input labeling contract.** Every control accepts `label`, `description`, `error`, `required` — use them, not placeholder-as-label or a separate `<label>`.
-7. **Slot vocabulary is fixed.** `#prefix`, `#suffix`, `#trigger`, `#empty`, `#header`, `#footer`, `#default`; per-item `#item-prefix` / `#item-suffix`. No `#icon-left` / `#avatar-right`.
-8. **Icons are CSS classes.** `<span class="lucide-<name> size-4" aria-hidden="true" />`; for icon props pass the string `"lucide-edit"`. Never import per-icon Vue components. See `COMPONENTS.md` → Icons.
-9. **Imperative for one-shot UI.** `dialog.confirm` / `alert` / `prompt`, `toast.success` / `error` / `info` — don't hand-mount `<Dialog>` to ask "are you sure?". One action, one toast: related edits (fields in the same form) reuse a single toast via a stable `id`, they never stack. See `DESIGN.md` → Toasts.
-10. **API calls go through `useCall`** (or `useList` / `useDoc`). Never `fetch` / `axios`; don't reach for the legacy `createResource` family in new code. See `COMPONENTS.md` → Data & resources.
-11. **Style components via `data-slot` / `data-state`, not class injection.** No `triggerClass` / `contentClass` props — they don't exist by design. See `TOKENS.md` → Custom CSS hooks.
-12. **Bootstrapping from scratch?** Follow `SETUP.md` exactly — version pins (Tailwind v3, Vite 5), `exports` subpaths, `optimizeDeps.exclude: ['frappe-ui']`, `app.use(FrappeUI)`, and `vue-router` are all required and easy to miss.
+| Writing this | Open this first |
+|---|---|
+| a list or a table | [COMPONENTS.md](COMPONENTS.md) → List family |
+| a form or any input | [COMPONENTS.md](COMPONENTS.md) → Input controls |
+| a dialog, popover, menu, toast | [COMPONENTS.md](COMPONENTS.md) → Overlays |
+| a command palette | [COMPONENTS.md](COMPONENTS.md) → CommandPalette |
+| anything that fetches or writes data | [DATA.md](DATA.md) |
+| a whole page, screen or app | [DESIGN.md](DESIGN.md) |
+| colors, typography, radius, shadow, dark mode | [TOKENS.md](TOKENS.md) |
+| a fresh Vite + Vue 3 project | [SETUP.md](SETUP.md) |
 
-## Reference files
+## Contracts
 
-- [SETUP.md](SETUP.md) — scaffolding a fresh Vite + Vue 3 + frappe-ui project: version pinning, `vite.config.js`, Tailwind, PostCSS, CSS entry, plugin vs provider. Read this first when bootstrapping from scratch.
-- [COMPONENTS.md](COMPONENTS.md) — component catalog: when to reach for each one, key props, common pitfalls.
-- [TOKENS.md](TOKENS.md) — semantic color tokens (`ink-*`, `surface-*`, `outline-*`), typography, spacing, radii.
-- [DESIGN.md](DESIGN.md) — the app design language: shell anatomy, screen archetypes, hierarchy by role, color rules, geometry, desktop→mobile, and common patterns (forms, confirmations, empty/loading states). Read when designing a whole app or screen.
+These hold across components. Everything else is per-component.
+
+1. **Pick the component.** Every interactive element comes from `COMPONENTS.md`.
+   Raw HTML is for layout: grids, flex, spacing wrappers.
+2. **Color is two props: `variant` and `theme`.** The value sets differ per
+   component — `COMPONENTS.md` lists each one. In your own markup, colors come
+   from the semantic scales: `bg-surface-*`, `text-ink-*`, `border-outline-*`
+   (`TOKENS.md`).
+3. **Two-way state is `v-model`.** Inputs take `v-model`. Overlays take
+   `v-model:open`. `Combobox` and `MultiSelect` add optional `v-model:query`.
+   `List` adds `v-model:selection` and `v-model:active`.
+4. **Icons are CSS classes.** `<span class="lucide-edit size-4" aria-hidden="true" />`.
+   A prop named `icon` takes the string `"lucide-edit"`.
+5. **Slot names are per component, never universal.** Read the component's
+   row in `COMPONENTS.md` → Overlays before writing a `<template #…>`.
+6. **Frappe API calls go through the `use*` composables** — `useCall`,
+   `useList`, `useDoc`, `useDoctype`, `useNewDoc`, all exported from
+   `frappe-ui`. Each one takes its own option set and returns its own shape;
+   [DATA.md](DATA.md) lists them separately.
 
 ## Authoritative upstream docs
 
-When the bundled refs don't answer a specific API question, fetch the official LLM-friendly index:
-
-- **https://ui.frappe.io/llms.txt** — curated index of every component doc, design-system tokens page, and data-fetching guide. Always current with the published library; follow the links inside for full details on a specific component.
-
-Prefer the upstream `llms.txt` over guessing — it lists every component's docs page and the canonical design-system / data-fetching pages. Source lives in the `frappe/frappe-ui` GitHub repo (`src/components/<Name>/`, plus `PHILOSOPHY.md` and `CONTEXT.md` at the repo root).
+When the bundled refs don't answer a specific API question, fetch **https://ui.frappe.io/llms.txt** — a curated index of every component doc, the design-system token pages, and the data-fetching guides. Source lives in the `frappe/frappe-ui` GitHub repo under `src/components/<Name>/`, with `PHILOSOPHY.md` (the API design rules) and `CONTEXT.md` (the shared vocabulary: `open`, `variant`, `theme`, `dismissible`) at the repo root.

@@ -1,37 +1,30 @@
 # Project setup
 
-Bootstrapping a fresh Vite + Vue 3 project with frappe-ui has several pitfalls — they all stem from frappe-ui shipping unbuilt source, exposing only a few package `exports` subpaths, and pulling in CJS / virtual-icon imports that Vite must be told how to handle. Follow this checklist to avoid running into them.
+## Versions to pin
 
-## Versions matter — pin them
-
-`npm create vite@latest` currently scaffolds Vite 8 + Tailwind v4. **Both are incompatible with frappe-ui 0.1.x.** After scaffolding, immediately uninstall the defaults and pin to versions frappe-ui expects:
+`npm create vite@latest` currently scaffolds Tailwind v4, which frappe-ui 1.0.x does not support. After scaffolding, uninstall the Tailwind defaults and pin what frappe-ui expects:
 
 ```bash
-npm uninstall tailwindcss @tailwindcss/vite vite @vitejs/plugin-vue
-npm install -D \
-  tailwindcss@^3.4 postcss autoprefixer \
-  vite@^5 @vitejs/plugin-vue@^5 \
-  vue-router@^4 \
-  unplugin-auto-import unplugin-vue-components unplugin-icons \
-  lucide-static @iconify/json
-npm install frappe-ui@beta
+npm uninstall tailwindcss @tailwindcss/vite
+npm install -D tailwindcss@^3.4 postcss autoprefixer vite@^7 @vitejs/plugin-vue@^6
+npm install frappe-ui@beta vue-router@^4
 ```
 
-- **Tailwind must be v3.** frappe-ui's preset is a Tailwind v3 config (`darkMode`, `plugins`, `content`). Tailwind v4 ignores that shape entirely and the design tokens silently won't load.
-- **Vite 5 (not 6/7/8).** frappe-ui's vite plugin is built against Vite 5's plugin API.
-- **`vue-router` is effectively required.** `<Button>` from frappe-ui injects `Symbol(router)`. Without a router instance, every Button logs `[Vue warn]: injection "Symbol(router)" not found.` Install it even if your prototype has only one screen.
-- **`unplugin-icons` + iconify data + lucide-static.** Required for resolving the `~icons/lucide/*` virtual imports that frappe-ui components do internally.
+- **Tailwind v3.** frappe-ui ships a Tailwind v3 preset (`darkMode`, `theme`, `plugins`, `safelist`). Tailwind v4 ignores that shape and the design tokens never load.
+- **Vite 7, Node `>=20.19.0`.** frappe-ui builds and tests against `vite@^7.3.2` (`package.json` `engines`, `devDependencies`).
+- **`vue-router`.** It is a peer dependency (`vue-router@^4.1.6`). `<Button :route>`, `Breadcrumbs`, `SidebarItem`, `Tabs` and `PageHeaderBackButton` render `RouterLink` or call `useRouter()`, and warn without a router instance.
+- `unplugin-icons`, `unplugin-auto-import`, `unplugin-vue-components` and `lucide-static` are already frappe-ui dependencies. frappe-ui's own vite sub-plugin resolves `~icons/lucide/*` from `lucide-static`, so install none of them yourself.
 
-## Use the package `exports` subpaths
+## Import from the package `exports` subpaths
 
-frappe-ui's `package.json` exposes only a handful of subpaths. The two most common mistakes:
+The exported subpaths are `frappe-ui`, `frappe-ui/list`, `frappe-ui/editor`, `frappe-ui/charts`, `frappe-ui/icons`, `frappe-ui/experimental`, `frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vite/lucideIconsPlugin`, `frappe-ui/vitepress`, `frappe-ui/style.css` and `frappe-ui/tsconfig.base.json`. The two most common mistakes:
 
 | Mistake | Use this instead |
 |---|---|
-| `import frappeUIPreset from 'frappe-ui/tailwind/preset'` | `import frappeUIPreset from 'frappe-ui/tailwind'` |
+| `import frappeUIPreset from 'frappe-ui/tailwind/preset'` | `import preset from 'frappe-ui/tailwind'` |
 | `@import 'frappe-ui/src/style.css'` | `@import 'frappe-ui/style.css'` |
 
-Anything not in the `exports` map (like `frappe-ui/src/*`) will fail with `Package subpath '…' is not defined by "exports"`.
+Anything outside the `exports` map (like `frappe-ui/src/*`) fails with `Package subpath '…' is not defined by "exports"`.
 
 ## `vite.config.js`
 
@@ -42,50 +35,39 @@ import frappeui from 'frappe-ui/vite'
 
 export default defineConfig({
   plugins: [
-    frappeui({
-      // For non-Frappe prototypes, opt out of the Frappe-specific plugins:
-      frappeProxy: false,
-      jinjaBootData: false,
-      buildConfig: false,
-    }),
+    frappeui({ frontendRoute: '/todo' }),
     vue(),
   ],
-  optimizeDeps: {
-    // frappe-ui ships unbuilt source with `~icons/lucide/*` virtual imports
-    // that esbuild's prebundler cannot resolve. Skip prebundling for it; the
-    // frappeui vite plugin handles the icon resolution at request time.
-    exclude: ['frappe-ui'],
-    // After excluding frappe-ui, its transitive CJS deps still need to be
-    // converted to ESM for the browser — list them explicitly so Vite
-    // prebundles them.
-    include: [
-      'tippy.js',
-      'engine.io-client',
-      'socket.io-client',
-      'debug',
-    ],
-  },
 })
 ```
 
-The `frappeui()` plugin's defaults (`frappeProxy`, `jinjaBootData`, `buildConfig`, `siteBanner`) all assume you're running inside a Frappe site. Disable them for any prototype that isn't.
+Every `frappeui()` sub-plugin except `frappeTypes` is on by default; pass `false` to turn one off, or an options object to configure it. `frontendRoute` is the route the app is served on. It drives the dev-server site banner and the inferred production `indexHtmlPath`.
+
+`frappeProxy`, `jinjaBootData` and `buildConfig` assume a Frappe site around the app. For a prototype that has no Frappe backend, turn those three off:
+
+```js
+frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false })
+```
+
+Leave `optimizeDeps` alone. The plugin declares its own `optimizeDeps.include` (`highlight.js/lib/core`, `reka-ui`, `vue-sonner`, `dompurify`), and its `barrelImports` sub-plugin expects Vite to pre-bundle an installed frappe-ui as one chunk.
+
+### Prototyping against a non-Frappe backend
+
+`useCall` expects Frappe's response envelope (`{ data: T }`); against a generic REST API `.data` stays `null`. Use `useFetch` from `@vueuse/core` for such prototypes — frappe-ui's fetch layer is built on the same `createFetch`. Moving to a Frappe backend is then `useFetch(url).json()` → `useCall({ url })`.
 
 ## `tailwind.config.js`
 
 ```js
-import frappeUIPreset from 'frappe-ui/tailwind'
+import preset, { content } from 'frappe-ui/tailwind'
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  presets: [frappeUIPreset],
-  content: [
-    './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}',
-    // Include frappe-ui source so Tailwind generates classes for component internals.
-    './node_modules/frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
-  ],
+  presets: [preset],
+  content: [...content, './index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
 }
 ```
+
+Spread the exported `content`. Tailwind v3 does not merge a preset's `content` into the app config, so frappe-ui's own source globs have to be listed by the app. A hand-copied `node_modules/frappe-ui/src/**` glob drops `icons/**` and the parked families, and their utility classes then never compile.
 
 ## `postcss.config.js`
 
@@ -102,29 +84,28 @@ export default {
 
 ```css
 @import 'frappe-ui/style.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 ```
+
+That one file emits `@tailwind base`, `@tailwind components`, `@tailwind utilities` and the Inter font import. Adding the directives again emits every Tailwind layer twice.
 
 ## App entry (`src/main.js`)
 
 ```js
 import { createApp } from 'vue'
-import { FrappeUI } from 'frappe-ui'
 import { router } from './router'
 import './style.css'
 import App from './App.vue'
 
 const app = createApp(App)
-app.use(router)   // required — frappe-ui's <Button> injects Symbol(router)
-app.use(FrappeUI) // installs the plugin (resource provider, etc.)
+app.use(router)
 app.mount('#app')
 ```
 
-`FrappeUI` (plugin, `app.use`) and `FrappeUIProvider` (component, wraps your template) are two different things — you usually want both. The plugin provides app-level injections; the provider mounts the imperative `dialog.*` / `toast.*` portals.
+`app.use(FrappeUI)` is optional for a new app: the plugin provides no injections. It installs the v1 resources Options API (`this.$resources`) when called as `app.use(FrappeUI, { resources: true })`, and otherwise only adds dev-mode guards for the removed `$socket` / `$call` / `$resources` globals.
 
 ## App root (`src/App.vue`)
+
+`<FrappeUIProvider>` is the one to mount. It renders the `dialog.*` and `toast.*` portals, wraps the app once at the root, and adds no element of its own.
 
 ```vue
 <script setup>
@@ -138,9 +119,9 @@ import { FrappeUIProvider } from 'frappe-ui'
 </template>
 ```
 
-## Minimal router stub (`src/router.js`)
+Mount exactly one. `<ToastProvider>` has no dedup guard, so a second provider renders every toast twice.
 
-Even if your prototype is single-page, install one — it silences Button warnings and lets `Button :route="..."` work later:
+## Router stub (`src/router.js`)
 
 ```js
 import { createRouter, createWebHistory } from 'vue-router'
@@ -157,8 +138,6 @@ export const router = createRouter({
 
 After `npm run dev`:
 
-- Page renders the frappe-ui Inter font and semantic surface colors (not raw Tailwind grays).
-- DevTools console is empty — no `Package subpath '…' is not defined`, no `Could not resolve '~icons/lucide/…'`, no `does not provide an export named 'default'`, no `injection "Symbol(router)" not found`.
-- A `<Button icon-left="lucide-plus" label="New" />` renders a button with an inline lucide plus icon.
-
-If any of the above fails, walk back through this file — every error in the wild from a fresh scaffold has corresponded to one of these checkboxes being skipped.
+- The page renders in the Inter font, on semantic surface colors.
+- The DevTools console is empty — no `Package subpath '…' is not defined`, no `Could not resolve '~icons/lucide/…'`, no `injection "Symbol(router)" not found`.
+- `<Button icon-left="lucide-plus" label="New" />` renders a button with an inline lucide plus icon.
