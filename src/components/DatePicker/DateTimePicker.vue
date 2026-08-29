@@ -118,6 +118,7 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
   variant: 'subtle',
   placeholder: 'Select date & time',
   typeable: true,
+  naturalLanguage: true,
   disabled: false,
   clearable: true,
   allowCustomTime: true,
@@ -229,7 +230,10 @@ const timeValue = ref<string>('')
 
 const initialValue = ref(props.modelValue || '')
 
-const coerceToDayjs = useDateCoercion(() => props.format)
+const coerceToDayjs = useDateCoercion(
+  () => props.format,
+  () => props.naturalLanguage,
+)
 
 // ── Constraints ──────────────────────────────────────────────────────────────
 

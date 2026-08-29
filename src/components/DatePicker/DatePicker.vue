@@ -102,6 +102,7 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
   variant: 'subtle',
   placeholder: 'Select date',
   typeable: true,
+  naturalLanguage: true,
   disabled: false,
   clearable: true,
   openOnFocus: false,
@@ -221,7 +222,10 @@ const checkUnavailable = makeUnavailableCheck(
   () => props.isDateUnavailable,
 )
 
-const coerceToDayjs = useDateCoercion(() => props.format)
+const coerceToDayjs = useDateCoercion(
+  () => props.format,
+  () => props.naturalLanguage,
+)
 
 function syncFromValue(val?: string): void {
   if (!val) {

@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
-import { dayjs } from '../../utils/dayjs'
+import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { monthStart, getDateValue } from './utils'
+import { parseNaturalDate } from './naturalDate'
 import type {
   CommonDatePickerProps,
   PopoverAlign,
@@ -93,7 +94,10 @@ export function useKeepOpen(props: CommonDatePickerProps) {
 }
 
 // Coerce arbitrary string input to a Dayjs, respecting an optional explicit format.
-export function useDateCoercion(getFormat: () => string | undefined) {
+export function useDateCoercion(
+  getFormat: () => string | undefined,
+  getNaturalLanguage?: () => boolean | undefined,
+) {
   return function coerceToDayjs(val?: string | null): Dayjs | null {
     if (!val) return null
     const raw = String(val).trim()
@@ -102,6 +106,13 @@ export function useDateCoercion(getFormat: () => string | undefined) {
     if (format) {
       const dStrict = dayjs(raw, format, true)
       if (dStrict.isValid()) return dStrict
+    }
+    // Natural language must run before the loose parse: `dayjs(raw)` falls
+    // through to the Date constructor, which eats strings like "may 4" with
+    // a wrong year.
+    if (getNaturalLanguage?.() !== false) {
+      const dNatural = parseNaturalDate(raw, dayjsLocal())
+      if (dNatural) return dNatural
     }
     const dLoose = dayjs(raw)
     if (dLoose.isValid()) return dLoose

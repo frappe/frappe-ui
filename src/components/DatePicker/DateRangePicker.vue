@@ -111,6 +111,7 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
+import { parseNaturalRange } from './naturalDate'
 import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
@@ -134,6 +135,7 @@ const props = withDefaults(defineProps<DateRangePickerProps>(), {
   variant: 'subtle',
   placeholder: 'Select range',
   typeable: true,
+  naturalLanguage: true,
   disabled: false,
   clearable: true,
   dualPane: false,
@@ -288,7 +290,10 @@ const checkUnavailable = makeUnavailableCheck(
   () => props.isDateUnavailable,
 )
 
-const coerceToDayjs = useDateCoercion(() => props.format)
+const coerceToDayjs = useDateCoercion(
+  () => props.format,
+  () => props.naturalLanguage,
+)
 
 // ── Value parsing ────────────────────────────────────────────────────────────
 
@@ -301,7 +306,15 @@ function normalizeIncoming(val?: string[] | null): [string, string] {
 
 function parseRangeInput(raw: string): [Dayjs | null, Dayjs | null] {
   if (!raw.trim()) return [null, null]
-  const normalized = raw.replace(/\s+to\s+/i, ',').replace(/\s+-\s+/g, ',')
+  // A whole-string phrase ("last 7 days", "may 4 to may 26") wins over the
+  // separator split — the range parser owns its own separators.
+  if (props.naturalLanguage) {
+    const range = parseNaturalRange(raw, dayjsLocal())
+    if (range) return range
+  }
+  const normalized = raw
+    .replace(/\s+to\s+/i, ',')
+    .replace(/\s+[-–—]\s+/g, ',')
   const parts = normalized
     .split(',')
     .map((p) => p.trim())
