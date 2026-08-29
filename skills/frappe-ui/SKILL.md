@@ -59,7 +59,3 @@ These hold across components. Everything else is per-component, and lives in
    `useList`, `useDoc`, `useDoctype`, `useNewDoc`, all exported from
    `frappe-ui`. Each one takes its own option set and returns its own shape;
    [DATA.md](DATA.md) lists them separately.
-
-## Authoritative upstream docs
-
-When the bundled refs don't answer a specific API question, fetch **https://ui.frappe.io/llms.txt** — a curated index of every component doc, the design-system token pages, and the data-fetching guides. Source lives in the `frappe/frappe-ui` GitHub repo under `src/components/<Name>/`, with `PHILOSOPHY.md` (the API design rules) and `CONTEXT.md` (the shared vocabulary: `open`, `variant`, `theme`, `dismissible`) at the repo root.

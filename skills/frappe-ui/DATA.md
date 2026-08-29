@@ -41,7 +41,7 @@ const user = useCall<User>({
 </template>
 ```
 
-**Write shape — `immediate: false` plus `submit(params)`.** This is the write pattern for the whole file: nothing fires until you call `submit`, and the params for that one request are passed in.
+**Write shape — `immediate: false` plus `await submit(params)`.** This is the write pattern for the whole file: nothing fires until you call `submit`, and the params for that one request are passed in. Always `await` it inside the handler and put the follow-up work at the await site; `onSuccess` is for side effects the caller does not sequence. The await only sequences under the `refetch: false` default — set `refetch: true` and `submit` returns before the request goes out.
 
 ```ts
 const createTask = useCall<Task, { title: string; description?: string }>({
@@ -68,9 +68,9 @@ Bind `loading` to the submit button (`<Button :loading="createTask.loading">`) a
 const todos = useList<Todo>({ doctype: 'ToDo', fields: ['name', 'status'], filters: { status: 'Open' }, orderBy: 'modified desc' })
 ```
 
-**Options** (`src/data-fetching/useList/types.ts:26-46`): `doctype` (required), `fields`, `filters`, `orderBy`, `start` (default `0`), `limit` (default `20`), `groupBy`, `parent`, `debug`, `cacheKey`, `staleOnError`, `initialData`, `immediate` (default `true`), `refetch` (**default `true`**, unlike `useCall`), `baseUrl`, `url`, `transform`, `onSuccess`, `onError`.
+**Options** (`src/data-fetching/useList/types.ts:26-46`): `doctype` (required), `fields`, `filters` and `orderBy` (both `MaybeRefOrGetter` — pass a ref or getter and the list refetches when it changes), `start` (default `0`), `limit` (default `20`), `groupBy`, `parent`, `debug`, `cacheKey`, `staleOnError`, `initialData`, `immediate` (default `true`), `refetch` (**default `true`**, unlike `useCall`), `baseUrl`, `url`, `transform`, `onSuccess`, `onError`.
 
-**Returns:** `data` (the current page's rows), `error`, `loading` / `isFetching`, `isFinished`, `hasNextPage` / `hasPreviousPage`, `start` and `limit` (both **readonly** — page with `next()` / `previous()`, do not assign), `url`, `canAbort`, `aborted`, `execute()` / `fetch()` / `reload()`, `abort()`, `next()` / `previous()`, `updateRow(doc)` / `removeRow(name)`, plus three write helpers: `insert.submit(values)`, `setValue.submit({ name, ...values })`, `delete.submit({ name })`. Each helper carries its own `data`, `error`, `loading` and `isLoading(...)`.
+**Returns:** `data` (the current page's rows, `null` until the first response unless `initialData` seeds it, so guard it before binding to `ListRows :items`), `error`, `loading` / `isFetching`, `isFinished`, `hasNextPage` / `hasPreviousPage`, `start` and `limit` (both **readonly** — page with `next()` / `previous()`, do not assign), `url`, `canAbort`, `aborted`, `execute()` / `fetch()` / `reload()`, `abort()`, `next()` / `previous()`, `updateRow(doc)` / `removeRow(name)`, plus three write helpers: `insert.submit(values)`, `setValue.submit({ name, ...values })`, `delete.submit({ name })`. Each helper carries its own `data`, `error`, `loading` and `isLoading(...)`.
 
 ## `useDoc`
 

@@ -1,6 +1,6 @@
 # frappe-ui core reference
 
-Component APIs, design tokens and page composition. Copy a recipe (`docs/components/recipes/*.vue`, live at `/recipes/demo/<slug>` on ui.frappe.io) or an existing Frappe app (Gameplan, CRM, Helpdesk, Drive, Insights) rather than invent.
+Component APIs, design tokens and page composition. When this file does not answer a prop, slot or option question, read the shipped source before guessing: the npm package includes all of `src/`. `node_modules/frappe-ui/src/components/<Name>/` holds `types.ts`, a generated `<Name>.api.md` prop/slot/emit table, and `stories/*.vue`; the chart tables sit in `src/charts/docs/*.api.md` and the molecules under `src/molecules/<family>/`. Grep for the name if the path does not match. Read these from disk; do not import from `frappe-ui/src/*`, which the `exports` map blocks. With no `node_modules` on disk, fetch https://ui.frappe.io/llms.txt. Copy an existing Frappe app (Gameplan, CRM, Helpdesk, Drive, Insights) rather than invent.
 
 Import from `'frappe-ui'`. Four families ship on their own subpaths: `frappe-ui/list`, `frappe-ui/editor`, `frappe-ui/charts`, `frappe-ui/experimental`.
 
@@ -110,7 +110,7 @@ Gray first: ink-gray on surface-base, colour only where it encodes information. 
 
 - `DesktopShell` — prop `scroll` (default `true`; `false` for multi-pane layouts that own their scroll), slots `#rail`, `#sidebar`, default. `MobileShell` — slots default and `#nav`.
 - Headers teleport into the shell's pinned target, so a `PageHeader` can sit anywhere in the page. `PageHeader` has a **default slot only** — a `#prefix` or `#suffix` template on it renders nothing, so the whole header row, actions included, goes in the default slot. `PageHeaderMobile` has a default slot (the centered title) plus `#prefix` and `#suffix`.
-- `PageHeaderBase` is padding-free: use it when the header must split to align with a column border below (two-pane layouts, editor toolbars). The family also ships `PageHeaderTitle`, `PageHeaderMobileTitle`, `PageHeaderBackButton`.
+- `PageHeaderBase` is padding-free: use it when the header must split to align with a column border below (two-pane layouts, editor toolbars). The family also ships `PageHeaderTitle` (prop `title`, or a default slot that overrides it), `PageHeaderMobileTitle` and `PageHeaderBackButton`.
 - Sidebar family: `Sidebar` (props `width`, `collapsedWidth`, `disableCollapse`), `SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `SidebarCollapseToggle`, `SidebarCard` (a promotional footer card taking `title`, `description`, `theme`, `icon`, `action`, `dismissible`, emitting `dismiss`). `SidebarItem` is `h-7`; wrap a group in `space-y-0.5`, labels `flex-1 truncate text-sm`, count suffix `mr-1 text-xs text-ink-gray-5`.
 - Also `Rail` / `RailItem`, `MobileNav` / `MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. On the rail, Home is a bespoke logo button (not a `RailItem`) and the user avatar sits in a bottom-pinned `Dropdown` trigger.
 - `ScrollArea` owns every app-level scroll region. Props `orientation` (`vertical | horizontal | both`), `viewportClass`, `scrollHideDelay`; exposes `viewportElement`.
@@ -147,7 +147,7 @@ Desktop → mobile: sidebar → `BottomSheet`; persistent nav → `MobileNav` ta
 | **Compose / editor** | Focused page, no sidebar; `Editor` + `EditorFixedMenu` + `EditorContent` from `frappe-ui/editor`; prose column `max-w-[770px]` |
 | **Detail + meta panel** | Its own route with the id as a route param (list ↔ detail is two routes); content column + right panel `w-[20rem] shrink-0 border-l` of label/control rows |
 | **Settings** | `SettingsDialog`: `SettingsNavGroup` nav → header + body → `space-y-11 pt-6` sections → `divide-y divide-outline-gray-1` of `SettingsRow` |
-| **Dashboard** | Centered `max-w-4xl space-y-6`; KPI strip as `divide-x divide-outline-gray-2` |
+| **Dashboard** | Centered `max-w-4xl space-y-6`; KPI strip of `NumberCard`s from `frappe-ui/charts`, charts below in a grid, each sized by its wrapper |
 
 ## Actions
 
@@ -213,7 +213,7 @@ dialog.prompt({
 })
 ```
 
-- `confirm(args)` — `title`, `message`, `confirmLabel` (default `'Confirm'`), `cancelLabel` (default `'Cancel'`), `theme`, `icon`, `size` (default `'md'`), `dismissible`, `onConfirm(ctx)`, `onCancel()`, `actions[]`. `ctx` is `{ close, setError }`. Resolving `onConfirm` closes the dialog; rejecting renders the error inline and re-enables the buttons.
+- `confirm(args)` — `title`, `message`, `confirmLabel` (default `'Confirm'`), `cancelLabel` (default `'Cancel'`), `theme`, `icon`, `size` (default `'md'`), `dismissible`, `onConfirm(ctx)`, `onCancel()`, `actions[]`. `ctx` is `{ close, setError }`, where `setError` takes a **message string** (or `null`), never an `Error`. Resolving `onConfirm` closes the dialog; rejecting renders the thrown error inline and re-enables the buttons, so call `setError` only when you catch the error yourself.
 - `prompt(args)` — the same args plus a **required** `fields` and a **required** `onConfirm({ values, close, setError })`. `confirmLabel` defaults to `'Submit'`, `size` to `'md'`; it has no `actions`. A field is `{ name, label?, placeholder?, description?, required?, validate?, type?, defaultValue?, options? }` with `type` one of `text` (default), `textarea`, `select`, `checkbox`, `combobox`.
 - `danger(args)` — the destructive preset: forces `theme: 'red'`, defaults the icon to `lucide-alert-triangle` and `confirmLabel` to `'Delete'`. Same args as `confirm` minus `theme` and `icon` (`DangerArgs = Omit<ConfirmArgs, 'theme' | 'icon'>`).
 - Toasts: `toast.success | error | warning | info (message, { id?, description?, duration?, action? })` and `toast.dismiss(id?)`. Toasts report what already happened; decisions go to `dialog.confirm`. One action, one toast — when a user edits several related fields in the same record, pass the same stable `id` so the message replaces itself in place: `toast.success(message, { id: 'contact-saved' })`.
@@ -251,7 +251,7 @@ The default for a labeled field, and a dispatcher: `type` picks the child compon
 - `TextInput` / `Textarea` / `Password` — single-line / multi-line / masked. `v-model` is `string | number` (`string` for `Textarea` and `Password`). Also `type` (`TextInput` only), `placeholder`, `disabled`, `debounce` (ms, `TextInput` / `Textarea`), `rows` (`Textarea`).
 - `Select` — fixed list, one value. `v-model` is `string | number`; `options: Array<string | { label, value, disabled?, icon?, description? }>`. Also `placeholder`, `emptyText`, `open`, `side`, `align`, `offset`, `portalTo`.
 - `MultiSelect` — fixed list, several values. `v-model` is `Array<string | number>`; `options` accepts `{ label, value, icon?, description?, disabled? }` and grouped entries `{ group, options, hideLabel? }`. Optional `v-model:query`.
-- `Combobox` — one value with search. `v-model` is `string | number | null`. Optional `v-model:query` — the component owns the query when unbound. `trigger` is `'input' | 'button'` (default `input`). Grouped options are `{ group, options }`.
+- `Combobox` — one value with search. `v-model` is `string | number | null`; `options` take the same `{ label, value, icon?, description?, disabled? }` shape as `MultiSelect`, or a bare string, and group as `{ group, options }`. Optional `v-model:query` — the component owns the query when unbound. Also `placeholder`, `loading`, `emptyText`, `hideSearch`, `trigger` (`'input' | 'button'`, default `input`), and `filterable` (default `true`) — set `filterable="false"` whenever the options come from a server search, or the client re-filters the ranked results away.
 - `Checkbox` / `Switch` / `Radio` — `v-model` plus `label`. `Checkbox` model is `boolean` (`1`/`0` still accepted) and adds `indeterminate`. `Switch` adds `controlPosition` (`start | end`, default `end`) and `icon`. `RadioGroup` holds the `v-model` (`string | number | boolean`) and `orientation` (`vertical | horizontal`), while `Radio` renders one option with a **required** `value` plus optional `disabled`. `Checkbox` and `Switch` take `padded` for a clickable row surface; on radios `padded` and `size` live on `RadioGroup` and are inherited, so `<Radio padded>` is ignored.
 - `DatePicker` / `DateTimePicker` / `TimePicker` — `v-model` holds the value as a string. `DateRangePicker`'s `v-model` is `[from, to]` in `YYYY-MM-DD`, or `[]` when nothing is selected; it also takes `dualPane`.
 - `Slider` — `v-model` is `number[]`: `[25]` for one thumb, `[20, 80]` for a range. Props `min`, `max`, `step`, `size` (`sm | md`); emits `value-commit` on drag end.
@@ -379,7 +379,15 @@ Seven parts: `CommandPalette` + `CommandPaletteInput` + `CommandPaletteList` + `
 
 ## Charts and Calendar
 
-`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `FunnelChart`, `HeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Chart props are flat and name the columns of your rows: `:data`, `x`, `y`.
+`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `FunnelChart`, `HeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Every chart takes `:data` (your rows) plus flat props that name the columns. The column names differ per family; everything below is required unless marked optional:
+
+- `BarChart` / `LineChart` / `AreaChart` — `x`, `y` (`string | string[]` for several series); optional `series`, plus `horizontal` on `BarChart`
+- `DonutChart` / `FunnelChart` — `category`, `value`
+- `ScatterChart` — `x`, `y`; optional `size`, `series`
+- `HeatmapChart` — `x`, `y`, `value`
+- `SankeyChart` — `source`, `target`, `value`
+
+Every chart also takes `title`, `subtitle`, `loading` and `error`, and draws its own header, tooltip and empty state, so pass `title` instead of drawing a heading above the chart. `BarChart`, `LineChart`, `AreaChart`, `DonutChart` and `ScatterChart` also draw their own legend; `FunnelChart`, `HeatmapChart` and `SankeyChart` draw none. Reach for `ChartLegend` / `ChartTooltip` only in a plot you draw yourself. There is no `height` prop: the chart root is `h-full`, so put the height on the wrapper (`<div class="h-80"><BarChart … /></div>`). `NumberCard` is the KPI tile, with **required** `title` and `value` (`number | string | null`) plus `prefix`, `suffix`, `delta`, `deltaSuffix`, `deltaCaption`, `negativeIsBetter`, `precision`, `compact`, `sparkline` and `card` (default `true`). `ChartCard` is that same card surface with a default slot.
 
 `Calendar` is a day/week/month view imported from `frappe-ui/experimental`. `CalendarMode` is `'Day' | 'Week' | 'Month'`; an event is `{ id?, title?, fromDate/toDate, fromTime/toTime, participant?, venue?, color? }`.
 
