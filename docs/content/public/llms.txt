@@ -36,7 +36,7 @@ All from the `frappe-ui` root entry.
 - [ContextMenu](https://ui.frappe.io/docs/components/contextmenu): right-click menu for surfaces, rows and canvas elements; opens at the cursor.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
 - [DesktopShell](https://ui.frappe.io/docs/components/desktopshell): the desktop app frame; arranges `Rail` and `Sidebar` beside the content, and owns the pinned `PageHeaderTarget` and scroll region.
-- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`dismissible`/`bare`. Imperative API: `dialog.confirm`, `dialog.prompt`, `dialog.danger`. There is no `dialog.alert`.
+- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`actions`/`size`/`position`/`dismissible`/`bare`. There is no `theme` prop: tone lives on the icon object, `:icon="{ name: 'lucide-trash-2', theme: 'red' }"`. Imperative API: `dialog.confirm`, `dialog.prompt`, `dialog.danger`. There is no `dialog.alert`.
 - [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
 - [Duration](https://ui.frappe.io/docs/components/duration): text input for a length of time; `v-model` is **seconds**, the user types any common duration notation.
