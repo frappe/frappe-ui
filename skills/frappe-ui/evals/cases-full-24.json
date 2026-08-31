@@ -1,0 +1,1536 @@
+{
+  "cases": [
+    {
+      "id": "trigger-names-library-dialog",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Plainest possible trigger: the user names frappe-ui and asks for a dialog, both literally in the skill description.",
+      "prompt": "We're on frappe-ui. Add a dialog to the projects page that asks for a new project name and creates it.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the overlay the library's Dialog (or the imperative dialog.prompt) rather than a hand-built absolutely-positioned overlay div?",
+          "severity": "critical",
+          "source": "src/index.ts:65"
+        },
+        {
+          "id": "r3",
+          "check": "Does the name field get its label from a `label` prop on the frappe-ui input, instead of using a placeholder or a separate <label> element as the label?",
+          "severity": "major",
+          "source": "spec/inputs.md:79"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens (bg-surface-*, text-ink-*, border-outline-*) with no bg-white / bg-gray-* / text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Is the confirm/create action a frappe-ui Button with variant and theme props rather than a <button> carrying utility classes?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:20"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the overlay the library's Dialog (or the imperative dialog.prompt) rather than a hand-built absolutely-positioned overlay div?",
+          "severity": "critical",
+          "source": "src/index.ts:65"
+        },
+        {
+          "id": "r3",
+          "check": "Does the name field get its label from a `label` prop on the frappe-ui input, instead of using a placeholder or a separate <label> element as the label?",
+          "severity": "major",
+          "source": "spec/inputs.md:79"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens (bg-surface-*, text-ink-*, border-outline-*) with no bg-white / bg-gray-* / text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Is the confirm/create action a frappe-ui Button with variant and theme props rather than a <button> carrying utility classes?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:20"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-names-library-filterbar",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Second literal-name trigger, on a control-heavy surface where a naive agent hand-rolls native inputs.",
+      "prompt": "Using frappe-ui, build a compact filter bar for our tasks page: a search box, a status picker with the five task statuses, and a clear-filters button.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the status picker a frappe-ui Select (short fixed list, one value) rather than a native <select> or a hand-rolled dropdown?",
+          "severity": "critical",
+          "source": "spec/selection.md:16"
+        },
+        {
+          "id": "r3",
+          "check": "Is the search box a frappe-ui TextInput or FormControl rather than a bare <input>?",
+          "severity": "major",
+          "source": "src/index.ts:60"
+        },
+        {
+          "id": "r4",
+          "check": "Is the clear button a frappe-ui Button whose colour comes from variant + theme props, with no invented props such as intent/kind/severity?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:4"
+        },
+        {
+          "id": "r5",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the status picker a frappe-ui Select (short fixed list, one value) rather than a native <select> or a hand-rolled dropdown?",
+          "severity": "critical",
+          "source": "spec/selection.md:16"
+        },
+        {
+          "id": "r3",
+          "check": "Is the search box a frappe-ui TextInput or FormControl rather than a bare <input>?",
+          "severity": "major",
+          "source": "src/index.ts:60"
+        },
+        {
+          "id": "r4",
+          "check": "Is the clear button a frappe-ui Button whose colour comes from variant + theme props, with no invented props such as intent/kind/severity?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:4"
+        },
+        {
+          "id": "r5",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-product-gameplan",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Product-look trigger using Gameplan, which the description names explicitly.",
+      "prompt": "Make our discussion thread page look like Gameplan: a title header, the list of replies, and a reply box pinned at the bottom.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Do the components come from the frappe-ui package (root barrel or a documented subpath such as frappe-ui/list) rather than being hand-built?",
+          "severity": "critical",
+          "source": "package.json:63"
+        },
+        {
+          "id": "r3",
+          "check": "Are avatars rendered with the frappe-ui Avatar component rather than a hand-styled rounded <img>?",
+          "severity": "major",
+          "source": "src/index.ts:25"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no bg-white / bg-gray-* / text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Are icons rendered as lucide-* utility classes rather than imported icon components?",
+          "severity": "major",
+          "source": "docs/content/docs/other/icons.md:22"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Do the components come from the frappe-ui package (root barrel or a documented subpath such as frappe-ui/list) rather than being hand-built?",
+          "severity": "critical",
+          "source": "package.json:63"
+        },
+        {
+          "id": "r3",
+          "check": "Are avatars rendered with the frappe-ui Avatar component rather than a hand-styled rounded <img>?",
+          "severity": "major",
+          "source": "src/index.ts:25"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no bg-white / bg-gray-* / text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Are icons rendered as lucide-* utility classes rather than imported icon components?",
+          "severity": "major",
+          "source": "docs/content/docs/other/icons.md:22"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-product-helpdesk",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Edge case: Helpdesk is a Frappe product look but is NOT named in the skill description, so this catches a description that only matches its own literal product list.",
+      "prompt": "Build a ticket detail panel that matches the Frappe Helpdesk look: subject, status badge, requester, and the conversation below.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code, even though Helpdesk is not named in the skill description?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the status rendered with the frappe-ui Badge component rather than a hand-styled span?",
+          "severity": "major",
+          "source": "src/index.ts:26"
+        },
+        {
+          "id": "r3",
+          "check": "Do the components come from the frappe-ui package rather than being hand-built markup?",
+          "severity": "critical",
+          "source": "src/index.ts:24"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the status rendered with the frappe-ui Badge component rather than a hand-styled span?",
+          "severity": "major",
+          "source": "src/index.ts:26"
+        },
+        {
+          "id": "r3",
+          "check": "Do the components come from the frappe-ui package rather than being hand-built markup?",
+          "severity": "critical",
+          "source": "src/index.ts:24"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-frappe-app-settings-page",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Frappe-app UI with neither the library nor a product named; only 'our Frappe app' + 'settings page' can fire the skill.",
+      "prompt": "Add a settings page to our Frappe app's frontend. It needs fields for full name, email and timezone, and a save button that writes the changes back.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Does every field use a frappe-ui input (FormControl / TextInput / Select) with a `label` prop rather than a bare <input> or placeholder-as-label?",
+          "severity": "critical",
+          "source": "src/components/FormControl/types.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the save call go through a frappe-ui data-fetching composable (useCall / useDoc) instead of fetch or axios?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:1"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Is the save action a frappe-ui Button rather than a hand-styled <button>?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:18"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Does every field use a frappe-ui input (FormControl / TextInput / Select) with a `label` prop rather than a bare <input> or placeholder-as-label?",
+          "severity": "critical",
+          "source": "src/components/FormControl/types.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the save call go through a frappe-ui data-fetching composable (useCall / useDoc) instead of fetch or axios?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:1"
+        },
+        {
+          "id": "r4",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r5",
+          "check": "Is the save action a frappe-ui Button rather than a hand-styled <button>?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:18"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-frappe-app-whole-screen",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Whole-screen design request inside a Frappe app with nothing named; must fire and must consult CORE.md before writing shell markup.",
+      "prompt": "I need a whole new screen in our Frappe app: a left sidebar with our sections, a header across the content, and a scrollable main area. Set the shell up for me.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Did the agent read CORE.md (the component, page-anatomy and token reference) before writing the shell?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:53"
+        },
+        {
+          "id": "r3",
+          "check": "Is the app frame built from DesktopShell plus the Sidebar family rather than a hand-rolled flex layout?",
+          "severity": "critical",
+          "source": "src/components/DesktopShell/index.ts:1"
+        },
+        {
+          "id": "r4",
+          "check": "Is the scrolling region a frappe-ui ScrollArea rather than a div with overflow-y-auto?",
+          "severity": "major",
+          "source": "src/index.ts:100"
+        },
+        {
+          "id": "r5",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r3",
+          "check": "Is the app frame built from DesktopShell plus the Sidebar family rather than a hand-rolled flex layout?",
+          "severity": "critical",
+          "source": "src/components/DesktopShell/index.ts:1"
+        },
+        {
+          "id": "r4",
+          "check": "Is the scrolling region a frappe-ui ScrollArea rather than a div with overflow-y-auto?",
+          "severity": "major",
+          "source": "src/index.ts:100"
+        },
+        {
+          "id": "r5",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-bootstrap-vite-project",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Bootstrap edge: 'scaffolding' in the description is about pages, not projects, so this tests whether project setup fires the skill and reaches SETUP.md.",
+      "prompt": "Set up a brand new Vite + Vue 3 project from scratch that uses frappe-ui. Give me the config files I need.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing any config?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Did the agent read SETUP.md (the bootstrapping reference) rather than only SKILL.md or the component catalog?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:50"
+        },
+        {
+          "id": "r3",
+          "check": "Is tailwindcss pinned to v3 (^3.x) rather than v4?",
+          "severity": "critical",
+          "source": "package.json:210"
+        },
+        {
+          "id": "r4",
+          "check": "Does tailwind.config put the default export of 'frappe-ui/tailwind' in `presets`, and include frappe-ui's own source globs in `content` (either the exported `content` array or an explicit node_modules/frappe-ui glob)?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/tailwind.md:3"
+        },
+        {
+          "id": "r5",
+          "check": "Does the CSS entry import 'frappe-ui/style.css' (a real exports subpath) rather than 'frappe-ui/src/style.css'?",
+          "severity": "major",
+          "source": "package.json:90"
+        },
+        {
+          "id": "r6",
+          "check": "Does the app entry install the FrappeUI plugin with app.use and does the root template wrap the app in FrappeUIProvider, with vue-router installed?",
+          "severity": "major",
+          "source": "spec/dialog.md:153"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r3",
+          "check": "Is tailwindcss pinned to v3 (^3.x) rather than v4?",
+          "severity": "critical",
+          "source": "package.json:210"
+        },
+        {
+          "id": "r4",
+          "check": "Does tailwind.config put the default export of 'frappe-ui/tailwind' in `presets`, and include frappe-ui's own source globs in `content` (either the exported `content` array or an explicit node_modules/frappe-ui glob)?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/tailwind.md:3"
+        },
+        {
+          "id": "r5",
+          "check": "Does the CSS entry import 'frappe-ui/style.css' (a real exports subpath) rather than 'frappe-ui/src/style.css'?",
+          "severity": "major",
+          "source": "package.json:90"
+        },
+        {
+          "id": "r6",
+          "check": "Does the app entry install the FrappeUI plugin with app.use and does the root template wrap the app in FrappeUIProvider, with vue-router installed?",
+          "severity": "major",
+          "source": "spec/dialog.md:153"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "trigger-style-polish-existing-markup",
+      "bucket": "trigger",
+      "expect_skill": true,
+      "intent": "Pure styling polish on existing markup in a Frappe app; the word 'styling' plus 'Frappe app' is the only trigger surface.",
+      "prompt": "This card in our Frappe app frontend looks off next to the rest of the app. Tidy up the styling.\n\n```vue\n<template>\n  <div class=\"bg-white border border-gray-200 rounded-lg p-4 shadow\">\n    <h3 class=\"text-lg font-bold text-gray-900 uppercase\">Team members</h3>\n    <p class=\"text-sm text-gray-500 mt-1\">3 people have access to this space</p>\n    <button class=\"mt-3 bg-blue-500 text-white px-3 py-1.5 rounded text-sm\">Invite</button>\n  </div>\n</template>\n```",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before rewriting the markup?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Were bg-white, border-gray-200, text-gray-900 and text-gray-500 all replaced with semantic tokens (bg-surface-*, border-outline-* or bare `border`, text-ink-*)?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r3",
+          "check": "Was `rounded-lg` replaced with a numbered radius token (rounded-6), given the named aliases emit no CSS?",
+          "severity": "critical",
+          "source": "spec/foundations.md:112"
+        },
+        {
+          "id": "r4",
+          "check": "Was the hand-styled <button> replaced with the frappe-ui Button component?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:18"
+        },
+        {
+          "id": "r5",
+          "check": "Was the `uppercase` class dropped so the heading reads as sentence case?",
+          "severity": "major",
+          "source": "docs/components/recipes/TicketsDesktop.vue:425"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Were bg-white, border-gray-200, text-gray-900 and text-gray-500 all replaced with semantic tokens (bg-surface-*, border-outline-* or bare `border`, text-ink-*)?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r3",
+          "check": "Was `rounded-lg` replaced with a numbered radius token (rounded-6), given the named aliases emit no CSS?",
+          "severity": "critical",
+          "source": "spec/foundations.md:112"
+        },
+        {
+          "id": "r4",
+          "check": "Was the hand-styled <button> replaced with the frappe-ui Button component?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:18"
+        },
+        {
+          "id": "r5",
+          "check": "Was the `uppercase` class dropped so the heading reads as sentence case?",
+          "severity": "major",
+          "source": "docs/components/recipes/TicketsDesktop.vue:425"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "nontrigger-python-backend-fix",
+      "bucket": "non-trigger",
+      "expect_skill": false,
+      "intent": "Frappe context but server-side Python; catches a description that fires on the word 'Frappe' alone.",
+      "prompt": "Our Frappe app throws a ValidationError when you save a Task with an empty due date. Fix the validation in the doctype controller so an empty due date is allowed.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent complete the task WITHOUT invoking the frappe-ui skill?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        }
+      ],
+      "rubric_graded": []
+    },
+    {
+      "id": "nontrigger-react-marketing-card",
+      "bucket": "non-trigger",
+      "expect_skill": false,
+      "intent": "UI + Tailwind but React and no Frappe context; catches a description that fires on 'component library' or 'design tokens'.",
+      "prompt": "Write a React component for our marketing site: a pricing card with a plan name, monthly price, a list of features and a call-to-action button. Style it with Tailwind.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent complete the task WITHOUT invoking the frappe-ui skill?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        }
+      ],
+      "rubric_graded": []
+    },
+    {
+      "id": "nontrigger-readme-edit",
+      "bucket": "non-trigger",
+      "expect_skill": false,
+      "intent": "Docs edit in a repo that may well be a Frappe frontend; catches over-triggering on repo context rather than the request.",
+      "prompt": "Update the README install section: we moved from yarn to pnpm, and the dev server now runs on port 8081.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent complete the task WITHOUT invoking the frappe-ui skill?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        }
+      ],
+      "rubric_graded": []
+    },
+    {
+      "id": "nontrigger-plain-css-landing",
+      "bucket": "non-trigger",
+      "expect_skill": false,
+      "intent": "Plain HTML/CSS layout work with no Frappe and no Vue; catches a description that fires on any styling request.",
+      "prompt": "I have a static landing page. Make the hero section stack vertically on mobile and centre the text. Plain HTML and CSS, no framework.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent complete the task WITHOUT invoking the frappe-ui skill?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        }
+      ],
+      "rubric_graded": []
+    },
+    {
+      "id": "component-list-family",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Table screen. Right answer is the composition family from 'frappe-ui/list'; ListView is parked in experimental and a hand-rolled <table> loses the shared geometry. Verified against src/molecules/list/index.ts and package.json exports.",
+      "prompt": "Build a tickets screen for our Frappe app: a table of tickets with subject, status, priority, assignee and last modified. Priority and last modified should be sortable.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Are List, ListRow, ListCell etc. imported from 'frappe-ui/list'?",
+          "severity": "critical",
+          "source": "src/molecules/list/index.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid ListView, ItemListRow and any hand-written <table>/<tr>/<td> markup for the grid?",
+          "severity": "critical",
+          "source": "src/molecules/list/list.md:9"
+        },
+        {
+          "id": "r4",
+          "check": "Is column mode used \u2014 an explicit `columns` prop on List plus a ListHeader with ListHeaderCell children?",
+          "severity": "major",
+          "source": "src/molecules/list/list.md:50"
+        },
+        {
+          "id": "r5",
+          "check": "Are the two sortable columns ListHeaderCellSort with a bound `direction` and a click handler that updates the app's own sort state?",
+          "severity": "major",
+          "source": "src/molecules/list/list.md:57"
+        },
+        {
+          "id": "r6",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "minor",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Are List, ListRow, ListCell etc. imported from 'frappe-ui/list'?",
+          "severity": "critical",
+          "source": "src/molecules/list/index.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid ListView, ItemListRow and any hand-written <table>/<tr>/<td> markup for the grid?",
+          "severity": "critical",
+          "source": "src/molecules/list/list.md:9"
+        },
+        {
+          "id": "r4",
+          "check": "Is column mode used \u2014 an explicit `columns` prop on List plus a ListHeader with ListHeaderCell children?",
+          "severity": "major",
+          "source": "src/molecules/list/list.md:50"
+        },
+        {
+          "id": "r5",
+          "check": "Are the two sortable columns ListHeaderCellSort with a bound `direction` and a click handler that updates the app's own sort state?",
+          "severity": "major",
+          "source": "src/molecules/list/list.md:57"
+        },
+        {
+          "id": "r6",
+          "check": "Are all colour classes semantic tokens with no raw Tailwind greys?",
+          "severity": "minor",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "component-combobox-single-select",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Searchable single-select. Right answer is Combobox; Autocomplete was removed and is not exported anywhere. Verified against src/index.ts:42 and spec/inputs.md:387.",
+      "prompt": "Add an assignee field to the ticket form. We have a few hundred users, so it needs a search box, and only one person can be assigned.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the field a Combobox (long list, one value) rather than Select or MultiSelect?",
+          "severity": "critical",
+          "source": "spec/selection.md:21"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid importing Autocomplete or FormControl type=\"autocomplete\", both of which no longer exist?",
+          "severity": "critical",
+          "source": "spec/inputs.md:387"
+        },
+        {
+          "id": "r4",
+          "check": "Does the code avoid a hand-rolled input plus dropdown list built from raw divs?",
+          "severity": "critical",
+          "source": "src/index.ts:42"
+        },
+        {
+          "id": "r5",
+          "check": "Is the selected value bound with v-model, and the search text (if the app controls it) with v-model:query \u2014 not :value plus @change?",
+          "severity": "major",
+          "source": "spec/selection.md:70"
+        },
+        {
+          "id": "r6",
+          "check": "Does the field carry a `label` prop rather than relying on a placeholder as its label?",
+          "severity": "major",
+          "source": "spec/inputs.md:79"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the field a Combobox (long list, one value) rather than Select or MultiSelect?",
+          "severity": "critical",
+          "source": "spec/selection.md:21"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid importing Autocomplete or FormControl type=\"autocomplete\", both of which no longer exist?",
+          "severity": "critical",
+          "source": "spec/inputs.md:387"
+        },
+        {
+          "id": "r4",
+          "check": "Does the code avoid a hand-rolled input plus dropdown list built from raw divs?",
+          "severity": "critical",
+          "source": "src/index.ts:42"
+        },
+        {
+          "id": "r5",
+          "check": "Is the selected value bound with v-model, and the search text (if the app controls it) with v-model:query \u2014 not :value plus @change?",
+          "severity": "major",
+          "source": "spec/selection.md:70"
+        },
+        {
+          "id": "r6",
+          "check": "Does the field carry a `label` prop rather than relying on a placeholder as its label?",
+          "severity": "major",
+          "source": "spec/inputs.md:79"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "component-imperative-danger-confirm",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Destructive confirm. Right answer is the imperative dialog namespace (dialog.danger, a red-themed dialog.confirm), not a <Dialog> hand-mounted with a ref. Verified against src/utils/dialog.ts:715 and :725.",
+      "prompt": "Deleting a space is permanent, so it should ask for confirmation first. Wire that up on the delete button in the space settings.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the confirmation raised by calling dialog.danger (or dialog.confirm with theme 'red') from the click handler?",
+          "severity": "critical",
+          "source": "src/utils/dialog.ts:715"
+        },
+        {
+          "id": "r3",
+          "check": "Does the component avoid declaring a <Dialog> in its template plus a boolean ref just to ask the are-you-sure question?",
+          "severity": "critical",
+          "source": "spec/dialog.md:147"
+        },
+        {
+          "id": "r4",
+          "check": "Does the actual delete run inside the awaited onConfirm callback, relying on resolve-to-close rather than manually closing on success?",
+          "severity": "major",
+          "source": "src/utils/dialog.ts:82"
+        },
+        {
+          "id": "r5",
+          "check": "Is the delete trigger a frappe-ui Button with theme=\"red\" rather than a hand-styled red <button>?",
+          "severity": "minor",
+          "source": "src/components/Button/types.ts:4"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the confirmation raised by calling dialog.danger (or dialog.confirm with theme 'red') from the click handler?",
+          "severity": "critical",
+          "source": "src/utils/dialog.ts:715"
+        },
+        {
+          "id": "r3",
+          "check": "Does the component avoid declaring a <Dialog> in its template plus a boolean ref just to ask the are-you-sure question?",
+          "severity": "critical",
+          "source": "spec/dialog.md:147"
+        },
+        {
+          "id": "r4",
+          "check": "Does the actual delete run inside the awaited onConfirm callback, relying on resolve-to-close rather than manually closing on success?",
+          "severity": "major",
+          "source": "src/utils/dialog.ts:82"
+        },
+        {
+          "id": "r5",
+          "check": "Is the delete trigger a frappe-ui Button with theme=\"red\" rather than a hand-styled red <button>?",
+          "severity": "minor",
+          "source": "src/components/Button/types.ts:4"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "component-command-palette",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Cmd-K palette. The root CommandPalette was removed in 1.0.0 and rebuilt as seven parts on 'frappe-ui/experimental'; the shortcut must set allowInInput or it dies the moment a field has focus. Verified against experimental.ts:37 and src/composables/useKeyboardShortcut.ts:121.",
+      "prompt": "Add a Cmd+K quick switcher to the app: type to filter pages and actions, arrow keys to move, Enter to run the highlighted one.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Are CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPaletteGroup and CommandPaletteItem imported from 'frappe-ui/experimental' (not from the package root, where CommandPalette no longer exists)?",
+          "severity": "critical",
+          "source": "experimental.ts:37"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid building the palette by hand from a Dialog plus an input and a filtered v-for list?",
+          "severity": "critical",
+          "source": "experimental/CommandPalette/index.ts:1"
+        },
+        {
+          "id": "r4",
+          "check": "Is the shortcut registered with useKeyboardShortcut using combo 'Mod+K'?",
+          "severity": "critical",
+          "source": "experimental/CommandPalette/CommandPalette.md:51"
+        },
+        {
+          "id": "r5",
+          "check": "Does that useKeyboardShortcut call pass allowInInput: true?",
+          "severity": "critical",
+          "source": "src/composables/useKeyboardShortcut.ts:121"
+        },
+        {
+          "id": "r6",
+          "check": "Is the palette's visibility bound with v-model:open?",
+          "severity": "major",
+          "source": "experimental/CommandPalette/stories/Default.vue:62"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Are CommandPalette, CommandPaletteInput, CommandPaletteList, CommandPaletteGroup and CommandPaletteItem imported from 'frappe-ui/experimental' (not from the package root, where CommandPalette no longer exists)?",
+          "severity": "critical",
+          "source": "experimental.ts:37"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid building the palette by hand from a Dialog plus an input and a filtered v-for list?",
+          "severity": "critical",
+          "source": "experimental/CommandPalette/index.ts:1"
+        },
+        {
+          "id": "r4",
+          "check": "Is the shortcut registered with useKeyboardShortcut using combo 'Mod+K'?",
+          "severity": "critical",
+          "source": "experimental/CommandPalette/CommandPalette.md:51"
+        },
+        {
+          "id": "r5",
+          "check": "Does that useKeyboardShortcut call pass allowInInput: true?",
+          "severity": "critical",
+          "source": "src/composables/useKeyboardShortcut.ts:121"
+        },
+        {
+          "id": "r6",
+          "check": "Is the palette's visibility bound with v-model:open?",
+          "severity": "major",
+          "source": "experimental/CommandPalette/stories/Default.vue:62"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "component-charts-dashboard",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Dashboard. Right answer is 'frappe-ui/charts'; the v1 family parked on 'frappe-ui/experimental' is an interim migration path, not the choice for new code, and a third-party chart lib is out. Verified against src/charts/index.ts and spec/charts.md:15.",
+      "prompt": "Put a small revenue dashboard on our home screen: monthly revenue for the last twelve months, revenue split by plan, and a couple of KPI tiles at the top.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Are the charts imported from 'frappe-ui/charts'?",
+          "severity": "critical",
+          "source": "src/charts/index.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid the parked v1 chart exports on 'frappe-ui/experimental'?",
+          "severity": "critical",
+          "source": "spec/charts.md:15"
+        },
+        {
+          "id": "r4",
+          "check": "Does the code avoid any third-party chart library (chart.js, recharts, apexcharts, or echarts imported directly)?",
+          "severity": "critical",
+          "source": "spec/charts.md:3"
+        },
+        {
+          "id": "r5",
+          "check": "Are the KPI tiles NumberCard from the same family rather than hand-built stat divs?",
+          "severity": "major",
+          "source": "src/charts/index.ts:11"
+        },
+        {
+          "id": "r6",
+          "check": "Does each chart get its heading from the `title` prop rather than an app-drawn header above the chart?",
+          "severity": "major",
+          "source": "src/charts/docs/Dashboard.md:8"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Are the charts imported from 'frappe-ui/charts'?",
+          "severity": "critical",
+          "source": "src/charts/index.ts:5"
+        },
+        {
+          "id": "r3",
+          "check": "Does the code avoid the parked v1 chart exports on 'frappe-ui/experimental'?",
+          "severity": "critical",
+          "source": "spec/charts.md:15"
+        },
+        {
+          "id": "r4",
+          "check": "Does the code avoid any third-party chart library (chart.js, recharts, apexcharts, or echarts imported directly)?",
+          "severity": "critical",
+          "source": "spec/charts.md:3"
+        },
+        {
+          "id": "r5",
+          "check": "Are the KPI tiles NumberCard from the same family rather than hand-built stat divs?",
+          "severity": "major",
+          "source": "src/charts/index.ts:11"
+        },
+        {
+          "id": "r6",
+          "check": "Does each chart get its heading from the `title` prop rather than an app-drawn header above the chart?",
+          "severity": "major",
+          "source": "src/charts/docs/Dashboard.md:8"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "component-card-surface",
+      "bucket": "component-choice",
+      "expect_skill": true,
+      "intent": "Card surface. There is no Card component in the library (verified: src/index.ts exports only HoverCard, and NumberCard/ChartCard live under frappe-ui/charts), so a card is composed from surface, outline and radius tokens.",
+      "prompt": "Add a card to the dashboard showing the team's storage usage: a title, the number in large type, and a small note under it.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Does the code avoid importing a <Card> component from 'frappe-ui' (no such export exists)?",
+          "severity": "critical",
+          "source": "src/index.ts:24"
+        },
+        {
+          "id": "r3",
+          "check": "Is the card surface composed from a bg-surface-* class, a border (bare `border` or border-outline-*), and a numbered rounded-* class on a plain element?",
+          "severity": "critical",
+          "source": "docs/components/recipes/DealsDesktop.vue:576"
+        },
+        {
+          "id": "r4",
+          "check": "If the card is given a shadow, is it paired with a surface-elevation-* token rather than a raw surface-gray-* background?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/elevation.md:30"
+        },
+        {
+          "id": "r5",
+          "check": "Is the radius a numbered token (rounded-4 / rounded-6 / \u2026) rather than a removed alias such as rounded-lg or a bare `rounded`?",
+          "severity": "major",
+          "source": "spec/foundations.md:112"
+        },
+        {
+          "id": "r6",
+          "check": "Are the text colours text-ink-* rather than text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Does the code avoid importing a <Card> component from 'frappe-ui' (no such export exists)?",
+          "severity": "critical",
+          "source": "src/index.ts:24"
+        },
+        {
+          "id": "r3",
+          "check": "Is the card surface composed from a bg-surface-* class, a border (bare `border` or border-outline-*), and a numbered rounded-* class on a plain element?",
+          "severity": "critical",
+          "source": "docs/components/recipes/DealsDesktop.vue:576"
+        },
+        {
+          "id": "r4",
+          "check": "If the card is given a shadow, is it paired with a surface-elevation-* token rather than a raw surface-gray-* background?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/elevation.md:30"
+        },
+        {
+          "id": "r5",
+          "check": "Is the radius a numbered token (rounded-4 / rounded-6 / \u2026) rather than a removed alias such as rounded-lg or a bare `rounded`?",
+          "severity": "major",
+          "source": "spec/foundations.md:112"
+        },
+        {
+          "id": "r6",
+          "check": "Are the text colours text-ink-* rather than text-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-semantic-colour-tokens",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "Semantic colour tokens vs raw Tailwind greys, on a surface with many muted-text and divider decisions.",
+      "prompt": "Add an activity feed panel to the project page. Each row shows an avatar, a line saying who did what, and a muted relative timestamp on the right. Separate the rows with hairlines.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is every background a bg-surface-* token, with no bg-white, bg-gray-*, bg-slate-* or bg-zinc-*?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r3",
+          "check": "Is every text colour a text-ink-* token, with no text-gray-*, text-black or text-white?",
+          "severity": "critical",
+          "source": "tailwind/colorPalette.js:85"
+        },
+        {
+          "id": "r4",
+          "check": "Are the row hairlines drawn with a bare `border`/`divide-y` (which resolve to the outline token) or an explicit border-outline-* / divide-outline-* class, and never border-gray-*?",
+          "severity": "critical",
+          "source": "tailwind/plugin.js:277"
+        },
+        {
+          "id": "r5",
+          "check": "Is the avatar the frappe-ui Avatar component rather than a hand-styled rounded <img>?",
+          "severity": "minor",
+          "source": "src/index.ts:25"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is every background a bg-surface-* token, with no bg-white, bg-gray-*, bg-slate-* or bg-zinc-*?",
+          "severity": "critical",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "r3",
+          "check": "Is every text colour a text-ink-* token, with no text-gray-*, text-black or text-white?",
+          "severity": "critical",
+          "source": "tailwind/colorPalette.js:85"
+        },
+        {
+          "id": "r4",
+          "check": "Are the row hairlines drawn with a bare `border`/`divide-y` (which resolve to the outline token) or an explicit border-outline-* / divide-outline-* class, and never border-gray-*?",
+          "severity": "critical",
+          "source": "tailwind/plugin.js:277"
+        },
+        {
+          "id": "r5",
+          "check": "Is the avatar the frappe-ui Avatar component rather than a hand-styled rounded <img>?",
+          "severity": "minor",
+          "source": "src/index.ts:25"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-typography-scale",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "Tight text-* for single-line UI vs loose text-p-* for multi-line copy; the prompt deliberately mixes a one-line headline with a multi-sentence body.",
+      "prompt": "Add an announcement banner to the top of the page: a short one-line headline in bold, a two or three sentence explanation under it, and a dismiss button on the right.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Does the multi-sentence explanation use a text-p-* class (the looser paragraph line-height)?",
+          "severity": "critical",
+          "source": "docs/components/foundations/TypographyPage.vue:218"
+        },
+        {
+          "id": "r3",
+          "check": "Does the single-line headline use the tight scale (text-base / text-lg / text-lg-medium \u2026) rather than a text-p-* class?",
+          "severity": "major",
+          "source": "spec/foundations.md:45"
+        },
+        {
+          "id": "r4",
+          "check": "Is the bold headline expressed with a named weight utility (text-lg-medium / text-base-semibold) or a font-* weight class on a scale size, with no arbitrary font size such as text-[15px]?",
+          "severity": "major",
+          "source": "spec/foundations.md:51"
+        },
+        {
+          "id": "r5",
+          "check": "Is the dismiss control a frappe-ui Button carrying a lucide icon rather than a hand-styled \u00d7 span?",
+          "severity": "minor",
+          "source": "src/components/Button/types.ts:28"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Does the multi-sentence explanation use a text-p-* class (the looser paragraph line-height)?",
+          "severity": "critical",
+          "source": "docs/components/foundations/TypographyPage.vue:218"
+        },
+        {
+          "id": "r3",
+          "check": "Does the single-line headline use the tight scale (text-base / text-lg / text-lg-medium \u2026) rather than a text-p-* class?",
+          "severity": "major",
+          "source": "spec/foundations.md:45"
+        },
+        {
+          "id": "r4",
+          "check": "Is the bold headline expressed with a named weight utility (text-lg-medium / text-base-semibold) or a font-* weight class on a scale size, with no arbitrary font size such as text-[15px]?",
+          "severity": "major",
+          "source": "spec/foundations.md:51"
+        },
+        {
+          "id": "r5",
+          "check": "Is the dismiss control a frappe-ui Button carrying a lucide icon rather than a hand-styled \u00d7 span?",
+          "severity": "minor",
+          "source": "src/components/Button/types.ts:28"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-icons-as-classes",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "Icons as CSS classes, not imported icon components; a toolbar makes the icon-per-button temptation maximal.",
+      "prompt": "Add a toolbar above the tasks table with buttons for refresh, filter, sort and export. Each button needs an icon.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Does the file import zero per-icon components (no lucide-vue-next imports, no ~icons/lucide/* imports, no <LucideFilter /> auto-import tags)?",
+          "severity": "critical",
+          "source": "docs/content/docs/other/icons.md:22"
+        },
+        {
+          "id": "r3",
+          "check": "Are Button icons passed as a string prop, e.g. icon=\"lucide-filter\" or icon-left=\"lucide-plus\"?",
+          "severity": "critical",
+          "source": "src/components/Button/types.ts:28"
+        },
+        {
+          "id": "r4",
+          "check": "Is every lucide class written out as a complete literal string, never assembled at runtime such as `lucide-${name}`?",
+          "severity": "critical",
+          "source": "docs/content/docs/other/icons.md:74"
+        },
+        {
+          "id": "r5",
+          "check": "Is any standalone icon rendered as a <span> carrying the lucide-* class plus a size-* class?",
+          "severity": "major",
+          "source": "docs/content/docs/other/icons.md:30"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Does the file import zero per-icon components (no lucide-vue-next imports, no ~icons/lucide/* imports, no <LucideFilter /> auto-import tags)?",
+          "severity": "critical",
+          "source": "docs/content/docs/other/icons.md:22"
+        },
+        {
+          "id": "r3",
+          "check": "Are Button icons passed as a string prop, e.g. icon=\"lucide-filter\" or icon-left=\"lucide-plus\"?",
+          "severity": "critical",
+          "source": "src/components/Button/types.ts:28"
+        },
+        {
+          "id": "r4",
+          "check": "Is every lucide class written out as a complete literal string, never assembled at runtime such as `lucide-${name}`?",
+          "severity": "critical",
+          "source": "docs/content/docs/other/icons.md:74"
+        },
+        {
+          "id": "r5",
+          "check": "Is any standalone icon rendered as a <span> carrying the lucide-* class plus a size-* class?",
+          "severity": "major",
+          "source": "docs/content/docs/other/icons.md:30"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-usecall-write-shape",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "The useCall write shape: a POST must be declared immediate: false and fired with submit(), not executed on setup.",
+      "prompt": "Add a \"Mark all as read\" button to the notifications panel. It should hit our notifications.mark_all_read endpoint and reflect the new state once it comes back.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Does the request go through useCall (or useList / useDoc) from frappe-ui rather than fetch or axios?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:1"
+        },
+        {
+          "id": "r3",
+          "check": "Is the call declared with method: 'POST' and immediate: false so it does not fire on setup?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:41"
+        },
+        {
+          "id": "r4",
+          "check": "Is the call fired by awaiting submit(params) inside the click handler, rather than execute() / reload() / fetch()?",
+          "severity": "critical",
+          "source": "src/data-fetching/useCall/useCall.ts:202"
+        },
+        {
+          "id": "r5",
+          "check": "Does the button reflect the in-flight state by binding the call's `loading` to the Button's loading prop?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:36"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Does the request go through useCall (or useList / useDoc) from frappe-ui rather than fetch or axios?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:1"
+        },
+        {
+          "id": "r3",
+          "check": "Is the call declared with method: 'POST' and immediate: false so it does not fire on setup?",
+          "severity": "critical",
+          "source": "docs/content/docs/data-fetching/use-call.md:41"
+        },
+        {
+          "id": "r4",
+          "check": "Is the call fired by awaiting submit(params) inside the click handler, rather than execute() / reload() / fetch()?",
+          "severity": "critical",
+          "source": "src/data-fetching/useCall/useCall.ts:202"
+        },
+        {
+          "id": "r5",
+          "check": "Does the button reflect the in-flight state by binding the call's `loading` to the Button's loading prop?",
+          "severity": "major",
+          "source": "src/components/Button/types.ts:36"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-sentence-case-headers",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "Sentence-case labels; small section headings are where agents reach for ALL CAPS + tracking-wider or Title Case.",
+      "prompt": "Add a details sidebar on the right of the ticket page with three sections: assignee, due date and attached files. Each section needs a small heading above it.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Are the section headings written in sentence case (\"Due date\", \"Attached files\") rather than Title Case (\"Due Date\") or ALL CAPS?",
+          "severity": "critical",
+          "source": "docs/components/recipes/TicketsDesktop.vue:425"
+        },
+        {
+          "id": "r3",
+          "check": "Is the `uppercase` class absent from the section headings?",
+          "severity": "critical",
+          "source": "src/molecules/list/ListHeaderCell.vue:10"
+        },
+        {
+          "id": "r4",
+          "check": "Are any button or menu labels in the sidebar also sentence case (\"Add attachment\", not \"Add Attachment\")?",
+          "severity": "major",
+          "source": "docs/components/recipes/AccountingDesktop.vue:428"
+        },
+        {
+          "id": "r5",
+          "check": "Are the headings tinted with a text-ink-gray-* token rather than text-gray-*?",
+          "severity": "minor",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Are the section headings written in sentence case (\"Due date\", \"Attached files\") rather than Title Case (\"Due Date\") or ALL CAPS?",
+          "severity": "critical",
+          "source": "docs/components/recipes/TicketsDesktop.vue:425"
+        },
+        {
+          "id": "r3",
+          "check": "Is the `uppercase` class absent from the section headings?",
+          "severity": "critical",
+          "source": "src/molecules/list/ListHeaderCell.vue:10"
+        },
+        {
+          "id": "r4",
+          "check": "Are any button or menu labels in the sidebar also sentence case (\"Add attachment\", not \"Add Attachment\")?",
+          "severity": "major",
+          "source": "docs/components/recipes/AccountingDesktop.vue:428"
+        },
+        {
+          "id": "r5",
+          "check": "Are the headings tinted with a text-ink-gray-* token rather than text-gray-*?",
+          "severity": "minor",
+          "source": "docs/content/docs/foundations/colors/semantic.md:11"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    },
+    {
+      "id": "guideline-dark-mode-survives",
+      "bucket": "guideline",
+      "expect_skill": true,
+      "intent": "Dark mode on a brand-new screen: semantic tokens flip at [data-theme=\"dark\"] on their own, so hardcoded light colours and per-class dark: patches are the failure.",
+      "prompt": "Our app has a light/dark toggle. Add a new Integrations screen: a list of connected apps, each row with a logo, name, connection status and a connect/disconnect button. It has to look right in both themes.",
+      "rubric": [
+        {
+          "id": "r1",
+          "check": "Did the agent invoke the frappe-ui skill before writing code?",
+          "severity": "critical",
+          "source": "skills/frappe-ui/SKILL.md:3"
+        },
+        {
+          "id": "r2",
+          "check": "Is the file free of light-only hardcoded colours (bg-white, text-black, bg-gray-50, #fff, and inline style colours)?",
+          "severity": "critical",
+          "source": "tailwind/colorPalette.js:96"
+        },
+        {
+          "id": "r3",
+          "check": "Do the base surface, text and border colours come from semantic tokens that already flip under [data-theme=\"dark\"], rather than from per-class dark: variants added by hand?",
+          "severity": "critical",
+          "source": "tailwind/preset.js:24"
+        },
+        {
+          "id": "r4",
+          "check": "If a row or panel is raised with a shadow, does it use a surface-elevation-* token rather than surface-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/elevation.md:23"
+        },
+        {
+          "id": "r5",
+          "check": "Is the connection status a frappe-ui Badge (whose themes flip with the colour scheme) rather than a hand-coloured pill?",
+          "severity": "minor",
+          "source": "src/index.ts:26"
+        }
+      ],
+      "rubric_graded": [
+        {
+          "id": "r2",
+          "check": "Is the file free of light-only hardcoded colours (bg-white, text-black, bg-gray-50, #fff, and inline style colours)?",
+          "severity": "critical",
+          "source": "tailwind/colorPalette.js:96"
+        },
+        {
+          "id": "r3",
+          "check": "Do the base surface, text and border colours come from semantic tokens that already flip under [data-theme=\"dark\"], rather than from per-class dark: variants added by hand?",
+          "severity": "critical",
+          "source": "tailwind/preset.js:24"
+        },
+        {
+          "id": "r4",
+          "check": "If a row or panel is raised with a shadow, does it use a surface-elevation-* token rather than surface-gray-*?",
+          "severity": "major",
+          "source": "docs/content/docs/foundations/elevation.md:23"
+        },
+        {
+          "id": "r5",
+          "check": "Is the connection status a frappe-ui Badge (whose themes flip with the colour scheme) rather than a hand-coloured pill?",
+          "severity": "minor",
+          "source": "src/index.ts:26"
+        },
+        {
+          "id": "api",
+          "severity": "critical",
+          "check": "Does EVERY frappe-ui thing the code uses actually exist with the right shape? Check each: import subpath; component name; every prop name AND its value type; every slot name; every option/config object shape; every member accessed on a composable's return. Pass only if there are zero defects. Name every defect you find in 'what_it_did_instead'.",
+          "source": "src/ and package.json exports are authoritative; check each identifier individually"
+        }
+      ]
+    }
+  ]
+}
