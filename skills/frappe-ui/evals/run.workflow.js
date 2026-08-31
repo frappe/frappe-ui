@@ -59,11 +59,15 @@ if (!REPO) throw new Error('args.repo is required: absolute path to the frappe-u
 // the condition the skill actually ships for: a consumer app with frappe-ui in
 // node_modules, where the skill is the agent's only reference. Without this the
 // eval measures "Opus + full library source" and ceilings at 100%.
-// Every entry is joined onto REPO below. A bare '/spec' in the prompt would
-// name the filesystem root and leave ${REPO}/spec readable.
-const BLIND_DIRS = ['src', 'spec', 'docs', 'experimental', 'tailwind', 'cypress', 'vitepress']
-const BLIND_PATHS = BLIND_DIRS.map((d) => `${REPO}/${d}`).join(', ')
-const BLIND = args.sourceBlind ? `You do not have access to the frappe-ui library source, its docs, its specs, or its test suite. Do not read, cat, grep, glob, find or otherwise open any file under any of these directories: ${BLIND_PATHS}. Do not open any node_modules copy of frappe-ui. Treat the library as a black box you cannot inspect. Work from the request itself, from your own knowledge, and from any skill or reference material that is available to you.
+// Allowlist, not denylist. A list of banned directories always leaks: the
+// grader's own AUTHORITY block below cites ${REPO}/experimental.ts and the
+// "exports" map in ${REPO}/package.json, two root files no directory ban
+// covers. Ban the checkout and carve out the two things a builder may read.
+const BLIND = args.sourceBlind ? `You do not have access to the frappe-ui library source, its docs, its specs, or its test suite. Treat the checkout at ${REPO} as off-limits: do not read, cat, grep, glob, find or otherwise open ANY file anywhere under ${REPO}, at any depth, including files at its top level such as package.json and experimental.ts. Do not open any node_modules copy of frappe-ui either.
+
+You may read exactly two things: your own working directory, named below, and the frappe-ui agent skill, which you reach through the Skill tool. Never open ${REPO}/skills/frappe-ui/evals/ by any route; that directory holds this eval's rubrics and a written list of the correct answers.
+
+Treat the library as a black box you cannot inspect. Work from the request itself, from your own knowledge, and from any skill or reference material that is available to you.
 
 ` : ''
 
