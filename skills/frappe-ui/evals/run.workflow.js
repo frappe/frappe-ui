@@ -85,7 +85,7 @@ Working directory for this task: ${OUT}/${c.id}/ (create it). Write every file y
   ).then((r) => ({ id: c.id, summary: r }))
 ))
 
-log(`built ${built.filter(Boolean).length}/${CASES.length} cases`)
+if (!args.gradeOnly) log(`built ${built.filter(Boolean).length}/${CASES.length} cases`)
 
 phase('Grade')
 
