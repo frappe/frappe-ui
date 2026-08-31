@@ -54,10 +54,10 @@ All from the `frappe-ui` root entry.
 - [LoadingText](https://ui.frappe.io/docs/components/loadingtext): LoadingIndicator with a label, for inline "Loading…" states.
 - [MobileNav](https://ui.frappe.io/docs/components/mobilenav): bottom tab bar for MobileShell; each `MobileNavItem` is one equal-width tab.
 - [MobileShell](https://ui.frappe.io/docs/components/mobileshell): the mobile app frame; pinned header with safe-area padding, native-scrolling content, `#nav` slot. A separate family from DesktopShell.
-- [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `string[]`.
+- [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `(string | number)[]`.
 - [PageHeader](https://ui.frappe.io/docs/components/pageheader): app-shell headers (`PageHeader`, `PageHeaderMobile`, `PageHeaderBase`). A page declares its header and it renders into the layout's `<PageHeaderTarget />`.
 - [Password](https://ui.frappe.io/docs/components/password): masked input with show/hide.
-- [Popover](https://ui.frappe.io/docs/components/popover): anchored floating panel; `v-model:open`, `#target` + `#body` slots.
+- [Popover](https://ui.frappe.io/docs/components/popover): anchored floating panel; `v-model:open`, a `#trigger` slot and the default slot for the body, positioned with `side` + `align`. The v0 `#target` / `#body` slots and `placement` are gone.
 - [Progress](https://ui.frappe.io/docs/components/progress): linear progress bar.
 - [Radio](https://ui.frappe.io/docs/components/radio): single choice from a set; `RadioGroup` owns the value, each `Radio` declares one.
 - [Rail](https://ui.frappe.io/docs/components/rail): the narrow icon column of an app shell; a bare 50px frame plus `RailItem` cells, laid out with plain flex utilities.
