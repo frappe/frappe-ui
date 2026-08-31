@@ -59,7 +59,11 @@ if (!REPO) throw new Error('args.repo is required: absolute path to the frappe-u
 // the condition the skill actually ships for: a consumer app with frappe-ui in
 // node_modules, where the skill is the agent's only reference. Without this the
 // eval measures "Opus + full library source" and ceilings at 100%.
-const BLIND = args.sourceBlind ? `You do not have access to the frappe-ui library source, its docs, its specs, or its test suite. Do not read, cat, grep, glob, find or otherwise open any file under ${REPO}/src, /spec, /docs, /experimental, /tailwind, /cypress or /vitepress, and do not open any node_modules copy of frappe-ui. Treat the library as a black box you cannot inspect. Work from the request itself, from your own knowledge, and from any skill or reference material that is available to you.
+// Every entry is joined onto REPO below. A bare '/spec' in the prompt would
+// name the filesystem root and leave ${REPO}/spec readable.
+const BLIND_DIRS = ['src', 'spec', 'docs', 'experimental', 'tailwind', 'cypress', 'vitepress']
+const BLIND_PATHS = BLIND_DIRS.map((d) => `${REPO}/${d}`).join(', ')
+const BLIND = args.sourceBlind ? `You do not have access to the frappe-ui library source, its docs, its specs, or its test suite. Do not read, cat, grep, glob, find or otherwise open any file under any of these directories: ${BLIND_PATHS}. Do not open any node_modules copy of frappe-ui. Treat the library as a black box you cannot inspect. Work from the request itself, from your own knowledge, and from any skill or reference material that is available to you.
 
 ` : ''
 
