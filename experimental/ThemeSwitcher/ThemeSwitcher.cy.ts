@@ -1,5 +1,5 @@
 import ThemeSwitcher from './ThemeSwitcher.vue'
-import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
+import { _resetWarnDeprecated } from '#utils/warnDeprecated'
 
 describe('<ThemeSwitcher />', () => {
   beforeEach(() => {

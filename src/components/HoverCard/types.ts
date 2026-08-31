@@ -1,15 +1,16 @@
-import { type HoverCardContentProps, type HoverCardPortalProps } from 'reka-ui'
+import type { PopoverAlign, PopoverSide } from '../Popover/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export interface HoverCardProps {
   /**
    * Side of the trigger the card is placed on.
    */
-  side?: HoverCardContentProps['side']
+  side?: PopoverSide
 
   /**
    * Alignment of the card relative to the trigger.
    */
-  align?: HoverCardContentProps['align']
+  align?: PopoverAlign
 
   /**
    * Distance in pixels between the card and the trigger.
@@ -19,7 +20,7 @@ export interface HoverCardProps {
   /**
    * Where the card is teleported to in the DOM. Unset, an embedding host's target is used, else `body`.
    */
-  portalTo?: HoverCardPortalProps['to']
+  portalTo?: PortalTarget
 
   /**
    * Padding (in pixels) kept between the card and the viewport edges when

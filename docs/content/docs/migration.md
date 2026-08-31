@@ -42,12 +42,14 @@ and slot rename is a hand edit.
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
-- **Moved, not removed** — these four families changed an import path and
+- **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
   [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
   [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
-  [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). The v0
-  `TextEditor` family moved the same way — see [Editor](#editor).
+  [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental) ·
+  [ThemeSwitcher](#themeswitcher), which
+  stays deprecated at its new path. The v0 `TextEditor` family moved the same
+  way — see [Editor](#editor).
 - **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
 
 ## Requirements
@@ -3178,6 +3180,188 @@ returns `{ tokens }` instead of `{ theme }`, and the `ColorScheme` type this
 subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
 `formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
 `resolveChartTheme` are no longer exported.
+
+## Toast: the legacy object form is removed {#toast-legacy-object}
+
+`toast({ title, text })` no longer works, and **nothing tells you**. The object
+is handed to sonner as the message. Sonner expects a string, a component or a
+VNode, so the toast renders empty or wrong instead of throwing.
+
+```js
+// Before
+toast({ title: 'Saved', text: 'Your changes are live.', type: 'success' })
+
+// After
+toast.success('Saved', { description: 'Your changes are live.' })
+```
+
+`position` was already ignored per toast. Set it once on `<ToastProvider>`.
+
+```js
+// Before
+toast({ title: 'Copied', position: 'bottom-right' })
+
+// After — position is global
+toast('Copied')
+```
+
+A grep for `toast(` will not find these reliably. Grep for the keys instead:
+`title:`, `text:` and `message:` inside a `toast(` call.
+
+The three named shims go at the same time, and those fail loudly:
+
+```js
+toast.create({ message: 'Loading…' })  // → toast.message('Loading…')
+toast.remove(id)                        // → toast.dismiss(id)
+toast.removeAll()                       // → toast.dismiss()
+```
+
+`toast.create({ closable: false })` mapped to three sonner flags. Write them out:
+
+```js
+// Before
+toast.create({ message: 'Uploading…', closable: false })
+
+// After
+toast.message('Uploading…', {
+  duration: Infinity,
+  closeButton: false,
+  dismissible: false,
+})
+```
+
+`toast.create` also took `duration` in **seconds**, where sonner takes
+milliseconds, and treated `duration: 0` as "never dismiss". Multiply by 1000,
+and write `Infinity` where you meant persistent.
+
+## Toast: `description` now renders limited inline HTML {#toast-description-html}
+
+`description` is sanitized and rendered like the message, with the same
+safelist (`a`, `em`, `strong`, `i`, `b`, `u`). It used to render as plain text.
+
+**This is silent.** A description holding a `<` that is not one of those six
+tags loses those characters, with no warning:
+
+```js
+// Before — rendered literally: Set <Button> variant
+toast('Heads up', { description: 'Set <Button> variant' })
+
+// After — DOMPurify strips <Button>: Set  variant
+// Escape it, or drop the angle brackets:
+toast('Heads up', { description: 'Set &lt;Button&gt; variant' })
+```
+
+Descriptions that are components, VNodes or render functions are untouched.
+
+## TabButtons: `class` on an option → `data-value` {#tabbuttons-class}
+
+`class` on a `TabButton` option object no longer applies. In JavaScript nothing
+warns and nothing fails: the tab simply loses its styling. Style the tab from
+CSS through the new `data-value` hook instead.
+
+```vue
+<!-- Before -->
+<script setup>
+const tabs = [
+  { label: 'Open', value: 'open', class: 'text-red-600 font-bold' },
+  { label: 'Closed', value: 'closed' },
+]
+</script>
+
+<template>
+  <TabButtons :buttons="tabs" v-model="tab" />
+</template>
+```
+
+```vue
+<!-- After -->
+<script setup>
+const tabs = [
+  { label: 'Open', value: 'open' },
+  { label: 'Closed', value: 'closed' },
+]
+</script>
+
+<template>
+  <TabButtons class="my-tabs" :options="tabs" v-model="tab" />
+</template>
+
+<style scoped>
+.my-tabs :deep([data-slot='tab-button'][data-value='open']) {
+  color: var(--ink-red-3);
+  font-weight: 600;
+}
+</style>
+```
+
+Two related names go with it:
+
+- `NativeButtonClass` is no longer exported. The import fails.
+- `customClass` is gone from the `#prefix` and `#suffix` slot props. Destructuring
+  it fails; spreading it silently yields nothing.
+
+The composed `Tabs` family needs no change. You write the `<TabTrigger>`
+yourself there, so a class goes on the element directly.
+
+## ThemeSwitcher — moved to `frappe-ui/experimental` {#themeswitcher}
+
+`ThemeSwitcher` is not core v1 surface. It moves out of the root export to
+`frappe-ui/experimental` (P14 — no stability promise) and parks there, still
+deprecated, while apps migrate. The import fails at the root; switch the
+subpath:
+
+```ts
+// Before
+import { ThemeSwitcher } from 'frappe-ui'
+
+// After
+import { ThemeSwitcher } from 'frappe-ui/experimental'
+```
+
+`ThemeSwitcherProps` moves the same way. Nothing about the component changed,
+only where it is imported from.
+
+### If you want off the deprecated component
+
+The replacement is behavioral, not visual. `ThemeSwitcher` renders a group of
+theme preview cards. `Select` bound to `useColorScheme` gives you the same
+control in a dropdown, so an app that wants the cards keeps its own markup:
+
+```vue
+<!-- Before -->
+<script setup>
+import { ThemeSwitcher } from 'frappe-ui'
+</script>
+
+<template>
+  <ThemeSwitcher />
+</template>
+```
+
+```vue
+<!-- After -->
+<script setup>
+import { Select, useColorScheme } from 'frappe-ui'
+
+const { colorScheme, setColorScheme } = useColorScheme()
+const options = [
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+  { label: 'System', value: 'system' },
+]
+</script>
+
+<template>
+  <Select
+    :model-value="colorScheme"
+    :options="options"
+    @update:model-value="setColorScheme"
+  />
+</template>
+```
+
+Moving the import is the smaller change and keeps the current UI. Take this
+rewrite only when you want off the deprecated component.
 
 ## FAQ
 

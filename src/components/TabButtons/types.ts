@@ -9,8 +9,6 @@ import type {
 
 export type TabButtonValue = TabValue
 export type TabButtonIcon = TabIcon
-export type NativeButtonClass = string | string[] | Record<string, boolean>
-
 export interface TabButton {
   value: TabButtonValue
   label?: string | number
@@ -20,7 +18,6 @@ export interface TabButton {
   iconLeft?: TabButtonIcon
   disabled?: boolean
   tooltip?: string
-  class?: NativeButtonClass
   /** Renders the tab as a `<RouterLink>` to the given target. */
   route?: RouteLocationRaw
   /** Renders the tab as an `<a href>`, opens in a new tab. */

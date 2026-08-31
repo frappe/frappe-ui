@@ -1,5 +1,6 @@
 import type { Component, VNodeChild } from 'vue'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
 export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -112,7 +113,7 @@ export interface MultiSelectProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 /**

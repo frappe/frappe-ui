@@ -64,6 +64,29 @@ items.
 
 <ComponentPreview name="TabButtons-PrefixSuffix" />
 
+## Styling a single tab
+
+Each tab exposes data-attribute hooks for styling:
+
+- `data-slot="tab-button"` on every tab.
+- `data-value` carries that tab's `value`, so CSS can address one tab.
+- `data-state="checked|unchecked"` and `data-disabled` for state.
+
+This is the only way to style one specific tab. The per-option `class` field
+was removed in `1.0.0`.
+
+```vue
+<template>
+  <TabButtons class="status-tabs" v-model="status" :options="options" />
+</template>
+
+<style scoped>
+.status-tabs :deep([data-slot='tab-button'][data-value='open']) {
+  color: var(--ink-red-3);
+}
+</style>
+```
+
 <!-- @include: ./TabButtons.api.md -->
 
 ## Migration from v0
@@ -77,6 +100,8 @@ See the [migration guide](../migration#tabbuttons) for the full list.
   removed; the model is the single source of truth.
 - `fluid` is new — buttons stretch to fill the container width. It replaces
   raw-CSS and wrapper-div workarounds.
+- `class` on an option object is removed. Style one tab through
+  `data-value` instead — see [Styling a single tab](#styling-a-single-tab).
 
 TabButtons no longer wraps `<Button>` internally — each tab is a native
 `<button>`, `<a href>`, or `<RouterLink>` rendering a `<Pill>` for its visual

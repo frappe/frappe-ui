@@ -120,9 +120,8 @@ export {
   type PressKeyboardShortcutConfig,
 } from './composables/useKeyboardShortcut'
 
-// Deprecated component compatibility
-/** @deprecated Use `Select` with `useColorScheme` instead. */
-export * from './components/ThemeSwitcher'
+// ThemeSwitcher moved to `frappe-ui/experimental` (#1094, P14) — parked
+// there, deprecated, while apps move to `Select` plus `useColorScheme`.
 
 // v1 Charts family moved to `frappe-ui/experimental` (#942, P14) — parked
 // there, API unchanged, while apps migrate to `frappe-ui/charts`.

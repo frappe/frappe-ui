@@ -74,8 +74,8 @@ import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import {
   useColorScheme,
   type ColorScheme,
-} from '../../composables/useColorScheme'
-import { warnDeprecated } from '../../utils/warnDeprecated'
+} from '#composables/useColorScheme'
+import { warnDeprecated } from '#utils/warnDeprecated'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
 

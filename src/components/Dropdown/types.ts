@@ -17,6 +17,7 @@ export type {
   MenuItemSlotProps as DropdownItemSlotProps,
   MenuGroupSlotProps as DropdownGroupSlotProps,
 } from '../Menu/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
 export type DropdownAlign = 'start' | 'center' | 'end'
@@ -44,7 +45,7 @@ export interface DropdownProps {
   matchTriggerWidth?: boolean
 
   /** Teleport target for dropdown portal content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 export interface DropdownTriggerSlotProps extends MenuSlotProps {

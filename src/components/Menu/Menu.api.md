@@ -28,7 +28,7 @@
     name: 'portalTo',
     description: 'Portal target for submenu content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'primitives',

@@ -39,6 +39,29 @@ describe('<TabButtons />', () => {
     cy.get('[data-slot="tab-button"]').should('have.length', 2)
   })
 
+  it('carries data-value on each tab so one tab can be styled', () => {
+    // `class` on an option was removed in 1.0.0; TabButtons.md and the
+    // migration guide both hand callers this exact selector, so pin it.
+    cy.mount(TabButtons, {
+      props: {
+        options: [
+          { label: 'Open', value: 'open' },
+          { label: 'Closed', value: 'closed' },
+        ],
+        modelValue: 'open',
+      },
+    })
+
+    cy.get('[data-slot="tab-button"][data-value="open"]')
+      .should('have.length', 1)
+      .and('contain.text', 'Open')
+      .and('have.attr', 'data-state', 'checked')
+    cy.get('[data-slot="tab-button"][data-value="closed"]').should(
+      'have.length',
+      1,
+    )
+  })
+
   it('clips the pill indicator so its shadow stops at the track', () => {
     cy.mount(TabButtons, {
       props: {

@@ -9,14 +9,14 @@
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"top" | "right" | "bottom" | "left"',
+    type: 'PopoverSide',
     default: '"bottom"'
   },
   {
     name: 'align',
     description: 'Alignment of the card relative to the trigger.',
     required: false,
-    type: '"start" | "center" | "end"',
+    type: 'PopoverAlign',
     default: '"start"'
   },
   {
@@ -30,7 +30,7 @@
     name: 'portalTo',
     description: 'Where the card is teleported to in the DOM. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'collisionPadding',

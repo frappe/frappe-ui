@@ -62,6 +62,11 @@ export {
   type BaseSuggestionItem,
   type CreateSuggestionExtensionOptions,
 } from './experimental/TextEditor/extensions/suggestion'
+// ThemeSwitcher. Moved out of root (#1094) — `Select` bound to
+// `useColorScheme()` is the replacement, and it replaces the behavior rather
+// than the markup: this renders a reka-ui `RadioGroupRoot` of preview cards.
+// Parked here, unstable and still deprecated, while apps migrate.
+export * from './experimental/ThemeSwitcher'
 // Sprite icon trio. Moved out of `frappe-ui/icons` (#904) as a parking spot
 // while apps migrate — `lucide-*` classes (and the root `Icon` component)
 // are the canonical way to render icons. Unstable; will be removed.

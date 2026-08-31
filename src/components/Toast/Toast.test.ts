@@ -51,62 +51,49 @@ describe('Toast v1 — vue-sonner API surface', () => {
   })
 })
 
-describe('Toast v1 — backwards-compat shim', () => {
-  it('toast.create is kept as a deprecated shim', () => {
-    expect(typeof (toast as any).create).toBe('function')
+describe('Toast v1 — the removed shims', () => {
+  it('no longer exposes create, remove or removeAll', () => {
+    expect((toast as any).create).toBeUndefined()
+    expect((toast as any).remove).toBeUndefined()
+    expect((toast as any).removeAll).toBeUndefined()
   })
 
-  it('toast.remove is kept as a deprecated shim for toast.dismiss(id)', () => {
-    expect(typeof (toast as any).remove).toBe('function')
+  it('hands a legacy object straight to sonner as the message', () => {
+    // The legacy object form is gone, and its removal is silent: nothing
+    // throws, sonner just receives an object where it expects a string. This
+    // pins that the wrapper no longer interprets the shape.
+    const legacy = { title: 'Old', text: 'shape' }
+    ;(toast as any)(legacy)
+    const [message, data] = sonnerSpy.mock.calls[0]!
+    expect(message).toBe(legacy)
+    expect(data?.description).toBeUndefined()
   })
+})
 
-  it('toast.removeAll is kept as a deprecated shim for toast.dismiss()', () => {
-    expect(typeof (toast as any).removeAll).toBe('function')
-  })
-
-  it('toast.create({ closable: false }) locks the toast (persistent + no × + not swipe-dismissible)', () => {
-    // Old reka-ui contract: closable=false made the toast fully locked.
-    // Sonner splits that into three flags — duration (auto-dismiss),
-    // closeButton (× visibility), and dismissible (swipe / pointer).
-    // Mapping closable → closeButton alone would let the helpdesk
-    // loading-indicator pattern still get swiped away.
-    ;(toast as any).create({ message: 'Loading…', closable: false })
+describe('Toast v1 — description sanitization', () => {
+  it('wraps a string description in a render function, like the message', () => {
+    toast('Saved', { description: 'Set <b>variant</b>' })
     const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.duration).toBe(Infinity)
-    expect(data.closeButton).toBe(false)
-    expect(data.dismissible).toBe(false)
+    expect(typeof data.description).toBe('function')
   })
 
-  it('toast.create({ closable: true }) keeps the toast dismissible', () => {
-    ;(toast as any).create({ message: 'OK', closable: true })
-    const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.dismissible).toBe(true)
+  it('sanitizes the description on the semantic creators too', () => {
+    toast.success('Saved', { description: '<em>done</em>' })
+    const [, data] = sonnerSpy.success.mock.calls[0]!
+    expect(typeof data.description).toBe('function')
   })
 
-  it('toast.create with closable omitted is dismissible by default', () => {
-    ;(toast as any).create({ message: 'Default' })
+  it('leaves a non-string description untouched', () => {
+    const vnode = () => 'already a render fn'
+    toast('Saved', { description: vnode })
     const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.dismissible).toBe(true)
+    expect(data.description).toBe(vnode)
   })
 
-  it('toast.create({ duration: 0 }) is persistent, not instant-dismiss', () => {
-    // Sonner treats 0 as "close immediately"; the legacy idiom meant
-    // "no timeout". Map 0 → Infinity to preserve old semantics.
-    ;(toast as any).create({ message: 'Pinned', duration: 0 })
+  it('leaves options without a description alone', () => {
+    toast('Saved', { duration: 1000 })
     const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.duration).toBe(Infinity)
-  })
-
-  it('toast.create maps seconds → ms for non-zero durations', () => {
-    ;(toast as any).create({ message: 'Brief', duration: 3 })
-    const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.duration).toBe(3000)
-  })
-
-  it('toast({ title, text, timeout: 0 }) is persistent', () => {
-    ;(toast as any)({ title: 'Stuck', text: 'No timeout', timeout: 0 })
-    const [, data] = sonnerSpy.mock.calls[0]!
-    expect(data.duration).toBe(Infinity)
-    expect(data.description).toBe('No timeout')
+    expect(data.description).toBeUndefined()
+    expect(data.duration).toBe(1000)
   })
 })

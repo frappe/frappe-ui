@@ -56,7 +56,7 @@
     name: 'portalTo',
     description: 'Teleport target for dropdown portal content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   }
 ]
 

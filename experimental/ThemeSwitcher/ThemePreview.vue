@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
-import type { ColorScheme } from '../../composables/useColorScheme'
+import type { ColorScheme } from '#composables/useColorScheme'
 import PreviewWindow, { type PreviewTone } from './previews/PreviewWindow.vue'
 
 defineOptions({ name: 'ThemePreview' })
