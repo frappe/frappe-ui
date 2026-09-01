@@ -135,6 +135,7 @@ import {
   getWeekMonthParts,
 } from './calendarUtils'
 import { dayjs } from '#utils/dayjs'
+import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
@@ -263,15 +264,7 @@ onUnmounted(() => {
 })
 function handleShortcuts(e: KeyboardEvent) {
   if (isOverlayOpen()) return
-
-  const target = e.target as HTMLElement | null
-  if (
-    target?.tagName === 'INPUT' ||
-    target?.tagName === 'TEXTAREA' ||
-    target?.isContentEditable
-  ) {
-    return
-  }
+  if (isTargetEditable(e)) return
 
   if (e.key.toLowerCase() === 'm') {
     activeView.value = 'Month'

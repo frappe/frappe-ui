@@ -166,6 +166,41 @@ describe('Popover', () => {
       cy.get('@onClose').should('have.been.called')
     })
 
+    it('does not emit open when a controlled parent declines the request', () => {
+      // A consumer that binds `:open` and honours `update:open` only on the way
+      // down (the calendar's event pills delay opening so a double click can
+      // edit instead) leaves the popover shut. `open` must stay unemitted: a
+      // listener registered there would never see the `close` that never comes.
+      const Harness = defineComponent({
+        setup() {
+          const open = ref(false)
+          return () =>
+            h(
+              Popover,
+              {
+                open: open.value,
+                // Declines every request to open; still closes on the way down.
+                'onUpdate:open': (value: boolean) =>
+                  !value && (open.value = false),
+                onOpen: cy.spy().as('onOpen'),
+                onClose: cy.spy().as('onClose'),
+              },
+              {
+                trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                default: () => h('div', { 'data-cy': 'content' }, 'controlled'),
+              },
+            )
+        },
+      })
+
+      cy.mount(Harness)
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('@onOpen').should('not.have.been.called')
+      cy.get('@onClose').should('not.have.been.called')
+    })
+
     it('closes on Escape', () => {
       cy.mount(Popover, { slots: NewSlots })
 

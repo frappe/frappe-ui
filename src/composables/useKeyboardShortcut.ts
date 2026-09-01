@@ -91,7 +91,13 @@ function isEnabled(config: KeyboardShortcutConfig): boolean {
   return toValue(config.enabled ?? true)
 }
 
-function isTargetEditable(e: KeyboardEvent): boolean {
+/**
+ * True when the keypress belongs to whatever the user is typing in — an input,
+ * a textarea, or a contenteditable. A shortcut that swallows those keys leaves
+ * the field looking broken, so every keydown listener on the document owes it
+ * this check.
+ */
+export function isTargetEditable(e: KeyboardEvent): boolean {
   const target = e.target as HTMLElement | null
   if (!target) return false
   return (

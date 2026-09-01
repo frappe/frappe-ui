@@ -1,4 +1,5 @@
-import { ref, inject, computed, watch, reactive } from 'vue'
+import { ref, inject, computed, watch, reactive, onUnmounted } from 'vue'
+import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import { activeEvent } from './composables/useCalendarData'
 import { colorMap, colorMapDark } from './calendarUtils'
 import {
@@ -96,11 +97,23 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     document.removeEventListener('keydown', handleDeleteShortcut)
   }
 
+  // `close` is the ordinary way out, but it never comes if the event goes away
+  // with its popover still open — which is exactly what the shortcut itself
+  // does: the delete drops the event, the pill unmounts, and the listener would
+  // outlive the component that owns it.
+  onUnmounted(unregisterDeleteShortcut)
+
+  // Asked of the document, so it hears keys that are owed to something else:
+  // Backspace in a text field is an edit, not a delete, and swallowing it there
+  // leaves the field looking uneditable. An overlay is not excluded the way the
+  // view shortcuts exclude one, since an open popover is exactly when this
+  // listener is meant to be live.
   function handleDeleteShortcut(e: KeyboardEvent) {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault()
-      handleEventDelete()
-    }
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return
+    if (isTargetEditable(e)) return
+
+    e.preventDefault()
+    handleEventDelete()
   }
 
   // ── Click / edit / delete ────────────────────────────────────────────────
