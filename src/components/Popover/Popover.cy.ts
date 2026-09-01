@@ -90,9 +90,7 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { bare: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]')
-        .find('[data-cy="content"]')
-        .should('exist')
+      cy.get('[data-slot="content"]').find('[data-cy="content"]').should('exist')
       cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
@@ -100,9 +98,7 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { arrow: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]')
-        .find('[data-slot="arrow"]')
-        .should('exist')
+      cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
     })
 
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
@@ -176,9 +172,8 @@ describe('Popover', () => {
       // edit instead) leaves the popover shut. `open` must stay unemitted: a
       // listener registered there would never see the `close` that never comes.
       const Harness = defineComponent({
-        setup(_, { expose }) {
+        setup() {
           const open = ref(false)
-          expose({ open })
           return () =>
             h(
               Popover,

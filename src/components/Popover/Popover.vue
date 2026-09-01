@@ -95,11 +95,9 @@ const isOpen = computed<boolean>({
 // did, or whatever `@open` set up is never taken down by the `@close` that never
 // comes. `update:open` above stays on the request: that IS the request.
 //
-// Sync flush so the pair still lands in the same tick as the change, ahead of
-// the content rendering — handlers that seed panel state on open depend on it.
-watch(isOpen, (value) => (value ? emit('open') : emit('close')), {
-  flush: 'sync',
-})
+// The default `pre` flush runs before the content renders and keeps the pair in
+// its old order, after `update:open`.
+watch(isOpen, (value) => (value ? emit('open') : emit('close')))
 
 function open() {
   if (isOpen.value) return

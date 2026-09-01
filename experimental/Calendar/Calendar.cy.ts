@@ -89,6 +89,11 @@ describe('Calendar', () => {
     cy.get('body').type('{del}')
     cy.get('@onDelete').should('have.been.calledWith', 'EV-001')
     cy.contains('Design review').should('not.exist')
+
+    // The pill unmounted with its popover still open, so no `close` came to
+    // take the listener down. A second press must find nothing listening.
+    cy.get('body').type('{del}')
+    cy.get('@onDelete').should('have.been.calledOnce')
   })
 
   // The delete shortcut listens on the document, so it hears keys that belong
