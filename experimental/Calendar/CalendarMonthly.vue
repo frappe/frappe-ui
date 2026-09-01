@@ -139,11 +139,13 @@ import {
   LANE_HEIGHT,
   LANE_PITCH,
   barsInColumn,
+  dayEvents,
   daysBetween,
+  isSpan,
   layoutRow,
   shiftEventDays,
 } from './eventSpan'
-import { dayEvents, isSpan, shortMonth, stripWeeks } from './monthStrip'
+import { shortMonth, stripWeeks } from './monthStrip'
 import { useNow } from './composables/useNow'
 import { useStripScroll } from './composables/useStripScroll'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'

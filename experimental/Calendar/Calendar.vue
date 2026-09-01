@@ -96,16 +96,34 @@
       :current-date="selectedDay"
       :config="overrideConfig"
     >
-      <template #header="{ parseDateWithDay, currentDate, fullDay }">
-        <slot
-          name="daily-header"
-          v-bind="{ parseDateWithDay, currentDate, fullDay }"
-        />
+      <template #event-description="slotProps">
+        <slot name="event-description" v-bind="slotProps" />
+      </template>
+      <template #event-suffix="slotProps">
+        <slot name="event-suffix" v-bind="slotProps" />
       </template>
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />
       </template>
     </CalendarDaily>
+
+    <CalendarAgenda
+      v-else-if="activeView === 'Agenda'"
+      :events="events"
+      :config="overrideConfig"
+      :current-month="currentMonth"
+      :current-year="currentYear"
+    >
+      <template #event-description="slotProps">
+        <slot name="event-description" v-bind="slotProps" />
+      </template>
+      <template #event-suffix="slotProps">
+        <slot name="event-suffix" v-bind="slotProps" />
+      </template>
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarAgenda>
 
     <NewEventModal
       v-if="showEventModal"
@@ -139,15 +157,18 @@ import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import DayIcon from './Icon/DayIcon.vue'
 import WeekIcon from './Icon/WeekIcon.vue'
 import MonthIcon from './Icon/MonthIcon.vue'
+import AgendaIcon from './Icon/AgendaIcon.vue'
 import DatePicker from '#components/DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
+import CalendarAgenda from './CalendarAgenda.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
 import { stripRange } from './monthStrip'
+import { agendaRange } from './agendaDays'
 import {
   ACTIVE_VIEW_KEY,
   CALENDAR_ACTIONS_KEY,
@@ -271,6 +292,9 @@ function handleShortcuts(e: KeyboardEvent) {
   }
   if (e.key.toLowerCase() === 'w') {
     activeView.value = 'Week'
+  }
+  if (e.key.toLowerCase() === 'a') {
+    activeView.value = 'Agenda'
   }
   if (e.key.toLowerCase() === 'd') {
     activeView.value = 'Day'
@@ -414,6 +438,7 @@ const actionOptions: CalendarActionOption[] = [
   { label: 'Day', value: 'Day', iconLeft: DayIcon },
   { label: 'Week', value: 'Week', iconLeft: WeekIcon },
   { label: 'Month', value: 'Month', iconLeft: MonthIcon },
+  { label: 'Agenda', value: 'Agenda', iconLeft: AgendaIcon },
 ]
 let enabledModes = actionOptions.filter(
   (mode) => !overrideConfig.disableModes.includes(mode.value),
@@ -500,6 +525,8 @@ const incrementClickEvents: Record<CalendarMode, () => void> = {
   Month: incrementMonth,
   Week: incrementWeek,
   Day: incrementDay,
+  // The Agenda lists a month, so its arrows step one.
+  Agenda: incrementMonth,
 }
 
 // decrementMonth lands on the month's last day, which is right for stepping
@@ -515,6 +542,9 @@ const decrementClickEvents: Record<CalendarMode, () => void> = {
   Month: decrementMonthView,
   Week: decrementWeek,
   Day: decrementDay,
+  // Lands on the 1st rather than the last day, which is where a month-scoped
+  // list wants to start reading.
+  Agenda: decrementMonthView,
 }
 
 function incrementMonth() {
@@ -732,6 +762,17 @@ function getVisibleRange() {
     return {
       startDate: start.format('YYYY-MM-DD'),
       endDate: end.format('YYYY-MM-DD'),
+    }
+  }
+
+  // The Agenda reports what it actually lists, which for the month under way
+  // starts at today — so a consumer's fetch window and its "new event" anchor
+  // agree with what is on screen.
+  if (activeView.value === 'Agenda') {
+    const { start, end } = agendaRange(currentMonth.value, currentYear.value)
+    return {
+      startDate: dayjs(start).format('YYYY-MM-DD'),
+      endDate: dayjs(end).format('YYYY-MM-DD'),
     }
   }
 

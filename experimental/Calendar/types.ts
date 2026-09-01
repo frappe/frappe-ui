@@ -1,6 +1,6 @@
 import type { Component, InjectionKey, Ref } from 'vue'
 
-export type CalendarMode = 'Day' | 'Week' | 'Month'
+export type CalendarMode = 'Day' | 'Week' | 'Month' | 'Agenda'
 export type CalendarTimeFormat = '12h' | '24h'
 
 export interface CalendarColor {
@@ -50,9 +50,41 @@ export interface CalendarEvent {
   isDeclined?: boolean
   startTime?: number
   endTime?: number
+  /**
+   * Which column of its overlap group the event sits in, and how many columns
+   * that group has. The Week view reads `hallNumber` alone and steps each
+   * overlapping event 20% to the right; the Day view divides the column into
+   * `hallCount` equal shares, so no title is ever occluded.
+   */
   hallNumber?: number
+  hallCount?: number
   idx?: number
   [key: string]: unknown
+}
+
+/**
+ * A tag on a listed event — the Day rail's and Agenda's rows carry these where
+ * a grid pill has no room for them. `tone` names a colour the way the rest of
+ * the library does, so a consumer's own tags sit beside the derived ones.
+ */
+export interface CalendarRowTag {
+  label: string
+  tone?: 'gray' | 'amber' | 'blue'
+}
+
+/** Which list an event row belongs to. */
+export type CalendarRowSurface = 'rail' | 'agenda'
+
+/** What `#event-description` and `#event-suffix` receive. */
+export interface CalendarRowSlotProps {
+  calendarEvent: CalendarEvent
+  /** The day the row belongs to; a multi-day event has one row per day. */
+  date: Date
+  surface: CalendarRowSurface
+  /** The library's own description, so a filled slot extends rather than re-derives. */
+  description: string
+  /** The tags the library derived, for the same reason. */
+  tags: CalendarRowTag[]
 }
 
 /**
@@ -145,7 +177,11 @@ export interface CalendarPublicProps {
    * Replaces the default single-click behavior (opening the event
    * popover) with your own handler.
    */
-  onClick?: (data: { e: MouseEvent; calendarEvent: CalendarEvent }) => void
+  onClick?: (data: {
+    /** A key event when the row was activated from the keyboard. */
+    e: MouseEvent | KeyboardEvent
+    calendarEvent: CalendarEvent
+  }) => void
 
   /**
    * Replaces the default double-click behavior (opening the edit

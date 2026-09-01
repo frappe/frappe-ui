@@ -294,6 +294,13 @@ describe('Calendar', () => {
     cy.get('body').type('m')
     cy.contains('All day').should('not.exist')
 
+    // a -> Agenda, which lists days rather than drawing a grid. Mounted with
+    // no events, so it is the empty month it reports.
+    cy.get('body').type('a')
+    cy.contains('Nothing on in').should('exist')
+    cy.contains('All day').should('not.exist')
+    cy.get('body').type('m')
+
     // ArrowRight moves forward, t returns to today
     cy.contains('button', 'Today')
       .parent()
@@ -386,5 +393,156 @@ describe('Calendar', () => {
       'have.text',
       'custom: Design review',
     )
+  })
+
+  describe('Agenda view', () => {
+    // Two events either side of a three-day hole, all inside one month.
+    const spread: CalendarEvent[] = [
+      {
+        id: 'AG-1',
+        title: 'Kickoff',
+        fromDate: monthYear(1),
+        toDate: monthYear(1),
+        fromTime: '10:00',
+        toTime: '11:00',
+      },
+      {
+        id: 'AG-2',
+        title: 'Retro',
+        fromDate: monthYear(5),
+        toDate: monthYear(5),
+        fromTime: '15:00',
+        toTime: '16:00',
+      },
+    ]
+
+    it('lists the month from today and collapses the empty days between', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      cy.contains('Kickoff').should('exist')
+      cy.contains('Retro').should('exist')
+      // Days 2-4 hold nothing, so they are one line rather than three rows.
+      cy.contains('No events').should('have.length.at.least', 1)
+      cy.get('[data-strip-date]').should('have.length.at.most', 31)
+    })
+
+    it('does not list the days already spent', () => {
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'AG-PAST',
+              title: 'Yesterday standup',
+              fromDate: monthYear(-1),
+              toDate: monthYear(-1),
+              fromTime: '09:00',
+              toTime: '09:15',
+            },
+          ],
+          config: { defaultMode: 'Agenda' },
+        },
+      })
+
+      // Only meaningful when yesterday was in this month; otherwise the view is
+      // showing a different month entirely and the event is out of range anyway.
+      cy.contains('Yesterday standup').should('not.exist')
+    })
+
+    it('renders the #event-description and #event-suffix slots on a row', () => {
+      cy.mount(Calendar, {
+        props: { events, config: { defaultMode: 'Agenda' } },
+        slots: {
+          'event-description': (props: any) =>
+            h('span', { 'data-cy': 'row-description' }, `at ${props.surface}`),
+          'event-suffix': (props: any) =>
+            h('span', { 'data-cy': 'row-suffix' }, String(props.tags.length)),
+        },
+      })
+
+      cy.get('[data-cy=row-description]')
+        .first()
+        .should('have.text', 'at agenda')
+      cy.get('[data-cy=row-suffix]').should('exist')
+    })
+  })
+
+  describe('Day view', () => {
+    // 764px of grid plus a 320px rail needs more than the 1024 the other specs
+    // run at, or the rail's own breakpoint hides the thing under test.
+    beforeEach(() => cy.viewport(1400, 900))
+
+    const concurrent = (count: number): CalendarEvent[] =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `CC-${i}`,
+        title: `Concurrent ${i}`,
+        fromDate: today,
+        toDate: today,
+        fromTime: '10:00',
+        toTime: '11:00',
+      }))
+
+    it('shows the schedule rail beside the grid', () => {
+      cy.mount(Calendar, {
+        props: { events, config: { defaultMode: 'Day' } },
+      })
+
+      cy.contains('Schedule').should('exist')
+      // The rail reads the day as a whole, which the grid cannot.
+      cy.contains(/event(s)? ·/).should('exist')
+    })
+
+    it('splits concurrent events into equal columns', () => {
+      cy.mount(Calendar, {
+        props: { events: concurrent(3), config: { defaultMode: 'Day' } },
+      })
+
+      const widths: number[] = []
+      const lefts: number[] = []
+      cy.get('.event')
+        .filter(':visible')
+        .each(($el) => {
+          const box = $el[0].getBoundingClientRect()
+          widths.push(Math.round(box.width))
+          lefts.push(Math.round(box.left))
+        })
+        .then(() => {
+          // Equal shares, and in chronological order left to right.
+          expect(Math.max(...widths) - Math.min(...widths)).to.be.lessThan(3)
+          expect([...lefts].sort((a, b) => a - b)).to.deep.equal(lefts)
+        })
+    })
+
+    // The whole point of leaving `hallNumber` alone: the Week view still
+    // cascades, and only the Day view divides the column.
+    it('keeps the cascade in the week view', () => {
+      cy.mount(Calendar, {
+        props: { events: concurrent(3), config: { defaultMode: 'Week' } },
+      })
+
+      const widths: number[] = []
+      cy.get('.event')
+        .filter(':visible')
+        .each(($el) =>
+          widths.push(Math.round($el[0].getBoundingClientRect().width)),
+        )
+        .then(() => {
+          // A cascade steps each event 20% narrower than the last.
+          expect(new Set(widths).size).to.be.greaterThan(1)
+        })
+    })
+
+    it('renders the #event-description slot on a rail row', () => {
+      cy.mount(Calendar, {
+        props: { events, config: { defaultMode: 'Day' } },
+        slots: {
+          'event-description': (props: any) =>
+            h('span', { 'data-cy': 'row-description' }, `at ${props.surface}`),
+        },
+      })
+
+      cy.get('[data-cy=row-description]').first().should('have.text', 'at rail')
+    })
   })
 })

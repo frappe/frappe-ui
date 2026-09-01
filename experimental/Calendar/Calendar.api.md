@@ -23,7 +23,7 @@
     name: 'onClick',
     description: 'Replaces the default single-click behavior (opening the event\npopover) with your own handler.',
     required: false,
-    type: '((data: { e: MouseEvent; calendarEvent: CalendarEvent; }) => void)'
+    type: '((data: { e: MouseEvent | KeyboardEvent; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onDblClick',
@@ -51,9 +51,14 @@
     type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
   },
   {
-    name: 'daily-header',
+    name: 'event-description',
     description: '',
-    type: '{ parseDateWithDay: any; currentDate: any; fullDay: any; }'
+    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
+  },
+  {
+    name: 'event-suffix',
+    description: '',
+    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
   }
 ]
 

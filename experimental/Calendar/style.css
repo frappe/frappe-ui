@@ -49,3 +49,75 @@
 .event.past:not(.active) {
   opacity: 0.5;
 }
+
+/* ── Listed events: the Day view's rail and the Agenda ────────────────────── */
+
+/* A row is not a pill: it carries no fill of its own, so the day reads as a
+   list rather than a stack of coloured blocks. The event's colour survives as
+   the bar alone. */
+.calendar-row-bar {
+  background-color: var(--border);
+}
+.calendar-row:hover {
+  background-color: var(--surface-gray-1);
+}
+.calendar-row.active {
+  background-color: var(--bg-active);
+}
+.calendar-row.active .calendar-row-title {
+  color: var(--text-active, var(--ink-base));
+}
+.calendar-row.active .calendar-row-bar {
+  background-color: var(--border-active);
+}
+/* Happening now: lifted off the rail's wash onto its own surface. Selection
+   still wins — you asked for that one. */
+.calendar-row.now:not(.active) {
+  background-color: var(--surface-white);
+  box-shadow:
+    0 0 1px rgb(0 0 0 / 0.13),
+    0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.calendar-row-tag {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.6;
+  padding: 0 7px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  background-color: var(--surface-gray-2);
+  color: var(--ink-gray-6);
+}
+.calendar-row-tag[data-tone='amber'] {
+  background-color: var(--surface-amber-1, var(--surface-gray-2));
+  color: var(--ink-amber-3, var(--ink-gray-6));
+}
+.calendar-row-tag[data-tone='blue'] {
+  background-color: var(--surface-blue-1, var(--surface-gray-2));
+  color: var(--ink-blue-3, var(--ink-gray-6));
+}
+
+.calendar-rail-section {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-gray-4);
+  margin: 10px 0 4px;
+  padding-left: 8px;
+}
+/* A gap marker: the label, then a rule running out to the edge — a break in
+   the list that you read past rather than stop at. */
+.calendar-rail-gap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--ink-gray-4);
+  padding: 2px 8px 2px 10px;
+}
+.calendar-rail-gap::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed var(--outline-gray-2);
+}

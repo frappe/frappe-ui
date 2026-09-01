@@ -257,3 +257,43 @@ export function stripPlacement(event: CalendarEvent): CalendarEvent {
   const { segFromTime, segToTime, segIsStart, segIsEnd, ...rest } = event
   return rest
 }
+
+/** Whether the event covers more than one day, and so draws as a bar. */
+export function isSpan(event: CalendarEvent): boolean {
+  return eventDayCount(event) > 1
+}
+
+/** Full-day events first, then by start time, then a stable tiebreak. */
+export function sortByStart(events: CalendarEvent[]): CalendarEvent[] {
+  return [...events].sort((a, b) => {
+    const fullA = a.isFullDay ? 0 : 1
+    const fullB = b.isFullDay ? 0 : 1
+    if (fullA !== fullB) return fullA - fullB
+    const timeA = minutes(a.fromTime)
+    const timeB = minutes(b.fromTime)
+    if (timeA !== timeB) return timeA - timeB
+    return String(a.id ?? '').localeCompare(String(b.id ?? ''))
+  })
+}
+
+/** Single-day events that fall on `date`. */
+export function dayEvents(
+  events: CalendarEvent[],
+  date: Date,
+): CalendarEvent[] {
+  const key = parseDate(date)
+  return sortByStart(
+    events.filter((e) => !isSpan(e) && eventDays(e).start === key),
+  )
+}
+
+/** Every event that occupies `date`, spans included. */
+export function eventsOn(events: CalendarEvent[], date: Date): CalendarEvent[] {
+  const key = parseDate(date)
+  return sortByStart(
+    events.filter((e) => {
+      const { start, end } = eventDays(e)
+      return start <= key && key <= end
+    }),
+  )
+}

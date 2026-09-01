@@ -92,8 +92,8 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
 import { daysList, formatTime, monthList, parseDate } from './calendarUtils'
-import { daysBetween, eventDays } from './eventSpan'
-import { eventsOn, isSpan, stripWeeks, weekStart } from './monthStrip'
+import { daysBetween, eventDays, eventsOn, isSpan } from './eventSpan'
+import { stripWeeks, weekStart } from './monthStrip'
 import { useNow } from './composables/useNow'
 import { useStripScroll } from './composables/useStripScroll'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'

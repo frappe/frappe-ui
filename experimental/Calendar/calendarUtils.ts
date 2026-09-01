@@ -165,40 +165,72 @@ export function findOverlappingEventsCount(
   // events they underlie.
   const declined = events
     .filter((event) => event.isDeclined)
-    .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
+    .map((event) => ({ ...event, hallNumber: 0, hallCount: 1, idx: -1 }))
   events = events.filter((event) => !event.isDeclined)
 
   // Sort events based on start time
   events = events.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
 
-  let hallNumber = 0
-  const result: CalendarEvent[][] = []
-
-  for (const event of events) {
-    const availableHall = result.find(
-      (hall) => (hall[hall.length - 1].endTime || 0) <= (event.startTime || 0),
-    )
-
-    if (availableHall) {
-      availableHall.push(event)
-    } else {
-      result.push([event])
-      hallNumber++
-    }
-  }
-
-  // flattening halls and events
+  // Halls are packed within a cluster rather than across the whole day: two
+  // events at 9 am and two at 4 pm are two columns each, not four. A cluster is
+  // a run of events joined by overlap — transitively, so A/B and B/C put all
+  // three in one cluster even when A and C do not themselves overlap.
   return declined.concat(
-    result
-      .map((hall, idx) =>
-        hall.map((event, eventIdx) => ({
-          ...event,
-          hallNumber: idx,
-          idx: eventIdx,
-        })),
-      )
+    overlapClusters(events)
+      .map((cluster) => {
+        const halls: CalendarEvent[][] = []
+
+        for (const event of cluster) {
+          const availableHall = halls.find(
+            (hall) =>
+              (hall[hall.length - 1]!.endTime || 0) <= (event.startTime || 0),
+          )
+
+          if (availableHall) availableHall.push(event)
+          else halls.push([event])
+        }
+
+        // Every event in a cluster reports the same hallCount, so the column
+        // divides evenly and the pieces line up.
+        return halls
+          .map((hall, idx) =>
+            hall.map((event, eventIdx) => ({
+              ...event,
+              hallNumber: idx,
+              hallCount: halls.length,
+              idx: eventIdx,
+            })),
+          )
+          .flat()
+      })
       .flat(),
   )
+}
+
+/**
+ * Events grouped into maximal runs of overlap, each run in start order.
+ * Expects `events` already sorted by start time.
+ */
+function overlapClusters(events: CalendarEvent[]): CalendarEvent[][] {
+  const clusters: CalendarEvent[][] = []
+  let current: CalendarEvent[] = []
+  let clusterEnd = -Infinity
+
+  for (const event of events) {
+    const start = event.startTime || 0
+    // Touching is not overlapping: an event starting exactly as the last one
+    // ends begins a new cluster, the same test the hall packing uses.
+    if (current.length && start >= clusterEnd) {
+      clusters.push(current)
+      current = []
+      clusterEnd = -Infinity
+    }
+    current.push(event)
+    clusterEnd = Math.max(clusterEnd, event.endTime || 0)
+  }
+  if (current.length) clusters.push(current)
+
+  return clusters
 }
 
 // Helpers

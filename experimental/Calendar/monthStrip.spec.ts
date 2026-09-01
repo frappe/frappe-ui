@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseDate } from './calendarUtils'
-import {
-  dayEvents,
-  eventsOn,
-  isSpan,
-  sortByStart,
-  stripRange,
-  stripWeeks,
-  weekStart,
-} from './monthStrip'
+import { dayEvents, eventsOn, isSpan, sortByStart } from './eventSpan'
+import { stripRange, stripWeeks, weekStart } from './monthStrip'
 import type { CalendarEvent } from './types'
 
 const d = (iso: string) => new Date(iso + 'T00:00:00')
