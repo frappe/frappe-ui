@@ -81,12 +81,58 @@ describe('Calendar', () => {
     cy.contains('Design review').should('exist')
     cy.contains('Team offsite').should('exist')
 
-    // Open the event popover (single click applies after a 200ms delay),
-    // then delete it with the keyboard shortcut.
+    // Open the event popover (single click applies after a 200ms delay) and
+    // wait for it — the shortcut is armed by the popover actually opening, not
+    // by the click — then delete it with the keyboard shortcut.
     cy.contains('Design review').click()
+    cy.get('[data-slot=content]').should('exist')
     cy.get('body').type('{del}')
     cy.get('@onDelete').should('have.been.calledWith', 'EV-001')
     cy.contains('Design review').should('not.exist')
+  })
+
+  // The delete shortcut listens on the document, so it hears keys that belong
+  // to something else. Backspace in a text field is an edit.
+  it('leaves Backspace to a text field while the popover is open', () => {
+    cy.mount(Calendar, {
+      props: {
+        events,
+        config: { isEditMode: true, enableShortcuts: true },
+        onDelete: cy.spy().as('onDelete'),
+      },
+      slots: {
+        'event-popover-content': () => h('input', { 'data-cy': 'note' }),
+      },
+    })
+
+    cy.contains('Design review').click()
+    cy.get('[data-cy=note]').type('ab{backspace}')
+    cy.get('[data-cy=note]').should('have.value', 'a')
+    cy.get('@onDelete').should('not.have.been.called')
+    cy.contains('Design review').should('exist')
+  })
+
+  // A consumer that takes over the click never opens the popover, so nothing
+  // should be listening for the shortcut. It used to arm anyway — the popover
+  // announced an open it never performed — and stayed armed, swallowing
+  // Backspace and Delete across the page for the rest of its life.
+  it('does not arm the delete shortcut when onClick suppresses the popover', () => {
+    cy.mount(Calendar, {
+      props: {
+        events,
+        config: { isEditMode: true, enableShortcuts: true },
+        onClick: cy.spy().as('onClick'),
+        onDelete: cy.spy().as('onDelete'),
+      },
+    })
+
+    cy.contains('Design review').click()
+    cy.get('@onClick').should('have.been.called')
+    cy.get('[data-slot=content]').should('not.exist')
+
+    cy.get('body').type('{del}')
+    cy.get('@onDelete').should('not.have.been.called')
+    cy.contains('Design review').should('exist')
   })
 
   it('draws a multi-day event as one bar in the month view', () => {

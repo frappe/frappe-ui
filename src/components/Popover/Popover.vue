@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   PopoverArrow,
   PopoverContent,
@@ -85,9 +85,20 @@ const isOpen = computed<boolean>({
       uncontrolledOpen.value = value
     }
     emit('update:open', value)
-    if (value) emit('open')
-    else emit('close')
   },
+})
+
+// `open` and `close` report the state the popover actually reached, not the one
+// reka asked for. A controlled parent may decline the request — binding `:open`
+// and honouring `update:open` only on the way down is how a consumer delays or
+// suppresses opening — and a popover that never opened must not announce that it
+// did, or whatever `@open` set up is never taken down by the `@close` that never
+// comes. `update:open` above stays on the request: that IS the request.
+//
+// Sync flush so the pair still lands in the same tick as the change, ahead of
+// the content rendering — handlers that seed panel state on open depend on it.
+watch(isOpen, (value) => (value ? emit('open') : emit('close')), {
+  flush: 'sync',
 })
 
 function open() {

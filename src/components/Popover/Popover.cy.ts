@@ -90,7 +90,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { bare: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-cy="content"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-cy="content"]')
+        .should('exist')
       cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
@@ -98,7 +100,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { arrow: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-slot="arrow"]')
+        .should('exist')
     })
 
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
@@ -164,6 +168,42 @@ describe('Popover', () => {
       cy.get('body').type('{esc}')
       cy.get('@onUpdateOpen').should('have.been.calledWith', false)
       cy.get('@onClose').should('have.been.called')
+    })
+
+    it('does not emit open when a controlled parent declines the request', () => {
+      // A consumer that binds `:open` and honours `update:open` only on the way
+      // down (the calendar's event pills delay opening so a double click can
+      // edit instead) leaves the popover shut. `open` must stay unemitted: a
+      // listener registered there would never see the `close` that never comes.
+      const Harness = defineComponent({
+        setup(_, { expose }) {
+          const open = ref(false)
+          expose({ open })
+          return () =>
+            h(
+              Popover,
+              {
+                open: open.value,
+                // Declines every request to open; still closes on the way down.
+                'onUpdate:open': (value: boolean) =>
+                  !value && (open.value = false),
+                onOpen: cy.spy().as('onOpen'),
+                onClose: cy.spy().as('onClose'),
+              },
+              {
+                trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                default: () => h('div', { 'data-cy': 'content' }, 'controlled'),
+              },
+            )
+        },
+      })
+
+      cy.mount(Harness)
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('@onOpen').should('not.have.been.called')
+      cy.get('@onClose').should('not.have.been.called')
     })
 
     it('closes on Escape', () => {

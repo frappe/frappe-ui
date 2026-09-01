@@ -96,11 +96,25 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     document.removeEventListener('keydown', handleDeleteShortcut)
   }
 
+  // Asked of the document, so it hears keys that are owed to something else:
+  // Backspace in a text field is an edit, not a delete, and swallowing it there
+  // leaves the field looking uneditable. Same guard the view shortcuts carry in
+  // Calendar.vue — an overlay is not excluded here, since an open popover is
+  // exactly when this listener is meant to be live.
   function handleDeleteShortcut(e: KeyboardEvent) {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault()
-      handleEventDelete()
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return
+
+    const target = e.target as HTMLElement | null
+    if (
+      target?.tagName === 'INPUT' ||
+      target?.tagName === 'TEXTAREA' ||
+      target?.isContentEditable
+    ) {
+      return
     }
+
+    e.preventDefault()
+    handleEventDelete()
   }
 
   // ── Click / edit / delete ────────────────────────────────────────────────
