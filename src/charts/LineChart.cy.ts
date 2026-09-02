@@ -163,14 +163,16 @@ describe('LineChart', () => {
         .and('contain.text', 'Refund cap')
     })
 
-    it('leaves the rule in place while every series is switched off', () => {
+    // The legend refuses to hide the last visible series, so one series off is
+    // as empty as the plot gets from here. An all-hidden plot has no scale to
+    // place the rule on, which is its own question.
+    it('leaves the rule in place while a series is switched off', () => {
       // Inside refunds' own range, so the rule stays on the scale the plot
       // settles at: a line off the end of the axis is not drawn, which would
       // pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
-      cy.get('[aria-label="Hide Refunds"]').click()
-      lines().should('not.exist')
+      lines().should('have.length', 1)
       cy.get('[data-slot="chart-plot"] svg text').should(
         'contain.text',
         'Target',
