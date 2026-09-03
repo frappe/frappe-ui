@@ -447,15 +447,10 @@ describe('bar chart option series', () => {
     expect(option.series[1].itemStyle.color).toBe('#000033')
   })
 
-  it('emphasises a whole series at a time, and only gently', () => {
+  it('never emphasises a series, so nothing else fades', () => {
     const option = build()
-    expect(option.series[0].emphasis).toEqual({
-      focus: 'series',
-      blurScope: 'coordinateSystem',
-    })
-    // Legend hover is the only thing that blurs, so it has to stay readable.
-    expect(option.series[0].blur.itemStyle.opacity).toBeGreaterThan(0.5)
-    expect(option.series[0].blur.itemStyle.opacity).toBeLessThan(1)
+    expect(option.series[0].emphasis).toEqual({ disabled: true })
+    expect(option.series[0].blur).toBeUndefined()
   })
 
   it('hides data labels unless asked, and formats them compactly', () => {

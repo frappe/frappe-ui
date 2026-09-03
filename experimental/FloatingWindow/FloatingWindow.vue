@@ -14,7 +14,7 @@
       ref="panel"
       v-bind="$attrs"
       :data-state="mode"
-      class="floating-window relative flex flex-col rounded-6 border border-outline-gray-2 bg-surface-elevation-1"
+      class="floating-window relative flex flex-col rounded-6 bg-surface-elevation-1"
       :class="isDocked ? '' : 'shadow-2xl'"
       :style="style"
     >

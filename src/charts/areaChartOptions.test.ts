@@ -182,10 +182,8 @@ describe('area chart option', () => {
     })
   })
 
-  it('dims the fill relative to its own opacity when blurred', () => {
-    expect(build().series[0].blur.areaStyle.opacity).toBeLessThan(
-      DEFAULT_FILL_OPACITY,
-    )
+  it('never blurs the fill: no series emphasis to blur against', () => {
+    expect(build().series[0].blur).toBeUndefined()
   })
 
   it('drops hidden series', () => {

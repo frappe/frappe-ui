@@ -178,13 +178,10 @@ describe('line chart option series', () => {
     expect(build({ connectNulls: true }).series[0].connectNulls).toBe(true)
   })
 
-  it('lifts a whole line on hover and fades the others', () => {
+  it('never emphasises a line, so the others keep their opacity', () => {
     const option = build()
-    expect(option.series[0].emphasis).toEqual({
-      focus: 'series',
-      blurScope: 'coordinateSystem',
-    })
-    expect(option.series[0].blur.lineStyle.opacity).toBeLessThan(1)
+    expect(option.series[0].emphasis).toEqual({ disabled: true })
+    expect(option.series[0].blur).toBeUndefined()
   })
 
   it('hides data labels unless asked, and formats them compactly', () => {

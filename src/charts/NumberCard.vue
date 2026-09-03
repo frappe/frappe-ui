@@ -108,11 +108,19 @@
         <!-- The ink is the caller's on a reading that carries one, the way a
              series' color is: a card standing for a series is read against it. -->
         <div
-          class="relative truncate text-3xl-semibold tabular-nums"
+          class="relative flex min-w-0 items-baseline gap-1.5 text-3xl-semibold tabular-nums"
           :class="isEmpty ? 'text-ink-gray-4' : 'text-ink-gray-9'"
           :style="valueStyle"
         >
-          {{ valueText }}
+          <span class="shrink-0">{{ valueText }}</span>
+          <!-- The target is the part that gives way: the reading clips only if
+               it alone overflows the card. -->
+          <span
+            v-if="targetText"
+            class="min-w-0 truncate text-base text-ink-gray-4"
+          >
+            / {{ targetText }}
+          </span>
         </div>
 
         <div v-if="isEmpty" class="text-sm text-ink-gray-5">No data</div>
@@ -136,7 +144,7 @@
           />
           <span
             v-if="formattedDelta"
-            class="text-sm-medium tabular-nums"
+            class="shrink-0 whitespace-nowrap text-sm-medium tabular-nums"
             :class="toneClass"
           >
             {{ formattedDelta }}
@@ -144,7 +152,13 @@
           <!-- The card states the comparison but does not own it: an app that
                lets the reader change the period puts its own Dropdown here. -->
           <slot name="caption" :caption="deltaCaption">
-            <span v-if="deltaCaption" class="truncate text-ink-gray-5">
+            <!-- Titled because it is the part that clips: a caption too long
+                 for the card is still readable on hover. -->
+            <span
+              v-if="deltaCaption"
+              :title="deltaCaption"
+              class="truncate text-ink-gray-5"
+            >
               {{ deltaCaption }}
             </span>
           </slot>
@@ -280,6 +294,12 @@ const formattedValue = computed(() =>
 // Never empty: this line sets the height of the card's top block, and an empty
 // one would collapse it and take the block's other variants with it.
 const valueText = computed(() => formattedValue.value || '—')
+
+// Not counted up, and never printed beside the em dash: nothing measured
+// against a target reads as a target of its own.
+const targetText = computed(() =>
+  isEmpty.value ? '' : formatCardValue(props, props.target),
+)
 
 let frame: number | undefined
 

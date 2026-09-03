@@ -376,8 +376,12 @@ export type NumberCardConfig = {
   value: number | null
   prefix?: string
   suffix?: string
+  /** What the reading is measured against, printed as a muted ` / target` in the value's own formatting. */
+  target?: number | string
   /** Change against the comparison period. Sign drives the arrow. */
   delta?: number | null
+  /** Unit printed before the delta, e.g. `'$'`. */
+  deltaPrefix?: string
   /** Unit printed after the delta, e.g. `'%'`. */
   deltaSuffix?: string
   /** What the delta is measured against, e.g. `'vs last month'`. */
@@ -925,8 +929,12 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     prefix?: string
     /** Printed after the number, e.g. a unit. */
     suffix?: string
+    /** What the reading is measured against, printed as a muted ` / target` in the value's own formatting. */
+    target?: number | string
     /** Change against the comparison period. Sign drives the arrow. */
     delta?: number | null
+    /** Unit printed before the delta, e.g. `'$'`. */
+    deltaPrefix?: string
     /** Unit printed after the delta, e.g. `'%'`. */
     deltaSuffix?: string
     /** What the delta is measured against, e.g. `'vs last month'`. */

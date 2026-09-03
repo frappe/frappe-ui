@@ -119,11 +119,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
 
   const renderError = computed(() => built.value.error)
 
-  const {
-    chart,
-    dispatch,
-    width: plotWidth,
-  } = useChart({
+  const { chart, width: plotWidth } = useChart({
     container: plotEl,
     option: () => built.value.option,
     events: {
@@ -175,21 +171,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       config.value.series.length,
     )
   }
-
-  // Legend hover is the only thing that emphasises a series. Pointing at the
-  // plot deliberately does not — the axis pointer and tooltip already read out
-  // the category, and dimming on every mouse move costs more than it says.
-  const hoveredSeries = ref<string | null>(null)
-  function hoverSeries(name: string | null) {
-    hoveredSeries.value = name
-  }
-
-  watch(hoveredSeries, (name, previous) => {
-    if (previous) dispatch({ type: 'downplay', seriesName: previous })
-    if (name && !hiddenSeries.value.includes(name)) {
-      dispatch({ type: 'highlight', seriesName: name })
-    }
-  })
 
   const tooltip = reactive({
     open: false,
@@ -440,7 +421,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     tooltip,
     legendItems,
     toggleSeries,
-    hoverSeries,
     /** `v-bind` onto the plot element: the tab stop and its arrow keys. */
     plotAttrs: keyboard.attrs,
     /** What the live region announces while the cursor walks the plot. */

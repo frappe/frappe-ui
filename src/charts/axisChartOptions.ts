@@ -12,7 +12,6 @@ import {
   resolveXAxis,
   toNumber,
   valueAxisIndex,
-  BLUR_OPACITY,
   DATA_LABEL_FONT_SIZE,
   type AxisChartOptionContext,
 } from './axisChartCommon'
@@ -500,14 +499,10 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
     barMaxWidth: BAR_MAX_WIDTH,
     barCategoryGap: BAR_CATEGORY_GAP,
     itemStyle: { color },
-    // A whole series lifts at a time, never a single bar: isolating the bar
-    // under the pointer turns every mouse move into a flicker, and the axis
-    // pointer and tooltip already say which category is being read.
-    emphasis: { focus: 'series', blurScope: 'coordinateSystem' },
-    blur: {
-      itemStyle: { opacity: BLUR_OPACITY },
-      label: { opacity: BLUR_OPACITY },
-    },
+    // No per-series emphasis: fading the other series to read one of them costs
+    // more than it says, and the axis pointer and tooltip already read out the
+    // category under the pointer.
+    emphasis: { disabled: true },
     label: {
       show: Boolean(series.showDataLabels),
       position,
@@ -560,14 +555,8 @@ function buildLineSeries(
       width: series.lineWidth ?? DEFAULT_LINE_WIDTH,
       type: series.lineType ?? 'solid',
     },
-    // 'series' rather than the bar chart's 'self': fading every point of a line
-    // except the hovered one breaks the line up, so a whole line lifts instead.
-    emphasis: { focus: 'series', blurScope: 'coordinateSystem' },
-    blur: {
-      lineStyle: { opacity: BLUR_OPACITY },
-      itemStyle: { opacity: BLUR_OPACITY },
-      label: { opacity: BLUR_OPACITY },
-    },
+    // No per-series emphasis, as on bars: hovering one line never fades the rest.
+    emphasis: { disabled: true },
     label: {
       show: Boolean(series.showDataLabels),
       position: 'top',
@@ -584,13 +573,6 @@ function buildLineSeries(
   return {
     ...base,
     areaStyle: fillStyle(series, config, color, banded),
-    blur: {
-      ...base.blur,
-      // The blur state has to dim the fill relative to its own opacity, not to 1.
-      areaStyle: {
-        opacity: fillOpacityOf(series, config, banded) * BLUR_OPACITY,
-      },
-    },
   }
 }
 
