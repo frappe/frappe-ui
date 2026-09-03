@@ -26,6 +26,7 @@
       :model-value="clampedValue"
       :max="MAX_VALUE"
       :get-value-label="() => valueLabel"
+      :aria-label="props.label || 'Progress'"
       class="transform-gpu overflow-hidden rounded-7"
       :class="indicatorContainerClasses"
     >
