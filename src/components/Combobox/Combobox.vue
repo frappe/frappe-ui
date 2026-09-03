@@ -90,7 +90,15 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const model = defineModel<ComboboxOptionValue | null>({ default: null })
+/**
+ * Controls the popover visibility. Fires `update:open` when toggled.
+ */
 const open = defineModel<boolean>('open', { default: false })
+/**
+ * Controls the search query. Fires `update:query` when the user types.
+ * Optional — the component owns the query when not bound, so `v-model:query`
+ * is never required.
+ */
 const query = defineModel<string>('query', { default: '' })
 // Bound, the query is the consumer's — the component never resets it on its
 // own (see `skipInitialDisplaySync` and the open watcher below).
