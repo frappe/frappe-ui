@@ -30,6 +30,10 @@ export interface ContextMenuProps {
   open?: boolean
 }
 
+export interface ContextMenuEmits {
+  'update:open': [open: boolean]
+}
+
 export type ContextMenuSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
   /** The right-clickable region that opens the menu. */
   default?: (props: ContextMenuTriggerSlotProps) => any

@@ -48,3 +48,10 @@ export interface TabButtonsProps {
 export interface TabButtonsEmits {
   'update:modelValue': [value: TabButtonValue]
 }
+
+export interface TabButtonsSlots {
+  /** Slot before the tab button label. */
+  prefix?: (props: { button: TabButton; checked: boolean; disabled: boolean }) => any
+  /** Slot after the tab button label. */
+  suffix?: (props: { button: TabButton; checked: boolean; disabled: boolean }) => any
+}
