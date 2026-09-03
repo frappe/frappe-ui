@@ -309,8 +309,9 @@ function extractTableData(name: string, data: any, vuePath: string) {
       }),
     )
 
-  const emits = sourceOrder
-    .sortByDeclaration(data.events.filter((x: any) => !x.global))
+  const emits = data.events
+    .filter((x: any) => !x.global)
+    .sort((a: any, b: any) => a.name.localeCompare(b.name))
     .map((x: any) =>
       withOptional({
         name: x.name,
