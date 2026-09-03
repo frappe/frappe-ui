@@ -84,14 +84,6 @@ export const PLATFORM_CONFIGS: readonly PlatformConfig[] = [
     example: 'https://figma.com/design/…',
   },
   {
-    name: 'Google Docs',
-    ratio: 4 / 3,
-    defaultWidth: 600,
-    hosts: ['docs.google.com', 'drive.google.com'],
-    icon: 'lucide-file-text',
-    example: 'https://docs.google.com/document/d/…',
-  },
-  {
     name: 'Notion',
     ratio: 4 / 3,
     defaultWidth: 600,
