@@ -84,6 +84,11 @@ export function useEditor(
     extensions,
     editable: toValue(options.editable) ?? true,
     autofocus: options.autofocus,
+    editorProps: {
+      handleDOMEvents: {
+        dragstart: (view) => !view.editable,
+      },
+    },
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
         const value = serialize(tiptapEditor)

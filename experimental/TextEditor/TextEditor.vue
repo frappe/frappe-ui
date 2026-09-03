@@ -43,6 +43,7 @@ import {
 } from 'vue'
 
 import { Editor, EditorContent } from '@tiptap/vue-3'
+import type { EditorView } from '@tiptap/pm/view'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extensions'
 import Typography from '@tiptap/extension-typography'
@@ -125,6 +126,9 @@ const editorProps = computed(() => {
   return {
     attributes: {
       class: normalizeClass(['prose', props.editorClass]),
+    },
+    handleDOMEvents: {
+      dragstart: (view: EditorView) => !view.editable,
     },
   }
 })
