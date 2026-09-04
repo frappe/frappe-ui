@@ -19,7 +19,7 @@ import type { CalendarEvent, CalendarRowTag, CalendarTimeFormat } from './types'
  * `#event-description` and `#event-suffix` slots instead.
  */
 
-/** "11 am - 1 pm", or "All day" for an event that owns the whole of it. */
+/** "11 am – 1 pm", or "All day" for an event that owns the whole of it. */
 export function rowTimeLabel(
   event: CalendarEvent,
   format: CalendarTimeFormat,

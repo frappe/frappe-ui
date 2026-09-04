@@ -293,7 +293,8 @@ export function formattedDuration(
     fromTime = fromTime.split(' ')[0]
   }
 
-  return fromTime + ' - ' + toTime
+  // An en dash, as the design sets it: a range, not a subtraction.
+  return fromTime + ' – ' + toTime
 }
 
 export function formatTime(time: string, format: CalendarTimeFormat): string {
