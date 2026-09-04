@@ -99,8 +99,11 @@ fetching by range agrees with it.
 
 Rows have the room a grid pill does not, so they carry a description line and
 tags. `Calendar` fills in what it can work out on its own — where the event is,
-whether it runs on past today, whether it is a draft, and whether it is under
-way (`Now`) or about to start (`Soon`, `In 3 h`), both in amber —
+which day of a stay the row is (`Day 2/3`), and whether it is a draft. Where it stands
+against the clock reads beside the time instead, which is where a reader
+scanning for "when" is already looking: `Now` in blue while it runs and `Soon` in
+amber in the hour before it, and nothing beyond that: an hour count would only
+restate the time written beside it —
 and the `#event-description` and `#event-suffix` slots let you say the rest.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />

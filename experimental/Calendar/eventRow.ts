@@ -1,11 +1,10 @@
 import {
   calculateMinutes,
-  daysList,
   formatTime,
   formattedDuration,
   parseDate,
 } from './calendarUtils'
-import { eventDays, isAllDayLike } from './eventSpan'
+import { daysBetween, eventDays, isAllDayLike, isOvernight } from './eventSpan'
 import type { CalendarEvent, CalendarRowTag, CalendarTimeFormat } from './types'
 
 /**
@@ -32,32 +31,59 @@ export function rowTimeLabel(
   format: CalendarTimeFormat,
   date?: Date,
 ): string {
-  if (isAllDayLike(event)) return 'All day'
+  // Only an event with no clock of its own owns the day outright. A timed one
+  // running from six on Friday to seven on Saturday is drawn as a bar in the
+  // all-day row, but it still starts and ends at a time, and a row saying "All
+  // day" of it is telling the reader something untrue.
+  if (event.isFullDay) return 'All day'
 
   const key = date ? parseDate(date) : null
-  if (key && eventDays(event).start < key) {
-    if (eventDays(event).end > key) return 'All day'
-    const ends = String(event.segToTime || event.toTime || '')
-    return ends ? `Ends ${formatTime(ends, format)}` : 'All day'
+  const { start, end } = key ? eventDays(event) : { start: '', end: '' }
+  if (key && (start < key || end > key)) {
+    if (start < key && end > key) return 'All day'
+    if (start < key) {
+      const ends = String(event.segToTime || event.toTime || '')
+      return ends ? `Ends ${formatTime(ends, format)}` : 'All day'
+    }
+    // An event under a day long reads as a range even across midnight — "11 pm
+    // – 2 am" is a night out. A longer one does not: "6 pm – 7 pm" over
+    // twenty-five hours describes an hour that isn't there.
+    if (isOvernight(event)) return spanLabel(event, format)
+    const begins = String(event.segFromTime || event.fromTime || '')
+    return begins ? `From ${formatTime(begins, format)}` : 'All day'
   }
 
+  return spanLabel(event, format)
+}
+
+/** The event's own times, as a range — or just the one when it has no length. */
+function spanLabel(event: CalendarEvent, format: CalendarTimeFormat): string {
   const from = String(event.segFromTime || event.fromTime || '00:00')
   const to = String(event.segToTime || event.toTime || '')
   if (!to || to === from) return formatTime(from, format)
   return formattedDuration(from, to, format)
 }
 
-/** "Tue 18" when the event runs past `date`, else null. */
-export function continuesTo(event: CalendarEvent, date: Date): string | null {
-  const end = eventDays(event).end
-  if (end <= parseDate(date)) return null
-  const endDate = new Date(end + 'T00:00:00')
-  return `${daysList[endDate.getDay()]} ${endDate.getDate()}`
+/**
+ * "Day 1/3" for an event that occupies more than one day, counting `date`'s
+ * place in it; null for an ordinary one.
+ *
+ * Which day of the stay you are looking at is the thing a reader wants from a
+ * row of a multi-day event — more than the date it happens to end on, which
+ * the row can only state and not place them within.
+ */
+export function daySpan(event: CalendarEvent, date: Date): string | null {
+  const { start, end } = eventDays(event)
+  const total = daysBetween(start, end) + 1
+  if (total < 2) return null
+  const day = daysBetween(start, parseDate(date)) + 1
+  if (day < 1 || day > total) return null
+  return `Day ${day}/${total}`
 }
 
 /**
- * The library's own one-line description of a row: where it is, and whether it
- * outlives the day you are looking at. A consumer's `#event-description` slot
+ * The library's own one-line description of a row: where it is, and which day
+ * of a stay it is, when the event covers more than one. A consumer's `#event-description` slot
  * receives this as its default, so filling the slot extends this rather than
  * replacing knowledge the row already had.
  */
@@ -65,8 +91,8 @@ export function rowDescription(event: CalendarEvent, date: Date): string {
   const parts: string[] = []
   if (event.venue) parts.push(String(event.venue))
   if (event.participant) parts.push(String(event.participant))
-  const ends = continuesTo(event, date)
-  if (ends) parts.push(`Ends ${ends}`)
+  const span = daySpan(event, date)
+  if (span) parts.push(span)
   return parts.join(' · ')
 }
 
@@ -80,16 +106,12 @@ function minutesUntil(event: CalendarEvent, date: Date, now: Date): number {
 }
 
 /**
- * Where the now-marker sits in a day's list of rows: the index of the first
- * event still to start, or the end of the list once they all have.
+ * How close is close enough to be worth saying.
  *
- * The list is ordered by start, so the line reads as the clock's own place in
- * that order — an event under way sits above it, having started, and says so
- * itself with a `Now` tag rather than by where the line falls.
- *
- * All-day events are not on the clock, so the line never lands above one — it
- * marks the point in the day the reader has got to, and an all-day event is not
- * at any point in particular.
+ * The hour before, not the several the row could count: the time is written
+ * beside the tag, the list is in order, and a red rule marks the present, so
+ * the distance to an event is already on the page. What is not is the moment
+ * it stops being something later and becomes something now.
  */
 const SOON_MINUTES = 60
 
@@ -100,38 +122,87 @@ const SOON_MINUTES = 60
  */
 export function rowTags(
   event: CalendarEvent,
-  date: Date,
-  now: Date,
+  _date: Date,
+  _now: Date,
 ): CalendarRowTag[] {
   const tags: CalendarRowTag[] = []
   if (event.isDraft) tags.push({ label: 'Draft' })
-
-  // Under way and about to start are the same kind of fact — the thing on the
-  // day that wants you now — so they wear one colour and never both at once.
-  if (isUnderWay(event, date, now)) {
-    tags.push({ label: 'Now', theme: 'amber' })
-    return tags
-  }
-
-  const until = minutesUntil(event, date, now)
-  if (until > 0 && until <= SOON_MINUTES) {
-    const hours = Math.round(until / 60)
-    tags.push({ label: hours < 1 ? 'Soon' : `In ${hours} h`, theme: 'amber' })
-  }
-
   return tags
 }
 
-/** Whether the event has started and not yet finished. */
-function isUnderWay(event: CalendarEvent, date: Date, now: Date): boolean {
-  if (isAllDayLike(event)) return false
-  if (parseDate(now) !== parseDate(date)) return false
-  const minutes = now.getHours() * 60 + now.getMinutes()
-  const from = calculateMinutes(
-    String(event.segFromTime || event.fromTime || '00:00'),
-  )
+/**
+ * Whether the event is behind the reader on the day it is listed under.
+ *
+ * A day already spent is over whatever is on it; on today, a timed event is
+ * over once it has ended, and an all-day one is not — it is still the day you
+ * are in. Nothing on a later day is over.
+ */
+export function hasEnded(event: CalendarEvent, date: Date, now: Date): boolean {
+  const day = parseDate(date)
+  const today = parseDate(now)
+  if (day < today) return true
+  if (day > today) return false
+  if (event.isFullDay) return false
+  // An event that began earlier and runs on through today has not ended here.
+  if (eventDays(event).end > day) return false
   const to =
     calculateMinutes(String(event.segToTime || event.toTime || '00:00')) ||
     24 * 60
+  return to <= now.getHours() * 60 + now.getMinutes()
+}
+
+/**
+ * Where the event stands against the clock: under way, or near enough to start
+ * to be worth saying. One tag, never two — under way and about to start are the
+ * same kind of fact, the thing on the day that wants you now — and it reads
+ * beside the time rather than after the title, which is where a reader scanning
+ * for "when" is already looking.
+ *
+ * Two states, not a countdown: blue while it runs, amber in the half hour
+ * before it. An hour count would only restate the time written beside it, on
+ * every row within reach of it, which is how the two that change what a reader
+ * does stop standing out.
+ */
+export function rowTiming(
+  event: CalendarEvent,
+  date: Date,
+  now: Date,
+): CalendarRowTag | null {
+  if (isUnderWay(event, date, now)) return { label: 'Now', theme: 'blue' }
+
+  const until = minutesUntil(event, date, now)
+  if (until > 0 && until <= SOON_MINUTES)
+    return { label: 'Soon', theme: 'amber' }
+
+  return null
+}
+
+/**
+ * Whether the event has started and not yet finished, on the day it is listed
+ * under.
+ *
+ * Only a full-day event is off the clock. A timed one spanning two days is
+ * drawn as an all-day bar but is under way from six on Friday to seven on
+ * Saturday, so it is measured by the part of it that falls on this day: from
+ * midnight if it began earlier, to midnight if it runs on.
+ */
+function isUnderWay(event: CalendarEvent, date: Date, now: Date): boolean {
+  if (event.isFullDay) return false
+  const key = parseDate(date)
+  if (parseDate(now) !== key) return false
+
+  const { start, end } = eventDays(event)
+  if (key < start || key > end) return false
+
+  const minutes = now.getHours() * 60 + now.getMinutes()
+  const from =
+    key > start
+      ? 0
+      : calculateMinutes(String(event.segFromTime || event.fromTime || '00:00'))
+  const to =
+    key < end
+      ? 24 * 60
+      : calculateMinutes(String(event.segToTime || event.toTime || '00:00')) ||
+        24 * 60
   return from <= minutes && minutes < to
 }
