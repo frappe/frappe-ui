@@ -65,29 +65,20 @@
       </div>
 
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-        <!-- The same red rule the grid draws: the clock's own place in a list
-             ordered by start, so what has begun is above it. -->
-        <template
-          v-for="(event, index) in row.events"
+        <CalendarEventRow
+          v-for="event in row.events"
           :key="String(event.id ?? event.name)"
         >
-          <span v-if="row.isToday && index === nowAt(row)" class="calendar-now" />
-          <CalendarEventRow :event="event" :date="row.date">
-            <template #event-description="slotProps">
-              <slot name="event-description" v-bind="slotProps" />
-            </template>
-            <template #event-suffix="slotProps">
-              <slot name="event-suffix" v-bind="slotProps" />
-            </template>
-            <template #event-popover-content="slotProps">
-              <slot name="event-popover-content" v-bind="slotProps" />
-            </template>
-          </CalendarEventRow>
-        </template>
-        <span
-          v-if="row.isToday && nowAt(row) === row.events.length"
-          class="calendar-now"
-        />
+          <template #event-description="slotProps">
+            <slot name="event-description" v-bind="slotProps" />
+          </template>
+          <template #event-suffix="slotProps">
+            <slot name="event-suffix" v-bind="slotProps" />
+          </template>
+          <template #event-popover-content="slotProps">
+            <slot name="event-popover-content" v-bind="slotProps" />
+          </template>
+        </CalendarEventRow>
       </div>
     </div>
   </div>
@@ -101,7 +92,6 @@ import { agendaRange, agendaRows, type AgendaRow } from './agendaDays'
 import { daysListFull, monthList } from './calendarUtils'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
-import { nowRowIndex } from './eventRow'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -142,7 +132,4 @@ const spanLabel = computed(() => {
 })
 
 const weekday = (date: Date) => daysListFull[date.getDay()]
-
-/** Which row of today's list the now-marker goes above. */
-const nowAt = (row: AgendaRow) => nowRowIndex(row.events, now.value)
 </script>

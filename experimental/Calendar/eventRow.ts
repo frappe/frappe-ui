@@ -91,19 +91,7 @@ function minutesUntil(event: CalendarEvent, date: Date, now: Date): number {
  * marks the point in the day the reader has got to, and an all-day event is not
  * at any point in particular.
  */
-export function nowRowIndex(events: CalendarEvent[], now: Date): number {
-  const minutes = now.getHours() * 60 + now.getMinutes()
-  const index = events.findIndex(
-    (event) =>
-      !isAllDayLike(event) &&
-      calculateMinutes(String(event.segFromTime || event.fromTime || '00:00')) >
-        minutes,
-  )
-  return index === -1 ? events.length : index
-}
-
-/** How soon is soon enough to be worth saying. */
-const SOON_MINUTES = 4 * 60
+const SOON_MINUTES = 60
 
 /**
  * The tags the library derives itself. A consumer adds its own — an RSVP it is

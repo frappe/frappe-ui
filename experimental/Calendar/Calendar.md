@@ -86,8 +86,8 @@ range has events for every cell.
 
 The Agenda view is three months as a list of days: a date column, then the
 events of that day as rows. A day with nothing on it is not listed — an empty
-row says nothing the dates either side of it do not. Today's row carries the
-same red now-marker the grid draws, above the first event still to start. An
+row says nothing the dates either side of it do not. An event that has ended is dimmed, the way a
+pill in the grid is once its time has passed. An
 event under way sits above the line and says so with its own tag.
 
 The window covers the month in view and the two after it, and the month already
