@@ -109,6 +109,26 @@ describe('agendaRows', () => {
     expect(rows[rows.length - 1]!.key).toBe('2026-10-30')
   })
 
+  it('marks the first row of each month it lists', () => {
+    const october: CalendarEvent = {
+      id: 'later',
+      fromDate: '2026-10-02',
+      toDate: '2026-10-02',
+      fromTime: '09:00',
+      toTime: '10:00',
+    }
+    const rows = agendaRows(
+      [...events, october],
+      d('2026-08-20'),
+      undefined,
+      d('2026-08-20'),
+    )
+    const opens = rows.filter((r) => r.opensMonth).map((r) => r.key)
+    // The first row of the list opens its own month; September has nothing on
+    // it at all, so the next is October's.
+    expect(opens).toEqual(['2026-08-20', '2026-10-02'])
+  })
+
   // The library's default weekend is Sunday alone; Saturday only counts when
   // the config says so.
   it('marks weekends the config names', () => {

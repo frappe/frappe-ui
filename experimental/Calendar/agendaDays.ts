@@ -29,6 +29,11 @@ export interface AgendaRow {
   key: string
   /** Everything occupying the day, spans included; never empty. */
   events: CalendarEvent[]
+  /**
+   * The first row of its month. The window spans three, and a list that runs
+   * 24, 1, 8 with nothing between them has crossed one without saying so.
+   */
+  opensMonth: boolean
   isToday: boolean
   isWeekend: boolean
 }
@@ -85,10 +90,12 @@ export function agendaRows(
     if (!onThisDay.length) continue
 
     const key = parseDate(date)
+    const previous = rows[rows.length - 1]
     rows.push({
       date,
       key,
       events: onThisDay,
+      opensMonth: !previous || previous.date.getMonth() !== date.getMonth(),
       isToday: key === todayKey,
       isWeekend: weekendDays.includes(date.getDay()),
     })

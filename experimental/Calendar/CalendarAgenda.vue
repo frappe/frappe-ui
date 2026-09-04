@@ -36,8 +36,13 @@
     >
       <!-- Baselines, not box centres: the date is a size larger than the
            weekday and sits in a 30px circle, so centring the two boxes leaves
-           the numeral riding above the word beside it. -->
-      <div class="flex w-[150px] shrink-0 items-baseline gap-2.5">
+           the numeral riding above the word beside it. The exception is a row
+           naming its month, where the words beside the date are two lines and
+           the date belongs against the middle of them. -->
+      <div
+        class="flex w-[150px] shrink-0 gap-2.5"
+        :class="row.opensMonth ? 'items-center' : 'items-baseline'"
+      >
         <span
           class="inline-flex size-[30px] items-center justify-center rounded-full text-base font-medium"
           :class="
@@ -46,8 +51,16 @@
         >
           {{ row.date.getDate() }}
         </span>
-        <span class="text-sm font-medium text-ink-gray-8">
-          {{ weekday(row.date) }}
+        <!-- The month, on the row that opens one: the window spans three, and a
+             column of bare numerals running 24, 1, 8 has crossed a month end
+             without saying so. -->
+        <span class="flex min-w-0 flex-col">
+          <span class="text-sm font-medium text-ink-gray-8">
+            {{ weekday(row.date) }}
+          </span>
+          <span v-if="row.opensMonth" class="text-2xs text-ink-gray-5">
+            {{ monthList[row.date.getMonth()] }}
+          </span>
         </span>
       </div>
 
