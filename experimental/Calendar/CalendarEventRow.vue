@@ -19,6 +19,7 @@
         class="calendar-row flex w-full items-baseline gap-2.5 rounded-4 px-2 py-1.5 text-left"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
+          past: isPast,
         }"
         :style="eventBgStyle"
         role="button"
@@ -28,10 +29,28 @@
         @keydown.enter.prevent="onKeydown($event)"
         @keydown.space.prevent="onKeydown($event)"
       >
-        <span
-          class="calendar-row-time w-30 shrink-0 whitespace-nowrap text-right text-xs tabular-nums text-ink-gray-5"
-        >
-          {{ timeLabel }}
+        <!-- Where it stands against the clock, beside the clock: a reader
+             scanning for "when" is already looking here. Tag and time are one
+             right-aligned pair, so the tag sits against the label it qualifies
+             rather than against a column edge that longer labels reach and
+             shorter ones do not.
+
+             176px holds the widest label ("11:30 am – 12:45 pm", 128px) and
+             most of a badge, which keeps the times aligned without a stretch of
+             empty row in front of them. A badge on the very longest label
+             overhangs by a few pixels, into space that is empty anyway. -->
+        <span class="flex w-44 shrink-0 items-baseline justify-end gap-1.5">
+          <Badge
+            v-if="timing"
+            :theme="timing.theme"
+            :label="timing.label"
+            size="sm"
+          />
+          <span
+            class="calendar-row-time whitespace-nowrap text-right text-xs tabular-nums text-ink-gray-5"
+          >
+            {{ timeLabel }}
+          </span>
         </span>
         <span class="calendar-row-bar w-0.5 shrink-0 self-stretch rounded-4" />
         <!-- Title, then what the row can add about it, on one line: a row is
@@ -117,7 +136,13 @@ import { Badge } from '#components/Badge'
 import EventModalContent from './EventModalContent.vue'
 import { useEventBase } from './useEventBase'
 import { useNow } from './composables/useNow'
-import { rowDescription, rowTags, rowTimeLabel } from './eventRow'
+import {
+  hasEnded,
+  rowDescription,
+  rowTags,
+  rowTimeLabel,
+  rowTiming,
+} from './eventRow'
 import type { CalendarEvent } from './types'
 
 const props = defineProps<{
@@ -152,6 +177,8 @@ const timeLabel = computed(() =>
 )
 const description = computed(() => rowDescription(props.event, props.date))
 const tags = computed(() => rowTags(props.event, props.date, now.value))
+const timing = computed(() => rowTiming(props.event, props.date, now.value))
+const isPast = computed(() => hasEnded(props.event, props.date, now.value))
 
 // An empty description line would still take its leading, so the row only
 // grows one when there is something to put on it.
@@ -164,6 +191,7 @@ const slotProps = computed(() => ({
   date: props.date,
   description: description.value,
   tags: tags.value,
+  timing: timing.value,
 }))
 
 // A row is a way to reach the event, so selecting it says so — the Day view

@@ -78,6 +78,8 @@ export interface CalendarRowSlotProps {
   description: string
   /** The tags the library derived, for the same reason. */
   tags: CalendarRowTag[]
+  /** Where the event stands against the clock, shown beside the time. */
+  timing: CalendarRowTag | null
 }
 
 /**

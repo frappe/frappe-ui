@@ -68,6 +68,8 @@
         <CalendarEventRow
           v-for="event in row.events"
           :key="String(event.id ?? event.name)"
+          :event="event"
+          :date="row.date"
         >
           <template #event-description="slotProps">
             <slot name="event-description" v-bind="slotProps" />
@@ -88,7 +90,7 @@
 import './style.css'
 
 import { computed, inject, ref } from 'vue'
-import { agendaRange, agendaRows, type AgendaRow } from './agendaDays'
+import { agendaRange, agendaRows } from './agendaDays'
 import { daysListFull, monthList } from './calendarUtils'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'

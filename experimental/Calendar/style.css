@@ -48,17 +48,28 @@
 .calendar-row:hover {
   background-color: var(--surface-gray-1);
 }
-/* Selected: the row rises off the list as a card, and takes no colour doing it.
-   A row runs the width of the list, so a fill across it is a band rather than a
-   card, and the event's own colour is already on its bar.
-
-   `md` rather than a lighter step: its drop is offset far enough (0 6px 12px)
-   to read as height, where `sm` and `base` lean on an unoffset halo that
-   against a white row reads as a border drawn round it. */
+/* Selected: blue, the same tint the rest of the library selects with (subtle
+   buttons, badges, the avatar's blue). Gray would have had to be a step past
+   hover's gray-1 to read at all, which is a difference you have to look for;
+   blue says "this is the one open" outright, and stays clear of the event
+   colours on the bars, none of which is this. */
 .calendar-row.active {
-  background-color: var(--surface-base);
-  box-shadow: var(--elevation-md);
+  background-color: var(--surface-blue-1);
 }
+/* Behind you: the row stays legible but stops asking for attention, the same
+   way a pill in the grid does once its time has passed. */
+.calendar-row.past:not(.active) {
+  opacity: 0.55;
+}
+
+/* A consumer fills `#event-description` once for every row, and for a given
+   event it may have nothing to say. The box it renders is then empty but still
+   present, taking a flex gap on either side — twice the space between the title
+   and the tags that a row without the slot gets. */
+.calendar-row-description:empty {
+  display: none;
+}
+
 /* A scroll container's bottom edge. A border would scroll out of reach of a
    list cut mid-row; an inset shadow is painted on the box, so it holds the
    bottom however far the content runs. */
@@ -66,5 +77,17 @@
   box-shadow: inset 0 -1px 0 var(--outline-gray-1);
 }
 
+/* A consumer fills `#event-description` once for every row, and for a given
+   event it may have nothing to say. The box it renders is then empty but still
+   present, taking a flex gap on either side — twice the space between the title
+   and the tags that a row without the slot gets. */
+.calendar-row-description:empty {
+  display: none;
+}
 
-
+/* A scroll container's bottom edge. A border would scroll out of reach of a
+   list cut mid-row; an inset shadow is painted on the box, so it holds the
+   bottom however far the content runs. */
+.calendar-list-edge {
+  box-shadow: inset 0 -1px 0 var(--outline-gray-1);
+}

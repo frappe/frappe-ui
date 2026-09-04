@@ -153,9 +153,9 @@ which receives `{ calendarEvent, date, isEditMode, close }`.
 
 The Agenda's rows take two more slots: `#event-description` for the line under
 the title, and `#event-suffix` for the tags beside it. Both receive
-`{ calendarEvent, date, description, tags }`, where `description` and `tags` are
-what the calendar derived itself, so you can add to them rather than work them
-out again. Grid pills have no room for either and ignore both slots.
+`{ calendarEvent, date, description, tags, timing }`, where `description`,
+`tags` and `timing` are what the calendar derived itself, so you can add to them
+rather than work them out again. Grid pills have no room for either and ignore both slots.
 
 `CalendarActiveEvent` exports the ref holding the id of the event whose popover
 is open. Set it from outside to highlight an event, or clear it with an empty
