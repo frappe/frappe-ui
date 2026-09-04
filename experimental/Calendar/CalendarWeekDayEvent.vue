@@ -64,7 +64,7 @@
                 :class="
                   isCompact
                     ? 'items-baseline gap-1.5'
-                    : 'w-fit flex-col gap-0.5'
+                    : 'w-full flex-col gap-0.5'
                 "
               >
                 <!-- Declined: struck through and muted; the fill and bar stay,
@@ -73,7 +73,7 @@
                   ref="eventTitleRef"
                   class="event-title text-sm-medium"
                   :class="[
-                    isCompact ? 'truncate' : lineClampClass,
+                    isCompact || isNarrow ? 'truncate' : lineClampClass,
                     props.event.isDeclined
                       ? 'line-through text-ink-gray-5'
                       : 'text-ink-gray-8',
@@ -84,15 +84,14 @@
                 <p
                   ref="eventTimeRef"
                   v-if="!isAllDay"
-                  class="text-xs event-subtitle"
-                  :class="isCompact && 'shrink-0 whitespace-nowrap'"
+                  class="event-subtitle whitespace-nowrap"
+                  :class="[
+                    isNarrow ? 'text-2xs' : 'text-xs',
+                    isCompact && 'shrink-0',
+                  ]"
                 >
                   {{
-                    formattedDuration(
-                      updatedEvent.fromTime || '',
-                      updatedEvent.toTime || '',
-                      config.timeFormat,
-                    )
+                    timeLabel
                   }}
                 </p>
               </div>
@@ -151,6 +150,7 @@ import NewEventModal from './NewEventModal.vue'
 import Popover from '#components/Popover/Popover.vue'
 import type { PopoverSide } from '#components/Popover/types'
 import { useEventBase } from './useEventBase'
+import { useElementSize } from '@vueuse/core'
 import {
   calculateMinutes,
   convertMinutesToHours,
@@ -314,6 +314,30 @@ const innerStyle = computed(() => ({
  * below the threshold the pill is held at its minimum height, which fits
  * one line, so the two go side by side.
  */
+/**
+ * The pill's own width, watched: a cascaded pill in the Week view can end up
+ * narrower than a full range needs, and the range is what gets cut.
+ */
+const { width } = useElementSize(eventRef)
+
+/** Narrower than a full range fits at the ordinary size. */
+const NARROW_PILL = 116
+
+/**
+ * A pill too narrow for its own range. The range then takes a size down rather
+ * than losing its end to the pill's edge: a time cut in half is worse than a
+ * small one, and the title above it can give up characters instead.
+ */
+const isNarrow = computed(() => !!width.value && width.value < NARROW_PILL)
+
+const timeLabel = computed(() =>
+  formattedDuration(
+    updatedEvent.fromTime || '',
+    updatedEvent.toTime || '',
+    config.timeFormat,
+  ),
+)
+
 const isCompact = computed(() => {
   if (isAllDay.value) return false
   return (
