@@ -82,28 +82,6 @@ number in either layout opens that day in the Day view.
 days of the first and last weeks included — so a data source that fetches by
 range has events for every cell.
 
-## Day view
-
-The Day view is one column of events beside a **schedule rail**. The grid keeps
-the Week view's geometry — same gutter, same hour rows — but stops at 764px, so
-an hour-long meeting is an hour-long block rather than a bar drawn across the
-whole window.
-
-The rail reads the day as a list: what is on, how much of the day that comes to,
-which stretches are free, and the events the grid cannot show — one running past
-the bottom of the scroll is still a row, noted with the day it ends on. Picking
-a row scrolls the grid to that event and highlights it. Below the `lg`
-breakpoint there is not room for both, so the rail steps aside and the grid
-takes the width back.
-
-Concurrent events divide the column between them — equal shares, in
-chronological order, so no title is hidden behind another. Past three abreast
-the shares would be too narrow to read, so they widen and overlap instead, the
-later one on top. The Week view keeps its cascade, where the columns are too
-narrow to divide.
-
-<ComponentPreview name="Calendar-Day" csr="true" />
-
 ## Agenda view
 
 The Agenda view is the month as a list of days: a date column, then the events

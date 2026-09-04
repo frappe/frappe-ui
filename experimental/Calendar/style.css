@@ -50,7 +50,7 @@
   opacity: 0.5;
 }
 
-/* ── Listed events: the Day view's rail and the Agenda ────────────────────── */
+/* ── Listed events: the Agenda's rows ─────────────────────────────────────── */
 
 /* A row is not a pill: it carries no fill of its own, so the day reads as a
    list rather than a stack of coloured blocks. The event's colour survives as
@@ -98,26 +98,3 @@
   color: var(--ink-blue-3, var(--ink-gray-6));
 }
 
-.calendar-rail-section {
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-gray-4);
-  margin: 10px 0 4px;
-  padding-left: 8px;
-}
-/* A gap marker: the label, then a rule running out to the edge — a break in
-   the list that you read past rather than stop at. */
-.calendar-rail-gap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10.5px;
-  color: var(--ink-gray-4);
-  padding: 2px 8px 2px 10px;
-}
-.calendar-rail-gap::after {
-  content: '';
-  flex: 1;
-  border-top: 1px dashed var(--outline-gray-2);
-}

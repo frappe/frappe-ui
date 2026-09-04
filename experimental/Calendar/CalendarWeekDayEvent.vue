@@ -251,44 +251,6 @@ const placedToTime = () =>
 
 // ── Position styles ───────────────────────────────────────────────────────
 
-/**
- * Where an event sits across its column.
- *
- * The Week view keeps the cascade: each overlapping event steps 20% right and
- * loses 20% of its width, so the one on top hides the title of the one under
- * it. The Day view has the room to do better — it divides the column into the
- * `hallCount` equal shares its overlap group needs, 2px apart, chronological
- * left to right, and every title stays readable.
- *
- * Past three abreast the shares are too narrow to read, so they widen and
- * overlap again, later columns over earlier ones. Rare in practice.
- */
-function horizontalPlacement(dragging: boolean) {
-  if (dragging) return { left: '0', width: '100%', zIndex: 0 }
-
-  const hallNumber = calendarEvent.value.hallNumber || 0
-  const hallCount = calendarEvent.value.hallCount || 1
-
-  if (activeView.value !== 'Day' || hallCount < 2)
-    return {
-      left: `${hallNumber * 20}%`,
-      width: `${93 - hallNumber * 20}%`,
-      zIndex: 0,
-    }
-
-  const share = 100 / hallCount
-  const left = hallNumber === 0 ? '2px' : `calc(${share * hallNumber}% + 1px)`
-
-  if (hallCount <= MAX_SPLIT_COLUMNS)
-    return { left, width: `calc(${share}% - 3px)`, zIndex: 0 }
-
-  return {
-    left,
-    width: `calc(${share}% + ${SPLIT_OVERLAP}px)`,
-    zIndex: hallNumber,
-  }
-}
-
 const containerStyle = computed<CSSProperties>(() => {
   if (props.bar) {
     const span = props.bar.endCol - props.bar.startCol + 1
@@ -316,8 +278,14 @@ const containerStyle = computed<CSSProperties>(() => {
   if (height < heightThreshold) height = minimumHeight
 
   const top = calculateMinutes(placedFromTime()) * minuteHeight
-  const dragging = isResizing.value || isRepositioning.value
-  const { left, width, zIndex } = horizontalPlacement(dragging)
+  const hallNumber = calendarEvent.value.hallNumber || 0
+
+  const width =
+    isResizing.value || isRepositioning.value
+      ? '100%'
+      : `${93 - hallNumber * 20}%`
+  const left =
+    isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
 
   return {
     position: 'absolute',
@@ -325,7 +293,7 @@ const containerStyle = computed<CSSProperties>(() => {
     left,
     width,
     height: `${height}px`,
-    zIndex: dragging ? 100 : zIndex,
+    zIndex: isResizing.value || isRepositioning.value ? 100 : 0,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
     transition:
       isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
@@ -484,10 +452,6 @@ function handleRepositionMouseDown(
 
 /** Number of day columns the card can move across sideways. */
 const DAY_COLUMNS = 7
-/** Columns the Day view will split into before it lets them overlap instead. */
-const MAX_SPLIT_COLUMNS = 3
-/** How far a column overruns its share once splitting has given up, in px. */
-const SPLIT_OVERLAP = 6
 
 /** Width of one day column: the enclosing row's share, or the card's own. */
 function columnWidth(): number {

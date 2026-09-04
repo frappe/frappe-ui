@@ -50,14 +50,7 @@ export interface CalendarEvent {
   isDeclined?: boolean
   startTime?: number
   endTime?: number
-  /**
-   * Which column of its overlap group the event sits in, and how many columns
-   * that group has. The Week view reads `hallNumber` alone and steps each
-   * overlapping event 20% to the right; the Day view divides the column into
-   * `hallCount` equal shares, so no title is ever occluded.
-   */
   hallNumber?: number
-  hallCount?: number
   idx?: number
   [key: string]: unknown
 }
