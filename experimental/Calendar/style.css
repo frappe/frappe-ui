@@ -24,10 +24,11 @@
   background-color: var(--bg-hover);
 }
 /* A draft: saved, but nothing sent. An outline in the event's colour rather
-   than a fill, so it reads as not yet real. */
+   than a fill, so it reads as not yet real — on its own white ground, not on
+   the grid showing through it. */
 .event.event-draft,
 .event.event-draft:hover {
-  background-color: transparent;
+  background-color: var(--surface-base);
   outline: 1px dashed var(--border);
   outline-offset: -1px;
 }
@@ -55,7 +56,7 @@
    to read as height, where `sm` and `base` lean on an unoffset halo that
    against a white row reads as a border drawn round it. */
 .calendar-row.active {
-  background-color: var(--surface-white);
+  background-color: var(--surface-base);
   box-shadow: var(--elevation-md);
 }
 /* A scroll container's bottom edge. A border would scroll out of reach of a
@@ -67,11 +68,13 @@
 
 /* Now, in a list rather than a grid: the same red rule, with the same tick at
    its left end, laid between the rows the moment falls between. */
+/* Enough margin for the tick to stand clear on both sides: a selected row is a
+   raised card, and a line lying across its corner reads as a fault in it. */
 .calendar-now {
   position: relative;
   display: block;
   height: 2px;
-  margin: 1px 8px;
+  margin: 5px 8px;
   border-radius: 4px;
   background-color: #e03636;
 }
@@ -79,9 +82,9 @@
   content: '';
   position: absolute;
   left: 0;
-  top: -5px;
+  top: -3px;
   width: 2px;
-  height: 12px;
+  height: 8px;
   border-radius: 8px;
   background-color: #e03636;
 }
