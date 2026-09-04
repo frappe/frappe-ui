@@ -75,8 +75,6 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     return {
       '--bg': _color.bg,
       '--subtext': _color.subtext,
-      '--text-active': _color.textActive,
-      '--subtext-active': _color.subtextActive,
       '--bg-hover': _color.bgHover,
       '--bg-active': _color.bgActive,
       // On the root, not only the colour bar: a draft's dashed outline reads
@@ -133,6 +131,7 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     }
     if (e.detail === 1) {
       clickTimer = setTimeout(() => {
+        markActive()
         if (calendarActions.props.onClick)
           calendarActions.props.onClick({
             e,
@@ -144,6 +143,16 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
         }
       }, 200)
     }
+  }
+
+  /**
+   * The event the reader last reached for, which the Agenda draws as a raised
+   * card. Set here rather than left to the host: a host with its own `onClick`
+   * — a detail panel of its own, say — would otherwise get no selection at all.
+   * `activeEvent` is exported, so a host can still move or clear it.
+   */
+  function markActive() {
+    activeEvent.value = props.event.id || props.event.name || ''
   }
 
   const showEventModal = ref(false)
@@ -175,6 +184,7 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     eventIcons: config.eventIcons,
     showEventModal,
     eventBgStyle,
+    markActive,
     preventClick,
     handleEventClick,
     handleEventEdit,

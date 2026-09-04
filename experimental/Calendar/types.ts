@@ -4,13 +4,16 @@ export type CalendarMode = 'Day' | 'Week' | 'Month' | 'Agenda'
 export type CalendarTimeFormat = '12h' | '24h'
 
 export interface CalendarColor {
+/**
+ * One event colour. Selection deepens the fill by a step and rings the pill in
+ * `borderActive`; it never repaints the text, so there is no active ink here to
+ * fall out of step with the fill it sits on.
+ */
   color: string
   border: string
   borderActive: string
   text: string
-  textActive?: string
   subtext: string
-  subtextActive: string
   bg: string
   bgHover: string
   bgActive: string

@@ -167,6 +167,7 @@ import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
+import { activeEvent } from './composables/useCalendarData'
 import { stripRange } from './monthStrip'
 import { agendaRange } from './agendaDays'
 import {
@@ -411,6 +412,9 @@ function handleCellClick(
     isAnyPopoverOpen.value = false
     return
   }
+  // Clicking the list or the grid itself is how you let go of the event.
+  activeEvent.value = ''
+
 
   const data: CalendarCellClickData = {
     e,

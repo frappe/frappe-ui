@@ -23,30 +23,24 @@
 .event.active {
   background-color: var(--bg-active);
 }
-/* A selected event may sit on a dark surface (violet, pink, cyan), where the
-   ink-gray-8 title the pills wear otherwise would vanish. */
-.event.active .event-title {
-  color: var(--text-active, var(--ink-base));
-}
-.event.active .event-subtitle {
-  color: var(--subtext-active);
-}
-.event.active .event-border {
-  background-color: var(--border-active);
-}
-.event:not(.active):hover {
+/* Selected: the event's own colours a step deeper, and nothing else. Not
+   repainted — inverting the fill and the title to white only ever worked on the
+   dark actives, and on the light ones (green, amber, blue) left white text on a
+   pale tint — and not outlined or lifted either: a pill sits in a grid of ruled
+   hours, where an edge drawn round one of them reads as a fault. */
+.event:hover {
   background-color: var(--bg-hover);
 }
 /* A draft: saved, but nothing sent. An outline in the event's colour rather
    than a fill, so it reads as not yet real. */
-.event.event-draft:not(.active),
-.event.event-draft:not(.active):hover {
+.event.event-draft,
+.event.event-draft:hover {
   background-color: transparent;
   outline: 1px dashed var(--border);
   outline-offset: -1px;
 }
-.event:not(.active) .past,
-.event.past:not(.active) {
+.event .past,
+.event.past {
   opacity: 0.5;
 }
 
@@ -61,14 +55,16 @@
 .calendar-row:hover {
   background-color: var(--surface-gray-1);
 }
+/* Selected: the row rises off the list as a card, and takes no colour doing it.
+   A row runs the width of the list, so a fill across it is a band rather than a
+   card, and the event's own colour is already on its bar.
+
+   `md` rather than a lighter step: its drop is offset far enough (0 6px 12px)
+   to read as height, where `sm` and `base` lean on an unoffset halo that
+   against a white row reads as a border drawn round it. */
 .calendar-row.active {
-  background-color: var(--bg-active);
-}
-.calendar-row.active .calendar-row-title {
-  color: var(--text-active, var(--ink-base));
-}
-.calendar-row.active .calendar-row-bar {
-  background-color: var(--border-active);
+  background-color: var(--surface-white);
+  box-shadow: var(--elevation-md);
 }
 /* Happening now: lifted off the rail's wash onto its own surface. Selection
    still wins — you asked for that one. */

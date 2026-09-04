@@ -133,6 +133,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ select: [event: CalendarEvent] }>()
+  markActive,
 
 const slots = useSlots()
 const now = useNow()
@@ -173,6 +174,7 @@ const slotProps = computed(() => ({
   description: description.value,
   tags: tags.value,
 }))
+  markActive()
 
 // A row is a way to reach the event, so selecting it says so — the Day view
 // scrolls its grid to the event. What the click itself does is the pill's
