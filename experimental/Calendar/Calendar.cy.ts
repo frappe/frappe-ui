@@ -297,7 +297,7 @@ describe('Calendar', () => {
     // a -> Agenda, which lists days rather than drawing a grid. Mounted with
     // no events, so it is the empty month it reports.
     cy.get('body').type('a')
-    cy.contains('Nothing on in').should('exist')
+    cy.contains('Nothing on between').should('exist')
     cy.contains('All day').should('not.exist')
     cy.get('body').type('m')
 
@@ -396,7 +396,7 @@ describe('Calendar', () => {
   })
 
   describe('Agenda view', () => {
-    // Two events either side of a three-day hole, all inside one month.
+    // Two events either side of a three-day hole, both inside the window.
     const spread: CalendarEvent[] = [
       {
         id: 'AG-1',
@@ -416,16 +416,15 @@ describe('Calendar', () => {
       },
     ]
 
-    it('lists the month from today and collapses the empty days between', () => {
+    it('lists only the days that have something on them', () => {
       cy.mount(Calendar, {
         props: { events: spread, config: { defaultMode: 'Agenda' } },
       })
 
       cy.contains('Kickoff').should('exist')
       cy.contains('Retro').should('exist')
-      // Days 2-4 hold nothing, so they are one line rather than three rows.
-      cy.contains('No events').should('have.length.at.least', 1)
-      cy.get('[data-strip-date]').should('have.length.at.most', 31)
+      // The days between the two hold nothing, so they are not listed at all.
+      cy.get('[data-strip-date]').should('have.length', 2)
     })
 
     it('does not list the days already spent', () => {
@@ -445,8 +444,7 @@ describe('Calendar', () => {
         },
       })
 
-      // Only meaningful when yesterday was in this month; otherwise the view is
-      // showing a different month entirely and the event is out of range anyway.
+      // The window starts at today, so yesterday is behind it.
       cy.contains('Yesterday standup').should('not.exist')
     })
 
@@ -455,15 +453,17 @@ describe('Calendar', () => {
         props: { events, config: { defaultMode: 'Agenda' } },
         slots: {
           'event-description': (props: any) =>
-            h('span', { 'data-cy': 'row-description' }, `at ${props.surface}`),
+            h(
+              'span',
+              { 'data-cy': 'row-description' },
+              `at ${props.date.getDate()}`,
+            ),
           'event-suffix': (props: any) =>
             h('span', { 'data-cy': 'row-suffix' }, String(props.tags.length)),
         },
       })
 
-      cy.get('[data-cy=row-description]')
-        .first()
-        .should('have.text', 'at agenda')
+      cy.get('[data-cy=row-description]').first().should('contain.text', 'at')
       cy.get('[data-cy=row-suffix]').should('exist')
     })
   })

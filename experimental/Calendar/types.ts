@@ -1,14 +1,15 @@
 import type { Component, InjectionKey, Ref } from 'vue'
+import type { BadgeProps } from '#components/Badge/types'
 
 export type CalendarMode = 'Day' | 'Week' | 'Month' | 'Agenda'
 export type CalendarTimeFormat = '12h' | '24h'
 
-export interface CalendarColor {
 /**
  * One event colour. Selection deepens the fill by a step and rings the pill in
  * `borderActive`; it never repaints the text, so there is no active ink here to
  * fall out of step with the fill it sits on.
  */
+export interface CalendarColor {
   color: string
   border: string
   borderActive: string
@@ -59,24 +60,20 @@ export interface CalendarEvent {
 }
 
 /**
- * A tag on a listed event — the Day rail's and Agenda's rows carry these where
- * a grid pill has no room for them. `tone` names a colour the way the rest of
- * the library does, so a consumer's own tags sit beside the derived ones.
+ * A tag on a listed event — the Agenda's rows carry these where a grid pill has
+ * no room for them. Rendered as a `Badge`, so `theme` is
+ * Badge's own and a consumer's tags sit beside the derived ones as equals.
  */
 export interface CalendarRowTag {
   label: string
-  tone?: 'gray' | 'amber' | 'blue'
+  theme?: BadgeProps['theme']
 }
-
-/** Which list an event row belongs to. */
-export type CalendarRowSurface = 'rail' | 'agenda'
 
 /** What `#event-description` and `#event-suffix` receive. */
 export interface CalendarRowSlotProps {
   calendarEvent: CalendarEvent
   /** The day the row belongs to; a multi-day event has one row per day. */
   date: Date
-  surface: CalendarRowSurface
   /** The library's own description, so a filled slot extends rather than re-derives. */
   description: string
   /** The tags the library derived, for the same reason. */

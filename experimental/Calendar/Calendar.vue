@@ -111,8 +111,7 @@
       v-else-if="activeView === 'Agenda'"
       :events="events"
       :config="overrideConfig"
-      :current-month="currentMonth"
-      :current-year="currentYear"
+      :anchor="agendaAnchor"
     >
       <template #event-description="slotProps">
         <slot name="event-description" v-bind="slotProps" />
@@ -167,8 +166,8 @@ import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
-import { activeEvent } from './composables/useCalendarData'
 import { stripRange } from './monthStrip'
+import { activeEvent } from './composables/useCalendarData'
 import { agendaRange } from './agendaDays'
 import {
   ACTIVE_VIEW_KEY,
@@ -412,9 +411,9 @@ function handleCellClick(
     isAnyPopoverOpen.value = false
     return
   }
+
   // Clicking the list or the grid itself is how you let go of the event.
   activeEvent.value = ''
-
 
   const data: CalendarCellClickData = {
     e,
@@ -529,9 +528,13 @@ const incrementClickEvents: Record<CalendarMode, () => void> = {
   Month: incrementMonth,
   Week: incrementWeek,
   Day: incrementDay,
-  // The Agenda lists a month, so its arrows step one.
+  // The Agenda's window is anchored on a month and covers three, so its arrows
+  // step one — each move keeps two thirds of what was on screen.
   Agenda: incrementMonth,
 }
+
+/** The day the Agenda is anchored on: whatever day the calendar is sitting on. */
+const agendaAnchor = computed(() => selectedDay.value ?? new Date())
 
 // decrementMonth lands on the month's last day, which is right for stepping
 // back a day across a month edge but scrolls the Month strip to its bottom;
@@ -546,8 +549,8 @@ const decrementClickEvents: Record<CalendarMode, () => void> = {
   Month: decrementMonthView,
   Week: decrementWeek,
   Day: decrementDay,
-  // Lands on the 1st rather than the last day, which is where a month-scoped
-  // list wants to start reading.
+  // Lands on the 1st rather than the last day, which is where the window's
+  // first month wants to start reading.
   Agenda: decrementMonthView,
 }
 
@@ -700,6 +703,16 @@ const currentMonthYear = computed(() => {
     }
   }
 
+  // The Agenda spans whole months (bar the days of the first already spent), so
+  // it names them rather than the dates its ends happen to land on.
+  if (activeView.value === 'Agenda') {
+    const { start, end } = agendaRange(agendaAnchor.value)
+    const short = (d: Date) => monthList[d.getMonth()].slice(0, 3)
+    return start.getFullYear() === end.getFullYear()
+      ? `${short(start)} – ${short(end)} ${end.getFullYear()}`
+      : `${short(start)} ${start.getFullYear()} – ${short(end)} ${end.getFullYear()}`
+  }
+
   // Non-week views or empty week fallback
   if (activeView.value !== 'Week')
     return formatMonthYear(currentMonth.value, currentYear.value)
@@ -769,11 +782,11 @@ function getVisibleRange() {
     }
   }
 
-  // The Agenda reports what it actually lists, which for the month under way
-  // starts at today — so a consumer's fetch window and its "new event" anchor
-  // agree with what is on screen.
+  // The Agenda reports what it actually lists — three months from where it is
+  // anchored, less the days already spent — so a consumer's fetch window and
+  // its "new event" anchor agree with what is on screen.
   if (activeView.value === 'Agenda') {
-    const { start, end } = agendaRange(currentMonth.value, currentYear.value)
+    const { start, end } = agendaRange(agendaAnchor.value)
     return {
       startDate: dayjs(start).format('YYYY-MM-DD'),
       endDate: dayjs(end).format('YYYY-MM-DD'),

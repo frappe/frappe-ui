@@ -1,73 +1,80 @@
 <template>
   <!--
-    The month as a list of days.
+    Three months as a list of days.
 
     A grid spends the same room on every day whether or not anything is in it.
-    The agenda spends room where the events are: quiet days collapse into a
-    line, and the row that is left has width enough to say where an event is and
-    who is coming — the things a pill has no space for.
+    The agenda spends room only where the events are: a quiet day is not listed,
+    and the rows that remain have width enough to say where an event is and who
+    is coming — the things a pill has no space for.
+
+    Every day row carries its own bottom border, so there is a line under the
+    last one wherever the list happens to end. The box's own bottom edge is an
+    inset shadow rather than a border, so it stays pinned to the bottom of the
+    scroll — closing off a list cut mid-row — and lands on the same pixel as a
+    row's border when the two meet, instead of drawing the line twice.
   -->
   <div
     ref="scroller"
     class="flex flex-1 flex-col overflow-y-auto"
-    :class="[config.noBorder ? 'border-t-[1px]' : 'border-[1px]']"
+    :class="[
+      config.noBorder
+        ? 'border-t-[1px]'
+        : 'calendar-list-edge border-[1px] border-b-0',
+    ]"
   >
-    <!-- A month with nothing in it says so once, rather than as a lone
-         collapsed row naming a span you can already see. -->
+    <!-- A span with nothing in it says so once, rather than as a lone
+         collapsed row naming dates you can already see. -->
     <p v-if="isEmpty" class="p-10 text-center text-sm text-ink-gray-4">
-      Nothing on in {{ monthName }}.
+      Nothing on between {{ spanLabel }}.
     </p>
 
     <div
       v-for="row in isEmpty ? [] : rows"
       :key="row.key"
       :data-strip-date="row.key"
-      class="flex border-b border-outline-gray-1 px-4 py-2.5 last:border-b-0"
-      :class="row.isToday && 'bg-surface-gray-1'"
+      class="flex border-b border-outline-gray-1 px-4 py-2.5"
     >
-      <div class="flex w-[150px] shrink-0 items-start gap-2.5 pt-1">
+      <!-- Baselines, not box centres: the date is a size larger than the
+           weekday and sits in a 30px circle, so centring the two boxes leaves
+           the numeral riding above the word beside it. -->
+      <div class="flex w-[150px] shrink-0 items-baseline gap-2.5">
         <span
           class="inline-flex size-[30px] items-center justify-center rounded-full text-base font-medium"
           :class="
-            row.isToday
-              ? 'bg-surface-gray-10 text-ink-white'
-              : 'text-ink-gray-8'
+            row.isToday ? 'bg-surface-gray-10 text-ink-base' : 'text-ink-gray-8'
           "
         >
           {{ row.date.getDate() }}
         </span>
-        <span class="pt-0.5 text-xs leading-relaxed text-ink-gray-5">
-          <span class="block text-sm font-medium text-ink-gray-8">
-            {{ weekday(row.date) }}
-          </span>
-          {{ subLabel(row) }}
+        <span class="text-sm font-medium text-ink-gray-8">
+          {{ weekday(row.date) }}
         </span>
       </div>
 
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p
-          v-if="!row.events.length"
-          class="px-2 py-1.5 text-xs text-ink-gray-4"
-        >
-          {{ emptyLabel(row) }}
-        </p>
-        <CalendarEventRow
-          v-for="event in row.events"
+        <!-- The same red rule the grid draws: the clock's own place in a list
+             ordered by start, so what has begun is above it. -->
+        <template
+          v-for="(event, index) in row.events"
           :key="String(event.id ?? event.name)"
-          :event="event"
-          :date="row.date"
-          surface="agenda"
         >
-          <template #event-description="slotProps">
-            <slot name="event-description" v-bind="slotProps" />
-          </template>
-          <template #event-suffix="slotProps">
-            <slot name="event-suffix" v-bind="slotProps" />
-          </template>
-          <template #event-popover-content="slotProps">
-            <slot name="event-popover-content" v-bind="slotProps" />
-          </template>
-        </CalendarEventRow>
+          <span v-if="row.isToday && index === nowAt(row)" class="calendar-now" />
+          <CalendarEventRow :event="event" :date="row.date">
+            <template #event-description="slotProps">
+              <slot name="event-description" v-bind="slotProps" />
+            </template>
+            <template #event-suffix="slotProps">
+              <slot name="event-suffix" v-bind="slotProps" />
+            </template>
+            <template #event-popover-content="slotProps">
+              <slot name="event-popover-content" v-bind="slotProps" />
+            </template>
+          </CalendarEventRow>
+        </template>
+        <span
+          v-if="row.isToday && nowAt(row) === row.events.length"
+          class="calendar-now"
+        />
       </div>
     </div>
   </div>
@@ -77,10 +84,11 @@
 import './style.css'
 
 import { computed, inject, ref } from 'vue'
-import { agendaRows, type AgendaRow } from './agendaDays'
-import { daysList, daysListFull, monthList } from './calendarUtils'
+import { agendaRange, agendaRows, type AgendaRow } from './agendaDays'
+import { daysListFull, monthList } from './calendarUtils'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
+import { nowRowIndex } from './eventRow'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -90,8 +98,8 @@ import {
 const props = defineProps<{
   events?: CalendarEvent[]
   config: CalendarConfig
-  currentMonth: number
-  currentYear: number
+  /** The day the list runs from. */
+  anchor: Date
 }>()
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)
@@ -108,33 +116,20 @@ const scroller = ref<HTMLElement | null>(null)
 const now = useNow()
 
 const rows = computed(() =>
-  agendaRows(
-    props.events ?? [],
-    props.currentMonth,
-    props.currentYear,
-    props.config,
-    now.value,
-  ),
+  agendaRows(props.events ?? [], props.anchor, props.config, now.value),
 )
 
-const isEmpty = computed(() => rows.value.every((row) => !row.events.length))
+const isEmpty = computed(() => !rows.value.length)
 
-const monthName = computed(() => monthList[props.currentMonth])
+/** "4 September and 31 October" — the ends of the window, for the empty state. */
+const spanLabel = computed(() => {
+  const { start, end } = agendaRange(props.anchor, now.value)
+  const on = (d: Date) => `${d.getDate()} ${monthList[d.getMonth()]}`
+  return `${on(start)} and ${on(end)}`
+})
 
 const weekday = (date: Date) => daysListFull[date.getDay()]
 
-const subLabel = (row: AgendaRow) => {
-  if (row.isToday) return 'Today'
-  return row.isWeekend ? 'Weekend' : ''
-}
-
-/** "No events · Sat 22 – Sun 23", or the single day when the run is one. */
-const emptyLabel = (row: AgendaRow) => {
-  const from = row.date
-  const to = row.emptyThrough ?? row.date
-  const day = (d: Date) => `${daysList[d.getDay()]} ${d.getDate()}`
-  return to.getDate() === from.getDate()
-    ? `No events · ${day(from)}`
-    : `No events · ${day(from)} – ${day(to)}`
-}
+/** Which row of today's list the now-marker goes above. */
+const nowAt = (row: AgendaRow) => nowRowIndex(row.events, now.value)
 </script>

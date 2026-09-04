@@ -84,18 +84,23 @@ range has events for every cell.
 
 ## Agenda view
 
-The Agenda view is the month as a list of days: a date column, then the events
-of that day as rows. Days with nothing on them collapse into their neighbours,
-so a quiet weekend is one line rather than two empty rows.
+The Agenda view is three months as a list of days: a date column, then the
+events of that day as rows. A day with nothing on it is not listed — an empty
+row says nothing the dates either side of it do not. Today's row carries the
+same red now-marker the grid draws, above the first event still to start. An
+event under way sits above the line and says so with its own tag.
 
-The month already under way starts at today — a list of what is coming has no
-use for the days already spent — and any other month runs whole. The arrows step
-a month at a time, and `rangeChange` reports the span actually listed, not the
-whole month, so a data source fetching by range agrees with what is on screen.
+The window covers the month in view and the two after it, and the month already
+under way starts at today — a list of what is coming has no use for the days
+already spent, and a single month is 31 days on the 1st and one day on the 31st.
+The arrows step a month at a time, so each move keeps two thirds of what was on
+screen, and `rangeChange` reports exactly the span listed, so a data source
+fetching by range agrees with it.
 
 Rows have the room a grid pill does not, so they carry a description line and
 tags. `Calendar` fills in what it can work out on its own — where the event is,
-whether it runs on past today, whether it is a draft, whether it starts soon —
+whether it runs on past today, whether it is a draft, and whether it is under
+way (`Now`) or about to start (`Soon`, `In 3 h`), both in amber —
 and the `#event-description` and `#event-suffix` slots let you say the rest.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />
@@ -143,13 +148,11 @@ off for that interaction.
 The popover's content is replaceable with the `#event-popover-content` slot,
 which receives `{ calendarEvent, date, isEditMode, close }`.
 
-The rows of the Day view's rail and of the Agenda take two more slots:
-`#event-description` for the line under the title, and `#event-suffix` for the
-tags beside it. Both receive
-`{ calendarEvent, date, surface, description, tags }` — `surface` is `'rail'` or
-`'agenda'`, and `description` and `tags` are what the calendar derived itself,
-so you can add to them rather than work them out again. Grid pills have no room
-for either and ignore both slots.
+The Agenda's rows take two more slots: `#event-description` for the line under
+the title, and `#event-suffix` for the tags beside it. Both receive
+`{ calendarEvent, date, description, tags }`, where `description` and `tags` are
+what the calendar derived itself, so you can add to them rather than work them
+out again. Grid pills have no room for either and ignore both slots.
 
 `CalendarActiveEvent` exports the ref holding the id of the event whose popover
 is open. Set it from outside to highlight an event, or clear it with an empty

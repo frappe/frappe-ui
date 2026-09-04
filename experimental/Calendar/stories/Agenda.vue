@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Calendar } from '..'
+import { Badge } from '../../../src/components/Badge'
 
 const config = {
   defaultMode: 'Agenda',
@@ -86,21 +87,19 @@ const events = ref([
     <Calendar :events="events" :config="config">
       <!-- What the library cannot know: this app's own reading of an event. -->
       <template #event-suffix="{ tags, calendarEvent }">
-        <span
+        <Badge
           v-for="tag in tags"
           :key="tag.label"
-          class="calendar-row-tag"
-          :data-tone="tag.tone"
-        >
-          {{ tag.label }}
-        </span>
-        <span
+          :theme="tag.theme"
+          :label="tag.label"
+          size="sm"
+        />
+        <Badge
           v-if="String(calendarEvent.participant).includes('not responded')"
-          class="calendar-row-tag"
-          data-tone="amber"
-        >
-          RSVP
-        </span>
+          theme="amber"
+          label="RSVP"
+          size="sm"
+        />
       </template>
     </Calendar>
   </div>

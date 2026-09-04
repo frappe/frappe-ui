@@ -20,14 +20,6 @@
 .event .event-border {
   background-color: var(--border);
 }
-.event.active {
-  background-color: var(--bg-active);
-}
-/* Selected: the event's own colours a step deeper, and nothing else. Not
-   repainted — inverting the fill and the title to white only ever worked on the
-   dark actives, and on the light ones (green, amber, blue) left white text on a
-   pale tint — and not outlined or lifted either: a pill sits in a grid of ruled
-   hours, where an edge drawn round one of them reads as a fault. */
 .event:hover {
   background-color: var(--bg-hover);
 }
@@ -66,31 +58,32 @@
   background-color: var(--surface-white);
   box-shadow: var(--elevation-md);
 }
-/* Happening now: lifted off the rail's wash onto its own surface. Selection
-   still wins — you asked for that one. */
-.calendar-row.now:not(.active) {
-  background-color: var(--surface-white);
-  box-shadow:
-    0 0 1px rgb(0 0 0 / 0.13),
-    0 1px 2px rgb(0 0 0 / 0.05);
+/* A scroll container's bottom edge. A border would scroll out of reach of a
+   list cut mid-row; an inset shadow is painted on the box, so it holds the
+   bottom however far the content runs. */
+.calendar-list-edge {
+  box-shadow: inset 0 -1px 0 var(--outline-gray-1);
 }
 
-.calendar-row-tag {
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.6;
-  padding: 0 7px;
-  border-radius: 9999px;
-  white-space: nowrap;
-  background-color: var(--surface-gray-2);
-  color: var(--ink-gray-6);
+/* Now, in a list rather than a grid: the same red rule, with the same tick at
+   its left end, laid between the rows the moment falls between. */
+.calendar-now {
+  position: relative;
+  display: block;
+  height: 2px;
+  margin: 1px 8px;
+  border-radius: 4px;
+  background-color: #e03636;
 }
-.calendar-row-tag[data-tone='amber'] {
-  background-color: var(--surface-amber-1, var(--surface-gray-2));
-  color: var(--ink-amber-3, var(--ink-gray-6));
+.calendar-now::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -5px;
+  width: 2px;
+  height: 12px;
+  border-radius: 8px;
+  background-color: #e03636;
 }
-.calendar-row-tag[data-tone='blue'] {
-  background-color: var(--surface-blue-1, var(--surface-gray-2));
-  color: var(--ink-blue-3, var(--ink-gray-6));
-}
+
 

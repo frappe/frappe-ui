@@ -11,8 +11,8 @@ import type { CalendarEvent, CalendarRowTag, CalendarTimeFormat } from './types'
 /**
  * What a listed event says about itself.
  *
- * The Day view's rail and the Agenda view both read an event as a row rather
- * than a pill, and a row has room for more than a title. These are the parts
+ * The Agenda view reads an event as a row rather than a pill, and a row has
+ * room for more than a title. These are the parts
  * the library can work out on its own — the time, the day it runs on to, the
  * state it is in. Anything that needs the consumer's own data model (who is
  * coming, where, whether you have replied) arrives through the
@@ -50,7 +50,7 @@ export function rowDescription(event: CalendarEvent, date: Date): string {
   if (event.venue) parts.push(String(event.venue))
   if (event.participant) parts.push(String(event.participant))
   const ends = continuesTo(event, date)
-  if (ends) parts.push(`ends ${ends}`)
+  if (ends) parts.push(`Ends ${ends}`)
   return parts.join(' · ')
 }
 
@@ -63,22 +63,27 @@ function minutesUntil(event: CalendarEvent, date: Date, now: Date): number {
   return start - (now.getHours() * 60 + now.getMinutes())
 }
 
-/** Whether the event is under way at `now`. */
-export function isHappeningNow(
-  event: CalendarEvent,
-  date: Date,
-  now: Date,
-): boolean {
-  if (isAllDayLike(event)) return false
-  if (parseDate(now) !== parseDate(date)) return false
+/**
+ * Where the now-marker sits in a day's list of rows: the index of the first
+ * event still to start, or the end of the list once they all have.
+ *
+ * The list is ordered by start, so the line reads as the clock's own place in
+ * that order — an event under way sits above it, having started, and says so
+ * itself with a `Now` tag rather than by where the line falls.
+ *
+ * All-day events are not on the clock, so the line never lands above one — it
+ * marks the point in the day the reader has got to, and an all-day event is not
+ * at any point in particular.
+ */
+export function nowRowIndex(events: CalendarEvent[], now: Date): number {
   const minutes = now.getHours() * 60 + now.getMinutes()
-  const from = calculateMinutes(
-    String(event.segFromTime || event.fromTime || '00:00'),
+  const index = events.findIndex(
+    (event) =>
+      !isAllDayLike(event) &&
+      calculateMinutes(String(event.segFromTime || event.fromTime || '00:00')) >
+        minutes,
   )
-  const to = calculateMinutes(
-    String(event.segToTime || event.toTime || '00:00'),
-  )
-  return from <= minutes && minutes < to
+  return index === -1 ? events.length : index
 }
 
 /** How soon is soon enough to be worth saying. */
@@ -95,13 +100,34 @@ export function rowTags(
   now: Date,
 ): CalendarRowTag[] {
   const tags: CalendarRowTag[] = []
-  if (event.isDraft) tags.push({ label: 'Draft', tone: 'amber' })
+  if (event.isDraft) tags.push({ label: 'Draft' })
+
+  // Under way and about to start are the same kind of fact — the thing on the
+  // day that wants you now — so they wear one colour and never both at once.
+  if (isUnderWay(event, date, now)) {
+    tags.push({ label: 'Now', theme: 'amber' })
+    return tags
+  }
 
   const until = minutesUntil(event, date, now)
   if (until > 0 && until <= SOON_MINUTES) {
     const hours = Math.round(until / 60)
-    tags.push({ label: hours < 1 ? 'Soon' : `In ${hours} h`, tone: 'gray' })
+    tags.push({ label: hours < 1 ? 'Soon' : `In ${hours} h`, theme: 'amber' })
   }
 
   return tags
+}
+
+/** Whether the event has started and not yet finished. */
+function isUnderWay(event: CalendarEvent, date: Date, now: Date): boolean {
+  if (isAllDayLike(event)) return false
+  if (parseDate(now) !== parseDate(date)) return false
+  const minutes = now.getHours() * 60 + now.getMinutes()
+  const from = calculateMinutes(
+    String(event.segFromTime || event.fromTime || '00:00'),
+  )
+  const to =
+    calculateMinutes(String(event.segToTime || event.toTime || '00:00')) ||
+    24 * 60
+  return from <= minutes && minutes < to
 }
