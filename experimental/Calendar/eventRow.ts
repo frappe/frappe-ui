@@ -19,12 +19,28 @@ import type { CalendarEvent, CalendarRowTag, CalendarTimeFormat } from './types'
  * `#event-description` and `#event-suffix` slots instead.
  */
 
-/** "11 am – 1 pm", or "All day" for an event that owns the whole of it. */
+/**
+ * "11 am – 1 pm", or "All day" for an event that owns the whole of it.
+ *
+ * A row says what the event does on the day it is listed under, not what it
+ * does in general: an event that began before `date` has no start to give that
+ * day, so it reports the end it is running towards, or owns the day outright if
+ * it does not end on it either.
+ */
 export function rowTimeLabel(
   event: CalendarEvent,
   format: CalendarTimeFormat,
+  date?: Date,
 ): string {
   if (isAllDayLike(event)) return 'All day'
+
+  const key = date ? parseDate(date) : null
+  if (key && eventDays(event).start < key) {
+    if (eventDays(event).end > key) return 'All day'
+    const ends = String(event.segToTime || event.toTime || '')
+    return ends ? `Ends ${formatTime(ends, format)}` : 'All day'
+  }
+
   const from = String(event.segFromTime || event.fromTime || '00:00')
   const to = String(event.segToTime || event.toTime || '')
   if (!to || to === from) return formatTime(from, format)

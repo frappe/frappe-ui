@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nowRowIndex, rowTags } from './eventRow'
+import { nowRowIndex, rowTags, rowTimeLabel } from './eventRow'
 import type { CalendarEvent } from './types'
 
 const at = (id: string, fromTime: string, toTime: string): CalendarEvent => ({
@@ -76,5 +76,39 @@ describe('rowTags', () => {
   // An all-day event is not at any point in the day, so it is never under way.
   it('leaves an all-day event alone', () => {
     expect(rowTags(allDay, date, now('10:30'))).toEqual([])
+  })
+})
+
+describe('rowTimeLabel', () => {
+  const afterparty: CalendarEvent = {
+    id: 'afterparty',
+    fromDate: '2026-08-17',
+    toDate: '2026-08-18',
+    fromTime: '23:00',
+    toTime: '02:00',
+  }
+  const conference: CalendarEvent = {
+    id: 'conference',
+    fromDate: '2026-08-17',
+    toDate: '2026-08-19',
+    fromTime: '09:00',
+    toTime: '17:00',
+  }
+  const day = (d: number) => new Date(2026, 7, d)
+
+  it('gives the range on the day the event starts', () => {
+    expect(rowTimeLabel(afterparty, '12h', day(17))).toBe('11 pm – 2 am')
+  })
+
+  it('gives the end on the day it finishes', () => {
+    expect(rowTimeLabel(afterparty, '12h', day(18))).toBe('Ends 2 am')
+  })
+
+  it('owns a day it neither starts nor ends on', () => {
+    expect(rowTimeLabel(conference, '12h', day(18))).toBe('All day')
+  })
+
+  it('falls back to the whole range without a date', () => {
+    expect(rowTimeLabel(afterparty, '12h')).toBe('11 pm – 2 am')
   })
 })

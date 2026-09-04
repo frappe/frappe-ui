@@ -264,13 +264,24 @@ export function isSpan(event: CalendarEvent): boolean {
 }
 
 /** Full-day events first, then by start time, then a stable tiebreak. */
-export function sortByStart(events: CalendarEvent[]): CalendarEvent[] {
+export function sortByStart(
+  events: CalendarEvent[],
+  date?: Date,
+): CalendarEvent[] {
+  // An event that began before `date` is already under way when the day opens,
+  // so it sorts from midnight rather than from the clock time it started at:
+  // a party that began at 11 pm yesterday comes before this evening's meeting,
+  // not after it.
+  const key = date ? parseDate(date) : null
+  const startsOn = (event: CalendarEvent) =>
+    key && eventDays(event).start < key ? 0 : minutes(event.fromTime)
+
   return [...events].sort((a, b) => {
     const fullA = a.isFullDay ? 0 : 1
     const fullB = b.isFullDay ? 0 : 1
     if (fullA !== fullB) return fullA - fullB
-    const timeA = minutes(a.fromTime)
-    const timeB = minutes(b.fromTime)
+    const timeA = startsOn(a)
+    const timeB = startsOn(b)
     if (timeA !== timeB) return timeA - timeB
     return String(a.id ?? '').localeCompare(String(b.id ?? ''))
   })
@@ -295,5 +306,6 @@ export function eventsOn(events: CalendarEvent[], date: Date): CalendarEvent[] {
       const { start, end } = eventDays(e)
       return start <= key && key <= end
     }),
+    date,
   )
 }

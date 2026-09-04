@@ -40,8 +40,12 @@
         <span class="flex min-w-0 flex-1 items-baseline gap-2">
           <!-- Declined reads the same here as on a pill: struck through and
                muted, still plainly the event you said no to. -->
+          <!-- leading-5 and leading-4 below, rather than the sizes' own 1.15: at
+               13px that leaves a 14.95px line box for glyphs that stand 16px, and
+               truncate's overflow-hidden then slices the descender off a g or a y.
+               The line box has to clear the ink before it can be clipped for width. -->
           <span
-            class="calendar-row-title shrink-0 truncate text-sm-medium"
+            class="calendar-row-title shrink-0 truncate text-sm-medium leading-5"
             :class="
               props.event.isDeclined
                 ? 'line-through text-ink-gray-5'
@@ -52,7 +56,7 @@
           </span>
           <span
             v-if="hasDescription"
-            class="calendar-row-description min-w-0 truncate text-xs text-ink-gray-5"
+            class="calendar-row-description min-w-0 truncate text-xs leading-4 text-ink-gray-5"
           >
             <slot name="event-description" v-bind="slotProps">
               {{ description }}
@@ -143,7 +147,9 @@ const {
 
 const isPopoverOpen = ref(false)
 
-const timeLabel = computed(() => rowTimeLabel(props.event, config.timeFormat))
+const timeLabel = computed(() =>
+  rowTimeLabel(props.event, config.timeFormat, props.date),
+)
 const description = computed(() => rowDescription(props.event, props.date))
 const tags = computed(() => rowTags(props.event, props.date, now.value))
 
