@@ -226,6 +226,40 @@ describe('Calendar', () => {
     cy.contains('Day 1 of 3').should('exist')
   })
 
+  // Carried over: an event that began yesterday and has not finished. The Day
+  // view is showing today, which is neither the day it starts nor a day it owns
+  // outright, and it still has to be on screen.
+  it('shows an event carried over from yesterday in the day view', () => {
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-CARRY',
+            title: 'Afterparty',
+            fromDate: monthYear(-1),
+            toDate: today,
+            fromTime: '23:00',
+            toTime: '02:00',
+            color: 'violet',
+          },
+          {
+            id: 'EV-LONG',
+            title: 'Conference',
+            fromDate: monthYear(-1),
+            toDate: monthYear(1),
+            fromTime: '09:00',
+            toTime: '17:00',
+            color: 'cyan',
+          },
+        ],
+        config: { defaultMode: 'Day' },
+      },
+    })
+
+    cy.contains('Afterparty').should('exist')
+    cy.contains('Conference').should('exist')
+  })
+
   it('puts a multi-day event in the all-day row and splits an overnight one', () => {
     cy.mount(Calendar, {
       props: {
@@ -264,7 +298,7 @@ describe('Calendar', () => {
       .filter(':contains("Release night")')
       .should('have.length', 2)
       .each(($piece) => {
-        expect($piece.text()).to.contain('10 pm - 2 am')
+        expect($piece.text()).to.contain('10 pm – 2 am')
       })
   })
 
