@@ -33,7 +33,7 @@
     -->
     <div
       ref="scroller"
-      class="relative min-h-0 flex-1 overflow-y-auto border-outline-gray-1"
+      class="relative min-h-0 flex-1 overflow-y-auto rounded-6 border-outline-gray-1"
       :class="!config.noBorder && 'border-[0.5px]'"
     >
       <div class="flex min-h-full flex-col">

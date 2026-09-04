@@ -15,7 +15,7 @@
   -->
   <div
     ref="scroller"
-    class="flex flex-1 flex-col overflow-y-auto"
+    class="flex flex-1 flex-col overflow-y-auto rounded-6"
     :class="[
       config.noBorder
         ? 'border-t-[1px]'

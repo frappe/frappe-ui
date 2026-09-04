@@ -1,12 +1,19 @@
 <template>
-  <div class="flex flex-col flex-1 overflow-y-auto">
+  <!-- The box's own edge is drawn here, on the element that carries the corner;
+       the sections inside keep their separators only. -->
+  <div
+    class="flex flex-col flex-1 overflow-y-auto rounded-6 border-outline-gray-1"
+    :class="config.noBorder ? '' : 'border-[1px]'"
+  >
     <!-- Full day events -->
     <div
       class="flex shrink-0 h-fit"
-      :class="[config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-b-0']"
+      :class="[config.noBorder ? 'border-t-[1px]' : 'border-b-[1px]']"
     >
+      <!-- The same rule the hour gutter draws below, carried up through the
+           all-day row so the day's left edge is one line. -->
       <div
-        class="flex justify-center items-start pt-[3px] w-20 text-base text-ink-gray-6 text-center"
+        class="flex w-20 shrink-0 items-start justify-center border-r-[1px] border-outline-gray-1 pt-[3px] text-center text-base text-ink-gray-6"
       >
         <component
           :is="showCollapsable ? Button : 'div'"
@@ -27,7 +34,7 @@
         </component>
       </div>
       <div
-        class="flex flex-wrap gap-1 py-1 w-full overflow-hidden"
+        class="flex w-full flex-wrap gap-1 overflow-hidden p-1"
         :data-date-attr="currentDate"
         @click.prevent="
           calendarActions.handleCellClick($event, currentDate, '', true)
@@ -58,13 +65,19 @@
     <div class="h-full overflow-hidden">
       <div
         class="flex h-full w-full overflow-scroll border-outline-gray-1"
-        :class="[
-          config.noBorder ? 'border-t-[1px]' : 'border-[1px] border-r-0',
-        ]"
+        :class="[config.noBorder ? 'border-t-[1px]' : '']"
         ref="gridRef"
       >
-        <!-- Left column -->
-        <div class="grid h-full w-20 grid-cols-1">
+        <!-- Left column. `shrink-0`, or the flex row squeezes the gutter and
+             its rule drifts out of line with the all-day label above it; and
+             the rule is this column's right edge, not the day column's left,
+             so it lands on the same pixel as the label's above. -->
+        <!-- `self-start`, so the gutter is as tall as its 24 hours rather than
+             stretched to the scroll viewport: its rule is the day's left edge,
+             and a stretched box paints one that stops at the fold. -->
+        <div
+          class="grid w-20 shrink-0 self-start grid-cols-1 border-r-[1px] border-outline-gray-1"
+        >
           <span
             v-for="time in 24"
             class="flex h-[72px] items-end justify-center text-center text-sm text-ink-gray-5"
@@ -75,8 +88,7 @@
         <!-- Calendar Grid / Right Column -->
         <div class="grid h-full w-full grid-cols-1 pb-2">
           <div
-            class="calendar-column relative border-l-[1px] border-outline-gray-1"
-            :class="[config.noBorder ? '' : ' border-r-[1px]']"
+            class="calendar-column relative"
             data-time-grid
           >
             <!-- Day Grid -->
