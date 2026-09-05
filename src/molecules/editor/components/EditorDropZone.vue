@@ -36,19 +36,27 @@ const props = withDefaults(
 
 const root = useTemplateRef<HTMLElement>('root')
 
+// One rule for both the drop handler and the overlay, so the zone never offers
+// a drop it would refuse. A function, not a computed: `isEditable` and
+// `isDestroyed` are plain tiptap state that never notifies Vue, so a cached
+// answer would survive a `setEditable()` call. Read fresh, every drag.
+function acceptsFiles(editor: Editor | null): editor is Editor {
+  return !props.disabled && !!editor && !editor.isDestroyed && editor.isEditable
+}
+
 const { isWindowDragging, isOverZone, draggedTypes } = useEditorFileDrop(
   root,
   (files) => {
     const editor = props.editor
-    if (props.disabled || !editor || editor.isDestroyed || !editor.isEditable) {
-      return
-    }
+    if (!acceptsFiles(editor)) return
     // The single drop pipeline decides single-image vs group dialog vs video.
     editor.commands.dropFiles(files)
   },
 )
 
-const showOverlay = computed(() => isWindowDragging.value && !props.disabled)
+const showOverlay = computed(
+  () => isWindowDragging.value && acceptsFiles(props.editor),
+)
 const overlayLabel = computed(() => {
   const imageCount = draggedTypes.value.filter((type) =>
     /^image\//i.test(type),

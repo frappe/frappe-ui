@@ -276,7 +276,7 @@ defineProps<{ editor?: Editor | null }>()
 
 ### `EditorDropZone`
 
-File-drop target that wraps the editor surface (toolbar + content). A file dropped on the chrome uploads and inserts at the document end; drops on the prose stay with the media plugin. The `#overlay` scoped slot replaces the overlay look.
+File-drop target that wraps the editor surface (toolbar + content). A file dropped on the chrome uploads and inserts at the document end; drops on the prose stay with the media plugin. The `#overlay` scoped slot replaces the overlay look. The overlay appears only when the zone would accept the drop, so a `disabled`, `null`, destroyed, or read-only editor shows nothing.
 
 ```ts
 defineProps<{ editor: Editor | null; disabled?: boolean; label?: string }>()
