@@ -70,12 +70,12 @@
 
 <script setup lang="ts">
 import { computed, useId } from 'vue'
-import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import {
   useColorScheme,
   type ColorScheme,
 } from '#composables/useColorScheme'
+import { useReactiveSlots } from '#composables/useReactiveSlots'
 import { warnDeprecated } from '#utils/warnDeprecated'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
