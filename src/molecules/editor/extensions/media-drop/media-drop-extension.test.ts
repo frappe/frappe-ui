@@ -7,43 +7,9 @@
  * read uploads the file and inserts it into the document you are reading.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { createApp, h, nextTick, reactive } from 'vue'
-import Editor from '../../Editor.vue'
-import EditorContent from '../../EditorContent.vue'
 import { CommentKit } from '../../kits'
+import { flush, mount } from '../../test-helpers'
 import type { Editor as TiptapEditor } from '../../useEditor'
-
-type EditorProps = InstanceType<typeof Editor>['$props']
-
-function mount(staticProps: EditorProps) {
-  const state = reactive({ modelValue: '' })
-  let editor: TiptapEditor | null = null
-  const root = document.createElement('div')
-  document.body.appendChild(root)
-  const app = createApp({
-    render() {
-      return h(
-        Editor,
-        { ...staticProps, ...state },
-        {
-          default: ({ editor: e }: { editor: TiptapEditor | null }) => {
-            editor = e
-            return h(EditorContent, { editor: e })
-          },
-        },
-      )
-    },
-  })
-  app.mount(root)
-  return { getEditor: () => editor!, app }
-}
-
-const flush = async () => {
-  for (let i = 0; i < 5; i++) {
-    await Promise.resolve()
-    await nextTick()
-  }
-}
 
 const image = () =>
   new File([new Uint8Array([1, 2, 3])], 'shot.png', { type: 'image/png' })
