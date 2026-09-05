@@ -42,10 +42,10 @@
           <div
             v-for="stage in stages"
             :key="stage.index"
-            class="min-w-0"
+            class="flex min-w-0 flex-col gap-1"
             :class="stage.index === 0 ? 'pe-3' : 'px-3'"
           >
-            <div class="truncate text-p-sm text-ink-gray-5">
+            <div class="truncate text-sm text-ink-gray-5">
               {{ stage.label }}
             </div>
             <div
