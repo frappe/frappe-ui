@@ -65,6 +65,11 @@ export const MediaDrop = Extension.create({
         (files: File[]) =>
         ({ editor }) => {
           if (files.length === 0) return false
+          // A read-only editor takes no files, whichever entry point asked.
+          // Guarding the command as well as its callers keeps the rule in one
+          // place: the drop plugin, `EditorDropZone`, and anything else that
+          // reaches for `dropFiles` all get it.
+          if (!editor.isEditable) return false
 
           const images = files.filter((f) => IMAGE_RE.test(f.type))
           const videos = files.filter((f) => VIDEO_RE.test(f.type))
@@ -116,6 +121,22 @@ export const MediaDrop = Extension.create({
             drop: (view: EditorView, event: DragEvent): boolean => {
               const files = collectFiles(event.dataTransfer)
               if (files.length === 0) return false
+
+              // ProseMirror runs `handleDOMEvents` before its own editable
+              // check (`runCustomHandler` in input.ts), so this fires on a
+              // read-only editor too. Without this guard, dropping an image on
+              // a post you are only reading uploads it and inserts it locally.
+              //
+              // Claimed rather than ignored: letting the event through means
+              // the browser navigates the tab to the dropped file, which is a
+              // worse outcome than a drop that does nothing. Propagation is
+              // left alone, so the event still bubbles. Inside
+              // `EditorDropZone` it goes no further: that handler stops
+              // propagation itself, and it also bails on a read-only editor.
+              if (!view.editable) {
+                event.preventDefault()
+                return true
+              }
               // Only claim drops we can actually route; let ProseMirror handle
               // the rest. Non-media files route to attachments when available.
               const hasMedia = files.some(
