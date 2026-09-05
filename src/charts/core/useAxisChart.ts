@@ -11,7 +11,8 @@ import {
 } from '../axisChartCommon'
 import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
-import type { AxisChartFormatters } from '../seriesData'
+import { buildTooltipItems } from '../tooltipItems'
+import { seriesLabel, type AxisChartFormatters } from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
@@ -151,9 +152,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     })),
   )
 
-  function seriesLabel(series: AxisChartSeriesConfig) {
-    return series.label ?? formatLabel(series.name)
-  }
 
   // A series reads in the units of the axis it is actually drawn against, so
   // `y2` series never fall back to the primary formatter — except on a
@@ -250,22 +248,15 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
 
   function showIndex(index: number, clientX?: number, clientY?: number) {
     const row = rows.value[index]
-    const items = config.value.series
-      .filter((series) => !hiddenSeries.value.includes(series.name))
-      .map((series) => ({
-        name: series.name,
-        label: seriesLabel(series),
-        color: seriesColors.value[series.name],
-        value: Number(row[series.name]),
-        formattedValue: formatSeriesValue(series, Number(row[series.name])),
-        // A normalized plot draws the share, so the tooltip is the only place
-        // the measured number survives — it carries both.
-        percent: stackShares.value?.get(series.name)?.[index] ?? undefined,
-      }))
-      // A series that silently drops out of the tooltip reads as a bug, so a
-      // zero stays. Only a blank cell is dropped. Biggest contributor first.
-      .filter((item) => !isNaN(item.value))
-      .sort((a, b) => b.value - a.value)
+    const items = buildTooltipItems({
+      row,
+      index,
+      series: config.value.series,
+      hiddenSeries: hiddenSeries.value,
+      colors: seriesColors.value,
+      formatSeries: formatSeriesValue,
+      shares: stackShares.value,
+    })
 
     if (!items.length) {
       tooltip.open = false

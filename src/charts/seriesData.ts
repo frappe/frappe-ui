@@ -8,6 +8,7 @@ import type {
   ChartYAxisConfig,
 } from './types'
 import { toNumber } from './axisChartCommon'
+import { formatLabel } from './format'
 import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 
 /** Below two there is nothing left to collapse into. */
@@ -84,6 +85,11 @@ export function normalizeAxisChartProps(
       y2: props.y2Axis?.format,
     },
   }
+}
+
+/** What a series is called wherever it is printed: legend, tooltip, reading. */
+export function seriesLabel(series: AxisChartSeriesConfig) {
+  return series.label ?? formatLabel(series.name)
 }
 
 /**
