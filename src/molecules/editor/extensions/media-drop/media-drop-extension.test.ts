@@ -6,22 +6,18 @@
  * on a read-only editor too. Unguarded, dropping an image on a post you can only
  * read uploads the file and inserts it into the document you are reading.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createApp, h, nextTick, reactive } from 'vue'
+import Editor from '../../Editor.vue'
+import EditorContent from '../../EditorContent.vue'
+import { CommentKit } from '../../kits'
+import type { Editor as TiptapEditor } from '../../useEditor'
 
-let Editor: any
-let EditorContent: any
-let CommentKit: any
+type EditorProps = InstanceType<typeof Editor>['$props']
 
-beforeEach(async () => {
-  ;({ default: Editor } = await import('../../Editor.vue'))
-  ;({ default: EditorContent } = await import('../../EditorContent.vue'))
-  ;({ CommentKit } = await import('../../kits'))
-})
-
-function mount(staticProps: Record<string, any>) {
-  const state = reactive<Record<string, any>>({ modelValue: '' })
-  let editor: any = null
+function mount(staticProps: EditorProps) {
+  const state = reactive({ modelValue: '' })
+  let editor: TiptapEditor | null = null
   const root = document.createElement('div')
   document.body.appendChild(root)
   const app = createApp({
@@ -30,7 +26,7 @@ function mount(staticProps: Record<string, any>) {
         Editor,
         { ...staticProps, ...state },
         {
-          default: ({ editor: e }: any) => {
+          default: ({ editor: e }: { editor: TiptapEditor | null }) => {
             editor = e
             return h(EditorContent, { editor: e })
           },
@@ -39,7 +35,7 @@ function mount(staticProps: Record<string, any>) {
     },
   })
   app.mount(root)
-  return { getEditor: () => editor, app }
+  return { getEditor: () => editor!, app }
 }
 
 const flush = async () => {
@@ -60,8 +56,12 @@ const pdf = () =>
     type: 'application/pdf',
   })
 
+// One spy per test, so call counts stay isolated.
+const uploadSpy = () =>
+  vi.fn(async (file: File) => ({ file_url: `/files/${file.name}` }))
+
 /** jsdom has no DataTransfer, and `collectFiles` only reads `items`. */
-function drop(editor: any, file: File) {
+function drop(editor: TiptapEditor, file: File) {
   const event: any = new Event('drop', { bubbles: true, cancelable: true })
   event.dataTransfer = { items: [{ kind: 'file', getAsFile: () => file }] }
   event.clientX = 0
@@ -70,9 +70,9 @@ function drop(editor: any, file: File) {
   return event
 }
 
-function nodeCount(editor: any, typeName: string): number {
+function nodeCount(editor: TiptapEditor, typeName: string): number {
   let count = 0
-  editor.state.doc.descendants((node: any) => {
+  editor.state.doc.descendants((node) => {
     if (node.type.name === typeName) count++
   })
   return count
@@ -80,9 +80,7 @@ function nodeCount(editor: any, typeName: string): number {
 
 describe('MediaDrop on a read-only editor', () => {
   it('does not upload or insert a dropped file', async () => {
-    const upload = vi.fn(async (file: File) => ({
-      file_url: `/files/${file.name}`,
-    }))
+    const upload = uploadSpy()
     const ctx = mount({
       extensions: [CommentKit],
       uploadFunction: upload,
@@ -101,9 +99,7 @@ describe('MediaDrop on a read-only editor', () => {
   })
 
   it('claims the drop so the browser does not navigate to the file', async () => {
-    const upload = vi.fn(async (file: File) => ({
-      file_url: `/files/${file.name}`,
-    }))
+    const upload = uploadSpy()
     const ctx = mount({
       extensions: [CommentKit],
       uploadFunction: upload,
@@ -119,9 +115,7 @@ describe('MediaDrop on a read-only editor', () => {
   })
 
   it('rejects dropFiles called directly, whatever the entry point', async () => {
-    const upload = vi.fn(async (file: File) => ({
-      file_url: `/files/${file.name}`,
-    }))
+    const upload = uploadSpy()
     const ctx = mount({
       extensions: [CommentKit],
       uploadFunction: upload,
@@ -141,9 +135,7 @@ describe('MediaDrop on a read-only editor', () => {
 
 describe('MediaDrop on an editable editor', () => {
   it('still uploads and inserts a dropped file', async () => {
-    const upload = vi.fn(async (file: File) => ({
-      file_url: `/files/${file.name}`,
-    }))
+    const upload = uploadSpy()
     const ctx = mount({ extensions: [CommentKit], uploadFunction: upload })
     const editor = ctx.getEditor()
     expect(editor.isEditable).toBe(true)
