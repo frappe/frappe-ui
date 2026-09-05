@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue'
+import { computed } from 'vue'
 
 interface ItemProp {
   name: string
@@ -16,9 +16,6 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const slots = useSlots()
-
-const hasCustomCodeSlot = computed(() => Boolean(slots.code))
 
 const typeDefinition = computed(() => {
   const typeName = props.name ? `${props.name}Props` : 'ComponentProps'
@@ -52,7 +49,7 @@ const typeDefinition = computed(() => {
       </summary>
 
       <div class="mt-1 overflow-hidden rounded-7 border bg-surface-gray-1">
-        <slot v-if="hasCustomCodeSlot" name="code" />
+        <slot v-if="$slots.code" name="code" />
         <pre
           v-else
           class="overflow-x-auto whitespace-pre px-4 py-3 font-mono text-xs leading-6 text-ink-gray-7"
