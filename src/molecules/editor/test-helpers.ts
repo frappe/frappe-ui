@@ -13,9 +13,33 @@ import type { Editor as TiptapEditor } from './useEditor'
 type EditorProps = InstanceType<typeof Editor>['$props']
 
 /**
+ * Every mount records how to take itself back down here. A failed assertion
+ * skips the rest of the test body, so cleanup cannot live at the end of a
+ * test. Without this registry a broken test leaks a mounted editor, and the
+ * root element it was mounted into, straight into the next test.
+ */
+const teardowns: Array<() => void> = []
+
+/**
+ * Adds a teardown for something a test mounted itself, so it drains in the
+ * same pass, and in the same order, as the ones `mount` registers.
+ */
+export function registerCleanup(teardown: () => void) {
+  teardowns.push(teardown)
+}
+
+/** Drains the registry, last registered first. Hand it to `afterEach`. */
+export function cleanupMounted() {
+  while (teardowns.length) teardowns.pop()!()
+}
+
+/**
  * Mounts `Editor` with `EditorContent` in its default slot and hands back the
  * tiptap instance the slot receives. `modelValue` is reactive so the editor
  * behaves like a controlled one; everything else is passed through as static.
+ *
+ * The returned `destroy` is already registered with `cleanupMounted`; call it
+ * directly only when a test needs the editor gone before the hook runs.
  */
 export function mount(staticProps: EditorProps) {
   const state = reactive({ modelValue: '' })
@@ -37,7 +61,12 @@ export function mount(staticProps: EditorProps) {
     },
   })
   app.mount(root)
-  return { getEditor: () => editor!, app, root }
+  const destroy = () => {
+    app.unmount()
+    root.remove()
+  }
+  registerCleanup(destroy)
+  return { getEditor: () => editor!, app, root, destroy }
 }
 
 /** Drains the microtask queue and Vue's render queue a few times over. */

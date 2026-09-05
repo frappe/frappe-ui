@@ -10,13 +10,15 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { createApp, h } from 'vue'
 import EditorDropZone from './EditorDropZone.vue'
 import { CommentKit } from '../kits'
-import { flush, mount as mountEditor } from '../test-helpers'
+import {
+  cleanupMounted,
+  flush,
+  mount as mountEditor,
+  registerCleanup,
+} from '../test-helpers'
 import type { Editor as TiptapEditor } from '../useEditor'
 
 const LABEL = 'Drop files to upload'
-
-type Teardown = () => void
-const teardowns: Teardown[] = []
 
 /**
  * Mounts the zone on its own, with a real tiptap instance from the shared
@@ -31,7 +33,7 @@ function mountZone(props: {
   document.body.appendChild(root)
   const app = createApp({ render: () => h(EditorDropZone, props) })
   app.mount(root)
-  teardowns.push(() => {
+  registerCleanup(() => {
     app.unmount()
     root.remove()
   })
@@ -39,9 +41,7 @@ function mountZone(props: {
 }
 
 function editorFor(options: { editable?: boolean }): TiptapEditor {
-  const ctx = mountEditor({ extensions: [CommentKit], ...options })
-  teardowns.push(() => ctx.app.unmount())
-  return ctx.getEditor()
+  return mountEditor({ extensions: [CommentKit], ...options }).getEditor()
 }
 
 /** jsdom has no DataTransfer, and the drag signal only reads `types`. */
@@ -51,11 +51,13 @@ function startWindowDrag() {
   window.dispatchEvent(event)
 }
 
+// One hook, so the order is explicit rather than a guess about how vitest
+// sequences two of them: end the drag first, then unmount.
 afterEach(() => {
   // The window drag signal is module-level and reference-counted: end the drag
   // and unmount, or the next test starts mid-drag.
   window.dispatchEvent(new Event('dragend'))
-  while (teardowns.length) teardowns.pop()!()
+  cleanupMounted()
 })
 
 describe('EditorDropZone overlay', () => {

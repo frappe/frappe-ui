@@ -7,31 +7,17 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { CommentKit } from '../../kits'
-import { flush, mount } from '../../test-helpers'
+import { cleanupMounted, flush, mount } from '../../test-helpers'
 import type { Editor as TiptapEditor } from '../../useEditor'
 
-type Teardown = () => void
-const teardowns: Teardown[] = []
-
-/** Mounts through the shared helper and records how to take it back down. */
-function mountEditor(props: Parameters<typeof mount>[0]) {
-  const ctx = mount(props)
-  teardowns.push(() => ctx.app.unmount())
-  return ctx
-}
-
-afterEach(() => {
-  // Cleanup lives here, not at the end of a test body: a failed assertion
-  // skips the rest of the test and would leak a mounted editor into the next.
-  while (teardowns.length) teardowns.pop()!()
-})
+afterEach(cleanupMounted)
 
 describe('attachment drop flow (CommentKit)', () => {
   it('inserts a chip node when a non-media file is uploaded', async () => {
     const upload = vi.fn(async (file: File) => ({
       file_url: `/files/${file.name}`,
     }))
-    const ctx = mountEditor({
+    const ctx = mount({
       extensions: [CommentKit],
       uploadFunction: upload,
     })
