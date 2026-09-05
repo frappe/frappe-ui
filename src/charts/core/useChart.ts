@@ -91,6 +91,13 @@ export function useChart({
   const chart = shallowRef<ECharts>()
   let unmounted = false
 
+  // The entry animation belongs to the chart arriving, not to every later
+  // option. `notMerge` rebuilds the series each time, so echarts replays that
+  // entry animation on any change — a colour tweak in a chart builder makes the
+  // whole plot grow from nothing again. Zeroing the initial duration after the
+  // first render leaves the chart still while it is edited.
+  let rendered = false
+
   // `chart` is a shallowRef, so this re-runs once the instance exists and then
   // on every reactive change inside the option getter. Nothing is built before
   // then: an option may be built from what this composable measures (`width`),
@@ -100,7 +107,11 @@ export function useChart({
     if (!instance) return
     const nextOption = option()
     if (!nextOption) return
-    instance.setOption(nextOption, { notMerge: true, lazyUpdate: true })
+    instance.setOption(
+      rendered ? { ...nextOption, animationDuration: 0 } : nextOption,
+      { notMerge: true, lazyUpdate: true },
+    )
+    rendered = true
   })
 
   const width = ref(0)
