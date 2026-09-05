@@ -28,9 +28,27 @@ export function registerCleanup(teardown: () => void) {
   teardowns.push(teardown)
 }
 
-/** Drains the registry, last registered first. Hand it to `afterEach`. */
+/**
+ * Drains the registry, last registered first. Hand it to `afterEach`.
+ *
+ * A throwing teardown must not strand the rest — that is the one thing this
+ * registry exists to guarantee — so the drain finishes and the first failure
+ * is rethrown afterwards. Swallowing it would hide a broken unmount.
+ */
 export function cleanupMounted() {
-  while (teardowns.length) teardowns.pop()!()
+  let failure: unknown
+  let failed = false
+  while (teardowns.length) {
+    try {
+      teardowns.pop()!()
+    } catch (error) {
+      if (!failed) {
+        failed = true
+        failure = error
+      }
+    }
+  }
+  if (failed) throw failure
 }
 
 /**
