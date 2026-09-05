@@ -6,10 +6,26 @@
  * on a read-only editor too. Unguarded, dropping an image on a post you can only
  * read uploads the file and inserts it into the document you are reading.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { CommentKit } from '../../kits'
 import { flush, mount } from '../../test-helpers'
 import type { Editor as TiptapEditor } from '../../useEditor'
+
+type Teardown = () => void
+const teardowns: Teardown[] = []
+
+/** Mounts through the shared helper and records how to take it back down. */
+function mountEditor(props: Parameters<typeof mount>[0]) {
+  const ctx = mount(props)
+  teardowns.push(() => ctx.app.unmount())
+  return ctx
+}
+
+afterEach(() => {
+  // Cleanup lives here, not at the end of a test body: a failed assertion
+  // skips the rest of the test and would leak a mounted editor into the next.
+  while (teardowns.length) teardowns.pop()!()
+})
 
 const image = () =>
   new File([new Uint8Array([1, 2, 3])], 'shot.png', { type: 'image/png' })
@@ -47,7 +63,7 @@ function nodeCount(editor: TiptapEditor, typeName: string): number {
 describe('MediaDrop on a read-only editor', () => {
   it('does not upload or insert a dropped file', async () => {
     const upload = uploadSpy()
-    const ctx = mount({
+    const ctx = mountEditor({
       extensions: [CommentKit],
       uploadFunction: upload,
       editable: false,
@@ -60,13 +76,11 @@ describe('MediaDrop on a read-only editor', () => {
 
     expect(upload).not.toHaveBeenCalled()
     expect(nodeCount(editor, 'attachment')).toBe(0)
-
-    ctx.app.unmount()
   })
 
   it('claims the drop so the browser does not navigate to the file', async () => {
     const upload = uploadSpy()
-    const ctx = mount({
+    const ctx = mountEditor({
       extensions: [CommentKit],
       uploadFunction: upload,
       editable: false,
@@ -76,13 +90,11 @@ describe('MediaDrop on a read-only editor', () => {
     await flush()
 
     expect(event.defaultPrevented).toBe(true)
-
-    ctx.app.unmount()
   })
 
   it('rejects dropFiles called directly, whatever the entry point', async () => {
     const upload = uploadSpy()
-    const ctx = mount({
+    const ctx = mountEditor({
       extensions: [CommentKit],
       uploadFunction: upload,
       editable: false,
@@ -94,15 +106,16 @@ describe('MediaDrop on a read-only editor', () => {
 
     expect(upload).not.toHaveBeenCalled()
     expect(nodeCount(editor, 'attachment')).toBe(0)
-
-    ctx.app.unmount()
   })
 })
 
 describe('MediaDrop on an editable editor', () => {
   it('still uploads and inserts a dropped file', async () => {
     const upload = uploadSpy()
-    const ctx = mount({ extensions: [CommentKit], uploadFunction: upload })
+    const ctx = mountEditor({
+      extensions: [CommentKit],
+      uploadFunction: upload,
+    })
     const editor = ctx.getEditor()
     expect(editor.isEditable).toBe(true)
 
@@ -111,7 +124,5 @@ describe('MediaDrop on an editable editor', () => {
 
     expect(upload).toHaveBeenCalledOnce()
     expect(nodeCount(editor, 'attachment')).toBe(1)
-
-    ctx.app.unmount()
   })
 })
