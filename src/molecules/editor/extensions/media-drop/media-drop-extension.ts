@@ -130,7 +130,9 @@ export const MediaDrop = Extension.create({
               // Claimed rather than ignored: letting the event through means
               // the browser navigates the tab to the dropped file, which is a
               // worse outcome than a drop that does nothing. Propagation is
-              // left alone so an outer drop target still sees it.
+              // left alone, so the event still bubbles. Inside
+              // `EditorDropZone` it goes no further: that handler stops
+              // propagation itself, and it also bails on a read-only editor.
               if (!view.editable) {
                 event.preventDefault()
                 return true
