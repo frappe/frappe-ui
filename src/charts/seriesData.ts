@@ -3,6 +3,7 @@ import type {
   AxisChartProps,
   AxisChartSeriesConfig,
   ChartCategoryFormatter,
+  ChartTooltipSeries,
   ChartValueAxisOptions,
   ChartValueFormatter,
   ChartYAxisConfig,
@@ -27,6 +28,12 @@ export type AxisChartFormatters = {
 export type NormalizedAxisChart = {
   config: AxisChartBaseConfig
   format: AxisChartFormatters
+  /**
+   * The tooltip-only columns, resolved. They travel beside the config rather
+   * than inside it: the option builders read the config, and nothing an option
+   * builder draws should learn that these exist.
+   */
+  tooltipSeries: ChartTooltipSeries[]
 }
 
 /**
@@ -84,6 +91,14 @@ export function normalizeAxisChartProps(
       y: props.yAxis?.format,
       y2: props.y2Axis?.format,
     },
+    tooltipSeries: (props.tooltipSeries ?? []).map((name) => {
+      const style = props.tooltipSeriesConfig?.[name]
+      return {
+        name,
+        label: style?.label ?? formatLabel(name),
+        format: style?.format,
+      }
+    }),
   }
 }
 

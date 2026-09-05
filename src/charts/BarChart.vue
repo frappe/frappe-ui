@@ -133,6 +133,7 @@ const {
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
+  tooltipSeries: () => normalized.value.tooltipSeries,
   horizontal: () => Boolean(props.horizontal),
   hiddenSeries,
   onSelect: (event) => emit('select', event),

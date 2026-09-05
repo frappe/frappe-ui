@@ -102,6 +102,32 @@ a date. `horizontal` swaps the two axes and the lines follow. A line outside the
 range the plot covers is not drawn — the scale follows the data, not the
 annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
 
+## Context in the tooltip
+
+`tooltipSeries` names columns that reach the tooltip and nothing else: no mark,
+no legend entry, no palette slot, and no effect on the value axis. Use it for a
+number the reader needs beside the picture but that does not belong on the same
+scale — the order count behind a conversion rate, the target beside the actual.
+
+```vue
+<BarChart
+  :data="data"
+  x="month"
+  :y="['conversion_rate']"
+  :tooltip-series="['orders']"
+  :tooltip-series-config="{ orders: { label: 'Orders' } }"
+/>
+```
+
+They print after the series rows, under a rule and without a swatch, in the
+order given. The series rows are ranked by magnitude; an extra is not, because
+a value in another unit says nothing when it is ranked among them.
+
+`tooltipSeriesConfig` is keyed by column name, the way `seriesConfig` is keyed
+by series. `format` prints the value: an extra sits on no axis, so it takes no
+formatter from one. A column holding text rather than a number is a legitimate
+extra, and prints as it stands.
+
 ## Hiding a series
 
 A chart with more than one series draws a legend under the plot. Press an entry

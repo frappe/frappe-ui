@@ -61,6 +61,7 @@ export type {
   ChartLegendEmits,
   ChartLegendProps,
   ChartStateSlots,
+  ChartTooltipFormatter,
   ChartTooltipProps,
   ChartTooltipSlots,
   ChartValueAxisOptions,
@@ -87,6 +88,7 @@ export type {
   ScatterChartProps,
   ScatterChartSlots,
   SeriesStyle,
+  TooltipSeriesStyle,
 } from './types'
 
 // Only what the props, emits, slots and template refs above reach for; the

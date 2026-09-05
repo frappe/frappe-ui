@@ -79,6 +79,18 @@
     default: '[]'
   },
   {
+    name: 'tooltipSeries',
+    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit — the count behind a rate, the target beside the actual.\n\nThey print after the series rows, in the order given, because a value in\nanother unit says nothing when it is ranked among the series.',
+    required: false,
+    type: 'string[]'
+  },
+  {
+    name: 'tooltipSeriesConfig',
+    description: 'Keyed by column name, the way `seriesConfig` is keyed by series.',
+    required: false,
+    type: 'Record<string, TooltipSeriesStyle>'
+  },
+  {
     name: 'xAxis',
     description: 'The category axis: its title, how the `x` column reads, and label format.',
     required: false,

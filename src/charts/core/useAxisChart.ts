@@ -22,6 +22,7 @@ import type {
   ChartDatapointEvent,
   ChartLegendItem,
   ChartTooltipItem,
+  ChartTooltipSeries,
   PlotLabelPlacement,
 } from '../types'
 
@@ -43,6 +44,12 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * beside it, so the reader gets both.
    */
   stackShares?: () => Map<string, (number | null)[]>
+  /**
+   * Columns that reach the tooltip and nothing else. They are handed in beside
+   * the config, not inside it, so the option builder never sees them: an extra
+   * has no mark, no legend entry, no palette slot and no axis.
+   */
+  tooltipSeries?: () => ChartTooltipSeries[]
   onSelect?: (event: ChartDatapointEvent) => void
 }
 
@@ -61,6 +68,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())
+  const tooltipSeries = computed(() => args.tooltipSeries?.() ?? [])
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
   // read the axis the way it is actually drawn — and the same row list, so a
@@ -151,7 +159,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       hidden: hiddenSeries.value.includes(series.name),
     })),
   )
-
 
   // A series reads in the units of the axis it is actually drawn against, so
   // `y2` series never fall back to the primary formatter — except on a
@@ -256,9 +263,12 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       colors: seriesColors.value,
       formatSeries: formatSeriesValue,
       shares: stackShares.value,
+      tooltipSeries: tooltipSeries.value,
     })
 
-    if (!items.length) {
+    // The tooltip still stands on the series: extras alone would open one over
+    // a chart whose whole legend is switched off.
+    if (!items.some((item) => item.kind === 'series')) {
       tooltip.open = false
       return
     }

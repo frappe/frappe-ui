@@ -15,7 +15,7 @@
         </div>
         <div class="flex flex-col gap-1.5">
           <div
-            v-for="item in items"
+            v-for="item in seriesItems"
             :key="item.name"
             class="flex items-center justify-between gap-5 text-p-sm"
           >
@@ -39,6 +39,27 @@
             </span>
           </div>
         </div>
+
+        <!-- Context rows carry no swatch: a swatch says the reader can find
+             this on the plot, and an extra is drawn nowhere. The rule is what
+             tells them apart from the series above. -->
+        <div
+          v-if="contextItems.length"
+          class="mt-2 flex flex-col gap-1.5 border-t border-outline-gray-1 pt-2"
+        >
+          <div
+            v-for="item in contextItems"
+            :key="item.name"
+            class="flex items-center justify-between gap-5 text-p-sm"
+          >
+            <span class="min-w-0 truncate text-ink-gray-5">{{
+              item.label
+            }}</span>
+            <span class="shrink-0 tabular-nums text-ink-gray-7">
+              {{ item.formattedValue }}
+            </span>
+          </div>
+        </div>
       </slot>
     </div>
   </Teleport>
@@ -51,6 +72,15 @@ import { formatPercent } from '../format'
 import type { ChartTooltipProps, ChartTooltipSlots } from '../types'
 
 const props = defineProps<ChartTooltipProps>()
+
+// `kind` is optional, so an item that names none is a series: that is what
+// every caller before `tooltipSeries` existed was handing over.
+const seriesItems = computed(() =>
+  props.items.filter((item) => item.kind !== 'context'),
+)
+const contextItems = computed(() =>
+  props.items.filter((item) => item.kind === 'context'),
+)
 
 const portalTarget = usePortalTarget()
 

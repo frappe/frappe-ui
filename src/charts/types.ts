@@ -565,11 +565,19 @@ export type ChartLegendItem = {
 export type ChartTooltipItem = {
   name: string
   label: string
-  color: string
-  value: number
+  /** Left out by a `'context'` item: a swatch would claim a mark on the plot. */
+  color?: string
+  /** A `'context'` item may carry a text attribute, so it is not always a number. */
+  value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
+  /**
+   * `'series'` is a row the plot draws, and is the default. `'context'` is a
+   * `tooltipSeries` column: it reaches the tooltip and nothing else, and is
+   * printed after the series rows.
+   */
+  kind?: 'series' | 'context'
 }
 
 export type ChartDatapointEvent = {
@@ -593,6 +601,9 @@ export type ChartValueFormatter = (value: number) => string
 
 /** A category axis carries whatever the column holds, so its formatter takes any. */
 export type ChartCategoryFormatter = (value: any) => string
+
+/** Prints a tooltip-only value, which may be a text attribute rather than a number. */
+export type ChartTooltipFormatter = (value: number | string) => string
 
 export type ChartBaseProps = {
   /** Heads the card. Left out, the chart draws no header row at all. */
@@ -695,6 +706,28 @@ export type SeriesStyle = {
   echartOptions?: EchartOptionsOverride
 }
 
+/**
+ * Look of a tooltip-only column. A `tooltipSeries` column draws no mark, so it
+ * has no color, no axis and no stack — only what it is called, and how it prints.
+ */
+export type TooltipSeriesStyle = {
+  /** Display name. The `tooltipSeriesConfig` key stays the identity. */
+  label?: string
+  /**
+   * Prints this column's value in the tooltip. An extra sits on no axis, so it
+   * takes no formatter from one. Left out, a number prints with the default
+   * grouping and anything else prints as it stands.
+   */
+  format?: ChartTooltipFormatter
+}
+
+/** One tooltip-only column, with its style already resolved. */
+export type ChartTooltipSeries = {
+  name: string
+  label: string
+  format?: ChartTooltipFormatter
+}
+
 export type AxisChartProps = ChartBaseProps & {
   /** The rows to plot. One row is one position on the category axis. */
   data: Record<string, any>[]
@@ -723,6 +756,17 @@ export type AxisChartProps = ChartBaseProps & {
    * reader hid across a reload. Left unbound, the legend owns it.
    */
   hiddenSeries?: string[]
+  /**
+   * Columns that reach the tooltip and nothing else: no mark, no legend entry,
+   * no palette slot, and no effect on the value axis. For context in another
+   * unit — the count behind a rate, the target beside the actual.
+   *
+   * They print after the series rows, in the order given, because a value in
+   * another unit says nothing when it is ranked among the series.
+   */
+  tooltipSeries?: string[]
+  /** Keyed by column name, the way `seriesConfig` is keyed by series. */
+  tooltipSeriesConfig?: Record<string, TooltipSeriesStyle>
   /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */

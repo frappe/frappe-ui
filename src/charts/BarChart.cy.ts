@@ -98,6 +98,57 @@ describe('BarChart', () => {
         .and('contain.text', 'Sales')
         .and('contain.text', '10')
     })
+
+    // `tooltipSeries` is the context in another unit — the count behind a rate.
+    // It reaches the tooltip and nothing else.
+    describe('a tooltip-only column', () => {
+      const withOrders = data.map((row, index) => ({
+        ...row,
+        orders: (index + 1) * 1000,
+      }))
+
+      const mountWithExtra = (props: Record<string, any> = {}) =>
+        mountChart({
+          data: withOrders,
+          tooltipSeries: ['orders'],
+          tooltipSeriesConfig: { orders: { label: 'Orders' } },
+          ...props,
+        })
+
+      it('prints in the tooltip', () => {
+        mountWithExtra()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]')
+          .should('contain.text', 'Orders')
+          .and('contain.text', '1,000')
+      })
+
+      it('carries no swatch, which would claim a mark on the plot', () => {
+        mountWithExtra()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        // Two series, and the extra adds no third.
+        cy.get('[data-slot="chart-tooltip"] .size-2').should('have.length', 2)
+      })
+
+      it('draws no mark and takes no legend entry', () => {
+        mountWithExtra()
+        bars().should('have.length', data.length * 2)
+        cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+        cy.get('[data-slot="chart-legend"]').should(
+          'not.contain.text',
+          'Orders',
+        )
+      })
+
+      it('stays in the tooltip when the legend hides a series', () => {
+        mountWithExtra()
+        cy.get('[aria-label="Hide Sales"]').click()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]')
+          .should('not.contain.text', 'Sales')
+          .and('contain.text', 'Orders')
+      })
+    })
   })
 
   describe('legend', () => {
