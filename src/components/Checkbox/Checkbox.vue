@@ -56,8 +56,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useAttrs, watchEffect, useSlots } from 'vue'
+import { computed, ref, useAttrs, watchEffect } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -86,14 +87,14 @@ function onChange(e: Event) {
   model.value = (e.target as HTMLInputElement).checked
 }
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
   description?: () => any
 }>()
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const {
   inputId,

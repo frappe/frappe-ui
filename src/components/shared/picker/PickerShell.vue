@@ -70,6 +70,7 @@ import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../../composables/usePortalTarget'
+import { useReactiveSlots } from '../../../composables/useReactiveSlots'
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import type { FrappeUIError } from '../../../composables/useInputLabeling'
 
@@ -133,13 +134,14 @@ const emit = defineEmits<{
   (e: 'requestFocus'): void
 }>()
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   trigger?: (props: TriggerSlotProps) => any
   target?: (props: TriggerSlotProps) => any
   prefix?: (props: TriggerSlotProps) => any
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 defineOptions({ inheritAttrs: false })
 

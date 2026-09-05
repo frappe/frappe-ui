@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, useAttrs, useSlots, useTemplateRef } from 'vue'
+import { computed, useAttrs, useTemplateRef } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { SelectionExposed } from '../shared/selection/types'
@@ -63,7 +64,7 @@ const props = withDefaults(defineProps<SelectProps>(), {
 const portalTarget = usePortalTarget(() => props.portalTo)
 
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<SelectSlots>()
 
 const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
 

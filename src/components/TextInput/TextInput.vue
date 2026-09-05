@@ -72,10 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
@@ -93,9 +94,9 @@ const props = withDefaults(defineProps<TextInputProps>(), {
 })
 
 const emit = defineEmits<TextInputEmits>()
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Content rendered before the input (left side) */
   prefix?: () => any
 

@@ -258,4 +258,56 @@ describe('Textinput', () => {
     cy.get('[data-cy="prefix"]').should('exist').and('have.text', '$')
     cy.get('[data-cy="suffix"]').should('exist').and('have.text', '.00')
   })
+
+  it('reserves room for #prefix and #suffix', () => {
+    cy.mount(TextInput, {
+      slots: { prefix: '<span>$</span>', suffix: '<span>.00</span>' },
+    })
+    cy.get('input').should('have.class', 'ps-8').and('have.class', 'pe-8')
+
+    cy.mount(TextInput)
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+  })
+
+  // The docs playground toggles both slots at runtime. The padding is read
+  // from `useSlots()`, which is not reactive, so a cached value used to leave
+  // the input at `ps-2` and the prefix painted over the text.
+  it('repads when a slot appears or disappears after mount', () => {
+    const Harness = defineComponent({
+      setup() {
+        const show = ref(false)
+
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              TextInput,
+              null,
+              show.value
+                ? {
+                    prefix: () => h('span', '$'),
+                    suffix: () => h('span', '.00'),
+                  }
+                : {},
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('input').should('have.class', 'ps-8').and('have.class', 'pe-8')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+  })
 })

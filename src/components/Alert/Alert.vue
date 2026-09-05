@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watchEffect } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps } from '../shared/action'
@@ -15,7 +16,8 @@ const props = defineProps(alertProps)
 
 const emit = defineEmits<AlertEmits>()
 
-const slots = defineSlots<AlertSlots>()
+defineSlots<AlertSlots>()
+const slots = useReactiveSlots<AlertSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {

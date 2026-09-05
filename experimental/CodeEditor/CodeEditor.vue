@@ -40,18 +40,11 @@
 // tree-shakes into its own async chunk — apps that never render a code field pay
 // no runtime cost (importing `frappe-ui/experimental` pulls in no editor code
 // until a field actually mounts).
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useAttrs,
-  useSlots,
-  watch,
-} from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue'
 import type { EditorView } from '@codemirror/view'
 import type { Compartment, Extension } from '@codemirror/state'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 import InputLabel from '../../src/components/InputLabeling/InputLabel.vue'
 import InputDescription from '../../src/components/InputLabeling/InputDescription.vue'
 import InputError from '../../src/components/InputLabeling/InputError.vue'
@@ -70,7 +63,7 @@ const props = withDefaults(defineProps<CodeEditorProps>(), {
   size: 'md',
 })
 const emit = defineEmits<CodeEditorEmits>()
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
@@ -78,7 +71,7 @@ defineSlots<{
 }>()
 
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const {
   labelId,

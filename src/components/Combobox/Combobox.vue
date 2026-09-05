@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  ref,
-  useAttrs,
-  useSlots,
-  useTemplateRef,
-  watch,
-} from 'vue'
+import { computed, nextTick, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -21,6 +13,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -87,7 +80,12 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<ComboboxSlots>()
+
+// `ComboboxResults` dispatches on dynamic names (`item-${slot}`), which the
+// enumerated `ComboboxSlots` cannot express. Same object, so reads still go
+// through the proxy.
+const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
 const model = defineModel<ComboboxOptionValue | null>({ default: null })
 const open = defineModel<boolean>('open', { default: false })
@@ -736,7 +734,7 @@ defineSlots<ComboboxSlots>()
                   :loading="loading"
                   :empty-text="emptyText"
                   :show-empty="showEmpty"
-                  :slot-fns="slots"
+                  :slot-fns="slotFns"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
                 />

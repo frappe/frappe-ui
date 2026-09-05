@@ -142,7 +142,7 @@ const props = withDefaults(defineProps<DateRangePickerProps>(), {
 })
 const emit = defineEmits<DateRangePickerEmits>()
 
-const slots = defineSlots<DateRangePickerSlots>()
+defineSlots<DateRangePickerSlots>()
 
 // ── Popover open state ───────────────────────────────────────────────────────
 

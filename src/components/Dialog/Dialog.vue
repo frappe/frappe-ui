@@ -159,11 +159,12 @@ import {
   DialogDescription,
   DialogClose,
 } from 'reka-ui'
-import { computed, reactive, ref, useSlots, watchEffect } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useAutofocusOnOpen } from '../../composables/useAutofocusOnOpen'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { Button } from '../Button'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import {
   warnUnsupportedIconString,
   isLucideIconString,
@@ -192,11 +193,11 @@ const props = withDefaults(defineProps<DialogProps>(), {
 
 const emit = defineEmits<DialogEmits>()
 
-const slots = defineSlots<DialogSlots>()
+defineSlots<DialogSlots>()
 
 const portalTarget = usePortalTarget()
 
-const allSlots = useSlots()
+const slots = useReactiveSlots<DialogSlots>()
 
 const isDismissible = computed(() => props.dismissible !== false)
 
@@ -344,7 +345,7 @@ const isSingleActionFullWidth = computed(() => {
 // is title/slot-driven only — the close button lives independently.
 const showHeader = computed(() => {
   if (props.bare) return false
-  if (allSlots.title) return true
+  if (slots.title) return true
   if (props.title) return true
   return false
 })

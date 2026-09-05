@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useReactiveSlots } from '../../../composables/useReactiveSlots'
 import { Icon } from '../../Icon'
 import { browserTabCardClasses, tabRadiusClasses } from './styles'
 import type { PillProps } from './pillTypes'
@@ -12,11 +13,12 @@ const props = withDefaults(defineProps<PillProps>(), {
   orientation: 'horizontal',
 })
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   prefix?: () => any
   default?: () => any
   suffix?: () => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 // `icon` means icon-only intent (label, if provided, is rendered as
 // sr-only). `iconLeft` is an accent icon next to a visible label. Trailing

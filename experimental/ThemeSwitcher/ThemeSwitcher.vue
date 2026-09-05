@@ -69,12 +69,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useId, useSlots } from 'vue'
+import { computed, useId } from 'vue'
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import {
   useColorScheme,
   type ColorScheme,
 } from '#composables/useColorScheme'
+import { useReactiveSlots } from '#composables/useReactiveSlots'
 import { warnDeprecated } from '#utils/warnDeprecated'
 import ThemePreview from './ThemePreview.vue'
 import type { ThemeSwitcherProps } from './types'
@@ -105,7 +106,7 @@ const emit = defineEmits<{
   'update:modelValue': [theme: ColorScheme]
 }>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the heading content. */
   label?: () => any
   /** Overrides the helper-text content. */
@@ -132,7 +133,7 @@ const selected = computed<ColorScheme>({
   },
 })
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const headingId = useId()
 const showLabel = computed(() => Boolean(props.label || slots.label))
 const showDescription = computed(() =>
