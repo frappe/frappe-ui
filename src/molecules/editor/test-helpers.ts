@@ -61,7 +61,14 @@ export function mount(staticProps: EditorProps) {
     },
   })
   app.mount(root)
+  // Idempotent, and it takes itself out of the registry: a test may destroy
+  // early, and the afterEach hook must not then unmount a second time.
+  let destroyed = false
   const destroy = () => {
+    if (destroyed) return
+    destroyed = true
+    const i = teardowns.indexOf(destroy)
+    if (i !== -1) teardowns.splice(i, 1)
     app.unmount()
     root.remove()
   }
