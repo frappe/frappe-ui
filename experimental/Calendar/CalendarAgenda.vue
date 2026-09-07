@@ -54,8 +54,8 @@
           </span>
         </div>
 
-        <!-- One day. Today's card is the one edged in blue, with a dot of the
-             same blue in its header.
+        <!-- One day. Today's card is the one edged and headed in blue, and the
+             one whose header opens with a word rather than a weekday.
 
              Its header rule is blue too: that rule runs edge to edge and meets
              the card's own border at both ends, so leaving it gray broke the
@@ -86,21 +86,13 @@
               past: block.row.isPast,
             }"
           >
-            <!-- Today, in the one mark a header has room for beside the name
-                 it already carries — the same blue as the card's own edge, so
-                 the two read as one signal. Centred rather than baselined: a
-                 dot has no baseline of its own to sit on. -->
-            <span
-              v-if="block.row.isToday"
-              class="size-2 shrink-0 self-center rounded-full bg-surface-blue-5"
-            />
             <!-- Three levels, three distinctions: the week above is a size
                  larger and a weight heavier, the event titles below share this
                  size and weight and are separated by ink alone. That last step
                  is the quiet one, and it is the one holding a card apart from
                  its own contents. -->
             <span class="text-sm-medium text-ink-gray-9">
-              {{ weekday(block.row.date) }}
+              {{ dayName(block.row) ?? weekday(block.row.date) }}
             </span>
             <span class="text-xs text-ink-gray-5">
               {{ dayLabel(block.row) }}
@@ -286,6 +278,12 @@ const weekday = (date: Date) => daysListFull[date.getDay()]
  * The word for a day near enough to have one — today and the day either side of
  * it. Beyond that a name is worse than a date: "in three days" is arithmetic
  * the date has already done.
+ *
+ * It heads the card in place of the weekday, the way "This week" heads a week
+ * in place of its dates: every other card opens with a weekday, so the one that
+ * does not is the one the eye stops on — and the word that makes a card
+ * findable belongs in the slot a reader is scanning, not trailing the date in
+ * the lightest ink on the line.
  */
 const dayName = (row: AgendaDayBlock['row']) => {
   if (row.isToday) return 'Today'
@@ -294,11 +292,13 @@ const dayName = (row: AgendaDayBlock['row']) => {
   return null
 }
 
-/** "7 September", and "· Today" on the days that have a word of their own. */
+/**
+ * "7 September" — with the weekday in front of it on a card that gave its name
+ * away to `dayName`, so no day loses the word it is called by.
+ */
 const dayLabel = (row: AgendaDayBlock['row']) => {
   const date = `${row.date.getDate()} ${monthList[row.date.getMonth()]}`
-  const name = dayName(row)
-  return name ? `${date} \u00b7 ${name}` : date
+  return dayName(row) ? `${weekday(row.date)}, ${date}` : date
 }
 
 /** "Sep 13 – 19" — the days the week covers, which is its name. */
