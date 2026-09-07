@@ -18,10 +18,12 @@ let observer: IntersectionObserver | undefined
 const visible = new Set<string>()
 
 const setHeadings = () => {
-  // Only real doc headings carry an `id` (VitePress adds it for the anchor).
-  // Headings rendered by components in a preview — e.g. Accordion triggers —
-  // have none, so this keeps them out of the page outline.
-  const elements = Array.from(document.querySelectorAll('h2[id], h3[id]'))
+  // Real doc headings carry an id (VitePress adds it for the anchor); headings
+  // from components without one, e.g. Accordion triggers, are filtered out already.
+  // RichTextKit assigns its own ids too, so also drop anything under `[data-demo-preview]`.
+  const elements = Array.from(
+    document.querySelectorAll('h2[id], h3[id]'),
+  ).filter((el) => !el.closest('[data-demo-preview]'))
 
   h2Exists.value = elements.some((el) => el.tagName == 'H2')
 

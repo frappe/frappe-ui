@@ -25,6 +25,7 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
       class="rounded-7 overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
+        data-demo-preview
         :class="[
           isEditorDemo ? '' : 'not-prose',
           'bg-surface-base overflow-x-auto scrollbar min-h-[200px]',
