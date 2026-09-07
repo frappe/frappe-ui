@@ -45,6 +45,20 @@
 .calendar-row-bar {
   background-color: var(--border);
 }
+/* A draft, in a row's vocabulary: the bar is broken rather than solid, saying
+   the same "saved, nothing sent" the pill says with a dashed outline — dashes
+   here too, at the 4/3 the pill's own dashed outline draws. It keeps the
+   event's colour, so the row still reads as belonging to its calendar. The
+   gradient is painted over the fill above, which the gaps would otherwise show
+   through. */
+.calendar-row.event-draft .calendar-row-bar {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0 4px,
+    transparent 4px 7px
+  );
+}
 .calendar-row:hover {
   background-color: var(--surface-gray-1);
 }

@@ -20,6 +20,7 @@
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
           past: isPast,
+          'event-draft': !!props.event.isDraft,
         }"
         :style="eventBgStyle"
         role="button"
