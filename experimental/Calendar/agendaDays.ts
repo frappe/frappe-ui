@@ -1,5 +1,6 @@
 import { getWeekendDays, parseDate } from './calendarUtils'
 import { eventsOn } from './eventSpan'
+import { shortMonth, weekStart } from './monthStrip'
 import type { CalendarEvent } from './types'
 
 /** Whatever names the weekend — the view hands it the whole config. */
@@ -35,24 +36,21 @@ export interface AgendaRow {
    */
   opensMonth: boolean
   isToday: boolean
+  /** The day after today, which reads "Tomorrow". */
+  isTomorrow: boolean
+  /** The day before it, which reads "Yesterday". */
+  isYesterday: boolean
+  /**
+   * The day is behind the reader. The rows of such a day already dim
+   * themselves; the card says it too, so a day spent reads as spent from its
+   * header rather than only from the events under it.
+   */
+  isPast: boolean
   isWeekend: boolean
 }
 
-/**
- * The span the view lists: the anchor's month and the two after it, whole —
- * from the 1st of the first to the last day of the third.
- *
- * The month under way used to start at today, which kept days already spent out
- * of the way but made the header lie: "Sep – Nov" over a list whose September
- * began on the 7th, with that month's earlier events nowhere to be found. The
- * view scrolls to today instead, so what is ahead still leads and what is behind
- * is a scroll away rather than gone.
- *
- * `Calendar` reports this same span as its visible range, so a consumer's fetch
- * window and its `+ Event` anchor agree with what is on screen. That is why it
- * lives here rather than inside the view.
- */
-export function agendaRange(anchor: Date): { start: Date; end: Date } {
+/** The three months the view is anchored on, from the 1st to the last day. */
+export function agendaMonths(anchor: Date): { start: Date; end: Date } {
   const year = anchor.getFullYear()
   const month = anchor.getMonth()
 
@@ -61,6 +59,34 @@ export function agendaRange(anchor: Date): { start: Date; end: Date } {
     // Day 0 of the month after the last is that last month's final day.
     end: new Date(year, month + AGENDA_MONTHS, 0),
   }
+}
+
+/**
+ * The span the view lists: the anchor's month and the two after it, padded out
+ * to whole weeks at both ends — the same padding the Month view's strip does,
+ * for the same reason.
+ *
+ * The list groups its days under the week they fall in, and a week label names
+ * seven days. Ending the span at a month boundary left the first and last of
+ * those labels naming days the list had never been given: "Last week ·
+ * Aug 30 – Sep 5" over a card list that began on the 1st, with the Sunday and
+ * Monday of that week missing rather than empty. A week is either listed or it
+ * is not.
+ *
+ * The month under way used to start at today, which kept days already spent out
+ * of the way but made the header lie: "Sep – Nov" over a list whose September
+ * began on the 7th, with that month's earlier events nowhere to be found. The
+ * view scrolls to today instead, so what is ahead still leads and what is behind
+ * is a scroll away rather than gone.
+ *
+ * `Calendar` reports this same span as its visible range, so a consumer's fetch
+ * window and its `+ Event` anchor agree with what is on screen. Its *title*
+ * comes from `agendaMonths` instead — the reader chose three months, and the
+ * days either side are how the view draws them, not what it is showing.
+ */
+export function agendaRange(anchor: Date): { start: Date; end: Date } {
+  const { start, end } = agendaMonths(anchor)
+  return { start: weekStart(start), end: addDays(weekStart(end), 6) }
 }
 
 /**
@@ -76,6 +102,8 @@ export function agendaRows(
 ): AgendaRow[] {
   const { start, end } = agendaRange(anchor)
   const todayKey = parseDate(today)
+  const tomorrowKey = parseDate(addDays(today, 1))
+  const yesterdayKey = parseDate(addDays(today, -1))
   const weekendDays = getWeekendDays(config)
   const rows: AgendaRow[] = []
 
@@ -97,9 +125,110 @@ export function agendaRows(
       events: onThisDay,
       opensMonth: !previous || previous.date.getMonth() !== date.getMonth(),
       isToday: key === todayKey,
+      isTomorrow: key === tomorrowKey,
+      isYesterday: key === yesterdayKey,
+      isPast: key < todayKey,
       isWeekend: weekendDays.includes(date.getDay()),
     })
   }
 
   return rows
+}
+
+/**
+ * The list is not a flat run of days: days are cards, and cards are grouped
+ * under the week they fall in. `agendaBlocks` is that sequence — the view walks
+ * it once and draws whichever of the two each entry is.
+ */
+export type AgendaBlock = AgendaWeekBlock | AgendaDayBlock
+
+/** The label a run of day cards sits under. */
+export interface AgendaWeekBlock {
+  kind: 'week'
+  key: string
+  /** Sunday to Saturday, the same week the Month view draws as a row. */
+  start: Date
+  end: Date
+  /** The week today falls in — the one that reads "This week". */
+  isCurrent: boolean
+  /** The week after it, which reads "Next week". */
+  isNext: boolean
+  /** The week before it, which reads "Last week". */
+  isPrevious: boolean
+  /**
+   * The week ended before today. Its label fades with the day headers under it,
+   * so a run of spent cards is spent from its heading down rather than reading
+   * as a live week of faded days.
+   */
+  isPast: boolean
+}
+
+/** One day, drawn as a card. */
+export interface AgendaDayBlock {
+  kind: 'day'
+  key: string
+  row: AgendaRow
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days)
+}
+
+/**
+ * The list as the view draws it: week labels and the day cards under them, in
+ * the order they appear.
+ *
+ * Days with nothing on them are not drawn at all, not even as a line saying how
+ * many there were — the dates on the cards either side of a quiet stretch
+ * already say how long it ran.
+ */
+export function agendaBlocks(
+  events: CalendarEvent[],
+  anchor: Date,
+  config?: WeekendConfig,
+  today: Date = new Date(),
+): AgendaBlock[] {
+  const rows = agendaRows(events, anchor, config, today)
+  const currentWeek = parseDate(weekStart(today))
+  const nextWeek = parseDate(addDays(weekStart(today), 7))
+  const lastWeek = parseDate(addDays(weekStart(today), -7))
+  const blocks: AgendaBlock[] = []
+  let week = ''
+
+  for (const row of rows) {
+    const start = weekStart(row.date)
+    const key = parseDate(start)
+    if (key !== week) {
+      week = key
+      const end = addDays(start, 6)
+      blocks.push({
+        kind: 'week',
+        key: `week:${key}`,
+        start,
+        end,
+        isCurrent: key === currentWeek,
+        isNext: key === nextWeek,
+        isPrevious: key === lastWeek,
+        isPast: parseDate(end) < parseDate(today),
+      })
+    }
+
+    blocks.push({ kind: 'day', key: `day:${row.key}`, row })
+  }
+
+  return blocks
+}
+
+/**
+ * "Sep 6 – 12", or "Sep 27 – Oct 3" where the range crosses a month end. The
+ * month is named once when both ends share it: the second is the same word the
+ * reader just read.
+ */
+export function agendaRangeLabel(start: Date, end: Date): string {
+  const from = `${shortMonth(start)} ${start.getDate()}`
+  const to =
+    start.getMonth() === end.getMonth()
+      ? `${end.getDate()}`
+      : `${shortMonth(end)} ${end.getDate()}`
+  return `${from} – ${to}`
 }

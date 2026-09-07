@@ -168,7 +168,7 @@ import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
 import { stripRange } from './monthStrip'
 import { activeEvent } from './composables/useCalendarData'
-import { agendaRange } from './agendaDays'
+import { agendaMonths, agendaRange } from './agendaDays'
 import {
   ACTIVE_VIEW_KEY,
   CALENDAR_ACTIONS_KEY,
@@ -703,10 +703,12 @@ const currentMonthYear = computed(() => {
     }
   }
 
-  // The Agenda spans whole months (bar the days of the first already spent), so
-  // it names them rather than the dates its ends happen to land on.
+  // The Agenda is anchored on whole months, so it names them rather than the
+  // dates its ends happen to land on — `agendaMonths`, not the listed range,
+  // which pads to whole weeks and would have the title naming a month for the
+  // sake of the two days of it the first week reaches back into.
   if (activeView.value === 'Agenda') {
-    const { start, end } = agendaRange(agendaAnchor.value)
+    const { start, end } = agendaMonths(agendaAnchor.value)
     const short = (d: Date) => monthList[d.getMonth()].slice(0, 3)
     return start.getFullYear() === end.getFullYear()
       ? `${short(start)} – ${short(end)} ${end.getFullYear()}`
