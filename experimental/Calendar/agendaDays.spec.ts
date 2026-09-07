@@ -46,20 +46,24 @@ const rowsFrom = (today: string) =>
   agendaRows(events, d(today), undefined, d(today))
 
 describe('agendaRange', () => {
-  it('runs to the end of the third month, starting at today', () => {
-    const { start, end } = agendaRange(d('2026-08-20'), d('2026-08-20'))
-    expect(parseDate(start)).toBe('2026-08-20')
-    expect(parseDate(end)).toBe('2026-10-31')
-  })
-
-  it('runs a month it is not in whole, from the 1st', () => {
-    const { start, end } = agendaRange(d('2026-08-20'), d('2026-07-15'))
+  it('runs three whole months, from the 1st of the first', () => {
+    const { start, end } = agendaRange(d('2026-08-20'))
     expect(parseDate(start)).toBe('2026-08-01')
     expect(parseDate(end)).toBe('2026-10-31')
   })
 
+  // The month under way used to start at today, which hid that month's earlier
+  // events under a header naming the whole month. The view scrolls to today
+  // instead; the span itself no longer depends on when it is read.
+  it('starts at the 1st wherever in the month it is read', () => {
+    const early = agendaRange(d('2026-08-01'))
+    const late = agendaRange(d('2026-08-20'))
+    expect(parseDate(early.start)).toBe(parseDate(late.start))
+    expect(parseDate(early.end)).toBe(parseDate(late.end))
+  })
+
   it('carries the window over a year end', () => {
-    const { end } = agendaRange(d('2026-12-01'), d('2026-12-01'))
+    const { end } = agendaRange(d('2026-12-01'))
     expect(parseDate(end)).toBe('2027-02-28')
   })
 })

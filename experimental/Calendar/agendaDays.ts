@@ -39,25 +39,25 @@ export interface AgendaRow {
 }
 
 /**
- * The span the view lists: the anchor's month and the two after it, ending on
- * the last day of the third. The month already under way starts at today
- * instead of its 1st; any other month runs whole, a past one included, which
- * reads as a plain record of it.
+ * The span the view lists: the anchor's month and the two after it, whole —
+ * from the 1st of the first to the last day of the third.
+ *
+ * The month under way used to start at today, which kept days already spent out
+ * of the way but made the header lie: "Sep – Nov" over a list whose September
+ * began on the 7th, with that month's earlier events nowhere to be found. The
+ * view scrolls to today instead, so what is ahead still leads and what is behind
+ * is a scroll away rather than gone.
  *
  * `Calendar` reports this same span as its visible range, so a consumer's fetch
  * window and its `+ Event` anchor agree with what is on screen. That is why it
  * lives here rather than inside the view.
  */
-export function agendaRange(
-  anchor: Date,
-  today: Date = new Date(),
-): { start: Date; end: Date } {
+export function agendaRange(anchor: Date): { start: Date; end: Date } {
   const year = anchor.getFullYear()
   const month = anchor.getMonth()
-  const underWay = today.getFullYear() === year && today.getMonth() === month
 
   return {
-    start: new Date(year, month, underWay ? today.getDate() : 1),
+    start: new Date(year, month, 1),
     // Day 0 of the month after the last is that last month's final day.
     end: new Date(year, month + AGENDA_MONTHS, 0),
   }
@@ -74,7 +74,7 @@ export function agendaRows(
   config?: WeekendConfig,
   today: Date = new Date(),
 ): AgendaRow[] {
-  const { start, end } = agendaRange(anchor, today)
+  const { start, end } = agendaRange(anchor)
   const todayKey = parseDate(today)
   const weekendDays = getWeekendDays(config)
   const rows: AgendaRow[] = []

@@ -15,7 +15,7 @@
   -->
   <div
     ref="scroller"
-    class="flex flex-1 flex-col overflow-y-auto rounded-6"
+    class="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-6"
     :class="[
       config.noBorder
         ? 'border-t-[1px]'
@@ -32,6 +32,7 @@
       v-for="row in isEmpty ? [] : rows"
       :key="row.key"
       :data-strip-date="row.key"
+      :data-today="row.isToday || undefined"
       class="flex border-b border-outline-gray-1 px-4 py-2.5"
     >
       <!-- Baselines, not box centres: the date is a size larger than the
@@ -89,9 +90,9 @@
 <script setup lang="ts">
 import './style.css'
 
-import { computed, inject, ref } from 'vue'
+import { computed, inject, nextTick, onMounted, ref, watch } from 'vue'
 import { agendaRange, agendaRows } from './agendaDays'
-import { daysListFull, monthList } from './calendarUtils'
+import { daysListFull, monthList, parseDate } from './calendarUtils'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
 import {
@@ -115,6 +116,7 @@ if (!calendarActions) {
 
 const scroller = ref<HTMLElement | null>(null)
 
+
 // The clock, not `new Date()` in the computed: the list is scoped from today,
 // so it has to re-scope itself when today changes rather than stranding a
 // viewer on yesterday's range.
@@ -126,11 +128,83 @@ const rows = computed(() =>
 
 const isEmpty = computed(() => !rows.value.length)
 
+/**
+ * The month runs from its 1st, so the list opens on days already spent. What
+ * the reader came for leads instead: the first day still to come, with the
+ * earlier ones above it — present, a scroll away.
+ *
+ * The first row *on or after* today, not today's own: a quiet day has no row at
+ * all, and anchoring on one that may not exist left the list sitting at the 1st
+ * on exactly the days with nothing to push it down.
+ *
+ * scrollTop rather than scrollIntoView, which walks up the ancestors and can
+ * take the page with it — this list is the only thing that should move.
+ */
+/**
+ * Whether the span is the one the view opens on — anchored on today's own
+ * month, not merely reaching far enough to include it. Paging back a month
+ * still spans today (three months from August covers September), and scrolling
+ * there would drag the reader forward out of the month they asked for.
+ */
+const anchoredOnThisMonth = computed(
+  () =>
+    props.anchor.getFullYear() === now.value.getFullYear() &&
+    props.anchor.getMonth() === now.value.getMonth(),
+)
+
+/**
+ * Where a span opens: on the months the view starts from, at the first day
+ * still to come; on any other span, at its first day.
+ *
+ * That second case is not a no-op. One scroller serves every span, and paging
+ * back prepends a month of rows above the viewport — the browser's scroll
+ * anchoring then holds the old rows still by growing scrollTop, landing the
+ * reader in the middle of months they just asked to see from the start.
+ */
+const positionList = () => {
+  const box = scroller.value
+  if (!box) return
+  // Paged either way, the reader asked for those months as a whole, so the list
+  // belongs at their first day; jumping to today would answer a question they
+  // did not ask.
+  if (!anchoredOnThisMonth.value) {
+    box.scrollTop = 0
+    return
+  }
+
+  const todayKey = parseDate(now.value)
+  const target = [...box.querySelectorAll<HTMLElement>('[data-strip-date]')].find(
+    (el) => (el.dataset.stripDate ?? '') >= todayKey,
+  )
+  // Nothing ahead: the span is behind the reader, so leave it where it opened
+  // rather than jumping to the bottom.
+  if (!target) return
+
+  // Measured, not offsetTop: that is relative to the nearest positioned
+  // ancestor, which is not this box, and the list landed a row short of the mark.
+  box.scrollTop += target.getBoundingClientRect().top - box.getBoundingClientRect().top
+}
+
+// On mount, and again when the span changes under it — paging either way, or a
+// day turning over while the view is left open. nextTick so the rows for the new
+// span exist before the list is put where it belongs.
+onMounted(() => nextTick(positionList))
+watch(
+  () => [props.anchor, rows.value.length],
+  () => nextTick(positionList),
+)
+
 /** "4 September and 31 October" — the ends of the window, for the empty state. */
+// The months, not the dates its ends land on — the same rule the header's title
+// follows. The span is three whole months bar the days of the first already
+// spent, so "7 September" names an implementation detail (today) rather than
+// anything the reader chose; "September" is the span they actually asked for.
 const spanLabel = computed(() => {
-  const { start, end } = agendaRange(props.anchor, now.value)
-  const on = (d: Date) => `${d.getDate()} ${monthList[d.getMonth()]}`
-  return `${on(start)} and ${on(end)}`
+  const { start, end } = agendaRange(props.anchor)
+  const name = (d: Date) => monthList[d.getMonth()]
+  return start.getFullYear() === end.getFullYear()
+    ? `${name(start)} and ${name(end)}`
+    : `${name(start)} ${start.getFullYear()} and ${name(end)} ${end.getFullYear()}`
 })
 
 const weekday = (date: Date) => daysListFull[date.getDay()]

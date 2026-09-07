@@ -461,25 +461,42 @@ describe('Calendar', () => {
       cy.get('[data-strip-date]').should('have.length', 2)
     })
 
-    it('does not list the days already spent', () => {
+    it('lists the days already spent, and marks today among them', () => {
+      // The 1st of the month under way: already spent unless today is the 1st,
+      // in which case it is today — listed either way, which is the point.
+      const firstOfMonth = (() => {
+        const now = new Date()
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+      })()
+
       cy.mount(Calendar, {
         props: {
           events: [
             {
               id: 'AG-PAST',
-              title: 'Yesterday standup',
-              fromDate: monthYear(-1),
-              toDate: monthYear(-1),
+              title: 'Month opener',
+              fromDate: firstOfMonth,
+              toDate: firstOfMonth,
               fromTime: '09:00',
               toTime: '09:15',
+            },
+            {
+              id: 'AG-TODAY',
+              title: 'Today standup',
+              fromDate: monthYear(),
+              toDate: monthYear(),
+              fromTime: '10:00',
+              toTime: '10:15',
             },
           ],
           config: { defaultMode: 'Agenda' },
         },
       })
 
-      // The window starts at today, so yesterday is behind it.
-      cy.contains('Yesterday standup').should('not.exist')
+      // The month runs whole, so a day behind today is still part of it — the
+      // view scrolls to today rather than cutting the month short at it.
+      cy.contains('Month opener').should('exist')
+      cy.get('[data-today]').should('exist')
     })
 
     it('renders the #event-description and #event-suffix slots on a row', () => {
