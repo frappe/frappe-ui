@@ -45,6 +45,13 @@
 .calendar-row-bar {
   background-color: var(--border);
 }
+/* Rows sit flush inside a day card, divided by a hairline rather than by a gap:
+   the card's own border already says where the day starts and stops, and gaps
+   between rows inside it would say it a second time, less clearly. The rule
+   goes between rows only — the header above the first draws its own. */
+.calendar-row + .calendar-row {
+  border-top: 1px solid var(--outline-gray-1);
+}
 /* A draft, in a row's vocabulary: the bar is broken rather than solid, saying
    the same "saved, nothing sent" the pill says with a dashed outline — dashes
    here too, at the 4/3 the pill's own dashed outline draws. It keeps the
@@ -58,21 +65,34 @@
     var(--border) 0 4px,
     transparent 4px 7px
   );
+  /* Square, where a solid bar's ends are rounded. The dashes are a gradient, so
+     only the ones meeting the bar's own edges could be capped — and where the
+     cycle lands against a row is a matter of how tall the title made it. One
+     rounded dash in a column of square ones reads as a mistake; all square
+     reads as a dashed line. */
+  border-radius: 0;
 }
 .calendar-row:hover {
   background-color: var(--surface-gray-1);
 }
-/* Selected: blue, the same tint the rest of the library selects with (subtle
-   buttons, badges, the avatar's blue). Gray would have had to be a step past
-   hover's gray-1 to read at all, which is a difference you have to look for;
-   blue says "this is the one open" outright, and stays clear of the event
-   colours on the bars, none of which is this. */
+/* Selected: gray, at the lightest step there is. Blue belongs to today — that band and the dot in it — and a blue
+   row would have read as more of the same rather than as the one row open,
+   most of all inside today's own card where the two would have touched. */
 .calendar-row.active {
-  background-color: var(--surface-blue-1);
+  background-color: var(--surface-gray-1);
 }
 /* Behind you: the row stays legible but stops asking for attention, the same
    way a pill in the grid does once its time has passed. */
 .calendar-row.past:not(.active) {
+  opacity: 0.55;
+}
+/* A day already spent says so from its header too — a date in full ink over a
+   card of faded rows reads as the live one. The header alone: the rows carry
+   their own fading, and dimming the card would apply it twice and take them
+   past legible. A week whose last day is behind the reader fades with them, so
+   a run of spent cards is spent from its heading down. */
+.calendar-day-header.past,
+.calendar-week-label.past {
   opacity: 0.55;
 }
 
@@ -82,26 +102,4 @@
    and the tags that a row without the slot gets. */
 .calendar-row-description:empty {
   display: none;
-}
-
-/* A scroll container's bottom edge. A border would scroll out of reach of a
-   list cut mid-row; an inset shadow is painted on the box, so it holds the
-   bottom however far the content runs. */
-.calendar-list-edge {
-  box-shadow: inset 0 -1px 0 var(--outline-gray-1);
-}
-
-/* A consumer fills `#event-description` once for every row, and for a given
-   event it may have nothing to say. The box it renders is then empty but still
-   present, taking a flex gap on either side — twice the space between the title
-   and the tags that a row without the slot gets. */
-.calendar-row-description:empty {
-  display: none;
-}
-
-/* A scroll container's bottom edge. A border would scroll out of reach of a
-   list cut mid-row; an inset shadow is painted on the box, so it holds the
-   bottom however far the content runs. */
-.calendar-list-edge {
-  box-shadow: inset 0 -1px 0 var(--outline-gray-1);
 }

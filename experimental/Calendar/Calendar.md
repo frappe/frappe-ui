@@ -84,26 +84,33 @@ range has events for every cell.
 
 ## Agenda view
 
-The Agenda view is three months as a list of days: a date column, then the
-events of that day as rows. A day with nothing on it is not listed — an empty
-row says nothing the dates either side of it do not. An event that has ended is dimmed, the way a
-pill in the grid is once its time has passed. An
-event under way sits above the line and says so with its own tag.
+The Agenda view is three months as a list of days, each day a card: its name,
+its date, how much is on it once that is more than one thing, then its events as
+rows. A day with nothing on
+it is not listed — an empty row says nothing the dates either side of it do
+not, and neither does a line counting how many were skipped. Cards are grouped
+under the week they fall in, which replaces the month dividers a flat list
+needs. Today's card carries a dot before its name; it, the day before it and
+the day after say so in words beside their dates, and a day already spent fades
+its header. An event that has ended is dimmed, the way a pill in the grid is
+once its time has passed. An event under way says so with its own tag.
 
-The window covers the month in view and the two after it, and the month already
-under way starts at today — a list of what is coming has no use for the days
-already spent, and a single month is 31 days on the 1st and one day on the 31st.
-The arrows step a month at a time, so each move keeps two thirds of what was on
-screen, and `rangeChange` reports exactly the span listed, so a data source
-fetching by range agrees with it.
+The window covers the month in view and the two after it, padded out to whole
+weeks at either end the way the Month view's strip is — the list groups its days
+under the week they fall in, and a week is either listed or it is not. A single
+month would be 31 days on the 1st and one day on the 31st, which is why it is
+three. The arrows step a month at a time, so each move keeps two thirds of what
+was on screen, and `rangeChange` reports exactly the span listed, padding
+included, so a data source fetching by range agrees with it. The header names
+the three months themselves, not the days the padding reaches into.
 
 Rows have the room a grid pill does not, so they carry a description line and
 tags. `Calendar` fills in what it can work out on its own — where the event is,
-which day of a stay the row is (`Day 2/3`), and whether it is a draft. Where it stands
-against the clock reads beside the time instead, which is where a reader
-scanning for "when" is already looking: `Now` in blue while it runs and `Soon` in
-amber in the hour before it, and nothing beyond that: an hour count would only
-restate the time written beside it —
+which day of a stay the row is (`Day 2/3`), and whether it is a draft, which the
+row draws as a dashed bar. Where it stands against the clock reads at the row's
+far end, the one edge a card aligns on other than the time column: `Now` in blue
+while it runs and `Soon` in amber in the hour before it, and nothing beyond
+that: an hour count would only restate the time written beside it —
 and the `#event-description` and `#event-suffix` slots let you say the rest.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />

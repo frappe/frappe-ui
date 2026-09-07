@@ -16,7 +16,7 @@
   >
     <template #trigger>
       <div
-        class="calendar-row flex w-full items-baseline gap-2.5 rounded-4 px-2 py-1.5 text-left"
+        class="calendar-row flex w-full items-baseline gap-2.5 px-3.5 py-2 text-left"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
           past: isPast,
@@ -30,30 +30,26 @@
         @keydown.enter.prevent="onKeydown($event)"
         @keydown.space.prevent="onKeydown($event)"
       >
-        <!-- Where it stands against the clock, beside the clock: a reader
-             scanning for "when" is already looking here. Tag and time are one
-             right-aligned pair, so the tag sits against the label it qualifies
-             rather than against a column edge that longer labels reach and
-             shorter ones do not.
+        <!-- The time, in a column of its own against the card's left edge: the
+             bars line up under each other whatever each row's label says, which
+             is what makes a card read as a day rather than as three sentences.
 
-             176px holds the widest label ("11:30 am – 12:45 pm", 128px) and
-             most of a badge, which keeps the times aligned without a stretch of
-             empty row in front of them. A badge on the very longest label
-             overhangs by a few pixels, into space that is empty anyway. -->
-        <span class="flex w-44 shrink-0 items-baseline justify-end gap-1.5">
-          <Badge
-            v-if="timing"
-            :theme="timing.theme"
-            :label="timing.label"
-            size="sm"
-          />
-          <span
-            class="calendar-row-time whitespace-nowrap text-right text-xs tabular-nums text-ink-gray-5"
-          >
-            {{ timeLabel }}
-          </span>
+             132px holds the widest label ("11:30 am – 12:45 pm", 128px). A
+             column sized to the common "2:30 – 3:30 pm" would let that one
+             overrun the bar it is supposed to stop short of. -->
+        <span
+          class="calendar-row-time w-33 shrink-0 whitespace-nowrap text-xs tabular-nums text-ink-gray-5"
+        >
+          {{ timeLabel }}
         </span>
-        <span class="calendar-row-bar w-0.5 shrink-0 self-stretch rounded-4" />
+        <!-- 3px, not the 2 a pill's border takes: a row carries no fill, so the
+             bar is the only colour on it and the only thing placing the event
+             on a calendar. It is that width whether or not the row is the open
+             one — a mark that thickens on click is a mark the reader has to
+             have seen thin to read as thick. -->
+        <span
+          class="calendar-row-bar w-[3px] shrink-0 self-stretch rounded-4"
+        />
         <!-- Title, then what the row can add about it, on one line: a row is
              wide and a title is short, so a second line spends the height of
              two rows to say what fits beside the first. -->
@@ -94,6 +90,18 @@
             </slot>
           </span>
         </span>
+        <!-- Where it stands against the clock, at the row's far end. It used to
+             sit beside the time, which is where a reader scanning for "when" is
+             looking — but a card gives the time a fixed column, and a badge in
+             front of it pushes one row's time out of line with the rest. The
+             card's right edge is the one other place a row is aligned. -->
+        <Badge
+          v-if="timing"
+          :theme="timing.theme"
+          :label="timing.label"
+          size="sm"
+          class="shrink-0"
+        />
       </div>
     </template>
 

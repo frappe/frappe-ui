@@ -461,6 +461,18 @@ describe('Calendar', () => {
       cy.get('[data-strip-date]').should('have.length', 2)
     })
 
+    it('groups the cards by week', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      // Whichever days of the week the 1st and the 5th land on, the cards sit
+      // under at least one week label.
+      cy.get('[data-strip-week]').should('exist')
+      // Each of these days holds one event, which the row itself already says.
+      cy.contains('1 event').should('not.exist')
+    })
+
     it('lists the days already spent, and marks today among them', () => {
       // The 1st of the month under way: already spent unless today is the 1st,
       // in which case it is today — listed either way, which is the point.

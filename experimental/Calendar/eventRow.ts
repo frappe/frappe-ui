@@ -154,9 +154,9 @@ export function hasEnded(event: CalendarEvent, date: Date, now: Date): boolean {
 /**
  * Where the event stands against the clock: under way, or near enough to start
  * to be worth saying. One tag, never two — under way and about to start are the
- * same kind of fact, the thing on the day that wants you now — and it reads
- * beside the time rather than after the title, which is where a reader scanning
- * for "when" is already looking.
+ * same kind of fact, the thing on the day that wants you now — and it reads at
+ * the row's far end, where the card aligns it with the tags of every other row
+ * rather than pushing one row's time out of the column the rest share.
  *
  * Two states, not a countdown: blue while it runs, amber in the half hour
  * before it. An hour count would only restate the time written beside it, on
