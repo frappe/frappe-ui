@@ -38,7 +38,7 @@
           />
         </div>
 
-        <div class="relative mb-4 grid" :style="gridStyle">
+        <div class="relative mb-6 grid" :style="gridStyle">
           <div
             v-for="stage in stages"
             :key="stage.index"
