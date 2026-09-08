@@ -41,7 +41,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 const typesOf = (option: any) => option.series.map((s: any) => s.type)
@@ -150,6 +153,14 @@ describe('combo axes', () => {
     // Re-spacing the axis on a legend toggle would move every remaining point.
     expect(option.xAxis.boundaryGap).toBe(true)
     expect(option.tooltip.axisPointer.type).toBe('shadow')
+  })
+
+  it('draws the band from a token, translucently', () => {
+    // Unstyled, echarts fills it with a hard-coded grey that no theme reaches.
+    // The alpha is what keeps the gridlines under it readable.
+    const { shadowStyle } = build().tooltip.axisPointer
+    expect(shadowStyle.color).toBe(tokens.splitLine)
+    expect(shadowStyle.opacity).toBeLessThan(1)
   })
 
   it('measures a line series against the second value axis', () => {

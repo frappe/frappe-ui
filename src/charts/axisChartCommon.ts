@@ -172,7 +172,15 @@ export function axisChartBase(
         // points at stay whole.
         z: 1,
         ...(axisPointer === 'shadow'
-          ? { type: 'shadow' }
+          ? {
+              // Bars sit in a slot, so the pointer covers the slot. The fill is
+              // the gridline token, because the band is furniture at the same
+              // weight as a gridline — and translucent, so the gridlines it
+              // covers still read through it. Left unstyled, echarts fills it
+              // with a hard-coded mid-grey that no theme reaches.
+              type: 'shadow',
+              shadowStyle: { color: tokens.splitLine, opacity: 0.7 },
+            }
           : {
               type: 'line',
               lineStyle: { color: tokens.axisLine, width: 1 },
@@ -485,8 +493,11 @@ function valueAxisReserve(config: AxisChartBaseConfig): number {
 
   const onY2 = (series: AxisChartSeriesConfig) => series.axis === 'y2'
   return (
-    tickColumnWidth(config, config.series.filter((s) => !onY2(s)), config.yAxis) +
-    tickColumnWidth(config, config.series.filter(onY2), config.y2Axis)
+    tickColumnWidth(
+      config,
+      config.series.filter((s) => !onY2(s)),
+      config.yAxis,
+    ) + tickColumnWidth(config, config.series.filter(onY2), config.y2Axis)
   )
 }
 
@@ -515,7 +526,9 @@ function tickColumnWidth(
   ]
   const tick = drawnTick(axisConfig)
   const widest = Math.max(
-    ...ends.map((value) => estimateTextWidth(tick(value), AXIS_LABEL_FONT_SIZE)),
+    ...ends.map((value) =>
+      estimateTextWidth(tick(value), AXIS_LABEL_FONT_SIZE),
+    ),
   )
   return Math.ceil(widest) + AXIS_LABEL_MARGIN
 }
