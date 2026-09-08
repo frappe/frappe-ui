@@ -58,6 +58,9 @@ the plot at a measured value, `'x'` for one down it at a category, a date, or a
 number on a numeric x axis. Each line also takes an optional `label`, `color`
 and `dashed`.
 
+`labelPlacement` moves the label off whatever it lands on. It is described under
+[BarChart](/docs/charts/barchart#targets-and-thresholds).
+
 <ComponentPreview name="Charts-LineThresholds" csr="true" self-layout />
 
 A reference line is an annotation, not a series: it has no legend entry, it is

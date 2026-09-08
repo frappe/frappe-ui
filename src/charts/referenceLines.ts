@@ -5,7 +5,7 @@ import {
   toNumber,
 } from './axisChartCommon'
 import { translucent, type ChartTokens } from './tokens'
-import type { ReferenceLine } from './types'
+import type { ReferenceLine, ReferenceLineLabelPlacement } from './types'
 
 /** Heavier than a gridline: the rule is a statement, not part of the grid. */
 const REFERENCE_LINE_WIDTH = 1.5
@@ -22,8 +22,23 @@ const REFERENCE_LINE_Z = MARK_Z.line + 1
 const LABEL_PADDING = [2, 4]
 
 /**
+ * Each placement as echarts spells it. The names are a pass-through and not a
+ * calculation: echarts reads `Start` and `End` off the axis the rule runs along,
+ * so an inverted axis, such as an RTL chart, swaps the two ends on its own.
+ */
+const LABEL_PLACEMENTS: Record<ReferenceLineLabelPlacement, string> = {
+  'start-top': 'insideStartTop',
+  'start-bottom': 'insideStartBottom',
+  'end-top': 'insideEndTop',
+  'end-bottom': 'insideEndBottom',
+}
+
+/** The far end of the rule, above it: clear of the axis and of most marks. */
+const DEFAULT_LABEL_PLACEMENT: ReferenceLineLabelPlacement = 'end-top'
+
+/**
  * How much of the plate is the surface behind the plot. Short of opaque, so a
- * mark the label covers reads on as a ghost rather than being cut in half — the
+ * mark the label covers reads on as a ghost rather than being cut in half. The
  * label wins the contrast, the plot keeps its shape.
  */
 const LABEL_PLATE_OPACITY = 80
@@ -130,17 +145,13 @@ function markLineEntry(
   // value as a horizontal rule. `horizontal` swaps which axis carries the
   // categories, so it swaps the key each kind of line needs.
   const axisKey = onXAxis !== horizontal ? 'xAxis' : 'yAxis'
-  // The ink the axis labels are printed in: a reference line annotates the plot,
-  // so it should read as furniture rather than as another measure. The data
-  // labels' darker ink puts it at the weight of the marks it is drawn over.
+  // Axis-label ink: the rule reads as furniture, not as another measure.
   const color = line.color || tokens.axisLabel
 
   return {
     [axisKey]: at,
     lineStyle: {
-      // A dash, not the dot texture the gridlines and the category baseline
-      // carry: a reference line is a statement about a value, not part of the
-      // furniture that locates one. See `dashedLine`.
+      // A dash against the grid's dots: see `dashedLine`.
       ...(line.dashed ? dashedLine(REFERENCE_LINE_WIDTH) : {}),
       width: REFERENCE_LINE_WIDTH,
       color,
@@ -149,15 +160,16 @@ function markLineEntry(
       ? {
           label: {
             show: true,
-            position: 'insideEndTop',
+            position:
+              LABEL_PLACEMENTS[line.labelPlacement ?? DEFAULT_LABEL_PLACEMENT],
             // A function rather than the string itself: echarts reads a string
             // formatter as a template, so a label with braces in it would come
             // out substituted.
             formatter: () => line.label,
             color,
             fontSize: DATA_LABEL_FONT_SIZE,
-            // The surface behind the plot, as a plate: the label lands wherever
-            // its line ends, which on a busy chart is on top of a mark.
+            // The surface behind the plot, as a plate: wherever the label is
+            // placed, on a busy chart it is placed on top of a mark.
             backgroundColor: translucent(tokens.backdrop, LABEL_PLATE_OPACITY),
             padding: LABEL_PADDING,
           },

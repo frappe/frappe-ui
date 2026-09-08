@@ -198,6 +198,30 @@ describe('reference line looks', () => {
     expect(label.formatter()).toBe('Target')
   })
 
+  it('places the label at the end and the side the caller names', () => {
+    const option = build({
+      referenceLines: [
+        { value: 10, label: 'A', labelPlacement: 'start-top' },
+        { value: 20, label: 'B', labelPlacement: 'start-bottom' },
+        { value: 30, label: 'C', labelPlacement: 'end-top' },
+        { value: 40, label: 'D', labelPlacement: 'end-bottom' },
+      ],
+    })
+    expect(entriesOf(option).map((entry: any) => entry.label.position)).toEqual([
+      'insideStartTop',
+      'insideStartBottom',
+      'insideEndTop',
+      'insideEndBottom',
+    ])
+  })
+
+  it('reads the two ends off the axis, so an RTL chart swaps them itself', () => {
+    // Nothing to assert on the option: echarts places `Start` where the axis
+    // begins.
+    const rtl = build({ dir: 'rtl', referenceLines: [{ value: 15, label: 'T' }] })
+    expect(entriesOf(rtl)[0].label.position).toBe('insideEndTop')
+  })
+
   it('carries no label at all when none is set', () => {
     expect(
       entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label,

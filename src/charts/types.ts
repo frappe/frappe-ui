@@ -96,6 +96,13 @@ export type AxisChartSeriesConfig = {
  * budget, or the date something changed. An annotation rather than a series —
  * it has no legend entry, cannot be switched off, and is never in the tooltip.
  */
+/** An end of a reference line, and a side of it. See `ReferenceLine.labelPlacement`. */
+export type ReferenceLineLabelPlacement =
+  | 'start-top'
+  | 'start-bottom'
+  | 'end-top'
+  | 'end-bottom'
+
 export type ReferenceLine = {
   /**
    * Where the line sits: a number on a value axis, or whatever the category
@@ -115,8 +122,16 @@ export type ReferenceLine = {
    * with `xAxis.type: 'value'` reads `'x'` the same way: a number on the scale.
    */
   axis?: 'y' | 'y2' | 'x'
-  /** Printed at the far end of the line. Left out, the rule carries no text. */
+  /** Printed on the line. Left out, the rule carries no text. */
   label?: string
+  /**
+   * Where the label sits, as an end of the rule and a side of it. Defaults to
+   * `'end-top'`. Move it when the default lands on a mark or on another rule's
+   * label. The ends are read in the direction of the axis the rule runs along,
+   * so an RTL chart swaps them. A rule drawn down the plot carries its label
+   * rotated, so its sides are the left and the right of it.
+   */
+  labelPlacement?: ReferenceLineLabelPlacement
   /** Defaults to the ink the axis labels are printed in, so it reads as furniture. */
   color?: string
   /** Breaks the rule up, for a line that should not read as a hard boundary. */
@@ -143,7 +158,7 @@ export type AxisChartBaseConfig = {
    * Ramp series colors are drawn from. Defaults to `'sequential'`: one series
    * gets a single mid-blue, more get evenly spaced stops running dark to light.
    * A chart of mixed marks spends those stops by mark rather than by series
-   * order — see `resolveSeriesColors`.
+   * order: see `resolveSeriesColors`.
    */
   palette?: ChartPalette
   /** Forces layout direction; defaults to document.documentElement.dir */
