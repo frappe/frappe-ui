@@ -154,10 +154,6 @@ import {
 } from './calendarUtils'
 import { dayjs } from '#utils/dayjs'
 import { isTargetEditable } from '#composables/useKeyboardShortcut'
-import DayIcon from './Icon/DayIcon.vue'
-import WeekIcon from './Icon/WeekIcon.vue'
-import MonthIcon from './Icon/MonthIcon.vue'
-import AgendaIcon from './Icon/AgendaIcon.vue'
 import DatePicker from '#components/DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
@@ -434,15 +430,21 @@ function handleCellClick(
 type CalendarActionOption = {
   label: CalendarMode
   value: CalendarMode
-  iconLeft: Component
+  iconLeft: string
 }
 
-// Calendar View Options
+// Calendar View Options.
+//
+// Named lucide icons rather than four SVGs of the library's own: the set draws each
+// view as the shape of what it lays out — one pane, columns, a grid, a stack of
+// rows. Being lucide they also carry the same weight and
+// optical size as every other icon on the page, which hand-drawn glyphs at a fixed
+// 16px did not.
 const actionOptions: CalendarActionOption[] = [
-  { label: 'Day', value: 'Day', iconLeft: DayIcon },
-  { label: 'Week', value: 'Week', iconLeft: WeekIcon },
-  { label: 'Month', value: 'Month', iconLeft: MonthIcon },
-  { label: 'Agenda', value: 'Agenda', iconLeft: AgendaIcon },
+  { label: 'Day', value: 'Day', iconLeft: 'lucide-square-square' },
+  { label: 'Week', value: 'Week', iconLeft: 'lucide-columns-3' },
+  { label: 'Month', value: 'Month', iconLeft: 'lucide-grid-3x3' },
+  { label: 'Agenda', value: 'Agenda', iconLeft: 'lucide-rows-3' },
 ]
 let enabledModes = actionOptions.filter(
   (mode) => !overrideConfig.disableModes.includes(mode.value),
