@@ -33,7 +33,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 function config(
@@ -312,7 +312,7 @@ describe('buildHeatmapOption', () => {
     expect(itemStyle).toMatchObject({
       borderRadius: 2,
       borderWidth: 2,
-      borderColor: tokens.cellGap,
+      borderColor: tokens.backdrop,
     })
   })
 
@@ -325,7 +325,7 @@ describe('buildHeatmapOption', () => {
 
     // The resting border, restated: a hovered cell keeps the gap around it.
     expect(series.emphasis.itemStyle).toEqual({
-      borderColor: tokens.cellGap,
+      borderColor: tokens.backdrop,
       borderWidth: 2,
       shadowBlur: 0,
       shadowColor: 'transparent',

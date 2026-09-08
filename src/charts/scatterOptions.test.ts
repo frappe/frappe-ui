@@ -15,7 +15,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** Diameters the size measure is mapped onto. */
@@ -477,7 +477,7 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 1500 }] })
 
     expect(entriesOf(option)).toEqual([
-      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-5' } },
     ])
   })
 
@@ -487,7 +487,7 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 500, axis: 'x' }] })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-5' } },
     ])
   })
 
@@ -504,8 +504,8 @@ describe('reference lines on a scatter', () => {
     })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
-      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-5' } },
+      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-5' } },
     ])
   })
 
@@ -562,8 +562,8 @@ describe('reference lines on a scatter', () => {
     })
     const [dashed, solid] = entriesOf(option)
 
-    expect(dashed.lineStyle.color).toBe(tokens.dataLabel)
-    expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
+    expect(dashed.lineStyle.color).toBe(tokens.axisLabel)
+    expect(dashed.lineStyle.type).not.toEqual(DOTTED_LINE.type)
     expect(solid.lineStyle.type).toBeUndefined()
   })
 

@@ -117,7 +117,7 @@ export type ReferenceLine = {
   axis?: 'y' | 'y2' | 'x'
   /** Printed at the far end of the line. Left out, the rule carries no text. */
   label?: string
-  /** Defaults to the ink data labels are printed in, so it reads as an annotation. */
+  /** Defaults to the ink the axis labels are printed in, so it reads as furniture. */
   color?: string
   /** Breaks the rule up, for a line that should not read as a hard boundary. */
   dashed?: boolean

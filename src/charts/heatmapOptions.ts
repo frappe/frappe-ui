@@ -363,7 +363,7 @@ export function buildHeatmapOption(
         itemStyle: {
           borderRadius: CELL_RADIUS,
           borderWidth: CELL_BORDER_WIDTH,
-          borderColor: tokens.cellGap,
+          borderColor: tokens.backdrop,
         },
         // Hover only lightens the fill (per cell, below). The border stays the
         // resting one and the shadow is turned off: a heatmap is read by
@@ -372,7 +372,7 @@ export function buildHeatmapOption(
         emphasis: {
           focus: 'none',
           itemStyle: {
-            borderColor: tokens.cellGap,
+            borderColor: tokens.backdrop,
             borderWidth: CELL_BORDER_WIDTH,
             shadowBlur: 0,
             shadowColor: 'transparent',

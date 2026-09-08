@@ -16,7 +16,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `BarChart` hands the builder: the shared config, marked `'bar'`. */
@@ -170,17 +170,14 @@ describe('resolveSeriesColors by ink weight', () => {
       { name: 'sales' },
       { name: 'refunds', type: 'line' },
     ]
-    // A categorical set has no ramp to reorder.
     expect(colorsFor({ palette: 'categorical', series: mixed })).toEqual({
       sales: '#111111',
       refunds: '#222222',
     })
-    // A diverging ramp's direction is its meaning.
     expect(colorsFor({ palette: 'diverging', series: mixed })).toEqual({
       sales: '#001100',
       refunds: '#003300',
     })
-    // A caller's own list is drawn in the order it was written.
     expect(colorsFor({ palette: ['a', 'b'], series: mixed })).toEqual({
       sales: 'a',
       refunds: 'b',

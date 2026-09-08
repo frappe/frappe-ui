@@ -1,9 +1,32 @@
-import { DATA_LABEL_FONT_SIZE, DOTTED_LINE, toNumber } from './axisChartCommon'
-import type { ChartTokens } from './tokens'
+import {
+  DATA_LABEL_FONT_SIZE,
+  MARK_Z,
+  dashedLine,
+  toNumber,
+} from './axisChartCommon'
+import { translucent, type ChartTokens } from './tokens'
 import type { ReferenceLine } from './types'
 
 /** Heavier than a gridline: the rule is a statement, not part of the grid. */
 const REFERENCE_LINE_WIDTH = 1.5
+
+/**
+ * The annotation layer, above every mark. The rule is furniture and could sit
+ * under the marks, but its label cannot: a label a series draws over is a label
+ * nobody reads. Both hang off one `markLine`, so the layer is one tier, and the
+ * rule is kept quiet by its ink rather than by its depth.
+ */
+const REFERENCE_LINE_Z = MARK_Z.line + 1
+
+/** Keeps a label off whatever it lands on. Padding is [vertical, horizontal]. */
+const LABEL_PADDING = [2, 4]
+
+/**
+ * How much of the plate is the surface behind the plot. Short of opaque, so a
+ * mark the label covers reads on as a ghost rather than being cut in half — the
+ * label wins the contrast, the plot keeps its shape.
+ */
+const LABEL_PLATE_OPACITY = 80
 
 /**
  * Name of the series that carries the lines targeting one value axis. Prefixed
@@ -71,6 +94,7 @@ export function buildReferenceLineSeries(
       name: `${HOST_SERIES_NAME}-${axisIndex}`,
       data: [],
       silent: true,
+      z: REFERENCE_LINE_Z,
       [axisIndexKey]: axisIndex,
       markLine: { silent: true, symbol: 'none', data },
     })
@@ -106,17 +130,18 @@ function markLineEntry(
   // value as a horizontal rule. `horizontal` swaps which axis carries the
   // categories, so it swaps the key each kind of line needs.
   const axisKey = onXAxis !== horizontal ? 'xAxis' : 'yAxis'
-  // The ink data labels are printed in: a reference line annotates the plot, so
-  // it should not read as another measure drawn in a palette color.
-  const color = line.color || tokens.dataLabel
+  // The ink the axis labels are printed in: a reference line annotates the plot,
+  // so it should read as furniture rather than as another measure. The data
+  // labels' darker ink puts it at the weight of the marks it is drawn over.
+  const color = line.color || tokens.axisLabel
 
   return {
     [axisKey]: at,
     lineStyle: {
-      // Every rule v2 draws that is not a mark — the gridlines, the category
-      // baseline — carries this one dot texture, so a broken reference line
-      // takes it too rather than introducing a second dash pattern.
-      ...(line.dashed ? DOTTED_LINE : {}),
+      // A dash, not the dot texture the gridlines and the category baseline
+      // carry: a reference line is a statement about a value, not part of the
+      // furniture that locates one. See `dashedLine`.
+      ...(line.dashed ? dashedLine(REFERENCE_LINE_WIDTH) : {}),
       width: REFERENCE_LINE_WIDTH,
       color,
     },
@@ -131,6 +156,10 @@ function markLineEntry(
             formatter: () => line.label,
             color,
             fontSize: DATA_LABEL_FONT_SIZE,
+            // The surface behind the plot, as a plate: the label lands wherever
+            // its line ends, which on a busy chart is on top of a mark.
+            backgroundColor: translucent(tokens.backdrop, LABEL_PLATE_OPACITY),
+            padding: LABEL_PADDING,
           },
         }
       : {}),

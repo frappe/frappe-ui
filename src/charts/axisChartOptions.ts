@@ -14,6 +14,7 @@ import {
   toNumber,
   valueAxisIndex,
   DATA_LABEL_FONT_SIZE,
+  MARK_Z,
   type AxisChartOptionContext,
 } from './axisChartCommon'
 import { buildReferenceLineSeries } from './referenceLines'
@@ -48,13 +49,6 @@ const GRADIENT_FADE = 0.1
 /** The scale a 100% stack is read against, whatever the numbers behind it. */
 const NORMALIZED_MIN = 0
 const NORMALIZED_MAX = 100
-
-/**
- * Marks paint in this order whatever order the series arrive in: a bar hides a
- * band, a band hides a line. Above the axis pointer at z 1, which is a reading
- * aid rather than a mark.
- */
-const MARK_Z: Record<ChartMark, number> = { bar: 2, area: 3, line: 4 }
 
 /** A series with the two things the config only implies: its mark and its stack. */
 type PlottedSeries = {

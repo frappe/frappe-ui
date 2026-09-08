@@ -38,8 +38,40 @@ export const BLUR_OPACITY = 0.75
  * Gridlines and the category baseline are drawn as fine dots rather than rules:
  * they should locate a value without competing with the marks in front of them.
  * A short dash with a round cap gives round dots at any device pixel ratio.
+ *
+ * The dash scales with the width, so a heavier rule takes the same texture drawn
+ * heavier. Held at the gridline's own dash, a 1.5-wide dot comes out a bead.
  */
-export const DOTTED_LINE = { type: [1, 3], cap: 'round', width: 1 }
+export function dottedLine(width: number) {
+  return { type: [width, width * 3], cap: 'round' as const, width }
+}
+
+export const DOTTED_LINE = dottedLine(1)
+
+/**
+ * The texture a broken reference line takes: long strokes with square ends,
+ * where the grid draws round dots.
+ *
+ * The plot holds two kinds of broken line and they have to be told apart. The
+ * grid locates a value and a reference line states one. Ink cannot carry that
+ * difference — the rule is drawn quietly on purpose, so it lands a step or two
+ * from the gridlines and reads as one of them. A dash against a dot is a
+ * difference in kind, and it survives at any weight and any color.
+ */
+export function dashedLine(width: number) {
+  return { type: [width * DASH_LENGTH, width * DASH_GAP], width }
+}
+
+/** Both in multiples of the line's width, so the texture scales with the rule. */
+const DASH_LENGTH = 3.5
+const DASH_GAP = 3
+
+/**
+ * Marks paint in this order whatever order the series arrive in: a bar hides a
+ * band, a band hides a line. Above the axis pointer at z 1, which is a reading
+ * aid rather than a mark.
+ */
+export const MARK_Z: Record<ChartMark, number> = { bar: 2, area: 3, line: 4 }
 
 /**
  * Most of a horizontal chart that its category labels may claim. `containLabel`

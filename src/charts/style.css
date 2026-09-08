@@ -76,12 +76,11 @@
      page. Charts flip to white on a fill dark enough to need it. */
   --chart-inside-label: oklch(0.271 0 0);
 
-  /* What a heatmap paints the gap between two cells in. A gap has to be drawn,
-     not left out — a cell is a filled rect, so the only way to separate two of
-     them is a border in whatever is behind the plot. Defaults to the elevated
-     card surface, which is where a chart normally sits; an app that puts one on
-     another background redefines this on that subtree. */
-  --chart-cell-gap: var(--surface-elevation-2);
+  /* The surface behind the plot: what a heatmap paints the gap between two cells
+     in, and what a reference line's label sits on. `--chart-backdrop` is
+     deliberately not set here. A chart reads it off its own ancestors, see
+     `backdropColor` in tokens.ts. Set it for a chart on a background the walk
+     cannot read, such as an image. */
 }
 
 [data-theme='dark'] {

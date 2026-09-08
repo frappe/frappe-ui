@@ -193,7 +193,7 @@ describe('normalizeAxisChartProps: the second value axis', () => {
       splitLine: 'outline-1',
       dataLabel: 'ink-6',
       insideLabel: 'ink-8',
-      cellGap: '#ffffff',
+      backdrop: '#ffffff',
     }
     const colorsOf = (props: Partial<AxisChartProps>) =>
       resolveSeriesColors({ ...normalize(props).config, type: 'bar' }, tokens)

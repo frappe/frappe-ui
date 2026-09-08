@@ -21,8 +21,8 @@ export type ChartTokens = {
   dataLabel: string
   /** Ink for a label printed on a pale fill rather than beside it. */
   insideLabel: string
-  /** What a heatmap draws between two cells, i.e. the surface behind the plot. */
-  cellGap: string
+  /** The surface behind the plot. Read off the page, not named: see `backdropColor`. */
+  backdrop: string
 }
 
 /**
@@ -153,7 +153,10 @@ const TOKENS = {
   // fill, not to the page, and `--ink-gray-8` inverts to a light gray in dark
   // mode — invisible on the categorical ramp's light-tier stops. See style.css.
   insideLabel: '--chart-inside-label',
-  cellGap: '--chart-cell-gap',
+  // Unset by default, unlike every other token here: the surface behind the plot
+  // is read off the page. This is the override for a chart drawn on something
+  // the walk cannot see, an image say. See `backdropColor`.
+  backdrop: '--chart-backdrop',
 } as const
 
 const FALLBACK_TOKENS: Record<
@@ -167,7 +170,7 @@ const FALLBACK_TOKENS: Record<
     splitLine: 'oklch(0.946 0 0)',
     dataLabel: 'oklch(0.439 0 0)',
     insideLabel: 'oklch(0.271 0 0)',
-    cellGap: '#ffffff',
+    backdrop: '#ffffff',
   },
   dark: {
     axisLabel: 'oklch(0.58 0 0)',
@@ -177,8 +180,33 @@ const FALLBACK_TOKENS: Record<
     dataLabel: 'oklch(0.683 0 0)',
     // Same near-black as light: see the note on `TOKENS.insideLabel`.
     insideLabel: 'oklch(0.271 0 0)',
-    cellGap: '#242424',
+    backdrop: '#242424',
   },
+}
+
+/**
+ * The painted background behind `el`: its first ancestor whose own background is
+ * not see-through, which is what a viewer actually sees behind the plot.
+ *
+ * Not a named surface token, because there is no one surface a chart sits on. A
+ * card puts it on `--surface-elevation-2` and a bare page on `--surface-base`,
+ * and in dark mode those are two different grays, so a plate filled with the
+ * card's color on a page draws a visible box. Light mode hides the mistake
+ * entirely: every light surface token is white.
+ */
+function backdropColor(el: HTMLElement | null | undefined): string {
+  let node: HTMLElement | null = el ?? document.documentElement
+  while (node) {
+    const background = getComputedStyle(node).backgroundColor
+    if (!isTransparent(background)) return background
+    node = node.parentElement
+  }
+  return ''
+}
+
+/** An alpha of zero, in any notation a computed `background-color` comes back in. */
+function isTransparent(color: string) {
+  return !color || color === 'transparent' || /[,/]\s*0\s*\)$/.test(color)
 }
 
 /**
@@ -226,7 +254,7 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
     splitLine: read(TOKENS.splitLine) || fallbacks.splitLine,
     dataLabel: read(TOKENS.dataLabel) || fallbacks.dataLabel,
     insideLabel: read(TOKENS.insideLabel) || fallbacks.insideLabel,
-    cellGap: read(TOKENS.cellGap) || fallbacks.cellGap,
+    backdrop: read(TOKENS.backdrop) || backdropColor(el) || fallbacks.backdrop,
   }
 }
 
@@ -380,6 +408,17 @@ export function chartColors(
   return name === 'sequential' && deepEnd === 'last'
     ? colors.slice().reverse()
     : colors
+}
+
+/**
+ * `color` at a fraction of its opacity. `color-mix` rather than an alpha channel
+ * written into the value, because a `--chart-*` token is read back in whatever
+ * notation it was authored in, oklch for the surface tokens and hex for the
+ * ramps, and only a mix takes all of them without a branch per notation. Both the SVG
+ * renderer and the canvas one resolve it.
+ */
+export function translucent(color: string, percent: number) {
+  return `color-mix(in srgb, ${color} ${percent}%, transparent)`
 }
 
 /**

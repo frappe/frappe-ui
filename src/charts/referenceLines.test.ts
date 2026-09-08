@@ -15,7 +15,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
@@ -56,7 +56,7 @@ describe('reference line placement', () => {
   it('draws a horizontal rule at a value on the value axis', () => {
     const option = build({ referenceLines: [{ value: 15 }] })
     expect(entriesOf(option)).toEqual([
-      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-5' } },
     ])
   })
 
@@ -204,21 +204,33 @@ describe('reference line looks', () => {
     ).toBeUndefined()
   })
 
-  it('takes its default ink from the tokens, not from the palette', () => {
+  it('takes the axis labels’ ink, not the palette and not the data labels’', () => {
     const option = build({ referenceLines: [{ value: 15, label: 'Target' }] })
     const [entry] = entriesOf(option)
-    expect(entry.lineStyle.color).toBe(tokens.dataLabel)
-    expect(entry.label.color).toBe(tokens.dataLabel)
+    expect(entry.lineStyle.color).toBe(tokens.axisLabel)
+    expect(entry.label.color).toBe(tokens.axisLabel)
   })
 
-  it('breaks a dashed line up with the same texture the gridlines use', () => {
+  it('prints its label on a plate of the surface behind the plot', () => {
+    const option = build({ referenceLines: [{ value: 15, label: 'Target' }] })
+    const [entry] = entriesOf(option)
+    // Short of opaque, so a mark under the label still reads through it.
+    expect(entry.label.backgroundColor).toBe(
+      `color-mix(in srgb, ${tokens.backdrop} 80%, transparent)`,
+    )
+    expect(entry.label.padding).toEqual([2, 4])
+  })
+
+  it('breaks a dashed line up with a dash of its own, not the gridline dots', () => {
     const option = build({
       referenceLines: [{ value: 15, dashed: true }, { value: 25 }],
     })
     const [dashed, solid] = entriesOf(option)
-    expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
-    expect(dashed.lineStyle.cap).toBe(DOTTED_LINE.cap)
-    // Heavier than the gridline the texture is borrowed from.
+    // A dash against the grid's dots: the two kinds of broken line have to be
+    // told apart by pattern, because the rule is drawn at furniture weight.
+    expect(dashed.lineStyle.type).toEqual([5.25, 4.5])
+    expect(dashed.lineStyle.cap).toBeUndefined()
+    expect(dashed.lineStyle.type).not.toEqual(DOTTED_LINE.type)
     expect(dashed.lineStyle.width).toBe(1.5)
     expect(solid.lineStyle.type).toBeUndefined()
   })
@@ -303,5 +315,17 @@ describe('reference lines against the rest of the plot', () => {
       structure(bare.series),
     )
     expect(annotated.series[3]).toBe(hostsOf(annotated)[0])
+  })
+
+  it('draws over every mark, so its label is never covered', () => {
+    const overrides: Partial<AxisChartConfig> = {
+      series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+    }
+    const option = build({ ...overrides, referenceLines: [{ value: 15 }] })
+    const marks = option.series
+      .filter((series: any) => !series.markLine)
+      .map((series: any) => series.z)
+
+    expect(hostsOf(option)[0].z).toBeGreaterThan(Math.max(...marks))
   })
 })
