@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { Editor, Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { OrderedList } from '@tiptap/extension-list'
@@ -16,25 +16,42 @@ const listItemJSON = (text: string) => ({
   content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
 })
 
+const openEditors: Editor[] = []
+const openApps: Array<ReturnType<typeof createApp>> = []
+
+afterEach(() => {
+  while (openEditors.length) openEditors.pop()?.destroy()
+  while (openApps.length) openApps.pop()?.unmount()
+})
+
 /** Mount `useEditor` the way a consumer does, without rendering EditorContent. */
 function mountUseEditor(
   content: ReturnType<typeof ref<string>>,
   options: Record<string, unknown> = {},
 ) {
   let editor: ReturnType<typeof useEditor> | null = null
-  createApp(
+  const app = createApp(
     defineComponent({
       setup() {
         editor = useEditor({ content, extensions: [StarterKit], ...options })
         return () => null
       },
     }),
-  ).mount(document.createElement('div'))
+  )
+  app.mount(document.createElement('div'))
+  openApps.push(app)
+  if (editor?.value) openEditors.push(editor.value)
   return editor!
 }
 
+function makeEditor(options: ConstructorParameters<typeof Editor>[0]) {
+  const editor = new Editor(options)
+  openEditors.push(editor)
+  return editor
+}
+
 function editorWith(content: string) {
-  return new Editor({ extensions: [StarterKit], content })
+  return makeEditor({ extensions: [StarterKit], content })
 }
 
 /** Position just inside the first empty top-level paragraph. */
@@ -172,7 +189,7 @@ describe('ListJoin', () => {
 
   it('does not mark a document dirty when repairing it on load', () => {
     const onUpdate = vi.fn()
-    new Editor({
+    makeEditor({
       extensions: [StarterKit],
       content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
       onUpdate,
@@ -183,7 +200,7 @@ describe('ListJoin', () => {
   it('repairs an unmounted editor through the command', () => {
     // `useEditor` builds with `element: null`, so there is no view — and until
     // it mounts, no ProseMirror plugins either. The command is the only path.
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [StarterKit],
       element: null,
       content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
@@ -200,7 +217,7 @@ describe('ListJoin', () => {
   })
 
   it('reports nothing to do when the document has no split list', () => {
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [StarterKit],
       element: null,
       content: '<ol><li><p>a</p></li></ol>',
@@ -237,7 +254,7 @@ describe('ListJoin', () => {
       name: 'ySyncStandIn',
       addProseMirrorPlugins: () => [new Plugin({ key: ySyncKey })],
     })
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [StarterKit.configure({ listJoin: false }), ListJoin, YSync],
       content: '<p>x</p>',
     })
@@ -270,7 +287,7 @@ describe('ListJoin', () => {
   })
 
   it('can be turned off through the kit', () => {
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [StarterKit.configure({ listJoin: false })],
       element: null,
       content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
@@ -297,7 +314,7 @@ describe('ListJoin', () => {
   })
 
   it('leaves the document alone when the command is only probed', () => {
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [StarterKit],
       element: null,
       content: '<ol><li><p>a</p></li></ol><ol><li><p>b</p></li></ol>',
@@ -358,7 +375,7 @@ describe('ListJoin', () => {
       },
     })
     const list = '<ol data-meta=\'{"a":1}\'><li><p>x</p></li></ol>'
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [
         StarterKit.configure({ orderedList: false }),
         ListWithObjectAttr,
@@ -387,7 +404,7 @@ describe('ListJoin', () => {
   it('merges adjacent task lists, which only RichTextKit enables', () => {
     const taskList = (text: string) =>
       `<ul data-type="taskList"><li data-type="taskItem" data-checked="false"><p>${text}</p></li></ul>`
-    const editor = new Editor({
+    const editor = makeEditor({
       extensions: [RichTextKit],
       content: taskList('a') + taskList('b'),
     })
