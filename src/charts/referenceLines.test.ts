@@ -56,7 +56,7 @@ describe('reference line placement', () => {
   it('draws a horizontal rule at a value on the value axis', () => {
     const option = build({ referenceLines: [{ value: 15 }] })
     expect(entriesOf(option)).toEqual([
-      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-5' }, label: { show: false } },
+      { yAxis: 15, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
     ])
   })
 
@@ -223,8 +223,6 @@ describe('reference line looks', () => {
   })
 
   it('turns the label off when none is set, rather than leaving it out', () => {
-    // Leaving it out hands the rule to echarts' own label, which prints the raw
-    // value past the end of the rule, outside the plot.
     expect(entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label).toEqual(
       { show: false },
     )
@@ -254,10 +252,10 @@ describe('reference line looks', () => {
     const [dashed, solid] = entriesOf(option)
     // A dash against the grid's dots: the two kinds of broken line have to be
     // told apart by pattern, because the rule is drawn at furniture weight.
-    expect(dashed.lineStyle.type).toEqual([5.25, 4.5])
+    expect(dashed.lineStyle.type).toEqual([3.5, 3])
     expect(dashed.lineStyle.cap).toBeUndefined()
     expect(dashed.lineStyle.type).not.toEqual(DOTTED_LINE.type)
-    expect(dashed.lineStyle.width).toBe(1.5)
+    expect(dashed.lineStyle.width).toBe(1)
     expect(solid.lineStyle.type).toBeUndefined()
   })
 

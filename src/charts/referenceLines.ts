@@ -7,8 +7,14 @@ import {
 import { translucent, type ChartTokens } from './tokens'
 import type { ReferenceLine, ReferenceLineLabelPlacement } from './types'
 
-/** Heavier than a gridline: the rule is a statement, not part of the grid. */
-const REFERENCE_LINE_WIDTH = 1.5
+/**
+ * A hairline, the gridline's own weight. What separates the rule from the grid
+ * is its dash against the grid's dots and its ink against the grid's, which is
+ * the difference `dashedLine` is built to carry at any weight. Weight is a third
+ * signal saying the same thing, and it costs: 1.5 lands between device pixels,
+ * so the rule renders as a two-pixel smear rather than as a line.
+ */
+const REFERENCE_LINE_WIDTH = 1
 
 /**
  * The annotation layer, above every mark. The rule is furniture and could sit
