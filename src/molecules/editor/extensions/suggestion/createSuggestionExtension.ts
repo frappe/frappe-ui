@@ -60,6 +60,14 @@ export interface CreateSuggestionExtensionOptions<
   component: VueComponent
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
+  /**
+   * TipTap joins this into a regex character class with no extra escaping.
+   * Keep entries to a single character; do not use `]`, `-`, or a leading `^`.
+   * An empty array is not useful: every prefix fails the matcher. The opener
+   * pads with a space, so omit `' '` from the list only if you do not use
+   * `openSuggestionMenu`.
+   */
+  allowedPrefixes?: string[] | null
   startOfLine?: boolean
   decorationTag?: string
   decorationClass?: string
@@ -97,6 +105,7 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           // (`:`/`#`/`@`) is literal source the author is typing — not a cue.
           allow: ({ state, range }) => !isInCode(state.doc, range.from),
           allowSpaces: options.allowSpaces,
+          allowedPrefixes: options.allowedPrefixes,
           startOfLine: options.startOfLine,
           decorationTag: options.decorationTag || 'span',
           decorationClass: options.decorationClass || 'suggestion',
@@ -119,7 +128,10 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           (extensionName: string) =>
           ({ editor, tr, commands, dispatch }) => {
             const target = getSuggestionOptions<{
-              suggestion?: { char?: string }
+              suggestion?: {
+                char?: string
+                allowedPrefixes?: string[] | null
+              }
             }>(editor, extensionName)
             const char = target?.suggestion?.char
             if (!char) return false
@@ -137,7 +149,11 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
             // shares this transaction — only `editor.chain()` would start a
             // rival one and throw.
             commands.focus()
-            insertSuggestionTrigger(tr, char)
+            insertSuggestionTrigger(
+              tr,
+              char,
+              target.suggestion?.allowedPrefixes,
+            )
             return true
           },
       }

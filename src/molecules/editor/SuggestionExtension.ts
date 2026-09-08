@@ -17,10 +17,22 @@ export type SuggestionExtensionOptions<TItem = any> = {
   component?: Component
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
-  command: (props: { editor: Editor; item: TItem; range: SuggestionRange }) => void
+  /**
+   * TipTap joins this into a regex character class with no extra escaping.
+   * Keep entries to a single character; do not use `]`, `-`, or a leading `^`.
+   * An empty array is not useful: every prefix fails the matcher.
+   */
+  allowedPrefixes?: string[] | null
+  command: (props: {
+    editor: Editor
+    item: TItem
+    range: SuggestionRange
+  }) => void
 }
 
-function buildSuggestionExtension<TItem = any>(options: SuggestionExtensionOptions<TItem>) {
+function buildSuggestionExtension<TItem = any>(
+  options: SuggestionExtensionOptions<TItem>,
+) {
   return Extension.create({
     name: options.name,
     addOptions() {
@@ -28,10 +40,21 @@ function buildSuggestionExtension<TItem = any>(options: SuggestionExtensionOptio
         suggestion: {
           char: options.trigger,
           allowSpaces: options.allowSpaces,
+          allowedPrefixes: options.allowedPrefixes,
           pluginKey: new PluginKey(options.name),
           items: ({ query }: { query: string }) =>
-            typeof options.items === 'function' ? options.items(query) : options.items,
-          command: ({ editor, range, props }: { editor: Editor; range: Range; props: TItem }) => {
+            typeof options.items === 'function'
+              ? options.items(query)
+              : options.items,
+          command: ({
+            editor,
+            range,
+            props,
+          }: {
+            editor: Editor
+            range: Range
+            props: TItem
+          }) => {
             options.command({ editor, item: props, range })
           },
           render: options.component

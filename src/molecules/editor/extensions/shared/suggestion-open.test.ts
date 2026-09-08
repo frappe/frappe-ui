@@ -159,6 +159,26 @@ describe('openSuggestionMenu', () => {
     expect(body(editor)).toBe('hello')
   })
 
+  it('does not pad after a character the suggester already allows', () => {
+    const editor = makeEditor('(')
+    caretTo(editor, 2)
+    const tr = editor.state.tr
+    insertSuggestionTrigger(tr, CHAR, [' ', '('])
+    // Inspect the transaction: dispatching would run TestSuggester, whose
+    // prefixes are still only space, so cleanup would take the char back out.
+    expect(tr.doc.textContent).toBe('(/')
+    expect(tr.getMeta('suggestionAutoOpen').padded).toBe(false)
+  })
+
+  it('pads after a non-breaking space so the matcher sees an allowed prefix', () => {
+    const editor = makeEditor('\u00a0')
+    caretTo(editor, 2)
+    const tr = editor.state.tr
+    insertSuggestionTrigger(tr, CHAR)
+    expect(tr.doc.textContent).toBe('\u00a0 /')
+    expect(tr.getMeta('suggestionAutoOpen').padded).toBe(true)
+  })
+
   it('removes the whole query run, not just the trigger', () => {
     const editor = makeEditor('hello')
     caretTo(editor, 6)

@@ -172,6 +172,21 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(options.suggestion.allowSpaces).toBe(true)
   })
 
+  it('forwards allowedPrefixes from SuggestionExtension options to the suggestion plugin', async () => {
+    const { SuggestionExtension } = await import('./index')
+
+    const extension = SuggestionExtension.configure({
+      name: 'people',
+      trigger: '@',
+      items: [],
+      allowedPrefixes: [' ', '('],
+      command: vi.fn(),
+    })
+
+    const options = (extension as any).addOptions()
+    expect(options.suggestion.allowedPrefixes).toEqual([' ', '('])
+  })
+
   it('creates and destroys a shallow editor ref', async () => {
     const { useEditor } = await import('./index')
     let editorRef: ReturnType<typeof useEditor> | undefined
