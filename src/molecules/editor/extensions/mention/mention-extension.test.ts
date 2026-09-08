@@ -7,7 +7,7 @@
  * those prefixes are covered too.
  */
 import { describe, it, expect, afterEach } from 'vitest'
-import { Editor } from '@tiptap/core'
+import { Editor, type AnyExtension } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
 import { Text } from '@tiptap/extension-text'
@@ -17,7 +17,7 @@ import { MentionExtension } from './mention-extension'
 
 const openEditors: Editor[] = []
 
-function makeEditor(extra: Parameters<typeof Editor>[0]['extensions'] = []) {
+function makeEditor(extra: AnyExtension[] = []) {
   const editor = new Editor({
     extensions: [
       Document,
@@ -49,7 +49,13 @@ function type(editor: Editor, text: string) {
   for (const char of text) {
     const { from, to } = editor.state.selection
     const handled = editor.view.someProp('handleTextInput', (handler) =>
-      handler(editor.view, from, to, char),
+      handler(
+        editor.view,
+        from,
+        to,
+        char,
+        () => editor.state.tr.insertText(char),
+      ),
     )
     if (!handled) editor.view.dispatch(editor.state.tr.insertText(char))
   }
