@@ -56,7 +56,7 @@ describe('reference line placement', () => {
   it('draws a horizontal rule at a value on the value axis', () => {
     const option = build({ referenceLines: [{ value: 15 }] })
     expect(entriesOf(option)).toEqual([
-      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-5' } },
+      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-5' }, label: { show: false } },
     ])
   })
 
@@ -222,10 +222,12 @@ describe('reference line looks', () => {
     expect(entriesOf(rtl)[0].label.position).toBe('insideEndTop')
   })
 
-  it('carries no label at all when none is set', () => {
-    expect(
-      entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label,
-    ).toBeUndefined()
+  it('turns the label off when none is set, rather than leaving it out', () => {
+    // Leaving it out hands the rule to echarts' own label, which prints the raw
+    // value past the end of the rule, outside the plot.
+    expect(entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label).toEqual(
+      { show: false },
+    )
   })
 
   it('takes the axis labels’ ink, not the palette and not the data labels’', () => {

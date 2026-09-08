@@ -156,24 +156,25 @@ function markLineEntry(
       width: REFERENCE_LINE_WIDTH,
       color,
     },
-    ...(line.label
+    // Written out even when the rule carries no text. Left off, echarts falls
+    // back to its own label, which prints the raw value past the end of the
+    // rule, outside the plot.
+    label: line.label
       ? {
-          label: {
-            show: true,
-            position:
-              LABEL_PLACEMENTS[line.labelPlacement ?? DEFAULT_LABEL_PLACEMENT],
-            // A function rather than the string itself: echarts reads a string
-            // formatter as a template, so a label with braces in it would come
-            // out substituted.
-            formatter: () => line.label,
-            color,
-            fontSize: DATA_LABEL_FONT_SIZE,
-            // The surface behind the plot, as a plate: wherever the label is
-            // placed, on a busy chart it is placed on top of a mark.
-            backgroundColor: translucent(tokens.backdrop, LABEL_PLATE_OPACITY),
-            padding: LABEL_PADDING,
-          },
+          show: true,
+          position:
+            LABEL_PLACEMENTS[line.labelPlacement ?? DEFAULT_LABEL_PLACEMENT],
+          // A function rather than the string itself: echarts reads a string
+          // formatter as a template, so a label with braces in it would come
+          // out substituted.
+          formatter: () => line.label,
+          color,
+          fontSize: DATA_LABEL_FONT_SIZE,
+          // The surface behind the plot, as a plate: wherever the label is
+          // placed, on a busy chart it is placed on top of a mark.
+          backgroundColor: translucent(tokens.backdrop, LABEL_PLATE_OPACITY),
+          padding: LABEL_PADDING,
         }
-      : {}),
+      : { show: false },
   }
 }
