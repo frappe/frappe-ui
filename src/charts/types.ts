@@ -565,19 +565,19 @@ export type ChartLegendItem = {
 export type ChartTooltipItem = {
   name: string
   label: string
-  /** Left out by a `'context'` item: a swatch would claim a mark on the plot. */
+  /** Left out by a `'column'` item: a swatch would claim a mark on the plot. */
   color?: string
-  /** A `'context'` item may carry a text attribute, so it is not always a number. */
+  /** A `'column'` item may carry a text attribute, so it is not always a number. */
   value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
   /**
-   * `'series'` is a row the plot draws, and is the default. `'context'` is a
-   * `tooltipSeries` column: it reaches the tooltip and nothing else, and is
+   * `'series'` is a row the plot draws, and is the default. `'column'` is a
+   * `tooltipColumns` entry: it reaches the tooltip and nothing else, and is
    * printed after the series rows.
    */
-  kind?: 'series' | 'context'
+  kind?: 'series' | 'column'
 }
 
 export type ChartDatapointEvent = {
@@ -707,24 +707,18 @@ export type SeriesStyle = {
 }
 
 /**
- * Look of a tooltip-only column. A `tooltipSeries` column draws no mark, so it
- * has no color, no axis and no stack — only what it is called, and how it prints.
+ * One tooltip-only column: it reaches the tooltip and nothing else — no mark,
+ * no legend entry, no palette slot, and no effect on the value axis.
  */
-export type TooltipSeriesStyle = {
-  /** Display name. The `tooltipSeriesConfig` key stays the identity. */
+export type ChartTooltipColumn = {
+  /** Row key. Also the label when none is given. */
+  name: string
   label?: string
   /**
-   * Prints this column's value in the tooltip. An extra sits on no axis, so it
-   * takes no formatter from one. Left out, a number prints with the default
-   * grouping and anything else prints as it stands.
+   * Prints this column's value. A column sits on no axis, so it takes no
+   * formatter from one. Left out, a number prints with the default grouping
+   * and anything else prints as it stands.
    */
-  format?: ChartTooltipFormatter
-}
-
-/** One tooltip-only column, with its style already resolved. */
-export type ChartTooltipSeries = {
-  name: string
-  label: string
   format?: ChartTooltipFormatter
 }
 
@@ -764,9 +758,7 @@ export type AxisChartProps = ChartBaseProps & {
    * They print after the series rows, in the order given, because a value in
    * another unit says nothing when it is ranked among the series.
    */
-  tooltipSeries?: string[]
-  /** Keyed by column name, the way `seriesConfig` is keyed by series. */
-  tooltipSeriesConfig?: Record<string, TooltipSeriesStyle>
+  tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */

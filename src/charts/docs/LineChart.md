@@ -29,8 +29,8 @@ chart has none.
 `seriesConfig[key].axis` measures a series against a second value axis, drawn
 opposite the primary — for a series in another unit, like a rate against
 dollars. `y2Axis.min` / `max` pin that scale so the line reads as over or under
-plan rather than as its own trend. The axis is only drawn when a series asks
-for it.
+plan rather than as its own trend. The axis is only drawn when a series asks for
+it.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
 
@@ -43,20 +43,20 @@ same way, keyed by a value of the `series` column.
 ## Filling one series
 
 `seriesConfig[key].type` sets the mark a single series draws as, so one line of
-a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There is
-no separate fill flag: an area *is* a filled line. `fillOpacity` sets the alpha,
-chart-wide or per series. The same key takes `'bar'`, which is what makes a
-combo chart.
+a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There
+is no separate fill flag: an area _is_ a filled line. `fillOpacity` sets the
+alpha, chart-wide or per series. The same key takes `'bar'`, which is what makes
+a combo chart.
 
 <ComponentPreview name="Charts-LineFilledSeries" csr="true" self-layout />
 
 ## Targets and thresholds
 
-`referenceLines` draws a rule over the plot at a fixed position. `axis` says what
-`value` is read against: `'y'` (the default) or `'y2'` for a rule across the plot
-at a measured value, `'x'` for one down it at a category, a date, or a number on
-a numeric x axis. Each line
-also takes an optional `label`, `color` and `dashed`.
+`referenceLines` draws a rule over the plot at a fixed position. `axis` says
+what `value` is read against: `'y'` (the default) or `'y2'` for a rule across
+the plot at a measured value, `'x'` for one down it at a category, a date, or a
+number on a numeric x axis. Each line also takes an optional `label`, `color`
+and `dashed`.
 
 <ComponentPreview name="Charts-LineThresholds" csr="true" self-layout />
 
@@ -68,7 +68,7 @@ data it is meant to be read against; pin `yAxis.min` / `max` instead.
 
 ## Context in the tooltip
 
-`tooltipSeries` names columns that reach the tooltip and nothing else: no mark,
+`tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
 no legend entry, no palette slot, and no effect on the value axis. Use it for a
 number the reader needs beside the picture but that does not belong on the same
 scale — the order count behind a conversion rate, the target beside the actual.
@@ -78,19 +78,19 @@ scale — the order count behind a conversion rate, the target beside the actual
   :data="data"
   x="month"
   :y="['conversion_rate']"
-  :tooltip-series="['orders']"
-  :tooltip-series-config="{ orders: { label: 'Orders' } }"
+  :tooltip-columns="[{ name: 'orders', label: 'Orders' }]"
 />
 ```
 
 They print after the series rows, under a rule and without a swatch, in the
-order given. The series rows are ranked by magnitude; an extra is not, because
-a value in another unit says nothing when it is ranked among them.
+order given. The series rows are ranked by magnitude; a column is not, because a
+value in another unit says nothing when it is ranked among them.
 
-`tooltipSeriesConfig` is keyed by column name, the way `seriesConfig` is keyed
-by series. `format` prints the value: an extra sits on no axis, so it takes no
-formatter from one. A column holding text rather than a number is a legitimate
-extra, and prints as it stands.
+`name` is the row key. `label` heads the row, and falls back to the column name.
+`format` prints the value: a column sits on no axis, so it takes no formatter
+from one. A column holding text rather than a number is legitimate, and prints
+as it stands.
+
 
 ## Hiding a series
 

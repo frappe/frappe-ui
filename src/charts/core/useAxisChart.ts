@@ -12,7 +12,11 @@ import {
 import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import { buildTooltipItems } from '../tooltipItems'
-import { seriesLabel, type AxisChartFormatters } from '../seriesData'
+import {
+  seriesLabel,
+  type AxisChartFormatters,
+  type ResolvedTooltipColumn,
+} from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
@@ -22,7 +26,6 @@ import type {
   ChartDatapointEvent,
   ChartLegendItem,
   ChartTooltipItem,
-  ChartTooltipSeries,
   PlotLabelPlacement,
 } from '../types'
 
@@ -49,7 +52,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * the config, not inside it, so the option builder never sees them: an extra
    * has no mark, no legend entry, no palette slot and no axis.
    */
-  tooltipSeries?: () => ChartTooltipSeries[]
+  tooltipColumns?: () => ResolvedTooltipColumn[]
   onSelect?: (event: ChartDatapointEvent) => void
 }
 
@@ -68,7 +71,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())
-  const tooltipSeries = computed(() => args.tooltipSeries?.() ?? [])
+  const tooltipColumns = computed(() => args.tooltipColumns?.() ?? [])
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
   // read the axis the way it is actually drawn — and the same row list, so a
@@ -263,7 +266,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       colors: seriesColors.value,
       formatSeries: formatSeriesValue,
       shares: stackShares.value,
-      tooltipSeries: tooltipSeries.value,
+      tooltipColumns: tooltipColumns.value,
     })
 
     // The tooltip still stands on the series: extras alone would open one over

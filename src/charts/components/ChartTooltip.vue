@@ -40,15 +40,15 @@
           </div>
         </div>
 
-        <!-- Context rows carry no swatch: a swatch says the reader can find
-             this on the plot, and an extra is drawn nowhere. The rule is what
+        <!-- Column rows carry no swatch: a swatch says the reader can find
+             this on the plot, and a column is drawn nowhere. The rule is what
              tells them apart from the series above. -->
         <div
-          v-if="contextItems.length"
+          v-if="columnItems.length"
           class="mt-2 flex flex-col gap-1.5 border-t border-outline-gray-1 pt-2"
         >
           <div
-            v-for="item in contextItems"
+            v-for="item in columnItems"
             :key="item.name"
             class="flex items-center justify-between gap-5 text-p-sm"
           >
@@ -74,12 +74,12 @@ import type { ChartTooltipProps, ChartTooltipSlots } from '../types'
 const props = defineProps<ChartTooltipProps>()
 
 // `kind` is optional, so an item that names none is a series: that is what
-// every caller before `tooltipSeries` existed was handing over.
+// every caller before `tooltipColumns` existed was handing over.
 const seriesItems = computed(() =>
-  props.items.filter((item) => item.kind !== 'context'),
+  props.items.filter((item) => item.kind !== 'column'),
 )
-const contextItems = computed(() =>
-  props.items.filter((item) => item.kind === 'context'),
+const columnItems = computed(() =>
+  props.items.filter((item) => item.kind === 'column'),
 )
 
 const portalTarget = usePortalTarget()

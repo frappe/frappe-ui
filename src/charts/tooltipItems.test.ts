@@ -5,8 +5,9 @@ import { buildTooltipItems, type TooltipItemsArgs } from './tooltipItems'
 import type { ChartTokens } from './tokens'
 import type { AxisChartProps, ChartTooltipItem } from './types'
 
-// A rate beside the count behind it: two units, which is the case `tooltipSeries`
-// exists for. `orders` is never drawn — it only prints in the tooltip.
+// A rate beside the count behind it: two units, which is the case
+// `tooltipColumns` exists for. `orders` is never drawn — it only prints in the
+// tooltip.
 const ROW = { month: 'Jan', conversion: 12, refund_rate: 3, orders: 1840 }
 
 function items(overrides: Partial<TooltipItemsArgs> = {}): ChartTooltipItem[] {
@@ -17,7 +18,7 @@ function items(overrides: Partial<TooltipItemsArgs> = {}): ChartTooltipItem[] {
     hiddenSeries: [],
     colors: { conversion: '#111111', refund_rate: '#222222' },
     formatSeries: (_series, value) => `${value}%`,
-    tooltipSeries: [{ name: 'orders', label: 'Orders' }],
+    tooltipColumns: [{ name: 'orders', label: 'Orders' }],
     ...overrides,
   })
 }
@@ -30,7 +31,7 @@ describe('a tooltip-only column', () => {
       label: 'Orders',
       value: 1840,
       formattedValue: '1,840',
-      kind: 'context',
+      kind: 'column',
     })
   })
 
@@ -46,7 +47,7 @@ describe('a tooltip-only column', () => {
 
   it('holds the order the author gave, rather than being ranked', () => {
     const rows = items({
-      tooltipSeries: [
+      tooltipColumns: [
         { name: 'orders', label: 'Orders' },
         { name: 'refunds', label: 'Refunds' },
       ],
@@ -62,7 +63,7 @@ describe('a tooltip-only column', () => {
 
   it('takes its format from its own config, not from an axis', () => {
     const rows = items({
-      tooltipSeries: [
+      tooltipColumns: [
         {
           name: 'orders',
           label: 'Orders',
@@ -71,14 +72,14 @@ describe('a tooltip-only column', () => {
       ],
     })
     // `formatSeries` prints a percent, because the series sit on a rate axis.
-    // An extra sits on no axis, so it never reaches that formatter.
+    // A column sits on no axis, so it never reaches that formatter.
     expect(rows.at(-1)?.formattedValue).toBe('1840 orders')
   })
 
   it('carries a text attribute as well as a number', () => {
     const rows = items({
       row: { ...ROW, category: 'Outerwear' },
-      tooltipSeries: [{ name: 'category', label: 'Category' }],
+      tooltipColumns: [{ name: 'category', label: 'Category' }],
     })
     expect(rows.at(-1)).toMatchObject({
       value: 'Outerwear',
@@ -89,7 +90,7 @@ describe('a tooltip-only column', () => {
   it('drops a blank cell rather than printing an empty row', () => {
     const rows = items({
       row: { ...ROW, orders: null, target: '' },
-      tooltipSeries: [
+      tooltipColumns: [
         { name: 'orders', label: 'Orders' },
         { name: 'target', label: 'Target' },
       ],
@@ -113,12 +114,12 @@ describe('the series rows are untouched by it', () => {
     expect(items().map((row) => row.kind)).toEqual([
       'series',
       'series',
-      'context',
+      'column',
     ])
   })
 })
 
-// The claim these guard is that an extra reaches the tooltip and nowhere else.
+// The claim these guard is that a column reaches the tooltip and nowhere else.
 // `normalizeAxisChartProps` keeps it out of the config, so no option builder
 // can read it even by mistake.
 
@@ -152,19 +153,17 @@ function optionFor(overrides: Partial<AxisChartProps> = {}) {
   return buildAxisChartOption({ ...config, type: 'bar' }, { tokens }) as any
 }
 
-describe('what an extra is kept out of', () => {
+describe('what a tooltip-only column is kept out of', () => {
   it('is not a series the config carries', () => {
-    const { config, tooltipSeries } = normalizeAxisChartProps(
-      props({ tooltipSeries: ['orders'] }),
+    const { config, tooltipColumns } = normalizeAxisChartProps(
+      props({ tooltipColumns: [{ name: 'orders' }] }),
     )
     expect(config.series.map((series) => series.name)).toEqual(['conversion'])
-    expect(tooltipSeries).toEqual([
-      { name: 'orders', label: 'Orders', format: undefined },
-    ])
+    expect(tooltipColumns).toEqual([{ name: 'orders', label: 'Orders' }])
   })
 
   it('is not drawn: the option carries the series alone', () => {
-    const drawn = optionFor({ tooltipSeries: ['orders'] })
+    const drawn = optionFor({ tooltipColumns: [{ name: 'orders' }] })
     expect(drawn.series.map((series: any) => series.name)).toEqual([
       'conversion',
     ])
@@ -174,18 +173,22 @@ describe('what an extra is kept out of', () => {
     // 2100 is an order of magnitude over the largest drawn value. An axis that
     // read it would put every bar in the bottom tenth of the plot.
     const extent = (option: any) => [option.yAxis.min, option.yAxis.max]
-    expect(extent(optionFor({ tooltipSeries: ['orders'] }))).toEqual(
+    expect(extent(optionFor({ tooltipColumns: [{ name: 'orders' }] }))).toEqual(
       extent(optionFor()),
     )
   })
 
-  it('takes its label from `tooltipSeriesConfig`', () => {
-    const { tooltipSeries } = normalizeAxisChartProps(
-      props({
-        tooltipSeries: ['orders'],
-        tooltipSeriesConfig: { orders: { label: 'Orders placed' } },
-      }),
+  it('falls back to the column name when the entry names no label', () => {
+    const { tooltipColumns } = normalizeAxisChartProps(
+      props({ tooltipColumns: [{ name: 'orders' }] }),
     )
-    expect(tooltipSeries[0].label).toBe('Orders placed')
+    expect(tooltipColumns[0].label).toBe('Orders')
+  })
+
+  it('takes the label the entry gives', () => {
+    const { tooltipColumns } = normalizeAxisChartProps(
+      props({ tooltipColumns: [{ name: 'orders', label: 'Orders placed' }] }),
+    )
+    expect(tooltipColumns[0].label).toBe('Orders placed')
   })
 })

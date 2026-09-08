@@ -3,7 +3,7 @@ import type {
   AxisChartProps,
   AxisChartSeriesConfig,
   ChartCategoryFormatter,
-  ChartTooltipSeries,
+  ChartTooltipColumn,
   ChartValueAxisOptions,
   ChartValueFormatter,
   ChartYAxisConfig,
@@ -25,6 +25,9 @@ export type AxisChartFormatters = {
   y2?: ChartValueFormatter
 }
 
+/** A `ChartTooltipColumn` after normalization, i.e. with its label filled in. */
+export type ResolvedTooltipColumn = ChartTooltipColumn & { label: string }
+
 export type NormalizedAxisChart = {
   config: AxisChartBaseConfig
   format: AxisChartFormatters
@@ -33,7 +36,7 @@ export type NormalizedAxisChart = {
    * than inside it: the option builders read the config, and nothing an option
    * builder draws should learn that these exist.
    */
-  tooltipSeries: ChartTooltipSeries[]
+  tooltipColumns: ResolvedTooltipColumn[]
 }
 
 /**
@@ -91,14 +94,10 @@ export function normalizeAxisChartProps(
       y: props.yAxis?.format,
       y2: props.y2Axis?.format,
     },
-    tooltipSeries: (props.tooltipSeries ?? []).map((name) => {
-      const style = props.tooltipSeriesConfig?.[name]
-      return {
-        name,
-        label: style?.label ?? formatLabel(name),
-        format: style?.format,
-      }
-    }),
+    tooltipColumns: (props.tooltipColumns ?? []).map((column) => ({
+      ...column,
+      label: column.label ?? formatLabel(column.name),
+    })),
   }
 }
 

@@ -49,10 +49,7 @@
     </template>
 
     <template v-if="legendItems.length > 1" #legend>
-      <ChartLegend
-        :items="legendItems"
-        @change="toggleSeries"
-      />
+      <ChartLegend :items="legendItems" @change="toggleSeries" />
     </template>
   </ChartContainer>
 </template>
@@ -130,7 +127,7 @@ const {
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
-  tooltipSeries: () => normalized.value.tooltipSeries,
+  tooltipColumns: () => normalized.value.tooltipColumns,
   hiddenSeries,
   onSelect: (event) => emit('select', event),
 })

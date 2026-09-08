@@ -99,8 +99,8 @@ describe('BarChart', () => {
         .and('contain.text', '10')
     })
 
-    // `tooltipSeries` is the context in another unit — the count behind a rate.
-    // It reaches the tooltip and nothing else.
+    // `tooltipColumns` is the context in another unit — the count behind a
+    // rate. It reaches the tooltip and nothing else.
     describe('a tooltip-only column', () => {
       const withOrders = data.map((row, index) => ({
         ...row,
@@ -110,8 +110,7 @@ describe('BarChart', () => {
       const mountWithExtra = (props: Record<string, any> = {}) =>
         mountChart({
           data: withOrders,
-          tooltipSeries: ['orders'],
-          tooltipSeriesConfig: { orders: { label: 'Orders' } },
+          tooltipColumns: [{ name: 'orders', label: 'Orders' }],
           ...props,
         })
 
@@ -126,7 +125,7 @@ describe('BarChart', () => {
       it('carries no swatch, which would claim a mark on the plot', () => {
         mountWithExtra()
         cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
-        // Two series, and the extra adds no third.
+        // Two series, and the column adds no third.
         cy.get('[data-slot="chart-tooltip"] .size-2').should('have.length', 2)
       })
 

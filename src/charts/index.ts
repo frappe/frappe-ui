@@ -88,7 +88,6 @@ export type {
   ScatterChartProps,
   ScatterChartSlots,
   SeriesStyle,
-  TooltipSeriesStyle,
 } from './types'
 
 // Only what the props, emits, slots and template refs above reach for; the
@@ -101,6 +100,7 @@ export type {
   ChartMark,
   ChartPalette,
   ChartPaletteName,
+  ChartTooltipColumn,
   ChartTooltipItem,
   DonutSliceEvent,
   DonutVariant,

@@ -31,7 +31,7 @@ chart-level alpha; a `seriesConfig` entry overrides it per series.
 
 ## Context in the tooltip
 
-`tooltipSeries` names columns that reach the tooltip and nothing else: no mark,
+`tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
 no legend entry, no palette slot, and no effect on the value axis. Use it for a
 number the reader needs beside the picture but that does not belong on the same
 scale — the order count behind a conversion rate, the target beside the actual.
@@ -41,26 +41,26 @@ scale — the order count behind a conversion rate, the target beside the actual
   :data="data"
   x="month"
   :y="['conversion_rate']"
-  :tooltip-series="['orders']"
-  :tooltip-series-config="{ orders: { label: 'Orders' } }"
+  :tooltip-columns="[{ name: 'orders', label: 'Orders' }]"
 />
 ```
 
 They print after the series rows, under a rule and without a swatch, in the
-order given. The series rows are ranked by magnitude; an extra is not, because
-a value in another unit says nothing when it is ranked among them.
+order given. The series rows are ranked by magnitude; a column is not, because a
+value in another unit says nothing when it is ranked among them.
 
-`tooltipSeriesConfig` is keyed by column name, the way `seriesConfig` is keyed
-by series. `format` prints the value: an extra sits on no axis, so it takes no
-formatter from one. A column holding text rather than a number is a legitimate
-extra, and prints as it stands.
+`name` is the row key. `label` heads the row, and falls back to the column name.
+`format` prints the value: a column sits on no axis, so it takes no formatter
+from one. A column holding text rather than a number is legitimate, and prints
+as it stands.
+
 
 ## Hiding a series
 
 A chart with more than one series draws a legend under the plot. Press an entry
 to take that band out of the chart. The stack closes over it, and a normalized
 stack re-takes its shares over the bands that are left. Bind
-`v-model:hiddenSeries` to own that list yourself;
-it is described under [BarChart](/docs/charts/barchart#hiding-a-series).
+`v-model:hiddenSeries` to own that list yourself; it is described under
+[BarChart](/docs/charts/barchart#hiding-a-series).
 
 <!-- @include: ./AreaChart.api.md -->
