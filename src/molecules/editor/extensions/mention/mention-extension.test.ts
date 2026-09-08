@@ -120,6 +120,12 @@ describe('Mention allowedPrefixes', () => {
     expect(mentionActive(editor)).toBe(true)
   })
 
+  it('opens after a pasted non-breaking space', () => {
+    const editor = makeEditor()
+    editor.commands.insertContent('\u00a0@')
+    expect(mentionActive(editor)).toBe(true)
+  })
+
   it('does not open in the middle of an email address', () => {
     const editor = makeEditor()
     editor.commands.insertContent('jane@')
