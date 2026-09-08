@@ -40,11 +40,10 @@ function mountUseEditor(
   )
   app.mount(document.createElement('div'))
   openApps.push(app)
-  if (editor?.value) openEditors.push(editor.value)
   return editor!
 }
 
-function makeEditor(options: ConstructorParameters<typeof Editor>[0]) {
+function makeEditor(options: ConstructorParameters<typeof Editor>[0] = {}) {
   const editor = new Editor(options)
   openEditors.push(editor)
   return editor
