@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
 import { buildTooltipItems, type TooltipItemsArgs } from './tooltipItems'
@@ -217,6 +217,39 @@ describe('what a tooltip-only column is kept out of', () => {
     })
     expect(config.data).toHaveLength(1)
     expect(config.data[0].orders).toBe(900)
+  })
+
+  it('drops a column a series name has taken, rather than printing the measure', () => {
+    // Long data flattens every group onto one row, so a group value equal to a
+    // column's name lands on the same key. Keeping the column would print the
+    // plotted measure under the column's label.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { config, tooltipColumns } = normalizeAxisChartProps({
+      data: [
+        { month: 'Jan', region: 'orders', sales: 12, orders: 1840 },
+        { month: 'Jan', region: 'South', sales: 9, orders: 1840 },
+      ],
+      x: 'month',
+      y: 'sales',
+      series: 'region',
+      tooltipColumns: [{ name: 'orders' }],
+    })
+    // The plot keeps the key: the series is what the reader can point at.
+    expect(config.data[0].orders).toBe(12)
+    expect(tooltipColumns).toEqual([])
+    expect(warn).toHaveBeenCalledOnce()
+    warn.mockRestore()
+  })
+
+  it('keeps a column whose name no series has taken', () => {
+    const { tooltipColumns } = normalizeAxisChartProps({
+      data: [{ month: 'Jan', region: 'North', sales: 12, orders: 1840 }],
+      x: 'month',
+      y: 'sales',
+      series: 'region',
+      tooltipColumns: [{ name: 'orders' }],
+    })
+    expect(tooltipColumns).toEqual([{ name: 'orders', label: 'Orders' }])
   })
 
   it('takes the label the entry gives', () => {

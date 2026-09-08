@@ -25,7 +25,6 @@ export type AxisChartFormatters = {
   y2?: ChartValueFormatter
 }
 
-/** A `ChartTooltipColumn` after normalization, i.e. with its label filled in. */
 export type ResolvedTooltipColumn = ChartTooltipColumn & { label: string }
 
 export type NormalizedAxisChart = {
@@ -80,6 +79,20 @@ export function normalizeAxisChartProps(
       )
     : { data: rows, names: yColumns }
 
+  // A pivoted row holds one value per key, so a group value equal to a tooltip
+  // column's name lands on the same key and the plotted measure wins. Keeping
+  // the column would print the measure under the column's label.
+  const clobbered = props.series
+    ? tooltipColumns.filter((column) => names.includes(column.name))
+    : []
+
+  if (import.meta.env.DEV && clobbered.length) {
+    const named = clobbered.map((column) => `"${column.name}"`).join(', ')
+    console.warn(
+      `[frappe-ui] \`series="${props.series}"\` produces a series named ${named}, which \`tooltipColumns\` also names. The series keeps the key and the column is dropped. Rename the column, or change the values in "${props.series}".`,
+    )
+  }
+
   return {
     config: {
       data,
@@ -105,7 +118,9 @@ export function normalizeAxisChartProps(
       y: props.yAxis?.format,
       y2: props.y2Axis?.format,
     },
-    tooltipColumns,
+    tooltipColumns: tooltipColumns.filter(
+      (column) => !clobbered.includes(column),
+    ),
   }
 }
 
@@ -149,8 +164,8 @@ function toColumns(value?: string | string[]): string[] {
  * survives. Duplicate (x, series) pairs are last-write-wins.
  *
  * `carry` names columns to copy across untouched. A tooltip column reads per
- * category rather than per group — the tooltip prints one row for it, not one
- * per series — so the first row to reach a category decides its value.
+ * category, not per group, so the first row to reach a category decides its
+ * value.
  */
 function pivot(
   rows: Record<string, any>[],
