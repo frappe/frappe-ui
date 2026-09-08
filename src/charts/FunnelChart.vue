@@ -164,6 +164,7 @@
 import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { chartColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
@@ -246,6 +247,14 @@ const tooltip = reactive({
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
   rates: [] as { label: string; value: string }[],
+})
+
+useTooltipDismiss({
+  plot: root,
+  data: () => stages.value,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 function hover(stage: FunnelStage, event: MouseEvent) {

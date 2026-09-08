@@ -53,6 +53,7 @@ import { computed, reactive, ref } from 'vue'
 import { SankeyChart as SankeySeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
 import { formatLabel, formatValue } from './format'
 import { useChartTokens } from './tokens'
@@ -141,6 +142,14 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+})
+
+useTooltipDismiss({
+  plot: plotEl,
+  data: () => graph.value.links,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 const { chart, dispatch } = useChart({

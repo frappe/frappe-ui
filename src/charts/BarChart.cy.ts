@@ -543,18 +543,92 @@ describe('BarChart', () => {
         .and('not.contain.text', 'Sales')
     })
 
+    describe('dismissal', () => {
+      function openTooltip() {
+        mountChart()
+        bars().should('have.length', data.length * 2)
+        plot().trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]').should('exist')
+      }
+
+      it('closes when the page scrolls', () => {
+        openTooltip()
+        // Dispatched on the plot, not the window: a scroll event does not
+        // bubble, so this reaches the listener only through the capture phase.
+        // That is how a scroll inside a nested container arrives.
+        plot().then(($el) => $el[0].dispatchEvent(new Event('scroll')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the window resizes', () => {
+        openTooltip()
+        cy.window().then((win) => win.dispatchEvent(new Event('resize')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the pointer leaves the plot', () => {
+        openTooltip()
+        plot().trigger('pointerleave')
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the window goes away', () => {
+        openTooltip()
+        cy.window().then((win) => win.dispatchEvent(new Event('blur')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the tab is hidden', () => {
+        openTooltip()
+        cy.document().then((doc) => {
+          Object.defineProperty(doc, 'hidden', {
+            value: true,
+            configurable: true,
+          })
+          doc.dispatchEvent(new Event('visibilitychange'))
+        })
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the rows behind it change', () => {
+        const rows = ref(data)
+        cy.mount(
+          defineComponent({
+            setup() {
+              return () =>
+                h('div', { style: 'width: 480px; height: 300px' }, [
+                  h(BarChart, {
+                    data: rows.value,
+                    x: 'month',
+                    y: ['sales', 'refunds'],
+                    echartOptions: { animation: false },
+                  }),
+                ])
+            },
+          }),
+        )
+        bars().should('have.length', data.length * 2)
+        plot().trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]').should('exist')
+        cy.then(() => {
+          rows.value = data.map((row) => ({ ...row, sales: row.sales * 2 }))
+        })
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+    })
+
     it('hands the plotted row to the tooltip slot', () => {
       // The row carries every column, `tooltipColumns` or not: a tooltip the
       // app draws itself needs no prop to reach one.
-      mountChart(
-        { data: data.map((row) => ({ ...row, orders: 1000 })) },
-        {
-          tooltip: ({ row }: any) => h('span', `${row.orders} orders`),
-        } as any,
-      )
+      mountChart({ data: data.map((row) => ({ ...row, orders: 1000 })) }, {
+        tooltip: ({ row }: any) => h('span', `${row.orders} orders`),
+      } as any)
       bars().should('have.length', data.length * 2)
       plot().focus()
-      cy.get('[data-slot="chart-tooltip"]').should('contain.text', '1000 orders')
+      cy.get('[data-slot="chart-tooltip"]').should(
+        'contain.text',
+        '1000 orders',
+      )
     })
   })
 

@@ -2,6 +2,7 @@ import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
+import { useTooltipDismiss } from './useTooltipDismiss'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
   hasSecondaryValueAxis,
@@ -189,6 +190,14 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     // Handed to the `#tooltip` slot so a replacement body can read a column the
     // chart never plotted.
     row: undefined as Record<string, any> | undefined,
+  })
+
+  useTooltipDismiss({
+    plot: plotEl,
+    data: () => rows.value,
+    close: () => {
+      tooltip.open = false
+    },
   })
 
   /**

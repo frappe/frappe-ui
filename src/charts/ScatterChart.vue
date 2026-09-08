@@ -64,6 +64,7 @@ import { GridComponent, MarkLineComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
@@ -381,6 +382,14 @@ function downplayPoint(index: number | null) {
     dataIndex: hit.dataIndex,
   })
 }
+
+useTooltipDismiss({
+  plot: plotEl,
+  data: () => walk.value,
+  close: () => {
+    tooltip.open = false
+  },
+})
 
 const keyboard = usePlotKeyboard({
   marks: () => walk.value,

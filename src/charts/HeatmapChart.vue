@@ -93,6 +93,7 @@ import { GridComponent, VisualMapContinuousComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { AXIS_LABEL_MARGIN } from './axisChartCommon'
 import {
   buildHeatmapMatrix,
@@ -186,6 +187,14 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+})
+
+useTooltipDismiss({
+  plot: plotEl,
+  data: () => matrix.value.cells,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 /**
