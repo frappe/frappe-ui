@@ -113,6 +113,8 @@ function createMentionNode(component?: Component) {
  * so `(@jane` never opened the list. Curly quotes are included because
  * Typography (on in RichTextKit) rewrites `"`/`'` the moment they are typed.
  * NBSP is included because pasted-from-email content often uses it as a space.
+ * Closing quotes (`” ’`) are included because Typography curls a quote after a
+ * word into the closing form; CJK and guillemet closers (`」 』 » ›`) match.
  *
  * Slash (`/`), tag (`#`), and emoji (`:`) keep the default: those triggers
  * after a word usually mean a path, a heading, or a colon, not a menu.
