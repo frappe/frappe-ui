@@ -60,6 +60,10 @@ export interface CreateSuggestionExtensionOptions<
   component: VueComponent
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
+  /**
+   * TipTap joins this into a regex character class with no extra escaping.
+   * Keep entries to a single character; do not use `]`, `-`, or a leading `^`.
+   */
   allowedPrefixes?: string[] | null
   startOfLine?: boolean
   decorationTag?: string

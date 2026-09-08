@@ -170,6 +170,15 @@ describe('openSuggestionMenu', () => {
     expect(tr.getMeta('suggestionAutoOpen').padded).toBe(false)
   })
 
+  it('pads after a non-breaking space so the matcher sees an allowed prefix', () => {
+    const editor = makeEditor('\u00a0')
+    caretTo(editor, 2)
+    const tr = editor.state.tr
+    insertSuggestionTrigger(tr, CHAR)
+    expect(tr.doc.textContent).toBe('\u00a0 /')
+    expect(tr.getMeta('suggestionAutoOpen').padded).toBe(true)
+  })
+
   it('removes the whole query run, not just the trigger', () => {
     const editor = makeEditor('hello')
     caretTo(editor, 6)

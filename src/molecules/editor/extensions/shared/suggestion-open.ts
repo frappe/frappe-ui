@@ -90,8 +90,9 @@ function isStrandedPadding(doc: ProseMirrorNode, pos: number): boolean {
  * there throws `Applying a mismatched transaction`.
  *
  * `allowedPrefixes` is the same list TipTap's matcher uses (`[' ']` when
- * omitted, `null` to allow any). Pad only when the preceding character would
- * make the trigger fail to match — so a mention after `(` stays `(@`, not `( @`.
+ * omitted, `null` to allow any). Pad only when the preceding character is
+ * not in that list — including other whitespace such as NBSP — so a mention
+ * after `(` stays `(@`, and a toolbar open after pasted NBSP still matches.
  */
 export function insertSuggestionTrigger(
   tr: Transaction,
@@ -102,10 +103,7 @@ export function insertSuggestionTrigger(
   const $from = tr.doc.resolve(from)
   const before = from > $from.start() ? tr.doc.textBetween(from - 1, from) : ''
   const prefixOk =
-    allowedPrefixes === null ||
-    !before ||
-    /\s/.test(before) ||
-    allowedPrefixes.includes(before)
+    allowedPrefixes === null || !before || allowedPrefixes.includes(before)
   const text = prefixOk ? char : ` ${char}`
 
   tr.insertText(text, from, to)
