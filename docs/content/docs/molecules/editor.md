@@ -83,6 +83,8 @@ To pick a different *named* size altogether, pass a Tailwind Typography size mod
 
 Build custom `@`, `#`, `/`, or `:` suggestion menus with `SuggestionExtension.configure(...)`, then pass the configured extension to a kit or to `useEditor`. The kits use this internally for `mention` (`@`) and `tag` (`#`).
 
+`allowSpaces` lets the query contain spaces. `allowedPrefixes` is the list of characters that may sit immediately before the trigger (TipTap's default is a space); pass `null` to allow any. Mentions in the kits already open after brackets and quotes.
+
 ```ts
 import { SuggestionExtension } from 'frappe-ui/editor'
 

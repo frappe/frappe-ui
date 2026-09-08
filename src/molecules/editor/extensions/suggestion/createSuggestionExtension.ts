@@ -63,6 +63,7 @@ export interface CreateSuggestionExtensionOptions<
   /**
    * TipTap joins this into a regex character class with no extra escaping.
    * Keep entries to a single character; do not use `]`, `-`, or a leading `^`.
+   * An empty array is not useful: every prefix fails the matcher.
    */
   allowedPrefixes?: string[] | null
   startOfLine?: boolean

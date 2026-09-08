@@ -9,6 +9,12 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Editor — mentions open after brackets and quotes
+
+Typing `@` after an opening bracket or quote (`(@jane`, `[@jane`, `"@jane`) now opens the mention list. TipTap only allowed a space before the trigger, so those sequences never matched. Emails (`jane@example.com`) still do not.
+
+`SuggestionExtension.configure` accepts `allowedPrefixes` for custom suggesters that need the same behaviour.
+
 ### Calendar — the Month view is a continuous strip that shows every event
 
 The Month view no longer draws a fixed 5- or 6-row grid that hid whatever
