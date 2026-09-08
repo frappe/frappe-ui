@@ -69,9 +69,9 @@ data it is meant to be read against; pin `yAxis.min` / `max` instead.
 ## Context in the tooltip
 
 `tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
-no legend entry, no palette slot, and no effect on the value axis. Use it for a
-number the reader needs beside the picture but that does not belong on the same
-scale — the order count behind a conversion rate, the target beside the actual.
+no legend entry, no palette slot, no place on the value axis. Use it for a
+number that does not belong on the same scale, such as the order count behind
+a conversion rate.
 
 ```vue
 <LineChart
@@ -82,18 +82,21 @@ scale — the order count behind a conversion rate, the target beside the actual
 />
 ```
 
-They print after the series rows, under a rule and without a swatch, in the
-order given. The series rows are ranked by magnitude; a column is not, because a
-value in another unit says nothing when it is ranked among them.
+<ComponentPreview name="Charts-LineTooltipColumns" csr="true" self-layout />
 
-`name` is the row key. `label` heads the row, and falls back to the column name.
-`format` prints the value: a column sits on no axis, so it takes no formatter
-from one. A column holding text rather than a number is legitimate, and prints
-as it stands.
+Columns print after the series rows, in the order given. They are not ranked
+by magnitude: a value in another unit cannot be ranked among the series.
 
-To read a column in a tooltip you write yourself, take `row` from the `tooltip`
-slot instead. It carries the whole data row, plotted columns and all.
+`name` is the row key. `label` falls back to it, and `format` prints the value.
+A column holding text prints as it stands.
 
+For a tooltip you write yourself, take `row` from the `tooltip` slot instead.
+
+```vue
+<LineChart :data="data" x="month" y="conversion_rate">
+  <template #tooltip="{ row }">{{ row.orders }} orders</template>
+</LineChart>
+```
 
 ## Hiding a series
 

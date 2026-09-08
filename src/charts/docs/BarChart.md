@@ -105,31 +105,8 @@ annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
 ## Context in the tooltip
 
 `tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
-no legend entry, no palette slot, and no effect on the value axis. Use it for a
-number the reader needs beside the picture but that does not belong on the same
-scale — the order count behind a conversion rate, the target beside the actual.
-
-```vue
-<BarChart
-  :data="data"
-  x="month"
-  :y="['conversion_rate']"
-  :tooltip-columns="[{ name: 'orders', label: 'Orders' }]"
-/>
-```
-
-They print after the series rows, under a rule and without a swatch, in the
-order given. The series rows are ranked by magnitude; a column is not, because a
-value in another unit says nothing when it is ranked among them.
-
-`name` is the row key. `label` heads the row, and falls back to the column name.
-`format` prints the value: a column sits on no axis, so it takes no formatter
-from one. A column holding text rather than a number is legitimate, and prints
-as it stands.
-
-To read a column in a tooltip you write yourself, take `row` from the `tooltip`
-slot instead. It carries the whole data row, plotted columns and all.
-
+no legend entry, no palette slot, no place on the value axis. It is described
+under [LineChart](/docs/charts/linechart#context-in-the-tooltip).
 
 ## Hiding a series
 
