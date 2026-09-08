@@ -3,7 +3,8 @@
  *
  * TipTap only opens `@` after a space by default. Mentions also have to fire
  * after opening brackets and quotes (`(@jane`) without matching emails
- * (`jane@example.com`).
+ * (`jane@example.com`). Typography rewrites straight quotes to curly ones, so
+ * those prefixes are covered too.
  */
 import { describe, it, expect, afterEach } from 'vitest'
 import { Editor } from '@tiptap/core'
@@ -11,11 +12,12 @@ import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
 import { Text } from '@tiptap/extension-text'
 import { PluginKey } from '@tiptap/pm/state'
+import { Typography } from '../../extensions'
 import { MentionExtension } from './mention-extension'
 
 const openEditors: Editor[] = []
 
-function makeEditor() {
+function makeEditor(extra: Parameters<typeof Editor>[0]['extensions'] = []) {
   const editor = new Editor({
     extensions: [
       Document,
@@ -24,6 +26,7 @@ function makeEditor() {
       MentionExtension.configure({
         items: [{ id: 'jane', label: 'Jane' }],
       }),
+      ...extra,
     ],
     content: '<p></p>',
   })
@@ -41,6 +44,17 @@ function mentionActive(editor: Editor) {
   )
 }
 
+/** Type one character at a time so Typography input rules can fire. */
+function type(editor: Editor, text: string) {
+  for (const char of text) {
+    const { from, to } = editor.state.selection
+    const handled = editor.view.someProp('handleTextInput', (handler) =>
+      handler(editor.view, from, to, char),
+    )
+    if (!handled) editor.view.dispatch(editor.state.tr.insertText(char))
+  }
+}
+
 describe('Mention allowedPrefixes', () => {
   afterEach(() => {
     while (openEditors.length) openEditors.pop()?.destroy()
@@ -56,7 +70,7 @@ describe('Mention allowedPrefixes', () => {
     expect(mentionActive(editor)).toBe(true)
   })
 
-  it.each(['(', '[', '{', '<', '（', '【', '《', '"', "'"])(
+  it.each(['(', '[', '{', '<', '（', '【', '《', '"', "'", '“', '”', '‘', '’'])(
     'opens immediately after %s',
     (prefix) => {
       const editor = makeEditor()
@@ -64,6 +78,18 @@ describe('Mention allowedPrefixes', () => {
       expect(mentionActive(editor)).toBe(true)
     },
   )
+
+  it('opens after a quote that Typography has already curled', () => {
+    const editor = makeEditor([Typography])
+    type(editor, '"@')
+    expect(editor.state.doc.textContent.startsWith('“')).toBe(true)
+    expect(mentionActive(editor)).toBe(true)
+
+    editor.commands.setContent('<p></p>')
+    type(editor, "'@")
+    expect(editor.state.doc.textContent.startsWith('‘')).toBe(true)
+    expect(mentionActive(editor)).toBe(true)
+  })
 
   it('does not open in the middle of an email address', () => {
     const editor = makeEditor()
