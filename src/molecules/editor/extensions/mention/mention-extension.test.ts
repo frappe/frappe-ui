@@ -49,12 +49,8 @@ function type(editor: Editor, text: string) {
   for (const char of text) {
     const { from, to } = editor.state.selection
     const handled = editor.view.someProp('handleTextInput', (handler) =>
-      handler(
-        editor.view,
-        from,
-        to,
-        char,
-        () => editor.state.tr.insertText(char),
+      handler(editor.view, from, to, char, () =>
+        editor.state.tr.insertText(char),
       ),
     )
     if (!handled) editor.view.dispatch(editor.state.tr.insertText(char))
@@ -76,14 +72,41 @@ describe('Mention allowedPrefixes', () => {
     expect(mentionActive(editor)).toBe(true)
   })
 
-  it.each(['(', '[', '{', '<', '（', '【', '《', '"', "'", '“', '”', '‘', '’'])(
-    'opens immediately after %s',
-    (prefix) => {
-      const editor = makeEditor()
-      editor.commands.insertContent(`${prefix}@`)
-      expect(mentionActive(editor)).toBe(true)
-    },
-  )
+  it.each([
+    '(',
+    '[',
+    '{',
+    '<',
+    '（',
+    '【',
+    '《',
+    '「',
+    '『',
+    '«',
+    '‹',
+    '"',
+    "'",
+    '“',
+    '”',
+    '‘',
+    '’',
+    '」',
+    '』',
+    '»',
+    '›',
+  ])('opens immediately after %s', (prefix) => {
+    const editor = makeEditor()
+    editor.commands.insertContent(`${prefix}@`)
+    expect(mentionActive(editor)).toBe(true)
+  })
+
+  it('opens the toolbar mention after a bracket without inserting a space', () => {
+    const editor = makeEditor()
+    editor.commands.insertContent('(')
+    expect(editor.commands.openSuggestionMenu('mentionSuggestion')).toBe(true)
+    expect(editor.state.doc.textContent).toBe('(@')
+    expect(mentionActive(editor)).toBe(true)
+  })
 
   it('opens after a quote that Typography has already curled', () => {
     const editor = makeEditor([Typography])

@@ -121,7 +121,10 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           (extensionName: string) =>
           ({ editor, tr, commands, dispatch }) => {
             const target = getSuggestionOptions<{
-              suggestion?: { char?: string }
+              suggestion?: {
+                char?: string
+                allowedPrefixes?: string[] | null
+              }
             }>(editor, extensionName)
             const char = target?.suggestion?.char
             if (!char) return false
@@ -139,7 +142,11 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
             // shares this transaction — only `editor.chain()` would start a
             // rival one and throw.
             commands.focus()
-            insertSuggestionTrigger(tr, char)
+            insertSuggestionTrigger(
+              tr,
+              char,
+              target.suggestion?.allowedPrefixes,
+            )
             return true
           },
       }

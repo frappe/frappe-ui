@@ -88,15 +88,25 @@ function isStrandedPadding(doc: ProseMirrorNode, pos: number): boolean {
  * Writes to the caller's transaction rather than dispatching its own: the
  * `openSuggestionMenu` command runs mid-dispatch, and a nested `editor.chain()`
  * there throws `Applying a mismatched transaction`.
+ *
+ * `allowedPrefixes` is the same list TipTap's matcher uses (`[' ']` when
+ * omitted, `null` to allow any). Pad only when the preceding character would
+ * make the trigger fail to match — so a mention after `(` stays `(@`, not `( @`.
  */
-export function insertSuggestionTrigger(tr: Transaction, char: string): void {
+export function insertSuggestionTrigger(
+  tr: Transaction,
+  char: string,
+  allowedPrefixes: string[] | null = [' '],
+): void {
   const { from, to } = tr.selection
-  // `allowedPrefixes` defaults to [' '], so a trigger glued to the end of a
-  // word never matches — but an unconditional space would leave a stray blank
-  // in an empty paragraph. Pad only when the caret follows text.
   const $from = tr.doc.resolve(from)
   const before = from > $from.start() ? tr.doc.textBetween(from - 1, from) : ''
-  const text = before && !/\s/.test(before) ? ` ${char}` : char
+  const prefixOk =
+    allowedPrefixes === null ||
+    !before ||
+    /\s/.test(before) ||
+    allowedPrefixes.includes(before)
+  const text = prefixOk ? char : ` ${char}`
 
   tr.insertText(text, from, to)
   tr.setMeta(AUTO_OPEN_META, {

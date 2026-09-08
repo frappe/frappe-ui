@@ -112,6 +112,9 @@ function createMentionNode(component?: Component) {
  * Characters that may sit immediately before `@`. TipTap defaults to `[' ']`,
  * so `(@jane` never opened the list. Curly quotes are included because
  * Typography (on in RichTextKit) rewrites `"`/`'` the moment they are typed.
+ *
+ * Slash (`/`), tag (`#`), and emoji (`:`) keep the default: those triggers
+ * after a word usually mean a path, a heading, or a colon, not a menu.
  */
 const ALLOWED_MENTION_PREFIXES = [
   ' ',
@@ -122,12 +125,20 @@ const ALLOWED_MENTION_PREFIXES = [
   '（',
   '【',
   '《',
+  '「',
+  '『',
+  '«',
+  '‹',
   '"',
   "'",
   '“',
   '”',
   '‘',
   '’',
+  '」',
+  '』',
+  '»',
+  '›',
 ]
 
 const MentionSuggestionExtension =
