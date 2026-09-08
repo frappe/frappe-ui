@@ -46,6 +46,7 @@ export const CHART_DIVERGING_LENGTH = 9
  * series keeps its hue across a theme flip. See style.css for the derivation.
  */
 // "Jewel": five hue families, each a dark member then its light partner.
+// blue, emerald, violet, amber, red.
 const LIGHT_CATEGORICAL = [
   '#2283c3',
   '#84c5f9',
@@ -55,8 +56,8 @@ const LIGHT_CATEGORICAL = [
   '#bb9df1',
   '#c98c28',
   '#f5ca8e',
-  '#ba205a',
-  '#f98da7',
+  '#bd2040',
+  '#fc8e94',
 ]
 
 const LIGHT_SEQUENTIAL = [
@@ -94,8 +95,8 @@ const DARK_CATEGORICAL = [
   '#b294e7',
   '#bf8319',
   '#ebc085',
-  '#af0f52',
-  '#ef849e',
+  '#b20e37',
+  '#f2858b',
 ]
 
 const DARK_SEQUENTIAL = [
@@ -214,7 +215,9 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   const diverging = readRamp('--chart-diverging-', CHART_DIVERGING_LENGTH)
 
   return {
-    categorical: categorical.length ? categorical : FALLBACK_CATEGORICAL[scheme],
+    categorical: categorical.length
+      ? categorical
+      : FALLBACK_CATEGORICAL[scheme],
     sequential: sequential.length ? sequential : FALLBACK_SEQUENTIAL[scheme],
     diverging: diverging.length ? diverging : FALLBACK_DIVERGING[scheme],
     axisLabel: read(TOKENS.axisLabel) || fallbacks.axisLabel,
@@ -317,7 +320,9 @@ export function paletteColors(
 function namedRamp(name: ChartPaletteName, tokens: ChartTokens): string[] {
   if (name === 'categorical') return tokens.categorical
   const ramp =
-    name === 'diverging' ? tokens.diverging : usableSequential(tokens.sequential)
+    name === 'diverging'
+      ? tokens.diverging
+      : usableSequential(tokens.sequential)
   return ramp.length ? ramp : tokens.categorical
 }
 
