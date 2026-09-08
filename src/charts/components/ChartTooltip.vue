@@ -4,7 +4,7 @@
       v-if="open && items.length"
       ref="tooltipEl"
       data-slot="chart-tooltip"
-      class="pointer-events-none fixed z-[100] max-w-xs rounded-6 border border-outline-gray-1 bg-surface-elevation-2 px-3 py-2 shadow-lg"
+      class="pointer-events-none fixed z-[100] max-w-xs rounded-6 bg-surface-elevation-2 px-3 py-2 shadow-lg"
       :style="style"
       :dir="dir"
       role="tooltip"
