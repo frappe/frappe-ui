@@ -142,6 +142,8 @@ export type AxisChartBaseConfig = {
   /**
    * Ramp series colors are drawn from. Defaults to `'sequential'`: one series
    * gets a single mid-blue, more get evenly spaced stops running dark to light.
+   * A chart of mixed marks spends those stops by mark rather than by series
+   * order — see `resolveSeriesColors`.
    */
   palette?: ChartPalette
   /** Forces layout direction; defaults to document.documentElement.dir */

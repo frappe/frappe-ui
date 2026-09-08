@@ -83,6 +83,12 @@ scale, which `axis: 'y2'` in the same entry gives it.
 
 <ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
 
+The sequential ramp is handed out by mark, not by series order: the line takes
+the deep end and the bars take the pale stops. A bar covers enough area to read
+in a pale color; a 2px stroke in the same color disappears. The other palettes
+keep series order, because a caller's own list, a diverging ramp and a
+categorical set all mean something in the order they are written.
+
 Marks stack among their own: bars stack with bars and areas with areas, and a
 line never stacks. `horizontal` draws bars only — a series that asks for another
 mark there is drawn as a bar, with a dev-mode warning.

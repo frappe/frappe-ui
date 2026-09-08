@@ -195,19 +195,24 @@ describe('combo axes', () => {
 })
 
 describe('combo colors', () => {
-  it('assigns the same color to a series whatever mark it draws as', () => {
-    const bars = build({ series: [{ name: 'sales' }, { name: 'refunds' }] })
+  it('spends the deep end of the ramp on the line, not on the bar', () => {
     const mixed = build()
-    expect(bars.series[0].itemStyle.color).toBe(mixed.series[0].itemStyle.color)
-    expect(bars.series[1].itemStyle.color).toBe(mixed.series[1].itemStyle.color)
+    expect(mixed.series[0].itemStyle.color).toBe('#000033')
+    expect(mixed.series[1].itemStyle.color).toBe('#000011')
     // The line takes the same stop for its stroke as for its symbols.
     expect(mixed.series[1].lineStyle.color).toBe(
       mixed.series[1].itemStyle.color,
     )
   })
 
+  it('leaves a chart of one mark on series order', () => {
+    const bars = build({ series: [{ name: 'sales' }, { name: 'refunds' }] })
+    expect(bars.series[0].itemStyle.color).toBe('#000011')
+    expect(bars.series[1].itemStyle.color).toBe('#000033')
+  })
+
   it('keeps every series on its own color when one is hidden', () => {
-    expect(build({}, ['sales']).series[0].itemStyle.color).toBe('#000033')
+    expect(build({}, ['sales']).series[0].itemStyle.color).toBe('#000011')
   })
 })
 

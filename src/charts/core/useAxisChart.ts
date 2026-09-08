@@ -22,7 +22,7 @@ import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
-  AxisChartBaseConfig,
+  AxisChartConfig,
   AxisChartSeriesConfig,
   ChartDatapointEvent,
   ChartLegendItem,
@@ -30,7 +30,7 @@ import type {
   PlotLabelPlacement,
 } from '../types'
 
-export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
+export type UseAxisChartArgs<C extends AxisChartConfig> = {
   config: () => C
   buildOption: (config: C, context: AxisChartOptionContext) => EChartsCoreOption
   /** Axis label and tooltip formatters, kept beside the config by `normalizeAxisChartProps`. */
@@ -62,7 +62,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
  * legend state and the hit-testing behind the HTML tooltip. Bar, line and area
  * differ only in the builder they hand in, so their interactions stay identical.
  */
-export function useAxisChart<C extends AxisChartBaseConfig>(
+export function useAxisChart<C extends AxisChartConfig>(
   args: UseAxisChartArgs<C>,
 ) {
   const plotEl = ref<HTMLElement>()

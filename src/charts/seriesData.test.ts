@@ -196,7 +196,7 @@ describe('normalizeAxisChartProps: the second value axis', () => {
       cellGap: '#ffffff',
     }
     const colorsOf = (props: Partial<AxisChartProps>) =>
-      resolveSeriesColors(normalize(props).config, tokens)
+      resolveSeriesColors({ ...normalize(props).config, type: 'bar' }, tokens)
 
     expect(colorsOf({ seriesConfig: { refunds: { axis: 'y2' } } })).toEqual(
       colorsOf({}),

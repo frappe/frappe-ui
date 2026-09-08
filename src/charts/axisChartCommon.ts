@@ -14,7 +14,9 @@ import { chartColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
+  AxisChartConfig,
   AxisChartSeriesConfig,
+  ChartMark,
   ChartPaletteName,
   ChartYAxisConfig,
 } from './types'
@@ -65,20 +67,90 @@ export const AXIS_LABEL_MARGIN = 8
 
 const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 
+const MARKS: ChartMark[] = ['bar', 'line', 'area']
+
+/**
+ * How much ink a mark lays down, least first. A fill still reads in a pale
+ * ramp stop because it covers area; a 2px stroke in the same stop disappears
+ * against the card. So the ramp is handed out thinnest mark first.
+ */
+const INK_WEIGHT: Record<ChartMark, number> = { line: 0, area: 1, bar: 2 }
+
 /** Series colors, keyed by name so a hidden series never shifts its neighbours. */
 export function resolveSeriesColors(
-  config: AxisChartBaseConfig,
+  config: AxisChartConfig,
   tokens: ChartTokens,
 ): Record<string, string> {
   const assigned = chartColors(config.palette, tokens, {
     fallback: DEFAULT_PALETTE,
     count: config.series.length,
   })
+  const slots = colorSlots(config)
   const colors: Record<string, string> = {}
   config.series.forEach((series, index) => {
-    colors[series.name] = series.color || assigned[index]
+    colors[series.name] = series.color || assigned[slots[index]]
   })
   return colors
+}
+
+/**
+ * Which color each series takes, as an index into the resolved list. Series
+ * order everywhere else, and ink weight where the colors are a sequential ramp:
+ * one hue getting paler carries nothing in the order its stops are spent, so a
+ * combo chart may spend the deep end on the mark that needs it.
+ *
+ * The other three palettes are all order that means something. A caller's own
+ * list is drawn as it was written, a diverging ramp's direction is its meaning,
+ * and a categorical set is unrelated hues with no ramp to reorder.
+ */
+function colorSlots(config: AxisChartConfig): number[] {
+  const identity = config.series.map((_, index) => index)
+  if (Array.isArray(config.palette)) return identity
+  if ((config.palette ?? DEFAULT_PALETTE) !== 'sequential') return identity
+
+  const weights = config.series.map(
+    (series) => INK_WEIGHT[resolveMark(series, config, true)],
+  )
+  const slots: number[] = []
+  identity
+    .slice()
+    .sort((a, b) => weights[a] - weights[b] || a - b)
+    .forEach((seriesIndex, slot) => (slots[seriesIndex] = slot))
+  return slots
+}
+
+/**
+ * `quiet` for a second read of the same config: a series asking for a mark the
+ * library cannot draw is reported by the option build, once, rather than again
+ * by everything else that resolves the same marks.
+ */
+export function resolveMark(
+  series: AxisChartSeriesConfig,
+  config: AxisChartConfig,
+  quiet = false,
+): ChartMark {
+  // A saved config outlives the code that wrote it, so an unreadable mark is a
+  // value to recover from rather than a reason to draw nothing.
+  const asked = series.type ?? config.type
+  if (!MARKS.includes(asked)) {
+    if (!quiet)
+      warn(
+        `Series "${series.name}" asks for type "${asked}", which is not one of ${MARKS.join(', ')}. Drawing it as ${article(config.type)}.`,
+      )
+    return config.type
+  }
+  if (config.horizontal && asked !== 'bar') {
+    if (!quiet)
+      warn(
+        `\`horizontal\` runs the value axis across the plot, which only bars are drawn against. Series "${series.name}" asked for ${article(asked)} and is drawn as a bar.`,
+      )
+    return 'bar'
+  }
+  return asked
+}
+
+function article(mark: ChartMark) {
+  return mark === 'area' ? 'an area' : `a ${mark}`
 }
 
 export type ResolvedXAxis = {

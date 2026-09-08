@@ -8,6 +8,7 @@ import {
   buildXAxis,
   hasSecondaryValueAxis,
   plotRows,
+  resolveMark,
   resolveSeriesColors,
   resolveXAxis,
   toNumber,
@@ -43,8 +44,6 @@ export const DEFAULT_FILL_OPACITY = 0.16
 export const DEFAULT_STACKED_FILL_OPACITY = 0.75
 /** Where the gradient lands by the time it reaches the axis. */
 const GRADIENT_FADE = 0.1
-
-const MARKS: ChartMark[] = ['bar', 'line', 'area']
 
 /** The scale a 100% stack is read against, whatever the numbers behind it. */
 const NORMALIZED_MIN = 0
@@ -193,41 +192,11 @@ export function buildAxisChartOption(
   return mergeDeep(option, config.echartOptions)
 }
 
-/**
- * `quiet` for a second read of the same config: a series asking for a mark the
- * library cannot draw is reported by the option build, once, rather than again
- * by everything else that resolves the same marks.
- */
 function plotSeries(config: AxisChartConfig, quiet = false): PlottedSeries[] {
   return config.series.map((series) => {
     const mark = resolveMark(series, config, quiet)
     return { series, mark, stack: stackKey(series, config, mark) }
   })
-}
-
-function resolveMark(
-  series: AxisChartSeriesConfig,
-  config: AxisChartConfig,
-  quiet = false,
-): ChartMark {
-  // A saved config outlives the code that wrote it, so an unreadable mark is a
-  // value to recover from rather than a reason to draw nothing.
-  const asked = series.type ?? config.type
-  if (!MARKS.includes(asked)) {
-    if (!quiet)
-      warn(
-        `Series "${series.name}" asks for type "${asked}", which is not one of ${MARKS.join(', ')}. Drawing it as ${article(config.type)}.`,
-      )
-    return config.type
-  }
-  if (config.horizontal && asked !== 'bar') {
-    if (!quiet)
-      warn(
-        `\`horizontal\` runs the value axis across the plot, which only bars are drawn against. Series "${series.name}" asked for ${article(asked)} and is drawn as a bar.`,
-      )
-    return 'bar'
-  }
-  return asked
 }
 
 /**
@@ -650,10 +619,6 @@ function withAlpha(color: string, alpha: number): string | null {
 
   const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16))
   return `rgba(${r}, ${g}, ${b}, ${Number(alpha.toFixed(3))})`
-}
-
-function article(mark: ChartMark) {
-  return mark === 'area' ? 'an area' : `a ${mark}`
 }
 
 function warn(message: string) {
