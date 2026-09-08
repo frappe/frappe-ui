@@ -62,9 +62,20 @@ export function normalizeAxisChartProps(
     )
   }
 
+  const tooltipColumns = (props.tooltipColumns ?? []).map((column) => ({
+    ...column,
+    label: column.label ?? formatLabel(column.name),
+  }))
+
   const { data, names } = props.series
     ? capSeries(
-        pivot(rows, props.x, yColumns[0], props.series),
+        pivot(
+          rows,
+          props.x,
+          yColumns[0],
+          props.series,
+          tooltipColumns.map((column) => column.name),
+        ),
         props.maxSeries,
       )
     : { data: rows, names: yColumns }
@@ -94,10 +105,7 @@ export function normalizeAxisChartProps(
       y: props.yAxis?.format,
       y2: props.y2Axis?.format,
     },
-    tooltipColumns: (props.tooltipColumns ?? []).map((column) => ({
-      ...column,
-      label: column.label ?? formatLabel(column.name),
-    })),
+    tooltipColumns,
   }
 }
 
@@ -139,12 +147,17 @@ function toColumns(value?: string | string[]): string[] {
  * Long rows to wide: one row per x value, one column per value of the grouping
  * column. Both orders follow first appearance in the data, so the caller's sort
  * survives. Duplicate (x, series) pairs are last-write-wins.
+ *
+ * `carry` names columns to copy across untouched. A tooltip column reads per
+ * category rather than per group — the tooltip prints one row for it, not one
+ * per series — so the first row to reach a category decides its value.
  */
 function pivot(
   rows: Record<string, any>[],
   x: string,
   y: string,
   series: string,
+  carry: string[] = [],
 ) {
   const names: string[] = []
   // Keyed by the stringified x value: `Date` objects and numbers still have to
@@ -156,10 +169,13 @@ function pivot(
     let wide = byCategory.get(key)
     if (!wide) {
       wide = { [x]: row[x] }
+      for (const column of carry) wide[column] = row[column]
       byCategory.set(key, wide)
     }
     const name = String(row[series])
     if (!names.includes(name)) names.push(name)
+    // Written after the carried columns, so a series named like one of them
+    // keeps the plot's number rather than losing it to the tooltip's.
     wide[name] = row[y]
   }
 

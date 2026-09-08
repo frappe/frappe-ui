@@ -185,6 +185,40 @@ describe('what a tooltip-only column is kept out of', () => {
     expect(tooltipColumns[0].label).toBe('Orders')
   })
 
+  it('survives the pivot that long data goes through', () => {
+    // `pivot` rebuilds each row as one x plus one column per group, so a column
+    // it does not carry is gone before the tooltip ever reads it.
+    const { config } = normalizeAxisChartProps({
+      data: [
+        { month: 'Jan', region: 'North', conversion: 12, orders: 1840 },
+        { month: 'Jan', region: 'South', conversion: 9, orders: 1840 },
+        { month: 'Feb', region: 'North', conversion: 14, orders: 2100 },
+      ],
+      x: 'month',
+      y: 'conversion',
+      series: 'region',
+      tooltipColumns: [{ name: 'orders' }],
+    })
+    expect(config.data.map((row) => row.orders)).toEqual([1840, 2100])
+  })
+
+  it('reads a carried column per category, not per group', () => {
+    // One tooltip row is printed for the column, so one value per category is
+    // all there is room for. The first row to reach a category decides it.
+    const { config } = normalizeAxisChartProps({
+      data: [
+        { month: 'Jan', region: 'North', conversion: 12, orders: 900 },
+        { month: 'Jan', region: 'South', conversion: 9, orders: 940 },
+      ],
+      x: 'month',
+      y: 'conversion',
+      series: 'region',
+      tooltipColumns: [{ name: 'orders' }],
+    })
+    expect(config.data).toHaveLength(1)
+    expect(config.data[0].orders).toBe(900)
+  })
+
   it('takes the label the entry gives', () => {
     const { tooltipColumns } = normalizeAxisChartProps(
       props({ tooltipColumns: [{ name: 'orders', label: 'Orders placed' }] }),
