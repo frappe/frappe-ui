@@ -41,6 +41,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :row="tooltip.row"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">

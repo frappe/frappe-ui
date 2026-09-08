@@ -91,6 +91,9 @@ value in another unit says nothing when it is ranked among them.
 from one. A column holding text rather than a number is legitimate, and prints
 as it stands.
 
+To read a column in a tooltip you write yourself, take `row` from the `tooltip`
+slot instead. It carries the whole data row, plotted columns and all.
+
 
 ## Hiding a series
 

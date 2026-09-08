@@ -9,7 +9,7 @@
       :dir="dir"
       role="tooltip"
     >
-      <slot :label="label" :items="items">
+      <slot :label="label" :items="items" :row="row">
         <div v-if="label" class="mb-2 text-p-sm text-ink-gray-5">
           {{ label }}
         </div>

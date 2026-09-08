@@ -567,16 +567,11 @@ export type ChartTooltipItem = {
   label: string
   /** Left out by a `'column'` item: a swatch would claim a mark on the plot. */
   color?: string
-  /** A `'column'` item may carry a text attribute, so it is not always a number. */
   value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
-  /**
-   * `'series'` is a row the plot draws, and is the default. `'column'` is a
-   * `tooltipColumns` entry: it reaches the tooltip and nothing else, and is
-   * printed after the series rows.
-   */
+  /** `'column'` is a `tooltipColumns` entry. Left out, `'series'`. */
   kind?: 'series' | 'column'
 }
 
@@ -602,7 +597,7 @@ export type ChartValueFormatter = (value: number) => string
 /** A category axis carries whatever the column holds, so its formatter takes any. */
 export type ChartCategoryFormatter = (value: any) => string
 
-/** Prints a tooltip-only value, which may be a text attribute rather than a number. */
+/** A tooltip column may hold text, so its formatter takes either. */
 export type ChartTooltipFormatter = (value: number | string) => string
 
 export type ChartBaseProps = {
@@ -706,18 +701,14 @@ export type SeriesStyle = {
   echartOptions?: EchartOptionsOverride
 }
 
-/**
- * One tooltip-only column: it reaches the tooltip and nothing else — no mark,
- * no legend entry, no palette slot, and no effect on the value axis.
- */
+/** One `tooltipColumns` entry. */
 export type ChartTooltipColumn = {
   /** Row key. Also the label when none is given. */
   name: string
   label?: string
   /**
-   * Prints this column's value. A column sits on no axis, so it takes no
-   * formatter from one. Left out, a number prints with the default grouping
-   * and anything else prints as it stands.
+   * A column sits on no axis, so it takes no formatter from one. Left out, a
+   * number prints with the default grouping and text prints as it stands.
    */
   format?: ChartTooltipFormatter
 }
@@ -753,10 +744,8 @@ export type AxisChartProps = ChartBaseProps & {
   /**
    * Columns that reach the tooltip and nothing else: no mark, no legend entry,
    * no palette slot, and no effect on the value axis. For context in another
-   * unit — the count behind a rate, the target beside the actual.
-   *
-   * They print after the series rows, in the order given, because a value in
-   * another unit says nothing when it is ranked among the series.
+   * unit, such as the count behind a rate. They print after the series rows,
+   * in the order given: a value in another unit cannot be ranked among them.
    */
   tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */
@@ -1039,6 +1028,11 @@ export type ChartTooltipProps = {
   label?: string
   /** One row per reading, in the order they should be read. */
   items: ChartTooltipItem[]
+  /**
+   * The data row under the pointer, so the slot can read a column the chart
+   * never plotted. Left out by charts that hover an aggregate.
+   */
+  row?: Record<string, any>
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -1081,9 +1075,14 @@ export type AxisChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds one entry per visible series at
-     * the hovered category, biggest first.
+     * the hovered category, biggest first. `row` is the data row behind them,
+     * so a replacement body can read a column the chart never plotted.
      */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      row?: Record<string, any>
+    }) => unknown
   }
 
 export type BarChartEmits = AxisChartEmits
@@ -1215,5 +1214,9 @@ export type ChartLegendEmits = {
 
 export type ChartTooltipSlots = {
   /** Replaces the whole tooltip body, headline row included. */
-  default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  default: (props: {
+    label?: string
+    items: ChartTooltipItem[]
+    row?: Record<string, any>
+  }) => unknown
 }

@@ -542,6 +542,20 @@ describe('BarChart', () => {
         .should('contain.text', 'at Jan: 2')
         .and('not.contain.text', 'Sales')
     })
+
+    it('hands the plotted row to the tooltip slot', () => {
+      // The row carries every column, `tooltipColumns` or not: a tooltip the
+      // app draws itself needs no prop to reach one.
+      mountChart(
+        { data: data.map((row) => ({ ...row, orders: 1000 })) },
+        {
+          tooltip: ({ row }: any) => h('span', `${row.orders} orders`),
+        } as any,
+      )
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', '1000 orders')
+    })
   })
 
   // echarts draws into one element, so the plot takes a single tab stop and the

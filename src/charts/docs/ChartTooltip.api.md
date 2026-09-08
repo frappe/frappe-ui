@@ -36,6 +36,12 @@
     type: 'ChartTooltipItem[]'
   },
   {
+    name: 'row',
+    description: 'The data row under the pointer, so the slot can read a column the chart\nnever plotted. Left out by charts that hover an aggregate.',
+    required: false,
+    type: 'Record<string, any>'
+  },
+  {
     name: 'dir',
     description: 'Forces layout direction; defaults to document.documentElement.dir',
     required: false,
@@ -47,7 +53,7 @@
   {
     name: 'default',
     description: 'Replaces the whole tooltip body, headline row included.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
   }
 ]
 </script>
