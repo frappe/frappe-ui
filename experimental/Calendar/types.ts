@@ -165,6 +165,16 @@ export interface CalendarPublicProps {
   /** Events to render. Each needs an `id`, a title, and date/time fields. */
   events: CalendarEvent[]
 
+  /**
+   * Whether the events for the visible range are still on their way.
+   *
+   * Only the Agenda reads it, and only to tell an empty list apart from one that
+   * has not arrived: a grid with nothing in it still draws the days, where a list
+   * with nothing in it is a blank panel, and saying "nothing on" of a range still
+   * being fetched is saying something that may not be true.
+   */
+  loading?: boolean
+
   /** Behavior overrides, merged over the defaults. */
   config?: Partial<CalendarConfig>
 

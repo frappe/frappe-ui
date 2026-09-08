@@ -112,6 +112,7 @@
       :events="events"
       :config="overrideConfig"
       :anchor="agendaAnchor"
+      :loading="loading"
     >
       <template #event-description="slotProps">
         <slot name="event-description" v-bind="slotProps" />

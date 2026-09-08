@@ -23,9 +23,15 @@
     class="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-6 bg-surface-base"
     :class="[config.noBorder ? 'border-t-[1px]' : 'border-[1px]']"
   >
+    <!-- Nothing yet, as against nothing at all: a list is a blank panel either way,
+         and "nothing on between September and November" is a claim about a range
+         whose events have not arrived. It waits to say it. -->
+    <div v-if="isEmpty && loading" class="flex justify-center p-10">
+      <Spinner size="lg" class="text-ink-gray-4" />
+    </div>
     <!-- A span with nothing in it says so once, rather than as a lone
          collapsed row naming dates you can already see. -->
-    <p v-if="isEmpty" class="p-10 text-center text-sm text-ink-gray-4">
+    <p v-else-if="isEmpty" class="p-10 text-center text-sm text-ink-gray-4">
       Nothing on between {{ spanLabel }}.
     </p>
 
@@ -146,6 +152,7 @@ import {
 import { daysListFull, monthList, parseDate } from './calendarUtils'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
+import { Spinner } from '#components/Spinner'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -157,6 +164,8 @@ const props = defineProps<{
   config: CalendarConfig
   /** The day the list runs from. */
   anchor: Date
+  /** Whether the events for this span are still on their way. */
+  loading?: boolean
 }>()
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)

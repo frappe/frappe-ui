@@ -511,6 +511,20 @@ describe('Calendar', () => {
       cy.get('[data-today]').should('exist')
     })
 
+    // A list is a blank panel whether the span is empty or the events have not
+    // arrived, and only one of the two is worth saying out loud.
+    it('waits before saying a span has nothing on it', () => {
+      cy.mount(Calendar, {
+        props: { events: [], loading: true, config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between').should('not.exist')
+
+      cy.mount(Calendar, {
+        props: { events: [], config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between').should('exist')
+    })
+
     it('renders the #event-description and #event-suffix slots on a row', () => {
       cy.mount(Calendar, {
         props: { events, config: { defaultMode: 'Agenda' } },
