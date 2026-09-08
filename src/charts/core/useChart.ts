@@ -82,6 +82,17 @@ function whenFontsSettled(): Promise<void> {
   return settling
 }
 
+/**
+ * Whether an option puts anything on the plot. Every chart here builds its own
+ * `series[].data` rather than handing echarts a `dataset`, so one read covers
+ * every family.
+ */
+export function drawsSomething(option: EChartsCoreOption) {
+  const series = (option as any).series
+  const list = Array.isArray(series) ? series : series ? [series] : []
+  return list.some((entry: any) => entry?.data?.length > 0)
+}
+
 export function useChart({
   container,
   option,
@@ -96,7 +107,12 @@ export function useChart({
   // entry animation on any change — a colour tweak in a chart builder makes the
   // whole plot grow from nothing again. Zeroing the initial duration after the
   // first render leaves the chart still while it is edited.
-  let rendered = false
+  //
+  // The flag turns on the first option that *draws*, not the first one set. A
+  // chart that fetches its rows sets an empty option first, and the plot stays
+  // mounted through the loading and empty states — so counting that one would
+  // spend the entry animation before the reader has seen anything.
+  let drawn = false
 
   // `chart` is a shallowRef, so this re-runs once the instance exists and then
   // on every reactive change inside the option getter. Nothing is built before
@@ -108,10 +124,10 @@ export function useChart({
     const nextOption = option()
     if (!nextOption) return
     instance.setOption(
-      rendered ? { ...nextOption, animationDuration: 0 } : nextOption,
+      drawn ? { ...nextOption, animationDuration: 0 } : nextOption,
       { notMerge: true, lazyUpdate: true },
     )
-    rendered = true
+    drawn ||= drawsSomething(nextOption)
   })
 
   const width = ref(0)
