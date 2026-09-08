@@ -137,7 +137,7 @@ export function buildAxisChartOption(
   const valueAxis = buildValueAxes(
     pinNormalizedAxes(config, visible, shares, hasSecondary),
     tokens,
-    { horizontal, isRTL },
+    { horizontal, isRTL, hiddenSeries },
   )
   const carriesTip = tipResolver(visible, config, rows)
 

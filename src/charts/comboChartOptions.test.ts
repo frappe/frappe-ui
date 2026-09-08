@@ -173,6 +173,58 @@ describe('combo axes', () => {
     expect(typesOf(option)).toEqual(['bar', 'line'])
   })
 
+  it('holds the second axis at its own ends once its last series is hidden', () => {
+    const dual = {
+      y2Axis: { title: 'rate' },
+      series: [
+        { name: 'sales' },
+        { name: 'rate', type: 'line' as ChartMark, axis: 'y2' as const },
+      ],
+    }
+    const [, live] = build(dual).yAxis
+    const [primary, emptied] = build(dual, ['rate']).yAxis
+
+    // echarts blanks an axis no series feeds: no ticks and no labels at all.
+    expect(live.min).toBeUndefined()
+    expect(emptied.min).toBe(0)
+    expect(emptied.max).toBe(40)
+    // The axis reads as switched off, the way the legend item does.
+    expect(emptied.axisLabel.opacity).toBeLessThan(1)
+    expect(live.axisLabel.opacity).toBeUndefined()
+    // The one still drawing its series is echarts' to scale.
+    expect(primary.min).toBeUndefined()
+  })
+
+  it('keeps the gridlines when the axis that carries them is the empty one', () => {
+    const option = build(
+      {
+        y2Axis: { title: 'rate' },
+        series: [{ name: 'sales' }, { name: 'rate', type: 'line', axis: 'y2' }],
+      },
+      ['sales'],
+    )
+    const [primary] = option.yAxis
+    expect(primary.min).toBe(0)
+    expect(primary.splitLine.show).toBe(true)
+  })
+
+  it('rounds the ends it pins, and yields them to the caller’s own', () => {
+    const dual = (y2Axis: any) => ({
+      y2Axis,
+      data: [
+        { month: 'Jan', sales: 10, rate: 17 },
+        { month: 'Feb', sales: 20, rate: 1743 },
+      ],
+      series: [
+        { name: 'sales' },
+        { name: 'rate', type: 'line' as ChartMark, axis: 'y2' as const },
+      ],
+    })
+    // A fixed end prints what it is given, so 1743 in five steps is unreadable.
+    expect(build(dual({}), ['rate']).yAxis[1].max).toBe(2000)
+    expect(build(dual({ max: 1800 }), ['rate']).yAxis[1].max).toBe(1800)
+  })
+
   it('reserves label room for the hungriest mark that shows labels', () => {
     const bare = build().grid.top
     const withLine = build({

@@ -31,8 +31,17 @@ export type AxisChartOptionContext = {
 
 export const AXIS_LABEL_FONT_SIZE = 11
 export const DATA_LABEL_FONT_SIZE = 11
+/** echarts' own default, named here because `niceExtent` has to split the same way. */
+const AXIS_SPLIT_NUMBER = 5
 /** How far the other series drop back while one is hovered in the legend. */
 export const BLUR_OPACITY = 0.75
+/**
+ * How far an axis drops back once the legend switches off every series on it.
+ * It lands about where `--ink-gray-4` does in either theme, which is the ink the
+ * legend fades a switched-off item to. Taken as opacity rather than as a second
+ * token, so the axis fades from whatever ink the page gave it.
+ */
+const EMPTY_AXIS_OPACITY = 0.7
 
 /**
  * Gridlines and the category baseline are drawn as fine dots rather than rules:
@@ -50,13 +59,10 @@ export const DOTTED_LINE = dottedLine(1)
 
 /**
  * The texture a broken reference line takes: long strokes with square ends,
- * where the grid draws round dots.
- *
- * The plot holds two kinds of broken line and they have to be told apart. The
- * grid locates a value and a reference line states one. Ink cannot carry that
- * difference — the rule is drawn quietly on purpose, so it lands a step or two
- * from the gridlines and reads as one of them. A dash against a dot is a
- * difference in kind, and it survives at any weight and any color.
+ * where the grid draws round dots. The grid locates a value and a reference
+ * line states one. Ink cannot carry that difference, because the rule is drawn
+ * quietly on purpose and lands a step or two from the gridlines. A dash against
+ * a dot is a difference in kind, and it survives at any weight and any color.
  */
 export function dashedLine(width: number) {
   return { type: [width * DASH_LENGTH, width * DASH_GAP], width }
@@ -611,23 +617,10 @@ function tickColumnWidth(
   series: AxisChartSeriesConfig[],
   axisConfig: ChartYAxisConfig | undefined,
 ): number {
-  let low = Infinity
-  let high = -Infinity
-  for (const row of config.data ?? []) {
-    for (const one of series) {
-      const value = toNumber(row[one.name])
-      if (value === null) continue
-      if (value < low) low = value
-      if (value > high) high = value
-    }
-  }
-
+  const extent = valueExtent(config.data ?? [], series)
   // An axis told where to start or stop prints ticks between those, whatever the
-  // rows hold. An axis with nothing numeric to plot still draws, and prints 0.
-  const ends = [
-    axisConfig?.min ?? (low === Infinity ? 0 : low),
-    axisConfig?.max ?? (high === -Infinity ? 0 : high),
-  ]
+  // rows hold.
+  const ends = [axisConfig?.min ?? extent.min, axisConfig?.max ?? extent.max]
   const tick = drawnTick(axisConfig)
   const widest = Math.max(
     ...ends.map((value) =>
@@ -691,14 +684,111 @@ export function valueAxisIndex(
 export function buildValueAxes(
   config: AxisChartBaseConfig,
   tokens: ChartTokens,
-  opts: { horizontal: boolean; isRTL: boolean },
+  opts: {
+    horizontal: boolean
+    isRTL: boolean
+    /** Series names the legend has switched off. See `emptyAxisExtent`. */
+    hiddenSeries?: string[]
+  },
 ) {
-  const primary = buildValueAxis(config.yAxis, tokens, opts)
-  if (!hasSecondaryValueAxis(config, opts.horizontal)) return primary
+  const hidden = opts.hiddenSeries ?? []
+  const secondary = hasSecondaryValueAxis(config, opts.horizontal)
+  const onY2 = (series: AxisChartSeriesConfig) =>
+    secondary && series.axis === 'y2'
+
+  const primary = buildValueAxis(config.yAxis, tokens, {
+    ...opts,
+    empty: emptyAxisExtent(
+      config,
+      config.series.filter((s) => !onY2(s)),
+      hidden,
+    ),
+  })
+  if (!secondary) return primary
   return [
     primary,
-    buildValueAxis(config.y2Axis, tokens, { ...opts, secondary: true }),
+    buildValueAxis(config.y2Axis, tokens, {
+      ...opts,
+      secondary: true,
+      empty: emptyAxisExtent(config, config.series.filter(onY2), hidden),
+    }),
   ]
+}
+
+/**
+ * The ends an axis holds while the legend has every one of its series switched
+ * off, and `null` while it still draws one.
+ *
+ * echarts blanks an axis that no series feeds: no ticks, no labels, and with
+ * them the gridlines the primary carries (see `buildValueAxis`). A dual-axis
+ * chart reaches that state on one click, so the ends its own series reach are
+ * handed over as fixed ones and the axis keeps the reading it had a moment
+ * earlier.
+ *
+ * A live axis is echarts' to scale. It rounds the ends better than fixing them
+ * does, and it is free to rescale to what is left on it.
+ */
+function emptyAxisExtent(
+  config: AxisChartBaseConfig,
+  series: AxisChartSeriesConfig[],
+  hidden: string[],
+): ValueExtent | null {
+  if (!series.length) return null
+  if (series.some((one) => !hidden.includes(one.name))) return null
+  const { min, max } = valueExtent(config.data ?? [], series)
+  // A value axis holds 0 unless told to `scale`, and none of these are, so the
+  // ends have to reach it the way the live axis did.
+  return niceExtent(Math.min(0, min), Math.max(0, max))
+}
+
+export type ValueExtent = { min: number; max: number }
+
+/**
+ * The low and the high a set of series reaches across the rows. Rows with
+ * nothing numeric in them read as 0 to 0, which is the scale echarts draws for
+ * them.
+ */
+export function valueExtent(
+  rows: Record<string, any>[],
+  series: AxisChartSeriesConfig[],
+): ValueExtent {
+  let low = Infinity
+  let high = -Infinity
+  for (const row of rows) {
+    for (const one of series) {
+      const value = toNumber(row[one.name])
+      if (value === null) continue
+      if (value < low) low = value
+      if (value > high) high = value
+    }
+  }
+  return { min: low === Infinity ? 0 : low, max: high === -Infinity ? 0 : high }
+}
+
+/** The steps a round axis interval is allowed to take, per power of ten. */
+const NICE_STEPS = [1, 2, 2.5, 5, 10]
+
+/**
+ * The extent widened until both ends sit on a round interval. echarts does this
+ * for an axis it scales itself; an axis handed a fixed `min` and `max` prints
+ * exactly what it was given, and a scale running to 1743 in five steps reads as
+ * noise.
+ */
+function niceExtent(min: number, max: number, splits = AXIS_SPLIT_NUMBER) {
+  if (!(max > min)) return { min, max: min + 1 }
+  const rough = (max - min) / splits
+  const magnitude = 10 ** Math.floor(Math.log10(rough))
+  const step =
+    (NICE_STEPS.find((s) => rough <= s * magnitude) ?? 10) * magnitude
+  return {
+    min: roundToStep(Math.floor(min / step) * step),
+    max: roundToStep(Math.ceil(max / step) * step),
+  }
+}
+
+/** Clears the float dust a multiple of 2.5 leaves behind: 0.30000000000000004. */
+function roundToStep(value: number) {
+  return Number(value.toPrecision(12))
 }
 
 /**
@@ -714,9 +804,11 @@ export function buildValueAxis(
     isRTL: boolean
     /** Drawn opposite the primary, and aligned to its ticks. */
     secondary?: boolean
+    /** The ends to pin it to while nothing is drawn on it. See `emptyAxisExtent`. */
+    empty?: ValueExtent | null
   },
 ) {
-  const { horizontal, isRTL } = opts
+  const { horizontal, isRTL, empty } = opts
   const secondary = Boolean(opts.secondary)
 
   const axis = {
@@ -729,8 +821,8 @@ export function buildValueAxis(
     // The value-axis title is chrome, not a mark: it is drawn as HTML above the
     // plot (see ChartContainer's `plotLabel`) so it lines up with the chart
     // title whichever way the bars run.
-    min: axisConfig?.min,
-    max: axisConfig?.max,
+    min: axisConfig?.min ?? empty?.min,
+    max: axisConfig?.max ?? empty?.max,
     // Gridlines carry the reading of the plot; the axis line itself is noise.
     // Only the primary draws them: with aligned ticks the second set lands on
     // the same rows, so it adds nothing but a doubled line.
@@ -748,6 +840,9 @@ export function buildValueAxis(
       showMaxLabel: true,
       margin: AXIS_LABEL_MARGIN,
       color: tokens.axisLabel,
+      // Dropped back rather than hidden: the numbers stay readable, and the
+      // axis reads as belonging to the series the legend has switched off.
+      ...(empty ? { opacity: EMPTY_AXIS_OPACITY } : {}),
       fontSize: AXIS_LABEL_FONT_SIZE,
       formatter: (value: number) => formatValue(value, 1, true),
     },
