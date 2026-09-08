@@ -60,6 +60,7 @@ export interface CreateSuggestionExtensionOptions<
   component: VueComponent
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
+  allowedPrefixes?: string[] | null
   startOfLine?: boolean
   decorationTag?: string
   decorationClass?: string
@@ -97,6 +98,9 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           // (`:`/`#`/`@`) is literal source the author is typing — not a cue.
           allow: ({ state, range }) => !isInCode(state.doc, range.from),
           allowSpaces: options.allowSpaces,
+          ...(options.allowedPrefixes !== undefined
+            ? { allowedPrefixes: options.allowedPrefixes }
+            : {}),
           startOfLine: options.startOfLine,
           decorationTag: options.decorationTag || 'span',
           decorationClass: options.decorationClass || 'suggestion',

@@ -108,12 +108,31 @@ function createMentionNode(component?: Component) {
   })
 }
 
+/**
+ * Characters that may sit immediately before `@`. TipTap defaults to `[' ']`,
+ * so `(@jane` never opened the list. `[` is written `\\[` because TipTap joins
+ * prefixes into a character class without escaping them.
+ */
+const ALLOWED_MENTION_PREFIXES = [
+  ' ',
+  '(',
+  '\\[',
+  '{',
+  '<',
+  '（',
+  '【',
+  '《',
+  '"',
+  "'",
+]
+
 const MentionSuggestionExtension =
   createSuggestionExtension<MentionSuggestionItem>({
     name: 'mentionSuggestion',
     char: '@',
     pluginKey: new PluginKey('mentionSuggestion'),
     component: SuggestionList,
+    allowedPrefixes: ALLOWED_MENTION_PREFIXES,
 
     addOptions() {
       return {
