@@ -1,8 +1,8 @@
 <template>
   <!--
-    <Tooltip> reuses SidebarRail's surrounding TooltipProvider when present (instant
-    hover between neighbours) and falls back to its own when a SidebarRailItem is used
-    standalone.
+    <Tooltip> reuses SidebarRail's surrounding TooltipProvider when present
+    (instant hover between neighbours) and falls back to its own when a
+    SidebarRailItem is used standalone.
   -->
   <Tooltip side="right">
     <!--

@@ -9,6 +9,26 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
+
+The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`
+is still a bare frame that renders on its own or beside `Sidebar`, `Sidebar`
+does not own the rail layout, and the rail is not a collapsed mode of it.
+Props, slots and events are unchanged.
+
+- `RailItemProps` is now `SidebarRailItemProps`, and the root exports it the
+  way it exports `SidebarItemProps`.
+- **Breaking, silent:** the styling hooks follow the name. `data-slot="rail"`
+  becomes `"sidebar-rail"`, `rail-item` becomes `sidebar-rail-item`, and so do
+  `rail-item-indicator` and `rail-item-badge-dot`. A rule written against an
+  old value still parses; it just stops matching.
+- `DesktopShell`'s `#rail` slot keeps its name. It names a layout region, not
+  the component that goes in it.
+
+There is no alias export. The import fails, so the build names every call
+site: the old name is a plain find-and-replace, as with every other component
+rename in v1.
+
 ### Editor — mentions open after brackets and quotes
 
 Typing `@` after an opening bracket or quote (`(@jane`, `[@jane`, `"@jane`) now opens the mention list. TipTap only allowed a space before the trigger, so those sequences never matched. Emails (`jane@example.com`) still do not.
@@ -2059,9 +2079,9 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 
 ### App shell family — brought to bar
 
-`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
-`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
-names.
+`DesktopShell`, `MobileShell`, `MobileNav`, `PageHeader`, `ScrollArea`, and
+`FrappeUIProvider` all keep their current exports and names. The rail was in
+this list until it was renamed to `SidebarRail` — see the entry above.
 
 - Every slot across the family now has a documented description, and each
   component has a docs page, a story, and cypress tests (several had none).

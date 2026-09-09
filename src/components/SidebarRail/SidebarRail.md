@@ -1,9 +1,15 @@
 # SidebarRail
 
-The narrow icon column of an app shell. `SidebarRail` is a bare frame — a fixed 50px
-column with one shared tooltip context and a single slot — and `SidebarRailItem` is one
-tooltip'd cell inside it. Lay the children out with plain flex utilities: give
-the middle section `flex-1` to push the anchors above and below it to the edges.
+The narrow icon column of an app shell. `SidebarRail` is a bare frame — a
+fixed 50px column with one shared tooltip context and a single slot — and
+`SidebarRailItem` is one tooltip'd cell inside it. Lay the children out with
+plain flex utilities: give the middle section `flex-1` to push the anchors
+above and below it to the edges.
+
+It shares the `Sidebar` name because the two sit side by side in the same app
+frame, not because one contains the other. Compose them independently: a rail
+with a `Sidebar` beside it, a rail on its own, or a sidebar on its own. The
+rail is not a collapsed `Sidebar` — collapsing is `Sidebar`'s own behaviour.
 
 <ComponentPreview name="SidebarRail-Default" />
 
@@ -13,8 +19,8 @@ overflow, wrap it in your own `overflow-y-auto` container.
 
 ## SidebarRailItem
 
-`SidebarRailItem` carries the tooltip (its `label`), the active indicator, and an
-optional unread `badge`. Two visual treatments:
+`SidebarRailItem` carries the tooltip (its `label`), the active indicator, and
+an optional unread `badge`. Two visual treatments:
 
 - `variant="tile"` (default) — a filled cell with a left indicator bar when
   active. Use the default slot for an image, avatar, or initials.

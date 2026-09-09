@@ -505,8 +505,8 @@ const spaceActions = [
     <DesktopShell>
       <template #rail>
         <SidebarRail class="border-r">
-          <!-- Home is a bespoke button, not a SidebarRailItem: the Frappe logo fills
-               the whole cell and carries no tooltip of its own. -->
+          <!-- Home is a bespoke button, not a SidebarRailItem: the Frappe
+               logo fills the whole cell and carries no tooltip of its own. -->
           <button
             type="button"
             class="flex size-7 items-center justify-center rounded-[7px] transition hover:opacity-90 focus-visible:ring-0 focus-visible:focus-ring"
