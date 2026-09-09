@@ -74,8 +74,12 @@ function toggleStar(id: string) {
           />
         </ListCell>
         <ListCell>
+          <!-- `type="button"` so the pattern stays safe inside a form, and
+               the row's own radius so the global `:focus-visible` outline
+               follows the row's corners instead of cutting them square. -->
           <button
-            class="absolute inset-0"
+            type="button"
+            class="absolute inset-0 sm:rounded-[10px]"
             :aria-label="`Open ${doc.title}`"
             @click="opened = doc.title"
           />

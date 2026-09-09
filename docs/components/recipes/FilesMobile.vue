@@ -613,7 +613,10 @@ function goHome() {
             </div>
           </ListCell>
           <ListCell>
+            <!-- No radius here: this row is square (`h-17`, no `rounded-*`),
+                 so the focus outline should be square too. -->
             <button
+              type="button"
               class="absolute inset-0"
               :aria-label="`Open ${item.name}`"
               @click="onRowClick(item)"

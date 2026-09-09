@@ -41,8 +41,10 @@ and every control that handles its own pointer events — action buttons, toolti
 triggers — gets `relative`, lifting it above the overlay. Which cells they live
 in doesn't matter; DOM order does: the overlay first, the layered controls after
 it. And because those controls are the overlay's siblings, not its children,
-their clicks never reach it — no `stopPropagation`. A static row brings no hover
-surface or content inset of its own, so add the hover/active classes and
+their clicks never reach it — no `stopPropagation`. Give the overlay
+`type="button"` so it doesn't submit a surrounding form, and the row's own
+radius so the focus outline follows the row's corners. A static row brings no
+hover surface or content inset of its own, so add the hover/active classes and
 `list-row-px-3` to keep the interactive look. One gap remains: dividers hide
 around a hovered row only for interactive rows, so here the hover surface keeps
 the rule at its top edge — live with it, or pass `divider="none"`. The Files and

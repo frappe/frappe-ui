@@ -1047,7 +1047,8 @@ function addComment() {
                 >
                   <ListCell>
                     <button
-                      class="absolute inset-0"
+                      type="button"
+                      class="absolute inset-0 sm:rounded-[10px]"
                       :aria-label="`Open ${task.title}`"
                       @click="selectedTaskId = task.id"
                     />
