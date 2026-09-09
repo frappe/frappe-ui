@@ -26,3 +26,9 @@ Charts (#1128) stays with Saqib and is out of this queue.
 
 - The data volume has roughly 690 MB free. Agents are told to skip `yarn build`, `yarn docs:build` and full Cypress runs, and to run Cypress with video off for touched specs only.
 - Each worktree has its own `node_modules`, cloned copy-on-write from the primary checkout, so no agent runs `yarn install`.
+
+## Notes for the integration track
+
+- Public types (#1091, branch `fix/exported-types-1070`) and duplicate model emits (#1098, branch `fix/duplicate-emit-1096`) are both small and open. #1091 touches `shared/picker/PickerShell.vue`, which the input track also touches, so merge it after `v1/rc-inputs` and expect one conflict there.
+- Local consumer clones for the read-only migration check: `~/Projects/gameplan` and `~/Projects/helpdesk`. There is no local CRM clone. `~/Projects/gameplan/frappe-ui` is itself a live worktree of this repository on another branch — read it, never write to it.
+- Booting the consumer apps needs a bench that is not set up here. Record any consumer check that could not run as unverified rather than dropping it.
