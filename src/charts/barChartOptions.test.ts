@@ -3,7 +3,7 @@ import { buildAxisChartOption } from './axisChartOptions'
 import { AXIS_LABEL_FONT_SIZE, resolveSeriesColors } from './axisChartCommon'
 import { estimateTextWidth } from './format'
 import type { ChartTokens } from './tokens'
-import type { AxisChartConfig } from './types'
+import type { AxisChartConfig, AxisChartSeriesConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
@@ -16,7 +16,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `BarChart` hands the builder: the shared config, marked `'bar'`. */
@@ -110,6 +110,87 @@ describe('resolveSeriesColors', () => {
   it('cycles an explicit color list from palette', () => {
     expect(colorsFor({ palette: ['a', 'b'] }).sales).toBe('a')
     expect(colorsFor({ palette: ['a', 'b'] }).refunds).toBe('b')
+  })
+})
+
+describe('resolveSeriesColors by ink weight', () => {
+  it('hands the deep stop to the line and the pale one to the bar', () => {
+    expect(
+      colorsFor({
+        series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+      }),
+    ).toEqual({ sales: '#000033', refunds: '#000011' })
+  })
+
+  it('reads the same whichever order the series arrive in', () => {
+    expect(
+      colorsFor({
+        series: [{ name: 'refunds', type: 'line' }, { name: 'sales' }],
+      }),
+    ).toEqual({ sales: '#000033', refunds: '#000011' })
+  })
+
+  it('ranks an area between the line and the bar', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'a' },
+          { name: 'b', type: 'area' },
+          { name: 'c', type: 'line' },
+        ],
+      }),
+    ).toEqual({ a: '#000033', b: '#000022', c: '#000011' })
+  })
+
+  it('keeps series order among marks of the same weight', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'a', type: 'line' },
+          { name: 'b', type: 'line' },
+          { name: 'c' },
+        ],
+      }),
+    ).toEqual({ a: '#000011', b: '#000022', c: '#000033' })
+  })
+
+  it('still honours an explicit series color', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'sales' },
+          { name: 'refunds', type: 'line', color: 'red' },
+        ],
+      }),
+    ).toEqual({ sales: '#000033', refunds: 'red' })
+  })
+
+  it('leaves the other palettes on series order', () => {
+    const mixed: AxisChartSeriesConfig[] = [
+      { name: 'sales' },
+      { name: 'refunds', type: 'line' },
+    ]
+    expect(colorsFor({ palette: 'categorical', series: mixed })).toEqual({
+      sales: '#111111',
+      refunds: '#222222',
+    })
+    expect(colorsFor({ palette: 'diverging', series: mixed })).toEqual({
+      sales: '#001100',
+      refunds: '#003300',
+    })
+    expect(colorsFor({ palette: ['a', 'b'], series: mixed })).toEqual({
+      sales: 'a',
+      refunds: 'b',
+    })
+  })
+
+  it('draws every series as a bar on a horizontal chart, so order stands', () => {
+    expect(
+      colorsFor({
+        horizontal: true,
+        series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+      }),
+    ).toEqual({ sales: '#000011', refunds: '#000033' })
   })
 })
 

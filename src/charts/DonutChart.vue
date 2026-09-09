@@ -105,6 +105,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
   buildDonutChartOption,
@@ -225,6 +226,14 @@ const tooltip = reactive({
   x: 0,
   y: 0,
   items: [] as ChartTooltipItem[],
+})
+
+useTooltipDismiss({
+  plot: plotEl,
+  data: () => visibleSlices.value,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 /** Slice under the pointer, or under the hovered legend entry. */

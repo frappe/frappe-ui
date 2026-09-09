@@ -93,6 +93,7 @@ import { GridComponent, VisualMapContinuousComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { AXIS_LABEL_MARGIN } from './axisChartCommon'
 import {
   buildHeatmapMatrix,
@@ -186,6 +187,14 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+})
+
+useTooltipDismiss({
+  plot: plotEl,
+  data: () => matrix.value.cells,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 /**
@@ -335,8 +344,10 @@ function downplayCell(index: number | null) {
 const keyboard = usePlotKeyboard({
   marks: () => matrix.value.cells,
   // The pair of categories names the cell, whatever order the grid ends up in
-  // and whichever refetch built the rows.
-  key: (cell) => `${cell.y} ${cell.x}`,
+  // and whichever refetch built the rows. NUL joins them because no category
+  // can hold one, so no pair of values can collide on the seam. Written as an
+  // escape: a literal NUL makes every text tool read this file as binary.
+  key: (cell) => `${cell.y}\u0000${cell.x}`,
   move: (index, previous) => {
     downplayCell(previous)
     readCell(index)

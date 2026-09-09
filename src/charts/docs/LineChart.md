@@ -29,8 +29,8 @@ chart has none.
 `seriesConfig[key].axis` measures a series against a second value axis, drawn
 opposite the primary — for a series in another unit, like a rate against
 dollars. `y2Axis.min` / `max` pin that scale so the line reads as over or under
-plan rather than as its own trend. The axis is only drawn when a series asks
-for it.
+plan rather than as its own trend. The axis is only drawn when a series asks for
+it.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
 
@@ -43,20 +43,23 @@ same way, keyed by a value of the `series` column.
 ## Filling one series
 
 `seriesConfig[key].type` sets the mark a single series draws as, so one line of
-a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There is
-no separate fill flag: an area *is* a filled line. `fillOpacity` sets the alpha,
-chart-wide or per series. The same key takes `'bar'`, which is what makes a
-combo chart.
+a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There
+is no separate fill flag: an area _is_ a filled line. `fillOpacity` sets the
+alpha, chart-wide or per series. The same key takes `'bar'`, which is what makes
+a combo chart.
 
 <ComponentPreview name="Charts-LineFilledSeries" csr="true" self-layout />
 
 ## Targets and thresholds
 
-`referenceLines` draws a rule over the plot at a fixed position. `axis` says what
-`value` is read against: `'y'` (the default) or `'y2'` for a rule across the plot
-at a measured value, `'x'` for one down it at a category, a date, or a number on
-a numeric x axis. Each line
-also takes an optional `label`, `color` and `dashed`.
+`referenceLines` draws a rule over the plot at a fixed position. `axis` says
+what `value` is read against: `'y'` (the default) or `'y2'` for a rule across
+the plot at a measured value, `'x'` for one down it at a category, a date, or a
+number on a numeric x axis. Each line also takes an optional `label`, `color`
+and `dashed`.
+
+`labelPlacement` moves the label off whatever it lands on. It is described under
+[BarChart](/docs/charts/barchart#targets-and-thresholds).
 
 <ComponentPreview name="Charts-LineThresholds" csr="true" self-layout />
 
@@ -65,6 +68,38 @@ never in the tooltip, and it cannot be switched off — which is what a threshol
 has to be to stay comparable. A line outside the range the plot covers is not
 drawn, because stretching the scale to fit a distant target would flatten the
 data it is meant to be read against; pin `yAxis.min` / `max` instead.
+
+## Context in the tooltip
+
+`tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
+no legend entry, no palette slot, no place on the value axis. Use it for a
+number that does not belong on the same scale, such as the order count behind
+a conversion rate.
+
+```vue
+<LineChart
+  :data="data"
+  x="month"
+  :y="['conversion_rate']"
+  :tooltip-columns="[{ name: 'orders', label: 'Orders' }]"
+/>
+```
+
+<ComponentPreview name="Charts-LineTooltipColumns" csr="true" self-layout />
+
+Columns print after the series rows, in the order given. They are not ranked
+by magnitude: a value in another unit cannot be ranked among the series.
+
+`name` is the row key. `label` falls back to it, and `format` prints the value.
+A column holding text prints as it stands.
+
+For a tooltip you write yourself, take `row` from the `tooltip` slot instead.
+
+```vue
+<LineChart :data="data" x="month" y="conversion_rate">
+  <template #tooltip="{ row }">{{ row.orders }} orders</template>
+</LineChart>
+```
 
 ## Hiding a series
 

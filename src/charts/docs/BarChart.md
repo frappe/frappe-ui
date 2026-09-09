@@ -83,6 +83,12 @@ scale, which `axis: 'y2'` in the same entry gives it.
 
 <ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
 
+The sequential ramp is handed out by mark, not by series order: the line takes
+the deep end and the bars take the pale stops. A bar covers enough area to read
+in a pale color. A 2px stroke in the same color disappears. The other palettes
+keep series order, because a caller's own list, a diverging ramp and a
+categorical set all mean something in the order they are written.
+
 Marks stack among their own: bars stack with bars and areas with areas, and a
 line never stacks. `horizontal` draws bars only — a series that asks for another
 mark there is drawn as a bar, with a dev-mode warning.
@@ -94,6 +100,12 @@ break-even point, the date something shipped. Each line takes a `value`, an
 optional `label`, `color` and `dashed`. They are annotations, not series: no
 legend entry, and no way to switch one off.
 
+`labelPlacement` moves the label off whatever it lands on. It names an end of the
+rule and a side of it: `'end-top'` (the default), `'end-bottom'`, `'start-top'`
+or `'start-bottom'`. The ends are read in the direction of the axis the rule
+runs along, so an RTL chart swaps them. A rule drawn down the plot carries its
+label rotated, and its two sides are the left and the right of it.
+
 <ComponentPreview name="Charts-BarTarget" csr="true" self-layout />
 
 `axis` says what `value` is read against: `'y'` (the default) or `'y2'` for a
@@ -101,6 +113,12 @@ rule across the plot at a measured value, `'x'` for one down it at a category or
 a date. `horizontal` swaps the two axes and the lines follow. A line outside the
 range the plot covers is not drawn — the scale follows the data, not the
 annotation — so pin `yAxis.min` / `max` to bring a distant target into frame.
+
+## Context in the tooltip
+
+`tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
+no legend entry, no palette slot, no place on the value axis. It is described
+under [LineChart](/docs/charts/linechart#context-in-the-tooltip).
 
 ## Hiding a series
 

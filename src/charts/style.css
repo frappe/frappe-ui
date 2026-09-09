@@ -14,13 +14,18 @@
  */
 :root {
   /* The "Jewel" ramp: ten slots are five hue families — blue, emerald, violet,
-     amber, crimson — each a dark member followed by its light partner, so a
+     amber, red — each a dark member followed by its light partner, so a
      two-series chart opens on one family at two strengths and a five-series one
      never repeats a hue. Slot 1 is the sequential ramp's mid-blue.
 
      The hues sit at jewel-tone depth rather than at their safe positions, so the
      dark members run a step below the anchor's lightness; chroma is capped at
-     0.19 so the violet and the crimson cannot out-shout the blue. */
+     0.19 so the violet and the red cannot out-shout the blue.
+
+     The red family sits at hue 17. It was authored at 5, a crimson, whose light
+     partner lightens into a pink rather than into a warning — so anything
+     reading the ramp for a status had to leave it. 17 keeps the family clear of
+     the amber at 75 while its light partner still reads as red. */
   --chart-categorical-1: #2283c3;
   --chart-categorical-2: #84c5f9;
   --chart-categorical-3: #289e60;
@@ -29,8 +34,8 @@
   --chart-categorical-6: #bb9df1;
   --chart-categorical-7: #c98c28;
   --chart-categorical-8: #f5ca8e;
-  --chart-categorical-9: #ba205a;
-  --chart-categorical-10: #f98da7;
+  --chart-categorical-9: #bd2040;
+  --chart-categorical-10: #fc8e94;
 
   --chart-sequential-1: #095895;
   --chart-sequential-2: #2283c3;
@@ -71,12 +76,11 @@
      page. Charts flip to white on a fill dark enough to need it. */
   --chart-inside-label: oklch(0.271 0 0);
 
-  /* What a heatmap paints the gap between two cells in. A gap has to be drawn,
-     not left out — a cell is a filled rect, so the only way to separate two of
-     them is a border in whatever is behind the plot. Defaults to the elevated
-     card surface, which is where a chart normally sits; an app that puts one on
-     another background redefines this on that subtree. */
-  --chart-cell-gap: var(--surface-elevation-2);
+  /* The surface behind the plot: what a heatmap paints the gap between two cells
+     in, and what a reference line's label sits on. `--chart-backdrop` is
+     deliberately not set here. A chart reads it off its own ancestors, see
+     `backdropColor` in tokens.ts. Set it for a chart on a background the walk
+     cannot read, such as an image. */
 }
 
 [data-theme='dark'] {
@@ -91,8 +95,8 @@
   --chart-categorical-6: #b294e7;
   --chart-categorical-7: #bf8319;
   --chart-categorical-8: #ebc085;
-  --chart-categorical-9: #af0f52;
-  --chart-categorical-10: #ef849e;
+  --chart-categorical-9: #b20e37;
+  --chart-categorical-10: #f2858b;
 
   --chart-sequential-1: #074677;
   --chart-sequential-2: #1b699c;

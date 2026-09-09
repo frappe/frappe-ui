@@ -38,14 +38,14 @@
           />
         </div>
 
-        <div class="relative mb-4 grid" :style="gridStyle">
+        <div class="relative mb-6 grid" :style="gridStyle">
           <div
             v-for="stage in stages"
             :key="stage.index"
-            class="min-w-0"
+            class="flex min-w-0 flex-col gap-1"
             :class="stage.index === 0 ? 'pe-3' : 'px-3'"
           >
-            <div class="truncate text-p-sm text-ink-gray-5">
+            <div class="truncate text-sm text-ink-gray-5">
               {{ stage.label }}
             </div>
             <div
@@ -164,6 +164,7 @@
 import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
+import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { chartColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
@@ -246,6 +247,14 @@ const tooltip = reactive({
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
   rates: [] as { label: string; value: string }[],
+})
+
+useTooltipDismiss({
+  plot: root,
+  data: () => stages.value,
+  close: () => {
+    tooltip.open = false
+  },
 })
 
 function hover(stage: FunnelStage, event: MouseEvent) {

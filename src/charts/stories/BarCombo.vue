@@ -22,7 +22,6 @@ const quarterly = [
         format: (value) => `$${(value / 1000).toFixed(0)}k`,
       }"
       :y2-axis="{ title: 'Margin (%)', min: 0, max: 25 }"
-      palette="categorical"
       :series-config="{
         margin: {
           type: 'line',

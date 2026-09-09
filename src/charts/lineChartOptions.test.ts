@@ -13,7 +13,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `LineChart` hands the builder: the shared config, marked `'line'`. */

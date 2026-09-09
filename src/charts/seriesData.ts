@@ -3,11 +3,13 @@ import type {
   AxisChartProps,
   AxisChartSeriesConfig,
   ChartCategoryFormatter,
+  ChartTooltipColumn,
   ChartValueAxisOptions,
   ChartValueFormatter,
   ChartYAxisConfig,
 } from './types'
 import { toNumber } from './axisChartCommon'
+import { formatLabel } from './format'
 import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 
 /** Below two there is nothing left to collapse into. */
@@ -23,9 +25,17 @@ export type AxisChartFormatters = {
   y2?: ChartValueFormatter
 }
 
+export type ResolvedTooltipColumn = ChartTooltipColumn & { label: string }
+
 export type NormalizedAxisChart = {
   config: AxisChartBaseConfig
   format: AxisChartFormatters
+  /**
+   * The tooltip-only columns, resolved. They travel beside the config rather
+   * than inside it: the option builders read the config, and nothing an option
+   * builder draws should learn that these exist.
+   */
+  tooltipColumns: ResolvedTooltipColumn[]
 }
 
 /**
@@ -51,12 +61,37 @@ export function normalizeAxisChartProps(
     )
   }
 
+  const tooltipColumns = (props.tooltipColumns ?? []).map((column) => ({
+    ...column,
+    label: column.label ?? formatLabel(column.name),
+  }))
+
   const { data, names } = props.series
     ? capSeries(
-        pivot(rows, props.x, yColumns[0], props.series),
+        pivot(
+          rows,
+          props.x,
+          yColumns[0],
+          props.series,
+          tooltipColumns.map((column) => column.name),
+        ),
         props.maxSeries,
       )
     : { data: rows, names: yColumns }
+
+  // A pivoted row holds one value per key, so a group value equal to a tooltip
+  // column's name lands on the same key and the plotted measure wins. Keeping
+  // the column would print the measure under the column's label.
+  const clobbered = props.series
+    ? tooltipColumns.filter((column) => names.includes(column.name))
+    : []
+
+  if (import.meta.env.DEV && clobbered.length) {
+    const named = clobbered.map((column) => `"${column.name}"`).join(', ')
+    console.warn(
+      `[frappe-ui] \`series="${props.series}"\` produces a series named ${named}, which \`tooltipColumns\` also names. The series keeps the key and the column is dropped. Rename the column, or change the values in "${props.series}".`,
+    )
+  }
 
   return {
     config: {
@@ -83,7 +118,15 @@ export function normalizeAxisChartProps(
       y: props.yAxis?.format,
       y2: props.y2Axis?.format,
     },
+    tooltipColumns: tooltipColumns.filter(
+      (column) => !clobbered.includes(column),
+    ),
   }
+}
+
+/** What a series is called wherever it is printed: legend, tooltip, reading. */
+export function seriesLabel(series: AxisChartSeriesConfig) {
+  return series.label ?? formatLabel(series.name)
 }
 
 /**
@@ -119,12 +162,17 @@ function toColumns(value?: string | string[]): string[] {
  * Long rows to wide: one row per x value, one column per value of the grouping
  * column. Both orders follow first appearance in the data, so the caller's sort
  * survives. Duplicate (x, series) pairs are last-write-wins.
+ *
+ * `carry` names columns to copy across untouched. A tooltip column reads per
+ * category, not per group, so the first row to reach a category decides its
+ * value.
  */
 function pivot(
   rows: Record<string, any>[],
   x: string,
   y: string,
   series: string,
+  carry: string[] = [],
 ) {
   const names: string[] = []
   // Keyed by the stringified x value: `Date` objects and numbers still have to
@@ -136,10 +184,13 @@ function pivot(
     let wide = byCategory.get(key)
     if (!wide) {
       wide = { [x]: row[x] }
+      for (const column of carry) wide[column] = row[column]
       byCategory.set(key, wide)
     }
     const name = String(row[series])
     if (!names.includes(name)) names.push(name)
+    // Written after the carried columns, so a series named like one of them
+    // keeps the plot's number rather than losing it to the tooltip's.
     wide[name] = row[y]
   }
 

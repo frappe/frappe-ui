@@ -29,12 +29,18 @@ chart-level alpha; a `seriesConfig` entry overrides it per series.
 
 <ComponentPreview name="Charts-AreaLatency" csr="true" self-layout />
 
+## Context in the tooltip
+
+`tooltipColumns` names columns that reach the tooltip and nothing else: no mark,
+no legend entry, no palette slot, no place on the value axis. It is described
+under [LineChart](/docs/charts/linechart#context-in-the-tooltip).
+
 ## Hiding a series
 
 A chart with more than one series draws a legend under the plot. Press an entry
 to take that band out of the chart. The stack closes over it, and a normalized
 stack re-takes its shares over the bands that are left. Bind
-`v-model:hiddenSeries` to own that list yourself;
-it is described under [BarChart](/docs/charts/barchart#hiding-a-series).
+`v-model:hiddenSeries` to own that list yourself; it is described under
+[BarChart](/docs/charts/barchart#hiding-a-series).
 
 <!-- @include: ./AreaChart.api.md -->

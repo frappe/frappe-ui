@@ -96,6 +96,13 @@ export type AxisChartSeriesConfig = {
  * budget, or the date something changed. An annotation rather than a series —
  * it has no legend entry, cannot be switched off, and is never in the tooltip.
  */
+/** An end of a reference line, and a side of it. See `ReferenceLine.labelPlacement`. */
+export type ReferenceLineLabelPlacement =
+  | 'start-top'
+  | 'start-bottom'
+  | 'end-top'
+  | 'end-bottom'
+
 export type ReferenceLine = {
   /**
    * Where the line sits: a number on a value axis, or whatever the category
@@ -115,9 +122,17 @@ export type ReferenceLine = {
    * with `xAxis.type: 'value'` reads `'x'` the same way: a number on the scale.
    */
   axis?: 'y' | 'y2' | 'x'
-  /** Printed at the far end of the line. Left out, the rule carries no text. */
+  /** Printed on the line. Left out, the rule carries no text. */
   label?: string
-  /** Defaults to the ink data labels are printed in, so it reads as an annotation. */
+  /**
+   * Where the label sits, as an end of the rule and a side of it. Defaults to
+   * `'end-top'`. Move it when the default lands on a mark or on another rule's
+   * label. The ends are read in the direction of the axis the rule runs along,
+   * so an RTL chart swaps them. A rule drawn down the plot carries its label
+   * rotated, so its sides are the left and the right of it.
+   */
+  labelPlacement?: ReferenceLineLabelPlacement
+  /** Defaults to the ink the axis labels are printed in, so it reads as furniture. */
   color?: string
   /** Breaks the rule up, for a line that should not read as a hard boundary. */
   dashed?: boolean
@@ -142,6 +157,8 @@ export type AxisChartBaseConfig = {
   /**
    * Ramp series colors are drawn from. Defaults to `'sequential'`: one series
    * gets a single mid-blue, more get evenly spaced stops running dark to light.
+   * A chart of mixed marks spends those stops by mark rather than by series
+   * order: see `resolveSeriesColors`.
    */
   palette?: ChartPalette
   /** Forces layout direction; defaults to document.documentElement.dir */
@@ -565,11 +582,14 @@ export type ChartLegendItem = {
 export type ChartTooltipItem = {
   name: string
   label: string
-  color: string
-  value: number
+  /** Left out by a `'column'` item: a swatch would claim a mark on the plot. */
+  color?: string
+  value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
+  /** `'column'` is a `tooltipColumns` entry. Left out, `'series'`. */
+  kind?: 'series' | 'column'
 }
 
 export type ChartDatapointEvent = {
@@ -593,6 +613,9 @@ export type ChartValueFormatter = (value: number) => string
 
 /** A category axis carries whatever the column holds, so its formatter takes any. */
 export type ChartCategoryFormatter = (value: any) => string
+
+/** A tooltip column may hold text, so its formatter takes either. */
+export type ChartTooltipFormatter = (value: number | string) => string
 
 export type ChartBaseProps = {
   /** Heads the card. Left out, the chart draws no header row at all. */
@@ -695,6 +718,18 @@ export type SeriesStyle = {
   echartOptions?: EchartOptionsOverride
 }
 
+/** One `tooltipColumns` entry. */
+export type ChartTooltipColumn = {
+  /** Row key. Also the label when none is given. */
+  name: string
+  label?: string
+  /**
+   * A column sits on no axis, so it takes no formatter from one. Left out, a
+   * number prints with the default grouping and text prints as it stands.
+   */
+  format?: ChartTooltipFormatter
+}
+
 export type AxisChartProps = ChartBaseProps & {
   /** The rows to plot. One row is one position on the category axis. */
   data: Record<string, any>[]
@@ -723,6 +758,13 @@ export type AxisChartProps = ChartBaseProps & {
    * reader hid across a reload. Left unbound, the legend owns it.
    */
   hiddenSeries?: string[]
+  /**
+   * Columns that reach the tooltip and nothing else: no mark, no legend entry,
+   * no palette slot, and no effect on the value axis. For context in another
+   * unit, such as the count behind a rate. They print after the series rows,
+   * in the order given: a value in another unit cannot be ranked among them.
+   */
+  tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */
@@ -1003,6 +1045,11 @@ export type ChartTooltipProps = {
   label?: string
   /** One row per reading, in the order they should be read. */
   items: ChartTooltipItem[]
+  /**
+   * The data row under the pointer, so the slot can read a column the chart
+   * never plotted. Left out by charts that hover an aggregate.
+   */
+  row?: Record<string, any>
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -1045,9 +1092,14 @@ export type AxisChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds one entry per visible series at
-     * the hovered category, biggest first.
+     * the hovered category, biggest first. `row` is the data row behind them,
+     * so a replacement body can read a column the chart never plotted.
      */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      row?: Record<string, any>
+    }) => unknown
   }
 
 export type BarChartEmits = AxisChartEmits
@@ -1179,5 +1231,9 @@ export type ChartLegendEmits = {
 
 export type ChartTooltipSlots = {
   /** Replaces the whole tooltip body, headline row included. */
-  default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  default: (props: {
+    label?: string
+    items: ChartTooltipItem[]
+    row?: Record<string, any>
+  }) => unknown
 }

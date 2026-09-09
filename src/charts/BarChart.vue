@@ -41,6 +41,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :row="tooltip.row"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -50,10 +51,7 @@
     </template>
 
     <template v-if="legendItems.length > 1" #legend>
-      <ChartLegend
-        :items="legendItems"
-        @change="toggleSeries"
-      />
+      <ChartLegend :items="legendItems" @change="toggleSeries" />
     </template>
   </ChartContainer>
 </template>
@@ -133,6 +131,7 @@ const {
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
+  tooltipColumns: () => normalized.value.tooltipColumns,
   horizontal: () => Boolean(props.horizontal),
   hiddenSeries,
   onSelect: (event) => emit('select', event),

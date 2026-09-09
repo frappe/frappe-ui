@@ -15,7 +15,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 function config(overrides: Partial<AxisChartConfig> = {}): AxisChartConfig {
@@ -56,7 +56,7 @@ describe('reference line placement', () => {
   it('draws a horizontal rule at a value on the value axis', () => {
     const option = build({ referenceLines: [{ value: 15 }] })
     expect(entriesOf(option)).toEqual([
-      { yAxis: 15, lineStyle: { width: 1.5, color: 'ink-6' } },
+      { yAxis: 15, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
     ])
   })
 
@@ -198,28 +198,64 @@ describe('reference line looks', () => {
     expect(label.formatter()).toBe('Target')
   })
 
-  it('carries no label at all when none is set', () => {
-    expect(
-      entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label,
-    ).toBeUndefined()
+  it('places the label at the end and the side the caller names', () => {
+    const option = build({
+      referenceLines: [
+        { value: 10, label: 'A', labelPlacement: 'start-top' },
+        { value: 20, label: 'B', labelPlacement: 'start-bottom' },
+        { value: 30, label: 'C', labelPlacement: 'end-top' },
+        { value: 40, label: 'D', labelPlacement: 'end-bottom' },
+      ],
+    })
+    expect(entriesOf(option).map((entry: any) => entry.label.position)).toEqual([
+      'insideStartTop',
+      'insideStartBottom',
+      'insideEndTop',
+      'insideEndBottom',
+    ])
   })
 
-  it('takes its default ink from the tokens, not from the palette', () => {
+  it('reads the two ends off the axis, so an RTL chart swaps them itself', () => {
+    // Nothing to assert on the option: echarts places `Start` where the axis
+    // begins.
+    const rtl = build({ dir: 'rtl', referenceLines: [{ value: 15, label: 'T' }] })
+    expect(entriesOf(rtl)[0].label.position).toBe('insideEndTop')
+  })
+
+  it('turns the label off when none is set, rather than leaving it out', () => {
+    expect(entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label).toEqual(
+      { show: false },
+    )
+  })
+
+  it('takes the axis labels’ ink, not the palette and not the data labels’', () => {
     const option = build({ referenceLines: [{ value: 15, label: 'Target' }] })
     const [entry] = entriesOf(option)
-    expect(entry.lineStyle.color).toBe(tokens.dataLabel)
-    expect(entry.label.color).toBe(tokens.dataLabel)
+    expect(entry.lineStyle.color).toBe(tokens.axisLabel)
+    expect(entry.label.color).toBe(tokens.axisLabel)
   })
 
-  it('breaks a dashed line up with the same texture the gridlines use', () => {
+  it('prints its label on a plate of the surface behind the plot', () => {
+    const option = build({ referenceLines: [{ value: 15, label: 'Target' }] })
+    const [entry] = entriesOf(option)
+    // Short of opaque, so a mark under the label still reads through it.
+    expect(entry.label.backgroundColor).toBe(
+      `color-mix(in srgb, ${tokens.backdrop} 80%, transparent)`,
+    )
+    expect(entry.label.padding).toEqual([2, 4])
+  })
+
+  it('breaks a dashed line up with a dash of its own, not the gridline dots', () => {
     const option = build({
       referenceLines: [{ value: 15, dashed: true }, { value: 25 }],
     })
     const [dashed, solid] = entriesOf(option)
-    expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
-    expect(dashed.lineStyle.cap).toBe(DOTTED_LINE.cap)
-    // Heavier than the gridline the texture is borrowed from.
-    expect(dashed.lineStyle.width).toBe(1.5)
+    // A dash against the grid's dots: the two kinds of broken line have to be
+    // told apart by pattern, because the rule is drawn at furniture weight.
+    expect(dashed.lineStyle.type).toEqual([3.5, 3])
+    expect(dashed.lineStyle.cap).toBeUndefined()
+    expect(dashed.lineStyle.type).not.toEqual(DOTTED_LINE.type)
+    expect(dashed.lineStyle.width).toBe(1)
     expect(solid.lineStyle.type).toBeUndefined()
   })
 
@@ -303,5 +339,17 @@ describe('reference lines against the rest of the plot', () => {
       structure(bare.series),
     )
     expect(annotated.series[3]).toBe(hostsOf(annotated)[0])
+  })
+
+  it('draws over every mark, so its label is never covered', () => {
+    const overrides: Partial<AxisChartConfig> = {
+      series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+    }
+    const option = build({ ...overrides, referenceLines: [{ value: 15 }] })
+    const marks = option.series
+      .filter((series: any) => !series.markLine)
+      .map((series: any) => series.z)
+
+    expect(hostsOf(option)[0].z).toBeGreaterThan(Math.max(...marks))
   })
 })

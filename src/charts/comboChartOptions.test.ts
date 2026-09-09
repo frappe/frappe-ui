@@ -17,7 +17,7 @@ const tokens: ChartTokens = {
   splitLine: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /**
@@ -41,7 +41,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 const typesOf = (option: any) => option.series.map((s: any) => s.type)
@@ -152,6 +155,14 @@ describe('combo axes', () => {
     expect(option.tooltip.axisPointer.type).toBe('shadow')
   })
 
+  it('draws the band from a token, translucently', () => {
+    // Unstyled, echarts fills it with a hard-coded grey that no theme reaches.
+    // The alpha is what keeps the gridlines under it readable.
+    const { shadowStyle } = build().tooltip.axisPointer
+    expect(shadowStyle.color).toBe(tokens.splitLine)
+    expect(shadowStyle.opacity).toBeLessThan(1)
+  })
+
   it('measures a line series against the second value axis', () => {
     const option = build({
       y2Axis: { title: 'rate' },
@@ -160,6 +171,58 @@ describe('combo axes', () => {
     expect(option.yAxis.map((a: any) => a.position)).toEqual(['left', 'right'])
     expect(option.series.map((s: any) => s.yAxisIndex)).toEqual([0, 1])
     expect(typesOf(option)).toEqual(['bar', 'line'])
+  })
+
+  it('holds the second axis at its own ends once its last series is hidden', () => {
+    const dual = {
+      y2Axis: { title: 'rate' },
+      series: [
+        { name: 'sales' },
+        { name: 'rate', type: 'line' as ChartMark, axis: 'y2' as const },
+      ],
+    }
+    const [, live] = build(dual).yAxis
+    const [primary, emptied] = build(dual, ['rate']).yAxis
+
+    // echarts blanks an axis no series feeds: no ticks and no labels at all.
+    expect(live.min).toBeUndefined()
+    expect(emptied.min).toBe(0)
+    expect(emptied.max).toBe(40)
+    // The axis reads as switched off, the way the legend item does.
+    expect(emptied.axisLabel.opacity).toBeLessThan(1)
+    expect(live.axisLabel.opacity).toBeUndefined()
+    // The one still drawing its series is echarts' to scale.
+    expect(primary.min).toBeUndefined()
+  })
+
+  it('keeps the gridlines when the axis that carries them is the empty one', () => {
+    const option = build(
+      {
+        y2Axis: { title: 'rate' },
+        series: [{ name: 'sales' }, { name: 'rate', type: 'line', axis: 'y2' }],
+      },
+      ['sales'],
+    )
+    const [primary] = option.yAxis
+    expect(primary.min).toBe(0)
+    expect(primary.splitLine.show).toBe(true)
+  })
+
+  it('rounds the ends it pins, and yields them to the caller’s own', () => {
+    const dual = (y2Axis: any) => ({
+      y2Axis,
+      data: [
+        { month: 'Jan', sales: 10, rate: 17 },
+        { month: 'Feb', sales: 20, rate: 1743 },
+      ],
+      series: [
+        { name: 'sales' },
+        { name: 'rate', type: 'line' as ChartMark, axis: 'y2' as const },
+      ],
+    })
+    // A fixed end prints what it is given, so 1743 in five steps is unreadable.
+    expect(build(dual({}), ['rate']).yAxis[1].max).toBe(2000)
+    expect(build(dual({ max: 1800 }), ['rate']).yAxis[1].max).toBe(1800)
   })
 
   it('reserves label room for the hungriest mark that shows labels', () => {
@@ -184,19 +247,24 @@ describe('combo axes', () => {
 })
 
 describe('combo colors', () => {
-  it('assigns the same color to a series whatever mark it draws as', () => {
-    const bars = build({ series: [{ name: 'sales' }, { name: 'refunds' }] })
+  it('spends the deep end of the ramp on the line, not on the bar', () => {
     const mixed = build()
-    expect(bars.series[0].itemStyle.color).toBe(mixed.series[0].itemStyle.color)
-    expect(bars.series[1].itemStyle.color).toBe(mixed.series[1].itemStyle.color)
+    expect(mixed.series[0].itemStyle.color).toBe('#000033')
+    expect(mixed.series[1].itemStyle.color).toBe('#000011')
     // The line takes the same stop for its stroke as for its symbols.
     expect(mixed.series[1].lineStyle.color).toBe(
       mixed.series[1].itemStyle.color,
     )
   })
 
+  it('leaves a chart of one mark on series order', () => {
+    const bars = build({ series: [{ name: 'sales' }, { name: 'refunds' }] })
+    expect(bars.series[0].itemStyle.color).toBe('#000011')
+    expect(bars.series[1].itemStyle.color).toBe('#000033')
+  })
+
   it('keeps every series on its own color when one is hidden', () => {
-    expect(build({}, ['sales']).series[0].itemStyle.color).toBe('#000033')
+    expect(build({}, ['sales']).series[0].itemStyle.color).toBe('#000011')
   })
 })
 

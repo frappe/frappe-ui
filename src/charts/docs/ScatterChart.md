@@ -38,6 +38,9 @@ and `dashed`. They are annotations, not series: no legend entry, no tooltip
 entry, and no way to switch one off, so a rule stays put while a legend toggle
 takes a group out of the plot.
 
+`labelPlacement` moves the label off whatever it lands on. It is described under
+[BarChart](/docs/charts/barchart#targets-and-thresholds).
+
 `axis` says which scale `value` is read against. Both scales are measured here,
 so `'x'` and `'y'` are the same kind of thing: a number. An axis chart reads
 `'x'` as a category or a date instead, unless `xAxis.type` is `'value'`. `'y'`

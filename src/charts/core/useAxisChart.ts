@@ -2,6 +2,7 @@ import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
+import { useTooltipDismiss } from './useTooltipDismiss'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
   hasSecondaryValueAxis,
@@ -11,12 +12,17 @@ import {
 } from '../axisChartCommon'
 import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
-import type { AxisChartFormatters } from '../seriesData'
+import { buildTooltipItems } from '../tooltipItems'
+import {
+  seriesLabel,
+  type AxisChartFormatters,
+  type ResolvedTooltipColumn,
+} from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
-  AxisChartBaseConfig,
+  AxisChartConfig,
   AxisChartSeriesConfig,
   ChartDatapointEvent,
   ChartLegendItem,
@@ -24,7 +30,7 @@ import type {
   PlotLabelPlacement,
 } from '../types'
 
-export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
+export type UseAxisChartArgs<C extends AxisChartConfig> = {
   config: () => C
   buildOption: (config: C, context: AxisChartOptionContext) => EChartsCoreOption
   /** Axis label and tooltip formatters, kept beside the config by `normalizeAxisChartProps`. */
@@ -42,6 +48,12 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * beside it, so the reader gets both.
    */
   stackShares?: () => Map<string, (number | null)[]>
+  /**
+   * Columns that reach the tooltip and nothing else. They are handed in beside
+   * the config, not inside it, so the option builder never sees them: an extra
+   * has no mark, no legend entry, no palette slot and no axis.
+   */
+  tooltipColumns?: () => ResolvedTooltipColumn[]
   onSelect?: (event: ChartDatapointEvent) => void
 }
 
@@ -50,7 +62,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
  * legend state and the hit-testing behind the HTML tooltip. Bar, line and area
  * differ only in the builder they hand in, so their interactions stay identical.
  */
-export function useAxisChart<C extends AxisChartBaseConfig>(
+export function useAxisChart<C extends AxisChartConfig>(
   args: UseAxisChartArgs<C>,
 ) {
   const plotEl = ref<HTMLElement>()
@@ -60,6 +72,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())
+  const tooltipColumns = computed(() => args.tooltipColumns?.() ?? [])
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
   // read the axis the way it is actually drawn — and the same row list, so a
@@ -151,10 +164,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     })),
   )
 
-  function seriesLabel(series: AxisChartSeriesConfig) {
-    return series.label ?? formatLabel(series.name)
-  }
-
   // A series reads in the units of the axis it is actually drawn against, so
   // `y2` series never fall back to the primary formatter — except on a
   // horizontal chart, which has no second axis to put them on.
@@ -178,6 +187,17 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     y: 0,
     label: undefined as string | undefined,
     items: [] as ChartTooltipItem[],
+    // Handed to the `#tooltip` slot so a replacement body can read a column the
+    // chart never plotted.
+    row: undefined as Record<string, any> | undefined,
+  })
+
+  useTooltipDismiss({
+    plot: plotEl,
+    data: () => rows.value,
+    close: () => {
+      tooltip.open = false
+    },
   })
 
   /**
@@ -250,24 +270,20 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
 
   function showIndex(index: number, clientX?: number, clientY?: number) {
     const row = rows.value[index]
-    const items = config.value.series
-      .filter((series) => !hiddenSeries.value.includes(series.name))
-      .map((series) => ({
-        name: series.name,
-        label: seriesLabel(series),
-        color: seriesColors.value[series.name],
-        value: Number(row[series.name]),
-        formattedValue: formatSeriesValue(series, Number(row[series.name])),
-        // A normalized plot draws the share, so the tooltip is the only place
-        // the measured number survives — it carries both.
-        percent: stackShares.value?.get(series.name)?.[index] ?? undefined,
-      }))
-      // A series that silently drops out of the tooltip reads as a bug, so a
-      // zero stays. Only a blank cell is dropped. Biggest contributor first.
-      .filter((item) => !isNaN(item.value))
-      .sort((a, b) => b.value - a.value)
+    const items = buildTooltipItems({
+      row,
+      index,
+      series: config.value.series,
+      hiddenSeries: hiddenSeries.value,
+      colors: seriesColors.value,
+      formatSeries: formatSeriesValue,
+      shares: stackShares.value,
+      tooltipColumns: tooltipColumns.value,
+    })
 
-    if (!items.length) {
+    // The tooltip still stands on the series: extras alone would open one over
+    // a chart whose whole legend is switched off.
+    if (!items.some((item) => item.kind === 'series')) {
       tooltip.open = false
       return
     }
@@ -277,6 +293,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       ? format.value.x(category)
       : formatAxisValue(category, xAxis.value.type, xAxis.value.timeGrain)
     tooltip.items = items
+    tooltip.row = row
     tooltip.x = clientX ?? tooltip.x
     tooltip.y = clientY ?? tooltip.y
     tooltip.open = true

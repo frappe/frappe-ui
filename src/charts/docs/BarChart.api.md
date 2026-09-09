@@ -79,6 +79,12 @@
     default: '[]'
   },
   {
+    name: 'tooltipColumns',
+    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit, such as the count behind a rate. They print after the series rows,\nin the order given: a value in another unit cannot be ranked among them.',
+    required: false,
+    type: 'ChartTooltipColumn[]'
+  },
+  {
     name: 'xAxis',
     description: 'The category axis: its title, how the `x` column reads, and label format.',
     required: false,
@@ -163,21 +169,21 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `row` is the data row behind them,\nso a replacement body can read a column the chart never plotted.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'select',
-    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its position along the category axis, and the\nrow behind it.',
-    type: '[event: ChartDatapointEvent]'
-  },
-  {
     name: 'update:hiddenSeries',
     description: 'Fired when the hidden series changes.',
     type: '[value: string[]]'
+  },
+  {
+    name: 'select',
+    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its position along the category axis, and the\nrow behind it.',
+    type: '[event: ChartDatapointEvent]'
   }
 ]
 </script>
