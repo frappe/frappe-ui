@@ -56,8 +56,8 @@ const LIGHT_CATEGORICAL = [
   '#bb9df1',
   '#c98c28',
   '#f5ca8e',
-  '#bd2040',
-  '#fc8e94',
+  '#c54b58',
+  '#fca0a4',
 ]
 
 const LIGHT_SEQUENTIAL = [
@@ -95,8 +95,8 @@ const DARK_CATEGORICAL = [
   '#b294e7',
   '#bf8319',
   '#ebc085',
-  '#b20e37',
-  '#f2858b',
+  '#ba4250',
+  '#f2979b',
 ]
 
 const DARK_SEQUENTIAL = [
