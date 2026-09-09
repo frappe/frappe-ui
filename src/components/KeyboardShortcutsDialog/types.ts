@@ -11,4 +11,7 @@ export interface KeyboardShortcutsDialogProps {
    * Rows, not registrations: shortcuts that merge count once (default: 20).
    */
   searchThreshold?: number
+
+  /** Controls the visibility of the dialog. */
+  open?: boolean
 }

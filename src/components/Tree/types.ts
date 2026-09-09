@@ -90,6 +90,9 @@ export interface TreeProps {
    * @default false
    */
   disabled?: boolean
+
+  /** Controls whether the whole tree is expanded. */
+  expanded?: boolean
 }
 
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */

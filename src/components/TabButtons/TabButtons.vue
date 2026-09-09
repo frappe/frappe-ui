@@ -27,6 +27,7 @@ import type {
   TabButton,
   TabButtonsEmits,
   TabButtonsProps,
+  TabButtonsSlots,
   TabButtonValue,
 } from './types'
 
@@ -44,6 +45,8 @@ const props = withDefaults(defineProps<TabButtonsProps>(), {
 })
 
 const emit = defineEmits<TabButtonsEmits>()
+
+defineSlots<TabButtonsSlots>()
 
 const options = computed(() => props.options ?? [])
 
