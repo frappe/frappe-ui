@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { createApp, defineComponent, h, nextTick, ref, type App } from 'vue'
 import Dialog from '../components/Dialog/Dialog.vue'
 import Popover from '../components/Popover/Popover.vue'
-import RailItemBadge from '../components/Rail/RailItemBadge.vue'
+import SidebarRailItemBadge from '../components/SidebarRail/SidebarRailItemBadge.vue'
 import {
   portalTargetKey,
   providePortalTarget,
@@ -151,10 +151,10 @@ describe('overlays honour the host target', () => {
   })
 
   it('routes a hand-rolled Teleport to the host target', async () => {
-    // The Rail badge pill teleports itself rather than through a reka portal,
+    // The SidebarRail badge pill teleports itself rather than through a reka portal,
     // so it spells out the 'body' fallback and would miss an inject it forgot.
-    const portal = portalElement('rail-portal')
-    const app = createApp(RailItemBadge, { count: 3, variant: 'count' })
+    const portal = portalElement('sidebar-rail-portal')
+    const app = createApp(SidebarRailItemBadge, { count: 3, variant: 'count' })
     app.provide(portalTargetKey, portal)
     mount(app)
     await nextTick()

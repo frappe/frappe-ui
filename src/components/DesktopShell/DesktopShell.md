@@ -1,6 +1,6 @@
 # DesktopShell
 
-The desktop app frame. `DesktopShell` arranges an app's `Rail` and `Sidebar`
+The desktop app frame. `DesktopShell` arranges an app's `SidebarRail` and `Sidebar`
 alongside the main content, and owns the skeleton the content needs: a pinned
 `PageHeaderTarget` and a registered scroll region. Its mobile counterpart is a
 separate family — [`MobileShell`](/docs/components/mobileshell) — because the

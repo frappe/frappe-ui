@@ -1,6 +1,6 @@
 <template>
   <div
-    data-slot="rail"
+    data-slot="sidebar-rail"
     class="flex h-full w-[50px] shrink-0 flex-col items-center bg-surface-sidebar px-[11px] pb-3 pt-2.5"
   >
     <!-- One provider for the whole rail: hovering between items shows their
@@ -15,7 +15,7 @@
 import TooltipProvider from '../Tooltip/TooltipProvider.vue'
 
 defineSlots<{
-  /** `RailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling. */
+  /** `SidebarRailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling. */
   default?: () => any
 }>()
 </script>

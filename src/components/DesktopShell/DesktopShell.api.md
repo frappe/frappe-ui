@@ -17,7 +17,7 @@
   const slotsData = [
   {
     name: 'rail',
-    description: 'The icon column — usually a `Rail`. Omit it on shells that don\'t use one.',
+    description: 'The icon column — usually a `SidebarRail`. Omit it on shells that don\'t use one.',
     type: 'any'
   },
   {

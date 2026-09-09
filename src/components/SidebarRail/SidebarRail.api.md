@@ -4,15 +4,15 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const railSlots = [
+  const sidebarRailSlots = [
   {
     name: 'default',
-    description: '`RailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling.',
+    description: '`SidebarRailItem`s, and any fixed anchors (a logo, a user menu). Layout is plain flex — no built-in scrolling.',
     type: 'any'
   }
 ]
 
-  const railItemProps = [
+  const sidebarRailItemProps = [
   {
     name: 'label',
     description: 'Tooltip text and the base of the item\'s accessible label.',
@@ -66,7 +66,7 @@
   }
 ]
 
-  const railItemSlots = [
+  const sidebarRailItemSlots = [
   {
     name: 'default',
     description: 'Custom content in place of the default icon — an image, avatar, or initials.',
@@ -74,7 +74,7 @@
   }
 ]
 
-  const railItemEmits = [
+  const sidebarRailItemEmits = [
   {
     name: 'click',
     description: '',
@@ -85,14 +85,14 @@
 
 ## API Reference
 
-### Rail
+### SidebarRail
 
-<SlotsTable :data="railSlots"/>
+<SlotsTable :data="sidebarRailSlots"/>
 
-### RailItem
+### SidebarRailItem
 
-<PropsTable folder="Rail" name="RailItem" :data="railItemProps"/>
+<PropsTable folder="SidebarRail" name="SidebarRailItem" :data="sidebarRailItemProps"/>
 
-<SlotsTable :data="railItemSlots"/>
+<SlotsTable :data="sidebarRailItemSlots"/>
 
-<EmitsTable :data="railItemEmits"/>
+<EmitsTable :data="sidebarRailItemEmits"/>

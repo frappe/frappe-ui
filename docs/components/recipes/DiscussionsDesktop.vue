@@ -8,8 +8,8 @@ import {
   Dropdown,
   PageHeader,
   PageHeaderTitle,
-  Rail,
-  RailItem,
+  SidebarRail,
+  SidebarRailItem,
   ScrollArea,
   Select,
   SettingsBody,
@@ -504,8 +504,8 @@ const spaceActions = [
   <div class="h-screen w-full bg-surface-base text-ink-gray-9">
     <DesktopShell>
       <template #rail>
-        <Rail class="border-r">
-          <!-- Home is a bespoke button, not a RailItem: the Frappe logo fills
+        <SidebarRail class="border-r">
+          <!-- Home is a bespoke button, not a SidebarRailItem: the Frappe logo fills
                the whole cell and carries no tooltip of its own. -->
           <button
             type="button"
@@ -516,7 +516,7 @@ const spaceActions = [
           </button>
 
           <div class="flex w-full flex-1 flex-col items-center gap-3 pt-3">
-            <RailItem
+            <SidebarRailItem
               v-for="c in communities"
               :key="c.id"
               :label="c.name"
@@ -532,14 +532,14 @@ const spaceActions = [
                 shape="square"
                 class="size-7"
               />
-            </RailItem>
+            </SidebarRailItem>
           </div>
 
           <!-- Bottom cluster: extra gap keeps the utility items and account
                avatar from crowding each other at the foot of the rail. -->
           <div class="flex flex-col items-center gap-2.5">
-            <RailItem label="Search" variant="ghost" icon="lucide-search" />
-            <RailItem
+            <SidebarRailItem label="Search" variant="ghost" icon="lucide-search" />
+            <SidebarRailItem
               label="Settings"
               variant="ghost"
               icon="lucide-settings"
@@ -566,7 +566,7 @@ const spaceActions = [
               </template>
             </Dropdown>
           </div>
-        </Rail>
+        </SidebarRail>
       </template>
 
       <template #sidebar>
