@@ -10,9 +10,9 @@ Base for every branch: `main` @ `2d65281be8` (`v1.0.0-beta.62`).
 | Track | Branch | Worktree | Ticket | State |
 | --- | --- | --- | --- | --- |
 | Rail rename | `v1/rc-rail` | `~/Projects/worktrees/rc-rail` | #1116 | **done**, 5 commits, head `017c9acb97` |
-| Input scale + form typography | `v1/rc-inputs` | `~/Projects/worktrees/rc-inputs` | #1117, #1118 | running |
-| List responsive columns | `v1/rc-list` | `~/Projects/worktrees/rc-list` | #1097 | running |
-| Integration | `v1/rc-api` | to be created | #1029, #1091, #1098 | not started |
+| Input scale + form typography | `v1/rc-inputs` | `~/Projects/worktrees/rc-inputs` | #1117, #1118 | **done**, head `a576d0f4b0` |
+| List responsive columns | `v1/rc-list` | `~/Projects/worktrees/rc-list` | #1097 | **done**, head `37c7853adc` |
+| Integration | `v1/rc-api` | `~/Projects/worktrees/rc-integration` | #1029, #1091, #1098 | running |
 
 Charts (#1128) stays with Saqib and is out of this queue.
 
@@ -56,3 +56,65 @@ Carried forward to integration:
   boots as plain Node and fails to find its app bundle. Not a code problem.
 - `yarn docs:gen` reorders emit rows in `src/charts/docs/{Area,Bar,Line}Chart.api.md`. Pre-existing
   drift, `docs:check` ignores row order, so leave Saqib's files alone.
+
+## Inputs track result (done)
+
+Branch `v1/rc-inputs`, head `a576d0f4b0`, 57 files. Checkpoint: `v1-release/checkpoints/inputs.md`.
+
+Six declarations of the scale unified (`InputSize`, `SelectionSize`, `ItemListSize`, `ComboboxSize`,
+`MultiSelectSize`, Select's inline union). 13 class maps gained `xs` and lost `xl`. `FormControl.size`
+widened to the full scale, with an `lg` to `md` clamp for `type="checkbox"`, which renders on `ToggleSize`.
+Every size lookup now routes through the existing `resolvePropValue`, so a stale `xl` falls back to `sm`
+and warns once instead of shipping an element with no geometry classes.
+
+Verified: type-check clean, `yarn test` 102 files / 1674 tests, `docs:check` matches, 17 input-family
+Cypress specs 452/452. Measured in a real browser: 24/28/32/40px at xs/sm/md/lg bare, with prefix and
+suffix, and in dark. Textarea and every label and description are 13px at all four sizes.
+
+Contrast finding: the old `ink-gray-5` label and description measured 4.18:1 in both themes, a WCAG AA
+failure. The accepted `ink-gray-6` gives 7.80:1 light and 6.29:1 dark. The disabled description moved
+`ink-gray-3` to `ink-gray-4` to match the disabled label.
+
+Consumer census (full-source grep of 25 local bench checkouts plus complete tarball greps of 24 remote
+repositories, not `gh search code`): input `size="xl"` has **one** hit org-wide, a size-showcase story in
+`frappe/frappe`'s `@framework/ui`, and no product call sites. `FormLabel.size` has 31 sites (helpdesk 21,
+gameplan 4, books 3, suite 2, lms 1), every one the literal `size="md"` with no dynamic bindings, so the
+migration is deleting an attribute. Unverified: frappe private repositories, `canvas-kit`, `lending`, and
+all consumers outside the frappe organisation.
+
+Open, not fixed, out of D2/D3 scope: `TextInput`, `Textarea`, `Password` and `Rating` render
+`InputLabel` and `InputDescription` without passing `:disabled`, so a disabled stack field keeps a
+full-strength label, while the inline-row controls dim theirs. Both components already have the prop
+wired. Pre-existing. Worth deciding before the tag.
+
+## List track result (done)
+
+Branch `v1/rc-list`, head `37c7853adc`, base `1380a431d3`. Checkpoint: `v1-release/checkpoints/list.md`.
+
+`columns` now takes `{ base, <screen>... }` beside the array. Resolution is pure CSS: `List.vue` writes one
+inline carrier per supplied tier, and the new `tailwind/listColumns.js` reads the app's resolved
+`theme('screens')` and emits a per-root reset plus one ascending media rule per screen, each picking the
+highest supplied tier through a `var()` fallback chain down to `base`. The per-root reset is what makes
+every List own its template, including roots with no `columns`. The generated rules use bare attribute
+specificity rather than `:where()`, because in the dev build the package stylesheet's base tier lands
+after the media rules and would win on source order alone.
+
+Verified: Cypress `List.cy.ts` 33/33, `yarn test` 104 files / 1685 tests, type-check clean, `docs:check`
+matches. Also verified in the browser at 500 / 900 / 1440px (header and rows identical at every width,
+nested static list unaffected), template inference through a scratch SFC (missing `base` and a non-array
+tier both rejected), and an app-customized screens map built through postcss with `md: 900px,
+tablet: 850px`, which re-sorts correctly and lands the `md` tier in the same block as `.md:hidden`.
+
+**Decision taken by the maintainer, 2026-09-09:** remove the public `--list-columns` hook and the
+`list-cols-[...]` utility, and migrate the seven downstream call sites. Columns are prop-only; the resolved
+variable is internal. `--list-gap` and `--list-row-padding-x` stay public and inherited, with their
+utilities intact. ADR-0017 rules 3 to 6 and #1097's ancestor-override tests were rewritten to match.
+
+Downstream sites to migrate after this pull request lands (every hit is a `max-<screen>:` variant, so
+`max-md:list-cols-[X]` plus `:columns="[Y]"` becomes `:columns="{ base: [X], md: [Y] }"`):
+
+- `frappe/gameplan`: `Configure/CommunitySpacesList.vue`, `Configure/CommunityMembersList.vue`,
+  `Configure/CommunitiesList.vue`, `Configure/CommunityGuestsList.vue`
+- `frappe/wiki`: `pages/Overview.vue` (two), `components/ContributionsPanel.vue`
+
+No `[--list-columns:` usage was found. `gh search code` truncates silently, so treat seven as a floor.
