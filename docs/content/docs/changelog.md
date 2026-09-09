@@ -196,7 +196,10 @@ hide cells: pair it with matching visibility classes on the header and rows.
 The switch is plain CSS, generated from your app's own breakpoint values, so
 the tracks move with your `md:` utilities and the server-rendered markup is
 already correct — no viewport measurement, no resize listener, no first-paint
-flash. Arrays keep working exactly as before.
+flash. Arrays keep working exactly as before. A key can name any screen your
+config defines, not only a plain width: a `{ min, max }` screen gives a tier
+that ends where the screen ends, and `{ max }` and `{ raw }` screens work too.
+Each tier is live in exactly the same places as that screen's own variants.
 
 The list family's public CSS hooks for v1 are now exactly `--list-gap` and
 `--list-row-padding-x` (with the preset sugar `list-gap-*`, `list-row-px-*`).
@@ -217,7 +220,8 @@ The observable changes while freezing them:
   in the subtree.
 - **Internal vars are renamed with a `--_list` prefix** and are explicitly not
   API: `--list-columns-default` → `--_list-columns` (plus one
-  `--_list-columns-<breakpoint>` carrier per tier), `--list-checkbox-width` →
+  `--_list-columns-<breakpoint>` carrier per tier and one generated
+  `--_list-tier-<screen>`), `--list-checkbox-width` →
   `--_list-checkbox-width`, `--list-row-height` → `--_list-row-height`. None
   was documented; anything targeting the old names breaks. Row height is the
   `rowHeight` prop — overriding the var would desync `virtual` windowing, so it

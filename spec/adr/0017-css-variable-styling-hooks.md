@@ -53,12 +53,18 @@ section. Everything else is internal and carries a `--_<family>` prefix
    A knob that must vary by breakpoint stays a prop and gets a **carrier per
    breakpoint**. `columns` writes `--_list-columns-base`,
    `--_list-columns-md`, … inline; the Tailwind plugin reads the app's resolved
-   `theme('screens')` and generates the reset plus one `@media (min-width: …)`
-   rule per screen, each picking the highest supplied tier through a `var()`
-   fallback chain down to `base`. This is what lets a prop be responsive without
-   JS, and it is generated rather than shipped in the family's static
-   stylesheet because the breakpoint names and widths belong to the consuming
-   app. Generated rules use bare attribute specificity, because the source order
+   `theme('screens')` and generates the reset, plus one media rule per screen
+   that copies that screen's carrier into a `--_list-tier-<screen>` var. A
+   `var()` fallback chain on the root then picks the highest tier that is live,
+   down to `base`. Each rule carries the same media condition Tailwind's own
+   variant for that screen carries, so a tier is live exactly where that
+   screen's utilities are: a `{ min, max }` screen takes its tracks off where
+   it takes `md:hidden` off, and a `{ max }` or `{ raw }` screen works at all.
+   Outside its screen a tier is guaranteed-invalid, which is what lets a tier
+   end — the ladder is not assumed to be min-width only. This is what lets a
+   prop be responsive without JS, and it is generated rather than shipped in
+   the family's static stylesheet because the breakpoint names and widths
+   belong to the consuming app. Generated rules use bare attribute specificity, because the source order
    of a package stylesheet and the app's Tailwind base layer is not something
    either file can control (see rule 4).
 
@@ -132,7 +138,8 @@ generated media rules.
   contract.
 - `--list-columns`, `--list-columns-default`, `--list-checkbox-width` and
   `--list-row-height` are internal: `--_list-columns` (plus one
-  `--_list-columns-<breakpoint>` carrier per tier), `--_list-checkbox-width` and
+  `--_list-columns-<breakpoint>` carrier per tier and one generated
+  `--_list-tier-<screen>`), `--_list-checkbox-width` and
   `--_list-row-height`. Column templates come from the `columns` prop alone; row
   height is the `rowHeight` prop's job (rule 5).
 - Ancestor theming works uniformly for both hooks, and reaches nested lists in

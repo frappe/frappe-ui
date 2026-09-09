@@ -122,6 +122,13 @@ redefined moves the list's tracks and your `md:hidden` utilities together. That
 also means the server-rendered markup is already correct: there is no viewport
 measurement, no resize listener and no first-paint flash.
 
+A key names a screen, so every shape a Tailwind screen can take works, not only
+a plain width: a `{ min, max }` screen gives a tier that ends where the screen
+ends, a `{ max }` screen one that applies below a width, and a `{ raw }` screen
+one that applies wherever its query matches. In each case the tier is live in
+exactly the same places as that screen's own variants. Where two screens match
+at once, the tier that wins is the one whose utilities win.
+
 Changing the track count never hides a cell. Say that part explicitly, with
 matching classes on the header and the rows:
 

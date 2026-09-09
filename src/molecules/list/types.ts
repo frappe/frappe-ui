@@ -8,7 +8,9 @@ export type ListSortDirection = 'asc' | 'desc'
  * from zero width up; every other key names a breakpoint from the app's
  * Tailwind `screens` and applies from that viewport width upward, until the
  * next supplied breakpoint. `sm` / `md` / `lg` / `xl` are the preset's own
- * names — an app with custom screens uses its own.
+ * names — an app with custom screens uses its own. A screen that is not a
+ * plain width (a `{ min, max }` band, a `{ max }` ceiling, a `{ raw }` query)
+ * gives a tier that is live wherever that screen's own variants are live.
  *
  * Each value replaces the whole template. Arrays are never merged track by
  * track, so a breakpoint may change the track count as well as the widths.
