@@ -42,7 +42,7 @@ export interface CodeEditorProps extends InputLabelingProps {
   variant?: Exclude<InputVariant, 'ghost'>
   /**
    * Size token, mirroring frappe-ui inputs. Scales the editor's font size and
-   * minimum height (`sm | md | lg | xl`). Defaults to `md`.
+   * minimum height (`xs | sm | md | lg`). Defaults to `md`.
    */
   size?: InputSize
 }

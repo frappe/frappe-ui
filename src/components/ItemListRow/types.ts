@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 
-export type ItemListSize = 'sm' | 'md' | 'lg' | 'xl'
+export type ItemListSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export interface ItemListRowProps {
   /** Element tag or component used for the row wrapper. */

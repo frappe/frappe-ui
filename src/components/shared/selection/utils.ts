@@ -1,4 +1,5 @@
 import type { ItemListSize } from '../../ItemListRow'
+import { resolvePropValue } from '../../../utils/resolvePropValue'
 
 /**
  * Shared helpers for the Select / MultiSelect / Combobox component family.
@@ -8,34 +9,50 @@ import type { ItemListSize } from '../../ItemListRow'
  * the pieces that were proven duplicates across at least two of those files.
  */
 
-export type SelectionSize = 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * Trigger size scale for the selection family. Mirrors `InputSize` value for
+ * value — the trigger is a text input in every way but the caret — so the
+ * heights are the same 24/28/32/40px. Kept as its own name because the
+ * selection components' public types reference it directly.
+ */
+export type SelectionSize = 'xs' | 'sm' | 'md' | 'lg'
 export type SelectionVariant = 'subtle' | 'outline' | 'ghost'
 
+const SIZE_FALLBACK = 'sm'
+const triggerContext = { component: 'Selection trigger', prop: 'size' }
+const itemContext = { component: 'Selection item', prop: 'size' }
+
+const triggerSizeMap: Record<SelectionSize, string> = {
+  xs: 'min-h-6 rounded-3 px-1.5',
+  sm: 'min-h-7 rounded-4 px-2',
+  md: 'min-h-8 rounded-4 px-2.5',
+  lg: 'min-h-10 rounded-5 px-3',
+}
+
+const inputFontSizeMap: Record<SelectionSize, string> = {
+  xs: 'text-xs',
+  sm: 'text-base',
+  md: 'text-base',
+  lg: 'text-lg',
+}
+
+const itemRootSizeMap: Record<SelectionSize, string> = {
+  xs: 'min-h-6',
+  sm: 'min-h-7',
+  md: 'min-h-8',
+  lg: 'min-h-10',
+}
+
 export function triggerSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'min-h-7 rounded-4 px-2',
-    md: 'min-h-8 rounded-4 px-2.5',
-    lg: 'min-h-10 rounded-5 px-3',
-    xl: 'min-h-10 rounded-5 px-3',
-  }[size]
+  return resolvePropValue(triggerSizeMap, size, SIZE_FALLBACK, triggerContext)
 }
 
 export function inputFontSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-2xl',
-  }[size]
+  return resolvePropValue(inputFontSizeMap, size, SIZE_FALLBACK, triggerContext)
 }
 
 export function itemRootSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'min-h-7',
-    md: 'min-h-8',
-    lg: 'min-h-10',
-    xl: 'min-h-10',
-  }[size]
+  return resolvePropValue(itemRootSizeMap, size, SIZE_FALLBACK, itemContext)
 }
 
 export function toItemListSize(size: SelectionSize): ItemListSize {

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { hasRenderableContent } from '../../utils/vnode'
-import type { ItemListRowProps } from './types'
+import { resolvePropValue } from '../../utils/resolvePropValue'
+import type { ItemListRowProps, ItemListSize } from './types'
 
 const props = withDefaults(defineProps<ItemListRowProps>(), {
   as: 'div',
@@ -15,13 +16,18 @@ const isEmphasized = computed(() => {
   return props.active || props.selected
 })
 
+const sizeClassMap: Record<ItemListSize, string> = {
+  xs: 'min-h-6 px-1.5 py-1 text-xs',
+  sm: 'min-h-7 px-2 py-1.5 text-base',
+  md: 'min-h-8 px-2.5 py-1.5 text-base',
+  lg: 'min-h-10 px-3 py-2 text-lg',
+}
+
 const sizeClasses = computed(() => {
-  return {
-    sm: 'min-h-7 px-2 py-1.5 text-base',
-    md: 'min-h-8 px-2.5 py-1.5 text-base',
-    lg: 'min-h-10 px-3 py-2 text-lg',
-    xl: 'min-h-10 px-3 py-2 text-2xl',
-  }[props.size]
+  return resolvePropValue(sizeClassMap, props.size, 'sm', {
+    component: 'ItemListRow',
+    prop: 'size',
+  })
 })
 
 const stateClasses = computed(() => {

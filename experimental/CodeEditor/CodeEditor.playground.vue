@@ -43,10 +43,10 @@ const knobs: Knob[] = [
     type: 'tabs',
     default: 'md',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   { name: 'placeholder', type: 'text', default: '', width: '12rem' },
