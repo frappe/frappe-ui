@@ -29,6 +29,9 @@ per the decision, not the issue.
 | `af43176e6d` | `test(inputs): assert computed geometry for the xs/sm/md/lg scale` |
 | `3ed7d7753d` | `docs(inputs)!: document the xs/sm/md/lg scale and fixed form typography` |
 | `7f54247bd4` | `fix(inputs): report a stale input size once, naming the family` |
+| `6799e29830` | `docs(v1-release): record inputs track results, consumer census and open questions` |
+| `f27d68c8d0` | `chore: untrack the RC handoff drafts` |
+| _(pending)_ | this checkpoint update |
 
 ## Done
 
