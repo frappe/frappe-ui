@@ -13,7 +13,8 @@ Commits on the branch:
 
 - `47567d9b91` `refactor(rail)!: rename Rail to SidebarRail and RailItem to SidebarRailItem`
 - `439a4dfb8b` `docs(rail): record the SidebarRail rename and its styling-hook break`
-- this checkpoint
+- `bacc02bdc5` this checkpoint
+- `2163022fcc` `docs(tabs): point the focus-ring comment at the renamed SidebarRailItem`
 
 ## What changed
 
@@ -103,6 +104,7 @@ Run from `/Users/netchampfaris/Projects/worktrees/rc-rail`.
 | `yarn test src/composables/usePortalTarget.spec.ts` | `Test Files 1 passed (1)`, `Tests 10 passed (10)` |
 | `env -u ELECTRON_RUN_AS_NODE ./node_modules/.bin/cypress run --component --spec src/components/SidebarRail/SidebarRail.cy.ts --config video=false` | `All specs passed! 7 7 - - -` |
 | `env -u ELECTRON_RUN_AS_NODE ./node_modules/.bin/cypress run --component --spec src/components/DesktopShell/DesktopShell.cy.ts --config video=false` | `All specs passed! 3 3 - - -` |
+| `yarn test` (full vitest suite) | `Test Files 102 passed (102)`, `Tests 1670 passed (1670)` |
 
 Note for whoever runs Cypress next: plain `yarn cypress run` fails in this
 agent environment with `Cannot find module .../Cypress.app/Contents/MacOS/Contents/Resources/app/index.js`.
