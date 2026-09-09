@@ -57,13 +57,13 @@
   const slotsData = [
   {
     name: 'prefix',
-    description: '',
-    type: '{ button: { value: TabValue; visibleLabel: boolean; accessibleLabel: string | undefined; label?: str'
+    description: 'Slot before the tab button label.',
+    type: '{ button: TabButton; checked: boolean; disabled: boolean; }'
   },
   {
     name: 'suffix',
-    description: '',
-    type: '{ button: { value: TabValue; visibleLabel: boolean; accessibleLabel: string | undefined; label?: str'
+    description: 'Slot after the tab button label.',
+    type: '{ button: TabButton; checked: boolean; disabled: boolean; }'
   }
 ]
 

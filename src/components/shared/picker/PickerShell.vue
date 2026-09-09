@@ -3,39 +3,38 @@
     <PopoverAnchor :reference="anchorEl" as-child>
       <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
-            <TextInput
-              ref="textInputRef"
-              v-model="inputValue"
-              type="text"
-              :class="inputClass"
-              :id="id"
-              :label="label"
-              :description="description"
-              :error="error"
-              :required="required"
-              :size="size"
-              :variant="variant"
-              :placeholder="placeholder"
-              :disabled="disabled"
-              :readonly="readonly"
-              @focus="onFocus"
-              @click="onClick"
-              @blur="onBlur"
-              @keydown.enter.prevent="onEnter"
-            >
-              <template v-if="$slots.prefix" #prefix>
-                <slot name="prefix" v-bind="triggerSlotProps" />
-              </template>
-              <template #suffix>
-                <slot name="suffix" v-bind="triggerSlotProps">
-                  <LucideChevronDown
-                    class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="toggle"
-                  />
-                </slot>
-              </template>
-            </TextInput>
-          </slot>
+          <TextInput
+            ref="textInputRef"
+            v-model="inputValue"
+            type="text"
+            :class="inputClass"
+            :id="id"
+            :label="label"
+            :description="description"
+            :error="error"
+            :required="required"
+            :size="size"
+            :variant="variant"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :readonly="readonly"
+            @focus="onFocus"
+            @click="onClick"
+            @blur="onBlur"
+            @keydown.enter.prevent="onEnter"
+          >
+            <template v-if="$slots.prefix" #prefix>
+              <slot name="prefix" v-bind="triggerSlotProps" />
+            </template>
+            <template #suffix>
+              <slot name="suffix" v-bind="triggerSlotProps">
+                <LucideChevronDown
+                  class="h-4 w-4 cursor-pointer"
+                  @mousedown.prevent="toggle"
+                />
+              </slot>
+            </template>
+          </TextInput>
         </slot>
       </div>
     </PopoverAnchor>

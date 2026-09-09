@@ -100,12 +100,8 @@ defineSlots<{
   empty: () => unknown
 }>()
 
-/**
- * Expand/collapse-all switch. Toggling it writes that value into every node's
- * `expanded` field. Two-way: it also reflects whether all collapsible nodes are
- * currently open, so a bound button stays in sync. Per-node state lives on the
- * nodes themselves (`node.expanded`).
- */
+// Documented on `expanded` in `./types.ts`. A JSDoc block here would be
+// appended to that description by `propsgen`, not replace it.
 const expanded = defineModel<boolean>('expanded', { default: false })
 
 const treeRef = ref<HTMLElement | null>(null)

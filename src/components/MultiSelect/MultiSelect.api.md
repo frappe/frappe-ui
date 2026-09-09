@@ -239,7 +239,7 @@
   },
   {
     name: 'update:query',
-    description: 'Fired when the search query changes.',
+    description: 'Fired when the query changes.',
     type: '[value: string]'
   },
   {
