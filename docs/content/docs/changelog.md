@@ -81,6 +81,72 @@ day.
   `24:00:00`.
 - Full-day events (`isFullDay`) cover `fromDate`..`toDate` whole; their
   times are ignored.
+### `frappe-ui/list` — responsive columns, and the CSS hook contract frozen (breaking)
+
+`List.columns` now takes a breakpoint object as well as a plain array:
+
+```vue
+<List
+  :columns="{
+    base: ['minmax(0,1fr)', '80px', '64px'],
+    md: ['minmax(0,1fr)', '140px', '100px'],
+    lg: ['minmax(0,2fr)', '180px', '120px'],
+  }"
+>
+```
+
+`base` is required and applies from zero width. Every other key names a
+breakpoint from your own Tailwind `screens` and applies from that width upward
+until the next supplied one, so an omitted breakpoint keeps the template below
+it. Each value replaces the whole template — nothing is merged track by track,
+so a breakpoint can change the track count too. Changing the count does not
+hide cells: pair it with matching visibility classes on the header and rows.
+
+The switch is plain CSS, generated from your app's own breakpoint values, so
+the tracks move with your `md:` utilities and the server-rendered markup is
+already correct — no viewport measurement, no resize listener, no first-paint
+flash. Arrays keep working exactly as before.
+
+The list family's public CSS hooks for v1 are now exactly `--list-gap` and
+`--list-row-padding-x` (with the preset sugar `list-gap-*`, `list-row-px-*`).
+The observable changes while freezing them:
+
+- **`--list-columns` and `list-cols-[…]` are gone.** Column templates come from
+  the `columns` prop, which now covers the responsive case the hook existed
+  for. Replace `class="max-sm:list-cols-[auto_minmax(0,1fr)_auto]"` with a
+  `base` tier in the prop. The var is internal (`--_list-columns`) and setting
+  it by hand is unsupported.
+- **Every `List` owns its columns.** A wrapper's `--list-columns` used to
+  override a nested list's own `columns` prop, with `[--list-columns:initial]`
+  as the opt-out. Nested lists now always keep their own template, or the
+  default feed template when they set none. Drop any `[--list-columns:initial]`
+  opt-outs; they are no longer needed.
+- **Both remaining hooks work from any ancestor.** They resolve through `var()`
+  fallbacks at the use site, so one declaration on a wrapper themes every list
+  in the subtree.
+- **Internal vars are renamed with a `--_list` prefix** and are explicitly not
+  API: `--list-columns-default` → `--_list-columns` (plus one
+  `--_list-columns-<breakpoint>` carrier per tier), `--list-checkbox-width` →
+  `--_list-checkbox-width`, `--list-row-height` → `--_list-row-height`. None
+  was documented; anything targeting the old names breaks. Row height is the
+  `rowHeight` prop — overriding the var would desync `virtual` windowing, so it
+  is deliberately not a hook, and it stays one number at every width.
+- **Internal carriers reset at every `List`.** A list nested inside another
+  list no longer inherits the outer list's `columns` template, checkbox inset,
+  or `rowHeight` when it doesn't set those props itself (pre-existing leak,
+  fixed while freezing).
+- **`--list-row-padding-x` now reaches static rows too.** Previously only
+  interactive rows and the header took the hook, so a static table with a
+  header drifted apart when it was set; now one declared value lands on every
+  row and the header. Unset defaults are unchanged (interactive rows
+  `0.75rem`, everything else flush).
+
+Responsive columns need the frappe-ui Tailwind preset, which is what knows your
+breakpoints. Without it a breakpoint object falls back to its `base` tier at
+every width.
+
+The conventions behind this (and for every future component with CSS hooks)
+are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
 
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Avatar, Button } from 'frappe-ui'
+import { Avatar } from 'frappe-ui'
 import {
   List,
   ListRow,
   ListCell,
   ListHeader,
-  ListHeaderCell,
   ListHeaderCellSort,
   ListRows,
 } from 'frappe-ui/list'
@@ -18,6 +17,8 @@ const members = [
   { name: 'Terry Jeffords', email: 'terry@example.com', role: 'Member', since: '2023-03' },
   { name: 'Raymond Holt', email: 'holt@example.com', role: 'Guest', since: '2024-08' },
 ]
+
+const activeMember = ref<string | undefined>('Rosa Diaz')
 
 // Sort state, toggle rules, comparator, and direction icons are all app
 // code — the header cells only render the chrome for whatever `direction`
@@ -53,7 +54,16 @@ const sortedMembers = computed(() => {
 </script>
 
 <template>
-  <List class="w-full" :columns="['minmax(0,1fr)', '7rem', '8rem', '3rem']" :row-height="56">
+  <!-- v-model:active makes the rows clickable, and clickable rows carry a
+       0.75rem hover-surface inset. `list-row-px-3` hands the header the same
+       inset, so its labels stay aligned with the cell text below them — the
+       canonical pairing for a column-mode list with interactive rows. -->
+  <List
+    v-model:active="activeMember"
+    class="w-full list-row-px-3"
+    :columns="['minmax(0,1fr)', '7rem', '8rem']"
+    :row-height="56"
+  >
     <ListHeader>
       <ListHeaderCellSort :direction="directionFor('name')" @click="toggleSort('name')">
         Member
@@ -77,10 +87,9 @@ const sortedMembers = computed(() => {
           <span class="block size-3.5" :class="sortIcon(direction)" />
         </template>
       </ListHeaderCellSort>
-      <ListHeaderCell />
     </ListHeader>
-    <ListRows :items="sortedMembers" v-slot="{ item: member }">
-      <ListRow>
+    <ListRows :items="sortedMembers" v-slot="{ item: member, value }">
+      <ListRow :value="value">
         <ListCell>
           <Avatar :label="member.name" size="xl" />
           <div class="ml-3 min-w-0">
@@ -93,9 +102,6 @@ const sortedMembers = computed(() => {
         </ListCell>
         <ListCell class="justify-end">
           <span class="text-base text-ink-gray-6">{{ member.since }}</span>
-        </ListCell>
-        <ListCell class="justify-end">
-          <Button variant="ghost" icon="lucide-trash-2" label="Remove member" />
         </ListCell>
       </ListRow>
     </ListRows>

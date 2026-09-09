@@ -3,15 +3,49 @@ import type { RouteLocationRaw } from 'vue-router'
 export type ListDivider = 'inset' | 'full' | 'none'
 export type ListSortDirection = 'asc' | 'desc'
 
+/**
+ * One complete track template per breakpoint. `base` is required and applies
+ * from zero width up; every other key names a breakpoint from the app's
+ * Tailwind `screens` and applies from that viewport width upward, until the
+ * next supplied breakpoint. `sm` / `md` / `lg` / `xl` are the preset's own
+ * names — an app with custom screens uses its own.
+ *
+ * Each value replaces the whole template. Arrays are never merged track by
+ * track, so a breakpoint may change the track count as well as the widths.
+ */
+export interface ListColumnsByBreakpoint {
+  /** Applies from zero width, up to the smallest supplied breakpoint. */
+  base: string[]
+  sm?: string[]
+  md?: string[]
+  lg?: string[]
+  xl?: string[]
+  [breakpoint: string]: string[] | undefined
+}
+
+/**
+ * `columns` in either form: one template for every width, or one template per
+ * breakpoint.
+ */
+export type ListColumns = string[] | ListColumnsByBreakpoint
+
 export interface ListProps {
   /**
-   * Grid track sizes, written to the `--list-columns` CSS var shared by the
-   * header and every row. Defaults to the feed template
-   * `['auto', 'minmax(0,1fr)', 'auto']` (leading media, content, trailing).
-   * Table-style lists must pass deterministic track sizes — `auto` tracks
-   * size independently per row.
+   * Grid track sizes shared by the header and every row. Defaults to the feed
+   * template `['auto', 'minmax(0,1fr)', 'auto']` (leading media, content,
+   * trailing). Table-style lists must pass deterministic track sizes — `auto`
+   * tracks size independently per row, so independent row grids can't agree.
+   *
+   * Pass an array for one template at every width, or an object keyed by
+   * breakpoint for a template that changes with the viewport:
+   * `{ base: ['minmax(0,1fr)', '80px'], md: ['minmax(0,2fr)', '140px', '100px'] }`.
+   * `base` is required, each breakpoint replaces the whole template, and an
+   * omitted breakpoint keeps the one below it. Breakpoints are the consuming
+   * app's own Tailwind `screens`, resolved in CSS — so `md` here and `md:hidden`
+   * on a cell switch at the same width. Changing the track count never hides a
+   * cell: pair it with matching visibility classes on the header and the rows.
    */
-  columns?: string[]
+  columns?: ListColumns
 
   /**
    * Divider treatment between rows: `inset` starts at the content column
@@ -32,9 +66,9 @@ export interface ListProps {
   // styles it and hides the dividers hugging it). See List.vue.
 
   /**
-   * Fixed row height in px (sets `--list-row-height`). Required for
-   * virtualization; without it rows size to their content. Responsive
-   * heights are non-virtual — set them with classes on the rows instead.
+   * Fixed row height in px. Required for virtualization; without it rows size
+   * to their content. Responsive heights are non-virtual — set them with
+   * height classes on the rows instead.
    */
   rowHeight?: number
 }

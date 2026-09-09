@@ -7,9 +7,9 @@
   const listProps = [
   {
     name: 'columns',
-    description: 'Grid track sizes, written to the `--list-columns` CSS var shared by the\nheader and every row. Defaults to the feed template\n`[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content, trailing).\nTable-style lists must pass deterministic track sizes — `auto` tracks\nsize independently per row.',
+    description: 'Grid track sizes shared by the header and every row. Defaults to the feed\ntemplate `[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content,\ntrailing). Table-style lists must pass deterministic track sizes — `auto`\ntracks size independently per row, so independent row grids can\'t agree.\n\nPass an array for one template at every width, or an object keyed by\nbreakpoint for a template that changes with the viewport:\n`{ base: [\'minmax(0,1fr)\', \'80px\'], md: [\'minmax(0,2fr)\', \'140px\', \'100px\'] }`.\n`base` is required, each breakpoint replaces the whole template, and an\nomitted breakpoint keeps the one below it. Breakpoints are the consuming\napp\'s own Tailwind `screens`, resolved in CSS — so `md` here and `md:hidden`\non a cell switch at the same width. Changing the track count never hides a\ncell: pair it with matching visibility classes on the header and the rows.',
     required: false,
-    type: 'string[]'
+    type: 'ListColumns'
   },
   {
     name: 'divider',
@@ -25,7 +25,7 @@
   },
   {
     name: 'rowHeight',
-    description: 'Fixed row height in px (sets `--list-row-height`). Required for\nvirtualization; without it rows size to their content. Responsive\nheights are non-virtual — set them with classes on the rows instead.',
+    description: 'Fixed row height in px. Required for virtualization; without it rows size\nto their content. Responsive heights are non-virtual — set them with\nheight classes on the rows instead.',
     required: false,
     type: 'number'
   },
