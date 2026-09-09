@@ -39,9 +39,11 @@ const activatable = computed(
 const hasHeader = ref(false)
 
 const style = computed(() => ({
-  ...(props.columns ? { '--list-columns-default': props.columns.join(' ') } : {}),
-  ...(props.selectable ? { '--list-checkbox-width': '32px' } : {}),
-  ...(props.rowHeight ? { '--list-row-height': `${props.rowHeight}px` } : {}),
+  ...(props.columns
+    ? { '--_list-columns-default': props.columns.join(' ') }
+    : {}),
+  ...(props.selectable ? { '--_list-checkbox-width': '32px' } : {}),
+  ...(props.rowHeight ? { '--_list-row-height': `${props.rowHeight}px` } : {}),
 }))
 
 function isSelected(value: string) {

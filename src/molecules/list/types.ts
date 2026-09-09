@@ -5,11 +5,11 @@ export type ListSortDirection = 'asc' | 'desc'
 
 export interface ListProps {
   /**
-   * Grid track sizes, written to the `--list-columns` CSS var shared by the
-   * header and every row. Defaults to the feed template
-   * `['auto', 'minmax(0,1fr)', 'auto']` (leading media, content, trailing).
-   * Table-style lists must pass deterministic track sizes — `auto` tracks
-   * size independently per row.
+   * Grid track sizes shared by the header and every row. Defaults to the feed
+   * template `['auto', 'minmax(0,1fr)', 'auto']` (leading media, content,
+   * trailing). Table-style lists must pass deterministic track sizes — `auto`
+   * tracks size independently per row. The `--list-columns` styling hook
+   * overrides this per breakpoint: a consumer class always beats the prop.
    */
   columns?: string[]
 
@@ -32,9 +32,9 @@ export interface ListProps {
   // styles it and hides the dividers hugging it). See List.vue.
 
   /**
-   * Fixed row height in px (sets `--list-row-height`). Required for
-   * virtualization; without it rows size to their content. Responsive
-   * heights are non-virtual — set them with classes on the rows instead.
+   * Fixed row height in px. Required for virtualization; without it rows size
+   * to their content. Responsive heights are non-virtual — set them with
+   * height classes on the rows instead.
    */
   rowHeight?: number
 }

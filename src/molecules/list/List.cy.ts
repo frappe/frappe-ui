@@ -590,6 +590,235 @@ describe('List (column mode)', () => {
   })
 })
 
+describe('List (styling hooks)', () => {
+  // The v1 CSS-var contract (ADR-0017): --list-columns, --list-gap and
+  // --list-row-padding-x are the public hooks. Defaults live in var()
+  // fallbacks at the use sites, so a consumer value — a class on the List or
+  // a declaration inherited from any ancestor — always beats the built-in
+  // defaults AND the props.
+
+  it('lets a --list-columns class beat the columns prop', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['50px', '50px', '50px'],
+            // The tailwind arbitrary-property form consumers author
+            // (list-cols-[…] compiles to the same declaration).
+            class: '[--list-columns:60px_90px_120px]',
+          },
+          () => [feedRow('1')],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+        '60px 90px 120px',
+      )
+    })
+  })
+
+  it('applies hooks inherited from an ancestor, over props and defaults', () => {
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style:
+              '--list-columns: 70px 110px 130px; --list-gap: 20px; --list-row-padding-x: 24px',
+          },
+          [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListHeader, () => [
+                h(ListHeaderCell, () => 'A'),
+                h(ListHeaderCell, () => 'B'),
+                h(ListHeaderCell, () => 'C'),
+              ]),
+              feedRow('1', { onClick: () => {} }),
+              feedRow('2'),
+            ]),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      const style = getComputedStyle($row[0])
+      expect(style.gridTemplateColumns).to.equal('70px 110px 130px')
+      expect(style.columnGap).to.equal('20px')
+    })
+    // One --list-row-padding-x value lands everywhere — interactive row,
+    // static row, and header — so none of them can drift.
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+  })
+
+  it('defaults the row inset to 12px and the header to flush until the hook is set', () => {
+    // The documented asymmetric default: interactive rows carry a 0.75rem
+    // hover-surface inset; static rows and the header (which can't know
+    // whether its rows are interactive) stay flush at 0 — the consumer aligns
+    // everything by declaring the hook once.
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(ListHeaderCell, () => 'A'),
+            h(ListHeaderCell, () => 'B'),
+            h(ListHeaderCell, () => 'C'),
+          ]),
+          feedRow('1', { onClick: () => {} }),
+          feedRow('2'),
+        ]),
+    })
+    // Also pins the preflight escape: the interactive row is a <button>, and
+    // preflight's `button { padding: 0 }` must not eat the inset (the padding
+    // rule deliberately keeps attribute specificity instead of :where()).
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+  })
+
+  it('drives the preset sugar utilities through the same vars', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['minmax(0,1fr)', '10rem'],
+            // list-gap-4 → --list-gap: 1rem; list-row-px-3 → 0.75rem.
+            class: 'list-gap-4 list-row-px-3',
+          },
+          () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+            ]),
+            feedRow('1', { onClick: () => {} }),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]')
+      .should('have.css', 'column-gap', '16px')
+      .and('have.css', 'padding-inline-start', '12px')
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+  })
+
+  it('applies rowHeight to every row', () => {
+    cy.mount({
+      render: () => h(List, { rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+  })
+
+  it('lets an ancestor hook override a descendant List columns prop, with initial as the opt-out', () => {
+    // The sharp edge of ancestor theming: a wrapper's --list-columns beats a
+    // descendant List's own `columns` prop (hooks beat props, wherever the
+    // hook comes from). `[--list-columns:initial]` on a list severs the
+    // inherited value — initial is the guaranteed-invalid value, so the
+    // use-site fallback chain falls through to that list's own prop carrier.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-columns: 90px 90px 90px' }, [
+          h(List, { columns: ['50px', '50px', '50px'] }, () => [
+            feedRow('themed'),
+          ]),
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              class: '[--list-columns:initial]',
+            },
+            () => [feedRow('optout')],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list]')
+      .eq(0)
+      .find('[data-slot=list-row]')
+      .should(($row) => {
+        expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+          '90px 90px 90px',
+        )
+      })
+    cy.get('[data-slot=list]')
+      .eq(1)
+      .find('[data-slot=list-row]')
+      .should(($row) => {
+        expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+          '50px 50px 50px',
+        )
+      })
+  })
+
+  it('contains prop carriers to their own list; public hooks cross into nested lists', () => {
+    // The outer list's columns/selectable/rowHeight ride internal --_list-*
+    // carriers, which reset at every list root — a nested list that omits
+    // those props falls back to its own defaults instead of inheriting the
+    // outer geometry. Public hooks (--list-gap here) keep crossing by design.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-gap: 20px' }, [
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              selectable: true,
+              rowHeight: 64,
+            },
+            () => [
+              feedRow('1'),
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list] [data-slot=list] [data-slot=list-row]').should(
+      ($row) => {
+        const style = getComputedStyle($row[0])
+        // Feed template, not the outer 50px tracks.
+        expect(style.gridTemplateColumns).to.not.equal('50px 50px 50px')
+        // No leaked checkbox column (32px) and no hover inset inherited from
+        // the outer selectable list or its interactive host row.
+        expect(style.paddingInlineStart).to.equal('0px')
+        expect(style.paddingInlineEnd).to.equal('0px')
+        // Not the outer fixed rowHeight.
+        expect(style.height).to.not.equal('64px')
+        // The public hook crossed both list boundaries.
+        expect(style.columnGap).to.equal('20px')
+      },
+    )
+  })
+})
+
 describe('ListRows (virtual)', () => {
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))

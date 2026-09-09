@@ -7,7 +7,7 @@
   const listProps = [
   {
     name: 'columns',
-    description: 'Grid track sizes, written to the `--list-columns` CSS var shared by the\nheader and every row. Defaults to the feed template\n`[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content, trailing).\nTable-style lists must pass deterministic track sizes — `auto` tracks\nsize independently per row.',
+    description: 'Grid track sizes shared by the header and every row. Defaults to the feed\ntemplate `[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content,\ntrailing). Table-style lists must pass deterministic track sizes — `auto`\ntracks size independently per row. The `--list-columns` styling hook\noverrides this per breakpoint: a consumer class always beats the prop.',
     required: false,
     type: 'string[]'
   },
@@ -25,7 +25,7 @@
   },
   {
     name: 'rowHeight',
-    description: 'Fixed row height in px (sets `--list-row-height`). Required for\nvirtualization; without it rows size to their content. Responsive\nheights are non-virtual — set them with classes on the rows instead.',
+    description: 'Fixed row height in px. Required for virtualization; without it rows size\nto their content. Responsive heights are non-virtual — set them with\nheight classes on the rows instead.',
     required: false,
     type: 'number'
   },

@@ -3,7 +3,8 @@ import type { ListDivider } from './types'
 
 // Everything a List provides to its descendants. Internal — the public
 // contract is the components' props/models and the CSS hooks
-// (`--list-columns`, `--list-gap`, data-slot/data-state attributes).
+// (`--list-columns`, `--list-gap`, `--list-row-padding-x`, data-slot/
+// data-state attributes).
 export interface ListContext {
   divider: ComputedRef<ListDivider>
   selectable: ComputedRef<boolean>
