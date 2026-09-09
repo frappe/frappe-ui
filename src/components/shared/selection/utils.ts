@@ -19,8 +19,17 @@ export type SelectionSize = 'xs' | 'sm' | 'md' | 'lg'
 export type SelectionVariant = 'subtle' | 'outline' | 'ghost'
 
 const SIZE_FALLBACK = 'sm'
-const triggerContext = { component: 'Selection trigger', prop: 'size' }
-const itemContext = { component: 'Selection item', prop: 'size' }
+
+// One context for the whole family, deliberately. `resolvePropValue` dedupes
+// on `component.prop=value`, so a single `<Select size="xl">` — which hits the
+// trigger map, the font map, the item map and then `ItemListRow` — reports the
+// stale value once instead of four times. The name is the family rather than
+// the component because these helpers are shared and exported; naming the
+// caller would mean a new parameter on public API.
+const sizeContext = {
+  component: 'Select / Combobox / MultiSelect',
+  prop: 'size',
+}
 
 const triggerSizeMap: Record<SelectionSize, string> = {
   xs: 'min-h-6 rounded-3 px-1.5',
@@ -44,19 +53,34 @@ const itemRootSizeMap: Record<SelectionSize, string> = {
 }
 
 export function triggerSizeClasses(size: SelectionSize) {
-  return resolvePropValue(triggerSizeMap, size, SIZE_FALLBACK, triggerContext)
+  return resolvePropValue(triggerSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function inputFontSizeClasses(size: SelectionSize) {
-  return resolvePropValue(inputFontSizeMap, size, SIZE_FALLBACK, triggerContext)
+  return resolvePropValue(inputFontSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function itemRootSizeClasses(size: SelectionSize) {
-  return resolvePropValue(itemRootSizeMap, size, SIZE_FALLBACK, itemContext)
+  return resolvePropValue(itemRootSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function toItemListSize(size: SelectionSize): ItemListSize {
-  return size
+  // Resolve here rather than forwarding the raw value: `ItemListRow` has the
+  // same scale and the same fallback, so passing an unsupported size straight
+  // through would make it warn a second time about the same call site.
+  return resolvePropValue(
+    itemListSizePassthrough,
+    size,
+    SIZE_FALLBACK,
+    sizeContext,
+  )
+}
+
+const itemListSizePassthrough: Record<SelectionSize, ItemListSize> = {
+  xs: 'xs',
+  sm: 'sm',
+  md: 'md',
+  lg: 'lg',
 }
 
 export function triggerVariantClasses(
