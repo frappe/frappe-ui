@@ -16,7 +16,7 @@
   >
     <template #trigger>
       <div
-        class="calendar-row flex w-full items-baseline gap-2.5 px-3.5 py-2 text-left"
+        class="calendar-row flex w-full items-baseline gap-2.5 px-3.5 py-2.5 text-left"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
           past: isPast,
@@ -30,9 +30,9 @@
         @keydown.enter.prevent="onKeydown($event)"
         @keydown.space.prevent="onKeydown($event)"
       >
-        <!-- The time, in a column of its own against the card's left edge: the
-             bars line up under each other whatever each row's label says, which
-             is what makes a card read as a day rather than as three sentences.
+        <!-- The time, in a column of its own against the day's left edge: the
+             dots line up under each other whatever each row's label says, which
+             is what makes a day read as a day rather than as three sentences.
 
              132px holds the widest label ("11:30 am – 12:45 pm", 128px). A
              column sized to the common "2:30 – 3:30 pm" would let that one
@@ -42,13 +42,21 @@
         >
           {{ timeLabel }}
         </span>
-        <!-- 3px, not the 2 a pill's border takes: a row carries no fill, so the
-             bar is the only colour on it and the only thing placing the event
-             on a calendar. It is that width whether or not the row is the open
-             one — a mark that thickens on click is a mark the reader has to
-             have seen thin to read as thick. -->
+        <!-- A dot, not a bar down the row's height: a row carries no fill, so
+             this is the only colour on it and the only thing placing the event
+             on a calendar, and a mark that says which calendar is a mark, not a
+             measure. Ruled the full height it read as an edge — a second rule
+             beside the gutter's, cutting the time off from the title it
+             belongs to.
+
+             8px, centred on the line rather than stretched to it: smaller and
+             the colour stopped reading as a colour — a dot is only as good as
+             the calendar a reader can name from it. It is that size whether or
+             not the row is the open one — a mark that grows on
+             click is a mark the reader has to have seen small to read as
+             large. -->
         <span
-          class="calendar-row-bar w-[3px] shrink-0 self-stretch rounded-4"
+          class="calendar-row-dot size-2 shrink-0 self-center rounded-full"
         />
         <!-- Title, then what the row can add about it, on one line: a row is
              wide and a title is short, so a second line spends the height of
@@ -78,16 +86,13 @@
               {{ description }}
             </slot>
           </span>
+          <!-- Nothing of the library's own goes here — the slot is where a
+               consumer's tags go. The one tag a row used to derive said
+               "Draft", which the dot beside the title already says by being a
+               ring rather than a disc; a word for it as well spent the row's
+               most valuable end on something the row had said at its other. -->
           <span class="flex shrink-0 items-center gap-1">
-            <slot name="event-suffix" v-bind="slotProps">
-              <Badge
-                v-for="tag in tags"
-                :key="tag.label"
-                :theme="tag.theme"
-                :label="tag.label"
-                size="sm"
-              />
-            </slot>
+            <slot name="event-suffix" v-bind="slotProps" />
           </span>
         </span>
         <!-- Where it stands against the clock, at the row's far end. It used to
@@ -145,13 +150,7 @@ import { Badge } from '#components/Badge'
 import EventModalContent from './EventModalContent.vue'
 import { useEventBase } from './useEventBase'
 import { useNow } from './composables/useNow'
-import {
-  hasEnded,
-  rowDescription,
-  rowTags,
-  rowTimeLabel,
-  rowTiming,
-} from './eventRow'
+import { hasEnded, rowDescription, rowTimeLabel, rowTiming } from './eventRow'
 import type { CalendarEvent } from './types'
 
 const props = defineProps<{
@@ -185,7 +184,6 @@ const timeLabel = computed(() =>
   rowTimeLabel(props.event, config.timeFormat, props.date),
 )
 const description = computed(() => rowDescription(props.event, props.date))
-const tags = computed(() => rowTags(props.event, props.date, now.value))
 const timing = computed(() => rowTiming(props.event, props.date, now.value))
 const isPast = computed(() => hasEnded(props.event, props.date, now.value))
 
@@ -199,7 +197,6 @@ const slotProps = computed(() => ({
   calendarEvent: calendarEvent.value,
   date: props.date,
   description: description.value,
-  tags: tags.value,
   timing: timing.value,
 }))
 

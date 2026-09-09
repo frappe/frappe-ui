@@ -116,21 +116,6 @@ function minutesUntil(event: CalendarEvent, date: Date, now: Date): number {
 const SOON_MINUTES = 60
 
 /**
- * The tags the library derives itself. A consumer adds its own — an RSVP it is
- * waiting on, say — through `#event-suffix`, which receives these as its
- * default.
- */
-export function rowTags(
-  event: CalendarEvent,
-  _date: Date,
-  _now: Date,
-): CalendarRowTag[] {
-  const tags: CalendarRowTag[] = []
-  if (event.isDraft) tags.push({ label: 'Draft' })
-  return tags
-}
-
-/**
  * Whether the event is behind the reader on the day it is listed under.
  *
  * A day already spent is over whatever is on it; on today, a timed event is

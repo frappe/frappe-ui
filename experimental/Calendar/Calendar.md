@@ -86,14 +86,14 @@ range has events for every cell.
 
 The Agenda view is three months as a list of days, each day a card: its name,
 its date, how much is on it once that is more than one thing, then its events as
-rows. A day with nothing on
-it is not listed — an empty row says nothing the dates either side of it do
-not, and neither does a line counting how many were skipped. Cards are grouped
-under the week they fall in, which replaces the month dividers a flat list
-needs. Today's card carries a dot before its name; it, the day before it and
-the day after say so in words beside their dates, and a day already spent fades
-its header. An event that has ended is dimmed, the way a pill in the grid is
-once its time has passed. An event under way says so with its own tag.
+rows. A day with nothing on it is not listed — an empty row says nothing the
+dates either side of it do not, and neither does a line counting how many were
+skipped. Cards are grouped under the week they fall in, which replaces the month
+dividers a flat list needs. Today's card carries a dot before its name; it, the
+day before it and the day after say so in words beside their dates, and a day
+already spent fades its header. An event that has ended is dimmed, the way a
+pill in the grid is once its time has passed. An event under way says so with
+its own tag.
 
 The window covers the month in view and the two after it, padded out to whole
 weeks at either end the way the Month view's strip is — the list groups its days
@@ -105,13 +105,14 @@ included, so a data source fetching by range agrees with it. The header names
 the three months themselves, not the days the padding reaches into.
 
 Rows have the room a grid pill does not, so they carry a description line and
-tags. `Calendar` fills in what it can work out on its own — where the event is,
-which day of a stay the row is (`Day 2/3`), and whether it is a draft, which the
-row draws as a dashed bar. Where it stands against the clock reads at the row's
-far end, the one edge a card aligns on other than the time column: `Now` in blue
-while it runs and `Soon` in amber in the hour before it, and nothing beyond
-that: an hour count would only restate the time written beside it —
-and the `#event-description` and `#event-suffix` slots let you say the rest.
+tags. `Calendar` fills in the description itself — where the event is, and which
+day of a stay the row is (`Day 2/3`) — and marks a draft by drawing the dot
+beside the title as a ring rather than a disc. Where it stands against the clock
+reads at the row's far end, the one edge a card aligns on other than the time
+column: `Now` in blue while it runs and `Soon` in amber in the hour before it,
+and nothing beyond that: an hour count would only restate the time written
+beside it — and the `#event-description` and `#event-suffix` slots let you say
+the rest.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />
 
@@ -160,9 +161,10 @@ which receives `{ calendarEvent, date, isEditMode, close }`.
 
 The Agenda's rows take two more slots: `#event-description` for the line under
 the title, and `#event-suffix` for the tags beside it. Both receive
-`{ calendarEvent, date, description, tags, timing }`, where `description`,
-`tags` and `timing` are what the calendar derived itself, so you can add to them
-rather than work them out again. Grid pills have no room for either and ignore both slots.
+`{ calendarEvent, date, description, timing }`, where `description` and `timing`
+are what the calendar derived itself, so you can add to them rather than work
+them out again. The suffix has no tags of its own to hand you — it is yours to
+fill. Grid pills have no room for either and ignore both slots.
 
 `CalendarActiveEvent` exports the ref holding the id of the event whose popover
 is open. Set it from outside to highlight an event, or clear it with an empty

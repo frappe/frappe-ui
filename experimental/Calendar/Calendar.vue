@@ -2,7 +2,13 @@
   <!-- No overflow-hidden here: each view scrolls itself, and clipping at the
        root only cut the focus outline off the header's buttons. -->
   <div class="flex h-full flex-col">
+    <!-- v-if on the slot, not a fallback inside it: `renderSlot` falls back whenever a
+         slot renders nothing, so a consumer passing an empty <template #header /> — a
+         phone, which draws its own — got this header anyway and had to cover it with an
+         element that renders nothing. Asking whether the slot was passed at all is the
+         question that was being asked. -->
     <slot
+      v-if="$slots.header"
       name="header"
       v-bind="{
         currentMonthYear,
@@ -17,7 +23,8 @@
         onMonthYearChange,
         selectedMonthDate,
       }"
-    >
+    />
+    <template v-else>
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
@@ -63,7 +70,7 @@
           />
         </div>
       </div>
-    </slot>
+    </template>
 
     <CalendarMonthly
       v-if="activeView === 'Month'"
@@ -112,6 +119,7 @@
       :events="events"
       :config="overrideConfig"
       :anchor="agendaAnchor"
+      :jump="agendaJump"
       :loading="loading"
     >
       <template #event-description="slotProps">
@@ -190,6 +198,9 @@ const emit = defineEmits<{
     payload: { view: CalendarMode; startDate: string; endDate: string },
   ]
 }>()
+
+/** Bumped by setCalendarDate; the Agenda scrolls back to its anchor on every bump. */
+const agendaJump = ref(0)
 
 const defaultConfig: CalendarConfig = {
   scrollToHour: 15,
@@ -747,6 +758,10 @@ function isCurrentMonthDate(date?: Date) {
 function setCalendarDate(d?: Date | string) {
   const dt = d ? new Date(d) : new Date()
   if (dt.toString() === 'Invalid Date') return
+  // Counted, not compared: the Agenda reads this to know it has been sent somewhere,
+  // which is not the same as its anchor changing — Today, pressed halfway down the
+  // list on the day it is already anchored on, moves nothing and means everything.
+  agendaJump.value++
   currentYear.value = dt.getFullYear()
   currentMonth.value = dt.getMonth()
   currentDate.value = dt

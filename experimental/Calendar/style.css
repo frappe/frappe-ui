@@ -41,36 +41,29 @@
 
 /* A row is not a pill: it carries no fill of its own, so the day reads as a
    list rather than a stack of coloured blocks. The event's colour survives as
-   the bar alone. */
-.calendar-row-bar {
+   the dot alone. */
+.calendar-row-dot {
   background-color: var(--border);
 }
-/* Rows sit flush inside a day card, divided by a hairline rather than by a gap:
-   the card's own border already says where the day starts and stops, and gaps
-   between rows inside it would say it a second time, less clearly. The rule
-   goes between rows only — the header above the first draws its own. */
+/* Rows sit flush beside their day, divided by a hairline rather than by a gap:
+   the gutter beside them already says where the day starts and stops, and gaps
+   between rows would say it a second time, less clearly. The rule goes between
+   rows only — the day above draws the one that closes them. */
 .calendar-row + .calendar-row {
   border-top: 1px solid var(--outline-gray-1);
 }
-/* A draft, in a row's vocabulary: the bar is broken rather than solid, saying
-   the same "saved, nothing sent" the pill says with a dashed outline — dashes
-   here too, at the 4/3 the pill's own dashed outline draws. It keeps the
-   event's colour, so the row still reads as belonging to its calendar. The
-   gradient is painted over the fill above, which the gaps would otherwise show
-   through. */
-.calendar-row.event-draft .calendar-row-bar {
+/* A draft, in a row's vocabulary: the dot is an outline rather than a disc,
+   saying the same "saved, nothing sent" the pill says with its dashed border in
+   the one mark a row has room for. Broken into dashes it read as a rough edge:
+   ~25px of circumference takes too few of them to be a pattern, and what the
+   eye got was a circle drawn badly. Unbroken, it is plainly not a disc.
+
+   A border rather than an inset shadow keeps it the same mark the panel draws.
+   Boxes are border-box here, so the 1.5px is drawn inside the dot's own 8px and
+   a draft sits in the column at exactly the size everything else in it does. */
+.calendar-row.event-draft .calendar-row-dot {
   background-color: transparent;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--border) 0 4px,
-    transparent 4px 7px
-  );
-  /* Square, where a solid bar's ends are rounded. The dashes are a gradient, so
-     only the ones meeting the bar's own edges could be capped — and where the
-     cycle lands against a row is a matter of how tall the title made it. One
-     rounded dash in a column of square ones reads as a mistake; all square
-     reads as a dashed line. */
-  border-radius: 0;
+  border: 1.5px solid var(--border);
 }
 .calendar-row:hover {
   background-color: var(--surface-gray-1);
@@ -82,16 +75,30 @@
   background-color: var(--surface-gray-1);
 }
 /* Behind you: the row stays legible but stops asking for attention, the same
-   way a pill in the grid does once its time has passed. */
-.calendar-row.past:not(.active) {
+   way a pill in the grid does once its time has passed.
+
+   What fades is the contents, not the box. A row's own fill (hover, selected)
+   and the hairline above it are the box, and the hairline is drawn by the lower
+   of the two rows it divides — so fading whole rows made a rule's weight depend
+   on which row happened to own it. A past row that was selected does not fade,
+   and it sat between a rule at full strength above and a faded one below. Fade
+   what is inside and every divider on the card is one weight, whatever the days
+   either side of it are. */
+.calendar-row.past:not(.active) > * {
   opacity: 0.55;
 }
 /* A day already spent says so from its header too — a date in full ink over a
-   card of faded rows reads as the live one. The header alone: the rows carry
-   their own fading, and dimming the card would apply it twice and take them
-   past legible. A week whose last day is behind the reader fades with them, so
-   a run of spent cards is spent from its heading down. */
-.calendar-day-header.past,
+   card of faded rows reads as the live one. Its ink alone, for the reason the
+   rows fade their contents: the band's wash and the rules closing it are the
+   card's structure, and structure that changes weight with the date makes the
+   card look creased. The rows carry their own fading, so dimming the day as a
+   whole would apply it twice and take them past legible. */
+.calendar-day-header.past > * {
+  opacity: 0.55;
+}
+/* The label carries no fill and no rule — nothing to hold at full strength — so
+   it fades whole. A week whose last day is behind the reader fades with the
+   days in it, so a spent stretch is spent from its heading down. */
 .calendar-week-label.past {
   opacity: 0.55;
 }

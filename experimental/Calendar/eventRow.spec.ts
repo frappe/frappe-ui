@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  daySpan,
-  hasEnded,
-  rowTags,
-  rowTimeLabel,
-  rowTiming,
-} from './eventRow'
+import { daySpan, hasEnded, rowTimeLabel, rowTiming } from './eventRow'
 import type { CalendarEvent } from './types'
 
 const at = (id: string, fromTime: string, toTime: string): CalendarEvent => ({
@@ -81,18 +75,7 @@ describe('rowTiming', () => {
     expect(
       rowTiming(stay, second, new Date('2026-08-21T03:00:00'))?.label,
     ).toBe('Now')
-    expect(
-      rowTiming(stay, second, new Date('2026-08-21T20:00:00')),
-    ).toBeNull()
-  })
-
-  // The timing tag reads beside the time; the tags after the title are the
-  // event's own state, and a draft stays a draft whatever the clock says.
-  it('is separate from the row tags', () => {
-    expect(rowTags(standup, date, now('10:30'))).toEqual([])
-    expect(rowTags({ ...standup, isDraft: true }, date, now('10:30'))).toEqual([
-      { label: 'Draft' },
-    ])
+    expect(rowTiming(stay, second, new Date('2026-08-21T20:00:00'))).toBeNull()
   })
 })
 
@@ -208,9 +191,9 @@ describe('daySpan', () => {
   })
 
   it('says nothing about an event that fits in one day', () => {
-    expect(daySpan(at('standup', '10:00', '11:00'), new Date(2026, 7, 20))).toBe(
-      null,
-    )
+    expect(
+      daySpan(at('standup', '10:00', '11:00'), new Date(2026, 7, 20)),
+    ).toBe(null)
   })
 
   it('says nothing for a date outside the stay', () => {

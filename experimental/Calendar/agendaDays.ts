@@ -42,8 +42,8 @@ export interface AgendaRow {
   isYesterday: boolean
   /**
    * The day is behind the reader. The rows of such a day already dim
-   * themselves; the card says it too, so a day spent reads as spent from its
-   * header rather than only from the events under it.
+   * themselves; the day's header says it too, so a day spent reads as spent
+   * from its heading rather than only from the events under it.
    */
   isPast: boolean
   isWeekend: boolean
@@ -136,15 +136,12 @@ export function agendaRows(
 }
 
 /**
- * The list is not a flat run of days: days are cards, and cards are grouped
- * under the week they fall in. `agendaBlocks` is that sequence — the view walks
- * it once and draws whichever of the two each entry is.
+ * The list is not a flat run of days: a week is a card, and the days that have
+ * something on them are its sections. `agendaWeeks` is that nesting — the view
+ * walks the weeks and, inside each, its days.
  */
-export type AgendaBlock = AgendaWeekBlock | AgendaDayBlock
-
-/** The label a run of day cards sits under. */
-export interface AgendaWeekBlock {
-  kind: 'week'
+export interface AgendaWeek {
+  /** The Sunday the week starts on, as `YYYY-MM-DD`. */
   key: string
   /** Sunday to Saturday, the same week the Month view draws as a row. */
   start: Date
@@ -157,17 +154,12 @@ export interface AgendaWeekBlock {
   isPrevious: boolean
   /**
    * The week ended before today. Its label fades with the day headers under it,
-   * so a run of spent cards is spent from its heading down rather than reading
+   * so a run of spent days is spent from its heading down rather than reading
    * as a live week of faded days.
    */
   isPast: boolean
-}
-
-/** One day, drawn as a card. */
-export interface AgendaDayBlock {
-  kind: 'day'
-  key: string
-  row: AgendaRow
+  /** The days of the week with something on them; never empty. */
+  days: AgendaRow[]
 }
 
 function addDays(date: Date, days: number): Date {
@@ -175,48 +167,51 @@ function addDays(date: Date, days: number): Date {
 }
 
 /**
- * The list as the view draws it: week labels and the day cards under them, in
- * the order they appear.
+ * The list as the view draws it: the weeks that have anything in them, each
+ * carrying its own days.
  *
  * Days with nothing on them are not drawn at all, not even as a line saying how
- * many there were — the dates on the cards either side of a quiet stretch
- * already say how long it ran.
+ * many there were — the dates on the sections either side of a quiet stretch
+ * already say how long it ran. A week with no such day is not drawn either: an
+ * empty card under a label is a week saying nothing at more length than the
+ * dates either side of it already do.
  */
-export function agendaBlocks(
+export function agendaWeeks(
   events: CalendarEvent[],
   anchor: Date,
   config?: WeekendConfig,
   today: Date = new Date(),
-): AgendaBlock[] {
+): AgendaWeek[] {
   const rows = agendaRows(events, anchor, config, today)
   const currentWeek = parseDate(weekStart(today))
   const nextWeek = parseDate(addDays(weekStart(today), 7))
   const lastWeek = parseDate(addDays(weekStart(today), -7))
-  const blocks: AgendaBlock[] = []
-  let week = ''
+  const weeks: AgendaWeek[] = []
 
   for (const row of rows) {
     const start = weekStart(row.date)
     const key = parseDate(start)
-    if (key !== week) {
-      week = key
+    let week = weeks[weeks.length - 1]
+
+    if (week?.key !== key) {
       const end = addDays(start, 6)
-      blocks.push({
-        kind: 'week',
-        key: `week:${key}`,
+      week = {
+        key,
         start,
         end,
         isCurrent: key === currentWeek,
         isNext: key === nextWeek,
         isPrevious: key === lastWeek,
         isPast: parseDate(end) < parseDate(today),
-      })
+        days: [],
+      }
+      weeks.push(week)
     }
 
-    blocks.push({ kind: 'day', key: `day:${row.key}`, row })
+    week.days.push(row)
   }
 
-  return blocks
+  return weeks
 }
 
 /**

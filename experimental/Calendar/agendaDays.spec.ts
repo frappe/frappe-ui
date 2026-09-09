@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  agendaBlocks,
   agendaMonths,
   agendaRange,
   agendaRangeLabel,
   agendaRows,
+  agendaWeeks,
 } from './agendaDays'
 import { parseDate } from './calendarUtils'
 import type { CalendarEvent } from './types'
@@ -219,33 +219,27 @@ describe('agendaRows', () => {
   })
 })
 
-describe('agendaBlocks', () => {
-  /** The blocks as `kind:key` pairs, which is all the ordering questions need. */
+describe('agendaWeeks', () => {
+  /** The weeks as their start and the days in each, which is all the grouping questions need. */
   const shape = (today: string) =>
-    agendaBlocks(events, d(today), undefined, d(today)).map(
-      (b) => `${b.kind}:${b.key.split(':')[1]}`,
-    )
+    agendaWeeks(events, d(today), undefined, d(today)).map((w) => [
+      w.key,
+      w.days.map((day) => day.key),
+    ])
 
-  it('opens a week label above the first card of each week', () => {
+  it('gathers the days of a week under the week they fall in', () => {
     // Aug 20, 21 and 22 are the Thursday, Friday and Saturday of the week
     // starting Sunday the 16th; the 23rd onwards run into the next.
     expect(shape('2026-08-20')).toEqual([
-      'week:2026-08-16',
-      'day:2026-08-20',
-      'day:2026-08-21',
-      'day:2026-08-22',
-      'week:2026-08-23',
-      'day:2026-08-23',
-      'day:2026-08-24',
-      'day:2026-08-25',
-      'day:2026-08-26',
+      ['2026-08-16', ['2026-08-20', '2026-08-21', '2026-08-22']],
+      ['2026-08-23', ['2026-08-23', '2026-08-24', '2026-08-25', '2026-08-26']],
     ])
   })
 
   it('names the week under way and the one either side of it', () => {
     // Read on Aug 27, a Thursday: the events run over the weeks of the 16th,
     // 23rd and 30th, so the list holds last week, this week and next.
-    const weeks = agendaBlocks(
+    const weeks = agendaWeeks(
       [
         ...events,
         {
@@ -259,40 +253,46 @@ describe('agendaBlocks', () => {
       d('2026-08-27'),
       undefined,
       d('2026-08-27'),
-    ).filter((b) => b.kind === 'week')
+    )
     expect(
-      weeks.map((w) =>
-        w.kind === 'week' ? [w.key, w.isPrevious, w.isCurrent, w.isNext] : null,
-      ),
+      weeks.map((w) => [w.key, w.isPrevious, w.isCurrent, w.isNext]),
     ).toEqual([
-      ['week:2026-08-16', true, false, false],
-      ['week:2026-08-23', false, true, false],
-      ['week:2026-08-30', false, false, true],
+      ['2026-08-16', true, false, false],
+      ['2026-08-23', false, true, false],
+      ['2026-08-30', false, false, true],
     ])
   })
 
   it('marks the weeks that are wholly behind the reader', () => {
     // Read on Aug 24, a Monday: the week of the 16th ended on Saturday the
     // 22nd, and the week the 24th falls in has not.
-    const weeks = agendaBlocks(
+    const weeks = agendaWeeks(
       events,
       d('2026-08-24'),
       undefined,
       d('2026-08-24'),
-    ).filter((b) => b.kind === 'week')
-    expect(
-      weeks.map((w) =>
-        w.kind === 'week' ? [w.key, w.isPast, w.isCurrent] : null,
-      ),
-    ).toEqual([
-      ['week:2026-08-16', true, false],
-      ['week:2026-08-23', false, true],
+    )
+    expect(weeks.map((w) => [w.key, w.isPast, w.isCurrent])).toEqual([
+      ['2026-08-16', true, false],
+      ['2026-08-23', false, true],
     ])
+  })
+
+  it('leaves out a week with nothing in it', () => {
+    // Never an empty card: a week is drawn because it has days, and a day
+    // because it has events.
+    const weeks = agendaWeeks(
+      events,
+      d('2026-08-20'),
+      undefined,
+      d('2026-08-20'),
+    )
+    expect(weeks.every((w) => w.days.length)).toBe(true)
   })
 
   it('has nothing to draw when no day is listed', () => {
     expect(
-      agendaBlocks([], d('2026-08-20'), undefined, d('2026-08-20')),
+      agendaWeeks([], d('2026-08-20'), undefined, d('2026-08-20')),
     ).toEqual([])
   })
 })

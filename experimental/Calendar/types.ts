@@ -61,8 +61,8 @@ export interface CalendarEvent {
 
 /**
  * A tag on a listed event — the Agenda's rows carry these where a grid pill has
- * no room for them. Rendered as a `Badge`, so `theme` is
- * Badge's own and a consumer's tags sit beside the derived ones as equals.
+ * no room for them. Rendered as a `Badge`, so `theme` is Badge's own and a
+ * consumer's tags in `#event-suffix` sit beside the timing tag as equals.
  */
 export interface CalendarRowTag {
   label: string
@@ -76,8 +76,6 @@ export interface CalendarRowSlotProps {
   date: Date
   /** The library's own description, so a filled slot extends rather than re-derives. */
   description: string
-  /** The tags the library derived, for the same reason. */
-  tags: CalendarRowTag[]
   /** Where the event stands against the clock, shown beside the time. */
   timing: CalendarRowTag | null
 }
