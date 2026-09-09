@@ -309,10 +309,4 @@ export interface MultiSelectEmits {
    * resolved out of `options`, so custom fields on an option survive.
    */
   'update:selectedOptions': [value: MultiSelectOption[]]
-
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the search query changes. */
-  'update:query': [value: string]
 }
