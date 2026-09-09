@@ -292,3 +292,71 @@ Independently reproduced after the merges, not carried over from the branches: `
    stack-input label, and `@update:model-value` / `@update:collapsed` typing across five components,
    whose real fix is a `propsgen` change.
 6. Then the RC cut itself: #1029's one-week app soak and maintainer sign-off.
+
+## Review rounds on #1133
+
+| Round | Greptile | Barista |
+| --- | --- | --- |
+| 1 | refused, 130 files against its 100-file limit | 2/5, three findings |
+| 2 | 4/5, one P1 on bounded Tailwind screens | run cancelled, never reviewed |
+| 3 | 5/5 | 4/5, two nits |
+| 4 | 5/5, safe to merge | 5/5 |
+
+Round 1 findings, all fixed: the `xs` addition left `MultiEmailInput`'s avatar ternary on an `sm` floor;
+the six size declarations were still literal copies rather than aliases of `InputSize`; the stretched row
+overlay in one story and three recipes had no `type="button"`.
+
+Round 2's P1 was real and wider than reported. Bounded screens (`{ min, max }`) generated an unbounded
+min-width rule, so above the max the tracks disagreed with the visibility utilities. `{ max }`, `{ raw }`
+and array screens were dropped from the ladder entirely, and mixed-unit screens were sorted on a px scale
+where Tailwind falls back to declaration order. Each tier now rides its own `--_list-tier-<screen>`
+variable declared under the same condition Tailwind emits for that screen, with priority carried by
+`var()` nesting rather than source order.
+
+Round 3's first nit produced a dev-time warning for a `columns` key that names no screen. The second was
+declined with a reproduction: wiring `ContextMenuEmits` into `defineEmits` recreates the `TS2322` collapse
+#1098 removed, and six other exported `*Emits` interfaces on `main` are unwired for the same reason.
+Barista withdrew it.
+
+**The barista run in round 2 was cancelled by Greptile's own comment.** Every issue comment shares the
+`manual` concurrency group with `cancel-in-progress`, so any later comment kills an in-flight
+`/barista review` and the cancelling run then skips the job filter, leaving no review and no failure.
+Order per round: push, tag Greptile, wait for its review, then post `/barista review` last. The workflow
+fix is to join the manual group only when the comment body contains `/barista review`.
+
+## Consumer validation — gameplan
+
+Run against `/Users/netchampfaris/Projects/benches/frappe-bench`, `apps/gameplan`, by repointing
+`frontend/node_modules/frappe-ui` at the candidate. Bench state recorded before and restored after, with
+the restore verified. Detail in `v1-release/checkpoints/consumer-gameplan.md`.
+
+Baseline was `main` @ `2d65281be8`, the RC's own base, rather than the checkout's beta.46, so 16 betas of
+drift did not pollute the comparison.
+
+- **Rail is a loud break, as intended.** Gameplan fails to build with `[MISSING_EXPORT] "Rail"` and
+  `"RailItem"` at `AppRail.vue:20`. With that one file migrated it builds clean. The rendered shell is
+  byte-identical between the two arms, so the `data-slot` rename costs gameplan nothing.
+- **Inputs.** `FormLabel` measured 14px `srgb(0.479)` to 13px `srgb(0.600)` live. Input `xl` does not
+  reach gameplan; its `xl` hits are Avatar and Dialog, which keep that size.
+- **List.** Tailwind run standalone against gameplan's own config gives 4 `list-cols` rules to 0, with the
+  `list-gap-*` rules identical on both arms as a control. On a live list the class no longer moves the
+  tracks. The affected band is 640-767px only: below 640px gameplan swaps to MobileLayout, and the dialog
+  hosting all four lists is desktop-only.
+
+Two consequences not in the migration notes:
+
+1. With `size` no longer a declared prop, `FormLabel size="md"` falls through to the DOM as a real
+   attribute (`<label size="md">`, confirmed by `getAttribute`, absent on the baseline). Stale usage emits
+   invalid HTML rather than being a harmless no-op.
+2. `frappe-ui/vite` sets `emptyOutDir: true`, so a failed consumer build wipes the served frontend before
+   it errors. Worth its own ticket.
+
+**Separate blocker found, not caused by this branch.** Gameplan's Settings dialog opens on beta.46 and does
+not on beta.62 or the candidate, same site and user and script. It mounts closed, logs no error,
+`get_user_info` returns 200, and `usersReady` never flips because the `useCall(...).isFinished` it latches
+never becomes true. `DevUserSwitcher`, gated on the same flag, is also absent. A bisect between
+`73f9a49f2` and `2d65281be8` is running. #1029's soak starts from a real boot, so this wants an answer
+before the tag even though it does not block this pull request.
+
+CRM and Helpdesk remain unverified: neither has `node_modules/frappe-ui` installed in this bench, so
+checking them needs a full install first.
