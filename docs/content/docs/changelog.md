@@ -240,6 +240,13 @@ Responsive columns need the frappe-ui Tailwind preset, which is what knows your
 breakpoints. Without it a breakpoint object falls back to its `base` tier at
 every width.
 
+A key that is not one of your screens is ignored — `{ base, medium }` renders
+`base` everywhere, because `medium` names no breakpoint. Screen names come from
+your Tailwind config, so `ListColumnsByBreakpoint` keeps an open index signature
+and the type cannot reject the key; a development build now warns instead,
+naming the key and listing the screens it could have been. The warning is
+stripped from production builds.
+
 The conventions behind this (and for every future component with CSS hooks)
 are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
 

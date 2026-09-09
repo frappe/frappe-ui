@@ -129,6 +129,24 @@ one that applies wherever its query matches. In each case the tier is live in
 exactly the same places as that screen's own variants. Where two screens match
 at once, the tier that wins is the one whose utilities win.
 
+**A key that is not one of your screens is ignored.**
+`{ base: […], medium: […] }` renders `base` at every width, because `medium`
+names no breakpoint and nothing switches to it. Breakpoint names come from your
+Tailwind config, so the type cannot reject the key — the index signature on
+`ListColumnsByBreakpoint` has to stay open for apps with custom screens. A
+development build warns instead, naming the key and listing the screens it could
+have been:
+
+```
+[frappe-ui] List: `columns` key `medium` is not one of this app's Tailwind
+screens (base, sm, md, lg, xl), so its template is ignored and the list keeps
+the one below it.
+```
+
+The warning is stripped from production builds. It needs frappe-ui's Tailwind
+preset, which is what tells the List which screens your app defines; without the
+preset every key above `base` is ignored anyway, and the warning says so.
+
 Changing the track count never hides a cell. Say that part explicitly, with
 matching classes on the header and the rows:
 

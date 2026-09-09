@@ -12,6 +12,10 @@ export type ListSortDirection = 'asc' | 'desc'
  * plain width (a `{ min, max }` band, a `{ max }` ceiling, a `{ raw }` query)
  * gives a tier that is live wherever that screen's own variants are live.
  *
+ * A key that is not one of the app's screens is ignored — its template never
+ * applies. The index signature has to stay open because the names belong to
+ * the app, so the type cannot reject it; a dev-mode warning does.
+ *
  * Each value replaces the whole template. Arrays are never merged track by
  * track, so a breakpoint may change the track count as well as the widths.
  */
@@ -44,8 +48,10 @@ export interface ListProps {
    * `base` is required, each breakpoint replaces the whole template, and an
    * omitted breakpoint keeps the one below it. Breakpoints are the consuming
    * app's own Tailwind `screens`, resolved in CSS — so `md` here and `md:hidden`
-   * on a cell switch at the same width. Changing the track count never hides a
-   * cell: pair it with matching visibility classes on the header and the rows.
+   * on a cell switch at the same width. A key that is not one of those screens
+   * is ignored: its template never applies, and a dev-mode warning names it.
+   * Changing the track count never hides a cell: pair it with matching
+   * visibility classes on the header and the rows.
    */
   columns?: ListColumns
 
