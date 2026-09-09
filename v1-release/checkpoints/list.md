@@ -251,3 +251,101 @@ computed templates.
 ## Left to do
 
 Nothing in this track.
+
+## Review round — bounded screens (PR #1133)
+
+### The finding
+
+Greptile, P1 on `tailwind/listColumns.js`: a `{ min: '700px', max: '900px' }`
+screen kept only its `min`, so the tier was emitted under an unbounded
+`min-width: 700px`. Above 900px the `band:` visibility utilities switch off
+while the list keeps that tier's tracks — cells and tracks disagreeing, which
+is the acceptance item ("an app-customized `md` agrees with that app's `md`
+visibility utilities") the file exists to satisfy. Real, and reproduced before
+fixing: built through postcss, `.band\:hidden` landed under
+`(min-width: 700px) and (max-width: 900px)` and the columns rule under
+`(min-width: 700px)`.
+
+The reviewer named the bounded case only. Auditing every shape `theme('screens')
+can hold turned up two more:
+
+- `{ max }` and `{ raw }` screens, and arrays (multi-range screens), were
+  dropped from the ladder entirely, so a `columns` key naming one silently did
+  nothing while `narrow:hidden` worked. Documented as deliberate, but it is the
+  same defect wearing a different hat: the key looks live and is not.
+- Mixed-unit screens (`{ tablet: '40rem', phone: '380px' }`) were sorted on a
+  px scale. Tailwind refuses to sort screens whose units differ and falls back
+  to declaration order, so the tier that won was not the one whose utilities
+  won.
+
+### The fix: preserve the range, for every shape
+
+Rejecting bounded screens was the other option Greptile offered. Not taken —
+the cascade can be made coherent, so rejecting would give up an acceptance
+criterion for nothing.
+
+Each tier now rides `--_list-tier-<screen>`, declared in one media rule under
+the same condition Tailwind's own variant for that screen emits (a mirror of
+its `normalizeScreens` + `buildMediaQuery`, ~25 lines, no internal imports).
+The root rule holds a single `var()` chain over the tier vars down to `base`.
+Outside its screen nothing declares a tier var, so it stays guaranteed-invalid
+and the chain falls through as if that tier had never been supplied.
+
+That is what makes a tier able to *end*. The old shape could not: it wrote the
+resolved `--_list-columns` inside each media rule and leaned on source order,
+which only works while every screen is an unbounded min-width, each one's
+region containing every region below it. With the tier vars, priority lives in
+the nesting of the chain instead of in source order, and screens may overlap in
+any way — the chain picks the highest live tier at every width.
+
+Order is Tailwind's own rule, mirrored: sort by min-width when every screen is
+a plain string in one unit (`areSimpleScreens && screensUseConsistentUnits`),
+otherwise keep declaration order. So where two screens match at once, the tier
+that wins is the one whose utilities win. This is the mixed-unit change above,
+and it is a behaviour change from the merged branch: `{ tablet: '40rem',
+phone: '380px' }` used to order by px, now by declaration, because that is what
+the app's own variants do.
+
+`raw` screens are supported rather than special-cased. A raw query is not a
+width range, so "applies upward until the next breakpoint" says nothing about
+it — but the contract that actually matters generalises cleanly: a tier is live
+in exactly the same places as that screen's variants. `{ raw: '(max-height:
+600px)' }` gives a tier that matches wherever `short:hidden` matches. Dropping
+raw would leave the silent-no-op bug in place for it.
+
+Nothing supported before was dropped. The only screens without a tier are the
+reserved names (`base`, `DEFAULT`) and a screen with no condition at all
+(`{}`), which Tailwind itself would emit as a broken `@media`.
+
+Not fixed, and out of scope: Tailwind disables the `min-*` and `max-*` variants
+altogether for a config containing object screens (it warns
+`complex-screen-config`). An app using a bounded screen therefore cannot write
+`max-band:hidden` — that is Tailwind's limit, not ours, and the named-screen
+variants it does emit agree with the tiers.
+
+### Verified
+
+- `tailwind/listColumns.test.js` — 18 tests, up from 11. Unit coverage for
+  string, `{ min }`, `{ min, max }`, `{ max }`, `{ raw }`, array, two screens
+  sharing one condition, reserved names and an empty screen; plus five built
+  through postcss against an app config, which compare the media conditions of
+  the tier rule and of that screen's own `hidden` utility with a postcss walk
+  rather than by eye. The bounded test was run against the pre-fix file first
+  and fails there (`(min-width: 700px)` vs `(min-width: 700px) and (max-width:
+  900px)`); it passes after.
+- `yarn type-check` clean. `yarn test` 104 files / 1696 tests passed.
+- `yarn docs:gen` + `yarn docs:check` — "The committed API tables match the
+  source." (`docs:gen` also reorders rows in `src/charts/docs/*.api.md`;
+  pre-existing drift, reverted.)
+- `env -u ELECTRON_RUN_AS_NODE yarn cypress run --component --spec
+  src/molecules/list/List.cy.ts --config video=false` — 33 passing. This is the
+  real-browser check on the extra indirection: `--_list-tier-x:
+  var(--_list-columns-x)` has to compute to guaranteed-invalid when the carrier
+  is `initial`, which is what the ladder, the omitted-tier fallthrough and the
+  nested-list containment tests all depend on. A throwaway spec confirmed the
+  Cypress bundle really serves the regenerated rules (`--_list-tier-md` present
+  in the document stylesheets), so the pass is not a stale build.
+
+Docs updated to match: `list.md` (a paragraph on the non-width screen shapes
+and the overlap rule), `types.ts`, ADR-0017 rule 3 and its consequences, and
+the changelog entry.
