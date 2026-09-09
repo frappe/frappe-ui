@@ -48,6 +48,12 @@ Six declarations of the scale updated to `xs | sm | md | lg`:
 | `MultiSelectSize` | `src/components/MultiSelect/types.ts` |
 | Select inline union | `src/components/Select/types.ts` |
 
+**Superseded on the integration branch.** All six were literal copies of one
+another, so the five below `InputSize` were later collapsed into aliases of it
+(`export type ComboboxSize = InputSize`, and the same for `SelectionSize`,
+`ItemListSize`, `MultiSelectSize` and Select's inline union). One declaration
+now, five names. See `integration.md`, finding 2.
+
 `FormControl.size` widened from `sm | md` to `InputSize`. It clamps `lg` to `md`
 for `type="checkbox"`, which renders on `ToggleSize` and has no `lg`.
 

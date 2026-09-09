@@ -480,3 +480,203 @@ track meant by "treat seven as a floor".
   `:disabled`, so a disabled stack field keeps a full-strength label while the
   inline-row controls dim theirs. Pre-existing, both components already have the
   prop wired. Worth a decision before the tag.
+
+---
+
+# Review round 1 — barista findings on #1133
+
+Three findings, all addressed. Commits `1bd4edbc2b`, `d5a57173ef`, `8a26478afb`
+and this checkpoint.
+
+## Finding 1 — `MultiEmailInput` drew an `md` avatar in an `xs` row
+
+`experimental/MultiEmailInput/MultiEmailInput.vue:169` computed the option-row
+avatar as `props.size === 'sm' ? 'sm' : 'md'`. That was written when `sm` was
+the floor of the input scale, so the new `xs` fell into the else branch and got
+the 24px `md` avatar.
+
+**Changed.** The ternary now steps down for `xs` and `sm` and keeps the `md` cap
+above, in the same shape as the `FormControl` checkbox clamp:
+
+```ts
+props.size === 'xs' ? 'xs' : props.size === 'sm' ? 'sm' : 'md'
+```
+
+`lg` deliberately stays on `md`: Avatar's `lg` is 28px and an `md` row is 32px
+before padding, so promoting it would recreate the bug one size up.
+
+**Verified.** Four Cypress cases measure the rendered avatar
+(`MultiEmailInput.cy.ts`): 16 / 20 / 24 / 24 px at `xs` / `sm` / `md` / `lg`.
+The `xs` case fails against the old ternary and passes against the new one —
+checked by reverting the line and re-running. Also measured in Chrome: `xs`
+avatar 16px (was 24px), `sm` 20px.
+
+**One correction to the finding.** The avatar never literally overflowed. The
+row is `min-h-*`, not a fixed height, so an oversized avatar grows the row
+instead of spilling out of it. The defect is density — the biggest avatar and
+an inflated row on the smallest control — not clipping.
+
+## Sweep for the same class of miss
+
+Every branch and map that could have assumed `sm` was the floor was checked:
+`=== 'sm'`, `!== 'sm'`, `'sm' ?`, every `size ===` / `size !==` in `src/` and
+`experimental/`, and every size-keyed map that has an `sm:` key but no `xs:`.
+
+`MultiEmailInput:169` was the only miss. Everything else is either on a scale
+that never had `xs` at all, or already exhaustive:
+
+| Site | Why it is fine |
+| --- | --- |
+| `Checkbox` `Radio` `Switch` | `ToggleSize` (`xs \| sm \| md`); their ternary chains already end on `xs`, not `sm` |
+| `Slider` | `RangeSize` (`sm \| md`), no `xs` by design |
+| `shared/tabs/styles.ts`, `Pill.vue` | `TabsSize` (`sm \| md`) |
+| `Button` | own scale, branches on `xs` explicitly |
+| `Badge`, `Progress` | own scales, no `xs` |
+| `*.playground.vue` (`if (v.size !== 'sm')`) | omits the default attribute from the printed snippet; not a render branch |
+
+### Left alone, with the reason
+
+`MultiEmailInput.vue:391` — the create-row's mail-icon box is a fixed
+`grid size-7` (28px) at every size, so it is taller than its own row at `xs`
+and `sm` and does not line up with the avatar beside it in the suggestion rows.
+That is **pre-existing**: it was already 28px in a 28px `sm` row before this
+release, so it is not an `xs` regression and not what the finding is about.
+Fixing it is a rendering change on an experimental component, outside the scope
+of a review round. Worth a ticket.
+
+## Finding 2 — five copies of the input scale collapsed to aliases
+
+`Select` declared `size` and `variant` as inline literal unions; `ComboboxSize`,
+`MultiSelectSize`, `SelectionSize` and `ItemListSize` were literal copies of
+`InputSize`, and `ComboboxVariant`, `MultiSelectVariant` and `SelectionVariant`
+were copies of `InputVariant`.
+
+**Changed.** Each renderer implements exactly the input scale, so each type is
+now an alias:
+
+| Name | Now |
+| --- | --- |
+| `SelectProps['size' \| 'variant']` | `InputSize` / `InputVariant` |
+| `ComboboxSize` / `ComboboxVariant` | `InputSize` / `InputVariant` |
+| `MultiSelectSize` / `MultiSelectVariant` | `InputSize` / `InputVariant` |
+| `SelectionSize` / `SelectionVariant` | `InputSize` / `InputVariant` |
+| `ItemListSize` | `InputSize` |
+
+Every exported name survives, so no consumer import breaks, and there is one
+declaration left to keep in sync. `inputTypes.ts` is types-only, so the new
+`import type` edges are erased at build and add no runtime cycle.
+
+The variant aliases were not named in the finding. They were collapsed anyway:
+leaving `ComboboxVariant` a literal copy on the line under an aliased
+`ComboboxSize` would have been the same debt in the same file, and the argument
+for one is the argument for the other.
+
+**Nothing was left as a copy.** No family here implements a different set —
+`SelectionSize`'s own doc comment already said it mirrors `InputSize` value for
+value, and `triggerSizeMap` / `itemRootSizeMap` / `ItemListRow`'s map all
+implement the same four. The narrower scales (`ToggleSize`, `RangeSize`) were
+already separate types and stay separate.
+
+**The generated tables did change — see the escalation below.**
+
+`inputs.md`'s "six copies" table is updated to point here.
+
+## Finding 3 — the stretched row overlay is now a real button
+
+`src/molecules/list/stories/RowActions.vue` plus **three** recipes —
+`docs/components/recipes/FilesDesktop.vue:665`, `FilesMobile.vue:617`,
+`TasksDesktop.vue:1050`. The finding says four; there are three.
+`AccountingDesktop.vue` also matches `absolute inset-0`, but that is a scroll
+region, not a row overlay.
+
+**Changed.** Each overlay gets `type="button"` (a button with no `type`
+defaults to `submit`, which is exactly what `ListRowBase.vue:10` guards
+against), and the row's own corner radius so the focus outline follows the
+row's corners. `list.md`'s description of the pattern says both.
+
+**The suggested class string was not copied verbatim.** Two differences, both
+because the codebase does it differently:
+
+1. **No `focus-visible:focus-ring`.** `tailwind/plugin.js:181` already applies
+   `outline: var(--focus-outline-default)` to `:focus-visible` globally, in the
+   base layer. Measured on the focused overlay: `matches(':focus-visible')` is
+   true and the computed outline is `rgba(201,201,201,.898) solid 2px`. So the
+   keyboard user was never seeing nothing — the ring was there, drawn square
+   over a rounded row. The utility would have been a redundant restatement of
+   the base rule.
+2. **`sm:rounded-[10px]`, not `rounded-[10px]`.** The rows are
+   `sm:rounded-[10px]`, so below the `sm` breakpoint they are square and the
+   outline should be too. `FilesMobile`'s row has no radius at all (`h-17`),
+   so its overlay stays square at every width.
+
+## Verification
+
+Run from `/Users/netchampfaris/Projects/worktrees/rc-integration`.
+Cypress needs `env -u ELECTRON_RUN_AS_NODE`, as the earlier tracks found.
+
+| Command | Result |
+| --- | --- |
+| `yarn type-check` | `Done in 22.68s.` — clean |
+| `yarn test` | `Test Files 104 passed (104)`, `Tests 1689 passed (1689)` |
+| `yarn docs:gen` + `yarn docs:check` | `The committed API tables match the source.` |
+| Cypress, 6 specs | `All specs passed! 189 189` |
+| Cypress, `MultiEmailInput` after the new cases | `All specs passed! 17 17` |
+
+The six specs: `MultiEmailInput`, `list/List`, `ItemListRow`, `Select`,
+`MultiSelect`, `Combobox`.
+
+`docs:gen` again reordered `update:hiddenSeries` in the three chart tables.
+Same pre-existing drift the inputs track recorded; reverted, not committed.
+
+### Screenshots
+
+Rendered through `vite` on a temporary `App.vue` harness, restored afterwards.
+
+- `/tmp/rc-fix-shots/00-multiemailinput-xs-before.png` — `xs`, old ternary,
+  24px avatars.
+- `/tmp/rc-fix-shots/01-multiemailinput-xs-fixed.png` — `xs`, 16px avatars.
+- `/tmp/rc-fix-shots/02-multiemailinput-sm-fixed.png` — `sm`, 20px, unchanged.
+- `/tmp/rc-fix-shots/03-rowactions-overlay-focus.png` — the overlay focused,
+  ring following the row's 10px corners.
+
+## Escalation — the generated API tables changed
+
+The finding claims aliasing "keeps the printed API table". It does not.
+`propsgen` resolves an alias of an alias down to the ultimate name, so seven
+rows moved:
+
+```
+Select.api.md       size     '"xs" | "sm" | "md" | "lg"'      -> 'InputSize'
+Select.api.md       variant  '"subtle" | "outline" | "ghost"' -> 'InputVariant'
+Combobox.api.md     size     'ComboboxSize'                   -> 'InputSize'
+Combobox.api.md     variant  'ComboboxVariant'                -> 'InputVariant'
+MultiSelect.api.md  size     'MultiSelectSize'                -> 'InputSize'
+MultiSelect.api.md  variant  'MultiSelectVariant'             -> 'InputVariant'
+ItemListRow.api.md  size     'ItemListSize'                   -> 'InputSize'
+```
+
+Kept, on the argument that it is a docs change and not a type change:
+
+- The types are identical and every alias is still exported, so no consumer
+  breaks and no `.d.ts` shape moves.
+- `TextInput` and `Textarea` already printed `InputSize` / `InputVariant`. The
+  whole input family now prints one name instead of five synonyms for it.
+- `InputSize` and `InputVariant` are exported from the root and announced in
+  the changelog for exactly this reason. `src/index.ts:155` already claimed
+  "every generated API table prints these alias names as a prop's type" —
+  that claim is only now true.
+
+The cost is real and worth naming: `Select`'s table used to spell the four
+values out and now shows an opaque `InputSize`. `PropsTable` does not resolve
+type names, so a reader has to look the name up. That matches how `TextInput`
+already reads, so it is a consistency call, not an improvement.
+
+Revert is `git revert d5a57173ef` if the orchestrator wants the tables held.
+
+## Also worth knowing
+
+The pull-request body says the scale is "declared once in meaning rather than
+six times in copies". That was aspirational when written — there were six
+copies that happened to agree. It is now literally true. The diff block under
+it still lists all six names as if they were separate declarations; the
+orchestrator owns the body.
