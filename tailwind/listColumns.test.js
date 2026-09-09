@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import postcss from 'postcss'
+import tailwind from 'tailwindcss'
 import { listBreakpoints, listColumnRules } from './listColumns.js'
+import preset from './preset.js'
 
 const PRESET_SCREENS = {
   sm: '640px',
@@ -106,5 +109,71 @@ describe('listColumnRules', () => {
         '--_list-columns': 'var(--_list-columns-base)',
       },
     })
+  })
+})
+
+// The unit tests above check the generator. This one checks the wiring: the
+// plugin has to read the *resolved* theme, so an app that overrides `screens`
+// moves the list's tracks with its own `md:` utilities rather than with the
+// preset's defaults.
+describe('the preset, built against an app config', () => {
+  async function baseLayer(config) {
+    const { css } = await postcss([tailwind(config)]).process('@tailwind base;', {
+      from: undefined,
+    })
+    return css
+  }
+
+  function ladder(css) {
+    return css
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(
+        (line) =>
+          line.startsWith('@media (min-width') ||
+          line.startsWith('--_list-columns:'),
+      )
+  }
+
+  it("uses the app's overridden and added screens, re-sorted by width", async () => {
+    const css = await baseLayer({
+      presets: [preset],
+      content: [{ raw: '<div data-slot="list"></div>' }],
+      theme: { extend: { screens: { md: '900px', tablet: '850px' } } },
+    })
+    expect(ladder(css)).toEqual([
+      '--_list-columns: var(--_list-columns-base);',
+      '@media (min-width: 640px) {',
+      '--_list-columns: var(--_list-columns-sm, var(--_list-columns-base));',
+      // tablet sorts below the overridden md, though it was declared after it.
+      '@media (min-width: 850px) {',
+      '--_list-columns: var(--_list-columns-tablet, var(--_list-columns-sm, var(--_list-columns-base)));',
+      '@media (min-width: 900px) {',
+      '--_list-columns: var(--_list-columns-md, var(--_list-columns-tablet, var(--_list-columns-sm, var(--_list-columns-base))));',
+      '@media (min-width: 1024px) {',
+      '--_list-columns: var(--_list-columns-lg, var(--_list-columns-md, var(--_list-columns-tablet, var(--_list-columns-sm, var(--_list-columns-base)))));',
+      '@media (min-width: 1280px) {',
+      '--_list-columns: var(--_list-columns-xl, var(--_list-columns-lg, var(--_list-columns-md, var(--_list-columns-tablet, var(--_list-columns-sm, var(--_list-columns-base))))));',
+    ])
+  })
+
+  it("switches list tracks at the same width as the app's md: utilities", async () => {
+    const config = {
+      presets: [preset],
+      content: [{ raw: '<div data-slot="list" class="md:hidden"></div>' }],
+      theme: { extend: { screens: { md: '900px' } } },
+    }
+    const { css } = await postcss([tailwind(config)]).process(
+      '@tailwind base;@tailwind utilities;',
+      { from: undefined },
+    )
+    // One width for both: the md tier of `columns` and `md:hidden` on a cell.
+    const mdBlocks = css
+      .split('@media (min-width: 900px)')
+      .slice(1)
+      .join('')
+    expect(mdBlocks).toContain('--_list-columns-md')
+    expect(mdBlocks).toContain('.md\\:hidden')
+    expect(css).not.toContain('@media (min-width: 768px)')
   })
 })

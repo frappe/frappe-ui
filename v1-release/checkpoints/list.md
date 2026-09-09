@@ -95,7 +95,8 @@ is ignored, since `base` is the prop's own reserved tier.
 ## Files changed
 
 - `tailwind/listColumns.js` (new) — breakpoint ladder and rule generation
-- `tailwind/listColumns.test.js` (new) — 9 unit tests
+- `tailwind/listColumns.test.js` (new) — 9 unit tests plus 2 that build the
+  preset through postcss against an app config that overrides `md`
 - `tailwind/plugin.js` — `addBase(listColumnRules(theme('screens')))`, removed
   the `list-cols` utility
 - `src/molecules/list/types.ts` — `ListColumnsByBreakpoint`, `ListColumns`
@@ -128,7 +129,7 @@ $ env -u ELECTRON_RUN_AS_NODE npx cypress run --component \
 ```
 $ yarn test
  Test Files  104 passed (104)
-      Tests  1683 passed (1683)
+      Tests  1685 passed (1685)
 ```
 
 ```
@@ -182,6 +183,19 @@ Computed values for `{ base: [1fr, 80px, 64px], md: [1fr, 140px, 100px], lg: [2f
 Header and row tracks are identical at every width, and the nested static list
 keeps its own template inside a responsive outer one. No console errors or Vue
 warnings.
+
+App-customized breakpoints, checked by building the preset through postcss with
+`theme.extend.screens = { md: '900px', tablet: '850px' }` (now a test):
+
+```
+--_list-columns-tablet: initial;
+@media (min-width: 850px) { --_list-columns: var(--_list-columns-tablet, var(--_list-columns-sm, var(--_list-columns-base))); }
+@media (min-width: 900px) { --_list-columns: var(--_list-columns-md, var(--_list-columns-tablet, …)); }
+```
+
+`tablet` sorts below the overridden `md` even though it was declared after it,
+no `768px` rule is emitted, and the `md` tier lands in the same `900px` block as
+`.md\:hidden`.
 
 Story check (`stories/Responsive.vue`, `max-md:hidden` on the Role header and
 cell): at 1200px `row="840px 144px 128px"` and the Role cells are `flex`; at
