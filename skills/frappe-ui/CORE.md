@@ -229,11 +229,11 @@ dialog.prompt({
 
 Every input control **except `FileUploader`** accepts the shared labeling contract `InputLabelingProps`: `label`, `description`, `error` (`string | Error`), `required`, `id`. `Radio` is the one partial: it takes `label`, `description` and `id`, while `required` and `error` sit on `RadioGroup`.
 
-Text-family sizes are `sm | md | lg | xl` (`InputSize`) and variants `subtle | outline | ghost` (`InputVariant`). Binary controls (`Checkbox`, `Radio`, `Switch`) take size `xs | sm | md` (`ToggleSize`).
+Text-family sizes are `xs | sm | md | lg` (`InputSize`) — fixed single-line heights of 24 / 28 / 32 / 40px — and variants `subtle | outline | ghost` (`InputVariant`). There is no `xl`. Binary controls (`Checkbox`, `Radio`, `Switch`) take size `xs | sm | md` (`ToggleSize`). Labels, descriptions and `Textarea` text are a fixed 13px at every size; `FormLabel` has no `size` prop.
 
 ### `FormControl`
 
-The default for a labeled field, and a dispatcher: `type` picks the child component. Values are any `TextInputTypes` value (`text`, `email`, `number`, `password`, `search`, `tel`, `url`, `date`, `datetime-local`, `time`, `month`, `week`, `file`, `range`) plus `textarea`, `select`, `checkbox`, `combobox`, `multiselect`, `date`, `daterange`, `datetime`, `time`. Its own props are `label`, `description`, `error`, `required`, `size` (`sm | md`), `variant` (`subtle | outline`); type-specific props and the `v-model` shape follow the child component, so read that entry. Reach for a bare `TextInput` only inside a control you compose yourself.
+The default for a labeled field, and a dispatcher: `type` picks the child component. Values are any `TextInputTypes` value (`text`, `email`, `number`, `password`, `search`, `tel`, `url`, `date`, `datetime-local`, `time`, `month`, `week`, `file`, `range`) plus `textarea`, `select`, `checkbox`, `combobox`, `multiselect`, `date`, `daterange`, `datetime`, `time`. Its own props are `label`, `description`, `error`, `required`, `size` (the full `InputSize` scale; `lg` clamps to `md` for `type="checkbox"`), `variant` (`subtle | outline`); type-specific props and the `v-model` shape follow the child component, so read that entry. Reach for a bare `TextInput` only inside a control you compose yourself.
 
 ```vue
 <form class="mx-auto max-w-xl space-y-4 p-6" @submit.prevent="save">
@@ -259,7 +259,7 @@ The default for a labeled field, and a dispatcher: `type` picks the child compon
 - `Duration` — `v-model` is seconds (`number | null`). `format` is `short | long | colon` or a token template such as `hh:mm:ss`.
 - `FileUploader` — Frappe-native upload. Props `fileTypes`, `private` (default `true`), `folder`, `doctype`, `docname`, `fieldname`, `optimize`, `validateFile`. Emits `success` with the uploaded File doc, and `failure`. It has no labeling props — render your own label around it.
 - `ErrorMessage` — `<ErrorMessage :message="err" />`; `message` takes a string or an `Error`.
-- `ItemListRow` — the shared row primitive behind `Dropdown`, `Select`, `Combobox` and `MultiSelect`. Use it when you compose a custom listbox or menu surface and want the design-system row shell with its prefix/label/suffix regions and `active` / `selected` / `disabled` states. Props `as`, `size` (`sm | md | lg | xl`), `active`, `selected`, `disabled`.
+- `ItemListRow` — the shared row primitive behind `Dropdown`, `Select`, `Combobox` and `MultiSelect`. Use it when you compose a custom listbox or menu surface and want the design-system row shell with its prefix/label/suffix regions and `active` / `selected` / `disabled` states. Props `as`, `size` (`xs | sm | md | lg`), `active`, `selected`, `disabled`.
 
 ## Display
 
@@ -299,7 +299,7 @@ The list primitive for every list. Feed mode is the default; adding `:columns` a
 
 `List` props:
 
-- `columns?: string[]` — **CSS grid track sizes**, joined into the `--list-columns` template shared by the header and every row. Not column descriptors: `['minmax(0,1fr)', '11rem', '6rem']`. Default is the feed template `['auto', 'minmax(0,1fr)', 'auto']`. Table lists need deterministic sizes; an `auto` track sizes per row.
+- `columns?: string[] | { base: string[], <screen>?: string[] }` — **CSS grid track sizes** for the template shared by the header and every row. Not column descriptors: `['minmax(0,1fr)', '11rem', '6rem']`. Default is the feed template `['auto', 'minmax(0,1fr)', 'auto']`. Table lists need deterministic sizes; an `auto` track sizes per row. The object form is responsive: `base` is required and applies from zero width, and every other key names a breakpoint from the app's own Tailwind `screens` and applies from that width up until the next supplied tier. Each tier replaces the whole template, so it can change the track count — pair that with matching visibility classes. Resolution is plain CSS, so the server-rendered markup is already correct. There is no `--list-columns` hook and no `list-cols-[…]` utility: columns are prop-only.
 - `divider?: 'inset' | 'full' | 'none'` — `inset` on the feed template, `full` once `columns` is set.
 - `selectable?: boolean` — reveals the checkbox column and switches row click from navigate to toggle.
 - `rowHeight?: number` — px; required for virtualization.
@@ -314,7 +314,7 @@ The parts:
 - `ListHeaderCellSort` — props `{ direction?: 'asc' | 'desc' | null, align?: 'start' | 'end' }`, emits `click`, label in the default slot, scoped `#suffix="{ direction }"` for a custom glyph. It is controlled: sort state and comparators are app code.
 - `ListHeader` — default slot holds the header cells. Its presence flips the list into table semantics; there is no mode prop.
 - `ListGroup` — props `{ label?: string, sticky?: boolean }`, slots `#header` and default.
-- Geometry: the `list-gap-*` and `list-row-px-*` utilities, or the raw `--list-columns`, `--list-gap`, `--list-row-padding-x` CSS vars.
+- Geometry: the `list-gap-*` and `list-row-px-*` utilities, or the raw `--list-gap` and `--list-row-padding-x` CSS vars. Those two are the whole public hook surface; the column template is internal.
 
 Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` desktop feed → `h-17` mobile feed. Use **one** height mechanism per list: either `:row-height` on the `List` or a height class on every `ListRow`.
 

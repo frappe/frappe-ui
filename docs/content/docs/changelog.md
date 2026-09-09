@@ -29,6 +29,96 @@ There is no alias export. The import fails, so the build names every call
 site: the old name is a plain find-and-replace, as with every other component
 rename in v1.
 
+### Inputs — the size scale is `xs / sm / md / lg` (breaking; loud in TS, silent in JS)
+
+`xs` is added and `xl` is removed across the input family. The four sizes are
+fixed single-line heights: **24 / 28 / 32 / 40px**. `sm`, `md` and `lg` render
+as before, and `xs` matches `Button`'s own `xs`, so a 24px input and a 24px
+button line up.
+
+`xl` was never a bigger box — it drew `lg`'s 40px height with an 18px font, so
+it was a font override wearing a size name. Replace it with `size="lg"`.
+
+Every component on the shared scale moves together: `TextInput`, `Textarea`,
+`Password`, `Rating`, `Select`, `Combobox`, `MultiSelect`, `ItemListRow`,
+`FormControl`, the `DatePicker` family, `TimePicker`, `Duration`, and the
+experimental `CodeEditor` and `MultiEmailInput`. `Progress`, `Slider`,
+`Switch`, `Checkbox`, `Radio`, `Avatar`, `Badge`, `Button` and `Dialog` keep
+their own scales, so `<Dialog size="xl">` and `<Avatar size="xl">` still work.
+
+- `FormControl.size` widens from `sm | md` to the whole scale. `type="checkbox"`
+  renders on the narrower toggle scale, so `lg` there clamps to `md` rather
+  than falling off the end.
+- **A leftover `size="xl"` no longer loses its geometry.** Every input size
+  lookup goes through `resolvePropValue`: an unsupported value falls back to
+  the component's own default and warns once in dev, instead of shipping an
+  element with no height, font, radius or padding class and no warning. Same
+  treatment `Badge` got for `theme`.
+- `InputSize`, `InputVariant`, `ToggleSize` and `RangeSize` are now exported
+  from the root, so a typed wrapper can name the scale the API tables already
+  print.
+
+TypeScript flags `xl` at the call site. JavaScript call sites and bound values
+(`:size="config.size"`) only surface through the dev warning, so check the
+console after upgrading.
+
+### Form typography — 13px labels, descriptions and Textarea text (breaking, silent)
+
+Labels, descriptions and `Textarea` text are a fixed 13px, and labels and
+descriptions default to `ink-gray-6`. Nothing to change in your source; this
+is a rendering change.
+
+| Member | Before | After |
+| --- | --- | --- |
+| Label (`InputLabel`) | 14px, `ink-gray-5` | 13px, `ink-gray-6` |
+| Label (`FormLabel`) | 12px `sm` / 14px `md`, `ink-gray-5` | 13px, `ink-gray-6` |
+| Description | 13px, `ink-gray-5` | 13px, `ink-gray-6` |
+| Description, disabled | `ink-gray-3` | `ink-gray-4` |
+| `Textarea` text, every size | 14 / 16 / 18 / 20px | 13px |
+
+The two label implementations used to disagree — `InputLabel`, which
+`FormControl` renders through, was a flat 14px, while `FormLabel` was 12px or
+14px depending on `size`. Both are 13px now, so a `FormLabel` and a `TextInput`
+label finally match.
+
+`ink-gray-5` measured 4.18:1 against the page in both themes, below WCAG AA for
+body text. `ink-gray-6` measures 7.80:1 light and 6.29:1 dark. The disabled
+description moved off `ink-gray-3` (1.69:1) to match the disabled label.
+
+- **`FormLabel.size` is removed**, not kept as a no-op: with the size fixed the
+  axis was degenerate. `size` falls through as a plain HTML attribute, so
+  nothing throws — the label just renders at 13px. TypeScript call sites get a
+  build error. `size="md"` was 14px and the `sm` default was 12px; both land on
+  the accepted 13px, so the migration is deleting the attribute.
+- `Textarea.size` still moves padding, corner radius and minimum height. It no
+  longer moves the type, and the single-line input heights do not prescribe a
+  `Textarea` height, so a `lg` `Textarea` is a roomier box of the same 13px
+  prose. The `Textarea` *value* colour is unchanged.
+
+### Combobox and MultiSelect — `update:open` and `update:query` leave the emit interfaces (breaking in TS only)
+
+`ComboboxEmits` and `MultiSelectEmits` no longer declare `'update:open'` and
+`'update:query'`. Both components declare those events through `defineModel`,
+and declaring them twice collapsed `$emit`'s signature to
+`(event, ...args: unknown[])` — a typed `@update:open` listener would not
+compile.
+
+**The runtime events are unchanged.** `v-model:open`, `v-model:query`, and
+`@update:open` / `@update:query` listeners all fire exactly as before, and both
+events are still listed in the API tables. Only these four interface *members*
+are gone:
+
+| Removed member | Still emitted at runtime |
+| --- | --- |
+| `ComboboxEmits['update:open']` | yes |
+| `ComboboxEmits['update:query']` | yes |
+| `MultiSelectEmits['update:open']` | yes |
+| `MultiSelectEmits['update:query']` | yes |
+
+You are affected only if you indexed those interfaces by hand, as in
+`type Handler = ComboboxEmits['update:open']`. Type the handler off the model
+instead: `(value: boolean) => void`.
+
 ### Editor — mentions open after brackets and quotes
 
 Typing `@` after an opening bracket or quote (`(@jane`, `[@jane`, `"@jane`) now opens the mention list. TipTap only allowed a space before the trigger, so those sequences never matched. Emails (`jane@example.com`) still do not.
@@ -81,6 +171,7 @@ day.
   `24:00:00`.
 - Full-day events (`isFullDay`) cover `fromDate`..`toDate` whole; their
   times are ignored.
+
 ### `frappe-ui/list` — responsive columns, and the CSS hook contract frozen (breaking)
 
 `List.columns` now takes a breakpoint object as well as a plain array:

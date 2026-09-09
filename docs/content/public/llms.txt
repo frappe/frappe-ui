@@ -35,7 +35,7 @@ All from the `frappe-ui` root entry.
 - [Combobox](https://ui.frappe.io/docs/components/combobox): single-select with search; `v-model` value + `v-model:query`. Set `filterable="false"` when the options come from a server search, or the client re-filters the ranked results away.
 - [ContextMenu](https://ui.frappe.io/docs/components/contextmenu): right-click menu for surfaces, rows and canvas elements; opens at the cursor.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
-- [DesktopShell](https://ui.frappe.io/docs/components/desktopshell): the desktop app frame; arranges `Rail` and `Sidebar` beside the content, and owns the pinned `PageHeaderTarget` and scroll region.
+- [DesktopShell](https://ui.frappe.io/docs/components/desktopshell): the desktop app frame; arranges `SidebarRail` and `Sidebar` beside the content, and owns the pinned `PageHeaderTarget` and scroll region.
 - [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`actions`/`size`/`position`/`dismissible`/`bare`. There is no `theme` prop: tone lives on the icon object, `:icon="{ name: 'lucide-trash-2', theme: 'red' }"`. Imperative API: `dialog.confirm`, `dialog.prompt`, `dialog.danger`. There is no `dialog.alert`.
 - [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
@@ -60,12 +60,12 @@ All from the `frappe-ui` root entry.
 - [Popover](https://ui.frappe.io/docs/components/popover): anchored floating panel; `v-model:open`, a `#trigger` slot and the default slot for the body, positioned with `side` + `align`. The v0 `#target` / `#body` slots and `placement` are gone.
 - [Progress](https://ui.frappe.io/docs/components/progress): linear progress bar.
 - [Radio](https://ui.frappe.io/docs/components/radio): single choice from a set; `RadioGroup` owns the value, each `Radio` declares one.
-- [Rail](https://ui.frappe.io/docs/components/rail): the narrow icon column of an app shell; a bare 50px frame plus `RailItem` cells, laid out with plain flex utilities.
 - [Rating](https://ui.frappe.io/docs/components/rating): star-rating input.
 - [ScrollArea](https://ui.frappe.io/docs/components/scrollarea): styled cross-browser scroll container with overlay scrollbars. A general primitive, not app-shell specific.
 - [Select](https://ui.frappe.io/docs/components/select): fixed-options single-value select.
 - [SettingsDialog](https://ui.frappe.io/docs/components/settingsdialog): settings modal with a sidebar of grouped tabs; composed from building blocks, not a config object.
 - [Sidebar](https://ui.frappe.io/docs/components/sidebar): app-shell sidebar primitive.
+- [SidebarRail](https://ui.frappe.io/docs/components/sidebarrail): the narrow icon column of an app shell; a bare 50px frame plus `SidebarRailItem` cells, laid out with plain flex utilities. Composes beside `Sidebar` or renders alone; it is not a collapsed mode of it.
 - [Skeleton](https://ui.frappe.io/docs/components/skeleton): placeholder block shown in place of content while data loads.
 - [Slider](https://ui.frappe.io/docs/components/slider): numeric range input.
 - [Spinner](https://ui.frappe.io/docs/components/spinner): indeterminate loading state.
