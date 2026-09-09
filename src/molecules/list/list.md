@@ -70,9 +70,14 @@ checkbox `selection` — and works in feed or column mode.
 
 ## Column mode
 
-Pass explicit `columns` (deterministic track sizes — `auto` tracks size
-independently per row) and a `ListHeader`. Header and rows share one
-`--list-columns` template, so they can never drift.
+Pass explicit `columns` and a `ListHeader`. The List resolves one template and
+the header and every row read it, so the two grids can never drift.
+
+Use deterministic track sizes. Every row is its own grid, so `auto` tracks size
+against that row's content alone and nothing lines up — the intrinsic sizing a
+real `<table>` shares across rows has no equivalent here. `minmax(0, 1fr)` for
+the content column and fixed widths (or `fr` ratios) for the rest is the shape
+that stays aligned.
 
 `ListHeaderCell` is a plain label with optional `#prefix` / `#suffix`
 adornments. Sortable columns use `ListHeaderCellSort` instead — a controlled
@@ -86,6 +91,60 @@ revealing an inactive column's suffix on hover. Both variants render the same
 seamless.
 
 <ComponentPreview name="List-Columns" />
+
+## Responsive columns
+
+A table that fits a desktop rarely fits a phone. Pass `columns` as an object
+keyed by breakpoint and the List switches templates with the viewport:
+
+```vue
+<List
+  :columns="{
+    base: ['minmax(0,1fr)', '80px', '64px'],
+    md: ['minmax(0,1fr)', '140px', '100px'],
+    lg: ['minmax(0,2fr)', '180px', '120px'],
+  }"
+>
+```
+
+`base` is required and applies from zero width. Every other key names a
+breakpoint from your own Tailwind `screens` and applies from that width upward,
+until the next supplied breakpoint — `sm` and `xl` are missing above, so `sm`
+keeps the `base` template and `xl` keeps the `lg` one.
+
+Each breakpoint replaces the **whole** template. Nothing is merged track by
+track, so a breakpoint is free to change the track count as well as the widths.
+
+The switch happens in CSS, against your app's breakpoint values — a `md` you
+redefined moves the list's tracks and your `md:hidden` utilities together. That
+also means the server-rendered markup is already correct: there is no viewport
+measurement, no resize listener and no first-paint flash.
+
+Changing the track count never hides a cell. Say that part explicitly, with
+matching classes on the header and the rows:
+
+```vue
+<List
+  :columns="{ base: ['minmax(0,1fr)', '64px'], md: ['minmax(0,1fr)', '140px', '100px'] }"
+>
+  <ListHeader>
+    <ListHeaderCell>Member</ListHeaderCell>
+    <ListHeaderCell class="max-md:hidden">Role</ListHeaderCell>
+    <ListHeaderCell>Since</ListHeaderCell>
+  </ListHeader>
+  …
+</List>
+```
+
+Each `List` owns its own columns. A list nested inside another list keeps its
+own `columns` prop, or the default feed template when it has none — an outer
+template never reaches it.
+
+Row height stays a plain prop. A per-breakpoint height would silently desync
+`virtual` windowing, so `rowHeight` is one number at every width; for a
+non-virtual list, set responsive heights with height classes on the rows.
+
+<ComponentPreview name="List-Responsive" />
 
 ## Virtual rows
 
@@ -101,23 +160,14 @@ composable, `useVirtualRows`, is exported for exotic cases.
 
 ## Styling hooks
 
-`--list-columns`, `--list-gap` (default `0.5rem`) and `--list-row-padding-x` are
-the list's public CSS hooks. Set them with plain (responsive) classes on the
-`List` — or on any ancestor, to theme every list in a subtree. Their defaults
-live in `var()` fallbacks, so a consumer value always wins, even over the
-`columns` prop — a nested list's included: a wrapper's `--list-columns` reaches
-every list below it, and an inner list that should keep its own `columns` opts
-out with `[--list-columns:initial]`. Hook-beats-prop is how people-style lists
-collapse to a feed on mobile with no dedicated API:
+`--list-gap` (default `0.5rem`) and `--list-row-padding-x` are the list's public
+CSS hooks. Set them with plain (responsive) classes on the `List` — or on any
+ancestor, to theme every list in a subtree. Their defaults live in `var()`
+fallbacks, so a consumer value always wins.
 
-```vue
-<List
-  :columns="['minmax(8rem,1fr)', '5.5rem', '5.5rem']"
-  class="max-sm:[--list-columns:auto_minmax(0,1fr)_auto]"
->
-```
-
-with `max-sm:hidden` on the numeric cells and the `ListHeader`.
+Column templates are deliberately not a hook. They come from the `columns` prop
+alone, which is what lets every `List` — nested ones included — own its own
+grid.
 
 `--list-row-padding-x` is the inline content inset, and its default is
 asymmetric on purpose: interactive rows get `0.75rem` so the rounded hover
@@ -129,21 +179,17 @@ the header labels stay aligned with the cell text below them. The checkbox
 column follows the same rule: in a `selectable` list with a header, the hook is
 also what lines the select-all checkbox up with the row checkboxes.
 
-For `--list-gap` and `--list-row-padding-x`, the frappe-ui Tailwind preset ships
-spacing-scale utilities — `list-gap-*` and `list-row-px-*` — so the usual
-authoring form is `max-sm:list-gap-3 sm:list-gap-4` rather than raw
-`[--list-gap:0.75rem]` properties. `list-cols-[…]` is the same sugar for
-`--list-columns`, arbitrary values only — track templates have no meaningful
-scale. Both forms hit the same CSS vars.
+For both hooks the frappe-ui Tailwind preset ships spacing-scale utilities —
+`list-gap-*` and `list-row-px-*` — so the usual authoring form is
+`max-sm:list-gap-3 sm:list-gap-4` rather than raw `[--list-gap:0.75rem]`
+properties. Both forms hit the same CSS vars.
 
 The prop/hook split follows one rule: knobs that drive behavior are props
 (`columns` also flips the divider default, `rowHeight` also feeds `virtual`
-windowing), knobs that are pure geometry are CSS hooks. Row height is
-deliberately a prop alone — a per-breakpoint height var would silently desync
-virtual windowing; in non-virtual lists, set responsive heights with height
-classes on the rows. Vars with a `--_list` prefix are internal carriers, not API
-— they can change in any release, and they reset at every `List`, so a nested
-list never inherits an outer list's props.
+windowing), knobs that are pure geometry are CSS hooks. Vars with a `--_list`
+prefix are internal, not API — they can change in any release, and they reset at
+every `List`, so a nested list never inherits an outer list's props. The
+resolved column template is one of them.
 
 Cells (and plain header cells) are flex containers with `items-center` — align
 content with justify utilities (`class="justify-end"` for numeric columns),
