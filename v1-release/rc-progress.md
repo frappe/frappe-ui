@@ -9,7 +9,7 @@ Base for every branch: `main` @ `2d65281be8` (`v1.0.0-beta.62`).
 
 | Track | Branch | Worktree | Ticket | State |
 | --- | --- | --- | --- | --- |
-| Rail rename | `v1/rc-rail` | `~/Projects/worktrees/rc-rail` | #1116 | running |
+| Rail rename | `v1/rc-rail` | `~/Projects/worktrees/rc-rail` | #1116 | **done**, 5 commits, head `017c9acb97` |
 | Input scale + form typography | `v1/rc-inputs` | `~/Projects/worktrees/rc-inputs` | #1117, #1118 | running |
 | List responsive columns | `v1/rc-list` | `~/Projects/worktrees/rc-list` | #1097 | running |
 | Integration | `v1/rc-api` | to be created | #1029, #1091, #1098 | not started |
@@ -32,3 +32,27 @@ Charts (#1128) stays with Saqib and is out of this queue.
 - Public types (#1091, branch `fix/exported-types-1070`) and duplicate model emits (#1098, branch `fix/duplicate-emit-1096`) are both small and open. #1091 touches `shared/picker/PickerShell.vue`, which the input track also touches, so merge it after `v1/rc-inputs` and expect one conflict there.
 - Local consumer clones for the read-only migration check: `~/Projects/gameplan` and `~/Projects/helpdesk`. There is no local CRM clone. `~/Projects/gameplan/frappe-ui` is itself a live worktree of this repository on another branch — read it, never write to it.
 - Booting the consumer apps needs a bench that is not set up here. Record any consumer check that could not run as unverified rather than dropping it.
+
+## Rail track result (done)
+
+Branch `v1/rc-rail`, head `017c9acb97`, 24 files, +364/-140, all moves done with `git mv`.
+Full detail in `v1-release/checkpoints/rail.md` on that branch, including the #1116 draft comment.
+
+Verified there: `yarn type-check` clean before and after, `yarn docs:check` reports the committed
+tables match, full `yarn test` 102 files / 1670 tests passed, Cypress `SidebarRail.cy.ts` 7/7 and
+`DesktopShell.cy.ts` 3/3. Screenshots in `/tmp/rc-rail-shots/`.
+
+Carried forward to integration:
+
+- `data-slot` values gained the prefix (`rail` -> `sidebar-rail`, `rail-item`, `rail-item-indicator`,
+  `rail-item-badge-dot`). That half of the break is silent, so consumer CSS needs a grep for
+  `data-slot="rail` and `[data-slot=rail`.
+- `SidebarRailItemProps` is now exported from the barrel. It existed but was unexported, unlike
+  `SidebarItemProps`. One added line to the public surface; revert if unwanted.
+- No codemod, by the rule in `migration.md`: only `tokens-v2` and `shortcuts-v1` have one, every other
+  rename is a hand edit. The import break is loud.
+- No v0 migration-guide section: `Rail` was added during the v1 betas and does not exist in v0.1.278.
+- Cypress in an agent shell needs `env -u ELECTRON_RUN_AS_NODE` in front of it, or the Electron binary
+  boots as plain Node and fails to find its app bundle. Not a code problem.
+- `yarn docs:gen` reorders emit rows in `src/charts/docs/{Area,Bar,Line}Chart.api.md`. Pre-existing
+  drift, `docs:check` ignores row order, so leave Saqib's files alone.
