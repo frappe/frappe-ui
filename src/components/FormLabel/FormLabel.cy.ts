@@ -1,4 +1,5 @@
 import FormLabel from './FormLabel.vue'
+import TextInput from '../TextInput/TextInput.vue'
 
 describe('FormLabel', () => {
   it('renders the label text', () => {
@@ -35,15 +36,33 @@ describe('FormLabel', () => {
     cy.get('label').should('have.attr', 'for', 'email-field')
   })
 
-  it('applies the size classes', () => {
+  it('renders at a fixed 13px in ink-gray-6', () => {
     cy.mount(FormLabel, {
-      props: { label: 'Email', size: 'md' },
+      props: { label: 'Email' },
     })
-    cy.get('label').should('have.class', 'text-base')
+    cy.get('label')
+      .should('have.class', 'text-sm')
+      .and('have.class', 'text-ink-gray-6')
+      .and('have.css', 'font-size', '13px')
+  })
 
+  it('ignores a stale size attribute rather than resizing', () => {
+    // `size` was removed with the fixed label type. It is not a prop any
+    // more, so it falls through to the DOM as an attribute and changes
+    // nothing — the label still reads at 13px.
     cy.mount(FormLabel, {
-      props: { label: 'Email', size: 'sm' },
+      props: { label: 'Email', size: 'md' } as never,
     })
-    cy.get('label').should('have.class', 'text-xs')
+    cy.get('label').should('have.css', 'font-size', '13px')
+  })
+
+  it('matches InputLabel, the other label implementation', () => {
+    // The two used to disagree: 12px/14px here, a flat 14px there. Both are
+    // 13px now, so `FormLabel` and a `TextInput` label are interchangeable.
+    cy.mount(FormLabel, { props: { label: 'Email' } })
+    cy.get('label').should('have.css', 'font-size', '13px')
+
+    cy.mount(TextInput, { props: { label: 'Email' } })
+    cy.get('label').should('have.css', 'font-size', '13px')
   })
 })
