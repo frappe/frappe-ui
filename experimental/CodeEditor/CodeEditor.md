@@ -40,7 +40,7 @@ and loses the affordance that it's an editable field.
 
 ## Sizes
 
-`size` mirrors the frappe-ui input sizes (`sm | md | lg | xl`, default `md`),
+`size` mirrors the frappe-ui input sizes (`xs | sm | md | lg`, default `md`),
 scaling the editor's font size and minimum height.
 
 <ComponentPreview name="CodeEditor-Sizes" />

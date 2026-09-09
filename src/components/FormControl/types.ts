@@ -1,4 +1,5 @@
 import type { TextInputTypes } from '../types/TextInput'
+import type { InputSize } from '../../composables/inputTypes'
 import type { FrappeUIError } from '../../composables/useInputLabeling'
 
 export interface FormControlProps {
@@ -29,8 +30,12 @@ export interface FormControlProps {
     | 'daterange'
     | 'datetime'
     | 'time'
-  /** Size of the input */
-  size?: 'sm' | 'md'
+  /**
+   * Size of the input. The full input scale — `xs` 24px, `sm` 28px, `md` 32px,
+   * `lg` 40px. `type="checkbox"` renders on the narrower toggle scale, so `lg`
+   * is clamped to that scale's largest value there.
+   */
+  size?: InputSize
   /** Visual variant of the input */
   variant?: 'subtle' | 'outline'
   /** Whether the input is required */

@@ -28,7 +28,7 @@ export type SelectNormalizedOption = Exclude<SelectOption, string>
 
 export interface SelectProps extends InputLabelingProps {
   /** Size of the select input. */
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
 
   /** Visual style of the select input. */
   variant?: 'subtle' | 'outline' | 'ghost'

@@ -3,7 +3,7 @@ import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
-export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
+export type MultiSelectSize = 'xs' | 'sm' | 'md' | 'lg'
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }

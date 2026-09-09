@@ -9,7 +9,7 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"sm" | "md" | "lg" | "xl"',
+    type: '"xs" | "sm" | "md" | "lg"',
     default: '"sm"'
   },
   {

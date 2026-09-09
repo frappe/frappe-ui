@@ -27,10 +27,10 @@ describe('Select', () => {
 
   it('sizes', () => {
     const classes = {
+      xs: 'min-h-6',
       sm: 'min-h-7',
       md: 'min-h-8',
       lg: 'min-h-10',
-      xl: 'min-h-10',
     }
 
     for (const size in classes) {
@@ -38,6 +38,24 @@ describe('Select', () => {
       cy.get('button').click()
       cy.get('[role=option]').should('have.class', classes[size])
     }
+  })
+
+  it('renders the trigger at the accepted single-line heights', () => {
+    const heights = { xs: 24, sm: 28, md: 32, lg: 40 }
+
+    for (const [size, height] of Object.entries(heights)) {
+      cy.mount(Select, { props: { options, size } })
+      cy.get('[role=combobox]').should(($el) => {
+        expect($el[0].getBoundingClientRect().height).to.equal(height)
+      })
+    }
+  })
+
+  it('falls back to sm geometry for a size outside the union', () => {
+    cy.mount(Select, { props: { options, size: 'xl' as never } })
+    cy.get('[role=combobox]').should(($el) => {
+      expect($el[0].getBoundingClientRect().height).to.equal(28)
+    })
   })
 
   it('v-model', () => {

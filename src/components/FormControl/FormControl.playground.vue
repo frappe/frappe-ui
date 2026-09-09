@@ -32,8 +32,10 @@ const knobs: Knob[] = [
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
+      { label: 'lg', value: 'lg' },
     ],
   },
   {

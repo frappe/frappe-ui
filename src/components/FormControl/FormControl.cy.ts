@@ -247,4 +247,44 @@ describe('FormControl', () => {
       })
     })
   })
+  describe('size scale', () => {
+    const heights = { xs: 24, sm: 28, md: 32, lg: 40 } as const
+
+    for (const [size, height] of Object.entries(heights)) {
+      it(`forwards size="${size}" to a text input as ${height}px`, () => {
+        cy.mount(FormControl, { props: { type: 'text', size, label: 'Email' } })
+        cy.get('input')
+          .should('have.attr', 'data-size', size)
+          .and('have.css', 'height', `${height}px`)
+        cy.get('label').should('have.css', 'font-size', '13px')
+      })
+
+      it(`forwards size="${size}" to a textarea`, () => {
+        cy.mount(FormControl, {
+          props: { type: 'textarea', size, label: 'Notes' },
+        })
+        cy.get('textarea')
+          .should('have.attr', 'data-size', size)
+          .and('have.css', 'font-size', '13px')
+      })
+    }
+
+    it('clamps lg to md for a checkbox, which has no lg', () => {
+      // Checkbox renders on `ToggleSize` (`xs | sm | md`). Forwarding `lg`
+      // would fall off the end of its size chain and draw an `xs` control.
+      cy.mount(FormControl, {
+        props: { type: 'checkbox', size: 'lg', label: 'Subscribe' },
+      })
+      cy.get('input[type="checkbox"]').should('have.attr', 'data-size', 'md')
+    })
+
+    it('forwards the narrower sizes to a checkbox unchanged', () => {
+      for (const size of ['xs', 'sm', 'md'] as const) {
+        cy.mount(FormControl, {
+          props: { type: 'checkbox', size, label: 'Subscribe' },
+        })
+        cy.get('input[type="checkbox"]').should('have.attr', 'data-size', size)
+      }
+    })
+  })
 })

@@ -3,7 +3,7 @@ import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
-export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
+export type ComboboxSize = 'xs' | 'sm' | 'md' | 'lg'
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }

@@ -105,7 +105,12 @@ const forwardedAttrs = computed(() => {
     if (key !== 'class' && key !== 'style') out[key] = attrs[key]
   }
 
-  out.size = props.size
+  // Checkbox is a toggle, not a text input: it renders on `ToggleSize`
+  // (`xs | sm | md`), which has no `lg`. Clamp rather than forward a value the
+  // control cannot draw — `FormControl` advertises the whole input scale, so
+  // `size="lg"` has to mean something for every type it dispatches to.
+  out.size =
+    props.type === 'checkbox' && props.size === 'lg' ? 'md' : props.size
   out.variant = props.variant
 
   if (props.label !== undefined) out.label = props.label

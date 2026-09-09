@@ -4,9 +4,9 @@ import { Password } from 'frappe-ui'
 
 <template>
   <div class="flex flex-col gap-3 w-full max-w-sm">
+    <Password size="xs" placeholder="Extra small" />
     <Password size="sm" placeholder="Small" />
     <Password size="md" placeholder="Medium" />
     <Password size="lg" placeholder="Large" />
-    <Password size="xl" placeholder="Extra large" />
   </div>
 </template>

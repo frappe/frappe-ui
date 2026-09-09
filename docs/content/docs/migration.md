@@ -741,6 +741,8 @@ Covers `TextInput`, `Textarea`, `Password`, `Checkbox`, `Switch`, `Rating`,
 | `Checkbox.padding`                         | `padded`               |
 | `Password` `:value` prop (removed)         | `v-model`              |
 | `TextInput` / `Textarea` ref `.el`         | ref `.inputElement`    |
+| `size="xl"` on any input                   | `size="lg"`            |
+| `FormLabel` `size` (removed)               | fixed 13px label       |
 
 The five rows below `<Input>` are **removed**, not aliased. The old names are
 silently ignored: a `Rating` with `:rating_from="10"` renders 5 stars, a
@@ -758,6 +760,104 @@ the control is announced correctly.
 
 `CircularProgressBar` is deleted — the import fails. Use `Progress` for a
 linear bar, or render the arc yourself; there is no circular variant in v1.
+
+### Input sizes
+
+The input size scale is now `xs | sm | md | lg`. `xs` is new, and `xl` is
+removed.
+
+| Size | Single-line height |
+| ---- | ------------------ |
+| `xs` | 24px               |
+| `sm` | 28px (default)     |
+| `md` | 32px               |
+| `lg` | 40px               |
+
+`sm`, `md` and `lg` render exactly as before. `xl` was never a bigger box: it
+drew `lg`'s 40px height with an 18px font, so it was a font override wearing a
+size name.
+
+```vue
+<!-- Before -->
+<TextInput size="xl" />
+
+<!-- After: pick the height you wanted -->
+<TextInput size="lg" />
+```
+
+This applies to every component on the shared input scale: `TextInput`,
+`Textarea`, `Password`, `Rating`, `Select`, `Combobox`, `MultiSelect`,
+`ItemListRow`, `FormControl`, the `DatePicker` family, `TimePicker`,
+`Duration`, and the experimental `CodeEditor` and `MultiEmailInput`.
+
+`Progress`, `Slider`, `Switch`, `Checkbox`, `Avatar`, `Badge`, `Button` and
+`Dialog` keep their own scales and are unaffected — `<Dialog size="xl">` and
+`<Avatar size="xl">` still work.
+
+A leftover `size="xl"` no longer drops the geometry. Every input size lookup
+now falls back to that component's default (`sm` for the input family) and
+warns once in dev:
+
+```
+[frappe-ui] TextInput.size="xl" is not a supported value — falling back to
+"sm". Supported: xs, sm, md, lg.
+```
+
+TypeScript flags the value at the call site. JavaScript call sites and bound
+values (`:size="config.size"`) only surface through that warning, so check the
+dev console after upgrading.
+
+`FormControl.size` widens the other way: it accepted only `sm | md` and now
+takes the whole scale. `type="checkbox"` renders on the narrower toggle scale,
+so `size="lg"` there is clamped to `md` rather than falling off the end.
+
+### Form typography — 13px labels, descriptions and Textarea text
+
+Labels, descriptions and `Textarea` text are a fixed 13px, and labels and
+descriptions are `ink-gray-6`. Nothing to change in your source — this is a
+rendering change.
+
+| Member                      | Before                 | After              |
+| --------------------------- | ---------------------- | ------------------ |
+| Label (`InputLabel`)        | 14px, `ink-gray-5`     | 13px, `ink-gray-6` |
+| Label (`FormLabel`)         | 12px `sm` / 14px `md`  | 13px, `ink-gray-6` |
+| Description                 | 13px, `ink-gray-5`     | 13px, `ink-gray-6` |
+| Description (disabled)      | `ink-gray-3`           | `ink-gray-4`       |
+| `Textarea` text, every size | 14 / 16 / 18 / 20px    | 13px               |
+
+The two label implementations used to disagree — `InputLabel`, which
+`FormControl` renders through, was a flat 14px while `FormLabel` was 12px or
+14px depending on `size`. Both are 13px now, so a `FormLabel` and a
+`TextInput` label finally match.
+
+`Textarea` `size` still exists and still matters: it moves padding, corner
+radius and the minimum height. It no longer moves the type. The single-line
+input heights do not prescribe a `Textarea` height, so a `lg` `Textarea` is a
+roomier box of the same 13px prose.
+
+The `Textarea` *value* colour is unchanged.
+
+### `FormLabel` — `size` prop removed
+
+With the label size fixed at 13px, `FormLabel`'s `size` axis was degenerate,
+so the prop is gone rather than kept as a no-op.
+
+```vue
+<!-- Before -->
+<FormLabel label="Email" size="md" />
+
+<!-- After -->
+<FormLabel label="Email" />
+```
+
+`size` now falls through as a plain HTML attribute, so nothing throws — the
+label just renders at 13px. TypeScript call sites get a build error.
+
+If you passed `size="md"` you were getting 14px; you now get 13px. If you
+relied on the `sm` default you were getting 12px; you now get 13px. Either way
+the label lands on the accepted size, so the usual answer is to delete the
+attribute and keep the new value. To hold a different size, style the label
+yourself rather than reaching for a prop that no longer exists.
 
 ### Password — `value` prop removed
 
