@@ -12,7 +12,7 @@ Base for every branch: `main` @ `2d65281be8` (`v1.0.0-beta.62`).
 | Rail rename | `v1/rc-rail` | `~/Projects/worktrees/rc-rail` | #1116 | **done**, 5 commits, head `017c9acb97` |
 | Input scale + form typography | `v1/rc-inputs` | `~/Projects/worktrees/rc-inputs` | #1117, #1118 | **done**, head `a576d0f4b0` |
 | List responsive columns | `v1/rc-list` | `~/Projects/worktrees/rc-list` | #1097 | **done**, head `37c7853adc` |
-| Integration | `v1/rc-api` | `~/Projects/worktrees/rc-integration` | #1029, #1091, #1098 | running |
+| Integration | `v1/rc-api` | `~/Projects/worktrees/rc-integration` | #1029, #1091, #1098 | **done**, head `9ffb6372a7` + checkpoint |
 
 Charts (#1128) stays with Saqib and is out of this queue.
 
@@ -118,3 +118,152 @@ Downstream sites to migrate after this pull request lands (every hit is a `max-<
 - `frappe/wiki`: `pages/Overview.vue` (two), `components/ContributionsPanel.vue`
 
 No `[--list-columns:` usage was found. `gh search code` truncates silently, so treat seven as a floor.
+
+## Integration track result (done)
+
+Branch `v1/rc-api`, base `2d65281be8`. Checkpoint: `v1-release/checkpoints/integration.md`.
+Nothing pushed, no pull request opened, no issue or pull-request comment posted.
+
+### Merges
+
+| Merge commit | Branch | Head merged | Conflicts |
+| --- | --- | --- | --- |
+| `853a9fb497` | `v1/rc-rail` | `017c9acb97` | none |
+| `6a13955d1f` | `v1/rc-inputs` | `a576d0f4b0` | none |
+| `45ae6f39af` | `v1/rc-list` | `37c7853adc` | none |
+| `1cad8f0453` | `pr-1098` | `bd37c29581` | none |
+| `673c68675a` | `pr-1091` | `ec08af334f` | none |
+
+**Zero textual conflicts.** The three predicted collisions did not happen: the rail track
+is the only one that touches `src/index.ts`; the changelog regions were disjoint (and the
+inputs track added no entry at all); and #1091's `PickerShell` hunks are disjoint from the
+inputs track's `size` widening. `yarn type-check` was clean after each merge.
+
+Integration commits: `9b6b79b4bd`, `d35b728324`, `9ffb6372a7`.
+
+### Checks (verbatim)
+
+| Command | Result |
+| --- | --- |
+| `yarn type-check` | `Done in 8.49s.` — clean |
+| `yarn test` | `Test Files 104 passed (104)`, `Tests 1689 passed (1689)` |
+| `yarn docs:gen` + `yarn docs:check` | `The committed API tables match the source.` |
+| Cypress, 29 touched specs | `All specs passed! 00:51 625 625 - - -` |
+
+`src/charts/docs/{Area,Bar,Line}Chart.api.md` reverted after every `docs:gen`, as both
+earlier tracks recorded. `yarn build` and `yarn docs:build` not run.
+
+### What #1091 and #1098 needed after merging
+
+- #1098's added JSDoc on the `defineModel` calls **appends** to the props-interface
+  description in `propsgen`, so four Combobox/MultiSelect props rendered their description
+  twice. Canonical text stays in `types.ts`; the SFC carries a plain comment.
+- #1091 left `PickerShell.vue` with a stray `</slot>` after removing the `<slot name="target">`
+  opening tag. `vue-tsc` passes (Vue's parser drops it with a warning); fixed anyway.
+- #1091 duplicated `TreeProps.expanded`'s description the same way. Fixed.
+- #1091 added `TabButtonsSlots` but never exported it, unlike every other `*Slots` type. Now
+  exported. `ContextMenuEmits` also sorted into place in its barrel.
+- The dead `#target` slot needed no changelog entry: `changelog.md:1335` and `migration.md:195`
+  already document it as removed. The code contradicted the published docs.
+
+### Public surface changed during integration
+
+Additive only, and each revertible in one commit:
+
+- `DividerAction` exported and documented. It was referenced by `DividerProps.action` and
+  printed in the API table, but had no `export` keyword and no member docs — the §4 audit item.
+- `InputSize`, `InputVariant`, `ToggleSize`, `RangeSize` exported from the root. Nine
+  components print `size: InputSize` in their tables, and the derived aliases
+  (`ComboboxSize`, `MultiSelectSize`, `ItemListSize`) were already exported while the base
+  was not.
+- `TabButtonsSlots` exported.
+
+Method: every `type: '…'` string in every committed `*.api.md` was tokenized to 98
+PascalCase names and imported from `./index` under `vue-tsc`. 22 did not resolve; the six
+this release owns were fixed, the rest recorded in the checkpoint.
+
+### Changelog
+
+The inputs track shipped `migration.md` but **no changelog entry**, so the release's largest
+break was missing from the log. Three entries added — input scale, form typography, and
+#1098's removed emit interface members with a table of which members went and which runtime
+events stayed. The three track entries were cross-read and do not contradict each other.
+
+Also corrected: `docs/content/public/llms.txt` (hand-written, so the rail rename never
+reached it — two stale entries, one pointing at a route that no longer exists) and
+`skills/frappe-ui/CORE.md` (four stale claims: input sizes `sm | md | lg | xl`,
+`FormControl` size `sm | md`, `ItemListRow` size, and `--list-columns` taught as a public
+hook).
+
+### Open finding for the maintainer — untyped `@update:model-value`
+
+`update:modelValue` is declared twice — once by `defineModel`, once in the hand-written
+emits type — on `Combobox`, `MultiSelect` and experimental `MultiEmailInput`, and
+`update:collapsed` likewise on `Sidebar` and `SidebarSection`. That is exactly the
+duplication #1098 removed for `open` and `query`, with the same effect: an explicit typed
+listener does not compile, because `$emit` collapses to `(...args: unknown[]) => any`.
+`v-model` is unaffected.
+
+Pre-existing on `main`, and **not fixed here on purpose**. `Sidebar.vue:30` documents the
+redeclaration as deliberate — it is the only place to write the emit's description, and
+`propsgen` would otherwise synthesize "Fired when the collapsed changes." The real fix is a
+`propsgen` change that lets a model emit carry a description without a second declaration.
+Needs a decision; half-fixing two of the five would be worse.
+
+### Consumer census
+
+Full detail in `v1-release/checkpoints/integration.md`. Method: 35 frappe-org consumers
+enumerated by reading every `package.json` in every public repo's HEAD tree (not
+`gh search code`), swept from 31 local bench checkouts plus fresh tarballs of every remote
+dependent — including the seven present locally, so bench staleness could not hide a hit.
+
+| Repo | Rail | Rail `data-slot` | Input `xl` | `FormLabel.size` | `list-cols` |
+| --- | --- | --- | --- | --- | --- |
+| gameplan | 6 | 0 | 0 | 4 | 4 |
+| helpdesk | 0 | 0 | 0 | 22 | 0 |
+| frappe (`ui/`) | 0 | 0 | 3 | 0 | 0 |
+| wiki | 0 | 0 | 0 | 0 | 4 |
+| suite | 0 | 0 | 0 | 2 | 0 |
+| lms | 0 | 0 | 0 | 1 | 2 (comments) |
+| toolbox | 0 | 0 | 1 | 0 | 0 |
+| studio | 1 (generated) | 0 | 12 (generated) | 0 | 0 |
+
+Everything else reachable is clean on all five axes.
+
+**The silent half of the rail rename has no downstream call sites** — zero
+`data-slot="rail*"` hits anywhere. Rail touches one real consumer file, gameplan's
+`AppRail.vue`. Input `xl` touches two, `frappe/toolbox`'s `ConversionField.vue:13` and
+`frappe/frappe`'s `ui/` Phone island (which re-declares `InputSize` with `xl` and no `xs`,
+so it drifts in both directions). `FormLabel.size` is the widest at 29 sites, every one a
+literal `size="md"` to delete. `list-cols-` is 8 live class strings, one more than the list
+track's floor of seven.
+
+Two items need judgement rather than a find-and-replace: `frappe/studio` ships **generated**
+prop schemas that still offer `xl` on twelve input components and export a `Rail.json` by
+name, and `frappe/lms`'s `SettingsTable.vue` has comments claiming two grid containers share
+one `--list-columns` track list — if that alignment relies on inheritance the prop-only model
+does not reproduce, the failure is visual, not a build error. Highest-risk item found.
+
+### Unverified
+
+- **CRM, Helpdesk and Gameplan were not built or booted against the candidate.** That needs a
+  bench which is not set up here. Recorded as unverified. #1029's one-week soak starts from a
+  real boot, not from this checkout.
+- Private `frappe` repositories, `frappe_calendar` among them.
+- Every consumer outside the `frappe` organisation.
+- `frappe/build_ctf` and `frappe/meet` remote HEAD (both archived, both on the v0 line that
+  predates all three breaks — reasoning, not a grep).
+- Runtime-constructed `size` values, and git-submodule references.
+
+Also: the GitHub API reports `frappe/drive` as **not archived**, contradicting the note that
+it was folded into `frappe/suite`. Swept anyway; clean.
+
+### Not done
+
+- Nothing pushed, no pull request, no comments. The orchestrator owns that.
+- `yarn build`, `yarn docs:build`, full `yarn test:cypress`.
+- The `update:modelValue` duplication (above).
+- The inputs track's open question is still open: `TextInput`, `Textarea`, `Password` and
+  `Rating` never pass `:disabled` to `InputLabel` / `InputDescription`, so a disabled stack
+  field keeps a full-strength label while inline-row controls dim theirs. Pre-existing, both
+  components already have the prop wired.
