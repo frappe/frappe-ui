@@ -152,6 +152,17 @@ export {
 } from './composables/usePortalTarget'
 export type { PortalTarget } from './composables/usePortalTarget'
 
+// Shared input scales. Every generated API table prints these alias names as a
+// prop's type (`size: InputSize`), and the per-component aliases built on them
+// — ComboboxSize, MultiSelectSize, ItemListSize — are already exported, so a
+// consumer typing a wrapper around TextInput can import the base too.
+export type {
+  InputSize,
+  InputVariant,
+  RangeSize,
+  ToggleSize,
+} from './composables/inputTypes'
+
 // Directives
 export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'

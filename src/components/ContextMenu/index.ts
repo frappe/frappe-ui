@@ -2,6 +2,7 @@ export { default as ContextMenu } from './ContextMenu.vue'
 export type {
   ContextMenuActionOption,
   ContextMenuBaseOption,
+  ContextMenuEmits,
   ContextMenuGroupOption,
   ContextMenuGroupSlotProps,
   ContextMenuItem,
@@ -9,7 +10,6 @@ export type {
   ContextMenuItemSlots,
   ContextMenuOption,
   ContextMenuOptions,
-  ContextMenuEmits,
   ContextMenuProps,
   ContextMenuSlotFn,
   ContextMenuSlotProps,
