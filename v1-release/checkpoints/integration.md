@@ -680,3 +680,219 @@ six times in copies". That was aspirational when written — there were six
 copies that happened to agree. It is now literally true. The diff block under
 it still lists all six names as if they were separate declarations; the
 orchestrator owns the body.
+
+---
+
+# Review round 2 — barista's last two nits on #1133
+
+Both addressed. Commits `1327eced22`, `de00c4a49a`, `7386681505` and this
+checkpoint. Nothing posted to the pull request; the orchestrator owns that.
+
+## Nit 1 — `ContextMenuEmits` is exported but never wired
+
+**Kept exported, kept unwired, and said why in the source.** No type change, no
+runtime change — `src/components/ContextMenu/types.ts` gains a comment above the
+interface.
+
+### Why not wire it
+
+Passing `ContextMenuEmits` to `defineEmits` alongside `defineModel('open')`
+declares `update:open` twice, which is the #1096 defect this pull request just
+removed. Measured rather than assumed: `defineEmits<ContextMenuEmits>()` was
+added to `ContextMenu.vue` and `vue-tsc` run against a scratch consumer SFC.
+
+```
+src/__nit_scratch__.vue(4,31): error TS2322: Type '(value: boolean) => void'
+  is not assignable to type '(...args: unknown[]) => any'.
+src/__nit_scratch__.vue(6,31): error TS2322: Type '(v: boolean) => boolean'
+  is not assignable to type '(...args: unknown[]) => any'.
+```
+
+The line was reverted immediately. `v-model:open` still compiled in that state,
+which matches the earlier finding: only an explicit typed listener breaks.
+
+### Why not delete it either
+
+The finding reads the wiring of `ComboboxEmits` and `MultiSelectEmits` as the
+house rule. It is not. **Seven** exported `*Emits` interfaces in
+`src/components/` are never passed to `defineEmits`, and six of them are on
+`main`, untouched by this release:
+
+| Interface | Component's declaration |
+| --- | --- |
+| `DropdownEmits` | `defineModel('open')` |
+| `SelectEmits` | `defineModel()` + `defineModel('open')` |
+| `SettingsDialogEmits` | `defineModel('open')` |
+| `RatingEmits` | `defineModel()` |
+| `DurationEmits` | `defineModel()` |
+| `RadioGroupEmits` | `defineModel()` |
+| `ContextMenuEmits` | `defineModel('open')` — new in #1091 |
+
+The actual rule is narrower and both halves of the pull request obey it: **an
+`*Emits` interface is passed to `defineEmits` only when the component has an
+event no model declares.** `Combobox` has `focus`, `blur` and
+`update:selectedOption`; `MultiSelect` has `update:selectedOptions`. That is why
+they are wired, and #1098 deleted `update:open` / `update:query` from them for
+exactly the reason we are not adding a `defineEmits` call here. `ContextMenu`
+has no non-model event, so `defineEmits` would add nothing and cost the typed
+listener.
+
+So the pull request "deleting `update:open` from two components and adding one
+to a third" is consistent, not contradictory — the two are wired and the third
+is not.
+
+Deleting the export instead would single `ContextMenu` out against those six
+siblings and re-open the gap #1091 (issue #1070) existed to close.
+
+### Why no new drift guard
+
+Considered and declined: deriving the interface from the component's real emit
+type. `types.ts` is imported *by* `ContextMenu.vue`, so deriving back from the
+SFC is a cycle through the type the SFC compiler is mid-way through resolving.
+A separate `vue-tsc`-checked assertion module would work, but it is the wrong
+size for one interface and would have to cover all seven to be honest — that is
+a `propsgen` job, and it lands next to the deferred `update:modelValue` item
+(same tool, same argument). Recorded as one ticket, not started.
+
+Drift is not silent today in any case. `propsgen` reads emits out of
+`__VLS_ModelEmit`, so renaming or retyping the model changes the committed
+`ContextMenu.api.md` and `docs:check` — a CI gate — fails until the table is
+regenerated, with the stale hand-written interface visible in the same diff.
+
+**No public API decision was needed.** `ContextMenuEmits` does not exist on
+`main` (`git show main:src/components/ContextMenu/types.ts` has no `Emits`, and
+the barrel does not export it); it arrives with this pull request, so nothing
+released changes either way.
+
+## Nit 2 — an unrecognised breakpoint key is silently ignored
+
+**The plugin can help, so it does.** The doc sentence is written too, but it is
+not the whole fix.
+
+### What changed
+
+`tailwind/listColumns.js` publishes the keys the resolved chain actually reads
+on `--_list-screens` — `base` plus every screen that got a tier, in the same
+lowest-first order as the chain. `src/molecules/list/style.css` declares
+`--_list-screens: base` as the floor. `List.vue` reads it back off the resolved
+style in a `flush: 'post'` effect and warns for any `columns` key that is not in
+it:
+
+```
+[frappe-ui] List: `columns` key `medium` is not one of this app's Tailwind
+screens (base, sm, md, lg, xl), so its template is ignored and the list keeps
+the one below it. If `medium` is a screen in your Tailwind config, this app is
+not using frappe-ui's Tailwind preset.
+```
+
+### Why this is worth the machinery
+
+The deciding fact is that **frappe-ui ships source**: `exports["."]` is
+`./src/index.ts`, so `import.meta.env.DEV` is substituted by the *consumer's*
+build. The warning therefore reaches a consumer's dev server and is stripped
+from their production build. That is a different proposition from a warning that
+only fires when running this repo from source, and it is what makes the check
+better than prose — the failure is silent and the person hitting it has no
+reason to re-read the prop docs.
+
+Cost, itemised:
+
+- **Public surface: none.** `--_list-screens` carries the `--_list` prefix that
+  `changelog.md:221` and `style.css` already declare internal and not API, the
+  same as the carriers it describes.
+- **CSS: one declaration in one base rule.** Not per element.
+- **Runtime: none in production**, and in development one `getComputedStyle`
+  per list, only when `columns` is an object, only when it changes.
+- **SSR: nothing.** Post-flush watchers do not run server-side;
+  `List.ssr.test.ts` passes.
+
+### The floor in style.css is what makes it precise
+
+Without it, an absent property would mean either "this key is not a screen" or
+"no CSS resolved at all" (jsdom, or a bare SSR string), and the check would have
+to guess. `frappe-ui/list`'s style.css always declares at least `base`, so:
+
+| Property reads | Means | Check does |
+| --- | --- | --- |
+| `base sm md lg xl` | preset installed | names any key outside the list |
+| `base` | list CSS loaded, no preset | names every key above `base` — correct, and the message says the preset may be missing |
+| empty | no CSS at all (test environment) | stays silent |
+
+### What was declined
+
+- **A build-time error instead of a dev warning.** The plugin cannot see the
+  prop — `:columns` is a runtime value. Catching it at build would take a lint
+  rule over template source, which is a great deal more machinery for the same
+  message.
+- **Closing the index signature on `ListColumnsByBreakpoint`.** It is open on
+  purpose: screen names belong to the consuming app. Module augmentation would
+  close it at the cost of breaking every app with custom screens that does not
+  augment.
+- **Reformatting `list.md` and `tailwind/listColumns.test.js`.** Both are
+  already prettier-nonconforming at `bee26aa349` under the repo's own config
+  (verified by checking `git show HEAD:` copies from inside the repo, not from
+  `/tmp` — prettier resolves no config there and reports false differences).
+  Prettier is not a CI gate. The added prose and the added test block are
+  prettier-clean; the pre-existing drift is left alone.
+
+### Documentation
+
+`ListProps.columns`, `ListColumnsByBreakpoint`, `list.md`'s responsive-columns
+section and the `frappe-ui/list` changelog entry all now state it plainly: a key
+that is not one of the app's screens is ignored, the type cannot reject it, and
+a development build warns.
+
+## Verification
+
+Run from `/Users/netchampfaris/Projects/worktrees/rc-integration`. Cypress needs
+`env -u ELECTRON_RUN_AS_NODE`, as every earlier round found.
+
+| Command | Result |
+| --- | --- |
+| `yarn type-check` | `Done in 7.43s.` — clean |
+| `yarn test` | `Test Files 104 passed (104)`, `Tests 1698 passed (1698)` |
+| `yarn docs:gen` + `yarn docs:check` | `The committed API tables match the source.` |
+| Cypress, `list/List` + `ContextMenu` | `All specs passed! 00:04 49 49 - - -` |
+
+1698 tests is 1689 plus the two `listColumns` cases added here and the seven
+added by `7e5f640a22` and `17a9d93499` after round 1's count.
+
+`docs:gen` reordered `update:hiddenSeries` in the three chart tables again.
+Same pre-existing drift; reverted, not committed.
+
+### New tests
+
+- `tailwind/listColumns.test.js` — `--_list-screens` lists `base` first then the
+  tiers in chain order, uses the app's own screen names (`base phone tablet`),
+  omits a screen with no condition to emit, and is `base` alone with no usable
+  screens. One preset-built case proves it survives a real Tailwind build.
+- `src/molecules/list/List.cy.ts` — an unrecognised key warns once, names the
+  app's real screens (`base, sm, md, lg, xl`, read from the preset's CSS, not
+  hard-coded in the component), does not warn about the keys beside it, and the
+  ignored key really is ignored — `md` still wins above 768px. A second case
+  asserts a fully valid object warns not at all, so the check cannot go noisy.
+
+The ContextMenu runtime event needed no new test: `ContextMenu.cy.ts:144`
+already drives `update:open` through a typed `(val: boolean)` handler and
+asserts the menu opens and closes. It passes, and nothing in this round touched
+the declaration it exercises.
+
+### Type-level acceptance, checked with a scratch SFC
+
+`src/__nit_scratch__.vue` was type-checked and deleted. It is not committed;
+the assertions are recorded here so they can be rebuilt. Against the committed
+state, all of these compile on `ContextMenu`:
+
+- `@update:open="onOpen"` with `function onOpen(value: boolean)`.
+- `@update:open="(v: boolean) => (isOpen = v)"`.
+- `v-model:open="isOpen"`.
+- `ContextMenuEmits['update:open']` imported and used as a tuple type, with a
+  `@ts-expect-error` on `['yes']` that fired.
+
+## Left for the orchestrator
+
+- Nothing posted to #1133 or any issue. No `gh` write command was run.
+- The `propsgen` ticket: one check that every exported `*Emits` interface agrees
+  with the emits the component really declares, which would also carry the
+  deferred `update:modelValue` fix for the five components in the open finding
+  above.
