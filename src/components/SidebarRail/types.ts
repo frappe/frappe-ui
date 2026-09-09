@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
-export interface RailItemProps {
+export interface SidebarRailItemProps {
   /** Tooltip text and the base of the item's accessible label. */
   label: string
 

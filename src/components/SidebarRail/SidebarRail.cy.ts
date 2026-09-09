@@ -1,7 +1,7 @@
 import { h } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import Rail from './Rail.vue'
-import RailItem from './RailItem.vue'
+import SidebarRail from './SidebarRail.vue'
+import SidebarRailItem from './SidebarRailItem.vue'
 
 function createTestRouter() {
   return createRouter({
@@ -13,62 +13,62 @@ function createTestRouter() {
   })
 }
 
-describe('<Rail />', () => {
+describe('<SidebarRail />', () => {
   it('renders its children in a single column', () => {
-    cy.mount(Rail, {
+    cy.mount(SidebarRail, {
       slots: {
         default: () => [
-          h(RailItem, { label: 'Home', icon: 'lucide-house' }),
-          h(RailItem, { label: 'Design' }, () => 'DE'),
-          h(RailItem, { label: 'Search', icon: 'lucide-search' }),
+          h(SidebarRailItem, { label: 'Home', icon: 'lucide-house' }),
+          h(SidebarRailItem, { label: 'Design' }, () => 'DE'),
+          h(SidebarRailItem, { label: 'Search', icon: 'lucide-search' }),
         ],
       },
     })
-    cy.get('[data-slot=rail]').should('exist')
-    cy.get('[data-slot=rail] [aria-label=Home]').should('exist')
-    cy.get('[data-slot=rail] [aria-label=Design]').should('contain.text', 'DE')
-    cy.get('[data-slot=rail] [aria-label=Search]').should('exist')
+    cy.get('[data-slot=sidebar-rail]').should('exist')
+    cy.get('[data-slot=sidebar-rail] [aria-label=Home]').should('exist')
+    cy.get('[data-slot=sidebar-rail] [aria-label=Design]').should('contain.text', 'DE')
+    cy.get('[data-slot=sidebar-rail] [aria-label=Search]').should('exist')
   })
 })
 
-describe('<RailItem />', () => {
+describe('<SidebarRailItem />', () => {
   it('renders a button and emits click when there is no `to`', () => {
     const onClick = cy.stub().as('click')
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Search', icon: 'lucide-search', onClick },
     })
-    cy.get('button[data-slot=rail-item]').should('exist')
+    cy.get('button[data-slot=sidebar-rail-item]').should('exist')
     cy.get('button').click()
     cy.get('@click').should('have.been.calledOnce')
   })
 
   it('renders a router link when `to` is set', () => {
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Search', icon: 'lucide-search', to: '/search' },
       global: { plugins: [createTestRouter()] },
     })
-    cy.get('a[data-slot=rail-item]').should('have.attr', 'href', '/search')
+    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', '/search')
   })
 
   it('shows the indicator bar for an active tile, not an active ghost', () => {
-    cy.mount(RailItem, { props: { label: 'Design', active: true } })
-    cy.get('[data-slot=rail-item][data-state=active]').should('exist')
-    cy.get('[data-slot=rail-item-indicator]').should('exist')
+    cy.mount(SidebarRailItem, { props: { label: 'Design', active: true } })
+    cy.get('[data-slot=sidebar-rail-item][data-state=active]').should('exist')
+    cy.get('[data-slot=sidebar-rail-item-indicator]').should('exist')
 
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Search', icon: 'lucide-search', variant: 'ghost', active: true },
     })
-    cy.get('[data-slot=rail-item-indicator]').should('not.exist')
-    cy.get('[data-slot=rail-item]').should('have.class', 'shadow-sm')
+    cy.get('[data-slot=sidebar-rail-item-indicator]').should('not.exist')
+    cy.get('[data-slot=sidebar-rail-item]').should('have.class', 'shadow-sm')
   })
 
   it('renders a dot for badgeStyle=dot and a capped pill for badgeStyle=count', () => {
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3, badgeStyle: 'dot' },
     })
-    cy.get('[data-slot=rail-item-badge-dot]').should('exist')
+    cy.get('[data-slot=sidebar-rail-item-badge-dot]').should('exist')
 
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 142, badgeStyle: 'count' },
     })
     // The pill teleports to <body>.
@@ -76,14 +76,14 @@ describe('<RailItem />', () => {
   })
 
   it('lets `description` replace the unread line under the tooltip label', () => {
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3, badgeStyle: 'dot' },
     })
-    cy.get('[data-slot=rail-item]').trigger('pointerenter').trigger('pointermove')
+    cy.get('[data-slot=sidebar-rail-item]').trigger('pointerenter').trigger('pointermove')
     // The tooltip teleports to <body>.
     cy.get('body').should('contain.text', '3 unread')
 
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: {
         label: 'People',
         icon: 'lucide-users-2',
@@ -92,7 +92,7 @@ describe('<RailItem />', () => {
         description: '12 members',
       },
     })
-    cy.get('[data-slot=rail-item]').trigger('pointerenter').trigger('pointermove')
+    cy.get('[data-slot=sidebar-rail-item]').trigger('pointerenter').trigger('pointermove')
     cy.get('body')
       .should('contain.text', '12 members')
       // Only meaningful because the line above already waited for the tooltip to open.
@@ -100,9 +100,9 @@ describe('<RailItem />', () => {
   })
 
   it('folds the unread count into the accessible label', () => {
-    cy.mount(RailItem, {
+    cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3 },
     })
-    cy.get('[data-slot=rail-item]').should('have.attr', 'aria-label', 'Notifications, 3 unread')
+    cy.get('[data-slot=sidebar-rail-item]').should('have.attr', 'aria-label', 'Notifications, 3 unread')
   })
 })
