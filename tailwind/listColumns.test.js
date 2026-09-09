@@ -86,6 +86,7 @@ describe('listColumnRules', () => {
       '--_list-columns':
         'var(--_list-tier-xl, var(--_list-tier-lg, var(--_list-tier-md, ' +
         'var(--_list-tier-sm, var(--_list-columns-base)))))',
+      '--_list-screens': 'base sm md lg xl',
     })
   })
 
@@ -106,6 +107,7 @@ describe('listColumnRules', () => {
         '--_list-columns-band': 'initial',
         '--_list-columns':
           'var(--_list-tier-band, var(--_list-columns-base))',
+        '--_list-screens': 'base band',
       },
       '@media (min-width: 700px) and (max-width: 900px)': {
         "[data-slot='list']": {
@@ -156,11 +158,36 @@ describe('listColumnRules', () => {
     )
   })
 
+  it('publishes the keys the chain reads, so a wrong one can be caught', () => {
+    // `<List>` cannot see the app's Tailwind config, so an unrecognised
+    // `columns` key would write a carrier no rule reads and be ignored in
+    // silence. The names go out on `--_list-screens` for List.vue's dev check
+    // to read back off the resolved style. `base` is always in the list: it is
+    // the required first tier and is always read, screens or no screens.
+    expect(
+      listColumnRules({ md: '900px', wide: '1600px' })["[data-slot='list']"][
+        '--_list-screens'
+      ],
+    ).toBe('base md wide')
+    // Same order as the chain: lowest priority first.
+    expect(
+      listColumnRules(PRESET_SCREENS)["[data-slot='list']"]['--_list-screens'],
+    ).toBe('base sm md lg xl')
+    // A screen with no condition to emit gets no tier, so it is not a key
+    // either — naming it in `columns` really would do nothing.
+    expect(
+      listColumnRules({ nothing: {}, md: '768px' })["[data-slot='list']"][
+        '--_list-screens'
+      ],
+    ).toBe('base md')
+  })
+
   it('still resets and resolves the base tier with no usable screens', () => {
     expect(listColumnRules({})).toEqual({
       "[data-slot='list']": {
         '--_list-columns-base': 'initial',
         '--_list-columns': 'var(--_list-columns-base)',
+        '--_list-screens': 'base',
       },
     })
   })
@@ -228,6 +255,15 @@ describe('the preset, built against an app config', () => {
         'var(--_list-tier-md, var(--_list-tier-tablet, ' +
         'var(--_list-tier-sm, var(--_list-columns-base))))))',
     )
+  })
+
+  it("publishes the app's own screen names, not the preset's", async () => {
+    const css = await baseLayer({
+      presets: [preset],
+      content: [{ raw: '<div data-slot="list"></div>' }],
+      theme: { screens: { phone: '380px', tablet: '850px' } },
+    })
+    expect(css).toContain('--_list-screens: base phone tablet;')
   })
 
   it("switches list tracks at the same width as the app's md: utilities", async () => {

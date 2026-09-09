@@ -1,11 +1,22 @@
 <template>
-  <div data-slot="list" :role="hasHeader ? 'table' : 'list'" :style="style">
+  <div
+    ref="root"
+    data-slot="list"
+    :role="hasHeader ? 'table' : 'list'"
+    :style="style"
+  >
     <slot />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref, watchEffect } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  ref,
+  useTemplateRef,
+  watchEffect,
+} from 'vue'
 import { provideListContext } from './list-context'
 import type { ListProps } from './types'
 
@@ -62,6 +73,8 @@ const style = computed(() => {
   return vars
 })
 
+const rootRef = useTemplateRef<HTMLElement>('root')
+
 if (import.meta.env.DEV) {
   watchEffect(() => {
     const columns = props.columns
@@ -74,6 +87,46 @@ if (import.meta.env.DEV) {
       )
     }
   })
+
+  // A key that names no screen writes a carrier no media rule reads, so its
+  // template never applies and the list silently keeps the tier below it — the
+  // failure `:columns="{ base: […], medium: […] }"` produces. Nothing in the
+  // types can catch it: breakpoint names belong to the app, so the index
+  // signature on `ListColumnsByBreakpoint` has to stay open.
+  //
+  // The component can't read the app's Tailwind config, but the preset can, and
+  // it publishes the names it emitted tiers for on `--_list-screens` (see
+  // tailwind/listColumns.js). Reading that back off the resolved style is how
+  // the check learns the app's own breakpoints. `flush: 'post'` so the root
+  // element exists; the whole block is stripped from a production build.
+  watchEffect(
+    () => {
+      const columns = props.columns
+      if (!columns || Array.isArray(columns)) return
+      const el = rootRef.value
+      if (!el) return
+      const declared = getComputedStyle(el)
+        .getPropertyValue('--_list-screens')
+        .trim()
+      // Empty means no list stylesheet resolved at all — a test environment
+      // with no CSS, for instance. There is nothing to check the keys against,
+      // so say nothing rather than guess. `frappe-ui/list`'s own style.css
+      // declares at least `base`, so a real app never lands here.
+      if (!declared) return
+      const known = new Set(declared.split(/\s+/))
+      for (const key of Object.keys(columns)) {
+        if (known.has(key) || columns[key] === undefined) continue
+        console.warn(
+          `[frappe-ui] List: \`columns\` key \`${key}\` is not one of this ` +
+            `app's Tailwind screens (${[...known].join(', ')}), so its ` +
+            'template is ignored and the list keeps the one below it. If ' +
+            `\`${key}\` is a screen in your Tailwind config, this app is not ` +
+            "using frappe-ui's Tailwind preset.",
+        )
+      }
+    },
+    { flush: 'post' },
+  )
 }
 
 function isSelected(value: string) {

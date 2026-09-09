@@ -107,6 +107,15 @@ export function listColumnRules(screens) {
     (fallback, { name }) => `var(--_list-tier-${name}, ${fallback})`,
     'var(--_list-columns-base)',
   )
+  // Every key the chain above actually reads, published so the component can
+  // check a `columns` object against it. A key naming no screen writes a
+  // carrier no rule reads, so its template never applies and the list silently
+  // stays on the tier below — and `<List>` cannot see the app's Tailwind config
+  // to catch that itself. Reading the resolved style is the only route, so the
+  // names go out as a custom property. `--_list` prefix: internal, like the
+  // carriers it describes, and read by nothing in production (List.vue's check
+  // is behind `import.meta.env.DEV`).
+  root['--_list-screens'] = ['base', ...tiers.map(({ name }) => name)].join(' ')
 
   const rules = { "[data-slot='list']": root }
   for (const { name, media } of tiers) {

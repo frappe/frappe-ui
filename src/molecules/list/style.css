@@ -32,6 +32,13 @@
   --_list-columns: var(--_list-columns-base);
   --_list-checkbox-width: initial;
   --_list-row-height: initial;
+  /* The `columns` keys the rules above actually read — here, only `base`. The
+   * preset overrides this with `base` plus every app screen it emitted a tier
+   * for. A dev-only check in List.vue reads it back to catch a key that names
+   * no screen, which would otherwise be ignored in silence. Declared here as
+   * well as in the preset so that check can tell "this key is not a screen"
+   * from "no list stylesheet loaded at all" and stay quiet in the second case. */
+  --_list-screens: base;
 }
 
 /* Attribute (not :where) specificity, so element-level resets — Tailwind

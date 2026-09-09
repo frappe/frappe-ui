@@ -879,6 +879,39 @@ describe('List (responsive columns)', () => {
     )
   })
 
+  it('warns about a key that names no screen, and only about that key', () => {
+    // The silent failure this catches: `medium` is not a breakpoint, so it
+    // writes a carrier no media rule reads and the list renders `base` at
+    // every width. The types cannot reject it — screen names belong to the
+    // app, so `ListColumnsByBreakpoint` keeps an open index signature — and
+    // the component cannot read the app's Tailwind config either. The preset
+    // publishes the names it emitted tiers for on `--_list-screens`; this is
+    // the check reading them back.
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive({
+      base: ['minmax(0, 1fr)', '80px'],
+      md: ['minmax(0, 1fr)', '140px'],
+      medium: ['minmax(0, 1fr)', '200px'],
+    })
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /`medium` is not one of this app's Tailwind screens \(base, sm, md, lg, xl\)/,
+    )
+    // `base` and `md` are real screens here, so exactly one key is reported.
+    cy.get('@warn').should('have.been.calledOnce')
+    // And the ignored key really is ignored: `md` still wins above 768px.
+    cy.viewport(900, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px'),
+    )
+  })
+
+  it('says nothing when every key names a screen', () => {
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive()
+    cy.get('@warn').should('not.have.been.called')
+  })
+
   it('replaces the whole template, track count included', () => {
     mountResponsive({ base: ['minmax(0, 1fr)'], lg: ['120px', '90px', '60px'] })
     cy.viewport(500, 400)
