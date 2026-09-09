@@ -1,15 +1,15 @@
 /* Structural rules for the list family. Geometry only — colors and type live
  * in the components as semantic-token classes.
  *
- * `--list-columns`, `--list-gap` and `--list-row-padding-x` are the public
- * styling hooks: apps set them with plain (responsive) classes on <List>, or
- * on any ancestor to theme every list in a subtree — custom properties
- * inherit, and every hook default lives in a var() fallback at its use site,
- * never as a declaration on an element (which would shadow inherited values).
- * Every rule a consumer may override is wrapped in :where() so any consumer
- * class wins on specificity, regardless of stylesheet order. Vars with a
- * `--_list` prefix are internal carriers, not API — they can change in any
- * release. */
+ * `--list-gap` and `--list-row-padding-x` are the public styling hooks: apps
+ * set them with plain (responsive) classes on <List>, or on any ancestor to
+ * theme every list in a subtree — custom properties inherit, and every hook
+ * default lives in a var() fallback at its use site, never as a declaration on
+ * an element (which would shadow inherited values). Every rule a consumer may
+ * override is wrapped in :where() so any consumer class wins on specificity,
+ * regardless of stylesheet order. Vars with a `--_list` prefix are internal,
+ * not API — they can change in any release. Column templates are one of them:
+ * they come from the `columns` prop alone. */
 
 /* Internal carriers are per-list prop state, not theming: each list root
  * severs their inheritance so an outer list's props (`columns`, `selectable`,
@@ -19,9 +19,17 @@
  * props) beats these zero-specificity declarations on the same element.
  * Public hooks are deliberately absent here — crossing list boundaries is
  * their purpose. (`--_list-row-pad` needs no reset: every row declares its
- * own below, so it never inherits across elements at all.) */
+ * own below, so it never inherits across elements at all.)
+ *
+ * `--_list-columns` is the resolved template, derived here from the base tier
+ * of the `columns` prop. This is only the floor of the ladder: the frappe-ui
+ * Tailwind preset re-emits this derivation plus one media rule per app
+ * breakpoint (see tailwind/listColumns.js), at attribute specificity so it
+ * wins over this block whichever file the app loads first. Without the preset,
+ * a responsive `columns` object degrades to its required `base` template. */
 :where([data-slot='list']) {
-  --_list-columns-default: initial;
+  --_list-columns-base: initial;
+  --_list-columns: var(--_list-columns-base);
   --_list-checkbox-width: initial;
   --_list-row-height: initial;
 }
@@ -32,16 +40,13 @@
 [data-slot='list-row'],
 [data-slot='list-header'] {
   display: grid;
-  /* --_list-columns-default carries the `columns` prop (inline style on the
-   * List). The indirection keeps --list-columns itself free for consumer
-   * overrides — a class on the List like
-   * `max-sm:list-cols-[auto_minmax(0,1fr)_auto]` (the tailwind preset's
-   * sugar over the var) or a value inherited from an ancestor — so a
-   * consumer value always beats the prop. */
-  grid-template-columns: var(
-    --list-columns,
-    var(--_list-columns-default, auto minmax(0, 1fr) auto)
-  );
+  /* --_list-columns is resolved once on the list root, from whichever tier of
+   * the `columns` prop the viewport is in, and inherits down to the header and
+   * every row — so the two grids are the same template by construction and
+   * can't drift. A root with no `columns` resolves it to the guaranteed-invalid
+   * value, which is what lands the default feed template here (and stops an
+   * outer list's template from reaching a nested one). */
+  grid-template-columns: var(--_list-columns, auto minmax(0, 1fr) auto);
   column-gap: var(--list-gap, 0.5rem);
   align-items: center;
   text-align: start;

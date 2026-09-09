@@ -15,6 +15,8 @@ export { default as ListGroup } from './ListGroup.vue'
 export { useVirtualRows, type UseVirtualRowsOptions } from './useVirtualRows'
 
 export type {
+  ListColumns,
+  ListColumnsByBreakpoint,
   ListProps,
   ListRowProps,
   ListHeaderCellSortProps,

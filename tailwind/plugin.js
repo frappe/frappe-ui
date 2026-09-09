@@ -8,6 +8,7 @@ import {
 import radiusTokens from './generated/radius.json'
 import typographyTokens from './generated/typography.json'
 import effectsData from './generated/effects.json'
+import { listColumnRules } from './listColumns.js'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
@@ -202,6 +203,10 @@ let componentStyles = {
 export default plugin(
   function ({ addBase, addComponents, matchUtilities, theme }) {
     addBase({ ...globalStyles(theme), ...cssVariables })
+    // Resolves <List :columns="{ base, md, … }"> against this app's own
+    // breakpoints, so list tracks and `md:hidden` cells switch at the same
+    // width. See tailwind/listColumns.js.
+    addBase(listColumnRules(theme('screens')))
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
@@ -215,12 +220,6 @@ export default plugin(
       },
       { values: theme('spacing') },
     )
-    // Grid tracks are arbitrary-only (no meaningful scale):
-    // `max-md:list-cols-[minmax(0,1fr)_auto]` instead of
-    // `max-md:[--list-columns:minmax(0,1fr)_auto]`.
-    matchUtilities({
-      'list-cols': (value) => ({ '--list-columns': value }),
-    })
   },
   {
     theme: {

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref } from 'vue'
+import { computed, getCurrentInstance, ref, watchEffect } from 'vue'
 import { provideListContext } from './list-context'
 import type { ListProps } from './types'
 
@@ -38,13 +38,43 @@ const activatable = computed(
 
 const hasHeader = ref(false)
 
-const style = computed(() => ({
-  ...(props.columns
-    ? { '--_list-columns-default': props.columns.join(' ') }
-    : {}),
-  ...(props.selectable ? { '--_list-checkbox-width': '32px' } : {}),
-  ...(props.rowHeight ? { '--_list-row-height': `${props.rowHeight}px` } : {}),
-}))
+// `columns` rides internal custom properties, one per supplied breakpoint
+// (`--_list-columns-base`, `--_list-columns-md`, …). The Tailwind preset emits
+// the media rules that pick one of them into the `--_list-columns` the header
+// and rows read, so the switch happens in CSS — correct in SSR markup, with no
+// viewport state and no resize listener. The array form is the single-tier
+// case. Those rules also reset every carrier at each list root, which is what
+// keeps a nested list's template its own. See tailwind/listColumns.js.
+const style = computed(() => {
+  const vars: Record<string, string> = {}
+  const columns = props.columns
+  if (Array.isArray(columns)) {
+    vars['--_list-columns-base'] = columns.join(' ')
+  } else if (columns) {
+    for (const [breakpoint, tracks] of Object.entries(columns)) {
+      if (tracks?.length) {
+        vars[`--_list-columns-${breakpoint}`] = tracks.join(' ')
+      }
+    }
+  }
+  if (props.selectable) vars['--_list-checkbox-width'] = '32px'
+  if (props.rowHeight) vars['--_list-row-height'] = `${props.rowHeight}px`
+  return vars
+})
+
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    const columns = props.columns
+    if (!columns || Array.isArray(columns)) return
+    if (!columns.base?.length) {
+      console.warn(
+        '[frappe-ui] List: `columns` needs a `base` template — it is what ' +
+          'applies below the smallest breakpoint. Without it the list falls ' +
+          'back to the default feed template at narrow widths.',
+      )
+    }
+  })
+}
 
 function isSelected(value: string) {
   return selection.value.includes(value)
