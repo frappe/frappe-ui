@@ -221,9 +221,30 @@ computed templates.
 
 1. Removing `list-cols-[…]` / `--list-columns` is the one call the ticket does
    not spell out. Reasoning above; easy to reverse if the maintainer disagrees.
-2. Downstream consumers were not swept for `list-cols-` or `[--list-columns:`.
-   Both shipped on `main`, so the integration agent should grep CRM, Helpdesk,
-   Gameplan and the other frappe-ui dependants before the RC freeze.
+2. **`list-cols-[…]` has seven downstream call sites.** `gh search code
+   list-cols- --owner frappe` (which truncates silently, so treat this as a
+   floor, not a total):
+
+   ```
+   frappe/gameplan  frontend/src/pages/Configure/CommunitySpacesList.vue   max-md:list-cols-[minmax(0,1fr)_auto]
+   frappe/gameplan  frontend/src/pages/Configure/CommunityMembersList.vue  max-md:list-cols-[1.25rem_minmax(0,1fr)]
+   frappe/gameplan  frontend/src/pages/Configure/CommunitiesList.vue       max-md:list-cols-[minmax(0,1fr)]
+   frappe/gameplan  frontend/src/pages/Configure/CommunityGuestsList.vue   max-md:list-cols-[1.25rem_minmax(0,1fr)_2rem]
+   frappe/wiki      frontend/src/pages/Overview.vue                        max-sm:list-cols-[auto_minmax(0,1fr)_auto]
+   frappe/wiki      frontend/src/pages/Overview.vue                        list-cols-[minmax(0,1fr)_7rem_4.5rem_8rem]
+   frappe/wiki      frontend/src/components/ContributionsPanel.vue         max-sm:list-cols-[minmax(0,1fr)_auto]
+   ```
+
+   No `[--list-columns:` usage was found. Every hit is a `max-<screen>:`
+   variant, so each migrates exactly: `max-md:list-cols-[X]` with
+   `:columns="[Y]"` becomes `:columns="{ base: [X], md: [Y] }"` — `max-md` is
+   `< md` and the `md` tier is `>= md`, so the two are complementary with no
+   gap or overlap. Mechanical, but it is a real cross-repo edit the maintainer
+   should agree to before the freeze. This is the escalation for option 1
+   above; the alternative that keeps every call site working is to keep the
+   utility and instead reset `--list-columns: initial` at each list root, which
+   also satisfies "each nested List owns its configuration" but leaves two
+   responsive mechanisms and the class-beats-prop precedence in place.
 3. `yarn docs:build` was not run (disk headroom). The `List-Responsive` preview
    was verified by rendering the story directly, not through VitePress.
 
