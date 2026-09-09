@@ -25,7 +25,10 @@
      The red family sits at hue 17. It was authored at 5, a crimson, whose light
      partner lightens into a pink rather than into a warning — so anything
      reading the ramp for a status had to leave it. 17 keeps the family clear of
-     the amber at 75 while its light partner still reads as red. */
+     the amber at 75 while its light partner still reads as red. Its chroma
+     sits at 0.155, under the cap, because the eye weights red above every
+     other hue and at the cap a slice of it reads as an alert. Lower still and
+     it turns brown. */
   --chart-categorical-1: #2283c3;
   --chart-categorical-2: #84c5f9;
   --chart-categorical-3: #289e60;
@@ -34,8 +37,8 @@
   --chart-categorical-6: #bb9df1;
   --chart-categorical-7: #c98c28;
   --chart-categorical-8: #f5ca8e;
-  --chart-categorical-9: #bd2040;
-  --chart-categorical-10: #fc8e94;
+  --chart-categorical-9: #c54b58;
+  --chart-categorical-10: #fca0a4;
 
   --chart-sequential-1: #095895;
   --chart-sequential-2: #2283c3;
@@ -95,8 +98,8 @@
   --chart-categorical-6: #b294e7;
   --chart-categorical-7: #bf8319;
   --chart-categorical-8: #ebc085;
-  --chart-categorical-9: #b20e37;
-  --chart-categorical-10: #f2858b;
+  --chart-categorical-9: #ba4250;
+  --chart-categorical-10: #f2979b;
 
   --chart-sequential-1: #074677;
   --chart-sequential-2: #1b699c;
