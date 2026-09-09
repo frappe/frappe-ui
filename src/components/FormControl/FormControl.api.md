@@ -32,9 +32,9 @@
   },
   {
     name: 'size',
-    description: 'Size of the input',
+    description: 'Size of the input. The full input scale — `xs` 24px, `sm` 28px, `md` 32px,\n`lg` 40px. `type="checkbox"` renders on the narrower toggle scale, so `lg`\nis clamped to that scale\'s largest value there.',
     required: false,
-    type: '"sm" | "md"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {

@@ -11,9 +11,7 @@
  * 40px height with an 18px font — so it added a fifth row to six class maps
  * without adding a size. See `docs/content/docs/migration.md#input-sizes`.
  */
-export const INPUT_SIZES = ['xs', 'sm', 'md', 'lg'] as const
-
-export type InputSize = (typeof INPUT_SIZES)[number]
+export type InputSize = 'xs' | 'sm' | 'md' | 'lg'
 
 /** Size scale for binary controls (Checkbox, Radio, Switch). */
 export type ToggleSize = 'xs' | 'sm' | 'md'
