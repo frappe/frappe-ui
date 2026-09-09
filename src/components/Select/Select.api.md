@@ -9,14 +9,14 @@
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"xs" | "sm" | "md" | "lg"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Visual style of the select input.',
     required: false,
-    type: '"subtle" | "outline" | "ghost"',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {

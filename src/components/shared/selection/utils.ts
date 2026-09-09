@@ -1,4 +1,5 @@
 import type { ItemListSize } from '../../ItemListRow'
+import type { InputSize, InputVariant } from '../../../composables/inputTypes'
 import { resolvePropValue } from '../../../utils/resolvePropValue'
 
 /**
@@ -10,13 +11,14 @@ import { resolvePropValue } from '../../../utils/resolvePropValue'
  */
 
 /**
- * Trigger size scale for the selection family. Mirrors `InputSize` value for
- * value — the trigger is a text input in every way but the caret — so the
- * heights are the same 24/28/32/40px. Kept as its own name because the
- * selection components' public types reference it directly.
+ * Trigger size scale for the selection family. The trigger is a text input in
+ * every way but the caret, so this is `InputSize` itself — same 24/28/32/40px
+ * heights — under a name the selection components' public types reference
+ * directly. An alias rather than a copy: the two cannot drift apart while the
+ * trigger renders on the input geometry.
  */
-export type SelectionSize = 'xs' | 'sm' | 'md' | 'lg'
-export type SelectionVariant = 'subtle' | 'outline' | 'ghost'
+export type SelectionSize = InputSize
+export type SelectionVariant = InputVariant
 
 const SIZE_FALLBACK = 'sm'
 

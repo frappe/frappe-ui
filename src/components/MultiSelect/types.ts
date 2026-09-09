@@ -1,9 +1,11 @@
 import type { Component, VNodeChild } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
-export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
-export type MultiSelectSize = 'xs' | 'sm' | 'md' | 'lg'
+/** The input scales under MultiSelect's own names. See `ComboboxSize`. */
+export type MultiSelectVariant = InputVariant
+export type MultiSelectSize = InputSize
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }

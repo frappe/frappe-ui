@@ -23,14 +23,14 @@
     name: 'variant',
     description: 'Visual style of the trigger.',
     required: false,
-    type: 'MultiSelectVariant',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'MultiSelectSize',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
