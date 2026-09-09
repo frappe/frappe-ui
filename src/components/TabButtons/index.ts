@@ -4,5 +4,6 @@ export type {
   TabButtonIcon,
   TabButtonsEmits,
   TabButtonsProps,
+  TabButtonsSlots,
   TabButtonValue,
 } from './types'

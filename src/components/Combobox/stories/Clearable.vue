@@ -11,7 +11,7 @@ const fields: Field[] = [
     label: 'colour',
     options: ['gray', 'blue', 'green', 'red'],
   },
-  { key: 'size', label: 'size', options: ['sm', 'md', 'lg', 'xl'] },
+  { key: 'size', label: 'size', options: ['xs', 'sm', 'md', 'lg'] },
   { key: 'style', label: 'style', options: ['subtle', 'outline', 'ghost'] },
   {
     key: 'fontSize',
@@ -41,10 +41,10 @@ const colourSwatch: Record<string, string> = {
 }
 
 const sizeDot: Record<string, string> = {
-  sm: 'size-1.5',
-  md: 'size-2',
-  lg: 'size-2.5',
-  xl: 'size-3',
+  xs: 'size-1.5',
+  sm: 'size-2',
+  md: 'size-2.5',
+  lg: 'size-3',
 }
 
 const fontSizePx: Record<string, number> = {

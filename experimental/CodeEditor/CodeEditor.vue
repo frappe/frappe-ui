@@ -288,17 +288,17 @@ function buildVariant(v?: string, disabled?: boolean): Extension {
   return cmView.EditorView.theme(fragments[v ?? 'subtle'] ?? fragments.subtle)
 }
 
-// Per-size font scale + content min-height, mirroring frappe-ui's `sm|md|lg|xl`
+// Per-size font scale + content min-height, mirroring frappe-ui's `xs|sm|md|lg`
 // input sizes. This compartment is the SOLE source of `&` font size and
 // `.cm-content` min-height — the base `theme` deliberately omits both so there's
 // no equal-specificity fight whose winner depends on StyleModule order.
 function buildSize(s?: string): Extension {
   if (!cmView) return []
   const sizes: Record<string, { fontSize: string; minHeight: string }> = {
+    xs: { fontSize: '11px', minHeight: '2.5rem' },
     sm: { fontSize: '12px', minHeight: '3.5rem' },
     md: { fontSize: '13px', minHeight: '4.5rem' },
     lg: { fontSize: '14px', minHeight: '6rem' },
-    xl: { fontSize: '16px', minHeight: '7.5rem' },
   }
   const cfg = sizes[s ?? 'md'] ?? sizes.md
   return cmView.EditorView.theme({

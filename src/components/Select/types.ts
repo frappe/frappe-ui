@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PopoverAlign, PopoverSide } from '../shared/selection/types'
 import type { PortalTarget } from '../../composables/usePortalTarget'
@@ -28,10 +29,10 @@ export type SelectNormalizedOption = Exclude<SelectOption, string>
 
 export interface SelectProps extends InputLabelingProps {
   /** Size of the select input. */
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: InputSize
 
   /** Visual style of the select input. */
-  variant?: 'subtle' | 'outline' | 'ghost'
+  variant?: InputVariant
 
   /** Placeholder text displayed when no option is selected. */
   placeholder?: string

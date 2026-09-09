@@ -1,9 +1,16 @@
 import type { Component, VNodeChild } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
-export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
-export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * Combobox renders the same trigger geometry and surfaces as every other text
+ * input, so these are the input scales under the component's own names. They
+ * stay aliases, not copies — a Combobox-only scale would have to come with a
+ * Combobox-only renderer.
+ */
+export type ComboboxVariant = InputVariant
+export type ComboboxSize = InputSize
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }
@@ -311,12 +318,6 @@ export interface ComboboxSlots
 export interface ComboboxEmits {
   /** Fired when the committed value changes. */
   'update:modelValue': [value: ComboboxOptionValue | null]
-
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the query changes. */
-  'update:query': [value: string]
 
   /** Fired when the resolved selected option changes. */
   'update:selectedOption': [

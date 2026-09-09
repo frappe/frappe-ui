@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import {
   DesktopShell,
-  Rail,
-  RailItem,
+  SidebarRail,
+  SidebarRailItem,
   Sidebar,
   SidebarItem,
   SidebarLabel,
@@ -65,8 +65,8 @@ const posts = (
   >
     <DesktopShell>
       <template #rail>
-        <Rail class="border-r">
-          <RailItem
+        <SidebarRail class="border-r">
+          <SidebarRailItem
             label="Home"
             variant="ghost"
             icon="lucide-house"
@@ -74,7 +74,7 @@ const posts = (
             @click="community = ''"
           />
           <div class="flex w-full flex-1 flex-col items-center gap-3 pt-3">
-            <RailItem
+            <SidebarRailItem
               v-for="c in communities"
               :key="c.id"
               :label="c.id"
@@ -84,10 +84,10 @@ const posts = (
               <span class="text-2xs-medium uppercase text-ink-gray-5">{{
                 c.initials
               }}</span>
-            </RailItem>
+            </SidebarRailItem>
           </div>
-          <RailItem label="Search" variant="ghost" icon="lucide-search" />
-        </Rail>
+          <SidebarRailItem label="Search" variant="ghost" icon="lucide-search" />
+        </SidebarRail>
       </template>
 
       <template #sidebar>

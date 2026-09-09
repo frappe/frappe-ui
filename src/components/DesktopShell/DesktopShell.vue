@@ -55,7 +55,7 @@ withDefaults(
 )
 
 defineSlots<{
-  /** The icon column — usually a `Rail`. Omit it on shells that don't use one. */
+  /** The icon column — usually a `SidebarRail`. Omit it on shells that don't use one. */
   rail?: () => any
   /** The navigation panel — usually a `Sidebar`. Render it conditionally to hide it on routes that don't need it. */
   sidebar?: () => any

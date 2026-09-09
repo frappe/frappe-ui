@@ -7,27 +7,27 @@
   const propsData = [
   {
     name: 'orientation',
-    description: '',
+    description: 'Which way the rule runs.',
     required: false,
     type: '"horizontal" | "vertical"',
     default: '"horizontal"'
   },
   {
     name: 'position',
-    description: '',
+    description: 'Where the action sits along the rule. Ignored without an `action`, since a\nplain rule has nothing to place.',
     required: false,
     type: '"start" | "center" | "end"',
     default: '"center"'
   },
   {
     name: 'flexItem',
-    description: '',
+    description: 'Stretches the divider to the cross-axis size of its flex parent\n(`align-self: stretch`) instead of taking the full height of its own box.\nUse it for a vertical divider between flex items of differing heights.',
     required: false,
     type: 'boolean'
   },
   {
     name: 'action',
-    description: '',
+    description: 'Renders a button on the rule instead of a bare `<hr>`. The rule is drawn\nbehind the button and runs the full length of the divider.',
     required: false,
     type: 'DividerAction'
   }

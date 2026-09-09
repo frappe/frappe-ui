@@ -17,7 +17,7 @@ describe('Checkbox', () => {
     cy.get('input[type="checkbox"]').should('be.disabled')
     // A disabled control dims its label — `disabled` outranks `color="gray-7"`.
     cy.get('label')
-      .should('have.class', 'text-base')
+      .should('have.class', 'text-sm')
       .and('have.class', 'text-ink-gray-4')
       .and('not.have.class', 'text-ink-gray-7')
   })
@@ -28,8 +28,8 @@ describe('Checkbox', () => {
     })
 
     cy.get('[data-slot="description"]')
-      .should('have.class', 'text-ink-gray-3')
-      .and('not.have.class', 'text-ink-gray-5')
+      .should('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-6')
   })
 
   it('toggles with the space key', () => {

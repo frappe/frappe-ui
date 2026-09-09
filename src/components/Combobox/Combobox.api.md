@@ -30,14 +30,14 @@
     name: 'variant',
     description: 'Visual style of the combobox.',
     required: false,
-    type: 'ComboboxVariant',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'ComboboxSize',
+    type: 'InputSize',
     default: '"sm"'
   },
   {

@@ -28,7 +28,7 @@
   },
   {
     name: 'open',
-    description: '',
+    description: 'Controls the visibility of the dialog.',
     required: false,
     type: 'boolean',
     default: 'false'

@@ -41,7 +41,7 @@
   },
   {
     name: 'size',
-    description: 'Size token, mirroring frappe-ui inputs. Scales the editor\'s font size and\nminimum height (`sm | md | lg | xl`). Defaults to `md`.',
+    description: 'Size token, mirroring frappe-ui inputs. Scales the editor\'s font size and\nminimum height (`xs | sm | md | lg`). Defaults to `md`.',
     required: false,
     type: 'InputSize',
     default: '"md"'

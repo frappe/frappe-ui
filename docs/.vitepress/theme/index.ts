@@ -9,9 +9,10 @@ import 'frappe-ui/charts/style.css'
 import Layout from './Layout.vue'
 
 // VitePress runs its own routing, but frappe-ui components like Breadcrumbs,
-// Sidebar and Rail render `<router-link>` and call `useRouter()`. Recipes are
-// standalone app screens, so give the app a real (in-memory) vue-router: links
-// resolve to `<a>` and no injection warnings fire. It never drives the URL.
+// Sidebar and SidebarRail render `<router-link>` and call `useRouter()`.
+// Recipes are standalone app screens, so give the app a real (in-memory)
+// vue-router: links resolve to `<a>` and no injection warnings fire. It never
+// drives the URL.
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [{ path: '/:pathMatch(.*)*', component: { render: () => h('div') } }],

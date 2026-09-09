@@ -77,9 +77,12 @@ const slots = useReactiveSlots<MultiSelectSlots>()
 const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
 const model = defineModel<Array<string | number>>({ default: () => [] })
+// Documented on `open` in `./types.ts`. A JSDoc block here would be appended
+// to that description by `propsgen`, not replace it.
 const open = defineModel<boolean>('open', { default: false })
-// Optional outside-in control of the search box. Unbound, `defineModel`
-// keeps the value local, so `v-model:query` is never required.
+// Optional outside-in control of the search box. Unbound, `defineModel` keeps
+// the value local, so `v-model:query` is never required. Documented on `query`
+// in `./types.ts`.
 const query = defineModel<string>('query', { default: '' })
 // Bound, the query is the consumer's — the component never resets it (see the
 // open watcher at the bottom of this block).

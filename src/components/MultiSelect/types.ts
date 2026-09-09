@@ -1,9 +1,11 @@
 import type { Component, VNodeChild } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
-export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
-export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
+/** The input scales under MultiSelect's own names. See `ComboboxSize`. */
+export type MultiSelectVariant = InputVariant
+export type MultiSelectSize = InputSize
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }
@@ -309,10 +311,4 @@ export interface MultiSelectEmits {
    * resolved out of `options`, so custom fields on an option survive.
    */
   'update:selectedOptions': [value: MultiSelectOption[]]
-
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the search query changes. */
-  'update:query': [value: string]
 }

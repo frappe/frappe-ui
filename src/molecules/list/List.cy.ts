@@ -590,6 +590,432 @@ describe('List (column mode)', () => {
   })
 })
 
+describe('List (styling hooks)', () => {
+  // The v1 CSS-var contract (ADR-0017): --list-gap and --list-row-padding-x
+  // are the public hooks. Defaults live in var() fallbacks at the use sites,
+  // so a consumer value — a class on the List or a declaration inherited from
+  // any ancestor — always beats the built-in defaults. Column templates are
+  // deliberately not a hook: they come from the `columns` prop alone, and each
+  // list root resolves its own (see the responsive-columns block below).
+
+  it('keeps the columns prop the only source of the template', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['50px', '50px', '50px'],
+            // The var is internal now: setting it by hand does nothing, and
+            // there is no list-cols-[…] utility that compiles to it.
+            class: '[--list-columns:60px_90px_120px]',
+          },
+          () => [feedRow('1')],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+        '50px 50px 50px',
+      )
+    })
+  })
+
+  it('applies hooks inherited from an ancestor, over props and defaults', () => {
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style:
+              '--list-columns: 70px 110px 130px; --list-gap: 20px; --list-row-padding-x: 24px',
+          },
+          // --list-columns is in there on purpose: it is not a hook, so the
+          // list below keeps its own 50px tracks while gap and inset cross.
+          [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListHeader, () => [
+                h(ListHeaderCell, () => 'A'),
+                h(ListHeaderCell, () => 'B'),
+                h(ListHeaderCell, () => 'C'),
+              ]),
+              feedRow('1', { onClick: () => {} }),
+              feedRow('2'),
+            ]),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      const style = getComputedStyle($row[0])
+      expect(style.gridTemplateColumns).to.equal('50px 50px 50px')
+      expect(style.columnGap).to.equal('20px')
+    })
+    // One --list-row-padding-x value lands everywhere — interactive row,
+    // static row, and header — so none of them can drift.
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+  })
+
+  it('defaults the row inset to 12px and the header to flush until the hook is set', () => {
+    // The documented asymmetric default: interactive rows carry a 0.75rem
+    // hover-surface inset; static rows and the header (which can't know
+    // whether its rows are interactive) stay flush at 0 — the consumer aligns
+    // everything by declaring the hook once.
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(ListHeaderCell, () => 'A'),
+            h(ListHeaderCell, () => 'B'),
+            h(ListHeaderCell, () => 'C'),
+          ]),
+          feedRow('1', { onClick: () => {} }),
+          feedRow('2'),
+        ]),
+    })
+    // Also pins the preflight escape: the interactive row is a <button>, and
+    // preflight's `button { padding: 0 }` must not eat the inset (the padding
+    // rule deliberately keeps attribute specificity instead of :where()).
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+  })
+
+  it('drives the preset sugar utilities through the same vars', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['minmax(0,1fr)', '10rem'],
+            // list-gap-4 → --list-gap: 1rem; list-row-px-3 → 0.75rem.
+            class: 'list-gap-4 list-row-px-3',
+          },
+          () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+            ]),
+            feedRow('1', { onClick: () => {} }),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]')
+      .should('have.css', 'column-gap', '16px')
+      .and('have.css', 'padding-inline-start', '12px')
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+  })
+
+  it('applies rowHeight to every row', () => {
+    cy.mount({
+      render: () => h(List, { rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+  })
+
+  it('contains prop carriers to their own list; public hooks cross into nested lists', () => {
+    // The outer list's columns/selectable/rowHeight ride internal --_list-*
+    // carriers, which reset at every list root — a nested list that omits
+    // those props falls back to its own defaults instead of inheriting the
+    // outer geometry. The two public hooks (--list-gap here) keep crossing by
+    // design; column templates deliberately do not.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-gap: 20px' }, [
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              selectable: true,
+              rowHeight: 64,
+            },
+            () => [
+              feedRow('1'),
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list] [data-slot=list] [data-slot=list-row]').should(
+      ($row) => {
+        const style = getComputedStyle($row[0])
+        // Feed template, not the outer 50px tracks.
+        expect(style.gridTemplateColumns).to.not.equal('50px 50px 50px')
+        // No leaked checkbox column (32px) and no hover inset inherited from
+        // the outer selectable list or its interactive host row.
+        expect(style.paddingInlineStart).to.equal('0px')
+        expect(style.paddingInlineEnd).to.equal('0px')
+        // Not the outer fixed rowHeight.
+        expect(style.height).to.not.equal('64px')
+        // The public hook crossed both list boundaries.
+        expect(style.columnGap).to.equal('20px')
+      },
+    )
+  })
+})
+
+describe('List (responsive columns)', () => {
+  // `columns` as an object is one complete template per breakpoint, resolved
+  // in CSS against the app's own Tailwind screens (sm 640 / md 768 / lg 1024 /
+  // xl 1280 in this repo's preset). A supplied tier applies from its width
+  // upward until the next supplied one; nothing is merged track by track.
+
+  const responsive = {
+    base: ['minmax(0, 1fr)', '80px', '64px'],
+    md: ['minmax(0, 1fr)', '140px', '100px'],
+    lg: ['minmax(0, 2fr)', '180px', '120px'],
+  }
+
+  function tracksOf(selector: string) {
+    return cy
+      .get(selector)
+      .then(($el) => getComputedStyle($el[0]).gridTemplateColumns)
+  }
+
+  // The 1fr tracks resolve to pixels, so pin the fixed tracks instead — they
+  // are what identifies the tier.
+  function fixedTracks(template: string) {
+    return template.split(' ').slice(1).join(' ')
+  }
+
+  function mountResponsive(columns: unknown = responsive) {
+    cy.mount({
+      render: () =>
+        h('div', { style: 'width: 100%' }, [
+          h(List, { columns } as never, () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+              h(ListHeaderCell, () => 'C'),
+            ]),
+            feedRow('1'),
+          ]),
+        ]),
+    })
+  }
+
+  it('picks the tier the viewport is in, below, at and above each breakpoint', () => {
+    mountResponsive()
+
+    // Below md → base.
+    cy.viewport(500, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('80px 64px'),
+    )
+    // Exactly md → md (min-width is inclusive).
+    cy.viewport(768, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px 100px'),
+    )
+    // Between md and lg → still md.
+    cy.viewport(900, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px 100px'),
+    )
+    // Exactly lg, and above it → lg.
+    cy.viewport(1024, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+    cy.viewport(1200, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+  })
+
+  it('keeps the header and the rows on one template at every width', () => {
+    mountResponsive()
+    for (const width of [500, 768, 900, 1024, 1200]) {
+      cy.viewport(width, 400)
+      cy.get('[data-slot=list-header]').should(($header) => {
+        const header = getComputedStyle($header[0]).gridTemplateColumns
+        const row = getComputedStyle(
+          document.querySelector('[data-slot=list-row]') as Element,
+        ).gridTemplateColumns
+        expect(header, `header and row tracks at ${width}px`).to.equal(row)
+      })
+    }
+  })
+
+  it('carries an omitted breakpoint up from the tier below it', () => {
+    // sm and xl are omitted: sm keeps base, xl keeps lg.
+    mountResponsive()
+    cy.viewport(700, 400) // ≥ sm, < md
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('80px 64px'),
+    )
+    cy.viewport(1280, 400) // ≥ xl
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+  })
+
+  it('warns about a key that names no screen, and only about that key', () => {
+    // The silent failure this catches: `medium` is not a breakpoint, so it
+    // writes a carrier no media rule reads and the list renders `base` at
+    // every width. The types cannot reject it — screen names belong to the
+    // app, so `ListColumnsByBreakpoint` keeps an open index signature — and
+    // the component cannot read the app's Tailwind config either. The preset
+    // publishes the names it emitted tiers for on `--_list-screens`; this is
+    // the check reading them back.
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive({
+      base: ['minmax(0, 1fr)', '80px'],
+      md: ['minmax(0, 1fr)', '140px'],
+      medium: ['minmax(0, 1fr)', '200px'],
+    })
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /`medium` is not one of this app's Tailwind screens \(base, sm, md, lg, xl\)/,
+    )
+    // `base` and `md` are real screens here, so exactly one key is reported.
+    cy.get('@warn').should('have.been.calledOnce')
+    // And the ignored key really is ignored: `md` still wins above 768px.
+    cy.viewport(900, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px'),
+    )
+  })
+
+  it('says nothing when every key names a screen', () => {
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive()
+    cy.get('@warn').should('not.have.been.called')
+  })
+
+  it('replaces the whole template, track count included', () => {
+    mountResponsive({ base: ['minmax(0, 1fr)'], lg: ['120px', '90px', '60px'] })
+    cy.viewport(500, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(tracks.split(' ')).to.have.length(1),
+    )
+    cy.viewport(1200, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(tracks).to.equal('120px 90px 60px'),
+    )
+  })
+
+  it('keeps a fixed rowHeight, so virtual windowing still matches', () => {
+    // Row height is a prop, never a breakpoint var — the virtualizer's
+    // itemHeight has to stay true at every width.
+    cy.mount({
+      render: () =>
+        h(List, { columns: responsive, rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    for (const width of [500, 900, 1200]) {
+      cy.viewport(width, 400)
+      cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+    }
+  })
+
+  it('gives every nesting combination its own template', () => {
+    // Three combinations in one tree: responsive outer with a static inner,
+    // static outer with a responsive inner, and an inner that sets no columns
+    // at all (it must land on the default feed template, not the outer's).
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('div', { 'data-testid': 'outer-responsive' }, [
+            h(List, { columns: responsive }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () =>
+                  h(List, { columns: ['30px', '40px'] }, () => [
+                    feedRow('inner'),
+                  ]),
+                ),
+              ]),
+            ]),
+          ]),
+          h('div', { 'data-testid': 'outer-static' }, [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () =>
+                  h(
+                    List,
+                    {
+                      columns: {
+                        base: ['20px', '20px'],
+                        lg: ['70px', '90px'],
+                      },
+                    },
+                    () => [feedRow('inner')],
+                  ),
+                ),
+              ]),
+            ]),
+          ]),
+          h('div', { 'data-testid': 'inner-default' }, [
+            h(List, { columns: responsive }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ]),
+          ]),
+        ]),
+    })
+
+    const innerRow = (testid: string) =>
+      `[data-testid=${testid}] [data-slot=list] [data-slot=list] [data-slot=list-row]`
+
+    cy.viewport(1200, 600)
+    // Static inner ignores the outer's lg tier.
+    tracksOf(innerRow('outer-responsive')).should((tracks) =>
+      expect(tracks).to.equal('30px 40px'),
+    )
+    // Responsive inner runs its own ladder inside a static outer.
+    tracksOf(innerRow('outer-static')).should((tracks) =>
+      expect(tracks).to.equal('70px 90px'),
+    )
+    // No columns at all → the default feed template, three tracks, not the
+    // outer's lg tier.
+    tracksOf(innerRow('inner-default')).should((tracks) => {
+      expect(tracks.split(' ')).to.have.length(3)
+      expect(tracks).to.not.contain('180px')
+    })
+
+    cy.viewport(500, 600)
+    tracksOf(innerRow('outer-responsive')).should((tracks) =>
+      expect(tracks).to.equal('30px 40px'),
+    )
+    tracksOf(innerRow('outer-static')).should((tracks) =>
+      expect(tracks).to.equal('20px 20px'),
+    )
+    tracksOf(innerRow('inner-default')).should((tracks) => {
+      expect(tracks.split(' ')).to.have.length(3)
+      expect(tracks).to.not.contain('80px 64px')
+    })
+  })
+})
+
 describe('ListRows (virtual)', () => {
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))

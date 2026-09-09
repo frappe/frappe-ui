@@ -90,6 +90,14 @@ export interface TreeProps {
    * @default false
    */
   disabled?: boolean
+
+  /**
+   * Expand/collapse-all switch. Toggling it writes that value into every node's
+   * `expanded` field. Two-way: it also reflects whether all collapsible nodes are
+   * currently open, so a bound button stays in sync. Per-node state lives on the
+   * nodes themselves (`node.expanded`).
+   */
+  expanded?: boolean
 }
 
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */

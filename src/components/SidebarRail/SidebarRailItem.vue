@@ -1,8 +1,8 @@
 <template>
   <!--
-    <Tooltip> reuses Rail's surrounding TooltipProvider when present (instant
-    hover between neighbours) and falls back to its own when a RailItem is used
-    standalone.
+    <Tooltip> reuses SidebarRail's surrounding TooltipProvider when present
+    (instant hover between neighbours) and falls back to its own when a
+    SidebarRailItem is used standalone.
   -->
   <Tooltip side="right">
     <!--
@@ -15,7 +15,7 @@
     <RouterLink
       v-if="to"
       :to="to"
-      data-slot="rail-item"
+      data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="active ? 'active' : 'inactive'"
       :aria-label="ariaLabel"
@@ -25,7 +25,7 @@
     >
       <span
         v-if="showIndicator"
-        data-slot="rail-item-indicator"
+        data-slot="sidebar-rail-item-indicator"
         aria-hidden="true"
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
@@ -42,13 +42,13 @@
           aria-hidden="true"
         />
       </slot>
-      <RailItemBadge :count="badge" :variant="badgeStyle" />
+      <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
     </RouterLink>
 
     <button
       v-else
       type="button"
-      data-slot="rail-item"
+      data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="active ? 'active' : 'inactive'"
       :aria-label="ariaLabel"
@@ -58,7 +58,7 @@
     >
       <span
         v-if="showIndicator"
-        data-slot="rail-item-indicator"
+        data-slot="sidebar-rail-item-indicator"
         aria-hidden="true"
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
@@ -75,7 +75,7 @@
           aria-hidden="true"
         />
       </slot>
-      <RailItemBadge :count="badge" :variant="badgeStyle" />
+      <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
     </button>
 
     <template #content>
@@ -93,10 +93,10 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import RailItemBadge from './RailItemBadge.vue'
-import type { RailItemProps } from './types'
+import SidebarRailItemBadge from './SidebarRailItemBadge.vue'
+import type { SidebarRailItemProps } from './types'
 
-const props = withDefaults(defineProps<RailItemProps>(), {
+const props = withDefaults(defineProps<SidebarRailItemProps>(), {
   variant: 'tile',
   badgeStyle: 'count',
   badge: 0,

@@ -3,40 +3,38 @@
     <PopoverAnchor :reference="anchorEl" as-child>
       <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
-          <slot name="target" v-bind="triggerSlotProps">
-            <TextInput
-              ref="textInputRef"
-              v-model="inputValue"
-              type="text"
-              :class="inputClass"
-              :id="id"
-              :label="label"
-              :description="description"
-              :error="error"
-              :required="required"
-              :size="size"
-              :variant="variant"
-              :placeholder="placeholder"
-              :disabled="disabled"
-              :readonly="readonly"
-              @focus="onFocus"
-              @click="onClick"
-              @blur="onBlur"
-              @keydown.enter.prevent="onEnter"
-            >
-              <template v-if="$slots.prefix" #prefix>
-                <slot name="prefix" v-bind="triggerSlotProps" />
-              </template>
-              <template #suffix>
-                <slot name="suffix" v-bind="triggerSlotProps">
-                  <LucideChevronDown
-                    class="h-4 w-4 cursor-pointer"
-                    @mousedown.prevent="toggle"
-                  />
-                </slot>
-              </template>
-            </TextInput>
-          </slot>
+          <TextInput
+            ref="textInputRef"
+            v-model="inputValue"
+            type="text"
+            :class="inputClass"
+            :id="id"
+            :label="label"
+            :description="description"
+            :error="error"
+            :required="required"
+            :size="size"
+            :variant="variant"
+            :placeholder="placeholder"
+            :disabled="disabled"
+            :readonly="readonly"
+            @focus="onFocus"
+            @click="onClick"
+            @blur="onBlur"
+            @keydown.enter.prevent="onEnter"
+          >
+            <template v-if="$slots.prefix" #prefix>
+              <slot name="prefix" v-bind="triggerSlotProps" />
+            </template>
+            <template #suffix>
+              <slot name="suffix" v-bind="triggerSlotProps">
+                <LucideChevronDown
+                  class="h-4 w-4 cursor-pointer"
+                  @mousedown.prevent="toggle"
+                />
+              </slot>
+            </template>
+          </TextInput>
         </slot>
       </div>
     </PopoverAnchor>
@@ -136,7 +134,6 @@ const emit = defineEmits<{
 
 const declaredSlots = defineSlots<{
   trigger?: (props: TriggerSlotProps) => any
-  target?: (props: TriggerSlotProps) => any
   prefix?: (props: TriggerSlotProps) => any
   suffix?: (props: TriggerSlotProps) => any
   default?: (props: { close: () => void }) => any
@@ -169,7 +166,7 @@ const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
 const anchorEl = computed(() => {
-  if (slots.trigger || slots.target) return undefined
+  if (slots.trigger) return undefined
   return textInputRef.value?.inputElement ?? undefined
 })
 
@@ -235,7 +232,7 @@ const triggerSlotProps = computed<TriggerSlotProps>(() => ({
   inputValue: inputValue.value,
 }))
 
-const hasCustomTrigger = computed(() => !!(slots.trigger || slots.target))
+const hasCustomTrigger = computed(() => !!slots.trigger)
 
 watch(open, (val, prev) => {
   if (val === prev) return

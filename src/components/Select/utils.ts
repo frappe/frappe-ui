@@ -1,4 +1,5 @@
 import type { SelectionSize, SelectionVariant } from '../shared/selection/utils'
+import { resolvePropValue } from '../../utils/resolvePropValue'
 
 export {
   inputFontSizeClasses,
@@ -16,13 +17,18 @@ export const EMPTY_VALUE_PREFIX = '__frappe_ui_select_empty__'
  * `triggerSizeClasses` and is used to align the absolutely-positioned
  * `SelectValue` measurement overlay with the rest of the trigger content.
  */
+const triggerContentPaddingMap: Record<SelectionSize, string> = {
+  xs: 'px-1.5',
+  sm: 'px-2',
+  md: 'px-2.5',
+  lg: 'px-3',
+}
+
 export function triggerContentPaddingClasses(size: SelectionSize) {
-  return {
-    sm: 'px-2',
-    md: 'px-2.5',
-    lg: 'px-3',
-    xl: 'px-3',
-  }[size]
+  return resolvePropValue(triggerContentPaddingMap, size, 'sm', {
+    component: 'Select',
+    prop: 'size',
+  })
 }
 
 /**

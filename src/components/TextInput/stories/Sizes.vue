@@ -4,9 +4,9 @@ import { TextInput } from 'frappe-ui'
 
 <template>
   <div class="flex flex-col gap-3 w-full max-w-sm">
+    <TextInput size="xs" placeholder="Extra small" />
     <TextInput size="sm" placeholder="Small" />
     <TextInput size="md" placeholder="Medium" />
     <TextInput size="lg" placeholder="Large" />
-    <TextInput size="xl" placeholder="Extra large" />
   </div>
 </template>

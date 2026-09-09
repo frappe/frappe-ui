@@ -12,13 +12,6 @@
     type: 'string'
   },
   {
-    name: 'size',
-    description: 'Size of the label text.',
-    required: false,
-    type: '"sm" | "md"',
-    default: '"sm"'
-  },
-  {
     name: 'id',
     description: 'id of the form control this label is for; wired to the `for` attribute.',
     required: false,

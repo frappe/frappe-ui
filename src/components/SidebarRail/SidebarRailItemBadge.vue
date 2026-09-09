@@ -13,7 +13,7 @@
 
   <span
     v-else-if="showDot"
-    data-slot="rail-item-badge-dot"
+    data-slot="sidebar-rail-item-badge-dot"
     aria-hidden="true"
     class="pointer-events-none absolute -right-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-base)] bg-surface-red-6"
   />

@@ -9,6 +9,116 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
+
+The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`
+is still a bare frame that renders on its own or beside `Sidebar`, `Sidebar`
+does not own the rail layout, and the rail is not a collapsed mode of it.
+Props, slots and events are unchanged.
+
+- `RailItemProps` is now `SidebarRailItemProps`, and the root exports it the
+  way it exports `SidebarItemProps`.
+- **Breaking, silent:** the styling hooks follow the name. `data-slot="rail"`
+  becomes `"sidebar-rail"`, `rail-item` becomes `sidebar-rail-item`, and so do
+  `rail-item-indicator` and `rail-item-badge-dot`. A rule written against an
+  old value still parses; it just stops matching.
+- `DesktopShell`'s `#rail` slot keeps its name. It names a layout region, not
+  the component that goes in it.
+
+There is no alias export. The import fails, so the build names every call
+site: the old name is a plain find-and-replace, as with every other component
+rename in v1.
+
+### Inputs — the size scale is `xs / sm / md / lg` (breaking; loud in TS, silent in JS)
+
+`xs` is added and `xl` is removed across the input family. The four sizes are
+fixed single-line heights: **24 / 28 / 32 / 40px**. `sm`, `md` and `lg` render
+as before, and `xs` matches `Button`'s own `xs`, so a 24px input and a 24px
+button line up.
+
+`xl` was never a bigger box — it drew `lg`'s 40px height with an 18px font, so
+it was a font override wearing a size name. Replace it with `size="lg"`.
+
+Every component on the shared scale moves together: `TextInput`, `Textarea`,
+`Password`, `Rating`, `Select`, `Combobox`, `MultiSelect`, `ItemListRow`,
+`FormControl`, the `DatePicker` family, `TimePicker`, `Duration`, and the
+experimental `CodeEditor` and `MultiEmailInput`. `Progress`, `Slider`,
+`Switch`, `Checkbox`, `Radio`, `Avatar`, `Badge`, `Button` and `Dialog` keep
+their own scales, so `<Dialog size="xl">` and `<Avatar size="xl">` still work.
+
+- `FormControl.size` widens from `sm | md` to the whole scale. `type="checkbox"`
+  renders on the narrower toggle scale, so `lg` there clamps to `md` rather
+  than falling off the end.
+- **A leftover `size="xl"` no longer loses its geometry.** Every input size
+  lookup goes through `resolvePropValue`: an unsupported value falls back to
+  the component's own default and warns once in dev, instead of shipping an
+  element with no height, font, radius or padding class and no warning. Same
+  treatment `Badge` got for `theme`.
+- `InputSize`, `InputVariant`, `ToggleSize` and `RangeSize` are now exported
+  from the root, so a typed wrapper can name the scale the API tables already
+  print.
+
+TypeScript flags `xl` at the call site. JavaScript call sites and bound values
+(`:size="config.size"`) only surface through the dev warning, so check the
+console after upgrading.
+
+### Form typography — 13px labels, descriptions and Textarea text (breaking, silent)
+
+Labels, descriptions and `Textarea` text are a fixed 13px, and labels and
+descriptions default to `ink-gray-6`. Nothing to change in your source; this
+is a rendering change.
+
+| Member | Before | After |
+| --- | --- | --- |
+| Label (`InputLabel`) | 14px, `ink-gray-5` | 13px, `ink-gray-6` |
+| Label (`FormLabel`) | 12px `sm` / 14px `md`, `ink-gray-5` | 13px, `ink-gray-6` |
+| Description | 13px, `ink-gray-5` | 13px, `ink-gray-6` |
+| Description, disabled | `ink-gray-3` | `ink-gray-4` |
+| `Textarea` text, every size | 14 / 16 / 18 / 20px | 13px |
+
+The two label implementations used to disagree — `InputLabel`, which
+`FormControl` renders through, was a flat 14px, while `FormLabel` was 12px or
+14px depending on `size`. Both are 13px now, so a `FormLabel` and a `TextInput`
+label finally match.
+
+`ink-gray-5` measured 4.18:1 against the page in both themes, below WCAG AA for
+body text. `ink-gray-6` measures 7.80:1 light and 6.29:1 dark. The disabled
+description moved off `ink-gray-3` (1.69:1) to match the disabled label.
+
+- **`FormLabel.size` is removed**, not kept as a no-op: with the size fixed the
+  axis was degenerate. `size` falls through as a plain HTML attribute, so
+  nothing throws — the label just renders at 13px. TypeScript call sites get a
+  build error. `size="md"` was 14px and the `sm` default was 12px; both land on
+  the accepted 13px, so the migration is deleting the attribute.
+- `Textarea.size` still moves padding, corner radius and minimum height. It no
+  longer moves the type, and the single-line input heights do not prescribe a
+  `Textarea` height, so a `lg` `Textarea` is a roomier box of the same 13px
+  prose. The `Textarea` *value* colour is unchanged.
+
+### Combobox and MultiSelect — `update:open` and `update:query` leave the emit interfaces (breaking in TS only)
+
+`ComboboxEmits` and `MultiSelectEmits` no longer declare `'update:open'` and
+`'update:query'`. Both components declare those events through `defineModel`,
+and declaring them twice collapsed `$emit`'s signature to
+`(event, ...args: unknown[])` — a typed `@update:open` listener would not
+compile.
+
+**The runtime events are unchanged.** `v-model:open`, `v-model:query`, and
+`@update:open` / `@update:query` listeners all fire exactly as before, and both
+events are still listed in the API tables. Only these four interface *members*
+are gone:
+
+| Removed member | Still emitted at runtime |
+| --- | --- |
+| `ComboboxEmits['update:open']` | yes |
+| `ComboboxEmits['update:query']` | yes |
+| `MultiSelectEmits['update:open']` | yes |
+| `MultiSelectEmits['update:query']` | yes |
+
+You are affected only if you indexed those interfaces by hand, as in
+`type Handler = ComboboxEmits['update:open']`. Type the handler off the model
+instead: `(value: boolean) => void`.
+
 ### Editor — mentions open after brackets and quotes
 
 Typing `@` after an opening bracket or quote (`(@jane`, `[@jane`, `"@jane`) now opens the mention list. TipTap only allowed a space before the trigger, so those sequences never matched. Emails (`jane@example.com`) still do not.
@@ -61,6 +171,84 @@ day.
   `24:00:00`.
 - Full-day events (`isFullDay`) cover `fromDate`..`toDate` whole; their
   times are ignored.
+
+### `frappe-ui/list` — responsive columns, and the CSS hook contract frozen (breaking)
+
+`List.columns` now takes a breakpoint object as well as a plain array:
+
+```vue
+<List
+  :columns="{
+    base: ['minmax(0,1fr)', '80px', '64px'],
+    md: ['minmax(0,1fr)', '140px', '100px'],
+    lg: ['minmax(0,2fr)', '180px', '120px'],
+  }"
+>
+```
+
+`base` is required and applies from zero width. Every other key names a
+breakpoint from your own Tailwind `screens` and applies from that width upward
+until the next supplied one, so an omitted breakpoint keeps the template below
+it. Each value replaces the whole template — nothing is merged track by track,
+so a breakpoint can change the track count too. Changing the count does not
+hide cells: pair it with matching visibility classes on the header and rows.
+
+The switch is plain CSS, generated from your app's own breakpoint values, so
+the tracks move with your `md:` utilities and the server-rendered markup is
+already correct — no viewport measurement, no resize listener, no first-paint
+flash. Arrays keep working exactly as before. A key can name any screen your
+config defines, not only a plain width: a `{ min, max }` screen gives a tier
+that ends where the screen ends, and `{ max }` and `{ raw }` screens work too.
+Each tier is live in exactly the same places as that screen's own variants.
+
+The list family's public CSS hooks for v1 are now exactly `--list-gap` and
+`--list-row-padding-x` (with the preset sugar `list-gap-*`, `list-row-px-*`).
+The observable changes while freezing them:
+
+- **`--list-columns` and `list-cols-[…]` are gone.** Column templates come from
+  the `columns` prop, which now covers the responsive case the hook existed
+  for. Replace `class="max-sm:list-cols-[auto_minmax(0,1fr)_auto]"` with a
+  `base` tier in the prop. The var is internal (`--_list-columns`) and setting
+  it by hand is unsupported.
+- **Every `List` owns its columns.** A wrapper's `--list-columns` used to
+  override a nested list's own `columns` prop, with `[--list-columns:initial]`
+  as the opt-out. Nested lists now always keep their own template, or the
+  default feed template when they set none. Drop any `[--list-columns:initial]`
+  opt-outs; they are no longer needed.
+- **Both remaining hooks work from any ancestor.** They resolve through `var()`
+  fallbacks at the use site, so one declaration on a wrapper themes every list
+  in the subtree.
+- **Internal vars are renamed with a `--_list` prefix** and are explicitly not
+  API: `--list-columns-default` → `--_list-columns` (plus one
+  `--_list-columns-<breakpoint>` carrier per tier and one generated
+  `--_list-tier-<screen>`), `--list-checkbox-width` →
+  `--_list-checkbox-width`, `--list-row-height` → `--_list-row-height`. None
+  was documented; anything targeting the old names breaks. Row height is the
+  `rowHeight` prop — overriding the var would desync `virtual` windowing, so it
+  is deliberately not a hook, and it stays one number at every width.
+- **Internal carriers reset at every `List`.** A list nested inside another
+  list no longer inherits the outer list's `columns` template, checkbox inset,
+  or `rowHeight` when it doesn't set those props itself (pre-existing leak,
+  fixed while freezing).
+- **`--list-row-padding-x` now reaches static rows too.** Previously only
+  interactive rows and the header took the hook, so a static table with a
+  header drifted apart when it was set; now one declared value lands on every
+  row and the header. Unset defaults are unchanged (interactive rows
+  `0.75rem`, everything else flush).
+
+Responsive columns need the frappe-ui Tailwind preset, which is what knows your
+breakpoints. Without it a breakpoint object falls back to its `base` tier at
+every width.
+
+A key that is not one of your screens is ignored — `{ base, medium }` renders
+`base` everywhere, because `medium` names no breakpoint. Screen names come from
+your Tailwind config, so `ListColumnsByBreakpoint` keeps an open index signature
+and the type cannot reject the key; a development build now warns instead,
+naming the key and listing the screens it could have been. The warning is
+stripped from production builds.
+
+The conventions behind this (and for every future component with CSS hooks)
+are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
 
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 
@@ -2059,9 +2247,9 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 
 ### App shell family — brought to bar
 
-`DesktopShell`, `MobileShell`, `MobileNav`, `Rail`, `PageHeader`,
-`ScrollArea`, and `FrappeUIProvider` all keep their current exports and
-names.
+`DesktopShell`, `MobileShell`, `MobileNav`, `PageHeader`, `ScrollArea`, and
+`FrappeUIProvider` all keep their current exports and names. The rail was in
+this list until it was renamed to `SidebarRail` — see the entry above.
 
 - Every slot across the family now has a documented description, and each
   component has a docs page, a story, and cypress tests (several had none).

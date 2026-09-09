@@ -162,7 +162,7 @@ export const tabIndicatorMotionClasses =
  * Reset, focus ring, and disabled treatment for the focusable element
  * wrapping a pill. The shell owns the ring (P12) so every track and both
  * components get the same one; `focus-visible:ring-0` clears the UA ring
- * first, matching `SidebarItem` and `RailItem`.
+ * first, matching `SidebarItem` and `SidebarRailItem`.
  */
 export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline focus-visible:ring-0 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-60'

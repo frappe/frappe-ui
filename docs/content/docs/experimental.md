@@ -401,7 +401,7 @@ empty.
 ## inputFontSizeClasses
 
 Returns the Tailwind font-size class frappe-ui input components use for a given
-size token (`'sm' | 'md' | 'lg' | 'xl'`), so custom controls render text at the
+size token (`'xs' | 'sm' | 'md' | 'lg'`), so custom controls render text at the
 same scale as built-in ones.
 
 ```ts

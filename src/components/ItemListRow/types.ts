@@ -1,6 +1,12 @@
 import type { Component } from 'vue'
+import type { InputSize } from '../../composables/inputTypes'
 
-export type ItemListSize = 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * Row density scale. The rows a selection menu is built from have to line up
+ * with the trigger above them, so this is `InputSize` under the row's own
+ * name — 24/28/32/40px — and the row implements all four.
+ */
+export type ItemListSize = InputSize
 
 export interface ItemListRowProps {
   /** Element tag or component used for the row wrapper. */

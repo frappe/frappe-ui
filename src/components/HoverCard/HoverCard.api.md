@@ -62,7 +62,7 @@
   },
   {
     name: 'open',
-    description: '',
+    description: 'Controls the visibility of the hover card.',
     required: false,
     type: 'boolean',
     default: 'false'

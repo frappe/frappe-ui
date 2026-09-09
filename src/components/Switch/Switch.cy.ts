@@ -34,8 +34,8 @@ describe('Switch', () => {
       .should('have.class', 'text-ink-gray-4')
       .and('not.have.class', 'text-ink-gray-7')
     cy.get('[data-slot="description"]')
-      .should('have.class', 'text-ink-gray-3')
-      .and('not.have.class', 'text-ink-gray-5')
+      .should('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-6')
   })
 
   it('v-model', () => {

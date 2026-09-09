@@ -1,10 +1,11 @@
 # DesktopShell
 
-The desktop app frame. `DesktopShell` arranges an app's `Rail` and `Sidebar`
-alongside the main content, and owns the skeleton the content needs: a pinned
-`PageHeaderTarget` and a registered scroll region. Its mobile counterpart is a
-separate family — [`MobileShell`](/docs/components/mobileshell) — because the
-two are different navigation models, not one responsive component.
+The desktop app frame. `DesktopShell` arranges an app's `SidebarRail` and
+`Sidebar` alongside the main content, and owns the skeleton the content needs:
+a pinned `PageHeaderTarget` and a registered scroll region. Its mobile
+counterpart is a separate family —
+[`MobileShell`](/docs/components/mobileshell) — because the two are different
+navigation models, not one responsive component.
 
 <ComponentPreview name="DesktopShell-Default" />
 

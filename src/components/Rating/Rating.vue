@@ -131,6 +131,7 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
+import { resolvePropValue } from '../../utils/resolvePropValue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
@@ -138,6 +139,7 @@ import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import LucideStar from '~icons/lucide/star'
+import type { InputSize } from '../../composables/inputTypes'
 import type { RatingProps, RatingIconSlotProps } from './types'
 
 const props = withDefaults(defineProps<RatingProps>(), {
@@ -192,14 +194,18 @@ const {
   hasDescriptionSlot: () => Boolean(slots.description),
 })
 
-const sizeClass = computed(
-  () =>
-    ({
-      sm: 'size-4',
-      md: 'size-5',
-      lg: 'size-6',
-      xl: 'size-7',
-    })[props.size],
+const starSizeMap: Record<InputSize, string> = {
+  xs: 'size-3.5',
+  sm: 'size-4',
+  md: 'size-5',
+  lg: 'size-6',
+}
+
+const sizeClass = computed(() =>
+  resolvePropValue(starSizeMap, props.size, 'sm', {
+    component: 'Rating',
+    prop: 'size',
+  }),
 )
 
 function roundToStep(v: number) {
