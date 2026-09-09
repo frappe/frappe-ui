@@ -267,3 +267,28 @@ it was folded into `frappe/suite`. Swept anyway; clean.
   `Rating` never pass `:disabled` to `InputLabel` / `InputDescription`, so a disabled stack
   field keeps a full-strength label while inline-row controls dim theirs. Pre-existing, both
   components already have the prop wired.
+
+## Pull request
+
+[#1133](https://github.com/frappe/frappe-ui/pull/1133), branch `v1/rc-api`, opened 2026-09-09.
+It closes #1116, #1117 and #1118, and supersedes #1097, #1091 and #1098.
+
+Independently reproduced after the merges, not carried over from the branches: `yarn type-check` clean,
+`yarn test` 104 files / 1689 tests, `docs:check` reports the tables match, Cypress 625 passing across the
+29 touched specs.
+
+## Remaining work after this pull request
+
+1. Migrate the downstream `list-cols-[...]` call sites. Maintainer approved 2026-09-09. Confirmed by the
+   integration sweep: `frappe/gameplan` 4 and `frappe/wiki` 4, every one a `max-<screen>:` variant that
+   maps exactly onto the object form.
+2. `frappe/lms` `SettingsTable.vue` claims in comments that two grid containers share one
+   `--list-columns` track list. If that alignment rests on inheritance, the prop-only model does not
+   reproduce it and the symptom is misaligned columns, not a build error. Needs a look, not a grep.
+3. `frappe/studio` generated schemas still offer `xl` on twelve input components and export `Rail.json`
+   by name. Invisible to a `.vue` grep, so they need a schema-side edit.
+4. Build and boot CRM, Helpdesk and Gameplan against the candidate. Still unverified; needs a bench.
+5. Two pre-existing defects recorded in the pull request and deliberately not fixed there: the disabled
+   stack-input label, and `@update:model-value` / `@update:collapsed` typing across five components,
+   whose real fix is a `propsgen` change.
+6. Then the RC cut itself: #1029's one-week app soak and maintainer sign-off.
