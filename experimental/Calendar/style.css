@@ -43,21 +43,29 @@
 .event .event-border {
   background-color: var(--border);
 }
-/* Pointed at: one step deeper in the event's own colour.
-   `bgHover` is the same step as `bg` in the palette, so hovering an event
-   changed nothing — the pill a reader was about to click looked exactly like
-   every pill they were not. */
-.event:hover {
-  background-color: var(--bg-active);
-}
 /* A draft: saved, but nothing sent. An outline in the event's colour rather
    than a fill, so it reads as not yet real — on its own white ground, not on
    the grid showing through it. */
-.event.event-draft,
-.event.event-draft:hover {
+.event.event-draft {
   background-color: var(--surface-base);
   outline: 1px dashed var(--border);
   outline-offset: -1px;
+}
+/* Every hover behind `(hover: hover)`, the way the utilities are: a phone has no
+   pointer to take away, so it leaves :hover on whatever was last tapped. A
+   tapped draft kept `.event.event-draft:hover` — three classes' worth of
+   specificity — over `.event.active`, and the one event a reader had just opened
+   was the one that did not look open. */
+@media (hover: hover) {
+  /* Pointed at: one step deeper in the event's own colour. `bgHover` is the same
+     step as `bg` in the palette, so hovering an event changed nothing — the pill
+     a reader was about to click looked exactly like every pill they were not. */
+  .event:hover {
+    background-color: var(--bg-active);
+  }
+  .event.event-draft:hover {
+    background-color: var(--surface-base);
+  }
 }
 /* Open: the event whose panel or popover is showing — a shade past the one
    hovering gives it, mixed from the event's own colour rather than taken from
@@ -100,8 +108,10 @@
   background-color: transparent;
   border: 1.5px solid var(--border);
 }
-.calendar-row:hover {
-  background-color: var(--surface-gray-1);
+@media (hover: hover) {
+  .calendar-row:hover {
+    background-color: var(--surface-gray-1);
+  }
 }
 /* Selected: gray, at the lightest step there is. Blue belongs to today — that band and the dot in it — and a blue
    row would have read as more of the same rather than as the one row open,
