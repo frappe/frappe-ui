@@ -16,8 +16,10 @@
     <template #trigger>
       <div
         v-bind="$attrs"
-        class="event flex gap-1.5 min-h-6 rounded-4 p-[5px] transition-all duration-75 overflow-hidden"
+        class="event flex rounded-4 transition-all duration-75 overflow-hidden"
         :class="{
+          'h-5 gap-1 px-1 py-0.5': dense,
+          'h-7 gap-1.5 px-1.5 py-1': !dense,
           active: activeEvent == (props.event?.id || props.event?.name),
           'rounded-l-none': bar && !bar.isStart,
           'rounded-r-none': bar && !bar.isEnd,
@@ -33,8 +35,13 @@
         "
         @dblclick.prevent="handleEventEdit($event)"
       >
+        <!-- The colour bar goes where the cell is narrow: 2px of it plus the gap
+             beside it is a tenth of a phone's column, spent saying in a second
+             way what the fill already says. The title takes some of that back as
+             padding — without the bar in front of it, 3px left it against the
+             pill's own edge. -->
         <div
-          v-if="props.event.fromTime && !props.event.isDraft"
+          v-if="props.event.fromTime && !props.event.isDraft && !dense"
           class="event-border w-[2px] rounded-4 shrink-0"
         />
         <div
@@ -45,8 +52,9 @@
           </div>
           <div class="min-w-0">
             <p
-              class="event-title text-sm-medium leading-5"
+              class="event-title"
               :class="[
+                dense ? 'text-xs-medium leading-4' : 'text-sm-medium leading-5',
                 wrap ? 'line-clamp-2 break-words' : 'truncate',
                 props.event.isDeclined
                   ? 'line-through text-ink-gray-5'
@@ -123,6 +131,16 @@ const props = defineProps<{
    * to show its whole title.
    */
   wrap?: boolean
+  /**
+   * Drawn for a cell a seventh of a phone's width: a size down and a couple of
+   * pixels off every side, which is two more events in the same cell.
+   *
+   * Either way the pill is exactly as tall as the lane it is laid in — 28px, or
+   * 20 dense — rather than as tall as what is in it. A month cell is a stack of
+   * rows and they have to be one rhythm; a floor let a pill grow past its lane
+   * the moment its padding and line came to more.
+   */
+  dense?: boolean
   /** A second, quieter line under the title — a time, or "Day 2 of 3". */
   subtitle?: string
 }>()

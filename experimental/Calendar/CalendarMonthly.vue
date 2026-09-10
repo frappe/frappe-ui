@@ -1,19 +1,5 @@
 <template>
-  <CalendarMonthStack
-    v-if="isNarrow"
-    :events="events"
-    :currentMonth="currentMonth"
-    :currentYear="currentYear"
-    :currentDate="currentDate"
-    :jumpDate="jumpDate"
-    :config="config"
-  >
-    <template #event-popover-content="slotProps">
-      <slot name="event-popover-content" v-bind="slotProps" />
-    </template>
-  </CalendarMonthStack>
-
-  <div v-else class="flex min-h-0 flex-1 flex-col">
+  <div class="flex min-h-0 flex-1 flex-col">
     <!-- Day List. Nothing marks a weekend: it was a wash down its cells, which
          is where the events are — an event's fill is a step of its colour barely
          above white, and on gray it had almost nothing left to be read by. Moved
@@ -21,9 +7,12 @@
          Saturday, and a grid whose columns are named does not have to say which
          two of them are the weekend twice. -->
     <div class="grid w-full grid-cols-7">
+      <!-- A size down where the columns are: seven names across a phone is the
+           widest thing in the grid, and the dates under them are 12px. -->
       <span
         v-for="day in daysList"
-        class="inline-flex items-center justify-center text-base text-ink-gray-6 h-8"
+        class="inline-flex items-center justify-center text-ink-gray-6 h-8"
+        :class="isNarrow ? 'text-sm' : 'text-base'"
       >
         {{ day }}
       </span>
@@ -36,16 +25,21 @@
       share whatever height is left over, and the strip scrolls once they
       outgrow it.
     -->
+    <!-- Bordered, the box's corner goes with it — `overflow-y-auto` clips to the
+         radius, so a rounded box with no border of its own cuts the ends off the
+         rules its own rows draw. Unbordered it keeps the top one: that rule is
+         what divides the weekday names from the first week under them, and
+         without it the dates ran straight on from their own headings. -->
     <div
       ref="scroller"
-      class="relative min-h-0 flex-1 overflow-y-auto rounded-6 border-outline-gray-1"
-      :class="!config.noBorder && 'border-[0.5px]'"
+      class="relative min-h-0 flex-1 overflow-y-auto border-outline-gray-1"
+      :class="config.noBorder ? 'border-t-[0.5px]' : 'rounded-6 border-[0.5px]'"
     >
       <div class="flex min-h-full flex-col">
         <div
-          v-for="row in rows"
+          v-for="row in laidOut"
           :key="row.key"
-          class="relative grid flex-auto grid-cols-7 border-b border-outline-gray-1 last:border-b-0"
+          class="relative grid flex-1 basis-0 grid-cols-7 border-b border-outline-gray-1 last:border-b-0"
           :data-strip-date="row.key"
           data-week-row
           @dragover.prevent
@@ -61,10 +55,18 @@
           >
             <!-- The today pill is a 25px box around the number, so it gets a
                  tighter inset that keeps its digits in the same column as the
-                 bare numbers on the other days. -->
+                 bare numbers on the other days.
+
+                 Centred where the cell is narrow, so a date sits under the
+                 weekday letter that names its column; a seventh of a phone's
+                 width has no margin to hang a number off. Wider, the number
+                 keeps to the right, where a month grid has always put it. -->
             <div
-              class="flex shrink-0 items-center justify-end text-xs"
-              :class="isToday(date) ? 'px-[3px]' : 'px-2'"
+              class="flex shrink-0 items-center text-xs"
+              :class="[
+                isToday(date) ? 'px-[3px]' : 'px-2',
+                isNarrow ? 'justify-center' : 'justify-end',
+              ]"
               :style="{ height: `${HEADER_HEIGHT}px` }"
             >
               <button
@@ -80,23 +82,32 @@
               </button>
             </div>
 
-            <!-- Room for the lanes of bars laid over this column. -->
+            <!-- Room for the lanes of bars laid over this column — the ones
+                 the row is drawing, which in a full week is not all of them. -->
             <div
-              v-if="row.lanes[col]"
+              v-if="row.cells[col]!.lanes"
               class="shrink-0"
-              :style="{ height: `${row.lanes[col]! * LANE_PITCH}px` }"
+              :style="{ height: `${row.cells[col]!.lanes * lanePitch}px` }"
             />
 
+            <!-- One line a title, cut where the cell ends. A grid cell is a
+                 seventh of the width and holds however many events the day has,
+                 so a title on two lines spends another event's row to finish a
+                 name the first line had mostly said — and at a phone's 50px it
+                 came out as two lines of four letters and an ellipsis. The stack
+                 is where a title has room to wrap, and that is where `wrap` is
+                 still passed. -->
             <div
-              v-if="row.days[col]!.length"
-              class="flex flex-col gap-1 px-0.5 pb-1.5"
+              v-if="row.cells[col]!.shown.length || row.cells[col]!.hidden"
+              class="flex flex-col px-0.5 pb-1.5"
+              :class="isNarrow ? 'gap-0.5' : 'gap-1'"
             >
               <CalendarMonthEvent
-                v-for="event in row.days[col]"
+                v-for="event in row.cells[col]!.shown"
                 :key="event.id"
                 :event="event"
                 :date="date"
-                wrap
+                :dense="isNarrow"
                 class="cursor-pointer"
                 :class="draggingId === event.id && 'opacity-50'"
                 :draggable="config.isEditMode"
@@ -107,15 +118,41 @@
                   <slot name="event-popover-content" v-bind="slotProps" />
                 </template>
               </CalendarMonthEvent>
+              <!-- What the cell could not hold, and the way to it: the day view,
+                   where the whole of it fits. The all-day rows' own button —
+                   outlined where the events are filled, and dashed for the thing
+                   standing in for what is not drawn.
+
+                   The count alone, without the "more" those rows can afford: a
+                   column this narrow truncated the word to an ellipsis, and "+5"
+                   beside four events says what the sentence was going to.
+
+                   Its height is a lane's, from the same value the bars and the
+                   pills are drawn at, so the rows of a cell are one rhythm down
+                   to the last of them. Centred, as the date above it is: a count
+                   is not a name, so there is no first letter for the eye to line
+                   up on. -->
+              <Button
+                v-if="row.cells[col]!.hidden"
+                variant="outline"
+                :label="`+${row.cells[col]!.hidden}`"
+                class="w-full cursor-pointer border-dashed !justify-center !rounded-4 !text-xs !text-ink-gray-6"
+                :style="{ height: `${laneHeight}px` }"
+                @click.stop="openDay(date)"
+              />
             </div>
           </div>
 
+          <!-- The bars laid across the row, drawn by the cells' own component and
+               at the cells' own density: a bar and a pill are the same event
+               written two ways, and the two came out a size apart. -->
           <CalendarMonthEvent
-            v-for="bar in row.bars"
+            v-for="bar in row.shownBars"
             :key="bar.event.id"
             :event="bar.event"
             :date="row.week[bar.startCol]!"
             :bar="bar"
+            :dense="isNarrow"
             class="absolute cursor-pointer"
             :class="draggingId === bar.event.id && 'opacity-50'"
             :style="barStyle(bar)"
@@ -134,7 +171,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { daysList, parseDate } from './calendarUtils'
 import {
@@ -151,7 +196,7 @@ import { shortMonth, stripWeeks } from './monthStrip'
 import { useNow } from './composables/useNow'
 import { useStripScroll } from './composables/useStripScroll'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
-import CalendarMonthStack from './CalendarMonthStack.vue'
+import { Button } from '#components/Button'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -170,11 +215,194 @@ const props = defineProps<{
   config: CalendarConfig
 }>()
 
-/** The date-number strip at the top of every cell. */
-const HEADER_HEIGHT = 32
+/**
+ * The date-number strip at the top of every cell — a lane's height, like every
+ * other row a cell stacks, so a date and the events under it keep one rhythm.
+ * It also sets where the bars laid across the row begin.
+ */
+const HEADER_HEIGHT = 28
+
+/**
+ * Whether a cell is narrow enough to need the denser treatment: a phone's
+ * seventh of the width, where a month is still a grid but a tight one.
+ */
+const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
+
+/**
+ * A bar's height, and the pitch of the lanes it is laid in.
+ *
+ * A bar and a single day's pill are the same thing said two ways, so they have
+ * to be the same height: 20px is what a dense pill comes to — its 16px line and
+ * 2px either side — where a bar kept the 30px the desktop lays its lanes at, two
+ * rows of events at two heights in one cell.
+ */
+const DENSE_LANE_HEIGHT = 20
+
+const laneHeight = computed(() =>
+  isNarrow.value ? DENSE_LANE_HEIGHT : LANE_HEIGHT,
+)
+/**
+ * The air between one row of a cell and the next, which the lanes carry as the
+ * difference between their height and their pitch. Two pixels where a cell holds
+ * three rows and a count; four where a cell has the room the desktop gives it.
+ */
+const DENSE_LANE_GAP = 2
+
+const lanePitch = computed(
+  () =>
+    laneHeight.value +
+    (isNarrow.value ? DENSE_LANE_GAP : LANE_PITCH - LANE_HEIGHT),
+)
+
+/**
+ * The fewest rows a cell will draw, however little room it has. Below three,
+ * a day with anything on it is mostly a count of what it is not showing.
+ *
+ * Rows, not events: the count is one of them, so a full cell at the floor shows
+ * two events and says how many more. Three events and a count needs 130px a week
+ * row — 780px of grid for six of them — which a phone does not have, and a month
+ * that scrolls to be read is not a month at a glance.
+ */
+const MIN_CELL_ROWS = 3
+
+/** The cell's own padding under its last row — `pb-1.5`. */
+const CELL_PAD = 6
+
+/**
+ * A week row's height, measured rather than assumed.
+ *
+ * How much a cell holds is a question about the window, not a number to choose
+ * in advance: a phone in portrait fits three events under the date, the same
+ * phone turned over fits one, and a short desktop window is somewhere between.
+ *
+ * A row, not the strip divided by the weeks in it. The rows are `flex-1
+ * basis-0`, so a share of the strip is the least a row can be — but a cell that
+ * cannot fit in its share grows the row past it, and then every column is
+ * working from a figure smaller than the row it is actually in. That happens at
+ * the `MIN_CELL_ROWS` floor, and it happened to the last column, which had no
+ * bar over it and so a lane spare: it drew a row the others were told there was
+ * no room for, the row grew to hold it, and the six columns that had capped
+ * themselves at the share left the difference empty beneath them.
+ *
+ * Asking a row how tall it is closes that: whatever a cell has grown the row to,
+ * the rest of the row's columns can spend. It settles rather than runs away —
+ * the capacity a height gives is drawn in that same height, so the row has no
+ * reason to grow again.
+ */
+const rowHeight = ref(0)
+
+let rowObserver: ResizeObserver | null = null
+
+/**
+ * The first week row stands for all of them: every row draws to the same
+ * capacity, so they come out a height. It is re-found when the weeks change,
+ * since the strip renders a new set of elements for the new month.
+ */
+const observeRow = () => {
+  if (!rowObserver) return
+  rowObserver.disconnect()
+  const row = scroller.value?.querySelector('[data-week-row]')
+  if (row) rowObserver.observe(row)
+}
+
+onMounted(() => {
+  if (typeof ResizeObserver === 'undefined') return
+  rowObserver = new ResizeObserver(([entry]) => {
+    rowHeight.value = entry?.contentRect.height ?? 0
+  })
+  observeRow()
+})
+
+onUnmounted(() => rowObserver?.disconnect())
+
+/**
+ * How many rows a cell can draw under its date — bars, events and the count
+ * alike, since they are all a lane tall.
+ *
+ * Never fewer than `MIN_CELL_ROWS`, and otherwise whatever the window gives it.
+ */
+const cellCapacity = computed(() => {
+  const room = rowHeight.value - HEADER_HEIGHT - CELL_PAD
+  // n rows are n heights and the n-1 gaps between them, so the room is asked
+  // about with one gap added back: dividing by the pitch alone charged a gap
+  // under the last row, and a cell with exactly four rows' worth of space was
+  // told it had three, leaving most of a row empty beneath them.
+  const gap = lanePitch.value - laneHeight.value
+  return Math.max(Math.floor((room + gap) / lanePitch.value), MIN_CELL_ROWS)
+})
+
+/**
+ * What a cell shows, and how many it does not.
+ *
+ * The bars laid across the row count against the room: they are drawn over the
+ * top of the cell, so a day under two of them holds two fewer of its own. And
+ * the count itself takes a row, so a cell one event over its capacity hides two
+ * — the last event, and the one whose place the count took. A bar the row is not
+ * drawing is one of them too: it is over this day, and this day is not showing
+ * it.
+ */
+const cellEvents = (row: StripRow, col: number, laneLimit: number) => {
+  const days = row.days[col] ?? []
+  const lanes = Math.min(row.lanes[col] ?? 0, laneLimit)
+  if (!isNarrow.value) return { shown: days, hidden: 0, lanes }
+
+  const hiddenBars = barsInColumn(row.bars, col).filter(
+    (bar) => bar.lane >= laneLimit,
+  ).length
+  const room = Math.max(cellCapacity.value - lanes, 0)
+  if (!hiddenBars && days.length <= room)
+    return { shown: days, hidden: 0, lanes }
+
+  const shown = Math.max(room - 1, 0)
+  return {
+    shown: days.slice(0, shown),
+    hidden: days.length - shown + hiddenBars,
+    lanes,
+  }
+}
+
+/**
+ * The rows, told how much of themselves to draw.
+ *
+ * A cell is a stack of rows — bars first, then the day's own events, then the
+ * count — and the whole stack has to fit in `cellCapacity`, bars included. Left
+ * out of the reckoning, they were what pushed a week past its share: the last
+ * column stood under three lanes and still drew a count beneath them, so its
+ * cell ran a row longer than the six beside it, the row stretched to hold it,
+ * and those six — capped at a capacity measured before the stretch — left the
+ * extra row empty.
+ *
+ * So a bar can be dropped, and the count is what says so. It goes from the row
+ * rather than from a cell, since a bar is one thing drawn across several days
+ * and cannot be shown in one of them and not the next. The row keeps as many
+ * lanes as it can while every column still has somewhere to put its count:
+ * a quiet week draws all its bars, a full one trades its last lane for the
+ * seven counts that stand in for it.
+ */
+const laidOut = computed(() =>
+  rows.value.map((row) => {
+    const maxLanes = row.lanes.length ? Math.max(...row.lanes) : 0
+
+    const fits = (limit: number) =>
+      row.week.every((_, col) => {
+        const lanes = Math.min(row.lanes[col] ?? 0, limit)
+        const dropped = (row.lanes[col] ?? 0) > limit
+        const needsRow = dropped || !!row.days[col]?.length
+        return lanes + (needsRow ? 1 : 0) <= cellCapacity.value
+      })
+
+    let laneLimit = maxLanes
+    if (isNarrow.value) while (laneLimit > 0 && !fits(laneLimit)) laneLimit--
+
+    return {
+      ...row,
+      shownBars: row.bars.filter((bar) => bar.lane < laneLimit),
+      cells: row.week.map((_, col) => cellEvents(row, col, laneLimit)),
+    }
+  }),
+)
 
 // Seven columns do not survive a phone's width; the days stack instead.
-const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
 
 interface StripRow {
   key: string
@@ -211,10 +439,13 @@ function barStyle(bar: CalendarRowBar) {
   return {
     left: `calc(${(bar.startCol / 7) * 100}% + 2px)`,
     width: `calc(${(span / 7) * 100}% - 4px)`,
-    top: `${HEADER_HEIGHT + bar.lane * LANE_PITCH}px`,
-    height: `${LANE_HEIGHT}px`,
+    top: `${HEADER_HEIGHT + bar.lane * lanePitch.value}px`,
+    height: `${laneHeight.value}px`,
   }
 }
+
+// Below `rows` because it reads it: a watcher's source is evaluated as it is set up.
+watch(rows, () => nextTick(observeRow))
 
 const now = useNow()
 
