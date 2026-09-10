@@ -26,14 +26,29 @@
 .event {
   background-color: var(--bg);
 }
+/* An event laid over another is cut out of it by a ring in the page's own
+   colour, drawn outside the pill. Only the raised one: the event at the back of
+   a stack has nothing under it to be cut from, and a ring round every pill would
+   nick every hour rule the grid draws.
+
+   It is the whole of what separates two overlapping events of one calendar, now
+   that they are the same tint again — flat, and one of them cut out of the
+   other. */
+.event.event-raised {
+  box-shadow: 0 0 0 2.5px var(--surface-base);
+}
 .event .event-subtitle {
   color: var(--subtext);
 }
 .event .event-border {
   background-color: var(--border);
 }
+/* Pointed at: one step deeper in the event's own colour.
+   `bgHover` is the same step as `bg` in the palette, so hovering an event
+   changed nothing — the pill a reader was about to click looked exactly like
+   every pill they were not. */
 .event:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-active);
 }
 /* A draft: saved, but nothing sent. An outline in the event's colour rather
    than a fill, so it reads as not yet real — on its own white ground, not on
@@ -43,6 +58,14 @@
   background-color: var(--surface-base);
   outline: 1px dashed var(--border);
   outline-offset: -1px;
+}
+/* Open: the event whose panel or popover is showing — a shade past the one
+   hovering gives it, mixed from the event's own colour rather than taken from
+   the palette, which has no step above `bgActive`. The pointer is usually on the
+   open event, so the two states are rarely seen apart; what separates them is
+   that the open one stays where it is when the pointer leaves. */
+.event.active {
+  background-color: color-mix(in srgb, var(--border) 10%, var(--bg-active));
 }
 .event .past,
 .event.past {

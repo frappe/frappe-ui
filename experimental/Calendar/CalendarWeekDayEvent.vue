@@ -21,7 +21,14 @@
     -->
     <template #trigger>
       <div class="flex" :style="containerStyle">
-        <!-- .stop as well as .prevent on the click below: the grid cell under
+        <!-- Flat: the tint is the event and the bar is its calendar, and a drop
+             shadow under each one made a grid of hours look like a pile of
+             cards. What the shadow was really doing — telling two overlapping
+             events of one calendar apart — an event laid over another does,
+             by carrying a ring of the page's own colour, so the edge it lands
+             on is a cut rather than a join.
+
+             .stop as well as .prevent on the click below: the grid cell under
              this pill reads a click as "make an event here", and a click on an
              event is not that. It was covered up rather than handled — a pill
              that opens a popover sets isAnyPopoverOpen, which the cell then
@@ -30,8 +37,9 @@
              behind the sheet it had just asked for. -->
         <div
           ref="eventRef"
-          class="event min-h-6 mx-px shadow rounded-4 transition-all duration-75 shrink-0"
+          class="event min-h-6 mx-px rounded-4 transition-all duration-75 shrink-0"
           :class="{
+            'event-raised': isRaised,
             active: activeEvent == (props.event?.id || props.event?.name),
             'rounded-l-none': bar && !bar.isStart,
             'rounded-r-none': bar && !bar.isEnd,
@@ -88,10 +96,17 @@
                 >
                   {{ props.event.title || '[No title]' }}
                 </p>
+                <!-- `truncate`, so a range with nowhere left to go ends in an
+                     ellipsis rather than at the pill's edge: below the width
+                     the small size needs there is no size left to step down to,
+                     and a glyph sliced down the middle reads as a bug where
+                     "10:15 am – 12:30 p…" reads as a range that did not fit.
+                     In the compact row the time is shrink-0 and the title gives
+                     up the characters instead, so this never fires there. -->
                 <p
                   ref="eventTimeRef"
                   v-if="!isAllDay"
-                  class="event-subtitle whitespace-nowrap"
+                  class="event-subtitle truncate"
                   :class="[
                     isNarrow ? 'text-2xs' : 'text-xs',
                     isCompact && 'shrink-0',
@@ -306,6 +321,22 @@ const containerStyle = computed<CSSProperties>(() => {
   }
 })
 
+/**
+ * Drawn over another event, and so in need of an edge against it.
+ *
+ * Two ways that happens. `hallNumber` is the column an overlap puts an event in,
+ * 0 for the one at the back — anything past that is laid over what came before.
+ * And `idx` is its place within its own column, where events follow each other
+ * in time and should not collide at all: they do because an event shorter than
+ * the grid can draw is padded to a minimum height, so a quarter of an hour ends
+ * a good deal further down the column than it does on the clock.
+ */
+const isRaised = computed(
+  () =>
+    (calendarEvent.value.hallNumber || 0) > 0 ||
+    (calendarEvent.value.idx || 0) > 0,
+)
+
 const innerStyle = computed(() => ({
   ...eventBgStyle.value,
   height: '100%',
@@ -326,8 +357,18 @@ const innerStyle = computed(() => ({
  */
 const { width } = useElementSize(eventRef)
 
-/** Narrower than a full range fits at the ordinary size. */
-const NARROW_PILL = 116
+/**
+ * Narrower than a full range fits at the ordinary size.
+ *
+ * Measured, not guessed: the longest label the formatter writes —
+ * "10:15 am – 12:30 pm", both ends with minutes and a meridiem each — is 114px
+ * at `text-xs`, and the pill spends 18px on either side of its text (5px of
+ * padding each way, the 2px bar, and the 6px between the bar and the text). At
+ * the 116 this was, the step down came 17px after the range had already
+ * stopped fitting, so the widest pill it was meant to save was the one that
+ * lost its "pm".
+ */
+const NARROW_PILL = 133
 
 /**
  * A pill too narrow for its own range. The range then takes a size down rather
