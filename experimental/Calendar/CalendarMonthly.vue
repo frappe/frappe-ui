@@ -171,15 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  inject,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { daysList, parseDate } from './calendarUtils'
 import {
@@ -275,45 +267,34 @@ const CELL_PAD = 6
  * in advance: a phone in portrait fits three events under the date, the same
  * phone turned over fits one, and a short desktop window is somewhere between.
  *
- * A row, not the strip divided by the weeks in it. The rows are `flex-1
- * basis-0`, so a share of the strip is the least a row can be — but a cell that
- * cannot fit in its share grows the row past it, and then every column is
- * working from a figure smaller than the row it is actually in. That happens at
- * the `MIN_CELL_ROWS` floor, and it happened to the last column, which had no
- * bar over it and so a lane spare: it drew a row the others were told there was
- * no room for, the row grew to hold it, and the six columns that had capped
- * themselves at the share left the difference empty beneath them.
+ * The strip over the number of weeks in it: a row's share, which is a row's
+ * height, since `flex-1 basis-0` gives every week the same share whatever is in
+ * it and nothing a cell draws now comes to more than that. (`flex-auto` gave
+ * each row its content *plus* a share of what was left, so a busy week was
+ * taller than a quiet one and this figure was neither.)
  *
- * Asking a row how tall it is closes that: whatever a cell has grown the row to,
- * the rest of the row's columns can spend. It settles rather than runs away —
- * the capacity a height gives is drawn in that same height, so the row has no
- * reason to grow again.
+ * The strip and not a row of it, though a row is what the question is about: a
+ * row can be grown by its content and cannot then shrink back below it, so a
+ * capacity read off one is a capacity reading its own last answer. The same
+ * month in the same window came out with a different number of events shown on
+ * a reload than on a switch from another view, having arrived at it from a
+ * different height. The scroller has no such memory: it is as tall as the
+ * window leaves it.
  */
 const rowHeight = ref(0)
 
-let rowObserver: ResizeObserver | null = null
-
-/**
- * The first week row stands for all of them: every row draws to the same
- * capacity, so they come out a height. It is re-found when the weeks change,
- * since the strip renders a new set of elements for the new month.
- */
-const observeRow = () => {
-  if (!rowObserver) return
-  rowObserver.disconnect()
-  const row = scroller.value?.querySelector('[data-week-row]')
-  if (row) rowObserver.observe(row)
-}
+let stripObserver: ResizeObserver | null = null
 
 onMounted(() => {
-  if (typeof ResizeObserver === 'undefined') return
-  rowObserver = new ResizeObserver(([entry]) => {
-    rowHeight.value = entry?.contentRect.height ?? 0
+  if (typeof ResizeObserver === 'undefined' || !scroller.value) return
+  stripObserver = new ResizeObserver(([entry]) => {
+    rowHeight.value =
+      (entry?.contentRect.height ?? 0) / Math.max(rows.value.length, 1)
   })
-  observeRow()
+  stripObserver.observe(scroller.value)
 })
 
-onUnmounted(() => rowObserver?.disconnect())
+onUnmounted(() => stripObserver?.disconnect())
 
 /**
  * How many rows a cell can draw under its date — bars, events and the count
@@ -443,9 +424,6 @@ function barStyle(bar: CalendarRowBar) {
     height: `${laneHeight.value}px`,
   }
 }
-
-// Below `rows` because it reads it: a watcher's source is evaluated as it is set up.
-watch(rows, () => nextTick(observeRow))
 
 const now = useNow()
 
