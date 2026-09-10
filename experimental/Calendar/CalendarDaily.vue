@@ -104,7 +104,7 @@
           v-if="hiddenFullDayEvents || measuring"
           variant="outline"
           data-all-day-more
-          class="!h-auto !min-h-6 w-fit shrink-0 cursor-pointer self-stretch border-dashed !rounded-4 !text-xs !text-ink-gray-6"
+          class="!h-auto !min-h-7 w-fit shrink-0 cursor-pointer self-stretch border-dashed !rounded-4 !text-xs !text-ink-gray-6"
           :label="`+${hiddenFullDayEvents || dayFullDayEvents.length} more`"
           @click.stop="isCollapsed = false"
         />

@@ -37,8 +37,15 @@
              behind the sheet it had just asked for. -->
         <div
           ref="eventRef"
-          class="event min-h-6 mx-px rounded-4 transition-all duration-75 shrink-0"
+          class="event mx-px rounded-4 transition-all duration-75 shrink-0"
           :class="{
+            // An all-day pill is read as a row of the day's own list, so it is
+            // exactly the height of one — a lane's — rather than as tall as its
+            // own padding and line happen to come to. A timed pill is as tall as
+            // its event is long, and only needs a floor to stay legible when
+            // that is minutes.
+            'h-7': isAllDay,
+            'min-h-6': !isAllDay,
             'event-raised': isRaised,
             active: activeEvent == (props.event?.id || props.event?.name),
             'rounded-l-none': bar && !bar.isStart,
@@ -60,7 +67,13 @@
             )
           "
         >
-          <div class="flex gap-1.5 h-full p-[5px]">
+          <!-- 4px above and below on an all-day pill, against the 5 a timed one
+               takes: 5 and a 20px line come to 30, which is two past the lane
+               the pill is laid in. -->
+          <div
+            class="flex gap-1.5 h-full"
+            :class="isAllDay ? 'px-1.5 py-1' : 'p-[5px]'"
+          >
             <div
               v-if="props.event.fromTime && !props.event.isDraft"
               class="event-border h-full w-[2px] rounded-4 shrink-0"

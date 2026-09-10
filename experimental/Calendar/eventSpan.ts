@@ -14,7 +14,12 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const DAY_MINUTES = 24 * 60
 
 /** Height of one all-day bar and the pitch between lanes, in pixels. */
-export const LANE_HEIGHT = 30
+/**
+ * A lane of all-day bars, and the bars in it — the same height an all-day pill
+ * is held to, since a bar is a pill that runs over several days. They were 30
+ * against the pill's 28, which read as two kinds of row in one lane.
+ */
+export const LANE_HEIGHT = 28
 export const LANE_PITCH = LANE_HEIGHT + 4
 
 /**
