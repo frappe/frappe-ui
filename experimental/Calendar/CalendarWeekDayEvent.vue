@@ -21,6 +21,13 @@
     -->
     <template #trigger>
       <div class="flex" :style="containerStyle">
+        <!-- .stop as well as .prevent on the click below: the grid cell under
+             this pill reads a click as "make an event here", and a click on an
+             event is not that. It was covered up rather than handled — a pill
+             that opens a popover sets isAnyPopoverOpen, which the cell then
+             declines on — so it surfaced only where the popover never opens,
+             which is a phone: every tap on an event opened a new-event form
+             behind the sheet it had just asked for. -->
         <div
           ref="eventRef"
           class="event min-h-6 mx-px shadow rounded-4 transition-all duration-75 shrink-0"
@@ -33,7 +40,7 @@
             'event-draft': !!props.event.isDraft,
           }"
           :style="innerStyle"
-          @click.prevent="
+          @click.stop.prevent="
             handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
           "
           @dblclick.prevent="handleEventEdit($event)"
@@ -71,7 +78,7 @@
                      so the event still reads as the one you said no to. -->
                 <p
                   ref="eventTitleRef"
-                  class="event-title text-sm-medium"
+                  class="event-title text-sm-medium leading-5"
                   :class="[
                     isCompact || isNarrow ? 'truncate' : lineClampClass,
                     props.event.isDeclined
@@ -90,9 +97,7 @@
                     isCompact && 'shrink-0',
                   ]"
                 >
-                  {{
-                    timeLabel
-                  }}
+                  {{ timeLabel }}
                 </p>
               </div>
             </div>
@@ -158,8 +163,9 @@ import {
   formattedDuration,
 } from './calendarUtils'
 import {
+  ALL_DAY_LANE_GAP,
+  ALL_DAY_LANE_PITCH,
   LANE_HEIGHT,
-  LANE_PITCH,
   isAllDayLike,
   shiftEventDays,
   shiftEventMinutes,
@@ -258,7 +264,7 @@ const containerStyle = computed<CSSProperties>(() => {
       position: 'absolute',
       left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + 2px)`,
       width: `calc(${(span / DAY_COLUMNS) * 100}% - 4px)`,
-      top: `${4 + props.bar.lane * LANE_PITCH}px`,
+      top: `${ALL_DAY_LANE_GAP + props.bar.lane * ALL_DAY_LANE_PITCH}px`,
       height: `${LANE_HEIGHT}px`,
       transform: `translate(${state.xAxis}px, 0)`,
       zIndex: isRepositioning.value ? 100 : 1,

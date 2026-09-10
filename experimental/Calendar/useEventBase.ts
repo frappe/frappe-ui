@@ -129,20 +129,32 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
       preventClick.value = false
       return
     }
-    if (e.detail === 1) {
-      clickTimer = setTimeout(() => {
-        markActive()
-        if (calendarActions.props.onClick)
-          calendarActions.props.onClick({
-            e,
-            calendarEvent: calendarEvent.value,
-          })
-        else {
-          togglePopover()
-          isAnyPopoverOpen.value = !isPopoverOpen
-        }
-      }, 200)
+    if (e.detail !== 1) return
+
+    const open = () => {
+      markActive()
+      if (calendarActions.props.onClick)
+        calendarActions.props.onClick({
+          e,
+          calendarEvent: calendarEvent.value,
+        })
+      else {
+        togglePopover()
+        isAnyPopoverOpen.value = !isPopoverOpen
+      }
     }
+
+    // The wait is for a second click, not for its own sake: it is what lets a
+    // double click edit instead of open. Where nothing answers a double click —
+    // no `onDblClick`, and editing turned off, which is how a phone is set up —
+    // there is nothing to wait for, and 200ms of nothing between a tap and the
+    // sheet it opens is the whole of what the surface feels like.
+    if (!calendarActions.props.onDblClick && !config.isEditMode) {
+      open()
+      return
+    }
+
+    clickTimer = setTimeout(open, 200)
   }
 
   /**
