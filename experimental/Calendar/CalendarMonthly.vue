@@ -14,7 +14,12 @@
   </CalendarMonthStack>
 
   <div v-else class="flex min-h-0 flex-1 flex-col">
-    <!-- Day List -->
+    <!-- Day List. Nothing marks a weekend: it was a wash down its cells, which
+         is where the events are — an event's fill is a step of its colour barely
+         above white, and on gray it had almost nothing left to be read by. Moved
+         to the day's name it read as a day switched off rather than as a
+         Saturday, and a grid whose columns are named does not have to say which
+         two of them are the weekend twice. -->
     <div class="grid w-full grid-cols-7">
       <span
         v-for="day in daysList"
@@ -51,10 +56,7 @@
             v-for="(date, col) in row.week"
             :key="parseDate(date)"
             class="flex min-w-0 flex-col border-outline-gray-1"
-            :class="[
-              col > 0 && 'border-l',
-              isWeekend(date, config) && 'bg-surface-gray-1',
-            ]"
+            :class="col > 0 && 'border-l'"
             @click="calendarActions.handleCellClick($event, date)"
           >
             <!-- The today pill is a 25px box around the number, so it gets a
@@ -69,7 +71,7 @@
                 class="cursor-pointer whitespace-nowrap"
                 :class="[
                   isToday(date)
-                    ? 'flex items-center justify-center bg-surface-gray-10 text-ink-gray-2 rounded-4 size-[25px]'
+                    ? 'flex size-6 items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-2'
                     : 'text-ink-gray-8',
                 ]"
                 @click.stop="openDay(date)"
@@ -134,7 +136,7 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { daysList, isWeekend, parseDate } from './calendarUtils'
+import { daysList, parseDate } from './calendarUtils'
 import {
   LANE_HEIGHT,
   LANE_PITCH,

@@ -5,15 +5,27 @@
     <div class="flex pb-1">
       <div class="w-14"></div>
       <div class="grid w-full grid-cols-7">
+        <!-- Nothing marks a weekend. It was a wash down the column, which is a
+             ground, and every part of a column has something drawn on it — an
+             event's fill is a step of its colour barely above white, and on gray
+             it had almost nothing left to be read by. Moved to the day's name it
+             read as a day switched off rather than as a Saturday, and a week
+             whose columns are named and dated does not have to say which two of
+             them are the weekend twice. -->
         <span
           v-for="date in weeklyDates"
           class="relative flex items-center justify-center gap-1.5 h-8 text-center text-base text-ink-gray-7 cursor-pointer"
           @click="calendarActions.updateActiveView('Day', date)"
         >
           {{ isToday(date) ? daysList[date.getDay()] : parseDateWithDay(date) }}
+          <!-- A circle, and the numeral's own line across: the same mark today
+               wears in the Month grid and in a month card, so a reader who has
+               learnt it in one view has learnt it in all of them. It was a
+               rounded square of 25px — a shape of its own, at a size off the
+               scale. -->
           <span
             v-if="isToday(date)"
-            class="inline-flex items-center justify-center bg-surface-gray-10 text-ink-gray-1 rounded-4 size-[25px]"
+            class="inline-flex size-6 items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-1"
           >
             {{ date.getDate() }}
           </span>
@@ -71,13 +83,7 @@
             v-for="(date, col) in weeklyDates"
             :key="parseDate(date)"
             class="cell -my-2 flex w-full cursor-pointer flex-col border-outline-gray-1"
-            :class="[
-              col === weeklyDates.length - 1 ? '' : 'border-r-[1px]',
-              // The same tint the column below carries: a weekend is one column
-              // from the all-day row to the last hour, so the tint cannot stop at
-              // the row's edge and leave a white notch at the top of the day.
-              isWeekend(date, config) && 'bg-surface-gray-1',
-            ]"
+            :class="col === weeklyDates.length - 1 ? '' : 'border-r-[1px]'"
             :data-date-attr="date"
             @click.prevent="
               (e) => {
@@ -87,8 +93,9 @@
             "
           >
             <!-- What this day has past the lanes on show: an outline button,
-                 bordered where the bars are filled, so it reads as a control
-                 among them rather than as one more of them. Its corners are the
+                 dashed where the bars are filled, so it reads as a control among
+                 them rather than as one more of them — and as a thing standing
+                 for what is not drawn, which is what a broken line says. Its corners are the
                  bars' own 8px, and so is its height — a lane, taken from the
                  constant the bars themselves are laid out by, so the two cannot
                  end up a few pixels apart. It says how many are hidden and then
@@ -97,7 +104,7 @@
               v-if="hiddenCount(col)"
               :label="`+${hiddenCount(col)} more`"
               variant="outline"
-              class="ml-0.5 w-fit cursor-pointer !justify-start !rounded-4 !text-xs !text-ink-gray-6"
+              class="ml-0.5 w-fit cursor-pointer border-dashed !justify-start !rounded-4 !text-xs !text-ink-gray-6"
               :style="{
                 marginTop: `${visibleLanes * ALL_DAY_LANE_PITCH + ALL_DAY_LANE_GAP}px`,
                 height: `${LANE_HEIGHT}px`,
@@ -143,7 +150,9 @@
           <div class="relative z-0 flex w-full flex-col">
             <!-- time events => not full day events => overflow-scroll here -->
             <div class="grid w-full grid-cols-7" data-day-columns="7">
-              <!-- 7 Columns -->
+              <!-- 7 Columns.
+
+                   No weekend wash. -->
               <div
                 v-for="(date, idx) in weeklyDates"
                 class="relative w-full border-outline-gray-1"
@@ -152,7 +161,6 @@
                   // The last column's right edge is the box's own, and the box
                   // draws that itself.
                   idx === weeklyDates.length - 1 ? '' : 'border-r-[1px]',
-                  isWeekend(date, config) && 'bg-surface-gray-1',
                 ]"
                 :data-date-attr="date"
                 data-time-grid
@@ -209,7 +217,6 @@ import {
   parseDateWithDay,
   parseDate,
   daysList,
-  isWeekend,
 } from './calendarUtils'
 import {
   ALL_DAY_LANE_GAP,
