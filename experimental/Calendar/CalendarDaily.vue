@@ -47,10 +47,12 @@
           All day
         </div>
       </div>
-      <!-- 8px round the lane and the same between what is in it: at 4px the pills
-           sat against each other and against the rule above them, and a row of
-           bordered things with no space between them reads as one thing with
-           lines through it.
+      <!-- 8px across and 6px down, round the lane and between what is in it: at
+           4px the pills sat against each other and against the rule above them,
+           and a row of bordered things with no space between them reads as one
+           thing with lines through it. Less down than across because a wrapped
+           row is already separated by the pills' own height, where two pills on
+           one line have only the gap.
 
            While it is being measured it keeps wrapping and is clipped to one row
            instead — 40px, a pill's 24px minimum and the lane's own padding. A
@@ -61,7 +63,7 @@
       <div
         ref="allDayLane"
         data-all-day-lane
-        class="flex w-full flex-wrap gap-2 overflow-hidden p-2"
+        class="flex w-full flex-wrap gap-x-2 gap-y-1.5 overflow-hidden px-2 py-1.5"
         :class="measuring && 'max-h-10'"
         :data-date-attr="currentDate"
         @click.prevent="
