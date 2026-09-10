@@ -47,7 +47,7 @@
           All day
         </div>
       </div>
-      <!-- 8px across and 6px down, round the lane and between what is in it: at
+      <!-- 6px across and 4px down, round the lane and between what is in it: at
            4px the pills sat against each other and against the rule above them,
            and a row of bordered things with no space between them reads as one
            thing with lines through it. Less down than across because a wrapped
@@ -63,7 +63,7 @@
       <div
         ref="allDayLane"
         data-all-day-lane
-        class="flex w-full flex-wrap gap-x-2 gap-y-1.5 overflow-hidden px-2 py-1.5"
+        class="flex w-full flex-wrap gap-x-1.5 gap-y-1 overflow-hidden px-1.5 py-1"
         :class="measuring && 'max-h-10'"
         :data-date-attr="currentDate"
         @click.prevent="
@@ -81,11 +81,12 @@
             <slot name="event-popover-content" v-bind="slotProps" />
           </template>
         </CalendarWeekDayEvent>
-        <!-- The rest of the day, as one more thing in the row: an outline button,
-             bordered where the events are filled, so it reads as a control among
-             them rather than as one more of them. Its corners are the events'
-             own 8px — a fully round pill beside them read as a different kind of
-             thing again.
+        <!-- The rest of the day, as one more thing in the row: an outline
+             button, dashed where the events are filled, so it reads as a control
+             among them rather than as one more of them — and as a thing standing
+             for what is not drawn, which is what a broken line says. Its corners
+             are the events' own 8px — a fully round pill beside them read as a
+             different kind of thing again.
 
              It says how many are hidden and then it is gone: the row it opened
              is the answer, and a button offering to close it again is a second
@@ -103,7 +104,7 @@
           v-if="hiddenFullDayEvents || measuring"
           variant="outline"
           data-all-day-more
-          class="!h-auto !min-h-6 w-fit shrink-0 cursor-pointer self-stretch !rounded-4 !text-xs !text-ink-gray-6"
+          class="!h-auto !min-h-6 w-fit shrink-0 cursor-pointer self-stretch border-dashed !rounded-4 !text-xs !text-ink-gray-6"
           :label="`+${hiddenFullDayEvents || dayFullDayEvents.length} more`"
           @click.stop="isCollapsed = false"
         />

@@ -19,14 +19,14 @@ export const LANE_PITCH = LANE_HEIGHT + 4
 
 /**
  * The air between one all-day bar and the next, and between the row's edge and
- * the bars inside it — the same 6px the day view's all-day lane puts between its
+ * the bars inside it — the same 4px the day view's all-day lane puts between its
  * own rows of pills.
  *
  * The week's row has one thing in it per lane and room to breathe; a month cell
  * has a day's worth stacked under a date and keeps the tighter `LANE_PITCH`.
  * Same bars, different room, so the two are spelled apart.
  */
-export const ALL_DAY_LANE_GAP = 6
+export const ALL_DAY_LANE_GAP = 4
 export const ALL_DAY_LANE_PITCH = LANE_HEIGHT + ALL_DAY_LANE_GAP
 
 export function addDays(date: string, days: number): string {
