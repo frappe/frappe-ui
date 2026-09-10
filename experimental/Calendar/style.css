@@ -2,11 +2,23 @@
   position: relative;
 }
 
+/* The hours hang 45px left of the day column — which is 45px in from the
+   gutter's right edge, the two being the same line. */
 .calendar-column ::before {
   content: attr(data-time-attr);
   position: absolute;
   left: -45px;
   top: -9px;
+  font-size: 12px;
+  font-weight: 400;
+}
+/* "All day" is one more label in that column and reads as one: the same type,
+   spelled here beside the hours rather than in the template, so the two cannot
+   be changed apart. It was a size up and a weight heavier — near enough to the
+   hours to look like a mistake, far enough to stop the column reading as a
+   column. Where it sits is the template's business: centred in the gutter,
+   with even air either side of it. */
+.calendar-all-day-label {
   font-size: 12px;
   font-weight: 400;
 }

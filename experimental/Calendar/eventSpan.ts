@@ -17,6 +17,17 @@ const DAY_MINUTES = 24 * 60
 export const LANE_HEIGHT = 30
 export const LANE_PITCH = LANE_HEIGHT + 4
 
+/**
+ * The air between one all-day bar and the next, and between the row's edge and
+ * the bars inside it — the same 8px the day view's all-day lane gives its pills.
+ *
+ * The week's row has one thing in it per lane and room to breathe; a month cell
+ * has a day's worth stacked under a date and keeps the tighter `LANE_PITCH`.
+ * Same bars, different room, so the two are spelled apart.
+ */
+export const ALL_DAY_LANE_GAP = 8
+export const ALL_DAY_LANE_PITCH = LANE_HEIGHT + ALL_DAY_LANE_GAP
+
 export function addDays(date: string, days: number): string {
   const d = toDate(date)
   return parseDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() + days))

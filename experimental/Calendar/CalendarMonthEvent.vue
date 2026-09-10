@@ -38,14 +38,14 @@
           class="event-border w-[2px] rounded-4 shrink-0"
         />
         <div
-          class="relative flex h-full min-w-0 select-none items-start gap-2 overflow-hidden"
+          class="relative flex h-full min-w-0 select-none items-center gap-2 overflow-hidden"
         >
           <div v-if="config.showIcon && eventIcon">
             <component :is="eventIcon" class="h-4 w-4 text-ink-gray-8" />
           </div>
           <div class="min-w-0">
             <p
-              class="event-title text-sm-medium"
+              class="event-title text-sm-medium leading-5"
               :class="[
                 wrap ? 'line-clamp-2 break-words' : 'truncate',
                 props.event.isDeclined
