@@ -22,6 +22,13 @@ const integerSpacing = Object.fromEntries(
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ['selector', '[data-theme="dark"]'],
+  // `hover:` compiles to `@media (hover: hover) { &:hover }`, so a hover style is
+  // only ever worn by a device that can point at something. A phone has no
+  // pointer to take away: it applies :hover on tap and keeps it there until the
+  // next tap lands elsewhere, so every ghost button a thumb touched stayed
+  // filled behind it. A laptop with a touchscreen answers (hover: hover) and
+  // keeps both.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       spacing: integerSpacing,
