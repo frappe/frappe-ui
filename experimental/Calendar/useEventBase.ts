@@ -9,6 +9,31 @@ import {
   type CalendarEvent,
 } from './types'
 
+/**
+ * The roles of a colour the palette does not know — a calendar carrying its own,
+ * set wherever its owner set it, rather than one of the seven names this library
+ * ships.
+ *
+ * Everything but the colour itself is mixed into `--surface-base`, so the fills
+ * are a wash of it on whatever the page's own ground is and follow the theme
+ * without the colour having to know there is one. The steps are the ones the
+ * palette uses between `bg`, `bgHover` and `borderActive`, so an event in a
+ * calendar's own colour sits at the same weights as one in green.
+ *
+ * It used to fall back to green, which said the calendar was a calendar and
+ * nothing about which.
+ */
+const derivedColor = (value: string): CalendarColor => ({
+  color: value,
+  border: value,
+  borderActive: `color-mix(in srgb, ${value} 30%, var(--surface-base))`,
+  text: value,
+  subtext: 'var(--ink-gray-6)',
+  bg: `color-mix(in srgb, ${value} 10%, var(--surface-base))`,
+  bgHover: `color-mix(in srgb, ${value} 16%, var(--surface-base))`,
+  bgActive: `color-mix(in srgb, ${value} 16%, var(--surface-base))`,
+})
+
 const legacyColorNamesByHex: Record<string, keyof typeof colorMap> = {
   '#db7706': 'amber',
   '#6846e3': 'violet',
@@ -67,7 +92,7 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     for (const value of Object.values(map)) {
       if (value.color === colorValue) return value
     }
-    return map['green']!
+    return derivedColor(colorValue)
   }
 
   const eventBgStyle = computed(() => {
