@@ -53,6 +53,26 @@
     default: 'true'
   },
   {
+    name: 'autoFocus',
+    description: 'Whether the content takes focus when it opens. Set it to `false` for a\npanel the consumer drives by typing, so the caret stays in the input.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'trigger',
+    description: 'What opens the popover. `click` toggles it from the trigger element.\n`manual` leaves open and close entirely to `v-model:open` — the trigger\nonly positions the content, so clicking it does nothing on its own (an\ninput trigger keeps a plain caret click) and the aria wiring a toggle\nwould carry is the consumer\'s to add.',
+    required: false,
+    type: '"click" | "manual"',
+    default: '"click"'
+  },
+  {
+    name: 'reference',
+    description: 'Element to position the content against, instead of the trigger element\nitself. Only `trigger="manual"` reads it — the case it exists for is an\ninput whose row is one part of a taller labelled field, where the panel\nbelongs under the row rather than under the description below it.',
+    required: false,
+    type: 'Element'
+  },
+  {
     name: 'matchTriggerWidth',
     description: 'Whether the content\'s min-width matches the trigger width.',
     required: false,

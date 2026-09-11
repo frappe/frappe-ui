@@ -24,6 +24,30 @@ export interface PopoverProps {
   /** Whether the popover closes on outside interaction (click/focus). */
   dismissible?: boolean
 
+  /**
+   * Whether the content takes focus when it opens. Set it to `false` for a
+   * panel the consumer drives by typing, so the caret stays in the input.
+   * Default: `true`.
+   */
+  autoFocus?: boolean
+
+  /**
+   * What opens the popover. `click` toggles it from the trigger element.
+   * `manual` leaves open and close entirely to `v-model:open` — the trigger
+   * only positions the content, so clicking it does nothing on its own (an
+   * input trigger keeps a plain caret click) and the aria wiring a toggle
+   * would carry is the consumer's to add.
+   */
+  trigger?: 'click' | 'manual'
+
+  /**
+   * Element to position the content against, instead of the trigger element
+   * itself. Only `trigger="manual"` reads it — the case it exists for is an
+   * input whose row is one part of a taller labelled field, where the panel
+   * belongs under the row rather than under the description below it.
+   */
+  reference?: Element
+
   /** Whether the content's min-width matches the trigger width. */
   matchTriggerWidth?: boolean
 

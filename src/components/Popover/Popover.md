@@ -60,6 +60,25 @@ to match the panel surface.
 
 <ComponentPreview name="Popover-Arrow" />
 
+## Typing-driven panels
+
+Two props keep a panel from fighting an input that drives it. `trigger="manual"`
+stops the trigger from toggling, so a click on the input places the caret and
+`v-model:open` is the only thing that opens or closes the panel.
+`:auto-focus="false"` declines the focus reka moves into the content on open, so
+the caret stays where the user is typing.
+
+<ComponentPreview name="Popover-Typeahead" />
+
+`manual` also drops the aria wiring a toggle carries (`aria-expanded`,
+`aria-controls`) — a combobox pattern is the consumer's to complete, or use
+[`Combobox`](./combobox), which already has it.
+
+When the trigger is a labelled field, the panel belongs under the input row, not
+under the description below it. Pass that row as `reference` and the content
+positions against it while the trigger stays the whole field. Only `manual`
+reads it.
+
 ## Styling
 
 The popover ships with its panel shell baked in
@@ -94,7 +113,7 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
 - Use `#trigger` + `#default` for the standard click popover. Both slots get
   `{ open, close }`.
 - Reach for `v-model:open` only when an external control needs to drive the
-  panel — clicking the trigger already toggles it.
+  panel — clicking the trigger already toggles it, unless `trigger="manual"`.
 - For a panel that opens on hover (profile previews, link previews), use the
   dedicated [`HoverCard`](./hovercard) component instead of a popover.
 - Attributes on `<Popover>` are not inherited — the component renders no element
@@ -104,7 +123,8 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
 
 The v0 API is gone in `1.0.0`. `#target` becomes `#trigger`, `#body` and
 `#body-main` become `#default`, and `placement` splits into `side` + `align`.
-See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard-tooltip)
+See
+[Migration from v0 → Popover / HoverCard](../migration#popover-hovercard-tooltip)
 for the full table.
 
 <!-- @include: ./Popover.api.md -->

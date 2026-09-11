@@ -302,6 +302,50 @@ describe('Popover', () => {
       })
     })
 
+    describe('trigger="manual"', () => {
+      it('does not open on a trigger click', () => {
+        cy.mount(Popover, { slots: NewSlots, props: { trigger: 'manual' } })
+
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('not.exist')
+      })
+
+      it('stays open when the trigger is clicked while open', () => {
+        const Harness = defineComponent({
+          setup() {
+            const open = ref(true)
+            return () =>
+              h(
+                Popover,
+                {
+                  trigger: 'manual',
+                  open: open.value,
+                  'onUpdate:open': (value: boolean) => (open.value = value),
+                },
+                {
+                  trigger: () =>
+                    h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                  default: () => h('div', { 'data-cy': 'content' }, 'manual'),
+                },
+              )
+          },
+        })
+
+        cy.mount(Harness)
+        cy.get('[data-slot="content"]').should('exist')
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('exist')
+      })
+    })
+
+    it('leaves focus on the trigger when autoFocus is false', () => {
+      cy.mount(Popover, { slots: NewSlots, props: { autoFocus: false } })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.focused().should('have.attr', 'data-cy', 'trigger')
+    })
+
     it('exposes open() and close() methods', () => {
       const popoverRef = ref()
       const Harness = defineComponent({

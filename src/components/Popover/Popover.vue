@@ -3,11 +3,18 @@
     <!--
       #trigger renders through reka's PopoverTrigger as-child, so click,
       keyboard and aria wiring come for free on whatever element the consumer
-      passes.
+      passes. `trigger="manual"` swaps in PopoverAnchor, which positions the
+      content against the same element but wires nothing to it.
     -->
-    <PopoverTrigger ref="triggerRef" as-child data-slot="trigger">
+    <component
+      :is="trigger === 'manual' ? PopoverAnchor : PopoverTrigger"
+      ref="triggerRef"
+      :reference="trigger === 'manual' ? reference : undefined"
+      as-child
+      data-slot="trigger"
+    >
       <slot name="trigger" v-bind="slotProps" />
-    </PopoverTrigger>
+    </component>
 
     <PopoverPortal :to="portalTarget">
       <PopoverContent
@@ -24,6 +31,7 @@
         }"
         @interact-outside="onInteractOutside"
         @escape-key-down="onEscapeKeyDown"
+        @open-auto-focus="onOpenAutoFocus"
       >
         <slot v-if="bare" v-bind="slotProps" />
         <PopoverPanel v-else>
@@ -42,6 +50,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import {
+  PopoverAnchor,
   PopoverArrow,
   PopoverContent,
   PopoverPortal,
@@ -63,6 +72,8 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   offset: 4,
   collisionPadding: 10,
   dismissible: true,
+  autoFocus: true,
+  trigger: 'click',
   matchTriggerWidth: false,
   bare: false,
   arrow: false,
@@ -127,6 +138,13 @@ const slotProps = computed<PopoverSlotProps>(() => ({
   close,
   toggle,
 }))
+
+// A panel driven by what the consumer types — a search box, a mention list —
+// must leave the caret where it is. reka focuses the content on open and
+// offers `openAutoFocus` to decline it.
+function onOpenAutoFocus(event: Event) {
+  if (!props.autoFocus) event.preventDefault()
+}
 
 // `dismissible` covers both user-initiated dismiss channels, per CONTEXT.md —
 // outside click and Escape. Wiring only the first left `:dismissible="false"`
