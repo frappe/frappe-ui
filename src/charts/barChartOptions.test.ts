@@ -7,8 +7,8 @@ import type { AxisChartConfig, AxisChartSeriesConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  // Five stops so the sequential pale-tail trim and even spacing are visible.
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  // Three stops so even spacing across the ramp is visible.
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
@@ -70,13 +70,13 @@ describe('resolveSeriesColors', () => {
     ).toEqual({ sales: '#000011', refunds: 'red' })
   })
 
-  it('gives a lone sequential series a mid stop, not the darkest', () => {
+  it('gives a lone sequential series the darkest stop', () => {
     expect(colorsFor({ series: [{ name: 'sales' }] })).toEqual({
-      sales: '#000022',
+      sales: '#000011',
     })
   })
 
-  it('spaces sequential series out dark to light, skipping the palest stops', () => {
+  it('spaces sequential series out dark to light', () => {
     expect(Object.values(colorsFor({ series: named(3) }))).toEqual([
       '#000011',
       '#000022',
@@ -84,10 +84,10 @@ describe('resolveSeriesColors', () => {
     ])
   })
 
-  it('cycles the sequential ramp once there are more series than usable stops', () => {
-    const colors = colorsFor({ series: named(6) })
+  it('cycles the sequential ramp once there are more series than stops', () => {
+    const colors = colorsFor({ series: named(4) })
     expect(colors.a).toBe('#000011')
-    expect(colors.f).toBe(colors.a)
+    expect(colors.d).toBe(colors.a)
   })
 
   it('cycles the categorical ramp in series order', () => {

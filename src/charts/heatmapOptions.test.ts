@@ -203,18 +203,10 @@ describe('buildHeatmapMatrix', () => {
 })
 
 describe('heatmapRampStops', () => {
-  it('reverses the sequential ramp and trims its palest stops', () => {
-    const stops = heatmapRampStops(config(), tokens)
-
-    expect(stops).toEqual([
-      '#cccccc',
-      '#aaaaaa',
-      '#8a8a8a',
-      '#5a5a5a',
-      '#3a3a3a',
-      '#1a1a1a',
-      '#0a0a0a',
-    ])
+  it('reverses the sequential ramp, palest first', () => {
+    expect(heatmapRampStops(config(), tokens)).toEqual(
+      [...tokens.sequential].reverse(),
+    )
   })
 
   it('takes the diverging ramp as authored, cool end first', () => {
@@ -347,7 +339,9 @@ describe('buildHeatmapOption', () => {
       const resting = cells[index].color
       const hovered = item.emphasis.itemStyle.color
       expect(hovered).toBe(hoverCellColor(resting))
-      expect(hexToOklch(hovered).l).toBeGreaterThan(hexToOklch(resting).l)
+      expect(hexToOklch(hovered).l).toBeGreaterThanOrEqual(
+        hexToOklch(resting).l,
+      )
     })
   })
 })

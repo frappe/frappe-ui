@@ -5,7 +5,7 @@ import type { AxisChartConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
