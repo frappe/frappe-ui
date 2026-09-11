@@ -23,6 +23,9 @@ picker, a menu, or a link to the records behind the chart. It keeps its width
 and the title truncates, because a control that shrinks stops being pressable
 while a name that shortens still reads.
 
+The header row is one title line tall. An action taller than that is centred on
+the title instead of making the row taller.
+
 ## Value-axis titles
 
 `plotLabel` titles the primary value axis and `plotLabelSecondary` the second

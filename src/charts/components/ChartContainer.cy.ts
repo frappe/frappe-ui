@@ -55,6 +55,46 @@ describe('ChartContainer', () => {
       cy.get('[data-slot="chart-header"] #period').should('exist')
     })
 
+    it('keeps the row the height of the title line, with a tall action', () => {
+      mountContainer({ title: 'Revenue' })
+      cy.get('.text-ink-gray-8').invoke('outerHeight').as('titleHeight')
+
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        actions: () =>
+          h('button', { id: 'period', style: 'height: 28px' }, 'Last 30 days'),
+      } as any)
+
+      cy.get('[data-slot="chart-header"]')
+        .invoke('outerHeight')
+        .then((rowHeight) => {
+          cy.get('@titleHeight').should('be.closeTo', rowHeight as number, 0.5)
+        })
+    })
+
+    it('centres a tall action on the title line', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        actions: () =>
+          h('button', { id: 'period', style: 'height: 28px' }, 'Last 30 days'),
+      } as any)
+
+      cy.get('.text-ink-gray-8')
+        .then(($title) => $title[0].getBoundingClientRect())
+        .as('title')
+
+      cy.get('#period')
+        .then(($action) => $action[0].getBoundingClientRect())
+        .then((action) => {
+          cy.get<DOMRect>('@title').should((title) => {
+            expect(action.top + action.height / 2).to.be.closeTo(
+              title.top + title.height / 2,
+              0.5,
+            )
+          })
+        })
+    })
+
     // A card with only controls still needs the row to hang them on.
     it('draws the header for actions alone', () => {
       mountContainer({}, {
