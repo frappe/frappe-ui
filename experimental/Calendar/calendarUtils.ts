@@ -156,6 +156,28 @@ export function handleSeconds(time: string): string {
   return time.split(':').slice(0, 2).join(':') + ':00'
 }
 
+/**
+ * Below this the pill is held at `MINIMUM_EVENT_HEIGHT`, which is the height a
+ * title and a time need to stay readable.
+ */
+export const EVENT_HEIGHT_THRESHOLD = 40
+export const MINIMUM_EVENT_HEIGHT = 32.5
+
+/**
+ * How tall a timed event is drawn, against how long it runs.
+ *
+ * An event shorter than the grid can draw is padded to a floor, so a quarter of
+ * an hour ends a good deal further down the column than it does on the clock —
+ * which is how two events that follow each other in time can still collide.
+ */
+export function paintedEventHeight(
+  durationMinutes: number,
+  minuteHeight: number,
+): number {
+  const height = durationMinutes * minuteHeight
+  return height < EVENT_HEIGHT_THRESHOLD ? MINIMUM_EVENT_HEIGHT : height
+}
+
 export function findOverlappingEventsCount(
   events: CalendarEvent[],
 ): CalendarEvent[] {

@@ -13,11 +13,10 @@ import type { CalendarEvent, CalendarRowBar, CalendarDaySegment } from './types'
 const DAY_MS = 24 * 60 * 60 * 1000
 const DAY_MINUTES = 24 * 60
 
-/** Height of one all-day bar and the pitch between lanes, in pixels. */
 /**
- * A lane of all-day bars, and the bars in it — the same height an all-day pill
- * is held to, since a bar is a pill that runs over several days. They were 30
- * against the pill's 28, which read as two kinds of row in one lane.
+ * A row of the day view's all-day lane, and of a month cell — a pill's height in
+ * either, since both stack them under one heading. They were 30 against the
+ * pill's 28, which read as two kinds of row in one lane.
  */
 export const LANE_HEIGHT = 28
 export const LANE_PITCH = LANE_HEIGHT + 4
@@ -32,7 +31,35 @@ export const LANE_PITCH = LANE_HEIGHT + 4
  * Same bars, different room, so the two are spelled apart.
  */
 export const ALL_DAY_LANE_GAP = 4
-export const ALL_DAY_LANE_PITCH = LANE_HEIGHT + ALL_DAY_LANE_GAP
+
+/**
+ * A bar in a narrow week's all-day row: the line itself, its title being set a
+ * size down there, with nothing above or below it. Three lanes of that and their
+ * gaps is as much of a phone's screen as the row can take from the hours under
+ * it.
+ *
+ * A week with room draws the day view's own lane, since a bar is a pill that
+ * runs over several days and the two sit on the same rule in the same box.
+ */
+export const NARROW_WEEK_LANE_HEIGHT = 20
+
+/** The lane a week draws its bars in, and the pitch from one to the next. */
+export const weekLaneHeight = (narrow?: boolean) =>
+  narrow ? NARROW_WEEK_LANE_HEIGHT : LANE_HEIGHT
+export const weekLanePitch = (narrow?: boolean) =>
+  weekLaneHeight(narrow) + ALL_DAY_LANE_GAP
+
+/**
+ * How far inside its day an event is drawn, in pixels — a bar in the all-day
+ * row, a pill in the time grid, and the "+n more" button that stands in for the
+ * bars a row has no room for, alike.
+ *
+ * A pill carries `PILL_MARGIN` of its own on top of this, in `mx-px`; anything
+ * laid out beside pills rather than being one has to add it back, or it starts
+ * a pixel to their left on the same edge.
+ */
+export const COLUMN_INSET = 2
+export const PILL_MARGIN = 1
 
 export function addDays(date: string, days: number): string {
   const d = toDate(date)

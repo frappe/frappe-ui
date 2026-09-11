@@ -99,8 +99,9 @@
                  still passed. -->
             <div
               v-if="row.cells[col]!.shown.length || row.cells[col]!.hidden"
-              class="flex flex-col px-0.5 pb-1.5"
+              class="flex flex-col pb-1.5"
               :class="isNarrow ? 'gap-0.5' : 'gap-1'"
+              :style="{ paddingInline: `${cellInset}px` }"
             >
               <CalendarMonthEvent
                 v-for="event in row.cells[col]!.shown"
@@ -177,6 +178,7 @@ import { daysList, parseDate } from './calendarUtils'
 import {
   LANE_HEIGHT,
   LANE_PITCH,
+  COLUMN_INSET,
   barsInColumn,
   dayEvents,
   daysBetween,
@@ -239,6 +241,20 @@ const laneHeight = computed(() =>
  * three rows and a count; four where a cell has the room the desktop gives it.
  */
 const DENSE_LANE_GAP = 2
+
+/**
+ * How far inside its cell an event is drawn, in pixels — the stacked pills and
+ * the bars laid across the row alike, so the two read off one left edge.
+ *
+ * Four where the cell has the room the desktop gives it, and the 2px the grid's
+ * other views inset by where it has not: a phone's cell is 50px wide, and 4
+ * either side of a pill in it is a sixth of the column spent on air.
+ */
+const CELL_INSET = 4
+
+const cellInset = computed(() =>
+  isNarrow.value ? COLUMN_INSET : CELL_INSET,
+)
 
 const lanePitch = computed(
   () =>
@@ -418,8 +434,8 @@ const rows = computed<StripRow[]>(() => {
 function barStyle(bar: CalendarRowBar) {
   const span = bar.endCol - bar.startCol + 1
   return {
-    left: `calc(${(bar.startCol / 7) * 100}% + 2px)`,
-    width: `calc(${(span / 7) * 100}% - 4px)`,
+    left: `calc(${(bar.startCol / 7) * 100}% + ${cellInset.value}px)`,
+    width: `calc(${(span / 7) * 100}% - ${cellInset.value * 2}px)`,
     top: `${HEADER_HEIGHT + bar.lane * lanePitch.value}px`,
     height: `${laneHeight.value}px`,
   }

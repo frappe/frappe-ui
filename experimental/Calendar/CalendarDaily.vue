@@ -20,7 +20,7 @@
            all-day row so the day's left edge is one line. Same width as that
            gutter, at either size, or the two rules are two lines. -->
       <div
-        class="flex w-14 shrink-0 justify-center border-r-[1px] border-outline-gray-1 pl-px pt-2"
+        class="flex w-14 shrink-0 justify-center border-r-[1px] border-outline-gray-1 pl-px pt-1"
       >
         <!-- A label, and only that. The chevron that used to sit beside it
              toggled a row it was not in, from a column whose job is to say what
@@ -37,22 +37,25 @@
              word standing alone in a box. It takes the hours' type from
              `.calendar-all-day-label`, so the two cannot drift apart.
 
-             Down 8px and 24px tall, which is the lane beside it: its padding
-             and its first pill, so the label sits on that pill's line. It stays
-             at the top when the lane grows — a label for a row of things
-             belongs beside the first of them, not halfway down the pile. -->
+             Down 4px and a pill tall, which is the lane beside it: its padding
+             and its first pill, so the label's middle is that pill's middle.
+             It stays at the top when the lane grows — a label for a row of
+             things belongs beside the first of them, not halfway down the
+             pile. -->
         <div
-          class="calendar-all-day-label inline-flex h-6 items-center text-ink-gray-8"
+          class="calendar-all-day-label inline-flex h-7 items-center text-ink-gray-8"
         >
           All day
         </div>
       </div>
-      <!-- 6px across and 4px down, round the lane and between what is in it: at
-           4px the pills sat against each other and against the rule above them,
-           and a row of bordered things with no space between them reads as one
-           thing with lines through it. Less down than across because a wrapped
-           row is already separated by the pills' own height, where two pills on
-           one line have only the gap.
+      <!-- The week's all-day row, to the pixel: a bar there sits on the day's
+           own inset and so twice that from the bar in the next day, and this
+           lane is that row with one day in it. The pills carry a further 1px
+           either side of their own, so the lane's padding is the inset less
+           that pixel — 2px on a phone, where the whole grid insets by 2, and 3
+           where a column has the room for it. It was 6px round and 6px between
+           — a day whose all-day pills started further in than the week's did,
+           on the same rule, in the same box.
 
            While it is being measured it keeps wrapping and is clipped to one row
            instead — 40px, a pill's 24px minimum and the lane's own padding. A
@@ -63,8 +66,9 @@
       <div
         ref="allDayLane"
         data-all-day-lane
-        class="flex w-full flex-wrap gap-x-1.5 gap-y-1 overflow-hidden px-1.5 py-1"
+        class="flex w-full flex-wrap gap-x-1 gap-y-1 overflow-hidden py-1"
         :class="measuring && 'max-h-10'"
+        :style="{ paddingInline: `${pillInset - PILL_MARGIN}px` }"
         :data-date-attr="currentDate"
         @click.prevent="
           calendarActions.handleCellClick($event, currentDate, '', true)
@@ -99,12 +103,15 @@
 
              Its height is the line's, not a number of its own: a pill is 24px of
              minimum plus whatever its own padding and text come to, so a button
-             fixed at 24 sat a few pixels short of everything beside it. -->
+             fixed at 24 sat a few pixels short of everything beside it. And
+             `mx-px` is the pills' own margin, so it sits the same distance from
+             the pill before it as the pills do from each other, and from the
+             lane's edge when it is the only thing in it. -->
         <Button
           v-if="hiddenFullDayEvents || measuring"
           variant="outline"
           data-all-day-more
-          class="!h-auto !min-h-7 w-fit shrink-0 cursor-pointer self-stretch border-dashed !rounded-4 !text-xs !text-ink-gray-6"
+          class="!h-auto !min-h-7 mx-px w-fit shrink-0 cursor-pointer self-stretch border-dashed !rounded-4 !text-xs !text-ink-gray-6"
           :label="`+${hiddenFullDayEvents || dayFullDayEvents.length} more`"
           @click.stop="isCollapsed = false"
         />
@@ -171,6 +178,7 @@
               :event="calendarEvent"
               :key="calendarEvent.id"
               :date="currentDate"
+              :inset="pillInset"
             >
               <template #event-popover-content="slotProps">
                 <slot name="event-popover-content" v-bind="slotProps" />
@@ -196,6 +204,7 @@ import {
   watch,
 } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Button } from '#components/Button'
 import {
   parseDate,
@@ -203,7 +212,7 @@ import {
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
-import { eventDays } from './eventSpan'
+import { COLUMN_INSET, PILL_MARGIN, eventDays } from './eventSpan'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
   CALENDAR_ACTIONS_KEY,
@@ -223,6 +232,28 @@ const allDayEvents = computed(
   () => useCalendarData(props.events).allDayEvents.value,
 )
 const gridRef = ref<HTMLElement | null>(null)
+
+/**
+ * How far inside the day its pills are drawn.
+ *
+ * 4px on a phone — the inset a month cell keeps where it has room, which is
+ * what the day has at every size: its column is the whole page, so where the
+ * week's narrow columns come down to 2 to buy a character of title, the day
+ * spends the same 4 the desktop's month does and reads as the roomiest of the
+ * three. 3px otherwise, which is the inset the grid lays out on plus the margin
+ * a pill carries.
+ *
+ * By the screen and not by the column: the day's column is the width of the
+ * page at every size, so there is nothing in it to measure. The Month grid
+ * chooses its dense rows the same way, at the same breakpoint.
+ */
+const PHONE_INSET = 4
+
+const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
+const pillInset = computed(() =>
+  isNarrow.value ? PHONE_INSET : COLUMN_INSET + PILL_MARGIN,
+)
+
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
 

@@ -4,7 +4,7 @@
          inside it, so the box starts at the all-day line. -->
     <div class="flex pb-1">
       <div class="w-14"></div>
-      <div class="grid w-full grid-cols-7">
+      <div ref="headRef" class="grid w-full grid-cols-7">
         <!-- Nothing marks a weekend. It was a wash down the column, which is a
              ground, and every part of a column has something drawn on it — an
              event's fill is a step of its colour barely above white, and on gray
@@ -12,20 +12,31 @@
              read as a day switched off rather than as a Saturday, and a week
              whose columns are named and dated does not have to say which two of
              them are the weekend twice. -->
+        <!-- A day is its name and its date on one line at every width. What a
+             narrow column changes is the size the line is set at, and then how
+             much of the name is spelled — the numeral stays, since it is the
+             half a reader counts by. Stacking the two was the other way out of
+             it, and it left the week a row taller for no reading gained. -->
         <span
           v-for="date in weeklyDates"
-          class="relative flex items-center justify-center gap-1.5 h-8 text-center text-base text-ink-gray-7 cursor-pointer"
+          :key="parseDate(date)"
+          class="relative flex h-8 cursor-pointer items-center justify-center text-center text-ink-gray-7"
+          :class="isNarrow ? 'gap-1 text-xs' : 'gap-1.5 text-base'"
           @click="calendarActions.updateActiveView('Day', date)"
         >
-          {{ isToday(date) ? daysList[date.getDay()] : parseDateWithDay(date) }}
+          {{
+            isToday(date) ? dayName(date) : `${dayName(date)} ${date.getDate()}`
+          }}
           <!-- A circle, and the numeral's own line across: the same mark today
                wears in the Month grid and in a month card, so a reader who has
                learnt it in one view has learnt it in all of them. It was a
                rounded square of 25px — a shape of its own, at a size off the
-               scale. -->
+               scale. A size down in a narrow column, where a 24px disc beside
+               the name is most of the day's width. -->
           <span
             v-if="isToday(date)"
-            class="inline-flex size-6 items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-1"
+            class="inline-flex items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-1"
+            :class="isNarrow ? 'size-5' : 'size-6'"
           >
             {{ date.getDate() }}
           </span>
@@ -35,10 +46,13 @@
 
     <!-- The corner goes with the border: `overflow-hidden` clips to the radius,
          so a rounded box with no border of its own cuts the ends off the rules
-         its own rows draw. -->
+         its own rows draw. Unbordered it keeps the top one, as the Month grid
+         and the day do: that rule is what divides the dates heading the week
+         from the all-day row under them, and without it the bars ran straight on
+         from the numerals. -->
     <div
       class="flex min-h-0 flex-1 flex-col overflow-hidden border-outline-gray-1"
-      :class="config.noBorder ? '' : 'rounded-6 border-[1px]'"
+      :class="config.noBorder ? 'border-t-[1px]' : 'rounded-6 border-[1px]'"
     >
       <!--
         All-day row. Full-day events and timed ones of a day or more are packed
@@ -63,10 +77,11 @@
                column it heads cannot drift apart.
 
                Down 4px and a lane tall — this row's own padding and its first
-               bar, which is the day view's 8 and 24 read at this row's
-               measurements. -->
+               bar, so the label's middle is that bar's middle. The day view's
+               label is the same 4 and 28 beside the same lane. -->
           <div
-            class="calendar-all-day-label inline-flex h-[30px] items-center text-ink-gray-8"
+            class="calendar-all-day-label inline-flex items-center text-ink-gray-8"
+            :style="{ height: `${laneHeight}px` }"
           >
             All day
           </div>
@@ -98,16 +113,33 @@
                  for what is not drawn, which is what a broken line says. Its corners are the
                  bars' own 8px, and so is its height — a lane, taken from the
                  constant the bars themselves are laid out by, so the two cannot
-                 end up a few pixels apart. It says how many are hidden and then
-                 it is gone — the lanes it opened are the answer. -->
+                 end up a few pixels apart. Its left edge is theirs too, margin
+                 and all — `barInset` is where a bar's own edge lands, which is
+                 not the same in a narrow column as in a wide one, and a button
+                 that read the inset alone started a pixel to their left. It says
+                 how many are hidden and then it is gone — the lanes it opened
+                 are the answer.
+
+                 As wide as the day in a narrow column, where the bars above it
+                 are: "+3" is 30-odd pixels of a 40px lane, so a button sized to
+                 its own label left a sliver of column beside it that read as a
+                 bar cut short rather than as air. Its label sits in the middle
+                 there rather than at the left edge the bars' titles start on: a
+                 count is not a title, and two characters held against one end of
+                 a box that wide read as text that had been pushed. -->
             <Button
               v-if="hiddenCount(col)"
-              :label="`+${hiddenCount(col)} more`"
+              :label="
+                isNarrow ? `+${hiddenCount(col)}` : `+${hiddenCount(col)} more`
+              "
               variant="outline"
-              class="ml-0.5 w-fit cursor-pointer border-dashed !justify-start !rounded-4 !text-xs !text-ink-gray-6"
+              class="cursor-pointer border-dashed !rounded-4 !text-xs !text-ink-gray-6"
+              :class="isNarrow ? 'self-stretch !px-1' : 'w-fit !justify-start'"
               :style="{
-                marginTop: `${visibleLanes * ALL_DAY_LANE_PITCH + ALL_DAY_LANE_GAP}px`,
-                height: `${LANE_HEIGHT}px`,
+                marginTop: `${visibleLanes * lanePitch + ALL_DAY_LANE_GAP}px`,
+                marginLeft: `${barInset}px`,
+                marginRight: isNarrow ? `${barInset}px` : undefined,
+                height: `${laneHeight}px`,
               }"
               @click.stop="isCollapsed = false"
             />
@@ -118,6 +150,8 @@
             :event="bar.event"
             :date="weeklyDates[bar.startCol]"
             :bar="bar"
+            :narrow="isNarrow"
+            :inset="barInset"
             @click.stop
           >
             <template #event-popover-content="slotProps">
@@ -192,6 +226,8 @@
                   :event="calendarEvent"
                   :key="`${calendarEvent.id}-${calendarEvent.date}`"
                   :date="date"
+                  :narrow="isNarrow"
+                  :inset="barInset"
                 >
                   <template #event-popover-content="slotProps">
                     <slot name="event-popover-content" v-bind="slotProps" />
@@ -210,20 +246,22 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, computed, inject } from 'vue'
+import { useElementSize } from '@vueuse/core'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import {
   twelveHoursFormat,
   twentyFourHoursFormat,
-  parseDateWithDay,
   parseDate,
   daysList,
 } from './calendarUtils'
 import {
   ALL_DAY_LANE_GAP,
-  ALL_DAY_LANE_PITCH,
-  LANE_HEIGHT,
+  COLUMN_INSET,
+  PILL_MARGIN,
   barsInColumn,
   layoutRow,
+  weekLaneHeight,
+  weekLanePitch,
 } from './eventSpan'
 
 import { Button } from '#components/Button'
@@ -248,7 +286,70 @@ const props = withDefaults(
 )
 
 const gridRef = ref<HTMLElement | null>(null)
+const headRef = ref<HTMLElement | null>(null)
 const isCollapsed = ref(true)
+
+/**
+ * How wide a day is drawn, and the two points at which the week's furniture
+ * steps down to fit it — the phone, where the seven days share what is left of
+ * the screen once the hour gutter has had its 56px, and any tablet held the
+ * short way.
+ *
+ * Measured rather than asked of the viewport: the week is a box on a page, and
+ * how wide it is drawn is the page's business — a sidebar opening takes the
+ * same 200px off the columns that a smaller screen does. The head row is what
+ * is measured because it is the day columns' own width, gutter already taken
+ * off, and it is laid out before the grid under it has anything in it.
+ *
+ * 64px is where "Wed 30" stops fitting at `text-base`: the name and the date
+ * come to some 50px, and on today, whose date is a 24px circle beside the name,
+ * to some 60. Below it the line is set at `text-xs` with a 20px circle, which
+ * asks 50.
+ *
+ * 50px is where even that stops fitting, and the name comes down to its
+ * initial: "W 9", and "W" beside the circle on today, which any column the grid
+ * can draw has room for.
+ */
+const NARROW_COLUMN = 64
+const TIGHT_COLUMN = 50
+
+const { width: headWidth } = useElementSize(headRef)
+
+const columnWidth = computed(
+  () => headWidth.value / (props.weeklyDates.length || 7),
+)
+
+const isNarrow = computed(
+  () => !!headWidth.value && columnWidth.value < NARROW_COLUMN,
+)
+const isTight = computed(
+  () => !!headWidth.value && columnWidth.value < TIGHT_COLUMN,
+)
+
+/**
+ * The lane the bars are drawn in, which a narrow week draws shorter: the title
+ * is set a size down there, and a row of three lanes is that much of the phone's
+ * screen not spent on the hours below it.
+ */
+const laneHeight = computed(() => weekLaneHeight(isNarrow.value))
+const lanePitch = computed(() => weekLanePitch(isNarrow.value))
+
+/**
+ * Where a bar's own left edge lands, inside its day: the column's inset, and the
+ * pixel of margin a pill carries on top of it — which a pill in a narrow week
+ * gives back, leaving the inset alone. Anything laid out beside the bars rather
+ * than being one reads it, or it starts on a different line to them.
+ *
+ * `isNarrow` and not `isTight`: a pill is told it is tight by this view, from
+ * the same measure, so the two have to be answering the same question.
+ */
+const barInset = computed(
+  () => COLUMN_INSET + (isNarrow.value ? 0 : PILL_MARGIN),
+)
+
+/** As much of the day's name as its column has room for. */
+const dayName = (date: Date) =>
+  isTight.value ? daysList[date.getDay()].slice(0, 1) : daysList[date.getDay()]
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
@@ -344,9 +445,9 @@ const ROW_PAD = ALL_DAY_LANE_GAP
 
 const allDayHeight = computed(
   () =>
-    visibleLanes.value * ALL_DAY_LANE_PITCH +
+    visibleLanes.value * lanePitch.value +
     (visibleLanes.value < allDayRow.value.laneCount
-      ? ALL_DAY_LANE_GAP + LANE_HEIGHT
+      ? ALL_DAY_LANE_GAP + laneHeight.value
       : 0) +
     ROW_PAD,
 )

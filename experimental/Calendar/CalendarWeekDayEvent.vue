@@ -41,10 +41,13 @@
           :class="{
             // An all-day pill is read as a row of the day's own list, so it is
             // exactly the height of one — a lane's — rather than as tall as its
-            // own padding and line happen to come to. A timed pill is as tall as
-            // its event is long, and only needs a floor to stay legible when
-            // that is minutes.
-            'h-7': isAllDay,
+            // own padding and line happen to come to. The week's lane is the
+            // shorter of the two: a bar there is one line read across the row,
+            // where the day's pill stands in a stack of them. A timed pill is as
+            // tall as its event is long, and only needs a floor to stay legible
+            // when that is minutes.
+            'h-full': isAllDay && !!bar,
+            'h-7': isAllDay && !bar,
             'min-h-6': !isAllDay,
             'event-raised': isRaised,
             active: activeEvent == (props.event?.id || props.event?.name),
@@ -67,19 +70,31 @@
             )
           "
         >
-          <!-- 4px above and below on an all-day pill, against the 5 a timed one
-               takes: 5 and a 20px line come to 30, which is two past the lane
-               the pill is laid in. -->
-          <div
-            class="flex gap-1.5 h-full"
-            :class="isAllDay ? 'px-1.5 py-1' : 'p-[5px]'"
-          >
+          <div class="flex gap-1.5 h-full" :class="padClass">
+            <!-- The calendar's own colour, down the pill's left edge — and the
+                 first thing a tight pill gives up: the bar and the air beside it
+                 are 8px of a pill some 40px wide, a fifth of it spent saying
+                 what the fill it is drawn on says already. Where the column has
+                 room — a desktop week, the day at any size — those 8px cost
+                 nothing and the stripe is worth having.
+
+                 By the view's answer rather than by the pill's own width, as
+                 everything else in the tight tier is: a narrow week draws
+                 single-day pills and bars three days wide in one row, and a
+                 stripe on the wide ones alone read as two kinds of event. -->
             <div
-              v-if="props.event.fromTime && !props.event.isDraft"
+              v-if="props.event.fromTime && !props.event.isDraft && !isTight"
               class="event-border h-full w-[2px] rounded-4 shrink-0"
             />
+            <!-- An all-day pill is one line in a box built to hold it, so the
+                 line sits in the middle of the box: a 20px line 2px inside a
+                 24px bar has nowhere else to be, and asking for the top left it
+                 a pixel high at the least convenient moment. A timed pill is as
+                 tall as its event, which is usually taller than what it has to
+                 say, and that starts at the top. -->
             <div
-              class="relative flex h-full select-none items-start gap-2 overflow-hidden"
+              class="relative flex h-full select-none gap-2 overflow-hidden"
+              :class="isAllDay ? 'items-center' : 'items-start'"
             >
               <div v-if="config.showIcon && eventIcon">
                 <component :is="eventIcon" class="h-4 w-4" />
@@ -97,11 +112,26 @@
               >
                 <!-- Declined: struck through and muted; the fill and bar stay,
                      so the event still reads as the one you said no to. -->
+                <!-- `break-words` so a word wider than the pill breaks and
+                     carries on underneath rather than running off the edge and
+                     being clipped: at a tight pill's width most titles have a
+                     word in them that no line can hold, and half of one against
+                     the pill's edge reads as a rendering fault where a broken
+                     one reads as a word that did not fit. It costs nothing
+                     where a line does hold, which is every wider pill. -->
                 <p
                   ref="eventTitleRef"
-                  class="event-title text-sm-medium leading-5"
+                  class="event-title break-words"
                   :class="[
-                    isCompact || isNarrow ? 'truncate' : lineClampClass,
+                    // A size down where the pill is tight, with the line height
+                    // that goes with it: 20px of leading under a 12px face
+                    // wasted one of the two or three lines such a pill has.
+                    isTight
+                      ? 'text-xs-medium leading-4'
+                      : 'text-sm-medium leading-5',
+                    isCompact || (isNarrow && !isTight)
+                      ? 'truncate'
+                      : lineClampClass,
                     props.event.isDeclined
                       ? 'line-through text-ink-gray-5'
                       : 'text-ink-gray-8',
@@ -118,7 +148,7 @@
                      up the characters instead, so this never fires there. -->
                 <p
                   ref="eventTimeRef"
-                  v-if="!isAllDay"
+                  v-if="!isAllDay && !isTight"
                   class="event-subtitle truncate"
                   :class="[
                     isNarrow ? 'text-2xs' : 'text-xs',
@@ -189,11 +219,15 @@ import {
   convertMinutesToHours,
   calculateDiff,
   formattedDuration,
+  paintedEventHeight,
+  EVENT_HEIGHT_THRESHOLD,
 } from './calendarUtils'
 import {
   ALL_DAY_LANE_GAP,
-  ALL_DAY_LANE_PITCH,
-  LANE_HEIGHT,
+  COLUMN_INSET,
+  PILL_MARGIN,
+  weekLaneHeight,
+  weekLanePitch,
   isAllDayLike,
   shiftEventDays,
   shiftEventMinutes,
@@ -216,6 +250,20 @@ const props = defineProps<{
    * all-day row). Without it an all-day card sits in normal flow.
    */
   bar?: CalendarRowBar
+  /**
+   * Drawn in a week whose columns are narrow, which is what a pill spanning
+   * several of them cannot tell from its own width: a three-day bar is wide and
+   * still belongs to a week where nothing else is.
+   */
+  narrow?: boolean
+  /**
+   * How far inside its column the pill's own edge lands, in pixels. The view
+   * decides it — a phone's day and a narrow week sit on the 2px the month cells
+   * use, where a roomy column keeps the 3 the pill's margin adds to the inset —
+   * and the view lays out anything standing beside the pills from the same
+   * number, so a "+n more" button lands on their line.
+   */
+  inset?: number
 }>()
 
 const isPopoverOpen = ref(false)
@@ -245,8 +293,6 @@ if (!activeView) {
 
 const minuteHeight = config.hourHeight / 60
 const height15Min = minuteHeight * 15
-const heightThreshold = 40
-const minimumHeight = 32.5
 
 // Week view puts the card beside the event; the other views centre it below.
 // `align` is always 'center' — the old `placement="center"` was never a valid
@@ -285,15 +331,31 @@ const placedToTime = () =>
 
 // ── Position styles ───────────────────────────────────────────────────────
 
+/**
+ * Where the pill's own edge lands inside its column, and what the positioning
+ * wrapper gives up so that it does — on both sides.
+ *
+ * The pill is the wrapper's width with `mx-px` besides, and `shrink-0`, so it
+ * hangs a pixel past the wrapper's right edge. The wrapper therefore starts a
+ * pixel inside the inset and gives the whole of it up twice over: the pill's
+ * own edges then land on the inset, left and right.
+ *
+ * The view's number, or the 3px a wide column keeps — the inset plus the pill's
+ * own margin. A phone reads the week, the day and the month as one grid, and 3
+ * against the month's 2 is a difference it can see without being able to name.
+ */
+const pillInset = computed(() => props.inset ?? COLUMN_INSET + PILL_MARGIN)
+const wrapperInset = computed(() => pillInset.value - PILL_MARGIN)
+
 const containerStyle = computed<CSSProperties>(() => {
   if (props.bar) {
     const span = props.bar.endCol - props.bar.startCol + 1
     return {
       position: 'absolute',
-      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + 2px)`,
-      width: `calc(${(span / DAY_COLUMNS) * 100}% - 4px)`,
-      top: `${ALL_DAY_LANE_GAP + props.bar.lane * ALL_DAY_LANE_PITCH}px`,
-      height: `${LANE_HEIGHT}px`,
+      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
+      width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2}px)`,
+      top: `${ALL_DAY_LANE_GAP + props.bar.lane * weekLanePitch(props.narrow)}px`,
+      height: `${weekLaneHeight(props.narrow)}px`,
       transform: `translate(${state.xAxis}px, 0)`,
       zIndex: isRepositioning.value ? 100 : 1,
       transition: isRepositioning.value ? 'none' : 'all 0.1s ease',
@@ -308,18 +370,33 @@ const containerStyle = computed<CSSProperties>(() => {
   }
 
   const diff = calculateDiff(placedFromTime(), placedToTime())
-  let height = diff * minuteHeight
-  if (height < heightThreshold) height = minimumHeight
+  const height = paintedEventHeight(diff, minuteHeight)
 
-  const top = calculateMinutes(placedFromTime()) * minuteHeight
+  // The last piece of the day is held to the day: an event ending at midnight
+  // is padded up to the minimum height like any short one, and since the pill
+  // hangs from its start time that padding hangs past the last hour rule, where
+  // the grid scrolls to reach it and the box below the week ends in a strip of
+  // nothing. Padded up against the bottom rather than down past it.
+  const top = Math.min(
+    calculateMinutes(placedFromTime()) * minuteHeight,
+    24 * config.hourHeight - height,
+  )
   const hallNumber = calendarEvent.value.hallNumber || 0
 
+  // Inset by the same 2px an all-day bar is, so the two read off one left
+  // edge: the all-day pill above and the events under it are the same day's,
+  // and a reader sees where the day starts once. The inset comes off the width
+  // so only the left edge moves; the right is where the column's own air
+  // begins. It holds through a drag as well — a pill that shifts 2px the
+  // moment it is picked up reads as a nudge the reader did not make.
   const width =
     isResizing.value || isRepositioning.value
-      ? '100%'
-      : `${93 - hallNumber * 20}%`
+      ? `calc(100% - ${pillInset.value}px)`
+      : `calc(${93 - hallNumber * 20}% - ${pillInset.value}px)`
   const left =
-    isResizing.value || isRepositioning.value ? '0' : `${hallNumber * 20}%`
+    isResizing.value || isRepositioning.value
+      ? `${wrapperInset.value}px`
+      : `calc(${hallNumber * 20}% + ${wrapperInset.value}px)`
 
   return {
     position: 'absolute',
@@ -390,6 +467,40 @@ const NARROW_PILL = 133
  */
 const isNarrow = computed(() => !!width.value && width.value < NARROW_PILL)
 
+/**
+ * What a pill keeps between its edge and its text.
+ *
+ * 4px above and below on the day's all-day pill, against the 5 a timed one
+ * takes: 5 and a 20px line come to 30, which is two past the lane the pill is
+ * laid in. A bar takes the same 4, its lane being the day's own, and 2 in a
+ * narrow week, whose lane is 20 and whose title is set at 16. The padding is
+ * what holds the colour bar off the pill's top and bottom edges — `h-full` is
+ * the height it is given, and given the whole pill it ran edge to edge and read
+ * as a rule drawn through the row.
+ *
+ * A tight pill gives a pixel back on each side, which is a character of title on
+ * a pill that has room for four.
+ */
+const padClass = computed(() => {
+  if (!isAllDay.value) return isTight.value ? 'p-1' : 'p-[5px]'
+  return isTight.value ? 'px-1 py-0.5' : 'px-1.5 py-1'
+})
+
+/**
+ * Drawn where there is no room for everything a pill can say: a week at phone
+ * width, where seven columns share some 330px and a pill is about 40 of them.
+ * What goes is the time, not the title — a pill's place on the grid already
+ * says when it is, to the quarter hour, and its title is the one thing only it
+ * can say. The padding comes down with it, and the title a size.
+ *
+ * The view's answer, handed in, rather than the pill's own width. A pill
+ * measures 40px for either of two reasons — a column that narrow, or a title
+ * that short, since the day's all-day lane sizes its pills to their text — and
+ * only the first is a reason to say less. Read from the width, "Holiday" and
+ * "Conference" sat in one row of one day at two sizes.
+ */
+const isTight = computed(() => !!props.narrow)
+
 const timeLabel = computed(() =>
   formattedDuration(
     updatedEvent.fromTime || '',
@@ -402,17 +513,18 @@ const isCompact = computed(() => {
   if (isAllDay.value) return false
   return (
     calculateDiff(placedFromTime(), placedToTime()) * minuteHeight <
-    heightThreshold
+    EVENT_HEIGHT_THRESHOLD
   )
 })
 
 const lineClampClass = computed(() => {
   if (isAllDay.value) return 'line-clamp-1'
-  if (!eventRef.value || !eventTitleRef.value || !eventTimeRef.value) return
+  if (!eventRef.value || !eventTitleRef.value) return
   if (!props.event.fromTime && !props.event.toTime) return
 
   const containerHeight = eventRef.value.clientHeight
-  const subtitleHeight = eventTimeRef.value.offsetHeight
+  // A tight pill draws no time, so the whole of it is the title's to fill.
+  const subtitleHeight = eventTimeRef.value?.offsetHeight ?? 0
   const availableHeightForTitle = containerHeight - subtitleHeight - 8
 
   const computedStyle = getComputedStyle(eventTitleRef.value)
