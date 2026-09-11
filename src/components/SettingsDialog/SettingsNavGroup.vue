@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="label || $slots.label"
-      class="flex h-7 items-center px-2 text-base text-ink-gray-5"
+      class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-5"
     >
       <slot name="label">{{ label }}</slot>
     </div>

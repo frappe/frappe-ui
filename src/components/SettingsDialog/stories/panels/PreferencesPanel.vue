@@ -36,7 +36,7 @@ const hideInactiveSpaces = ref(false)
       </SettingsRow>
 
       <section>
-        <h3 class="text-base font-semibold text-ink-gray-8">Sidebar</h3>
+        <h3 class="text-base-semibold text-ink-gray-8">Sidebar</h3>
         <div class="mt-2 divide-y divide-outline-gray-1">
           <SettingsRow
             title="Unread badge"

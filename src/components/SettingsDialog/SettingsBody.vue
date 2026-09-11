@@ -3,7 +3,7 @@
   <ScrollArea
     ref="scrollArea"
     class="min-h-0 flex-1"
-    viewport-class="px-[4.4rem] pb-16"
+    viewport-class="px-10 pb-16"
   >
     <slot />
   </ScrollArea>

@@ -39,7 +39,7 @@ const filtered = computed(() =>
   <SettingsHeader>
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-ink-gray-8">Users</h2>
+        <h2 class="text-lg-semibold text-ink-gray-8">Users</h2>
         <Button variant="solid" icon-left="lucide-plus">Invite</Button>
       </div>
       <TextInput v-model="search" placeholder="Search by name or email">
@@ -48,7 +48,7 @@ const filtered = computed(() =>
         </template>
       </TextInput>
       <div
-        class="grid h-8 grid-cols-[1fr_8rem] items-center border-b text-sm text-ink-gray-5"
+        class="grid h-8 grid-cols-[1fr_8rem] items-center border-b border-outline-gray-1 text-sm text-ink-gray-5"
       >
         <div>User</div>
         <div>Role</div>
