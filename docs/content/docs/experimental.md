@@ -331,6 +331,24 @@ const { inputId, labelledBy, describedBy, hasError, errorLines, dataAttrs } =
   useInputLabeling(props, { size: () => props.size })
 ```
 
+## useInputClasses
+
+The size and variant classes `TextInput` renders, for an element that is not an
+`<input>`. A contenteditable title, a tag field, or any box that holds its own
+caret reads them here instead of copying them, so a restyle of the input reaches
+them too. `focusPrefix` moves the focus treatment onto the box:
+
+```ts
+import { useInputClasses } from 'frappe-ui/experimental'
+
+const { inputClasses, textColor, prefixClasses, suffixClasses } =
+  useInputClasses({
+    size: () => props.size,
+    variant: () => props.variant,
+    focusPrefix: 'focus-within',
+  })
+```
+
 ## Input labeling components
 
 The presentational counterparts of `useInputLabeling`: small components that

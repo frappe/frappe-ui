@@ -43,4 +43,12 @@ own required indicator.
 
 <ComponentPreview name="TextInput-States" />
 
+## Reusing the box classes
+
+The size and variant classes on this page are a table `TextInput` reads through
+`useInputClasses` (`frappe-ui/experimental`). An element that is not an `<input>`
+— a contenteditable title, a tag field — reads the same table instead of copying
+it, and passes `focusPrefix: 'focus-within'` so the focus treatment lands on the
+box rather than on a child.
+
 <!-- @include: ./TextInput.api.md -->

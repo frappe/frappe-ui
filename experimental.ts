@@ -9,6 +9,12 @@ export {
   InputDescription,
   InputError,
 } from './src/components/InputLabeling'
+export { useInputClasses } from './src/composables/useInputClasses'
+export type {
+  InputFocusPrefix,
+  UseInputClassesOptions,
+  UseInputClassesReturn,
+} from './src/composables/useInputClasses'
 export { useInputLabeling } from './src/composables/useInputLabeling'
 export type { FrappeUIError } from './src/composables/useInputLabeling'
 export {
