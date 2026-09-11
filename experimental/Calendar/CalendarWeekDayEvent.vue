@@ -115,9 +115,14 @@
                  a pixel high at the least convenient moment. A timed pill is as
                  tall as its event, which is usually taller than what it has to
                  say, and that starts at the top. -->
+            <!-- `min-w-0 flex-1`: as wide as the row has room for, whatever
+                 is in it. Its width is what the floors below are read against,
+                 and read off a box sized to its content, a title hidden for
+                 want of room left the box no width, no width read as not yet
+                 measured, the title came back, and the pill blinked. -->
             <div
               ref="contentRef"
-              class="relative flex h-full select-none gap-2 overflow-hidden"
+              class="relative flex h-full min-w-0 flex-1 select-none gap-2 overflow-hidden"
               :class="isAllDay ? 'items-center' : 'items-start'"
             >
               <div v-if="config.showIcon && eventIcon">
@@ -641,10 +646,16 @@ const lineHeightOf = (el: HTMLElement) =>
  * The pill's content box, watched: the counts and floors below read the DOM,
  * which nothing reactive tracks, and its width is what changes underneath
  * them — the sidebar opening, a cascade forming — so they are reckoned again
- * when it does. The content box rather than the pill, so the icon, when there
- * is one, is already out of the width.
+ * when it does. The box is the room the row has, not the room its text takes
+ * — see the template — so what is drawn in it cannot change the measure that
+ * decides what is drawn in it.
  */
 const { width: contentWidth } = useElementSize(contentRef)
+
+/** What the icon and the gap after it take off the row, when there is one. */
+const iconWidth = computed(() =>
+  config.showIcon && eventIcon.value ? 16 + 8 : 0,
+)
 
 /**
  * How many lines the pill's height affords, less its padding and the gap
@@ -702,14 +713,21 @@ const timeClampClass = computed(() => {
 
 /**
  * The least each of the compact row's two texts is drawn at: a letter and an
- * ellipsis. 24px holds a W and the dots on the title's 13px face; 16 holds a
- * digit and the dots on the time's 12px. The class is what the flex layout
- * shrinks each down to and no further; the number is what says whether there
- * is room to draw it at all, since the row's overflow-hidden would otherwise
- * clip what does not fit to the sliver of a glyph.
+ * ellipsis. 24px holds a W and the dots on the title's 13px face, 20 on the
+ * 12px face the tight tier sets it at; 16 holds a digit and the dots on the
+ * time's 12px. The class is what the flex layout shrinks each down to and no
+ * further; the number is what says whether there is room to draw it at all,
+ * since the row's overflow-hidden would otherwise clip what does not fit to
+ * the sliver of a glyph.
+ *
+ * The title's follows its face: a cascaded pill in a phone's week has some
+ * 22px to draw in, which holds "S…" at 12px and was refused at the 13px
+ * face's 24, so every such pill came up empty.
  */
-const TITLE_FLOOR = 24
-const TITLE_FLOOR_CLASS = 'min-w-6'
+const TITLE_FLOOR = computed(() => (isTight.value ? 20 : 24))
+const TITLE_FLOOR_CLASS = computed(() =>
+  isTight.value ? 'min-w-5' : 'min-w-6',
+)
 const TIME_FLOOR = 16
 const TIME_FLOOR_CLASS = 'min-w-4'
 /** `gap-1.5` between the two. */
@@ -723,7 +741,7 @@ const COMPACT_GAP = 6
 const showTitle = computed(() => {
   if (!isCompact.value) return true
   if (!contentWidth.value) return true
-  return contentWidth.value >= TITLE_FLOOR
+  return contentWidth.value - iconWidth.value >= TITLE_FLOOR.value
 })
 
 /**
@@ -736,10 +754,12 @@ const showTime = computed(() => {
   if (!isCompact.value) return true
   if (!contentWidth.value || !showTitle.value) return showTitle.value
   const title = Math.min(
-    eventTitleRef.value?.scrollWidth ?? TITLE_FLOOR,
-    TITLE_FLOOR,
+    eventTitleRef.value?.scrollWidth ?? TITLE_FLOOR.value,
+    TITLE_FLOOR.value,
   )
-  return contentWidth.value - COMPACT_GAP - title >= TIME_FLOOR
+  return (
+    contentWidth.value - iconWidth.value - COMPACT_GAP - title >= TIME_FLOOR
+  )
 })
 
 // ── Resize ────────────────────────────────────────────────────────────────
