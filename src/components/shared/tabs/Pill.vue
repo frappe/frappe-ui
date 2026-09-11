@@ -104,7 +104,6 @@ const iconClass = computed(() => {
 function hasLabel(label: PillProps['label']) {
   return label !== undefined && label !== null && label !== ''
 }
-
 </script>
 
 <template>
@@ -115,7 +114,7 @@ function hasLabel(label: PillProps['label']) {
     <span
       v-if="$slots.prefix"
       data-slot="tab-prefix"
-      class="inline-flex items-center"
+      class="inline-flex items-center empty:hidden"
     >
       <slot name="prefix" />
     </span>
@@ -131,7 +130,7 @@ function hasLabel(label: PillProps['label']) {
     <span
       v-if="$slots.suffix"
       data-slot="tab-suffix"
-      class="inline-flex items-center"
+      class="inline-flex items-center empty:hidden"
     >
       <slot name="suffix" />
     </span>

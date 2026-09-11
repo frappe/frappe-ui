@@ -72,6 +72,10 @@ function syncFullscreen(): void {
     document.fullscreenElement === containerRef.value
 }
 
+function syncWebKitFullscreen(fullscreen: boolean): void {
+  isFullscreen.value = fullscreen
+}
+
 onMounted(() => document.addEventListener('fullscreenchange', syncFullscreen))
 onBeforeUnmount(() =>
   document.removeEventListener('fullscreenchange', syncFullscreen),
@@ -374,6 +378,7 @@ function setVideoOptions(options: {
           :video-el="mediaRef as HTMLVideoElement | null"
           :hidden="isResizing"
           :fullscreen="isFullscreen"
+          @fullscreen-change="syncWebKitFullscreen"
         />
 
         <MediaToolbar

@@ -42,6 +42,17 @@ const props = defineProps<{
   fullscreen?: boolean
 }>()
 
+const emit = defineEmits<{
+  'fullscreen-change': [fullscreen: boolean]
+}>()
+
+type WebKitVideoElement = HTMLVideoElement & {
+  readonly webkitSupportsFullscreen?: boolean
+  readonly webkitDisplayingFullscreen?: boolean
+  webkitEnterFullscreen?: () => void
+  webkitExitFullscreen?: () => void
+}
+
 const playing = ref(false)
 const muted = ref(false)
 const currentTime = ref(0)
@@ -97,6 +108,16 @@ function bind(el: HTMLVideoElement) {
   on('loadedmetadata', () => (duration.value = el.duration || 0))
   on('durationchange', () => (duration.value = el.duration || 0))
   on('volumechange', () => (muted.value = el.muted))
+  // iPhone presents video through its native fullscreen player rather than
+  // the standard Fullscreen API, so `document.fullscreenElement` never moves.
+  // Pass those transitions back to the node view to keep its editing chrome
+  // and control state in sync with either fullscreen implementation.
+  on('webkitbeginfullscreen', () => emit('fullscreen-change', true))
+  on('webkitendfullscreen', () => emit('fullscreen-change', false))
+
+  if ((el as WebKitVideoElement).webkitDisplayingFullscreen) {
+    emit('fullscreen-change', true)
+  }
 }
 
 function unbind(el: HTMLVideoElement) {
@@ -158,16 +179,67 @@ function toggleMute() {
   if (el) el.muted = !el.muted
 }
 
+function ignoreFullscreenRejection(promise: Promise<void> | undefined) {
+  // A fullscreen request can be refused by browser policy. It is an optional
+  // presentation affordance, so a rejection must not become an unhandled app
+  // error.
+  void promise?.catch(() => {})
+}
+
 function toggleFullscreen() {
   const el = props.videoEl
   if (!el) return
-  if (document.fullscreenElement) {
-    void document.exitFullscreen()
+  const webkitVideo = el as WebKitVideoElement
+
+  if (webkitVideo.webkitDisplayingFullscreen) {
+    try {
+      webkitVideo.webkitExitFullscreen?.()
+    } catch {
+      // The native player may already be leaving fullscreen.
+    }
     return
   }
+
+  if (document.fullscreenElement) {
+    try {
+      ignoreFullscreenRejection(document.exitFullscreen?.())
+    } catch {
+      // Fullscreen state may have changed between the check and the request.
+    }
+    return
+  }
+
   // Fullscreen the wrapper so these controls stay visible over the video.
   const root = el.closest('[data-video-fullscreen-root]') ?? el
-  void (root as HTMLElement).requestFullscreen?.()
+  const requestFullscreen = (root as HTMLElement).requestFullscreen
+
+  // `fullscreenEnabled` is false on iPhone even though the video-specific
+  // WebKit API is available. Choose that path before making an asynchronous
+  // standard request: `webkitEnterFullscreen()` must run directly inside the
+  // click's user-activation window.
+  if (
+    typeof requestFullscreen === 'function' &&
+    document.fullscreenEnabled !== false
+  ) {
+    try {
+      ignoreFullscreenRejection(requestFullscreen.call(root))
+      return
+    } catch {
+      // A synchronous standard-API failure can still fall through to WebKit
+      // while this click retains user activation.
+    }
+  }
+
+  if (
+    webkitVideo.webkitSupportsFullscreen &&
+    typeof webkitVideo.webkitEnterFullscreen === 'function'
+  ) {
+    try {
+      webkitVideo.webkitEnterFullscreen()
+    } catch {
+      // Native fullscreen can be unavailable until media metadata is ready.
+    }
+  }
 }
 
 function timeFromPointer(event: PointerEvent): number {
@@ -367,14 +439,20 @@ const SCRIM =
       </button>
     </Tooltip>
 
-    <Tooltip text="Fullscreen" class="flex h-5">
+    <Tooltip
+      :text="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+      class="flex h-5"
+    >
       <button
         type="button"
         class="opacity-90 transition-opacity hover:opacity-100"
-        aria-label="Fullscreen"
+        :aria-label="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
         @click="toggleFullscreen"
       >
-        <span class="lucide-maximize-2 size-5" />
+        <span
+          :class="fullscreen ? 'lucide-minimize-2' : 'lucide-maximize-2'"
+          class="size-5"
+        />
       </button>
     </Tooltip>
   </div>
