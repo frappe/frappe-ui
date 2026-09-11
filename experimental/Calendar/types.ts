@@ -56,6 +56,8 @@ export interface CalendarEvent {
   endTime?: number
   hallNumber?: number
   idx?: number
+  /** The events this pill is drawn on, with their own place in the layout — see `findOverlappingEventsCount`. */
+  over?: CalendarEvent[]
   [key: string]: unknown
 }
 

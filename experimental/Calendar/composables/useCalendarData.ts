@@ -14,7 +14,11 @@ export const activeEvent = ref<string | number>('')
  * rest: full-day events and multi-day timed ones, which the views pack into
  * lanes per row with `layoutRow`.
  */
-export default function useCalendarData(events: CalendarEvent[] = []) {
+export default function useCalendarData(
+  events: CalendarEvent[] = [],
+  /** The grid's pixels per minute, so collisions are judged as they are drawn. */
+  minuteHeight?: number,
+) {
   const timedEvents = computed(() => {
     const grouped: GroupedCalendarEvents = {}
     for (const event of events) {
@@ -26,7 +30,7 @@ export default function useCalendarData(events: CalendarEvent[] = []) {
       }
     }
     for (const [date, segments] of Object.entries(grouped)) {
-      grouped[date] = findOverlappingEventsCount(segments)
+      grouped[date] = findOverlappingEventsCount(segments, minuteHeight)
     }
     return grouped
   })

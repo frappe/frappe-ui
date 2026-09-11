@@ -404,7 +404,7 @@ function slotTime(e: MouseEvent, hour: number): string {
 }
 
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value,
+  () => useCalendarData(props.events, minuteHeight).timedEvents.value,
 )
 const allDayEvents = computed(
   () => useCalendarData(props.events).allDayEvents.value,

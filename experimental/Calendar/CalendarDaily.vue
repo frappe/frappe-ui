@@ -224,7 +224,7 @@ const props = defineProps<{
   currentDate: Date
 }>()
 const timedEvents = computed(
-  () => useCalendarData(props.events).timedEvents.value,
+  () => useCalendarData(props.events, minuteHeight).timedEvents.value,
 )
 const allDayEvents = computed(
   () => useCalendarData(props.events).allDayEvents.value,

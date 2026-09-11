@@ -26,17 +26,10 @@
 .event {
   background-color: var(--bg);
 }
-/* An event laid over another is cut out of it by a ring in the page's own
-   colour, drawn outside the pill. Only the raised one: the event at the back of
-   a stack has nothing under it to be cut from, and a ring round every pill would
-   nick every hour rule the grid draws.
-
-   It is the whole of what separates two overlapping events of one calendar, now
-   that they are the same tint again — flat, and one of them cut out of the
-   other. */
-.event.event-raised {
-  box-shadow: 0 0 0 2.5px var(--surface-base);
-}
+/* The cut between an event and the one it is drawn over is an element of its
+   own — see `cuts` in CalendarWeekDayEvent — not a shadow on the pill: a shadow
+   falls on whatever is beside the pill, the grid included, and cannot be told
+   to stop at the other event's edge. */
 .event .event-subtitle {
   color: var(--subtext);
 }

@@ -6,6 +6,23 @@
     no such delay, so `update:open` is honoured only on the way down — Escape
     and outside-click still close it.
   -->
+  <!-- The cut between this pill and each event it is drawn over: a rounded
+       rect 2.5px larger than this pill on every side, in the page's own
+       colour, clipped to the exact rounded shape of the pill beneath — so what
+       shows is a ring of even width, only where it lies on the other event,
+       and never on the grid. Its own element rather than a shadow on the pill:
+       a shadow falls on whatever is beside the pill and cannot be told to stop
+       at another's edge. Before the pill in the DOM and after the one beneath,
+       which is where the pill's fill covers the ring's inside and the other
+       pill's fill shows through the ring's outside. -->
+  <div
+    v-for="cut in cuts"
+    :key="cut.id"
+    class="pointer-events-none absolute inset-0"
+    :style="{ clipPath: cut.clip }"
+  >
+    <div class="absolute bg-surface-base" :style="cut.ring" />
+  </div>
   <Popover
     :open="isPopoverOpen"
     :side="popoverSide"
@@ -49,7 +66,6 @@
             'h-full': isAllDay && !!bar,
             'h-7': isAllDay && !bar,
             'min-h-6': !isAllDay,
-            'event-raised': isRaised,
             active: activeEvent == (props.event?.id || props.event?.name),
             'rounded-l-none': bar && !bar.isStart,
             'rounded-r-none': bar && !bar.isEnd,
@@ -371,42 +387,120 @@ const containerStyle = computed<CSSProperties>(() => {
     }
   }
 
-  const diff = calculateDiff(placedFromTime(), placedToTime())
-  const height = paintedEventHeight(diff, minuteHeight)
-
-  // The last piece of the day is held to the day: an event ending at midnight
-  // is padded up to the minimum height like any short one, and since the pill
-  // hangs from its start time that padding hangs past the last hour rule, where
-  // the grid scrolls to reach it and the box below the week ends in a strip of
-  // nothing. Padded up against the bottom rather than down past it.
-  const top = Math.min(
-    calculateMinutes(placedFromTime()) * minuteHeight,
-    24 * config.hourHeight - height,
+  const { top, height, hallNumber } = timedBox(
+    calculateMinutes(placedFromTime()),
+    calculateDiff(placedFromTime(), placedToTime()),
+    calendarEvent.value.hallNumber,
   )
-  const hallNumber = calendarEvent.value.hallNumber || 0
 
   // Inset by the same measure an all-day bar is, so the two read off one left
   // edge: the all-day pill above and the events under it are the same day's,
   // and a reader sees where the day starts once. The inset comes off the width
   // so only the left edge moves; the right is where the column's own air
   // begins, at 93%, which is where the cascade of overlapping pills is read
+/** The ring's width, and the pill's corner radius it runs concentric with. */
+const CUT = 2.5
+const PILL_RADIUS = 8
+
+/**
+ * Where a timed pill sits in its column, from its start, its length and its
+ * overlap column — the one reckoning for this pill and for the cuts it draws
+ * against the pills beneath it, so the two cannot come apart.
+ *
+ * The last piece of the day is held to the day: an event ending at midnight
+ * is padded up to the minimum height like any short one, and since the pill
+ * hangs from its start time that padding hangs past the last hour rule, where
+ * the grid scrolls to reach it and the box below the week ends in a strip of
+ * nothing. Padded up against the bottom rather than down past it.
+ *
+ * Across, the pill's own edges: its wrapper starts a pixel inside the inset and
+ * the pill's margin puts its edge on it. The pill at the back ends on 93% of
+ * the column, and each pill laid over another starts a fifth of the column
+ * further in and ends two ring-widths sooner — so its ring lies wholly on the
+ * pill beneath, with a ring's width of that pill's fill still showing past it.
+ * Ending on the same line, the ring's outer arc could not reach the corner it
+ * turned, and the other pill's fill showed in the wedge between the two, cut
+ * off square by its own edge; no shape of corner mends a shared edge.
+ *
+ * A right edge rather than a width, so that the pills resolve the same `7%`
+ * against the same column: as `left + width`, 20% + 73% and 3px + 93% came out
+ * a sixty-fourth of a pixel apart, a device pixel on a good screen.
+ */
+const timedBox = (startMinutes: number, minutes: number, hall?: number) => {
+  // Whole pixels, so the pill and the ring drawn round it snap to the same
+  // line: a quarter past the hour is 12.5px down a 50px hour, and a pill on a
+  // half pixel rounds one way while a ring set 2px off it rounds the other,
+  // and the ring came out 2px on one side and 3 on the next.
+  const height = Math.round(paintedEventHeight(minutes, minuteHeight))
+  const top = Math.round(
+    Math.min(startMinutes * minuteHeight, 24 * config.hourHeight - height),
+  )
+  const hallNumber = hall || 0
+  return {
+    top,
+    height,
+    hallNumber,
+    left: (extra = 0) => `calc(${hallNumber * 20}% + ${pillInset.value + extra}px)`,
+    right: (extra = 0) => `calc(7% + ${hallNumber * 2 * CUT - extra}px)`,
+  }
+}
+
+/**
+ * One cut per event this pill lies on — see the template. Nothing while the
+ * pill is being dragged or resized: it is out of the layout's hands then, and
+ * its cuts would be drawn against where it was.
+ */
+const cuts = computed(() => {
+  if (isAllDay.value || isResizing.value || isRepositioning.value) return []
+  const over = (calendarEvent.value.over || []) as CalendarEvent[]
+  if (!over.length) return []
+  const own = timedBox(
+    calculateMinutes(placedFromTime()),
+    calculateDiff(placedFromTime(), placedToTime()),
+    calendarEvent.value.hallNumber,
+  )
+  // The pill's own box, a ring's width larger on every side, its corners
+  // concentric with the pill's: a ring of one width all the way round. It is
+  // never on an edge of the pill beneath — see `timedBox` — so it is whole
+  // wherever it shows.
+  const ring: CSSProperties = {
+    top: `${own.top - CUT}px`,
+    left: own.left(-CUT),
+    right: own.right(CUT),
+    height: `${own.height + 2 * CUT}px`,
+    borderRadius: `${PILL_RADIUS + CUT}px`,
+  }
+  return over.map((other) => {
+    const box = timedBox(
+      other.startTime || 0,
+      (other.endTime || 0) - (other.startTime || 0),
+      other.hallNumber,
+    )
+    // `inset()` clips this element — the whole column — to the other pill's
+    // box: its top and bottom in pixels from the column's edges, its left and
+    // right the pill's own, and its corners the pill's own.
+    const clip = `inset(${box.top}px ${box.right()} calc(100% - ${box.top + box.height}px) ${box.left()} round ${PILL_RADIUS}px)`
+    return { id: `${other.id}-${other.hallNumber}-${other.idx}`, clip, ring }
+  })
+})
+
   // from — each pill laid over another starts a fifth of the column further
   // in. It holds through a drag as well — a pill that shifts on being picked
   // up reads as a nudge the reader did not make.
-  const width =
-    isResizing.value || isRepositioning.value
-      ? `calc(100% - ${pillInset.value}px)`
-      : `calc(${93 - hallNumber * 20}% - ${pillInset.value}px)`
-  const left =
-    isResizing.value || isRepositioning.value
-      ? `${wrapperInset.value}px`
-      : `calc(${hallNumber * 20}% + ${wrapperInset.value}px)`
+  // The wrapper's edges are the pill's less its margin either side — see
+  // `timedBox`. Dragged, it runs the column's width.
+  const dragging = isResizing.value || isRepositioning.value
+  const box = timedBox(0, 0, hallNumber)
+  const left = dragging
+    ? `${wrapperInset.value}px`
+    : `calc(${hallNumber * 20}% + ${wrapperInset.value}px)`
+  const right = dragging ? `${PILL_MARGIN}px` : box.right(-PILL_MARGIN)
 
   return {
     position: 'absolute',
     top: `${top}px`,
     left,
-    width,
+    right,
     height: `${height}px`,
     zIndex: isResizing.value || isRepositioning.value ? 100 : 0,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
@@ -414,22 +508,6 @@ const containerStyle = computed<CSSProperties>(() => {
       isResizing.value || isRepositioning.value ? 'none' : 'all 0.1s ease',
   }
 })
-
-/**
- * Drawn over another event, and so in need of an edge against it.
- *
- * Two ways that happens. `hallNumber` is the column an overlap puts an event in,
- * 0 for the one at the back — anything past that is laid over what came before.
- * And `idx` is its place within its own column, where events follow each other
- * in time and should not collide at all: they do because an event shorter than
- * the grid can draw is padded to a minimum height, so a quarter of an hour ends
- * a good deal further down the column than it does on the clock.
- */
-const isRaised = computed(
-  () =>
-    (calendarEvent.value.hallNumber || 0) > 0 ||
-    (calendarEvent.value.idx || 0) > 0,
-)
 
 const innerStyle = computed(() => ({
   ...eventBgStyle.value,
