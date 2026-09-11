@@ -97,10 +97,17 @@
                  By the view's answer rather than by the pill's own width, as
                  everything else in the tight tier is: a narrow week draws
                  single-day pills and bars three days wide in one row, and a
-                 stripe on the wide ones alone read as two kinds of event. -->
+                 stripe on the wide ones alone read as two kinds of event.
+
+                 A pixel shorter at either end than the text beside it — 5px in
+                 from the pill's edge where the padding alone would put it 4 —
+                 so it reads as a mark set on the pill rather than a rule run
+                 through it. Sized by the row's stretch with the margin taken
+                 off, not `h-full` with a margin added on, which would run it
+                 past the bottom. -->
             <div
               v-if="props.event.fromTime && !props.event.isDraft && !isTight"
-              class="event-border h-full w-[2px] rounded-4 shrink-0"
+              class="event-border my-px w-[2px] rounded-4 shrink-0"
             />
             <!-- An all-day pill is one line in a box built to hold it, so the
                  line sits in the middle of the box: a 20px line 2px inside a

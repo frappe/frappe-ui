@@ -39,10 +39,11 @@
              beside it is a tenth of a phone's column, spent saying in a second
              way what the fill already says. The title takes some of that back as
              padding — without the bar in front of it, 3px left it against the
-             pill's own edge. -->
+             pill's own edge. A pixel shorter at either end than the text beside
+             it, as in the week — a mark set on the pill, not a rule through it. -->
         <div
           v-if="props.event.fromTime && !props.event.isDraft && !dense"
-          class="event-border w-[2px] rounded-4 shrink-0"
+          class="event-border my-px w-[2px] rounded-4 shrink-0"
         />
         <div
           class="relative flex h-full min-w-0 select-none items-center gap-2 overflow-hidden"
