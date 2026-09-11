@@ -277,10 +277,6 @@ export function pickSeriesColor(ramp: string[], index: number) {
   return ramp[index % ramp.length]
 }
 
-/** The two palest sequential stops vanish against a white card. */
-const SEQUENTIAL_TAIL_TRIM = 2
-/** A lone series reads best as one confident mid-blue, not the ramp's dark end. */
-const SEQUENTIAL_SOLO_INDEX = 1
 /**
  * Below this relative luminance a fill needs white text on top of it. It is the
  * crossover, not a taste call: white and the near-black inside-label ink
@@ -290,23 +286,57 @@ const SEQUENTIAL_SOLO_INDEX = 1
 const DARK_FILL_LUMINANCE = 0.22
 
 /**
- * `count` evenly spaced stops from a continuous ramp, so a stack reads as one
- * progression rather than n unrelated hues. Cycles instead once there are more
- * series than usable stops, where even spacing would hand out duplicates.
+ * How much of the sequential ramp a chart spends before it must widen. The
+ * last two stops of a nine-stop ramp are pale enough that a series in them is
+ * hard to read against a card, so a chart stays inside the first seven until
+ * it has more series than that.
  */
-function rampStops(ramp: string[], count: number, lastIndex: number): string[] {
-  if (count > lastIndex + 1) {
+const SEQUENTIAL_SPAN = 7
+/**
+ * The most stops apart two neighbouring series sit. Without it two series
+ * take the two ends of the span, and a third then recolors the second. With
+ * it a chart of one, two or three series is a prefix of the next.
+ */
+const SEQUENTIAL_MAX_STEP = 3
+
+/**
+ * `count` stops from the deep end of a sequential ramp: spread evenly over the
+ * first `SEQUENTIAL_SPAN` stops, never more than `SEQUENTIAL_MAX_STEP` apart,
+ * widening past the span only for a chart with more series than it holds.
+ * Cycles once there are more series than stops.
+ */
+function sequentialStops(ramp: string[], count: number): string[] {
+  if (count === 1) return [ramp[0]]
+  if (count > ramp.length) {
     return Array.from({ length: count }, (_, i) => pickSeriesColor(ramp, i))
   }
+  const lastIndex = Math.min(Math.max(SEQUENTIAL_SPAN, count), ramp.length) - 1
+  return Array.from(
+    { length: count },
+    (_, i) =>
+      ramp[
+        Math.min(
+          Math.round((i * lastIndex) / (count - 1)),
+          i * SEQUENTIAL_MAX_STEP,
+        )
+      ],
+  )
+}
+
+/**
+ * `count` evenly spaced stops across the whole of a diverging ramp, which is
+ * read by its extremes. Cycles once there are more series than stops.
+ */
+function divergingStops(ramp: string[], count: number): string[] {
+  if (count === 1) return [ramp[0]]
+  if (count > ramp.length) {
+    return Array.from({ length: count }, (_, i) => pickSeriesColor(ramp, i))
+  }
+  const lastIndex = ramp.length - 1
   return Array.from(
     { length: count },
     (_, i) => ramp[Math.round((i * lastIndex) / (count - 1))],
   )
-}
-
-/** The sequential ramp without the stops that vanish against a card. */
-function usableSequential(ramp: string[]) {
-  return ramp.slice(0, Math.max(1, ramp.length - SEQUENTIAL_TAIL_TRIM))
 }
 
 /**
@@ -328,16 +358,9 @@ export function paletteColors(
 
   const ramp = name === 'diverging' ? tokens.diverging : tokens.sequential
   if (!ramp.length) return cycle(tokens.categorical)
-
-  if (count === 1) {
-    if (name === 'diverging') return [ramp[0]]
-    return [ramp[Math.min(SEQUENTIAL_SOLO_INDEX, ramp.length - 1)]]
-  }
-
-  // A diverging ramp is read by its extremes, so it always spans end to end.
-  const lastIndex =
-    name === 'diverging' ? ramp.length - 1 : usableSequential(ramp).length - 1
-  return rampStops(ramp, count, lastIndex)
+  return name === 'diverging'
+    ? divergingStops(ramp, count)
+    : sequentialStops(ramp, count)
 }
 
 /**
@@ -347,10 +370,7 @@ export function paletteColors(
  */
 function namedRamp(name: ChartPaletteName, tokens: ChartTokens): string[] {
   if (name === 'categorical') return tokens.categorical
-  const ramp =
-    name === 'diverging'
-      ? tokens.diverging
-      : usableSequential(tokens.sequential)
+  const ramp = name === 'diverging' ? tokens.diverging : tokens.sequential
   return ramp.length ? ramp : tokens.categorical
 }
 

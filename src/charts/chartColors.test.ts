@@ -25,9 +25,6 @@ const tokens: ChartTokens = {
   backdrop: '#ffffff',
 }
 
-/** The sequential ramp minus the two palest stops, as every chart reads it. */
-const USABLE_SEQUENTIAL = tokens.sequential.slice(0, 7)
-
 describe('chartColors: precedence', () => {
   it("draws in the caller's own colors when they passed a list", () => {
     expect(
@@ -56,7 +53,7 @@ describe('chartColors: precedence', () => {
     ).toEqual(tokens.categorical.slice(0, 2))
     expect(
       chartColors([], tokens, { fallback: 'sequential', count: 'ramp' }),
-    ).toEqual(USABLE_SEQUENTIAL)
+    ).toEqual(tokens.sequential)
   })
 })
 
@@ -90,6 +87,38 @@ describe('chartColors: one color per thing drawn', () => {
   })
 })
 
+describe('chartColors: how a sequential ramp is spent', () => {
+  const stops = (count: number) =>
+    chartColors('sequential', tokens, { fallback: 'sequential', count }).map(
+      (color) => tokens.sequential.indexOf(color) + 1,
+    )
+
+  it('gives a lone series the deep end', () => {
+    expect(stops(1)).toEqual([1])
+  })
+
+  it('keeps a small chart a prefix of the next size up', () => {
+    expect(stops(2)).toEqual([1, 4])
+    expect(stops(3)).toEqual([1, 4, 7])
+  })
+
+  it('stays inside the first seven stops up to seven series', () => {
+    expect(stops(4)).toEqual([1, 3, 5, 7])
+    expect(stops(5)).toEqual([1, 3, 4, 6, 7])
+    expect(stops(6)).toEqual([1, 2, 3, 5, 6, 7])
+    expect(stops(7)).toEqual([1, 2, 3, 4, 5, 6, 7])
+  })
+
+  it('reaches the pale stops only once the series outnumber the span', () => {
+    expect(stops(8)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+    expect(stops(9)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
+  })
+
+  it('cycles once there are more series than stops', () => {
+    expect(stops(10)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 1])
+  })
+})
+
 describe('chartColors: the ramp itself', () => {
   it('gives the stops rather than a slot each', () => {
     expect(
@@ -97,16 +126,7 @@ describe('chartColors: the ramp itself', () => {
         fallback: 'sequential',
         count: 'ramp',
       }),
-    ).toEqual(USABLE_SEQUENTIAL)
-  })
-
-  it('trims the sequential stops that vanish against a card', () => {
-    const ramp = chartColors(undefined, tokens, {
-      fallback: 'sequential',
-      count: 'ramp',
-    })
-    expect(ramp).not.toContain('#f5f5f5')
-    expect(ramp).not.toContain('#e0e0e0')
+    ).toEqual(tokens.sequential)
   })
 
   it('takes a diverging ramp end to end', () => {
@@ -151,7 +171,7 @@ describe('chartColors: which end of the ramp leads', () => {
         count: 'ramp',
         deepEnd: 'last',
       }),
-    ).toEqual([...USABLE_SEQUENTIAL].reverse())
+    ).toEqual([...tokens.sequential].reverse())
   })
 
   it('leaves a categorical set alone, having no order to reverse', () => {

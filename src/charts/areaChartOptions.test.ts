@@ -9,7 +9,7 @@ import type { AxisChartConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
@@ -169,9 +169,8 @@ describe('area chart option', () => {
       build({
         fillOpacity: 0.5,
         series: [{ name: 'sales', fillOpacity: 0.25 }],
-        // A lone series takes the ramp's mid stop, hence the shifted blue.
       }).series[0].areaStyle.color.colorStops[0].color,
-    ).toBe('rgba(0, 0, 34, 0.25)')
+    ).toBe('rgba(0, 0, 17, 0.25)')
   })
 
   it('falls back to a flat fill for a color it cannot add alpha to', () => {
