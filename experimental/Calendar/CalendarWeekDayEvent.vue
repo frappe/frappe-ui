@@ -109,6 +109,7 @@
                  tall as its event, which is usually taller than what it has to
                  say, and that starts at the top. -->
             <div
+              ref="contentRef"
               class="relative flex h-full select-none gap-2 overflow-hidden"
               :class="isAllDay ? 'items-center' : 'items-start'"
             >
@@ -135,18 +136,48 @@
                      the pill's edge reads as a rendering fault where a broken
                      one reads as a word that did not fit. It costs nothing
                      where a line does hold, which is every wider pill. -->
+                <!-- Not drawn at all where the row has no room for even a
+                     letter and an ellipsis — see `showTitle` — since what a
+                     narrower row shows is the sliver of a letter, which reads
+                     as a fault, and an empty pill reads as a pill too narrow
+                     to say anything, which it is. -->
                 <p
+                  v-if="showTitle"
                   ref="eventTitleRef"
                   class="event-title break-words"
                   :class="[
                     // A size down where the pill is tight, with the line height
                     // that goes with it: 20px of leading under a 12px face
                     // wasted one of the two or three lines such a pill has.
+                    //
+                    // A title with room to wrap sets its lines snug, ~18px on
+                    // the 13px face: at the 20 a one-line pill keeps, its lines
+                    // sat further from each other than the last of them sat
+                    // from the time, and the pair read as two things. Snug
+                    // puts the two distances within a pixel. The one-line
+                    // pills — compact, all-day — keep 20, which is what their
+                    // lanes are built round.
                     isTight
                       ? 'text-xs-medium leading-4'
-                      : 'text-sm-medium leading-5',
-                    isCompact || (isNarrow && !isTight)
-                      ? 'truncate'
+                      : isCompact || isAllDay
+                        ? 'text-sm-medium leading-5'
+                        : 'text-sm-medium leading-snug',
+                    // One line only where the pill has one line's height. A
+                    // narrow pill is not a short one: it wraps into whatever
+                    // height it has, and the clamp is reckoned from what is
+                    // left after the time line, so the range keeps its end
+                    // either way.
+                    // In the compact row the title gives up its characters
+                    // before the time gives up any: it shrinks a hundred times
+                    // as readily, which is the only order flex knows, and only
+                    // once it is down to its floor does the time start to go.
+                    // The floor is one letter and an ellipsis — 24px holds a W
+                    // and the dots at this size — so the row always says what
+                    // the event is, if only by its initial, and never shows an
+                    // ellipsis on its own, or the sliver of a letter that a
+                    // title squeezed to nothing was.
+                    isCompact
+                      ? `${TITLE_FLOOR_CLASS} shrink-[100] truncate`
                       : lineClampClass,
                     props.event.isDeclined
                       ? 'line-through text-ink-gray-5'
@@ -155,21 +186,31 @@
                 >
                   {{ props.event.title || '[No title]' }}
                 </p>
-                <!-- `truncate`, so a range with nowhere left to go ends in an
-                     ellipsis rather than at the pill's edge: below the width
-                     the small size needs there is no size left to step down to,
-                     and a glyph sliced down the middle reads as a bug where
-                     "10:15 am – 12:30 p…" reads as a range that did not fit.
-                     In the compact row the time is shrink-0 and the title gives
-                     up the characters instead, so this never fires there. -->
+                <!-- Under the title the range wraps into the lines the title
+                     leaves — see `timeClampClass` — and beside it, in the
+                     compact row, it is one line, and gone altogether where
+                     the title's floor leaves it less than a digit and an
+                     ellipsis — see `showTime`.
+                     `truncate`, so a range with nowhere left to go ends in an
+                     ellipsis rather than at the pill's edge: a glyph sliced
+                     down the middle reads as a bug where "10:15 am – 12:30 p…"
+                     reads as a range that did not fit. One size, whatever the
+                     pill's width: a cascaded or sidebar-squeezed pill is the
+                     same event at the same distance from the reader, and its
+                     type does not get smaller for being in a narrower column —
+                     only the tight tier, which the view hands in, sets type
+                     down, and it drops the time altogether. In the compact
+                     row this fires only after the title is down to
+                     its initial — see the title's shrink — since a pill too
+                     narrow for both has to cut one, and a range with its end
+                     gone still says when the event starts. -->
                 <p
                   ref="eventTimeRef"
-                  v-if="!isAllDay && !isTight"
-                  class="event-subtitle truncate"
-                  :class="[
-                    isNarrow ? 'text-2xs' : 'text-xs',
-                    isCompact && 'shrink-0',
-                  ]"
+                  v-if="!isAllDay && !isTight && showTime"
+                  class="event-subtitle text-xs"
+                  :class="
+                    isCompact ? `${TIME_FLOOR_CLASS} truncate` : timeClampClass
+                  "
                 >
                   {{ timeLabel }}
                 </p>
@@ -224,12 +265,12 @@
 import './style.css'
 
 import { ref, inject, computed, reactive, type CSSProperties } from 'vue'
+import { useElementSize } from '@vueuse/core'
 import EventModalContent from './EventModalContent.vue'
 import NewEventModal from './NewEventModal.vue'
 import Popover from '#components/Popover/Popover.vue'
 import type { PopoverSide } from '#components/Popover/types'
 import { useEventBase } from './useEventBase'
-import { useElementSize } from '@vueuse/core'
 import {
   calculateMinutes,
   convertMinutesToHours,
@@ -324,6 +365,7 @@ const eventIcon = computed(() =>
 // ── Refs ─────────────────────────────────────────────────────────────────
 
 const eventRef = ref<HTMLElement | null>(null)
+const contentRef = ref<HTMLElement | null>(null)
 const eventTitleRef = ref<HTMLElement | null>(null)
 const eventTimeRef = ref<HTMLElement | null>(null)
 
@@ -364,40 +406,6 @@ const placedToTime = () =>
 const pillInset = computed(() => props.inset ?? PILL_INSET)
 const wrapperInset = computed(() => pillInset.value - PILL_MARGIN)
 
-
-const containerStyle = computed<CSSProperties>(() => {
-  if (props.bar) {
-    const span = props.bar.endCol - props.bar.startCol + 1
-    return {
-      position: 'absolute',
-      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
-      width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2 + COLUMN_RULE}px)`,
-      top: `${weekLaneGap(props.narrow) + props.bar.lane * weekLanePitch(props.narrow)}px`,
-      height: `${weekLaneHeight(props.narrow)}px`,
-      transform: `translate(${state.xAxis}px, 0)`,
-      zIndex: isRepositioning.value ? 100 : 1,
-      transition: isRepositioning.value ? 'none' : 'all 0.1s ease',
-    }
-  }
-
-  if (isAllDay.value) {
-    return {
-      transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
-      zIndex: isRepositioning.value ? 100 : (props.event.idx || 0) + 1,
-    }
-  }
-
-  const { top, height, hallNumber } = timedBox(
-    calculateMinutes(placedFromTime()),
-    calculateDiff(placedFromTime(), placedToTime()),
-    calendarEvent.value.hallNumber,
-  )
-
-  // Inset by the same measure an all-day bar is, so the two read off one left
-  // edge: the all-day pill above and the events under it are the same day's,
-  // and a reader sees where the day starts once. The inset comes off the width
-  // so only the left edge moves; the right is where the column's own air
-  // begins, at 93%, which is where the cascade of overlapping pills is read
 /** The ring's width, and the pill's corner radius it runs concentric with. */
 const CUT = 2.5
 const PILL_RADIUS = 8
@@ -484,6 +492,40 @@ const cuts = computed(() => {
   })
 })
 
+
+const containerStyle = computed<CSSProperties>(() => {
+  if (props.bar) {
+    const span = props.bar.endCol - props.bar.startCol + 1
+    return {
+      position: 'absolute',
+      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
+      width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2 + COLUMN_RULE}px)`,
+      top: `${weekLaneGap(props.narrow) + props.bar.lane * weekLanePitch(props.narrow)}px`,
+      height: `${weekLaneHeight(props.narrow)}px`,
+      transform: `translate(${state.xAxis}px, 0)`,
+      zIndex: isRepositioning.value ? 100 : 1,
+      transition: isRepositioning.value ? 'none' : 'all 0.1s ease',
+    }
+  }
+
+  if (isAllDay.value) {
+    return {
+      transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
+      zIndex: isRepositioning.value ? 100 : (props.event.idx || 0) + 1,
+    }
+  }
+
+  const { top, height, hallNumber } = timedBox(
+    calculateMinutes(placedFromTime()),
+    calculateDiff(placedFromTime(), placedToTime()),
+    calendarEvent.value.hallNumber,
+  )
+
+  // Inset by the same measure an all-day bar is, so the two read off one left
+  // edge: the all-day pill above and the events under it are the same day's,
+  // and a reader sees where the day starts once. The inset comes off the width
+  // so only the left edge moves; the right is where the column's own air
+  // begins, at 93%, which is where the cascade of overlapping pills is read
   // from — each pill laid over another starts a fifth of the column further
   // in. It holds through a drag as well — a pill that shifts on being picked
   // up reads as a nudge the reader did not make.
@@ -523,32 +565,6 @@ const innerStyle = computed(() => ({
  * below the threshold the pill is held at its minimum height, which fits
  * one line, so the two go side by side.
  */
-/**
- * The pill's own width, watched: a cascaded pill in the Week view can end up
- * narrower than a full range needs, and the range is what gets cut.
- */
-const { width } = useElementSize(eventRef)
-
-/**
- * Narrower than a full range fits at the ordinary size.
- *
- * Measured, not guessed: the longest label the formatter writes —
- * "10:15 am – 12:30 pm", both ends with minutes and a meridiem each — is 114px
- * at `text-xs`, and the pill spends 18px on either side of its text (5px of
- * padding each way, the 2px bar, and the 6px between the bar and the text). At
- * the 116 this was, the step down came 17px after the range had already
- * stopped fitting, so the widest pill it was meant to save was the one that
- * lost its "pm".
- */
-const NARROW_PILL = 133
-
-/**
- * A pill too narrow for its own range. The range then takes a size down rather
- * than losing its end to the pill's edge: a time cut in half is worse than a
- * small one, and the title above it can give up characters instead.
- */
-const isNarrow = computed(() => !!width.value && width.value < NARROW_PILL)
-
 /**
  * What a pill keeps between its edge and its text.
  *
@@ -600,28 +616,123 @@ const isCompact = computed(() => {
   )
 })
 
-const lineClampClass = computed(() => {
-  if (isAllDay.value) return 'line-clamp-1'
+const clampMap: Record<number, string> = {
+  1: 'line-clamp-1',
+  2: 'line-clamp-2',
+  3: 'line-clamp-3',
+  4: 'line-clamp-4',
+  5: 'line-clamp-5',
+  6: 'line-clamp-6',
+}
+const clampClass = (lines: number) =>
+  clampMap[Math.min(Math.max(1, Math.floor(lines)), 6)]
+
+const lineHeightOf = (el: HTMLElement) =>
+  parseFloat(getComputedStyle(el).lineHeight)
+
+/**
+ * The pill's content box, watched: the counts and floors below read the DOM,
+ * which nothing reactive tracks, and its width is what changes underneath
+ * them — the sidebar opening, a cascade forming — so they are reckoned again
+ * when it does. The content box rather than the pill, so the icon, when there
+ * is one, is already out of the width.
+ */
+const { width: contentWidth } = useElementSize(contentRef)
+
+/**
+ * How many lines the pill's height affords, less its padding and the gap
+ * between title and time, laid out in some mix of the two faces.
+ */
+const contentHeight = () => (eventRef.value?.clientHeight ?? 0) - 8 - 2
+
+/**
+ * The lines the title may run to: what the pill's height holds once a single
+ * line of the time is set aside. One line and not the time's rendered height,
+ * since the time wraps too — into what the title leaves, and the title is
+ * reckoned first, so the pair cannot chase each other round.
+ */
+const titleLines = computed(() => {
+  if (isAllDay.value) return 1
+  // Read so the count follows the column's width.
+  void contentWidth.value
   if (!eventRef.value || !eventTitleRef.value) return
   if (!props.event.fromTime && !props.event.toTime) return
 
-  const containerHeight = eventRef.value.clientHeight
   // A tight pill draws no time, so the whole of it is the title's to fill.
-  const subtitleHeight = eventTimeRef.value?.offsetHeight ?? 0
-  const availableHeightForTitle = containerHeight - subtitleHeight - 8
+  const timeLine = eventTimeRef.value ? lineHeightOf(eventTimeRef.value) : 0
+  return Math.max(
+    1,
+    Math.floor((contentHeight() - timeLine) / lineHeightOf(eventTitleRef.value)),
+  )
+})
 
-  const computedStyle = getComputedStyle(eventTitleRef.value)
-  const lineHeight = parseFloat(computedStyle.lineHeight)
-  const maxLines = Math.max(1, Math.floor(availableHeightForTitle / lineHeight))
-  const clampMap: Record<number, string> = {
-    1: 'line-clamp-1',
-    2: 'line-clamp-2',
-    3: 'line-clamp-3',
-    4: 'line-clamp-4',
-    5: 'line-clamp-5',
-    6: 'line-clamp-6',
-  }
-  return clampMap[Math.min(maxLines, 6)]
+const lineClampClass = computed(() =>
+  titleLines.value === undefined ? undefined : clampClass(titleLines.value),
+)
+
+/**
+ * The lines the time may run to: what is left under the lines the title
+ * actually takes — its natural count, or its clamp, whichever is fewer. A
+ * range that fits on one line takes one; one that does not wraps at its dash
+ * as far as the height goes, "2:30 –" over "5:30 pm", and ends in an ellipsis
+ * only where there is no line left to wrap onto.
+ */
+const timeClampClass = computed(() => {
+  void contentWidth.value
+  if (
+    titleLines.value === undefined ||
+    !eventTitleRef.value ||
+    !eventTimeRef.value
+  )
+    return 'line-clamp-1'
+  const titleLine = lineHeightOf(eventTitleRef.value)
+  const natural = Math.round(eventTitleRef.value.scrollHeight / titleLine)
+  const taken = Math.min(natural, titleLines.value) * titleLine
+  return clampClass((contentHeight() - taken) / lineHeightOf(eventTimeRef.value))
+})
+
+// ── Compact row ───────────────────────────────────────────────────────────
+
+/**
+ * The least each of the compact row's two texts is drawn at: a letter and an
+ * ellipsis. 24px holds a W and the dots on the title's 13px face; 16 holds a
+ * digit and the dots on the time's 12px. The class is what the flex layout
+ * shrinks each down to and no further; the number is what says whether there
+ * is room to draw it at all, since the row's overflow-hidden would otherwise
+ * clip what does not fit to the sliver of a glyph.
+ */
+const TITLE_FLOOR = 24
+const TITLE_FLOOR_CLASS = 'min-w-6'
+const TIME_FLOOR = 16
+const TIME_FLOOR_CLASS = 'min-w-4'
+/** `gap-1.5` between the two. */
+const COMPACT_GAP = 6
+
+/**
+ * Whether the compact row is wide enough for the title's floor. Anything
+ * narrower draws nothing: a pill too narrow for one letter of its title has
+ * nothing to say but its place on the grid, and it says that by being there.
+ */
+const showTitle = computed(() => {
+  if (!isCompact.value) return true
+  if (!contentWidth.value) return true
+  return contentWidth.value >= TITLE_FLOOR
+})
+
+/**
+ * Whether the compact row has room for the time's floor beside the title.
+ * The title shrinks first and to its floor, so the room is what lies past the
+ * gap and past the narrower of the title's own width and that floor. The
+ * title has the first claim, so no title means no time either.
+ */
+const showTime = computed(() => {
+  if (!isCompact.value) return true
+  if (!contentWidth.value || !showTitle.value) return showTitle.value
+  const title = Math.min(
+    eventTitleRef.value?.scrollWidth ?? TITLE_FLOOR,
+    TITLE_FLOOR,
+  )
+  return contentWidth.value - COMPACT_GAP - title >= TIME_FLOOR
 })
 
 // ── Resize ────────────────────────────────────────────────────────────────
