@@ -35,6 +35,8 @@ const props = defineProps<{
   videoEl: HTMLVideoElement | null
   /** Hidden entirely while true (e.g. during a resize drag). */
   hidden?: boolean
+  /** The wrapper uses the standard API and stretches this row to the screen. */
+  standardFullscreen?: boolean
 }>()
 
 /**
@@ -337,7 +339,7 @@ const SCRIM =
     class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
     :style="{ backgroundImage: SCRIM }"
     :class="[
-      fullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
+      standardFullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
         : 'opacity-100',

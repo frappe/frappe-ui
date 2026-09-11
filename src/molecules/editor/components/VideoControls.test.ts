@@ -42,7 +42,11 @@ async function paint() {
 
 function mount(
   videoEl: HTMLVideoElement,
-  onUpdateFullscreen?: (fullscreen: boolean) => void,
+  options: {
+    fullscreen?: boolean
+    standardFullscreen?: boolean
+    onUpdateFullscreen?: (fullscreen: boolean) => void
+  } = {},
 ) {
   const root = document.createElement('div')
   document.body.appendChild(root)
@@ -50,7 +54,9 @@ function mount(
     render: () =>
       h(VideoControls, {
         videoEl,
-        'onUpdate:fullscreen': onUpdateFullscreen,
+        fullscreen: options.fullscreen,
+        standardFullscreen: options.standardFullscreen,
+        'onUpdate:fullscreen': options.onUpdateFullscreen,
       }),
   })
   app.mount(root)
@@ -58,6 +64,7 @@ function mount(
     root,
     fill: () => root.querySelector<HTMLElement>('[aria-label="Seek"] div div'),
     slider: () => root.querySelector<HTMLElement>('[aria-label="Seek"]'),
+    controls: () => root.firstElementChild as HTMLElement,
     fullscreenButton: () =>
       root.querySelector<HTMLButtonElement>('[aria-label="Fullscreen"]'),
     unmount: () => {
@@ -197,7 +204,7 @@ describe('VideoControls fullscreen', () => {
   it('reports native WebKit fullscreen transitions', () => {
     const video = fakeVideo()
     const onUpdateFullscreen = vi.fn()
-    const ctx = mount(video, onUpdateFullscreen)
+    const ctx = mount(video, { onUpdateFullscreen })
 
     video.dispatchEvent(new Event('webkitbeginfullscreen'))
     video.dispatchEvent(new Event('webkitendfullscreen'))
@@ -205,5 +212,24 @@ describe('VideoControls fullscreen', () => {
     expect(onUpdateFullscreen).toHaveBeenNthCalledWith(1, true)
     expect(onUpdateFullscreen).toHaveBeenNthCalledWith(2, false)
     ctx.unmount()
+  })
+
+  it('keeps inline spacing for native fullscreen', () => {
+    const native = mount(fakeVideo(), { fullscreen: true })
+
+    expect(native.controls().classList).toContain('rounded-b-4')
+    expect(native.controls().classList).not.toContain('px-6')
+    expect(
+      native.root.querySelector('[aria-label="Exit fullscreen"]'),
+    ).not.toBeNull()
+    native.unmount()
+
+    const standard = mount(fakeVideo(), {
+      fullscreen: true,
+      standardFullscreen: true,
+    })
+    expect(standard.controls().classList).toContain('px-6')
+    expect(standard.controls().classList).not.toContain('rounded-b-4')
+    standard.unmount()
   })
 })

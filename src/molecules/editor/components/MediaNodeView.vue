@@ -378,6 +378,7 @@ function setVideoOptions(options: {
           v-model:fullscreen="isFullscreen"
           :video-el="mediaRef as HTMLVideoElement | null"
           :hidden="isResizing"
+          :standard-fullscreen="isStandardFullscreen"
         />
 
         <MediaToolbar
