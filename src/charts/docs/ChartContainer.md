@@ -23,6 +23,11 @@ picker, a menu, or a link to the records behind the chart. It keeps its width
 and the title truncates, because a control that shrinks stops being pressable
 while a name that shortens still reads.
 
+The actions are centred on the title's line box, and that line box is what sets
+the row's height. A button taller than the line — the 28px `sm` Button is the
+common case — centres on the title instead of hanging below it, and the header
+keeps the height it has with no actions at all.
+
 ## Value-axis titles
 
 `plotLabel` titles the primary value axis and `plotLabelSecondary` the second

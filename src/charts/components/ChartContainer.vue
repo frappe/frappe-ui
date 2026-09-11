@@ -21,7 +21,14 @@
           {{ subtitle }}
         </div>
       </div>
-      <div v-if="$slots.actions" class="shrink-0">
+      <!-- The actions sit centred on the title's line box, and the box is
+           what sets the row's height: a 28px button next to a 20px title
+           line used to sit low and push the header 8px taller. `1lh` is that
+           line box, so the row keeps its height whatever the action is. -->
+      <div
+        class="flex h-[1lh] shrink-0 items-center text-p-base"
+        v-if="$slots.actions"
+      >
         <slot name="actions" />
       </div>
     </div>

@@ -55,6 +55,39 @@ describe('ChartContainer', () => {
       cy.get('[data-slot="chart-header"] #period').should('exist')
     })
 
+    // A 28px control next to a 20px title line used to sit 4px low and grow
+    // the row 8px taller.
+    it('centres a tall action on the title line, without growing the row', () => {
+      mountContainer({ title: 'Revenue' })
+      cy.get('[data-slot="chart-header"]').then(($titleOnly) => {
+        const bare = $titleOnly[0].getBoundingClientRect()
+
+        mountContainer({ title: 'Revenue' }, {
+          default: () => h('div', 'Plot'),
+          actions: () =>
+            h(
+              'button',
+              { id: 'period', style: 'height: 28px' },
+              'Last 30 days',
+            ),
+        } as any)
+
+        cy.get('[data-slot="chart-header"]').then(($withActions) => {
+          const row = $withActions[0].getBoundingClientRect()
+          expect(row.height).to.be.closeTo(bare.height, 0.5)
+
+          const title = $withActions
+            .find('.text-ink-gray-8')[0]
+            .getBoundingClientRect()
+          const action = $withActions.find('#period')[0].getBoundingClientRect()
+          expect(action.top + action.height / 2).to.be.closeTo(
+            title.top + title.height / 2,
+            0.5,
+          )
+        })
+      })
+    })
+
     // A card with only controls still needs the row to hang them on.
     it('draws the header for actions alone', () => {
       mountContainer({}, {
