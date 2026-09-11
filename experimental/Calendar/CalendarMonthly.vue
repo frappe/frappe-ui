@@ -179,6 +179,7 @@ import {
   LANE_HEIGHT,
   LANE_PITCH,
   COLUMN_INSET,
+  COLUMN_RULE,
   barsInColumn,
   dayEvents,
   daysBetween,
@@ -434,8 +435,11 @@ const rows = computed<StripRow[]>(() => {
 function barStyle(bar: CalendarRowBar) {
   const span = bar.endCol - bar.startCol + 1
   return {
+    // The rule's own pixel comes off the right as well: a bar is laid against
+    // the boundary the cell's border sits on, where the stacked pills above it
+    // are inside the content box and clear of it — see `COLUMN_RULE`.
     left: `calc(${(bar.startCol / 7) * 100}% + ${cellInset.value}px)`,
-    width: `calc(${(span / 7) * 100}% - ${cellInset.value * 2}px)`,
+    width: `calc(${(span / 7) * 100}% - ${cellInset.value * 2 + COLUMN_RULE}px)`,
     top: `${HEADER_HEIGHT + bar.lane * lanePitch.value}px`,
     height: `${laneHeight.value}px`,
   }

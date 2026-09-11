@@ -19,7 +19,7 @@
         class="event flex rounded-4 transition-all duration-75 overflow-hidden"
         :class="{
           'h-5 gap-1 px-1 py-0.5': dense,
-          'h-7 gap-1.5 px-1.5 py-1': !dense,
+          'h-7 gap-1.5 px-1 py-1': !dense,
           active: activeEvent == (props.event?.id || props.event?.name),
           'rounded-l-none': bar && !bar.isStart,
           'rounded-r-none': bar && !bar.isEnd,

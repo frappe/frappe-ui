@@ -31,6 +31,7 @@ export const LANE_PITCH = LANE_HEIGHT + 4
  * Same bars, different room, so the two are spelled apart.
  */
 export const ALL_DAY_LANE_GAP = 4
+export const NARROW_ALL_DAY_LANE_GAP = 2
 
 /**
  * A bar in a narrow week's all-day row: the line itself, its title being set a
@@ -43,11 +44,19 @@ export const ALL_DAY_LANE_GAP = 4
  */
 export const NARROW_WEEK_LANE_HEIGHT = 20
 
-/** The lane a week draws its bars in, and the pitch from one to the next. */
+/**
+ * The lane a week draws its bars in, the air between lanes — which is also the
+ * air between the row's rules and the first and last of them — and the pitch
+ * from one lane to the next. A narrow week halves the gap along with the lane:
+ * the 2px a phone's month cell puts between its rows, so the two grids read as
+ * one at the width they share.
+ */
 export const weekLaneHeight = (narrow?: boolean) =>
   narrow ? NARROW_WEEK_LANE_HEIGHT : LANE_HEIGHT
+export const weekLaneGap = (narrow?: boolean) =>
+  narrow ? NARROW_ALL_DAY_LANE_GAP : ALL_DAY_LANE_GAP
 export const weekLanePitch = (narrow?: boolean) =>
-  weekLaneHeight(narrow) + ALL_DAY_LANE_GAP
+  weekLaneHeight(narrow) + weekLaneGap(narrow)
 
 /**
  * How far inside its day an event is drawn, in pixels — a bar in the all-day
@@ -60,6 +69,30 @@ export const weekLanePitch = (narrow?: boolean) =>
  */
 export const COLUMN_INSET = 2
 export const PILL_MARGIN = 1
+
+/**
+ * The gap an event keeps from the edges of its day, in pixels — what a reader
+ * sees, white, between a pill and the rule beside it.
+ *
+ * 4px where the column has the room. A narrow week comes down to `COLUMN_INSET`,
+ * which is the 2px a phone's month cell leaves: the character of title it buys
+ * back is worth more there than the air.
+ */
+export const PILL_INSET = 4
+
+/**
+ * The rule a column draws down its own right edge, and so the pixel that comes
+ * off the gap on that side.
+ *
+ * The divider is a border inside each column's box, where a bar is laid out
+ * against the boundary the border sits on: 4px of inset on the right is 3px of
+ * white and the rule, against 4px of white on the left of the next column. So
+ * anything positioned against the boundary asks for one pixel more on its right
+ * than on its left, and the two gaps a reader sees are equal. Pills in normal
+ * flow are inside the content box, which the border is not part of, and take the
+ * inset as it stands.
+ */
+export const COLUMN_RULE = 1
 
 export function addDays(date: string, days: number): string {
   const d = toDate(date)

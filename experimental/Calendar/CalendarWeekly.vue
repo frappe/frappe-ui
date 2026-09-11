@@ -136,7 +136,7 @@
               class="cursor-pointer border-dashed !rounded-4 !text-xs !text-ink-gray-6"
               :class="isNarrow ? 'self-stretch !px-1' : 'w-fit !justify-start'"
               :style="{
-                marginTop: `${visibleLanes * lanePitch + ALL_DAY_LANE_GAP}px`,
+                marginTop: `${visibleLanes * lanePitch + laneGap}px`,
                 marginLeft: `${barInset}px`,
                 marginRight: isNarrow ? `${barInset}px` : undefined,
                 height: `${laneHeight}px`,
@@ -255,11 +255,11 @@ import {
   daysList,
 } from './calendarUtils'
 import {
-  ALL_DAY_LANE_GAP,
   COLUMN_INSET,
-  PILL_MARGIN,
+  PILL_INSET,
   barsInColumn,
   layoutRow,
+  weekLaneGap,
   weekLaneHeight,
   weekLanePitch,
 } from './eventSpan'
@@ -332,19 +332,20 @@ const isTight = computed(
  * screen not spent on the hours below it.
  */
 const laneHeight = computed(() => weekLaneHeight(isNarrow.value))
+const laneGap = computed(() => weekLaneGap(isNarrow.value))
 const lanePitch = computed(() => weekLanePitch(isNarrow.value))
 
 /**
  * Where a bar's own left edge lands, inside its day: the column's inset, and the
- * pixel of margin a pill carries on top of it — which a pill in a narrow week
- * gives back, leaving the inset alone. Anything laid out beside the bars rather
- * than being one reads it, or it starts on a different line to them.
+ * the standard gap, or the 2px a narrow week comes down to. Anything laid out
+ * beside the bars rather than being one reads it, or it starts on a different
+ * line to them.
  *
  * `isNarrow` and not `isTight`: a pill is told it is tight by this view, from
  * the same measure, so the two have to be answering the same question.
  */
-const barInset = computed(
-  () => COLUMN_INSET + (isNarrow.value ? 0 : PILL_MARGIN),
+const barInset = computed(() =>
+  isNarrow.value ? COLUMN_INSET : PILL_INSET,
 )
 
 /** As much of the day's name as its column has room for. */
@@ -433,23 +434,20 @@ const hiddenCount = (col: number) =>
     (bar) => bar.lane >= visibleLanes.value,
   ).length
 /**
- * The air above the first lane and below the last thing in the row: the lanes'
- * own gap, so the row is padded by the same measure that separates what is in
- * it.
- *
- * The same on both edges, which it was not — a lane's pitch carries its gap
- * below it and the row then added more, so the band sat tight at the top and
- * loose at the bottom, reading as misaligned rather than as padded.
+ * The row's height: its lanes at their pitch, the lane a "+n more" button
+ * stands in where the row is folded, and the air below the last of them — the
+ * lanes' own gap, so the row is padded by the same measure that separates what
+ * is in it, and the same on both edges. A lane's pitch carries its gap below
+ * it; the row once added more, and the band sat tight at the top and loose at
+ * the bottom.
  */
-const ROW_PAD = ALL_DAY_LANE_GAP
-
 const allDayHeight = computed(
   () =>
     visibleLanes.value * lanePitch.value +
     (visibleLanes.value < allDayRow.value.laneCount
-      ? ALL_DAY_LANE_GAP + laneHeight.value
+      ? laneGap.value + laneHeight.value
       : 0) +
-    ROW_PAD,
+    laneGap.value,
 )
 
 const now = useNow()

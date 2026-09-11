@@ -223,9 +223,10 @@ import {
   EVENT_HEIGHT_THRESHOLD,
 } from './calendarUtils'
 import {
-  ALL_DAY_LANE_GAP,
-  COLUMN_INSET,
+  COLUMN_RULE,
+  PILL_INSET,
   PILL_MARGIN,
+  weekLaneGap,
   weekLaneHeight,
   weekLanePitch,
   isAllDayLike,
@@ -340,12 +341,13 @@ const placedToTime = () =>
  * pixel inside the inset and gives the whole of it up twice over: the pill's
  * own edges then land on the inset, left and right.
  *
- * The view's number, or the 3px a wide column keeps — the inset plus the pill's
- * own margin. A phone reads the week, the day and the month as one grid, and 3
- * against the month's 2 is a difference it can see without being able to name.
+ * The view's number, or the standard gap. A bar laid against the column boundary
+ * asks for the rule's own pixel back on its right, so that the white either side
+ * of a divider is the same width — see `COLUMN_RULE`.
  */
-const pillInset = computed(() => props.inset ?? COLUMN_INSET + PILL_MARGIN)
+const pillInset = computed(() => props.inset ?? PILL_INSET)
 const wrapperInset = computed(() => pillInset.value - PILL_MARGIN)
+
 
 const containerStyle = computed<CSSProperties>(() => {
   if (props.bar) {
@@ -353,8 +355,8 @@ const containerStyle = computed<CSSProperties>(() => {
     return {
       position: 'absolute',
       left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
-      width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2}px)`,
-      top: `${ALL_DAY_LANE_GAP + props.bar.lane * weekLanePitch(props.narrow)}px`,
+      width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2 + COLUMN_RULE}px)`,
+      top: `${weekLaneGap(props.narrow) + props.bar.lane * weekLanePitch(props.narrow)}px`,
       height: `${weekLaneHeight(props.narrow)}px`,
       transform: `translate(${state.xAxis}px, 0)`,
       zIndex: isRepositioning.value ? 100 : 1,
@@ -383,12 +385,14 @@ const containerStyle = computed<CSSProperties>(() => {
   )
   const hallNumber = calendarEvent.value.hallNumber || 0
 
-  // Inset by the same 2px an all-day bar is, so the two read off one left
+  // Inset by the same measure an all-day bar is, so the two read off one left
   // edge: the all-day pill above and the events under it are the same day's,
   // and a reader sees where the day starts once. The inset comes off the width
   // so only the left edge moves; the right is where the column's own air
-  // begins. It holds through a drag as well — a pill that shifts 2px the
-  // moment it is picked up reads as a nudge the reader did not make.
+  // begins, at 93%, which is where the cascade of overlapping pills is read
+  // from — each pill laid over another starts a fifth of the column further
+  // in. It holds through a drag as well — a pill that shifts on being picked
+  // up reads as a nudge the reader did not make.
   const width =
     isResizing.value || isRepositioning.value
       ? `calc(100% - ${pillInset.value}px)`
@@ -470,21 +474,22 @@ const isNarrow = computed(() => !!width.value && width.value < NARROW_PILL)
 /**
  * What a pill keeps between its edge and its text.
  *
- * 4px above and below on the day's all-day pill, against the 5 a timed one
- * takes: 5 and a 20px line come to 30, which is two past the lane the pill is
- * laid in. A bar takes the same 4, its lane being the day's own, and 2 in a
- * narrow week, whose lane is 20 and whose title is set at 16. The padding is
- * what holds the colour bar off the pill's top and bottom edges — `h-full` is
+ * 4px across, on every pill in either view. The two were 5 on a timed pill and 6
+ * on an all-day one, which put their titles a pixel apart in a column where the
+ * all-day row sits directly over the hours — everything else about the two edges
+ * is the same, the inset, the colour bar and the air beside it, so that pixel
+ * was the whole of the misalignment.
+ *
+ * 4px above and below as well, where the pill's height is its own: a 20px line
+ * in the 28px lane the day's all-day pills and the week's bars are laid in. Two
+ * in a narrow week, whose lane is 20 and whose title is set at 16. That padding
+ * is what holds the colour bar off the pill's top and bottom edges — `h-full` is
  * the height it is given, and given the whole pill it ran edge to edge and read
  * as a rule drawn through the row.
- *
- * A tight pill gives a pixel back on each side, which is a character of title on
- * a pill that has room for four.
  */
-const padClass = computed(() => {
-  if (!isAllDay.value) return isTight.value ? 'p-1' : 'p-[5px]'
-  return isTight.value ? 'px-1 py-0.5' : 'px-1.5 py-1'
-})
+const padClass = computed(() =>
+  isAllDay.value ? (isTight.value ? 'px-1 py-0.5' : 'p-1') : 'p-1',
+)
 
 /**
  * Drawn where there is no room for everything a pill can say: a week at phone

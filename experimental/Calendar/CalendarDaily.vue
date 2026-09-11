@@ -52,10 +52,9 @@
            own inset and so twice that from the bar in the next day, and this
            lane is that row with one day in it. The pills carry a further 1px
            either side of their own, so the lane's padding is the inset less
-           that pixel — 2px on a phone, where the whole grid insets by 2, and 3
-           where a column has the room for it. It was 6px round and 6px between
-           — a day whose all-day pills started further in than the week's did,
-           on the same rule, in the same box.
+           that pixel. It was 6px round and 6px between — a day whose all-day
+           pills started further in than the week's did, on the same rule, in
+           the same box.
 
            While it is being measured it keeps wrapping and is clipped to one row
            instead — 40px, a pill's 24px minimum and the lane's own padding. A
@@ -204,7 +203,6 @@ import {
   watch,
 } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Button } from '#components/Button'
 import {
   parseDate,
@@ -212,7 +210,7 @@ import {
   twentyFourHoursFormat,
 } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
-import { COLUMN_INSET, PILL_MARGIN, eventDays } from './eventSpan'
+import { PILL_INSET, PILL_MARGIN, eventDays } from './eventSpan'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
   CALENDAR_ACTIONS_KEY,
@@ -234,25 +232,11 @@ const allDayEvents = computed(
 const gridRef = ref<HTMLElement | null>(null)
 
 /**
- * How far inside the day its pills are drawn.
- *
- * 4px on a phone — the inset a month cell keeps where it has room, which is
- * what the day has at every size: its column is the whole page, so where the
- * week's narrow columns come down to 2 to buy a character of title, the day
- * spends the same 4 the desktop's month does and reads as the roomiest of the
- * three. 3px otherwise, which is the inset the grid lays out on plus the margin
- * a pill carries.
- *
- * By the screen and not by the column: the day's column is the width of the
- * page at every size, so there is nothing in it to measure. The Month grid
- * chooses its dense rows the same way, at the same breakpoint.
+ * How far inside the day its pills are drawn: the standard gap, at every size.
+ * The day's column is the width of the page whatever the screen is, so it never
+ * has the reason a narrow week has to come down from it.
  */
-const PHONE_INSET = 4
-
-const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
-const pillInset = computed(() =>
-  isNarrow.value ? PHONE_INSET : COLUMN_INSET + PILL_MARGIN,
-)
+const pillInset = PILL_INSET
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
