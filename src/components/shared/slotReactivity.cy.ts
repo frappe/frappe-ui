@@ -359,4 +359,40 @@ describe('slot-derived computeds follow the slots', () => {
     cy.get('[data-cy="toggle"]').click()
     cy.get('[data-cy="mark"]').should('not.exist')
   })
+
+  it('Pill does not reserve space for a conditional empty suffix', () => {
+    const Harness = defineComponent({
+      setup() {
+        const show = ref(false)
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              Pill,
+              { label: 'Discussions' },
+              {
+                suffix: () =>
+                  show.value ? h('span', { 'data-cy': 'count' }, '2') : null,
+              },
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('[data-slot="tab-suffix"]')
+      .should('have.class', 'empty:hidden')
+      .and('not.be.visible')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('[data-slot="tab-suffix"]').should('be.visible')
+    cy.get('[data-cy="count"]').should('have.text', '2')
+  })
 })

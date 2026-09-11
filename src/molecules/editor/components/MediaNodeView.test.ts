@@ -158,6 +158,36 @@ describe('media node view in read mode', () => {
   })
 })
 
+describe('media node view native video fullscreen', () => {
+  it('hides editing chrome without restyling the inline container', async () => {
+    const ctx = mount(
+      '<p><video src="/files/clip.mp4" data-caption="Release demo"></video></p>',
+    )
+    await settle()
+
+    const video = ctx.root.querySelector('video') as HTMLVideoElement
+    const container = video.closest(
+      '[data-video-fullscreen-root]',
+    ) as HTMLElement
+    expect(captionInputs(ctx.root)).toHaveLength(1)
+
+    video.dispatchEvent(new Event('webkitbeginfullscreen'))
+    await settle()
+
+    expect(captionInputs(ctx.root)).toHaveLength(0)
+    expect(container.classList).not.toContain('bg-black')
+    expect(video.classList).toContain('rounded-4')
+    expect(video.classList).not.toContain('rounded-none')
+    expect(video.classList).not.toContain('size-full')
+
+    video.dispatchEvent(new Event('webkitendfullscreen'))
+    await settle()
+    expect(captionInputs(ctx.root)).toHaveLength(1)
+
+    ctx.app.unmount()
+  })
+})
+
 describe('media node view reuse', () => {
   it('does not carry a caption over to the next image', async () => {
     const ctx = mount(
