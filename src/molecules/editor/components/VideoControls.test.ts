@@ -30,6 +30,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  Reflect.deleteProperty(document, 'fullscreenEnabled')
 })
 
 /** Run one animation frame, the way the browser would. */
@@ -41,12 +42,16 @@ async function paint() {
 
 function mount(
   videoEl: HTMLVideoElement,
-  onFullscreenChange?: (fullscreen: boolean) => void,
+  onUpdateFullscreen?: (fullscreen: boolean) => void,
 ) {
   const root = document.createElement('div')
   document.body.appendChild(root)
   const app = createApp({
-    render: () => h(VideoControls, { videoEl, onFullscreenChange }),
+    render: () =>
+      h(VideoControls, {
+        videoEl,
+        'onUpdate:fullscreen': onUpdateFullscreen,
+      }),
   })
   app.mount(root)
   return {
@@ -170,7 +175,6 @@ describe('VideoControls fullscreen', () => {
     expect(video.webkitEnterFullscreen).toHaveBeenCalledOnce()
     ctx.unmount()
     wrapper.remove()
-    Reflect.deleteProperty(document, 'fullscreenEnabled')
   })
 
   it('handles a rejected standard fullscreen request', async () => {
@@ -192,14 +196,14 @@ describe('VideoControls fullscreen', () => {
 
   it('reports native WebKit fullscreen transitions', () => {
     const video = fakeVideo()
-    const onFullscreenChange = vi.fn()
-    const ctx = mount(video, onFullscreenChange)
+    const onUpdateFullscreen = vi.fn()
+    const ctx = mount(video, onUpdateFullscreen)
 
     video.dispatchEvent(new Event('webkitbeginfullscreen'))
     video.dispatchEvent(new Event('webkitendfullscreen'))
 
-    expect(onFullscreenChange).toHaveBeenNthCalledWith(1, true)
-    expect(onFullscreenChange).toHaveBeenNthCalledWith(2, false)
+    expect(onUpdateFullscreen).toHaveBeenNthCalledWith(1, true)
+    expect(onUpdateFullscreen).toHaveBeenNthCalledWith(2, false)
     ctx.unmount()
   })
 })

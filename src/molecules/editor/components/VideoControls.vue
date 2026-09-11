@@ -35,16 +35,14 @@ const props = defineProps<{
   videoEl: HTMLVideoElement | null
   /** Hidden entirely while true (e.g. during a resize drag). */
   hidden?: boolean
-  /**
-   * The media is the fullscreen element: the row spans the screen instead of a
-   * media box, so it drops the rounded corner and takes more breathing room.
-   */
-  fullscreen?: boolean
 }>()
 
-const emit = defineEmits<{
-  'fullscreen-change': [fullscreen: boolean]
-}>()
+/**
+ * Whether this video is fullscreen through either browser API. The node view
+ * writes standard Fullscreen API changes; WebKit native-player events write
+ * their changes here.
+ */
+const fullscreen = defineModel<boolean>('fullscreen', { default: false })
 
 type WebKitVideoElement = HTMLVideoElement & {
   readonly webkitSupportsFullscreen?: boolean
@@ -110,13 +108,13 @@ function bind(el: HTMLVideoElement) {
   on('volumechange', () => (muted.value = el.muted))
   // iPhone presents video through its native fullscreen player rather than
   // the standard Fullscreen API, so `document.fullscreenElement` never moves.
-  // Pass those transitions back to the node view to keep its editing chrome
-  // and control state in sync with either fullscreen implementation.
-  on('webkitbeginfullscreen', () => emit('fullscreen-change', true))
-  on('webkitendfullscreen', () => emit('fullscreen-change', false))
+  // Write those transitions through the shared fullscreen model to keep the
+  // node view's editing chrome in sync with either implementation.
+  on('webkitbeginfullscreen', () => (fullscreen.value = true))
+  on('webkitendfullscreen', () => (fullscreen.value = false))
 
   if ((el as WebKitVideoElement).webkitDisplayingFullscreen) {
-    emit('fullscreen-change', true)
+    fullscreen.value = true
   }
 }
 
