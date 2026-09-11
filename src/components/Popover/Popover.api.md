@@ -53,6 +53,26 @@
     default: 'true'
   },
   {
+    name: 'autoFocus',
+    description: 'Whether the content takes focus when it opens. Set to `false` when typing\nin the trigger drives the panel, so the caret stays in the input.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'trigger',
+    description: 'What opens the popover. `click` toggles it from the trigger element.\n`manual` does nothing on click; only `v-model:open` opens and closes it.\nIn `manual` mode the trigger gets no `aria-expanded` or `aria-controls`.\nDefault: `click`.',
+    required: false,
+    type: '"click" | "manual"',
+    default: '"click"'
+  },
+  {
+    name: 'reference',
+    description: 'Element to position the content against, instead of the trigger. Use it\nwhen the trigger is a labelled field, so the panel sits under the input row\nrather than under the description.',
+    required: false,
+    type: 'Element'
+  },
+  {
     name: 'matchTriggerWidth',
     description: 'Whether the content\'s min-width matches the trigger width.',
     required: false,
@@ -95,14 +115,14 @@
     type: '[]'
   },
   {
-    name: 'update:open',
-    description: 'Fired when the open state changes.',
-    type: '[value: boolean]'
-  },
-  {
     name: 'close',
     description: 'Fired when the component closes.',
     type: '[]'
+  },
+  {
+    name: 'update:open',
+    description: 'Fired when the open state changes.',
+    type: '[value: boolean]'
   }
 ]
 </script>
