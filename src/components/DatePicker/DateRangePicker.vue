@@ -20,7 +20,6 @@
     :disabled="props.disabled"
     :readonly="inputReadonly"
     :display-label="displayLabel"
-    content-class="w-fit"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
@@ -33,7 +32,7 @@
 
     <template #default="{ close }">
       <div
-        class="flex"
+        class="flex w-fit"
         :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
         <aside

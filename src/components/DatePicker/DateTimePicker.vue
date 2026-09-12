@@ -20,7 +20,6 @@
     :disabled="props.disabled"
     :readonly="inputReadonly"
     :display-label="displayLabel"
-    :content-class="contentClass"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
@@ -34,7 +33,7 @@
     <template #default="{ close }">
       <div
         class="flex"
-        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
+        :class="$slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'"
       >
         <aside
           v-if="$slots.actions"
@@ -94,7 +93,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
@@ -128,11 +126,6 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
 const emit = defineEmits<DateTimePickerEmits>()
 
 defineSlots<DateTimePickerSlots>()
-const slots = useReactiveSlots<DateTimePickerSlots>()
-
-// Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
-// PopoverPanel inside PickerShell.
-const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
 
 // ── Popover open state ───────────────────────────────────────────────────────
 

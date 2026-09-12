@@ -1,13 +1,21 @@
 <template>
-  <PopoverRoot v-model:open="open">
-    <PopoverAnchor :reference="anchorEl" as-child>
+  <Popover
+    v-model:open="open"
+    trigger="manual"
+    :auto-focus="false"
+    bare
+    :side="side"
+    :align="align"
+    :offset="offset"
+    :reference="anchorEl"
+  >
+    <template #trigger>
       <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <TextInput
             ref="textInputRef"
             v-model="inputValue"
             type="text"
-            :class="inputClass"
             :id="id"
             :label="label"
             :description="description"
@@ -37,84 +45,35 @@
           </TextInput>
         </slot>
       </div>
-    </PopoverAnchor>
-    <PopoverPortal :to="portalTarget">
-      <PopoverContent
-        data-slot="content"
-        class="z-[100]"
-        :side="side"
-        :align="align"
-        :side-offset="offset"
-        @open-auto-focus.prevent
-        @interact-outside="onInteractOutside"
-      >
-        <PopoverPanel ref="popoverPanelRef" :class="contentClass">
-          <slot :close="closePopover" />
-        </PopoverPanel>
-      </PopoverContent>
-    </PopoverPortal>
-  </PopoverRoot>
+    </template>
+
+    <PopoverPanel ref="popoverPanelRef">
+      <slot :close="closePopover" />
+    </PopoverPanel>
+  </Popover>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import {
-  PopoverAnchor,
-  PopoverContent,
-  PopoverPortal,
-  PopoverRoot,
-} from 'reka-ui'
+import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import PopoverPanel from '../popover/PopoverPanel.vue'
-import { usePortalTarget } from '../../../composables/usePortalTarget'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
-import type { InputSize, InputVariant } from '../../../composables/inputTypes'
-import type { FrappeUIError } from '../../../composables/useInputLabeling'
+import type {
+  PickerShellProps,
+  PickerShellSlots,
+  PickerShellTriggerSlotProps,
+} from './types'
 
-interface Props {
-  // Positioning — already resolved by caller from side/align/placement.
-  side: 'top' | 'right' | 'bottom' | 'left'
-  align: 'start' | 'center' | 'end'
-  offset: number
-
-  // Behaviour
-  openOnFocus?: boolean
-  openOnClick?: boolean
-
-  // TextInput pass-through
-  id?: string
-  label?: string
-  description?: string
-  error?: string | FrappeUIError
-  required?: boolean
-  size?: InputSize
-  variant?: InputVariant
-  placeholder?: string
-  disabled?: boolean
-  readonly?: boolean
-  inputClass?: string | Array<string> | Record<string, boolean>
-
-  // Display label exposed via trigger slot props for caller-rendered triggers.
-  displayLabel?: string
-
-  // Extra Tailwind classes (layout/sizing such as `w-56`/`w-fit`) merged onto
-  // the `PopoverPanel` shell. The elevated shell itself (rounded/bg/shadow/ring)
-  // is owned by `PopoverPanel`, so callers no longer pass those here.
-  contentClass?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<PickerShellProps>(), {
   openOnFocus: false,
   openOnClick: true,
   required: false,
   disabled: false,
   readonly: false,
   displayLabel: '',
-  contentClass: '',
 })
-
-const portalTarget = usePortalTarget()
 
 const emit = defineEmits<{
   (e: 'focus'): void
@@ -132,13 +91,8 @@ const emit = defineEmits<{
   (e: 'requestFocus'): void
 }>()
 
-const declaredSlots = defineSlots<{
-  trigger?: (props: TriggerSlotProps) => any
-  prefix?: (props: TriggerSlotProps) => any
-  suffix?: (props: TriggerSlotProps) => any
-  default?: (props: { close: () => void }) => any
-}>()
-const slots = useReactiveSlots<typeof declaredSlots>()
+defineSlots<PickerShellSlots>()
+const slots = useReactiveSlots<PickerShellSlots>()
 
 defineOptions({ inheritAttrs: false })
 
@@ -146,17 +100,6 @@ const open = defineModel<boolean>('open', { default: false })
 const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
 
-interface TriggerSlotProps {
-  /** Flips the popover open state, or sets it when passed a boolean. */
-  toggle: (flag?: boolean | Event) => void
-  /** Whether the popover is currently open. */
-  open: boolean
-  displayLabel: string
-  inputValue: string
-}
-
-// Anchor the popover at the input element itself (not the labeling wrapper),
-// so it sits below the input rather than below the description text.
 const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 
@@ -165,6 +108,9 @@ const popoverPanelRef = ref<{ $el: HTMLElement } | null>(null)
 // focus; click-outside should not).
 const panelEl = computed(() => popoverPanelRef.value?.$el ?? null)
 
+// Anchor the popover at the input element itself, not the labeling wrapper
+// `Popover` would otherwise measure, so it sits below the input rather than
+// below the description text.
 const anchorEl = computed(() => {
   if (slots.trigger) return undefined
   return textInputRef.value?.inputElement ?? undefined
@@ -180,19 +126,6 @@ function toggle(flag?: boolean | Event) {
 
 function closePopover() {
   open.value = false
-}
-
-// Reka treats anything outside `PopoverContent` as "outside" — including our
-// own trigger — so a click on the input fires interact-outside and closes
-// the popover, then the click handler reopens it. Suppress the close when
-// the pointerdown originated inside the input's row (which holds the input
-// and any suffix like the chevron); those elements have their own logic.
-function onInteractOutside(event: Event) {
-  const target = event.target as Node | null
-  const triggerRow = textInputRef.value?.inputElement?.parentElement
-  if (target && triggerRow?.contains(target)) {
-    event.preventDefault()
-  }
 }
 
 function onFocus() {
@@ -225,7 +158,7 @@ function onArrowDown() {
   emit('requestFocus')
 }
 
-const triggerSlotProps = computed<TriggerSlotProps>(() => ({
+const triggerSlotProps = computed<PickerShellTriggerSlotProps>(() => ({
   toggle,
   open: open.value,
   displayLabel: props.displayLabel,
