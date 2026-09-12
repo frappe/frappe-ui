@@ -21,7 +21,13 @@
           {{ subtitle }}
         </div>
       </div>
-      <div v-if="$slots.actions" class="shrink-0">
+      <!-- `1lh` is one line of this element's text. The line-height is set
+           explicitly to the title's (14px × 1.5) instead of via `text-p-base`,
+           so the slot does not inherit a font-size. -->
+      <div
+        v-if="$slots.actions"
+        class="flex h-[1lh] shrink-0 items-center leading-[21px]"
+      >
         <slot name="actions" />
       </div>
     </div>

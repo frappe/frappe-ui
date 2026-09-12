@@ -35,12 +35,35 @@ export * from './experimental/Charts'
 // rebuilt here as seven composable parts. Unstable: the parts stay here until
 // gameplan, helpdesk and this repo's docs site all run on them.
 export * from './experimental/CommandPalette'
+// Date calendars. `DateCalendar` and `DateRangeCalendar` are the calendars
+// inside the date pickers, as standalone components. Incubating while their
+// props and events settle.
+export { default as DateCalendar } from './src/components/DatePicker/DateCalendar.vue'
+export { default as DateRangeCalendar } from './src/components/DatePicker/DateRangeCalendar.vue'
+export type {
+  DateCalendarProps,
+  DateCalendarEmits,
+  DateCalendarExposed,
+  DateRangeCalendarProps,
+  DateRangeCalendarEmits,
+  DateRangeCalendarExposed,
+} from './src/components/DatePicker/calendarTypes'
 // ListView family. Moved out of root (#985) — `frappe-ui/list` is
 // composition-based by design (P3) and doesn't replicate ListView's
 // config-driven columns (resizable widths, per-column getLabel/prefix
 // functions, tooltips, disabled-row exclusion, the select banner), so this
 // stays here, unstable, until `frappe-ui/list` reaches parity.
 export * from './experimental/ListView'
+// PickerShell. The input half of the date pickers: a `TextInput`, a manual
+// `Popover` and the focus wiring between them. Incubating while its props and
+// slots settle.
+export { default as PickerShell } from './src/components/shared/picker/PickerShell.vue'
+export type {
+  PickerShellProps,
+  PickerShellTriggerSlotProps,
+  PickerShellSlots,
+  PickerShellExposed,
+} from './src/components/shared/picker/types'
 // v0 TextEditor family. Moved out of root (#974) — `frappe-ui/editor` is the
 // composition-based replacement. Parked here (#1007), unstable, as an interim
 // import path while apps migrate. Deletion stays human-gated (spec/editor.md

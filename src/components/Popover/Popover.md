@@ -25,8 +25,8 @@ within the viewport (`collisionPadding` controls the gap kept from the edge).
 ## Controlled open state
 
 Bind `v-model:open` to drive the panel from outside, or read it to react to open
-/ close. The component also exposes `open()` and `close()` methods via a
-template ref, and emits `open` / `close` events.
+/ close. A template ref exposes `open()`, `close()` and `contentEl`, the content
+element (`null` while closed). The component emits `open` / `close` events.
 
 <ComponentPreview name="Popover-Controlled" />
 
@@ -45,6 +45,13 @@ Handy for select-style menus where the panel should line up under a wide button.
 
 <ComponentPreview name="Popover-MatchTriggerWidth" />
 
+## Reference element
+
+By default the content is positioned against the trigger element. Pass
+`reference` to position it against another element. This is for a trigger that
+is a labelled field: pass the input row, and the panel sits under the input
+rather than under the description. It works in both trigger modes.
+
 ## Bare
 
 Set `bare` to drop the panel shell (background, border, shadow, rounding) so
@@ -59,6 +66,18 @@ Set `arrow` to render a small arrow that points back at the trigger. It's styled
 to match the panel surface.
 
 <ComponentPreview name="Popover-Arrow" />
+
+## Typing-driven panels
+
+Two props stop a panel from fighting the input that drives it.
+`trigger="manual"` turns off toggling: a click on the input only places the
+caret, and `v-model:open` alone opens and closes the panel.
+`:auto-focus="false"` keeps focus in the input when the panel opens.
+
+<ComponentPreview name="Popover-Typeahead" />
+
+`manual` also removes the `aria-expanded` and `aria-controls` wiring. Add the
+combobox pattern yourself, or use [`Combobox`](./combobox), which has it.
 
 ## Styling
 
@@ -94,7 +113,7 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
 - Use `#trigger` + `#default` for the standard click popover. Both slots get
   `{ open, close }`.
 - Reach for `v-model:open` only when an external control needs to drive the
-  panel — clicking the trigger already toggles it.
+  panel. Clicking the trigger already toggles it, unless `trigger="manual"`.
 - For a panel that opens on hover (profile previews, link previews), use the
   dedicated [`HoverCard`](./hovercard) component instead of a popover.
 - Attributes on `<Popover>` are not inherited — the component renders no element
