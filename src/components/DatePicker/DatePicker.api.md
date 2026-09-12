@@ -194,6 +194,54 @@
   }
 ]
 
+  const dateCalendarProps = [
+  {
+    name: 'min',
+    description: 'Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard\nnavigation and the year list.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'max',
+    description: 'Latest selectable date in `YYYY-MM-DD` format. Also bounds keyboard\nnavigation and the year list.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'isDateUnavailable',
+    description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
+    required: false,
+    type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'todayLabel',
+    description: 'Label for the action that selects today. Empty hides the button. Default: `Today`.',
+    required: false,
+    type: 'string',
+    default: '"Today"'
+  },
+  {
+    name: 'modelValue',
+    description: 'Selected date in `YYYY-MM-DD` format, or `\'\'` when nothing is selected.',
+    required: false,
+    type: 'string',
+    default: '""'
+  }
+]
+
+  const dateCalendarEmits = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: string]'
+  },
+  {
+    name: 'today',
+    description: 'Fired when the today button is pressed, before today\'s date is committed.',
+    type: '[]'
+  }
+]
+
   const dateRangePickerProps = [
   {
     name: 'side',
@@ -598,6 +646,12 @@
 <SlotsTable :data="datePickerSlots"/>
 
 <EmitsTable :data="datePickerEmits"/>
+
+### DateCalendar
+
+<PropsTable folder="DatePicker" name="DateCalendar" :data="dateCalendarProps"/>
+
+<EmitsTable :data="dateCalendarEmits"/>
 
 ### DateRangePicker
 

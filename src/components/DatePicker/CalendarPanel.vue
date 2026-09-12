@@ -204,56 +204,9 @@ import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { months } from './utils'
-import type { DatePickerViewMode as ViewMode } from './types'
+import type { CalendarPanelCell, CalendarPanelProps } from './types'
 
-export interface CalendarPanelCell {
-  date: Dayjs
-  key: string
-  inMonth: boolean
-  isToday: boolean
-  isSelected: boolean
-  isUnavailable: boolean
-  isRangeStart?: boolean
-  isRangeEnd?: boolean
-  inRange?: boolean
-}
-
-interface Props {
-  view: ViewMode
-  currentYear: number
-  currentMonth: number
-  weeks: CalendarPanelCell[][]
-  /** Label for the optional Today/Now action button between prev/next. Empty/undefined hides it. */
-  todayLabel?: string
-  /** Hide the prev nav button — used in dual-pane right side. */
-  hidePrev?: boolean
-  /** Hide the next nav button — used in dual-pane left side. */
-  hideNext?: boolean
-  /** Hide the Today/Now button — used in dual-pane to avoid duplicates. */
-  hideToday?: boolean
-  /** Render out-of-month cells as empty placeholders — used in dual-pane to avoid showing the same date in both panes. */
-  hideOutOfMonth?: boolean
-  /**
-   * Render a slim header with prev/next flanking a centered, non-clickable
-   * month label. Used in dual-pane so the two panels read as
-   * `< First Month | Second Month >`.
-   */
-  centerHeader?: boolean
-  /** Earliest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
-  min?: string
-  /** Latest selectable date in YYYY-MM-DD format. Used to bound keyboard nav. */
-  max?: string
-  /**
-   * The date that currently holds the roving tabindex. Controlled — parent
-   * owns the state, panel emits `update:focusedDate` when arrow keys land on
-   * a new cell. Multiple panels (e.g. dual-pane DateRangePicker) can share
-   * the same value; each panel only renders `tabindex=0` if the date falls
-   * inside its own visible weeks.
-   */
-  focusedDate?: Dayjs | null
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<CalendarPanelProps>(), {
   todayLabel: '',
   hidePrev: false,
   hideNext: false,

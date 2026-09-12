@@ -53,24 +53,15 @@
           />
         </aside>
         <div class="flex flex-col">
-          <CalendarPanel
-            ref="panelRef"
-            :view="view"
-            :current-year="currentYear"
-            :current-month="currentMonth"
-            :weeks="weeks"
+          <DateCalendar
+            ref="calendarRef"
+            :model-value="selectedDate"
             today-label="Now"
             :min="resolvedMin"
             :max="resolvedMax"
-            v-model:focused-date="focusedDate"
-            @prev="prev"
-            @next="next"
+            :is-date-unavailable="props.isDateUnavailable"
+            @update:model-value="handleDateCellClick"
             @today="handleNowClick"
-            @cycle-view="cycleView"
-            @select-month="selectMonth"
-            @select-year="selectYear"
-            @select-date="handleDateCellClick"
-            @navigate="onPanelNavigate"
           />
           <div class="flex flex-col gap-2 p-2 pt-0">
             <TimePicker
@@ -95,11 +86,9 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
-import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import DateCalendar from './DateCalendar.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
-  useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
   useTypeable,
@@ -147,51 +136,25 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
-  seedFocusedDate()
 }
 
 function onShellClose() {
-  resetView()
   if (isTyping.value) {
     commitInput()
     isTyping.value = false
   }
-  focusedDate.value = null
 }
 
 defineExpose({
   open: () => shellRef.value?.open(),
 })
 
-const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const calendarRef = ref<{ focus: () => void } | null>(null)
 const timePickerRef = ref<{ focus: () => void } | null>(null)
-const focusedDate = ref<Dayjs | null>(null)
-
-function seedFocusedDate() {
-  if (focusedDate.value) return
-  if (selectedDate.value) {
-    const d = dayjs(selectedDate.value)
-    if (!checkUnavailable(d)) {
-      focusedDate.value = d
-      return
-    }
-  }
-  const today = dayjsLocal()
-  if (!checkUnavailable(today)) {
-    focusedDate.value = today
-    return
-  }
-  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
-  if (first) focusedDate.value = first.date
-}
 
 function onShellRequestFocus() {
-  seedFocusedDate()
-  nextTick(() => panelRef.value?.focusInitialCell())
-}
-
-function onPanelNavigate(target: Dayjs) {
-  focusOn(target)
+  // The calendar only mounts with the popover, so wait a tick for it.
+  nextTick(() => calendarRef.value?.focus())
 }
 
 // ── Positioning / keepOpen ────────────────────────────────────────────────────
@@ -203,24 +166,14 @@ const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
 
-const {
-  view,
-  currentYear,
-  currentMonth,
-  prev,
-  next,
-  cycleView,
-  selectMonth,
-  selectYear,
-  focusOn,
-  resetView,
-} = useCalendarView()
-
 const DATE_FORMAT = 'YYYY-MM-DD'
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 
 const selectedDate = ref<string>('')
 const timeValue = ref<string>('')
+
+/** The next date commit closes the popover. Set by Now, cleared on use. */
+const closeAfterCommit = ref(false)
 
 const initialValue = ref(props.modelValue || '')
 
@@ -254,7 +207,6 @@ function syncFromValue(val?: string): void {
   if (!val) {
     if (!props.clearable) {
       const now = dayjsLocal()
-      focusOn(now)
       selectedDate.value = now.format(DATE_FORMAT)
       timeValue.value = now.format('HH:mm:ss')
     } else {
@@ -269,7 +221,6 @@ function syncFromValue(val?: string): void {
     timeValue.value = ''
     return
   }
-  focusOn(d)
   selectedDate.value = d.format(DATE_FORMAT)
   timeValue.value = d.format('HH:mm:ss')
 }
@@ -308,18 +259,6 @@ const isTyping = ref(false)
 watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
-
-// ── Calendar grid ────────────────────────────────────────────────────────────
-
-const weeks = computed<CalendarPanelCell[][]>(() =>
-  generateWeeks(currentYear.value, currentMonth.value, selectedDate.value).map(
-    (week) =>
-      week.map((d) => ({
-        ...d,
-        isUnavailable: checkUnavailable(d.date),
-      })),
-  ),
-)
 
 const computedMinTime = computed<string>(() => {
   if (!minDT.value || !selectedDate.value) return ''
@@ -374,18 +313,21 @@ function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
   if (!d.isValid() || checkUnavailable(d)) return
   selectedDate.value = d.format(DATE_FORMAT)
-  focusOn(d)
 }
 
 function handleDateCellClick(date: string | Date | Dayjs) {
   selectDate(date)
   emitChange()
-  // Keep the popover open — DateTimePicker is a two-step selection (date
-  // then time). Auto-close on date alone strands the embedded TimePicker.
   isTyping.value = false
-  resetView()
-  // Move keyboard focus to the time input so the user can immediately
-  // continue with the time. Harmless for mouse users.
+  if (closeAfterCommit.value) {
+    closeAfterCommit.value = false
+    if (!shouldKeepOpen.value) isOpen.value = false
+    return
+  }
+  // Otherwise keep the popover open — DateTimePicker is a two-step selection
+  // (date then time), and auto-close on date alone strands the embedded
+  // TimePicker. Move keyboard focus there so the user can continue with the
+  // time. Harmless for mouse users.
   nextTick(() => timePickerRef.value?.focus?.())
 }
 
@@ -423,19 +365,17 @@ function clearSelection() {
   inputValue.value = ''
 }
 
+// Now fires before the calendar commits today's date. Stamping the time here
+// lets the one commit that follows carry date and time together, instead of
+// emitting once for the date and again for the time.
 function handleNowClick() {
-  const now = dayjsLocal()
-  selectDate(now)
-  timeValue.value = now.format('HH:mm:ss')
-  emitChange()
-  if (!shouldKeepOpen.value) isOpen.value = false
-  isTyping.value = false
+  timeValue.value = dayjsLocal().format('HH:mm:ss')
+  closeAfterCommit.value = true
 }
 
 function handleClearClick() {
   clearSelection()
   if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  resetView()
 }
 </script>

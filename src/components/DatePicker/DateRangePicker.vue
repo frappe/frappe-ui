@@ -110,7 +110,7 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import CalendarPanel from './CalendarPanel.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
   useCalendarView,
@@ -122,6 +122,7 @@ import {
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
 import type {
+  CalendarPanelCell,
   DateRangePickerProps,
   DateRangePickerEmits,
   DateRangePickerSlots,
