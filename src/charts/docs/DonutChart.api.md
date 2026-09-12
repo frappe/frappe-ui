@@ -61,14 +61,14 @@
   },
   {
     name: 'hiddenSeries',
-    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app. Left unbound, the\nlegend owns it. A slice is the donut\'s series.',
+    description: 'Slices the legend has switched off, by name. A slice is the donut\'s series,\nso this is the same `hiddenSeries` an axis chart takes. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app. Left unbound, the\nlegend owns it.',
     required: false,
     type: 'string[]',
     default: '[]'
   },
   {
     name: 'showDataLabels',
-    description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default: the legend says the same without the\nleader lines.',
+    description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default. The legend already names every slice and its\nshare, without the lines that tie a label back to its arc.',
     required: false,
     type: 'boolean'
   },
@@ -132,7 +132,7 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. `rows`\nis plural because a slice groups: one row for a named slice, every row\nit collapsed for the "Others" slice.',
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. `rows`\nis a list because one slice can stand for several rows: a named slice\ncarries one, and the "Others" slice carries every row it collapsed.',
     type: '{ label?: string | undefined; items: ChartTooltipItem[]; rows: Record<string, any>[]; }'
   }
 ]
@@ -140,12 +140,12 @@
   const emitsData = [
   {
     name: 'update:hiddenSeries',
-    description: 'The `v-model:hiddenSeries` half of the legend\'s visibility list.',
+    description: 'The legend switched a slice off or back on. Carries the new list.',
     type: '[value: string[]]'
   },
   {
     name: 'select',
-    description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nis `OTHERS_KEY` for the tail, which carries every row it grouped, so a\ncaller can drill into the tail as well as into a named slice.',
+    description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nidentifies the slice and `label` is what it printed. The collapsed tail is\nnamed `OTHERS_KEY` and carries every row it grouped, so a caller can drill\ninto it as well as into a named slice.',
     type: '[event: DonutSliceEvent]'
   }
 ]

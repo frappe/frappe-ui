@@ -73,7 +73,7 @@
   },
   {
     name: 'showDataLabels',
-    description: 'Prints each series\' value beside its marks. A `seriesConfig` entry of the\nsame name overrides it for one series.',
+    description: 'Prints every series\' value beside its marks. A `seriesConfig` entry\noverrides it for one series, on or off.',
     required: false,
     type: 'boolean'
   },
@@ -183,7 +183,7 @@
   const emitsData = [
   {
     name: 'update:hiddenSeries',
-    description: 'The `v-model:hiddenSeries` half of the legend\'s visibility list.',
+    description: 'The legend switched a series off or back on. Carries the new list.',
     type: '[value: string[]]'
   },
   {

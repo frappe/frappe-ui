@@ -253,6 +253,7 @@ export type DonutSliceEvent = {
   /** The slice as it reads, i.e. the category value or "Others". */
   label: string
   value: number
+  /** Share of the *visible* total, so a hidden slice changes what this reads. */
   percent: number
   /** One row, or every grouped row when the "Others" slice was clicked. */
   rows: Record<string, any>[]
@@ -415,9 +416,9 @@ export type NumberCardSparkline = {
   /** Oldest reading first. Gaps are skipped, not drawn as zero. */
   data: (number | null | undefined)[]
   /**
-   * The mark, read the way every other chart reads `type`: `'area'` for a
-   * continuous reading under a filled curve, `'line'` for the stroke alone,
-   * `'bar'` for a reading the eye counts in periods. Defaults to `'area'`.
+   * The mark, from the set every other chart's `type` takes. `'area'` draws a
+   * line over a filled curve, `'line'` the stroke alone, and `'bar'` one bar
+   * per reading. Defaults to `'area'`.
    */
   type?: ChartMark
   /** Overrides the sequential-palette blue the sparkline is drawn in. */
@@ -584,7 +585,10 @@ export type ChartTooltipItem = {
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
-  /** `'series'` is a reading off the plot; `'column'` is a `tooltipColumns` entry. */
+  /**
+   * `'series'` is a value the plot draws. `'column'` is a `tooltipColumns`
+   * entry, which the plot does not draw.
+   */
   kind: 'series' | 'column'
 }
 
@@ -751,8 +755,8 @@ export type AxisChartProps = ChartBaseProps & {
   /** Keyed by series identity: a `y` column, or a value of the `series` column. */
   seriesConfig?: Record<string, SeriesStyle>
   /**
-   * Prints each series' value beside its marks. A `seriesConfig` entry of the
-   * same name overrides it for one series.
+   * Prints every series' value beside its marks. A `seriesConfig` entry
+   * overrides it for one series, on or off.
    */
   showDataLabels?: boolean
   /**
@@ -821,15 +825,16 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
-   * Slices the legend has switched off, by name. Bind it with
+   * Slices the legend has switched off, by name. A slice is the donut's series,
+   * so this is the same `hiddenSeries` an axis chart takes. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
-   * legend owns it. A slice is the donut's series.
+   * legend owns it.
    */
   hiddenSeries?: string[]
   /**
    * Prints each slice's name and share beside the ring, and drops the readout
-   * in the middle. Off by default: the legend says the same without the
-   * leader lines.
+   * in the middle. Off by default. The legend already names every slice and its
+   * share, without the lines that tie a label back to its arc.
    */
   showDataLabels?: boolean
   /** Caption under the total in the middle. Defaults to the `value` key. */
@@ -931,10 +936,10 @@ export type ScatterChartProps = ChartBaseProps & {
   /** Row key holding the point's own name, which heads its tooltip. */
   label?: string
   /**
-   * Prints the point's own name beside it, the way an axis series prints its
-   * value. `label` is what it prints, so a chart that names no label column has
-   * nothing to show and says so in a dev-mode warning. Names that would collide
-   * with a neighbour are dropped, so a dense cloud carries few.
+   * Prints each point's own name beside it, the way an axis series prints its
+   * value. The `label` prop names the column those come from; without it there
+   * is nothing to print, and a development build warns. A name that would
+   * collide with its neighbour is dropped, so a dense cloud carries few.
    */
   showDataLabels?: boolean
   /** The horizontal scale. Both axes are value axes: a scatter has no categories. */
@@ -1087,7 +1092,7 @@ export type ChartActionsSlot = {
 }
 
 export type AxisChartEmits = {
-  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  /** The legend switched a series off or back on. Carries the new list. */
   'update:hiddenSeries': [value: string[]]
   /**
    * A mark was selected, by click or by Enter on the keyboard cursor. Carries
@@ -1118,12 +1123,13 @@ export type AreaChartEmits = AxisChartEmits
 export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
-  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  /** The legend switched a slice off or back on. Carries the new list. */
   'update:hiddenSeries': [value: string[]]
   /**
    * A slice was selected, by click or by Enter on the keyboard cursor. `name`
-   * is `OTHERS_KEY` for the tail, which carries every row it grouped, so a
-   * caller can drill into the tail as well as into a named slice.
+   * identifies the slice and `label` is what it printed. The collapsed tail is
+   * named `OTHERS_KEY` and carries every row it grouped, so a caller can drill
+   * into it as well as into a named slice.
    */
   select: [event: DonutSliceEvent]
 }
@@ -1142,8 +1148,8 @@ export type DonutChartSlots = ChartActionsSlot &
     }) => unknown
     /**
      * Replaces the tooltip body. `items` holds the hovered slice alone. `rows`
-     * is plural because a slice groups: one row for a named slice, every row
-     * it collapsed for the "Others" slice.
+     * is a list because one slice can stand for several rows: a named slice
+     * carries one, and the "Others" slice carries every row it collapsed.
      */
     tooltip?: (props: {
       label?: string
@@ -1164,8 +1170,9 @@ export type FunnelChartEmits = {
 export type FunnelChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
-     * Replaces the tooltip body. `stage` is the extra the funnel carries: the
-     * two conversion rates the default body prints under the value.
+     * Replaces the tooltip body. `row` is the row behind the stage. `stage` is
+     * the extra the funnel carries: the two conversion rates the default body
+     * prints under the value.
      */
     tooltip?: (props: {
       label?: string
@@ -1185,7 +1192,10 @@ export type HeatmapChartEmits = {
 
 export type HeatmapChartSlots = ChartActionsSlot &
   ChartStateSlots & {
-    /** Replaces the tooltip body. `items` holds the hovered cell alone. */
+    /**
+     * Replaces the tooltip body. `items` holds the hovered cell alone, and
+     * `row` the row behind it, so a body can read a column the grid never drew.
+     */
     tooltip?: (props: {
       label?: string
       items: ChartTooltipItem[]
@@ -1216,7 +1226,7 @@ export type SankeyChartSlots = ChartActionsSlot &
   }
 
 export type ScatterChartEmits = {
-  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  /** The legend switched a group off or back on. Carries the new list. */
   'update:hiddenSeries': [value: string[]]
   /**
    * A point was selected, by click or by Enter on the keyboard cursor. Carries
@@ -1229,7 +1239,8 @@ export type ScatterChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the point's two measures, and
-     * its size when the chart draws one.
+     * its size when the chart draws one. `row` is the row behind the point, so
+     * a body can read a column the plot never drew.
      */
     tooltip?: (props: {
       label?: string

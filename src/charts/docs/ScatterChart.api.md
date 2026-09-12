@@ -80,7 +80,7 @@
   },
   {
     name: 'showDataLabels',
-    description: 'Prints the point\'s own name beside it, the way an axis series prints its\nvalue. `label` is what it prints, so a chart that names no label column has\nnothing to show and says so in a dev-mode warning. Names that would collide\nwith a neighbour are dropped, so a dense cloud carries few.',
+    description: 'Prints each point\'s own name beside it, the way an axis series prints its\nvalue. The `label` prop names the column those come from; without it there\nis nothing to print, and a development build warns. A name that would\ncollide with its neighbour is dropped, so a dense cloud carries few.',
     required: false,
     type: 'boolean'
   },
@@ -145,7 +145,7 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one.',
+    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one. `row` is the row behind the point, so\na body can read a column the plot never drew.',
     type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
   }
 ]
@@ -153,7 +153,7 @@
   const emitsData = [
   {
     name: 'update:hiddenSeries',
-    description: 'The `v-model:hiddenSeries` half of the legend\'s visibility list.',
+    description: 'The legend switched a group off or back on. Carries the new list.',
     type: '[value: string[]]'
   },
   {
