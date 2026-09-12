@@ -332,8 +332,7 @@ function animate(from: number, to: number) {
   const start = performance.now()
   // Snapped to the decimals the endpoints carry: an unrounded intermediate makes
   // the number grow and shrink digits on its way up.
-  const decimals =
-    props.precision ?? (Number.isInteger(from) && Number.isInteger(to) ? 0 : 2)
+  const decimals = Number.isInteger(from) && Number.isInteger(to) ? 0 : 2
   const factor = 10 ** decimals
 
   const step = (now: number) => {

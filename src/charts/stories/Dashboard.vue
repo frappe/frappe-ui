@@ -149,6 +149,12 @@ const ordersVsTypical = ORDERS_BY_HOUR.flatMap((counts, day) =>
   })),
 )
 
+const compact = (value: number) =>
+  new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
+
 function growth(series: number[]) {
   const [previous, latest] = series.slice(-2)
   return Math.round(((latest - previous) / previous) * 1000) / 10
@@ -159,7 +165,7 @@ const kpiCards: NumberCardProps[] = [
     title: 'Net revenue',
     value: monthlyRevenue.at(-1)!,
     prefix: '$',
-    compact: true,
+    format: compact,
     delta: growth(monthlyRevenue),
     deltaSuffix: '%',
     deltaCaption: 'vs last month',
@@ -177,7 +183,7 @@ const kpiCards: NumberCardProps[] = [
     title: 'Monthly churn',
     value: monthlyChurn.at(-1)!,
     suffix: '%',
-    precision: 1,
+    format: (value) => value.toFixed(1),
     delta: -0.4,
     deltaSuffix: 'pts',
     deltaCaption: 'vs last month',
@@ -189,7 +195,7 @@ const kpiCards: NumberCardProps[] = [
     value:
       Math.round((monthlyRevenue.at(-1)! / monthlyOrders.at(-1)!) * 100) / 100,
     prefix: '$',
-    precision: 2,
+    format: (value) => value.toFixed(2),
     delta: 2.4,
     deltaSuffix: '%',
     deltaCaption: 'vs last month',

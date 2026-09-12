@@ -32,14 +32,14 @@ export function deltaTone(
 
 /** The big number, with its prefix and suffix. Empty when there is no value. */
 export function formatCardValue(
-  config: Pick<NumberCardConfig, 'prefix' | 'suffix' | 'precision' | 'compact'>,
+  config: Pick<NumberCardConfig, 'prefix' | 'suffix' | 'format'>,
   value: number | string | null | undefined,
 ): string {
   // A string is already the reading the caller wants shown, so nothing here has
   // anything to add to it.
   if (typeof value === 'string') return value
   if (!isPresent(value)) return ''
-  const formatted = formatValue(value, config.precision, config.compact)
+  const formatted = config.format ? config.format(value) : formatValue(value)
   return `${config.prefix ?? ''}${formatted}${config.suffix ?? ''}`
 }
 
@@ -48,15 +48,15 @@ export function formatCardValue(
  * `-3.1%` next to a down arrow would say it twice.
  */
 export function formatCardDelta(
-  config: Pick<NumberCardConfig, 'deltaPrefix' | 'deltaSuffix'>,
+  config: Pick<NumberCardConfig, 'deltaPrefix' | 'deltaSuffix' | 'deltaFormat'>,
   delta: number | null | undefined,
 ): string {
   if (!isPresent(delta)) return ''
-  return `${config.deltaPrefix ?? ''}${formatValue(
-    Math.abs(delta),
-    undefined,
-    true,
-  )}${config.deltaSuffix ?? ''}`
+  const magnitude = Math.abs(delta)
+  const formatted = config.deltaFormat
+    ? config.deltaFormat(magnitude)
+    : formatValue(magnitude, undefined, true)
+  return `${config.deltaPrefix ?? ''}${formatted}${config.deltaSuffix ?? ''}`
 }
 
 function isPresent(value: number | null | undefined): value is number {

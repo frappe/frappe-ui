@@ -407,10 +407,10 @@ export type NumberCardConfig = {
   deltaCaption?: string
   /** Flips the delta colors, for metrics like churn or cost. */
   negativeIsBetter?: boolean
-  /** Decimal places. Defaults to as many as the value carries, up to 2. */
-  precision?: number
-  /** Shortens the value, `12300` -> `12.3K`. */
-  compact?: boolean
+  /** Prints the reading and the target: they are one measure, read against each other. */
+  format?: ChartValueFormatter
+  /** Prints the delta. It takes the absolute value: the arrow beside it carries the sign. */
+  deltaFormat?: ChartValueFormatter
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
   /** A trend across the bottom of the card: shape only, no axes to read against. */
@@ -1013,10 +1013,10 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     deltaCaption?: string
     /** Flips the delta colors, for metrics like churn or cost. */
     negativeIsBetter?: boolean
-    /** Decimal places. Defaults to as many as the value carries, up to 2. */
-    precision?: number
-    /** Shortens the value, `12300` -> `12.3K`. */
-    compact?: boolean
+    /** Prints the reading and the target: they are one measure, read against each other. */
+    format?: ChartValueFormatter
+    /** Prints the delta. It takes the absolute value: the arrow beside it carries the sign. */
+    deltaFormat?: ChartValueFormatter
     /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
   }

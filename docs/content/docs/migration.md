@@ -3363,6 +3363,10 @@ The build or the type-check reports the rest.
   what the `palette` prop takes — a ramp name, an explicit list of colors, or
   nothing — and `fallback` names the ramp to read when it is nothing, defaulting
   to `'sequential'`. A call passing a ramp name is unchanged.
+- `NumberCard`'s `precision` and `compact` are gone. Pass `format`, and
+  `deltaFormat` for the delta: `:compact="true"` becomes
+  `:format="(v) => Intl.NumberFormat(undefined, { notation: 'compact' }).format(v)"`
+  and `:precision="1"` becomes `:format="(v) => v.toFixed(1)"`.
 
 ## Toast: the legacy object form is removed {#toast-legacy-object}
 

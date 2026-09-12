@@ -4,9 +4,9 @@ One reading, with the change against a comparison period.
 
 ## A reading and its change
 
-`negativeIsBetter` flips the delta colors for metrics like churn, `compact`
-shortens the value, and a `null` value renders the empty state — a KPI with no
-number is not a zero. The card states the period it compares against; choosing
+`negativeIsBetter` flips the delta colors for metrics like churn, `format`
+prints the value and the target, and a `null` value renders the empty state — a
+KPI with no number is not a zero. The card states the period it compares against; choosing
 it is the app's business, so that control goes in the `#caption` slot.
 
 <ComponentPreview name="Charts-NumberKpis" csr="true" self-layout />

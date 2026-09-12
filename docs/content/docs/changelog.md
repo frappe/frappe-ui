@@ -717,6 +717,11 @@ Landed so far:
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
+- `NumberCard` prints through `format` and `deltaFormat`, the `ChartValueFormatter`
+  every other chart takes. `precision` and `compact` are **removed**: a caller
+  who wants either writes it in `format`. `format` prints the value and the
+  target, `deltaFormat` prints the delta and receives it unsigned. A card with
+  neither prints what it printed before.
 
 Changed since `1.0.0-beta.41`, the first beta that shipped the family:
 
