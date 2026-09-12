@@ -103,7 +103,7 @@ describe('SankeyChart', () => {
   })
 
   it('turns the flow downwards on request', () => {
-    mountChart({ orient: 'vertical' })
+    mountChart({ vertical: true })
     // The plot is wider than it is tall, so a vertical flow packs the first
     // column across the top rather than down the left edge.
     nodes().should('have.length', NODE_COUNT)
@@ -227,7 +227,10 @@ describe('SankeyChart', () => {
       )
       bands().should('have.length', data.length)
       plot().focus()
-      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'signups 120')
+      cy.get('[data-slot="chart-tooltip"]').should(
+        'contain.text',
+        'signups 120',
+      )
       plot().type('{rightarrow}')
       cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'signups 80')
     })

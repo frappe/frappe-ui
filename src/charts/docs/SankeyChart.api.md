@@ -60,10 +60,10 @@
     type: 'string'
   },
   {
-    name: 'orient',
-    description: 'Defaults to `\'horizontal\'`: the flow runs left to right.',
+    name: 'vertical',
+    description: 'Flow runs top to bottom, in rows of nodes. Defaults to left to right.',
     required: false,
-    type: 'SankeyOrient'
+    type: 'boolean'
   },
   {
     name: 'nodeAlign',

@@ -218,7 +218,7 @@ const revenueVsTargetChart: LineChartProps = {
   y2Axis: { title: 'Attainment (%)', min: 90, max: 110 },
   palette: 'categorical',
   seriesConfig: {
-    target: { lineType: 'dashed', lineWidth: 1.5 },
+    target: { dashed: true },
     attainment: { axis: 'y2' },
   },
   title: 'Revenue against target',

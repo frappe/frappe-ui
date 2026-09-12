@@ -28,7 +28,7 @@ const performance = [
       :y2-axis="{ title: 'Attainment (%)', min: 90, max: 110 }"
       palette="categorical"
       :series-config="{
-        target: { lineType: 'dashed', lineWidth: 1.5 },
+        target: { dashed: true },
         attainment: { label: 'Attainment', axis: 'y2' },
       }"
       title="Revenue against target"

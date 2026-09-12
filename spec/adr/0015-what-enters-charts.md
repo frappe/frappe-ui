@@ -141,6 +141,27 @@ props are not shaped around a stored config format.
 `timeGrain` all exist, as do the heatmap, the empty and loading and error
 states, theme-reactive palettes, HTML tooltips with slots, and typed events.
 
+### Not a gap any more: four props left before 1.0.0 (2026-09-12)
+
+Convention 2 reads on the way out as well. Each of these named a renderer
+setting rather than a reading of the data, and each is breaking to remove after
+the tag.
+
+- `SeriesStyle.lineWidth` is stroke weight, which the library decides once for
+  every line it draws. `echartOptions: { lineStyle: { width } }` sets it per
+  series.
+- `fillOpacity`, chart-level and per-series, handed a caller the alpha the
+  library already decides twice over: a fading gradient for a free area, a solid
+  wash for a banded one. `echartOptions: { areaStyle: { opacity } }` sets it per
+  series.
+- `SeriesStyle.lineType` offered three textures where the meaning that survives
+  is "this line is a comparison or a projection". It is `dashed?: boolean`, the
+  shape and the dash `ReferenceLine.dashed` already uses.
+- `SankeyChartProps.orient` was echarts' own key and value set for what
+  `BarChart` spells `horizontal?: boolean`. It is `vertical?: boolean`.
+  `nodeAlign` stays: which end a node with nothing leaving it sits at is a
+  reading of the flow.
+
 ## Consequences
 
 Three decisions fell out of the work and answer questions this record raised.

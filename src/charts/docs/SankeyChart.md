@@ -14,7 +14,7 @@ carries the row behind the band.
 
 ## Vertical flow
 
-`orient="vertical"` turns the flow downwards, which suits a tall card or a graph
+`vertical` turns the flow downwards, which suits a tall card or a graph
 with few stages. `format` prints every value the chart shows, on the node labels
 and in the tooltip alike. `nodeAlign` decides where a node with nothing leaving
 it sits: `justify` pushes it to the far end, `left` and `right` pin it to the

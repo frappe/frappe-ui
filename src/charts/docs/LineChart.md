@@ -4,8 +4,9 @@ Lines for a measure that moves over time.
 
 ## Trends
 
-Two series on a time axis, one dashed as the comparison. `smooth`, `lineType`,
-`lineWidth` and `showDataPoints` are per-series settings in `seriesConfig`.
+Two series on a time axis, one dashed as the comparison. `dashed`, `smooth` and
+`showDataPoints` are per-series settings in `seriesConfig`. `dashed` breaks the
+line for a projection or a comparison that was not measured like the rest.
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
@@ -44,9 +45,8 @@ same way, keyed by a value of the `series` column.
 
 `seriesConfig[key].type` sets the mark a single series draws as, so one line of
 a `LineChart` carries a fill on `type: 'area'` while the rest stay bare. There
-is no separate fill flag: an area _is_ a filled line. `fillOpacity` sets the
-alpha, chart-wide or per series. The same key takes `'bar'`, which is what makes
-a combo chart.
+is no separate fill flag: an area _is_ a filled line. The same key takes
+`'bar'`, which is what makes a combo chart.
 
 <ComponentPreview name="Charts-LineFilledSeries" csr="true" self-layout />
 

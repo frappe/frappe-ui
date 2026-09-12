@@ -107,7 +107,6 @@ const config = computed<AxisChartConfig>(() => ({
   type: 'line',
   stacked: props.stacked,
   connectNulls: props.connectNulls,
-  fillOpacity: props.fillOpacity,
 }))
 
 const {

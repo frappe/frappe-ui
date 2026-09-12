@@ -3344,6 +3344,20 @@ The build or the type-check reports the rest.
   `PlotLabelPlacement` type now `AxisTitlePlacement`. They title the value axes,
   which every chart names `yAxis.title` and `y2Axis.title`. Only a hand-composed
   `ChartContainer` passes them; the built-in charts set them from those props.
+- `SeriesStyle.lineWidth` is removed. Every line draws at the library's own
+  weight; `seriesConfig[key].echartOptions = { lineStyle: { width: 3 } }` sets
+  another.
+- `fillOpacity` is removed, chart-level and per-series. The library's fill rules
+  stay: a free area fades out towards the axis, a banded one is solid.
+  `seriesConfig[key].echartOptions = { areaStyle: { opacity: 0.25 } }` sets an
+  alpha on one series.
+- `seriesConfig[key].lineType` is `dashed?: boolean`. `lineType: 'dashed'` is
+  `dashed: true`, and `'dotted'` has no replacement — a dotted line paints the
+  gridlines' own texture on a mark. A dashed series now draws the dash the
+  reference lines use.
+- `SankeyChart`'s `orient` is `vertical`, a boolean, and the `SankeyOrient` type
+  is no longer exported. `orient="vertical"` is `vertical`, and
+  `orient="horizontal"` is the default. `nodeAlign` is unchanged.
 - `paletteColors(name, tokens, count)` is
   `paletteColors(palette, tokens, count, fallback?)`. The first argument now takes
   what the `palette` prop takes — a ramp name, an explicit list of colors, or

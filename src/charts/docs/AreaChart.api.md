@@ -127,12 +127,6 @@
     type: 'boolean'
   },
   {
-    name: 'fillOpacity',
-    description: 'Chart-level fill alpha; `seriesConfig` overrides it per series. Area series.',
-    required: false,
-    type: 'number'
-  },
-  {
     name: 'referenceLines',
     description: 'Targets, thresholds and other fixed marks drawn over the plot. They are\nannotations, not series: no legend entry, and no way to switch one off.',
     required: false,

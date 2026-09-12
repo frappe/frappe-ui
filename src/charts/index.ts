@@ -114,6 +114,5 @@ export type {
   ReferenceLineLabelPlacement,
   SankeyLinkEvent,
   SankeyNodeAlign,
-  SankeyOrient,
   ScatterPointEvent,
 } from './types'

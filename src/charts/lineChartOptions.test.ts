@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildAxisChartOption } from './axisChartOptions'
+import { buildAxisChartOption, DEFAULT_LINE_WIDTH } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
@@ -130,18 +131,15 @@ describe('line chart option series', () => {
     ).toBe('red')
   })
 
-  it('takes the dash pattern and width from the series, solid otherwise', () => {
+  it('breaks the line of a dashed series, solid otherwise', () => {
     expect(build().series[0].lineStyle.type).toBe('solid')
 
-    const option = build({
-      series: [
-        { name: 'sales', lineType: 'dashed', lineWidth: 3 },
-        { name: 'refunds', lineType: 'dotted' },
-      ],
-    })
-    expect(option.series[0].lineStyle.type).toBe('dashed')
-    expect(option.series[0].lineStyle.width).toBe(3)
-    expect(option.series[1].lineStyle.type).toBe('dotted')
+    const option = build({ series: [{ name: 'sales', dashed: true }] })
+    // The reference lines' dash, at the one stroke width the library draws.
+    expect(option.series[0].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
+    expect(option.series[0].lineStyle.width).toBe(DEFAULT_LINE_WIDTH)
   })
 
   it('hides datapoints unless asked for', () => {

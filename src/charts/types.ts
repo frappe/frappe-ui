@@ -83,10 +83,8 @@ export type AxisChartSeriesConfig = {
    * only by the marks that stack — a line never does.
    */
   stackName?: string
-  /** Dash pattern of the line itself. Defaults to a solid stroke. */
-  lineType?: 'solid' | 'dashed' | 'dotted'
-  /** Stroke width in px. Defaults to 2. */
-  lineWidth?: number
+  /** Breaks the line into a dash. Defaults to a solid stroke. */
+  dashed?: boolean
   /**
    * Marks every datapoint with a dot. Off by default — a clean line reads
    * better, and the dot for the hovered point appears anyway.
@@ -94,8 +92,6 @@ export type AxisChartSeriesConfig = {
   showDataPoints?: boolean
   /** Rounds the corners of the line instead of drawing straight segments. */
   smooth?: boolean
-  /** Overrides the chart-level `fillOpacity`. Read by an area series. */
-  fillOpacity?: number
   echartOptions?: EchartOptionsOverride
 }
 
@@ -196,11 +192,6 @@ export type AxisChartConfig = AxisChartBaseConfig & {
    * the line is how missing data should read. Line and area series only.
    */
   connectNulls?: boolean
-  /**
-   * Alpha of the fill under an area series. Defaults to a faint wash that fades
-   * out towards the axis; areas that stack into a band default to solid.
-   */
-  fillOpacity?: number
 }
 
 export type DonutChartConfig = {
@@ -439,9 +430,6 @@ export type NumberCardSparkline = {
   color?: string
 }
 
-/** Which way the flow runs: columns of nodes left to right, or rows top to bottom. */
-export type SankeyOrient = 'horizontal' | 'vertical'
-
 /**
  * Where a node sits along the flow. `'justify'` pushes a node with no outgoing
  * flow to the far end, `'left'` and `'right'` pin every node to the end it is
@@ -460,7 +448,7 @@ export type SankeyChartConfig = {
   valueColumn: string
   title?: string
   subtitle?: string
-  orient?: SankeyOrient
+  vertical?: boolean
   nodeAlign?: SankeyNodeAlign
   /**
    * Ramp node colors are drawn from. Defaults to `'categorical'`: the nodes of
@@ -739,16 +727,15 @@ export type SeriesStyle = {
    * only by the marks that stack: bars stack with bars, areas with areas.
    */
   stackName?: string
-  /** Line and area series. */
-  lineType?: 'solid' | 'dashed' | 'dotted'
-  /** Line and area series. */
-  lineWidth?: number
+  /**
+   * Breaks this series' line, for a projection or a comparison that should not
+   * read as measured as the rest. Line and area series.
+   */
+  dashed?: boolean
   /** Line and area series. */
   showDataPoints?: boolean
   /** Line and area series. */
   smooth?: boolean
-  /** Overrides the chart-level `fillOpacity`. Area series only. */
-  fillOpacity?: number
   /** Escape hatch: deep-merged into this series' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
@@ -821,8 +808,6 @@ export type AxisChartProps = ChartBaseProps & {
   stacked?: boolean | 'normalized'
   /** Bridges gaps left by nulls. Line and area series. */
   connectNulls?: boolean
-  /** Chart-level fill alpha; `seriesConfig` overrides it per series. Area series. */
-  fillOpacity?: number
   /**
    * Targets, thresholds and other fixed marks drawn over the plot. They are
    * annotations, not series: no legend entry, and no way to switch one off.
@@ -937,8 +922,8 @@ export type SankeyChartProps = ChartBaseProps & {
   target: string
   /** Row key holding how much flows along the link. */
   value: string
-  /** Defaults to `'horizontal'`: the flow runs left to right. */
-  orient?: SankeyOrient
+  /** Flow runs top to bottom, in rows of nodes. Defaults to left to right. */
+  vertical?: boolean
   /** Where a node sits along the flow. Defaults to `'justify'`. */
   nodeAlign?: SankeyNodeAlign
   /** Prints every number the flow shows, i.e. what a band or node carries. */

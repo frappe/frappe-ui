@@ -791,6 +791,15 @@ unless it says otherwise. The
   a ramp name, a list of colors, or nothing — plus the fallback ramp, so the
   exported helper is the resolver the charts themselves call:
   `paletteColors(palette, tokens, count, fallback?)`.
+- **Breaking:** four props that set a look rather than state a reading are gone.
+  `SeriesStyle.lineWidth` and `fillOpacity` (chart-level and per-series) are
+  removed: the library draws one stroke weight, and it decides the fill — a
+  fading gradient for a free area, a solid wash for a banded one. The per-series
+  `echartOptions` reaches both, `lineStyle: { width }` and
+  `areaStyle: { opacity }`. `SeriesStyle.lineType` is `dashed?: boolean`, the
+  same shape as `ReferenceLine.dashed` and drawn in the same dash.
+  `SankeyChart`'s `orient="vertical"` is `vertical`, beside `BarChart`'s
+  `horizontal`, and the `SankeyOrient` type is gone.
 - `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
   `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
 

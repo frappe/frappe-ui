@@ -164,7 +164,7 @@ export function buildSankeyOption(
 ): EChartsCoreOption {
   const { tokens, format } = context
   const graph = buildSankeyGraph(config, context)
-  const isVertical = config.orient === 'vertical'
+  const isVertical = Boolean(config.vertical)
 
   const option = {
     animation: true,

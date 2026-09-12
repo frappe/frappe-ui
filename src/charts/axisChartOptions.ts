@@ -6,6 +6,7 @@ import {
   buildAxisGrid,
   buildValueAxes,
   buildXAxis,
+  dashedLine,
   hasSecondaryValueAxis,
   plotRows,
   resolveMark,
@@ -35,7 +36,7 @@ const BAR_LABEL_GUTTER = 40
 /** Room for a data label sitting above a point. */
 const LINE_LABEL_GUTTER = 24
 
-const DEFAULT_LINE_WIDTH = 2
+export const DEFAULT_LINE_WIDTH = 2
 /** Big enough to hit with a pointer, small enough not to read as a scatter plot. */
 const SYMBOL_SIZE = 6
 
@@ -515,8 +516,10 @@ function buildLineSeries(
     itemStyle: { color },
     lineStyle: {
       color,
-      width: series.lineWidth ?? DEFAULT_LINE_WIDTH,
-      type: series.lineType ?? 'solid',
+      width: DEFAULT_LINE_WIDTH,
+      // The reference lines' dash, so a broken stroke means the same thing
+      // wherever the chart draws one.
+      type: series.dashed ? dashedLine(DEFAULT_LINE_WIDTH).type : 'solid',
     },
     // No per-series emphasis, as on bars: hovering one line never fades the rest.
     emphasis: { disabled: true },
@@ -535,7 +538,7 @@ function buildLineSeries(
 
   return {
     ...base,
-    areaStyle: fillStyle(series, config, color, banded),
+    areaStyle: fillStyle(color, banded),
   }
 }
 
@@ -548,30 +551,13 @@ function plottedLabel(value: any, normalized: boolean) {
   return normalized ? formatPercent(value) : formatValue(value, 1, true)
 }
 
-function fillOpacityOf(
-  series: AxisChartSeriesConfig,
-  config: AxisChartConfig,
-  banded: boolean,
-) {
-  return (
-    series.fillOpacity ??
-    config.fillOpacity ??
-    (banded ? DEFAULT_STACKED_FILL_OPACITY : DEFAULT_FILL_OPACITY)
-  )
-}
-
 /**
  * Overlapping washes fade out towards the axis so the lines stay legible where
  * they cross. A band that stacks on another has no overlap to resolve and reads
  * as one solid block, so it takes a flat fill instead.
  */
-function fillStyle(
-  series: AxisChartSeriesConfig,
-  config: AxisChartConfig,
-  color: string,
-  banded: boolean,
-) {
-  const opacity = fillOpacityOf(series, config, banded)
+function fillStyle(color: string, banded: boolean) {
+  const opacity = banded ? DEFAULT_STACKED_FILL_OPACITY : DEFAULT_FILL_OPACITY
   if (banded) return { color, opacity }
 
   const top = withAlpha(color, opacity)

@@ -95,7 +95,7 @@ const config = computed<SankeyChartConfig>(() => ({
   sourceColumn: props.source,
   targetColumn: props.target,
   valueColumn: props.value,
-  orient: props.orient,
+  vertical: props.vertical,
   nodeAlign: props.nodeAlign,
   palette: props.palette,
   echartOptions: props.echartOptions,
