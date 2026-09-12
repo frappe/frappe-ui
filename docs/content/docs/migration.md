@@ -3335,6 +3335,20 @@ The build or the type-check reports the rest.
 - `seriesName` is `name` on `ChartDatapointEvent` and `ScatterPointEvent`, matching
   every other payload. `FunnelStageEvent` carries a `name` as well, the category
   value behind the printed `label`.
+- `ChartExposed.chart` is `ECharts | undefined`, not
+  `ComputedRef<ECharts | undefined>`. The runtime is unchanged — Vue always
+  unwrapped the computed — so only code that named the old type moves:
+  `plot.value?.chart?.getDataURL(...)` reads the same as before.
+- `ChartContainer`'s `plotLabel` is `yAxisTitle`, `plotLabelSecondary` is
+  `y2AxisTitle` and `plotLabelPlacement` is `axisTitlePlacement`, with the
+  `PlotLabelPlacement` type now `AxisTitlePlacement`. They title the value axes,
+  which every chart names `yAxis.title` and `y2Axis.title`. Only a hand-composed
+  `ChartContainer` passes them; the built-in charts set them from those props.
+- `paletteColors(name, tokens, count)` is
+  `paletteColors(palette, tokens, count, fallback?)`. The first argument now takes
+  what the `palette` prop takes — a ramp name, an explicit list of colors, or
+  nothing — and `fallback` names the ramp to read when it is nothing, defaulting
+  to `'sequential'`. A call passing a ramp name is unchanged.
 
 ## Toast: the legacy object form is removed {#toast-legacy-object}
 

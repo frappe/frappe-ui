@@ -781,7 +781,16 @@ unless it says otherwise. The
   an area, so that shape is `'area'` and the default. `'line'` is the stroke alone.
 - **Breaking:** `OTHERS_LABEL` is no longer exported and `ResolvedColorScheme` is
   exported from the root only. `OTHERS_KEY` stays.
-  `ReferenceLineLabelPlacement` is now exported.
+  `ReferenceLineLabelPlacement` is now exported. `ChartExposed` is the caller's
+  view of the template ref: `chart` is typed `ECharts | undefined`, the value Vue
+  hands back, where the type said `ComputedRef<ECharts | undefined>`.
+  `ChartContainer`'s `plotLabel`, `plotLabelSecondary` and `plotLabelPlacement`
+  are `yAxisTitle`, `y2AxisTitle` and `axisTitlePlacement`, after the `yAxis.title`
+  and `y2Axis.title` every chart already spells them with; `PlotLabelPlacement`
+  is `AxisTitlePlacement`. `paletteColors` takes the `palette` prop's own value —
+  a ramp name, a list of colors, or nothing — plus the fallback ramp, so the
+  exported helper is the resolver the charts themselves call:
+  `paletteColors(palette, tokens, count, fallback?)`.
 - `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
   `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
 

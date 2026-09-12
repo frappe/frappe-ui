@@ -230,17 +230,22 @@ is for a plot the library does not draw.
 
 ```ts
 function paletteColors(
-  name: ChartPaletteName,
+  palette: ChartPalette | undefined,
   tokens: ChartTokens,
   count: number,
+  fallback?: ChartPaletteName,
 ): string[]
 ```
 
-`count` colors off one named ramp, the same way a built-in chart picks its
-series colors. `'categorical'` cycles the ramp, so eleven series reuse the first
-hue. `'sequential'` and `'diverging'` spread the count over the ramp instead,
-because a stop only means something against the stops beside it — three series
-take three spaced stops, not the first three.
+`count` colors off a palette, the same call a built-in chart picks its series
+colors with. `palette` takes what the `palette` prop takes: a ramp name, an
+explicit list, or nothing, in which case `fallback` names the ramp to read.
+
+A list is handed out in the order it was written and cycled once it runs out.
+`'categorical'` cycles the ramp too, so eleven series reuse the first hue.
+`'sequential'` and `'diverging'` spread the count over the ramp instead, because
+a stop only means something against the stops beside it — three series take
+three spaced stops, not the first three.
 
 ### `OTHERS_KEY`
 

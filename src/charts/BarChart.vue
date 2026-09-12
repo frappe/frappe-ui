@@ -2,9 +2,9 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
-    :plot-label-secondary="plotLabelSecondary"
-    :plot-label-placement="plotLabelPlacement"
+    :y-axis-title="yAxisTitle"
+    :y2-axis-title="y2AxisTitle"
+    :axis-title-placement="axisTitlePlacement"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
@@ -80,7 +80,7 @@ import type {
   BarChartEmits,
   BarChartProps,
   BarChartSlots,
-  ChartExposed,
+  ChartExposedRefs,
 } from './types'
 
 registerChartModules([
@@ -117,9 +117,9 @@ const {
   chart,
   dir,
   isEmpty,
-  plotLabel,
-  plotLabelSecondary,
-  plotLabelPlacement,
+  yAxisTitle,
+  y2AxisTitle,
+  axisTitlePlacement,
   renderError,
   tooltip,
   legendItems,
@@ -137,5 +137,5 @@ const {
   onSelect: (event) => emit('select', event),
 })
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

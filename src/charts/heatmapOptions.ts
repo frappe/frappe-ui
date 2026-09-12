@@ -8,7 +8,7 @@ import {
 import { hexToOklch, interpolateRamp, oklchToHex } from './colorMath'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, insideLabelColor, type ChartTokens } from './tokens'
+import { insideLabelColor, rampStops, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartCategoryFormatter,
@@ -206,11 +206,13 @@ export function heatmapRampStops(
   config: HeatmapChartConfig,
   tokens: ChartTokens,
 ): string[] {
-  return chartColors(config.palette, tokens, {
-    fallback: HEATMAP_PALETTE,
-    count: 'ramp',
-    deepEnd: 'last',
-  })
+  const stops = rampStops(config.palette, tokens, HEATMAP_PALETTE)
+  // The sequential ramp is authored deep to pale, and only it has a deep end to
+  // place: a caller's own list is drawn as written and diverging already runs
+  // cool to warm.
+  return (config.palette ?? HEATMAP_PALETTE) === 'sequential'
+    ? stops.slice().reverse()
+    : stops
 }
 
 /**

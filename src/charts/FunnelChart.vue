@@ -170,7 +170,7 @@ import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
-import { chartColors, useChartTokens } from './tokens'
+import { paletteColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -229,13 +229,20 @@ const { tokens } = useChartTokens(root)
 const FUNNEL_PALETTE: ChartPaletteName = 'sequential'
 
 /** Palest first, deepest last, so the color darkens as the population narrows. */
-const colors = computed(() =>
-  chartColors(props.palette, tokens.value, {
-    fallback: FUNNEL_PALETTE,
-    count: stages.value.length,
-    deepEnd: 'last',
-  }),
-)
+const colors = computed(() => {
+  const assigned = paletteColors(
+    props.palette,
+    tokens.value,
+    stages.value.length,
+    FUNNEL_PALETTE,
+  )
+  // Only the sequential ramp has a deep end to move: a caller's own list is
+  // drawn in the order it was written, and a diverging ramp's direction is its
+  // meaning.
+  return (props.palette ?? FUNNEL_PALETTE) === 'sequential'
+    ? assigned.slice().reverse()
+    : assigned
+})
 
 const hovered = ref<number | null>(null)
 const hoveredStage = computed(() =>

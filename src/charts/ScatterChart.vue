@@ -2,7 +2,7 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
+    :y-axis-title="yAxisTitle"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
@@ -75,7 +75,7 @@ import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartLegendItem,
   ChartTooltipItem,
   ScatterChartConfig,
@@ -154,7 +154,7 @@ const isEmpty = computed(() =>
 
 // The y-axis title is chrome rather than an echarts axis name, so it lines up
 // with the chart title above the plot. The x-axis title is drawn on its axis.
-const plotLabel = computed(() =>
+const yAxisTitle = computed(() =>
   props.yAxis?.title ? formatLabel(props.yAxis.title) : undefined,
 )
 
@@ -433,5 +433,5 @@ watch(
   },
 )
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

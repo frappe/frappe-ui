@@ -92,6 +92,7 @@ export type {
 // Only what the props, emits, slots and template refs above reach for; the
 // config shapes the option builders read stay internal.
 export type {
+  AxisTitlePlacement,
   ChartDatapointEvent,
   ChartDir,
   ChartExposed,
@@ -109,7 +110,6 @@ export type {
   HeatmapCellEvent,
   HeatmapPalette,
   NumberCardSparkline,
-  PlotLabelPlacement,
   ReferenceLine,
   ReferenceLineLabelPlacement,
   SankeyLinkEvent,

@@ -7,6 +7,14 @@ export type ChartDir = 'ltr' | 'rtl'
 /** What an echarts-backed chart hands back through a template ref. */
 export type ChartExposed = {
   /** The echarts instance, once the plot has a size to initialise into. */
+  chart: ECharts | undefined
+}
+
+/**
+ * What a chart hands `defineExpose`. Vue unwraps the computed on the way out,
+ * so what a caller reads is `ChartExposed`. Internal.
+ */
+export type ChartExposedRefs = {
   chart: ComputedRef<ECharts | undefined>
 }
 
@@ -431,7 +439,6 @@ export type NumberCardSparkline = {
   color?: string
 }
 
-
 /** Which way the flow runs: columns of nodes left to right, or rows top to bottom. */
 export type SankeyOrient = 'horizontal' | 'vertical'
 
@@ -571,7 +578,7 @@ export type ScatterPointEvent = {
  * Which edge of the plot the value-axis title heads, i.e. the edge that axis is
  * drawn on: the top for a column chart, the bottom for a row chart.
  */
-export type PlotLabelPlacement = 'top' | 'bottom'
+export type AxisTitlePlacement = 'top' | 'bottom'
 
 export type ChartLegendItem = {
   /** Series name, i.e. the identity used by echarts actions. */
@@ -1048,12 +1055,15 @@ export type ChartContainerProps = {
   title?: string
   /** A second line under the title, e.g. the period the numbers cover. */
   subtitle?: string
-  /** Value-axis title, drawn above the plot instead of inside it. */
-  plotLabel?: string
+  /**
+   * Title of the primary value axis. The container draws it above the plot
+   * rather than along the axis, where it would have to be turned sideways.
+   */
+  yAxisTitle?: string
   /** Title of the second value axis, drawn over the edge that axis sits on. */
-  plotLabelSecondary?: string
+  y2AxisTitle?: string
   /** Edge of the plot the value-axis titles head. Defaults to the top. */
-  plotLabelPlacement?: PlotLabelPlacement
+  axisTitlePlacement?: AxisTitlePlacement
   /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
   /** Non-empty switches the container into its error state. */

@@ -10,7 +10,7 @@ import {
   type TimeGrain,
 } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
@@ -119,10 +119,12 @@ export function resolveSeriesColors(
   config: AxisChartConfig,
   tokens: ChartTokens,
 ): Record<string, string> {
-  const assigned = chartColors(config.palette, tokens, {
-    fallback: DEFAULT_PALETTE,
-    count: config.series.length,
-  })
+  const assigned = paletteColors(
+    config.palette,
+    tokens,
+    config.series.length,
+    DEFAULT_PALETTE,
+  )
   const slots = colorSlots(config)
   const colors: Record<string, string> = {}
   config.series.forEach((series, index) => {
@@ -819,7 +821,7 @@ export function buildValueAxis(
     // the two sets of gridlines interleave and the plot reads as a mesh.
     alignTicks: secondary,
     // The value-axis title is chrome, not a mark: it is drawn as HTML above the
-    // plot (see ChartContainer's `plotLabel`) so it lines up with the chart
+    // plot (see ChartContainer's `yAxisTitle`) so it lines up with the chart
     // title whichever way the bars run.
     min: axisConfig?.min ?? empty?.min,
     max: axisConfig?.max ?? empty?.max,

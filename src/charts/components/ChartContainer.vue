@@ -29,12 +29,12 @@
     <!-- Value-axis titles, each over the edge its axis is drawn on, so the row
          mirrors with the plot in RTL. -->
     <div
-      v-if="topPlotLabel"
+      v-if="topAxisTitle"
       class="flex items-baseline justify-between gap-3 text-p-xs text-ink-gray-5"
     >
-      <span class="truncate">{{ plotLabel }}</span>
-      <span v-if="plotLabelSecondary" class="truncate">
-        {{ plotLabelSecondary }}
+      <span class="truncate">{{ yAxisTitle }}</span>
+      <span v-if="y2AxisTitle" class="truncate">
+        {{ y2AxisTitle }}
       </span>
     </div>
 
@@ -43,7 +43,7 @@
     <div
       data-slot="chart-plot"
       class="relative min-h-0 flex-1"
-      :class="{ 'pb-3': !$slots.legend && !bottomPlotLabel }"
+      :class="{ 'pb-3': !$slots.legend && !bottomAxisTitle }"
     >
       <!-- The plot stays mounted through every state: unmounting it would
            dispose the echarts instance and re-init it on the way back. -->
@@ -99,12 +99,12 @@
          bottom. Pinned to the far end: the near end of a row chart is the
          category-label column, where a title would read as a heading for it. -->
     <div
-      v-if="bottomPlotLabel"
+      v-if="bottomAxisTitle"
       class="-mt-2 flex items-baseline justify-end gap-3 text-p-xs text-ink-gray-5"
     >
-      <span class="truncate">{{ plotLabel }}</span>
-      <span v-if="plotLabelSecondary" class="truncate">
-        {{ plotLabelSecondary }}
+      <span class="truncate">{{ yAxisTitle }}</span>
+      <span v-if="y2AxisTitle" class="truncate">
+        {{ y2AxisTitle }}
       </span>
     </div>
 
@@ -131,16 +131,15 @@ const state = computed(() => {
 // The label heads an axis, so it goes wherever that axis does: over a
 // placeholder, a message or an empty card it is a title for a plot that isn't
 // drawn.
-const showPlotLabel = computed(
+const showAxisTitle = computed(
   () =>
-    state.value === 'ready' &&
-    Boolean(props.plotLabel || props.plotLabelSecondary),
+    state.value === 'ready' && Boolean(props.yAxisTitle || props.y2AxisTitle),
 )
 
-const topPlotLabel = computed(
-  () => showPlotLabel.value && props.plotLabelPlacement !== 'bottom',
+const topAxisTitle = computed(
+  () => showAxisTitle.value && props.axisTitlePlacement !== 'bottom',
 )
-const bottomPlotLabel = computed(
-  () => showPlotLabel.value && props.plotLabelPlacement === 'bottom',
+const bottomAxisTitle = computed(
+  () => showAxisTitle.value && props.axisTitlePlacement === 'bottom',
 )
 </script>

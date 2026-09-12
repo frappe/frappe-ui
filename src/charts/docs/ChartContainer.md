@@ -25,13 +25,12 @@ while a name that shortens still reads.
 
 ## Value-axis titles
 
-`plotLabel` titles the primary value axis and `plotLabelSecondary` the second
-one. They are drawn as a row over the plot rather than as echarts axis names: an
-axis name inside the plot has to be rotated to fit, and a rotated name is read
-last.
+`yAxisTitle` titles the primary value axis and `y2AxisTitle` the second one.
+They are drawn as a row over the plot rather than as echarts axis names: an axis
+name inside the plot has to be rotated to fit, and a rotated name is read last.
 
 Each title sits over the edge its axis is drawn on, so the row mirrors with the
-plot in RTL. `plotLabelPlacement` moves the row: `'top'` by default, `'bottom'`
+plot in RTL. `axisTitlePlacement` moves the row: `'top'` by default, `'bottom'`
 for a chart whose value axis runs along the bottom. A horizontal `BarChart` sets
 `'bottom'` for that reason, and pins the titles to the far end — the near end of
 a row chart is the category-label column, where a title would read as a heading

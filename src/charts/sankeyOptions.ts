@@ -2,7 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatValue } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
@@ -91,10 +91,12 @@ export function buildSankeyGraph(
     unpainted.push({ source, target, value, row })
   }
 
-  const colors = chartColors(config.palette, tokens, {
-    fallback: SANKEY_PALETTE,
-    count: names.length,
-  })
+  const colors = paletteColors(
+    config.palette,
+    tokens,
+    names.length,
+    SANKEY_PALETTE,
+  )
   const colorOf = new Map(names.map((name, index) => [name, colors[index]]))
 
   return {

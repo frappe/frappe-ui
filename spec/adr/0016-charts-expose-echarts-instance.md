@@ -8,9 +8,10 @@ Seven components in `src/charts/` hand back the echarts instance through a
 template ref — `AreaChart.vue:143`, `BarChart.vue:147`, `DonutChart.vue:370`,
 `HeatmapChart.vue:245`, `LineChart.vue:143`, `SankeyChart.vue:225` and
 `ScatterChart.vue:321`, each calling
-`defineExpose<ChartExposed>({ chart: computed(() => chart.value) })`.
-`ChartExposed` lives at `src/charts/types.ts:8-11` and is exported from
-`src/charts/index.ts:79`.
+`defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })`.
+`ChartExposed`, the caller's view of that object, lives in `src/charts/types.ts`
+and is exported from `src/charts/index.ts`; `ChartExposedRefs` types the call and
+stays internal.
 
 The **form** is what [`imperative-api.md`](../imperative-api.md) §2.5 asks for: a
 generic on `defineExpose`, never `satisfies`, one shared exported type, a
@@ -124,9 +125,9 @@ the component's instance handle. Assigning to an unwrapped computed fails loudly
 That is §2.2's reason, and it applies here unchanged.
 
 The published type follows the runtime. `ShallowUnwrapRef` applies to the exposed
-type, so a caller reading `plot.value.chart` gets `ECharts | undefined` and not a
-`ComputedRef` — checked with `vue-tsc` against
-`InstanceType<typeof AreaChart>['chart']`. `ScrollArea`'s getter
+object, so a caller reading `plot.value.chart` gets `ECharts | undefined` and not
+a `ComputedRef`, and `ChartExposed` states that unwrapped shape — checked with
+`vue-tsc` against `InstanceType<typeof AreaChart>['chart']`. `ScrollArea`'s getter
 (`ScrollArea.vue:43-49`) and this computed give the same guarantee.
 
 ### It freezes at `1.0.0`

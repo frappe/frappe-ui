@@ -27,7 +27,7 @@ import type {
   ChartDatapointEvent,
   ChartLegendItem,
   ChartTooltipItem,
-  PlotLabelPlacement,
+  AxisTitlePlacement,
 } from '../types'
 
 export type UseAxisChartArgs<C extends AxisChartConfig> = {
@@ -87,15 +87,15 @@ export function useAxisChart<C extends AxisChartConfig>(
   // Value-axis titles are chrome, not echarts axis names. The title heads the
   // edge its axis is drawn on: on a row chart the top-left belongs to the
   // category labels, so a title there would name the wrong axis.
-  const plotLabelPlacement = computed<PlotLabelPlacement>(() =>
+  const axisTitlePlacement = computed<AxisTitlePlacement>(() =>
     horizontal.value ? 'bottom' : 'top',
   )
-  const plotLabel = computed(() =>
+  const yAxisTitle = computed(() =>
     config.value.yAxis?.title
       ? formatLabel(config.value.yAxis.title)
       : undefined,
   )
-  const plotLabelSecondary = computed(() =>
+  const y2AxisTitle = computed(() =>
     config.value.y2Axis?.title &&
     hasSecondaryValueAxis(config.value, horizontal.value)
       ? formatLabel(config.value.y2Axis.title)
@@ -429,9 +429,9 @@ export function useAxisChart<C extends AxisChartConfig>(
     chart,
     dir,
     isEmpty,
-    plotLabel,
-    plotLabelSecondary,
-    plotLabelPlacement,
+    yAxisTitle,
+    y2AxisTitle,
+    axisTitlePlacement,
     renderError,
     tooltip,
     legendItems,

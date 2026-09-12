@@ -67,7 +67,7 @@ import {
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartTooltipItem,
   SankeyChartConfig,
   SankeyChartEmits,
@@ -318,5 +318,5 @@ const keyboard = usePlotKeyboard({
 
 const plotAttrs = keyboard.attrs
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>
