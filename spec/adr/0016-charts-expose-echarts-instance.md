@@ -161,8 +161,8 @@ sixth verb and §2.3 on a third element role.
 - §2.4 now names two exceptions, `Editor.editor` and charts' `chart`.
   `imperative-api.md` §2.7 carries the chart row and `charts.md` records the
   contract.
-- **The two "may not rely on" clauses have to reach the docs.** No chart docs
-  page mentions the handle today, and the generated API tables have no exposed
-  section. That belongs to the charts docs sweep.
+- **The two "may not rely on" clauses reach the docs.** The charts overview
+  carries them under "The echarts instance", with `getDataURL` as the worked
+  example. The generated API tables still have no exposed section.
 - A repeated use of the handle is a feature request, not a second member. Image
   export is the candidate, and [`charts.md`](../charts.md)'s rule decides it.

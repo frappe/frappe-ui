@@ -156,6 +156,50 @@ chart the app has already placed inside a card of its own: the content renders
 with no border, background, radius or padding, and one bordered box stops
 nesting in another.
 
+## The echarts instance
+
+Every echarts-backed chart hands back its instance as `chart` on a template ref.
+`FunnelChart` and `NumberCard` draw no echarts plot and hand back nothing.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { BarChart, type ChartExposed } from 'frappe-ui/charts'
+
+const plot = ref<ChartExposed>()
+
+function downloadPng() {
+  const url = plot.value?.chart?.getDataURL({ type: 'png', pixelRatio: 2 })
+  if (url) window.open(url)
+}
+</script>
+
+<template>
+  <BarChart ref="plot" :data="rows" x="month" y="sales">
+    <template #actions>
+      <Button label="Download" @click="downloadPng" />
+    </template>
+  </BarChart>
+</template>
+```
+
+It is the imperative half of the escape hatch `echartOptions` opens for options.
+Reach for it when an app needs an echarts call that no option key expresses: an
+image for a download button, or chart coordinates for an overlay of its own.
+
+Three limits.
+
+- The instance is `undefined` until the plot has a size and the fonts settle.
+  Watch it rather than read it once in `onMounted`.
+- State applied through the instance does not survive. The component rebuilds
+  the whole option and calls `setOption` with `notMerge: true` on every reactive
+  change, so the next prop, data or theme change drops any highlight or
+  selection dispatched from outside, and any hand-written `setOption`. The handle
+  is for one-shot reads and actions. State goes in props.
+- `ECharts` is echarts' type, not this library's. A major echarts bump can change
+  it inside a frappe-ui minor. The promise is that the member exists and carries
+  the live instance, not anything about echarts' own API.
+
 ## Utilities
 
 The subpath exports three helpers beside the components. A built-in chart calls
