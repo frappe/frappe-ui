@@ -60,7 +60,7 @@
                 <div
                   class="truncate text-center text-xl font-semibold tabular-nums text-ink-gray-8"
                 >
-                  {{ center.value }}
+                  {{ center.formattedValue }}
                 </div>
                 <!-- The share is the point of the readout, so only the name
                      gives way when the hole is too narrow for both. -->
@@ -68,8 +68,8 @@
                   class="flex items-baseline justify-center gap-1 text-xs text-ink-gray-5"
                 >
                   <span class="min-w-0 truncate">{{ center.label }}</span>
-                  <span v-if="center.percent" class="shrink-0">
-                    {{ center.percent }}
+                  <span v-if="center.percent !== undefined" class="shrink-0">
+                    {{ formatPercent(center.percent) }}
                   </span>
                 </div>
               </slot>
@@ -83,10 +83,11 @@
         :x="tooltip.x"
         :y="tooltip.y"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
-          <slot name="tooltip" v-bind="slotProps" :rows="tooltip.rows" />
+          <slot name="tooltip" v-bind="slotProps" />
         </template>
       </ChartTooltip>
     </template>
@@ -394,14 +395,16 @@ const center = computed(() => {
   const slice = hovered.value ? sliceByName.value.get(hovered.value) : undefined
   if (slice && !slice.hidden) {
     return {
-      value: shorten(slice.value),
       label: slice.label,
-      percent: formatPercent(slice.percent),
+      value: slice.value,
+      formattedValue: shorten(slice.value),
+      percent: slice.percent,
     }
   }
   return {
-    value: shorten(visibleTotal.value),
     label: props.centerLabel ?? formatLabel(props.value),
+    value: visibleTotal.value,
+    formattedValue: shorten(visibleTotal.value),
     percent: undefined,
   }
 })

@@ -232,7 +232,8 @@ describe('DonutChart', () => {
       mountChart(
         {},
         {
-          center: ({ value, label }: any) => h('span', `${value} of ${label}`),
+          center: ({ formattedValue, label }: any) =>
+            h('span', `${formattedValue} of ${label}`),
         },
       )
       cy.get('[data-slot="chart-plot"]').should('contain.text', '100 of Visits')
@@ -242,8 +243,8 @@ describe('DonutChart', () => {
       mountChart(
         {},
         {
-          center: ({ label, percent }: any) =>
-            h('span', `${label} ${percent ?? ''}`),
+          center: ({ label, value, percent }: any) =>
+            h('span', `${label} ${value} ${Math.round(percent)}%`),
         },
       )
       slices().should('have.length', data.length)
@@ -254,7 +255,7 @@ describe('DonutChart', () => {
         350,
         135,
       )
-      cy.get('[data-slot="chart-plot"]').should('contain.text', 'Search 50%')
+      cy.get('[data-slot="chart-plot"]').should('contain.text', 'Search 50 50%')
     })
 
     it('takes an app’s own tooltip body', () => {

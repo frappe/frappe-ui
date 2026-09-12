@@ -748,10 +748,19 @@ unless it says otherwise. The
   and `FunnelStageEvent.index` are gone — read the row, which every event carries.
   `DonutSliceEvent.name` is the slice's identity, `OTHERS_KEY` for the collapsed
   tail, and what it printed moves to a new `label`.
-- **Breaking:** one tooltip slot shape. `row` reaches the `#tooltip` slot on every
-  chart, not the axis charts alone. A sankey node passes none and the donut passes
-  `rows`, because both stand for more than one row. `ChartTooltipItem.kind` is
-  required; an item built by hand needs `kind: 'series'`.
+- **Breaking:** one tooltip slot shape. Every `#tooltip` slot, and `ChartTooltip`
+  itself, carries `{ label, items, rows }`. `row` is gone: `rows` holds one row for
+  a point, cell, band or stage, every grouped row for a donut's "Others" slice, and
+  none for a sankey node, which stands for every row through it. `FunnelChart`'s
+  `stage` slot prop is gone with it — the two conversion rates are items named
+  `ofFirst` and `ofPrevious`. `ChartTooltipItem.kind` is required, and the value
+  `'column'` is now `'context'`: a reading the plot does not draw, which is a
+  `tooltipColumns` entry or a funnel rate. An item built by hand needs
+  `kind: 'series'`.
+- **Breaking:** `DonutChart`'s `#center` slot passes `{ label, value,
+  formattedValue, percent }` instead of preformatted strings, the way
+  `ChartTooltipItem` does. `value` and `percent` are numbers, so a readout of your
+  own can do its own arithmetic; `formattedValue` is what the default prints.
 - **Breaking:** one name for the data label. `showValues` on `HeatmapChart` and
   `showInlineLabels` on `DonutChart` are both `showDataLabels`. Axis charts take it
   at the chart level too, so one prop replaces one `seriesConfig` entry per series.

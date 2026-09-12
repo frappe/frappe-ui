@@ -36,10 +36,10 @@
     type: 'ChartTooltipItem[]'
   },
   {
-    name: 'row',
-    description: 'The data row under the pointer, so the slot can read a column the chart\nnever plotted. Left out by charts that hover an aggregate.',
-    required: false,
-    type: 'Record<string, any>'
+    name: 'rows',
+    description: 'The rows behind the reading, handed to the slot so a body can read a column\nthe plot never drew. Empty when the pointer is over an aggregate that\nstands for no single row.',
+    required: true,
+    type: 'Record<string, any>[]'
   },
   {
     name: 'dir',
@@ -53,7 +53,7 @@
   {
     name: 'default',
     description: 'Replaces the whole tooltip body, headline row included.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    type: 'ChartTooltipSlotProps'
   }
 ]
 </script>

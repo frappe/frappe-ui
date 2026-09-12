@@ -145,21 +145,21 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one. `row` is the row behind the point, so\na body can read a column the plot never drew.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one. `rows` holds the row behind the point,\nso a body can read a column the plot never drew.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:hiddenSeries',
-    description: 'The legend switched a group off or back on. Carries the new list.',
-    type: '[value: string[]]'
-  },
-  {
     name: 'select',
     description: 'A point was selected, by click or by Enter on the keyboard cursor. Carries\nboth measures and the row behind it.',
     type: '[event: ScatterPointEvent]'
+  },
+  {
+    name: 'update:hiddenSeries',
+    description: 'The legend switched a group off or back on. Carries the new list.',
+    type: '[value: string[]]'
   }
 ]
 </script>

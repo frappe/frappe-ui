@@ -90,8 +90,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `row` is the row behind the stage. `stage` is\nthe extra the funnel carries: the two conversion rates the default body\nprints under the value.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; stag'
+    description: 'Replaces the tooltip body. `items` holds the stage\'s value and its two\nconversion rates, which are `\'context\'` items; `rows` holds the row\nbehind the stage.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 

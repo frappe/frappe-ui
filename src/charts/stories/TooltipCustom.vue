@@ -31,6 +31,7 @@ const tooltip = reactive({
   y: 0,
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 function show(row: (typeof REGIONS)[number], event: MouseEvent) {
@@ -55,6 +56,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
       kind: 'series',
     },
   ]
+  tooltip.rows = [row]
   // Viewport coordinates: the tooltip is teleported to the body and placed
   // against the window, so it is never clipped by the card.
   tooltip.x = event.clientX
@@ -99,6 +101,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
       />
     </ChartContainer>
   </ChartCard>

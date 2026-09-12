@@ -31,7 +31,7 @@ describe('a tooltip-only column', () => {
       label: 'Orders',
       value: 1840,
       formattedValue: '1,840',
-      kind: 'column',
+      kind: 'context',
     })
   })
 
@@ -114,7 +114,7 @@ describe('the series rows are untouched by it', () => {
     expect(items().map((row) => row.kind)).toEqual([
       'series',
       'series',
-      'column',
+      'context',
     ])
   })
 })

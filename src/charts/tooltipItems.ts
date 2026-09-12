@@ -4,7 +4,7 @@ import type { AxisChartSeriesConfig, ChartTooltipItem } from './types'
 
 /**
  * The rows a shared tooltip prints for one plotted row. Series rows are ranked
- * by magnitude, biggest first. Column rows are drawn nowhere and usually in
+ * by magnitude, biggest first. Context rows are drawn nowhere and usually in
  * another unit, so they keep the author's order and print after every series.
  */
 export type TooltipItemsArgs = {
@@ -21,7 +21,7 @@ export type TooltipItemsArgs = {
 }
 
 export function buildTooltipItems(args: TooltipItemsArgs): ChartTooltipItem[] {
-  return [...seriesItems(args), ...columnItems(args)]
+  return [...seriesItems(args), ...contextItems(args)]
 }
 
 function seriesItems(args: TooltipItemsArgs): ChartTooltipItem[] {
@@ -49,7 +49,7 @@ function seriesItems(args: TooltipItemsArgs): ChartTooltipItem[] {
   )
 }
 
-function columnItems(args: TooltipItemsArgs): ChartTooltipItem[] {
+function contextItems(args: TooltipItemsArgs): ChartTooltipItem[] {
   return (args.tooltipColumns ?? [])
     .map((column) => ({ column, value: args.row[column.name] }))
     .filter(
@@ -60,7 +60,7 @@ function columnItems(args: TooltipItemsArgs): ChartTooltipItem[] {
       label: column.label,
       value: typeof value === 'number' ? value : String(value),
       formattedValue: formatColumnValue(column, value),
-      kind: 'column' as const,
+      kind: 'context' as const,
     }))
 }
 

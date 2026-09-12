@@ -38,7 +38,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
-        :row="tooltip.row"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -144,7 +144,7 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
-  row: undefined as Record<string, any> | undefined,
+  rows: [] as Record<string, any>[],
 })
 
 useTooltipDismiss({
@@ -222,7 +222,7 @@ function showReading(reading: SankeyReading, x: number, y: number) {
       kind: 'series',
     },
   ]
-  tooltip.row = reading.row
+  tooltip.rows = reading.row ? [reading.row] : []
   tooltip.x = x
   tooltip.y = y
   tooltip.open = true

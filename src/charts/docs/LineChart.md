@@ -93,11 +93,11 @@ by magnitude: a value in another unit cannot be ranked among the series.
 `name` is the row key. `label` falls back to it, and `format` prints the value.
 A column holding text prints as it stands.
 
-For a tooltip you write yourself, take `row` from the `tooltip` slot instead.
+For a tooltip you write yourself, take `rows` from the `tooltip` slot instead.
 
 ```vue
 <LineChart :data="data" x="month" y="conversion_rate">
-  <template #tooltip="{ row }">{{ row.orders }} orders</template>
+  <template #tooltip="{ rows }">{{ rows[0].orders }} orders</template>
 </LineChart>
 ```
 

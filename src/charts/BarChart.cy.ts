@@ -620,7 +620,7 @@ describe('BarChart', () => {
       // The row carries every column, `tooltipColumns` or not: a tooltip the
       // app draws itself needs no prop to reach one.
       mountChart({ data: data.map((row) => ({ ...row, orders: 1000 })) }, {
-        tooltip: ({ row }: any) => h('span', `${row.orders} orders`),
+        tooltip: ({ rows }: any) => h('span', `${rows[0].orders} orders`),
       } as any)
       bars().should('have.length', data.length * 2)
       plot().focus()

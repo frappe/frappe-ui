@@ -253,7 +253,7 @@ describe('HeatmapChart', () => {
     it('hands the row behind the cell to the tooltip slot', () => {
       mountChart(
         {},
-        { tooltip: ({ row }: any) => h('span', `day ${row?.day}`) },
+        { tooltip: ({ rows }: any) => h('span', `day ${rows[0]?.day}`) },
       )
       cells().should('have.length', data.length)
       plot().focus()

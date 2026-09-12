@@ -3317,8 +3317,15 @@ The build or the type-check reports the rest.
 - `showValues` on `HeatmapChart` and `showInlineLabels` on `DonutChart` are both
   `showDataLabels`. Axis charts take it at the chart level too, so one prop
   replaces one `seriesConfig` entry per series.
-- `ChartTooltipItem.kind` is required. An item built by hand needs
-  `kind: 'series'`.
+- `ChartTooltipItem.kind` is required, and `'column'` is now `'context'`. An item
+  built by hand needs `kind: 'series'`.
+- The `#tooltip` slot passes `rows`, a list, in place of `row` on every chart.
+  Read `rows[0]` where you read `row`. `FunnelChart`'s `stage` slot prop is gone:
+  its `percentOfFirst` and `percentOfPrevious` are items named `ofFirst` and
+  `ofPrevious`. `ChartTooltip` takes `rows` as a prop too.
+- `DonutChart`'s `#center` slot passes `{ label, value, formattedValue, percent }`.
+  `value` and `percent` are numbers now; print `formattedValue` where you printed
+  `value`.
 - `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes a
   `ChartMark`. The old `'line'` is now `'area'`, which is the default, so a card
   naming no type is unchanged.

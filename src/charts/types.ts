@@ -579,17 +579,35 @@ export type ChartLegendItem = {
 export type ChartTooltipItem = {
   name: string
   label: string
-  /** Left out by a `'column'` item: a swatch would claim a mark on the plot. */
+  /** Left out by a `'context'` item: a swatch would claim a mark on the plot. */
   color?: string
   value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
   /**
-   * `'series'` is a value the plot draws. `'column'` is a `tooltipColumns`
-   * entry, which the plot does not draw.
+   * `'series'` is a value the plot draws. `'context'` is a reading it does not:
+   * a `tooltipColumns` entry, or a funnel stage's conversion rate.
    */
-  kind: 'series' | 'column'
+  kind: 'series' | 'context'
+}
+
+/**
+ * What every tooltip body reads: the `#tooltip` slot on every chart, and
+ * `ChartTooltip`'s own default slot.
+ */
+export type ChartTooltipSlotProps = {
+  /** Heads the readings, e.g. the category the pointer is over. */
+  label?: string
+  /** One entry per reading, in the order they should be read. */
+  items: ChartTooltipItem[]
+  /**
+   * The rows behind the reading, so a body can read a column the plot never
+   * drew. One row for a point, cell, band or stage; every grouped row for the
+   * donut's "Others" slice; none for a sankey node, which stands for every row
+   * through it rather than one.
+   */
+  rows: Record<string, any>[]
 }
 
 export type ChartDatapointEvent = {
@@ -1058,10 +1076,11 @@ export type ChartTooltipProps = {
   /** One row per reading, in the order they should be read. */
   items: ChartTooltipItem[]
   /**
-   * The data row under the pointer, so the slot can read a column the chart
-   * never plotted. Left out by charts that hover an aggregate.
+   * The rows behind the reading, handed to the slot so a body can read a column
+   * the plot never drew. Empty when the pointer is over an aggregate that
+   * stands for no single row.
    */
-  row?: Record<string, any>
+  rows: Record<string, any>[]
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -1105,14 +1124,10 @@ export type AxisChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds one entry per visible series at
-     * the hovered category, biggest first. `row` is the data row behind them,
-     * so a replacement body can read a column the chart never plotted.
+     * the hovered category, biggest first. `rows` holds the data row behind
+     * them, so a replacement body can read a column the chart never plotted.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      row?: Record<string, any>
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type BarChartEmits = AxisChartEmits
@@ -1141,21 +1156,17 @@ export type DonutChartSlots = ChartActionsSlot &
      * hovered slice while one is hovered.
      */
     center?: (props: {
-      value: string
       label: string
+      value: number
+      formattedValue: string
       /** Only set while a slice is hovered. */
-      percent?: string
+      percent?: number
     }) => unknown
     /**
-     * Replaces the tooltip body. `items` holds the hovered slice alone. `rows`
-     * is a list because one slice can stand for several rows: a named slice
-     * carries one, and the "Others" slice carries every row it collapsed.
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A named
+     * slice carries one row, and the "Others" slice every row it collapsed.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      rows: Record<string, any>[]
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type FunnelChartEmits = {
@@ -1170,16 +1181,11 @@ export type FunnelChartEmits = {
 export type FunnelChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
-     * Replaces the tooltip body. `row` is the row behind the stage. `stage` is
-     * the extra the funnel carries: the two conversion rates the default body
-     * prints under the value.
+     * Replaces the tooltip body. `items` holds the stage's value and its two
+     * conversion rates, which are `'context'` items; `rows` holds the row
+     * behind the stage.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      row?: Record<string, any>
-      stage?: FunnelStage
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type HeatmapChartEmits = {
@@ -1194,13 +1200,9 @@ export type HeatmapChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the hovered cell alone, and
-     * `row` the row behind it, so a body can read a column the grid never drew.
+     * `rows` the row behind it, so a body can read a column the grid never drew.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      row?: Record<string, any>
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type SankeyChartEmits = {
@@ -1216,13 +1218,9 @@ export type SankeyChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the hovered band or node alone.
-     * A node has no `row`: it stands for every row through it, not one.
+     * A node's `rows` is empty: it stands for every row through it, not one.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      row?: Record<string, any>
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type ScatterChartEmits = {
@@ -1239,14 +1237,10 @@ export type ScatterChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the point's two measures, and
-     * its size when the chart draws one. `row` is the row behind the point, so
-     * a body can read a column the plot never drew.
+     * its size when the chart draws one. `rows` holds the row behind the point,
+     * so a body can read a column the plot never drew.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      row?: Record<string, any>
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 /** No tooltip slot: a card with no plot has nothing to hover. */
@@ -1278,9 +1272,5 @@ export type ChartLegendEmits = {
 
 export type ChartTooltipSlots = {
   /** Replaces the whole tooltip body, headline row included. */
-  default: (props: {
-    label?: string
-    items: ChartTooltipItem[]
-    row?: Record<string, any>
-  }) => unknown
+  default: (props: ChartTooltipSlotProps) => unknown
 }

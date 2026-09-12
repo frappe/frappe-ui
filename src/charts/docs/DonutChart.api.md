@@ -128,25 +128,25 @@
   {
     name: 'center',
     description: 'Replaces the readout in the middle of the ring. Reads the total, or the\nhovered slice while one is hovered.',
-    type: '{ value: string; label: string; percent?: string | undefined; }'
+    type: '{ label: string; value: number; formattedValue: string; percent?: number | undefined; }'
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. `rows`\nis a list because one slice can stand for several rows: a named slice\ncarries one, and the "Others" slice carries every row it collapsed.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; rows: Record<string, any>[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. A named\nslice carries one row, and the "Others" slice every row it collapsed.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:hiddenSeries',
-    description: 'The legend switched a slice off or back on. Carries the new list.',
-    type: '[value: string[]]'
-  },
-  {
     name: 'select',
     description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nidentifies the slice and `label` is what it printed. The collapsed tail is\nnamed `OTHERS_KEY` and carries every row it grouped, so a caller can drill\ninto it as well as into a named slice.',
     type: '[event: DonutSliceEvent]'
+  },
+  {
+    name: 'update:hiddenSeries',
+    description: 'The legend switched a slice off or back on. Carries the new list.',
+    type: '[value: string[]]'
   }
 ]
 </script>

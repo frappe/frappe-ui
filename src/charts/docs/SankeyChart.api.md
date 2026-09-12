@@ -114,8 +114,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.\nA node has no `row`: it stands for every row through it, not one.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.\nA node\'s `rows` is empty: it stands for every row through it, not one.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 

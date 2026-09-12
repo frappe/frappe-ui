@@ -82,6 +82,16 @@ describe('FunnelChart', () => {
       .and('contain.text', 'Won')
   })
 
+  it('reads both conversion rates in the tooltip, against the first stage and the one before', () => {
+    mountChart()
+    cy.get('[aria-label="Won, 20"]').trigger('mouseenter')
+    cy.get('[data-slot="chart-tooltip"]')
+      .should('contain.text', 'of Visited')
+      .and('contain.text', '40%')
+      .and('contain.text', 'of Demoed')
+      .and('contain.text', '67%')
+  })
+
   describe('keyboard', () => {
     // The funnel draws its own HTML, so each stage is a tab stop of its own —
     // no arrow-key cursor, unlike the echarts plots.
@@ -184,12 +194,18 @@ describe('FunnelChart', () => {
       cy.get('[data-slot="chart-header"]').should('contain.text', 'Export')
     })
 
-    it('takes an app’s own tooltip body, with the stage behind it', () => {
+    it('takes an app’s own tooltip body, with the rates among the items', () => {
       mountChart(
         {},
         {
-          tooltip: ({ label, stage }: any) =>
-            h('span', `${label} at ${Math.round(stage.percentOfPrevious)}%`),
+          tooltip: ({ items, rows }: any) =>
+            h(
+              'span',
+              `${rows[0].stage} at ${
+                items.find((item: any) => item.name === 'ofPrevious')
+                  .formattedValue
+              }`,
+            ),
         },
       )
       cy.get('[aria-label="Won, 20"]').focus()

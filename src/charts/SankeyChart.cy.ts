@@ -221,7 +221,9 @@ describe('SankeyChart', () => {
     it('hands the row behind the band to the tooltip slot', () => {
       mountChart(
         {},
-        { tooltip: ({ row }: any) => h('span', `signups ${row?.signups}`) },
+        {
+          tooltip: ({ rows }: any) => h('span', `signups ${rows[0]?.signups}`),
+        },
       )
       bands().should('have.length', data.length)
       plot().focus()

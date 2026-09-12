@@ -188,7 +188,7 @@ export function useAxisChart<C extends AxisChartConfig>(
     items: [] as ChartTooltipItem[],
     // Handed to the `#tooltip` slot so a replacement body can read a column the
     // chart never plotted.
-    row: undefined as Record<string, any> | undefined,
+    rows: [] as Record<string, any>[],
   })
 
   useTooltipDismiss({
@@ -292,7 +292,7 @@ export function useAxisChart<C extends AxisChartConfig>(
       ? format.value.x(category)
       : formatAxisValue(category, xAxis.value.type, xAxis.value.timeGrain)
     tooltip.items = items
-    tooltip.row = row
+    tooltip.rows = [row]
     tooltip.x = clientX ?? tooltip.x
     tooltip.y = clientY ?? tooltip.y
     tooltip.open = true

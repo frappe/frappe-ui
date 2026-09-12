@@ -9,7 +9,7 @@
       :dir="dir"
       role="tooltip"
     >
-      <slot :label="label" :items="items" :row="row">
+      <slot :label="label" :items="items" :rows="rows">
         <div v-if="label" class="mb-2 text-p-sm text-ink-gray-5">
           {{ label }}
         </div>
@@ -40,15 +40,15 @@
           </div>
         </div>
 
-        <!-- Column rows carry no swatch: a swatch says the reader can find
-             this on the plot, and a column is drawn nowhere. The rule is what
-             tells them apart from the series above. -->
+        <!-- Context rows carry no swatch: a swatch says the reader can find
+             this on the plot, and a context reading is drawn nowhere. The rule
+             is what tells them apart from the series above. -->
         <div
-          v-if="columnItems.length"
+          v-if="contextItems.length"
           class="mt-2 flex flex-col gap-1.5 border-t border-outline-gray-1 pt-2"
         >
           <div
-            v-for="item in columnItems"
+            v-for="item in contextItems"
             :key="item.name"
             class="flex items-center justify-between gap-5 text-p-sm"
           >
@@ -76,8 +76,8 @@ const props = defineProps<ChartTooltipProps>()
 const seriesItems = computed(() =>
   props.items.filter((item) => item.kind === 'series'),
 )
-const columnItems = computed(() =>
-  props.items.filter((item) => item.kind === 'column'),
+const contextItems = computed(() =>
+  props.items.filter((item) => item.kind === 'context'),
 )
 
 const portalTarget = usePortalTarget()

@@ -35,7 +35,15 @@ function mountTooltip(props: Record<string, any> = {}, slots?: any) {
         return () =>
           h(
             ChartTooltip,
-            { open: true, x: 100, y: 100, label: 'Jan', items, ...props },
+            {
+              open: true,
+              x: 100,
+              y: 100,
+              label: 'Jan',
+              items,
+              rows: [],
+              ...props,
+            },
             slots,
           )
       },

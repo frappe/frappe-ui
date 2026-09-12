@@ -169,21 +169,21 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `row` is the data row behind them,\nso a replacement body can read a column the chart never plotted.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `rows` holds the data row behind\nthem, so a replacement body can read a column the chart never plotted.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:hiddenSeries',
-    description: 'The legend switched a series off or back on. Carries the new list.',
-    type: '[value: string[]]'
-  },
-  {
     name: 'select',
     description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its value, and the row behind it.',
     type: '[event: ChartDatapointEvent]'
+  },
+  {
+    name: 'update:hiddenSeries',
+    description: 'The legend switched a series off or back on. Carries the new list.',
+    type: '[value: string[]]'
   }
 ]
 </script>

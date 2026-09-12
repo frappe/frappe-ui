@@ -132,8 +132,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered cell alone, and\n`row` the row behind it, so a body can read a column the grid never drew.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered cell alone, and\n`rows` the row behind it, so a body can read a column the grid never drew.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 

@@ -113,17 +113,19 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
-        :row="hoveredStage?.row"
+        :rows="hoveredStage ? [hoveredStage.row] : []"
         :dir="dir"
       >
         <template #default="slotProps">
-          <slot name="tooltip" v-bind="slotProps" :stage="hoveredStage">
+          <slot name="tooltip" v-bind="slotProps">
             <div class="mb-2 text-p-sm text-ink-gray-5">
               {{ slotProps.label }}
             </div>
             <div class="flex flex-col gap-1.5 text-p-sm">
               <div
-                v-for="item in slotProps.items"
+                v-for="item in slotProps.items.filter(
+                  (entry) => entry.kind === 'series',
+                )"
                 :key="item.name"
                 class="flex items-center justify-between gap-5"
               >
@@ -143,13 +145,15 @@
               <!-- Indented to the swatch column so the two rates read as notes
                    on the value above rather than as values of their own. -->
               <div
-                v-for="rate in tooltip.rates"
-                :key="rate.label"
+                v-for="item in slotProps.items.filter(
+                  (entry) => entry.kind === 'context',
+                )"
+                :key="item.name"
                 class="flex items-center justify-between gap-5 ps-4"
               >
-                <span class="truncate text-ink-gray-5">{{ rate.label }}</span>
+                <span class="truncate text-ink-gray-5">{{ item.label }}</span>
                 <span class="shrink-0 tabular-nums text-ink-gray-6">
-                  {{ rate.value }}
+                  {{ item.formattedValue }}
                 </span>
               </div>
             </div>
@@ -243,7 +247,6 @@ const tooltip = reactive({
   y: 0,
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
-  rates: [] as { label: string; value: string }[],
 })
 
 useTooltipDismiss({
@@ -282,19 +285,23 @@ function readStage(stage: FunnelStage) {
       formattedValue: formatMeasure(stage.value),
       kind: 'series',
     },
-  ]
-  tooltip.rates = [
     {
+      name: 'ofFirst',
       label: `of ${stages.value[0]?.label ?? ''}`,
-      value: formatPercent(stage.percentOfFirst),
+      value: stage.percentOfFirst,
+      formattedValue: formatPercent(stage.percentOfFirst),
+      kind: 'context',
     },
   ]
   // The first stage has no predecessor, and the second one's predecessor *is*
   // the first stage — printing that rate again would repeat the line above it.
   if (stage.index > 1) {
-    tooltip.rates.push({
+    tooltip.items.push({
+      name: 'ofPrevious',
       label: `of ${stages.value[stage.index - 1].label}`,
-      value: formatPercent(stage.percentOfPrevious),
+      value: stage.percentOfPrevious,
+      formattedValue: formatPercent(stage.percentOfPrevious),
+      kind: 'context',
     })
   }
 }
