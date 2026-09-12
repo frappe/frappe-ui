@@ -25,14 +25,6 @@ export type ChartTokens = {
   backdrop: string
 }
 
-/**
- * The scheme a chart picks its fallback colors by. The package-root
- * `resolvedColorScheme` is the one resolution of `data-theme`, the `dark` class
- * and the OS setting; a chart has no `'system'` state to hold, because it reads
- * what the document is painted in rather than what the user selected.
- */
-export type { ResolvedColorScheme } from '../composables/useColorScheme'
-
 export const CHART_CATEGORICAL_LENGTH = 10
 export const CHART_SEQUENTIAL_LENGTH = 9
 export const CHART_DIVERGING_LENGTH = 9

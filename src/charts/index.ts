@@ -30,7 +30,6 @@ export type {
 // reads them once and stays internal: a plot that does not re-resolve on a
 // theme flip is the bug the composable exists to prevent.
 export { paletteColors, useChartTokens, type ChartTokens } from './tokens'
-export type { ResolvedColorScheme } from './tokens'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
 // so a caller can style it without hardcoding the reserved key.
@@ -112,6 +111,7 @@ export type {
   NumberCardSparkline,
   PlotLabelPlacement,
   ReferenceLine,
+  ReferenceLineLabelPlacement,
   SankeyLinkEvent,
   SankeyNodeAlign,
   SankeyOrient,
