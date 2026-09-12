@@ -24,7 +24,13 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { computed, onBeforeUnmount, watch } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  toValue,
+  watch,
+  type MaybeRefOrGetter,
+} from 'vue'
 import { useListContext } from './list-context'
 import { useVirtualRows } from './useVirtualRows'
 
@@ -46,6 +52,12 @@ const props = defineProps<{
    * scrollable ancestor.
    */
   virtual?: boolean
+
+  /**
+   * Explicit scroll viewport, such as ScrollArea's `viewportElement`.
+   * Defaults to the nearest scrollable ancestor when null or undefined.
+   */
+  scrollContainer?: MaybeRefOrGetter<HTMLElement | null | undefined>
 
   /** Rows rendered beyond the visible window on each side. Default: `6`. */
   overscan?: number
@@ -82,6 +94,7 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
   {
     enabled: () => virtualEnabled.value,
     rowHeight: () => rowHeight.value ?? 0,
+    scrollContainer: () => toValue(props.scrollContainer),
     overscan: () => props.overscan ?? 6,
   },
 )

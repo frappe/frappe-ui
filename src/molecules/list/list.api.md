@@ -195,6 +195,12 @@
     type: 'boolean'
   },
   {
+    name: 'scrollContainer',
+    description: 'Explicit scroll viewport, such as ScrollArea\'s `viewportElement`.\nDefaults to the nearest scrollable ancestor when null or undefined.',
+    required: false,
+    type: 'MaybeRefOrGetter<HTMLElement | null | undefined>'
+  },
+  {
     name: 'overscan',
     description: 'Rows rendered beyond the visible window on each side. Default: `6`.',
     required: false,
