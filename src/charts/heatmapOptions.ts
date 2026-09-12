@@ -285,7 +285,7 @@ export function buildHeatmapOption(
   const { tokens, format, xFormat, yFormat } = context
   const isRTL = config.dir === 'rtl'
   const matrix = buildHeatmapMatrix(config, context)
-  const showValues = Boolean(config.showValues)
+  const showDataLabels = Boolean(config.showDataLabels)
 
   const option = {
     animation: true,
@@ -379,14 +379,14 @@ export function buildHeatmapOption(
           },
         },
         label: {
-          show: showValues,
+          show: showDataLabels,
           fontSize: DATA_LABEL_FONT_SIZE,
           formatter: (params: any) => {
             const value = cellValue(params)
             return format ? format(value) : formatValue(value, 1, true)
           },
         },
-        // What makes `showValues` mean "when they fit": a label with no room
+        // What makes `showDataLabels` mean "when they fit": a label with no room
         // collides with its neighbour, and the loser is dropped rather than
         // printed over the cell next door.
         labelLayout: { hideOverlap: true },
@@ -399,7 +399,7 @@ export function buildHeatmapOption(
           emphasis: { itemStyle: { color: hoverCellColor(cell.color) } },
           // Ink per cell, because the fill under it is per cell: the pale end of
           // the ramp needs the dark ink the deep end would disappear into.
-          ...(showValues
+          ...(showDataLabels
             ? {
                 label: {
                   color: insideLabelColor(cell.color, tokens.insideLabel),

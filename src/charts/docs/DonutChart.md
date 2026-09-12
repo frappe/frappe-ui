@@ -28,7 +28,7 @@ row, for "Others".
 `variant="half"` draws the ring as a semicircle, which fits a short card.
 Ordered categories read better on the `sequential` ramp than on separate hues.
 
-`showInlineLabels` prints each slice's name and share next to the ring, and it
+`showDataLabels` prints each slice's name and share next to the ring, and it
 takes the center readout away — the labels are already on the arcs, and a total
 in the hole would repeat what they add up to. `centerLabel` and `format` have
 nothing to caption while it is on. The legend still draws below the plot, and

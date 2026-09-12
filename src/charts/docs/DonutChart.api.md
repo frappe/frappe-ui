@@ -60,7 +60,7 @@
     type: 'number'
   },
   {
-    name: 'showInlineLabels',
+    name: 'showDataLabels',
     description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default: the legend says the same without the\nleader lines.',
     required: false,
     type: 'boolean'

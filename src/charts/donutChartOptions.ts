@@ -166,10 +166,10 @@ export function buildDonutChartOption(
         type: 'pie',
         name: config.valueColumn,
         radius: isHalf
-          ? config.showInlineLabels
+          ? config.showDataLabels
             ? HALF_RADIUS_WITH_LABELS
             : HALF_RADIUS
-          : config.showInlineLabels
+          : config.showDataLabels
             ? DONUT_RADIUS_WITH_LABELS
             : DONUT_RADIUS,
         center: ['50%', isHalf ? HALF_CENTER_Y : '50%'],
@@ -186,7 +186,7 @@ export function buildDonutChartOption(
         itemStyle: { borderRadius: SLICE_RADIUS, borderWidth: 0 },
         avoidLabelOverlap: true,
         label: {
-          show: Boolean(config.showInlineLabels),
+          show: Boolean(config.showDataLabels),
           color: tokens.dataLabel,
           fontSize: DATA_LABEL_FONT_SIZE,
           // `params.percent` is echarts' own share of the series total, which is
@@ -197,7 +197,7 @@ export function buildDonutChartOption(
             )}`,
         },
         labelLine: {
-          show: Boolean(config.showInlineLabels),
+          show: Boolean(config.showDataLabels),
           length: 8,
           length2: 12,
           smooth: true,

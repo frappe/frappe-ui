@@ -36,7 +36,7 @@
         <!-- HTML rather than an echarts graphic: swapping the readout on hover
              costs two spans instead of a `setOption` on the ring. -->
         <div
-          v-if="!showInlineLabels"
+          v-if="!showDataLabels"
           class="pointer-events-none absolute inset-0 flex items-center justify-center"
           :dir="dir"
         >
@@ -154,7 +154,7 @@ const config = computed<DonutChartConfig>(() => ({
   categoryColumn: props.category,
   valueColumn: props.value,
   maxSlices: props.maxSlices,
-  showInlineLabels: props.showInlineLabels,
+  showDataLabels: props.showDataLabels,
   centerLabel: props.centerLabel,
   variant: props.variant,
   palette: props.palette,

@@ -142,7 +142,7 @@ const config = computed<HeatmapChartConfig>(() => ({
   valueColumn: props.value,
   min: props.min,
   max: props.max,
-  showValues: props.showValues,
+  showDataLabels: props.showDataLabels,
   palette: props.palette,
   dir: dir.value,
   echartOptions: props.echartOptions,

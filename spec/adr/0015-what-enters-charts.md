@@ -25,6 +25,14 @@ costs an app to reach the chrome — and those belong to the plot-and-chrome
 contract in [charts.md](../charts.md) rather than here. The other three are
 decided below, by the same rule, and are marked as second-pass entries.
 
+**Names since renamed (2026-09-12).** The reasoning below is recorded as it
+stood. Three of the props it names have moved: `showInlineLabels` on the donut
+and `showValues` on the heatmap are both `showDataLabels`, the one name the
+family uses for a data label, and the funnel's `showPercentages` is removed
+because a funnel always prints its conversion rates. The decisions are
+unchanged — what entered still entered. See the
+[RC API audit](https://github.com/frappe/frappe-ui/issues/1139), item 4.
+
 ## Decision
 
 ### Enters

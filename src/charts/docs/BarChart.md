@@ -52,7 +52,8 @@ renames or recolors it like any other series.
 
 `horizontal` moves the category axis to Y, which is how long labels stay
 readable. Per-series looks live in `seriesConfig`, keyed by series identity —
-here to print the value on each bar.
+here to print the value on each bar. `showDataLabels` on the chart prints them
+on every series at once, and a `seriesConfig` entry overrides it for one.
 
 <ComponentPreview name="Charts-BarHorizontal" csr="true" self-layout />
 

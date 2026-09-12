@@ -56,7 +56,7 @@
             <!-- Nothing to convert from at the top of the funnel: printing
                  "100%" there states a tautology. -->
             <div
-              v-if="showPercentages && stage.index > 0"
+              v-if="stage.index > 0"
               class="truncate text-xs tabular-nums text-ink-gray-5"
             >
               {{ formatPercent(stage.percentOfFirst) }}
@@ -183,9 +183,7 @@ import type {
 // descending silhouette while the labels stay on a straight baseline. No
 // echarts — the geometry is a division per stage, see funnelGeometry.ts.
 
-const props = withDefaults(defineProps<FunnelChartProps>(), {
-  showPercentages: true,
-})
+const props = defineProps<FunnelChartProps>()
 
 const emit = defineEmits<FunnelChartEmits>()
 
@@ -198,7 +196,6 @@ const config = computed<FunnelChartConfig>(() => ({
   data: props.data,
   categoryColumn: props.category,
   valueColumn: props.value,
-  showPercentages: props.showPercentages,
   palette: props.palette,
   dir: dir.value,
 }))

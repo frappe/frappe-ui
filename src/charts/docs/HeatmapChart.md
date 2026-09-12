@@ -5,7 +5,7 @@ Magnitude across two dimensions, a cell per pair.
 ## Values in cells
 
 `x`, `y` and `value` name a cell's column, row and magnitude, so the data is one
-row per cell. `showValues` prints values inside the cells, dropping any label
+row per cell. `showDataLabels` prints values inside the cells, dropping any label
 that would collide with its neighbour.
 
 <ComponentPreview name="Charts-HeatmapTickets" csr="true" self-layout />

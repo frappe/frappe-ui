@@ -99,7 +99,7 @@ describe('DonutChart', () => {
   })
 
   it('gives up the readout when the labels move onto the ring', () => {
-    mountChart({ showInlineLabels: true })
+    mountChart({ showDataLabels: true })
     cy.get('[data-slot="chart-plot"]').should('not.contain.text', 'Visits')
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Search')
   })

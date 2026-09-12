@@ -150,6 +150,25 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
     })
     expect(config.series[0].name).toBe('sales')
   })
+
+  it('spreads the chart-level showDataLabels to every series', () => {
+    const { config } = normalize({ showDataLabels: true })
+    expect(config.series.map((series) => series.showDataLabels)).toEqual([
+      true,
+      true,
+    ])
+  })
+
+  it('lets a seriesConfig entry turn the chart-level labels back off', () => {
+    const { config } = normalize({
+      showDataLabels: true,
+      seriesConfig: { refunds: { showDataLabels: false } },
+    })
+    expect(config.series.map((series) => series.showDataLabels)).toEqual([
+      true,
+      false,
+    ])
+  })
 })
 
 describe('normalizeAxisChartProps: the second value axis', () => {

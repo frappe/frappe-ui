@@ -21,7 +21,6 @@ const stage = ref<FunnelStageEvent | null>(null)
         :data="dealStages"
         category="stage"
         value="count"
-        :show-percentages="false"
         title="Deal pipeline"
         subtitle="Open deals by stage, this quarter"
         @select="stage = $event"

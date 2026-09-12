@@ -72,6 +72,12 @@
     type: 'Record<string, SeriesStyle>'
   },
   {
+    name: 'showDataLabels',
+    description: 'Prints each series\' value beside its marks. A `seriesConfig` entry of the\nsame name overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'hiddenSeries',
     description: 'Series the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app, or to keep what a\nreader hid across a reload. Left unbound, the legend owns it.',
     required: false,

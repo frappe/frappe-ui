@@ -58,11 +58,6 @@ describe('FunnelChart', () => {
       .and('not.contain.text', '100%')
   })
 
-  it('drops the percentages on request', () => {
-    mountChart({ showPercentages: false })
-    cy.get('[data-slot="chart-container"]').should('not.contain.text', '60%')
-  })
-
   it('gives every stage a hit area that names it', () => {
     mountChart()
     hitAreas().should('have.length', data.length)

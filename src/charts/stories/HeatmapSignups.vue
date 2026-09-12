@@ -29,7 +29,7 @@ const monthName = (month: Date) =>
       y="plan"
       value="signups"
       :x-axis="{ format: monthName }"
-      show-values
+      show-data-labels
       title="Signups by plan"
       subtitle="First half of 2024"
     />

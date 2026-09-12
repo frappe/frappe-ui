@@ -148,6 +148,7 @@ function buildSeries(
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.
     ...(name === OTHERS_KEY ? { label: OTHERS_LABEL } : {}),
+    showDataLabels: props.showDataLabels,
     ...style,
     name,
   }

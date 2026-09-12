@@ -84,7 +84,7 @@
     type: 'HeatmapAxisOptions'
   },
   {
-    name: 'showValues',
+    name: 'showDataLabels',
     description: 'Prints each cell\'s value inside it. A label that would collide with its\nneighbour is dropped, so a grid too fine to carry numbers shows none.',
     required: false,
     type: 'boolean'

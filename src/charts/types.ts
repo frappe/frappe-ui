@@ -219,7 +219,7 @@ export type DonutChartConfig = {
    * Prints each slice's name and share next to the ring. Off by default: the
    * legend carries the same information without the leader lines.
    */
-  showInlineLabels?: boolean
+  showDataLabels?: boolean
   /** Caption under the total in the middle. Defaults to the value column name. */
   centerLabel?: string
   /** `'half'` draws the ring as a semicircle; only the geometry changes. */
@@ -273,11 +273,6 @@ export type FunnelChartConfig = {
    * as the population narrows.
    */
   palette?: ChartPalette
-  /**
-   * Prints each stage's share of the first stage under its value. On by
-   * default: the conversion rate is what a funnel is read for.
-   */
-  showPercentages?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -343,7 +338,7 @@ export type HeatmapChartConfig = {
    * Prints each cell's value inside it. Labels that would collide with a
    * neighbour are dropped, so a grid too fine to carry numbers shows none.
    */
-  showValues?: boolean
+  showDataLabels?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
   echartOptions?: EchartOptionsOverride
@@ -697,7 +692,10 @@ export type SeriesStyle = {
    * `y` order whatever axis each one sits on, so a series keeps its color.
    */
   axis?: 'y' | 'y2'
-  /** Prints this series' value beside each of its marks. */
+  /**
+   * Prints this series' value beside each of its marks, overriding the chart's
+   * own `showDataLabels`.
+   */
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -752,6 +750,11 @@ export type AxisChartProps = ChartBaseProps & {
   maxSeries?: number
   /** Keyed by series identity: a `y` column, or a value of the `series` column. */
   seriesConfig?: Record<string, SeriesStyle>
+  /**
+   * Prints each series' value beside its marks. A `seriesConfig` entry of the
+   * same name overrides it for one series.
+   */
+  showDataLabels?: boolean
   /**
    * Series the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app, or to keep what a
@@ -822,7 +825,7 @@ export type DonutChartProps = ChartBaseProps & {
    * in the middle. Off by default: the legend says the same without the
    * leader lines.
    */
-  showInlineLabels?: boolean
+  showDataLabels?: boolean
   /** Caption under the total in the middle. Defaults to the `value` key. */
   centerLabel?: string
   /** `'half'` draws the ring as a semicircle; only the geometry changes. */
@@ -842,8 +845,6 @@ export type FunnelChartProps = ChartBaseProps & {
   category: string
   /** Row key holding how many reached the stage. */
   value: string
-  /** Prints each stage's share of the first stage. On by default. */
-  showPercentages?: boolean
   /** Prints every number the funnel shows: the stage values and the tooltip. */
   format?: ChartValueFormatter
   /** Defaults to `'sequential'` reversed, so color darkens as the funnel narrows. */
@@ -871,7 +872,7 @@ export type HeatmapChartProps = ChartBaseProps & {
    * Prints each cell's value inside it. A label that would collide with its
    * neighbour is dropped, so a grid too fine to carry numbers shows none.
    */
-  showValues?: boolean
+  showDataLabels?: boolean
   /** Prints every number the grid shows: the cells, the scale ends, the tooltip. */
   format?: ChartValueFormatter
   /**

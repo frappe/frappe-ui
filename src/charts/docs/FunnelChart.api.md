@@ -54,13 +54,6 @@
     type: 'string'
   },
   {
-    name: 'showPercentages',
-    description: 'Prints each stage\'s share of the first stage. On by default.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
-  },
-  {
     name: 'format',
     description: 'Prints every number the funnel shows: the stage values and the tooltip.',
     required: false,

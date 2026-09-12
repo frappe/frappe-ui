@@ -143,7 +143,7 @@ describe('HeatmapChart', () => {
   })
 
   it('prints the values in the cells on request', () => {
-    mountChart({ showValues: true })
+    mountChart({ showDataLabels: true })
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '8')
   })
 
