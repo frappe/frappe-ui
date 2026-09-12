@@ -50,6 +50,24 @@
               <div class="bg-surface-elevation-1 px-4 pb-6 pt-5 sm:px-6">
                 <div class="flex">
                   <div class="w-full flex-1">
+                    <!--
+                      Always render DialogTitle so aria-labelledby targets a
+                      real element. When the header is hidden, render it
+                      sr-only so the label still exists for screen readers.
+                    -->
+                    <DialogTitle
+                      :as="showHeader ? 'header' : 'span'"
+                      :class="showHeader ? 'flex-1' : 'sr-only'"
+                    >
+                      <slot name="title" :close="close">
+                        <h3
+                          v-if="props.title"
+                          class="text-2xl-semibold leading-6 text-ink-gray-8"
+                        >
+                          {{ props.title }}
+                        </h3>
+                      </slot>
+                    </DialogTitle>
                     <div
                       v-if="showHeader"
                       class="mb-6 flex items-center justify-between"
@@ -69,16 +87,6 @@
                             aria-hidden="true"
                           />
                         </div>
-                        <DialogTitle as="header" class="flex-1">
-                          <slot name="title" :close="close">
-                            <h3
-                              v-if="props.title"
-                              class="text-2xl-semibold leading-6 text-ink-gray-8"
-                            >
-                              {{ props.title }}
-                            </h3>
-                          </slot>
-                        </DialogTitle>
                       </div>
                       <DialogClose v-if="props.showCloseButton" as-child>
                         <Button variant="ghost" label="Close">
@@ -89,13 +97,12 @@
                       </DialogClose>
                     </div>
 
-                    <slot :close="close">
-                      <DialogDescription as-child v-if="props.message">
-                        <p class="text-p-base text-ink-gray-7">
-                          {{ props.message }}
-                        </p>
-                      </DialogDescription>
-                    </slot>
+                    <DialogDescription as-child v-if="props.message">
+                      <p class="text-p-base text-ink-gray-7">
+                        {{ props.message }}
+                      </p>
+                    </DialogDescription>
+                    <slot :close="close" />
                   </div>
                 </div>
               </div>
