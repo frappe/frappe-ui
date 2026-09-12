@@ -34,6 +34,7 @@ it is likely to move:
 | [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
+| [`PickerShell`](#pickershell) | Incubating | Its API settling |
 | [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
 | [`ThemeSwitcher`](#themeswitcher) | Parked | Apps moving to `Select` plus `useColorScheme` |
 | [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
@@ -316,6 +317,44 @@ entirely with `#tag`:
 form fields (this example shows a required error until a recipient is added).
 
 <ComponentPreview name="MultiEmailInput-Labeling" csr="true" />
+
+## PickerShell
+
+The input-and-panel half of the date pickers: a `TextInput` trigger, a `Popover`
+the input drives rather than toggles, and the typing, open and focus wiring
+between them. Build a picker of your own on it instead of copying `DatePicker` —
+fill `#default` with the panel, and read or write the text through
+`v-model:input-value`.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { PickerShell } from 'frappe-ui/experimental'
+
+const open = ref(false)
+const text = ref('')
+</script>
+
+<template>
+  <PickerShell
+    v-model:open="open"
+    v-model:input-value="text"
+    side="bottom"
+    align="start"
+    :offset="4"
+    label="Colour"
+  >
+    <template #default="{ close }">
+      <ColourGrid @select="close" />
+    </template>
+  </PickerShell>
+</template>
+```
+
+Style it through the `data-slot` hooks `TextInput` and
+[`Popover`](/docs/components/popover) already render — there are no
+class-injection props, and the panel takes its width from whatever `#default`
+renders.
 
 ## useInputLabeling
 

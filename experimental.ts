@@ -41,6 +41,17 @@ export * from './experimental/CommandPalette'
 // functions, tooltips, disabled-row exclusion, the select banner), so this
 // stays here, unstable, until `frappe-ui/list` reaches parity.
 export * from './experimental/ListView'
+// PickerShell. The input-and-panel half of the date pickers: a `TextInput`
+// trigger, a manual `Popover`, and the typing, open and focus wiring between
+// them. Incubating — exported so an app can build a picker of its own instead
+// of copying it, while the props and slots settle.
+export { default as PickerShell } from './src/components/shared/picker/PickerShell.vue'
+export type {
+  PickerShellProps,
+  PickerShellTriggerSlotProps,
+  PickerShellSlots,
+  PickerShellExposed,
+} from './src/components/shared/picker/types'
 // v0 TextEditor family. Moved out of root (#974) — `frappe-ui/editor` is the
 // composition-based replacement. Parked here (#1007), unstable, as an interim
 // import path while apps migrate. Deletion stays human-gated (spec/editor.md
