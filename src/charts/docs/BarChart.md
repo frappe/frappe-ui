@@ -32,7 +32,8 @@ measured over every x, and the survivors stay in the order the data put them in.
 
 The rows are never rewritten, so the plot shows the share and the tooltip shows
 both it and the number that was measured. A `yAxis.format` prints that number in
-the tooltip; the ticks read as percentages whatever it says.
+the tooltip; the ticks read as percentages whatever it says, and so does an
+`axisLabel.formatter` set through that axis' `echartOptions`.
 
 The share is taken per stack, so two stacks under different `stackName`s each
 reach 100 on their own, and a bar stack and an area stack are two wholes. A

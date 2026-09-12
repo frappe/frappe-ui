@@ -3282,8 +3282,12 @@ break**: nothing errors, the grouping and decimal marks just change.
 
 A page with no `lang`, or a malformed one, prints exactly what it printed
 before. A page that declares `de-DE` gets `1.234,5` where it used to get
-`1,234.5`. If a chart must stay in one locale whatever the page says, pass your
-own `format` — the axis, the tooltip and the labels all run through it.
+`1,234.5`. A page that flips `lang` after a chart mounts reprints it. If a chart
+must stay in one locale whatever the page says, pass your own `format` — the
+axis, the tooltip and the labels all run through it.
+
+Numbers only. Dates and time-axis labels still print in English, whatever the
+page declares. Pass `xAxis.format` to print them in another language.
 
 ### `FunnelChart` always prints its percentages
 
@@ -3301,6 +3305,48 @@ through as an attribute and the percentages come back.
 ```
 
 Grep for `show-percentages` and `showPercentages`.
+
+### `DonutSliceEvent.name` is the slice's identity
+
+`@select` on `DonutChart` used to pass the printed slice name as `name`. It now
+passes the identity, and what it printed moves to `label`. Both are strings, so
+a handler that keyed on `name` type-checks and keeps running on a different
+value: the collapsed tail is `__others__` (the exported `OTHERS_KEY`), and a
+label a second row repeats is deduplicated to `"A (2)"`. A slice whose label is
+unique and not collapsed passes what it always passed.
+
+```ts
+// Before: name carried what the slice printed
+function open(slice: DonutSliceEvent) { showTitle(slice.name) }
+
+// After: label prints, name identifies
+function open(slice: DonutSliceEvent) { showTitle(slice.label) }
+```
+
+Grep for `@select` handlers on `DonutChart` and read what they do with `.name`.
+
+### A sparkline `type: 'line'` draws the stroke alone
+
+`NumberCardSparkline.type` still accepts `'line'`, so a card that names it
+compiles unchanged and draws something else: the old `'line'` was a stroke over
+a fill, which the family calls an area, and `'line'` is now the stroke alone.
+For the old drawing, say `'area'`, or drop the key — `'area'` is the default.
+
+Grep for `sparkline` objects carrying `type: 'line'`.
+
+### A value that does not plot is dropped
+
+One policy across the family, and every part of it is silent. A funnel stage
+whose count is missing, unreadable or negative is dropped rather than drawn at
+0, so `FunnelStage.index` and the conversion rates count the stages that remain.
+A row whose x cannot be read as a date is dropped from a `time` axis, and the
+rows sort by time. Bar, line and area draw the empty state where they used to
+draw bare axes, when no visible series carries a number at any row. `select` no
+longer fires on Enter for a cell the plot drew no mark for.
+
+Grep for `FunnelChart` data that can carry a blank or negative value, and for
+`#empty` slots on bar, line and area, which now render for a `y` key no row
+carries.
 
 ### The loud ones
 
@@ -3327,11 +3373,9 @@ The build or the type-check reports the rest.
   `value` and `percent` are numbers now; print `formattedValue` where you printed
   `value`.
 - `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes a
-  `ChartMark`. The old `'line'` is now `'area'`, which is the default, so a card
-  naming no type is unchanged.
+  `ChartMark`.
 - `ChartDatapointEvent.dataIndex` and `FunnelStageEvent.index` are gone. Read the
-  row, which every event carries. `DonutSliceEvent.name` is now the slice's
-  identity and `label` is what it prints.
+  row, which every event carries.
 - `seriesName` is `name` on `ChartDatapointEvent` and `ScatterPointEvent`, matching
   every other payload. `FunnelStageEvent` carries a `name` as well, the category
   value behind the printed `label`.

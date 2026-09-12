@@ -18,7 +18,15 @@ export type ChartExposedRefs = {
   chart: ComputedRef<ECharts | undefined>
 }
 
-/** Deep-merged into the generated echarts option as a last-resort escape hatch. */
+/**
+ * Deep-merged into the generated echarts option as a last-resort escape hatch.
+ * Objects merge key by key; arrays replace. So `series: [...]` at chart level
+ * throws away the generated series, data and colors included. To reach one
+ * series key, use the per-series `echartOptions` on an axis chart.
+ *
+ * `animationDuration` set here applies to the first draw only; every later
+ * draw is instant.
+ */
 export type EchartOptionsOverride = Record<string, any>
 
 export type ChartPaletteName = 'sequential' | 'categorical' | 'diverging'
@@ -647,8 +655,8 @@ export type ChartBaseProps = {
   /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
   /**
-   * Puts the chart in its error state and prints this message under it. A
-   * chart that fails to draw sets its own; this is for a failed request.
+   * Puts the chart in its error state and prints this message under it. Data
+   * the chart cannot draw shows the empty state, not this one.
    */
   error?: string | null
 }
@@ -676,8 +684,8 @@ export type ChartXAxisOptions = {
 
 export type ChartValueAxisOptions = {
   /**
-   * Names what the axis measures. Drawn above the plot rather than turned
-   * sideways along it, so it reads with the chart title.
+   * Names what the axis measures. Reads as running text, never set on its
+   * side.
    */
   title?: string
   /** Bottom of the scale. Defaults to a round number under the data. */
@@ -686,7 +694,11 @@ export type ChartValueAxisOptions = {
   max?: number
   /** Prints each tick label, and every value this axis carries elsewhere. */
   format?: ChartValueFormatter
-  /** Escape hatch: deep-merged into this axis' echarts option. */
+  /**
+   * Escape hatch: deep-merged into this axis' echarts option. On a
+   * `stacked: 'normalized'` chart the percent formatter wins over an
+   * `axisLabel.formatter` set here.
+   */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -859,7 +871,7 @@ export type DonutChartProps = ChartBaseProps & {
   centerLabel?: string
   /** `'half'` draws the ring as a semicircle; only the geometry changes. */
   variant?: DonutVariant
-  /** Prints every number the ring shows: the readout, the tooltip, the labels. */
+  /** Prints the readout and the tooltip. The slice labels print shares. */
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
   palette?: ChartPalette

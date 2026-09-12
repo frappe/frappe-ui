@@ -126,6 +126,10 @@ format from `xAxis` and `yAxis`.
 `tooltipColumns[].format` is the one other place, and it is the same rule: a
 tooltip column is drawn on no axis, so it carries its own.
 
+`HeatmapAxisOptions` carries `format` and no `title`, where every other axis
+options type carries both. That is a gap, not a decision: a title on a heatmap
+axis is additive and can land in a 1.x minor.
+
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as

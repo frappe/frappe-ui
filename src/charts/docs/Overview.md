@@ -17,7 +17,7 @@ rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 An echarts-backed component registers only the modules it can draw. A donut
 costs a donut; the three axis charts share the bar and line modules, because any
 of them draws any mark. `FunnelChart` and `NumberCard` use no echarts at all —
-both draw their own SVG — so they add nothing to the bundle.
+both draw their own SVG.
 
 ## Data shapes
 
@@ -155,6 +155,16 @@ the option builder over them, and the state of the query that fetched them.
 chart the app has already placed inside a card of its own: the content renders
 with no border, background, radius or padding, and one bordered box stops
 nesting in another.
+
+## The option escape hatch
+
+`echartOptions` is deep-merged into the option the props built: objects merge
+key by key, arrays replace. So `series: [...]` at chart level throws away the
+generated series, data and colors included. The per-series `echartOptions` in
+`seriesConfig` is the path to one series key on an axis chart.
+
+`animationDuration` set through the hatch applies to the first draw only; every
+later draw is instant.
 
 ## The echarts instance
 

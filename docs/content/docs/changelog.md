@@ -727,11 +727,13 @@ Landed so far:
   row. A row whose x cannot be read as a date is dropped from a `time` axis, the
   way a non-numeric x is already dropped from a `value` axis, and the rows sort
   by time. The funnel drops a stage whose count is missing, unreadable or
-  negative instead of drawing it at 0.
+  negative instead of drawing it at 0, so its indexes and conversion rates count
+  the stages that remain. **Breaking, silent:** a chart drawing any of these
+  draws something else now, with no error.
 - **The empty state is what the plot draws.** Bar, line and area now show it
   when no visible series has a number at any row, where they used to draw bare
   axes: a `y` key no row carries reads as empty, and so does switching every
-  series off through the legend.
+  series off through the legend. Silent as well.
 - `NumberCard` prints through `format` and `deltaFormat`, the `ChartValueFormatter`
   every other chart takes. `precision` and `compact` are **removed**: a caller
   who wants either writes it in `format`. `format` prints the value and the
@@ -766,12 +768,16 @@ unless it says otherwise. The
 
 - **Breaking:** one shape for every `select` payload. `ChartDatapointEvent.dataIndex`
   and `FunnelStageEvent.index` are gone — read the row, which every event carries.
-  `DonutSliceEvent.name` is the slice's identity, `OTHERS_KEY` for the collapsed
-  tail, and what it printed moves to a new `label`. `seriesName` on
+  `seriesName` on
   `ChartDatapointEvent` and `ScatterPointEvent` is `name`, the field every other
   payload, item and legend entry already used for an identity, and
   `FunnelStageEvent` gains the `name` it never carried: the category value, where
   `label` is what the column printed.
+- **Breaking, silent:** `DonutSliceEvent.name` is the slice's identity, where it
+  was the printed name, and what it printed moves to a new `label`. Both are
+  strings, so a handler reading `name` keeps running on a different value:
+  `OTHERS_KEY` for the collapsed tail and `"A (2)"` for a label a second row
+  repeats. Grep for `@select` handlers on `DonutChart` reading `.name`.
 - **Breaking:** one tooltip slot shape. Every `#tooltip` slot, and `ChartTooltip`
   itself, carries `{ label, items, rows }`. `row` is gone: `rows` holds one row for
   a point, cell, band or stage, every grouped row for a donut's "Others" slice, and
@@ -793,12 +799,18 @@ unless it says otherwise. The
   `false` gets them back with no error.
 - **Breaking, silent:** numbers print in the page's language. Charts read
   `document.documentElement.lang`, the attribute `dir` already reads. A page that
-  declares no language, or a malformed one, prints what it printed before.
+  declares no language, or a malformed one, prints what it printed before. Dates
+  and time-axis labels still print in English; `xAxis.format` prints them in
+  another language.
 - **Breaking:** `ChartTokens.splitLine` is `gridline`, after the `--chart-gridline`
   variable it reads. `splitLine` is still echarts' own option key.
 - **Breaking:** `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes
-  a `ChartMark`. The old `'line'` drew a stroke over a fill, which the family calls
-  an area, so that shape is `'area'` and the default. `'line'` is the stroke alone.
+  a `ChartMark`.
+- **Breaking, silent:** a sparkline's `'line'` draws the stroke alone. It drew a
+  stroke over a fill, which the family calls an area, so that shape is `'area'`
+  and the default. `'line'` is still a `ChartMark`, so a card naming it compiles
+  unchanged and draws something else; a card naming no type is unaffected. Grep
+  for `sparkline` objects with `type: 'line'`.
 - **Breaking:** `OTHERS_LABEL` is no longer exported and `ResolvedColorScheme` is
   exported from the root only. `OTHERS_KEY` stays.
   `ReferenceLineLabelPlacement` is now exported. `ChartExposed` is the caller's

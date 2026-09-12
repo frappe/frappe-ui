@@ -38,7 +38,7 @@ the imperative half. It is a `1.0.0` question because whatever ships freezes.
 **`ChartExposed` stays, on all seven echarts-backed charts.** It is the second
 and last named exception to §2.4.
 
-### `echartOptions` reaches every option key and no instance method
+### `echartOptions` reaches the option and no instance method
 
 The escape hatch is a deep merge into the generated option. It merges at the
 chart root (`axisChartOptions.ts:194`, `donutChartOptions.ts:227`,
@@ -46,7 +46,10 @@ chart root (`axisChartOptions.ts:194`, `donutChartOptions.ts:227`,
 axis (`axisChartCommon.ts:299`, `:572`) and per series
 (`axisChartOptions.ts:409`), through `mergeDeep` at `utils.ts:21-38`.
 
-So no option key is out of reach. echarts' other half — the methods on the
+So an option key an object path reaches is in reach. `mergeDeep` replaces
+arrays, so a key inside a generated array — a series on the donut, sankey or
+heatmap, which have the chart-level hatch only — is reachable by rebuilding
+that array by hand. echarts' other half — the methods on the
 instance — takes no option key, and nothing on the component surface stands in
 for it.
 

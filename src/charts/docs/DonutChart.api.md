@@ -31,7 +31,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -86,7 +86,7 @@
   },
   {
     name: 'format',
-    description: 'Prints every number the ring shows: the readout, the tooltip, the labels.',
+    description: 'Prints the readout and the tooltip. The slice labels print shares.',
     required: false,
     type: 'ChartValueFormatter'
   },
