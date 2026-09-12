@@ -75,10 +75,20 @@ describe('NumberCard', () => {
   })
 
   describe('sparkline', () => {
-    it('draws a line and the band under it', () => {
+    it('draws an area by default: a line and the band under it', () => {
       mountCard({ sparkline: { data: [1, 5, 3, 8] } })
       cy.get('[data-slot="chart-card"] svg path').should('have.length', 2)
+      cy.get('[data-slot="chart-card"] svg path')
+        .first()
+        .should('not.have.attr', 'd', '')
       cy.get('linearGradient').should('exist')
+    })
+
+    it('draws the stroke alone when asked for a line', () => {
+      mountCard({ sparkline: { data: [1, 5, 3, 8], type: 'line' } })
+      cy.get('[data-slot="chart-card"] svg path')
+        .first()
+        .should('have.attr', 'd', '')
     })
 
     it('draws bars instead when asked for', () => {

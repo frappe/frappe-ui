@@ -110,7 +110,6 @@ export type {
   HeatmapCellEvent,
   HeatmapPalette,
   NumberCardSparkline,
-  NumberCardSparklineType,
   PlotLabelPlacement,
   ReferenceLine,
   SankeyLinkEvent,

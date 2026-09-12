@@ -9,7 +9,7 @@
       aria-hidden="true"
     >
       <svg
-        v-if="sparklineType === 'line'"
+        v-if="sparklineMark !== 'bar'"
         class="h-full w-full"
         :viewBox="`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`"
         preserveAspectRatio="none"
@@ -244,10 +244,10 @@ const VIEW_INSET = 3
 // One gradient per card: two cards sharing an id would share a fill.
 const gradientId = `number-card-sparkline-${useId()}`
 
-const sparklineType = computed(() => props.sparkline?.type ?? 'line')
+const sparklineMark = computed(() => props.sparkline?.type ?? 'area')
 
 const points = computed(() =>
-  sparklineType.value === 'line'
+  sparklineMark.value !== 'bar'
     ? sparklinePoints(props.sparkline?.data, {
         width: VIEW_WIDTH,
         height: VIEW_HEIGHT,
@@ -256,7 +256,7 @@ const points = computed(() =>
     : [],
 )
 const bars = computed(() =>
-  sparklineType.value === 'bar'
+  sparklineMark.value === 'bar'
     ? sparklineBars(props.sparkline?.data, {
         width: VIEW_WIDTH,
         height: VIEW_HEIGHT,
@@ -272,7 +272,12 @@ const showSparkline = computed(
     (points.value.length > 0 || bars.value.length > 0),
 )
 const linePath = computed(() => sparklineLinePath(points.value))
-const areaPath = computed(() => sparklineAreaPath(points.value, VIEW_HEIGHT))
+// Only an area carries the fill; a line is the stroke alone.
+const areaPath = computed(() =>
+  sparklineMark.value === 'area'
+    ? sparklineAreaPath(points.value, VIEW_HEIGHT)
+    : '',
+)
 
 const { tokens } = useChartTokens(root)
 const sparklineColor = computed(

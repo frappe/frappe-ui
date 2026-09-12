@@ -14,8 +14,9 @@ it is the app's business, so that control goes in the `#caption` slot.
 ## Sparklines
 
 `sparkline` adds a trend across the bottom of the card: shape only, with no axes
-to read against. `line` suits a continuous reading, `bar` one the reader counts
-in periods.
+to read against. `type` names the mark the way every other chart does. `area`,
+the default, suits a continuous reading; `line` draws the stroke alone; `bar`
+suits a reading the eye counts in periods.
 
 <ComponentPreview name="Charts-NumberSparklines" csr="true" self-layout />
 

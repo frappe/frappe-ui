@@ -415,15 +415,15 @@ export type NumberCardSparkline = {
   /** Oldest reading first. Gaps are skipped, not drawn as zero. */
   data: (number | null | undefined)[]
   /**
-   * `line` for a continuous reading, `bar` for one the reader counts in
-   * periods. Defaults to `line`.
+   * The mark, read the way every other chart reads `type`: `'area'` for a
+   * continuous reading under a filled curve, `'line'` for the stroke alone,
+   * `'bar'` for a reading the eye counts in periods. Defaults to `'area'`.
    */
-  type?: NumberCardSparklineType
+  type?: ChartMark
   /** Overrides the sequential-palette blue the sparkline is drawn in. */
   color?: string
 }
 
-export type NumberCardSparklineType = 'line' | 'bar'
 
 /** Which way the flow runs: columns of nodes left to right, or rows top to bottom. */
 export type SankeyOrient = 'horizontal' | 'vertical'
