@@ -33,7 +33,7 @@ const slice = ref<DonutSliceEvent | null>(null)
     </div>
     <p class="text-p-sm text-ink-gray-5">
       <template v-if="slice">
-        Selected {{ slice.name }} · {{ Math.round(slice.percent) }}% ·
+        Selected {{ slice.label }} · {{ Math.round(slice.percent) }}% ·
         {{ slice.rows.length }} row(s) behind it
       </template>
       <template v-else

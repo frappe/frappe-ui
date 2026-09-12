@@ -29,7 +29,7 @@ const stage = ref<FunnelStageEvent | null>(null)
     </div>
     <p class="text-p-sm text-ink-gray-5">
       <template v-if="stage">
-        Selected {{ stage.label }} · {{ stage.value }} · index {{ stage.index }}
+        Selected {{ stage.label }} · {{ stage.value }}
       </template>
       <template v-else>Select a stage.</template>
     </p>

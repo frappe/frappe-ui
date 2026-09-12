@@ -100,7 +100,6 @@
               emit('select', {
                 label: stage.label,
                 value: stage.value,
-                index: stage.index,
                 row: stage.row,
               })
             "

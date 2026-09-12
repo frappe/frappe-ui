@@ -182,7 +182,7 @@
   },
   {
     name: 'select',
-    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its position along the category axis, and the\nrow behind it.',
+    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its value, and the row behind it.',
     type: '[event: ChartDatapointEvent]'
   }
 ]

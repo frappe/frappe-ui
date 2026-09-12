@@ -105,7 +105,7 @@
   const emitsData = [
   {
     name: 'select',
-    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits position in the funnel and the row behind it; the whole column is the\nhit area, not just the shape it draws.',
+    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits label, its value and the row behind it; the whole column is the hit\narea, not just the shape it draws.',
     type: '[event: FunnelStageEvent]'
   }
 ]

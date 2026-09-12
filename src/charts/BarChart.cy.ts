@@ -82,7 +82,6 @@ describe('BarChart', () => {
       bars().first().click()
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
-        dataIndex: 0,
         value: 10,
         row: { month: 'Jan', sales: 10 },
       })
@@ -659,7 +658,6 @@ describe('BarChart', () => {
       plot().type('{rightarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
-        dataIndex: 1,
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })
@@ -674,7 +672,6 @@ describe('BarChart', () => {
       plot().type('{downarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'refunds',
-        dataIndex: 0,
         value: 4,
       })
     })
@@ -686,7 +683,6 @@ describe('BarChart', () => {
       plot().type('{downarrow}{uparrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
-        dataIndex: 0,
         value: 10,
       })
     })

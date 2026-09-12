@@ -255,7 +255,8 @@ const { chart, dispatch } = useChart({
       const slice = sliceByName.value.get(params.name)
       if (!slice) return
       emit('select', {
-        name: slice.label,
+        name: slice.name,
+        label: slice.label,
         value: slice.value,
         percent: slice.percent,
         rows: slice.rows,
@@ -351,7 +352,8 @@ const { attrs: plotAttrs } = usePlotKeyboard({
     const slice = visibleSlices.value[index]
     if (!slice) return
     emit('select', {
-      name: slice.label,
+      name: slice.name,
+      label: slice.label,
       value: slice.value,
       percent: slice.percent,
       rows: slice.rows,

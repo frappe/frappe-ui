@@ -359,7 +359,6 @@ describe('LineChart', () => {
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'refunds',
-        dataIndex: 0,
         value: 4,
         row: { month: 'Jan', refunds: 4 },
       })
@@ -373,7 +372,6 @@ describe('LineChart', () => {
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         seriesName: 'sales',
-        dataIndex: 1,
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })

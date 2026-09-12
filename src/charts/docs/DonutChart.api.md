@@ -133,7 +133,7 @@
   const emitsData = [
   {
     name: 'select',
-    description: 'A slice was selected, by click or by Enter on the keyboard cursor. The\n"Others" slice carries every row it grouped, so a caller can drill into\nthe tail as well as into a named slice.',
+    description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nis `OTHERS_KEY` for the tail, which carries every row it grouped, so a\ncaller can drill into the tail as well as into a named slice.',
     type: '[event: DonutSliceEvent]'
   }
 ]

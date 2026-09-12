@@ -248,8 +248,10 @@ export type DonutSlice = {
 }
 
 export type DonutSliceEvent = {
-  /** The slice as it reads, i.e. the category value or "Others". */
+  /** Identity of the slice: the category value, or `OTHERS_KEY` for the tail. */
   name: string
+  /** The slice as it reads, i.e. the category value or "Others". */
+  label: string
   value: number
   percent: number
   /** One row, or every grouped row when the "Others" slice was clicked. */
@@ -295,7 +297,6 @@ export type FunnelStage = {
 export type FunnelStageEvent = {
   label: string
   value: number
-  index: number
   row: Record<string, any>
 }
 
@@ -594,7 +595,6 @@ export type ChartTooltipItem = {
 
 export type ChartDatapointEvent = {
   seriesName: string
-  dataIndex: number
   value: number
   row: Record<string, any>
 }
@@ -1082,8 +1082,7 @@ export type ChartActionsSlot = {
 export type AxisChartEmits = {
   /**
    * A mark was selected, by click or by Enter on the keyboard cursor. Carries
-   * the series it belongs to, its position along the category axis, and the
-   * row behind it.
+   * the series it belongs to, its value, and the row behind it.
    */
   select: [event: ChartDatapointEvent]
 }
@@ -1111,9 +1110,9 @@ export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
   /**
-   * A slice was selected, by click or by Enter on the keyboard cursor. The
-   * "Others" slice carries every row it grouped, so a caller can drill into
-   * the tail as well as into a named slice.
+   * A slice was selected, by click or by Enter on the keyboard cursor. `name`
+   * is `OTHERS_KEY` for the tail, which carries every row it grouped, so a
+   * caller can drill into the tail as well as into a named slice.
    */
   select: [event: DonutSliceEvent]
 }
@@ -1137,8 +1136,8 @@ export type DonutChartSlots = ChartActionsSlot &
 export type FunnelChartEmits = {
   /**
    * A stage was selected, by click or by Enter on the keyboard cursor. Carries
-   * its position in the funnel and the row behind it; the whole column is the
-   * hit area, not just the shape it draws.
+   * its label, its value and the row behind it; the whole column is the hit
+   * area, not just the shape it draws.
    */
   select: [event: FunnelStageEvent]
 }

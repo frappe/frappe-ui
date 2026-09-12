@@ -141,7 +141,6 @@ export function useAxisChart<C extends AxisChartConfig>(
         if (!row) return
         args.onSelect?.({
           seriesName: params.seriesName,
-          dataIndex: params.dataIndex,
           value: Number(row[params.seriesName]),
           row,
         })
@@ -402,7 +401,6 @@ export function useAxisChart<C extends AxisChartConfig>(
       if (!row || !series) return
       args.onSelect?.({
         seriesName: series.name,
-        dataIndex: index,
         value: Number(row[series.name]),
         row,
       })

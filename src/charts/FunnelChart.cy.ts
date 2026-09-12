@@ -75,7 +75,6 @@ describe('FunnelChart', () => {
     cy.get('@onSelect').should('have.been.calledWithMatch', {
       label: 'Demoed',
       value: 30,
-      index: 1,
       row: { stage: 'Demoed', deals: 30 },
     })
   })
@@ -122,7 +121,6 @@ describe('FunnelChart', () => {
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         label: 'Won',
         value: 20,
-        index: 2,
         row: { stage: 'Won', deals: 20 },
       })
     })

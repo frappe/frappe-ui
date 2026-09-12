@@ -1,5 +1,6 @@
 import { defineComponent, h } from 'vue'
 import DonutChart from './DonutChart.vue'
+import { OTHERS_KEY } from './utils'
 import './style.css'
 
 const data = [
@@ -73,6 +74,7 @@ describe('DonutChart', () => {
     cy.get('@onSelect')
       .should('have.been.calledWithMatch', {
         name: 'Search',
+        label: 'Search',
         value: 50,
         percent: 50,
       })
@@ -112,6 +114,25 @@ describe('DonutChart', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)
     cy.get('[data-slot="chart-legend"]').should('contain.text', 'Others')
+  })
+
+  // The tail is identified by the reserved key, not by what it prints, so a
+  // caller can tell it apart from a category that happens to read "Others".
+  it('names the tail slice by the reserved key', () => {
+    mountChart({ maxSlices: 2, onSelect: cy.spy().as('onSelect') })
+    slices().should('have.length', 2)
+    cy.get('[data-slot="chart-plot"] [role="img"]')
+      .focus()
+      .type('{rightarrow}{enter}')
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
+      name: OTHERS_KEY,
+      label: 'Others',
+      value: 50,
+      rows: [
+        { source: 'Direct', visits: 30 },
+        { source: 'Email', visits: 20 },
+      ],
+    })
   })
 
   describe('states', () => {
@@ -244,6 +265,7 @@ describe('DonutChart', () => {
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         name: 'Direct',
+        label: 'Direct',
         value: 30,
         percent: 30,
         rows: [{ source: 'Direct', visits: 30 }],
