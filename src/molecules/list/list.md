@@ -183,6 +183,40 @@ windows against an app-owned scroll area (a settings body, the page) and keeps
 its scrollbar. `itemHeight` defaults to the List's `rowHeight`. The underlying
 composable, `useVirtualRows`, is exported for exotic cases.
 
+When the scroll viewport is supplied by `ScrollArea`, pass its exposed
+`viewportElement` through `virtual.scrollContainer`. This avoids depending on
+when the viewport's overflow styles are applied, including when rows are
+already available at mount. The option accepts an element, a ref, or a getter;
+use a ref or getter when the viewport becomes available after setup. `null` or
+`undefined` falls back to the nearest scrollable ancestor.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { ScrollArea, type ScrollAreaExposed } from 'frappe-ui'
+import { List, ListRows, ListRow, ListCell } from 'frappe-ui/list'
+
+const scroller = ref<ScrollAreaExposed | null>(null)
+const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
+</script>
+
+<template>
+  <ScrollArea ref="scroller" class="h-72">
+    <List :columns="['minmax(0,1fr)']" :row-height="40">
+      <ListRows
+        :items="rows"
+        :virtual="{ scrollContainer: () => scroller?.viewportElement ?? null }"
+        v-slot="{ item, value }"
+      >
+        <ListRow :value="value">
+          <ListCell>Row {{ item.id }}</ListCell>
+        </ListRow>
+      </ListRows>
+    </List>
+  </ScrollArea>
+</template>
+```
+
 <ComponentPreview name="List-Virtual" csr="true" />
 
 ## Styling hooks

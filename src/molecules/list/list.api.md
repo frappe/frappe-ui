@@ -184,7 +184,7 @@
   },
   {
     name: 'virtual',
-    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
+    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer defaults to the nearest scrollable ancestor. Pass\n`scrollContainer` to use an explicit element, ref, or getter.',
     required: false,
     type: 'boolean | ListVirtualOptions'
   }

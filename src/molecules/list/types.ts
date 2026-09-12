@@ -1,3 +1,4 @@
+import type { MaybeRefOrGetter } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
 export type ListDivider = 'inset' | 'full' | 'none'
@@ -116,6 +117,12 @@ export interface ListHeaderCellSortProps {
 }
 
 export interface ListVirtualOptions {
+  /**
+   * Explicit scroll viewport, such as ScrollArea's `viewportElement`.
+   * Defaults to the nearest scrollable ancestor when null or undefined.
+   */
+  scrollContainer?: MaybeRefOrGetter<HTMLElement | null | undefined>
+
   /** Row height in px. Defaults to the List's `rowHeight`. */
   itemHeight?: number
 
