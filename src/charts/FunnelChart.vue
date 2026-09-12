@@ -113,6 +113,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :row="hoveredStage?.row"
         :dir="dir"
       >
         <template #default="slotProps">
@@ -282,6 +283,7 @@ function readStage(stage: FunnelStage) {
       color: colors.value[stage.index],
       value: stage.value,
       formattedValue: formatMeasure(stage.value),
+      kind: 'series',
     },
   ]
   tooltip.rates = [

@@ -217,7 +217,9 @@ describe('heatmapRampStops', () => {
 
   it('takes an explicit list in the order it was written', () => {
     const colors = ['#ffffff', '#000000']
-    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(colors)
+    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(
+      colors,
+    )
   })
 })
 

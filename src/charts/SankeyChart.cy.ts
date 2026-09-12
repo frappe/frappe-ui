@@ -215,6 +215,20 @@ describe('SankeyChart', () => {
         .should('contain.text', 'flow Search → Trial')
         .and('not.contain.text', 'Signups')
     })
+
+    // The band carries its row down both paths. The keyboard reads a band the
+    // same way the pointer does, so a slot that reads a column is not hover-only.
+    it('hands the row behind the band to the tooltip slot', () => {
+      mountChart(
+        {},
+        { tooltip: ({ row }: any) => h('span', `signups ${row?.signups}`) },
+      )
+      bands().should('have.length', data.length)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'signups 120')
+      plot().type('{rightarrow}')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'signups 80')
+    })
   })
 
   // echarts draws into one element, so the flow takes a single tab stop and the

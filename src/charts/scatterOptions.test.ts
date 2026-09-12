@@ -477,7 +477,11 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 1500 }] })
 
     expect(entriesOf(option)).toEqual([
-      { yAxis: 1500, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
+      {
+        yAxis: 1500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -487,7 +491,11 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 500, axis: 'x' }] })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
+      {
+        xAxis: 500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -504,8 +512,16 @@ describe('reference lines on a scatter', () => {
     })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
-      { yAxis: 1500, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
+      {
+        xAxis: 500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
+      {
+        yAxis: 1500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 

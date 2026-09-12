@@ -34,7 +34,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 describe('line chart option axes', () => {

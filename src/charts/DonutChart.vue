@@ -86,7 +86,7 @@
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
-          <slot name="tooltip" v-bind="slotProps" />
+          <slot name="tooltip" v-bind="slotProps" :rows="tooltip.rows" />
         </template>
       </ChartTooltip>
     </template>
@@ -226,6 +226,8 @@ const tooltip = reactive({
   x: 0,
   y: 0,
   items: [] as ChartTooltipItem[],
+  /** Plural: a slice groups, and "Others" groups the whole tail. */
+  rows: [] as Record<string, any>[],
 })
 
 useTooltipDismiss({
@@ -303,8 +305,10 @@ function showTooltip(name: string) {
       value: slice.value,
       formattedValue: formatMeasure(slice.value),
       percent: slice.percent,
+      kind: 'series',
     },
   ]
+  tooltip.rows = slice.rows
   tooltip.x = pointer.x
   tooltip.y = pointer.y
   tooltip.open = true

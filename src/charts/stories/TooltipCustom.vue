@@ -42,6 +42,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
       color: colors.value[0],
       value: row.signups,
       formattedValue: row.signups.toLocaleString(),
+      kind: 'series',
     },
     {
       name: 'trials',
@@ -51,6 +52,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
       formattedValue: row.trials.toLocaleString(),
       // Part-to-whole readings carry a share, printed after the value.
       percent: (row.trials / row.signups) * 100,
+      kind: 'series',
     },
   ]
   // Viewport coordinates: the tooltip is teleported to the body and placed

@@ -589,8 +589,8 @@ export type ChartTooltipItem = {
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
-  /** `'column'` is a `tooltipColumns` entry. Left out, `'series'`. */
-  kind?: 'series' | 'column'
+  /** `'series'` is a reading off the plot; `'column'` is a `tooltipColumns` entry. */
+  kind: 'series' | 'column'
 }
 
 export type ChartDatapointEvent = {
@@ -1129,8 +1129,16 @@ export type DonutChartSlots = ChartActionsSlot &
       /** Only set while a slice is hovered. */
       percent?: string
     }) => unknown
-    /** Replaces the tooltip body. `items` holds the hovered slice alone. */
-    tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered slice alone. `rows`
+     * is plural because a slice groups: one row for a named slice, every row
+     * it collapsed for the "Others" slice.
+     */
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      rows: Record<string, any>[]
+    }) => unknown
   }
 
 export type FunnelChartEmits = {
@@ -1145,12 +1153,13 @@ export type FunnelChartEmits = {
 export type FunnelChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /**
-     * Replaces the tooltip body. `stage` carries the two conversion rates the
-     * default body prints under the value.
+     * Replaces the tooltip body. `stage` is the extra the funnel carries: the
+     * two conversion rates the default body prints under the value.
      */
     tooltip?: (props: {
       label?: string
       items: ChartTooltipItem[]
+      row?: Record<string, any>
       stage?: FunnelStage
     }) => unknown
   }
@@ -1166,7 +1175,11 @@ export type HeatmapChartEmits = {
 export type HeatmapChartSlots = ChartActionsSlot &
   ChartStateSlots & {
     /** Replaces the tooltip body. `items` holds the hovered cell alone. */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      row?: Record<string, any>
+    }) => unknown
   }
 
 export type SankeyChartEmits = {
@@ -1180,8 +1193,15 @@ export type SankeyChartEmits = {
 
 export type SankeyChartSlots = ChartActionsSlot &
   ChartStateSlots & {
-    /** Replaces the tooltip body. `items` holds the hovered band or node alone. */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered band or node alone.
+     * A node has no `row`: it stands for every row through it, not one.
+     */
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      row?: Record<string, any>
+    }) => unknown
   }
 
 export type ScatterChartEmits = {
@@ -1198,7 +1218,11 @@ export type ScatterChartSlots = ChartActionsSlot &
      * Replaces the tooltip body. `items` holds the point's two measures, and
      * its size when the chart draws one.
      */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: {
+      label?: string
+      items: ChartTooltipItem[]
+      row?: Record<string, any>
+    }) => unknown
   }
 
 /** No tooltip slot: a card with no plot has nothing to hover. */

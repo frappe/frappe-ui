@@ -39,6 +39,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :row="tooltip.row"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -189,6 +190,7 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+  row: undefined as Record<string, any> | undefined,
 })
 
 const { chart, dispatch } = useChart({
@@ -263,6 +265,7 @@ function showHit(hit: ScatterHit, x: number, y: number) {
       ? [tooltipItem(props.size, point.size, props.format, entry.color)]
       : []),
   ]
+  tooltip.row = point.row
   tooltip.x = x
   tooltip.y = y
   tooltip.open = true
@@ -280,6 +283,7 @@ function tooltipItem(
     color,
     value,
     formattedValue: format ? format(value) : formatValue(value),
+    kind: 'series',
   }
 }
 

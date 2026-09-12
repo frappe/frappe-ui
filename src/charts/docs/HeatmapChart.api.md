@@ -133,7 +133,7 @@
   {
     name: 'tooltip',
     description: 'Replaces the tooltip body. `items` holds the hovered cell alone.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
   }
 ]
 

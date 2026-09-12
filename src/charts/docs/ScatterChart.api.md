@@ -146,20 +146,20 @@
   {
     name: 'tooltip',
     description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
   }
 ]
 
   const emitsData = [
   {
-    name: 'select',
-    description: 'A point was selected, by click or by Enter on the keyboard cursor. Carries\nboth measures and the row behind it.',
-    type: '[event: ScatterPointEvent]'
-  },
-  {
     name: 'update:hiddenSeries',
     description: 'Fired when the hidden series changes.',
     type: '[value: string[]]'
+  },
+  {
+    name: 'select',
+    description: 'A point was selected, by click or by Enter on the keyboard cursor. Carries\nboth measures and the row behind it.',
+    type: '[event: ScatterPointEvent]'
   }
 ]
 </script>

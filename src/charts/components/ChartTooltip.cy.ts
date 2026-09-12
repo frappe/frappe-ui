@@ -1,14 +1,16 @@
 import { defineComponent, h, ref } from 'vue'
 import ChartTooltip from './ChartTooltip.vue'
+import type { ChartTooltipItem } from '../types'
 import '../style.css'
 
-const items = [
+const items: ChartTooltipItem[] = [
   {
     name: 'sales',
     label: 'Sales',
     color: '#318AD8',
     value: 10,
     formattedValue: '10',
+    kind: 'series',
   },
   {
     name: 'refunds',
@@ -16,6 +18,7 @@ const items = [
     color: '#48BB74',
     value: 4,
     formattedValue: '4',
+    kind: 'series',
   },
 ]
 

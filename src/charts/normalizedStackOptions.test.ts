@@ -5,10 +5,7 @@ import {
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
-import type {
-  AxisChartConfig,
-  AxisChartProps,
-} from './types'
+import type { AxisChartConfig, AxisChartProps } from './types'
 import type { ChartTokens } from './tokens'
 
 const tokens: ChartTokens = {
@@ -43,7 +40,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 /** The plotted number of each point, whichever way the pairs are ordered. */

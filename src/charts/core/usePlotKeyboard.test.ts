@@ -42,9 +42,13 @@ function setup(count = 4) {
     press: (key: string) =>
       handlers().onKeydown({ key, preventDefault: () => {} }),
     pressEvent: (key: string) => {
-      const event = { key, prevented: false, preventDefault() {
-        event.prevented = true
-      } }
+      const event = {
+        key,
+        prevented: false,
+        preventDefault() {
+          event.prevented = true
+        },
+      }
       handlers().onKeydown(event)
       return event
     },

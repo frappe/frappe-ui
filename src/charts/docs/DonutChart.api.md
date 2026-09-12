@@ -125,8 +125,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered slice alone.',
-    type: '{ items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. `rows`\nis plural because a slice groups: one row for a named slice, every row\nit collapsed for the "Others" slice.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; rows: Record<string, any>[]; }'
   }
 ]
 

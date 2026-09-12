@@ -35,7 +35,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 /** The series echarts is handed that actually carry reference lines. */
@@ -56,7 +59,11 @@ describe('reference line placement', () => {
   it('draws a horizontal rule at a value on the value axis', () => {
     const option = build({ referenceLines: [{ value: 15 }] })
     expect(entriesOf(option)).toEqual([
-      { yAxis: 15, lineStyle: { width: 1, color: 'ink-5' }, label: { show: false } },
+      {
+        yAxis: 15,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -207,25 +214,30 @@ describe('reference line looks', () => {
         { value: 40, label: 'D', labelPlacement: 'end-bottom' },
       ],
     })
-    expect(entriesOf(option).map((entry: any) => entry.label.position)).toEqual([
-      'insideStartTop',
-      'insideStartBottom',
-      'insideEndTop',
-      'insideEndBottom',
-    ])
+    expect(entriesOf(option).map((entry: any) => entry.label.position)).toEqual(
+      [
+        'insideStartTop',
+        'insideStartBottom',
+        'insideEndTop',
+        'insideEndBottom',
+      ],
+    )
   })
 
   it('reads the two ends off the axis, so an RTL chart swaps them itself', () => {
     // Nothing to assert on the option: echarts places `Start` where the axis
     // begins.
-    const rtl = build({ dir: 'rtl', referenceLines: [{ value: 15, label: 'T' }] })
+    const rtl = build({
+      dir: 'rtl',
+      referenceLines: [{ value: 15, label: 'T' }],
+    })
     expect(entriesOf(rtl)[0].label.position).toBe('insideEndTop')
   })
 
   it('turns the label off when none is set, rather than leaving it out', () => {
-    expect(entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label).toEqual(
-      { show: false },
-    )
+    expect(
+      entriesOf(build({ referenceLines: [{ value: 15 }] }))[0].label,
+    ).toEqual({ show: false })
   })
 
   it('takes the axis labels’ ink, not the palette and not the data labels’', () => {

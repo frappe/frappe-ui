@@ -73,10 +73,8 @@ import type { ChartTooltipProps, ChartTooltipSlots } from '../types'
 
 const props = defineProps<ChartTooltipProps>()
 
-// `kind` is optional, so an item that names none is a series: that is what
-// every caller before `tooltipColumns` existed was handing over.
 const seriesItems = computed(() =>
-  props.items.filter((item) => item.kind !== 'column'),
+  props.items.filter((item) => item.kind === 'series'),
 )
 const columnItems = computed(() =>
   props.items.filter((item) => item.kind === 'column'),

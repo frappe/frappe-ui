@@ -97,8 +97,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `stage` carries the two conversion rates the\ndefault body prints under the value.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; stage?: FunnelStage | undefined; }'
+    description: 'Replaces the tooltip body. `stage` is the extra the funnel carries: the\ntwo conversion rates the default body prints under the value.',
+    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; stag'
   }
 ]
 
