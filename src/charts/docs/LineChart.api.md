@@ -177,7 +177,7 @@
   const emitsData = [
   {
     name: 'update:hiddenSeries',
-    description: 'Fired when the hidden series changes.',
+    description: 'The `v-model:hiddenSeries` half of the legend\'s visibility list.',
     type: '[value: string[]]'
   },
   {

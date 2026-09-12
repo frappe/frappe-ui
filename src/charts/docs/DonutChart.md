@@ -36,4 +36,10 @@ each entry still carries its slice's share.
 
 <ComponentPreview name="Charts-DonutHalf" csr="true" self-layout />
 
+## Hiding slices
+
+A slice is the donut's series, so `v-model:hiddenSeries` works here the way it
+does on an axis chart: bind it to drive the legend from the app, or to keep what
+a reader hid across a reload. Left unbound, the legend owns the list.
+
 <!-- @include: ./DonutChart.api.md -->

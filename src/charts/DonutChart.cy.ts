@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import DonutChart from './DonutChart.vue'
 import { OTHERS_KEY } from './utils'
 import './style.css'
@@ -96,6 +96,45 @@ describe('DonutChart', () => {
     slices().should('have.length', 2)
     // 30 of the 50 still on the ring.
     cy.get('[data-slot="chart-legend"]').should('contain.text', '60%')
+  })
+
+  it('round-trips v-model:hiddenSeries', () => {
+    const hidden = ref<string[]>([])
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', { style: 'width: 480px; height: 300px' }, [
+              h(DonutChart, {
+                data,
+                category: 'source',
+                value: 'visits',
+                echartOptions: { animation: false },
+                hiddenSeries: hidden.value,
+                'onUpdate:hiddenSeries': (v: string[]) => (hidden.value = v),
+              }),
+            ])
+        },
+      }),
+    )
+
+    cy.get('[aria-label="Hide Search"]')
+      .click()
+      .then(() => expect(hidden.value).to.deep.equal(['Search']))
+    slices().should('have.length', 2)
+  })
+
+  // An empty ring reads as a bug, so the last entry left showing does nothing.
+  it('refuses to hide the last slice left on the ring', () => {
+    mountChart()
+    cy.get('[aria-label="Hide Search"]').click()
+    cy.get('[aria-label="Hide Direct"]').click()
+    cy.get('[aria-label="Hide Email"]').click()
+    cy.get('[aria-label="Hide Email"]').should(
+      'have.attr',
+      'aria-pressed',
+      'true',
+    )
   })
 
   it('gives up the readout when the labels move onto the ring', () => {

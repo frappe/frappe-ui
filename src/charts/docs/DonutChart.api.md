@@ -60,6 +60,13 @@
     type: 'number'
   },
   {
+    name: 'hiddenSeries',
+    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app. Left unbound, the\nlegend owns it. A slice is the donut\'s series.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
     name: 'showDataLabels',
     description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default: the legend says the same without the\nleader lines.',
     required: false,
@@ -131,6 +138,11 @@
 ]
 
   const emitsData = [
+  {
+    name: 'update:hiddenSeries',
+    description: 'The `v-model:hiddenSeries` half of the legend\'s visibility list.',
+    type: '[value: string[]]'
+  },
   {
     name: 'select',
     description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nis `OTHERS_KEY` for the tail, which carries every row it grouped, so a\ncaller can drill into the tail as well as into a named slice.',

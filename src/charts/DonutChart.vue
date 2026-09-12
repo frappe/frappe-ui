@@ -105,6 +105,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
@@ -139,12 +140,15 @@ registerChartModules([PieSeries])
 
 const props = defineProps<DonutChartProps>()
 
+const hiddenSlices = defineModel<string[]>('hiddenSeries', {
+  default: () => [],
+})
+
 const emit = defineEmits<DonutChartEmits>()
 
 defineSlots<DonutChartSlots>()
 
 const plotEl = ref<HTMLElement>()
-const hiddenSlices = ref<string[]>([])
 
 const dir = computed(() => props.dir ?? documentDir())
 const isHalf = computed(() => props.variant === 'half')
@@ -371,14 +375,11 @@ const { attrs: plotAttrs } = usePlotKeyboard({
 })
 
 function toggleSlice(name: string) {
-  const hidden = hiddenSlices.value
-  // Refuse to hide the last visible slice — an empty ring reads as a bug.
-  if (!hidden.includes(name)) {
-    if (visibleSlices.value.length === 1) return
-    hiddenSlices.value = [...hidden, name]
-  } else {
-    hiddenSlices.value = hidden.filter((n) => n !== name)
-  }
+  hiddenSlices.value = toggleHiddenSeries(
+    hiddenSlices.value,
+    name,
+    slices.value.length,
+  )
 }
 
 function hoverSlice(name: string | null) {
@@ -420,10 +421,7 @@ function shorten(value: number) {
 watch(
   () => slices.value.map((slice) => slice.name),
   (names) => {
-    if (hiddenSlices.value.every((name) => names.includes(name))) return
-    hiddenSlices.value = hiddenSlices.value.filter((name) =>
-      names.includes(name),
-    )
+    hiddenSlices.value = pruneHiddenSeries(hiddenSlices.value, names)
   },
 )
 

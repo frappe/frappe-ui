@@ -821,6 +821,12 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
+   * legend owns it. A slice is the donut's series.
+   */
+  hiddenSeries?: string[]
+  /**
    * Prints each slice's name and share beside the ring, and drops the readout
    * in the middle. Off by default: the legend says the same without the
    * leader lines.
@@ -1081,6 +1087,8 @@ export type ChartActionsSlot = {
 }
 
 export type AxisChartEmits = {
+  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  'update:hiddenSeries': [value: string[]]
   /**
    * A mark was selected, by click or by Enter on the keyboard cursor. Carries
    * the series it belongs to, its value, and the row behind it.
@@ -1110,6 +1118,8 @@ export type AreaChartEmits = AxisChartEmits
 export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
+  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  'update:hiddenSeries': [value: string[]]
   /**
    * A slice was selected, by click or by Enter on the keyboard cursor. `name`
    * is `OTHERS_KEY` for the tail, which carries every row it grouped, so a
@@ -1206,6 +1216,8 @@ export type SankeyChartSlots = ChartActionsSlot &
   }
 
 export type ScatterChartEmits = {
+  /** The `v-model:hiddenSeries` half of the legend's visibility list. */
+  'update:hiddenSeries': [value: string[]]
   /**
    * A point was selected, by click or by Enter on the keyboard cursor. Carries
    * both measures and the row behind it.
