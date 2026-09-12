@@ -51,24 +51,15 @@
             }"
           />
         </aside>
-        <CalendarPanel
-          ref="panelRef"
-          :view="view"
-          :current-year="currentYear"
-          :current-month="currentMonth"
-          :weeks="weeks"
+        <DateCalendar
+          ref="calendarRef"
+          :model-value="selected"
           today-label="Today"
           :min="props.min"
           :max="props.max"
-          v-model:focused-date="focusedDate"
-          @prev="prev"
-          @next="next"
-          @today="handleTodayClick"
-          @cycle-view="cycleView"
-          @select-month="selectMonth"
-          @select-year="selectYear"
-          @select-date="handleDateCellClick"
-          @navigate="onPanelNavigate"
+          :is-date-unavailable="props.isDateUnavailable"
+          @select="handleDateCellClick"
+          @today="handleDateCellClick"
         />
       </div>
     </template>
@@ -78,11 +69,9 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import DateCalendar from './DateCalendar.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
-  useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
   useTypeable,
@@ -90,11 +79,8 @@ import {
   makeUnavailableCheck,
 } from './composables'
 import type { Dayjs } from 'dayjs/esm'
-import type {
-  DatePickerProps,
-  DatePickerEmits,
-  DatePickerSlots,
-} from './types'
+import type { DatePickerProps, DatePickerEmits, DatePickerSlots } from './types'
+import type { DateCalendarExposed } from './calendarTypes'
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   modelValue: '',
@@ -130,54 +116,20 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
-  seedFocusedDate()
 }
 
 function onShellClose() {
-  resetView()
   if (isTyping.value) {
     commitInput()
     isTyping.value = false
   }
-  // Drop the focused-date so the next open re-seeds it from today/selected
-  // rather than resuming on a stale arrow-key target.
-  focusedDate.value = null
 }
 
-const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
-const focusedDate = ref<Dayjs | null>(null)
-
-function seedFocusedDate() {
-  if (focusedDate.value) return
-  if (selected.value) {
-    const d = dayjs(selected.value)
-    if (!checkUnavailable(d)) {
-      focusedDate.value = d
-      return
-    }
-  }
-  const today = dayjsLocal()
-  if (!checkUnavailable(today)) {
-    focusedDate.value = today
-    return
-  }
-  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
-  if (first) focusedDate.value = first.date
-}
+const calendarRef = ref<DateCalendarExposed | null>(null)
 
 function onShellRequestFocus() {
-  // Seed synchronously *before* the reactive flush so the CalendarPanel
-  // mounts with `props.focusedDate` already set — that way the focused cell
-  // has `tabindex=0` on first render and `focusInitialCell` (queued for
-  // next tick) finds it.
-  seedFocusedDate()
-  nextTick(() => panelRef.value?.focusInitialCell())
-}
-
-function onPanelNavigate(target: Dayjs) {
-  // Single-pane: target dictates the view. focusedDate stays in sync via
-  // CalendarPanel's `update:focusedDate` (already wired via v-model).
-  focusOn(target)
+  // The calendar only mounts with the popover, so wait a tick for it.
+  nextTick(() => calendarRef.value?.focus())
 }
 
 defineExpose({
@@ -192,19 +144,6 @@ const shouldKeepOpen = useKeepOpen(props)
 const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
-
-const {
-  view,
-  currentYear,
-  currentMonth,
-  prev,
-  next,
-  cycleView,
-  selectMonth,
-  selectYear,
-  focusOn,
-  resetView,
-} = useCalendarView()
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 const selected = ref<string>('')
@@ -221,9 +160,7 @@ const coerceToDayjs = useDateCoercion(() => props.format)
 function syncFromValue(val?: string): void {
   if (!val) {
     if (!props.clearable) {
-      const today = dayjsLocal()
-      focusOn(today)
-      selected.value = today.format(DATE_FORMAT)
+      selected.value = dayjsLocal().format(DATE_FORMAT)
     } else {
       selected.value = ''
     }
@@ -234,7 +171,6 @@ function syncFromValue(val?: string): void {
     selected.value = ''
     return
   }
-  focusOn(d)
   selected.value = d.format(DATE_FORMAT)
 }
 
@@ -269,18 +205,6 @@ const isTyping = ref(false)
 watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
-
-// ── Calendar grid ────────────────────────────────────────────────────────────
-
-const weeks = computed<CalendarPanelCell[][]>(() =>
-  generateWeeks(currentYear.value, currentMonth.value, selected.value).map(
-    (week) =>
-      week.map((d) => ({
-        ...d,
-        isUnavailable: checkUnavailable(d.date),
-      })),
-  ),
-)
 
 // ── Input commit / selection ─────────────────────────────────────────────────
 
@@ -320,7 +244,6 @@ function selectDate(date: string | Date | Dayjs): void {
   if (checkUnavailable(d)) return
   const prev = selected.value
   selected.value = d.format(DATE_FORMAT)
-  focusOn(d)
 
   if (selected.value !== initialValue.value) {
     emit('update:modelValue', selected.value)
@@ -333,7 +256,6 @@ function selectDate(date: string | Date | Dayjs): void {
       ? formatter(selected.value, props.format)
       : selected.value
   }
-  resetView()
 }
 
 function handleDateCellClick(date: string | Date | Dayjs) {
@@ -342,14 +264,9 @@ function handleDateCellClick(date: string | Date | Dayjs) {
   isTyping.value = false
 }
 
-function handleTodayClick() {
-  handleDateCellClick(dayjsLocal())
-}
-
 function handleClearClick() {
   clearSelection()
   if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  resetView()
 }
 </script>

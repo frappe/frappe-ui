@@ -1,4 +1,5 @@
 import { h } from 'vue'
+import { dayjs } from '../../utils/dayjs'
 import DateTimePicker from './DateTimePicker.vue'
 import type {
   DateTimePickerActionsSlotProps,
@@ -38,12 +39,41 @@ describe('DateTimePicker', () => {
     cy.get('[aria-label=cycle-calendar-view]').should('exist')
   })
 
-  it('Now button selects current date and time', () => {
-    cy.mount(DateTimePicker)
+  it('Now button selects current date and time, and closes', () => {
+    cy.mount(DateTimePicker, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
+    })
     cy.get('input').first().dblclick()
     cy.get('[role=dialog]').should('exist')
     cy.get('[aria-label="Now"]').click()
+    cy.get('[role=dialog]').should('not.exist')
     cy.get('input').first().should('not.have.value', '')
+    cy.get('@onUpdate').then((spy) => {
+      // One press, one emit — no transient midnight value on the way.
+      expect((spy as any).callCount).to.equal(1)
+      const emitted = (spy as any).lastCall.args[0] as string
+      // The current time, not the midnight a plain date selection would give.
+      expect(dayjs(emitted).diff(dayjs(), 'minute')).to.be.closeTo(0, 1)
+    })
+  })
+
+  it('Now emits once with the current time when today is already selected', () => {
+    const today = dayjs().format('YYYY-MM-DD')
+    cy.mount(DateTimePicker, {
+      props: {
+        modelValue: `${today} 00:00:00`,
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').first().dblclick()
+    cy.get('[aria-label="Now"]').click()
+    cy.get('[role=dialog]').should('not.exist')
+    cy.get('@onUpdate').then((spy) => {
+      expect((spy as any).callCount).to.equal(1)
+      const emitted = (spy as any).lastCall.args[0] as string
+      expect(emitted.startsWith(today)).to.equal(true)
+      expect(dayjs(emitted).diff(dayjs(), 'minute')).to.be.closeTo(0, 1)
+    })
   })
 
   it('Clear from #actions slot resets the value', () => {
@@ -66,8 +96,16 @@ describe('DateTimePicker', () => {
       },
     })
     cy.get('input').first().dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 

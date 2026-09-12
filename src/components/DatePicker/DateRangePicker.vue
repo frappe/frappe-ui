@@ -26,9 +26,15 @@
     @close="onShellClose"
     @request-focus="onShellRequestFocus"
   >
-    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
-    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+    <template v-if="$slots.trigger" #trigger="ts"
+      ><slot name="trigger" v-bind="ts"
+    /></template>
+    <template v-if="$slots.prefix" #prefix="ts"
+      ><slot name="prefix" v-bind="ts"
+    /></template>
+    <template v-if="$slots.suffix" #suffix="ts"
+      ><slot name="suffix" v-bind="ts"
+    /></template>
 
     <template #default="{ close }">
       <div
@@ -110,7 +116,7 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import CalendarPanel from './CalendarPanel.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
   useCalendarView,
@@ -127,6 +133,7 @@ import type {
   DateRangePickerSlots,
   DateRangeValue,
 } from './types'
+import type { CalendarPanelCell } from './calendarTypes'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
   modelValue: () => [],
@@ -239,8 +246,7 @@ function onPanelNavigate(target: Dayjs) {
       target.month() === currentMonth.value &&
       target.year() === currentYear.value
     const inRight =
-      target.month() === rightMonth.value &&
-      target.year() === rightYear.value
+      target.month() === rightMonth.value && target.year() === rightYear.value
     if (inLeft || inRight) {
       focusedDate.value = target
       return
@@ -381,8 +387,7 @@ function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
       if (f && t) {
         inRange = d.date.isAfter(f, 'day') && d.date.isBefore(t, 'day')
       } else if (hoverEnd && f) {
-        inRange =
-          d.date.isAfter(f, 'day') && !d.date.isAfter(hoverEnd, 'day')
+        inRange = d.date.isAfter(f, 'day') && !d.date.isAfter(hoverEnd, 'day')
       } else if (hoverStart && f) {
         inRange =
           !d.date.isBefore(hoverStart, 'day') && d.date.isBefore(f, 'day')
@@ -518,9 +523,7 @@ function handleTodayClick() {
   resetView()
 }
 
-function handleSetRange(
-  range: [string | Date | Dayjs, string | Date | Dayjs],
-) {
+function handleSetRange(range: [string | Date | Dayjs, string | Date | Dayjs]) {
   const a = dayjs(range[0])
   const b = dayjs(range[1])
   if (!a.isValid() || !b.isValid()) return
