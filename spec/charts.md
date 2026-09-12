@@ -94,6 +94,17 @@ the established pattern. `NumberCard` draws one by default, because a reading
 with no plot is a card, and `:card="false"` lets an app lay out several readings
 inside its own card.
 
+## The engine composable
+
+`useChart` and `registerChartModules` are exported for a plot the library does
+not draw, beside the chrome components that dress it. The library owns the
+composable's shape and its lifecycle: init once the container has a size and the
+fonts settle, resize following, disposal on unmount, the SVG renderer, and
+reduced motion. The echarts types it carries — the option, the instance, the
+modules — are echarts' and move with that dependency.
+[ADR-0018](./adr/0018-charts-engine-composable-is-public.md) records why they are
+public and what freezes with them.
+
 ## Where `format` lives
 
 A formatter lives where the values it prints live.
