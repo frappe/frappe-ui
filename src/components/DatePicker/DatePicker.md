@@ -19,4 +19,12 @@ and `isDateUnavailable` constraints.
 
 <ComponentPreview name="DatePicker-DateCalendar" />
 
+## Date Range Calendar
+
+The range twin of the same calendar, on the page instead of in a popover. It
+owns a `[from, to]` pair as `v-model`, previews the range under the cursor while
+the end is still open, and takes the same constraints.
+
+<ComponentPreview name="DatePicker-DateRangeCalendar" />
+
 <!-- @include: ./DatePicker.api.md -->

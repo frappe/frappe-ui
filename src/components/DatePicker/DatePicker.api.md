@@ -242,6 +242,61 @@
   }
 ]
 
+  const dateRangeCalendarProps = [
+  {
+    name: 'min',
+    description: 'Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard\nnavigation and the year list.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'max',
+    description: 'Latest selectable date in `YYYY-MM-DD` format. Also bounds keyboard\nnavigation and the year list.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'isDateUnavailable',
+    description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
+    required: false,
+    type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'todayLabel',
+    description: 'Label for the action that selects today. Empty hides the button. Default: `Today`.',
+    required: false,
+    type: 'string',
+    default: '"Today"'
+  },
+  {
+    name: 'dualPane',
+    description: 'Render two calendar panels side by side (current month + next month).',
+    required: false,
+    type: 'boolean',
+    default: 'false'
+  },
+  {
+    name: 'modelValue',
+    description: 'Selected range as `[from, to]` in `YYYY-MM-DD` format, or `[]` when empty.',
+    required: false,
+    type: 'DateRangeValue',
+    default: '[]'
+  }
+]
+
+  const dateRangeCalendarEmits = [
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: DateRangeValue]'
+  },
+  {
+    name: 'today',
+    description: 'Fired when the today button is pressed, before today\'s range is committed.',
+    type: '[]'
+  }
+]
+
   const dateRangePickerProps = [
   {
     name: 'side',
@@ -652,6 +707,12 @@
 <PropsTable folder="DatePicker" name="DateCalendar" :data="dateCalendarProps"/>
 
 <EmitsTable :data="dateCalendarEmits"/>
+
+### DateRangeCalendar
+
+<PropsTable folder="DatePicker" name="DateRangeCalendar" :data="dateRangeCalendarProps"/>
+
+<EmitsTable :data="dateRangeCalendarEmits"/>
 
 ### DateRangePicker
 

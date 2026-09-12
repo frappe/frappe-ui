@@ -254,6 +254,36 @@ export type DateCalendarEmits = {
   today: []
 }
 
+// ── DateRangeCalendar ────────────────────────────────────────────────────────
+
+export interface DateRangeCalendarProps {
+  /**
+   * Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
+   * navigation and the year list.
+   */
+  min?: string
+
+  /**
+   * Latest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
+   * navigation and the year list.
+   */
+  max?: string
+
+  /** Return true to prevent a date from being selected. Combined with `min`/`max`. */
+  isDateUnavailable?: (date: Dayjs) => boolean
+
+  /** Label for the action that selects today. Empty hides the button. Default: `Today`. */
+  todayLabel?: string
+
+  /** Render two calendar panels side by side (current month + next month). */
+  dualPane?: boolean
+}
+
+export type DateRangeCalendarEmits = {
+  /** Fired when the today button is pressed, before today's range is committed. */
+  today: []
+}
+
 // ── CalendarPanel ────────────────────────────────────────────────────────────
 
 /** A single day cell in the calendar grid. */
