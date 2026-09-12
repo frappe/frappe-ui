@@ -34,11 +34,10 @@ export type { ResolvedColorScheme } from './tokens'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
 // so a caller can style it without hardcoding the reserved key.
-export { OTHERS_KEY, OTHERS_LABEL } from './utils'
+export { OTHERS_KEY } from './utils'
 
-// The grain a time x axis is read at. The format helpers that consume it are
-// internal: each one hardcodes `en-US`, so exporting them would freeze that
-// until `2.0.0`.
+// The grain a time x axis is read at. The format helpers that consume it stay
+// internal: they are the library's own printing, not a utility to build on.
 export type { TimeGrain } from './format'
 
 export type {

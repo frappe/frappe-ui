@@ -1,5 +1,6 @@
 import { dayjs } from '#utils/dayjs'
 import { chartFont, measureTextWidth } from './measureText'
+import { documentLocale } from './utils'
 
 export type TimeGrain =
   | 'second'
@@ -115,7 +116,7 @@ export function formatValue(
 ) {
   if (value === null || value === undefined || isNaN(value)) return ''
 
-  const locale = 'en-US'
+  const locale = documentLocale()
 
   if (shorten) {
     return new Intl.NumberFormat(locale, {

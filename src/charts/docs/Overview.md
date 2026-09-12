@@ -203,5 +203,5 @@ take three spaced stops, not the first three.
 The series identity a cap collapses its tail into: `maxSeries` on an axis chart,
 `maxSlices` on a donut. It is reserved, so a group whose name really is "Others"
 cannot collide with it, and stable, so `seriesConfig[OTHERS_KEY]` renames or
-recolors the bucket like any other series. `OTHERS_LABEL` is the name it reads
-as until a `label` overrides it.
+recolors the bucket like any other series. It reads as "Others" until a `label`
+overrides it.
