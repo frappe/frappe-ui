@@ -13,7 +13,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -230,10 +230,10 @@ describe('bar chart option axes', () => {
 
     // Gridlines run across the values; the category axis carries the baseline.
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.gridline)
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.axisLine.show).toBe(false)
-    expect(option.xAxis.axisLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.xAxis.axisLine.lineStyle.color).toBe(tokens.gridline)
   })
 
   it('puts dates on a time axis without being told to', () => {

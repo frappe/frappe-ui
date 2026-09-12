@@ -25,7 +25,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -90,16 +90,16 @@
     type: 'boolean'
   },
   {
-    name: 'precision',
-    description: 'Decimal places. Defaults to as many as the value carries, up to 2.',
+    name: 'format',
+    description: 'Prints the reading and the target: they are one measure, read against each other.',
     required: false,
-    type: 'number'
+    type: 'ChartValueFormatter'
   },
   {
-    name: 'compact',
-    description: 'Shortens the value, `12300` -> `12.3K`.',
+    name: 'deltaFormat',
+    description: 'Prints the delta. It takes the absolute value: the arrow beside it carries the sign.',
     required: false,
-    type: 'boolean'
+    type: 'ChartValueFormatter'
   },
   {
     name: 'sparkline',

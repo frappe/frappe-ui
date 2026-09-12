@@ -9,13 +9,19 @@ const revenueTrend = [
   202100, 209500, 220200,
 ]
 
+const compact = (value: number) =>
+  new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
+
 const cards: NumberCardProps[] = [
   {
     title: 'Net revenue',
     value: 220200,
     target: 250000,
     prefix: '$',
-    compact: true,
+    format: compact,
     delta: 5.1,
     deltaSuffix: '%',
     sparkline: { data: revenueTrend },
@@ -24,7 +30,7 @@ const cards: NumberCardProps[] = [
     title: 'Monthly churn',
     value: 2.1,
     suffix: '%',
-    precision: 1,
+    format: (value) => value.toFixed(1),
     delta: -0.4,
     deltaSuffix: 'pts',
     deltaCaption: 'vs last month',

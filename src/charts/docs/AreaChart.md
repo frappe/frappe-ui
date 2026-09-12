@@ -24,8 +24,8 @@ before the shares are taken, so they still add up. Both are described under
 
 ## A single series
 
-Unstacked, the fill fades out towards the axis. `fillOpacity` sets the
-chart-level alpha; a `seriesConfig` entry overrides it per series.
+Unstacked, the fill fades out towards the axis, so lines stay legible where
+they cross. Areas that stack into a band take a solid fill instead.
 
 <ComponentPreview name="Charts-AreaLatency" csr="true" self-layout />
 

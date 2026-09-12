@@ -25,6 +25,14 @@ costs an app to reach the chrome — and those belong to the plot-and-chrome
 contract in [charts.md](../charts.md) rather than here. The other three are
 decided below, by the same rule, and are marked as second-pass entries.
 
+**Names since renamed (2026-09-12).** The reasoning below is recorded as it
+stood. Three of the props it names have moved: `showInlineLabels` on the donut
+and `showValues` on the heatmap are both `showDataLabels`, the one name the
+family uses for a data label, and the funnel's `showPercentages` is removed
+because a funnel always prints its conversion rates. The decisions are
+unchanged — what entered still entered. See the
+[RC API audit](https://github.com/frappe/frappe-ui/issues/1139), item 4.
+
 ## Decision
 
 ### Enters
@@ -133,9 +141,49 @@ props are not shaped around a stored config format.
 `timeGrain` all exist, as do the heatmap, the empty and loading and error
 states, theme-reactive palettes, HTML tooltips with slots, and typed events.
 
+### Not a gap any more: four props left before 1.0.0 (2026-09-12)
+
+Convention 2 reads on the way out as well. Each of these named a renderer
+setting rather than a reading of the data, and each is breaking to remove after
+the tag.
+
+- `SeriesStyle.lineWidth` is stroke weight, which the library decides once for
+  every line it draws. `echartOptions: { lineStyle: { width } }` sets it per
+  series.
+- `fillOpacity`, chart-level and per-series, handed a caller the alpha the
+  library already decides twice over: a fading gradient for a free area, a solid
+  wash for a banded one. `echartOptions: { areaStyle: { opacity } }` sets it per
+  series.
+- `SeriesStyle.lineType` offered three textures where the meaning that survives
+  is "this line is a comparison or a projection". It is `dashed?: boolean`, the
+  shape and the dash `ReferenceLine.dashed` already uses.
+- `SankeyChartProps.orient` was echarts' own key and value set for what
+  `BarChart` spells `horizontal?: boolean`. It is `vertical?: boolean`.
+  `nodeAlign` stays: which end a node with nothing leaving it sits at is a
+  reading of the flow.
+
+### Stays in: four looks read once more before 1.0.0 (2026-09-12)
+
+The same reading of convention 2 was run over what the family already ships.
+These four stay, and the reason is recorded here so the question is closed for
+1.x.
+
+- `ReferenceLine.color` stays. A reference line is furniture and carries no
+  identity, so the identity argument above does not admit it. What does is that
+  a chart carries several rules at once — a target, a threshold, last year's
+  average — and the color is what says which line is which.
+- `smooth` stays. A curve says the measure runs between the points and a
+  straight join says the points are all that was measured, so it reads the data
+  and not only the stroke.
+- `showDataPoints` stays. The marks say where a measurement was taken, which a
+  dense line otherwise hides.
+- Donut `variant` stays. `'half'` is a look, admitted because it already ships
+  and is named in `DonutChart.md`. Removing it after the tag is breaking, so it
+  is closed rather than argued.
+
 ## Consequences
 
-Three decisions fell out of the work and answer questions this record raised.
+These decisions fell out of the work and answer questions this record raised.
 
 - **A reference line does not stretch the value axis.** A target far outside the
   data would flatten the data it is read against, so a line beyond the range is
@@ -147,6 +195,10 @@ Three decisions fell out of the work and answer questions this record raised.
   data has none to name — the series come out of a grouping column — so a
   grouped chart had no way to put one group on its own scale. Keying the axis by
   series identity gives it one, and drops a branch instead of adding a prop.
+- **`NumberCard` prints through `format`.** `compact` and `precision` named in
+  the "already present" list above left before 1.0.0: they were a second
+  formatting mechanism beside the `ChartValueFormatter` every other chart takes,
+  which `spec/charts.md` already promised the card.
 - **A numeric x axis is asked for, never inferred.** `'time'` is inferred
   because a column of dates is a column of dates. A column of numbers is as
   often a list of categories — quarters, store numbers, shirt sizes — so

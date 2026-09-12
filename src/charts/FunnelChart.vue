@@ -56,7 +56,7 @@
             <!-- Nothing to convert from at the top of the funnel: printing
                  "100%" there states a tautology. -->
             <div
-              v-if="showPercentages && stage.index > 0"
+              v-if="stage.index > 0"
               class="truncate text-xs tabular-nums text-ink-gray-5"
             >
               {{ formatPercent(stage.percentOfFirst) }}
@@ -98,9 +98,9 @@
             @blur="clearHover"
             @click="
               emit('select', {
+                name: stage.name,
                 label: stage.label,
                 value: stage.value,
-                index: stage.index,
                 row: stage.row,
               })
             "
@@ -114,16 +114,19 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="hoveredStage ? [hoveredStage.row] : []"
         :dir="dir"
       >
         <template #default="slotProps">
-          <slot name="tooltip" v-bind="slotProps" :stage="hoveredStage">
+          <slot name="tooltip" v-bind="slotProps">
             <div class="mb-2 text-p-sm text-ink-gray-5">
               {{ slotProps.label }}
             </div>
             <div class="flex flex-col gap-1.5 text-p-sm">
               <div
-                v-for="item in slotProps.items"
+                v-for="item in slotProps.items.filter(
+                  (entry) => entry.kind === 'series',
+                )"
                 :key="item.name"
                 class="flex items-center justify-between gap-5"
               >
@@ -143,13 +146,15 @@
               <!-- Indented to the swatch column so the two rates read as notes
                    on the value above rather than as values of their own. -->
               <div
-                v-for="rate in tooltip.rates"
-                :key="rate.label"
+                v-for="item in slotProps.items.filter(
+                  (entry) => entry.kind === 'context',
+                )"
+                :key="item.name"
                 class="flex items-center justify-between gap-5 ps-4"
               >
-                <span class="truncate text-ink-gray-5">{{ rate.label }}</span>
+                <span class="truncate text-ink-gray-5">{{ item.label }}</span>
                 <span class="shrink-0 tabular-nums text-ink-gray-6">
-                  {{ rate.value }}
+                  {{ item.formattedValue }}
                 </span>
               </div>
             </div>
@@ -165,7 +170,7 @@ import { computed, reactive, ref } from 'vue'
 import { formatLabel, formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
-import { chartColors, useChartTokens } from './tokens'
+import { paletteColors, useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -183,9 +188,7 @@ import type {
 // descending silhouette while the labels stay on a straight baseline. No
 // echarts — the geometry is a division per stage, see funnelGeometry.ts.
 
-const props = withDefaults(defineProps<FunnelChartProps>(), {
-  showPercentages: true,
-})
+const props = defineProps<FunnelChartProps>()
 
 const emit = defineEmits<FunnelChartEmits>()
 
@@ -198,7 +201,6 @@ const config = computed<FunnelChartConfig>(() => ({
   data: props.data,
   categoryColumn: props.category,
   valueColumn: props.value,
-  showPercentages: props.showPercentages,
   palette: props.palette,
   dir: dir.value,
 }))
@@ -227,13 +229,20 @@ const { tokens } = useChartTokens(root)
 const FUNNEL_PALETTE: ChartPaletteName = 'sequential'
 
 /** Palest first, deepest last, so the color darkens as the population narrows. */
-const colors = computed(() =>
-  chartColors(props.palette, tokens.value, {
-    fallback: FUNNEL_PALETTE,
-    count: stages.value.length,
-    deepEnd: 'last',
-  }),
-)
+const colors = computed(() => {
+  const assigned = paletteColors(
+    props.palette,
+    tokens.value,
+    stages.value.length,
+    FUNNEL_PALETTE,
+  )
+  // Only the sequential ramp has a deep end to move: a caller's own list is
+  // drawn in the order it was written, and a diverging ramp's direction is its
+  // meaning.
+  return (props.palette ?? FUNNEL_PALETTE) === 'sequential'
+    ? assigned.slice().reverse()
+    : assigned
+})
 
 const hovered = ref<number | null>(null)
 const hoveredStage = computed(() =>
@@ -246,7 +255,6 @@ const tooltip = reactive({
   y: 0,
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
-  rates: [] as { label: string; value: string }[],
 })
 
 useTooltipDismiss({
@@ -283,20 +291,25 @@ function readStage(stage: FunnelStage) {
       color: colors.value[stage.index],
       value: stage.value,
       formattedValue: formatMeasure(stage.value),
+      kind: 'series',
     },
-  ]
-  tooltip.rates = [
     {
+      name: 'ofFirst',
       label: `of ${stages.value[0]?.label ?? ''}`,
-      value: formatPercent(stage.percentOfFirst),
+      value: stage.percentOfFirst,
+      formattedValue: formatPercent(stage.percentOfFirst),
+      kind: 'context',
     },
   ]
   // The first stage has no predecessor, and the second one's predecessor *is*
   // the first stage — printing that rate again would repeat the line above it.
   if (stage.index > 1) {
-    tooltip.rates.push({
+    tooltip.items.push({
+      name: 'ofPrevious',
       label: `of ${stages.value[stage.index - 1].label}`,
-      value: formatPercent(stage.percentOfPrevious),
+      value: stage.percentOfPrevious,
+      formattedValue: formatPercent(stage.percentOfPrevious),
+      kind: 'context',
     })
   }
 }

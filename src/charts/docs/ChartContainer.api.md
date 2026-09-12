@@ -18,22 +18,22 @@
     type: 'string'
   },
   {
-    name: 'plotLabel',
-    description: 'Value-axis title, drawn above the plot instead of inside it.',
+    name: 'yAxisTitle',
+    description: 'Title of the primary value axis. The container draws it above the plot\nrather than along the axis, where it would have to be turned sideways.',
     required: false,
     type: 'string'
   },
   {
-    name: 'plotLabelSecondary',
+    name: 'y2AxisTitle',
     description: 'Title of the second value axis, drawn over the edge that axis sits on.',
     required: false,
     type: 'string'
   },
   {
-    name: 'plotLabelPlacement',
+    name: 'axisTitlePlacement',
     description: 'Edge of the plot the value-axis titles head. Defaults to the top.',
     required: false,
-    type: 'PlotLabelPlacement'
+    type: 'AxisTitlePlacement'
   },
   {
     name: 'loading',

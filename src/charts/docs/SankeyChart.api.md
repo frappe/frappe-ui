@@ -31,7 +31,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -60,10 +60,10 @@
     type: 'string'
   },
   {
-    name: 'orient',
-    description: 'Defaults to `\'horizontal\'`: the flow runs left to right.',
+    name: 'vertical',
+    description: 'Flow runs top to bottom, in rows of nodes. Defaults to left to right.',
     required: false,
-    type: 'SankeyOrient'
+    type: 'boolean'
   },
   {
     name: 'nodeAlign',
@@ -114,8 +114,8 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.\nA node\'s `rows` is empty: it stands for every row through it, not one.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 

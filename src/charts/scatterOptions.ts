@@ -10,7 +10,7 @@ import {
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
 import { buildReferenceLineSeries } from './referenceLines'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   ChartPaletteName,
@@ -95,10 +95,12 @@ export function buildScatterSeries(
   if (dropped) warnDropped(dropped, config)
 
   const scale = symbolSizeScale(sizes, Boolean(config.sizeColumn))
-  const colors = chartColors(config.palette, tokens, {
-    fallback: SCATTER_PALETTE,
-    count: names.length,
-  })
+  const colors = paletteColors(
+    config.palette,
+    tokens,
+    names.length,
+    SCATTER_PALETTE,
+  )
 
   return names.map((name, index) => ({
     name,

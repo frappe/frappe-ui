@@ -30,15 +30,13 @@ export type {
 // reads them once and stays internal: a plot that does not re-resolve on a
 // theme flip is the bug the composable exists to prevent.
 export { paletteColors, useChartTokens, type ChartTokens } from './tokens'
-export type { ResolvedColorScheme } from './tokens'
 
 // Identity of the bucket `maxSeries` and `maxSlices` collapse their tail into,
 // so a caller can style it without hardcoding the reserved key.
-export { OTHERS_KEY, OTHERS_LABEL } from './utils'
+export { OTHERS_KEY } from './utils'
 
-// The grain a time x axis is read at. The format helpers that consume it are
-// internal: each one hardcodes `en-US`, so exporting them would freeze that
-// until `2.0.0`.
+// The grain a time x axis is read at. The format helpers that consume it stay
+// internal: they are the library's own printing, not a utility to build on.
 export type { TimeGrain } from './format'
 
 export type {
@@ -63,6 +61,7 @@ export type {
   ChartStateSlots,
   ChartTooltipFormatter,
   ChartTooltipProps,
+  ChartTooltipSlotProps,
   ChartTooltipSlots,
   ChartValueAxisOptions,
   ChartValueFormatter,
@@ -93,6 +92,7 @@ export type {
 // Only what the props, emits, slots and template refs above reach for; the
 // config shapes the option builders read stay internal.
 export type {
+  AxisTitlePlacement,
   ChartDatapointEvent,
   ChartDir,
   ChartExposed,
@@ -105,17 +105,14 @@ export type {
   DonutSliceEvent,
   DonutVariant,
   EchartOptionsOverride,
-  FunnelStage,
   FunnelStageEvent,
   HeatmapAxisOptions,
   HeatmapCellEvent,
   HeatmapPalette,
   NumberCardSparkline,
-  NumberCardSparklineType,
-  PlotLabelPlacement,
   ReferenceLine,
+  ReferenceLineLabelPlacement,
   SankeyLinkEvent,
   SankeyNodeAlign,
-  SankeyOrient,
   ScatterPointEvent,
 } from './types'

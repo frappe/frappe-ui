@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   buildAxisChartOption,
   DEFAULT_FILL_OPACITY,
+  DEFAULT_LINE_WIDTH,
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, ChartMark } from './types'
 
@@ -14,7 +16,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -98,23 +100,6 @@ describe('combo series marks', () => {
     )
   })
 
-  it('reads chart-level and per-series fillOpacity for that fill', () => {
-    const option = build({
-      type: 'line',
-      fillOpacity: 0.5,
-      series: [
-        { name: 'sales', type: 'area' },
-        { name: 'refunds', type: 'area', fillOpacity: 0.25 },
-      ],
-    })
-    expect(option.series[0].areaStyle.color.colorStops[0].color).toBe(
-      'rgba(0, 0, 17, 0.5)',
-    )
-    expect(option.series[1].areaStyle.color.colorStops[0].color).toBe(
-      'rgba(0, 0, 51, 0.25)',
-    )
-  })
-
   it('paints lines over bands over bars, whatever order they are declared in', () => {
     const option = build({
       series: [
@@ -159,7 +144,7 @@ describe('combo axes', () => {
     // Unstyled, echarts fills it with a hard-coded grey that no theme reaches.
     // The alpha is what keeps the gridlines under it readable.
     const { shadowStyle } = build().tooltip.axisPointer
-    expect(shadowStyle.color).toBe(tokens.splitLine)
+    expect(shadowStyle.color).toBe(tokens.gridline)
     expect(shadowStyle.opacity).toBeLessThan(1)
   })
 
@@ -370,8 +355,8 @@ describe('combo line options', () => {
     const option = build({
       connectNulls: true,
       series: [
-        { name: 'sales', smooth: true, lineType: 'dashed' },
-        { name: 'refunds', type: 'line', smooth: true, lineType: 'dashed' },
+        { name: 'sales', smooth: true, dashed: true },
+        { name: 'refunds', type: 'line', smooth: true, dashed: true },
         { name: 'rate', type: 'area', showDataPoints: true },
       ],
     })
@@ -380,7 +365,9 @@ describe('combo line options', () => {
     expect(option.series[0].smooth).toBeUndefined()
     expect(option.series[0].connectNulls).toBeUndefined()
 
-    expect(option.series[1].lineStyle.type).toBe('dashed')
+    expect(option.series[1].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
     expect(option.series[1].smooth).toBe(true)
     expect(option.series[1].connectNulls).toBe(true)
     expect(option.series[2].showSymbol).toBe(true)

@@ -31,7 +31,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -70,6 +70,12 @@
     description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
     required: false,
     type: 'Record<string, SeriesStyle>'
+  },
+  {
+    name: 'showDataLabels',
+    description: 'Prints every series\' value beside its marks. A `seriesConfig` entry\noverrides it for one series, on or off.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'hiddenSeries',
@@ -121,12 +127,6 @@
     type: 'boolean'
   },
   {
-    name: 'fillOpacity',
-    description: 'Chart-level fill alpha; `seriesConfig` overrides it per series. Area series.',
-    required: false,
-    type: 'number'
-  },
-  {
     name: 'referenceLines',
     description: 'Targets, thresholds and other fixed marks drawn over the plot. They are\nannotations, not series: no legend entry, and no way to switch one off.',
     required: false,
@@ -163,21 +163,21 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `row` is the data row behind them,\nso a replacement body can read a column the chart never plotted.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; row?: Record<string, any> | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `rows` holds the data row behind\nthem, so a replacement body can read a column the chart never plotted.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
-    name: 'update:hiddenSeries',
-    description: 'Fired when the hidden series changes.',
-    type: '[value: string[]]'
+    name: 'select',
+    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its value, and the row behind it.',
+    type: '[event: ChartDatapointEvent]'
   },
   {
-    name: 'select',
-    description: 'A mark was selected, by click or by Enter on the keyboard cursor. Carries\nthe series it belongs to, its position along the category axis, and the\nrow behind it.',
-    type: '[event: ChartDatapointEvent]'
+    name: 'update:hiddenSeries',
+    description: 'The legend switched a series off or back on. Carries the new list.',
+    type: '[value: string[]]'
   }
 ]
 </script>

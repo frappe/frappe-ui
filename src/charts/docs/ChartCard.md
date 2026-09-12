@@ -24,8 +24,8 @@ structure: a plot draws inside the box and expects the box to hold it.
 ## Direction
 
 `dir` forces the layout direction to `'ltr'` or `'rtl'`. It defaults to
-`document.documentElement.dir`, so an app that sets the direction once at the
-root needs nothing here.
+`document.documentElement.dir` and follows it, so an app that sets the direction
+at the root needs nothing here, whether it sets it once or switches it later.
 
 <ComponentPreview name="Charts-CustomRadar" csr="true" self-layout />
 

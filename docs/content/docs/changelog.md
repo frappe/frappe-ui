@@ -717,6 +717,28 @@ Landed so far:
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
+- **`dir` and `lang` are followed, not read once.** A page that flips
+  `document.documentElement.dir` or `lang` after a chart mounts redraws it in
+  the new direction and reprints its numbers in the new locale. A chart that
+  names its own `dir` is unaffected.
+- One policy for a value that does not plot, across the family. A cell that does
+  not read as a number has no mark, so `select` no longer fires for it on Enter
+  and the keyboard cursor no longer stops on a series that has nothing at the
+  row. A row whose x cannot be read as a date is dropped from a `time` axis, the
+  way a non-numeric x is already dropped from a `value` axis, and the rows sort
+  by time. The funnel drops a stage whose count is missing, unreadable or
+  negative instead of drawing it at 0, so its indexes and conversion rates count
+  the stages that remain. **Breaking, silent:** a chart drawing any of these
+  draws something else now, with no error.
+- **The empty state is what the plot draws.** Bar, line and area now show it
+  when no visible series has a number at any row, where they used to draw bare
+  axes: a `y` key no row carries reads as empty, and so does switching every
+  series off through the legend. Silent as well.
+- `NumberCard` prints through `format` and `deltaFormat`, the `ChartValueFormatter`
+  every other chart takes. `precision` and `compact` are **removed**: a caller
+  who wants either writes it in `format`. `format` prints the value and the
+  target, `deltaFormat` prints the delta and receives it unsigned. A card with
+  neither prints what it printed before.
 
 Changed since `1.0.0-beta.41`, the first beta that shipped the family:
 
@@ -735,9 +757,90 @@ Changed since `1.0.0-beta.41`, the first beta that shipped the family:
 - **Breaking, loud:** `formatValue`, `formatDate`, `formatLabel`,
   `formatPercent`, `formatAxisValue`, `currentColorScheme` and
   `resolveChartTheme` are no longer exported. They had no documented use, and
-  each format helper hardcodes `en-US`. Read the plot-area colors with
-  `useChartTokens`, which re-resolves on a theme flip; `currentColorScheme` was
-  the root `resolvedColorScheme` under another name.
+  they are the library's own printing rather than a utility to build on. Read
+  the plot-area colors with `useChartTokens`, which re-resolves on a theme flip;
+  `currentColorScheme` was the root `resolvedColorScheme` under another name.
+
+The RC API audit ([#1139](https://github.com/frappe/frappe-ui/issues/1139))
+settled the rest before the entry freezes. Every item is loud in TypeScript
+unless it says otherwise. The
+[migration guide](https://frappeui.com/docs/migration#charts) has the rewrites.
+
+- **Breaking:** one shape for every `select` payload. `ChartDatapointEvent.dataIndex`
+  and `FunnelStageEvent.index` are gone — read the row, which every event carries.
+  `seriesName` on
+  `ChartDatapointEvent` and `ScatterPointEvent` is `name`, the field every other
+  payload, item and legend entry already used for an identity, and
+  `FunnelStageEvent` gains the `name` it never carried: the category value, where
+  `label` is what the column printed.
+- **Breaking, silent:** `DonutSliceEvent.name` is the slice's identity, where it
+  was the printed name, and what it printed moves to a new `label`. Both are
+  strings, so a handler reading `name` keeps running on a different value:
+  `OTHERS_KEY` for the collapsed tail and `"A (2)"` for a label a second row
+  repeats. Grep for `@select` handlers on `DonutChart` reading `.name`.
+- **Breaking:** one tooltip slot shape. Every `#tooltip` slot, and `ChartTooltip`
+  itself, carries `{ label, items, rows }`. `row` is gone: `rows` holds one row for
+  a point, cell, band or stage, every grouped row for a donut's "Others" slice, and
+  none for a sankey node, which stands for every row through it. `FunnelChart`'s
+  `stage` slot prop is gone with it — the two conversion rates are items named
+  `ofFirst` and `ofPrevious`. `ChartTooltipItem.kind` is required, and the value
+  `'column'` is now `'context'`: a reading the plot does not draw, which is a
+  `tooltipColumns` entry or a funnel rate. An item built by hand needs
+  `kind: 'series'`.
+- **Breaking:** `DonutChart`'s `#center` slot passes `{ label, value,
+  formattedValue, percent }` instead of preformatted strings, the way
+  `ChartTooltipItem` does. `value` and `percent` are numbers, so a readout of your
+  own can do its own arithmetic; `formattedValue` is what the default prints.
+- **Breaking:** one name for the data label. `showValues` on `HeatmapChart` and
+  `showInlineLabels` on `DonutChart` are both `showDataLabels`. Axis charts take it
+  at the chart level too, so one prop replaces one `seriesConfig` entry per series.
+- **Breaking, silent:** `FunnelChart.showPercentages` is removed — a funnel always
+  prints its conversion rates now. It defaulted to `true`, so a chart that set
+  `false` gets them back with no error.
+- **Breaking, silent:** numbers print in the page's language. Charts read
+  `document.documentElement.lang`, the attribute `dir` already reads. A page that
+  declares no language, or a malformed one, prints what it printed before. Dates
+  and time-axis labels still print in English; `xAxis.format` prints them in
+  another language.
+- **Breaking:** `ChartTokens.splitLine` is `gridline`, after the `--chart-gridline`
+  variable it reads. `splitLine` is still echarts' own option key.
+- **Breaking:** `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes
+  a `ChartMark`.
+- **Breaking, silent:** a sparkline's `'line'` draws the stroke alone. It drew a
+  stroke over a fill, which the family calls an area, so that shape is `'area'`
+  and the default. `'line'` is still a `ChartMark`, so a card naming it compiles
+  unchanged and draws something else; a card naming no type is unaffected. Grep
+  for `sparkline` objects with `type: 'line'`.
+- **Breaking:** `OTHERS_LABEL` is no longer exported and `ResolvedColorScheme` is
+  exported from the root only. `OTHERS_KEY` stays.
+  `ReferenceLineLabelPlacement` is now exported. `ChartExposed` is the caller's
+  view of the template ref: `chart` is typed `ECharts | undefined`, the value Vue
+  hands back, where the type said `ComputedRef<ECharts | undefined>`.
+  `ChartContainer`'s `plotLabel`, `plotLabelSecondary` and `plotLabelPlacement`
+  are `yAxisTitle`, `y2AxisTitle` and `axisTitlePlacement`, after the `yAxis.title`
+  and `y2Axis.title` every chart already spells them with; `PlotLabelPlacement`
+  is `AxisTitlePlacement`. `paletteColors` takes the `palette` prop's own value —
+  a ramp name, a list of colors, or nothing — plus the fallback ramp, so the
+  exported helper is the resolver the charts themselves call:
+  `paletteColors(palette, tokens, count, fallback?)`.
+- **Breaking:** four props that set a look rather than state a reading are gone.
+  `SeriesStyle.lineWidth` and `fillOpacity` (chart-level and per-series) are
+  removed: the library draws one stroke weight, and it decides the fill — a
+  fading gradient for a free area, a solid wash for a banded one. The per-series
+  `echartOptions` reaches both, `lineStyle: { width }` and
+  `areaStyle: { opacity }`. `SeriesStyle.lineType` is `dashed?: boolean`, the
+  same shape as `ReferenceLine.dashed` and drawn in the same dash.
+  `SankeyChart`'s `orient="vertical"` is `vertical`, beside `BarChart`'s
+  `horizontal`, and the `SankeyOrient` type is gone.
+- `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
+  `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
+
+`useChart`, `registerChartModules` and their three types stay on
+`frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and
+lifecycle; echarts owns the option and instance types it carries. The four
+non-ramp `--chart-*` properties are documented on the
+[chart colors](/docs/foundations/colors/charts) page, and the echarts template
+ref on the [charts overview](/docs/charts/overview).
 
 ### DatePicker family — trigger slot props renamed to `open` / `toggle` (breaking, silent)
 

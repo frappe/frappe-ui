@@ -2,7 +2,7 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
+    :y-axis-title="yAxisTitle"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
@@ -39,6 +39,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -74,7 +75,7 @@ import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartLegendItem,
   ChartTooltipItem,
   ScatterChartConfig,
@@ -153,7 +154,7 @@ const isEmpty = computed(() =>
 
 // The y-axis title is chrome rather than an echarts axis name, so it lines up
 // with the chart title above the plot. The x-axis title is drawn on its axis.
-const plotLabel = computed(() =>
+const yAxisTitle = computed(() =>
   props.yAxis?.title ? formatLabel(props.yAxis.title) : undefined,
 )
 
@@ -189,6 +190,7 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 const { chart, dispatch } = useChart({
@@ -201,7 +203,7 @@ const { chart, dispatch } = useChart({
       const hit = pointAt(params)
       if (!hit) return
       emit('select', {
-        seriesName: hit.series.name,
+        name: hit.series.name,
         x: hit.point.x,
         y: hit.point.y,
         size: hit.point.size,
@@ -263,6 +265,7 @@ function showHit(hit: ScatterHit, x: number, y: number) {
       ? [tooltipItem(props.size, point.size, props.format, entry.color)]
       : []),
   ]
+  tooltip.rows = [point.row]
   tooltip.x = x
   tooltip.y = y
   tooltip.open = true
@@ -280,6 +283,7 @@ function tooltipItem(
     color,
     value,
     formattedValue: format ? format(value) : formatValue(value),
+    kind: 'series',
   }
 }
 
@@ -404,7 +408,7 @@ const keyboard = usePlotKeyboard({
     const hit = walk.value[index]
     if (!hit) return
     emit('select', {
-      seriesName: hit.entry.name,
+      name: hit.entry.name,
       x: hit.point.x,
       y: hit.point.y,
       size: hit.point.size,
@@ -429,5 +433,5 @@ watch(
   },
 )
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

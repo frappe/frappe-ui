@@ -1,5 +1,6 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import DonutChart from './DonutChart.vue'
+import { OTHERS_KEY } from './utils'
 import './style.css'
 
 const data = [
@@ -73,6 +74,7 @@ describe('DonutChart', () => {
     cy.get('@onSelect')
       .should('have.been.calledWithMatch', {
         name: 'Search',
+        label: 'Search',
         value: 50,
         percent: 50,
       })
@@ -96,8 +98,47 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-legend"]').should('contain.text', '60%')
   })
 
+  it('round-trips v-model:hiddenSeries', () => {
+    const hidden = ref<string[]>([])
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', { style: 'width: 480px; height: 300px' }, [
+              h(DonutChart, {
+                data,
+                category: 'source',
+                value: 'visits',
+                echartOptions: { animation: false },
+                hiddenSeries: hidden.value,
+                'onUpdate:hiddenSeries': (v: string[]) => (hidden.value = v),
+              }),
+            ])
+        },
+      }),
+    )
+
+    cy.get('[aria-label="Hide Search"]')
+      .click()
+      .then(() => expect(hidden.value).to.deep.equal(['Search']))
+    slices().should('have.length', 2)
+  })
+
+  // An empty ring reads as a bug, so the last entry left showing does nothing.
+  it('refuses to hide the last slice left on the ring', () => {
+    mountChart()
+    cy.get('[aria-label="Hide Search"]').click()
+    cy.get('[aria-label="Hide Direct"]').click()
+    cy.get('[aria-label="Hide Email"]').click()
+    cy.get('[aria-label="Hide Email"]').should(
+      'have.attr',
+      'aria-pressed',
+      'true',
+    )
+  })
+
   it('gives up the readout when the labels move onto the ring', () => {
-    mountChart({ showInlineLabels: true })
+    mountChart({ showDataLabels: true })
     cy.get('[data-slot="chart-plot"]').should('not.contain.text', 'Visits')
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Search')
   })
@@ -112,6 +153,25 @@ describe('DonutChart', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)
     cy.get('[data-slot="chart-legend"]').should('contain.text', 'Others')
+  })
+
+  // The tail is identified by the reserved key, not by what it prints, so a
+  // caller can tell it apart from a category that happens to read "Others".
+  it('names the tail slice by the reserved key', () => {
+    mountChart({ maxSlices: 2, onSelect: cy.spy().as('onSelect') })
+    slices().should('have.length', 2)
+    cy.get('[data-slot="chart-plot"] [role="img"]')
+      .focus()
+      .type('{rightarrow}{enter}')
+    cy.get('@onSelect').should('have.been.calledWithMatch', {
+      name: OTHERS_KEY,
+      label: 'Others',
+      value: 50,
+      rows: [
+        { source: 'Direct', visits: 30 },
+        { source: 'Email', visits: 20 },
+      ],
+    })
   })
 
   describe('states', () => {
@@ -172,7 +232,8 @@ describe('DonutChart', () => {
       mountChart(
         {},
         {
-          center: ({ value, label }: any) => h('span', `${value} of ${label}`),
+          center: ({ formattedValue, label }: any) =>
+            h('span', `${formattedValue} of ${label}`),
         },
       )
       cy.get('[data-slot="chart-plot"]').should('contain.text', '100 of Visits')
@@ -182,8 +243,8 @@ describe('DonutChart', () => {
       mountChart(
         {},
         {
-          center: ({ label, percent }: any) =>
-            h('span', `${label} ${percent ?? ''}`),
+          center: ({ label, value, percent }: any) =>
+            h('span', `${label} ${value} ${Math.round(percent)}%`),
         },
       )
       slices().should('have.length', data.length)
@@ -194,7 +255,7 @@ describe('DonutChart', () => {
         350,
         135,
       )
-      cy.get('[data-slot="chart-plot"]').should('contain.text', 'Search 50%')
+      cy.get('[data-slot="chart-plot"]').should('contain.text', 'Search 50 50%')
     })
 
     it('takes an app’s own tooltip body', () => {
@@ -244,6 +305,7 @@ describe('DonutChart', () => {
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         name: 'Direct',
+        label: 'Direct',
         value: 30,
         percent: 30,
         rows: [{ source: 'Direct', visits: 30 }],

@@ -31,7 +31,7 @@ describe('a tooltip-only column', () => {
       label: 'Orders',
       value: 1840,
       formattedValue: '1,840',
-      kind: 'column',
+      kind: 'context',
     })
   })
 
@@ -114,7 +114,7 @@ describe('the series rows are untouched by it', () => {
     expect(items().map((row) => row.kind)).toEqual([
       'series',
       'series',
-      'column',
+      'context',
     ])
   })
 })
@@ -130,7 +130,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',

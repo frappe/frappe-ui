@@ -22,6 +22,9 @@ The tooltip has no pointer of its own. The plot tells it what to show and where:
 - `x` and `y` are viewport coordinates, i.e. `clientX` and `clientY`.
 - `label` heads the rows, e.g. the category or the date the pointer is over.
 - `items` are the rows.
+- `rows` are the data rows behind the reading, passed on to the slot. One row
+  for a point, cell, band or stage; every grouped row for a donut's "Others"
+  slice; none for an aggregate that stands for no single row.
 - `dir` forces the layout direction. It defaults to
   `document.documentElement.dir`.
 
@@ -37,6 +40,7 @@ One `ChartTooltipItem` per reading:
 | `value` | The number behind the reading. |
 | `formattedValue` | That number as it should print, e.g. through `format`. |
 | `percent` | Share of the total, printed after the value. Part-to-whole charts only. |
+| `kind` | `'series'` for a value the plot draws, `'context'` for a reading it does not. A `'context'` item carries no color and prints under a rule. |
 
 `formattedValue` is what the tooltip prints. `value` is there for a slot that
 wants to do its own arithmetic.
@@ -57,8 +61,8 @@ first.
 
 ## Replacing the content
 
-The default slot takes over the whole body, with `label` and `items` as slot
-props. Use it for a reading the rows cannot carry — a sparkline, a second
+The default slot takes over the whole body, with `label`, `items` and `rows` as
+slot props. Use it for a reading the rows cannot carry — a sparkline, a second
 measure, a link to the records behind the point.
 
 ```vue

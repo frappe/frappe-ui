@@ -50,17 +50,24 @@ describe('FunnelChart', () => {
     columns().should('have.length', data.length)
   })
 
+  it('leaves out a stage whose count it cannot read', () => {
+    mountChart({
+      data: [
+        { stage: 'Visited', deals: 50 },
+        { stage: 'Demoed', deals: 'n/a' },
+        { stage: 'Won', deals: 20 },
+      ],
+    })
+    columns().should('have.length', 2)
+    cy.get('[data-slot="chart-container"]').should('not.contain.text', 'Demoed')
+  })
+
   it('prints each stage against the first, and nothing against the first', () => {
     mountChart()
     cy.get('[data-slot="chart-container"]')
       .should('contain.text', '60%')
       .and('contain.text', '40%')
       .and('not.contain.text', '100%')
-  })
-
-  it('drops the percentages on request', () => {
-    mountChart({ showPercentages: false })
-    cy.get('[data-slot="chart-container"]').should('not.contain.text', '60%')
   })
 
   it('gives every stage a hit area that names it', () => {
@@ -73,9 +80,9 @@ describe('FunnelChart', () => {
     mountChart({ onSelect: cy.spy().as('onSelect') })
     cy.get('[aria-label="Demoed, 30"]').click()
     cy.get('@onSelect').should('have.been.calledWithMatch', {
+      name: 'Demoed',
       label: 'Demoed',
       value: 30,
-      index: 1,
       row: { stage: 'Demoed', deals: 30 },
     })
   })
@@ -86,6 +93,16 @@ describe('FunnelChart', () => {
     cy.get('[data-slot="chart-tooltip"]')
       .should('exist')
       .and('contain.text', 'Won')
+  })
+
+  it('reads both conversion rates in the tooltip, against the first stage and the one before', () => {
+    mountChart()
+    cy.get('[aria-label="Won, 20"]').trigger('mouseenter')
+    cy.get('[data-slot="chart-tooltip"]')
+      .should('contain.text', 'of Visited')
+      .and('contain.text', '40%')
+      .and('contain.text', 'of Demoed')
+      .and('contain.text', '67%')
   })
 
   describe('keyboard', () => {
@@ -122,7 +139,6 @@ describe('FunnelChart', () => {
       cy.get('@onSelect').should('have.been.calledWithMatch', {
         label: 'Won',
         value: 20,
-        index: 2,
         row: { stage: 'Won', deals: 20 },
       })
     })
@@ -160,6 +176,12 @@ describe('FunnelChart', () => {
       cy.contains('No data to show').should('be.visible')
     })
 
+    it('says so when no row carries a count', () => {
+      mountChart({ data: [{ stage: 'Visited', deals: null }] })
+      container().should('have.attr', 'data-state', 'empty')
+      cy.contains('No data to show').should('be.visible')
+    })
+
     it('takes an app’s own placeholder in place of the skeleton', () => {
       mountChart({ loading: true }, { loading: () => h('div', { id: 'own' }) })
       cy.get('#own').should('exist')
@@ -191,12 +213,18 @@ describe('FunnelChart', () => {
       cy.get('[data-slot="chart-header"]').should('contain.text', 'Export')
     })
 
-    it('takes an app’s own tooltip body, with the stage behind it', () => {
+    it('takes an app’s own tooltip body, with the rates among the items', () => {
       mountChart(
         {},
         {
-          tooltip: ({ label, stage }: any) =>
-            h('span', `${label} at ${Math.round(stage.percentOfPrevious)}%`),
+          tooltip: ({ items, rows }: any) =>
+            h(
+              'span',
+              `${rows[0].stage} at ${
+                items.find((item: any) => item.name === 'ofPrevious')
+                  .formattedValue
+              }`,
+            ),
         },
       )
       cy.get('[aria-label="Won, 20"]').focus()

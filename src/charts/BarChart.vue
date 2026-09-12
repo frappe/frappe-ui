@@ -2,9 +2,9 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
-    :plot-label-secondary="plotLabelSecondary"
-    :plot-label-placement="plotLabelPlacement"
+    :y-axis-title="yAxisTitle"
+    :y2-axis-title="y2AxisTitle"
+    :axis-title-placement="axisTitlePlacement"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
@@ -41,7 +41,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
-        :row="tooltip.row"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -80,7 +80,7 @@ import type {
   BarChartEmits,
   BarChartProps,
   BarChartSlots,
-  ChartExposed,
+  ChartExposedRefs,
 } from './types'
 
 registerChartModules([
@@ -109,7 +109,6 @@ const config = computed<AxisChartConfig>(() => ({
   stacked: props.stacked,
   horizontal: props.horizontal,
   connectNulls: props.connectNulls,
-  fillOpacity: props.fillOpacity,
 }))
 
 const {
@@ -117,9 +116,9 @@ const {
   chart,
   dir,
   isEmpty,
-  plotLabel,
-  plotLabelSecondary,
-  plotLabelPlacement,
+  yAxisTitle,
+  y2AxisTitle,
+  axisTitlePlacement,
   renderError,
   tooltip,
   legendItems,
@@ -137,5 +136,5 @@ const {
   onSelect: (event) => emit('select', event),
 })
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

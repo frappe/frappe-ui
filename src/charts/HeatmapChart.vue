@@ -76,6 +76,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -107,7 +108,7 @@ import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartTooltipItem,
   HeatmapChartConfig,
   HeatmapChartEmits,
@@ -141,7 +142,7 @@ const config = computed<HeatmapChartConfig>(() => ({
   valueColumn: props.value,
   min: props.min,
   max: props.max,
-  showValues: props.showValues,
+  showDataLabels: props.showDataLabels,
   palette: props.palette,
   dir: dir.value,
   echartOptions: props.echartOptions,
@@ -187,6 +188,7 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 useTooltipDismiss({
@@ -286,8 +288,10 @@ function showTooltip(dataIndex: number) {
       formattedValue: props.format
         ? props.format(cell.value)
         : formatValue(cell.value),
+      kind: 'series',
     },
   ]
+  tooltip.rows = [cell.row]
   tooltip.x = pointer.x
   tooltip.y = pointer.y
   tooltip.open = true
@@ -402,5 +406,5 @@ function shorten(value: number) {
   return props.format ? props.format(value) : formatValue(value, 1, true)
 }
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

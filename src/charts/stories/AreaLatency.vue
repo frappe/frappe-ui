@@ -25,7 +25,6 @@ const latency = [
       y="p95"
       :x-axis="{ type: 'time', timeGrain: 'hour' }"
       :y-axis="{ title: 'Latency', format: (value) => `${value} ms` }"
-      :fill-opacity="0.25"
       :series-config="{ p95: { label: 'p95 latency', smooth: true } }"
       title="Response time"
       subtitle="95th percentile, all endpoints"

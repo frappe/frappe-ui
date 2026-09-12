@@ -94,6 +94,42 @@ the established pattern. `NumberCard` draws one by default, because a reading
 with no plot is a card, and `:card="false"` lets an app lay out several readings
 inside its own card.
 
+## The engine composable
+
+`useChart` and `registerChartModules` are exported for a plot the library does
+not draw, beside the chrome components that dress it. The library owns the
+composable's shape and its lifecycle: init once the container has a size and the
+fonts settle, resize following, disposal on unmount, the SVG renderer, and
+reduced motion. The echarts types it carries — the option, the instance, the
+modules — are echarts' and move with that dependency.
+[ADR-0018](./adr/0018-charts-engine-composable-is-public.md) records why they are
+public and what freezes with them.
+
+## Where `format` lives
+
+A formatter lives where the values it prints live.
+
+A chart whose values are measured against a value axis takes `format` on that
+axis: `yAxis.format`, `y2Axis.format`, and `xAxis.format` for the category
+labels. `y` and `y2` are there to carry two units, so one chart-level formatter
+could only be right for one of them. This is the axis charts and the scatter.
+
+A chart with one measure and no value axis takes `format` at the chart level,
+because there is one unit and nowhere else to put it: the donut, the funnel, the
+heatmap and the number card.
+
+A measure with no axis of its own takes the chart-level formatter too. That is
+what `ScatterChartProps.format` is for — the size column sits on no scale, so
+the two axis formatters have nothing to say about it. Its two coordinates still
+format from `xAxis` and `yAxis`.
+
+`tooltipColumns[].format` is the one other place, and it is the same rule: a
+tooltip column is drawn on no axis, so it carries its own.
+
+`HeatmapAxisOptions` carries `format` and no `title`, where every other axis
+options type carries both. That is a gap, not a decision: a title on a heatmap
+axis is additive and can land in a 1.x minor.
+
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as

@@ -2,8 +2,8 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
-    :plot-label-secondary="plotLabelSecondary"
+    :y-axis-title="yAxisTitle"
+    :y2-axis-title="y2AxisTitle"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
@@ -40,7 +40,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
-        :row="tooltip.row"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -76,7 +76,7 @@ import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   AxisChartConfig,
-  ChartExposed,
+  ChartExposedRefs,
   LineChartEmits,
   LineChartProps,
   LineChartSlots,
@@ -107,7 +107,6 @@ const config = computed<AxisChartConfig>(() => ({
   type: 'line',
   stacked: props.stacked,
   connectNulls: props.connectNulls,
-  fillOpacity: props.fillOpacity,
 }))
 
 const {
@@ -115,8 +114,8 @@ const {
   chart,
   dir,
   isEmpty,
-  plotLabel,
-  plotLabelSecondary,
+  yAxisTitle,
+  y2AxisTitle,
   renderError,
   tooltip,
   legendItems,
@@ -133,5 +132,5 @@ const {
   onSelect: (event) => emit('select', event),
 })
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

@@ -81,8 +81,7 @@ describe('BarChart', () => {
       mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().first().click()
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 0,
+        name: 'sales',
         value: 10,
         row: { month: 'Jan', sales: 10 },
       })
@@ -476,6 +475,18 @@ describe('BarChart', () => {
       container().should('have.attr', 'data-state', 'empty')
     })
 
+    it('says so when no row carries a number for a series', () => {
+      mountChart({ y: ['typo'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
+    it('says so once the legend has switched every series off', () => {
+      mountChart({ hiddenSeries: ['sales', 'refunds'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
     it('reads as ready once the bars are drawn', () => {
       mountChart()
       bars().should('have.length', data.length * 2)
@@ -621,7 +632,7 @@ describe('BarChart', () => {
       // The row carries every column, `tooltipColumns` or not: a tooltip the
       // app draws itself needs no prop to reach one.
       mountChart({ data: data.map((row) => ({ ...row, orders: 1000 })) }, {
-        tooltip: ({ row }: any) => h('span', `${row.orders} orders`),
+        tooltip: ({ rows }: any) => h('span', `${rows[0].orders} orders`),
       } as any)
       bars().should('have.length', data.length * 2)
       plot().focus()
@@ -658,8 +669,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{rightarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 1,
+        name: 'sales',
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })
@@ -673,8 +683,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{downarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'refunds',
-        dataIndex: 0,
+        name: 'refunds',
         value: 4,
       })
     })
@@ -685,8 +694,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{downarrow}{uparrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 0,
+        name: 'sales',
         value: 10,
       })
     })

@@ -31,6 +31,7 @@ const tooltip = reactive({
   y: 0,
   label: '' as string | undefined,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 function show(row: (typeof REGIONS)[number], event: MouseEvent) {
@@ -42,6 +43,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
       color: colors.value[0],
       value: row.signups,
       formattedValue: row.signups.toLocaleString(),
+      kind: 'series',
     },
     {
       name: 'trials',
@@ -51,8 +53,10 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
       formattedValue: row.trials.toLocaleString(),
       // Part-to-whole readings carry a share, printed after the value.
       percent: (row.trials / row.signups) * 100,
+      kind: 'series',
     },
   ]
+  tooltip.rows = [row]
   // Viewport coordinates: the tooltip is teleported to the body and placed
   // against the window, so it is never clipped by the card.
   tooltip.x = event.clientX
@@ -97,6 +101,7 @@ function show(row: (typeof REGIONS)[number], event: MouseEvent) {
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
       />
     </ChartContainer>
   </ChartCard>

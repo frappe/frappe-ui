@@ -30,7 +30,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -217,7 +217,9 @@ describe('heatmapRampStops', () => {
 
   it('takes an explicit list in the order it was written', () => {
     const colors = ['#ffffff', '#000000']
-    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(colors)
+    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(
+      colors,
+    )
   })
 })
 
@@ -377,7 +379,7 @@ describe('hoverCellColor', () => {
   })
 
   it('prints values in ink picked against each cell own fill', () => {
-    const series = build({ showValues: true }).series[0]
+    const series = build({ showDataLabels: true }).series[0]
 
     expect(series.label.show).toBe(true)
     expect(series.labelLayout).toEqual({ hideOverlap: true })
@@ -387,13 +389,13 @@ describe('hoverCellColor', () => {
   })
 
   it('shortens the printed value', () => {
-    const series = build({ showValues: true }).series[0]
+    const series = build({ showDataLabels: true }).series[0]
 
     expect(series.label.formatter({ value: [0, 0, 12400] })).toBe('12.4K')
   })
 
   it('prints the value through `format` when one is given', () => {
-    const option = buildHeatmapOption(config({ showValues: true }), {
+    const option = buildHeatmapOption(config({ showDataLabels: true }), {
       tokens,
       format: (value: number) => `${value} orders`,
     }) as any

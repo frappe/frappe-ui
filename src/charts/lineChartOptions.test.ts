@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildAxisChartOption } from './axisChartOptions'
+import { buildAxisChartOption, DEFAULT_LINE_WIDTH } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
@@ -10,7 +11,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -34,7 +35,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 describe('line chart option axes', () => {
@@ -54,7 +58,7 @@ describe('line chart option axes', () => {
     const option = build()
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.gridline)
     expect(option.yAxis.axisLine.show).toBe(false)
     expect(option.xAxis.axisLabel.color).toBe(tokens.axisLabel)
     expect(option.yAxis.axisLabel.color).toBe(tokens.axisLabel)
@@ -127,18 +131,15 @@ describe('line chart option series', () => {
     ).toBe('red')
   })
 
-  it('takes the dash pattern and width from the series, solid otherwise', () => {
+  it('breaks the line of a dashed series, solid otherwise', () => {
     expect(build().series[0].lineStyle.type).toBe('solid')
 
-    const option = build({
-      series: [
-        { name: 'sales', lineType: 'dashed', lineWidth: 3 },
-        { name: 'refunds', lineType: 'dotted' },
-      ],
-    })
-    expect(option.series[0].lineStyle.type).toBe('dashed')
-    expect(option.series[0].lineStyle.width).toBe(3)
-    expect(option.series[1].lineStyle.type).toBe('dotted')
+    const option = build({ series: [{ name: 'sales', dashed: true }] })
+    // The reference lines' dash, at the one stroke width the library draws.
+    expect(option.series[0].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
+    expect(option.series[0].lineStyle.width).toBe(DEFAULT_LINE_WIDTH)
   })
 
   it('hides datapoints unless asked for', () => {

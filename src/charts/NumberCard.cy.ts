@@ -27,17 +27,23 @@ describe('NumberCard', () => {
   })
 
   it('wraps the reading in its prefix and suffix', () => {
-    mountCard({ value: 1234.5, prefix: '$', suffix: ' MRR', precision: 1 })
+    mountCard({ value: 1234.5, prefix: '$', suffix: ' MRR' })
     card().should('contain.text', '$1,234.5 MRR')
   })
 
-  it('shortens the reading on request', () => {
-    mountCard({ compact: true })
+  it('prints the reading through format', () => {
+    mountCard({
+      format: (value: number) =>
+        new Intl.NumberFormat('en-US', {
+          notation: 'compact',
+          maximumFractionDigits: 1,
+        }).format(value),
+    })
     card().should('contain.text', '12.3K')
   })
 
   it('prints a string reading exactly as given', () => {
-    mountCard({ value: 'Not tracked', compact: true })
+    mountCard({ value: 'Not tracked', format: () => 'ignored' })
     card().should('contain.text', 'Not tracked')
   })
 
@@ -75,10 +81,20 @@ describe('NumberCard', () => {
   })
 
   describe('sparkline', () => {
-    it('draws a line and the band under it', () => {
+    it('draws an area by default: a line and the band under it', () => {
       mountCard({ sparkline: { data: [1, 5, 3, 8] } })
       cy.get('[data-slot="chart-card"] svg path').should('have.length', 2)
+      cy.get('[data-slot="chart-card"] svg path')
+        .first()
+        .should('not.have.attr', 'd', '')
       cy.get('linearGradient').should('exist')
+    })
+
+    it('draws the stroke alone when asked for a line', () => {
+      mountCard({ sparkline: { data: [1, 5, 3, 8], type: 'line' } })
+      cy.get('[data-slot="chart-card"] svg path')
+        .first()
+        .should('have.attr', 'd', '')
     })
 
     it('draws bars instead when asked for', () => {

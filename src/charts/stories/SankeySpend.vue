@@ -21,7 +21,7 @@ const inThousands = (value: number) => `$${value}K`
       source="service"
       target="team"
       value="amount"
-      orient="vertical"
+      vertical
       :format="inThousands"
       title="Infrastructure spend"
       subtitle="Service to team, this month"

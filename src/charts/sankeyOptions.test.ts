@@ -10,7 +10,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -279,7 +279,7 @@ describe('buildSankeyOption', () => {
   })
 
   it('turns the flow downwards and the labels with it', () => {
-    const series = build({ orient: 'vertical' }).series[0]
+    const series = build({ vertical: true }).series[0]
 
     expect(series.orient).toBe('vertical')
     // A vertical node is a wide bar, so a label beside it lands on a neighbour.

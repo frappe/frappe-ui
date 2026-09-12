@@ -32,7 +32,8 @@ measured over every x, and the survivors stay in the order the data put them in.
 
 The rows are never rewritten, so the plot shows the share and the tooltip shows
 both it and the number that was measured. A `yAxis.format` prints that number in
-the tooltip; the ticks read as percentages whatever it says.
+the tooltip; the ticks read as percentages whatever it says, and so does an
+`axisLabel.formatter` set through that axis' `echartOptions`.
 
 The share is taken per stack, so two stacks under different `stackName`s each
 reach 100 on their own, and a bar stack and an area stack are two wholes. A
@@ -52,7 +53,8 @@ renames or recolors it like any other series.
 
 `horizontal` moves the category axis to Y, which is how long labels stay
 readable. Per-series looks live in `seriesConfig`, keyed by series identity —
-here to print the value on each bar.
+here to print the value on each bar. `showDataLabels` on the chart prints them
+on every series at once, and a `seriesConfig` entry overrides it for one.
 
 <ComponentPreview name="Charts-BarHorizontal" csr="true" self-layout />
 

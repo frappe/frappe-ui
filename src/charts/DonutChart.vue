@@ -36,7 +36,7 @@
         <!-- HTML rather than an echarts graphic: swapping the readout on hover
              costs two spans instead of a `setOption` on the ring. -->
         <div
-          v-if="!showInlineLabels"
+          v-if="!showDataLabels"
           class="pointer-events-none absolute inset-0 flex items-center justify-center"
           :dir="dir"
         >
@@ -60,7 +60,7 @@
                 <div
                   class="truncate text-center text-xl font-semibold tabular-nums text-ink-gray-8"
                 >
-                  {{ center.value }}
+                  {{ center.formattedValue }}
                 </div>
                 <!-- The share is the point of the readout, so only the name
                      gives way when the hole is too narrow for both. -->
@@ -68,8 +68,8 @@
                   class="flex items-baseline justify-center gap-1 text-xs text-ink-gray-5"
                 >
                   <span class="min-w-0 truncate">{{ center.label }}</span>
-                  <span v-if="center.percent" class="shrink-0">
-                    {{ center.percent }}
+                  <span v-if="center.percent !== undefined" class="shrink-0">
+                    {{ formatPercent(center.percent) }}
                   </span>
                 </div>
               </slot>
@@ -83,6 +83,7 @@
         :x="tooltip.x"
         :y="tooltip.y"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -105,6 +106,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
+import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import {
@@ -124,7 +126,7 @@ import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartLegendItem,
   ChartTooltipItem,
   DonutChartConfig,
@@ -139,12 +141,15 @@ registerChartModules([PieSeries])
 
 const props = defineProps<DonutChartProps>()
 
+const hiddenSlices = defineModel<string[]>('hiddenSeries', {
+  default: () => [],
+})
+
 const emit = defineEmits<DonutChartEmits>()
 
 defineSlots<DonutChartSlots>()
 
 const plotEl = ref<HTMLElement>()
-const hiddenSlices = ref<string[]>([])
 
 const dir = computed(() => props.dir ?? documentDir())
 const isHalf = computed(() => props.variant === 'half')
@@ -154,7 +159,7 @@ const config = computed<DonutChartConfig>(() => ({
   categoryColumn: props.category,
   valueColumn: props.value,
   maxSlices: props.maxSlices,
-  showInlineLabels: props.showInlineLabels,
+  showDataLabels: props.showDataLabels,
   centerLabel: props.centerLabel,
   variant: props.variant,
   palette: props.palette,
@@ -226,6 +231,8 @@ const tooltip = reactive({
   x: 0,
   y: 0,
   items: [] as ChartTooltipItem[],
+  /** Plural: a slice groups, and "Others" groups the whole tail. */
+  rows: [] as Record<string, any>[],
 })
 
 useTooltipDismiss({
@@ -255,7 +262,8 @@ const { chart, dispatch } = useChart({
       const slice = sliceByName.value.get(params.name)
       if (!slice) return
       emit('select', {
-        name: slice.label,
+        name: slice.name,
+        label: slice.label,
         value: slice.value,
         percent: slice.percent,
         rows: slice.rows,
@@ -302,8 +310,10 @@ function showTooltip(name: string) {
       value: slice.value,
       formattedValue: formatMeasure(slice.value),
       percent: slice.percent,
+      kind: 'series',
     },
   ]
+  tooltip.rows = slice.rows
   tooltip.x = pointer.x
   tooltip.y = pointer.y
   tooltip.open = true
@@ -351,7 +361,8 @@ const { attrs: plotAttrs } = usePlotKeyboard({
     const slice = visibleSlices.value[index]
     if (!slice) return
     emit('select', {
-      name: slice.label,
+      name: slice.name,
+      label: slice.label,
       value: slice.value,
       percent: slice.percent,
       rows: slice.rows,
@@ -365,14 +376,11 @@ const { attrs: plotAttrs } = usePlotKeyboard({
 })
 
 function toggleSlice(name: string) {
-  const hidden = hiddenSlices.value
-  // Refuse to hide the last visible slice — an empty ring reads as a bug.
-  if (!hidden.includes(name)) {
-    if (visibleSlices.value.length === 1) return
-    hiddenSlices.value = [...hidden, name]
-  } else {
-    hiddenSlices.value = hidden.filter((n) => n !== name)
-  }
+  hiddenSlices.value = toggleHiddenSeries(
+    hiddenSlices.value,
+    name,
+    slices.value.length,
+  )
 }
 
 function hoverSlice(name: string | null) {
@@ -387,14 +395,16 @@ const center = computed(() => {
   const slice = hovered.value ? sliceByName.value.get(hovered.value) : undefined
   if (slice && !slice.hidden) {
     return {
-      value: shorten(slice.value),
       label: slice.label,
-      percent: formatPercent(slice.percent),
+      value: slice.value,
+      formattedValue: shorten(slice.value),
+      percent: slice.percent,
     }
   }
   return {
-    value: shorten(visibleTotal.value),
     label: props.centerLabel ?? formatLabel(props.value),
+    value: visibleTotal.value,
+    formattedValue: shorten(visibleTotal.value),
     percent: undefined,
   }
 })
@@ -414,12 +424,9 @@ function shorten(value: number) {
 watch(
   () => slices.value.map((slice) => slice.name),
   (names) => {
-    if (hiddenSlices.value.every((name) => names.includes(name))) return
-    hiddenSlices.value = hiddenSlices.value.filter((name) =>
-      names.includes(name),
-    )
+    hiddenSlices.value = pruneHiddenSeries(hiddenSlices.value, names)
   },
 )
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

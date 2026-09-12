@@ -38,6 +38,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -66,12 +67,13 @@ import {
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
-  ChartExposed,
+  ChartExposedRefs,
   ChartTooltipItem,
   SankeyChartConfig,
   SankeyChartEmits,
   SankeyChartProps,
   SankeyChartSlots,
+  SankeyLink,
 } from './types'
 
 // The series is all a sankey needs: it lays itself out, so there is no grid and
@@ -93,7 +95,7 @@ const config = computed<SankeyChartConfig>(() => ({
   sourceColumn: props.source,
   targetColumn: props.target,
   valueColumn: props.value,
-  orient: props.orient,
+  vertical: props.vertical,
   nodeAlign: props.nodeAlign,
   palette: props.palette,
   echartOptions: props.echartOptions,
@@ -142,6 +144,7 @@ const tooltip = reactive({
   y: 0,
   label: undefined as string | undefined,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 useTooltipDismiss({
@@ -197,7 +200,13 @@ function showTooltip(params: any) {
   showReading(reading, pointer.x, pointer.y)
 }
 
-type SankeyReading = { label: string; color: string; value: number }
+type SankeyReading = {
+  label: string
+  color: string
+  value: number
+  /** A node stands for every row through it, so only a band carries one. */
+  row?: Record<string, any>
+}
 
 function showReading(reading: SankeyReading, x: number, y: number) {
   tooltip.label = reading.label
@@ -210,8 +219,10 @@ function showReading(reading: SankeyReading, x: number, y: number) {
       formattedValue: props.format
         ? props.format(reading.value)
         : formatValue(reading.value),
+      kind: 'series',
     },
   ]
+  tooltip.rows = reading.row ? [reading.row] : []
   tooltip.x = x
   tooltip.y = y
   tooltip.open = true
@@ -224,17 +235,21 @@ function showReading(reading: SankeyReading, x: number, y: number) {
  */
 function readingAt(params: any) {
   const link = linkAt(params)
-  if (link) {
-    return {
-      label: `${link.source} → ${link.target}`,
-      color: link.color,
-      value: link.value,
-    }
-  }
+  if (link) return linkReading(link)
 
   const node = graph.value.nodes[params?.dataIndex]
   if (params?.dataType !== 'node' || !node) return undefined
   return { label: node.name, color: node.color, value: node.value }
+}
+
+/** One place, so the pointer and the keyboard cannot read a band differently. */
+function linkReading(link: SankeyLink): SankeyReading {
+  return {
+    label: `${link.source} → ${link.target}`,
+    color: link.color,
+    value: link.value,
+    row: link.row,
+  }
 }
 
 // The flow is one tab stop and the arrow keys walk its bands: an echarts plot
@@ -247,20 +262,16 @@ function readLink(index: number) {
   const link = graph.value.links[index]
   if (!link) return
   const center = elementCenter(plotEl.value)
-  const label = `${link.source} → ${link.target}`
+  const band = linkReading(link)
   dispatch({
     type: 'highlight',
     seriesIndex: 0,
     dataType: 'edge',
     dataIndex: index,
   })
-  showReading(
-    { label, color: link.color, value: link.value },
-    center?.x ?? pointer.x,
-    center?.y ?? pointer.y,
-  )
+  showReading(band, center?.x ?? pointer.x, center?.y ?? pointer.y)
   reading.value = plotReading(
-    label,
+    band.label,
     tooltip.items.map((item) => ({
       label: item.label,
       value: item.formattedValue,
@@ -307,5 +318,5 @@ const keyboard = usePlotKeyboard({
 
 const plotAttrs = keyboard.attrs
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

@@ -6,11 +6,12 @@ import {
   formatValue,
   inferTimeGrain,
   isTemporal,
+  toDate,
   truncateMiddleToWidth,
   type TimeGrain,
 } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
@@ -119,10 +120,12 @@ export function resolveSeriesColors(
   config: AxisChartConfig,
   tokens: ChartTokens,
 ): Record<string, string> {
-  const assigned = chartColors(config.palette, tokens, {
-    fallback: DEFAULT_PALETTE,
-    count: config.series.length,
-  })
+  const assigned = paletteColors(
+    config.palette,
+    tokens,
+    config.series.length,
+    DEFAULT_PALETTE,
+  )
   const slots = colorSlots(config)
   const colors: Record<string, string> = {}
   config.series.forEach((series, index) => {
@@ -226,11 +229,11 @@ export function resolveXAxis(
 /**
  * The rows in the order the plot draws them, and only the rows it can place.
  *
- * A value axis puts a point at its own x number instead of in its row's slot,
- * so rows arriving out of order would draw a line that doubles back on itself,
- * and a row whose x is not a number has nowhere on the scale to sit. Every
- * other axis draws the rows as they arrive: that order is the caller's reading
- * of the data, not something to correct.
+ * A scaled axis, `'value'` or `'time'`, puts a point at its own x instead of in
+ * its row's slot, so rows arriving out of order would draw a line that doubles
+ * back on itself, and a row whose x does not read as a number or a date has
+ * nowhere on the scale to sit. A category axis draws the rows as they arrive:
+ * that order is the caller's reading of the data, not something to correct.
  *
  * Everything that counts datapoints — the tooltip, the click event, the stack
  * shares — indexes into these rather than into `config.data`, so the row a
@@ -243,18 +246,23 @@ export function plotRows(
   quiet = false,
 ): Record<string, any>[] {
   const rows = config.data ?? []
-  if (type !== 'value') return rows
+  if (type === 'category') return rows
 
+  const place =
+    type === 'value'
+      ? toNumber
+      : (value: any) => toDate(value)?.getTime() ?? null
   const placed: { row: Record<string, any>; x: number }[] = []
   for (const row of rows) {
-    const x = toNumber(row[config.xAxis.key])
+    const x = place(row[config.xAxis.key])
     if (x !== null) placed.push({ row, x })
   }
 
   const dropped = rows.length - placed.length
   if (dropped && !quiet) {
+    const reads = type === 'value' ? 'quantity' : 'date'
     warn(
-      `Dropped ${dropped} ${dropped === 1 ? 'row' : 'rows'}: \`xAxis.type: "value"\` reads "${config.xAxis.key}" as a quantity, and a point with no number for it has nowhere on the scale to sit.`,
+      `Dropped ${dropped} ${dropped === 1 ? 'row' : 'rows'}: \`xAxis.type: "${type}"\` reads "${config.xAxis.key}" as a ${reads}, and a point with no ${reads} for it has nowhere on the scale to sit.`,
     )
   }
 
@@ -289,7 +297,7 @@ export function axisChartBase(
               // covers still read through it. Left unstyled, echarts fills it
               // with a hard-coded mid-grey that no theme reaches.
               type: 'shadow',
-              shadowStyle: { color: tokens.splitLine, opacity: 0.7 },
+              shadowStyle: { color: tokens.gridline, opacity: 0.7 },
             }
           : {
               type: 'line',
@@ -384,7 +392,7 @@ export function buildXAxis(
     // the zero line of that grid rather than as a frame around the plot.
     axisLine: {
       show: true,
-      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.gridline, ...DOTTED_LINE },
     },
     axisTick: { show: false },
     axisLabel: {
@@ -819,7 +827,7 @@ export function buildValueAxis(
     // the two sets of gridlines interleave and the plot reads as a mesh.
     alignTicks: secondary,
     // The value-axis title is chrome, not a mark: it is drawn as HTML above the
-    // plot (see ChartContainer's `plotLabel`) so it lines up with the chart
+    // plot (see ChartContainer's `yAxisTitle`) so it lines up with the chart
     // title whichever way the bars run.
     min: axisConfig?.min ?? empty?.min,
     max: axisConfig?.max ?? empty?.max,
@@ -828,7 +836,7 @@ export function buildValueAxis(
     // the same rows, so it adds nothing but a doubled line.
     splitLine: {
       show: !secondary,
-      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.gridline, ...DOTTED_LINE },
     },
     axisLine: { show: false },
     axisTick: { show: false },

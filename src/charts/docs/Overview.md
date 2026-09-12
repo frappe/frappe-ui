@@ -17,7 +17,7 @@ rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 An echarts-backed component registers only the modules it can draw. A donut
 costs a donut; the three axis charts share the bar and line modules, because any
 of them draws any mark. `FunnelChart` and `NumberCard` use no echarts at all —
-both draw their own SVG — so they add nothing to the bundle.
+both draw their own SVG.
 
 ## Data shapes
 
@@ -156,6 +156,60 @@ chart the app has already placed inside a card of its own: the content renders
 with no border, background, radius or padding, and one bordered box stops
 nesting in another.
 
+## The option escape hatch
+
+`echartOptions` is deep-merged into the option the props built: objects merge
+key by key, arrays replace. So `series: [...]` at chart level throws away the
+generated series, data and colors included. The per-series `echartOptions` in
+`seriesConfig` is the path to one series key on an axis chart.
+
+`animationDuration` set through the hatch applies to the first draw only; every
+later draw is instant.
+
+## The echarts instance
+
+Every echarts-backed chart hands back its instance as `chart` on a template ref.
+`FunnelChart` and `NumberCard` draw no echarts plot and hand back nothing.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { BarChart, type ChartExposed } from 'frappe-ui/charts'
+
+const plot = ref<ChartExposed>()
+
+function downloadPng() {
+  const url = plot.value?.chart?.getDataURL({ type: 'png', pixelRatio: 2 })
+  if (url) window.open(url)
+}
+</script>
+
+<template>
+  <BarChart ref="plot" :data="rows" x="month" y="sales">
+    <template #actions>
+      <Button label="Download" @click="downloadPng" />
+    </template>
+  </BarChart>
+</template>
+```
+
+It is the imperative half of the escape hatch `echartOptions` opens for options.
+Reach for it when an app needs an echarts call that no option key expresses: an
+image for a download button, or chart coordinates for an overlay of its own.
+
+Three limits.
+
+- The instance is `undefined` until the plot has a size and the fonts settle.
+  Watch it rather than read it once in `onMounted`.
+- State applied through the instance does not survive. The component rebuilds
+  the whole option and calls `setOption` with `notMerge: true` on every reactive
+  change, so the next prop, data or theme change drops any highlight or
+  selection dispatched from outside, and any hand-written `setOption`. The handle
+  is for one-shot reads and actions. State goes in props.
+- `ECharts` is echarts' type, not this library's. A major echarts bump can change
+  it inside a frappe-ui minor. The promise is that the member exists and carries
+  the live instance, not anything about echarts' own API.
+
 ## Utilities
 
 The subpath exports three helpers beside the components. A built-in chart calls
@@ -176,7 +230,7 @@ on a light page takes the panel's colors. Pass the element the plot draws into.
 `tokens` re-resolve when the page theme flips, so a `computed` option built from
 it rebuilds and `setOption` runs again with the new values. It carries the three
 ramps — `categorical`, `sequential` and `diverging` — and the inks the chrome
-draws in: `axisLabel`, `axisTitle`, `axisLine`, `splitLine`, `dataLabel`,
+draws in: `axisLabel`, `axisTitle`, `axisLine`, `gridline`, `dataLabel`,
 `insideLabel` and `backdrop`.
 
 Color a chart's own series through the `palette` prop instead. `useChartTokens`
@@ -186,22 +240,27 @@ is for a plot the library does not draw.
 
 ```ts
 function paletteColors(
-  name: ChartPaletteName,
+  palette: ChartPalette | undefined,
   tokens: ChartTokens,
   count: number,
+  fallback?: ChartPaletteName,
 ): string[]
 ```
 
-`count` colors off one named ramp, the same way a built-in chart picks its
-series colors. `'categorical'` cycles the ramp, so eleven series reuse the first
-hue. `'sequential'` and `'diverging'` spread the count over the ramp instead,
-because a stop only means something against the stops beside it — three series
-take three spaced stops, not the first three.
+`count` colors off a palette, the same call a built-in chart picks its series
+colors with. `palette` takes what the `palette` prop takes: a ramp name, an
+explicit list, or nothing, in which case `fallback` names the ramp to read.
+
+A list is handed out in the order it was written and cycled once it runs out.
+`'categorical'` cycles the ramp too, so eleven series reuse the first hue.
+`'sequential'` and `'diverging'` spread the count over the ramp instead, because
+a stop only means something against the stops beside it — three series take
+three spaced stops, not the first three.
 
 ### `OTHERS_KEY`
 
 The series identity a cap collapses its tail into: `maxSeries` on an axis chart,
 `maxSlices` on a donut. It is reserved, so a group whose name really is "Others"
 cannot collide with it, and stable, so `seriesConfig[OTHERS_KEY]` renames or
-recolors the bucket like any other series. `OTHERS_LABEL` is the name it reads
-as until a `label` overrides it.
+recolors the bucket like any other series. It reads as "Others" until a `label`
+overrides it.

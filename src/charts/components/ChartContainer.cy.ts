@@ -182,9 +182,9 @@ describe('ChartContainer', () => {
     })
   })
 
-  describe('plot labels', () => {
+  describe('axis titles', () => {
     it('heads the plot with the axis titles', () => {
-      mountContainer({ plotLabel: 'Revenue', plotLabelSecondary: 'Orders' })
+      mountContainer({ yAxisTitle: 'Revenue', y2AxisTitle: 'Orders' })
       container()
         .should('contain.text', 'Revenue')
         .and('contain.text', 'Orders')
@@ -198,7 +198,7 @@ describe('ChartContainer', () => {
     })
 
     it('puts them under the plot when asked to', () => {
-      mountContainer({ plotLabel: 'Revenue', plotLabelPlacement: 'bottom' })
+      mountContainer({ yAxisTitle: 'Revenue', axisTitlePlacement: 'bottom' })
       cy.contains('Revenue').then(($label) => {
         cy.get('[data-slot="chart-plot"]').then(($plot) => {
           expect($label[0].getBoundingClientRect().top).to.be.greaterThan(
@@ -215,7 +215,7 @@ describe('ChartContainer', () => {
       ['empty', { empty: true }],
     ] as const) {
       it(`leaves the titles off while ${name}`, () => {
-        mountContainer({ plotLabel: 'Revenue', ...props })
+        mountContainer({ yAxisTitle: 'Revenue', ...props })
         container().should('not.contain.text', 'Revenue')
       })
     }

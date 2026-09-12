@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   buildAxisChartOption,
   DEFAULT_FILL_OPACITY,
+  DEFAULT_LINE_WIDTH,
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
@@ -14,7 +16,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -38,7 +40,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 function alphaOf(rgba: string) {
@@ -72,13 +77,15 @@ describe('area chart option', () => {
       series: [
         {
           name: 'sales',
-          lineType: 'dashed',
+          dashed: true,
           showDataPoints: true,
           smooth: true,
         },
       ],
     })
-    expect(option.series[0].lineStyle.type).toBe('dashed')
+    expect(option.series[0].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
     expect(option.series[0].showSymbol).toBe(true)
     expect(option.series[0].smooth).toBe(true)
     expect(option.series[0].connectNulls).toBe(true)
@@ -159,18 +166,6 @@ describe('area chart option', () => {
       color: '#000033',
       opacity: DEFAULT_STACKED_FILL_OPACITY,
     })
-  })
-
-  it('takes fillOpacity from the series, then the chart', () => {
-    expect(
-      build({ fillOpacity: 0.5 }).series[0].areaStyle.color.colorStops[0].color,
-    ).toBe('rgba(0, 0, 17, 0.5)')
-    expect(
-      build({
-        fillOpacity: 0.5,
-        series: [{ name: 'sales', fillOpacity: 0.25 }],
-      }).series[0].areaStyle.color.colorStops[0].color,
-    ).toBe('rgba(0, 0, 17, 0.25)')
   })
 
   it('falls back to a flat fill for a color it cannot add alpha to', () => {
