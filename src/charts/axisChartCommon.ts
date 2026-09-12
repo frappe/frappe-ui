@@ -289,7 +289,7 @@ export function axisChartBase(
               // covers still read through it. Left unstyled, echarts fills it
               // with a hard-coded mid-grey that no theme reaches.
               type: 'shadow',
-              shadowStyle: { color: tokens.splitLine, opacity: 0.7 },
+              shadowStyle: { color: tokens.gridline, opacity: 0.7 },
             }
           : {
               type: 'line',
@@ -384,7 +384,7 @@ export function buildXAxis(
     // the zero line of that grid rather than as a frame around the plot.
     axisLine: {
       show: true,
-      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.gridline, ...DOTTED_LINE },
     },
     axisTick: { show: false },
     axisLabel: {
@@ -828,7 +828,7 @@ export function buildValueAxis(
     // the same rows, so it adds nothing but a doubled line.
     splitLine: {
       show: !secondary,
-      lineStyle: { color: tokens.splitLine, ...DOTTED_LINE },
+      lineStyle: { color: tokens.gridline, ...DOTTED_LINE },
     },
     axisLine: { show: false },
     axisTick: { show: false },

@@ -17,7 +17,7 @@ export type ChartTokens = {
   axisLabel: string
   axisTitle: string
   axisLine: string
-  splitLine: string
+  gridline: string
   dataLabel: string
   /** Ink for a label printed on a pale fill rather than beside it. */
   insideLabel: string
@@ -147,7 +147,7 @@ const TOKENS = {
   // elevated card surface, so a gridline drawn in it is invisible. The two
   // `--chart-*` vars name a hairline stop per mode instead. See style.css.
   axisLine: '--chart-axis-line',
-  splitLine: '--chart-gridline',
+  gridline: '--chart-gridline',
   dataLabel: '--ink-gray-6',
   // Its own token rather than `--ink-gray-8`: the ink on a fill answers to the
   // fill, not to the page, and `--ink-gray-8` inverts to a light gray in dark
@@ -167,7 +167,7 @@ const FALLBACK_TOKENS: Record<
     axisLabel: 'oklch(0.586 0 0)',
     axisTitle: 'oklch(0.341 0 0)',
     axisLine: 'oklch(0.913 0 0)',
-    splitLine: 'oklch(0.946 0 0)',
+    gridline: 'oklch(0.946 0 0)',
     dataLabel: 'oklch(0.439 0 0)',
     insideLabel: 'oklch(0.271 0 0)',
     backdrop: '#ffffff',
@@ -176,7 +176,7 @@ const FALLBACK_TOKENS: Record<
     axisLabel: 'oklch(0.58 0 0)',
     axisTitle: 'oklch(0.754 0 0)',
     axisLine: 'oklch(0.379 0 0)',
-    splitLine: 'oklch(0.341 0 0)',
+    gridline: 'oklch(0.341 0 0)',
     dataLabel: 'oklch(0.683 0 0)',
     // Same near-black as light: see the note on `TOKENS.insideLabel`.
     insideLabel: 'oklch(0.271 0 0)',
@@ -251,7 +251,7 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
     axisLabel: read(TOKENS.axisLabel) || fallbacks.axisLabel,
     axisTitle: read(TOKENS.axisTitle) || fallbacks.axisTitle,
     axisLine: read(TOKENS.axisLine) || fallbacks.axisLine,
-    splitLine: read(TOKENS.splitLine) || fallbacks.splitLine,
+    gridline: read(TOKENS.gridline) || fallbacks.gridline,
     dataLabel: read(TOKENS.dataLabel) || fallbacks.dataLabel,
     insideLabel: read(TOKENS.insideLabel) || fallbacks.insideLabel,
     backdrop: read(TOKENS.backdrop) || backdropColor(el) || fallbacks.backdrop,

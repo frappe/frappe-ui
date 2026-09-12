@@ -176,7 +176,7 @@ on a light page takes the panel's colors. Pass the element the plot draws into.
 `tokens` re-resolve when the page theme flips, so a `computed` option built from
 it rebuilds and `setOption` runs again with the new values. It carries the three
 ramps — `categorical`, `sequential` and `diverging` — and the inks the chrome
-draws in: `axisLabel`, `axisTitle`, `axisLine`, `splitLine`, `dataLabel`,
+draws in: `axisLabel`, `axisTitle`, `axisLine`, `gridline`, `dataLabel`,
 `insideLabel` and `backdrop`.
 
 Color a chart's own series through the `palette` prop instead. `useChartTokens`

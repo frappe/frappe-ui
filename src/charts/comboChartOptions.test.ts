@@ -14,7 +14,7 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
   backdrop: '#ffffff',
@@ -159,7 +159,7 @@ describe('combo axes', () => {
     // Unstyled, echarts fills it with a hard-coded grey that no theme reaches.
     // The alpha is what keeps the gridlines under it readable.
     const { shadowStyle } = build().tooltip.axisPointer
-    expect(shadowStyle.color).toBe(tokens.splitLine)
+    expect(shadowStyle.color).toBe(tokens.gridline)
     expect(shadowStyle.opacity).toBeLessThan(1)
   })
 
