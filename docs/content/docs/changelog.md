@@ -717,6 +717,10 @@ Landed so far:
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
+- **`dir` and `lang` are followed, not read once.** A page that flips
+  `document.documentElement.dir` or `lang` after a chart mounts redraws it in
+  the new direction and reprints its numbers in the new locale. A chart that
+  names its own `dir` is unaffected.
 - One policy for a value that does not plot, across the family. A cell that does
   not read as a number has no mark, so `select` no longer fires for it on Enter
   and the keyboard cursor no longer stops on a series that has nothing at the

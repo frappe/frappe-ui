@@ -1,8 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { createApp, defineComponent, h, ref, type Ref } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { createApp, defineComponent, h, nextTick, ref, type Ref } from 'vue'
+import { afterEach, describe, expect, it } from 'vitest'
 import { useAxisChart } from './useAxisChart'
 import { buildAxisChartOption } from '../axisChartOptions'
 import type { AxisChartConfig, ChartDatapointEvent } from '../types'
@@ -105,5 +105,23 @@ describe('isEmpty', () => {
     expect(plot.chart.isEmpty.value).toBe(false)
     hidden.value = ['revenue']
     expect(plot.chart.isEmpty.value).toBe(true)
+  })
+})
+
+describe('dir', () => {
+  afterEach(() => {
+    document.documentElement.dir = ''
+  })
+
+  it('follows the document when the page flips direction after mount', async () => {
+    const plot = setup(config())
+    expect(plot.chart.dir.value).toBe('ltr')
+
+    document.documentElement.dir = 'rtl'
+    // The observer reports on a microtask; the computed invalidates after it.
+    await Promise.resolve()
+    await nextTick()
+
+    expect(plot.chart.dir.value).toBe('rtl')
   })
 })

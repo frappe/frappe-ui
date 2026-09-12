@@ -1,8 +1,9 @@
-import { computed, ref, type ComputedRef, type Ref } from 'vue'
+import { computed, type ComputedRef, type Ref } from 'vue'
 import {
   resolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
+import { documentAttributes } from './utils'
 import type { ChartPalette, ChartPaletteName } from './types'
 
 /**
@@ -250,20 +251,6 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   }
 }
 
-// One observer for the whole page: the theme flips on `<html>`, so a per-chart
-// observer would watch the same node N times over.
-const themeVersion = ref(0)
-let observer: MutationObserver | undefined
-
-function ensureThemeObserver() {
-  if (observer || typeof MutationObserver === 'undefined') return
-  observer = new MutationObserver(() => themeVersion.value++)
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme', 'class'],
-  })
-}
-
 export function pickSeriesColor(ramp: string[], index: number) {
   if (!ramp.length) return FALLBACK_CATEGORICAL.light[0]
   return ramp[index % ramp.length]
@@ -456,10 +443,8 @@ function hexLuminance(color: string): number | null {
 export function useChartTokens(el: Ref<HTMLElement | undefined>): {
   tokens: ComputedRef<ChartTokens>
 } {
-  ensureThemeObserver()
-
   const tokens = computed<ChartTokens>(() => {
-    themeVersion.value
+    documentAttributes()
     return resolveChartTokens(el.value)
   })
 
