@@ -31,7 +31,8 @@ it is likely to move:
 | [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
 | [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
 | [`CommandPalette`](#commandpalette) | Incubating | gameplan, helpdesk and this site running on it |
-| [`DateCalendar`](#date-calendar) | Incubating | Its API settling |
+| [`DateCalendar`](#date-calendars) | Incubating | Its API settling |
+| [`DateRangeCalendar`](#date-calendars) | Incubating | Its API settling |
 | [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
@@ -121,19 +122,21 @@ import {
 See the [CommandPalette page](/docs/experimental/commandpalette) for filtering,
 server search, link items and the styling hooks.
 
-## Date calendar
+## Date calendars
 
-The calendar inside the single-date pickers, as a standalone component. `DateCalendar` holds one date as `v-model`, accepts `min`, `max` and `isDateUnavailable`, and exposes `focus()`.
+The calendars inside the date pickers, as standalone components. `DateCalendar` holds one date as `v-model`. `DateRangeCalendar` holds a `[from, to]` pair, previews the pending range under the cursor, and shows two months with `dualPane`. Both accept `min`, `max` and `isDateUnavailable`, and expose `focus()`.
 
 ```ts
-import { DateCalendar } from 'frappe-ui/experimental'
+import { DateCalendar, DateRangeCalendar } from 'frappe-ui/experimental'
 ```
 
-It emits `select` on every click and `today` from the Today button, even when the value does not change. `update:modelValue` alone does not fire for an unchanged value, so listen to these when every click matters, for example to close a popover.
+Both emit `select` on every click and `today` from the Today button, even when the value does not change. `update:modelValue` alone does not fire for an unchanged value, so listen to these when every click matters, for example to close a popover.
 
 <ComponentPreview name="DatePicker-DateCalendar" />
 
 Setting the value from outside moves the view to that month. Clicking inside the calendar does not move the view.
+
+<ComponentPreview name="DatePicker-DateRangeCalendar" />
 
 ## FloatingWindow
 

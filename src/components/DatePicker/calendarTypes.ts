@@ -1,5 +1,9 @@
 import type { Dayjs } from 'dayjs/esm'
-import type { DatePickerDateObj, DatePickerViewMode } from './types'
+import type {
+  DatePickerDateObj,
+  DatePickerViewMode,
+  DateRangeValue,
+} from './types'
 
 // Types for the calendars. Not in `types.ts`, which `index.ts` re-exports: the
 // calendars ship from `frappe-ui/experimental`, and `CalendarPanel` is internal.
@@ -35,6 +39,47 @@ export type DateCalendarEmits = {
 }
 
 export interface DateCalendarExposed {
+  /** Move keyboard focus into the day grid. */
+  focus(): void
+}
+
+// ── DateRangeCalendar ────────────────────────────────────────────────────────
+
+export interface DateRangeCalendarProps {
+  /**
+   * Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
+   * navigation and the year list.
+   */
+  min?: string
+
+  /**
+   * Latest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
+   * navigation and the year list.
+   */
+  max?: string
+
+  /** Return true to prevent a date from being selected. Combined with `min`/`max`. */
+  isDateUnavailable?: (date: Dayjs) => boolean
+
+  /** Label for the action that selects today. Empty hides the button. Default: `Today`. */
+  todayLabel?: string
+
+  /** Render two calendar panels side by side (current month + next month). */
+  dualPane?: boolean
+}
+
+export type DateRangeCalendarEmits = {
+  /**
+   * Fired on every endpoint click, even when the range is unchanged. After the
+   * first click it carries `[from, '']`.
+   */
+  select: [range: DateRangeValue]
+
+  /** Fired when the Today button is pressed, with `[today, today]`. */
+  today: [range: DateRangeValue]
+}
+
+export interface DateRangeCalendarExposed {
   /** Move keyboard focus into the day grid. */
   focus(): void
 }
