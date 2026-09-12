@@ -6,6 +6,7 @@ import {
   formatValue,
   inferTimeGrain,
   isTemporal,
+  toDate,
   truncateMiddleToWidth,
   type TimeGrain,
 } from './format'
@@ -228,11 +229,11 @@ export function resolveXAxis(
 /**
  * The rows in the order the plot draws them, and only the rows it can place.
  *
- * A value axis puts a point at its own x number instead of in its row's slot,
- * so rows arriving out of order would draw a line that doubles back on itself,
- * and a row whose x is not a number has nowhere on the scale to sit. Every
- * other axis draws the rows as they arrive: that order is the caller's reading
- * of the data, not something to correct.
+ * A scaled axis, `'value'` or `'time'`, puts a point at its own x instead of in
+ * its row's slot, so rows arriving out of order would draw a line that doubles
+ * back on itself, and a row whose x does not read as a number or a date has
+ * nowhere on the scale to sit. A category axis draws the rows as they arrive:
+ * that order is the caller's reading of the data, not something to correct.
  *
  * Everything that counts datapoints — the tooltip, the click event, the stack
  * shares — indexes into these rather than into `config.data`, so the row a
@@ -245,18 +246,23 @@ export function plotRows(
   quiet = false,
 ): Record<string, any>[] {
   const rows = config.data ?? []
-  if (type !== 'value') return rows
+  if (type === 'category') return rows
 
+  const place =
+    type === 'value'
+      ? toNumber
+      : (value: any) => toDate(value)?.getTime() ?? null
   const placed: { row: Record<string, any>; x: number }[] = []
   for (const row of rows) {
-    const x = toNumber(row[config.xAxis.key])
+    const x = place(row[config.xAxis.key])
     if (x !== null) placed.push({ row, x })
   }
 
   const dropped = rows.length - placed.length
   if (dropped && !quiet) {
+    const reads = type === 'value' ? 'quantity' : 'date'
     warn(
-      `Dropped ${dropped} ${dropped === 1 ? 'row' : 'rows'}: \`xAxis.type: "value"\` reads "${config.xAxis.key}" as a quantity, and a point with no number for it has nowhere on the scale to sit.`,
+      `Dropped ${dropped} ${dropped === 1 ? 'row' : 'rows'}: \`xAxis.type: "${type}"\` reads "${config.xAxis.key}" as a ${reads}, and a point with no ${reads} for it has nowhere on the scale to sit.`,
     )
   }
 

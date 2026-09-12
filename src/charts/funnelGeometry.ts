@@ -46,17 +46,30 @@ const REFERENCE_HEIGHT = 160
  */
 export function buildFunnelStages(config: FunnelChartConfig): FunnelStage[] {
   const rows = config.data ?? []
-  const raw = rows.map((row) => {
-    const name = stageName(row[config.categoryColumn])
-    return {
-      row,
-      name,
-      label: stageLabel(name),
-      // A funnel counts things that got this far, so a missing or negative
-      // count is noise; both read as nothing reaching the stage.
-      value: Math.max(0, toNumber(row[config.valueColumn]) ?? 0),
-    }
-  })
+  const raw = rows
+    .map((row) => {
+      const name = stageName(row[config.categoryColumn])
+      return {
+        row,
+        name,
+        label: stageLabel(name),
+        value: toNumber(row[config.valueColumn]),
+      }
+    })
+    // A funnel counts things that got this far, and a stage that reports no
+    // number did not report a zero. Dropped rather than drawn at 0, the way the
+    // ring drops a slice it cannot size: a stage invented at 0 is a count the
+    // data never gave, and the stage after it would divide by it.
+    .filter(
+      (
+        stage,
+      ): stage is {
+        row: Record<string, any>
+        name: string
+        label: string
+        value: number
+      } => stage.value !== null && stage.value >= 0,
+    )
 
   const first = raw[0]?.value ?? 0
 

@@ -233,9 +233,43 @@ describe('numeric x axis: horizontal bars', () => {
 })
 
 describe('plotRows', () => {
-  it('hands every other axis the rows exactly as they came', () => {
+  it('hands a category axis the rows exactly as they came', () => {
     const built = config({ xAxis: { key: 'discount', type: 'category' } })
     expect(plotRows(built, 'category')).toBe(built.data)
+  })
+
+  it('drops a row a time axis cannot place, and sorts the rest by time', () => {
+    const built = config({
+      data: [
+        { day: '2024-03-02', revenue: 20 },
+        { day: '', revenue: 40 },
+        { day: '2024-03-01', revenue: 10 },
+        { day: 'n/a', revenue: 50 },
+      ],
+      xAxis: { key: 'day' },
+    })
+    let placed: Record<string, any>[] = []
+    const warnings = captureWarnings(() => {
+      placed = plotRows(built, 'time')
+    })
+    expect(placed.map((row) => row.day)).toEqual(['2024-03-01', '2024-03-02'])
+    expect(warnings[0]).toContain('Dropped 2 rows')
+    expect(warnings[0]).toContain('xAxis.type: "time"')
+  })
+
+  it('drops the blank a column of dates carries into an inferred time axis', () => {
+    const built = config({
+      data: [
+        { day: '2024-03-01', revenue: 10 },
+        { day: '', revenue: 40 },
+      ],
+      xAxis: { key: 'day' },
+    })
+    // The blank does not stop the column reading as dates, so it arrives here.
+    expect(resolveXAxis(built).type).toBe('time')
+    expect(plotRows(built, 'time', true).map((row) => row.day)).toEqual([
+      '2024-03-01',
+    ])
   })
 
   it('keeps the caller’s rows intact while it sorts', () => {

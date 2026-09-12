@@ -167,7 +167,7 @@ export function formatDate(
  */
 const ISO_DATE = /^\d{4}-\d{2}(-\d{2})?([T ]\d{2}:\d{2}(:\d{2})?)?/
 
-function toDate(value: any): Date | null {
+export function toDate(value: any): Date | null {
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value
   if (typeof value !== 'string' || !ISO_DATE.test(value)) return null
   const parsed = new Date(value)

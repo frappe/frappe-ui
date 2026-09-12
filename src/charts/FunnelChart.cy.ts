@@ -50,6 +50,18 @@ describe('FunnelChart', () => {
     columns().should('have.length', data.length)
   })
 
+  it('leaves out a stage whose count it cannot read', () => {
+    mountChart({
+      data: [
+        { stage: 'Visited', deals: 50 },
+        { stage: 'Demoed', deals: 'n/a' },
+        { stage: 'Won', deals: 20 },
+      ],
+    })
+    columns().should('have.length', 2)
+    cy.get('[data-slot="chart-container"]').should('not.contain.text', 'Demoed')
+  })
+
   it('prints each stage against the first, and nothing against the first', () => {
     mountChart()
     cy.get('[data-slot="chart-container"]')
@@ -160,6 +172,12 @@ describe('FunnelChart', () => {
 
     it('says so when there is nothing to plot', () => {
       mountChart({ data: [] })
+      container().should('have.attr', 'data-state', 'empty')
+      cy.contains('No data to show').should('be.visible')
+    })
+
+    it('says so when no row carries a count', () => {
+      mountChart({ data: [{ stage: 'Visited', deals: null }] })
       container().should('have.attr', 'data-state', 'empty')
       cy.contains('No data to show').should('be.visible')
     })

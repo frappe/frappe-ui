@@ -717,6 +717,17 @@ Landed so far:
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
   standing for a series drawn in that color elsewhere. The card, the title and
   the delta tone are unchanged by it.
+- One policy for a value that does not plot, across the family. A cell that does
+  not read as a number has no mark, so `select` no longer fires for it on Enter
+  and the keyboard cursor no longer stops on a series that has nothing at the
+  row. A row whose x cannot be read as a date is dropped from a `time` axis, the
+  way a non-numeric x is already dropped from a `value` axis, and the rows sort
+  by time. The funnel drops a stage whose count is missing, unreadable or
+  negative instead of drawing it at 0.
+- **The empty state is what the plot draws.** Bar, line and area now show it
+  when no visible series has a number at any row, where they used to draw bare
+  axes: a `y` key no row carries reads as empty, and so does switching every
+  series off through the legend.
 - `NumberCard` prints through `format` and `deltaFormat`, the `ChartValueFormatter`
   every other chart takes. `precision` and `compact` are **removed**: a caller
   who wants either writes it in `format`. `format` prints the value and the

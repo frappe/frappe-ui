@@ -475,6 +475,18 @@ describe('BarChart', () => {
       container().should('have.attr', 'data-state', 'empty')
     })
 
+    it('says so when no row carries a number for a series', () => {
+      mountChart({ y: ['typo'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
+    it('says so once the legend has switched every series off', () => {
+      mountChart({ hiddenSeries: ['sales', 'refunds'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
     it('reads as ready once the bars are drawn', () => {
       mountChart()
       bars().should('have.length', data.length * 2)
