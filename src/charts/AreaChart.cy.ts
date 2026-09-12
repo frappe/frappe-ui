@@ -210,7 +210,7 @@ describe('AreaChart', () => {
       reading().should('contain.text', 'Refunds')
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'refunds',
+        name: 'refunds',
         value: 4,
         row: { month: 'Jan', refunds: 4 },
       })
@@ -223,7 +223,7 @@ describe('AreaChart', () => {
       plot().type('{rightarrow}')
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
+        name: 'sales',
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })

@@ -29,7 +29,7 @@ const selected = ref<ChartDatapointEvent | null>(null)
     </div>
     <p class="text-p-sm text-ink-gray-5">
       <template v-if="selected">
-        Selected {{ selected.seriesName }} · {{ selected.row.warehouse }} ·
+        Selected {{ selected.name }} · {{ selected.row.warehouse }} ·
         {{ selected.value.toLocaleString('en-US') }}
       </template>
       <template v-else>Select a bar.</template>

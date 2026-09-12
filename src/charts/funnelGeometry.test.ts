@@ -68,6 +68,20 @@ describe('buildFunnelStages', () => {
     )
 
     expect(stages.map((s) => s.label)).toEqual(['(Blank)', '(Blank)'])
+    // The identity stays the category value, so a handler can tell a blank
+    // stage from one that reads "(Blank)".
+    expect(stages.map((s) => s.name)).toEqual(['', ''])
+  })
+
+  it('carries the category value as the stage identity', () => {
+    const stages = buildFunnelStages(
+      config([
+        { stage: 'Leads', count: 100 },
+        { stage: 2024, count: 50 },
+      ]),
+    )
+
+    expect(stages.map((s) => s.name)).toEqual(['Leads', '2024'])
   })
 
   it('carries the row behind each stage, for click handlers', () => {

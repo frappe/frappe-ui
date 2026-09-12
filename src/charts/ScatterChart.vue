@@ -203,7 +203,7 @@ const { chart, dispatch } = useChart({
       const hit = pointAt(params)
       if (!hit) return
       emit('select', {
-        seriesName: hit.series.name,
+        name: hit.series.name,
         x: hit.point.x,
         y: hit.point.y,
         size: hit.point.size,
@@ -408,7 +408,7 @@ const keyboard = usePlotKeyboard({
     const hit = walk.value[index]
     if (!hit) return
     emit('select', {
-      seriesName: hit.entry.name,
+      name: hit.entry.name,
       x: hit.point.x,
       y: hit.point.y,
       size: hit.point.size,

@@ -140,7 +140,7 @@ export function useAxisChart<C extends AxisChartConfig>(
         const row = rows.value[params.dataIndex]
         if (!row) return
         args.onSelect?.({
-          seriesName: params.seriesName,
+          name: params.seriesName,
           value: Number(row[params.seriesName]),
           row,
         })
@@ -400,7 +400,7 @@ export function useAxisChart<C extends AxisChartConfig>(
       const series = visibleSeries.value[cursorSeries.value]
       if (!row || !series) return
       args.onSelect?.({
-        seriesName: series.name,
+        name: series.name,
         value: Number(row[series.name]),
         row,
       })

@@ -3332,6 +3332,9 @@ The build or the type-check reports the rest.
 - `ChartDatapointEvent.dataIndex` and `FunnelStageEvent.index` are gone. Read the
   row, which every event carries. `DonutSliceEvent.name` is now the slice's
   identity and `label` is what it prints.
+- `seriesName` is `name` on `ChartDatapointEvent` and `ScatterPointEvent`, matching
+  every other payload. `FunnelStageEvent` carries a `name` as well, the category
+  value behind the printed `label`.
 
 ## Toast: the legacy object form is removed {#toast-legacy-object}
 

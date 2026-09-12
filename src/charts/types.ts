@@ -281,6 +281,9 @@ export type FunnelChartConfig = {
 /** One stage of the funnel, after coercion and percentage arithmetic. */
 export type FunnelStage = {
   index: number
+  /** Identity of the stage: the category value as a string. */
+  name: string
+  /** The stage as it should read; `(Blank)` where the category is empty. */
   label: string
   value: number
   /** Share of the first stage, i.e. the conversion rate to here. 0-100. */
@@ -291,6 +294,9 @@ export type FunnelStage = {
 }
 
 export type FunnelStageEvent = {
+  /** Identity of the stage: the category value as a string. */
+  name: string
+  /** The stage as it printed, i.e. `(Blank)` where the category is empty. */
   label: string
   value: number
   row: Record<string, any>
@@ -551,7 +557,8 @@ export type ScatterSeries = {
 }
 
 export type ScatterPointEvent = {
-  seriesName: string
+  /** Identity of the group the point belongs to, i.e. the grouping value. */
+  name: string
   x: number
   y: number
   /** Null when the chart has no size column. */
@@ -611,7 +618,8 @@ export type ChartTooltipSlotProps = {
 }
 
 export type ChartDatapointEvent = {
-  seriesName: string
+  /** Identity of the series the mark belongs to, i.e. the column it plots. */
+  name: string
   value: number
   row: Record<string, any>
 }

@@ -68,6 +68,7 @@ describe('FunnelChart', () => {
     mountChart({ onSelect: cy.spy().as('onSelect') })
     cy.get('[aria-label="Demoed, 30"]').click()
     cy.get('@onSelect').should('have.been.calledWithMatch', {
+      name: 'Demoed',
       label: 'Demoed',
       value: 30,
       row: { stage: 'Demoed', deals: 30 },

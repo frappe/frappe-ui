@@ -16,7 +16,7 @@ the `tooltip` slot as `'context'` items, named `ofFirst` and `ofPrevious`.
 
 ## Clicks
 
-`select` reports the stage and its row.
+`select` reports the stage, its value and its row. `name` is the category value; `label` is what the column printed.
 
 <ComponentPreview name="Charts-FunnelDeals" csr="true" self-layout />
 

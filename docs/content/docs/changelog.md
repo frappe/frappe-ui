@@ -747,7 +747,11 @@ unless it says otherwise. The
 - **Breaking:** one shape for every `select` payload. `ChartDatapointEvent.dataIndex`
   and `FunnelStageEvent.index` are gone — read the row, which every event carries.
   `DonutSliceEvent.name` is the slice's identity, `OTHERS_KEY` for the collapsed
-  tail, and what it printed moves to a new `label`.
+  tail, and what it printed moves to a new `label`. `seriesName` on
+  `ChartDatapointEvent` and `ScatterPointEvent` is `name`, the field every other
+  payload, item and legend entry already used for an identity, and
+  `FunnelStageEvent` gains the `name` it never carried: the category value, where
+  `label` is what the column printed.
 - **Breaking:** one tooltip slot shape. Every `#tooltip` slot, and `ChartTooltip`
   itself, carries `{ label, items, rows }`. `row` is gone: `rows` holds one row for
   a point, cell, band or stage, every grouped row for a donut's "Others" slice, and

@@ -98,6 +98,7 @@
             @blur="clearHover"
             @click="
               emit('select', {
+                name: stage.name,
                 label: stage.label,
                 value: stage.value,
                 row: stage.row,
