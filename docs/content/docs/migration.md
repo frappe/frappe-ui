@@ -3274,12 +3274,57 @@ Grep for `datapoint-click`, `slice-click`, `stage-click`, `cell-click`,
 `link-click` and `point-click`, and for the camelCase spellings in render
 functions and `h()` props.
 
-The rest of the family's breaks are loud — the build or the type-check reports
-them. `ChartTheme` is `ChartTokens`, `useChartTheme` is `useChartTokens` and it
-returns `{ tokens }` instead of `{ theme }`, and the `ColorScheme` type this
-subpath exported is now `ResolvedColorScheme`. `formatValue`, `formatDate`,
-`formatLabel`, `formatPercent`, `formatAxisValue`, `currentColorScheme` and
-`resolveChartTheme` are no longer exported.
+### Numbers follow the page's language
+
+Charts used to print every number in `en-US` whatever the page was in. They now
+read `<html lang>`, the same attribute `dir` already reads. Another **silent
+break**: nothing errors, the grouping and decimal marks just change.
+
+A page with no `lang`, or a malformed one, prints exactly what it printed
+before. A page that declares `de-DE` gets `1.234,5` where it used to get
+`1,234.5`. If a chart must stay in one locale whatever the page says, pass your
+own `format` — the axis, the tooltip and the labels all run through it.
+
+### `FunnelChart` always prints its percentages
+
+`showPercentages` is removed. A funnel always printed its counts, so turning the
+prop off took the conversion rate away and put nothing in its place. A **silent
+break**, because the prop defaulted to `true`: Vue passes the unknown prop
+through as an attribute and the percentages come back.
+
+```vue
+<!-- Before: counts only -->
+<FunnelChart :data="rows" category="stage" value="count" :show-percentages="false" />
+
+<!-- After: counts and conversion rates, always -->
+<FunnelChart :data="rows" category="stage" value="count" />
+```
+
+Grep for `show-percentages` and `showPercentages`.
+
+### The loud ones
+
+The build or the type-check reports the rest.
+
+- `ChartTheme` is `ChartTokens`, `useChartTheme` is `useChartTokens` and it
+  returns `{ tokens }` instead of `{ theme }`. `ChartTokens.splitLine` is
+  `gridline`, after the `--chart-gridline` variable it reads.
+- The `ColorScheme` type this subpath exported is gone, and so is its
+  replacement here: import `ResolvedColorScheme` from the package root.
+- `formatValue`, `formatDate`, `formatLabel`, `formatPercent`,
+  `formatAxisValue`, `currentColorScheme`, `resolveChartTheme` and
+  `OTHERS_LABEL` are no longer exported. `OTHERS_KEY` stays.
+- `showValues` on `HeatmapChart` and `showInlineLabels` on `DonutChart` are both
+  `showDataLabels`. Axis charts take it at the chart level too, so one prop
+  replaces one `seriesConfig` entry per series.
+- `ChartTooltipItem.kind` is required. An item built by hand needs
+  `kind: 'series'`.
+- `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes a
+  `ChartMark`. The old `'line'` is now `'area'`, which is the default, so a card
+  naming no type is unchanged.
+- `ChartDatapointEvent.dataIndex` and `FunnelStageEvent.index` are gone. Read the
+  row, which every event carries. `DonutSliceEvent.name` is now the slice's
+  identity and `label` is what it prints.
 
 ## Toast: the legacy object form is removed {#toast-legacy-object}
 

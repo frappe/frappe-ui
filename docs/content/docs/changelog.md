@@ -735,9 +735,49 @@ Changed since `1.0.0-beta.41`, the first beta that shipped the family:
 - **Breaking, loud:** `formatValue`, `formatDate`, `formatLabel`,
   `formatPercent`, `formatAxisValue`, `currentColorScheme` and
   `resolveChartTheme` are no longer exported. They had no documented use, and
-  each format helper hardcodes `en-US`. Read the plot-area colors with
-  `useChartTokens`, which re-resolves on a theme flip; `currentColorScheme` was
-  the root `resolvedColorScheme` under another name.
+  they are the library's own printing rather than a utility to build on. Read
+  the plot-area colors with `useChartTokens`, which re-resolves on a theme flip;
+  `currentColorScheme` was the root `resolvedColorScheme` under another name.
+
+The RC API audit ([#1139](https://github.com/frappe/frappe-ui/issues/1139))
+settled the rest before the entry freezes. Every item is loud in TypeScript
+unless it says otherwise. The
+[migration guide](https://frappeui.com/docs/migration#charts) has the rewrites.
+
+- **Breaking:** one shape for every `select` payload. `ChartDatapointEvent.dataIndex`
+  and `FunnelStageEvent.index` are gone — read the row, which every event carries.
+  `DonutSliceEvent.name` is the slice's identity, `OTHERS_KEY` for the collapsed
+  tail, and what it printed moves to a new `label`.
+- **Breaking:** one tooltip slot shape. `row` reaches the `#tooltip` slot on every
+  chart, not the axis charts alone. A sankey node passes none and the donut passes
+  `rows`, because both stand for more than one row. `ChartTooltipItem.kind` is
+  required; an item built by hand needs `kind: 'series'`.
+- **Breaking:** one name for the data label. `showValues` on `HeatmapChart` and
+  `showInlineLabels` on `DonutChart` are both `showDataLabels`. Axis charts take it
+  at the chart level too, so one prop replaces one `seriesConfig` entry per series.
+- **Breaking, silent:** `FunnelChart.showPercentages` is removed — a funnel always
+  prints its conversion rates now. It defaulted to `true`, so a chart that set
+  `false` gets them back with no error.
+- **Breaking, silent:** numbers print in the page's language. Charts read
+  `document.documentElement.lang`, the attribute `dir` already reads. A page that
+  declares no language, or a malformed one, prints what it printed before.
+- **Breaking:** `ChartTokens.splitLine` is `gridline`, after the `--chart-gridline`
+  variable it reads. `splitLine` is still echarts' own option key.
+- **Breaking:** `NumberCardSparklineType` is gone; `NumberCardSparkline.type` takes
+  a `ChartMark`. The old `'line'` drew a stroke over a fill, which the family calls
+  an area, so that shape is `'area'` and the default. `'line'` is the stroke alone.
+- **Breaking:** `OTHERS_LABEL` is no longer exported and `ResolvedColorScheme` is
+  exported from the root only. `OTHERS_KEY` stays.
+  `ReferenceLineLabelPlacement` is now exported.
+- `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
+  `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
+
+`useChart`, `registerChartModules` and their three types stay on
+`frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and
+lifecycle; echarts owns the option and instance types it carries. The four
+non-ramp `--chart-*` properties are documented on the
+[chart colors](/docs/foundations/colors/charts) page, and the echarts template
+ref on the [charts overview](/docs/charts/overview).
 
 ### DatePicker family — trigger slot props renamed to `open` / `toggle` (breaking, silent)
 
