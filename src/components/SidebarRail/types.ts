@@ -18,10 +18,13 @@ export interface SidebarRailItemProps {
   icon?: string | Component
 
   /**
-   * Navigation target. When set, the item renders as a router link; otherwise
-   * it renders as a button. A `click` event fires in both cases.
+   * Router navigation target. When neither `to` nor `href` is set, the item
+   * renders as a button. A `click` event fires in both cases.
    */
   to?: RouteLocationRaw
+
+  /** Plain link destination. Takes precedence over `to` and bypasses the router. */
+  href?: string
 
   /** Marks the item as the current destination (indicator bar / active fill). */
   active?: boolean

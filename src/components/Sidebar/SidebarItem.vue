@@ -19,7 +19,7 @@
     -->
     <component
       :is="linkComponent"
-      v-if="to"
+      v-if="href !== undefined || to"
       v-bind="linkAttrs"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
@@ -162,17 +162,23 @@ const tooltipText = computed(() => props.label || slotLabel.value)
 const globals = getCurrentInstance()?.appContext.config.globalProperties
 const hasRouter = computed(() => Boolean(globals?.$router))
 
-// With a router, render RouterLink; without one, degrade to a plain <a> (with an
-// href only when `to` is a string — we can't resolve a route-location object).
-const linkComponent = computed(() => (hasRouter.value ? RouterLink : 'a'))
+// An explicit href always uses a native anchor. Otherwise use RouterLink when
+// installed, or an anchor for a string `to` when no router can resolve it.
+const linkComponent = computed(() =>
+  props.href === undefined && hasRouter.value ? RouterLink : 'a',
+)
 const linkAttrs = computed(() =>
-  hasRouter.value
-    ? { to: props.to }
-    : { href: typeof props.to === 'string' ? props.to : undefined },
+  props.href !== undefined
+    ? { href: props.href }
+    : hasRouter.value
+      ? { to: props.to }
+      : { href: typeof props.to === 'string' ? props.to : undefined },
 )
 
 const resolvedRoute = computed(() =>
-  props.to && globals?.$router ? globals.$router.resolve(props.to) : null,
+  props.href === undefined && props.to && globals?.$router
+    ? globals.$router.resolve(props.to)
+    : null,
 )
 
 // Explicit `active` wins; otherwise infer from the current route so

@@ -121,6 +121,45 @@ describe('<SidebarSection />', () => {
 })
 
 describe('<SidebarItem />', () => {
+  for (const href of [
+    'https://docs.frappe.io',
+    '/apps/erpnext',
+    'mailto:help@example.com',
+    '',
+  ]) {
+    it(`renders a native link for ${href}, even with a router and to`, () => {
+      const onClick = cy.stub()
+        .callsFake((event: MouseEvent) => {
+          expect(event.defaultPrevented).to.equal(false)
+          event.preventDefault() // Keep the component test on this page.
+        })
+        .as('nativeClick')
+      cy.mount(SidebarItem, {
+        props: { label: 'Outside', href, to: '/', onClick },
+        global: { plugins: [createTestRouter()] },
+      })
+      cy.get('[data-slot=sidebar-item] > a')
+        .should('have.attr', 'href', href)
+        .and('not.have.attr', 'aria-current')
+      cy.get('[data-slot=sidebar-item] > a')
+        .focus()
+        .should('have.focus')
+        .click()
+      cy.get('@nativeClick').should('have.been.calledOnce')
+    })
+  }
+
+  it('supports a native link without an installed router', () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Outside', href: '/apps/erpnext', active: true },
+      slots: { default: () => 'ERPNext' },
+    })
+    cy.get('[data-slot=sidebar-item] > a')
+      .should('have.attr', 'href', '/apps/erpnext')
+      .and('have.attr', 'aria-current', 'page')
+      .and('contain.text', 'ERPNext')
+  })
+
   it('renders a router link when `to` is set, a button otherwise', () => {
     cy.mount(SidebarItem, {
       props: { label: 'Deals', to: '/deals' },

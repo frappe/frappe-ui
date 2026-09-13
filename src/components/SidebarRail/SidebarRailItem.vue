@@ -6,15 +6,15 @@
   -->
   <Tooltip side="right">
     <!--
-      Link vs. button are split with v-if/v-else rather than a dynamic
-      <component :is>: a raw 'button' string there resolves to a
+      Links use RouterLink for `to` and a native anchor for `href`. Keep the
+      button literal: a raw 'button' string in <component :is> resolves to a
       globally-registered <Button> in consumer apps, and reka's trigger can't
-      forward its element ref through a functional wrapper. The inner content is
-      identical in both branches.
+      forward its element ref through a functional wrapper.
     -->
-    <RouterLink
-      v-if="to"
-      :to="to"
+    <component
+      :is="href !== undefined ? 'a' : RouterLink"
+      v-if="href !== undefined || to"
+      v-bind="href !== undefined ? { href } : { to }"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="active ? 'active' : 'inactive'"
@@ -43,7 +43,7 @@
         />
       </slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
-    </RouterLink>
+    </component>
 
     <button
       v-else
