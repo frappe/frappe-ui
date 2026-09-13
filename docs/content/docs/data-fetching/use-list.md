@@ -49,6 +49,23 @@ const todos = useList({
 </script>
 ```
 
+To apply more than one condition to the same field, use an array of
+`[fieldname, operator, value]` triples:
+
+```js
+const invoices = useList({
+  doctype: 'Sales Invoice',
+  filters: [
+    ['grand_total', '>', 100],
+    ['grand_total', '<', 500],
+  ],
+})
+```
+
+Triple values also accept refs or getters. Both forms normalize `like` values by
+adding surrounding `%` wildcards when none are present, and omit empty `like`
+values.
+
 ## Write methods
 
 `insert`, `setValue` and `delete` write to the DocType `useList` was created
@@ -87,7 +104,8 @@ async function close(name) {
   `"field as alias"`, `"link_field.fieldname"` for a linked doc's field, or a
   child table map (`{ items: ['item_code', 'qty'] }`).
 - `filters` — a map of field name to a value (equality) or a `[operator, value]`
-  tuple. Accepts `Ref`s/getters for reactive values.
+  tuple, or an array of `[fieldname, operator, value]` triples. Accepts
+  `Ref`s/getters for reactive values.
 - `orderBy` — `"<field> asc"` or `"<field> desc"`. Accepts a `Ref`/getter.
 - `start` — the offset of the first row. Defaults to `0`.
 - `limit` — the page size. Defaults to `20`.
