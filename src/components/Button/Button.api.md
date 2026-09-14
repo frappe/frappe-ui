@@ -84,7 +84,7 @@
   },
   {
     name: 'href',
-    description: 'External link URL',
+    description: 'External URL, opened in a new tab.',
     required: false,
     type: 'string'
   },

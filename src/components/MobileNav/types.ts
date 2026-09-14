@@ -24,7 +24,7 @@ export interface MobileNavItemProps {
    */
   route?: RouteLocationRaw
 
-  /** External URL. Used when `route` is absent; renders a plain anchor. */
+  /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
   href?: string
 
   /**

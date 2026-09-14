@@ -23,7 +23,7 @@ export interface SidebarRailItemProps {
    */
   route?: RouteLocationRaw
 
-  /** External URL. Used when `route` is absent; renders a plain anchor. */
+  /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
   href?: string
 
   /** Marks the item as the current destination (indicator bar / active fill). */

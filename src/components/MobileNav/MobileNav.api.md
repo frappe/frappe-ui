@@ -33,7 +33,7 @@
   },
   {
     name: 'href',
-    description: 'External URL. Used when `route` is absent; renders a plain anchor.',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
     required: false,
     type: 'string'
   },

@@ -9,10 +9,10 @@ the bar adapts to any number of items.
 ## MobileNavItem
 
 Each item takes a `label`, an `icon` (or a default slot for custom content like
-an avatar), and a `route` or `href` target (`route` takes precedence). It renders
-a link when navigating
-somewhere new, and — when it's already the current route — a button that scrolls
-the shell's scroll container to the top instead of re-navigating.
+an avatar), and a `route` or `href` target (`route` takes precedence). `href`
+renders a native same-tab anchor. A `route` renders a link when navigating
+somewhere new and — when it is already current — a button that scrolls the
+shell's scroll container to the top instead of re-navigating.
 
 `active` controls the highlight and is independent of the current route, so one
 tab can stay lit across a whole section (e.g. Home across every community route)

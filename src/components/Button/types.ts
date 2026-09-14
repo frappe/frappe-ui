@@ -43,7 +43,7 @@ export const buttonProps = {
     type: [String, Object] as PropType<RouterLinkProps['to']>,
     default: undefined,
   },
-  /** External link URL */
+  /** External URL, opened in a new tab. */
   href: { type: String, default: undefined },
   /** Native button type */
   type: {
