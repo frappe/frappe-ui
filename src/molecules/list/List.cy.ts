@@ -1155,7 +1155,10 @@ describe('ListRows (virtual)', () => {
       render: () =>
         h(
           'div',
-          { style: 'height: 200px; overflow-y: auto' },
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'overscan-viewport',
+          },
           h(List, { rowHeight: 40 }, () =>
             h(
               ListRows,
@@ -1168,6 +1171,11 @@ describe('ListRows (virtual)', () => {
           ),
         ),
     })
+
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.get('[data-testid=overscan-viewport]').scrollTo(0, 20)
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.contains('[data-slot=list-row]', 'Row 6').should('exist')
 
     let initialRows = 0
     cy.get('[data-slot=list-row]').then(($rows) => {

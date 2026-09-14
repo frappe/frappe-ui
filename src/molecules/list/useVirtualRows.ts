@@ -52,10 +52,12 @@ export function useVirtualRows<T>(
   const range = computed(() => {
     const rowHeight = Math.max(1, toValue(options.rowHeight))
     const overscan = Math.max(0, Math.floor(toValue(options.overscan ?? 6)))
-    const offset = Math.floor(scrollTop.value / rowHeight) + 1
-    const capacity = Math.ceil(viewportHeight.value / rowHeight)
-    const start = Math.max(0, offset - overscan)
-    const end = Math.min(source.value.length, offset + capacity + overscan)
+    const visibleStart = Math.floor(scrollTop.value / rowHeight)
+    const visibleEnd = Math.ceil(
+      (scrollTop.value + viewportHeight.value) / rowHeight,
+    )
+    const start = Math.max(0, visibleStart - overscan)
+    const end = Math.min(source.value.length, visibleEnd + overscan)
     return { start, end, rowHeight }
   })
 
