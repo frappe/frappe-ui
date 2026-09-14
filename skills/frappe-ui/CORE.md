@@ -311,9 +311,10 @@ The parts:
 - `ListRows` — props `{ items: T[], rowKey?: string | ((item, index) => PropertyKey), virtual?: boolean | { itemHeight?, overscan? } }`. Its scoped slot gives `{ item, index, value }`. `rowKey` defaults to the item's `name`, then `id`, then the index.
 - `ListCell` — default slot only.
 - `ListHeaderCell` — **the column label goes in the default slot**, not a prop. Optional `#prefix` / `#suffix`.
-- `ListHeaderCellSort` — props `{ direction?: 'asc' | 'desc' | null, align?: 'start' | 'end' }`, emits `click`, label in the default slot, scoped `#suffix="{ direction }"` for a custom glyph. It is controlled: sort state and comparators are app code.
+- `ListHeaderCellSort` — props `{ direction?: 'asc' | 'desc' | null, align?: 'start' | 'end' }`, emits `click`, label in the default slot, scoped `#sort-indicator="{ direction }"` for a custom glyph. It is controlled: sort state and comparators are app code; `align="end"` keeps the indicator on the leading edge.
 - `ListHeader` — default slot holds the header cells. Its presence flips the list into table semantics; there is no mode prop.
-- `ListGroup` — props `{ label?: string, sticky?: boolean }`, slots `#header` and default.
+- `ListGroup` — props `{ label?: string, sticky?: boolean }`, slots `#label` and default.
+- `ListRowBase` hooks — `data-state="active|inactive"`; boolean `data-selected` and `data-interactive`. Active and selected are independent.
 - Geometry: the `list-gap-*` and `list-row-px-*` utilities, or the raw `--list-gap` and `--list-row-padding-x` CSS vars. Those two are the whole public hook surface; the column template is internal.
 
 Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` desktop feed → `h-17` mobile feed. Use **one** height mechanism per list: either `:row-height` on the `List` or a height class on every `ListRow`.

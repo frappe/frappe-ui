@@ -10,7 +10,7 @@ rg -n -P -U \
   --glob '!.git/**' --glob '!**/frappe-ui/**' PATTERN ROOTS
 ```
 
-The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations are GP, Frappe, CRM, HD, Builder, Books, and Wiki. Counts include tests and app-local documentation. Identical edits are consolidated under one row to prevent double counting. This applies to X1/H07, X3/the HoverCard mechanical line, X6/the two barrel lines, and H10/the related L-root cleanup. The L-root batch is split by break type because its changes have different tiers.
+The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations are GP, Frappe, CRM, HD, Builder, Books, and Wiki. Counts include tests and app-local documentation. LIST-Q8 additionally measures Suite, which is outside the original report columns; its 3 sites are called out in that row. Identical edits are consolidated under one row to prevent double counting. This applies to X1/H07, X3/the HoverCard mechanical line, X6/the two barrel lines, and H10/the related L-root cleanup. The L-root batch is split by break type because its changes have different tiers.
 
 ## Summary
 
@@ -49,7 +49,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-dialog/A Dialog text | Dialog `message` -> `description` | T1 | 2 | 0 | 5 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | M-tabs-tree/A Tree slots | `node`/`level`/`focused` -> `item`/`index`/`active` | T1 | 2 | 0 | 6 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
 | M-editor/A fixed menu size | `buttonSize` -> `size` | T1 | 2 | 0 | 4 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
-| M-list/A row hooks | Three ListRow state hooks -> one state vocabulary | T1 | 2 | 0 | 9 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
+| M-list/A row hooks | Three ListRow state hooks -> one state vocabulary | T1 | 0 | 0 | 9 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
+| M-list/A sort slot | ListHeaderCellSort `#suffix` -> `#sort-indicator` | T1 | 5 | 0 | 3 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | H26 | Dead StarterKit `code`, `codeBlock`, `link` keys -> removed | T1 | 1 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H05 | Duplicate TimePicker emits -> keep model and validation emits | T1 | 0 | 0 | 8 | yes | **trap** | **break**, trap clause |
 | H18 | `--mobile-header-height` -> `--page-header-mobile-height` | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
@@ -133,7 +134,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-dialog/A Dialog text | The component prop name breaks. Imperative `dialog.confirm({ message })` is excluded. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bmessage\s*=` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 5 |
 | M-tabs-tree/A Tree slots | Slot-prop destructuring breaks. | Find `<Tree\b` files, then trigger/item templates containing `\b(?:node|level|focused)\b` | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 6 |
 | M-editor/A fixed menu size | The prop name breaks. | `(?s)<EditorFixedMenu\b(?:(?!>).)*?(?::|v-bind:)?\bbutton-size\s*=` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| M-list/A row hooks | CSS selectors break. | In files using ListRow, `data-(?:interactive|active)\b|data-\[state=selected\]|\[data-state=['"]?selected` | 0 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 9 |
+| M-list/A row hooks | CSS selectors break. The 2 Builder candidates are app-authored div hooks, so actual migrations are 0. | In files using ListRow, `data-(?:interactive|active)\b|data-\[state=selected\]|\[data-state=['"]?selected` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
+| M-list/A sort slot | The slot name breaks. Suite's 3 live sites are supplemental to these columns; GP has 2 live sites plus 2 documentation examples. | Find `<ListHeaderCellSort\b`, then inside each block use `#suffix\b|v-slot:suffix\b|slot=['"]suffix['"]` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | H26 | Dead object keys stop type-checking. | In editor-kit config files, `\b(?:code|codeBlock|link)\s*:\s*(?:false|\{)` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 6 |
 | H05 | Removed TimePicker emits and their declarations break. No app listener exists. | In TimePicker sites and types, `@(?:open|close|input-invalid)\b|on(?:Open|Close|InputInvalid)\s*:|e:\s*['"](?:open|close|input-invalid)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
 | H18 | The CSS variable name breaks. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
@@ -185,4 +187,4 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-editor/A InlineKit config | Previously ignored StarterKit settings start changing behavior. | InlineKit configuration blocks containing `starterKit\s*:\s*\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | M-packaging/A rounded token | Every `rounded-9` use changes radius. | `\brounded-9\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 
-The inventory contains 72 candidate changes. The rule calls for 63 breaks and 9 permanent keeps. If only the break calls are made, 384 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
+The inventory contains 73 candidate changes. The rule calls for 64 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, 387 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.

@@ -161,7 +161,7 @@
     type: '{ direction: "asc" | "desc" | null; }'
   },
   {
-    name: 'suffix',
+    name: 'sort-indicator',
     description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
     type: '{ direction: "asc" | "desc" | null; }'
   }
@@ -207,7 +207,7 @@
   const listGroupProps = [
   {
     name: 'label',
-    description: 'Section label shown in the group header. Overridden by the #header slot.',
+    description: 'Section label shown in the group header. Overridden by the #label slot.',
     required: false,
     type: 'string'
   },
@@ -226,8 +226,8 @@
     type: 'any'
   },
   {
-    name: 'header',
-    description: 'Replaces the header content (the label).',
+    name: 'label',
+    description: 'Replaces the group label.',
     type: 'any'
   }
 ]

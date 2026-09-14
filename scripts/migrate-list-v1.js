@@ -84,20 +84,15 @@ function importedBindings(clause) {
   const named = /\{([\s\S]*?)\}/.exec(clause)?.[1]
   if (!named) return bindings
   for (const part of named.split(',')) {
-    const match = /^\s*(?:type\s+)?([\w$]+)(?:\s+as\s+([\w$]+))?\s*$/.exec(
-      part,
-    )
-    if (match) bindings.push({ imported: match[1], local: match[2] || match[1] })
+    const match = /^\s*(?:type\s+)?([\w$]+)(?:\s+as\s+([\w$]+))?\s*$/.exec(part)
+    if (match)
+      bindings.push({ imported: match[1], local: match[2] || match[1] })
   }
   return bindings
 }
 
 export function componentAliases(source) {
   const aliases = new Map()
-  for (const name of COMPONENTS) {
-    aliases.set(name, name)
-    aliases.set(kebab(name), name)
-  }
 
   const mask = codeMask(source)
   const imports = /\bimport\s+([\s\S]*?)\s+from\s*(['"])([^'"]+)\2/g
@@ -117,7 +112,10 @@ export function componentAliases(source) {
   }
 
   for (const name of COMPONENTS) {
-    const declaration = new RegExp(`\\b(?:const|let|var|class|function)\\s+${name}\\b`, 'g')
+    const declaration = new RegExp(
+      `\\b(?:const|let|var|class|function)\\s+${name}\\b`,
+      'g',
+    )
     let match
     while ((match = declaration.exec(source))) {
       if (mask[match.index]) continue
@@ -204,6 +202,15 @@ function migrateMarkup(source, aliases) {
     }
 
     const name = open[1]
+    if (name === 'script' || name === 'style') {
+      const close = new RegExp(`</${name}\\s*>`, 'gi')
+      close.lastIndex = end + 1
+      const match = close.exec(source)
+      const next = match ? close.lastIndex : source.length
+      migrated += source.slice(start, next)
+      cursor = next
+      continue
+    }
     const component = aliases.get(name)
     let nextTag = tag
     if (component === 'ListRow') nextTag = replaceListRowUtilities(nextTag)
@@ -225,7 +232,10 @@ function migrateMarkup(source, aliases) {
     }
 
     migrated += nextTag
-    if (!/\/\s*>$/.test(tag) && !['slot', 'img', 'input', 'br', 'hr'].includes(name)) {
+    if (
+      !/\/\s*>$/.test(tag) &&
+      !['slot', 'img', 'input', 'br', 'hr'].includes(name)
+    ) {
       stack.push({ name, component })
     }
     cursor = end + 1
@@ -268,10 +278,18 @@ function filesIn(target, seen = new Set()) {
   try {
     stat = fs.lstatSync(target)
   } catch (error) {
-    throw new Error(`${target}: ${error.code === 'ENOENT' ? 'not found' : error.message}`)
+    throw new Error(
+      `${target}: ${error.code === 'ENOENT' ? 'not found' : error.message}`,
+    )
   }
   if (stat.isSymbolicLink()) return []
-  if (stat.isFile()) return EXTENSIONS.has(path.extname(target)) ? [target] : []
+  if (stat.isFile()) {
+    // Migration guides intentionally contain the old spelling in "before"
+    // examples. Rewriting them makes the guide false and prevents idempotent
+    // own-tree runs.
+    if (path.basename(target).toLowerCase() === 'migration.md') return []
+    return EXTENSIONS.has(path.extname(target)) ? [target] : []
+  }
   if (!stat.isDirectory()) return []
   const real = fs.realpathSync(target)
   if (seen.has(real)) return []
@@ -280,7 +298,8 @@ function filesIn(target, seen = new Set()) {
     .readdirSync(target, { withFileTypes: true })
     .sort((a, b) => a.name.localeCompare(b.name))
     .flatMap((entry) => {
-      if (['node_modules', '.git', 'dist', 'build'].includes(entry.name)) return []
+      if (['node_modules', '.git', 'dist', 'build'].includes(entry.name))
+        return []
       return filesIn(path.join(target, entry.name), seen)
     })
 }
@@ -300,7 +319,9 @@ export function run(argv) {
 
   let files
   try {
-    files = [...new Set(targets.flatMap((target) => filesIn(path.resolve(target))))]
+    files = [
+      ...new Set(targets.flatMap((target) => filesIn(path.resolve(target)))),
+    ]
   } catch (error) {
     console.error(error.message)
     return 1

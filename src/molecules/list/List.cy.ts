@@ -139,7 +139,6 @@ describe('List (feed mode)', () => {
       })
   })
 })
-
 describe('List (selection)', () => {
   function mountSelectable(rowProps: Record<string, unknown> = {}) {
     const selection = ref<string[]>([])

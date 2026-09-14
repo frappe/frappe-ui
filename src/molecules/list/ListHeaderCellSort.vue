@@ -74,7 +74,7 @@ const sortIndicatorRevealClass = computed(() =>
   props.direction ? '' : 'opacity-0 group-hover:opacity-100',
 )
 
-// Built-in sort glyph, used when the consumer supplies no #suffix: a muted
+// Built-in sort glyph, used when the consumer supplies no #sort-indicator: a muted
 // up/down when inactive, a directional arrow when the column is the sort key.
 const defaultArrowClass = computed(() => {
   if (!props.direction) return 'lucide-arrow-up-down'

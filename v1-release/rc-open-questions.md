@@ -1178,6 +1178,23 @@ No behavior change, so no `!`. Section 5 of the research (other libraries) was f
 
 **Follow-up (2026-09-14).** The maintainer: "yes". The recommendation is decided.
 
+## LIST-Q5 and LIST-Q8 — What are the actual consumer migrations?
+
+**LIST-Q5.** The two Builder matches are false positives, both in
+`frontend/src/components/CommandPalette.vue`: `data-active` belongs to
+app-authored `div` rows and its query selector, with no `ListRow` in the file.
+The actual Builder ListRow selector migration count is 0.
+
+**LIST-Q8.** There are 5 live `#suffix` occurrences across 2 consumer files:
+
+- Gameplan `frontend/src/components/Settings/MembersSettings.vue`: 2
+- Suite `frontend/src/apps/drive/components/ListView.vue`: 3
+
+Gameplan's `LIST_FAMILY_SPEC.md` has 2 additional documentation examples,
+counted separately from live sites. No tied dynamic slot, `v-slot:suffix`, or
+legacy `slot="suffix"` form was found. The rename to `#sort-indicator` is fully
+mechanical and preserves the component's edge-aware placement.
+
 ## PKG-Q4 and PKG-Q6 — Are the `--focus-<name>` variables legacy? Examples
 
 **Short answer.** They are superseded inside frappe-ui, but "legacy" and "kept for backward compatibility" are wrong. No release used them alone, and no app reads frappe-ui's copy. Recommendation: remove them before RC.

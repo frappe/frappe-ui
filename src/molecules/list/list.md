@@ -86,12 +86,13 @@ that stays aligned.
 adornments. Sortable columns use `ListHeaderCellSort` instead — a controlled
 sort button: you hand it the active `direction` (`asc` / `desc` / `null`) and
 update your own sort state in its `click` handler. Your code owns the state,
-toggle rules, direction glyphs (via the scoped `#suffix="{ direction }"` slot),
+toggle rules, direction glyphs (via the scoped
+`#sort-indicator="{ direction }"` slot),
 and whether ordering happens client-side or through `useList` orderBy. The cell
 keeps only the behavioral chrome: a real button, `aria-sort`, the tooltip, and
-revealing an inactive column's suffix on hover. Both variants render the same
-`data-slot="list-header-cell"` geometry, so mixing them in one header is
-seamless.
+revealing an inactive column's sort indicator on hover. Both variants render
+the same `data-slot="list-header-cell"` geometry, so mixing them in one header
+is seamless.
 
 <ComponentPreview name="List-Columns" />
 
@@ -228,9 +229,10 @@ and the label stays flush with the column edge.
 Slots for CSS targeting:
 `data-slot="list | list-header | list-header-cell | list-header-checkbox | list-row | list-cell | list-row-checkbox | list-group | list-group-header | list-divider"`.
 Slots not listed here are internal and may change. State:
-`data-state="selected"` (checkbox selection), `data-active` (+ `aria-current`,
-the `v-model:active` row) and `data-interactive` on rows, `data-sort` on the
-active header cell.
+`data-state="active|inactive"` (+ `aria-current` on the `v-model:active` row),
+boolean `data-selected` for checkbox selection, and boolean `data-interactive`
+on rows. Active and selected are independent. Header cells use `data-sort` when
+sorted.
 
 Accessibility follows header presence: `role="list"` / `"listitem"` without a
 `ListHeader`, `table` / `row` / `columnheader` / `cell` (plus `aria-sort`) with

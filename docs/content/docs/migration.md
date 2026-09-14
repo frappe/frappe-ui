@@ -31,8 +31,9 @@ token renames (`tokens-v2`, see [Tokens](#tokens)), shortcut config
 (`shortcuts-v1`, see [The shortcuts codemod](#the-shortcuts-codemod)),
 destination prop renames (`destinations-v1`, see
 [Destinations](#navigation-destinations)), and the EditorFixedMenu prop rename
-(`editor-v1`, see [Editor](#editor)), plus base component prop normalization
-(`base-props-v1`, see [Base component props](#base-component-props)). Every
+(`editor-v1`, see [Editor](#editor)), base component prop normalization
+(`base-props-v1`, see [Base component props](#base-component-props)), and List
+row hooks and slot names (`list-v1`, see [List family](#list-family)). Every
 other component, prop, and slot rename is a hand edit.
 
 ### Sections
@@ -42,7 +43,7 @@ other component, prop, and slot rename is a hand edit.
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
 - **Navigation and layout** — [Destinations](#navigation-destinations) · [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
-- **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
+- **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
@@ -1064,6 +1065,39 @@ file's base64 representation yourself is a few lines of
 
 This is a **silent break**: `handler` is dropped as an unknown key, so the
 action button still renders and does nothing on click.
+
+## List family
+
+Run `npx list-v1 .` from each app that imports components from
+`frappe-ui/list`. It updates selectors anchored to
+`[data-slot="list-row"]`, Tailwind state variants on imported `ListRow`
+components, and the two statically named slots below:
+
+| Before | After |
+| --- | --- |
+| `[data-slot="list-row"][data-active]` | `[data-slot="list-row"][data-state="active"]` |
+| `[data-slot="list-row"][data-state="selected"]` | `[data-slot="list-row"][data-selected]` |
+| `ListGroup` `#header` | `#label` |
+| `ListHeaderCellSort` `#suffix` | `#sort-indicator` |
+
+```diff
+-<ListGroup><template #header>Open</template></ListGroup>
++<ListGroup><template #label>Open</template></ListGroup>
+ <ListHeaderCellSort align="end">
+-  <template #suffix="{ direction }">…</template>
++  <template #sort-indicator="{ direction }">…</template>
+ </ListHeaderCellSort>
+```
+
+Every `ListRowBase` now has `data-state="active"` or `"inactive"`.
+Selection and interactivity are independent boolean attributes:
+`data-selected` and `data-interactive`. The sort-indicator slot keeps its
+edge-aware placement, including the leading edge for `align="end"`.
+
+The codemod leaves same-named local or globally registered components alone.
+It exits non-zero and leaves a file unchanged when it finds a dynamic slot
+under either renamed component; replace that slot by hand. These slot renames
+are silent breaks because Vue drops content passed under an unknown name.
 
 ## ListView — moved to `frappe-ui/experimental`
 
@@ -3692,8 +3726,9 @@ utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
 keyboard shortcuts — it also catches the punctuation keys that a hand
 migration breaks in silence. Run `editor-v1` if you use `EditorFixedMenu`.
 `base-props-v1` handles the Icon, Progress, and Divider changes above. Review
-any sites the codemods report before completing the hand edits named in other
-family sections.
+Run `destinations-v1` for navigation props and `list-v1` for the List family.
+Review any sites the codemods report before completing the hand edits named in
+other family sections.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
