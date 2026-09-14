@@ -255,5 +255,7 @@ describe('data migration', () => {
       ).toBeDefined()
     }
     expect(declared.bin['data-v1']).toBe('./scripts/migrate-data-v1.js')
+    // A bin whose file is not published installs as a broken symlink.
+    expect(declared.files).toContain('scripts/migrate-data-v1.js')
   })
 })

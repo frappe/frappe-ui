@@ -19,7 +19,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | X2 | Menu handler `PointerEvent` -> `Event`; keep `onClick` only in data objects | T0 | 0 | 0 | 2 | yes | **trap** | **break**, trap clause |
 | X6 + two A barrel lines | Four implementation `export *` declarations -> named exports | T0 | 0 | 0 | 4 | yes | **trap** | **break**, trap clause |
 | H06 | Component option types -> additive shared selection union | T0 | 0 | 0 | 8 | yes | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
-| H15 | Empty `DesktopShellProps` -> declared `scroll` prop | T0 | 0 | 0 | 4 | yes | **trap** | **break**, trap clause |
+| H15 | Empty `DesktopShellProps` -> declared `scroll` prop | T0 | 2 | 0 | 4 | yes | **trap** | **break**, trap clause |
 | H19 | Gated Progress `#hint` -> independently rendered slot | T0 | 0 | 0 | 3 | yes | **trap** | **break**, trap clause |
 | H22 | Toast spec `5000ms` -> actual `4000ms`; add owned option types | T0 | 0 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H23 | Editor `Extension[]` -> TipTap `Extensions` | T0 | 0 | 0 | 5 | yes | **trap** | **break**, trap clause |
@@ -42,8 +42,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-dialog/A Breadcrumb slots | `#prefix`/`#suffix` -> `#item-prefix`/`#item-suffix` | T1 | 12 | 1 | 1 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
 | M-dialog/A Dialog statics | `Dialog.Title`, `.Description`, `.Close` -> removed | T1 | 6 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | M-base/A Icon prop | Icon `name` -> `icon` | T1 | 5 | 1 | 3 | yes | **misleading name** | **break**, misleading-name T1 clause |
-| M-composables/A getter | `resolvedColorScheme` -> `getResolvedColorScheme` | T1 | 3 | 0 | 13 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
-| B11 | DesktopShell `#rail`/`#sidebar` -> `#nav` | T1 | 3 | 0 | 10 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
+| M-composables/A getter | Root `resolvedColorScheme()` -> removed; read `useColorScheme().resolvedColorScheme` | T2 | 3 | 0 | 13 | no | **trap** | **break**, trap clause |
 | H10 + L-root SettingsDialog | `shortcut` -> `keyboardShortcut` | T1 | 2 | 0 | 6 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | M-data/A resources option | Unread object `resources` -> boolean | T1 | 2 | 0 | 7 | yes | **trap** | **break**, trap clause |
 | M-dialog/A Dialog text | Dialog `message` -> `description` | T1 | 2 | 0 | 5 | yes | **misleading name** | **break**, misleading-name T1 clause |
@@ -53,7 +52,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-list/A sort slot | ListHeaderCellSort `#suffix` -> `#sort-indicator` | T1 | 5 | 0 | 3 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | H26 | Dead StarterKit `code`, `codeBlock`, `link` keys -> removed | T1 | 1 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H05 | Duplicate TimePicker emits -> keep model and validation emits | T1 | 0 | 0 | 8 | yes | **trap** | **break**, trap clause |
-| H18 | `--mobile-header-height` -> `--page-header-mobile-height` | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
+| H18 | `--mobile-header-height` -> removed; the mobile header is a fixed 52px | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | H28 | ListRows object-form `virtual` -> boolean `virtual` plus `overscan` | T1 | 0 | 0 | 5 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
 | H35 | Deep Tailwind shim path -> `frappe-ui/tailwind` | T1 | 0 | 1 | 1 | yes | **trap** | **break**, trap clause |
 | L-root internal exports | Accidental date-picker types -> removed from root | T1 | 0 | 0 | 2 | yes | **trap** | **break**, trap clause |
@@ -64,13 +63,13 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-overlays/A Popover control | Trigger-slot `toggle` -> `setOpen` | T1 | 0 | 0 | 3 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | M-inputs/A DateTimePicker | `allowCustomTime` -> `typeable` | T1 | 0 | 0 | 7 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | M-tabs-tree/A Tab state | `checked|unchecked` -> `active|inactive` | T1 | 0 | 0 | 2 | yes | **misleading name** | **break**, misleading-name T1 clause |
-| M-shells/A useSheetDrag | Root import -> `frappe-ui/experimental` | T1 | 0 | 0 | 8 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
-| M-shells/A ScrollBar | Root import/tag -> experimental-only export | T1 | 0 | 0 | 7 | yes | **trap** | **break**, trap clause |
+| M-shells/A useSheetDrag | Root import -> removed from the package; BottomSheet keeps it internally | T1 | 0 | 0 | 8 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
+| M-shells/A ScrollBar | Root import/tag -> removed from the package, with no replacement | T1 | 0 | 0 | 7 | yes | **trap** | **break**, trap clause |
 | M-list/A ListGroup slot | `#header` -> `#label` | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | B7 | Picker trigger `toggle` -> `setOpen` | T1 | 0 | 0 | 2 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | B9 | SidebarRailItem `tile` -> `subtle` | T1 | 0 | 0 | 4 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
 | B12 | Suggestion `component` -> `nodeView` or `listComponent` | T1 | 2 | 0 | 9 | no | **misleading name** | **break**, misleading-name T1 clause |
-| H14 | ScrollArea `viewportClass` -> `data-slot` selector | T2 | 7 | 0 | 11 | no | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
+| H14 | ScrollArea `viewportClass` -> `data-slot` selector | T2 | 10 | 0 | 11 | no | **consistency only** | **kept** (SHELL-Q4): `viewportClass` stays as the documented P10 exception |
 | H24 | Optional `UploadedFile.file_url` -> required | T2 | 6 | 0 | 1 | no | **trap** | **break**, trap clause |
 | M-editor/A floating options | TipTap option bag -> owned narrow options | T2 | 6 | 0 | 0 | no | **trap** | **break**, trap clause |
 | M-tabs-tree/A TabButton item | Remove `tooltip`; number label -> string label | T2 | 5 | 4 | 1 | no | **trap** | **break**, trap clause |
@@ -81,7 +80,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-editor/A slash commands | Untyped `slashCommands` -> typed object with `items` | T2 | 1 | 0 | 2 | no | **trap** | **break**, trap clause |
 | M-overlays/A attributes | Three fallthrough targets -> one public root per overlay | T3 | 213 | 123 | 71 | no | **trap** | **break**, trap clause |
 | H01 | Resolve-on-failure v2 actions -> reject | T3 | 58 | 25 | 97 | no | **trap** | **break**, trap clause |
-| L-root defaults | TabButtons and Rating fallback defaults -> aligned defaults | T3 | 38 | 9 | 44 | no | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
+| L-root defaults (Rating) | Rating `size` default `md` -> `sm` | T3 | 3 | 0 | 11 | no | **consistency only** | **break** (INP-Q16) |
+| L-root defaults (TabButtons) | TabButtons omitted `variant` fallback -> aligned default | T3 | 38 | 9 | 37 | no | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
 | X3 + HoverCard A | Delay seconds -> milliseconds; omitted HoverCard delay -> 500ms | T3 | 36 | 19 | 30 | no | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
 | M-editor/A prose defaults | Omitted prose font fallback `15px` -> `14px` | T3 | 22 | 1 | 73 | no | **trap** | **break**, trap clause |
 | M-packaging/A Tailwind extension | Replacing defaults -> `theme.extend` | T3 | 8 | 6 | 16 | no | **trap** | **break**, trap clause |
@@ -98,7 +98,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | X2 | Only explicitly annotated Menu handler parameters can fail type-check. None exist. | `onClick\s*:\s*\([^)]*:\s*PointerEvent` in Menu option files | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | X6 + A barrels | Internal barrel declarations change. | `export\s+\*\s+from\s+['"](?:\./)?(?:local|realtime|extensions|menu)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
 | H06 | This adds a shared type. | imports of `SelectOption|ComboboxOption|MultiSelectOption|SelectionOption|SelectionGroup` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| H15 | This corrects an empty exported props type. | `\bDesktopShellProps\b|<DesktopShell\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
+| H15 | This corrects an empty exported props type. Nothing to edit: `scroll` already worked, and Suite Drive already passes it. Measured 2026-09-15: GP `DesktopLayout.vue:5`, Suite Drive `DriveLayout.vue:10` (Suite has no column here). | `\bDesktopShellProps\b|<DesktopShell\b` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
 | H19 | Existing `#hint` content starts rendering. No caller edit is needed. | Progress blocks containing `#hint|v-slot:hint|slot="hint"` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | H22 | Code already uses 4000ms. The change is docs and additive types. | `\b(?:ExternalToast|ToastOptions)\b|duration\s*:\s*5000` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 | H23 | This widens the accepted extensions type. | imports of `Extension|Extensions` tied to `<Editor>` or `useEditor(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
@@ -126,8 +126,6 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-dialog/A Breadcrumb slots | Slot names break. Counts inspect only text inside each Breadcrumbs block. | Find files with `<Breadcrumbs\b`, then inside each block use `#(?:prefix|suffix)\b|v-slot:(?:prefix|suffix)\b|slot=['"](?:prefix|suffix)['"]` | 3 | 0 | 8 | 1 | 0 | 0 | 0 | 1 | 1 |
 | M-dialog/A Dialog statics | Raw statics disappear. Opening tags count once. | `<Dialog\.(?:Title|Description|Close)\b|Dialog\.(?:Title|Description|Close)\s*=` | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 | M-base/A Icon prop | The prop name breaks. | `(?s)<Icon\b(?:(?!>).)*?(?::|v-bind:)?\bname\s*=` | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 1 | 3 |
-| M-composables/A getter | Imports and calls break. | `\bresolvedColorScheme\b` | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 13 |
-| B11 | DesktopShell slot names break. | Find `<DesktopShell\b`, then inside each block use `#(?:rail|sidebar)\b|v-slot:(?:rail|sidebar)\b|slot=['"](?:rail|sidebar)['"]` | 2 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
 | H10 + L-root | The prop name and boolean type break. The Books alias `FrappeSettingsDialog` is included. | `(?s)<(?:SettingsDialog|FrappeSettingsDialog)\b(?:(?!>).)*?(?::|v-bind:)?\bshortcut\s*=` | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 6 |
 | M-data/A resources | The ignored object form stops type-checking. | `\bresources\s*:\s*\{` near `FrappeUIPluginOptions` or `app.use` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
 | M-dialog/A Dialog text | The component prop name breaks. Imperative `dialog.confirm({ message })` is excluded. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bmessage\s*=` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 5 |
@@ -137,7 +135,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-list/A sort slot | The slot name breaks. Suite's 3 live sites are supplemental to these columns; GP has 2 live sites plus 2 documentation examples. | Find `<ListHeaderCellSort\b`, then inside each block use `#suffix\b|v-slot:suffix\b|slot=['"]suffix['"]` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | H26 | Dead object keys stop type-checking. | In editor-kit config files, `\b(?:code|codeBlock|link)\s*:\s*(?:false|\{)` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 6 |
 | H05 | Removed TimePicker emits and their declarations break. No app listener exists. | In TimePicker sites and types, `@(?:open|close|input-invalid)\b|on(?:Open|Close|InputInvalid)\s*:|e:\s*['"](?:open|close|input-invalid)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| H18 | The CSS variable name breaks. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| H18 | The library stops reading the variable. GP defines and reads its own copy at 52px (`index.css:10` plus 3 reads), which keeps working unchanged. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | H28 | The object form is removed; height moves to parent `List.rowHeight`. | `virtual\s*=.*\{|itemHeight|ListVirtualOptions|useVirtualRows` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
 | H35 | The unsupported deep path disappears. | `frappe-ui/src/utils/tailwind\.config` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
 | L-root internal exports | Root type imports break. None exist in apps. | imports from `frappe-ui` containing `DatePickerViewMode|DatePickerDateObj` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
@@ -148,8 +146,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-overlays/A Popover control | Current `toggle` sites are own-tree only. The codemod separately reports 43 files in Frappe, CRM, HD, and Builder that still use old `#target`/`togglePopover` APIs. | In Popover blocks, trigger templates containing `\btoggle\b`, plus old `#target`/`togglePopover` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | M-inputs/A DateTimePicker | The prop name breaks. | `(?s)<DateTimePicker\b(?:(?!>).)*?(?::|v-bind:)?\ballow-custom-time\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
 | M-tabs-tree/A Tab state | CSS selectors break. | In TabButtons files, `data-\[state=(?:checked|unchecked)\]|\[data-state=['"]?(?:checked|unchecked)` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| M-shells/A useSheetDrag | Root imports break. | imports from `frappe-ui` containing `useSheetDrag` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| M-shells/A ScrollBar | Root imports and global tags break. | imports from `frappe-ui` containing `ScrollBar`, plus `<ScrollBar\b|<scroll-bar\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
+| M-shells/A useSheetDrag | Root imports break, with no replacement path. | imports from `frappe-ui` containing `useSheetDrag` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
+| M-shells/A ScrollBar | Root imports and global tags break, with no replacement path. | imports from `frappe-ui` containing `ScrollBar`, plus `<ScrollBar\b|<scroll-bar\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
 | M-list/A ListGroup slot | The slot name breaks. | Find `<ListGroup\b`, then inside each block use `#header\b|v-slot:header\b|slot=['"]header['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | B7 | Picker trigger-slot destructuring breaks. | In DatePicker, DateRangePicker, DateTimePicker, or TimePicker blocks, trigger/suffix templates containing `\btoggle\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | B9 | The variant value breaks. | `(?s)<SidebarRailItem\b(?:(?!>).)*?\bvariant\s*=\s*['"]tile['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
@@ -159,7 +157,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 
 | Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | v0 | Own |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| H14 | Each class string must become a selector rule or an arbitrary descendant variant. | `(?s)<ScrollArea\b(?:(?!>).)*?(?::|v-bind:)?\bviewport-class\s*=` | 6 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 11 |
+| H14 | Nothing breaks. SHELL-Q4 keeps the prop; the count is recorded because the earlier 7 missed Builder and Books. Measured 2026-09-15: GP 6 and Builder 1 confirmed on this box. | `(?s)<ScrollArea\b(?:(?!>).)*?(?::|v-bind:)?\bviewport-class\s*=` | 6 | 0 | 0 | 1 | 1 | 2 | 0 | 0 | 11 |
+| M-composables/A getter | The import breaks and each call has to become a `.value` read on `useColorScheme()`. A codemod cannot do it: the replacement needs a binding in the caller's scope. Wiki also deletes the `MutationObserver` the call needed. | `\bresolvedColorScheme\b` | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 13 |
 | H24 | Each imported type site must prove that every constructed result has `file_url`. | imports from `frappe-ui` or `frappe-ui/editor` containing `UploadedFile` | 3 | 1 | 0 | 2 | 0 | 0 | 0 | 0 | 1 |
 | M-editor/A floating options | Each option object must be checked against the owned keys. | `(?s)<Editor(?:Bubble|Floating)Menu\b(?:(?!>).)*?(?::|v-bind:)?\boptions\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 |
 | M-tabs-tree/A TabButton item | Each item needs a decision for removed tooltip text or a non-string label. | In TabButtons files, `\btooltip\s*:|\blabel\s*:\s*(?!['"\x60])` | 0 | 0 | 0 | 3 | 2 | 0 | 0 | 4 | 1 |
@@ -175,7 +174,8 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | M-overlays/A attributes | Attributes can move to a different DOM element. Review every overlay use. | `<(?:Popover|Dropdown|HoverCard|ContextMenu)\b` | 23 | 9 | 71 | 70 | 26 | 3 | 11 | 123 | 71 |
 | H01 | Error handling changes from a resolved value to rejection. | In files using `useCall|useDoc`, `\.(?:submit|setValue|delete|runDocMethod)\s*\(` | 58 | 0 | 0 | 0 | 0 | 0 | 0 | 25 | 97 |
-| L-root defaults | Omitted TabButtons variants and dynamic Rating sizes can render differently. | `(?s)<TabButtons\b(?![^>]*\bvariant\s*=)[^>]*>|(?s)<Rating\b(?:(?!>).)*?(?::|v-bind:)?\bsize\s*=` | 10 | 4 | 2 | 7 | 6 | 0 | 1 | 9 | 44 |
+| L-root defaults (Rating) | Every Rating with no `size` renders one step smaller. The old combined row counted Ratings that *pass* `size`, which is the set that does not change. Measured 2026-09-15: 0 Rating tags in GP, Builder and Suite. The 3 v1 sites are recorded under INP-Q16 (frappe/ui `RatingField.vue:2`, HD `FilterValueEditor.vue:93`, CRM `CFCondition.vue:265`). | `(?s)<Rating\b(?![^>]*\bsize\s*=)[^>]*>` | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 11 |
+| L-root defaults (TabButtons) | Omitted TabButtons variants can render differently. The per-app counts are the old combined row's, which is safe for GP (measured 0 Rating tags there); for Frappe, CRM and HD a few of them may be Ratings that pass `size`, which do not change. Own tree measured 2026-09-15. | `(?s)<TabButtons\b(?![^>]*\bvariant\s*=)[^>]*>` | 10 | 4 | 2 | 7 | 6 | 0 | 1 | 9 | 37 |
 | X3 + HoverCard A | Explicit values change unit. HoverCards without a delay get a new default. | `\b(?:hoverDelay|hover-delay|leaveDelay|leave-delay)\s*=|(?s)<HoverCard\b(?![^>]*(?:hoverDelay|hover-delay)\s*=)[^>]*>` | 2 | 2 | 9 | 8 | 13 | 2 | 0 | 19 | 30 |
 | M-editor/A prose defaults | Editors without an override render at a new base size. | `(?s)<Editor\b(?![^>]*(?:style|class)[^>]*--prose-font-size)[^>]*>` | 4 | 1 | 2 | 10 | 1 | 0 | 4 | 1 | 73 |
 | M-packaging/A Tailwind extension | Restored Tailwind defaults can change generated CSS. Review every preset consumer. | `frappe-ui/(?:tailwind|src/utils/tailwind\.config)` | 1 | 0 | 3 | 1 | 1 | 1 | 1 | 6 | 16 |
@@ -185,4 +185,11 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-editor/A InlineKit config | Previously ignored StarterKit settings start changing behavior. | InlineKit configuration blocks containing `starterKit\s*:\s*\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | M-packaging/A rounded token | Every `rounded-9` use changes radius. | `\brounded-9\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 
-The inventory contains 72 candidate changes. The rule calls for 63 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, 386 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
+The inventory contains 72 candidate changes. The rule calls for 63 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, and batch 2's four corrections applied, 391 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
+
+Batch 2 corrections to the counts above, from `rc-api-decisions.md` and from greps run on 2026-09-15:
+
+- **B11 is gone.** SHELL-Q2 keeps `#rail`/`#sidebar` and `#nav`, so there is nothing to migrate (-3).
+- **H15 is 2, not 0.** Two apps render `DesktopShell`: GP `DesktopLayout.vue:5` and Suite Drive `DriveLayout.vue:10`. Neither has anything to edit — `scroll` already worked and Drive already passes it (+2).
+- **H14 is 10, not 7.** The earlier count missed Builder and Books. SHELL-Q4 keeps `viewportClass`, so none of the 10 migrate (+3).
+- **The L-root defaults row split.** Rating is a break with 3 v1 sites (INP-Q16); TabButtons stays a keep and carries the old combined numbers (+3).

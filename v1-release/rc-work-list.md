@@ -1,12 +1,14 @@
 # Frappe UI v1 RC work list
 
 - Audited commit: `f4dfb48160` (`v1.0.0-beta.63`).
-- Current batch base: `0f2162c689aee0a0bdf8ae1559ac2043e9a5cd85` (`v1.0.0-beta.68`).
+- Current batch base: `2b990bdb7de35616a4e600e2222a733c51aba5d3` (`v1.0.0-beta.69`).
 - Items 1, 3, and 6 landed in PRs #1151, #1150, and #1149.
 - The remaining 15 sections ship as exactly three sequential PRs: batch 1 is
   items 2, 4, 5, 7, 9, 12, and 16; batch 2 is items 8, 10, 11, 13, and 14;
   batch 3 is items 15, 17, and 18. Section titles below are scope records, not
   separate PR instructions.
+- Batch 1 landed at `v1.0.0-beta.69`. Batch 2 is implemented on `v1/rc-batch-2`:
+  items 8, 10, 11, 13, and 14, covering 45 QIDs. Batch 3 is not started.
 - Already landed: one delegated chart workstream, issue #1139 through PR #1141 at `bc0b402820`.
 - Deferred: 8 complete QIDs and 4 parts of QIDs wait for 1.1.
 - Delegated: two workstreams. Charts #1139 is complete. Tree #1142 is still outside this list.
@@ -279,7 +281,7 @@ Size: **M**. The work touches 10 to 30 files.
 
 Decisions:
 
-- **SHELL-Q1** — Add `scroll` to `DesktopShellProps`, use that type in the component, and document `scroll=false`. Touch DesktopShell types, component, tests, and docs. GP and Wiki are the 2 real shell sites. Wiki should pass `false`; this is a follow-up, not a required API migration.
+- **SHELL-Q1** — Add `scroll` to `DesktopShellProps`, use that type in the component, and document `scroll=false`. Touch DesktopShell types, component, tests, and docs. Measured 2026-09-15: the 2 shell sites are GP `DesktopLayout.vue:5` and Suite Drive `DriveLayout.vue:10`, and Drive already passes `:scroll`. Wiki is not on this box. Neither site needs an edit; the prop already worked and only the type was empty.
 - **SHELL-Q2** — Keep DesktopShell `#rail/#sidebar` and MobileShell `#nav`; document the split. Touch shell docs and the shell contract note. Consumer migration is 0.
 - **SHELL-Q3** — Provide the nearest shell scroll element and PageHeader target, with registries as fallback. Touch both shells, `useShellScrolled`, PageHeader target code, tests, and `spec/portal-target.md`. No caller syntax changes.
 - **SHELL-Q4** — Keep `viewportClass` and document it as the ScrollArea exception. Touch `PHILOSOPHY.md` and ScrollArea docs. The 10 app sites stay unchanged.
@@ -302,7 +304,7 @@ Size: **L**. Ownership, tests, docs, and export changes exceed 30 files.
 
 Decisions:
 
-- **VOC-Q7** — Remove `--mobile-header-height` and keep 52px fixed. Touch `PageHeaderMobile.vue`, docs, tests, and ADR-0017. App reads are 0; Gameplan's unused definition can be deleted in its follow-up.
+- **VOC-Q7** — Remove `--mobile-header-height` and keep 52px fixed. Touch `PageHeaderMobile.vue`, docs, tests, and ADR-0017. Measured 2026-09-15: Gameplan declares the variable itself at `index.css:10` as `52px` and reads it in 3 of its own files, so its declaration is not unused and keeps working. The library simply stops reading the name; nothing renders differently.
 - **SHELL-Q8** — Extract and export every PageHeader prop type. Touch PageHeader components, types, barrels, generated API docs, and export tests. This is additive.
 - **SHELL-Q9** — Keep one-click scroll-to-top and the existing `data-no-scroll-top` and `data-no-sheet-drag` names. Touch docs and tests only. No migration.
 - **SHELL-Q11** — Make `getResolvedColorScheme` internal, remove `resolvedColorScheme()` from root, and add a read-only `resolvedColorScheme` ref to `useColorScheme()`. Touch the composable, charts token import, root exports, recipes, tests, docs, and types. Manually migrate 3 Wiki sites and 2 own recipes. A codemod cannot change a function call into a ref.

@@ -114,6 +114,8 @@
     "scripts/migrate-list-v1.js",
     "scripts/migrate-navigation-v1.js",
     "scripts/migrate-overlays-v1.js",
+    "scripts/migrate-destinations-v1.js",
+    "scripts/migrate-data-v1.js",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"
