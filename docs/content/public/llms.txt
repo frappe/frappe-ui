@@ -105,7 +105,7 @@ Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Pro
 ## Molecules
 
 - [Editor](https://ui.frappe.io/docs/molecules/editor): TipTap-based rich editor, from the `frappe-ui/editor` subpath (heavy, and not SSR-safe, so use only when needed).
-- [List](https://ui.frappe.io/docs/molecules/list): the list family, from the `frappe-ui/list` subpath: `List`, `ListHeader`, `ListHeaderCell`, `ListHeaderCellSort`, `ListRows`, `ListRow`, `ListCell`, `ListGroup`, plus the `useVirtualRows` composable. Feed or table mode.
+- [List](https://ui.frappe.io/docs/molecules/list): the list family, from the `frappe-ui/list` subpath: `List`, `ListHeader`, `ListHeaderCell`, `ListHeaderCellSort`, `ListRows`, `ListRow`, `ListCell`, `ListGroup`. Feed or table mode.
 
 ## Foundations
 

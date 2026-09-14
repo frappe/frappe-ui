@@ -24,7 +24,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H22 | Toast spec `5000ms` -> actual `4000ms`; add owned option types | T0 | 0 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H23 | Editor `Extension[]` -> TipTap `Extensions` | T0 | 0 | 0 | 5 | yes | **trap** | **break**, trap clause |
 | H25 | One-argument upload callback type -> expose request options and progress type | T0 | 0 | 0 | 7 | yes | **trap** | **break**, trap clause |
-| H30 | VueUse-inferred virtual-row return -> owned exported return type | T0 | 0 | 0 | 6 | yes | **trap** | **break**, trap clause |
+| H30 | Public `useVirtualRows` export -> component-owned virtualization | T0 | 0 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H33 | Undeclared Tailwind runtime requirement -> Tailwind v3 peer dependency | T0 | 0 | 0 | 3 | yes | **trap** | **break**, trap clause |
 | H34 | Hoisted `@floating-ui/vue` -> direct dependency | T0 | 0 | 0 | 2 | yes | **trap** | **break**, trap clause |
 | L-root emit types | Stale or wrong component emit declarations -> runtime declarations | T0 | 0 | 0 | 6 | yes | **trap** | **break**, trap clause |
@@ -54,7 +54,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H26 | Dead StarterKit `code`, `codeBlock`, `link` keys -> removed | T1 | 1 | 0 | 6 | yes | **trap** | **break**, trap clause |
 | H05 | Duplicate TimePicker emits -> keep model and validation emits | T1 | 0 | 0 | 8 | yes | **trap** | **break**, trap clause |
 | H18 | `--mobile-header-height` -> `--page-header-mobile-height` | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
-| H28 | Virtual-list `itemHeight` -> `rowHeight` | T1 | 0 | 0 | 5 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
+| H28 | ListRows object-form `virtual` -> boolean `virtual` plus `overscan` | T1 | 0 | 0 | 5 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
 | H35 | Deep Tailwind shim path -> `frappe-ui/tailwind` | T1 | 0 | 1 | 1 | yes | **trap** | **break**, trap clause |
 | L-root internal exports | Accidental date-picker types -> removed from root | T1 | 0 | 0 | 2 | yes | **trap** | **break**, trap clause |
 | L-root aliases | Redundant public type aliases -> surviving canonical names | T1 | 0 | 0 | 4 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
@@ -88,7 +88,6 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H04 | Upload failures -> one error type; remove `is_private` option | T3 | 7 | 1 | 13 | no | **trap** | **break**, trap clause |
 | B14 | RichTextKit default extensions -> opt-in | T3 | 6 | 0 | 17 | no | **trap** | **break**, trap clause |
 | M-tabs-tree/A Tree move events | `drag-start`/`drag-end` -> `move-start`/`move` with new cancellation | T3 | 1 | 0 | 2 | no | **misleading name** | **keep and record in CONTEXT.md**, fallback clause |
-| B15 | Selectable ListRow swallowed clicks -> activation click fires | T3 | 1 | 0 | 15 | no | **trap** | **break**, trap clause |
 | M-editor/A InlineKit config | Ignored StarterKit object -> honored object | T3 | 0 | 0 | 2 | no | **trap** | **break**, trap clause |
 | M-packaging/A rounded token | `rounded-9` `999px` -> `100px` | T3 | 0 | 0 | 6 | no | **trap** | **break**, trap clause |
 
@@ -104,7 +103,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H22 | Code already uses 4000ms. The change is docs and additive types. | `\b(?:ExternalToast|ToastOptions)\b|duration\s*:\s*5000` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 | H23 | This widens the accepted extensions type. | imports of `Extension|Extensions` tied to `<Editor>` or `useEditor(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
 | H25 | One-argument callbacks remain valid. | `\buploadFunction\s*[:=]|\bMediaUploadProgress\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| H30 | This replaces an inferred return declaration with an owned one. | imports of `UseVirtualRows(?:Options|Return)?` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| H30 | The public composable and its types are removed; no app imports them. | imports of `useVirtualRows|UseVirtualRows(?:Options|Return)?` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 | H33 | Only package metadata and docs change. | `\btailwindcss\b` in this package's manifests and contract docs | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | H34 | Only package metadata changes. | `@floating-ui/vue` in this package | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | L-root emit types | No consumer imports the affected emit types. | imports from `frappe-ui` containing `ComboboxEmits|MultiSelectEmits|RadioGroupEmits` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
@@ -139,14 +138,14 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H26 | Dead object keys stop type-checking. | In editor-kit config files, `\b(?:code|codeBlock|link)\s*:\s*(?:false|\{)` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 6 |
 | H05 | Removed TimePicker emits and their declarations break. No app listener exists. | In TimePicker sites and types, `@(?:open|close|input-invalid)\b|on(?:Open|Close|InputInvalid)\s*:|e:\s*['"](?:open|close|input-invalid)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
 | H18 | The CSS variable name breaks. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| H28 | The virtual-list option key breaks. | `\bitemHeight\s*[:=]` after finding `ListVirtualOptions|useVirtualRows|virtual` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
+| H28 | The object form is removed; height moves to parent `List.rowHeight`. | `virtual\s*=.*\{|itemHeight|ListVirtualOptions|useVirtualRows` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
 | H35 | The unsupported deep path disappears. | `frappe-ui/src/utils/tailwind\.config` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
 | L-root internal exports | Root type imports break. None exist in apps. | imports from `frappe-ui` containing `DatePickerViewMode|DatePickerDateObj` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | L-root aliases | Removed alias imports break. None exist in apps. | imports from `frappe-ui` containing `TabButtonValue|TabButtonIcon|AlertActionContext|AlertActionsSlotProps` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
 | M-base/A Progress intervals | Two props become one number prop. | `(?s)<Progress\b(?:(?!>).)*?(?::|v-bind:)?\b(?:intervals|interval-count)\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | M-dialog/A Alert hook | CSS selectors break. | `\[?data-color(?:\]|\s*=|=)` scoped to Alert | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | M-dialog/A Divider align | The prop name breaks. | `(?s)<Divider\b(?:(?!>).)*?(?::|v-bind:)?\bposition\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-overlays/A Popover control | Trigger-slot destructuring and calls break. | In Popover blocks, trigger templates containing `\btoggle\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
+| M-overlays/A Popover control | Current `toggle` sites are own-tree only. The codemod separately reports 43 files in Frappe, CRM, HD, and Builder that still use old `#target`/`togglePopover` APIs. | In Popover blocks, trigger templates containing `\btoggle\b`, plus old `#target`/`togglePopover` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
 | M-inputs/A DateTimePicker | The prop name breaks. | `(?s)<DateTimePicker\b(?:(?!>).)*?(?::|v-bind:)?\ballow-custom-time\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
 | M-tabs-tree/A Tab state | CSS selectors break. | In TabButtons files, `data-\[state=(?:checked|unchecked)\]|\[data-state=['"]?(?:checked|unchecked)` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | M-shells/A useSheetDrag | Root imports break. | imports from `frappe-ui` containing `useSheetDrag` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
@@ -183,8 +182,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | H04 | Upload callers can observe new rejection values. The removed alias has no measured call-site use. | `\buseFileUpload\s*\(`; check each `.upload(` catch path and `is_private` option | 2 | 0 | 1 | 1 | 0 | 0 | 3 | 1 | 13 |
 | B14 | Editors lose three default extensions unless they opt in. | `\bRichTextKit\.configure\s*\(|\[RichTextKit\]` | 1 | 1 | 1 | 1 | 0 | 0 | 2 | 0 | 17 |
 | M-tabs-tree/A Tree events | Event names and cancellation payload change. | In Tree blocks, `@(?:drag-start|drag-end)\b|on(?:DragStart|DragEnd)\s*:` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 2 |
-| B15 | A selectable row can now run its activation handler. | `(?s)<ListRow\b(?:(?!>).)*?(?:@click\s*=|(?::|v-bind:)?\bonClick\s*=)` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
 | M-editor/A InlineKit config | Previously ignored StarterKit settings start changing behavior. | InlineKit configuration blocks containing `starterKit\s*:\s*\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | M-packaging/A rounded token | Every `rounded-9` use changes radius. | `\brounded-9\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
 
-The inventory contains 73 candidate changes. The rule calls for 64 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, 387 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
+The inventory contains 72 candidate changes. The rule calls for 63 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, 386 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
