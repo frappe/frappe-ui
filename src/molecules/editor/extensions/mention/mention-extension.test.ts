@@ -6,7 +6,7 @@
  * (`jane@example.com`). Typography rewrites straight quotes to curly ones, so
  * those prefixes are covered too.
  */
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { Editor, type AnyExtension } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
@@ -70,6 +70,20 @@ describe('Mention allowedPrefixes', () => {
     editor.commands.setContent('<p></p>')
     editor.commands.insertContent('hello @')
     expect(mentionActive(editor)).toBe(true)
+  })
+
+  it('warns in development when Mention receives the old component key', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const extension = MentionExtension.configure({ component: {} } as any)
+
+    ;(extension.config.addExtensions as Function).call(extension)
+    ;(extension.config.addExtensions as Function).call(extension)
+
+    expect(warn).toHaveBeenCalledWith(
+      '[frappe-ui] Mention: `component` was renamed to `nodeView`.',
+    )
+    expect(warn).toHaveBeenCalledTimes(1)
+    warn.mockRestore()
   })
 
   it.each([

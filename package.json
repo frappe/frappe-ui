@@ -20,7 +20,8 @@
   },
   "bin": {
     "tokens-v2": "./tailwind/migrate-tokens-v2.js",
-    "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js"
+    "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js",
+    "editor-v1": "./scripts/migrate-editor-v1.js"
   },
   "scripts": {
     "test": "vitest --run",
@@ -102,6 +103,7 @@
     "tailwind",
     "vitepress",
     "scripts/migrate-shortcuts-v1.js",
+    "scripts/migrate-editor-v1.js",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"

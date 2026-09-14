@@ -57,7 +57,7 @@ export interface CreateSuggestionExtensionOptions<
     editor: Editor
   }) => TItem[] | Promise<TItem[]>
   command: (props: { editor: Editor; range: Range; props: TItem }) => void
-  component: VueComponent
+  listComponent: VueComponent
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
   /**
@@ -111,7 +111,7 @@ export function createSuggestionExtension<TItem extends BaseSuggestionItem>(
           decorationClass: options.decorationClass || 'suggestion',
           render: () =>
             createSuggestionRenderer(
-              options.component,
+              options.listComponent,
               options.floatingOptions,
             ),
         } as Omit<SuggestionOptions<TItem>, 'editor'>,

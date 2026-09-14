@@ -42,6 +42,13 @@ Primitives recipe). The win is ergonomic — the common case
 (`<Editor v-slot="{ editor }">` composing `EditorContent` + menus in the slot)
 no longer needs `:editor="editor"` threaded onto every building block by hand.
 
+## Amendment (2026-09-14): explicit editor component roles
+
+Suggestion configuration now names the component's role: Mention calls its
+rendered node a `nodeView`, while reusable suggestion extensions call their
+popup a `listComponent`. `EditorFixedMenu` exposes its button `size` directly,
+using the library's canonical size vocabulary.
+
 ## Context
 
 The v0 `TextEditor` is a monolith. Every consumer app (gameplan, helpdesk, drive, crm, insights) wraps it to peel off defaults it can't control: auto-loaded extensions, frappe-coupled upload, fixed menu presets, opinionated layout slots. A bench-wide usage audit showed 4 of 5 apps maintain their own wrapper, five copies of the same toolbar-button array exist in the fleet, and most apps fight the same defaults in slightly different ways. Static imports in `TextEditor.vue` also defeat tree-shaking — everyone pays for every extension.

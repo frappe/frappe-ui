@@ -141,7 +141,7 @@ describe('frappe-ui/editor minimal primitives', () => {
     expect(editor.InsertIframe).toBeTruthy()
   })
 
-  it('wires the public SuggestionExtension component into the suggestion renderer', async () => {
+  it('wires the public SuggestionExtension list component into the suggestion renderer', async () => {
     const component = defineComponent({ setup: () => () => h('div') })
     const { SuggestionExtension } = await import('./index')
 
@@ -149,12 +149,38 @@ describe('frappe-ui/editor minimal primitives', () => {
       name: 'people',
       trigger: '@',
       items: [],
-      component,
+      listComponent: component,
       command: vi.fn(),
     })
 
     const options = (extension as any).addOptions()
     expect(typeof options.suggestion.render).toBe('function')
+  })
+
+  it('warns in development when SuggestionExtension receives the old component key', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { SuggestionExtension } = await import('./index')
+
+    SuggestionExtension.configure({
+      name: 'people',
+      trigger: '@',
+      items: [],
+      component: defineComponent({ setup: () => () => h('div') }),
+      command: vi.fn(),
+    } as any)
+    SuggestionExtension.configure({
+      name: 'tags',
+      trigger: '#',
+      items: [],
+      component: defineComponent({ setup: () => () => h('div') }),
+      command: vi.fn(),
+    } as any)
+
+    expect(warn).toHaveBeenCalledWith(
+      '[frappe-ui] SuggestionExtension: `component` was renamed to `listComponent`.',
+    )
+    expect(warn).toHaveBeenCalledTimes(1)
+    warn.mockRestore()
   })
 
   it('forwards allowSpaces from SuggestionExtension options to the suggestion plugin', async () => {

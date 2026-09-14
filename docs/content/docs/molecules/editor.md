@@ -87,11 +87,13 @@ Build custom `@`, `#`, `/`, or `:` suggestion menus with `SuggestionExtension.co
 
 ```ts
 import { SuggestionExtension } from 'frappe-ui/editor'
+import PeopleSuggestionList from './PeopleSuggestionList.vue'
 
 const People = SuggestionExtension.configure({
   name: 'people',
   trigger: '@',
   items: (query) => users.filter((user) => user.name.includes(query)),
+  listComponent: PeopleSuggestionList,
   command: ({ editor, item, range }) => {
     editor.chain().focus().deleteRange(range).insertContent(item.name).run()
   },
@@ -118,7 +120,7 @@ import { Editor, RichTextKit, articleToolbar } from 'frappe-ui/editor'
 | Export               | What it is                                                                              |
 | -------------------- | --------------------------------------------------------------------------------------- |
 | `EditorContent`      | Renders the editable surface for a given `:editor`.                                     |
-| `EditorFixedMenu`    | A static toolbar row. Takes `:editor` and `:items` (a `MenuItem[]`).                    |
+| `EditorFixedMenu`    | A static toolbar row. Takes `:editor`, `:items` (a `MenuItem[]`), and `size` (`xs` or `sm`). |
 | `EditorBubbleMenu`   | Floating toolbar shown over the current text selection.                                 |
 | `EditorFloatingMenu` | Floating toolbar shown on an empty line.                                                |
 

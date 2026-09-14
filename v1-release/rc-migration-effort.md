@@ -68,7 +68,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-list/A ListGroup slot | `#header` -> `#label` | T1 | 0 | 0 | 1 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | B7 | Picker trigger `toggle` -> `setOpen` | T1 | 0 | 0 | 2 | yes | **misleading name** | **break**, misleading-name T1 clause |
 | B9 | SidebarRailItem `tile` -> `subtle` | T1 | 0 | 0 | 4 | yes | **consistency only** | **break**, consistency-only T1 at 20 or fewer clause |
-| B12 | Suggestion `component` -> `nodeView` or `listComponent` | T1 | 0 | 0 | 9 | yes | **misleading name** | **break**, misleading-name T1 clause |
+| B12 | Suggestion `component` -> `nodeView` or `listComponent` | T1 | 2 | 0 | 9 | no | **misleading name** | **break**, misleading-name T1 clause |
 | H14 | ScrollArea `viewportClass` -> `data-slot` selector | T2 | 7 | 0 | 11 | no | **consistency only** | **keep and record in CONTEXT.md**, fallback clause |
 | H24 | Optional `UploadedFile.file_url` -> required | T2 | 6 | 0 | 1 | no | **trap** | **break**, trap clause |
 | M-editor/A floating options | TipTap option bag -> owned narrow options | T2 | 6 | 0 | 0 | no | **trap** | **break**, trap clause |
@@ -152,7 +152,7 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 | M-list/A ListGroup slot | The slot name breaks. | Find `<ListGroup\b`, then inside each block use `#header\b|v-slot:header\b|slot=['"]header['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | B7 | Picker trigger-slot destructuring breaks. | In DatePicker, DateRangePicker, DateTimePicker, or TimePicker blocks, trigger/suffix templates containing `\btoggle\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
 | B9 | The variant value breaks. | `(?s)<SidebarRailItem\b(?:(?!>).)*?\bvariant\s*=\s*['"]tile['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| B12 | Suggestion option keys break. | In `MentionMember` or `SuggestionExtensionOptions` config, `\bcomponent\s*:` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
+| B12 | Suggestion option keys break. The two meanings require manual context. | In `MentionMember` or `SuggestionExtensionOptions` config, `\bcomponent\s*:` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 9 |
 
 ## T2: manual migration per site
 

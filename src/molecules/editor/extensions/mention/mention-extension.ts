@@ -33,9 +33,11 @@ interface MentionSuggestionOptions {
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
 }
 
-function createMentionNode(component?: Component) {
-  const nodeView = component
-    ? { addNodeView: () => VueNodeViewRenderer(component) }
+let warnedLegacyComponent = false
+
+function createMentionNode(nodeView?: Component) {
+  const nodeViewExtension = nodeView
+    ? { addNodeView: () => VueNodeViewRenderer(nodeView) }
     : {}
 
   return Node.create({
@@ -44,12 +46,6 @@ function createMentionNode(component?: Component) {
     inline: true,
     selectable: true,
     atom: true,
-    addOptions() {
-      return {
-        component: undefined,
-      }
-    },
-
     addAttributes() {
       return {
         id: {
@@ -104,7 +100,7 @@ function createMentionNode(component?: Component) {
       return `@${node.attrs.label || node.attrs.id || ''}`
     },
 
-    ...nodeView,
+    ...nodeViewExtension,
   })
 }
 
@@ -150,7 +146,7 @@ const MentionSuggestionExtension =
     name: 'mentionSuggestion',
     char: '@',
     pluginKey: new PluginKey('mentionSuggestion'),
-    component: SuggestionList,
+    listComponent: SuggestionList,
     allowedPrefixes: ALLOWED_MENTION_PREFIXES,
 
     addOptions() {
@@ -189,19 +185,28 @@ const MentionSuggestionExtension =
 
 export const MentionExtension = Extension.create<{
   items: MaybeRefOrGetter<MentionSuggestionItem[]> | null
-  component?: Component
+  nodeView?: Component
 }>({
   name: 'mentionExtension',
 
   addOptions() {
     return {
       items: null,
-      component: undefined,
     }
   },
 
   addExtensions() {
-    const node = createMentionNode(this.options.component)
+    if (
+      import.meta.env.DEV &&
+      !warnedLegacyComponent &&
+      'component' in this.options
+    ) {
+      warnedLegacyComponent = true
+      console.warn(
+        '[frappe-ui] Mention: `component` was renamed to `nodeView`.',
+      )
+    }
+    const node = createMentionNode(this.options.nodeView)
     // Inert until configured: only wire the `@` suggestion when an item source
     // is provided. Existing mentions in content still render through the node.
     if (this.options.items == null) return [node]

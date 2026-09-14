@@ -144,6 +144,17 @@ describe('editor menu primitives and presets', () => {
     expect(calls.join('|')).toContain('focus:|toggleBold:|run:')
   })
 
+  it('uses the fixed menu size for its buttons', async () => {
+    const { EditorFixedMenu, Bold } = editorMenu
+    const { editor } = fakeEditor()
+
+    const root = mount(EditorFixedMenu, { editor, items: [Bold], size: 'sm' })
+
+    expect(root.querySelector('[aria-label="Bold"]')?.className).toContain(
+      'h-7',
+    )
+  })
+
   it('hides items whose mark/node/extension is absent (self-pruning)', async () => {
     const { EditorFixedMenu, Bold, InsertTable, AlignLeft } = editorMenu
     // A trimmed editor: no table node, no textAlign extension.

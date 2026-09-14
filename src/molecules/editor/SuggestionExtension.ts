@@ -14,7 +14,7 @@ export type SuggestionExtensionOptions<TItem = any> = {
   name: string
   trigger: string
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
-  component?: Component
+  listComponent?: Component
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
   /**
@@ -30,9 +30,17 @@ export type SuggestionExtensionOptions<TItem = any> = {
   }) => void
 }
 
+let warnedLegacyComponent = false
+
 function buildSuggestionExtension<TItem = any>(
   options: SuggestionExtensionOptions<TItem>,
 ) {
+  if (import.meta.env.DEV && !warnedLegacyComponent && 'component' in options) {
+    warnedLegacyComponent = true
+    console.warn(
+      '[frappe-ui] SuggestionExtension: `component` was renamed to `listComponent`.',
+    )
+  }
   return Extension.create({
     name: options.name,
     addOptions() {
@@ -57,10 +65,10 @@ function buildSuggestionExtension<TItem = any>(
           }) => {
             options.command({ editor, item: props, range })
           },
-          render: options.component
+          render: options.listComponent
             ? () =>
                 createSuggestionRenderer(
-                  options.component as Component,
+                  options.listComponent as Component,
                   options.floatingOptions,
                 )
             : undefined,
