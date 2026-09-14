@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import {
   ContextMenuContent,
   ContextMenuItem,
@@ -64,6 +64,7 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 const groups = computed(() => normalizeMenuOptions(props.options))
 const triggerRef = ref<{ $el?: HTMLElement } | null>(null)
 const contentRef = ref<{ $el?: HTMLElement } | null>(null)
+let setOpenRequest = 0
 
 const primitives = {
   Item: ContextMenuItem,
@@ -78,24 +79,35 @@ function close() {
   setOpen(false)
 }
 
+function dismissContent() {
+  const content = contentRef.value?.$el
+  if (!content) return false
+  content.dispatchEvent(
+    new KeyboardEvent('keydown', {
+      key: 'Escape',
+      code: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    }),
+  )
+  return true
+}
+
 function setOpen(value: boolean) {
+  const request = ++setOpenRequest
   if (!value) {
     // ContextMenuRoot owns a private open ref. It emits model updates but does
     // not accept an open prop, so close it through the same Escape path as a
     // keyboard dismissal.
-    const content = contentRef.value?.$el
-    if (content) {
-      content.dispatchEvent(
-        new KeyboardEvent('keydown', {
-          key: 'Escape',
-          code: 'Escape',
-          bubbles: true,
-          cancelable: true,
-        }),
-      )
-      return
-    }
-    openModel.value = false
+    if (dismissContent()) return
+    // A same-tick open has no content yet. Reka opens after one tick and Vue
+    // mounts the portal on the next, so dismiss it after both have settled.
+    void nextTick()
+      .then(() => nextTick())
+      .then(() => {
+        if (request !== setOpenRequest) return
+        if (!dismissContent()) openModel.value = false
+      })
     return
   }
 
@@ -164,5 +176,8 @@ watch(
   { immediate: true },
 )
 
-onUnmounted(() => removeScrollLock?.())
+onUnmounted(() => {
+  setOpenRequest++
+  removeScrollLock?.()
+})
 </script>

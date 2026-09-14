@@ -1147,4 +1147,35 @@ describe('ListRows (virtual)', () => {
     cy.contains('[data-slot=list-row]', 'Row 500').should('exist')
     cy.contains('[data-slot=list-row]', 'Row 1').should('not.exist')
   })
+
+  it('updates the rendered window when overscan changes', () => {
+    const overscan = ref(0)
+    const items = Array.from({ length: 100 }, (_, i) => ({ id: String(i + 1) }))
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          { style: 'height: 200px; overflow-y: auto' },
+          h(List, { rowHeight: 40 }, () =>
+            h(
+              ListRows,
+              { items, virtual: true, overscan: overscan.value },
+              {
+                default: ({ item }: { item: { id: string } }) =>
+                  h(ListRow, { key: item.id }, () => `Row ${item.id}`),
+              },
+            ),
+          ),
+        ),
+    })
+
+    let initialRows = 0
+    cy.get('[data-slot=list-row]').then(($rows) => {
+      initialRows = $rows.length
+    })
+    cy.then(() => (overscan.value = 20))
+    cy.get('[data-slot=list-row]').should(($rows) => {
+      expect($rows.length).to.be.greaterThan(initialRows)
+    })
+  })
 })

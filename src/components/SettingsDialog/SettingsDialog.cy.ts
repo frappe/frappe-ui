@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import SettingsDialog from './SettingsDialog.vue'
 import SettingsSidebar from './SettingsSidebar.vue'
 import SettingsNavGroup from './SettingsNavGroup.vue'
@@ -107,6 +107,37 @@ describe('SettingsDialog', () => {
       )
     })
     cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('uses a new keyboardShortcut value after mount', () => {
+    const keyboardShortcut = ref<false | 'Mod+K'>(false)
+    const open = ref(false)
+    cy.mount({
+      render: () =>
+        h(SettingsDialog, {
+          open: open.value,
+          keyboardShortcut: keyboardShortcut.value,
+          'onUpdate:open': (value: boolean) => (open.value = value),
+        }),
+    })
+
+    cy.then(() => {
+      keyboardShortcut.value = 'Mod+K'
+      return nextTick()
+    })
+    cy.window().then((win) => {
+      const isMac = /Mac|iPod|iPhone|iPad/i.test(win.navigator.platform)
+      win.document.dispatchEvent(
+        new win.KeyboardEvent('keydown', {
+          key: 'k',
+          ctrlKey: !isMac,
+          metaKey: isMac,
+          bubbles: true,
+          cancelable: true,
+        }),
+      )
+    })
+    cy.get('[role=dialog]').should('exist')
   })
 
   it('does not render while closed; renders when open (v-model:open)', () => {

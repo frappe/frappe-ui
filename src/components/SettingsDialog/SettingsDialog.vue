@@ -62,10 +62,11 @@ defineSlots<{
 }>()
 
 useKeyboardShortcut({
-  combo:
+  combo: computed(() =>
     props.keyboardShortcut === false || props.keyboardShortcut === 'Mod+Shift+,'
       ? 'Mod+Shift+Comma'
       : props.keyboardShortcut,
+  ),
   description: 'Toggle settings',
   enabled: computed(() => props.keyboardShortcut !== false),
   allowInInput: true,

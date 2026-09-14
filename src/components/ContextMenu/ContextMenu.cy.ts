@@ -160,6 +160,34 @@ describe('ContextMenu', () => {
     cy.get('[role=menu]').should('not.exist')
   })
 
+  it('honors an open and close request in the same tick', () => {
+    let controls: any
+    cy.mount(ContextMenu, {
+      props: { options: simpleOptions },
+      slots: {
+        trigger: (props) => {
+          controls = props
+          return h(
+            'div',
+            { 'data-cy': 'same-tick-trigger' },
+            String(props.open),
+          )
+        },
+      },
+    })
+
+    cy.then(() => {
+      controls.setOpen(true)
+      controls.setOpen(false)
+    })
+    cy.get('[role=menu]').should('not.exist')
+    cy.get('[data-cy=same-tick-trigger]').should('have.text', 'false')
+    cy.then(() => {
+      const wheel = new WheelEvent('wheel', { cancelable: true })
+      expect(document.dispatchEvent(wheel)).to.equal(true)
+    })
+  })
+
   it('portals content to portalTo and drops arbitrary attributes', () => {
     const target = document.createElement('div')
     target.id = 'context-menu-target'

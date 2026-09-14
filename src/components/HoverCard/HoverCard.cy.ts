@@ -151,6 +151,34 @@ describe('HoverCard', () => {
     cy.get('[data-cy=card]').should('exist')
   })
 
+  it('does not reopen after a controlled close during an imperative-open delay', () => {
+    const open = ref(false)
+    const cardRef = ref<any>(null)
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(
+            HoverCard,
+            {
+              ref: cardRef,
+              open: open.value,
+              hoverDelay: 30,
+              'onUpdate:open': (value: boolean) => (open.value = value),
+            },
+            Slots,
+          )
+      },
+    })
+
+    cy.mount(Harness)
+    cy.then(() => cardRef.value.open())
+    cy.get('[data-slot=content]').should('exist')
+    cy.then(() => (open.value = false))
+    cy.get('[data-slot=content]').should('not.exist')
+    cy.wait(50)
+    cy.get('[data-slot=content]').should('not.exist')
+  })
+
   it('does not forward arbitrary attributes to the content', () => {
     cy.mount(HoverCard, {
       props: { hoverDelay: 0, 'data-consumer-attr': 'ignored' } as any,

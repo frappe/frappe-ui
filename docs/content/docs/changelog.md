@@ -1958,6 +1958,9 @@ Before/after for each silent break is in the
 
 ### Tooltip — vocabulary aligned with Popover and HoverCard (breaking)
 
+- **Breaking, silent:** Tooltip, TooltipProvider, and HoverCard delay props now
+  use milliseconds. For example, change `0.5` to `500`. Run `overlays-v1` to
+  convert static values and report dynamic expressions for manual review.
 - **Breaking, silent:** `placement` is renamed to `side`, matching `Popover`
   and `HoverCard`. An unknown prop is ignored, so the tooltip keeps working and
   points at its default side.

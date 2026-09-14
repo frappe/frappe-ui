@@ -681,6 +681,8 @@ unit. HoverCard keeps its 300ms default.
 
 | Before              | After                                                      |
 | ------------------- | ---------------------------------------------------------- |
+| `hoverDelay="0.5"`  | `hoverDelay="500"` (milliseconds)                          |
+| `skipDelay="0.3"`   | `skipDelay="300"` on `TooltipProvider` (milliseconds)      |
 | `placement="right"` | `side="right"`                                             |
 | `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
 | `#body`             | `#content` (add `bare` if the content owns its surface)     |

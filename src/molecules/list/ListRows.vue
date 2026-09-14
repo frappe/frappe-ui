@@ -41,9 +41,9 @@ const props = defineProps<{
   rowKey?: string | ((item: T, index: number) => PropertyKey)
 
   /**
-   * Window the rows (vueuse useVirtualList) so only rows near the viewport
-   * mount. Height comes from the parent List's `rowHeight`; the scroll
-   * container is the nearest scrollable ancestor.
+   * Window the rows so only rows near the viewport mount. Height comes from
+   * the parent List's `rowHeight`; the scroll container is the nearest
+   * scrollable ancestor.
    */
   virtual?: boolean
 
@@ -82,7 +82,7 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
   {
     enabled: () => virtualEnabled.value,
     rowHeight: () => rowHeight.value ?? 0,
-    overscan: props.overscan,
+    overscan: () => props.overscan ?? 6,
   },
 )
 

@@ -127,6 +127,29 @@ describe('useKeyboardShortcut — setup ownership', () => {
   })
 })
 
+describe('useKeyboardShortcut — reactive combo', () => {
+  it('matches the current combo after it changes', () => {
+    const combo = ref<'Mod+K' | 'Mod+J'>('Mod+K')
+    const handler = vi.fn()
+    const mounted = mountWithShortcut({
+      combo,
+      description: 'Reactive combo',
+      handler,
+    })
+
+    fireKey({ key: 'k', ...MOD })
+    expect(handler).toHaveBeenCalledTimes(1)
+
+    combo.value = 'Mod+J'
+    fireKey({ key: 'k', ...MOD })
+    fireKey({ key: 'j', ...MOD })
+    expect(handler).toHaveBeenCalledTimes(2)
+    expect(getShortcutGroups()[0].shortcuts[0].combo).toBe('Mod+J')
+
+    mounted.unmount()
+  })
+})
+
 // ---------------------------------------------------------------------------
 // matchesCombo — the grammar
 // ---------------------------------------------------------------------------

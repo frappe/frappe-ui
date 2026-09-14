@@ -7,7 +7,7 @@ import {
   HoverCardTrigger,
   injectHoverCardRootContext,
 } from 'reka-ui'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import type {
@@ -68,6 +68,12 @@ function setOpen(value: boolean) {
 function close() {
   setOpen(false)
 }
+
+// A controlled parent can close without calling the slot control. Clear any
+// imperative-open timer so Reka cannot reopen after the model turns false.
+watch(open, (isOpen) => {
+  if (!isOpen) controllerRef.value?.setOpen(false)
+})
 
 const slotProps = computed<HoverCardSlotProps>(() => ({
   open: open.value,
