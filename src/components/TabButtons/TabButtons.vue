@@ -59,11 +59,11 @@ watchEffect(() => {
 
 const resolvedButtons = computed(() => {
   return options.value.map((button) => {
-    const { value, label, icon, tooltip } = button
+    const { value, label, icon } = button
 
     const isIconOnly = Boolean(icon)
     const visibleLabel = hasLabel(label) && !isIconOnly
-    const accessibleLabel = hasLabel(label) ? String(label) : tooltip
+    const accessibleLabel = hasLabel(label) ? label : undefined
 
     return {
       ...button,
@@ -355,7 +355,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           :title="
             button.accessibleLabel && !button.visibleLabel
               ? button.accessibleLabel
-              : button.tooltip
+              : undefined
           "
           :class="[
             tabShellClasses,

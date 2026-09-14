@@ -35,9 +35,11 @@ trailing zone, so an options menu in `#suffix` isn't nested inside the link
   adornments like a lock icon here next to the text.
 - `#suffix` — the trailing zone: an unread count, an options `…` menu, etc.
 
-Set `to` to render a router link; omit it for a button. `active` drives
-`data-state`; when omitted it's inferred by matching `to` against the current
-route. A click invokes `onClick` (bound from `@click`) in both cases.
+Set `route` to render a router link or `href` for a plain anchor; `route` takes
+precedence when both are set. Omit both for a button. `active` drives
+`data-state`; when omitted it's inferred by matching
+`route` against the current route. A click invokes `onClick` (bound from
+`@click`) in every case.
 
 ## SidebarHeader
 

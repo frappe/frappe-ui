@@ -251,11 +251,11 @@ export default defineComponent({
       if (!isDisabled.value && props.route) {
         return { is: RouterLink, props: { to: props.route } }
       }
-      if (!isDisabled.value && props.link) {
+      if (!isDisabled.value && props.href) {
         return {
           is: 'a',
           props: {
-            href: props.link,
+            href: props.href,
             target: '_blank',
             rel: 'noreferrer noopener',
           },

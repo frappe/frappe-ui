@@ -21,7 +21,10 @@ export interface SidebarRailItemProps {
    * Navigation target. When set, the item renders as a router link; otherwise
    * it renders as a button. A `click` event fires in both cases.
    */
-  to?: RouteLocationRaw
+  route?: RouteLocationRaw
+
+  /** External URL. Used when `route` is absent; renders a plain anchor. */
+  href?: string
 
   /** Marks the item as the current destination (indicator bar / active fill). */
   active?: boolean

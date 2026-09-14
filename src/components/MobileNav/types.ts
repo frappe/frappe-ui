@@ -22,12 +22,15 @@ export interface MobileNavItemProps {
    * already the current route scrolls the shell to the top instead of
    * re-navigating.
    */
-  to?: RouteLocationRaw
+  route?: RouteLocationRaw
+
+  /** External URL. Used when `route` is absent; renders a plain anchor. */
+  href?: string
 
   /**
    * Highlight this item. Independent of the current route so one tab can stay
    * lit across a whole section (e.g. Home across community routes). Defaults to
-   * whether `to` resolves to the current route.
+   * whether `route` resolves to the current route.
    */
   active?: boolean
 }

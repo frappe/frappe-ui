@@ -9,18 +9,19 @@ the bar adapts to any number of items.
 ## MobileNavItem
 
 Each item takes a `label`, an `icon` (or a default slot for custom content like
-an avatar), and a `to` target. It renders a router link when navigating
+an avatar), and a `route` or `href` target (`route` takes precedence). It renders
+a link when navigating
 somewhere new, and — when it's already the current route — a button that scrolls
 the shell's scroll container to the top instead of re-navigating.
 
 `active` controls the highlight and is independent of the current route, so one
 tab can stay lit across a whole section (e.g. Home across every community route)
 while tapping it still navigates home. When `active` is omitted it defaults to
-whether `to` matches the current route. The default slot receives `{ active }`
+whether `route` matches the current route. The default slot receives `{ active }`
 so custom content — an avatar, a badge — can react to the highlight:
 
 ```vue
-<MobileNavItem label="You" :to="{ name: 'More' }" :active="isMoreRoute">
+<MobileNavItem label="You" :route="{ name: 'More' }" :active="isMoreRoute">
   <template #default="{ active }">
     <UserAvatar :user="me" :class="{ 'ring-2 ring-outline-gray-4': active }" />
   </template>

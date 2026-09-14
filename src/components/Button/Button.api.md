@@ -83,7 +83,7 @@
     type: 'string | kt | Tt'
   },
   {
-    name: 'link',
+    name: 'href',
     description: 'External link URL',
     required: false,
     type: 'string'

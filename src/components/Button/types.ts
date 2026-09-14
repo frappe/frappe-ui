@@ -44,7 +44,7 @@ export const buttonProps = {
     default: undefined,
   },
   /** External link URL */
-  link: { type: String, default: undefined },
+  href: { type: String, default: undefined },
   /** Native button type */
   type: {
     type: String as PropType<'button' | 'submit' | 'reset'>,

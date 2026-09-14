@@ -32,10 +32,16 @@
     type: 'string | Component'
   },
   {
-    name: 'to',
+    name: 'route',
     description: 'Navigation target. When set, the item renders as a router link; otherwise\nit renders as a button. A `click` event fires in both cases.',
     required: false,
     type: 'string | kt | Tt'
+  },
+  {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a plain anchor.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'active',

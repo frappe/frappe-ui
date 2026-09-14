@@ -57,3 +57,6 @@ still on its way out, and removing it needs no major version.
 - Apps upgrading from a beta to `1.0.0` do real work. This is accepted: the
   alternative is that every app pays a smaller, permanent tax instead.
 - Aliases stop being a tool. A rename is now a rename.
+- The destination vocabulary therefore ships directly as `route` for router
+  destinations and `href` for external URLs. `PageHeaderBackButton` uses the
+  more precise `fallbackRoute`; the old `to` and `link` names do not ship.

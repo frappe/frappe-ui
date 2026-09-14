@@ -27,7 +27,8 @@ an optional unread `badge`. Two visual treatments:
 - `variant="ghost"` — transparent until hovered, raised when active. Pass an
   `icon` for a shortcut like Search or Notifications.
 
-Set `to` to render a router link; omit it to get a button that emits `click`.
+Set `route` to render a router link or `href` for a plain anchor; `route` takes
+precedence when both are set. Omit both to get a button that emits `click`.
 The `badge` count shows as a pill (`badgeStyle="count"`) or a dot
 (`badgeStyle="dot"`); either way it folds into the item's accessible label, and
 a dot surfaces the real number in the tooltip. The badge pill teleports to
