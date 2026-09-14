@@ -1,5 +1,10 @@
 # Frappe UI v1 Changelog
 
+## Unreleased
+
+- ListRows: accept `virtual.scrollContainer` so virtual rows can use a
+  ScrollArea viewport directly, including when items are available at mount.
+
 User-facing v1 changes. **Unreleased** entries describe changes since
 **v0.1.278**. Log only breaking changes, deprecations, observable behavior
 changes, and migration guidance — not internal refactors or test additions.

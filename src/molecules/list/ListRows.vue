@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { computed, onBeforeUnmount, watch } from 'vue'
+import { computed, onBeforeUnmount, toValue, watch } from 'vue'
 import { useListContext } from './list-context'
 import { useVirtualRows } from './useVirtualRows'
 import type { ListVirtualOptions } from './types'
@@ -36,7 +36,8 @@ const props = defineProps<{
   /**
    * Window the rows (vueuse useVirtualList) so only rows near the viewport
    * mount. `itemHeight` defaults to the List's `rowHeight`; the scroll
-   * container is the nearest scrollable ancestor.
+   * container defaults to the nearest scrollable ancestor. Pass
+   * `scrollContainer` to use an explicit element, ref, or getter.
    */
   virtual?: boolean | ListVirtualOptions
 }>()
@@ -70,6 +71,10 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
   {
     enabled: () => virtualEnabled.value,
     itemHeight: () => itemHeight.value ?? 0,
+    scrollContainer: () =>
+      typeof props.virtual === 'object'
+        ? toValue(props.virtual.scrollContainer)
+        : undefined,
     overscan:
       typeof props.virtual === 'object' ? props.virtual.overscan : undefined,
   },
