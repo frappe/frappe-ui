@@ -95,6 +95,8 @@ export interface SelectSlotProps {
 
   /** Sets the menu open state. */
   setOpen: (value: boolean) => void
+  /** Closes the menu. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export type SelectTriggerSlotProps = SelectSlotProps

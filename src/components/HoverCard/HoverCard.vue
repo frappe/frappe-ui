@@ -6,7 +6,7 @@ import {
   HoverCardRoot,
   HoverCardTrigger,
 } from 'reka-ui'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import type {
@@ -24,8 +24,8 @@ const props = withDefaults(defineProps<HoverCardProps>(), {
   align: 'start',
   offset: 4,
   collisionPadding: 10,
-  hoverDelay: 0.3,
-  leaveDelay: 0.3,
+  hoverDelay: 300,
+  leaveDelay: 300,
   arrow: false,
 })
 
@@ -33,26 +33,58 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const open = defineModel<boolean>('open', { default: false })
 
-// reka HoverCard delays are in milliseconds; the public API uses seconds to
-// stay consistent with Tooltip.
-const openDelay = computed(() => props.hoverDelay * 1000)
-const closeDelay = computed(() => props.leaveDelay * 1000)
+const openDelay = computed(() => props.hoverDelay)
+const closeDelay = computed(() => props.leaveDelay)
+
+const triggerRef = ref<{ $el: Element } | null>(null)
+
+function setOpen(value: boolean) {
+  open.value = value
+
+  // Reka schedules an open when the pointer enters the content. If a content
+  // control closes the card during that delay, the pending callback would
+  // otherwise reopen it immediately. Re-apply the explicit close after the
+  // configured open delay; a later explicit open cancels this callback.
+  const request = ++openRequest
+  if (!value && typeof window !== 'undefined') {
+    window.setTimeout(() => {
+      if (request === openRequest) open.value = false
+    }, props.hoverDelay)
+  }
+}
+
+let openRequest = 0
+
+function close() {
+  setOpen(false)
+}
+
+const slotProps = computed<HoverCardSlotProps>(() => ({
+  open: open.value,
+  setOpen,
+  close,
+}))
 
 defineExpose<HoverCardExposed>({
   open: () => {
     open.value = true
   },
-  close: () => {
-    open.value = false
-  },
+  close,
 })
 
 defineSlots<{
   /** Trigger element. Rendered as-child so hover/focus a11y is auto-wired. */
   trigger?: (props: HoverCardSlotProps) => any
   /** Card contents, rendered inside the standard PopoverPanel shell. */
-  default?: () => any
+  default?: (props: HoverCardSlotProps) => any
 }>()
+
+function onPointerDownOutside(event: Event) {
+  const target = event.target
+  const triggerEl = triggerRef.value?.$el
+  if (target instanceof Node && triggerEl?.contains(target))
+    event.preventDefault()
+}
 </script>
 
 <template>
@@ -61,8 +93,8 @@ defineSlots<{
     :open-delay="openDelay"
     :close-delay="closeDelay"
   >
-    <HoverCardTrigger as-child>
-      <slot name="trigger" :open="open" />
+    <HoverCardTrigger ref="triggerRef" as-child data-slot="trigger">
+      <slot name="trigger" v-bind="slotProps" />
     </HoverCardTrigger>
     <HoverCardPortal :to="portalTarget">
       <HoverCardContent
@@ -72,14 +104,14 @@ defineSlots<{
         :align="align"
         :side-offset="offset"
         :collision-padding="collisionPadding"
-        v-bind="$attrs"
+        @pointer-down-outside="onPointerDownOutside"
       >
         <!--
           The panel relies on the ancestor HoverCardContent's data-state for
           motion.
         -->
         <PopoverPanel>
-          <slot />
+          <slot v-bind="slotProps" />
         </PopoverPanel>
         <HoverCardArrow
           v-if="arrow"

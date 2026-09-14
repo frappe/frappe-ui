@@ -22,7 +22,7 @@
     name: 'slotFns',
     description: 'Dynamic `item-*` slot implementations resolved by name.',
     required: false,
-    type: 'Record<string, ((props?: any) => any)> | undefined'
+    type: 'MenuSlots'
   },
   {
     name: 'portalTo',

@@ -18,7 +18,7 @@ const props = withDefaults(
     close: () => void
     reserveIconSpace?: boolean
     trailing?: 'none' | 'submenu' | 'switch'
-    slotFns?: Record<string, ((props?: any) => any) | undefined>
+    slotFns?: import('./types').MenuSlots
   }>(),
   {
     reserveIconSpace: false,
@@ -26,7 +26,7 @@ const props = withDefaults(
   },
 )
 
-const itemSlotName = computed(() => {
+const itemSlotName = computed<`item-${string}` | undefined>(() => {
   return props.item.slot ? `item-${props.item.slot}` : undefined
 })
 

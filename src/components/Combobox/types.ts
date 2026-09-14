@@ -196,6 +196,8 @@ export interface ComboboxControlSlotProps {
 
   /** Sets the popover open state (no-op while disabled). */
   setOpen: (value: boolean) => void
+  /** Closes the popover. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export interface ComboboxSearchSlotProps {

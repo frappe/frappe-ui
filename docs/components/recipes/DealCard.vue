@@ -66,7 +66,7 @@ const cardActions = [
           {{ owners[deal.owner].name }}
         </span>
       </div>
-      <HoverCard v-else :hover-delay="0.3">
+      <HoverCard v-else :hover-delay="300">
         <template #trigger>
           <button class="flex items-center gap-1.5">
             <Avatar

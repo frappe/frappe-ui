@@ -221,19 +221,19 @@ describe('DateTimePicker', () => {
     cy.get('[role=listbox][aria-label="Select month"]').should('exist')
   })
 
-  // `open` and `toggle` are the public slot contract, so a rename here is a
+  // `open` and `setOpen` are the public slot contract, so a rename here is a
   // silent break in consumer templates. Popover carries the same test.
-  it('exposes open and toggle to the #trigger slot', () => {
+  it('exposes open and setOpen to the #trigger slot', () => {
     cy.mount(DateTimePicker, {
       props: { modelValue: '2025-06-15 10:30:00' },
       slots: {
-        trigger: ({ open, toggle }: DatePickerTriggerSlotProps) =>
+        trigger: ({ open, setOpen }: DatePickerTriggerSlotProps) =>
           h(
             'button',
             {
               'data-cy': 'trigger',
               class: open ? 'is-open' : 'is-closed',
-              onClick: () => toggle(),
+              onClick: () => setOpen(!open),
             },
             open ? 'Close' : 'Open',
           ),

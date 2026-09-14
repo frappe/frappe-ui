@@ -20,5 +20,8 @@ Lets users select a specific time from a list or enter a custom value. Supports 
 ## Sizes & Variants
 <ComponentPreview name="TimePicker-SizesAndVariants" />
 
-<!-- @include: ./TimePicker.api.md -->
+The `#suffix` slot receives `{ open, disabled, setOpen, close }`. Use
+`setOpen(!open)` for a custom chevron; `close()` is shorthand for
+`setOpen(false)`.
 
+<!-- @include: ./TimePicker.api.md -->

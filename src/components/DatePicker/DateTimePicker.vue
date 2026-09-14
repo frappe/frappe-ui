@@ -36,7 +36,7 @@
       ><slot name="suffix" v-bind="ts"
     /></template>
 
-    <template #default="{ close }">
+    <template #default="{ close, open, disabled, setOpen }">
       <div
         class="flex"
         :class="
@@ -57,6 +57,9 @@
               setDate: handleDateCellClick,
               clear: handleClearClick,
               close,
+              open,
+              disabled,
+              setOpen,
             }"
           />
         </aside>
@@ -75,7 +78,7 @@
             <TimePicker
               ref="timePickerRef"
               :modelValue="timeValue"
-              :typeable="props.allowCustomTime"
+              :typeable="props.typeable"
               side="bottom"
               align="start"
               placeholder="Select time"
@@ -117,7 +120,6 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
   typeable: true,
   disabled: false,
   clearable: true,
-  allowCustomTime: true,
   openOnFocus: false,
   openOnClick: true,
 })

@@ -18,10 +18,46 @@
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'portalTo',
+    description: 'Teleport target for menu content. Unset uses the nearest host target or `body`.',
+    required: false,
+    type: 'PortalTarget'
   }
 ]
 
   const slotsData = [
+  {
+    name: 'item',
+    description: 'Replaces the entire item row.',
+    type: 'MenuItemSlotProps'
+  },
+  {
+    name: 'item-prefix',
+    description: 'Content rendered before the standard item label.',
+    type: 'MenuItemSlotProps'
+  },
+  {
+    name: 'item-label',
+    description: 'Content rendered for the standard item label area.',
+    type: 'MenuItemSlotProps'
+  },
+  {
+    name: 'item-suffix',
+    description: 'Content rendered after the standard item label.',
+    type: 'MenuItemSlotProps'
+  },
+  {
+    name: 'group-label',
+    description: 'Custom renderer for group labels.',
+    type: 'MenuGroupSlotProps'
+  },
+  {
+    name: 'empty',
+    description: 'Fallback content rendered when no items are available.',
+    type: 'any'
+  },
   {
     name: 'default',
     description: 'The right-clickable region that opens the menu.',

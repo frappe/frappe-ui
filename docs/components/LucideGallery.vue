@@ -67,8 +67,8 @@ const filteredIcons = computed(() => {
     <div class="h-[450px] overflow-auto">
       <TooltipProvider
         v-if="filteredIcons.length > 0"
-        :hover-delay="0.3"
-        :skip-delay="1"
+        :hover-delay="300"
+        :skip-delay="1000"
       >
         <div
           class="grid grid-cols-[repeat(auto-fill,56px)] gap-1 justify-center"

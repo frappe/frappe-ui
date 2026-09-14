@@ -1,12 +1,13 @@
 <template>
   <ContextMenuRoot v-model:open="openModel">
-    <ContextMenuTrigger as-child>
-      <slot v-if="$slots.trigger" name="trigger" :open="openModel" />
-      <slot v-else :open="openModel" />
+    <ContextMenuTrigger ref="triggerRef" as-child data-slot="trigger">
+      <slot v-if="$slots.trigger" name="trigger" v-bind="triggerSlotProps" />
+      <slot v-else v-bind="triggerSlotProps" />
     </ContextMenuTrigger>
 
     <ContextMenuPortal :to="portalTarget">
       <ContextMenuContent
+        ref="contentRef"
         data-slot="content"
         data-motion="instant"
         :class="menuClasses.content"
@@ -16,6 +17,7 @@
           :close="close"
           :slot-fns="slots"
           :primitives="primitives"
+          :portal-to="portalTo"
         />
       </ContextMenuContent>
     </ContextMenuPortal>
@@ -23,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import {
   ContextMenuContent,
   ContextMenuItem,
@@ -37,9 +39,15 @@ import {
 } from 'reka-ui'
 import Menu from '../Menu/Menu.vue'
 import { menuClasses, normalizeMenuOptions } from '../Menu/utils'
-import type { ContextMenuProps, ContextMenuSlots } from './types'
+import type {
+  ContextMenuProps,
+  ContextMenuSlots,
+  ContextMenuTriggerSlotProps,
+} from './types'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
+
+defineOptions({ inheritAttrs: false })
 
 const openModel = defineModel<boolean>('open', { default: false })
 
@@ -51,9 +59,11 @@ defineSlots<ContextMenuSlots>()
 
 const slots = useReactiveSlots<ContextMenuSlots>()
 
-const portalTarget = usePortalTarget()
+const portalTarget = usePortalTarget(() => props.portalTo)
 
 const groups = computed(() => normalizeMenuOptions(props.options))
+const triggerRef = ref<{ $el?: HTMLElement } | null>(null)
+const contentRef = ref<{ $el?: HTMLElement } | null>(null)
 
 const primitives = {
   Item: ContextMenuItem,
@@ -65,8 +75,45 @@ const primitives = {
 }
 
 function close() {
+  const content = contentRef.value?.$el
+  if (openModel.value && content) {
+    content.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        code: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      }),
+    )
+    return
+  }
   openModel.value = false
 }
+
+function setOpen(value: boolean) {
+  if (value && !openModel.value) {
+    const trigger = triggerRef.value?.$el
+    if (trigger) {
+      const bounds = trigger.getBoundingClientRect()
+      trigger.dispatchEvent(
+        new MouseEvent('contextmenu', {
+          bubbles: true,
+          cancelable: true,
+          clientX: bounds.left,
+          clientY: bounds.bottom,
+        }),
+      )
+      return
+    }
+  }
+  openModel.value = value
+}
+
+const triggerSlotProps = computed<ContextMenuTriggerSlotProps>(() => ({
+  open: openModel.value,
+  setOpen,
+  close,
+}))
 
 // Standard context menu behaviour: lock scroll while open so an accidental
 // trackpad flick doesn't destroy the interaction. `scroll` events aren't

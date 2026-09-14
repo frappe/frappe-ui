@@ -36,7 +36,7 @@
       ><slot name="suffix" v-bind="ts"
     /></template>
 
-    <template #default="{ close }">
+    <template #default="{ close, open, disabled, setOpen }">
       <div
         class="flex w-fit"
         :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
@@ -56,6 +56,9 @@
               setRange: handleSetRange,
               clear: handleClearClick,
               close,
+              open,
+              disabled,
+              setOpen,
             }"
           />
         </aside>

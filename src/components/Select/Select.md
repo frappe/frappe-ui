@@ -18,12 +18,12 @@ Use `#item-prefix` and `#item-label` to tailor the standard row — for example,
 <ComponentPreview name="Select-OptionSlot" />
 
 ## Custom Trigger
-Use `#trigger` to replace the trigger content entirely. The slot receives `{ open, disabled, selectedOption, clear, setOpen }`. For lighter changes, `#prefix` and `#suffix` sit inside the default trigger shell — `#suffix` replaces the chevron.
+Use `#trigger` to replace the trigger content entirely. The slot receives `{ open, disabled, selectedOption, clear, setOpen, close }`. For lighter changes, `#prefix` and `#suffix` sit inside the default trigger shell — `#suffix` replaces the chevron.
 
 <ComponentPreview name="Select-CustomTrigger" />
 
 ## Footer
-The `#footer` slot renders below the option list and stays pinned to the bottom of the popover — it does not scroll with the options. It receives the same shape as `#trigger`, `#prefix`, and `#suffix`: `{ open, disabled, selectedOption, clear, setOpen }`.
+The `#footer` slot renders below the option list and stays pinned to the bottom of the popover — it does not scroll with the options. It receives the same shape as `#trigger`, `#prefix`, and `#suffix`: `{ open, disabled, selectedOption, clear, setOpen, close }`.
 
 <ComponentPreview name="Select-Footer" layout="stacked" />
 

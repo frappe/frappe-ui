@@ -126,7 +126,7 @@ type DropdownGroupLabelSlotProps = {
 
 Supported slots:
 
-- `#trigger="{ open, close, disabled }"`
+- `#trigger="{ open, setOpen, close, disabled }"`
   - preferred advanced trigger slot
 - default slot
   - supported trigger slot with the same contract as `#trigger`

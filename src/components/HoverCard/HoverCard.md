@@ -10,13 +10,13 @@ click-driven ones. For short text hints prefer [`Tooltip`](./tooltip) instead.
 ## Example
 
 `#trigger` is rendered as-child, so hover and focus a11y are wired
-automatically. `#default` renders inside the standard panel shell.
+automatically. `#default` renders inside the standard panel shell. Both slots receive `{ open, setOpen, close }`; `close()` is shorthand for `setOpen(false)`.
 
 <ComponentPreview name="HoverCard-Example" />
 
 ## Delays
 
-`hoverDelay` and `leaveDelay` are in **seconds** (consistent with `Tooltip`).
+`hoverDelay` and `leaveDelay` are in **milliseconds** (consistent with `Tooltip`).
 `hoverDelay` is how long the pointer must rest before the card opens;
 `leaveDelay` is how long after the pointer leaves before it closes.
 

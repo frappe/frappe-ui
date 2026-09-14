@@ -245,8 +245,16 @@ describe('DateRangePicker', () => {
       },
     })
     cy.get('input').dblclick()
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -290,19 +298,19 @@ describe('DateRangePicker', () => {
     })
   })
 
-  // `open` and `toggle` are the public slot contract, so a rename here is a
+  // `open` and `setOpen` are the public slot contract, so a rename here is a
   // silent break in consumer templates. Popover carries the same test.
-  it('exposes open and toggle to the #trigger slot', () => {
+  it('exposes open and setOpen to the #trigger slot', () => {
     cy.mount(DateRangePicker, {
       props: { modelValue: ['2025-06-10', '2025-06-15'] },
       slots: {
-        trigger: ({ open, toggle }: DatePickerTriggerSlotProps) =>
+        trigger: ({ open, setOpen }: DatePickerTriggerSlotProps) =>
           h(
             'button',
             {
               'data-cy': 'trigger',
               class: open ? 'is-open' : 'is-closed',
-              onClick: () => toggle(),
+              onClick: () => setOpen(!open),
             },
             open ? 'Close' : 'Open',
           ),
@@ -325,7 +333,10 @@ describe('DateRangePicker', () => {
     it('renders two side-by-side calendar grids', () => {
       cy.mount(DateRangePicker, { props: { dualPane: true } })
       cy.get('input').dblclick()
-      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+      cy.get('[role=grid][aria-label="Calendar dates"]').should(
+        'have.length',
+        2,
+      )
     })
 
     it('shows the centered header (no cycle button) in dual-pane', () => {
@@ -390,7 +401,10 @@ describe('DateRangePicker', () => {
       cy.focused().trigger('keydown', { key: 'ArrowRight' })
       cy.focused().should('have.attr', 'data-value', '2025-07-01')
       // Both panes still rendered — view didn't advance to hide June.
-      cy.get('[role=grid][aria-label="Calendar dates"]').should('have.length', 2)
+      cy.get('[role=grid][aria-label="Calendar dates"]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="2025-06-28"]').should('exist')
     })
   })

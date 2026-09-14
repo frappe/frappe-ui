@@ -9,7 +9,7 @@ import { Button, Tooltip, TooltipProvider } from 'frappe-ui'
     instantly — no per-button flicker — because the whole row shares one
     tooltip context.
   -->
-  <TooltipProvider :hover-delay="0.5" :skip-delay="0.3">
+  <TooltipProvider :hover-delay="500" :skip-delay="300">
     <div class="flex items-center gap-1">
       <Button icon="bold" :tooltip="'Bold'" />
       <Button icon="italic" :tooltip="'Italic'" />

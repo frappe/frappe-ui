@@ -62,9 +62,7 @@ describe('Tooltip', () => {
   })
 
   it('exposes the arrow through a data-slot hook rather than a class prop', () => {
-    cy.mount(
-      h(Tooltip, { text: 'abc', hoverDelay: 0 }, [h(Button, {}, 'k')]),
-    )
+    cy.mount(h(Tooltip, { text: 'abc', hoverDelay: 0 }, [h(Button, {}, 'k')]))
 
     cy.get('button').trigger('focus')
     cy.get('[data-slot="arrow"]').should('exist')
@@ -87,7 +85,7 @@ describe('Tooltip', () => {
     const Group = () =>
       h(
         TooltipProvider,
-        { hoverDelay: 0.5, skipDelay: 0.3, disableHoverableContent: true },
+        { hoverDelay: 500, skipDelay: 300, disableHoverableContent: true },
         () => [
           h(Tooltip, { text: 'First' }, () =>
             h('button', { 'data-cy': 'first' }, 'one'),
@@ -120,7 +118,9 @@ describe('Tooltip', () => {
   it('a standalone Tooltip still mounts its own provider (no grouping)', () => {
     // Without a surrounding provider every tooltip delays independently.
     cy.clock()
-    cy.mount(h(Tooltip, { text: 'solo', hoverDelay: 0.5 }, () => h('button', 'k')))
+    cy.mount(
+      h(Tooltip, { text: 'solo', hoverDelay: 500 }, () => h('button', 'k')),
+    )
 
     cy.get('button').trigger('pointermove')
     cy.get('[role=tooltip]').should('not.exist')

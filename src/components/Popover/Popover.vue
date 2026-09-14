@@ -133,10 +133,8 @@ function close() {
   isOpen.value = false
 }
 
-function toggle(flag?: boolean | Event) {
-  if (flag instanceof Event) flag = undefined
-  if (flag == null) flag = !isOpen.value
-  if (flag) open()
+function setOpen(value: boolean) {
+  if (value) open()
   else close()
 }
 
@@ -150,12 +148,10 @@ defineExpose({
 
 // `open` is the state, not a method — the same word the rest of the family's
 // trigger slots use (Dropdown, Select, MultiSelect, HoverCard, Sidebar). The
-// trigger opens itself through reka's `as-child` wiring, so a slot-level
-// `open()` had no callers; `toggle` covers the cases that need it by hand.
 const slotProps = computed<PopoverSlotProps>(() => ({
   open: isOpen.value,
+  setOpen,
   close,
-  toggle,
 }))
 
 // reka focuses the content on open. A panel driven by typing must leave the

@@ -9,8 +9,8 @@ aria wiring come for free.
 
 `#trigger` is rendered through reka's `PopoverTrigger` as-child — clicking it
 (or pressing <kbd>Enter</kbd> / <kbd>Space</kbd> while focused) toggles the
-panel. `#default` renders inside the standard shell. Both slots receive `open`
-and `close` helpers.
+panel. `#default` renders inside the standard shell. Both slots receive
+`{ open, setOpen, close }`; `close()` is shorthand for `setOpen(false)`.
 
 <ComponentPreview name="Popover-Click" />
 
@@ -111,7 +111,7 @@ opens, and `prefers-reduced-motion` is respected. No configuration is required.
 ## Notes
 
 - Use `#trigger` + `#default` for the standard click popover. Both slots get
-  `{ open, close }`.
+  `{ open, setOpen, close }`.
 - Reach for `v-model:open` only when an external control needs to drive the
   panel. Clicking the trigger already toggles it, unless `trigger="manual"`.
 - For a panel that opens on hover (profile previews, link previews), use the

@@ -142,6 +142,8 @@ export interface MultiSelectSlotProps {
 
   /** Sets the popover open state. */
   setOpen: (value: boolean) => void
+  /** Closes the popover. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export type MultiSelectTriggerSlotProps = MultiSelectSlotProps

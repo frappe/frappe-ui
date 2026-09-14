@@ -6,6 +6,11 @@ A right-click context menu for surfaces, rows, and canvas elements. Opens at the
 
 Right-click a chat message to open a quick-actions menu.
 
+The default and `#trigger` slots receive `{ open, setOpen, close }`. Use
+`portalTo` when the menu must render inside a specific host container.
+Attributes do not fall through; put them on the element inside the trigger
+slot.
+
 <ComponentPreview name="ContextMenu-Simple" />
 
 ## Groups and Submenus

@@ -191,15 +191,11 @@ describe('Select', () => {
     cy.mount(Select, {
       props: { options, modelValue: 'def' },
       slots: {
-        footer: ({ selectedOption, clear, setOpen }: any) =>
+        footer: ({ selectedOption, clear, close }: any) =>
           h('div', [
             h('span', { 'data-cy': 'footer-label' }, selectedOption?.label),
             h('button', { 'data-cy': 'footer-clear', onClick: clear }, 'Clear'),
-            h(
-              'button',
-              { 'data-cy': 'footer-close', onClick: () => setOpen(false) },
-              'Close',
-            ),
+            h('button', { 'data-cy': 'footer-close', onClick: close }, 'Close'),
           ]),
       },
     })

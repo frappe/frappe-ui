@@ -30,6 +30,9 @@ Toggle items live inside the menu using `switch: true` + `switchValue`. Clicking
 ## Kebab Menu
 The classic row-actions pattern — a ghost icon button that opens a grouped menu. `#trigger` swaps in the `LucideMoreHorizontal` button, and the `open` slot prop keeps the button in its `active` state while the menu is open.
 
+The default and `#trigger` slots receive `{ open, disabled, setOpen, close }`.
+`close()` is shorthand for `setOpen(false)`.
+
 <ComponentPreview name="Dropdown-KebabMenu" />
 
 ## User Menu

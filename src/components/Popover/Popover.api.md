@@ -115,14 +115,14 @@
     type: '[]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  },
+  {
+    name: 'close',
+    description: 'Fired when the component closes.',
+    type: '[]'
   }
 ]
 </script>

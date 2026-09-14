@@ -26,14 +26,22 @@
     @close="onShellClose"
     @request-focus="onShellRequestFocus"
   >
-    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
-    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+    <template v-if="$slots.trigger" #trigger="ts"
+      ><slot name="trigger" v-bind="ts"
+    /></template>
+    <template v-if="$slots.prefix" #prefix="ts"
+      ><slot name="prefix" v-bind="ts"
+    /></template>
+    <template v-if="$slots.suffix" #suffix="ts"
+      ><slot name="suffix" v-bind="ts"
+    /></template>
 
-    <template #default="{ close }">
+    <template #default="{ close, open, disabled, setOpen }">
       <div
         class="flex"
-        :class="$slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'"
+        :class="
+          $slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'
+        "
       >
         <aside
           v-if="$slots.actions"
@@ -48,6 +56,9 @@
               setDate: handleDateCellClick,
               clear: handleClearClick,
               close,
+              open,
+              disabled,
+              setOpen,
             }"
           />
         </aside>

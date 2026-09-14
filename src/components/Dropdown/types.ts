@@ -1,5 +1,10 @@
 import type { ButtonProps } from '../Button'
-import type { MenuOptions, MenuSlotProps, MenuSlots } from '../Menu/types'
+import type {
+  MenuDynamicSlots,
+  MenuFixedSlots,
+  MenuOptions,
+  MenuSlotProps,
+} from '../Menu/types'
 
 export type {
   MenuTheme as DropdownTheme,
@@ -54,16 +59,19 @@ export interface DropdownTriggerSlotProps extends MenuSlotProps {
 
   /** Whether the trigger should render as disabled. */
   disabled: boolean
-
-  [key: string]: any
+  /** Sets the dropdown open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the dropdown. */
+  close: () => void
 }
 
-export type DropdownSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
-  /** Alternate trigger renderer. */
-  default?: (props: DropdownTriggerSlotProps) => any
-  /** Explicit trigger slot renderer. */
-  trigger?: (props: DropdownTriggerSlotProps) => any
-}
+export type DropdownSlots = MenuFixedSlots &
+  MenuDynamicSlots & {
+    /** Alternate trigger renderer. */
+    default?: (props: DropdownTriggerSlotProps) => any
+    /** Explicit trigger slot renderer. */
+    trigger?: (props: DropdownTriggerSlotProps) => any
+  }
 
 export interface DropdownEmits {
   /** Fired when the dropdown open state changes. */

@@ -33,14 +33,13 @@ documents for HoverCard.
 ## Relationship to `Popover` `trigger="hover"`
 
 `Popover` historically supported `trigger="hover"` with hand-rolled
-`hoverDelay` / `leaveDelay` timers (seconds; defaults `hoverDelay: 0`,
-`leaveDelay: 0.5`). In v1 that hand-rolled timer code is **deleted** and the
+`hoverDelay` / `leaveDelay` timers (milliseconds). In v1 that hand-rolled timer code is **deleted** and the
 hover affordance moves to this component.
 
 - `Popover` keeps `trigger="hover"` working through `v1.x` for back-compat, but
   emits a **one-time** dev-mode `warnDeprecated` pointing at `HoverCard`.
 - The deprecated path maps `hoverDelay` → `openDelay` and `leaveDelay` →
-  `closeDelay` (both stay in seconds — see the mapping table below). No behavior
+  `closeDelay` (both use milliseconds — see the mapping table below). No behavior
   change for existing callers in `v1.x`.
 - New code uses `<HoverCard>` directly.
 
@@ -52,7 +51,7 @@ See the `Popover` spec ("Deprecations") for the full Popover back-compat table.
 |---|---|
 | Primitive | reka `HoverCardRoot` / `HoverCardTrigger` / `HoverCardPortal` / `HoverCardContent` |
 | Open trigger | Pointer hover + focus only — no click, no keyboard toggle (reka contract) |
-| Delay units | **Seconds** (`hoverDelay` / `leaveDelay`), consistent with `Tooltip`. Converted to reka's ms `openDelay` / `closeDelay` internally |
+| Delay units | **Milliseconds** (`hoverDelay` / `leaveDelay`), consistent with `Tooltip` and reka |
 | Visibility model | `v-model:open` (canonical) |
 | Positioning | `side` / `align` / `offset` / `collisionPadding` / `portalTo`, same vocabulary and defaults as `Popover` |
 | Shell | Shared `PopoverPanel` — owns `data-slot="content"` + rounded/elevated/ring visuals only, no behavior |
@@ -100,14 +99,13 @@ Defaults (aligned with `Popover` for positioning, `Tooltip` for delays):
 - `collisionPadding = 10`
 - `portalTo = 'body'` — the fallback when neither the prop nor an embedding
   host names a target. See [`portal-target.md`](./portal-target.md).
-- `hoverDelay = 0.5`
-- `leaveDelay = 0.3`
+- `hoverDelay = 300`
+- `leaveDelay = 300`
 
 Notes:
 
-- `hoverDelay` / `leaveDelay` are in **seconds** and multiplied by `1000` for
-  reka's `openDelay` / `closeDelay` (which are ms), matching how `Tooltip`
-  converts `hoverDelay`.
+- `hoverDelay` / `leaveDelay` are in **milliseconds** and pass directly to
+  reka's `openDelay` / `closeDelay`.
 - `side` / `align` map to reka's `side` + `align` on `HoverCardContent`;
   `offset` maps to `side-offset`. Same split as `Popover` (and the
   `placement="bottom-start"` legacy mapping lives only on `Popover`).
@@ -131,8 +129,8 @@ keyboard shortcuts on a hover card's open/close, so the surface stays minimal.
 
 | Slot | Scope | Purpose |
 |---|---|---|
-| `#trigger` | `{ open, close }` | Rendered through reka `HoverCardTrigger as-child`. Hover/focus + `aria-describedby` wiring is automatic. The slot must render a single element root (as-child contract). |
-| `#default` | `{ open, close }` | Card content, rendered inside the shared `PopoverPanel` shell. |
+| `#trigger` | `{ open, setOpen, close }` | Rendered through reka `HoverCardTrigger as-child`. Hover/focus + `aria-describedby` wiring is automatic. The slot must render a single element root (as-child contract). |
+| `#default` | `{ open, setOpen, close }` | Card content, rendered inside the shared `PopoverPanel` shell. |
 
 Slot rules:
 
@@ -140,7 +138,7 @@ Slot rules:
 - `#default` content should be read-only / supplementary. Focusable controls are
   technically renderable but discouraged (reka keeps the card open while the
   pointer is over it, but keyboard users cannot reliably reach it).
-- Both slots receive the same `{ open, close }` shape as `Popover` for symmetry,
+- Both slots receive the same `{ open, setOpen, close }` shape as `Popover` for symmetry,
   even though hover cards rarely need imperative control.
 
 ### Exposed
@@ -258,8 +256,8 @@ internally):
 | `Popover` (deprecated hover) | `HoverCard` |
 |---|---|
 | `trigger="hover"` | (implicit — HoverCard only opens on hover) |
-| `hoverDelay` (seconds) | `hoverDelay` (seconds) |
-| `leaveDelay` (seconds) | `leaveDelay` (seconds) |
+| `hoverDelay` (seconds) | `hoverDelay` (milliseconds; multiply by 1000) |
+| `leaveDelay` (seconds) | `leaveDelay` (milliseconds; multiply by 1000) |
 | `placement="top-start"` | `side="top"` + `align="start"` |
 | `#target` | `#trigger` |
 | `#body` / `#body-main` | `#default` |
