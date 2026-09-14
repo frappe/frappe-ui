@@ -464,7 +464,8 @@ describe('one instance, two submits: the store gate decides, not submit order', 
     const doc = makeDoc()
 
     const older = doc.setValue.submit({ email: 'slow-old@example.com' })
-    const newer = doc.setValue.submit({ email: 'quickfail' })
+    // A failed write rejects (DAT-Q1); this test is about the store gate.
+    const newer = doc.setValue.submit({ email: 'quickfail' }).catch(() => null)
 
     await Promise.all([older, newer])
 

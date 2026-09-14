@@ -96,8 +96,11 @@ interface InputLabelingProps {
    * Sets `aria-invalid="true"` and `data-state="invalid"` on the control.
    * Accepts an `Error` object; `Error.messages` is rendered as stacked
    * plain text, `Error.message` is the fallback.
+   *
+   * The type is written inline. No exported alias names it, so a component
+   * that forwards the prop reads it from `InputLabelingProps['error']`.
    */
-  error?: string | Error
+  error?: string | (Error & { messages?: string[] })
 
   /**
    * Marks the field as required.

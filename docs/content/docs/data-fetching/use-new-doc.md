@@ -33,8 +33,10 @@ async function save() {
   Server-managed fields (`creation`, `modified`, `owner`, `modified_by`) are
   excluded from the type.
 - `options` — the same options as [`useCall`](./use-call.md), minus `url`,
-  `method`, `params` and `immediate` (all fixed: a `POST` to create a document
-  from `doc`, not fired until `submit()` is called).
+  `method`, `params`, `immediate`, `refetch`, `cacheKey` and `staleOnError`.
+  An insert is a write that runs once, so the request is fixed: a `POST` that
+  creates a document from `doc`, sent only when `submit()` is called, and never
+  read from or written to the cache.
 
 ## Return value
 
@@ -47,6 +49,7 @@ insert request, plus:
 - `submit()` — inserts `doc`, ignoring any params argument. On success, the
   created document (including server-assigned fields like `name`) is written
   into the shared store `useDoc` reads from, and the promise resolves with it.
+  On failure it rejects; see [the error table](./use-call.md#errors).
 
 ```vue
 <script setup>

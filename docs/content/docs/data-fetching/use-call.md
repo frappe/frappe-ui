@@ -99,20 +99,57 @@ async function rename(name, newName) {
 - `canAbort` — `true` while a request that can still be aborted is in flight.
 - `aborted` — `true` if the last request was aborted.
 - `execute()` (aliases `fetch()`, `reload()`) — fires a request using the
-  current `params`, ignoring `immediate`/`refetch`. Returns a promise that
-  resolves with the response data, or rejects if the request fails.
+  current `params`, ignoring `immediate`/`refetch`. Resolves with the response
+  data, or with `null` when the request fails; read `error` after awaiting it.
 - `submit(params?)` — runs `beforeSubmit`, then sends a request with the given
   params (or the configured `params` if omitted). Resolves with the response
-  data, or rejects with the error.
+  data, or **rejects** with the error.
 - `reset()` — clears any params set by a previous `submit()` call.
 - `abort()` — aborts the in-flight request.
 
+`execute`/`fetch`/`reload` are one function under three names, and
+`loading`/`isFetching` one ref under two. v1 keeps every alias: apps use all of
+them, and dropping a name buys nothing. The docs use `reload()` and `loading`.
+This is the only place the library publishes two names for one thing.
+
 ## Errors
 
-A Frappe error response rejects `submit()`/`execute()` and sets `error` to a
-[`FrappeResponseError`](../other/utilities.md#frapperesponseerror), which
-carries `title`, `type`, `exception` and `indicator` from the server's response
-— narrow a catch block with `error instanceof FrappeResponseError` to read them.
+**Actions reject, reads resolve.** A failed write rejects, so a caller that does
+not handle the failure never runs its success path. A failed read resolves, so a
+template can keep rendering the last value and show `error` instead.
+
+| Call                                                           | On failure             |
+| -------------------------------------------------------------- | ---------------------- |
+| `submit()`                                                     | rejects                |
+| `doc.setValue()`, `doc.delete()`, a `useDoc` `methods:` member | rejects                |
+| `execute()`, `fetch()`, `reload()`, `useList` `reload()`       | resolves, sets `error` |
+
+Every one of them sets `error` and calls `onError`, whether it rejects or not.
+
+```js
+try {
+  await renameTodo.submit({ old_name: 'todo-1', new_name: 'todo-2' })
+  toast.success('Renamed')
+} catch (error) {
+  toast.error(error.message)
+}
+```
+
+### Which error class
+
+Each class is a plain `Error` subtype. Which one you get depends on the API that
+made the request, not on the failure:
+
+| API                                                                  | Error class                                                        | Extra fields                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            | [`FrappeResponseError`](../other/utilities.md#frapperesponseerror) | `title`, `type`, `exception`, `indicator`           |
+| `call`, `frappeRequest`, `createResource` and the other v1 resources | [`FrappeRequestError`](../other/utilities.md#frapperequesterror)   | `messages`, `exc_type`, `exc`, `status`, `response` |
+| `upload`, `useFileUpload`, `FileUploadHandler`                       | [`UploadError`](../other/utilities.md#uploaderror)                 | `kind`, `status`, `messages`, `response`            |
+
+The two Frappe classes stay separate on purpose: the v2 composables read the
+parsed error page (`title`, `indicator`), and the v1 request layer keeps the raw
+transport fields (`status`, `response`). Narrow a catch block with
+`error instanceof FrappeResponseError` before reading either set.
 
 ## Caching
 

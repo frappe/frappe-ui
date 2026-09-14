@@ -13,7 +13,7 @@ export interface FrappeUIPluginOptions {
    * There is no useful way to run such a component, and letting it render with
    * `this.$resources` undefined fails much further downstream.
    */
-  resources?: boolean | Record<string, any>
+  resources?: boolean
 }
 
 const knownOptions = ['resources'] as const
@@ -94,7 +94,7 @@ export default {
     }
 
     if (options.resources) {
-      app.use(resourcesPlugin, options.resources)
+      app.use(resourcesPlugin)
       return
     }
 

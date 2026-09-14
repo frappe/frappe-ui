@@ -1,6 +1,6 @@
 import type { TextInputTypes } from '../types/TextInput'
 import type { InputSize } from '../../composables/inputTypes'
-import type { FrappeUIError } from '../../composables/useInputLabeling'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export interface FormControlProps {
   /** Label text displayed above the input */
@@ -8,7 +8,7 @@ export interface FormControlProps {
   /** Optional description or helper text shown below the input */
   description?: string
   /** Error message shown below the input. Sets aria-invalid on the control. */
-  error?: string | FrappeUIError
+  error?: InputLabelingProps['error']
   /**
    * Type of input to render. FormControl is a thin dispatcher — it forwards
    * `label`/`description`/`error`/`required`/`size`/`variant` plus all

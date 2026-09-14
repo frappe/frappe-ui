@@ -91,7 +91,7 @@
     name: 'fallbackRoute',
     description: 'Fallback destination, used only when there is no in-app history to go back to\n(a cold load onto a deep link). Taps otherwise go back through history.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   },
   {
     name: 'label',

@@ -3,9 +3,24 @@ import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
 
+/**
+ * `refetch`, `cacheKey`, and `staleOnError` are left out on purpose (DAT-Q6).
+ *
+ * `params()` reads the reactive `doc`, so `refetch: true` sends an insert on
+ * every edit — one new row per keystroke under autoname — and then `submit()`
+ * sends nothing and rejects. `cacheKey` would replay the last insert's
+ * response as `data` in the next session, before anything was submitted, and
+ * `staleOnError` only works with it.
+ */
 type UseNewDocOptions<T> = Omit<
   UseCallOptions<any, Partial<T>>,
-  'url' | 'method' | 'params' | 'immediate'
+  | 'url'
+  | 'method'
+  | 'params'
+  | 'immediate'
+  | 'refetch'
+  | 'cacheKey'
+  | 'staleOnError'
 >
 
 type NewDoc<T> = Partial<
@@ -37,8 +52,11 @@ export function useNewDoc<T extends object>(
       }
       return payload
     },
-    immediate: false,
     ...options,
+    // After the spread, not before it: an untyped caller could otherwise
+    // override either one (DAT-Q6).
+    immediate: false,
+    refetch: false,
     // The store write lives here, not in `submit()`'s `.then`: this hook is
     // handed the POST's stamp, so the write records. In the `.then` there is
     // no stamp to hand it — it would have to claim `LOCAL_WRITE` and never
@@ -58,8 +76,8 @@ export function useNewDoc<T extends object>(
     return callSubmit().then((created) => {
       const response = created as DocResponse | null
       if (!response?.name) {
-        // A failed request resolves `null` (`useIsolatedCall`'s contract
-        // toward its own caller); `submit()` keeps rejecting instead.
+        // A failed request already rejected upstream (DAT-Q1). This covers
+        // the response that arrives without a `name`.
         throw (
           (out.error as Error | null) ?? new Error(`insert ${doctype} failed`)
         )

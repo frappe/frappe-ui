@@ -5,8 +5,9 @@
 import { describe, expect, it } from 'vitest'
 import { createApp } from 'vue'
 import ErrorMessage from './ErrorMessage.vue'
+import type { ErrorMessageValue } from './types'
 
-function renderErrorMessage(message: string | Error) {
+function renderErrorMessage(message: ErrorMessageValue) {
   const host = document.createElement('div')
   const app = createApp(ErrorMessage, { message })
   app.mount(host)
@@ -27,6 +28,28 @@ describe('ErrorMessage', () => {
     expect(alert.innerHTML).not.toContain('onerror')
     expect(alert.innerHTML).not.toContain('<script')
     expect(alert.textContent).not.toContain('alert(2)')
+
+    unmount()
+  })
+
+  it('renders every message in an array', () => {
+    const { alert, unmount } = renderErrorMessage(['First', 'Second'])
+
+    expect(alert.textContent).toContain('First')
+    expect(alert.textContent).toContain('Second')
+
+    unmount()
+  })
+
+  it('renders every message on an Error carrying a messages array', () => {
+    const error = Object.assign(new Error('Fallback message'), {
+      messages: ['First', 'Second'],
+    })
+    const { alert, unmount } = renderErrorMessage(error)
+
+    expect(alert.textContent).toContain('First')
+    expect(alert.textContent).toContain('Second')
+    expect(alert.textContent).not.toContain('Fallback message')
 
     unmount()
   })

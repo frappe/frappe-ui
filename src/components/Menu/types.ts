@@ -1,5 +1,5 @@
 import type { Component, VNodeChild } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import type { NormalizedMenuGroup } from './utils'
 import type { PortalTarget } from '../../composables/usePortalTarget'
 
@@ -54,7 +54,7 @@ export interface MenuActionOption extends MenuBaseOption {
   label: string
 
   /** Router destination to navigate to when the item is clicked. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 
   /** Click handler invoked when the action item is selected. */
   onClick?: (event: Event) => void

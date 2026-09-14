@@ -208,7 +208,12 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       submitParams.value = params
     }
     if (!refetch) {
-      return execute()
+      const response = await execute()
+      // Actions reject, reads resolve. `submit()` writes, so a caller that
+      // does not handle failure must not run its success path (DAT-Q1).
+      // `execute`/`fetch`/`reload` keep resolving; read `error` after them.
+      if (error.value) throw error.value
+      return response
     }
   }
 

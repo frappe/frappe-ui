@@ -328,17 +328,71 @@ describe('useDoc concurrency', () => {
     })
 
     let slow = user.setValue.submit({ email: 'slow@example.com' })
-    let quick = user.setValue.submit({ email: 'quick_fail' })
+    // A failed write rejects, per the v1 submit contract (DAT-Q1).
+    let quick = user.setValue.submit({ email: 'quick_fail' }).catch((e) => e)
 
     let [slowResult, quickResult] = await Promise.all([slow, quick])
 
-    // A failed request resolves `null`, per `useCall`'s submit contract.
-    expect(quickResult).toBe(null)
+    expect((quickResult as Error).message).toContain('setValue user1 failed')
     // The stale success still answers its own caller...
     expect(slowResult?.email).toBe('slow@example.com')
     // ...but writes nothing shared: the newest submit's error stays.
     expect(user.setValue.error?.message).toContain('setValue user1 failed')
     expect(user.setValue.data).toBe(null)
+  })
+
+  // DAT-Q2: a `methods:` entry is spread over what `useDoc` returns, so a
+  // colliding key would replace a built-in member without a word.
+  it('refuses a method name that collides with a built-in member', () => {
+    expect(() =>
+      useDoc<User>({
+        baseUrl,
+        doctype: 'User',
+        name: 'user1',
+        immediate: false,
+        methods: { setValue: 'set_value' },
+      }),
+    ).toThrow('already a member of the object useDoc returns')
+
+    expect(() =>
+      useDoc<User>({
+        baseUrl,
+        doctype: 'User',
+        name: 'user1',
+        immediate: false,
+        methods: { reload: 'reload_doc' },
+      }),
+    ).toThrow('already a member of the object useDoc returns')
+  })
+
+  // DAT-Q6: `refetch: true` on a document method re-sends it from the params
+  // watcher and makes `submit()` send nothing at all. The option is gone from
+  // the type, and the value is forced after the caller's spread so an untyped
+  // caller cannot put it back.
+  it('keeps a document method on submit only, whatever the caller passes', async () => {
+    interface UserMethods {
+      updateEmail: (params: { email: string }) => User
+    }
+
+    const user = useDoc<User, UserMethods>({
+      baseUrl,
+      doctype: 'User',
+      name: 'user1',
+      immediate: false,
+      methods: {
+        updateEmail: {
+          name: 'update_email',
+          ...({ refetch: true, immediate: true } as {}),
+        },
+      },
+    })
+
+    const submitted = user.updateEmail.submit({ email: 'forced@example.com' })
+    // A request went out. With `refetch: true` in force, `submit()` would
+    // return without sending anything and `loading` would stay false.
+    expect(user.updateEmail.loading).toBe(true)
+    await submitted
+    expect(user.updateEmail.error).toBe(null)
   })
 
   it('clears the previous error when a new submit starts', async () => {
@@ -349,7 +403,9 @@ describe('useDoc concurrency', () => {
       immediate: false,
     })
 
-    await user.setValue.submit({ email: 'quick_fail' })
+    await expect(
+      user.setValue.submit({ email: 'quick_fail' }),
+    ).rejects.toThrow('setValue user1 failed')
     expect(user.setValue.error).toBeTruthy()
 
     // A retry must not sit at `loading: true` with the old error still set —

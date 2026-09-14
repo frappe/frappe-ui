@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="message"
+    v-if="lines.length"
     class="whitespace-pre-line text-sm text-ink-red-7"
     role="alert"
     v-html="errorMessage"
@@ -22,28 +22,37 @@ const escapeMap: Record<string, string> = {
   "'": '&#39;',
 }
 
-const errorMessage = computed(() => {
-  if (!props.message) return ''
-
-  const message =
-    props.message instanceof Error
-      ? (props.message as Error & { messages?: string }).messages ||
-        props.message.message
-      : props.message
-
-  // DOMPurify needs a real DOM, so `sanitize` doesn't exist during SSR
-  // (`isSupported` is false). Escape instead — a server-rendered string can't
-  // execute anything anyway, and the client sanitizes properly on hydration.
-  //
-  // The two disagree for a message that contains markup DOMPurify would keep
-  // (`<b>x</b>` prints literally in the static HTML, then renders bold once
-  // hydrated) — Vue overwrites the `v-html` on mismatch, so it self-corrects.
-  // Matching exactly would mean shipping a server DOM (jsdom); not worth it
-  // for a fallback that only runs in prerendered docs pages.
-  if (!DOMPurify.isSupported) {
-    return message.replace(/[&<>"']/g, (char) => escapeMap[char])
-  }
-
-  return DOMPurify.sanitize(message)
+// Every shape collapses to a list of lines, and every line renders. An
+// `Error` with several `messages` used to render only the first one it could
+// coerce to a string.
+const lines = computed<string[]>(() => {
+  const value = props.message
+  if (!value) return []
+  if (typeof value === 'string') return [value]
+  if (Array.isArray(value)) return value.filter(Boolean).map(String)
+  const messages = value.messages
+  if (Array.isArray(messages)) return messages.filter(Boolean).map(String)
+  if (messages) return [String(messages)]
+  return value.message ? [value.message] : []
 })
+
+// DOMPurify needs a real DOM, so `sanitize` doesn't exist during SSR
+// (`isSupported` is false). Escape instead — a server-rendered string can't
+// execute anything anyway, and the client sanitizes properly on hydration.
+//
+// The two disagree for a message that contains markup DOMPurify would keep
+// (`<b>x</b>` prints literally in the static HTML, then renders bold once
+// hydrated) — Vue overwrites the `v-html` on mismatch, so it self-corrects.
+// Matching exactly would mean shipping a server DOM (jsdom); not worth it
+// for a fallback that only runs in prerendered docs pages.
+function clean(line: string) {
+  if (!DOMPurify.isSupported) {
+    return line.replace(/[&<>"']/g, (char) => escapeMap[char])
+  }
+  return DOMPurify.sanitize(line)
+}
+
+// `whitespace-pre-line` on the wrapper turns the newline into a line break,
+// so several messages stack without a second element per message.
+const errorMessage = computed(() => lines.value.map(clean).join('\n'))
 </script>

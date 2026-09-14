@@ -993,12 +993,91 @@ Each submit now sends its own request and resolves with its own response
 (#991).
 
 - No API change. These members keep the full `useCall` surface — same
-  members, same types. `submit()` still resolves `null` on a failed request.
+  members, same types. (`submit()` resolved `null` on a failed request at the
+  time. It rejects now — see the entry below.)
 - `data` and `error` belong to the submit that started last, same as
   `useDoctype` and `useList`: a stale submit answers its own caller and
   writes nothing shared. `loading` stays `true` until every submit settles.
 - Behavior change if you relied on it: a second submit no longer cancels the
   first — both requests reach the server.
+
+### Data fetching (v2) — writes reject, reads resolve (breaking, silent)
+
+One rule for every composable: a write rejects when it fails, a read resolves.
+A failed write must not let its caller fall through to the success path.
+
+- **Now rejects:** `useCall`'s `submit()`, and `useDoc`'s `setValue`, `delete`
+  and every `methods:` member. They used to resolve with `null`.
+- **Still resolves:** `execute()`, `fetch()` and `reload()` in every
+  composable. Read `error` after awaiting them.
+- `useDoctype` and `useList` write methods already rejected. Nothing changes
+  for them.
+
+`error`, `onError` and the stores behave exactly as before. This is silent:
+nothing fails to build, the success path simply stops running, and an
+unawaited `submit()` becomes an unhandled rejection. `null` is a valid
+response now, so `if (!result)` after a `submit()` is no longer a failure
+check. The [migration guide](/docs/migration#data-fetching-writes-reject) has
+the before/after and what to grep for.
+
+### Data fetching (v2) — `useDoc` method names cannot shadow built-in members (breaking, loud)
+
+A `methods:` key that is already a member of the object `useDoc` returns
+(`doc`, `error`, `loading`, `reload`, `setValue`, `delete`, and the rest) used
+to replace it silently, which broke the document itself. `useDoc` throws at
+setup now, naming the key and the collision. Rename the key and keep the server
+method name: `{ reloadItems: { name: 'reload_items' } }`.
+
+### Data fetching (v2) — `useNewDoc` and `useDoc` methods take fewer options (breaking)
+
+An insert and a document method run when `submit()` is called, so the options
+that say otherwise are gone.
+
+- `useNewDoc` options no longer accept `refetch`, `cacheKey` or `staleOnError`,
+  on top of the `url`, `method`, `params` and `immediate` it already fixed.
+  `refetch: true` used to re-send the insert on every edit to `doc`.
+- `useDoc`'s `methods:` options no longer accept `immediate` or `refetch`.
+- Both force `immediate: false, refetch: false` at runtime, so a JavaScript app
+  that still passes them is safe; the values are ignored.
+
+### Data fetching (v2) — error classes and read aliases documented
+
+No code change. Two facts the docs now state:
+
+- `FrappeResponseError` (the v2 composables) and `FrappeRequestError` (`call`,
+  `frappeRequest`, v1 resources) stay separate classes with different fields,
+  and `UploadError` is the third.
+  [A table](/docs/data-fetching/use-call#which-error-class) says which API
+  raises which.
+- `execute`/`fetch`/`reload` and `loading`/`isFetching` stay as aliases of one
+  another. It is the one place the library publishes two names for one thing.
+  The docs use `reload()` and `loading`.
+
+### Root exports — `FrappeUIError` removed, `InputLabelingProps` and `RouteDestination` added (breaking, loud)
+
+- **`FrappeUIError` is removed** from `frappe-ui` and `frappe-ui/experimental`.
+  An input's `error` prop is typed where it is declared. Forward it with
+  `InputLabelingProps['error']`, which the root now exports. The accepted
+  runtime values are unchanged.
+- **`RouteDestination` and `RouteLocationObject` are exported.** Every prop
+  that takes a router destination is typed with them instead of vue-router's
+  `RouteLocationRaw`. Same accepted values; the generated API docs can print
+  the name.
+- `dayjs` and `dayjsLocal` stay exported and public. `dayjsSystem` stays
+  internal.
+
+### `frappe-ui/resources` and `frappe-ui/editor` — named exports (breaking, loud)
+
+Both barrels used `export *` from implementation files, so they published
+whatever those files exported next. Each now lists its exports by name, with a
+test that fails when the lists drift. Every name apps import is still there.
+
+### ErrorMessage — several messages
+
+`message` accepts `string[]`, and an `Error` carrying a `messages` array (what
+Frappe's whitelisted methods return) renders one line per message instead of
+`[object Object]`. A single string and a plain `Error` render as before. The
+prop type is exported as `ErrorMessageValue`. Additive.
 
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
@@ -1075,6 +1154,24 @@ behavior change.
   internal `state`/`reset` arguments the public signature never exposed a way
   to pass. It's now a real standalone function; `useFileUpload()` wraps it
   with reactive state.
+
+### Uploads — `UploadError`, and the `is_private` option removed (breaking)
+
+`upload`, `useFileUpload` and `FileUploadHandler` reject with an exported
+`UploadError` instead of a plain `Error`, and `useFileUpload`'s `state.error`
+is typed with it.
+
+- `error.kind` is `'file-size' | 'network' | 'server' | 'abort'`. Branch on it
+  instead of matching the message text.
+- A server failure also carries `status`, the parsed `messages` and the raw
+  `response`. An aborted upload rejects instead of leaving the promise open.
+- Existing `catch` blocks keep working: `UploadError` is an `Error` and its
+  `message` is unchanged.
+- **Breaking, silent in JS:** the `is_private` upload option is removed;
+  `private` is the only spelling. An `is_private` still passed is ignored, so
+  `{ is_private: 0 }` now uploads private. The `is_private` field on the
+  returned file record is unchanged.
+- `isPrivateUpload` and the `UploadPrivacy` type are no longer exported.
 
 ### FileUploader — flat props replace the `uploadArgs` blob (breaking, P3)
 
@@ -2155,6 +2252,16 @@ crash somewhere else. So:
 resource when no socket is set. That has always been its behaviour and this
 does not change it.
 
+### `FrappeUI` plugin — `resources` is a boolean (breaking)
+
+The option was typed as an object of resource definitions, and the plugin never
+read what was in it — only whether it was set. It is `boolean` now.
+
+Passing an object is a type error and still installs the mixin at runtime, so
+an app that misses the change keeps working. `npx -p frappe-ui data-v1 ./src`
+rewrites the call; it reports any site it will not touch (a spread, a computed
+key, a variable) instead of guessing.
+
 ### Data fetching (v2) — one request per submit
 
 `useDoctype`'s `insert`, `delete`, `setValue`, `runDocMethod` and `runMethod`,
@@ -2353,9 +2460,9 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
   `Combobox`, `Select`, `MultiSelect`, and `MultiEmailInput` import it from
   there internally — only the `experimental` re-export had zero external
   importers, so only that goes. The only member cut in the barrel tidy.
-- `FrappeUIError` is now exported from `frappe-ui/experimental` as a type. A
-  consumer previously hand-declared a structural copy of it because it wasn't
-  re-exported — that copy can now be dropped in favor of the real type.
+- `FrappeUIError` was exported from `frappe-ui/experimental` as a type during
+  the betas. It is removed again before `1.0.0` — see the root exports entry
+  above. Type a forwarded `error` prop with `InputLabelingProps['error']`.
 
 ### `tsconfig.base.json` — cleaned up (breaking for extenders)
 

@@ -59,7 +59,7 @@ const todo = useDoc({
   methods: {
     // shorthand: the server method name
     markDone: 'mark_done',
-    // full options, same shape as useCall (minus url/method/immediate)
+    // full options, same shape as useCall (minus url/immediate/refetch)
     reassign: {
       name: 'reassign',
       onSuccess: () => console.log('reassigned'),
@@ -80,10 +80,14 @@ todo.reassign.submit({ allocated_to: 'jane@example.com' })
 - `baseUrl` — prefix prepended to the generated request URLs.
 - `url` — overrides the default `/api/v2/document/<doctype>/<name>` GET URL.
 - `methods` — a map of member name to either a server method name (string), or a
-  [`useCall`](./use-call.md) options object (minus `url` and `baseUrl`) plus a
-  required `name` naming the server method. Defaults to `method: 'POST'` and
-  `immediate: false`; both can be overridden per method. Each becomes a
-  `useCall`-shaped member on the returned object.
+  [`useCall`](./use-call.md) options object (minus `url`, `baseUrl`, `immediate`
+  and `refetch`) plus a required `name` naming the server method. Defaults to
+  `method: 'POST'`. A document method runs on `submit()` only, so `immediate`
+  and `refetch` are fixed to `false` and are not accepted. Each entry becomes a
+  `useCall`-shaped member on the returned object. A member name that is already
+  part of the returned object (`doc`, `error`, `loading`, `setValue`, `delete`,
+  `reload`, and the rest) throws at setup: rename the key and keep the server
+  method name in `{ key: { name: '…' } }`.
 - `immediate` — fire the initial GET automatically once `name` resolves.
   Defaults to `true`.
 - `staleOnError` — when `true`, a failed refetch keeps showing the last known
@@ -99,18 +103,35 @@ todo.reassign.submit({ allocated_to: 'jane@example.com' })
 - `isFinished` — `true` once the current fetch has settled, either way.
 - `canAbort` — `true` while a fetch that can still be aborted is in flight.
 - `aborted` — `true` if the last fetch was aborted.
-- `execute()` (aliases `fetch()`, `reload()`) — refetches the document. Returns
-  a promise that resolves with the response, or rejects if the fetch fails.
+- `execute()` (aliases `fetch()`, `reload()`) — refetches the document. Resolves
+  with the response, or with `null` when the fetch fails; read `error` after
+  awaiting it.
 - `abort()` — aborts the in-flight fetch.
 - `setValue` — a [`useCall`](./use-call.md)-shaped member;
   `setValue.submit(values)` `PUT`s a partial update and writes the response back
-  into `doc`.
+  into `doc`. It **rejects** when the update fails.
 - `delete` — a `useCall`-shaped member; `delete.submit()` deletes the document
-  and clears it from every `useDoc`/`useList` reading it.
+  and clears it from every `useDoc`/`useList` reading it. It **rejects** when
+  the delete fails.
 - `onSuccess(callback)` — registers a callback that runs with the document every
   time _this_ `useDoc` call's own fetch (the initial load, or a `reload()`)
   succeeds. Returns an unsubscribe function.
 - one member per entry in `methods`, each a `useCall`-shaped object.
+
+## Errors
+
+`setValue.submit()`, `delete.submit()` and every `methods:` member reject on
+failure, so a `catch` block is the place to report it. `reload()` resolves and
+sets `error` instead. See [the error table](./use-call.md#errors) for the rule
+and the error classes.
+
+```js
+try {
+  await todo.setValue.submit({ status: 'Closed' })
+} catch (error) {
+  toast.error(error.message)
+}
+```
 
 ## Shared cache
 

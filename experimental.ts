@@ -10,7 +10,6 @@ export {
   InputError,
 } from './src/components/InputLabeling'
 export { useInputLabeling } from './src/composables/useInputLabeling'
-export type { FrappeUIError } from './src/composables/useInputLabeling'
 export {
   CodeEditor,
   CodePreview,

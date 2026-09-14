@@ -34,7 +34,9 @@ destination prop renames (`destinations-v1`, see
 (`overlays-v1`), navigation props and tab state (`navigation-v1`), and the EditorFixedMenu prop rename
 (`editor-v1`, see [Editor](#editor)), base component prop normalization
 (`base-props-v1`, see [Base component props](#base-component-props)), and List
-row hooks and slot names (`list-v1`, see [List family](#list-family)). The tools
+row hooks and slot names (`list-v1`, see [List family](#list-family)), and the
+`FrappeUI` plugin's `resources` option (`data-v1`, see
+[the plugin](#http-transport-and-the-frappeui-plugin)). The tools
 report ambiguous dynamic syntax for manual review instead of guessing.
 
 ### Sections
@@ -46,7 +48,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
-- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
@@ -959,6 +961,50 @@ digest, an image embedded on a public page — audit every call that omits
 `private` / `is_private` before upgrading. A file that flips to private
 returns `403` to a session-less request instead of the image.
 
+### Uploads reject an `UploadError` {#uploads-reject-an-uploaderror}
+
+`upload`, `useFileUpload` and `FileUploadHandler` reject with an exported
+`UploadError` instead of a plain `Error`, and `state.error` is typed with it.
+Branch on `error.kind` (`'file-size' | 'network' | 'server' | 'abort'`) rather
+than matching the message text. A server failure also carries `status`,
+`messages` (the parsed server messages) and the raw `response`.
+
+```js
+import { UploadError, upload } from 'frappe-ui'
+
+try {
+  await upload(file, { doctype: 'ToDo', docname: 'TODO-0001' })
+} catch (error) {
+  if (error instanceof UploadError && error.kind === 'file-size') {
+    showError('That file is too large.')
+  } else {
+    throw error
+  }
+}
+```
+
+Existing `catch` blocks keep working: `UploadError` is an `Error` and its
+`message` is unchanged. An aborted upload now rejects instead of hanging.
+
+### The `is_private` upload option is removed
+
+`useFileUpload` and `FileUploadHandler` took `private` and `is_private` for the
+same decision, with `private` winning. Only `private` is left, and it is a
+boolean. This is loud in TypeScript and silent in JavaScript, where an
+`is_private` you still pass is ignored and the upload falls back to the private
+default — so a public upload written as `{ is_private: 0 }` becomes private.
+
+```js
+// Before
+await upload(file, { is_private: 0 })
+
+// After
+await upload(file, { private: false })
+```
+
+The `is_private` field on the uploaded file record the server returns is
+unchanged.
+
 ### `uploadArgs` → flat props
 
 The single `uploadArgs` object prop is gone. Its commonly-used fields are now
@@ -1666,6 +1712,91 @@ save, debounce or guard the call site yourself. `data` and `error` follow the
 same newest-wins rule as `useDoctype` above, and `loading` stays `true` until
 every submit settles.
 
+## Data fetching: writes reject, reads resolve {#data-fetching-writes-reject}
+
+One rule now covers every composable: **a write rejects when it fails, a read
+resolves.** A failed write must not let its caller run the success path. A
+failed read leaves the last value on screen and reports through `error`.
+
+| Call                                                     | Before                   | After                  |
+| -------------------------------------------------------- | ------------------------ | ---------------------- |
+| `useCall` `submit()`                                     | resolved with `null`     | rejects                |
+| `useDoc` `setValue.submit()`, `delete.submit()`          | resolved with `null`     | rejects                |
+| a `useDoc` `methods:` member's `submit()`                | resolved with `null`     | rejects                |
+| `execute()` / `fetch()` / `reload()` in every composable | resolved                 | resolves (no change)   |
+
+`useDoctype` and `useList` write methods already rejected — see
+[the section above](#data-fetching-usedoctype-uselist). This change brings the
+rest in line with them.
+
+**Silent.** Nothing fails to build. The success path simply stops running, and
+an unawaited `submit()` becomes an unhandled rejection.
+
+```js
+// Before: the failure fell through to the success path
+const doc = await todo.setValue.submit({ status: 'Closed' })
+if (!doc) return showError(todo.setValue.error)
+toast.success('Saved')
+
+// After
+try {
+  await todo.setValue.submit({ status: 'Closed' })
+  toast.success('Saved')
+} catch (error) {
+  showError(error)
+}
+```
+
+Grep for `.submit(` and check each site. Three patterns need work:
+
+- `if (!result)` after a `submit()` — `null` is a valid response now, not a
+  failure. Move the handling into a `catch`.
+- a `submit()` that is not awaited — add `.catch(...)` or it reaches
+  `window.onunhandledrejection`.
+- a `submit()` inside a `Promise.all` — one rejection now fails the whole
+  batch. Use `Promise.allSettled` if that is not what you want.
+
+`error` and `onError` are unchanged: both still fire, whether the call rejects
+or not. Reads need no change.
+
+### `useDoc` method names cannot shadow the object's own members
+
+A `methods:` key that is already a member of what `useDoc` returns (`doc`,
+`error`, `loading`, `reload`, `setValue`, `delete`, and the rest) used to
+overwrite it silently. It throws at setup now and names the collision. Rename
+the key and keep the server method name:
+
+```js
+// Before: `reload` silently replaced the document's own reload()
+useDoc({ doctype: 'ToDo', name, methods: { reload: 'reload_items' } })
+
+// After
+useDoc({
+  doctype: 'ToDo',
+  name,
+  methods: { reloadItems: { name: 'reload_items' } },
+})
+```
+
+### `useNewDoc` and `useDoc` methods take fewer options
+
+An insert and a document method are writes that run when you call `submit()`.
+`immediate` and `refetch` are fixed to `false` for both, and `useNewDoc` no
+longer accepts `refetch`, `cacheKey` or `staleOnError` at all.
+
+This is loud in TypeScript and silent in JavaScript, where the values are now
+ignored. `refetch: true` was the dangerous one: it re-sent the insert on every
+keystroke in the form bound to `doc`.
+
+```js
+// Before: an insert per edit to the draft
+const draft = useNewDoc('ToDo', { description: '' }, { refetch: true })
+
+// After
+const draft = useNewDoc('ToDo', { description: '' })
+await draft.submit()
+```
+
 ## Data fetching (exports)
 
 `useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
@@ -1710,6 +1841,55 @@ try {
   }
 }
 ```
+
+### `FrappeUIError` is removed
+
+The exported error type for an input's `error` prop is gone. The prop is typed
+where it is declared, and a wrapper that forwards it reads the type from
+`InputLabelingProps`, which the root now exports.
+
+```ts
+// Before
+import type { FrappeUIError } from 'frappe-ui'
+defineProps<{ error?: string | FrappeUIError }>()
+
+// After
+import type { InputLabelingProps } from 'frappe-ui'
+defineProps<{ error?: InputLabelingProps['error'] }>()
+```
+
+The runtime value the prop accepts is unchanged: a string, or an `Error` that
+may carry `messages`.
+
+### Upload exports
+
+`UploadError` is exported. Every upload failure rejects with it, and
+`useFileUpload`'s `state.error` holds it — see
+[FileUploader](#uploads-reject-an-uploaderror).
+
+`isPrivateUpload` and the `UploadPrivacy` type are removed. They existed for
+the `is_private` upload option, which is gone; pass `private` instead. This is
+a build failure at the import. No app used either name.
+
+### A destination prop is typed `RouteDestination`
+
+Every prop that takes a router destination (`Button.route`, the Sidebar,
+Tabs, Breadcrumbs and Menu item types, and the rest) is typed
+`RouteDestination` instead of vue-router's `RouteLocationRaw`. The root exports
+`RouteDestination` and `RouteLocationObject`.
+
+The accepted values do not change: a path string, or an object with `name` /
+`params` / `path` / `query` / `hash`. The owned type exists so the generated
+API docs print a readable name rather than vue-router's minified internal
+ones.
+
+### Resource and editor barrels name their exports
+
+`frappe-ui/resources` and `frappe-ui/editor` used `export *` from their
+implementation files, which published every name those files happened to
+export. Both now list what they publish. The names apps import are all still
+there; an import of an internal helper that was never meant to be public fails
+at build time.
 
 ## Tree
 
@@ -2537,6 +2717,23 @@ The plugin used to install the v1 resources Options API mixin by default, so
 ```js
 app.use(FrappeUI, { resources: true })
 ```
+
+`resources` is a boolean. It used to be typed as an object of resource
+definitions, and the plugin never read what was in it — only whether it was
+set. Passing an object is a type error now, and still installs the mixin at
+runtime, so nothing breaks while you fix it:
+
+```js
+// Before
+app.use(FrappeUI, { resources: { todos: { url: '…' } } })
+
+// After
+app.use(FrappeUI, { resources: true })
+```
+
+`npx -p frappe-ui data-v1 ./src` makes that edit. It rewrites only an object
+literal written inline at the `app.use(FrappeUI, …)` call, and reports any site
+it will not touch (a spread, a computed key, a variable) instead of guessing.
 
 Nothing changes for Composition API code — `createResource`,
 `createListResource` and `createDocumentResource` never went through the plugin.

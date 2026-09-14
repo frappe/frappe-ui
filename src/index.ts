@@ -163,6 +163,18 @@ export type {
   ToggleSize,
 } from './composables/inputTypes'
 
+// The labeling props every input shares. A wrapper that forwards an input
+// error types it as `InputLabelingProps['error']`; the library owns no
+// separate name for that value (ADR-0008, VOC-Q4).
+export type { InputLabelingProps } from './composables/useInputLabeling'
+
+// One owned name for a router destination, so every `route` prop prints the
+// same type instead of vue-router's minified internal union.
+export type {
+  RouteDestination,
+  RouteLocationObject,
+} from './components/shared/route'
+
 // Directives
 export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'
@@ -177,11 +189,11 @@ export { default as debounce } from './utils/debounce'
 // stay internal to the upload paths that use them.
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export {
-  isPrivateUpload,
   upload,
+  UploadError,
   useFileUpload,
   type UploadedFile,
+  type UploadErrorKind,
   type UploadOptions,
-  type UploadPrivacy,
   type UploadState,
 } from './utils/useFileUpload'

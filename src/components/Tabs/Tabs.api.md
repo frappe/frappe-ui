@@ -155,7 +155,7 @@
     name: 'route',
     description: 'Renders the trigger as a RouterLink. See route mode in the spec.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   }
 ]
 

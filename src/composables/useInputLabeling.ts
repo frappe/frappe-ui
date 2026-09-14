@@ -3,15 +3,6 @@ import { useId } from '../utils/useId'
 import { useSlotTick } from './useSlotTick'
 import type { InputSize, InputVariant, ToggleSize } from './inputTypes'
 
-/**
- * Library-level extension of the standard `Error` type. Frappe's whitelisted
- * methods may return an error with multiple messages on `messages?: string[]`.
- * This is the shape input components render in their error region.
- */
-export interface FrappeUIError extends Error {
-  messages?: string[]
-}
-
 export interface InputLabelingProps {
   /** Label rendered above (or beside, for binary controls) the input. */
   label?: string
@@ -29,7 +20,7 @@ export interface InputLabelingProps {
    * or an `Error` object whose `messages?: string[]` is rendered as stacked
    * lines (with `Error.message` as the fallback).
    */
-  error?: string | FrappeUIError
+  error?: string | (Error & { messages?: string[] })
 
   /**
    * Marks the field as required. Renders an asterisk next to the label, with

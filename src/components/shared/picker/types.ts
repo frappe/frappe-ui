@@ -1,5 +1,5 @@
 import type { InputSize, InputVariant } from '../../../composables/inputTypes'
-import type { FrappeUIError } from '../../../composables/useInputLabeling'
+import type { InputLabelingProps } from '../../../composables/useInputLabeling'
 
 export interface PickerShellProps {
   /** Side of the trigger to render the panel on. Already resolved by the caller. */
@@ -26,8 +26,8 @@ export interface PickerShellProps {
   /** Help text below the input. */
   description?: string
 
-  /** Error message, as a string or `FrappeUIError`. */
-  error?: string | FrappeUIError
+  /** Error message, as a string or an `Error` carrying `messages`. */
+  error?: InputLabelingProps['error']
 
   /** Whether the input is required. */
   required?: boolean

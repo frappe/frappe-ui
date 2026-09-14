@@ -260,9 +260,37 @@ describe('useCall', () => {
     })
 
     // @ts-expect-error
-    call.submit({ hello: 1 })
+    await call.submit({ hello: 1 }).catch(() => {})
 
-    call.submit({ value: 'test' })
+    await call.submit({ value: 'test' })
+  })
+
+  // Actions reject, reads resolve (DAT-Q1).
+  it('rejects a failed submit and resolves a failed read', async () => {
+    const call = useCall({
+      url: url('/api/v2/method/error'),
+      immediate: false,
+    })
+
+    await expect(call.submit()).rejects.toThrow('ServerError')
+    expect(call.error).toBeTruthy()
+
+    // The same failure, through every read name.
+    await expect(call.execute()).resolves.toBe(null)
+    await expect(call.fetch()).resolves.toBe(null)
+    await expect(call.reload()).resolves.toBe(null)
+    expect(call.error).toBeTruthy()
+  })
+
+  it('resolves a successful submit with the response', async () => {
+    const call = useCall<{ success: boolean }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      immediate: false,
+    })
+
+    await expect(call.submit()).resolves.toMatchObject({ success: true })
+    expect(call.error).toBe(null)
   })
 
   it('caches data if cacheKey is provided', async () => {

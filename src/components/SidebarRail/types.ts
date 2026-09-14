@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 
 export interface SidebarRailItemProps {
   /** Tooltip text and the base of the item's accessible label. */
@@ -21,7 +21,7 @@ export interface SidebarRailItemProps {
    * Navigation target. When set, the item renders as a router link; otherwise
    * it renders as a button. A `click` event fires in both cases.
    */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 
   /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
   href?: string

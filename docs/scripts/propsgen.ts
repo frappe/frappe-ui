@@ -46,11 +46,14 @@ const SOURCE_ROOTS = [
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
 const AUTO_STORIES_END = '<!-- AUTO-GENERATED STORIES END -->'
 
+/**
+ * Drops the `| undefined` an optional prop or an optional object member
+ * carries, because the `?` already says it. Replacing the first match dropped
+ * the wrong one: `string | (Error & { messages?: string[] | undefined })` has
+ * two, and only the outer one belongs to the prop.
+ */
 function parseTypeStr(type: string) {
-  if (type.includes('undefined')) {
-    return type.replace(' | undefined', '').trim()
-  }
-  return type
+  return type.replace(/ \| undefined(?=$|[;,)}\]])/g, '').trim()
 }
 
 // Names Vue's language tooling gives the emit types it generates for an SFC:
