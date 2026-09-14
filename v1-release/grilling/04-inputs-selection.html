@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inputs and selection | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'inputs-selection'
+      const TITLE = 'Inputs and selection'
+      const INTRO =
+        'Set the permanent model, type, ref, and DOM contracts for input components. Picker trigger control is not asked again here: B7 is already answered in <a href="03-overlays-dialogs.html">Overlays and dialogs</a> as state plus <code>setOpen(boolean)</code>.'
+      const QUESTIONS = [
+        {
+          id: 'INP-Q1',
+          title: 'Selection option type hierarchy',
+          covers: ['H06'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>Select</code>, <code>Combobox</code>, and <code>MultiSelect</code> each accept option objects and grouped options. Their component-specific types include real differences, such as custom Combobox actions, but wrapper code also needs one type that can hold options for any selection control. The decision is whether to preserve the precise component types and add that shared union.</p>`,
+          visual: {
+            label: 'Type hierarchy',
+            code: `SelectionOption
+  SelectOption
+  ComboboxSimpleOption
+  MultiSelectOption
+
+SelectionGroup
+  ComboboxGroupedOption
+  MultiSelectGroupedOption`,
+          },
+          found: `<p>The three public naming hierarchies describe overlapping option shapes, so a generic wrapper cannot name the family without importing each component type. The current names are declared at <code>src/components/Select/types.ts:14-28</code>, <code>src/components/Combobox/types.ts:37-84</code>, and <code>src/components/MultiSelect/types.ts:29-54</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H06 choice</div><p>“Keep component-specific types; add a new shared union alongside them”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping only separate types freezes a merely inconsistent hierarchy and makes shared wrappers repeat the same union. Adding shared types changes zero measured v1-app sites, requires no consumer migration, and is codemod-able because existing component types remain valid. Replacing the component types would make precise component-only features harder to express; adding the union gives wrappers a common name without that loss.</p>`,
+          options: [
+            'Keep the component-specific types and add SelectionOption and SelectionGroup unions',
+            'Replace the component-specific option types with one shared option and group type',
+            'Keep the three independent hierarchies and document their overlap',
+          ],
+          recommended: 0,
+          why: 'The additive union gives wrappers one type while preserving each component’s precise contract at zero measured migration cost.',
+        },
+        {
+          id: 'INP-Q2',
+          title: 'Select, Combobox, and MultiSelect empty values',
+          covers: ['M-inputs'],
+          severity: 'Medium · Mechanical',
+          tier: 'not measured',
+          dependsOn: 'INP-Q1',
+          what: `<p>The selection models use different empty values because their value shapes differ. <code>Select</code> clears to <code>undefined</code>, <code>Combobox</code> clears to <code>null</code>, and <code>MultiSelect</code> clears to an empty array. <code>FormControl</code> forwards whichever model belongs to its selected component type.</p>`,
+          visual: {
+            label: 'Empty model values',
+            html: `<table><thead><tr><th>Component</th><th>Selected value</th><th>Empty value</th></tr></thead><tbody><tr><td>Select</td><td><code>string | number</code></td><td><code>undefined</code></td></tr><tr><td>Combobox</td><td><code>string | number</code></td><td><code>null</code></td></tr><tr><td>MultiSelect</td><td><code>Array&lt;string | number&gt;</code></td><td><code>[]</code></td></tr></tbody></table>`,
+          },
+          found: `<p>The audit flagged the three empty values as inconsistent, but <code>spec/selection.md</code> explicitly assigns each value and the runtime model types match. See <code>src/components/Select/types.ts:43-50</code>, <code>src/components/Combobox/types.ts:86-91</code>, and <code>src/components/MultiSelect/types.ts:56-61</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the split freezes a merely inconsistent-looking API, but the values carry useful type information: a nullable single value is not the same state as an empty collection. This item was not measured because the triage recommends no API change. Unifying the values would break model checks and FormControl forwarding without removing a runtime trap.</p>`,
+          options: [
+            'Keep the three empty values and document FormControl type-based forwarding',
+            'Use undefined for empty Select and Combobox values while keeping [] for MultiSelect',
+            'Use null for empty Select and Combobox values while keeping [] for MultiSelect',
+          ],
+          recommended: 0,
+          why: 'The specification already makes the distinction explicit, and changing model sentinels creates an unnecessary behavior break.',
+        },
+        {
+          id: 'INP-Q3',
+          title: 'TimePicker emits and exported types',
+          covers: ['H05'],
+          severity: 'High',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>TimePicker</code> reports value changes, validation state, and popover state through Vue events. It currently declares two ways to observe opening and closing, plus two invalid-input events with overlapping meaning. Its public prop and emit declarations also use a private <code>Variant</code> name and do not export <code>TimePickerEmits</code> from the component barrel.</p>`,
+          visual: {
+            label: 'Current versus proposed event contract',
+            code: `  update:modelValue(value)
+  change(value)
+  update:open(open)
+- open()
+- close()
+- input-invalid(input)
+  invalid-change(invalid)
++ export type { TimePickerEmits }
++ variant?: InputVariant`,
+          },
+          found: `<p>Duplicate events can fire for one state change, which leaves consumers to choose between equivalent subscriptions and risks double handling. The declarations are at <code>src/components/TimePicker/types.ts:75-83</code>, the paired runtime emits are at <code>src/components/TimePicker/TimePicker.vue:514-520</code>, and the barrel exports only props at <code>src/components/TimePicker/index.ts:1-2</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H05 choice</div><p>“Keep <code>update:open</code> and <code>invalid-change</code>, remove duplicate emits, shared variant type, export <code>TimePickerEmits</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping duplicate emits freezes a trap because one user action has two public notification paths and consumers can attach both. Removing <code>open</code>, <code>close</code>, and <code>input-invalid</code> touches zero measured v1-app sites; the T1 removal is codemod-able if an unmeasured listener exists. The smaller contract leaves model updates for state and <code>invalid-change</code> for validation, while exporting the types makes the contract usable.</p>`,
+          options: [
+            'Keep update:open and invalid-change, remove the duplicate events, use InputVariant, and export TimePickerEmits',
+            'Keep update:open plus open and close, but remove input-invalid and export all types',
+            'Remove all behavior events and expose only update:modelValue and update:open',
+          ],
+          recommended: 0,
+          why: 'It removes duplicate notification paths with zero measured listeners and preserves the distinct model and validation events.',
+        },
+        {
+          id: 'INP-Q4',
+          title: 'DateTimePicker allowCustomTime versus typeable',
+          covers: ['M-inputs'],
+          severity: 'Medium · Mechanical',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>DatePicker</code>, <code>DateRangePicker</code>, and their trigger inputs use <code>typeable</code> to say whether a user may type instead of choosing from the panel. <code>DateTimePicker</code> adds <code>allowCustomTime</code> for the same typed-entry capability inside its time field. One component therefore exposes both words for one interaction rule.</p>`,
+          visual: {
+            label: 'Current versus proposed prop',
+            code: `  <DateTimePicker
+    typeable
+-   :allow-custom-time="canTypeTime"
++   :typeable="canTypeDateAndTime"
+  />
+
+- allowCustomTime?: boolean
++ // typeable governs the trigger and time input`,
+          },
+          found: `<p>The second name makes callers guess whether typed date and typed time are separate policies even though the input family uses <code>typeable</code>. The shared prop is at <code>src/components/DatePicker/types.ts:46-51</code>; the extra prop is at <code>src/components/DatePicker/types.ts:117-123</code> and is forwarded at <code>src/components/DatePicker/DateTimePicker.vue:80</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping both names freezes a misleading API because <code>allowCustomTime</code> looks like a separate feature switch beside <code>typeable</code>. Renaming touches zero measured v1-app sites and is a T1 codemod-able change. One <code>typeable</code> prop gives the whole date-time input one policy; separate props preserve independent control only if the product intends to support that distinction.</p>`,
+          options: [
+            'Remove allowCustomTime and let typeable govern both date and time typing',
+            'Rename allowCustomTime to timeTypeable and keep independent date and time policies',
+            'Keep allowCustomTime and document the two typing policies separately',
+          ],
+          recommended: 0,
+          why: 'The family already uses typeable, and the zero-site mechanical rename avoids freezing a second name for the same behavior.',
+        },
+        {
+          id: 'INP-Q5',
+          title: 'Input template-ref methods',
+          covers: ['M-inputs', 'L-root'],
+          severity: 'Medium · Low',
+          tier: 'T0 · 0 sites',
+          what: `<p>A parent uses a template ref when it must focus, clear, or open an input from script. The picker family currently exposes only <code>open()</code>, while <code>Checkbox</code>, <code>Switch</code>, <code>Slider</code>, <code>RadioGroup</code>, and <code>FormControl</code> expose no common method. That leaves a generic form unable to call <code>focus()</code> on its rendered control.</p>`,
+          visual: {
+            label: 'Form control ref shape',
+            code: `<FormControl ref="field" type="date" />
+
+- field.value?.open?.()
++ field.value?.focus()
++ field.value?.clear?.()
++ field.value?.open?.()
+
+// every control guarantees focus();
+// clear() and open() stay capability-specific`,
+          },
+          found: `<p>The date pickers expose only <code>open()</code> at <code>src/components/DatePicker/DatePicker.vue:190-192</code>, <code>DateRangePicker.vue:180-182</code>, and <code>DateTimePicker.vue:169-171</code>. The audit found no equivalent exposed method on the five other controls, making <code>focus()</code> unavailable through 185 FormControl uses.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current refs freezes an incomplete but additive API: callers must reach into DOM details or special-case component types. Adding methods changes zero measured v1-app sites and needs no codemod, but it adds implementation and tests across several controls before RC. A guaranteed <code>focus()</code> gives generic forms one dependable action; richer methods should remain capability-specific so every control does not promise meaningless operations.</p>`,
+          options: [
+            'Add focus() to every input and keep clear() and open() capability-specific',
+            'Add a shared ref contract with focus(), clear(), and open() on every input',
+            'Keep the current ref methods and document each component separately',
+            'Defer all additive ref methods to 1.1',
+          ],
+          recommended: 0,
+          why: 'A universal focus() solves the generic-form gap at zero migration cost without forcing irrelevant methods onto every control.',
+        },
+        {
+          id: 'INP-Q6',
+          title: 'Fallthrough attributes on input wrappers and controls',
+          covers: ['M-inputs'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p>Vue sends undeclared attributes such as <code>aria-label</code>, <code>name</code>, <code>data-*</code>, <code>class</code>, and listeners to a component's chosen DOM element. Input components have both a layout wrapper and the actual interactive control, so the destination affects forms, accessibility, styling, and events. The family needs a rule for which attributes belong on which element.</p>`,
+          visual: {
+            label: 'Attribute destinations',
+            html: `<table><thead><tr><th>Attribute</th><th>Public target</th></tr></thead><tbody><tr><td><code>name</code>, <code>aria-*</code>, listeners</td><td>Interactive control</td></tr><tr><td><code>class</code>, <code>style</code></td><td>Layout wrapper when present</td></tr><tr><td><code>data-*</code></td><td>Control unless documented otherwise</td></tr></tbody></table>`,
+          },
+          found: `<p>The audit found attributes landing on the wrapper, the control, or both, including duplicate application in Checkbox. The relevant routing can be seen at <code>src/components/TextInput/TextInput.vue:1-48</code>, <code>src/components/Checkbox/Checkbox.vue:2-23</code>, and <code>src/components/FormControl/FormControl.vue:1-13</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current routing is a trap because an accessibility attribute or listener may decorate a non-interactive wrapper, and duplicate listeners may run twice. The migration report did not measure input attribute sites, and a codemod cannot determine the intended DOM target. Fixing the rule may move styling or event behavior, but it gives every control a predictable native-attribute contract.</p>`,
+          options: [
+            'Route control attributes and listeners once to the interactive element, with class and style on the layout wrapper',
+            'Route every fallthrough attribute to the interactive control',
+            'Disable fallthrough and require explicit controlAttrs and wrapperAttrs props',
+          ],
+          recommended: 0,
+          why: 'It puts semantic attributes on the element that implements the input while preserving wrapper-level layout styling.',
+        },
+        {
+          id: 'INP-Q7',
+          title: 'Duration label and description slots',
+          covers: ['M-inputs'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p><code>Duration</code> wraps <code>TextInput</code> and forwards labeling props such as <code>label</code> and <code>description</code>. It does not forward the matching <code>#label</code> and <code>#description</code> slots, so a caller loses custom label content when switching from TextInput to Duration. The missing slots can be added without changing existing calls.</p>`,
+          visual: {
+            label: 'Duration slot forwarding',
+            code: `<Duration v-model="seconds">
++ <template #label="{ required }">
++   Runtime <RequiredMark v-if="required" />
++ </template>
++ <template #description>
++   Stored in seconds
++ </template>
+</Duration>`,
+          },
+          found: `<p><code>DurationProps</code> inherits the shared labeling contract at <code>src/components/Duration/types.ts:20-42</code>, but the wrapper renders a self-closing TextInput with no forwarded templates at <code>src/components/Duration/Duration.vue:1-18</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the omission freezes a merely inconsistent wrapper: the props work but their companion slots disappear. This item is not measured, though adding slots does not break any existing site and needs no codemod. Adding them now completes the inherited labeling contract; deferring leaves Duration as the family exception until 1.1.</p>`,
+          options: [
+            'Forward #label and #description through Duration before RC',
+            'Keep and document Duration as a prop-only labeling wrapper',
+            'Defer the additive slots to 1.1',
+          ],
+          recommended: 0,
+          why: 'The slots complete an API Duration already claims through InputLabelingProps and require no consumer migration.',
+        },
+        {
+          id: 'INP-Q8',
+          title: 'FormControl type routing and variant forwarding',
+          covers: ['M-inputs'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p><code>FormControl</code> is a dispatcher: its <code>type</code> chooses TextInput, selection, toggle, and picker components, then it forwards common props. The audited type union accidentally made native date and time inputs unreachable, while <code>variant</code> was sent to toggle controls that do not support it. A caller could therefore get a different control or a stray DOM attribute despite passing a type-correct prop.</p>`,
+          visual: {
+            label: 'FormControl dispatch',
+            code: `<FormControl type="date" />
+  -> DatePicker
+<FormControl type="time" />
+  -> TimePicker
+<FormControl type="checkbox" variant="outline" />
+  -> Checkbox
+-    DOM variant="outline"
++    variant is not forwarded`,
+          },
+          found: `<p>The problem sits where <code>TextInputTypes</code> and composite type names meet, and where every child receives <code>variant</code>. See <code>src/components/FormControl/types.ts:22-40</code> and <code>src/components/FormControl/FormControl.vue:76-114</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping this behavior is a trap because valid-looking configuration can select the wrong component or leak an unsupported attribute. The migration report did not measure this item, so the affected site count and codemod safety are unknown. Correct routing makes native and composite types explicit, and filtering common props prevents FormControl from inventing child APIs.</p>`,
+          options: [
+            'Make native and composite type routes explicit and forward only props each child supports',
+            'Limit FormControl to text, textarea, and selection controls and remove picker and toggle routing',
+            'Split FormControl into separate text, selection, picker, and toggle dispatchers',
+          ],
+          recommended: 0,
+          why: 'It fixes both silent routing failures while preserving the existing FormControl component family.',
+        },
+        {
+          id: 'INP-Q9',
+          title: 'Stable exports for input labeling types',
+          covers: ['M-inputs', 'X4'],
+          severity: 'Medium · Cross-cutting',
+          tier: 'not measured',
+          what: `<p>Most root input props extend <code>InputLabelingProps</code>, whose <code>error</code> field accepts <code>FrappeUIError</code>. Consumers need those names to type wrapper props and reusable validation helpers. Today the types are tied to the experimental entry point even though stable root components expose them in permanent signatures.</p>`,
+          visual: {
+            label: 'Stable type imports',
+            code: `- import type {
+-  FrappeUIError,
+-  InputLabelingProps,
+-} from 'frappe-ui/experimental'
++ import type {
++  InputErrorValue,
++  InputLabelingProps,
++} from 'frappe-ui'`,
+          },
+          found: `<p>Stable props depend on types consumers cannot import from the same stable entry point. The declarations are at <code>src/composables/useInputLabeling.ts:6-15</code>, and FormControl exposes the error type at <code>src/components/FormControl/types.ts:3-11</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">X4 research</div><p><code>FrappeUIError</code> is not a Frappe response object. It is a smaller display contract extending <code>Error</code> with optional <code>messages</code>. The research recommends renaming it to <code>InputErrorValue</code> and exporting that name.</p></div>`,
+          tradeoff: `<p>Keeping the types experimental freezes an unnameable stable contract, and <code>FrappeUIError</code> is substandard because its name implies a transport error it does not model. This M-inputs item has no separate migration row, though the related L-root model-type batch has zero measured v1-app imports and is codemod-able. Promoting accurate names makes wrapper types usable; retaining the old name avoids a type-only rename but preserves the false meaning.</p>`,
+          options: [
+            'Export InputLabelingProps and rename FrappeUIError to the stable InputErrorValue type',
+            'Export InputLabelingProps and FrappeUIError from the stable root without renaming',
+            'Inline the labeling and error shapes into every public component props type',
+          ],
+          recommended: 0,
+          why: 'Stable components need stable names for their signatures, and InputErrorValue describes the rendered value without implying a server response.',
+        },
+        {
+          id: 'INP-Q10',
+          title: 'Input data-slot names and FormLabel hook',
+          covers: ['M-inputs'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p>Input components publish <code>data-slot</code> attributes so consumers can style internal regions without class-injection props. Some families call the interactive element <code>control</code>, while selection components call it <code>trigger</code>. <code>FormLabel</code> also needs the same <code>data-slot="label"</code> hook used by the shared InputLabel.</p>`,
+          visual: {
+            label: 'Proposed styling hooks',
+            code: `[data-slot="control"]  // typed controls
+[data-slot="trigger"]  // opens a picker/list
+[data-slot="label"]    // every rendered label
+
+<FormLabel data-slot="label" />
+<Select data-slot="trigger" />
+<TextInput data-slot="control" />`,
+          },
+          found: `<p>The family splits the main element between <code>control</code> and <code>trigger</code>, and the audited FormLabel root had no label marker. Current examples are <code>src/components/Checkbox/Checkbox.vue:8-23</code>, <code>src/components/Combobox/Combobox.vue:530-534</code>, and <code>src/components/FormLabel/FormLabel.vue:1-5</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-inputs choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping undocumented hooks freezes a merely inconsistent styling vocabulary and makes shared selectors miss part of the family. This item is not measured; adding a missing marker is compatible, while renaming existing markers would break selectors and needs a census. Keeping <code>trigger</code> for elements that open a panel and <code>control</code> for direct inputs preserves a useful distinction if it is documented.</p>`,
+          options: [
+            'Keep control for direct inputs and trigger for panel openers, document both, and add data-slot="label" to FormLabel',
+            'Rename every interactive input marker to data-slot="control" and add the FormLabel hook',
+            'Expose both control and trigger markers on selection components and add the FormLabel hook',
+            'Keep and document the current markers without adding a FormLabel hook',
+          ],
+          recommended: 0,
+          why: 'The two names describe different jobs, while adding the missing label hook completes the shared styling contract without a rename.',
+        },
+        {
+          id: 'INP-Q11',
+          title: 'Selection emit type declarations',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T0 · 0 sites',
+          dependsOn: 'INP-Q2',
+          what: `<p>Exported emit types tell TypeScript which Vue events exist and what payload each event carries. <code>ComboboxEmits</code> and <code>MultiSelectEmits</code> list model events that <code>defineModel</code> already owns, while <code>RadioGroupEmits</code> promises the wrong value shape. These types must describe runtime behavior exactly because wrapper code can import them.</p>`,
+          visual: {
+            label: 'Emit declaration cleanup',
+            code: `- ComboboxEmits['update:modelValue']
+- MultiSelectEmits['update:modelValue']
+  // declared by defineModel instead
+
+- RadioGroupEmits: string | number
++ RadioGroupEmits: RadioValue
++ type RadioValue = string | number | boolean`,
+          },
+          found: `<p>The stale model declarations and wrong RadioGroup payload make exported types disagree with the SFC macros and accepted values. See <code>src/components/Combobox/types.ts:318-325</code>, <code>src/components/MultiSelect/types.ts:305-313</code>, and <code>src/components/Radio/types.ts:5-34</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping false emit declarations is a trap because TypeScript accepts listeners that do not match the component's real model contract. Correcting the types touches zero measured v1-app imports, is T0, and is codemod-able. The result makes <code>defineModel</code> the single owner of model updates and gives RadioGroup the boolean payload it already accepts.</p>`,
+          options: [
+            'Remove duplicate defineModel events from ComboboxEmits and MultiSelectEmits and correct RadioGroupEmits',
+            'Keep the model events in every emits interface but generate them from shared model types',
+            'Stop exporting all three emits interfaces',
+          ],
+          recommended: 0,
+          why: 'It makes the exported declarations match runtime ownership and payloads with zero measured consumer edits.',
+        },
+        {
+          id: 'INP-Q12',
+          title: 'TextInput and DateRangePicker model types',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>TextInput</code> accepts a string or number model but emits only a string from the native input. <code>DateRangePicker</code> declares its prop as any string array but emits either an exact two-item tuple or an empty tuple. The prop and emit sides of each <code>v-model</code> should tell one consistent story.</p>`,
+          visual: {
+            label: 'Model type alignment',
+            code: `- TextInput model: string | number
+- TextInput emit: string
++ TextInput model and emit: string
+
+- DateRangePicker model: string[]
++ DateRangePicker model: DateRangeValue
+  type DateRangeValue = [string, string] | []`,
+          },
+          found: `<p>The public prop and emit shapes disagree at <code>src/components/TextInput/types.ts:21-30</code> and <code>src/components/DatePicker/types.ts:84-108</code>. A two-way binding can therefore type-check on input and fail when code handles the emitted value.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping mismatched model types is a trap because one binding has two incompatible static contracts. Aligning them touches zero measured v1-app imports, is T0, and is codemod-able. Narrowing TextInput to string reflects browser output; using <code>DateRangeValue</code> prevents arrays with one or three dates from appearing valid.</p>`,
+          options: [
+            'Use string for TextInput and DateRangeValue for both sides of DateRangePicker v-model',
+            'Preserve TextInput numbers by parsing number inputs and widen DateRangePicker emits to string[]',
+            'Make both components generic over their model and emitted value types',
+          ],
+          recommended: 0,
+          why: 'The narrow types match the values the components already emit and reject impossible model states.',
+        },
+        {
+          id: 'INP-Q13',
+          title: 'Dayjs in DatePicker callbacks and methods',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T0 · 0 sites',
+          what: `<p>The DatePicker family exposes <code>Dayjs</code> in <code>isDateUnavailable</code>, action-slot setters, and range setters. That makes a third-party date object part of the frozen component contract, even for consumers that otherwise exchange strings or native Date objects. B4 separately decided to keep <code>dayjs</code> utilities at the package root for app code.</p>`,
+          visual: {
+            label: 'Current versus owned date boundary',
+            code: `- isDateUnavailable?: (date: Dayjs) => boolean
+- setDate(date: string | Date | Dayjs)
+- setRange([string | Date | Dayjs, ...])
++ isDateUnavailable?: (date: Date) => boolean
++ setDate(date: string | Date)
++ setRange([string | Date, string | Date])
+
+// root dayjs utilities remain a separate B4 choice`,
+          },
+          found: `<p>The dependency type appears directly in stable props and slot methods at <code>src/components/DatePicker/types.ts:1-76</code> and <code>src/components/DatePicker/types.ts:139-169</code>. This couples component callbacks to the <code>dayjs/esm</code> type path.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">B4 choice</div><p>“Keep <code>dayjs</code> and <code>dayjsLocal</code> exported from the root”</p><div class="source-label">Comment</div><p>“dayjs exports are necessary and must be exported from frappe-ui, it is supposed to be used in app code”</p></div>`,
+          tradeoff: `<p>Keeping <code>Dayjs</code> freezes a third-party type path and means a dependency upgrade can change stable callback methods. Replacing it with native Date and string inputs touches zero measured v1-app imports, is T0, and is codemod-able according to the owned-types batch, though runtime callback users still need behavior tests. B4 can keep root date utilities without requiring every picker callback to expose their object type.</p>`,
+          options: [
+            'Use native Date in callbacks and string or Date in setters while keeping B4 root utilities separate',
+            'Keep Dayjs in the component contract and export the Dayjs type from frappe-ui',
+            'Create and export an owned DatePickerDate interface backed by the supported date methods',
+          ],
+          recommended: 0,
+          why: 'It keeps the component boundary owned by frappe-ui while respecting the separate decision to offer dayjs utilities to app code.',
+        },
+        {
+          id: 'INP-Q14',
+          title: 'DatePickerViewMode and DatePickerDateObj root exports',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T1 · 0 sites',
+          dependsOn: 'INP-Q13',
+          what: `<p><code>DatePickerViewMode</code> and <code>DatePickerDateObj</code> support the calendar panel implementation. The DatePicker barrel uses <code>export *</code>, so those internal names also reach the package root. Consumers can import them even though no stable component prop, emit, slot, or method asks for them.</p>`,
+          visual: {
+            label: 'DatePicker barrel',
+            code: `- export * from './types'
++ export type {
++  DatePickerProps,
++  DateRangePickerProps,
++  DateTimePickerProps,
++  DatePickerEmits,
++  DateRangePickerEmits,
++  DateTimePickerEmits,
++ } from './types'
+- DatePickerViewMode
+- DatePickerDateObj`,
+          },
+          found: `<p>The two implementation types are declared at <code>src/components/DatePicker/types.ts:220-228</code> and escape through <code>src/components/DatePicker/index.ts:1-4</code>, then through the root barrel at <code>src/index.ts:40-44</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the wildcard exports is a trap because internal calendar refactors become root API changes after the freeze. Removing the two names touches zero measured v1-app imports and is a T1 codemod-able removal if an unmeasured import exists. An explicit barrel keeps the public picker types while preventing the next internal type from escaping by accident.</p>`,
+          options: [
+            'Replace the wildcard with an explicit public type list and remove both internal root exports',
+            'Move both types to an experimental DatePicker subpath',
+            'Promote both types as documented stable root API',
+          ],
+          recommended: 0,
+          why: 'No measured consumer uses the internal names, and an explicit barrel prevents accidental API growth after the freeze.',
+        },
+        {
+          id: 'INP-Q15',
+          title: 'Rating focus() template-ref method',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T0 · 0 sites',
+          dependsOn: 'INP-Q5',
+          what: `<p><code>Rating</code> is keyboard-focusable and already moves focus among its star buttons internally. A parent form cannot call <code>focus()</code> through a Rating template ref because the component exposes no public method. Adding the method would make Rating follow the common focus decision from INP-Q5.</p>`,
+          visual: {
+            label: 'Consumer usage',
+            code: `<Rating ref="rating" v-model="score" />
+
+function focusFirstError() {
+- document.querySelector('.rating-star')?.focus()
++ rating.value?.focus()
+}`,
+          },
+          found: `<p>Rating owns a root ref and focuses star buttons inside keyboard handling, but has no <code>defineExpose</code> contract. See <code>src/components/Rating/Rating.vue:17-58</code> and <code>src/components/Rating/Rating.vue:377-386</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping Rating without <code>focus()</code> freezes a merely inconsistent ref API and forces DOM queries in generic validation flows. Adding it touches zero measured v1-app sites, is T0, and needs no codemod. The only permanent choice is where focus lands, so the contract should specify the current selected star or the first available star.</p>`,
+          options: [
+            'Add focus() and focus the selected star, or the first star when the value is empty',
+            'Add focus(index) and require callers to choose a star',
+            'Keep and document Rating without a public focus method',
+            'Defer Rating.focus() to 1.1',
+          ],
+          recommended: 0,
+          why: 'It matches normal form focus behavior and reuses Rating’s existing roving-focus target with no consumer migration.',
+        },
+        {
+          id: 'INP-Q16',
+          title: 'Rating invalid-size fallback versus default size',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T3 · 38 sites combined',
+          what: `<p><code>Rating</code> defaults its <code>size</code> prop to <code>md</code>. If JavaScript passes an unsupported size at runtime, the lookup falls back to <code>sm</code>, so an invalid value renders smaller than an omitted value. The migration report groups the Rating review set with TabButtons defaults; this page asks only about Rating.</p>`,
+          visual: {
+            label: 'Default and fallback',
+            code: `const props = withDefaults(..., {
+  size: 'md',
+})
+
+resolvePropValue(
+  starSizeMap,
+  props.size,
+- 'sm',
++ 'md',
+)`,
+          },
+          found: `<p>The component default is <code>md</code> at <code>src/components/Rating/Rating.vue:145-150</code>, while invalid values fall back to <code>sm</code> at <code>src/components/Rating/Rating.vue:197-208</code>. That makes omission and recovery use different defaults.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the fallback freezes a merely inconsistent recovery rule: omitted Rating is medium, but a stale or invalid size becomes small. The report counts 38 v1-app review sites for Rating and TabButtons together, does not isolate Rating's share, classifies the change as T3, and says a codemod cannot prove visual safety. Aligning to <code>md</code> makes recovery predictable but may resize an invalid dynamic use; keeping it avoids that review and must be documented.</p>`,
+          options: [
+            'Keep the sm invalid-size fallback and document that it differs from the md default',
+            'Change the invalid-size fallback to md before RC and review the combined 38-site set',
+            'Throw on an invalid Rating size instead of rendering a fallback',
+          ],
+          recommended: 0,
+          why: 'The difference affects only invalid runtime input, while the available 38-site count is a combined manual review set that does not isolate Rating.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

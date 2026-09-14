@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shells, page header and scroll | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'shells-page-header'
+      const TITLE = 'Shells, page header and scroll'
+      const INTRO =
+        'Decide how shells name and own their regions, how PageHeader finds its destination, and which scroll and color-scheme contracts belong in stable v1. The PageHeaderBackButton fallback is H16 in <a href="01-vocabulary.html">VOC-Q6</a>; the mobile-height CSS variable is H18 in <a href="01-vocabulary.html">VOC-Q7</a>.'
+      const QUESTIONS = [
+        {
+          id: 'SHELL-Q1',
+          title: 'DesktopShellProps: declare the scroll prop',
+          covers: ['H15'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>DesktopShell</code> can either own one page-wide scroll area or leave scrolling to panes inside the page. Consumers select that behavior with the <code>scroll</code> prop, which defaults to <code>true</code>. <code>DesktopShellProps</code> is the exported TypeScript contract that wrappers and documentation should use for the same component.</p>`,
+          visual: {
+            label: 'Current versus declared prop contract',
+            code: `- export interface DesktopShellProps {}
+- defineProps<{ scroll?: boolean }>()
++ export interface DesktopShellProps {
++   scroll?: boolean
++ }
++ defineProps<DesktopShellProps>()`,
+          },
+          found: `<p>The exported interface is empty while the component declares <code>scroll?: boolean</code> inline. See <code>src/components/DesktopShell/types.ts:1-2</code> and <code>src/components/DesktopShell/DesktopShell.vue:45-55</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H15 choice</div><p>"Add <code>scroll</code> to <code>DesktopShellProps</code>; component consumes the exported type"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the empty interface freezes a false type contract: code that uses the exported props type cannot see a real component prop. Changing it touches zero measured v1-app sites and requires no consumer codemod. The component and its exported type then have one source of truth.</p>`,
+          options: [
+            'Add scroll to DesktopShellProps and use that interface in DesktopShell',
+            'Remove DesktopShellProps and leave the prop type local to the component',
+            'Move scroll behavior to a separate DesktopShellContent component',
+          ],
+          recommended: 0,
+          why: 'It fixes a false exported type at zero measured consumer cost.',
+        },
+        {
+          id: 'SHELL-Q2',
+          title: 'DesktopShell and MobileShell: name the side region',
+          covers: ['B11'],
+          severity: 'Medium · real decision',
+          tier: 'T1 · 3 sites',
+          what: `<p>The shell side region holds primary navigation beside desktop content or below mobile content. <code>DesktopShell</code> currently splits it into <code>#rail</code> and <code>#sidebar</code>, while <code>MobileShell</code> calls its corresponding slot <code>#nav</code>. A common name lets responsive layouts pass the same conceptual region to either shell.</p>`,
+          visual: {
+            label: 'Current shell slots',
+            html: `<table><thead><tr><th>Component</th><th>Named slots</th><th>Typical content</th></tr></thead><tbody><tr><td><code>DesktopShell</code></td><td><code>#rail</code>, <code>#sidebar</code></td><td><code>SidebarRail</code>, <code>Sidebar</code></td></tr><tr><td><code>MobileShell</code></td><td><code>#nav</code></td><td><code>MobileNav</code></td></tr></tbody></table>`,
+          },
+          found: `<p>One shell family uses three names for the same navigation region. The desktop slots are at <code>src/components/DesktopShell/DesktopShell.vue:1-5</code> and <code>:57-64</code>; the mobile slot is at <code>src/components/MobileShell/MobileShell.vue:25</code> and <code>:37-42</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B11 choice</div><p>"Shell side region is called <code>nav</code> on both shells"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Triage recommendation</div><p>Use <code>sidebar</code> because it describes the region without prescribing width or content.</p></div>`,
+          tradeoff: `<p>Keeping and documenting the split freezes a merely inconsistent slot vocabulary, so responsive wrappers must translate between desktop and mobile names. Renaming to <code>#nav</code> changes three measured v1-app sites and a codemod can handle all of them. Choosing <code>#sidebar</code> is more spatially specific, while <code>#nav</code> matches the content across both placements and preserves the maintainer's decision.</p>`,
+          options: [
+            'Rename the DesktopShell side-region slots to nav',
+            'Use sidebar as the common slot name on both shells',
+            'Use rail as the common slot name on both shells',
+            'Keep rail, sidebar, and nav and document the split',
+          ],
+          recommended: 0,
+          why: 'Nav names the shared content rather than its desktop placement and costs three codemod-able sites.',
+        },
+        {
+          id: 'SHELL-Q3',
+          title: 'Shell scroll and PageHeader target registries',
+          covers: ['H17'],
+          severity: 'High',
+          tier: 'not measured',
+          dependsOn: 'SHELL-Q1',
+          what: `<p><code>DesktopShell</code> and <code>MobileShell</code> register their scrolling elements so <code>useShellScrolled</code> can find one without consumer wiring. Each <code>PageHeaderTarget</code> also registers a teleport destination for <code>PageHeaderBase</code>. Both registries currently choose whichever element mounted last, without checking which shell or page owns the caller.</p>`,
+          visual: {
+            label: 'Ownership problem and the three researched options',
+            code: `DesktopShell
+  PageHeaderTarget A <- PageHeader
+  ScrollArea A       <- useShellScrolled
+Two shells or a later dialog target
+  Shell A: Page A --listener--> ScrollArea B  WRONG
+           Header A --teleport--> Target B     WRONG
+  Shell B: Target B + ScrollArea B  (mounted last)
+Option 1: nearest owner, registry fallback
+  <DesktopShell><Page /></DesktopShell>
+  useShellScrolled()
+Option 2: explicit targets only
+  <PageHeader :target="headerTarget" />
+  useShellScrolled({ target: scrollElement })
+Option 3: keep last-mounted-wins
+  Avoid concurrent shells and local targets`,
+          },
+          found: `<p>The module-global arrays route every caller to their last entry, so concurrent shells or a later local target can misroute both scrolling and headers. See <code>src/composables/useShellScrolled.ts:21-47</code>, <code>src/components/PageHeader/target.ts:7-19</code>, and <code>src/components/PageHeader/PageHeaderBase.vue:1-13</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H17 choice</div><p>"(no option chosen)"</p><div class="source-label">Comment</div><p>"need simple/visual explanation with examples of this before deciding"</p></div><div class="source-quote"><div class="source-label">Research</div><p>A registry is a module-level array of mounted elements, and the active value is its last element. This works with one shell but ignores component ancestry when two shells or a dialog target coexist. Option 1 provides the nearest targets and keeps the registry for router and non-component access. Option 2 makes every consumer wire targets; option 3 keeps the misrouting risk.</p></div>`,
+          tradeoff: `<p>Keeping last-mounted-wins freezes a routing trap: a valid nested layout can make a page observe or render into another shell. The migration report did not measure H17, so the affected site count and codemod safety are unknown. Nearest-owner lookup fixes nested layouts while a registry fallback preserves current zero-wiring use and access outside components.</p>`,
+          options: [
+            'Use the nearest shell and PageHeader owner, with the registries as fallback',
+            'Remove the registries and require explicit header and scroll targets',
+            'Keep last-mounted-wins and document that shells and local targets cannot overlap',
+          ],
+          recommended: 0,
+          why: 'Nearest ownership fixes concurrent layouts without removing the current fallback used outside component setup.',
+        },
+        {
+          id: 'SHELL-Q4',
+          title: 'ScrollArea.viewportClass inner-element styling',
+          covers: ['H14'],
+          severity: 'High',
+          tier: 'T2 · 7 sites',
+          what: `<p><code>ScrollArea</code> wraps content in the element that actually scrolls. <code>viewportClass</code> lets a caller place classes such as padding on that inner viewport instead of the outer root. The viewport also has <code>data-slot="scroll-area-viewport"</code>, so CSS can target it without a dedicated class prop.</p>`,
+          visual: {
+            label: 'Settings-style viewport padding',
+            code: `- <ScrollArea viewport-class="px-4" />
++ <ScrollArea class="settings-scroll" />
++ <style>
++ .settings-scroll
++   [data-slot='scroll-area-viewport'] {
++   padding-inline: 1rem;
++ }
++ </style>`,
+          },
+          found: `<p><code>viewportClass</code> is the remaining named class-injection prop even though the project rule uses <code>data-slot</code> selectors for inner elements. The prop is declared at <code>src/components/ScrollArea/types.ts:1-8</code>, applied at <code>src/components/ScrollArea/ScrollArea.vue:7-12</code>, and the replacement hook is on line 9.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H14 choice</div><p>"Remove <code>viewportClass</code>; document the <code>data-slot</code> selector; migrate 7 consumer uses (Gameplan 6, Helpdesk 1)"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Research</div><p>The prop was introduced with <code>ScrollArea</code> for padding inside <code>SettingsDialog</code>. There are seven consumer uses and eleven own-tree uses. The same result is possible through <code>data-slot="scroll-area-viewport"</code>, with <code>:deep()</code> needed in scoped Vue styles. The research first recommended removal, but the migration report later recommended keeping it because every consumer edit is manual.</p></div>`,
+          tradeoff: `<p>Keeping and documenting the prop freezes a merely inconsistent styling API because one inner element gets a special class prop instead of the shared <code>data-slot</code> rule. Removing it requires manual T2 edits at seven measured v1-app sites; a codemod cannot choose the right scoped CSS or Tailwind selector. Keeping avoids those edits, while removal makes the permanent styling contract uniform.</p>`,
+          options: [
+            'Keep viewportClass and document it as the ScrollArea exception',
+            'Remove viewportClass and migrate callers to the data-slot selector',
+            'Deprecate viewportClass in v1 and remove it in v2',
+          ],
+          recommended: 0,
+          why: 'This is a styling inconsistency, and removing it costs seven manual app migrations that a codemod cannot make safe.',
+        },
+        {
+          id: 'SHELL-Q5',
+          title: 'ScrollArea.orientation value both',
+          covers: ['M-shells'],
+          severity: 'Medium · mechanical',
+          tier: 'not measured',
+          what: `<p><code>ScrollArea.orientation</code> selects which scrollbars the component renders. It accepts <code>vertical</code>, <code>horizontal</code>, or <code>both</code>. The third value renders both axes and is implemented directly by <code>ScrollArea</code>.</p>`,
+          visual: {
+            label: 'Orientation behavior',
+            html: `<table><thead><tr><th>Value</th><th>Rendered bars</th></tr></thead><tbody><tr><td><code>vertical</code></td><td>Vertical</td></tr><tr><td><code>horizontal</code></td><td>Horizontal</td></tr><tr><td><code>both</code></td><td>Vertical and horizontal</td></tr></tbody></table>`,
+          },
+          found: `<p>The audit flagged <code>both</code> because it was absent from the written contract, not because it is dead. The union is at <code>src/components/ScrollArea/types.ts:1-4</code> and both branches render at <code>src/components/ScrollArea/ScrollArea.vue:14-18</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping and documenting <code>both</code> preserves a useful implemented state; its only substandard part is the missing contract text. Removing it would break any unmeasured two-axis use, and no migration row establishes a site count or codemod. Separate booleans would add invalid combinations without improving the three actual states.</p>`,
+          options: [
+            'Keep both and document that it renders both scrollbars',
+            'Remove both and require nested ScrollArea components for two axes',
+            'Replace orientation with horizontal and vertical boolean props',
+          ],
+          recommended: 0,
+          why: 'The value is implemented, names a real third state, and needs documentation rather than a breaking redesign.',
+        },
+        {
+          id: 'SHELL-Q6',
+          title: 'ScrollBar public export and Reka root requirement',
+          covers: ['M-shells'],
+          severity: 'Medium · mechanical',
+          tier: 'T1 · 0 sites',
+          dependsOn: 'SHELL-Q5',
+          what: `<p><code>ScrollBar</code> renders the thumb used inside <code>ScrollArea</code>. It immediately reads Reka UI's private <code>ScrollAreaRoot</code> context, so it cannot work when a consumer places it on its own. Frappe UI exports <code>ScrollBar</code> but does not export the required root component.</p>`,
+          visual: {
+            label: 'Required component tree',
+            code: `ScrollAreaRoot (from reka-ui; not public here)
+  ScrollAreaViewport
+  ScrollBar
+    injectScrollAreaRootContext()
+    ScrollAreaScrollbar
+      ScrollAreaThumb`,
+          },
+          found: `<p>The stable export promises a standalone component that throws when its unavailable parent context is missing. The context read is at <code>src/components/ScrollArea/ScrollBar.vue:24-45</code>, while the public export is <code>src/components/ScrollArea/index.ts:1-7</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the root export freezes a trap because consumers can import a component they cannot place in a valid public tree. Moving it to experimental changes zero measured v1-app sites and a codemod can rewrite any later import. The stable <code>ScrollArea</code> keeps using <code>ScrollBar</code> internally.</p>`,
+          options: [
+            'Move ScrollBar to frappe-ui/experimental and keep it internal to ScrollArea',
+            'Export an owned ScrollAreaRoot so ScrollBar can be composed safely',
+            'Stop exporting ScrollBar and expose no standalone replacement',
+          ],
+          recommended: 0,
+          why: 'Experimental matches an incomplete building block and avoids freezing an unusable stable export.',
+        },
+        {
+          id: 'SHELL-Q7',
+          title: 'useSheetDrag stable root export',
+          covers: ['M-shells'],
+          severity: 'Medium · mechanical',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>useSheetDrag</code> owns the pointer and touch state machine for dragging a bottom sheet down to dismiss it. Its thresholds, timing, resistance, and opt-out selector are fixed inside the module. The stable root currently exposes those BottomSheet-specific choices as a general composable.</p>`,
+          visual: {
+            label: 'Current versus proposed import',
+            code: `- import { useSheetDrag } from 'frappe-ui'
++ import { useSheetDrag } from 'frappe-ui/experimental'
+
+useSheetDrag({
+  target: sheet,
+  handle,
+  onDismiss,
+})`,
+          },
+          found: `<p>The generic name hides a BottomSheet-specific contract with module constants such as a 25 percent close ratio and a 0.5 px/ms velocity threshold. See <code>src/composables/useSheetDrag.ts:11-24</code> and its root export at <code>src/index.ts:141-145</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping it at the stable root freezes an under-designed general API whose behavior is actually tuned for one component. Parking it changes zero measured v1-app sites, and a codemod can rewrite imports if an unmeasured consumer exists. It can return to stable later with configurable behavior or a BottomSheet-specific name.</p>`,
+          options: [
+            'Move useSheetDrag and its types to frappe-ui/experimental',
+            'Rename it useBottomSheetDrag and keep it stable',
+            'Keep and document the current stable root API',
+            'Make the thresholds configurable and keep useSheetDrag stable',
+          ],
+          recommended: 0,
+          why: 'The composable is coupled to one component and has zero measured root consumers.',
+        },
+        {
+          id: 'SHELL-Q8',
+          title: 'PageHeader public prop type exports',
+          covers: ['M-shells'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          what: `<p>The PageHeader family includes desktop, mobile, title, target, base, and back-button components. Consumers need named prop types when they wrap those components or build typed configuration. Some prop interfaces exist in <code>types.ts</code>, while other props remain inline, and the family index exports none of them.</p>`,
+          visual: {
+            label: 'Type export gap',
+            code: `PageHeaderMobileProps       declared, not exported
+PageHeaderMobileTitleProps  declared, not exported
+PageHeaderBackButtonProps   declared, not exported
+PageHeaderTitle props       inline only
+
++ export type {
++   PageHeaderMobileProps,
++   PageHeaderMobileTitleProps,
++   PageHeaderBackButtonProps,
++   PageHeaderTitleProps,
++ }`,
+          },
+          found: `<p>The package renders prop tables but gives TypeScript consumers no public names for this family. Existing interfaces are at <code>src/components/PageHeader/types.ts:1-22</code>, an inline title prop is at <code>src/components/PageHeader/PageHeaderTitle.vue:8-11</code>, and <code>src/components/PageHeader/index.ts:1-7</code> exports components only.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping and documenting the current state leaves a substandard TypeScript API because wrapper authors must recreate public prop shapes. Adding named exports is non-breaking, and the migration file does not measure it because consumers have nothing to rename. Doing it before RC lets the generated docs and public types share names; waiting until 1.1 does not lock in a bad runtime behavior.</p>`,
+          options: [
+            'Extract and export every PageHeader prop type before RC',
+            'Export only the three interfaces that already exist',
+            'Add the missing prop type exports in 1.1',
+            'Keep component-only prop types and document that wrappers should infer them',
+          ],
+          recommended: 0,
+          why: 'Named prop types are additive and make the family usable in typed wrappers before its contract is published.',
+        },
+        {
+          id: 'SHELL-Q9',
+          title: 'PageHeaderBase click-to-scroll behavior',
+          covers: ['M-shells'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          dependsOn: 'SHELL-Q3',
+          what: `<p><code>PageHeaderBase</code> listens for clicks on the whole rendered header and smooth-scrolls the nearest scroll parent to the top. It skips common interactive elements and anything inside <code>data-no-scroll-top</code>. This is implicit component behavior rather than a prop, event, or named action.</p>`,
+          visual: {
+            label: 'Current versus scoped behavior',
+            code: `- <header @click="handleHeaderClick">
++ <header @dblclick="handleHeaderDoubleClick">
+
+- [data-no-scroll-top]
++ [data-frappe-ui-no-scroll-top]
+
+skip: a, button, input, textarea,
+      select, label, [role="button"]
+act:  remaining header background`,
+          },
+          found: `<p>A single click on non-interactive header content can unexpectedly move the page, and the opt-out attribute has no package namespace. The listener, exclusions, and scroll call are at <code>src/components/PageHeader/PageHeaderBase.vue:1-38</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current behavior freezes a surprising action and a collision-prone attribute name. Removing it can break an unmeasured convenience, and no codemod can find users who rely on clicking empty header space. Requiring a double-click and namespacing the opt-out preserves the shortcut while making accidental activation less likely.</p>`,
+          options: [
+            'Use a background double-click and rename the opt-out to data-frappe-ui-no-scroll-top',
+            'Remove implicit click-to-scroll and let apps add an explicit control',
+            'Keep one-click behavior but namespace the opt-out attribute',
+          ],
+          recommended: 0,
+          why: 'A double-click keeps the convenience without making an ordinary click change scroll position.',
+        },
+        {
+          id: 'SHELL-Q10',
+          title: 'useShellScrolled default threshold',
+          covers: ['M-shells'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          dependsOn: 'SHELL-Q3',
+          what: `<p><code>useShellScrolled</code> returns whether the active shell has scrolled past a pixel threshold. Headers use that state to add a border or shadow after content moves. Callers may pass a threshold, but an omitted value currently means 200 pixels.</p>`,
+          visual: {
+            label: 'Documented usage versus default',
+            code: `const scrolled = useShellScrolled({
+  threshold: 12,
+})
+
+- const { threshold = 200 } = options
++ const { threshold = 12 } = options`,
+          },
+          found: `<p>The implementation defaults to 200 even though every example passes 12, so omission produces a much later visual response than the examples teach. The example and default are next to each other at <code>src/composables/useShellScrolled.ts:59-76</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-shells choice</div><p>"Resolve all shell findings before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping and documenting 200 would freeze an inconsistent default that delays the common header state far beyond the examples. Changing it can alter behavior wherever callers omit the option, but those sites were not measured and a codemod cannot detect the visual intent. Requiring an explicit threshold removes ambiguity at the cost of making every caller choose.</p>`,
+          options: [
+            'Change the default threshold to 12 and align the docs',
+            'Require threshold and remove the default',
+            'Keep the 200 default and change every example to match',
+          ],
+          recommended: 0,
+          why: 'Twelve pixels matches every example and the point where a header separation cue normally becomes useful.',
+        },
+        {
+          id: 'SHELL-Q11',
+          title: 'resolvedColorScheme function name',
+          covers: ['M-composables'],
+          severity: 'Medium · mechanical',
+          tier: 'T1 · 3 sites',
+          what: `<p><code>resolvedColorScheme()</code> reads the scheme currently painted on the document after resolving the <code>system</code> preference. It returns <code>light</code> or <code>dark</code> and does not return reactive state. Despite being a function call, its noun name reads like a stored value.</p>`,
+          visual: {
+            label: 'Consumer usage',
+            code: `- import { resolvedColorScheme } from 'frappe-ui'
++ import { getResolvedColorScheme } from 'frappe-ui'
+
+- const scheme = resolvedColorScheme()
++ const scheme = getResolvedColorScheme()`,
+          },
+          found: `<p>The exported function breaks the project's behavior-name rule and can be mistaken for a ref or constant. Its implementation is <code>src/composables/useColorScheme.ts:45-61</code> and its root export is <code>src/index.ts:131-136</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-composables choice</div><p>"Resolve names and system-toggle behavior, and add the missing docs before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping and documenting the noun freezes a merely inconsistent name that hides a fresh DOM read. Renaming touches three measured v1-app sites and a codemod can update every import and call. The verb makes the non-reactive function shape clear before v1.</p>`,
+          options: [
+            'Rename resolvedColorScheme to getResolvedColorScheme',
+            'Keep resolvedColorScheme and document that it is a function',
+            'Replace it with a reactive resolvedColorScheme ref',
+          ],
+          recommended: 0,
+          why: 'The verb fixes the misleading call shape with three mechanical migrations.',
+        },
+        {
+          id: 'SHELL-Q12',
+          title: 'toggleColorScheme behavior from system mode',
+          covers: ['M-composables'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          dependsOn: 'SHELL-Q11',
+          what: `<p><code>useColorScheme()</code> exposes a preference that can be <code>light</code>, <code>dark</code>, or <code>system</code>. <code>toggleColorScheme()</code> should visibly switch the current page between light and dark. Today it compares the stored preference rather than the resolved scheme on screen.</p>`,
+          visual: {
+            label: 'Dark OS with system preference',
+            code: `preference: system
+resolved screen: dark
+
+- toggle compares "system" to "dark"
+- chooses dark -> screen stays dark
++ toggle reads the resolved screen
++ chooses light -> screen changes`,
+          },
+          found: `<p>On a dark OS, toggling from <code>system</code> writes <code>dark</code>, so the visible scheme does not change. The comparison is at <code>src/composables/useColorScheme.ts:91-99</code>, while system resolution is implemented at <code>:38-43</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-composables choice</div><p>"Resolve names and system-toggle behavior, and add the missing docs before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current code freezes a behavior trap because a toggle can report success without changing the screen. Fixing it may change the saved preference from <code>system</code> to the opposite explicit scheme, but the migration report did not measure behavioral reliance and a codemod cannot help. Comparing against the resolved scheme makes every toggle visible.</p>`,
+          options: [
+            'Toggle to the opposite of the resolved light or dark scheme',
+            'Cycle system to light to dark to system',
+            'Remove toggleColorScheme and require setColorScheme',
+          ],
+          recommended: 0,
+          why: 'A toggle must change the visible state, including when the saved preference is system.',
+        },
+        {
+          id: 'SHELL-Q13',
+          title: 'Portal target trio documentation',
+          covers: ['M-composables'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          what: `<p><code>portalTargetKey</code>, <code>providePortalTarget()</code>, and <code>usePortalTarget()</code> let an embedded app redirect all overlay teleports away from <code>document.body</code>. A host can provide one target, while an individual component's <code>portalTo</code> value takes precedence. These APIs are stable root exports but have no docs page.</p>`,
+          visual: {
+            label: 'Portal target precedence',
+            code: `overlay portalTo prop
+  -> usePortalTarget(override)
+    -> override, when set
+    -> injected portalTargetKey
+    -> undefined
+      -> Reka defaults to document.body
+
+host:
+  app.provide(portalTargetKey, element)`,
+          },
+          found: `<p>The implementation and its precedence are complete, but users cannot discover the three root exports in the documentation. The trio is defined at <code>src/composables/usePortalTarget.ts:11-49</code> and exported at <code>src/index.ts:147-153</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-composables choice</div><p>"Resolve names and system-toggle behavior, and add the missing docs before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the trio undocumented freezes a substandard discovery path: embedders must read source to avoid sending overlays to the wrong document body. Documentation changes no runtime API, touches no consumer sites, and needs no codemod; the migration file therefore has no measured row. Writing the page before RC makes the already-stable precedence usable without changing it.</p>`,
+          options: [
+            'Document all three exports and portal target precedence before RC',
+            'Document only providePortalTarget as the supported entry point',
+            'Add the docs in 1.1',
+            'Keep the trio undocumented and treat it as advanced internal behavior',
+          ],
+          recommended: 0,
+          why: 'The API is already stable and complete, so documenting it has no migration cost.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>
