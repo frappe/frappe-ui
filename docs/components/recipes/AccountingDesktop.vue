@@ -684,7 +684,7 @@ const pnlColumns = computed(() => [
             >
           </ListHeader>
           <ListRows :items="payroll" v-slot="{ item, value }">
-            <ListRow :value="value" @click="() => {}">
+            <ListRow :value="value">
               <ListCell>
                 <span class="truncate text-base text-ink-gray-8">{{
                   item.name

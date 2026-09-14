@@ -13,7 +13,7 @@ export interface UseVirtualRowsOptions {
   enabled?: MaybeRefOrGetter<boolean>
 
   /** Row height in px. */
-  itemHeight: MaybeRefOrGetter<number>
+  rowHeight: MaybeRefOrGetter<number>
 
   /** Rows rendered beyond the visible window on each side. */
   overscan?: number
@@ -40,7 +40,7 @@ export function useVirtualRows<T>(
   const { list, containerProps, wrapperProps } = useVirtualList(
     source as Ref<T[]>,
     {
-      itemHeight: () => toValue(options.itemHeight),
+      itemHeight: () => toValue(options.rowHeight),
       overscan: options.overscan ?? 6,
     },
   )

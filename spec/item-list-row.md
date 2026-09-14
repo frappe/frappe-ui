@@ -121,3 +121,9 @@ families.
 `ItemListRow` is public in v1. It is a small primitive, but worth exposing
 so that app code building advanced or custom listboxes can match the
 design system row styling without copying markup.
+
+## Known accessibility follow-up
+
+A selectable linked or button row currently nests its checkbox control inside
+the row's interactive element. Fixing that markup requires a separate design;
+this RC keeps row-click selection behavior unchanged.

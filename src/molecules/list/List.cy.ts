@@ -81,7 +81,8 @@ describe('List (feed mode)', () => {
       },
       { global: { plugins: [makeRouter()] } },
     )
-    cy.get('a[data-slot=list-row]').eq(0)
+    cy.get('a[data-slot=list-row]')
+      .eq(0)
       .should('have.attr', 'href', '/item/1')
       .and('have.attr', 'data-interactive', 'true')
       .and('have.attr', 'data-state', 'inactive')
@@ -96,27 +97,22 @@ describe('List (feed mode)', () => {
   it('renders ListGroup label content through the #label slot', () => {
     cy.mount({
       render: () =>
-        h(
-          List,
-          () =>
-            h(
-              ListGroup,
-              { label: 'Fallback' },
-              {
-                label: () => 'Custom label',
-                default: () => feedRow('1'),
-              },
-            ),
+        h(List, () =>
+          h(
+            ListGroup,
+            { label: 'Fallback' },
+            {
+              label: () => 'Custom label',
+              default: () => feedRow('1'),
+            },
+          ),
         ),
     })
 
     cy.get('[data-slot=list-group]')
       .should('have.attr', 'role', 'rowgroup')
       .and('have.attr', 'aria-label', 'Fallback')
-    cy.get('[data-slot=list-group-header]').should(
-      'have.text',
-      'Custom label',
-    )
+    cy.get('[data-slot=list-group-header]').should('have.text', 'Custom label')
   })
 
   it('navigates on row click', () => {
@@ -1084,6 +1080,41 @@ describe('List (responsive columns)', () => {
 })
 
 describe('ListRows (virtual)', () => {
+  it('exposes independent selected and active slot state', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['1'],
+            active: '2',
+            'onUpdate:active': () => {},
+          },
+          () =>
+            h(
+              ListRows,
+              { items: [{ id: '1' }, { id: '2' }] },
+              {
+                default: ({ value, selected, active }) =>
+                  h('span', {
+                    'data-cy': `row-${value}`,
+                    'data-selected': String(selected),
+                    'data-active': String(active),
+                  }),
+              },
+            ),
+        ),
+    })
+
+    cy.get('[data-cy=row-1]')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-active', 'false')
+    cy.get('[data-cy=row-2]')
+      .should('have.attr', 'data-selected', 'false')
+      .and('have.attr', 'data-active', 'true')
+  })
+
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
     cy.mount({

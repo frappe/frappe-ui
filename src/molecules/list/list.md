@@ -178,12 +178,14 @@ non-virtual list, set responsive heights with height classes on the rows.
 ## Virtual rows
 
 `ListRows` iterates items through its scoped slot; with `virtual`, only rows
-near the viewport mount. The scoped slot receives `{ item, index, value }`,
+near the viewport mount. The scoped slot receives `{ item, index, value, selected, active }`,
+where `selected` and `active` are independent,
 where `value` is the string row identity used by select-all and active-row
 state. The scroll container is the nearest scrollable ancestor — the list
 windows against an app-owned scroll area (a settings body, the page) and keeps
-its scrollbar. `itemHeight` defaults to the List's `rowHeight`. The underlying
-composable, `useVirtualRows`, is exported for exotic cases.
+its scrollbar. `virtual` is a boolean and `overscan` controls the extra rows on each side;
+height always comes from the parent `List`'s `rowHeight`. Virtualization is
+owned by `ListRows`.
 
 <ComponentPreview name="List-Virtual" csr="true" />
 

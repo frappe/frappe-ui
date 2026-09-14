@@ -1,7 +1,13 @@
 <template>
   <template v-if="!virtualEnabled">
     <template v-for="(item, index) in items" :key="getItemValue(item, index)">
-      <slot :item="item" :index="index" :value="getItemValue(item, index)" />
+      <slot
+        :item="item"
+        :index="index"
+        :value="getItemValue(item, index)"
+        :selected="isSelected(item, index)"
+        :active="isActive(item, index)"
+      />
     </template>
   </template>
   <div v-else ref="anchor" v-bind="wrapperProps" role="presentation">
@@ -10,6 +16,8 @@
         :item="row.data"
         :index="row.index"
         :value="getItemValue(row.data, row.index)"
+        :selected="isSelected(row.data, row.index)"
+        :active="isActive(row.data, row.index)"
       />
     </template>
   </div>
@@ -19,7 +27,6 @@
 import { computed, onBeforeUnmount, watch } from 'vue'
 import { useListContext } from './list-context'
 import { useVirtualRows } from './useVirtualRows'
-import type { ListVirtualOptions } from './types'
 
 const props = defineProps<{
   /** Items to iterate — one default-slot render per item. */
@@ -35,30 +42,35 @@ const props = defineProps<{
 
   /**
    * Window the rows (vueuse useVirtualList) so only rows near the viewport
-   * mount. `itemHeight` defaults to the List's `rowHeight`; the scroll
+   * mount. Height comes from the parent List's `rowHeight`; the scroll
    * container is the nearest scrollable ancestor.
    */
-  virtual?: boolean | ListVirtualOptions
+  virtual?: boolean
+
+  /** Rows rendered beyond the visible window on each side. Default: `6`. */
+  overscan?: number
 }>()
 
 defineSlots<{
-  /** One render per item — `{ item, index, value }`, where `value` is the row's resolved identity. */
-  default?: (props: { item: T; index: number; value: string }) => unknown
+  /** One render per item. `active` and `selected` are independent row states. */
+  default?: (props: {
+    item: T
+    index: number
+    value: string
+    selected: boolean
+    active: boolean
+  }) => unknown
 }>()
 
 const context = useListContext()
 
-const itemHeight = computed(() => {
-  const fromOptions =
-    typeof props.virtual === 'object' ? props.virtual.itemHeight : undefined
-  return fromOptions ?? context?.rowHeight.value
-})
+const rowHeight = computed(() => context?.rowHeight.value)
 
 const virtualEnabled = computed(() => {
   if (!props.virtual) return false
-  if (!itemHeight.value) {
+  if (!rowHeight.value) {
     console.warn(
-      '[frappe-ui] <ListRows virtual> needs a row height — set `rowHeight` on <List> or pass `virtual.itemHeight`.',
+      '[frappe-ui] <ListRows virtual> needs a row height. Set `rowHeight` on <List>.',
     )
     return false
   }
@@ -69,9 +81,8 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
   () => (virtualEnabled.value ? props.items : []),
   {
     enabled: () => virtualEnabled.value,
-    itemHeight: () => itemHeight.value ?? 0,
-    overscan:
-      typeof props.virtual === 'object' ? props.virtual.overscan : undefined,
+    rowHeight: () => rowHeight.value ?? 0,
+    overscan: props.overscan,
   },
 )
 
@@ -90,6 +101,18 @@ onBeforeUnmount(() => context?.setAllValues([]))
 
 function getItemValue(item: T, index: number) {
   return String(getItemKey(item, index))
+}
+
+function isSelected(item: T, index: number) {
+  return Boolean(
+    context?.selectable.value && context.isSelected(getItemValue(item, index)),
+  )
+}
+
+function isActive(item: T, index: number) {
+  return Boolean(
+    context?.activatable.value && context.isActive(getItemValue(item, index)),
+  )
 }
 
 function getItemKey(item: T, index: number): PropertyKey {

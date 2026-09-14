@@ -190,17 +190,23 @@
   },
   {
     name: 'virtual',
-    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
+    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. Height comes from the parent List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
     required: false,
-    type: 'boolean | ListVirtualOptions'
+    type: 'boolean'
+  },
+  {
+    name: 'overscan',
+    description: 'Rows rendered beyond the visible window on each side. Default: `6`.',
+    required: false,
+    type: 'number'
   }
 ]
 
   const listRowsSlots = [
   {
     name: 'default',
-    description: 'One render per item — `{ item, index, value }`, where `value` is the row\'s resolved identity.',
-    type: '{ item: T; index: number; value: string; }'
+    description: 'One render per item. `active` and `selected` are independent row states.',
+    type: '{ item: T; index: number; value: string; selected: boolean; active: boolean; }'
   }
 ]
 
