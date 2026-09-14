@@ -83,6 +83,13 @@ describe('base props migration', () => {
     )
   })
 
+  it('removes a disabled Progress interval mode without leaving extra space', () => {
+    const source = `<template><Progress :intervals="false" label="Loading" /><Progress :interval-count="5" label="Loading" :intervals="false" /></template>`
+    expect(migrateBaseProps(source).migrated).toBe(
+      `<template><Progress label="Loading" /><Progress label="Loading" /></template>`,
+    )
+  })
+
   it('is idempotent for the numeric Progress API', () => {
     const source = `<template><Progress :intervals="steps.length" /></template>`
     const first = migrateBaseProps(source)

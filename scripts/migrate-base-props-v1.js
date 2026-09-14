@@ -187,10 +187,33 @@ function progressEdit(element, offset, refusals) {
     return []
   }
 
-  let replacement
   if (condition === 'false') {
-    replacement = ''
-  } else if (!count && numericStatic) {
+    const removeProp = (prop, description) => {
+      let start = prop.loc.start.offset
+      while (
+        start > element.loc.start.offset &&
+        /\s/.test(
+          element.loc.source[start - element.loc.start.offset - 1] || '',
+        )
+      )
+        start--
+      return {
+        start: offset + start,
+        end: offset + prop.loc.end.offset,
+        text: '',
+        description,
+      }
+    }
+    return [
+      removeProp(intervals, 'remove disabled Progress interval mode'),
+      ...(count
+        ? [removeProp(count, 'remove unused Progress intervalCount')]
+        : []),
+    ]
+  }
+
+  let replacement
+  if (!count && numericStatic) {
     replacement = `:intervals="${staticValue}"`
   } else {
     const countValue = count ? countExpression(count) : '6'
