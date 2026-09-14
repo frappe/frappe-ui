@@ -3,7 +3,7 @@ import Suggestion from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
 import type { Component } from 'vue'
 import type { Editor } from './useEditor'
-import { warnDeprecated } from '#utils/warnDeprecated'
+import { warnRemoved } from '#utils/warnDeprecated'
 import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
@@ -35,7 +35,7 @@ function buildSuggestionExtension<TItem = any>(
   options: SuggestionExtensionOptions<TItem>,
 ) {
   if ('component' in options) {
-    warnDeprecated(
+    warnRemoved(
       'SuggestionExtension.component',
       'SuggestionExtension.listComponent',
     )

@@ -179,7 +179,7 @@ describe('frappe-ui/editor minimal primitives', () => {
     } as any)
 
     expect(warn).toHaveBeenCalledWith(
-      '[frappe-ui] SuggestionExtension.component is deprecated. Use SuggestionExtension.listComponent instead.',
+      '[frappe-ui] SuggestionExtension.component was removed. Use SuggestionExtension.listComponent instead.',
     )
     expect(warn).toHaveBeenCalledTimes(1)
     warn.mockRestore()

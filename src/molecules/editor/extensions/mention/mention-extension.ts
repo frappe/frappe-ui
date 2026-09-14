@@ -14,7 +14,7 @@ import {
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
-import { warnDeprecated } from '#utils/warnDeprecated'
+import { warnRemoved } from '#utils/warnDeprecated'
 import {
   insertSuggestionNode,
   filterByQuery,
@@ -196,7 +196,7 @@ export const MentionExtension = Extension.create<{
 
   addExtensions() {
     if ('component' in this.options) {
-      warnDeprecated('Mention.component', 'Mention.nodeView')
+      warnRemoved('Mention.component', 'Mention.nodeView')
     }
     const node = createMentionNode(this.options.nodeView)
     // Inert until configured: only wire the `@` suggestion when an item source

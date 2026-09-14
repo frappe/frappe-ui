@@ -82,7 +82,7 @@ describe('Mention allowedPrefixes', () => {
     ;(extension.config.addExtensions as Function).call(extension)
 
     expect(warn).toHaveBeenCalledWith(
-      '[frappe-ui] Mention.component is deprecated. Use Mention.nodeView instead.',
+      '[frappe-ui] Mention.component was removed. Use Mention.nodeView instead.',
     )
     expect(warn).toHaveBeenCalledTimes(1)
     warn.mockRestore()
