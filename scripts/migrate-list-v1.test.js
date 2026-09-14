@@ -168,10 +168,24 @@ import { ListGroup } from 'frappe-ui/list'
     const source = `<script setup>
 import { ListGroup } from 'frappe-ui/list'
 </script>
-a < b and c > d
+a < b without a closing angle
+a < 'quoted prose'
 <ListGroup><img src="group.svg"><template #header>Title</template></ListGroup>`
 
     expect(migrateList(source).migrated).toContain('<template #label>')
+  })
+
+  it('recognizes imports inside fenced Markdown code', () => {
+    const source = `\`\`\`vue
+<script setup>
+import { ListHeaderCellSort } from 'frappe-ui/list'
+</script>
+<ListHeaderCellSort><template #suffix>Icon</template></ListHeaderCellSort>
+\`\`\``
+
+    const result = migrateList(source, { markdown: true })
+    expect(result.refusals).toEqual([])
+    expect(result.migrated).toContain('<template #sort-indicator>')
   })
 })
 
@@ -194,11 +208,23 @@ describe('CLI', () => {
     expect(fs.readFileSync(path.join(dir, 'Example.vue'), 'utf8')).toBe(source)
   })
 
+  it('refuses an unterminated tag without changing the file', () => {
+    const source = `<script setup>import { ListGroup } from 'frappe-ui/list'</script>
+<ListGroup`
+    const dir = tempDir({ 'Broken.vue': source })
+    const result = run([dir])
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('unterminated <ListGroup> tag')
+    expect(fs.readFileSync(path.join(dir, 'Broken.vue'), 'utf8')).toBe(source)
+  })
+
   it('walks supported files, skips dependencies and symlinks', () => {
     const dir = tempDir({
       'src/Example.vue': `<ListGroup><template #header>Title</template></ListGroup>`,
       'node_modules/Skipped.vue': `<ListGroup><template #header>Old</template></ListGroup>`,
       'docs/migration.md': `<script setup>import { ListGroup } from 'frappe-ui/list'</script>\n<ListGroup><template #header>Before</template></ListGroup>`,
+      'docs/ListSpec.md': `\`\`\`vue\n<script setup>import { ListGroup } from 'frappe-ui/list'</script>\n<ListGroup><template #header>Example</template></ListGroup>\n\`\`\``,
       'notes.txt': `<ListGroup><template #header>Old</template></ListGroup>`,
     })
     fs.symlinkSync(path.join(dir, 'src'), path.join(dir, 'linked'))
@@ -209,7 +235,7 @@ describe('CLI', () => {
     const result = run([dir])
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Migrated 1 file.')
+    expect(result.stdout).toContain('Migrated 2 files.')
     expect(
       fs.readFileSync(path.join(dir, 'src/Example.vue'), 'utf8'),
     ).toContain('#label')
@@ -219,6 +245,9 @@ describe('CLI', () => {
     expect(
       fs.readFileSync(path.join(dir, 'docs/migration.md'), 'utf8'),
     ).toContain('#header')
+    expect(fs.readFileSync(path.join(dir, 'docs/ListSpec.md'), 'utf8')).toContain(
+      '#label',
+    )
     expect(fs.readFileSync(path.join(dir, 'notes.txt'), 'utf8')).toContain(
       '#header',
     )

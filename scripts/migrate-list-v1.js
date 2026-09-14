@@ -51,7 +51,7 @@ function lineAt(source, index) {
 
 // Only the start of an import has to be code. Its module string is expected to
 // be masked, and checking every character would reject every real import.
-function codeMask(source) {
+function codeMask(source, { templateStrings = true } = {}) {
   const mask = new Uint8Array(source.length)
   let i = 0
   while (i < source.length) {
@@ -71,7 +71,11 @@ function codeMask(source) {
       i = stop
       continue
     }
-    if (char === "'" || char === '"' || char === '`') {
+    if (
+      char === "'" ||
+      char === '"' ||
+      (templateStrings && char === '`')
+    ) {
       const quote = char
       mask[i] = 1
       i += 1
@@ -112,10 +116,10 @@ function importedBindings(clause) {
   return bindings
 }
 
-export function componentAliases(source) {
+export function componentAliases(source, { markdown = false } = {}) {
   const aliases = new Map()
 
-  const mask = codeMask(source)
+  const mask = codeMask(source, { templateStrings: !markdown })
   const imports = /\bimport\s+([\s\S]*?)\s+from\s*(['"])([^'"]+)\2/g
   for (const match of source.matchAll(imports)) {
     if (mask[match.index]) continue
@@ -200,23 +204,28 @@ function migrateMarkup(source, aliases) {
       cursor = next
       continue
     }
+    const remainder = source.slice(start)
+    const close = /^<\/([A-Za-z][\w.-]*)/.exec(remainder)
+    const open = /^<([A-Za-z][\w.-]*)/.exec(remainder)
+    if (!close && !open) {
+      migrated += '<'
+      cursor = start + 1
+      continue
+    }
     const end = findTagEnd(source, start + 1)
     if (end === -1) {
       migrated += source.slice(start)
+      refusals.push({
+        line: lineAt(source, start),
+        message: `unterminated <${(close || open)[1]}> tag must be checked manually`,
+      })
       cursor = source.length
       break
     }
     const tag = source.slice(start, end + 1)
-    const close = /^<\/([A-Za-z][\w.-]*)/.exec(tag)
     if (close) {
       const at = stack.map((entry) => entry.name).lastIndexOf(close[1])
       if (at !== -1) stack.splice(at)
-      migrated += tag
-      cursor = end + 1
-      continue
-    }
-    const open = /^<([A-Za-z][\w.-]*)/.exec(tag)
-    if (!open) {
       migrated += tag
       cursor = end + 1
       continue
@@ -320,10 +329,12 @@ function migrateAnchoredSelectors(source) {
     )
 }
 
-export function migrateList(source) {
-  const aliases = componentAliases(source)
+export function migrateList(source, options = {}) {
+  const aliases = componentAliases(source, options)
   const selectorsMigrated = migrateAnchoredSelectors(source)
-  return migrateMarkup(selectorsMigrated, aliases)
+  return options.markup === false
+    ? { migrated: selectorsMigrated, refusals: [] }
+    : migrateMarkup(selectorsMigrated, aliases)
 }
 
 function filesIn(target, seen = new Set()) {
@@ -384,7 +395,11 @@ export function run(argv) {
   let refusalCount = 0
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8')
-    const result = migrateList(source)
+    const extension = path.extname(file).toLowerCase()
+    const result = migrateList(source, {
+      markdown: extension === '.md',
+      markup: ['.html', '.md', '.vue'].includes(extension),
+    })
     if (result.refusals.length) {
       refusalCount += result.refusals.length
       for (const refusal of result.refusals) {

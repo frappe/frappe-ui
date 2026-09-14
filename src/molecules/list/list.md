@@ -234,6 +234,9 @@ boolean `data-selected` for checkbox selection, and boolean `data-interactive`
 on rows. Active and selected are independent. Header cells use `data-sort` when
 sorted.
 
+`data-slot="list-group-header"` names the structural header element and stays
+unchanged when the ListGroup content slot is renamed to `#label`.
+
 Accessibility follows header presence: `role="list"` / `"listitem"` without a
 `ListHeader`, `table` / `row` / `columnheader` / `cell` (plus `aria-sort`) with
 one.

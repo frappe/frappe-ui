@@ -1100,6 +1100,11 @@ check. It also exits non-zero and leaves a file unchanged when it finds a
 dynamic slot under either renamed component. These slot renames are silent
 breaks because Vue drops content passed under an unknown name.
 
+After the codemod, grep for `group-data-[active]`, unanchored
+`data-state="selected"` / `data-active` selectors, render-function slot keys
+named `header` or `suffix`, and dynamic slots. Those forms need a manual check
+because the tool cannot prove which component owns them.
+
 ## ListView — moved to `frappe-ui/experimental`
 
 `ListView` is not core v1 surface. It moves out of the root export to
