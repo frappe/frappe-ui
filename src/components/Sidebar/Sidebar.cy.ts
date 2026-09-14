@@ -121,12 +121,21 @@ describe('<SidebarSection />', () => {
 })
 
 describe('<SidebarItem />', () => {
-  it('renders a router link when `to` is set, a button otherwise', () => {
+  it('renders links for `route` and `href`, and a button otherwise', () => {
     cy.mount(SidebarItem, {
-      props: { label: 'Deals', to: '/deals' },
+      props: { label: 'Deals', route: '/deals' },
       global: { plugins: [createTestRouter()] },
     })
     cy.get('a[href="/deals"]').should('exist')
+
+    cy.mount(SidebarItem, { props: { label: 'Docs', href: 'https://frappe.io/docs' } })
+    cy.get('[data-slot=sidebar-item] > a').should('have.attr', 'href', 'https://frappe.io/docs')
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Route wins', route: '/deals', href: 'https://frappe.io/docs' },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should('have.attr', 'href', '/deals')
 
     const onClick = cy.stub().as('click')
     cy.mount(SidebarItem, { props: { label: 'Action', onClick } })
@@ -158,7 +167,7 @@ describe('<SidebarItem />', () => {
   it('keeps a #suffix options button a sibling of the link (not nested inside it)', () => {
     const onOptions = cy.stub().as('options')
     cy.mount(SidebarItem, {
-      props: { label: 'Design', to: '/design' },
+      props: { label: 'Design', route: '/design' },
       slots: {
         suffix: () =>
           h('button', { 'data-test': 'options', onClick: onOptions }, '...'),
@@ -172,7 +181,7 @@ describe('<SidebarItem />', () => {
   })
 
   it('is keyboard reachable and shows a visible focus-visible outline', () => {
-    cy.mount(SidebarItem, { props: { label: 'Design', to: '/design' } })
+    cy.mount(SidebarItem, { props: { label: 'Design', route: '/design' } })
     cy.get('a')
       .focus()
       .should('have.focus')

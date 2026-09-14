@@ -67,10 +67,16 @@
 
   const listRowProps = [
   {
-    name: 'to',
-    description: 'Renders the row as a RouterLink. Without `to`, a row with a click\nlistener renders as a button; otherwise a plain div.',
+    name: 'route',
+    description: 'Renders the row as a RouterLink. Without `route` or `href`, a row with a click\nlistener renders as a button; otherwise a plain div.',
     required: false,
     type: 'string | kt | Tt'
+  },
+  {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'value',

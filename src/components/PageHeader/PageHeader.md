@@ -15,8 +15,9 @@ Keeps its title centered regardless of the `#left` / `#right` control widths, on
 a single line with a trailing ellipsis.
 
 `PageHeaderBackButton` goes back through history, the way the browser's own back
-button does. It only navigates to `to` when there is no in-app history to go
-back to, so give it a `to` that makes the page recoverable on a cold load.
+button does. It only navigates to `fallbackRoute` when there is no in-app
+history to go back to, so give it a fallback that makes the page recoverable
+on a cold load.
 
 <ComponentPreview name="PageHeader-Mobile" />
 

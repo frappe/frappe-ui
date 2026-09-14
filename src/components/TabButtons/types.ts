@@ -11,13 +11,12 @@ export type TabButtonValue = TabValue
 export type TabButtonIcon = TabIcon
 export interface TabButton {
   value: TabButtonValue
-  label?: string | number
+  label: string
   /** Icon-only tab; `label` becomes accessibility text. */
   icon?: TabButtonIcon
   /** Leading accent icon, rendered next to the visible label. */
   iconLeft?: TabButtonIcon
   disabled?: boolean
-  tooltip?: string
   /** Renders the tab as a `<RouterLink>` to the given target. */
   route?: RouteLocationRaw
   /** Renders the tab as an `<a href>`, opens in a new tab. */
@@ -51,7 +50,15 @@ export interface TabButtonsEmits {
 
 export interface TabButtonsSlots {
   /** Slot before the tab button label. */
-  prefix?: (props: { button: TabButton; checked: boolean; disabled: boolean }) => any
+  prefix?: (props: {
+    button: TabButton
+    checked: boolean
+    disabled: boolean
+  }) => any
   /** Slot after the tab button label. */
-  suffix?: (props: { button: TabButton; checked: boolean; disabled: boolean }) => any
+  suffix?: (props: {
+    button: TabButton
+    checked: boolean
+    disabled: boolean
+  }) => any
 }

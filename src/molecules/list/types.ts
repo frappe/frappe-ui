@@ -83,10 +83,13 @@ export interface ListProps {
 
 export interface ListRowProps {
   /**
-   * Renders the row as a RouterLink. Without `to`, a row with a click
+   * Renders the row as a RouterLink. Without `route` or `href`, a row with a click
    * listener renders as a button; otherwise a plain div.
    */
-  to?: RouteLocationRaw
+  route?: RouteLocationRaw
+
+  /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
+  href?: string
 
   /**
    * Row key — the `selection` key when `selectable` and the `v-model:active`

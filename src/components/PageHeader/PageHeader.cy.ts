@@ -1,6 +1,8 @@
 import { defineComponent, h } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import PageHeader from './PageHeader.vue'
 import PageHeaderBase from './PageHeaderBase.vue'
+import PageHeaderBackButton from './PageHeaderBackButton.vue'
 import PageHeaderTarget from './PageHeaderTarget.vue'
 import PageHeaderMobile from './PageHeaderMobile.vue'
 import PageHeaderMobileTitle from './PageHeaderMobileTitle.vue'
@@ -66,6 +68,28 @@ describe('PageHeader', () => {
     cy.get('header').click()
     cy.get('[data-testid=page]').should(($el) => {
       expect($el[0].scrollTop).to.equal(0)
+    })
+  })
+})
+
+describe('PageHeaderBackButton', () => {
+  it('uses fallbackRoute after a cold load', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/new', component: { render: () => null } },
+        { path: '/drafts', component: { render: () => null } },
+      ],
+    })
+    router.push('/new')
+    cy.wrap(router.isReady()).then(() => {
+      cy.mount(PageHeaderBackButton, {
+        props: { fallbackRoute: '/drafts' },
+        global: { plugins: [router] },
+      })
+      cy.get('button').click().then(() => {
+        expect(router.currentRoute.value.fullPath).to.equal('/drafts')
+      })
     })
   })
 })
