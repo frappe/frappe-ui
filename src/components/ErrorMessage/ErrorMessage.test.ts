@@ -54,6 +54,39 @@ describe('ErrorMessage', () => {
     unmount()
   })
 
+  it('falls back to message when the messages array is empty', () => {
+    const error = Object.assign(new Error('Fallback message'), {
+      messages: [] as string[],
+    })
+    const { alert, unmount } = renderErrorMessage(error)
+
+    expect(alert.textContent).toContain('Fallback message')
+
+    unmount()
+  })
+
+  it('falls back to message when every entry in messages is empty', () => {
+    const error = Object.assign(new Error('Fallback message'), {
+      messages: ['', ''],
+    })
+    const { alert, unmount } = renderErrorMessage(error)
+
+    expect(alert.textContent).toContain('Fallback message')
+
+    unmount()
+  })
+
+  it('renders nothing for an Error with no messages and no message', () => {
+    const error = Object.assign(new Error(''), { messages: [] as string[] })
+    const host = document.createElement('div')
+    const app = createApp(ErrorMessage, { message: error })
+    app.mount(host)
+
+    expect(host.querySelector('[role="alert"]')).toBeNull()
+
+    app.unmount()
+  })
+
   it('sanitizes the non-standard messages value on Error objects', () => {
     const error = Object.assign(new Error('Fallback message'), {
       messages: '<a href="javascript:alert(1)">Invalid</a>',

@@ -30,9 +30,15 @@ const lines = computed<string[]>(() => {
   if (!value) return []
   if (typeof value === 'string') return [value]
   if (Array.isArray(value)) return value.filter(Boolean).map(String)
+  // An empty `messages` array is not an answer, so fall through to `message`.
+  // `useInputLabeling` guards on length the same way.
   const messages = value.messages
-  if (Array.isArray(messages)) return messages.filter(Boolean).map(String)
-  if (messages) return [String(messages)]
+  if (Array.isArray(messages) && messages.length) {
+    const lines = messages.filter(Boolean).map(String)
+    if (lines.length) return lines
+  } else if (typeof messages === 'string' && messages) {
+    return [messages]
+  }
   return value.message ? [value.message] : []
 })
 
