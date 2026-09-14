@@ -67,13 +67,13 @@ const sortedMembers = computed(() => {
     <ListHeader>
       <ListHeaderCellSort :direction="directionFor('name')" @click="toggleSort('name')">
         Member
-        <template #suffix="{ direction }">
+        <template #sort-indicator="{ direction }">
           <span class="block size-3.5" :class="sortIcon(direction)" />
         </template>
       </ListHeaderCellSort>
       <ListHeaderCellSort :direction="directionFor('role')" @click="toggleSort('role')">
         Role
-        <template #suffix="{ direction }">
+        <template #sort-indicator="{ direction }">
           <span class="block size-3.5" :class="sortIcon(direction)" />
         </template>
       </ListHeaderCellSort>
@@ -83,7 +83,7 @@ const sortedMembers = computed(() => {
         @click="toggleSort('since', 'desc')"
       >
         Member since
-        <template #suffix="{ direction }">
+        <template #sort-indicator="{ direction }">
           <span class="block size-3.5" :class="sortIcon(direction)" />
         </template>
       </ListHeaderCellSort>

@@ -8,6 +8,7 @@ import {
 import {
   List,
   ListCell,
+  ListGroup,
   ListHeader,
   ListHeaderCell,
   ListHeaderCellSort,
@@ -82,11 +83,40 @@ describe('List (feed mode)', () => {
     )
     cy.get('a[data-slot=list-row]').eq(0)
       .should('have.attr', 'href', '/item/1')
-      .and('have.attr', 'data-interactive')
-    cy.get('a[data-slot=list-row]').eq(1).should('have.attr', 'href', 'https://frappe.io')
+      .and('have.attr', 'data-interactive', 'true')
+      .and('have.attr', 'data-state', 'inactive')
+    cy.get('a[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'href', 'https://frappe.io')
     cy.get('button[data-slot=list-row]').click()
     cy.get('@rowClick').should('have.been.calledOnce')
     cy.get('div[data-slot=list-row]').should('exist')
+  })
+
+  it('renders ListGroup label content through the #label slot', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          () =>
+            h(
+              ListGroup,
+              { label: 'Fallback' },
+              {
+                label: () => 'Custom label',
+                default: () => feedRow('1'),
+              },
+            ),
+        ),
+    })
+
+    cy.get('[data-slot=list-group]')
+      .should('have.attr', 'role', 'rowgroup')
+      .and('have.attr', 'aria-label', 'Fallback')
+    cy.get('[data-slot=list-group-header]').should(
+      'have.text',
+      'Custom label',
+    )
   })
 
   it('navigates on row click', () => {
@@ -141,7 +171,8 @@ describe('List (selection)', () => {
     cy.get('@rowClick').should('not.have.been.called')
     cy.get('[data-slot=list-row]')
       .first()
-      .should('have.attr', 'data-state', 'selected')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-state', 'inactive')
     cy.get('[data-slot=list-row]')
       .first()
       .click()
@@ -393,7 +424,7 @@ describe('List (active row)', () => {
     mountActive()
     // Binding v-model:active opts every row into interactivity → buttons.
     cy.get('button[data-slot=list-row]').should('have.length', 4)
-    cy.get('[data-slot=list-row][data-active]')
+    cy.get('[data-slot=list-row][data-state=active]')
       .should('have.length', 1)
       .and('contain.text', 'Content 2')
       .and('have.attr', 'aria-current', 'true')
@@ -410,8 +441,12 @@ describe('List (active row)', () => {
       })
     // Unlike selection, activation is additive — the app’s handler still runs.
     cy.get('@rowClick').should('have.been.calledOnce')
-    cy.get('[data-slot=list-row]').eq(0).should('have.attr', 'data-active')
-    cy.get('[data-slot=list-row]').eq(1).should('not.have.attr', 'data-active')
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'active')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'inactive')
   })
 
   it('hides the dividers directly above and below the active row', () => {
@@ -424,9 +459,35 @@ describe('List (active row)', () => {
     cy.get('[data-slot=list-divider]').eq(3).should('have.css', 'opacity', '1')
   })
 
+  it('exposes active and selected as independent row states', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['2'],
+            active: '2',
+            'onUpdate:active': () => undefined,
+          },
+          () => [feedRow('1'), feedRow('2')],
+        ),
+    })
+
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'inactive')
+      .and('not.have.attr', 'data-selected')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'active')
+      .and('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-interactive', 'true')
+  })
+
   it('stays inert when v-model:active is not bound', () => {
     cy.mount({ render: () => h(List, () => [feedRow('1'), feedRow('2')]) })
-    cy.get('[data-slot=list-row][data-active]').should('not.exist')
+    cy.get('[data-slot=list-row][data-state=active]').should('not.exist')
     cy.get('button[data-slot=list-row]').should('not.exist')
   })
 })
@@ -459,7 +520,11 @@ describe('List (column mode)', () => {
               {
                 default: () => 'User',
                 // Adornments are app-supplied; expose the scoped direction for assertions.
-                suffix: ({ direction }: { direction: string | null }) =>
+                'sort-indicator': ({
+                  direction,
+                }: {
+                  direction: string | null
+                }) =>
                   h(
                     'span',
                     { 'data-testid': 'sort-icon' },
@@ -563,7 +628,8 @@ describe('List (column mode)', () => {
               },
               {
                 default: () => 'Size',
-                suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
+                'sort-indicator': () =>
+                  h('span', { 'data-testid': 'glyph' }, 'icon'),
               },
             ),
             h(ListHeaderCell, () => ''),

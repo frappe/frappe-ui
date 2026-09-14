@@ -206,8 +206,8 @@
 /* The active row (v-model:active) is a persistent version of the same idea:
  * its rounded highlight surface floats free of the rules above and below it.
  * Hides its own divider-above and the next row's (the divider below it). */
-[data-slot='list-row'][data-active] [data-slot='list-divider'],
-[data-slot='list-row'][data-active]
+[data-slot='list-row'][data-state=active] [data-slot='list-divider'],
+[data-slot='list-row'][data-state=active]
   + [data-slot='list-row']
   [data-slot='list-divider'] {
   opacity: 0;
