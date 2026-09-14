@@ -11,7 +11,7 @@ The source check used `git log --oneline f4dfb48160..HEAD` and `git diff --stat 
 
 ## Vocabulary and codemod PRs
 
-### 1. `refactor(navigation)!: use route and href for destinations`
+### 1. `refactor(navigation)!: use route and href for destinations` — #1151
 
 Decisions:
 
@@ -51,7 +51,7 @@ Dependencies: PR 1, because the codemod shares component-import and template-tag
 
 Size: **L**. This changes more than 30 component, test, story, documentation, and codemod files.
 
-### 3. `refactor(base)!: normalize base component props`
+### 3. `refactor(base)!: normalize base component props` — #1150
 
 Decisions:
 
@@ -108,7 +108,7 @@ Dependencies: PR 2, because PickerShell slot changes affect the same tests and g
 
 Size: **S**. The change stays under 10 files.
 
-### 6. `refactor(editor)!: name suggestion components and menu size`
+### 6. `refactor(editor)!: name suggestion components and menu size` — #1149
 
 Decisions:
 
