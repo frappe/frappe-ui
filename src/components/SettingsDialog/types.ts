@@ -1,11 +1,12 @@
 import type { DialogSize } from '../Dialog/types'
+import type { KeyboardShortcutCombo } from '../../composables/useKeyboardShortcut'
 
 export interface SettingsDialogProps {
   /** Max-width size of the dialog. */
   size?: DialogSize
 
-  /** Enable the Cmd/Ctrl+Shift+, shortcut that toggles the dialog. */
-  shortcut?: boolean
+  /** Shortcut that toggles the dialog. Pass `false` to disable it. */
+  keyboardShortcut?: KeyboardShortcutCombo | 'Mod+Shift+,' | false
 
   /**
    * Unmount a panel's content when its tab is inactive (reka-ui default: true).

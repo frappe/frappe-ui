@@ -2,6 +2,7 @@ import {
   onActivated,
   onBeforeUnmount,
   onDeactivated,
+  getCurrentInstance,
   ref,
   toValue,
   type MaybeRefOrGetter,
@@ -285,6 +286,11 @@ export function getShortcutGroups(): KeyboardShortcutGroup[] {
 export function useKeyboardShortcut(
   shortcuts: KeyboardShortcutConfig | KeyboardShortcutConfig[],
 ): void {
+  if (!getCurrentInstance()) {
+    throw new Error(
+      '[frappe-ui] useKeyboardShortcut() must be called during component setup.',
+    )
+  }
   attachGlobalListener()
 
   const configs = Array.isArray(shortcuts) ? shortcuts : [shortcuts]

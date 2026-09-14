@@ -66,7 +66,7 @@ export interface TabTriggerProps {
   route?: RouteLocationRaw
 }
 
-export type TabTriggerSlotProps = { selected: boolean; disabled: boolean }
+export type TabTriggerSlotProps = { active: boolean; disabled: boolean }
 
 export interface TabPanelProps {
   value: TabValue

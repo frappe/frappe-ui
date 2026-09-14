@@ -26,7 +26,10 @@ describe('<SidebarRail />', () => {
     })
     cy.get('[data-slot=sidebar-rail]').should('exist')
     cy.get('[data-slot=sidebar-rail] [aria-label=Home]').should('exist')
-    cy.get('[data-slot=sidebar-rail] [aria-label=Design]').should('contain.text', 'DE')
+    cy.get('[data-slot=sidebar-rail] [aria-label=Design]').should(
+      'contain.text',
+      'DE',
+    )
     cy.get('[data-slot=sidebar-rail] [aria-label=Search]').should('exist')
   })
 })
@@ -47,40 +50,98 @@ describe('<SidebarRailItem />', () => {
       props: { label: 'Search', icon: 'lucide-search', route: '/search' },
       global: { plugins: [createTestRouter()] },
     })
-    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', '/search')
+    cy.get('a[data-slot=sidebar-rail-item]').should(
+      'have.attr',
+      'href',
+      '/search',
+    )
 
     cy.mount(SidebarRailItem, {
-      props: { label: 'Docs', icon: 'lucide-book-open', href: 'https://frappe.io/docs' },
+      props: {
+        label: 'Docs',
+        icon: 'lucide-book-open',
+        href: 'https://frappe.io/docs',
+      },
     })
-    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', 'https://frappe.io/docs')
+    cy.get('a[data-slot=sidebar-rail-item]').should(
+      'have.attr',
+      'href',
+      'https://frappe.io/docs',
+    )
 
     cy.mount(SidebarRailItem, {
-      props: { label: 'Route wins', route: '/search', href: 'https://frappe.io/docs' },
+      props: {
+        label: 'Route wins',
+        route: '/search',
+        href: 'https://frappe.io/docs',
+      },
       global: { plugins: [createTestRouter()] },
     })
-    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', '/search')
+    cy.get('a[data-slot=sidebar-rail-item]').should(
+      'have.attr',
+      'href',
+      '/search',
+    )
   })
 
-  it('shows the indicator bar for an active tile, not an active ghost', () => {
+  it('shows the indicator bar for an active subtle item, not an active ghost', () => {
     cy.mount(SidebarRailItem, { props: { label: 'Design', active: true } })
     cy.get('[data-slot=sidebar-rail-item][data-state=active]').should('exist')
     cy.get('[data-slot=sidebar-rail-item-indicator]').should('exist')
 
     cy.mount(SidebarRailItem, {
-      props: { label: 'Search', icon: 'lucide-search', variant: 'ghost', active: true },
+      props: {
+        label: 'Search',
+        icon: 'lucide-search',
+        variant: 'ghost',
+        active: true,
+      },
     })
     cy.get('[data-slot=sidebar-rail-item-indicator]').should('not.exist')
     cy.get('[data-slot=sidebar-rail-item]').should('have.class', 'shadow-sm')
   })
 
+  it('derives active state from the current route', () => {
+    const router = createTestRouter()
+    cy.wrap(router.push('/search'))
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Search', icon: 'lucide-search', route: '/search' },
+      global: { plugins: [router] },
+    })
+    cy.get('[data-slot=sidebar-rail-item]')
+      .should('have.attr', 'data-state', 'active')
+      .and('have.attr', 'aria-current', 'page')
+  })
+
+  it('falls back to a plain anchor for a string route without a router', () => {
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Search', icon: 'lucide-search', route: '/search' },
+    })
+    cy.get('a[data-slot=sidebar-rail-item]').should(
+      'have.attr',
+      'href',
+      '/search',
+    )
+  })
+
   it('renders a dot for badgeStyle=dot and a capped pill for badgeStyle=count', () => {
     cy.mount(SidebarRailItem, {
-      props: { label: 'Notifications', icon: 'lucide-bell', badge: 3, badgeStyle: 'dot' },
+      props: {
+        label: 'Notifications',
+        icon: 'lucide-bell',
+        badge: 3,
+        badgeStyle: 'dot',
+      },
     })
     cy.get('[data-slot=sidebar-rail-item-badge-dot]').should('exist')
 
     cy.mount(SidebarRailItem, {
-      props: { label: 'Notifications', icon: 'lucide-bell', badge: 142, badgeStyle: 'count' },
+      props: {
+        label: 'Notifications',
+        icon: 'lucide-bell',
+        badge: 142,
+        badgeStyle: 'count',
+      },
     })
     // The pill teleports to <body>.
     cy.get('body').should('contain.text', '99+')
@@ -88,9 +149,16 @@ describe('<SidebarRailItem />', () => {
 
   it('lets `description` replace the unread line under the tooltip label', () => {
     cy.mount(SidebarRailItem, {
-      props: { label: 'Notifications', icon: 'lucide-bell', badge: 3, badgeStyle: 'dot' },
+      props: {
+        label: 'Notifications',
+        icon: 'lucide-bell',
+        badge: 3,
+        badgeStyle: 'dot',
+      },
     })
-    cy.get('[data-slot=sidebar-rail-item]').trigger('pointerenter').trigger('pointermove')
+    cy.get('[data-slot=sidebar-rail-item]')
+      .trigger('pointerenter')
+      .trigger('pointermove')
     // The tooltip teleports to <body>.
     cy.get('body').should('contain.text', '3 unread')
 
@@ -103,7 +171,9 @@ describe('<SidebarRailItem />', () => {
         description: '12 members',
       },
     })
-    cy.get('[data-slot=sidebar-rail-item]').trigger('pointerenter').trigger('pointermove')
+    cy.get('[data-slot=sidebar-rail-item]')
+      .trigger('pointerenter')
+      .trigger('pointermove')
     cy.get('body')
       .should('contain.text', '12 members')
       // Only meaningful because the line above already waited for the tooltip to open.
@@ -114,6 +184,10 @@ describe('<SidebarRailItem />', () => {
     cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3 },
     })
-    cy.get('[data-slot=sidebar-rail-item]').should('have.attr', 'aria-label', 'Notifications, 3 unread')
+    cy.get('[data-slot=sidebar-rail-item]').should(
+      'have.attr',
+      'aria-label',
+      'Notifications, 3 unread',
+    )
   })
 })

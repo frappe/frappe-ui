@@ -70,7 +70,7 @@ Each tab exposes data-attribute hooks for styling:
 
 - `data-slot="tab-button"` on every tab.
 - `data-value` carries that tab's `value`, so CSS can address one tab.
-- `data-state="checked|unchecked"` and `data-disabled` for state.
+- `data-state="active|inactive"` and `data-disabled` for state.
 
 This is the only way to style one specific tab. The per-option `class` field
 was removed in `1.0.0`.

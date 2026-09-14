@@ -12,14 +12,14 @@
       both branches.
     -->
     <component
-      :is="route ? RouterLink : 'a'"
+      :is="linkComponent"
       v-if="route || href"
-      v-bind="route ? { to: route } : { href }"
+      v-bind="linkAttrs"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
-      :data-state="active ? 'active' : 'inactive'"
+      :data-state="resolvedActive ? 'active' : 'inactive'"
       :aria-label="ariaLabel"
-      :aria-current="active ? 'page' : undefined"
+      :aria-current="resolvedActive ? 'page' : undefined"
       :class="cellClasses"
       @click="emit('click', $event)"
     >
@@ -29,19 +29,7 @@
         aria-hidden="true"
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
-      <slot>
-        <span
-          v-if="typeof icon === 'string'"
-          :class="[icon, 'size-4']"
-          aria-hidden="true"
-        />
-        <component
-          v-else-if="icon"
-          :is="icon"
-          class="size-4"
-          aria-hidden="true"
-        />
-      </slot>
+      <slot><Icon :icon="icon" class="size-4" /></slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
     </component>
 
@@ -50,9 +38,9 @@
       type="button"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
-      :data-state="active ? 'active' : 'inactive'"
+      :data-state="resolvedActive ? 'active' : 'inactive'"
       :aria-label="ariaLabel"
-      :aria-current="active ? 'page' : undefined"
+      :aria-current="resolvedActive ? 'page' : undefined"
       :class="cellClasses"
       @click="emit('click', $event)"
     >
@@ -62,19 +50,7 @@
         aria-hidden="true"
         class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
       />
-      <slot>
-        <span
-          v-if="typeof icon === 'string'"
-          :class="[icon, 'size-4']"
-          aria-hidden="true"
-        />
-        <component
-          v-else-if="icon"
-          :is="icon"
-          class="size-4"
-          aria-hidden="true"
-        />
-      </slot>
+      <slot><Icon :icon="icon" class="size-4" /></slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
     </button>
 
@@ -90,14 +66,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
+import Icon from '../Icon/Icon.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarRailItemBadge from './SidebarRailItemBadge.vue'
 import type { SidebarRailItemProps } from './types'
 
 const props = withDefaults(defineProps<SidebarRailItemProps>(), {
-  variant: 'tile',
+  variant: 'subtle',
+  active: undefined,
   badgeStyle: 'count',
   badge: 0,
 })
@@ -109,20 +87,47 @@ defineSlots<{
   default?: () => any
 }>()
 
-// The left indicator bar is the `tile` variant's active affordance; `ghost`
+const globals = getCurrentInstance()?.appContext.config.globalProperties
+const hasRouter = computed(() => Boolean(globals?.$router))
+const linkComponent = computed(() =>
+  props.route && hasRouter.value ? RouterLink : 'a',
+)
+const linkAttrs = computed(() =>
+  props.route
+    ? hasRouter.value
+      ? { to: props.route }
+      : { href: typeof props.route === 'string' ? props.route : undefined }
+    : { href: props.href },
+)
+const resolvedRoute = computed(() =>
+  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
+)
+const resolvedActive = computed(() => {
+  if (props.active !== undefined) return props.active
+  const target = resolvedRoute.value
+  const current = globals?.$route
+  if (!target || !current) return false
+  return target.name
+    ? current.name === target.name
+    : current.path === target.path
+})
+
+// The left indicator bar is the `subtle` variant's active affordance; `ghost`
 // items signal active state through their raised background instead.
-const showIndicator = computed(() => props.variant === 'tile' && props.active)
+const showIndicator = computed(
+  () => props.variant === 'subtle' && resolvedActive.value,
+)
 
 const cellClasses = computed(() => [
   'relative flex size-7 shrink-0 items-center justify-center text-base transition focus-visible:ring-0 focus-visible:focus-ring',
-  // `tile` uses the community-tile radius; `ghost` mirrors frappe-ui's icon
+  // `subtle` uses the community-tile radius; `ghost` mirrors frappe-ui's icon
   // button (rounded-4 = 8px).
-  props.variant === 'tile' ? 'rounded-[7px]' : 'rounded-4',
-  props.variant === 'tile'
-    ? props.active
+  props.variant === 'subtle' ? 'rounded-[7px]' : 'rounded-4',
+  props.variant === 'subtle'
+    ? resolvedActive.value
       ? 'bg-surface-gray-4'
       : 'bg-surface-gray-3'
-    : props.active
+    : resolvedActive.value
       ? 'text-ink-gray-8 !bg-surface-elevation-3 shadow-sm'
       : 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3',
 ])

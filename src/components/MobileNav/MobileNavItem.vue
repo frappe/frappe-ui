@@ -19,18 +19,10 @@
     @click="emit('click', $event)"
   >
     <slot :active="resolvedActive">
-      <span
-        v-if="typeof icon === 'string'"
-        :class="[icon, resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5']"
-        class="size-6"
-        aria-hidden="true"
-      />
-      <component
-        v-else-if="icon"
-        :is="icon"
+      <Icon
+        :icon="icon"
         :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
         class="size-6"
-        aria-hidden="true"
       />
     </slot>
     <span
@@ -52,18 +44,10 @@
     @click="onButtonClick"
   >
     <slot :active="resolvedActive">
-      <span
-        v-if="typeof icon === 'string'"
-        :class="[icon, resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5']"
-        class="size-6"
-        aria-hidden="true"
-      />
-      <component
-        v-else-if="icon"
-        :is="icon"
+      <Icon
+        :icon="icon"
         :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
         class="size-6"
-        aria-hidden="true"
       />
     </slot>
     <span
@@ -78,6 +62,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
+import Icon from '../Icon/Icon.vue'
 import { scrollShellToTop } from '../../composables/useShellScrolled'
 import type { MobileNavItemProps } from './types'
 

@@ -45,9 +45,7 @@ watchEffect(() => {
 
 // Route mode. `route` is assumed present-or-absent for the trigger's
 // lifetime — useLink can only be called during setup.
-const link = props.route
-  ? useLink({ to: computed(() => props.route!) })
-  : null
+const link = props.route ? useLink({ to: computed(() => props.route!) }) : null
 
 if (import.meta.env.DEV) {
   let warned = false
@@ -82,7 +80,7 @@ onUnmounted(() => unregister?.())
 const selected = computed(() => root?.selected.value === props.value)
 
 const slotProps = computed<TabTriggerSlotProps>(() => ({
-  selected: selected.value,
+  active: selected.value,
   disabled: !!props.disabled,
 }))
 

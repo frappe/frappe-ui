@@ -39,11 +39,11 @@ describe('Tabs', () => {
           h('span', `[${tab.value}`),
         'tab-label': ({
           tab,
-          selected,
+          active,
         }: {
           tab: (typeof items)[number]
-          selected: boolean
-        }) => h('span', `${tab.label}${selected ? '*' : ''}`),
+          active: boolean
+        }) => h('span', `${tab.label}${active ? '*' : ''}`),
         'tab-suffix': () => h('span', ']'),
         'tab-panel': ({ tab }: { tab: (typeof items)[number] }) =>
           h('div', `${tab.label} content`),

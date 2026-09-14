@@ -113,6 +113,20 @@ beforeEach(() => {
   _resetKeyboardShortcutWarnings()
 })
 
+describe('useKeyboardShortcut — setup ownership', () => {
+  it('rejects calls outside component setup', () => {
+    expect(() =>
+      useKeyboardShortcut({
+        combo: 'Mod+K',
+        description: 'Outside setup',
+        handler: vi.fn(),
+      }),
+    ).toThrow(
+      '[frappe-ui] useKeyboardShortcut() must be called during component setup.',
+    )
+  })
+})
+
 // ---------------------------------------------------------------------------
 // matchesCombo — the grammar
 // ---------------------------------------------------------------------------
@@ -1144,7 +1158,9 @@ describe('a combo the matcher refuses is a combo the chip warns about', () => {
     // is the silent failure this family exists to remove.
     const silent = COMBO_VERDICTS.map(([combo]) => combo).filter((combo) => {
       const { verdict, chips } = displayVerdict(combo, false)
-      return chips > 0 && verdict === 'accept' && matchingVerdict(combo) !== 'accept'
+      return (
+        chips > 0 && verdict === 'accept' && matchingVerdict(combo) !== 'accept'
+      )
     })
     expect(silent, 'combos drawn as chips that can never fire').toEqual([])
   })

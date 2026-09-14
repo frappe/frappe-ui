@@ -29,7 +29,7 @@
     >
       <Tooltip
         :text="tooltipText"
-        placement="right"
+        side="right"
         :disabled="!isCollapsed || !tooltipText"
       >
         <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
@@ -68,7 +68,7 @@
     >
       <Tooltip
         :text="tooltipText"
-        placement="right"
+        side="right"
         :disabled="!isCollapsed || !tooltipText"
       >
         <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`

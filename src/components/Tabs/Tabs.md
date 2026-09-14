@@ -65,7 +65,7 @@ tabs attach to.
 ## Prefix slot
 
 `#prefix` renders leading content inside a trigger, after `iconLeft`. It
-receives `{ selected, disabled }`.
+receives `{ active, disabled }`.
 
 <ComponentPreview name="Tabs-Prefix" />
 

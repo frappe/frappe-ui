@@ -15,8 +15,8 @@ container, and push a footer down with `mt-auto`.
 ## Collapse
 
 `Sidebar` owns collapse. Bind `v-model:collapsed` to control it, or leave it
-unset to collapse automatically below the `sm` breakpoint. `disableCollapse`
-pins it open. Width comes from the `width` / `collapsedWidth` props (CSS lengths,
+unset to collapse automatically below the `sm` breakpoint. Set
+`:collapsible="false"` to pin it open. Width comes from the `width` / `collapsedWidth` props (CSS lengths,
 applied inline so an app can override them). Drop a `SidebarCollapseToggle`
 anywhere inside to flip the state; `SidebarLabel divider` turns a section label
 into a divider line while collapsed.
