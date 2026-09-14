@@ -135,7 +135,6 @@ The `value` prop is a legacy uncontrolled pattern that should be deprecated. Kee
 interface ExtraDateTimeProps {
   minDateTime?: string
   maxDateTime?: string
-  allowCustomTime?: boolean
 }
 ```
 
@@ -147,7 +146,6 @@ interface ExtraDateTimeProps {
 export interface DateTimePickerProps extends DatePickerProps {
   minDateTime?: string
   maxDateTime?: string
-  allowCustomTime?: boolean
 }
 ```
 
@@ -326,9 +324,9 @@ type DatePickerEmits = {
 }
 ```
 
-Slots: `trigger`, `prefix`, `suffix` (all with `{ open, toggle, displayLabel, inputValue }`).
-`toggle` carries `Popover`'s signature, `(flag?: boolean | Event) => void`: a bare
-call flips, a boolean sets, a DOM event is ignored. One name, one meaning.
+Slots: `trigger`, `prefix`, `suffix`, and `actions` receive `{ open, disabled,
+setOpen, close, displayLabel, inputValue }` plus slot-specific fields. `close()`
+is shorthand for `setOpen(false)`.
 
 Exposed: `open(): void`
 
@@ -380,7 +378,6 @@ interface DateTimePickerProps extends CommonDatePickerProps {
   minDateTime?: string
   /** @deprecated use `max` */
   maxDateTime?: string
-  allowCustomTime?: boolean
 }
 ```
 
@@ -478,8 +475,7 @@ type TimePickerEmits = {
 }
 ```
 
-Slots: `prefix`, `suffix` (suffix exposes `{ open, toggle }`, with `toggle` the
-same `(flag?: boolean | Event) => void` as on the date pickers and `Popover`).
+Slots: `prefix`, `suffix` (`suffix` receives `{ open, disabled, setOpen, close }`).
 
 ---
 

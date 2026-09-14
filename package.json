@@ -20,6 +20,9 @@
   },
   "bin": {
     "base-props-v1": "./scripts/migrate-base-props-v1.js",
+    "list-v1": "./scripts/migrate-list-v1.js",
+    "navigation-v1": "./scripts/migrate-navigation-v1.js",
+    "overlays-v1": "./scripts/migrate-overlays-v1.js",
     "tokens-v2": "./tailwind/migrate-tokens-v2.js",
     "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js",
     "editor-v1": "./scripts/migrate-editor-v1.js",
@@ -107,6 +110,9 @@
     "scripts/migrate-shortcuts-v1.js",
     "scripts/migrate-base-props-v1.js",
     "scripts/migrate-editor-v1.js",
+    "scripts/migrate-list-v1.js",
+    "scripts/migrate-navigation-v1.js",
+    "scripts/migrate-overlays-v1.js",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"

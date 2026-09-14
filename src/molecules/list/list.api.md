@@ -161,7 +161,7 @@
     type: '{ direction: "asc" | "desc" | null; }'
   },
   {
-    name: 'suffix',
+    name: 'sort-indicator',
     description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
     type: '{ direction: "asc" | "desc" | null; }'
   }
@@ -190,24 +190,30 @@
   },
   {
     name: 'virtual',
-    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
+    description: 'Window the rows so only rows near the viewport mount. Height comes from\nthe parent List\'s `rowHeight`; the scroll container is the nearest\nscrollable ancestor.',
     required: false,
-    type: 'boolean | ListVirtualOptions'
+    type: 'boolean'
+  },
+  {
+    name: 'overscan',
+    description: 'Rows rendered beyond the visible window on each side. Default: `6`.',
+    required: false,
+    type: 'number'
   }
 ]
 
   const listRowsSlots = [
   {
     name: 'default',
-    description: 'One render per item — `{ item, index, value }`, where `value` is the row\'s resolved identity.',
-    type: '{ item: T; index: number; value: string; }'
+    description: 'One render per item. `active` and `selected` are independent row states.',
+    type: '{ item: T; index: number; value: string; selected: boolean; active: boolean; }'
   }
 ]
 
   const listGroupProps = [
   {
     name: 'label',
-    description: 'Section label shown in the group header. Overridden by the #header slot.',
+    description: 'Section label shown in the group header. Overridden by the #label slot.',
     required: false,
     type: 'string'
   },
@@ -226,8 +232,8 @@
     type: 'any'
   },
   {
-    name: 'header',
-    description: 'Replaces the header content (the label).',
+    name: 'label',
+    description: 'Replaces the group label.',
     type: 'any'
   }
 ]

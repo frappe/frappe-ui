@@ -8,6 +8,7 @@ import {
 import {
   List,
   ListCell,
+  ListGroup,
   ListHeader,
   ListHeaderCell,
   ListHeaderCellSort,
@@ -80,13 +81,38 @@ describe('List (feed mode)', () => {
       },
       { global: { plugins: [makeRouter()] } },
     )
-    cy.get('a[data-slot=list-row]').eq(0)
+    cy.get('a[data-slot=list-row]')
+      .eq(0)
       .should('have.attr', 'href', '/item/1')
-      .and('have.attr', 'data-interactive')
-    cy.get('a[data-slot=list-row]').eq(1).should('have.attr', 'href', 'https://frappe.io')
+      .and('have.attr', 'data-interactive', 'true')
+      .and('have.attr', 'data-state', 'inactive')
+    cy.get('a[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'href', 'https://frappe.io')
     cy.get('button[data-slot=list-row]').click()
     cy.get('@rowClick').should('have.been.calledOnce')
     cy.get('div[data-slot=list-row]').should('exist')
+  })
+
+  it('renders ListGroup label content through the #label slot', () => {
+    cy.mount({
+      render: () =>
+        h(List, () =>
+          h(
+            ListGroup,
+            { label: 'Fallback' },
+            {
+              label: () => 'Custom label',
+              default: () => feedRow('1'),
+            },
+          ),
+        ),
+    })
+
+    cy.get('[data-slot=list-group]')
+      .should('have.attr', 'role', 'rowgroup')
+      .and('have.attr', 'aria-label', 'Fallback')
+    cy.get('[data-slot=list-group-header]').should('have.text', 'Custom label')
   })
 
   it('navigates on row click', () => {
@@ -109,7 +135,6 @@ describe('List (feed mode)', () => {
       })
   })
 })
-
 describe('List (selection)', () => {
   function mountSelectable(rowProps: Record<string, unknown> = {}) {
     const selection = ref<string[]>([])
@@ -141,7 +166,8 @@ describe('List (selection)', () => {
     cy.get('@rowClick').should('not.have.been.called')
     cy.get('[data-slot=list-row]')
       .first()
-      .should('have.attr', 'data-state', 'selected')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-state', 'inactive')
     cy.get('[data-slot=list-row]')
       .first()
       .click()
@@ -393,7 +419,7 @@ describe('List (active row)', () => {
     mountActive()
     // Binding v-model:active opts every row into interactivity → buttons.
     cy.get('button[data-slot=list-row]').should('have.length', 4)
-    cy.get('[data-slot=list-row][data-active]')
+    cy.get('[data-slot=list-row][data-state=active]')
       .should('have.length', 1)
       .and('contain.text', 'Content 2')
       .and('have.attr', 'aria-current', 'true')
@@ -410,8 +436,12 @@ describe('List (active row)', () => {
       })
     // Unlike selection, activation is additive — the app’s handler still runs.
     cy.get('@rowClick').should('have.been.calledOnce')
-    cy.get('[data-slot=list-row]').eq(0).should('have.attr', 'data-active')
-    cy.get('[data-slot=list-row]').eq(1).should('not.have.attr', 'data-active')
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'active')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'inactive')
   })
 
   it('hides the dividers directly above and below the active row', () => {
@@ -424,9 +454,35 @@ describe('List (active row)', () => {
     cy.get('[data-slot=list-divider]').eq(3).should('have.css', 'opacity', '1')
   })
 
+  it('exposes active and selected as independent row states', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['2'],
+            active: '2',
+            'onUpdate:active': () => undefined,
+          },
+          () => [feedRow('1'), feedRow('2')],
+        ),
+    })
+
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'inactive')
+      .and('not.have.attr', 'data-selected')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'active')
+      .and('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-interactive', 'true')
+  })
+
   it('stays inert when v-model:active is not bound', () => {
     cy.mount({ render: () => h(List, () => [feedRow('1'), feedRow('2')]) })
-    cy.get('[data-slot=list-row][data-active]').should('not.exist')
+    cy.get('[data-slot=list-row][data-state=active]').should('not.exist')
     cy.get('button[data-slot=list-row]').should('not.exist')
   })
 })
@@ -459,7 +515,11 @@ describe('List (column mode)', () => {
               {
                 default: () => 'User',
                 // Adornments are app-supplied; expose the scoped direction for assertions.
-                suffix: ({ direction }: { direction: string | null }) =>
+                'sort-indicator': ({
+                  direction,
+                }: {
+                  direction: string | null
+                }) =>
                   h(
                     'span',
                     { 'data-testid': 'sort-icon' },
@@ -563,7 +623,8 @@ describe('List (column mode)', () => {
               },
               {
                 default: () => 'Size',
-                suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
+                'sort-indicator': () =>
+                  h('span', { 'data-testid': 'glyph' }, 'icon'),
               },
             ),
             h(ListHeaderCell, () => ''),
@@ -1019,6 +1080,41 @@ describe('List (responsive columns)', () => {
 })
 
 describe('ListRows (virtual)', () => {
+  it('exposes independent selected and active slot state', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['1'],
+            active: '2',
+            'onUpdate:active': () => {},
+          },
+          () =>
+            h(
+              ListRows,
+              { items: [{ id: '1' }, { id: '2' }] },
+              {
+                default: ({ value, selected, active }) =>
+                  h('span', {
+                    'data-cy': `row-${value}`,
+                    'data-selected': String(selected),
+                    'data-active': String(active),
+                  }),
+              },
+            ),
+        ),
+    })
+
+    cy.get('[data-cy=row-1]')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-active', 'false')
+    cy.get('[data-cy=row-2]')
+      .should('have.attr', 'data-selected', 'false')
+      .and('have.attr', 'data-active', 'true')
+  })
+
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
     cy.mount({
@@ -1050,5 +1146,44 @@ describe('ListRows (virtual)', () => {
     cy.get('[data-testid=viewport]').scrollTo('bottom')
     cy.contains('[data-slot=list-row]', 'Row 500').should('exist')
     cy.contains('[data-slot=list-row]', 'Row 1').should('not.exist')
+  })
+
+  it('updates the rendered window when overscan changes', () => {
+    const overscan = ref(0)
+    const items = Array.from({ length: 100 }, (_, i) => ({ id: String(i + 1) }))
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'overscan-viewport',
+          },
+          h(List, { rowHeight: 40 }, () =>
+            h(
+              ListRows,
+              { items, virtual: true, overscan: overscan.value },
+              {
+                default: ({ item }: { item: { id: string } }) =>
+                  h(ListRow, { key: item.id }, () => `Row ${item.id}`),
+              },
+            ),
+          ),
+        ),
+    })
+
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.get('[data-testid=overscan-viewport]').scrollTo(0, 20)
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.contains('[data-slot=list-row]', 'Row 6').should('exist')
+
+    let initialRows = 0
+    cy.get('[data-slot=list-row]').then(($rows) => {
+      initialRows = $rows.length
+    })
+    cy.then(() => (overscan.value = 20))
+    cy.get('[data-slot=list-row]').should(($rows) => {
+      expect($rows.length).to.be.greaterThan(initialRows)
+    })
   })
 })

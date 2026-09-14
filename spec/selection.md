@@ -78,8 +78,8 @@ every time the popover opens. On `Combobox` in its default input mode the query
 doubles as the value display, so it follows the committed option's label either
 way.
 
-Every trigger and footer slot hands you `setOpen(boolean)` to open or close the
-popover and `clear()` to empty the selection. They exist because slot content
+Every trigger and footer slot hands you `setOpen(boolean)` and `close()` to
+control the popover, plus `clear()` to empty the selection. They exist because slot content
 has no reference to the state the parent owns. They complement `v-model:open`
 rather than replace it: one drives the component from outside, the other from
 inside.
@@ -114,7 +114,7 @@ receives the default text (`"3 selected"`, a single label, or the placeholder)
 as `summary`, so you can fall back to it.
 
 All of these receive the same shape: `open`, `disabled`, the selected option or
-options, `clear`, and `setOpen`. `Combobox` and `MultiSelect` add `query`, and
+options, `clear`, `setOpen`, and `close`. `Combobox` and `MultiSelect` add `query`, and
 `Combobox` adds `displayValue`.
 
 ## Customizing rows

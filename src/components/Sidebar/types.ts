@@ -2,6 +2,7 @@ import type { Component, ComputedRef, InjectionKey } from 'vue'
 import { RouteLocationRaw } from 'vue-router'
 import type { AlertAction } from '../Alert'
 import type { StatusTheme } from '../shared/statusIcon'
+import type { MenuOptions } from '../Menu/types'
 
 /**
  * Read-only collapsed state, provided by `Sidebar` and consumed by
@@ -19,8 +20,8 @@ export const sidebarToggleKey: InjectionKey<() => void> =
   Symbol('sidebarToggle')
 
 export type SidebarProps = {
-  /** Disables collapsing entirely (fixed width, no built-in toggle). */
-  disableCollapse?: boolean
+  /** Allows the sidebar to collapse. Default: `true`. */
+  collapsible?: boolean
 
   /** Expanded width as a CSS length. Applied inline so apps can override it. */
   width?: string
@@ -88,11 +89,7 @@ export type SidebarHeaderProps = {
    */
   showLogo?: boolean
   /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */
-  menuItems?: {
-    label: string
-    icon?: string | Component
-    onClick?: () => void
-  }[]
+  menuItems?: MenuOptions
 }
 
 /**

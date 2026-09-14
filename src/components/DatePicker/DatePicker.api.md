@@ -509,13 +509,6 @@
     default: '""'
   },
   {
-    name: 'allowCustomTime',
-    description: 'Allows typing a custom time into the embedded time picker.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
-  },
-  {
     name: 'label',
     description: 'Label rendered above (or beside, for binary controls) the input.',
     required: false,

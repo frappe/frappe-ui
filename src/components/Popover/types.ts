@@ -77,8 +77,8 @@ export interface PopoverSlotProps {
   open: boolean
   /** Closes the popover. No-op when it is already closed. */
   close: () => void
-  /** Flips the open state, or sets it when passed a boolean. */
-  toggle: (flag?: boolean | Event) => void
+  /** Sets the popover open state. */
+  setOpen: (value: boolean) => void
 }
 
 /** What a `<Popover>` template ref exposes. */

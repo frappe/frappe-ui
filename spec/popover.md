@@ -94,9 +94,9 @@ interface PopoverProps {
   matchTargetWidth?: boolean
   /** @deprecated use the separate `HoverCard` component */
   trigger?: 'click' | 'hover'
-  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (seconds) */
+  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (milliseconds) */
   hoverDelay?: number
-  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (seconds) */
+  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (milliseconds) */
   leaveDelay?: number
   /** @deprecated no class-injection; use data-slot CSS hooks */
   popoverClass?: string | object | Array<string | object>
@@ -172,14 +172,14 @@ type PopoverTargetSlotProps = {
 
 Supported slots:
 
-- `#trigger="{ open, close }"`
+- `#trigger="{ open, setOpen, close }"`
   - rendered via reka `PopoverTrigger` **as-child**: click, keyboard, and aria
     wiring are automatic. Do **not** hand-wire `@click` here.
-- `#default="{ open, close }"`
+- `#default="{ open, setOpen, close }"`
   - panel content, rendered inside the standard `PopoverPanel` shell (or bare,
     with no shell, when the `bare` prop is set)
 - `#body` / `#body-main`
-  - compatibility aliases with the same `{ open, close }` props. `#body` is a
+  - compatibility aliases with the same `{ open, setOpen, close }` props. `#body` is a
     full body override and renders **bare** (no shell), matching its v0 contract
     — equivalent to `#default` + `bare`. `#body-main` renders inside the shell.
 - `#target="{ togglePopover, updatePosition, isOpen, open, close }"`
@@ -225,7 +225,7 @@ Mapping table:
 | `placement="bottom-start"` | `side="bottom"` + `align="start"` | split on `'-'`; bare side (e.g. `"bottom"`) → `align: "center"` |
 | `hideOnBlur` | `dismissible` | direct (same boolean meaning) |
 | `matchTargetWidth` | `matchTriggerWidth` | rename, same `--reka-popover-trigger-width` behavior |
-| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | `<HoverCard>` | keeps working; one-time warn points at `HoverCard`. Delays stay in **seconds**. |
+| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | `<HoverCard>` | keeps working; one-time warn points at `HoverCard`. Delays use **milliseconds**. |
 | `popoverClass` | `data-slot` CSS hooks | no-op + warn |
 | `transition="default"` | default motion | no-op (motion is on by default) |
 | `#target` | `#trigger` | old manual contract preserved on `#target` |
@@ -294,7 +294,7 @@ A separate `<HoverCard>` component is built on reka `HoverCard` primitives. It
 owns hover-reveal behavior and deletes the hand-rolled timer code from the
 legacy `Popover`:
 
-- `hoverDelay` / `leaveDelay` in **seconds** (consistent with `Tooltip`)
+- `hoverDelay` / `leaveDelay` in **milliseconds** (consistent with `Tooltip`)
 - standard `side` / `align` / `offset` / `portalTo` / `collisionPadding`
 - renders content inside the shared `PopoverPanel` shell
 

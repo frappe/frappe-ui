@@ -259,8 +259,12 @@ function handleTriggerClick() {
 }
 
 function setOpen(value: boolean) {
-  if (props.disabled) return
+  if (props.disabled && value) return
   open.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function setQuery(value: string) {
@@ -283,6 +287,7 @@ const controlSlotProps = computed<ComboboxControlSlotProps>(() => ({
   displayValue: displayValue.value,
   clear,
   setOpen,
+  close,
 }))
 
 const searchSlotProps = computed<ComboboxSearchSlotProps>(() => ({

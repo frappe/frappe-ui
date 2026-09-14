@@ -53,10 +53,14 @@ export interface PickerShellProps {
 
 /** Slot props passed to the `#trigger`, `#prefix` and `#suffix` slots. */
 export interface PickerShellTriggerSlotProps {
-  /** Flips the open state, or sets it when passed a boolean. */
-  toggle: (flag?: boolean | Event) => void
   /** Whether the panel is currently open. */
   open: boolean
+  /** Whether the picker is disabled. */
+  disabled: boolean
+  /** Sets the panel open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the panel. Equivalent to `setOpen(false)`. */
+  close: () => void
   /** The formatted value. */
   displayLabel: string
   /** The raw text in the input. */
@@ -71,7 +75,7 @@ export interface PickerShellSlots {
   /** Content after the input text. Replaces the chevron. */
   suffix?: (props: PickerShellTriggerSlotProps) => any
   /** The panel body. */
-  default?: (props: { close: () => void }) => any
+  default?: (props: PickerShellTriggerSlotProps) => any
 }
 
 /** Methods available on a `<PickerShell>` template ref. */

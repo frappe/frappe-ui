@@ -60,6 +60,10 @@ Avatar rows with a contextual invite action authored through a template slot.
 ## Footer
 The `#footer` slot renders below the list and stays pinned to the bottom of the popover — it does not scroll with the options. Scroll the list to confirm the footer remains fixed.
 
+The trigger, prefix, suffix, and footer control slots receive `open`,
+`disabled`, `setOpen`, and `close` with their selection fields. `close()` is
+shorthand for `setOpen(false)`.
+
 <ComponentPreview name="Combobox-Footer" layout="stacked" />
 
 ## In Dialog

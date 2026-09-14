@@ -1,13 +1,18 @@
 # Frappe UI v1 RC work list
 
 - Audited commit: `f4dfb48160` (`v1.0.0-beta.63`).
-- Current HEAD: `7aeba2268c56f5fd62893e820f381ad86d13f7d7`.
-- Remaining RC work: 18 PRs covering 92 final grilling QIDs, including documentation-only decisions.
+- Current batch base: `0f2162c689aee0a0bdf8ae1559ac2043e9a5cd85` (`v1.0.0-beta.68`).
+- Items 1, 3, and 6 landed in PRs #1151, #1150, and #1149.
+- The remaining 15 sections ship as exactly three sequential PRs: batch 1 is
+  items 2, 4, 5, 7, 9, 12, and 16; batch 2 is items 8, 10, 11, 13, and 14;
+  batch 3 is items 15, 17, and 18. Section titles below are scope records, not
+  separate PR instructions.
 - Already landed: one delegated chart workstream, issue #1139 through PR #1141 at `bc0b402820`.
 - Deferred: 8 complete QIDs and 4 parts of QIDs wait for 1.1.
 - Delegated: two workstreams. Charts #1139 is complete. Tree #1142 is still outside this list.
 
-The source check used `git log --oneline f4dfb48160..HEAD` and `git diff --stat f4dfb48160..HEAD`. No non-chart final decision landed in that range. PR #1140 changed picker internals, but the public delay, `toggle`, and `allowCustomTime` contracts remain unchanged. Each item below is still required at HEAD unless it says that the current API stays.
+The source check used `git log --oneline f4dfb48160..HEAD` and `git diff --stat f4dfb48160..HEAD`. No non-chart final decision landed in that range. PR #1140 changed picker internals, but the public delay, `toggle`, and `allowCustomTime` contracts remain unchanged. Each unlanded item below remains required unless it says the current API stays.
+Exact decisions and later user overrides win over older wording in this file.
 
 ## Vocabulary and codemod PRs
 
@@ -128,9 +133,9 @@ Size: **M**. The change touches about 15 files.
 
 Decisions:
 
-- **LIST-Q5** — Use `data-state="active|inactive"` plus boolean `data-selected` and `data-interactive`. Touch `ListRowBase.vue`, styles, tests, docs, and `spec/item-list-row.md`. Migrate 2 Builder selector sites. The codemod covers selectors and runs on this tree.
+- **LIST-Q5** — Use `data-state="active|inactive"` plus boolean `data-selected` and `data-interactive` on `ListRowBase` only. Active and selected remain independent. `ItemListRow` keeps its runtime behavior, and reka-native attributes are exempt. The 2 Builder candidates are app-authored divs, so actual ListRow selector migrations are 0. The codemod covers owned selectors and runs on this tree.
 - **LIST-Q7** — Rename ListGroup `#header` to `#label`. Touch `ListGroup.vue`, types, docs, and tests. App sites are 0. The codemod migrates the own-tree site.
-- **LIST-Q8** — Rename ListHeaderCellSort `#suffix` to `#sort-indicator` and keep edge-aware placement. Touch `ListHeaderCellSort.vue`, types, docs, and tests. App sites are not measured. The codemod covers statically named slots and reports other forms.
+- **LIST-Q8** — Rename ListHeaderCellSort `#suffix` to `#sort-indicator` and keep edge-aware placement. Touch `ListHeaderCellSort.vue`, types, docs, and tests. Consumer impact is 5 live sites: 2 in Gameplan `MembersSettings.vue` and 3 in Suite Drive `ListView.vue`; Gameplan `LIST_FAMILY_SPEC.md` has 2 documentation examples separately. The codemod covers statically named slots and reports other forms.
 
 Migration guide:
 

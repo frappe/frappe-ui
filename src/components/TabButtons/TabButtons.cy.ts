@@ -55,7 +55,7 @@ describe('<TabButtons />', () => {
     cy.get('[data-slot="tab-button"][data-value="open"]')
       .should('have.length', 1)
       .and('contain.text', 'Open')
-      .and('have.attr', 'data-state', 'checked')
+      .and('have.attr', 'data-state', 'active')
     cy.get('[data-slot="tab-button"][data-value="closed"]').should(
       'have.length',
       1,
@@ -124,7 +124,7 @@ describe('<TabButtons />', () => {
     })
 
     cy.get('@onUpdate').should('not.have.been.called')
-    cy.get('button[data-state=checked]').should('not.exist')
+    cy.get('button[data-state=active]').should('not.exist')
   })
 
   it('keeps hidden labels accessible for icon-only buttons', () => {
@@ -221,7 +221,7 @@ describe('<TabButtons />', () => {
     cy.get('.border-b').should('exist')
   })
 
-  it('slides the browser-tab indicator card onto the checked button', () => {
+  it('slides the browser-tab indicator card onto the active button', () => {
     const Harness = defineComponent({
       setup() {
         const value = ref('day')
@@ -244,10 +244,10 @@ describe('<TabButtons />', () => {
     cy.mount(Harness)
 
     cy.contains('button', 'Month').click()
-    cy.contains('button', 'Month').should('have.attr', 'data-state', 'checked')
+    cy.contains('button', 'Month').should('have.attr', 'data-state', 'active')
 
     // Retries until the 200ms slide settles: the indicator card covers the
-    // checked button's box exactly (rect-based measurement).
+    // active button's box exactly (rect-based measurement).
     cy.contains('button', 'Month').should(($btn) => {
       const indicator = document.querySelector<HTMLElement>(
         '[data-slot="tab-indicator"]',
@@ -277,7 +277,7 @@ describe('<TabButtons />', () => {
     })
 
     cy.contains('button', 'Month').click()
-    cy.contains('button', 'Month').should('have.attr', 'data-state', 'checked')
+    cy.contains('button', 'Month').should('have.attr', 'data-state', 'active')
 
     cy.contains('button', 'Month').should(($btn) => {
       const indicator = document.querySelector<HTMLElement>(

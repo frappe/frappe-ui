@@ -2,17 +2,18 @@
   <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
     <DropdownMenuTrigger
       as-child
+      data-slot="trigger"
       :disabled="triggerDisabled"
       @pointerdown="openOnPointerDown"
     >
       <slot
         v-if="$slots.trigger"
         name="trigger"
-        v-bind="{ ...attrs, open, close, disabled: triggerDisabled }"
+        v-bind="{ ...attrs, open, setOpen, close, disabled: triggerDisabled }"
       />
       <slot
         v-else-if="$slots.default"
-        v-bind="{ ...attrs, open, close, disabled: triggerDisabled }"
+        v-bind="{ ...attrs, open, setOpen, close, disabled: triggerDisabled }"
       />
       <!--
         No active/open prop: reka stamps `data-state="open"` on the trigger and
@@ -32,7 +33,9 @@
         :align="align"
         :side-offset="offset"
         :style="{
-          width: matchTriggerWidth ? 'var(--reka-dropdown-menu-trigger-width)' : undefined,
+          width: matchTriggerWidth
+            ? 'var(--reka-dropdown-menu-trigger-width)'
+            : undefined,
         }"
       >
         <Menu
@@ -88,6 +91,11 @@ function close() {
   openModel.value = false
 }
 
+function setOpen(value: boolean) {
+  if (triggerDisabled.value && value) return
+  openModel.value = value
+}
+
 const primitives = {
   Item: DropdownMenuItem,
   Label: DropdownMenuLabel,
@@ -100,7 +108,6 @@ const primitives = {
 const groups = computed(() => {
   return normalizeMenuOptions(props.options)
 })
-
 
 const triggerDisabled = computed(() => {
   return (

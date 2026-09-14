@@ -41,17 +41,17 @@
   },
   {
     name: 'hoverDelay',
-    description: 'Delay (in seconds) from when the pointer enters the trigger until the card\nopens. Matches the Tooltip convention of using seconds.',
+    description: 'Delay in milliseconds before the card opens. Default: `300`.',
     required: false,
     type: 'number',
-    default: '0.3'
+    default: '300'
   },
   {
     name: 'leaveDelay',
-    description: 'Delay (in seconds) from when the pointer leaves the trigger or card until\nthe card closes.',
+    description: 'Delay in milliseconds before the card closes. Default: `300`.',
     required: false,
     type: 'number',
-    default: '0.3'
+    default: '300'
   },
   {
     name: 'arrow',
@@ -78,7 +78,7 @@
   {
     name: 'default',
     description: 'Card contents, rendered inside the standard PopoverPanel shell.',
-    type: 'any'
+    type: 'HoverCardSlotProps'
   }
 ]
 

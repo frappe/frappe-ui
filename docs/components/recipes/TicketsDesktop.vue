@@ -432,7 +432,7 @@ const selection = ref([])
             </ListHeaderCellSort>
           </ListHeader>
           <ListRows :items="sortedTickets" v-slot="{ item: ticket, value }">
-            <ListRow :value="value" @click="() => {}">
+            <ListRow :value="value">
               <ListCell>
                 <div class="min-w-0">
                   <div class="truncate text-base text-ink-gray-8">

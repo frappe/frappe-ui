@@ -1,46 +1,55 @@
 # Executing the RC work list
 
-Brief for the session that orchestrates the 18 PRs in `rc-work-list.md`. Give the orchestrator this file. Everything else it needs is linked from here.
+Use this brief to finish the remaining RC work in `rc-work-list.md`.
 
-## Inputs
+## Sources of truth
 
-| File | Use it for |
+| File | Use |
 | --- | --- |
-| `rc-work-list.md` | What to build. One section per PR: QIDs, files, consumer sites, migration-guide lines, dependencies, size. Record PR numbers here. |
-| `rc-api-decisions.md` | Why, and the exact shapes. Every QID row has the chosen option and the maintainer's own words. Round 5 settles Tooltip (exempt) and row state (`active|inactive` plus `data-selected`). When a work-list line is ambiguous, this file wins. |
-| `rc-open-questions.md` | Research behind the decisions: codemod coverage numbers, consumer call sites, type shapes that were tried. |
-| `rc-migration-effort.md` | Per-app site counts. If a PR finds more sites than measured, stop and report. |
-| `grilling/0N-*.html` | The context each decision was made against. Read only when a decision row is unclear. |
+| `rc-work-list.md` | Scope, QIDs, migrations, dependencies, and consumer counts. |
+| `rc-api-decisions.md` | Exact contracts. It wins when older work-list wording differs. |
+| `rc-open-questions.md` | Research and consumer evidence behind the decisions. |
+| `rc-migration-effort.md` | Expected migration counts. Report any new impact before changing scope. |
 
-Codemods live in `scripts/` (see `scripts/migrate-shortcuts-v1.js` and its test for the pattern).
+The original 18 sections remain intact as scope records. Items 1, 3, and 6
+landed in PRs #1151, #1150, and #1149. Combine the remaining sections into
+exactly three sequential PRs:
+
+1. **Batch 1 — overlays, navigation, and list:** items 2, 4, 5, 7, 9, 12, 16.
+2. **Batch 2 — data, dialogs, inputs, shells, and headers:** items 8, 10, 11,
+   13, 14.
+3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18.
+
+Finish and merge each batch before starting the next. Do not split a batch to
+satisfy an old file-count preference. Include generated docs required by its
+scope.
 
 ## Authority
 
-- Pushing branches and opening PRs on `frappe/frappe-ui` is authorized.
-- Merging, commenting on other people's PRs or issues, and changing any consumer app (gameplan, crm, helpdesk, builder, wiki, frappe_books, frappe/ui) are not. Consumer follow-ups come after the frappe-ui PR merges and need a separate go-ahead.
-- Put these limits in every subagent prompt.
-- Subagents run on Opus or the codex CLI, never Fable.
+- Pushing branches and opening PRs on `frappe/frappe-ui` is authorized after
+  the coordinated independent review.
+- Do not merge. The maintainer merges after review.
+- Do not change consumer apps or comment on other people's PRs or issues.
+  Consumer migrations need separate authorization after the library PR lands.
+- Read-only consumer checks are allowed.
+- Use one implementation agent and one independent Claude CLI Opus high review
+  per batch. Do not trigger GitHub Barista with a comment or action.
 
-## Order
+## Batch workflow
 
-Follow "Suggested execution order" in the work list. PRs 1 to 7 go first and land before anything that depends on them. Base every branch on current `origin/main`, not on another PR's branch: stacked PRs get no bot review. Run in parallel only PRs whose "Dependencies" lines do not reference each other. The maintainer merges; the orchestrator waits for the merge before starting a dependent PR.
-
-## One PR, start to finish
-
-1. New worktree off `origin/main`, branch named `v1/<short-topic>`. Run `yarn install` there. Never bare `git stash`.
-2. Read the PR section, then every QID row it names in `rc-api-decisions.md`.
-3. Codemod first when the section says one exists, with a test. Run it on the frappe-ui tree itself, then diff for anything it missed.
-4. Implement. Update the spec and ADR files the "Conflicts and gaps" list names for that PR.
-5. `yarn test`, the Cypress specs for touched components, `yarn type-check` (baseline is red in `vitepress/`, nothing else), `yarn docs:gen` then `yarn docs:check`.
-6. Add the section's migration-guide lines to `docs/content/docs/migration.md`.
-7. Merge `origin/main` and re-run the codemod once more before pushing.
-8. PR title exactly as the work list gives it, with the `!`. Body lists the QIDs, the migration lines, and the consumer site counts. Normal PR, not draft. Keep it under 100 files or Greptile skips it.
-9. Wait for Greptile, fix real findings, then post `/barista review` once as the last comment. Any later comment cancels barista's run.
-10. Write the PR number next to the section heading in `rc-work-list.md` and commit that on the `v1-rc-api-decisions` branch.
-
-## Stop and ask when
-
-- A decision row does not give the exact type or name the code needs.
-- Consumer sites exceed the measured count, or a change breaks a site the effort file does not list.
-- A test that is green on `main` goes red for a reason the PR did not intend.
-- Two PRs need the same file in conflicting ways.
+1. Fetch `origin/main`. Create a new worktree and a `v1/<batch>` branch from
+   the fetched commit. Run `yarn install`.
+2. Read every section and QID in the batch. Carry forward merged contracts;
+   preserve `Icon.name` and `Icon.icon`, with `icon` winning when defined.
+3. Implement codemods first. Test safe parsing, lexical scope, refusal paths,
+   idempotence, symlink execution, and packaged dependencies. Run each codemod
+   on its own tree.
+4. Implement runtime, types, tests, specs, generated API docs, migration docs,
+   and the recorded consumer inventory. Keep unrelated behavior unchanged.
+5. Run focused checks while editing. At the end run one full `yarn test`, the
+   touched Cypress specs with `ELECTRON_RUN_AS_NODE` unset, `yarn type-check`,
+   `yarn docs:gen`, `yarn docs:check`, and clean own-tree codemod reruns.
+6. Prepare one readable PR and request one independent review. A batch is ready
+   only when CI is green and Barista is at least 4/5.
+7. Babysit CI and GitHub review findings until ready, then wait for user review;
+   do not merge or start the next batch.

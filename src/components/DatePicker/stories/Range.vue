@@ -230,7 +230,7 @@ const ret = computed(() =>
 
     <!-- 5. Flight booking — split trigger over one shared popover -->
     <DateRangePicker v-model="flight" dual-pane :min="today">
-      <template #trigger="{ toggle, open }">
+      <template #trigger="{ setOpen, open }">
         <div
           class="grid grid-cols-2 divide-x divide-outline-gray-2 rounded-4 border bg-surface-base text-sm transition-colors"
           :class="
@@ -242,7 +242,7 @@ const ret = computed(() =>
           <button
             type="button"
             class="flex items-center gap-2 rounded-l-4 px-3 py-2 text-left hover:bg-surface-gray-1"
-            @click="toggle"
+            @click="setOpen(!open)"
           >
             <span
               class="lucide-plane-takeoff size-4 text-ink-gray-5"
@@ -258,7 +258,7 @@ const ret = computed(() =>
           <button
             type="button"
             class="flex items-center gap-2 rounded-r-4 px-3 py-2 text-left hover:bg-surface-gray-1"
-            @click="toggle"
+            @click="setOpen(!open)"
           >
             <span
               class="lucide-plane-landing size-4 text-ink-gray-5"

@@ -30,10 +30,12 @@ Run the codemod linked from each relevant section. The tools cover Tailwind
 token renames (`tokens-v2`, see [Tokens](#tokens)), shortcut config
 (`shortcuts-v1`, see [The shortcuts codemod](#the-shortcuts-codemod)),
 destination prop renames (`destinations-v1`, see
-[Destinations](#navigation-destinations)), and the EditorFixedMenu prop rename
-(`editor-v1`, see [Editor](#editor)), plus base component prop normalization
-(`base-props-v1`, see [Base component props](#base-component-props)). Every
-other component, prop, and slot rename is a hand edit.
+[Destinations](#navigation-destinations)), overlay and picker controls
+(`overlays-v1`), navigation props and tab state (`navigation-v1`), and the EditorFixedMenu prop rename
+(`editor-v1`, see [Editor](#editor)), base component prop normalization
+(`base-props-v1`, see [Base component props](#base-component-props)), and List
+row hooks and slot names (`list-v1`, see [List family](#list-family)). The tools
+report ambiguous dynamic syntax for manual review instead of guessing.
 
 ### Sections
 
@@ -42,7 +44,7 @@ other component, prop, and slot rename is a hand edit.
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
 - **Navigation and layout** — [Destinations](#navigation-destinations) · [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
-- **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
+- **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
@@ -229,35 +231,27 @@ rendering.
 
 ### Trigger slot props
 
-`#trigger`, `#prefix` and `#suffix` receive `{ open, toggle }` — the same two
-names `Popover`, `HoverCard`, `Dropdown`, `Select`, `Combobox` and
-`MultiSelect` hand out. `TimePicker`'s `#suffix` follows.
+`#trigger`, `#prefix`, `#suffix`, and `#actions` receive `open`, `setOpen`,
+`close`, and `disabled`, alongside their picker-specific fields. `TimePicker`'s
+`#suffix` follows. `close()` is shorthand for `setOpen(false)`.
 
 | Before          | After    |
 | --------------- | -------- |
 | `isOpen`        | `open`   |
-| `togglePopover` | `toggle` |
+| `togglePopover` | `setOpen` |
 
-`displayLabel` and `inputValue` are unchanged, and `#actions` already used
-`close` — that stays too.
-
-`toggle` also takes `Popover`'s signature, `(flag?: boolean | Event) => void`:
-a bare call flips, a boolean sets, and a DOM event is ignored. `togglePopover`
-only ever flipped, so nothing that worked before behaves differently.
-
-This is a **silent break**: a destructured `isOpen` becomes `undefined`, so a
-class bound to it stops applying with no error, and `togglePopover()` throws
-`togglePopover is not a function` only if you call it.
+`displayLabel` and `inputValue` are unchanged. Replace `toggle()` with
+`setOpen(!open)` and `toggle(value)` with `setOpen(value)`.
 
 ```vue
 <!-- Before -->
 <template #trigger="{ togglePopover, isOpen }">
-  <Button :class="isOpen && 'ring-2'" label="Pick a date" @click="togglePopover" />
+  <Button :class="isOpen && 'ring-2'" @click="togglePopover" />
 </template>
 
 <!-- After -->
-<template #trigger="{ toggle, open }">
-  <Button :class="open && 'ring-2'" label="Pick a date" @click="toggle" />
+<template #trigger="{ open, setOpen }">
+  <Button :class="open && 'ring-2'" @click="setOpen(!open)" />
 </template>
 ```
 
@@ -558,7 +552,7 @@ site renders a popover with no trigger, or an empty one. Check every
 | `#target` slot                                    | `#trigger` — reka wires the click, so drop your own click handler                                  |
 | `#body` slot                                      | `#default` + `bare` prop (renders without the panel shell)                                          |
 | `#body-main` slot                                 | `#default`                                                                                          |
-| `togglePopover` / `updatePosition` slot props     | `toggle` (`updatePosition` is gone — reka repositions on its own)                                   |
+| `togglePopover` / `updatePosition` slot props     | `setOpen` (`updatePosition` is gone — reka repositions on its own)                                  |
 | `placement="bottom-start"`                        | `side="bottom"` + `align="start"` (a bare side like `placement="bottom"` maps to `align="center"`) |
 | `show` / `v-model:show`                           | `open` / `v-model:open`                                                                            |
 | `update:show` emit                                | `update:open`                                                                                       |
@@ -638,13 +632,13 @@ open it behind your back:
 
 ### Slot props
 
-`#trigger` and `#default` receive `{ open, close, toggle }`.
+`#trigger` and `#default` receive `{ open, setOpen, close }`.
 
 | Before                     | After                                    |
 | -------------------------- | ---------------------------------------- |
 | `isOpen`                   | `open`                                   |
-| `open` (a method to call)  | `toggle`, or nothing — see below         |
-| `togglePopover`            | `toggle`                                 |
+| `open` (a method to call)  | `setOpen(true)`, or nothing — see below |
+| `togglePopover`            | `setOpen`                                 |
 | `updatePosition`           | gone; reka repositions on its own        |
 
 `open` is now the boolean state, which is what it already means on `Dropdown`,
@@ -667,8 +661,8 @@ This one is silent and worth grepping for: a destructured `isOpen` becomes
 ```
 
 Most triggers need nothing at all — `#trigger` wires its own click, so the
-`open()` method it used to hand out had no callers. `toggle` is there for the
-cases that drive it by hand.
+`open()` method it used to hand out had no callers. `setOpen` is there for
+the cases that drive it by hand.
 
 ### Attributes are not inherited
 
@@ -679,12 +673,16 @@ those attributes now go nowhere. Move them onto the element inside `#trigger`.
 ### Hover panels
 
 Hover-driven panels move to the [`HoverCard`](./components/hovercard)
-component, which keeps `hoverDelay` / `leaveDelay` in seconds.
+component. `hoverDelay` and `leaveDelay` now use milliseconds; change `0.5`
+to `500` and `0.3` to `300`. Tooltip and TooltipProvider delays use the same
+unit. HoverCard keeps its 300ms default.
 
 ### Tooltip
 
 | Before              | After                                                      |
 | ------------------- | ---------------------------------------------------------- |
+| `hoverDelay="0.5"`  | `hoverDelay="500"` (milliseconds)                          |
+| `skipDelay="0.3"`   | `skipDelay="300"` on `TooltipProvider` (milliseconds)      |
 | `placement="right"` | `side="right"`                                             |
 | `arrowClass`        | `[data-slot="arrow"]` CSS, or `offset` to shift the bubble  |
 | `#body`             | `#content` (add `bare` if the content owns its surface)     |
@@ -1065,6 +1063,52 @@ file's base64 representation yourself is a few lines of
 This is a **silent break**: `handler` is dropped as an unknown key, so the
 action button still renders and does nothing on click.
 
+## List family
+
+Run `npx list-v1 .` from each app that imports components from
+`frappe-ui/list`. It updates selectors anchored to
+`[data-slot="list-row"]`, Tailwind state variants on imported `ListRow`
+components, and the two statically named slots below:
+
+| Before | After |
+| --- | --- |
+| `[data-slot='list-row'][data-active]` | `[data-slot='list-row'][data-state='active']` |
+| `[data-slot="list-row"][data-state="selected"]` | `[data-slot="list-row"][data-selected]` |
+| `ListGroup` `#header` | `#label` |
+| `ListHeaderCellSort` `#suffix` | `#sort-indicator` |
+
+```diff
+-<ListGroup><template #header>Open</template></ListGroup>
++<ListGroup><template #label>Open</template></ListGroup>
+ <ListHeaderCellSort align="end">
+-  <template #suffix="{ direction }">…</template>
++  <template #sort-indicator="{ direction }">…</template>
+ </ListHeaderCellSort>
+```
+
+Every `ListRowBase` now has `data-state="active"` or `"inactive"`.
+Selection and interactivity are independent boolean attributes:
+`data-selected` and `data-interactive`. `ItemListRow` keeps its existing runtime
+contract. The sort-indicator slot keeps its
+edge-aware placement, including the leading edge for `align="end"`.
+
+The codemod leaves same-named local or globally registered components alone. If
+one still contains an old slot name, it reports the ambiguity for a manual
+check. It also exits non-zero and leaves a file unchanged when it finds a
+dynamic slot under either renamed component. These slot renames are silent
+breaks because Vue drops content passed under an unknown name.
+
+After the codemod, grep for `group-data-[active]`, unanchored
+`data-state="selected"` / `data-active` selectors, render-function slot keys
+named `header` or `suffix`, and dynamic slots. Those forms need a manual check
+because the tool cannot prove which component owns them.
+
+`ListRows.virtual` is now a boolean. Move the object's `overscan` field to the
+new top-level `overscan` prop and set height on the parent `List` with
+`rowHeight`. Stop importing `ListVirtualOptions` or `useVirtualRows`;
+virtualization is component-owned. The ListRows slot also receives independent
+`selected` and `active` booleans.
+
 ## ListView — moved to `frappe-ui/experimental`
 
 `ListView` is not core v1 surface. It moves out of the root export to
@@ -1326,6 +1370,8 @@ for the full API.
 | `SidebarItem.isActive`                     | `SidebarItem.active`                              |
 | `SidebarItem.to`                           | `SidebarItem.route`                               |
 | `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
+| `Sidebar.disableCollapse`                   | `Sidebar.collapsible` with the boolean inverted   |
+| `SidebarRailItem variant="tile"`            | `variant="subtle"`                               |
 
 Every removal here is a **silent break**. A dropped prop (`header`, `sections`,
 `items`, `isActive`) becomes a fall-through attribute on the component's root
@@ -1381,8 +1427,14 @@ error, so the dialog just never opens.
 <SettingsDialog v-model:open="showSettings" v-model:tab="tab">…</SettingsDialog>
 ```
 
-`v-model:tab` is unchanged. Unlike `Dialog`, `SettingsDialog` has no legacy
-unnamed-`v-model` binding to keep — `open` is the only visibility channel.
+`v-model:tab` is unchanged. Replace `shortcut` with `keyboardShortcut`; it
+defaults to `"Mod+Shift+,"`, and `false` disables the registration. Unlike
+`Dialog`, `SettingsDialog` has no legacy unnamed-`v-model` binding to keep —
+`open` is the only visibility channel.
+
+`navigation-v1` removes bare and statically true `shortcut` props because the
+new default preserves their behavior. It converts static `false` values and
+reports dynamic boolean expressions for a manual combo-or-`false` decision.
 
 ## Tabs
 
@@ -1390,9 +1442,10 @@ The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
 `TabTrigger`, `TabPanel`. The model is the trigger `value`, never an index.
 See the [Tabs](./components/tabs) component page for the full API.
 
-There is no codemod for the Tabs family. `tokens-v2` rewrites Tailwind token
-names only — it never touches a component, prop, or slot name. Every rename
-below is a hand edit, and most of them fail silently, so grep for the old name
+Run `npx navigation-v1 .` for the current TabButtons and Tabs active slot/state
+vocabulary. The broader v0 Tabs composition rewrite remains a hand edit.
+`tokens-v2` rewrites Tailwind token names only — it never touches a component,
+prop, or slot name, so grep for the remaining old names
 rather than waiting for the build to tell you.
 
 | Before                                      | After                                                                      |
@@ -1410,6 +1463,8 @@ rather than waiting for the build to tell you.
 | `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
 | built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |
 | `iconRight` on a trigger or a `tabs` item   | `<template #suffix>` on a composed `TabTrigger`, `<template #tab-suffix>` in shorthand mode — the icon silently stops rendering, nothing throws |
+| slot prop `selected` / `checked`             | `active`                                                                |
+| `data-state="checked|unchecked"`             | `data-state="active|inactive"`                                           |
 
 ```vue
 <!-- Before -->
@@ -2372,9 +2427,9 @@ function object and was **always truthy**. On `#trigger` it is the real open
 state, so those expressions start doing what they always looked like they did.
 
 `Combobox`'s `#trigger` receives
-`{ open, disabled, query, selectedOption, displayValue, clear, setOpen }`.
+`{ open, disabled, query, selectedOption, displayValue, clear, setOpen, close }`.
 `MultiSelect`'s receives `{ open, disabled, query, selectedOptions, clear,
-setOpen }` — plural, and with no `displayValue`. Use `setOpen` for a trigger
+setOpen, close }` — plural, and with no `displayValue`. Use `setOpen` for a trigger
 that has to open the popover from somewhere other than its own click.
 
 ### The trigger shape changed — pass `trigger="button"` to keep v0's
@@ -3691,9 +3746,11 @@ emit no CSS at all, with no build or type error. Run the
 utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
 keyboard shortcuts — it also catches the punctuation keys that a hand
 migration breaks in silence. Run `editor-v1` if you use `EditorFixedMenu`.
-`base-props-v1` handles the Icon, Progress, and Divider changes above. Review
-any sites the codemods report before completing the hand edits named in other
-family sections.
+`base-props-v1` handles the Icon, Progress, and Divider changes above. Run
+`destinations-v1` and `navigation-v1` for navigation changes, `overlays-v1`
+for overlays and pickers, and `list-v1` for the List family.
+Review any sites the codemods report before completing the hand edits named in
+other family sections.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,

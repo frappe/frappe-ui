@@ -17,19 +17,21 @@ const props = withDefaults(defineProps<TooltipProps>(), {
   text: '',
   side: 'top',
   offset: 4,
-  hoverDelay: 0.5,
+  hoverDelay: 500,
   bare: false,
   disabled: false,
 })
 
-const delayDuration = computed(() => props.hoverDelay * 1000)
+const delayDuration = computed(() => props.hoverDelay)
 
 // When already inside a <TooltipProvider> (a button group), reuse that shared
 // context so the group's skip-delay spans this tooltip too, instead of
 // mounting a private provider that would isolate it.
 const parentProvider = injectTooltipProviderContext(null)
 const Passthrough: Component = (_, { slots }) => slots.default?.()
-const Provider = computed(() => (parentProvider ? Passthrough : TooltipProvider))
+const Provider = computed(() =>
+  parentProvider ? Passthrough : TooltipProvider,
+)
 const providerProps = computed(() =>
   parentProvider ? {} : { delayDuration: delayDuration.value },
 )
@@ -51,7 +53,7 @@ defineSlots<{
   <slot v-if="disabled" />
   <component :is="Provider" v-else v-bind="providerProps">
     <TooltipRoot>
-      <TooltipTrigger as-child>
+      <TooltipTrigger as-child data-slot="trigger">
         <slot />
       </TooltipTrigger>
       <TooltipBubble

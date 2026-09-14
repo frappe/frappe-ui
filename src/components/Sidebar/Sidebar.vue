@@ -18,6 +18,7 @@ import { computed, provide } from 'vue'
 import { SidebarProps, sidebarCollapsedKey, sidebarToggleKey } from './types'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
+  collapsible: true,
   width: '15rem',
   collapsedWidth: '3rem',
 })
@@ -41,9 +42,8 @@ const isCollapsed = defineModel<boolean | null>('collapsed', { default: null })
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
 
-// Unset (`null`) falls back to collapsing on mobile; `disableCollapse` pins open.
 const shouldCollapse = computed(
-  () => (isCollapsed.value ?? isMobile.value) && !props.disableCollapse,
+  () => props.collapsible && (isCollapsed.value ?? isMobile.value),
 )
 
 function toggle() {

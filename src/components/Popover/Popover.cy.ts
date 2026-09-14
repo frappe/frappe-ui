@@ -36,22 +36,25 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('not.exist')
     })
 
-    it('exposes reactive open state to the #trigger slot', () => {
+    it('exposes reactive open state and setOpen to the #trigger slot', () => {
       // The #trigger click is auto-wired by reka, so the slot must NOT bind its
       // own onClick (that would double-toggle). It can still read `open` to
       // reflect state — e.g. flip a label or a chevron.
+      let setOpen: ((value: boolean) => void) | undefined
       cy.mount(Popover, {
         slots: {
-          trigger: ({ open }: { open: boolean }) =>
-            h(Button, { 'data-cy': 'trigger' }, () =>
-              open ? 'Close' : 'Open',
-            ),
+          trigger: (props) => {
+            setOpen = props.setOpen
+            return h(Button, { 'data-cy': 'trigger' }, () =>
+              props.open ? 'Close' : 'Open',
+            )
+          },
           default: () => h('div', { 'data-cy': 'content' }, 'content'),
         },
       })
 
       cy.get('[data-cy="trigger"]').should('have.text', 'Open')
-      cy.get('[data-cy="trigger"]').click()
+      cy.then(() => setOpen?.(true))
       cy.get('[data-slot="content"]').should('exist')
       cy.get('[data-cy="trigger"]').should('have.text', 'Close')
     })

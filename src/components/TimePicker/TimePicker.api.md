@@ -173,7 +173,7 @@
   {
     name: 'suffix',
     description: 'Rendered inside the trigger input, after the typed value. Defaults to a\nchevron-down that toggles the popover.',
-    type: '{ toggle: (flag?: boolean | Event | undefined) => void; open: boolean; }'
+    type: '{ open: boolean; disabled: boolean; setOpen: (value: boolean) => void; close: () => void; }'
   }
 ]
 

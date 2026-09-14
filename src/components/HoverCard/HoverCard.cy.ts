@@ -12,7 +12,7 @@ describe('HoverCard', () => {
     cy.clock()
     cy.mount(HoverCard, {
       slots: Slots,
-      props: { hoverDelay: 0.5, leaveDelay: 0.3 },
+      props: { hoverDelay: 500, leaveDelay: 300 },
     })
 
     cy.get('[data-slot="content"]').should('not.exist')
@@ -102,6 +102,93 @@ describe('HoverCard', () => {
     cy.get('[data-slot="content"]').should('exist')
     cy.then(() => cardRef.value.close())
     cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('exposes open controls to trigger and content slots', () => {
+    let setOpen: ((value: boolean) => void) | undefined
+    cy.mount(HoverCard, {
+      props: { hoverDelay: 0 },
+      slots: {
+        trigger: (props) => {
+          setOpen = props.setOpen
+          return h(Button, { 'data-cy': 'trigger' }, () => 'Trigger')
+        },
+        default: ({ open, close }) =>
+          h(Button, { 'data-cy': 'close', onClick: close }, () => String(open)),
+      },
+    })
+
+    cy.then(() => setOpen?.(true))
+    cy.get('[data-slot="trigger"]').should('exist')
+    cy.get('[data-cy="close"]').should('have.text', 'true').click()
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('stays open when the trigger is re-entered after an explicit close', () => {
+    let close: (() => void) | undefined
+    cy.mount(HoverCard, {
+      props: { hoverDelay: 30, leaveDelay: 0 },
+      slots: {
+        trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'Trigger'),
+        default: (props) => {
+          close = props.close
+          return h('div', { 'data-cy': 'card' }, 'Card')
+        },
+      },
+    })
+
+    cy.get('[data-cy=trigger]').trigger('pointerenter', {
+      pointerType: 'mouse',
+    })
+    cy.get('[data-cy=card]').should('exist')
+    cy.then(() => close?.())
+    cy.get('[data-cy=card]').should('not.exist')
+    cy.get('[data-cy=trigger]')
+      .trigger('pointerleave', { pointerType: 'mouse' })
+      .trigger('pointerenter', { pointerType: 'mouse' })
+    cy.get('[data-cy=card]').should('exist')
+    cy.wait(50)
+    cy.get('[data-cy=card]').should('exist')
+  })
+
+  it('does not reopen after a controlled close during an imperative-open delay', () => {
+    const open = ref(false)
+    const cardRef = ref<any>(null)
+    const Harness = defineComponent({
+      setup() {
+        return () =>
+          h(
+            HoverCard,
+            {
+              ref: cardRef,
+              open: open.value,
+              hoverDelay: 30,
+              'onUpdate:open': (value: boolean) => (open.value = value),
+            },
+            Slots,
+          )
+      },
+    })
+
+    cy.mount(Harness)
+    cy.then(() => cardRef.value.open())
+    cy.get('[data-slot=content]').should('exist')
+    cy.then(() => (open.value = false))
+    cy.get('[data-slot=content]').should('not.exist')
+    cy.wait(50)
+    cy.get('[data-slot=content]').should('not.exist')
+  })
+
+  it('does not forward arbitrary attributes to the content', () => {
+    cy.mount(HoverCard, {
+      props: { hoverDelay: 0, 'data-consumer-attr': 'ignored' } as any,
+      slots: Slots,
+    })
+    cy.get('[data-cy="trigger"]').focus()
+    cy.get('[data-slot="content"]').should(
+      'not.have.attr',
+      'data-consumer-attr',
+    )
   })
 
   it('positions the card via side + align', () => {

@@ -111,7 +111,7 @@ Gray first: ink-gray on surface-base, colour only where it encodes information. 
 - `DesktopShell` — prop `scroll` (default `true`; `false` for multi-pane layouts that own their scroll), slots `#rail`, `#sidebar`, default. `MobileShell` — slots default and `#nav`.
 - Headers teleport into the shell's pinned target, so a `PageHeader` can sit anywhere in the page. `PageHeader` has a **default slot only** — a `#prefix` or `#suffix` template on it renders nothing, so the whole header row, actions included, goes in the default slot. `PageHeaderMobile` has a default slot (the centered title) plus `#prefix` and `#suffix`.
 - `PageHeaderBase` is padding-free: use it when the header must split to align with a column border below (two-pane layouts, editor toolbars). The family also ships `PageHeaderTitle` (prop `title`, or a default slot that overrides it), `PageHeaderMobileTitle` and `PageHeaderBackButton`.
-- Sidebar family: `Sidebar` (props `width`, `collapsedWidth`, `disableCollapse`), `SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `SidebarCollapseToggle`, `SidebarCard` (a promotional footer card taking `title`, `description`, `theme`, `icon`, `action`, `dismissible`, emitting `dismiss`). `SidebarItem` is `h-7`; wrap a group in `space-y-0.5`, labels `flex-1 truncate text-sm`, count suffix `mr-1 text-xs text-ink-gray-5`.
+- Sidebar family: `Sidebar` (props `width`, `collapsedWidth`, `collapsible`), `SidebarHeader`, `SidebarSection`, `SidebarLabel`, `SidebarItem`, `SidebarCollapseToggle`, `SidebarCard` (a promotional footer card taking `title`, `description`, `theme`, `icon`, `action`, `dismissible`, emitting `dismiss`). `SidebarItem` is `h-7`; wrap a group in `space-y-0.5`, labels `flex-1 truncate text-sm`, count suffix `mr-1 text-xs text-ink-gray-5`.
 - Also `SidebarRail` / `SidebarRailItem`, `MobileNav` / `MobileNavItem`, `BottomSheet`, and the `SettingsDialog` family. On the rail, Home is a bespoke logo button (not a `SidebarRailItem`) and the user avatar sits in a bottom-pinned `Dropdown` trigger.
 - `ScrollArea` owns every app-level scroll region. Props `orientation` (`vertical | horizontal | both`), `viewportClass`, `scrollHideDelay`; exposes `viewportElement`.
 - There is no Card component. Build the surface from tokens: `bg-surface-base rounded-6 border border-outline-gray-1 p-4`.
@@ -222,7 +222,7 @@ dialog.prompt({
 ### `Popover` / `Tooltip` / `HoverCard`
 
 - `Popover` — arbitrary anchored content. `v-model:open`, `side`, `align`, `offset`, `bare`, `portalTo`. Trigger in `#trigger`, content in the default slot.
-- `Tooltip` — hover hints: `<Tooltip text="Rename"><Button icon="lucide-pencil" /></Tooltip>`. Props `text`, `side`, `offset`, `hoverDelay` (seconds), `bare`, `disabled`; rich content goes in `#content`. Anything clickable belongs in `Popover` or `Dropdown` instead.
+- `Tooltip` — hover hints: `<Tooltip text="Rename"><Button icon="lucide-pencil" /></Tooltip>`. Props `text`, `side`, `offset`, `hoverDelay` (milliseconds), `bare`, `disabled`; rich content goes in `#content`. Anything clickable belongs in `Popover` or `Dropdown` instead.
 - `HoverCard` — hover-revealed rich previews (person cards, deal owners). `#trigger` plus the default slot.
 
 ## Input controls
@@ -307,13 +307,14 @@ The list primitive for every list. Feed mode is the default; adding `:columns` a
 
 The parts:
 
-- `ListRow` — props `{ to?: RouteLocationRaw, value?: string, onClick? }`. `value` is the **row key**, required whenever the list uses `selectable` or `v-model:active`. There is no `row` prop; the row's content is app-written `<ListCell>` children.
-- `ListRows` — props `{ items: T[], rowKey?: string | ((item, index) => PropertyKey), virtual?: boolean | { itemHeight?, overscan? } }`. Its scoped slot gives `{ item, index, value }`. `rowKey` defaults to the item's `name`, then `id`, then the index.
+- `ListRow` — props `{ route?: RouteLocationRaw, href?: string, value?: string, onClick? }`. `value` is the **row key**, required whenever the list uses `selectable` or `v-model:active`. There is no `row` prop; the row's content is app-written `<ListCell>` children.
+- `ListRows` — props `{ items: T[], rowKey?: string | ((item, index) => PropertyKey), virtual?: boolean, overscan?: number }`. Height comes from `List.rowHeight`. Its scoped slot gives `{ item, index, value, selected, active }`. `rowKey` defaults to the item's `name`, then `id`, then the index.
 - `ListCell` — default slot only.
 - `ListHeaderCell` — **the column label goes in the default slot**, not a prop. Optional `#prefix` / `#suffix`.
-- `ListHeaderCellSort` — props `{ direction?: 'asc' | 'desc' | null, align?: 'start' | 'end' }`, emits `click`, label in the default slot, scoped `#suffix="{ direction }"` for a custom glyph. It is controlled: sort state and comparators are app code.
+- `ListHeaderCellSort` — props `{ direction?: 'asc' | 'desc' | null, align?: 'start' | 'end' }`, emits `click`, label in the default slot, scoped `#sort-indicator="{ direction }"` for a custom glyph. It is controlled: sort state and comparators are app code; `align="end"` keeps the indicator on the leading edge.
 - `ListHeader` — default slot holds the header cells. Its presence flips the list into table semantics; there is no mode prop.
-- `ListGroup` — props `{ label?: string, sticky?: boolean }`, slots `#header` and default.
+- `ListGroup` — props `{ label?: string, sticky?: boolean }`, slots `#label` and default.
+- `ListRowBase` hooks — `data-state="active|inactive"`; boolean `data-selected` and `data-interactive`. Active and selected are independent.
 - Geometry: the `list-gap-*` and `list-row-px-*` utilities, or the raw `--list-gap` and `--list-row-padding-x` CSS vars. Those two are the whole public hook surface; the column template is internal.
 
 Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` desktop feed → `h-17` mobile feed. Use **one** height mechanism per list: either `:row-height` on the `List` or a height class on every `ListRow`.
@@ -326,7 +327,7 @@ Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` deskto
     <ListHeaderCellSort :direction="dir" align="end" @click="toggleSort">Modified</ListHeaderCellSort>
   </ListHeader>
   <ListRows :items="rows" v-slot="{ item, value }">
-    <ListRow :value="value" @click="open(item)">
+    <ListRow :value="value">
       <ListCell>{{ item.subject }}</ListCell>
       <ListCell>{{ item.owner }}</ListCell>
       <ListCell class="justify-end">{{ item.modified }}</ListCell>

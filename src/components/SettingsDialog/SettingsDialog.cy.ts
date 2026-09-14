@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import SettingsDialog from './SettingsDialog.vue'
 import SettingsSidebar from './SettingsSidebar.vue'
 import SettingsNavGroup from './SettingsNavGroup.vue'
@@ -56,7 +56,90 @@ const Harness = defineComponent({
   },
 })
 
+const ShortcutHarness = defineComponent({
+  props: { keyboardShortcut: { default: undefined } },
+  setup(props) {
+    const open = ref(false)
+    return () =>
+      h(SettingsDialog, {
+        open: open.value,
+        keyboardShortcut: props.keyboardShortcut as any,
+        'onUpdate:open': (value: boolean) => (open.value = value),
+      })
+  },
+})
+
 describe('SettingsDialog', () => {
+  it('toggles with the default keyboard shortcut', () => {
+    cy.mount(ShortcutHarness)
+    cy.get('[role=dialog]').should('not.exist')
+    cy.window().then((win) => {
+      const isMac = /Mac|iPod|iPhone|iPad/i.test(win.navigator.platform)
+      win.document.dispatchEvent(
+        new win.KeyboardEvent('keydown', {
+          key: ',',
+          code: 'Comma',
+          ctrlKey: !isMac,
+          metaKey: isMac,
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      )
+    })
+    cy.get('[role=dialog]').should('exist')
+  })
+
+  it('disables the keyboard shortcut when keyboardShortcut is false', () => {
+    cy.mount(ShortcutHarness, { props: { keyboardShortcut: false } })
+    cy.window().then((win) => {
+      const isMac = /Mac|iPod|iPhone|iPad/i.test(win.navigator.platform)
+      win.document.dispatchEvent(
+        new win.KeyboardEvent('keydown', {
+          key: ',',
+          code: 'Comma',
+          ctrlKey: !isMac,
+          metaKey: isMac,
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      )
+    })
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('uses a new keyboardShortcut value after mount', () => {
+    const keyboardShortcut = ref<false | 'Mod+K'>(false)
+    const open = ref(false)
+    cy.mount({
+      render: () =>
+        h(SettingsDialog, {
+          open: open.value,
+          keyboardShortcut: keyboardShortcut.value,
+          'onUpdate:open': (value: boolean) => (open.value = value),
+        }),
+    })
+
+    cy.then(() => {
+      keyboardShortcut.value = 'Mod+K'
+      return nextTick()
+    })
+    cy.window().then((win) => {
+      const isMac = /Mac|iPod|iPhone|iPad/i.test(win.navigator.platform)
+      win.document.dispatchEvent(
+        new win.KeyboardEvent('keydown', {
+          key: 'k',
+          ctrlKey: !isMac,
+          metaKey: isMac,
+          bubbles: true,
+          cancelable: true,
+        }),
+      )
+    })
+    cy.get('[role=dialog]').should('exist')
+  })
+
   it('does not render while closed; renders when open (v-model:open)', () => {
     cy.mount(Harness, { props: { open: false } })
     cy.get('[role=dialog]').should('not.exist')

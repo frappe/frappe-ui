@@ -11,7 +11,7 @@
   >
     <!-- Controlled: sort state and toggle rules live in the app, surfaced
          back via `direction`. The cell renders only the behavioral chrome —
-         real button, aria-sort, tooltip, suffix reveal. -->
+         real button, aria-sort, tooltip, sort-indicator reveal. -->
     <Tooltip :text="tooltipText" :disabled="!tooltipText">
       <button
         ref="button"
@@ -25,10 +25,10 @@
         <span
           v-if="isEnd"
           class="shrink-0"
-          :class="suffixRevealClass"
+          :class="sortIndicatorRevealClass"
           aria-hidden="true"
         >
-          <slot name="suffix" :direction="direction ?? null">
+          <slot name="sort-indicator" :direction="direction ?? null">
             <span class="block size-3.5" :class="defaultArrowClass" />
           </slot>
         </span>
@@ -37,15 +37,15 @@
         </span>
         <span class="truncate"><slot /></span>
         <!-- A built-in arrow derived from `direction` by default, so the common
-             case needs no glyph wiring; supply #suffix to override. The cell
+             case needs no glyph wiring; supply #sort-indicator to override. The cell
              owns the reveal: an inactive column's glyph shows on hover. -->
         <span
           v-if="!isEnd"
           class="shrink-0"
-          :class="suffixRevealClass"
+          :class="sortIndicatorRevealClass"
           aria-hidden="true"
         >
-          <slot name="suffix" :direction="direction ?? null">
+          <slot name="sort-indicator" :direction="direction ?? null">
             <span class="block size-3.5" :class="defaultArrowClass" />
           </slot>
         </span>
@@ -70,11 +70,11 @@ const isEnd = computed(() => props.align === 'end')
 
 // An inactive column's sort glyph is hidden until hover — but with opacity, not
 // display, so revealing it never shifts the label's position.
-const suffixRevealClass = computed(() =>
+const sortIndicatorRevealClass = computed(() =>
   props.direction ? '' : 'opacity-0 group-hover:opacity-100',
 )
 
-// Built-in sort glyph, used when the consumer supplies no #suffix: a muted
+// Built-in sort glyph, used when the consumer supplies no #sort-indicator: a muted
 // up/down when inactive, a directional arrow when the column is the sort key.
 const defaultArrowClass = computed(() => {
   if (!props.direction) return 'lucide-arrow-up-down'
@@ -91,7 +91,9 @@ defineSlots<{
    * by default. Provide this to override (e.g. a custom lucide span). The cell
    * owns the reveal: an inactive column's glyph shows on hover.
    */
-  suffix?: (props: { direction: 'asc' | 'desc' | null }) => unknown
+  'sort-indicator'?: (props: {
+    direction: 'asc' | 'desc' | null
+  }) => unknown
 }>()
 
 // The label is slot content, so the tooltip reads the rendered text.

@@ -276,6 +276,17 @@ stripped from production builds.
 The conventions behind this (and for every future component with CSS hooks)
 are [ADR-0017](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0017-css-variable-styling-hooks.md).
 
+### `frappe-ui/list` — row state and slot vocabulary (breaking, silent)
+
+- `ListRowBase` now uses `data-state="active|inactive"` plus independent boolean
+  `data-selected` and `data-interactive` attributes.
+- `ListGroup`'s `#header` slot is renamed to `#label`.
+- `ListHeaderCellSort`'s `#suffix` slot is renamed to `#sort-indicator`; its
+  edge-aware placement is unchanged.
+
+Run `npx list-v1 .` for the mechanical selectors and statically named slots.
+See the [migration guide](/docs/migration#list-family) for manual checks.
+
 ### CommandPalette — removed from the root export, rebuilt in `frappe-ui/experimental` (breaking, loud)
 
 `CommandPalette` and `CommandPaletteItem` leave the root export. The family is
@@ -1947,6 +1958,9 @@ Before/after for each silent break is in the
 
 ### Tooltip — vocabulary aligned with Popover and HoverCard (breaking)
 
+- **Breaking, silent:** Tooltip, TooltipProvider, and HoverCard delay props now
+  use milliseconds. For example, change `0.5` to `500`. Run `overlays-v1` to
+  convert static values and report dynamic expressions for manual review.
 - **Breaking, silent:** `placement` is renamed to `side`, matching `Popover`
   and `HoverCard`. An unknown prop is ignored, so the tooltip keeps working and
   points at its default side.

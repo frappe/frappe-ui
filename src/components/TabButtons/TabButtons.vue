@@ -154,7 +154,7 @@ function measureIndicator() {
     return
   }
   const checked = track.querySelector<HTMLElement>(
-    '[data-slot="tab-button"][data-state="checked"]',
+    '[data-slot="tab-button"][data-state="active"]',
   )
   if (!checked) {
     indicatorRect.value = null
@@ -345,7 +345,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           v-bind="tabElementProps(button)"
           data-slot="tab-button"
           :data-value="button.value"
-          :data-state="checked ? 'checked' : 'unchecked'"
+          :data-state="checked ? 'active' : 'inactive'"
           :data-disabled="disabled ? '' : undefined"
           :aria-label="
             button.accessibleLabel && !button.visibleLabel
@@ -383,7 +383,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
               <slot
                 name="prefix"
                 :button="button"
-                :checked="checked"
+                :active="checked"
                 :disabled="disabled"
               />
             </template>
@@ -391,7 +391,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
               <slot
                 name="suffix"
                 :button="button"
-                :checked="checked"
+                :active="checked"
                 :disabled="disabled"
               />
             </template>

@@ -2,6 +2,7 @@ import {
   onActivated,
   onBeforeUnmount,
   onDeactivated,
+  getCurrentInstance,
   ref,
   toValue,
   type MaybeRefOrGetter,
@@ -28,7 +29,7 @@ export type {
 
 interface KeyboardShortcutBase {
   /** The key combination, e.g. `"Mod+Shift+K"`. */
-  combo: KeyboardShortcutCombo
+  combo: MaybeRefOrGetter<KeyboardShortcutCombo>
   /** Label shown in `KeyboardShortcutsDialog`. Shortcuts sharing one are merged into a single row. */
   description: string
   /** Heading the shortcut is listed under in the dialog (default: `"General"`). */
@@ -91,6 +92,10 @@ function isEnabled(config: KeyboardShortcutConfig): boolean {
   return toValue(config.enabled ?? true)
 }
 
+function getCombo(config: KeyboardShortcutConfig): KeyboardShortcutCombo {
+  return toValue(config.combo)
+}
+
 /**
  * True when the keypress belongs to whatever the user is typing in — an input,
  * a textarea, or a contenteditable. A shortcut that swallows those keys leaves
@@ -122,7 +127,7 @@ function globalKeydownHandler(e: KeyboardEvent) {
   for (let i = registrations.length - 1; i >= 0; i--) {
     const registration = registrations[i]
     const { config } = registration
-    if (!matchesCombo(e, config.combo)) continue
+    if (!matchesCombo(e, getCombo(config))) continue
     if (!isEnabled(config)) continue
     if (!config.allowInInput && isTargetEditable(e)) continue
     if (!config.allowInDialog && isInsideDialog(e)) continue
@@ -149,7 +154,7 @@ function globalKeydownHandler(e: KeyboardEvent) {
 function globalKeyupHandler(e: KeyboardEvent) {
   for (const { id, config } of [...registrations]) {
     if (!heldShortcuts.has(id)) continue
-    const parsed = parseComboForMatching(config.combo)
+    const parsed = parseComboForMatching(getCombo(config))
     if (!parsed || isStillHeld(e, parsed)) continue
     heldShortcuts.delete(id)
     // Guarded like the release path in `remove()`: a throwing `onRelease` must
@@ -183,7 +188,7 @@ function attachGlobalListener() {
 // shortcut first and the earliest registration last. Three or more can be live
 // at once, so every one is named. Naming only the ends hides the middle.
 function warnOnCollision(live: Registration[]) {
-  const { combo } = live[0].config
+  const combo = getCombo(live[0].config)
   const lines = live.map(
     ({ config }, i) =>
       `  "${config.description}" (${i === 0 ? 'active' : 'shadowed'})`,
@@ -230,6 +235,8 @@ export function getShortcutGroups(): KeyboardShortcutGroup[] {
   for (const { config } of registrations) {
     if (!isEnabled(config)) continue
 
+    const combo = getCombo(config)
+
     const name = config.group ?? 'General'
     let group = groupsByName.get(name)
     if (!group) {
@@ -241,17 +248,14 @@ export function getShortcutGroups(): KeyboardShortcutGroup[] {
     const identity = `${name}|${config.description}`
     const existing = entriesByIdentity.get(identity)
     if (existing) {
-      if (
-        existing.combo !== config.combo &&
-        !existing.altCombos.includes(config.combo)
-      ) {
-        existing.altCombos.push(config.combo)
+      if (existing.combo !== combo && !existing.altCombos.includes(combo)) {
+        existing.altCombos.push(combo)
       }
       continue
     }
 
     const entry: KeyboardShortcutEntry = {
-      combo: config.combo,
+      combo,
       altCombos: [],
       description: config.description,
       group: name,
@@ -285,6 +289,11 @@ export function getShortcutGroups(): KeyboardShortcutGroup[] {
 export function useKeyboardShortcut(
   shortcuts: KeyboardShortcutConfig | KeyboardShortcutConfig[],
 ): void {
+  if (!getCurrentInstance()) {
+    throw new Error(
+      '[frappe-ui] useKeyboardShortcut() must be called during component setup.',
+    )
+  }
   attachGlobalListener()
 
   const configs = Array.isArray(shortcuts) ? shortcuts : [shortcuts]

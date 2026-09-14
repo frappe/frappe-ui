@@ -180,12 +180,12 @@ interface TabTriggerProps {
 Slots:
 
 ```ts
-type TabTriggerSlotProps = { selected: boolean; disabled: boolean }
+type TabTriggerSlotProps = { active: boolean; disabled: boolean }
 ```
 
-- `#prefix="{ selected, disabled }"` — leading content, after `iconLeft`
-- default slot `="{ selected, disabled }"` — replaces the label region
-- `#suffix="{ selected, disabled }"` — trailing content (badges, counts)
+- `#prefix="{ active, disabled }"` — leading content, after `iconLeft`
+- default slot `="{ active, disabled }"` — replaces the label region
+- `#suffix="{ active, disabled }"` — trailing content (badges, counts)
 
 The trigger shell — variant styling, selected state, focus ring — is always
 owned by the component. There is no full-trigger escape hatch in v1; the v0
@@ -230,9 +230,9 @@ interface TabItem {
 
 Shorthand slots:
 
-- `#tab-prefix="{ tab, selected, disabled }"` / `#tab-suffix="{ ... }"` —
+- `#tab-prefix="{ tab, active, disabled }"` / `#tab-suffix="{ ... }"` —
   forwarded into every generated trigger
-- `#tab-label="{ tab, selected, disabled }"` — replaces the label region of
+- `#tab-label="{ tab, active, disabled }"` — replaces the label region of
   every generated trigger
 - `#tab-panel="{ tab }"` — the panel body for the selected tab
 
@@ -241,6 +241,8 @@ Rules:
 - `condition()` is evaluated before rendering; items that return false are
   omitted. The model fallback rule above handles the selected tab
   disappearing
+- composed triggers keep `#prefix` / `#suffix`; shorthand slots keep the `tab-` prefix so the two modes are unambiguous
+- `TabList` defaults to `underline`, while value-picking `TabButtons` defaults to `subtle`
 - app-defined extras go in `data` and reach the slots as `tab.data`. The item
   itself takes no unknown keys, so a misspelled `label` or `route` is a type
   error instead of silent passthrough

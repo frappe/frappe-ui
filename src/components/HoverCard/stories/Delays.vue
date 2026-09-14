@@ -3,7 +3,7 @@ import { Button, HoverCard } from 'frappe-ui'
 </script>
 
 <template>
-  <HoverCard :hover-delay="0.1" :leave-delay="0.5">
+  <HoverCard :hover-delay="100" :leave-delay="500">
     <template #trigger>
       <Button>Hover me</Button>
     </template>

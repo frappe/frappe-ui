@@ -1,4 +1,9 @@
-import type { MenuOptions, MenuSlots } from '../Menu/types'
+import type {
+  MenuDynamicSlots,
+  MenuFixedSlots,
+  MenuOptions,
+} from '../Menu/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type {
   MenuTheme as ContextMenuTheme,
@@ -20,6 +25,10 @@ export type {
 export interface ContextMenuTriggerSlotProps {
   /** Whether the context menu is currently open. */
   open: boolean
+  /** Sets the context menu open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the context menu. */
+  close: () => void
 }
 
 export interface ContextMenuProps {
@@ -28,6 +37,8 @@ export interface ContextMenuProps {
 
   /** Controls the visibility of the context menu. */
   open?: boolean
+  /** Teleport target for menu content. Unset uses the nearest host target or `body`. */
+  portalTo?: PortalTarget
 }
 
 // Exported for consumers to import, and deliberately **not** passed to
@@ -46,9 +57,10 @@ export interface ContextMenuEmits {
   'update:open': [open: boolean]
 }
 
-export type ContextMenuSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
-  /** The right-clickable region that opens the menu. */
-  default?: (props: ContextMenuTriggerSlotProps) => any
-  /** Explicit trigger slot; same as default. */
-  trigger?: (props: ContextMenuTriggerSlotProps) => any
-}
+export type ContextMenuSlots = MenuFixedSlots &
+  MenuDynamicSlots & {
+    /** The right-clickable region that opens the menu. */
+    default?: (props: ContextMenuTriggerSlotProps) => any
+    /** Explicit trigger slot; same as default. */
+    trigger?: (props: ContextMenuTriggerSlotProps) => any
+  }

@@ -117,9 +117,6 @@ export type DateRangePickerEmits = {
 export interface DateTimePickerProps extends CommonDatePickerProps {
   /** Controlled value for the picker. */
   modelValue?: string
-
-  /** Allows typing a custom time into the embedded time picker. */
-  allowCustomTime?: boolean
 }
 
 export type DateTimePickerEmits = DatePickerEmits
@@ -128,10 +125,14 @@ export type DateTimePickerEmits = DatePickerEmits
 
 /** Props bound to the trigger / prefix / suffix slots on all three pickers. */
 export interface DatePickerTriggerSlotProps {
-  /** Flips the popover open state, or sets it when passed a boolean. */
-  toggle: (flag?: boolean | Event) => void
   /** Whether the popover is currently open. */
   open: boolean
+  /** Whether the picker is disabled. */
+  disabled: boolean
+  /** Sets the popover open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the popover. Equivalent to `setOpen(false)`. */
+  close: () => void
   displayLabel: string
   inputValue: string
 }
@@ -142,6 +143,9 @@ export interface DatePickerActionsSlotProps {
   setDate: (date: string | Date | Dayjs) => void
   clear: () => void
   close: () => void
+  open: boolean
+  disabled: boolean
+  setOpen: (value: boolean) => void
 }
 
 /** Props bound to the `actions` slot on `DateRangePicker`. */
@@ -160,6 +164,9 @@ export interface DateRangePickerActionsSlotProps {
   setRange: (range: [string | Date | Dayjs, string | Date | Dayjs]) => void
   clear: () => void
   close: () => void
+  open: boolean
+  disabled: boolean
+  setOpen: (value: boolean) => void
 }
 
 /** Props bound to the `actions` slot on `DateTimePicker`. */
@@ -169,6 +176,9 @@ export interface DateTimePickerActionsSlotProps {
   setDate: (date: string | Date | Dayjs) => void
   clear: () => void
   close: () => void
+  open: boolean
+  disabled: boolean
+  setOpen: (value: boolean) => void
 }
 
 export interface DatePickerSlots {

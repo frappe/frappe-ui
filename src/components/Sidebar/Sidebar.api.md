@@ -6,10 +6,11 @@
 
   const sidebarProps = [
   {
-    name: 'disableCollapse',
-    description: 'Disables collapsing entirely (fixed width, no built-in toggle).',
+    name: 'collapsible',
+    description: 'Allows the sidebar to collapse. Default: `true`.',
     required: false,
-    type: 'boolean'
+    type: 'boolean',
+    default: 'true'
   },
   {
     name: 'width',
@@ -166,7 +167,7 @@
     name: 'menuItems',
     description: 'Options rendered in the trigger\'s dropdown — the same shape `Dropdown` itself takes.',
     required: false,
-    type: '{ label: string; icon?: string | Component; onClick?: (() => void) | undefined; }[] | undefined'
+    type: 'MenuOptions'
   }
 ]
 

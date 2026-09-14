@@ -110,13 +110,13 @@ const events = ref([
               @update:modelValue="(val) => headerProps.onMonthYearChange(val)"
               :clearable="false"
             >
-              <template #trigger="{ toggle }">
+              <template #trigger="{ setOpen, open }">
                 <Button
                   variant="ghost"
                   class="text-lg-medium text-ink-gray-7"
                   :label="headerProps.currentMonthYear"
                   iconRight="lucide-chevron-down"
-                  @click="toggle"
+                  @click="setOpen(!open)"
                 />
               </template>
             </DatePicker>

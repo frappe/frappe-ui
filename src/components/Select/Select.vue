@@ -210,7 +210,12 @@ function clear() {
 }
 
 function setOpen(value: boolean) {
+  if (props.disabled && value) return
   open.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function focus(options?: FocusOptions) {
@@ -226,6 +231,7 @@ const controlSlotProps = computed<SelectSlotProps>(() => ({
   selectedOption: selectedOption.value,
   clear,
   setOpen,
+  close,
 }))
 
 function isBlank(value: unknown) {

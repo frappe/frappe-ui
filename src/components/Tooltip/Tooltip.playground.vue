@@ -15,7 +15,7 @@ const knobs: Knob[] = [
       { label: 'left', value: 'left' },
     ],
   },
-  { name: 'hoverDelay', type: 'text', default: '0.5', width: '4rem' },
+  { name: 'hoverDelay', type: 'text', default: '500', width: '4rem' },
   { name: 'disabled', type: 'switch', default: false },
 ]
 
@@ -23,7 +23,7 @@ function buildCode(v: Record<string, any>) {
   const attrs: string[] = [`text="${v.text}"`]
   if (v.side !== 'top') attrs.push(`side="${v.side}"`)
   const hd = Number(v.hoverDelay)
-  if (!Number.isNaN(hd) && hd !== 0.5) attrs.push(`:hover-delay="${hd}"`)
+  if (!Number.isNaN(hd) && hd !== 500) attrs.push(`:hover-delay="${hd}"`)
   if (v.disabled) attrs.push('disabled')
   return [
     '<Tooltip',

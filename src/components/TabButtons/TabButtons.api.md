@@ -58,12 +58,12 @@
   {
     name: 'prefix',
     description: 'Slot before the tab button label.',
-    type: '{ button: TabButton; checked: boolean; disabled: boolean; }'
+    type: '{ button: TabButton; active: boolean; disabled: boolean; }'
   },
   {
     name: 'suffix',
     description: 'Slot after the tab button label.',
-    type: '{ button: TabButton; checked: boolean; disabled: boolean; }'
+    type: '{ button: TabButton; active: boolean; disabled: boolean; }'
   }
 ]
 

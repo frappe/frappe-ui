@@ -117,11 +117,3 @@ export interface ListHeaderCellSortProps {
    */
   align?: 'start' | 'end'
 }
-
-export interface ListVirtualOptions {
-  /** Row height in px. Defaults to the List's `rowHeight`. */
-  itemHeight?: number
-
-  /** Rows rendered beyond the visible window on each side. */
-  overscan?: number
-}

@@ -27,13 +27,13 @@
             @update:modelValue="(val) => onMonthYearChange(val)"
             :clearable="false"
           >
-            <template #trigger="{ toggle }">
+            <template #trigger="{ open, setOpen }">
               <Button
                 variant="ghost"
                 class="text-lg-medium text-ink-gray-7"
                 :label="currentMonthYear"
                 iconRight="lucide-chevron-down"
-                @click="toggle"
+                @click="setOpen(!open)"
               />
             </template>
           </DatePicker>

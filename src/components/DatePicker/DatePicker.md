@@ -14,4 +14,8 @@ A set of pickers for selecting dates, date ranges, or date and time. Smooth, int
 
 <ComponentPreview name="DatePicker-Range" />
 
+Picker trigger and action slots receive `{ open, disabled, setOpen, close }`
+alongside their date-specific fields. `DateTimePicker` uses `typeable` for both
+the date and time inputs.
+
 <!-- @include: ./DatePicker.api.md -->

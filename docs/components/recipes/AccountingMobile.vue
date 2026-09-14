@@ -218,7 +218,6 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
           v-for="item in flowRows"
           :key="item.description"
           class="h-14"
-          @click="() => {}"
         >
           <ListCell>
             <div class="min-w-0">
@@ -250,7 +249,6 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
           v-for="item in expenses"
           :key="item.description + item.date"
           class="h-14"
-          @click="() => {}"
         >
           <ListCell>
             <div class="min-w-0">
@@ -282,7 +280,6 @@ const pnlColumns = ['8rem', ...months.map(() => '4.5rem')]
           :key="item.id"
           :value="String(item.id)"
           class="h-16"
-          @click="() => {}"
         >
           <ListCell>
             <Avatar :label="item.name" size="lg" />

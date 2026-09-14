@@ -105,8 +105,25 @@ Rules:
 The row shell is shared; each higher-level component owns its own listbox
 container.
 
+## Relationship to ListRowBase
+
+`ListRowBase`, used by the separate `frappe-ui/list` family, exposes
+`data-state="active|inactive"` plus boolean `data-selected` and
+`data-interactive`. Active identifies the current or highlighted row; selected
+identifies membership in a multi-selection, so both can be present at once.
+
+This contract is limited to `ListRowBase`. It does not change ItemListRow's
+runtime attributes or the reka-ui attributes rendered by the selection and menu
+families.
+
 ## v1 stance
 
 `ItemListRow` is public in v1. It is a small primitive, but worth exposing
 so that app code building advanced or custom listboxes can match the
 design system row styling without copying markup.
+
+## Known accessibility follow-up
+
+A selectable linked or button row currently nests its checkbox control inside
+the row's interactive element. Fixing that markup requires a separate design;
+this RC keeps row-click selection behavior unchanged.

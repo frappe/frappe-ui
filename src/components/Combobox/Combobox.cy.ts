@@ -895,12 +895,8 @@ describe('Combobox', () => {
       cy.mount(Combobox, {
         props: { open: true, options: fruits },
         slots: {
-          footer: ({ setOpen }: any) =>
-            h(
-              'button',
-              { 'data-cy': 'footer', onClick: () => setOpen(false) },
-              'FOOTER',
-            ),
+          footer: ({ close }: any) =>
+            h('button', { 'data-cy': 'footer', onClick: close }, 'FOOTER'),
         },
       })
       cy.get('[data-slot="footer"] [data-cy="footer"]').should(

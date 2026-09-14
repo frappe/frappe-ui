@@ -37,12 +37,12 @@
           <template #suffix>
             <slot
               name="suffix"
-              v-bind="{ toggle: togglePopover, open: isOpen }"
+              v-bind="{ open: isOpen, disabled, setOpen, close }"
             >
               <span
                 class="lucide-chevron-down size-4 cursor-pointer"
                 aria-hidden="true"
-                @mousedown.prevent="togglePopover"
+                @mousedown.prevent="setOpen(!isOpen)"
               />
             </slot>
           </template>
@@ -147,8 +147,10 @@ defineSlots<{
    * chevron-down that toggles the popover.
    */
   suffix?: (props: {
-    toggle: (flag?: boolean | Event) => void
     open: boolean
+    disabled: boolean
+    setOpen: (value: boolean) => void
+    close: () => void
   }) => any
 }>()
 
@@ -239,7 +241,10 @@ const displayedOptions = computed<TimeOption[]>(() => {
  * typed text, or the option nearest to it in minutes. Drives both the
  * highlighted row and the scroll-into-view target.
  */
-const typingTarget = computed<{ exact: TimeOption | null; nearest: TimeOption | null }>(() => {
+const typingTarget = computed<{
+  exact: TimeOption | null
+  nearest: TimeOption | null
+}>(() => {
   const list = displayedOptions.value
   if (!list.length) return { exact: null, nearest: null }
   const parsed = parseFlexibleTime(displayValue.value, resolvedFormat.value)
@@ -291,7 +296,10 @@ watch(
   () => resolvedFormat.value,
   () => {
     if (!isTyping.value) {
-      displayValue.value = formatTime(canonicalValue.value, resolvedFormat.value)
+      displayValue.value = formatTime(
+        canonicalValue.value,
+        resolvedFormat.value,
+      )
     }
   },
 )
@@ -331,7 +339,10 @@ function commitTyped(raw: string) {
     commit('')
     return
   }
-  const formattedCurrent = formatTime(canonicalValue.value, resolvedFormat.value)
+  const formattedCurrent = formatTime(
+    canonicalValue.value,
+    resolvedFormat.value,
+  )
   if (raw === formattedCurrent) {
     displayValue.value = formattedCurrent
     isTyping.value = false
@@ -383,11 +394,13 @@ function selectOption(value: string) {
 
 // ── Popover + keyboard wiring ──
 
-// Bound out as the `toggle` slot prop, so it carries `Popover`'s signature: a
-// bare call flips, a boolean sets, a DOM event is ignored.
-function togglePopover(flag?: boolean | Event) {
-  if (flag instanceof Event) flag = undefined
-  isOpen.value = flag ?? !isOpen.value
+function setOpen(value: boolean) {
+  if (props.disabled && value) return
+  isOpen.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function onClickInput() {
@@ -446,7 +459,8 @@ function moveHighlight(delta: number) {
     const idx = seed ? list.findIndex((o) => o.value === seed) : -1
     highlightIndex.value = idx > -1 ? idx : 0
   } else {
-    highlightIndex.value = (highlightIndex.value + delta + list.length) % list.length
+    highlightIndex.value =
+      (highlightIndex.value + delta + list.length) % list.length
   }
   isTyping.value = false
   scrollHighlightedIntoView()
@@ -501,9 +515,7 @@ function scrollOnOpen() {
     const target =
       typingTarget.value.exact?.value ??
       typingTarget.value.nearest?.value ??
-      (canonicalValue.value
-        ? baseCompare(canonicalValue.value)
-        : null)
+      (canonicalValue.value ? baseCompare(canonicalValue.value) : null)
     if (!target) return
     const el = panel.querySelector<HTMLElement>(`[data-value="${target}"]`)
     el?.scrollIntoView({ block: 'center' })

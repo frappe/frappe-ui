@@ -29,14 +29,12 @@ export interface HoverCardProps {
   collisionPadding?: number
 
   /**
-   * Delay (in seconds) from when the pointer enters the trigger until the card
-   * opens. Matches the Tooltip convention of using seconds.
+   * Delay in milliseconds before the card opens. Default: `300`.
    */
   hoverDelay?: number
 
   /**
-   * Delay (in seconds) from when the pointer leaves the trigger or card until
-   * the card closes.
+   * Delay in milliseconds before the card closes. Default: `300`.
    */
   leaveDelay?: number
 
@@ -54,6 +52,15 @@ export interface HoverCardProps {
 export interface HoverCardSlotProps {
   /** Whether the card is currently open. */
   open: boolean
+  /** Sets the card open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the card. */
+  close: () => void
+}
+
+export interface HoverCardEmits {
+  /** Fired when the card open state changes. */
+  'update:open': [open: boolean]
 }
 
 /** Methods available on a `<HoverCard>` template ref. */

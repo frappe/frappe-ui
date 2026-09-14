@@ -19,7 +19,7 @@ function createTestRouter() {
 describe('<Sidebar /> composition', () => {
   it('renders whatever the default slot provides (bare frame)', () => {
     cy.mount(Sidebar, {
-      props: { disableCollapse: true },
+      props: { collapsible: false },
       slots: {
         default: () => [
           h(SidebarLabel, () => 'Spaces'),
@@ -128,11 +128,21 @@ describe('<SidebarItem />', () => {
     })
     cy.get('a[href="/deals"]').should('exist')
 
-    cy.mount(SidebarItem, { props: { label: 'Docs', href: 'https://frappe.io/docs' } })
-    cy.get('[data-slot=sidebar-item] > a').should('have.attr', 'href', 'https://frappe.io/docs')
+    cy.mount(SidebarItem, {
+      props: { label: 'Docs', href: 'https://frappe.io/docs' },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should(
+      'have.attr',
+      'href',
+      'https://frappe.io/docs',
+    )
 
     cy.mount(SidebarItem, {
-      props: { label: 'Route wins', route: '/deals', href: 'https://frappe.io/docs' },
+      props: {
+        label: 'Route wins',
+        route: '/deals',
+        href: 'https://frappe.io/docs',
+      },
       global: { plugins: [createTestRouter()] },
     })
     cy.get('[data-slot=sidebar-item] > a').should('have.attr', 'href', '/deals')
@@ -365,10 +375,14 @@ describe('<SidebarCollapseToggle />', () => {
     const collapsed = ref(false)
     cy.mount(
       () =>
-        h(Sidebar, {
-          collapsed: collapsed.value,
-          'onUpdate:collapsed': (v: boolean | null) => (collapsed.value = v),
-        }, () => h(SidebarCollapseToggle)),
+        h(
+          Sidebar,
+          {
+            collapsed: collapsed.value,
+            'onUpdate:collapsed': (v: boolean | null) => (collapsed.value = v),
+          },
+          () => h(SidebarCollapseToggle),
+        ),
       { global: { plugins: [createTestRouter()] } },
     )
     cy.contains('Collapse').should('exist')

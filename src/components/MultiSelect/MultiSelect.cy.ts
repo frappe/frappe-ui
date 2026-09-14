@@ -56,7 +56,8 @@ describe('MultiSelect', () => {
     cy.mount(MultiSelect, {
       props: { options },
       slots: {
-        footer: () => h('div', { 'data-cy': 'footer' }, ['footer']),
+        footer: ({ close }) =>
+          h('button', { 'data-cy': 'footer', onClick: close }, ['footer']),
         'item-label': () => h('div', { 'data-cy': 'item-label' }, ['label']),
       },
     })
@@ -65,6 +66,8 @@ describe('MultiSelect', () => {
 
     cy.get('[data-cy="footer"]').should('exist')
     cy.get('[data-cy="item-label"]').should('exist')
+    cy.get('[data-cy="footer"]').click()
+    cy.get('[data-slot="content"]').should('not.exist')
   })
 
   it('emits update:selectedOptions with the original option objects', () => {

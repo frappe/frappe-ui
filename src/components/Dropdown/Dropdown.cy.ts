@@ -232,6 +232,28 @@ describe('Dropdown', () => {
     cy.get('[aria-haspopup=menu]').should('have.text', 'Trigger')
   })
 
+  it('exposes open controls and disabled state to the trigger slot', () => {
+    let controls: any
+    cy.mount(Dropdown, {
+      props: { options },
+      slots: {
+        trigger: (props) => {
+          controls = props
+          return h('button', { 'data-cy': 'trigger' }, String(props.open))
+        },
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').should('exist')
+    cy.then(() => {
+      expect(controls.disabled).to.equal(false)
+      controls.setOpen(true)
+    })
+    cy.get('[role=menu]').should('exist')
+    cy.then(() => controls.close())
+    cy.get('[role=menu]').should('not.exist')
+  })
+
   it('round-trips v-model:open', () => {
     cy.mount(Dropdown, {
       props: {
@@ -315,9 +337,7 @@ describe('Dropdown', () => {
   })
 
   it('renders group labels, and #group-label overrides them', () => {
-    const grouped = [
-      { group: 'Edit', options: [{ label: 'Rename' }] },
-    ]
+    const grouped = [{ group: 'Edit', options: [{ label: 'Rename' }] }]
     cy.mount(Dropdown, { props: { options: grouped } })
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[data-slot=group-label]').should('contain.text', 'Edit')

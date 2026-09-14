@@ -9,5 +9,6 @@ export { default as SettingsBody } from './SettingsBody.vue'
 export { default as SettingsRow } from './SettingsRow.vue'
 export type {
   SettingsDialogProps,
+  SettingsDialogEmits,
   SettingsBodyExposed,
 } from './types'

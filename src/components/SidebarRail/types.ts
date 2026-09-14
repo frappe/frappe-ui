@@ -37,10 +37,10 @@ export interface SidebarRailItemProps {
 
   /**
    * Visual treatment.
-   * - `tile` (default): a filled cell with a left indicator bar when active —
+   * - `subtle` (default): a filled cell with a left indicator bar when active —
    *   for image/avatar items like communities or workspaces.
    * - `ghost`: transparent until hovered, a raised highlight when active — for
    *   icon shortcuts like Search or Notifications.
    */
-  variant?: 'tile' | 'ghost'
+  variant?: 'subtle' | 'ghost'
 }

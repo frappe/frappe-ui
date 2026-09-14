@@ -91,7 +91,7 @@ const posts = (
       </template>
 
       <template #sidebar>
-        <Sidebar class="border-r" disable-collapse width="14rem">
+        <Sidebar class="border-r" :collapsible="false" width="14rem">
           <SidebarHeader
             title="Acme Design"
             subtitle="v1.0.0-beta"

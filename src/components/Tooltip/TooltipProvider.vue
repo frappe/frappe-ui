@@ -21,10 +21,10 @@ import { computed } from 'vue'
  */
 const props = withDefaults(
   defineProps<{
-    /** Delay (in seconds) before the first tooltip in the group opens. */
+    /** Delay in milliseconds before the first tooltip in the group opens. */
     hoverDelay?: number
     /**
-     * Window (in seconds) during which moving to another trigger in this
+     * Window in milliseconds during which moving to another trigger in this
      * group opens its tooltip with no delay. Mirrors reka's
      * `skipDelayDuration`.
      */
@@ -35,11 +35,11 @@ const props = withDefaults(
      */
     disableHoverableContent?: boolean
   }>(),
-  { hoverDelay: 0.5, skipDelay: 0.3, disableHoverableContent: false },
+  { hoverDelay: 500, skipDelay: 300, disableHoverableContent: false },
 )
 
-const delayDuration = computed(() => props.hoverDelay * 1000)
-const skipDelayDuration = computed(() => props.skipDelay * 1000)
+const delayDuration = computed(() => props.hoverDelay)
+const skipDelayDuration = computed(() => props.skipDelay)
 </script>
 
 <template>

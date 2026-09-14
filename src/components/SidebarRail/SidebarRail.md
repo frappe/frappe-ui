@@ -22,13 +22,15 @@ overflow, wrap it in your own `overflow-y-auto` container.
 `SidebarRailItem` carries the tooltip (its `label`), the active indicator, and
 an optional unread `badge`. Two visual treatments:
 
-- `variant="tile"` (default) — a filled cell with a left indicator bar when
+- `variant="subtle"` (default) — a filled cell with a left indicator bar when
   active. Use the default slot for an image, avatar, or initials.
 - `variant="ghost"` — transparent until hovered, raised when active. Pass an
   `icon` for a shortcut like Search or Notifications.
 
 Set `route` to render a router link or `href` for a native same-tab anchor;
-`route` takes precedence when both are set. Omit both to get a button that emits `click`.
+`route` takes precedence when both are set. A string `route` falls back to a
+plain anchor when no router is installed. Omit both to get a button that emits
+`click`. When `active` is omitted, a routed item derives it from the current route.
 The `badge` count shows as a pill (`badgeStyle="count"`) or a dot
 (`badgeStyle="dot"`); either way it folds into the item's accessible label, and
 a dot surfaces the real number in the tooltip. The badge pill teleports to

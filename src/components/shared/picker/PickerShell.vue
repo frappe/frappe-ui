@@ -38,7 +38,7 @@
               <slot name="suffix" v-bind="triggerSlotProps">
                 <LucideChevronDown
                   class="h-4 w-4 cursor-pointer"
-                  @mousedown.prevent="toggle"
+                  @mousedown.prevent="setOpen(!open)"
                 />
               </slot>
             </template>
@@ -47,7 +47,7 @@
       </div>
     </template>
 
-    <slot :close="closePopover" />
+    <slot v-bind="triggerSlotProps" />
   </Popover>
 </template>
 
@@ -109,16 +109,13 @@ const anchorEl = computed(() => {
   return textInputRef.value?.inputElement ?? undefined
 })
 
-// Same signature and semantics as `Popover`'s `toggle` slot prop: a bare call
-// flips, a boolean sets, and a DOM event (from `@click="toggle"`) is ignored so
-// the handler argument does not read as `true`.
-function toggle(flag?: boolean | Event) {
-  if (flag instanceof Event) flag = undefined
-  open.value = flag ?? !open.value
+function setOpen(value: boolean) {
+  if (props.disabled && value) return
+  open.value = value
 }
 
-function closePopover() {
-  open.value = false
+function close() {
+  setOpen(false)
 }
 
 function onFocus() {
@@ -153,8 +150,10 @@ function onArrowDown() {
 }
 
 const triggerSlotProps = computed<PickerShellTriggerSlotProps>(() => ({
-  toggle,
   open: open.value,
+  disabled: Boolean(props.disabled),
+  setOpen,
+  close,
   displayLabel: props.displayLabel,
   inputValue: inputValue.value,
 }))
@@ -186,8 +185,6 @@ watch(open, (val, prev) => {
 })
 
 defineExpose<PickerShellExposed>({
-  open: () => {
-    open.value = true
-  },
+  open: () => setOpen(true),
 })
 </script>

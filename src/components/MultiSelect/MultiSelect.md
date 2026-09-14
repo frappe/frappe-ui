@@ -53,12 +53,12 @@ Fetch options from a server as the user types. Bind `v-model:query`, debounce th
 ```
 
 ## Custom Footer
-Replace the default Clear All / Select All footer with a custom one. The slot receives the shared control props (`open`, `disabled`, `query`, `selectedOptions`, `clear`, `setOpen`) plus `selectAll`.
+Replace the default Clear All / Select All footer with a custom one. The slot receives the shared control props (`open`, `disabled`, `query`, `selectedOptions`, `clear`, `setOpen`, `close`) plus `selectAll`.
 
 <ComponentPreview name="MultiSelect-Footer" />
 
 ## Custom Trigger
-Use `#trigger` to fully replace the default button trigger. The slot receives `open`, `disabled`, `query`, `selectedOptions`, `clear`, and `setOpen`.
+Use `#trigger` to fully replace the default button trigger. The slot receives `open`, `disabled`, `query`, `selectedOptions`, `clear`, `setOpen`, and `close`.
 
 <ComponentPreview name="MultiSelect-TriggerSlot" />
 
