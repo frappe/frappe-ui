@@ -114,7 +114,7 @@ The `options` blob is flattened into top-level props. See the
 | `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
-| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`     |
+| `:icon="{ appearance: 'warning' }"`   | `icon="…"` + `theme="amber"`     |
 | `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
@@ -151,19 +151,58 @@ For the imperative API, use `dialog.confirm` / `dialog.danger` / `dialog.prompt`
 from `frappe-ui` (callback-based: `onConfirm` resolves to close, throws to stay
 open) and wrap your app root in `<FrappeUIProvider>`.
 
-### `icon.appearance` → `icon.theme`
+### The `icon` object is replaced by `icon` + `theme` {#dialog-icon-theme}
+
+`icon` takes a `lucide-*` class name or a Vue component. The tone moves to its
+own `theme` prop, so the two decisions are separate and an icon component is
+possible at all.
 
 ```vue
 <!-- Before -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'red' }" ... />
 
 <!-- After -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" ... />
+<Dialog icon="lucide-alert-triangle" theme="red" ... />
+<Dialog :icon="AlertTriangleIcon" theme="red" ... />
 ```
 
-`appearance` is dropped silently — Vue accepts the unknown key with no error,
-so the icon renders with no tone. Map `warning → amber`, `info → blue`,
-`danger → red`, `success → green`.
+The same two keys move on `dialog.confirm`, `dialog.danger` and
+`dialog.prompt`, which already had a top-level `theme`:
+
+```js
+// Before
+dialog.confirm({ title: 'Delete', icon: { name: 'lucide-trash', theme: 'red' } })
+
+// After
+dialog.confirm({ title: 'Delete', icon: 'lucide-trash', theme: 'red' })
+```
+
+**Silent.** An object passed to `icon` renders no icon at all now, and the
+`DialogIcon` type is gone (loud in TypeScript). Coming from v0, the older
+`appearance` key went the same way: map `warning → amber`, `info → blue`,
+`danger → red`, `success → green` and pass it as `theme`.
+
+### `DialogAction` is `ImperativeDialogAction` for `dialog.*`
+
+Two action types existed under one name. The component's `actions` prop takes
+`DialogAction`, whose `onClick` receives `{ close }`. The imperative helpers
+take a different shape, whose `onClick` receives `{ close, setError }` and is
+awaited. That one is exported as `ImperativeDialogAction`.
+
+```ts
+// Before: the name resolved to the component's type, which does not match
+import type { DialogAction } from 'frappe-ui'
+const actions: DialogAction[] = [{ label: 'Delete', onClick: async () => {} }]
+dialog.confirm({ title: 'Delete', actions })
+
+// After
+import type { ImperativeDialogAction } from 'frappe-ui'
+const actions: ImperativeDialogAction[] = [
+  { label: 'Delete', onClick: async () => {} },
+]
+```
+
+Types only; nothing changes at runtime.
 
 ### `theme: 'yellow'` → `theme: 'amber'`
 
@@ -174,7 +213,7 @@ color.
 
 | Before                     | After                     |
 | -------------------------- | ------------------------- |
-| `:icon="{ theme: 'yellow' }"` | `:icon="{ theme: 'amber' }"` |
+| `theme="yellow"`              | `theme="amber"`              |
 | `dialog.confirm({ theme: 'yellow' })` | `dialog.confirm({ theme: 'amber' })` |
 
 This is a **silent break** for JavaScript call sites: `yellow` is no longer a

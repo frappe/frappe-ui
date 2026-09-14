@@ -74,12 +74,18 @@ export {
   type DialogControl,
   type DialogHandle,
   type DialogNamespace,
+  type ImperativeDialogAction,
   type PromptArgs,
   type PromptControl,
   type PromptField,
   type PromptFieldValidator,
 } from './utils/dialog'
 export { toast } from './components/Toast/toast'
+export type {
+  ToastAction,
+  ToastId,
+  ToastOptions,
+} from './components/Toast/types'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
 
 // Lists and collection views

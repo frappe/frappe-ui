@@ -31,9 +31,15 @@
   },
   {
     name: 'icon',
-    description: 'Icon shown next to the title in the auto-header.',
+    description: 'Icon shown next to the title in the auto-header. A `lucide-*` class name\nor a Vue component. Its badge takes its tone from `theme`.',
     required: false,
-    type: 'string | DialogIcon'
+    type: 'string | Component'
+  },
+  {
+    name: 'theme',
+    description: 'Tone of the header icon badge: `amber`, `blue`, `red` or `green`.\nUnset renders the neutral gray badge.',
+    required: false,
+    type: 'DialogTheme'
   },
   {
     name: 'size',

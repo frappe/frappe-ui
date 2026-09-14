@@ -11,11 +11,7 @@ import Dialog from '../components/Dialog/Dialog.vue'
 import { Button } from '../components/Button'
 import FormControl from '../components/FormControl/FormControl.vue'
 import ErrorMessage from '../components/ErrorMessage/ErrorMessage.vue'
-import type {
-  DialogIcon,
-  DialogSize,
-  DialogTheme,
-} from '../components/Dialog/types'
+import type { DialogSize, DialogTheme } from '../components/Dialog/types'
 import type { ButtonProps } from '../components/Button'
 import type {
   ComboboxCustomOption,
@@ -49,7 +45,7 @@ export interface PromptControl extends DialogControl {
  * If `onClick` rejects, the thrown error is rendered inline via `setError`.
  * If `onClick` is omitted, the action simply closes the dialog.
  */
-export type DialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
+export type ImperativeDialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
   label: string
   onClick?: (ctx: DialogControl) => void | Promise<void>
 }
@@ -63,8 +59,8 @@ export interface ConfirmArgs {
   cancelLabel?: string
   /** Colors the confirm button + picks the default icon. */
   theme?: DialogTheme
-  /** Overrides the theme-derived default icon. */
-  icon?: string | DialogIcon
+  /** Overrides the theme-derived default icon. A `lucide-*` class name or a Vue component. */
+  icon?: string | Component
   /** @default 'md' */
   size?: DialogSize
   /**
@@ -94,7 +90,7 @@ export interface ConfirmArgs {
    * state is tracked independently. When set, `confirmLabel`, `cancelLabel`,
    * and `onConfirm` are ignored.
    */
-  actions?: DialogAction[]
+  actions?: ImperativeDialogAction[]
 }
 
 /**
@@ -160,7 +156,8 @@ export interface PromptArgs {
   /** @default 'Cancel' */
   cancelLabel?: string
   theme?: DialogTheme
-  icon?: string | DialogIcon
+  /** Overrides the theme-derived default icon. A `lucide-*` class name or a Vue component. */
+  icon?: string | Component
   /** @default 'md' */
   size?: DialogSize
   /**
@@ -231,13 +228,10 @@ function themeToButtonTheme(theme?: DialogTheme): ButtonTheme | undefined {
 
 function resolveIcon(
   theme?: DialogTheme,
-  icon?: string | DialogIcon,
-): DialogIcon | undefined {
-  if (icon) {
-    if (typeof icon === 'string') return { name: icon, theme }
-    return { ...icon, theme: icon.theme ?? theme }
-  }
-  if (theme) return { name: THEME_DEFAULT_ICON[theme], theme }
+  icon?: string | Component,
+): string | Component | undefined {
+  if (icon) return icon
+  if (theme) return THEME_DEFAULT_ICON[theme]
   return undefined
 }
 
@@ -287,12 +281,12 @@ function extractErrorMessage(err: unknown): string {
 
 // -- confirm -------------------------------------------------------------
 
-// Wraps a `DialogAction.onClick` so each button tracks its own loading state.
+// Wraps an `ImperativeDialogAction.onClick` so each button tracks its own loading state.
 // Awaits the user-supplied handler, auto-closes on success, and surfaces
 // thrown errors inline via the shared `setError` channel (which also resets
 // every button's loading flag).
 function makeActionRunner(
-  action: DialogAction,
+  action: ImperativeDialogAction,
   state: LifecycleState,
   actionStates: Array<{ loading: boolean }>,
   index: number,
@@ -421,6 +415,7 @@ export function confirm(args: ConfirmArgs): DialogHandle {
             },
             title: args.title,
             icon: resolvedIcon,
+            theme: args.theme,
             size: args.size || 'md',
             dismissible,
             showCloseButton: dismissible,
@@ -652,6 +647,7 @@ export function prompt(args: PromptArgs): DialogHandle {
             },
             title: args.title,
             icon: resolvedIcon,
+            theme: args.theme,
             size: args.size || 'md',
             dismissible,
             showCloseButton: dismissible,

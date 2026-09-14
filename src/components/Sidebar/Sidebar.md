@@ -78,4 +78,8 @@ a status announcement, so it has no live-region role.
 shape as `Alert`'s actions). `#prefix`, `#title`, `#description`, and
 `#actions` override the corresponding parts.
 
+The card's root carries its tone as `data-color` (`gray`, `blue`, `green`,
+`amber` or `red`), the same hook `Alert` uses. It is not `data-theme`: that
+attribute is the light/dark switch on the document.
+
 <!-- @include: ./Sidebar.api.md -->

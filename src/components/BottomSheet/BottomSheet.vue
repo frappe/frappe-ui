@@ -14,6 +14,7 @@
         honest when a mobile URL bar collapses.
       -->
       <DialogContent
+        data-slot="content"
         class="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
         :aria-label="title || 'Bottom sheet'"
         @escape-key-down="onDismissAttempt"
@@ -101,9 +102,12 @@ const handleRef = ref<HTMLElement | null>(null)
  * fires exactly once, with the comment, and the gesture is bound to nothing.
  * `handleRef` is a plain element ref, which Vue re-runs every time the content
  * mounts and unmounts, so this re-resolves on every open.
+ *
+ * The query reads the sheet's own `data-slot` hook, the same attribute an app
+ * styles it with. `closest` stops at the nearest match, which is this sheet.
  */
 const sheetEl = computed(
-  () => handleRef.value?.closest<HTMLElement>('.bottom-sheet-content') ?? null,
+  () => handleRef.value?.closest<HTMLElement>('[data-slot="content"]') ?? null,
 )
 
 /*

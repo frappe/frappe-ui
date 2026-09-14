@@ -46,12 +46,6 @@ type DialogTheme = 'amber' | 'blue' | 'red' | 'green'
 
 type DialogPosition = 'center' | 'top'
 
-interface DialogIcon {
-  name: string
-  /** Color tone. Replaces deprecated `appearance`. */
-  theme?: DialogTheme
-}
-
 type DialogActionContext = { close: () => void }
 
 interface DialogAction extends ButtonProps {
@@ -70,12 +64,13 @@ interface DialogProps {
   // Content.
   title?: string
   message?: string
-  icon?: string | DialogIcon
+  icon?: string | Component         // lucide-* class name, or a component
+  theme?: DialogTheme               // tone of the icon badge
 
   // Layout.
   size?: DialogSize                 // default 'lg'
   position?: DialogPosition         // default 'center'
-  paddingTop?: string | number
+  paddingTop?: string | number      // a number is pixels
 
   // Actions.
   actions?: DialogAction[]
@@ -93,7 +88,9 @@ interface DialogProps {
 - **`dismissible`** — when `false`, both outside-click and Escape are suppressed. Replaces `disableOutsideClickToClose`. Default `true`.
 - **`bare`** — when `true`, drops the chrome: no padded card, no auto-header, no auto-actions container. `#default` fills the modal shell directly. `title`/`actions` props become no-ops with a dev warning; `#title`/`#actions` slots are not rendered. Used for command palettes, full-screen settings, etc.
 - **`showCloseButton`** — controls the absolute-positioned top-right close button. Independent of the auto-header. Default `true`.
-- **`paddingTop`** — overrides the position-based top padding (escape hatch; kept for the single in-the-wild use case).
+- **`icon` / `theme`** — two independent props. `icon` takes a `lucide-*` class name or a Vue component; `theme` colors the badge behind it and defaults to the neutral gray one. The structured `DialogIcon` object is gone: it carried the tone inside the icon, which no other component does, and it could not hold a component.
+- **`message`** — the short paragraph below the title, rendered through reka's `DialogDescription` so it is announced with the dialog. It stays: it is the whole body of a confirm-shaped dialog. Longer content goes in `#default`, which replaces it.
+- **`paddingTop`** — overrides the position-based top padding (escape hatch; kept for the single in-the-wild use case). A number is pixels; a string is used as given.
 
 ### Slots
 
@@ -136,11 +133,18 @@ interface DialogProps {
 - `aria-describedby` ← the description element when `message` is set.
 - When `bare`, the caller is responsible for `aria-labelledby` / `aria-describedby`.
 
+### Parts
+
+`Dialog.Title`, `Dialog.Description` and `Dialog.Close` are reka's own parts,
+re-exported on the component. They are public, and documented: a `bare` dialog
+has no auto-header, so it needs `Dialog.Title` to carry its accessible name.
+
 ### Styling hooks
 
 - `data-state="open" | "closed"` on overlay and content (already provided by reka-ui).
 - `data-dialog="{title}"` on overlay (kept from current API for test selection).
 - `data-position="center" | "top"` on the centering wrapper.
+- `data-slot="content"` on the dialog card, `data-slot="icon"` on the header icon badge, `data-slot="actions"` on the footer action row.
 
 ## Imperative API
 
@@ -187,8 +191,12 @@ interface PromptControl extends DialogControl {
   values: Record<string, any>
 }
 
-/** A button in `actions[]`. Extends `ButtonProps` (theme, variant, icon, …). */
-type DialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
+/**
+ * A button in `actions[]`. Extends `ButtonProps` (theme, variant, icon, …).
+ * Named `ImperativeDialogAction`, because the component's own `actions` prop
+ * takes `DialogAction`, whose `onClick` receives `{ close }` and nothing else.
+ */
+type ImperativeDialogAction = Omit<ButtonProps, 'onClick' | 'loading'> & {
   label: string
   onClick?: (ctx: DialogControl) => void | Promise<void>
 }
@@ -199,7 +207,7 @@ interface ConfirmArgs {
   confirmLabel?: string          // default 'Confirm'; ignored when actions[] is set
   cancelLabel?: string           // default 'Cancel';  ignored when actions[] is set
   theme?: DialogTheme            // colors the confirm button + picks default icon
-  icon?: string | DialogIcon     // overrides theme-derived default icon
+  icon?: string | Component      // overrides theme-derived default icon
   size?: DialogSize              // default 'md'
   dismissible?: boolean          // default true
   onConfirm?: (ctx: DialogControl) => void | Promise<void>
@@ -209,7 +217,7 @@ interface ConfirmArgs {
    * Button; its onClick is awaited independently and shows a loading spinner
    * while pending. When set, confirmLabel/cancelLabel/onConfirm are ignored.
    */
-  actions?: DialogAction[]
+  actions?: ImperativeDialogAction[]
 }
 
 /**
@@ -226,7 +234,7 @@ interface PromptArgs {
   confirmLabel?: string          // default 'Submit'
   cancelLabel?: string           // default 'Cancel'
   theme?: DialogTheme
-  icon?: string | DialogIcon
+  icon?: string | Component
   size?: DialogSize              // default 'md'
   dismissible?: boolean          // default true
   onConfirm: (ctx: PromptControl) => void | Promise<void>

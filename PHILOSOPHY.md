@@ -311,7 +311,7 @@ setTimeout(close, 5000)
 **Rule:** Components expose customization through two channels:
 
 1. **Slots** — for *content* injection (governed by P6/P7).
-2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size` on rendered DOM so callers and brand themes target them via CSS.
+2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size`, `data-color` on rendered DOM so callers and brand themes target them via CSS. `data-color` carries the component's tone (`theme` prop). It is not `data-theme`: that attribute is the light/dark switch the app sets on the document.
 
 **Forbidden:**
 - Class-name injection props (`triggerClass`, `contentClass`, `itemClass`)

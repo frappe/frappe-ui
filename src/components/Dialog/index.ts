@@ -10,7 +10,6 @@ export type {
   DialogAction,
   DialogReactiveAction,
   DialogActionContext,
-  DialogIcon,
   DialogPosition,
   DialogSize,
   DialogTheme,

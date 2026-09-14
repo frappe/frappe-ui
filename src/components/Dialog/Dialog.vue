@@ -29,6 +29,7 @@
         >
           <DialogContent
             ref="contentRef"
+            data-slot="content"
             class="my-8 inline-block w-full transform overflow-hidden rounded-7 bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
             @open-auto-focus="handleOpenAutoFocus"
@@ -56,16 +57,21 @@
                     >
                       <div class="flex items-center space-x-2 flex-1">
                         <div
-                          v-if="resolvedIcon && isLucide(resolvedIcon.name)"
+                          v-if="hasIcon"
+                          data-slot="icon"
                           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
                           :class="dialogIconBgClasses"
                         >
                           <span
-                            :class="[
-                              resolvedIcon.name,
-                              'size-4',
-                              dialogIconClasses,
-                            ]"
+                            v-if="lucideIcon"
+                            :class="[lucideIcon, 'size-4', dialogIconClasses]"
+                            aria-hidden="true"
+                          />
+                          <component
+                            :is="componentIcon"
+                            v-else
+                            class="size-4"
+                            :class="dialogIconClasses"
                             aria-hidden="true"
                           />
                         </div>
@@ -102,6 +108,7 @@
 
               <div
                 v-if="reactiveActions.length || $slots.actions"
+                data-slot="actions"
                 class="px-4 pb-7 pt-4 sm:px-6"
               >
                 <slot
@@ -173,7 +180,6 @@ import type {
   DialogProps,
   DialogEmits,
   DialogSlots,
-  DialogIcon,
   DialogTheme,
   DialogReactiveAction,
 } from './types'
@@ -236,23 +242,30 @@ function close() {
   isOpen.value = false
 }
 
-// Resolved icon.
-const resolvedIcon = computed<DialogIcon | null>(() => {
-  const raw = props.icon
-  if (!raw) return null
-  if (typeof raw === 'string') return { name: raw }
-  return raw
-})
+// Resolved icon: a `lucide-*` class name, or a component to render.
+const lucideIcon = computed(() =>
+  typeof props.icon === 'string' && isLucideIconString(props.icon)
+    ? props.icon
+    : null,
+)
+
+const componentIcon = computed(() =>
+  props.icon && typeof props.icon !== 'string' ? props.icon : null,
+)
+
+const hasIcon = computed(() => Boolean(lucideIcon.value || componentIcon.value))
 
 watchEffect(() => {
-  warnUnsupportedIconString('Dialog', 'icon', resolvedIcon.value?.name)
+  if (typeof props.icon === 'string') {
+    warnUnsupportedIconString('Dialog', 'icon', props.icon)
+  }
 })
 
 if (import.meta.env.DEV) {
   let warnedBareTitle = false
   let warnedBareActions = false
   watchEffect(() => {
-    if (props.bare && (props.title || resolvedIcon.value) && !warnedBareTitle) {
+    if (props.bare && (props.title || props.icon) && !warnedBareTitle) {
       console.warn(
         '[frappe-ui] Dialog `title`/`icon` have no effect when `bare` is true. Render them yourself inside `#default`.',
       )
@@ -267,9 +280,7 @@ if (import.meta.env.DEV) {
   })
 }
 
-const iconTheme = computed<DialogTheme | null>(
-  () => resolvedIcon.value?.theme ?? null,
-)
+const iconTheme = computed<DialogTheme | null>(() => props.theme ?? null)
 
 const dialogIconBgClasses = computed(() => {
   const theme = iconTheme.value
@@ -305,8 +316,15 @@ const dialogPositionClasses = computed(() => {
 })
 
 const dialogPositionStyles = computed(() => {
+  // A number is pixels. Vue writes the value straight to the CSSOM, which
+  // drops a unitless length, so `:padding-top="80"` used to remove the
+  // position padding and add nothing back.
   if (props.paddingTop) {
-    return { paddingTop: props.paddingTop }
+    const value =
+      typeof props.paddingTop === 'number'
+        ? `${props.paddingTop}px`
+        : props.paddingTop
+    return { paddingTop: value }
   }
   return {}
 })
@@ -349,10 +367,6 @@ const showHeader = computed(() => {
   if (props.title) return true
   return false
 })
-
-function isLucide(name: string | undefined) {
-  return isLucideIconString(name)
-}
 
 // Honor a descendant `[autofocus]` element on open. Reka's FocusScope
 // otherwise focuses the content wrapper (or the first tabbable element),

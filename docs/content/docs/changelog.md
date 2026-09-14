@@ -1079,6 +1079,54 @@ Frappe's whitelisted methods return) renders one line per message instead of
 `[object Object]`. A single string and a plain `Error` render as before. The
 prop type is exported as `ErrorMessageValue`. Additive.
 
+### Dialog — `icon` takes a string or a component, tone moves to `theme` (breaking)
+
+The structured `DialogIcon` object is gone. `icon` is a `lucide-*` class name
+or a Vue component, and `theme` (`amber | blue | red | green`) colors the badge
+behind it. The same split applies to `dialog.confirm`, `dialog.danger` and
+`dialog.prompt`, which already had a top-level `theme`.
+
+- **Silent:** an object still passed to `icon` renders no icon.
+- **Loud in TypeScript:** the `DialogIcon` export is removed.
+- `paddingTop` accepts a number again. A unitless length never reached the
+  CSSOM, so `:padding-top="80"` removed the position padding and added nothing
+  back. A number is pixels now.
+- Styling hooks: `data-slot="content"` on the card, `data-slot="icon"` on the
+  header badge, `data-slot="actions"` on the footer row. BottomSheet's content
+  carries `data-slot="content"` too, and the sheet finds itself through that
+  hook instead of a class name.
+
+### `dialog.*` actions are typed `ImperativeDialogAction` (breaking, loud)
+
+Two different action shapes shared the name `DialogAction`. The component's
+`actions` prop keeps it; the imperative helpers' array is
+`ImperativeDialogAction`, which the root now exports. Its `onClick` receives
+`{ close, setError }` and is awaited. Types only.
+
+### Toast — the default duration is 4000ms, and the option types are exported
+
+- No behavior change. The viewport never set a duration, so vue-sonner's own
+  4000ms applied while `spec/toast.md` promised 5000ms. The spec and the docs
+  say 4000ms now. Pass `duration` per toast to change it.
+- `ToastOptions`, `ToastAction` and `ToastId` are exported from `frappe-ui`, so
+  an app that wraps `toast` no longer imports types from vue-sonner, which it
+  does not depend on.
+- `ToastProvider` still takes no props, on purpose.
+
+### Documented, not changed: Dialog, Breadcrumbs and Alert contracts
+
+- `Dialog.Title`, `Dialog.Description` and `Dialog.Close` are public parts. A
+  `bare` dialog needs `Dialog.Title` for its accessible name.
+- Dialog `message` stays. It is the body of a confirm-shaped dialog, and it is
+  announced with the dialog through reka's `DialogDescription`.
+- `BreadcrumbItem` keeps its open index signature, so a crumb can carry extra
+  fields for the `#prefix` / `#suffix` slots.
+- Alert and SidebarCard keep `data-color` for tone. `data-theme` is the
+  light/dark attribute on the document, which is why the tone hook is not
+  called that. P10 in `PHILOSOPHY.md` lists it.
+- Alert `icon: true` means "the theme's auto icon", the same as leaving it
+  unset.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave

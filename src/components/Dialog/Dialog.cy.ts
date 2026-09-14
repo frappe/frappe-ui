@@ -17,6 +17,24 @@ describe('Dialog', () => {
     cy.get('[role=dialog] [aria-label=Close]').should('exist')
   })
 
+  it('takes paddingTop as pixels or as a CSS length', () => {
+    cy.mount(Dialog, { props: { open: true, paddingTop: 80 } })
+
+    cy.get('[data-position=center]').should(
+      'have.css',
+      'padding-top',
+      '80px',
+    )
+
+    cy.mount(Dialog, { props: { open: true, paddingTop: '120px' } })
+
+    cy.get('[data-position=center]').should(
+      'have.css',
+      'padding-top',
+      '120px',
+    )
+  })
+
   it('renders title, message and action; ctx.close() closes the dialog', () => {
     const onClose = cy.spy().as('onClose')
     const onActionClick = cy.spy().as('onActionClick')
@@ -358,16 +376,46 @@ describe('Dialog', () => {
 
   // ---- Icon theming ----------------------------------------------------------
 
-  it('renders an icon by theme color', () => {
+  it('renders a lucide icon string, toned by theme', () => {
     cy.mount(Dialog, {
       props: {
         open: true,
         title: 'Heads up',
-        icon: { name: 'lucide-alert-triangle', theme: 'red' },
+        icon: 'lucide-alert-triangle',
+        theme: 'red',
       },
     })
 
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
+    cy.get('[role=dialog] [data-slot=icon]').should(
+      'have.class',
+      'bg-surface-red-2',
+    )
+  })
+
+  it('renders a component icon', () => {
+    const Glyph = defineComponent({
+      render() {
+        return h('svg', { 'data-cy': 'component-icon' })
+      },
+    })
+
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: Glyph },
+    })
+
+    cy.get('[role=dialog] [data-cy=component-icon]').should('exist')
+  })
+
+  it('keeps the neutral badge when no theme is set', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: 'lucide-info' },
+    })
+
+    cy.get('[role=dialog] [data-slot=icon]').should(
+      'have.class',
+      'bg-surface-gray-2',
+    )
   })
 
   // ---- Escape ------------------------------------------------------------

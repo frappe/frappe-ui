@@ -13,7 +13,7 @@ Toasts are short-lived, non-blocking notifications that surface in a fixed viewp
 `frappe-ui` v1 **vendors [`vue-sonner`](https://github.com/xiaoluoboding/vue-sonner)** and re-exports its `toast` namespace and `<Toaster>` component **with sonner's API surface unchanged**. Our only contribution is:
 
 1. **Visual defaults** — CSS overrides that match the current dark high-contrast toast (`bg-surface-gray-9` + `ink-base`).
-2. **Configuration defaults** — `position='bottom-right'`, `duration=5000`, `closeButton=true`.
+2. **Configuration defaults** — `position='bottom-right'`, `closeButton=true`. `duration` is left at sonner's own 4000ms.
 3. **Mount integration** — `<FrappeUIProvider>` renders `<Toaster>` with those defaults.
 
 We deliberately **do not** wrap sonner behind a frappe-ui-shaped API, do not rename options, and do not add convenience extensions. The contract is: if it's documented in vue-sonner's docs, it works here exactly the same way. If we ever swap implementations, that swap is a breaking change.
@@ -32,6 +32,10 @@ Bolting both onto the reka-based implementation would essentially re-implement s
 ```ts
 // Imperative API — sonner's `toast`, re-exported as-is.
 import { toast } from 'frappe-ui'
+
+// Option types, under frappe-ui names, so an app that wraps `toast` does not
+// import from vue-sonner.
+import type { ToastAction, ToastId, ToastOptions } from 'frappe-ui'
 
 // Viewport — our styled wrapper around sonner's `<Toaster>`, with the
 // frappe-ui defaults baked in. Raw `<Toaster>` is intentionally *not*
@@ -76,7 +80,7 @@ anything the app toasts from `setup()` is lost if it mounts later.
 ```ts
 {
   position: 'bottom-right',  // sonner default is 'top-right'; matches current behaviour
-  duration: 5000,            // ms; matches current behaviour
+  duration: 4000,            // ms; sonner's own default, set by sonner, not by us
   closeButton: true,         // every toast shows the × unless caller passes dismissible:false
   expand: false,             // no hover-to-expand stack
   richColors: false,         // tone comes from icon + our dark theme, not tinted backgrounds
@@ -84,7 +88,10 @@ anything the app toasts from `setup()` is lost if it mounts later.
 }
 ```
 
-No app-level override knob is exposed for v1. If a real ask shows up (different position, expand-on-hover, custom `toastOptions.classes`), the additive fix is to thread a `toasterProps` slot through `<FrappeUIProvider>`. Deferred until needed.
+A single toast overrides the duration through its own options:
+`toast.success('Saved', { duration: 10000 })`.
+
+No app-level override knob is exposed for v1. `ToastProvider` takes no props. If a real ask shows up (different position, expand-on-hover, custom `toastOptions.classes`), the additive fix is to thread a `toasterProps` slot through `<FrappeUIProvider>`. Deferred until needed.
 
 ## Visual theme
 

@@ -11,6 +11,15 @@
 
 import { describe, expect, it } from 'vitest'
 import * as root from './index'
+import type {
+  ErrorMessageValue,
+  ImperativeDialogAction,
+  InputLabelingProps,
+  RouteDestination,
+  ToastAction,
+  ToastId,
+  ToastOptions,
+} from './index'
 import * as resources from './resources/index'
 import * as local from './resources/local'
 import * as realtime from './resources/realtime'
@@ -42,7 +51,28 @@ describe('resources barrel', () => {
   })
 })
 
+/**
+ * Types are erased at runtime, so the assertions above cannot see them. This
+ * alias is the check: `yarn type-check` covers this file, and a type that
+ * stops being exported fails to resolve here.
+ */
+type PublicTypes = [
+  ErrorMessageValue,
+  ImperativeDialogAction,
+  InputLabelingProps,
+  RouteDestination,
+  ToastAction,
+  ToastId,
+  ToastOptions,
+]
+
 describe('root exports', () => {
+  it('keeps the public type names resolvable', () => {
+    const names: PublicTypes[number] extends never ? never : true = true
+
+    expect(names).toBe(true)
+  })
+
   it('exports the dayjs helpers apps use, and keeps dayjsSystem private', () => {
     expect(root).toHaveProperty('dayjs')
     expect(root).toHaveProperty('dayjsLocal')
@@ -60,6 +90,8 @@ describe('root exports', () => {
       'FrappeUIError',
       // DAT-Q4
       'UploadPrivacy',
+      // OVR-Q5: Dialog takes `icon` and `theme` separately now
+      'DialogIcon',
     ]) {
       expect(root).not.toHaveProperty(name)
     }
