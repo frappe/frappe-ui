@@ -12,8 +12,9 @@ Not to be confused with the config-driven `ListView` in `frappe-ui/experimental`
 ## Feed mode
 
 The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
-content, and a right-aligned trailing cell. Rows with `to` render as
-RouterLinks, rows with a click listener as buttons — real interactive elements,
+content, and a right-aligned trailing cell. Rows with `route` render as
+RouterLinks, rows with `href` as native same-tab anchors, and rows with a click
+listener as buttons — real interactive elements,
 so a row is clickable _or_ carries inline action buttons, never both (nested
 interactive controls are invalid HTML); [row actions](#row-actions) shows how to
 combine them. `selectable` reveals the animated checkbox column and switches row
@@ -58,7 +59,7 @@ A master–detail list (a mail inbox, a file browser) tracks one open row. Bind
 `v-model:active` to a row `value` and the List owns the rest: it highlights that
 row and hides the dividers hugging it — above and below — so its rounded surface
 floats free, like a hovered row but persistent. Clicking a row sets `active`;
-unlike `selectable`, activation is additive, so the row's own `@click` and `to`
+unlike `selectable`, activation is additive, so the row's own `@click` and `route`
 navigation still run. It's single-select and independent of the multi-select
 checkbox `selection` — and works in feed or column mode.
 

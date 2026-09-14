@@ -167,10 +167,10 @@ describe('<Button />', () => {
     cy.get('button').should('not.exist')
   })
 
-  it('renders an anchor when link is provided', () => {
+  it('renders an anchor when href is provided', () => {
     cy.mount(Button, {
       props: {
-        link: 'https://frappe.io/docs',
+        href: 'https://frappe.io/docs',
         label: 'Docs',
       },
     })
@@ -193,7 +193,7 @@ describe('<Button />', () => {
     cy.get('button').should('be.disabled')
   })
 
-  it('falls back to a disabled button when route or link is blocked', () => {
+  it('falls back to a disabled button when route or href is blocked', () => {
     const router = createTestRouter()
 
     cy.mount(Button, {
@@ -211,7 +211,7 @@ describe('<Button />', () => {
 
     cy.mount(Button, {
       props: {
-        link: 'https://frappe.io/docs',
+        href: 'https://frappe.io/docs',
         loading: true,
         loadingText: 'Loading docs',
         label: 'Docs',

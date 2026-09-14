@@ -111,12 +111,11 @@ entries:
 - `theme`, `variant`, `size`, `loading`, `prefix` on individual options are no
   longer honored. Use `Button` or `Pill` directly if you need per-tab theming or
   a loading spinner.
-- `hideLabel` on options is gone. Use `icon` for an icon-only tab — its `label`,
-  if provided, is automatically exposed as accessibility text. Use `iconLeft`
+- `hideLabel` on options is gone. Use `icon` for an icon-only tab — its required
+  string `label` is automatically exposed as accessibility text. Use `iconLeft`
   for an accent icon before a visible label, and the `#suffix` slot for
   trailing content.
 - `route` and `href` on options are honored: a tab renders as a `<RouterLink>`
   when `route` is set, or an `<a href target=_blank>` when `href` is set.
-- The per-tab `tooltip` value surfaces as the native `title` attribute rather
-  than the floating `<Tooltip>` popover. Wrap the `TabButtons` instance in a
-  custom tooltip if you need styled behavior.
+- The per-tab `tooltip` field is removed. Put help text in app-owned UI when a
+  label alone is not enough.

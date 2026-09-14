@@ -35,7 +35,7 @@ describe('<MobileNav />', () => {
 })
 
 describe('<MobileNavItem />', () => {
-  it('renders a button and emits click when there is no `to`', () => {
+  it('renders a button and emits click when there is no destination', () => {
     const onClick = cy.stub().as('click')
     cy.mount(MobileNavItem, { props: { label: 'Home', icon: 'lucide-house', onClick } })
     cy.get('button[data-slot=mobile-nav-item]').should('exist')
@@ -45,15 +45,28 @@ describe('<MobileNavItem />', () => {
 
   it('renders a router link to a different route', () => {
     cy.mount(MobileNavItem, {
-      props: { label: 'Search', icon: 'lucide-search', to: '/search' },
+      props: { label: 'Search', icon: 'lucide-search', route: '/search' },
       global: { plugins: [routerAt('/')] },
     })
     cy.get('a[data-slot=mobile-nav-item]').should('have.attr', 'href', '/search')
   })
 
-  it('is a button (not a link) when `to` is already the current route', () => {
+  it('renders a plain anchor for href', () => {
     cy.mount(MobileNavItem, {
-      props: { label: 'Home', icon: 'lucide-house', to: '/' },
+      props: { label: 'Docs', icon: 'lucide-book-open', href: 'https://frappe.io/docs' },
+    })
+    cy.get('a[data-slot=mobile-nav-item]').should('have.attr', 'href', 'https://frappe.io/docs')
+
+    cy.mount(MobileNavItem, {
+      props: { label: 'Route wins', route: '/search', href: 'https://frappe.io/docs' },
+      global: { plugins: [routerAt('/')] },
+    })
+    cy.get('a[data-slot=mobile-nav-item]').should('have.attr', 'href', '/search')
+  })
+
+  it('is a button (not a link) when `route` is already the current route', () => {
+    cy.mount(MobileNavItem, {
+      props: { label: 'Home', icon: 'lucide-house', route: '/' },
       global: { plugins: [routerAt('/')] },
     })
     cy.get('button[data-slot=mobile-nav-item]').should('exist')
@@ -69,7 +82,7 @@ describe('<MobileNavItem />', () => {
     registerShellScrollContainer(scroller)
 
     cy.mount(MobileNavItem, {
-      props: { label: 'Home', icon: 'lucide-house', to: '/' },
+      props: { label: 'Home', icon: 'lucide-house', route: '/' },
       global: { plugins: [routerAt('/')] },
     })
     cy.get('button[data-slot=mobile-nav-item]').click()

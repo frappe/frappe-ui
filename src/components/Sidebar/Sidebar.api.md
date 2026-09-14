@@ -76,14 +76,20 @@
     type: 'string'
   },
   {
-    name: 'to',
+    name: 'route',
     description: 'Navigation target. When set the row\'s main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.',
     required: false,
     type: 'string | kt | Tt'
   },
   {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
+    required: false,
+    type: 'string'
+  },
+  {
     name: 'active',
-    description: 'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `to` against the current route.',
+    description: 'Marks the row active (`data-state="active"`). When omitted, active state is\ninferred by matching `route` against the current route.',
     required: false,
     type: 'boolean'
   },

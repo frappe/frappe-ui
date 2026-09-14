@@ -15,7 +15,7 @@ export interface PageHeaderBackButtonProps {
    * Fallback destination, used only when there is no in-app history to go back to
    * (a cold load onto a deep link). Taps otherwise go back through history.
    */
-  to?: RouteLocationRaw
+  fallbackRoute?: RouteLocationRaw
 
   /** Accessible label for the button. */
   label?: string

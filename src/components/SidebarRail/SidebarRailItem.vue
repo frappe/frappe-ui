@@ -6,15 +6,15 @@
   -->
   <Tooltip side="right">
     <!--
-      Link vs. button are split with v-if/v-else rather than a dynamic
-      <component :is>: a raw 'button' string there resolves to a
-      globally-registered <Button> in consumer apps, and reka's trigger can't
-      forward its element ref through a functional wrapper. The inner content is
-      identical in both branches.
+      Router and plain links share a dynamic component. The button stays a
+      literal v-else because a raw 'button' string can resolve to the globally
+      registered <Button> in consumer apps. The inner content is identical in
+      both branches.
     -->
-    <RouterLink
-      v-if="to"
-      :to="to"
+    <component
+      :is="route ? RouterLink : 'a'"
+      v-if="route || href"
+      v-bind="route ? { to: route } : { href }"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="active ? 'active' : 'inactive'"
@@ -43,7 +43,7 @@
         />
       </slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
-    </RouterLink>
+    </component>
 
     <button
       v-else

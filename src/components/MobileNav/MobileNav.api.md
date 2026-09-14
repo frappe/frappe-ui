@@ -26,14 +26,20 @@
     type: 'string | Component'
   },
   {
-    name: 'to',
+    name: 'route',
     description: 'Navigation target. Renders a router link. Tapping the item while it is\nalready the current route scrolls the shell to the top instead of\nre-navigating.',
     required: false,
     type: 'string | kt | Tt'
   },
   {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
+    required: false,
+    type: 'string'
+  },
+  {
     name: 'active',
-    description: 'Highlight this item. Independent of the current route so one tab can stay\nlit across a whole section (e.g. Home across community routes). Defaults to\nwhether `to` resolves to the current route.',
+    description: 'Highlight this item. Independent of the current route so one tab can stay\nlit across a whole section (e.g. Home across community routes). Defaults to\nwhether `route` resolves to the current route.',
     required: false,
     type: 'boolean'
   }

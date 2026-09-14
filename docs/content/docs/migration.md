@@ -26,8 +26,9 @@ a word, so those are the ones that reach production. Each is marked.
 replacement needs explaining. If your build already names the file and the
 line, the changelog is the faster read.
 
-Two changes have a codemod: the Tailwind token renames (`tokens-v2`, see
-[Tokens](#tokens)) and the shortcut config (`shortcuts-v1`, see
+Three changes have a codemod: the destination prop renames
+(`destinations-v1`), Tailwind token renames (`tokens-v2`, see
+[Tokens](#tokens)), and shortcut config (`shortcuts-v1`, see
 [The shortcuts codemod](#the-shortcuts-codemod)). Every other component, prop
 and slot rename is a hand edit.
 
@@ -36,7 +37,7 @@ and slot rename is a hand edit.
 - **Overlays** — [Dialog](#dialog) · [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip) · [CommandPalette](#commandpalette)
 - **Pickers and selection** — [DatePicker / TimePicker](#datepicker-timepicker-family) · [MonthPicker](#monthpicker) · [Selection family](#selection-family-dropdown-select-combobox-multiselect) · [Autocomplete](#autocomplete-removed) · [FormControl `type="autocomplete"`](#formcontrol-type-autocomplete-removed)
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
-- **Navigation and layout** — [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
+- **Navigation and layout** — [Destinations](#navigation-destinations) · [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
@@ -72,6 +73,23 @@ depends on `@vueuse/core` directly, move it to `^14` as well. Two major ranges
 in one app install two copies of the library, and a `resolve.dedupe` entry for
 `@vueuse/core` then collapses them onto whichever copy wins. That breaks the
 components which expect the newer one.
+
+## Navigation destinations
+
+Run `npx destinations-v1 .` to migrate statically named component props imported
+from `frappe-ui`. It covers the first three renames below, including bound and
+shorthand props:
+
+- Replace component router props named `to` with `route`. Keep `to` only inside
+  the route object itself.
+- Replace Button `link` with `href` for external URLs.
+- Replace PageHeader back `to` with `fallbackRoute`.
+- Replace TabButton `tooltip` with app-owned help UI and convert non-string
+  labels to strings.
+
+The codemod deliberately leaves globally registered components, JavaScript and
+TypeScript data objects, render functions, and `v-bind="object"` spreads alone.
+Review those shapes by hand.
 
 ## Dialog
 
@@ -1302,6 +1320,7 @@ for the full API.
 | `<template #sidebar-item="{ item }">`      | write the `<SidebarItem>` directly, no slot needed |
 | `item.condition`                           | `v-if` on the composed `<SidebarItem>`            |
 | `SidebarItem.isActive`                     | `SidebarItem.active`                              |
+| `SidebarItem.to`                           | `SidebarItem.route`                               |
 | `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                    |
 
 Every removal here is a **silent break**. A dropped prop (`header`, `sections`,
@@ -1325,7 +1344,7 @@ frame. Grep for `:header=`, `:sections=`, `:items=`, `#sidebar-item` and
 <Sidebar>
   <SidebarHeader title="Frappe CRM" subtitle="crm.frappe.io" :menu-items="menuItems" />
   <div class="flex-1 overflow-y-auto px-2">
-    <SidebarItem label="Leads" to="/leads" icon="lucide-user-plus" />
+    <SidebarItem label="Leads" route="/leads" icon="lucide-user-plus" />
     <SidebarSection label="Views" collapsible>
       <SidebarItem v-for="item in viewItems" :key="item.label" v-bind="item" />
     </SidebarSection>
@@ -1464,13 +1483,15 @@ and aligns its vocabulary with the Tabs family. See the
 | `iconRight` on an option                    | `<template #suffix>` — silent, nothing throws |
 | `hideLabel: true` on an option              | `icon` alone — the option is icon-only and `label` becomes its accessible name |
 | `theme` / `variant` / `size` / `loading` on an option | removed — options no longer forward `Button` props. Use `Button` directly for per-tab theming or a spinner |
-| `tooltip` on an option                      | still `tooltip`, but it renders as the native `title` attribute, not a floating `Tooltip` |
+| `tooltip` on an option                      | app-owned help UI                                 |
+| numeric or missing `label`                  | required string `label`                           |
 
 Every prop rename here is a **silent break**: an unknown prop lands in `$attrs`
 and is spread onto the radiogroup root, so a `TabButtons` still on `:buttons`
-renders an empty track with no build error, type error, or warning. As with
-Tabs, there is no codemod — grep for `:buttons`, `type=`, `direction=` and
-`hideLabel`.
+renders an empty track with no build error, type error, or warning. The
+destination codemod handles statically named component props only. Grep for
+`:buttons`, `type=`, `direction=`, `hideLabel`, `tooltip`, and non-string
+labels in option data.
 
 ## Data fetching (useDoctype / useList)
 

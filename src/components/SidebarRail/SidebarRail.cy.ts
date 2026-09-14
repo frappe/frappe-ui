@@ -32,7 +32,7 @@ describe('<SidebarRail />', () => {
 })
 
 describe('<SidebarRailItem />', () => {
-  it('renders a button and emits click when there is no `to`', () => {
+  it('renders a button and emits click when there is no destination', () => {
     const onClick = cy.stub().as('click')
     cy.mount(SidebarRailItem, {
       props: { label: 'Search', icon: 'lucide-search', onClick },
@@ -42,9 +42,20 @@ describe('<SidebarRailItem />', () => {
     cy.get('@click').should('have.been.calledOnce')
   })
 
-  it('renders a router link when `to` is set', () => {
+  it('renders links for `route` and `href`', () => {
     cy.mount(SidebarRailItem, {
-      props: { label: 'Search', icon: 'lucide-search', to: '/search' },
+      props: { label: 'Search', icon: 'lucide-search', route: '/search' },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', '/search')
+
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Docs', icon: 'lucide-book-open', href: 'https://frappe.io/docs' },
+    })
+    cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', 'https://frappe.io/docs')
+
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Route wins', route: '/search', href: 'https://frappe.io/docs' },
       global: { plugins: [createTestRouter()] },
     })
     cy.get('a[data-slot=sidebar-rail-item]').should('have.attr', 'href', '/search')
