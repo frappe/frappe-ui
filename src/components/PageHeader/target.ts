@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, type InjectionKey, type Ref } from 'vue'
 
 // Module-level registry connecting shells to targets across the component
 // tree (a layout's target and a routed page's header aren't ancestor and
@@ -17,3 +17,14 @@ export function registerTarget(el: HTMLElement) {
 export function unregisterTarget(el: HTMLElement) {
   targets.value = targets.value.filter((t) => t !== el)
 }
+
+/**
+ * The `PageHeaderTarget` element of the nearest enclosing shell, provided by
+ * `DesktopShell` and `MobileShell` (SHELL-Q3). Internal.
+ *
+ * `provide`/`inject` reaches slot content, so a page header written inside a
+ * shell's `<slot />` resolves its own shell's target. The stack above stays as
+ * the fallback for what `inject` cannot reach.
+ */
+export const pageHeaderTargetKey: InjectionKey<Ref<HTMLElement | null>> =
+  Symbol('pageHeaderTarget')

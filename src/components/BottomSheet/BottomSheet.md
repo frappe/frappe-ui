@@ -37,9 +37,6 @@ starts inside a scrolled list scrolls that list instead of moving the sheet; it
 becomes a drag once the list is back at its top. A drag closes the sheet if it
 passes a distance threshold or ends in a fast flick, and springs back otherwise.
 
-The gesture logic lives in the `useSheetDrag` composable, exported from the
-package root if you need the same behaviour on a surface of your own.
-
 ## Events
 
 `update:open` fires as soon as the sheet starts closing. `after-leave` fires

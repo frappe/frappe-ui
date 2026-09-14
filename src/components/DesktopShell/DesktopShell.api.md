@@ -7,7 +7,7 @@
   const propsData = [
   {
     name: 'scroll',
-    description: 'Whether the content area scrolls as one page (default). Set `false` for\nmulti-pane layouts where inner panes own their own scroll — the content\narea then fills the remaining height and never page-scrolls.',
+    description: 'Whether the content area scrolls as one page. Defaults to `true`.\n\nPass `false` for a multi-pane layout where the panes own their own\noverflow — a list-and-detail split, or a board whose columns scroll\nseparately. The content area then fills the remaining height and never\npage-scrolls, instead of the app faking it with `absolute inset-0` or a\nhardcoded `h-[calc(100vh-3rem)]`.\n\n`false` also means there is no shell scroll element, so\n`shellScrollContainer` stays `null` and `useShellScrolled()` stays `false`.',
     required: false,
     type: 'boolean',
     default: 'true'

@@ -8,7 +8,7 @@
       class="flex min-w-0 flex-1 flex-col overflow-hidden"
     >
       <!-- Pages teleport their headers here; it stays pinned above the scroll. -->
-      <PageHeaderTarget />
+      <PageHeaderTarget ref="headerTarget" />
 
       <!--
         The scroll region. Registered into the shared scroll-container registry
@@ -34,25 +34,18 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, provide, ref, watch } from 'vue'
 import ScrollArea from '../ScrollArea/ScrollArea.vue'
 import PageHeaderTarget from '../PageHeader/PageHeaderTarget.vue'
+import { pageHeaderTargetKey } from '../PageHeader/target'
 import {
   registerShellScrollContainer,
+  shellScrollElementKey,
   unregisterShellScrollContainer,
 } from '../../composables/useShellScrolled'
+import type { DesktopShellProps } from './types'
 
-withDefaults(
-  defineProps<{
-    /**
-     * Whether the content area scrolls as one page (default). Set `false` for
-     * multi-pane layouts where inner panes own their own scroll — the content
-     * area then fills the remaining height and never page-scrolls.
-     */
-    scroll?: boolean
-  }>(),
-  { scroll: true },
-)
+withDefaults(defineProps<DesktopShellProps>(), { scroll: true })
 
 defineSlots<{
   /** The icon column — usually a `SidebarRail`. Omit it on shells that don't use one. */
@@ -64,6 +57,18 @@ defineSlots<{
 }>()
 
 const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null)
+const headerTarget = ref<{ el: HTMLElement | null } | null>(null)
+
+// SHELL-Q3: the shell owns both elements, so it hands them to its own subtree.
+// The module registries stay as the fallback for what `inject` cannot reach.
+provide(
+  shellScrollElementKey,
+  computed(() => scrollArea.value?.viewportElement ?? null),
+)
+provide(
+  pageHeaderTargetKey,
+  computed(() => headerTarget.value?.el ?? null),
+)
 
 // Register the real scrolling viewport once ScrollArea exposes it, and follow it
 // if it ever remounts. Unregister on teardown so a layout swap hands over to the

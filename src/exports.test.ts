@@ -14,12 +14,14 @@ import * as root from './index'
 import type {
   DateRangeValue,
   Dayjs,
+  DesktopShellProps,
   ErrorMessageValue,
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
   PickerExposed,
   RouteDestination,
+  ScrollAreaExposed,
   SelectionGroup,
   SelectionOption,
   ToastAction,
@@ -65,12 +67,14 @@ describe('resources barrel', () => {
 type PublicTypes = [
   DateRangeValue,
   Dayjs,
+  DesktopShellProps,
   ErrorMessageValue,
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
   PickerExposed,
   RouteDestination,
+  ScrollAreaExposed,
   ToastAction,
   ToastId,
   ToastOptions,
@@ -97,9 +101,24 @@ describe('root exports', () => {
   })
 
   it('drops the value exports v1 removed', () => {
-    for (const name of ['isPrivateUpload', 'dayjsSystem']) {
+    for (const name of [
+      'isPrivateUpload',
+      'dayjsSystem',
+      // SHELL-Q6: ScrollArea draws its own bars; ScrollBar has no use alone.
+      'ScrollBar',
+      // SHELL-Q7: BottomSheet is the only caller.
+      'useSheetDrag',
+    ]) {
       expect(root).not.toHaveProperty(name)
     }
+  })
+
+  it('keeps the shell exports v1 kept', () => {
+    expect(root).toHaveProperty('ScrollArea')
+    expect(root).toHaveProperty('DesktopShell')
+    expect(root).toHaveProperty('MobileShell')
+    expect(root).toHaveProperty('shellScrollContainer')
+    expect(root).toHaveProperty('useShellScrolled')
   })
 })
 
@@ -118,6 +137,12 @@ import type { DialogIcon } from './index'
 import type { DatePickerViewMode } from './index'
 // @ts-expect-error INP-Q14: calendar internals, published by the old wildcard
 import type { DatePickerDateObj } from './index'
+// @ts-expect-error SHELL-Q6: ScrollBar is not a public component
+import type { ScrollBarProps } from './index'
+// @ts-expect-error SHELL-Q7: useSheetDrag is internal to BottomSheet
+import type { UseSheetDrag } from './index'
+// @ts-expect-error SHELL-Q7: useSheetDrag is internal to BottomSheet
+import type { UseSheetDragOptions } from './index'
 
 type RemovedTypes = [
   FrappeUIError,
@@ -125,4 +150,7 @@ type RemovedTypes = [
   DialogIcon,
   DatePickerViewMode,
   DatePickerDateObj,
+  ScrollBarProps,
+  UseSheetDrag,
+  UseSheetDragOptions,
 ]

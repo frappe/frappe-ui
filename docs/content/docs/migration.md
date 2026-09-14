@@ -3734,6 +3734,90 @@ any test or stylesheet that selects `[role='note']`.
 comment said it was exported for unit tests only. Register a shortcut with
 `useKeyboardShortcut` instead of matching a `KeyboardEvent` by hand.
 
+## App shells and ScrollArea {#shells}
+
+### `ScrollBar` is no longer exported {#scrollbar-removed}
+
+`import { ScrollBar } from 'frappe-ui'` fails at the build. There is no
+replacement. `ScrollArea` draws its own scrollbars, and `ScrollBar` only ever
+worked inside reka-ui's `ScrollAreaRoot`, which frappe-ui does not export. Use
+`ScrollArea` with `orientation`:
+
+```vue
+<!-- After -->
+<ScrollArea orientation="both">
+  <WideTable />
+</ScrollArea>
+```
+
+`orientation="both"` renders one scrollbar per axis. `ScrollBarProps` is gone
+with the component.
+
+### `useSheetDrag` is no longer exported {#usesheetdrag-removed}
+
+`useSheetDrag`, `UseSheetDrag` and `UseSheetDragOptions` leave the root. Both
+imports fail loudly. `BottomSheet` still uses the composable internally and is
+unchanged, so an app that renders `BottomSheet` has nothing to do. There is no
+standalone replacement in `1.0.0`: the drag thresholds are fixed constants tuned
+for that one surface. It can come back when a second surface needs it.
+
+### `useShellScrolled` needs a `threshold` {#useshellscrolled-threshold}
+
+`threshold` is now required, in pixels.
+
+```js
+// Before — 200px by default
+const scrolled = useShellScrolled()
+
+// After
+const scrolled = useShellScrolled({ threshold: 12 })
+```
+
+A call with no argument is a **type error**, so the build catches it. At runtime
+it warns in development and stays `false`. The old 200px default suited a long
+document and nothing else: a header border that appears 200px late reads as a
+bug rather than as a missing argument.
+
+### A page reads the shell it is inside {#shell-ownership}
+
+No syntax changes. `useShellScrolled()`, and a `PageHeader` teleporting to its
+target, now resolve the **nearest enclosing shell** first, and fall back to the
+`shellScrollContainer` registry only when there is no shell above them.
+
+This only changes what you see while two shells are mounted at once — a
+desktop-to-mobile swap mid-transition, or a test that mounts both. Before, both
+answers came from the registry, which returns the shell that mounted most
+recently, so a header could teleport into the wrong frame. `shellScrollContainer`
+itself is unchanged and is still the way to reach the scroll element from a
+router `scrollBehavior` or any other code outside a component.
+
+### `DesktopShell` takes `:scroll="false"` {#desktopshell-scroll}
+
+New prop, default `true`, nothing to migrate. Pass `false` for a layout whose
+panes own their own overflow, instead of fighting the shell's page scroll:
+
+```vue
+<!-- Before -->
+<DesktopShell>
+  <div class="absolute inset-0 flex h-[calc(100vh-3rem)]">…</div>
+</DesktopShell>
+
+<!-- After -->
+<DesktopShell :scroll="false">
+  <div class="flex min-h-0 flex-1">…</div>
+</DesktopShell>
+```
+
+With `:scroll="false"` the shell has no scroll element, so
+`shellScrollContainer` is `null` and `useShellScrolled()` stays `false`. Read
+the pane's own `ScrollArea` instead.
+
+### Shell slot names stay split {#shell-slots}
+
+Nothing to change. `DesktopShell` keeps `#rail` and `#sidebar`; `MobileShell`
+keeps `#nav`. The names describe regions, not components, and the two frames
+have different regions, so there is no shared name to move to.
+
 ## PageHeaderMobile family: slot names
 
 `PageHeaderMobile`'s `#left`/`#right` and `PageHeaderMobileTitle`'s `#icon`

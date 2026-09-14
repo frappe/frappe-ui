@@ -320,6 +320,8 @@ setTimeout(close, 5000)
 
 Root `class` fallthrough — `<MyDropdown class="my-4">` landing on the root via Vue's default attribute inheritance — is fine. P10 forbids *named class props for inner elements*, not the implicit single binding.
 
+**One exception: `ScrollArea.viewportClass`.** The scrolling viewport is an element reka-ui owns inside the root, so root `class` fallthrough cannot reach it, and layout rules that have to sit on the scroller itself (`[&>div]:h-full`, a grid, a min-width) have nowhere else to go. `data-slot="scroll-area-viewport"` covers styling from a stylesheet; it does not cover a Tailwind utility written at the call site. The prop stays, and it stays the only one: a second class prop needs an ADR.
+
 The exact data-slot / data-state taxonomy is per component family; each family's spec defines its own values.
 
 **Why:**

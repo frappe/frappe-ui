@@ -83,3 +83,27 @@ default outranks the host and defeats embedding silently.
 
 The documented default of every `portalTo` prop stays `'body'`. That is still
 what an unembedded app gets. It is now a fallback rather than a prop default.
+
+## Shell-owned targets
+
+`PageHeader` teleports too, but not to the portal target. It goes to the
+`PageHeaderTarget` its shell pins above the scroll region, because the header is
+a piece of the shell's own layout rather than an overlay above the page.
+
+Ownership resolves the same way on both sides (SHELL-Q3):
+
+1. The nearest enclosing shell. `DesktopShell` and `MobileShell` provide the
+   `PageHeaderTarget` element and the scroll element to everything they render.
+   `provide`/`inject` reaches slot content, because Vue parents a component by
+   where its vnode is mounted, not by where it was written.
+2. A module registry, as the fallback. Both registries are stacks: the newest
+   entry wins, so a desktop-to-mobile swap hands over whatever the mount order.
+
+The registry alone was the whole rule before `1.0.0`. It answers "which shell
+mounted last", which is only the same question as "which shell is this page in"
+while exactly one is mounted. During a layout swap, and for a page inside a
+shell that is not the newest, it gives the wrong element.
+
+The registry stays because `inject` cannot reach everything: a `Teleport` out of
+the shell subtree, a router `scrollBehavior`, a navigation guard, any code
+outside a component. `shellScrollContainer` is a plain computed for that reason.

@@ -1252,6 +1252,66 @@ forwarded one anyway, and it landed on the `<input>` as a stray
 `type` routes are unchanged: `date` renders `DatePicker`, `time` renders
 `TimePicker`, and a native date field is `<TextInput type="date" />`.
 
+### Shells — a page reads the shell it is inside (fix)
+
+`DesktopShell` and `MobileShell` now hand their scroll element and their
+`PageHeaderTarget` to everything they render, and a page prefers the shell above
+it over the module registry. No caller syntax changes.
+
+The registries answer "the shell that mounted most recently", which is the wrong
+answer while two shells are mounted at once — a desktop-to-mobile swap
+mid-transition, or a test that mounts both. A `PageHeader` could teleport into
+the other frame, and `useShellScrolled()` could track the other scroll element.
+The registries stay as the fallback for what `inject` cannot reach: a router
+`scrollBehavior`, a navigation guard, a header teleported out of the shell.
+`shellScrollContainer` itself is unchanged.
+
+### `DesktopShell` — `:scroll="false"` (additive)
+
+`scroll` defaults to `true`. Pass `false` and the content area fills the
+remaining height and never page-scrolls, for a layout whose panes own their own
+overflow — a list-and-detail split, a board with per-column scrolling. Apps
+faked this with `absolute inset-0`, a hardcoded `h-[calc(100vh-3rem)]`, or
+`[&>div]:h-full`.
+
+With `:scroll="false"` the shell has no scroll element, so
+`shellScrollContainer` is `null` and `useShellScrolled()` stays `false`.
+`DesktopShellProps` is exported and now carries the prop.
+
+### `useShellScrolled` — `threshold` is required (breaking, loud in TS)
+
+`useShellScrolled()` with no argument is a type error, and warns in development
+at runtime while staying `false`. Pass `{ threshold: 12 }`. The old default was
+200px, which suits a long document and nothing else: a header border appearing
+200px late reads as a bug rather than as a missing argument.
+
+### `ScrollBar` — no longer exported (breaking, loud)
+
+`import { ScrollBar } from 'frappe-ui'` fails, and `ScrollBarProps` with it.
+There is no replacement. `ScrollArea` draws its own scrollbars and
+`ScrollBar` only worked inside reka-ui's `ScrollAreaRoot`, which frappe-ui does
+not export, so the export named an unusable component. Use `ScrollArea` and its
+`orientation` prop; `orientation="both"` renders one scrollbar per axis.
+
+`ScrollArea.viewportClass` stays. It is the one class-name prop the library
+ships and the documented exception to PHILOSOPHY.md P10: the scrolling viewport
+is an element reka-ui owns inside the root, so root `class` fallthrough cannot
+reach it.
+
+### `useSheetDrag` — no longer exported (breaking, loud)
+
+`useSheetDrag`, `UseSheetDrag` and `UseSheetDragOptions` leave the root.
+`BottomSheet` still uses the composable internally and is unchanged. There is no
+standalone replacement: the drag thresholds are constants tuned for that one
+surface. It can come back when a second surface needs it.
+
+### Documented, not changed: shell slot names
+
+`DesktopShell` keeps `#rail` and `#sidebar`; `MobileShell` keeps `#nav`. The
+names describe regions, not components. The desktop frame has two side regions
+that can appear together and the mobile frame has one bar along the bottom, so
+one shared name would have to mean three things at once.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave
@@ -2576,7 +2636,7 @@ shellScrollContainer.value?.scrollTo({ top: 0, behavior: 'smooth' })
 | Removed                        | Use instead                                     |
 | ------------------------------ | ----------------------------------------------- |
 | `activeScrollContainer`        | `shellScrollContainer`                          |
-| `useScrollContainer().isScrolled` | `useShellScrolled()`                         |
+| `useScrollContainer().isScrolled` | `useShellScrolled({ threshold })`            |
 | `useScrollContainer().el`      | `shellScrollContainer`                          |
 | `getScrollContainer()`         | `shellScrollContainer.value` (works outside `setup()` too) |
 | `scrollTo(o)`                  | `shellScrollContainer.value?.scrollTo(o)`       |
@@ -2694,8 +2754,8 @@ this list until it was renamed to `SidebarRail` — see the entry above.
   the vocabulary). Vue drops content passed to an unknown slot name with no
   error, so the old names don't warn — they just stop rendering. See the
   [migration guide](/docs/migration#pageheadermobile-family-slot-names).
-- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollBarProps`,
-  `ScrollAreaExposed`) and `data-slot="scroll-area"` /
+- `ScrollArea` gets a `types.ts` (`ScrollAreaProps`, `ScrollAreaExposed`) and
+  `data-slot="scroll-area"` /
   `"scroll-area-viewport"` / `"scroll-area-scrollbar"` / `"scroll-area-thumb"`
   styling hooks — it had none. `viewportElement` on the template ref is now
   typed via `ScrollAreaExposed`. (`SettingsDialog`'s `SettingsBody` exposes

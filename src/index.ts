@@ -148,11 +148,9 @@ export {
   shellScrollContainer,
   useShellScrolled,
 } from './composables/useShellScrolled'
-export {
-  useSheetDrag,
-  type UseSheetDrag,
-  type UseSheetDragOptions,
-} from './composables/useSheetDrag'
+// `useSheetDrag` is not exported (SHELL-Q7). `BottomSheet` is the only caller,
+// its thresholds are fixed constants, and no app used it. It can come back when
+// a second surface needs it.
 
 // Embedding: name one portal target for every overlay under a Vue app
 export {

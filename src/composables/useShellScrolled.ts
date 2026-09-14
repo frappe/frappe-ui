@@ -1,10 +1,14 @@
 import {
   computed,
+  getCurrentInstance,
+  inject,
   onBeforeUnmount,
   onMounted,
   ref,
   watch,
   type ComputedRef,
+  type InjectionKey,
+  type Ref,
 } from 'vue'
 
 /**
@@ -47,6 +51,20 @@ export function unregisterShellScrollContainer(el: HTMLElement) {
 }
 
 /**
+ * The scroll element of the nearest enclosing shell, provided by `DesktopShell`
+ * and `MobileShell` (SHELL-Q3). Internal.
+ *
+ * `provide`/`inject` reaches slot content: Vue parents a component by where its
+ * vnode is mounted, not by where it was written, so a routed page inside a
+ * shell's `<slot />` is a descendant of the shell. Ownership is therefore
+ * unambiguous where it can be read, and the module registry above stays as the
+ * fallback for what `inject` cannot reach — a `Teleport` out of the shell, and
+ * code outside any component.
+ */
+export const shellScrollElementKey: InjectionKey<Ref<HTMLElement | null>> =
+  Symbol('shellScrollElement')
+
+/**
  * Smooth-scroll the shell to the top. Internal — `MobileNavItem` uses it for the
  * tap-the-active-tab gesture. Apps call `shellScrollContainer.value?.scrollTo()`.
  */
@@ -67,23 +85,46 @@ let warnedNoShell = false
  * const scrolled = useShellScrolled({ threshold: 12 })
  * ```
  *
+ * `threshold` is required. There is no default: 200px suits a long document and
+ * nothing else, and a header border that appears 200px late reads as a bug
+ * rather than as a missing argument (SHELL-Q10).
+ *
  * Requires a mounted `DesktopShell` or `MobileShell`; without one it stays
  * `false` and warns once in development.
  */
-export function useShellScrolled(
-  options: { threshold?: number } = {},
-): ComputedRef<boolean> {
-  const { threshold = 200 } = options
+export function useShellScrolled(options: {
+  threshold: number
+}): ComputedRef<boolean> {
+  const threshold = options?.threshold
+
+  if (import.meta.env.DEV && typeof threshold !== 'number') {
+    console.warn(
+      '[frappe-ui] useShellScrolled() requires a threshold in pixels, ' +
+        'for example useShellScrolled({ threshold: 12 }). ' +
+        'Without one it will never report true.',
+    )
+  }
+
+  // The nearest shell wins; the registry is the fallback for what `inject`
+  // cannot reach (SHELL-Q3). `inject` outside a setup scope warns, so only ask
+  // when there is an instance.
+  const provided = getCurrentInstance()
+    ? inject(shellScrollElementKey, null)
+    : null
+  const element = computed(
+    () => provided?.value ?? shellScrollContainer.value ?? null,
+  )
+
   const scrollTop = ref(0)
 
   const onScroll = () => {
-    scrollTop.value = shellScrollContainer.value?.scrollTop ?? 0
+    scrollTop.value = element.value?.scrollTop ?? 0
   }
 
   // Follow the active container as it changes (layout swap): detach from the
   // previous element, attach to the new one, and re-read immediately.
   watch(
-    shellScrollContainer,
+    element,
     (el, prev) => {
       prev?.removeEventListener('scroll', onScroll)
       el?.addEventListener('scroll', onScroll, { passive: true })
@@ -106,7 +147,7 @@ export function useShellScrolled(
     if (import.meta.env.PROD || warnedNoShell) return
     warnTimer = setTimeout(() => {
       warnTimer = null
-      if (shellScrollContainer.value || warnedNoShell) return
+      if (element.value || warnedNoShell) return
       warnedNoShell = true
       console.warn(
         '[frappe-ui] useShellScrolled() found no app shell, so it will stay false. ' +
@@ -117,10 +158,12 @@ export function useShellScrolled(
 
   onBeforeUnmount(() => {
     if (warnTimer !== null) clearTimeout(warnTimer)
-    shellScrollContainer.value?.removeEventListener('scroll', onScroll)
+    element.value?.removeEventListener('scroll', onScroll)
   })
 
-  return computed(() => scrollTop.value > threshold)
+  return computed(
+    () => typeof threshold === 'number' && scrollTop.value > threshold,
+  )
 }
 
 /** Test-only: allow the no-shell warning to fire again. */

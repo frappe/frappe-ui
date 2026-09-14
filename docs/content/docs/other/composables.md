@@ -107,8 +107,17 @@ const scrolled = useShellScrolled({ threshold: 12 })
 </template>
 ```
 
-`threshold` defaults to `200`. Without a mounted shell, `scrolled` stays
-`false` and the composable warns once in development.
+`threshold` is required, in pixels. There is no default: 200px suited a long
+document and nothing else, and a header border that appeared 200px late read as
+a bug rather than as a missing argument.
+
+The value comes from the nearest enclosing shell. A shell provides its own
+scroll element to its subtree, so a page inside one reads that shell even while
+another is still mounted. The module registry is the fallback for a caller no
+shell encloses.
+
+Without a mounted shell, `scrolled` stays `false` and the composable warns once
+in development.
 
 ## useKeyboardShortcut
 

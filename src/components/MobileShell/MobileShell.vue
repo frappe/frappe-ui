@@ -6,6 +6,7 @@
     <!-- Pages teleport their headers here. Extra top padding clears the notch /
          status bar when running as an installed PWA (display-mode: standalone). -->
     <PageHeaderTarget
+      ref="headerTarget"
       class="[@media(display-mode:standalone)]:pt-[env(safe-area-inset-top)]"
     />
 
@@ -27,10 +28,19 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  ref,
+  useTemplateRef,
+} from 'vue'
 import PageHeaderTarget from '../PageHeader/PageHeaderTarget.vue'
+import { pageHeaderTargetKey } from '../PageHeader/target'
 import {
   registerShellScrollContainer,
+  shellScrollElementKey,
   unregisterShellScrollContainer,
 } from '../../composables/useShellScrolled'
 
@@ -42,6 +52,18 @@ defineSlots<{
 }>()
 
 const scroll = useTemplateRef<HTMLElement>('scroll')
+const headerTarget = ref<{ el: HTMLElement | null } | null>(null)
+
+// SHELL-Q3: the shell owns both elements, so it hands them to its own subtree.
+// The module registries stay as the fallback for what `inject` cannot reach.
+provide(
+  shellScrollElementKey,
+  computed(() => scroll.value ?? null),
+)
+provide(
+  pageHeaderTargetKey,
+  computed(() => headerTarget.value?.el ?? null),
+)
 
 onMounted(() => scroll.value && registerShellScrollContainer(scroll.value))
 onBeforeUnmount(

@@ -17,16 +17,26 @@ const scrollArea = useTemplateRef('scrollArea')
 scrollArea.value?.viewportElement // HTMLElement | null
 ```
 
-## ScrollBar
+## Orientation
 
-The scrollbar thumb, rendered internally by `ScrollArea` — not something apps
-mount on its own. Exported for the rare case of composing it into a custom
-scroll root.
+`orientation="both"` renders **both** scrollbars, one per axis, not a single
+diagonal one. Use it for a surface that can overflow either way — a wide table,
+a canvas. `vertical` (the default) and `horizontal` render one.
 
 ## Styling
 
 `data-slot="scroll-area"` / `"scroll-area-viewport"` / `"scroll-area-scrollbar"`
 / `"scroll-area-thumb"` mark the root, the scrolling viewport, the scrollbar
 track, and the thumb, for app-level CSS.
+
+`viewportClass` is the one class-name prop the library ships, and the documented
+exception to P10. The scrolling viewport is an element reka-ui owns inside the
+root, so root `class` fallthrough cannot reach it, and layout rules that have to
+sit on the scroller itself (`[&>div]:h-full`, a grid, a min-width) have nowhere
+else to go. Style everything else through the `data-slot` hooks.
+
+`ScrollBar` is not exported. `ScrollArea` renders its own scrollbars, and the
+component only works inside reka-ui's `ScrollAreaRoot`, which frappe-ui does not
+export.
 
 <!-- @include: ./ScrollArea.api.md -->

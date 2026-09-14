@@ -120,5 +120,10 @@ Anything else waits for a real request and arrives in a minor release.
   option (the first enabled one when there is no selection), and `Rating`
   focuses the selected star (the first star when the value is empty), except in
   half-star mode where the whole control is one slider.
+- **`ScrollArea.viewportElement` earns its place twice over.** `DesktopShell`
+  reads it to provide and register its scroll region, which is the rule's own
+  test: parent script needs it and no other surface reaches. It is also why
+  `ScrollBar` is not exported (SHELL-Q6) — the scrollbar is drawn by
+  `ScrollArea`, and the only thing outside ever needed was the element.
 - **A sixth verb, or a third element role, still needs an ADR.** That limit is what stops
   this surface drifting back into four names for one idea.
