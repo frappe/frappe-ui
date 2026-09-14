@@ -50,7 +50,11 @@ defineOptions({
   inheritAttrs: false,
 })
 
-const model = defineModel<SelectOptionValue | undefined>()
+// `default: null`, so an unbound Select starts at the same empty value it
+// reports after `clear()`. Combobox already does this; INP-Q2 makes the two
+// agree. Without it the model starts `undefined` and the emitted type carries
+// an `undefined` that nothing ever emits.
+const model = defineModel<SelectOptionValue | null>({ default: null })
 const open = defineModel<boolean>('open', { default: false })
 
 const props = withDefaults(defineProps<SelectProps>(), {
@@ -182,13 +186,17 @@ const internalOptions = computed(() =>
   })),
 )
 
-function toInternalValue(value: SelectOptionValue | undefined) {
+function toInternalValue(value: SelectOptionValue | null) {
+  // Empty is `null` on this side of the boundary and `undefined` on reka's,
+  // which is the only value its Select reads as "nothing selected".
+  if (value === null) return undefined
   if (value !== '') return value
   const empty = selectOptions.value.find((option) => option.value === '')
   return empty ? toInternal(empty) : value
 }
 
 function toExternalValue(value: SelectOptionValue | undefined) {
+  if (value === undefined) return null
   return toExternal(value)
 }
 
@@ -206,7 +214,9 @@ const selectedOption = computed(() => {
 })
 
 function clear() {
-  model.value = undefined
+  // `null`, not `undefined`: an empty value survives JSON, and it is what a
+  // Frappe empty field holds. Combobox uses the same one (INP-Q2).
+  model.value = null
 }
 
 function setOpen(value: boolean) {

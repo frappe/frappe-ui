@@ -76,6 +76,19 @@
   }
 ]
 
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
   const emitsData = [
   {
     name: 'update:modelValue',
@@ -88,5 +101,7 @@
 ## API Reference
 
 <PropsTable name="Duration" :data="propsData"/>
+
+<SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>

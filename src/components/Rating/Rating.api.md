@@ -44,7 +44,7 @@
     description: 'Size of the rating component.',
     required: false,
     type: 'InputSize',
-    default: '"md"'
+    default: '"sm"'
   },
   {
     name: 'label',

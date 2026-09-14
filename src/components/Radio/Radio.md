@@ -37,4 +37,27 @@ label, and the whole row is the click target.
 
 <ComponentPreview name="Radio-SettingsList" />
 
+## Template ref
+
+`focus()` is the one method every input in the library exposes. It moves focus
+to the component's own interactive element, so a generic form can call it
+without knowing which control it holds.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const field = useTemplateRef('field')
+</script>
+
+<template>
+  <RadioGroup ref="field" v-model="value" />
+</template>
+```
+
+## Attributes
+
+`class` and `style` go to the layout wrapper. Everything else — `name`,
+`aria-*`, `data-*`, and listeners — goes once to the interactive element.
+
 <!-- @include: ./Radio.api.md -->

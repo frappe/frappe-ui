@@ -333,4 +333,56 @@ describe('Radio', () => {
       )
     })
   })
+
+  // INP-Q5 / INP-Q6.
+  describe('template ref and attribute routing', () => {
+    it('exposes focus() which focuses the selected option', () => {
+      mountGroup({ modelValue: 'b' }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('[role="radio"]').eq(1).should('be.focused')
+    })
+
+    it('focuses the first option when nothing is selected', () => {
+      mountGroup().then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('[role="radio"]').eq(0).should('be.focused')
+    })
+
+    it('puts aria-label and data-* on the group, and only once', () => {
+      cy.mount(RadioGroup, {
+        attrs: { 'aria-label': 'Plan', 'data-test': 'plan' },
+        slots: {
+          default: () => [
+            h(Radio, { value: 'a', label: 'Option A' }),
+            h(Radio, { value: 'b', label: 'Option B' }),
+          ],
+        },
+      })
+
+      cy.get('[role="radiogroup"]')
+        .should('have.attr', 'aria-label', 'Plan')
+        .and('have.attr', 'data-test', 'plan')
+      cy.get('[data-test="plan"]').should('have.length', 1)
+    })
+
+    it('puts class and style on the layout wrapper', () => {
+      cy.mount(RadioGroup, {
+        attrs: { class: 'my-wrapper', style: 'margin-top: 12px' },
+        slots: {
+          default: () => [h(Radio, { value: 'a', label: 'Option A' })],
+        },
+      })
+
+      cy.get('.my-wrapper')
+        .should('have.length', 1)
+        .and('have.css', 'margin-top', '12px')
+      cy.get('[role="radiogroup"]').should('not.have.class', 'my-wrapper')
+    })
+  })
 })

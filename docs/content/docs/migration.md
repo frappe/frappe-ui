@@ -314,6 +314,68 @@ Behavior changes that apply even if you don't touch your code:
   `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
   the picker components used them; drop the import.
 
+### `TimePicker` emits: `open`, `close`, `input-invalid`, `invalid-change` {#timepicker-emits}
+
+`update:open` carries the open and the close, with the state in the payload.
+`input-invalid` and `invalid-change` are gone with nothing in their place: typed
+text that does not parse reverts to the last valid value, which the user sees.
+
+```vue
+<!-- Before -->
+<TimePicker
+  @open="onOpen"
+  @close="onClose"
+  @input-invalid="showHint"
+  @invalid-change="setInvalid"
+/>
+
+<!-- After -->
+<TimePicker @update:open="(open) => (open ? onOpen() : onClose())" />
+```
+
+A leftover `@open` is silent in JavaScript: it lands as an inert listener and
+never fires. TypeScript reports it, because `TimePickerEmits` is narrowed (and
+now exported). `Variant` on `TimePicker` is an alias of the shared
+`InputVariant`, not a second scale.
+
+### `DateRangePicker` `v-model` is `DateRangeValue`
+
+The prop was `string[]`, which let a one-element array in. Both sides are
+`DateRangeValue` now — `[from, to]` or `[]`. TypeScript reports a `ref<string[]>`
+bound to the model.
+
+```ts
+// Before
+const range = ref<string[]>([])
+
+// After
+import type { DateRangeValue } from 'frappe-ui'
+const range = ref<DateRangeValue>([])
+```
+
+### Picker template refs, styling hooks and ARIA
+
+All four pickers expose `{ open, close, focus }`. They used to expose `open()`
+alone. `open()` is a no-op while the picker is disabled.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+const picker = useTemplateRef('picker')
+</script>
+
+<template>
+  <DatePicker ref="picker" v-model="date" />
+  <Button label="Pick a date" @click="picker?.open()" />
+</template>
+```
+
+Additive, and worth knowing if you style or test the pickers: the chevron
+carries `data-slot="chevron"`, and the `<input>` carries `role="combobox"`,
+`aria-haspopup` (`dialog` on the date pickers, `listbox` on `TimePicker`) and
+`aria-expanded`. The `<input>` keeps `data-slot="control"` — `trigger` names the
+selection family's box only.
+
 ## MonthPicker
 
 `MonthPicker` is deleted — the import fails.
@@ -371,6 +433,31 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | -------------------------------- | -------------------------------------------------------- |
 | `displayValue` trigger slot prop | `selectedOption.label`                                   |
 | `data-slot="trigger-value"`      | nothing — it marked an invisible element used to measure |
+| empty value `undefined`          | `null`, the same as `Combobox`                           |
+
+The empty value is a **silent break**. `Select` emitted `undefined` and
+`Combobox` emitted `null`, so one single-value family had two answers for
+"nothing selected". Both are `null` now.
+
+```js
+// Before
+watch(value, (v) => {
+  if (v === undefined) reset()
+})
+
+// After
+watch(value, (v) => {
+  if (v === null) reset()
+})
+```
+
+`clear()` and the `clear` slot prop both write `null`. `MultiSelect` keeps `[]`,
+because an empty array is what its consumers iterate. An empty string is still a
+real value, so a "None" row with `value: ''` round-trips unchanged.
+
+`SelectionOption` and `SelectionGroup` are exported from the root, so a wrapper
+around any of the three can name its option shape once. The component-specific
+types stay.
 
 ### Combobox
 
@@ -969,6 +1056,120 @@ function focusIt() {
 
 `Duration` already exposed `focus()`; it now takes the same `options?`
 parameter as the rest of the family.
+
+### `focus()` is on every input {#inputs-focus}
+
+`Checkbox`, `Switch`, `Slider`, `RadioGroup`, `Rating` and `FormControl` expose
+`focus()` too. They exposed nothing before. The shape is declared once as the
+exported `InputExposed`, so a generic form can type a ref to a control it did
+not choose:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { InputExposed } from 'frappe-ui'
+
+const fields = ref<InputExposed[]>([])
+function focusField(index: number) {
+  fields.value[index]?.focus()
+}
+</script>
+```
+
+`FormControl` forwards `focus()` to whichever control its `type` resolved to.
+
+Focus lands on the element `Tab` reaches, not on the container: `Slider` focuses
+the thumb, `RadioGroup` the selected option (the first enabled one when nothing
+is selected), and `Rating` the selected star (the first star when the value is
+empty), except in half-star mode where the whole control is one slider.
+
+### Attributes go to the control, `class` and `style` to the wrapper {#inputs-attrs}
+
+An input has a layout wrapper and an interactive element. `class` and `style` go
+to the wrapper; `name`, `aria-*`, `data-*` and listeners go **once** to the
+interactive element.
+
+This is a silent break in four components:
+
+| Component    | Before                                                      |
+| ------------ | ----------------------------------------------------------- |
+| `Checkbox`   | every attribute applied twice — wrapper **and** `<input>`   |
+| `Switch`     | everything went to the wrapper, nothing to the control      |
+| `RadioGroup` | everything went to the wrapper, nothing to the radio group  |
+| `Rating`     | everything went to the wrapper, nothing to the control      |
+
+Two things to audit. A listener now fires once, from the control:
+
+```vue
+<!-- fired twice before; fires once now, and not from the padded row -->
+<Checkbox padded label="Agree" @click="onClick" />
+```
+
+And a CSS rule written against the wrapper no longer matches a `data-*` you
+passed in. Move the selector to the control, or keep using `class`.
+
+`TextInput`, `Textarea`, `Password`, `Select`, `Combobox`, `MultiSelect`,
+`Slider`, `FormControl`, `Duration` and the date pickers already followed the
+rule and are unchanged.
+
+### `Rating` defaults to `size="sm"` {#rating-size}
+
+Every other input defaults to `sm`. A `<Rating>` with no `size` now renders
+smaller. Pass `size="md"` to keep the old size.
+
+```vue
+<!-- Before: rendered md -->
+<Rating v-model="score" />
+
+<!-- After: same pixels -->
+<Rating v-model="score" size="md" />
+```
+
+Silent, and there is no codemod: an omitted prop is not a token a codemod can
+find, and rewriting every `<Rating>` in an app to pin the old default would be
+worse than the change. Three v1 app sites were already passing a smaller size by
+hand.
+
+### `Duration` forwards `#label` and `#description`
+
+They used to be dropped. If you passed either slot to `Duration`, it renders now
+— check that it does not duplicate a `label` or `description` prop you also set.
+
+### `FormControl` no longer forwards `variant` to a checkbox
+
+A checkbox draws no container surface, so it has no `variant`. The forwarded
+value used to land on the `<input>` as a stray `variant="subtle"` attribute. The
+`type` routes are unchanged: `date` renders `DatePicker`, `time` renders
+`TimePicker`, and a native date field is `<TextInput type="date" />`.
+
+### `data-slot="label"` on `FormLabel`
+
+`FormLabel` carries the hook `InputLabel` already rendered, so one selector
+reaches every label in the library. Additive.
+
+### Input types the root publishes {#input-types}
+
+Additive, except for two removals:
+
+- `InputExposed` — the template-ref shape every input implements.
+- `PickerExposed` — `InputExposed` plus `open` and `close`, for the four
+  pickers.
+- `SelectionOption`, `SelectionGroup` — the shared option shapes.
+- `Dayjs` — the date pickers hand one to `formatter`, `disabledDate` and the
+  setter slot props, so the type has to be nameable.
+- `DateRangeValue` — both sides of `DateRangePicker`'s `v-model`.
+- `InputLabelingProps` — for a wrapper that forwards `label` / `description` /
+  `error` / `required`.
+
+`DatePicker`'s barrel lists its public types instead of re-exporting the whole
+module. `DatePickerViewMode` and `DatePickerDateObj` were calendar internals the
+wildcard published; they leave the root and the import fails. Nothing replaces
+them — they described the calendar's internal state.
+
+`ComboboxEmits` and `MultiSelectEmits` no longer redeclare the model events
+`defineModel` already declares, and `RadioGroupEmits` says
+`RadioValue | undefined`, which is what an unbound group starts at. A handler
+typed against the old shapes still compiles.
 
 ## FileUploader
 

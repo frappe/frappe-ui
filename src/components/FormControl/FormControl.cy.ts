@@ -287,4 +287,38 @@ describe('FormControl', () => {
       }
     })
   })
+
+  // INP-Q5 / INP-Q8.
+  describe('template ref and forwarded props', () => {
+    for (const type of ['text', 'textarea', 'checkbox', 'select'] as const) {
+      it(`exposes focus() for type="${type}"`, () => {
+        cy.mount(FormControl, {
+          props: { type, label: 'Field', options: ['a', 'b'] },
+        }).then((mounted: any) => {
+          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+          vm?.focus?.()
+        })
+
+        cy.focused().should('exist')
+        cy.get('[data-slot="control"], [data-slot="trigger"]')
+          .filter(':focus')
+          .should('have.length', 1)
+      })
+    }
+
+    it('does not forward variant to a checkbox', () => {
+      cy.mount(FormControl, {
+        props: { type: 'checkbox', variant: 'outline', label: 'Subscribe' },
+      })
+      cy.get('input[type="checkbox"]').should('not.have.attr', 'variant')
+      cy.get('input[type="checkbox"]').should('not.have.attr', 'data-variant')
+    })
+
+    it('still forwards variant to a text input', () => {
+      cy.mount(FormControl, {
+        props: { type: 'text', variant: 'outline', label: 'Name' },
+      })
+      cy.get('input').should('have.attr', 'data-variant', 'outline')
+    })
+  })
 })

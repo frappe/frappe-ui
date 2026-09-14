@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="attrs.class as any" :style="attrs.style as any">
     <InputLabel
       v-if="props.label || $slots.label"
       :id="labelId"
@@ -14,6 +14,7 @@
       </template>
     </InputLabel>
     <RadioGroupRoot
+      ref="rootRef"
       :model-value="model as AcceptableValue"
       @update:model-value="model = $event as RadioValue"
       :name="groupName"
@@ -26,7 +27,7 @@
       :aria-invalid="hasError || undefined"
       :aria-errormessage="hasError ? errorMessageId : undefined"
       :class="rootClasses"
-      v-bind="dataAttrs"
+      v-bind="{ ...dataAttrs, ...controlAttrs }"
     >
       <slot />
     </RadioGroupRoot>
@@ -45,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide } from 'vue'
+import { computed, provide, ref, useAttrs } from 'vue'
 // reka-ui's AcceptableValue omits `boolean`, but the runtime never touches the
 // declared type — the prop is untyped and values are compared with ohash's
 // isEqual — so a yes/no radio works. Cast at the boundary to keep it.
@@ -58,6 +59,12 @@ import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import { RadioGroupContextKey } from './types'
 import type { RadioGroupProps, RadioValue } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
+
+// INP-Q6: `class` and `style` stay on the layout wrapper; `name`, `aria-*`,
+// `data-*` and listeners go once to the radio group itself, which carries the
+// `role="radiogroup"` the assistive technology reports.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<RadioGroupProps>(), {
   size: 'sm',
@@ -69,6 +76,32 @@ const props = withDefaults(defineProps<RadioGroupProps>(), {
 
 const model = defineModel<RadioValue>()
 const slots = useReactiveSlots<typeof declaredSlots>()
+const attrs = useAttrs()
+
+// reka-ui's RadioGroupRoot is a generic function component, so `InstanceType`
+// does not apply. The ref only needs `$el`, the rendered root element.
+const rootRef = ref<{ $el: HTMLElement } | null>(null)
+
+const controlAttrs = computed(() =>
+  Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  ),
+)
+
+// A radio group is one tabstop: focus goes to the selected option, or to the
+// first enabled one when nothing is selected. That is where a Tab press lands,
+// so a ref call and the keyboard agree (INP-Q5).
+defineExpose<InputExposed>({
+  focus: (options?: FocusOptions) => {
+    const root = rootRef.value?.$el
+    if (!root) return
+    const target =
+      root.querySelector<HTMLElement>('[role="radio"][data-state="checked"]') ??
+      root.querySelector<HTMLElement>('[role="radio"]:not([disabled])') ??
+      root.querySelector<HTMLElement>('[role="radio"]')
+    target?.focus(options)
+  },
+})
 
 const declaredSlots = defineSlots<{
   /** The `<Radio>` options. */

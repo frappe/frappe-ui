@@ -65,4 +65,13 @@ describe('FormLabel', () => {
     cy.mount(TextInput, { props: { label: 'Email' } })
     cy.get('label').should('have.css', 'font-size', '13px')
   })
+
+  // INP-Q10.
+  it('carries data-slot="label", the same hook InputLabel renders', () => {
+    cy.mount(FormLabel, { props: { label: 'Email' } })
+    cy.get('[data-slot="label"]').should('contain.text', 'Email')
+
+    cy.mount(TextInput, { props: { label: 'Email' } })
+    cy.get('[data-slot="label"]').should('exist')
+  })
 })

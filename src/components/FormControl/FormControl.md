@@ -53,6 +53,13 @@ Everything else is forwarded generically:
 - **Props and listeners** — `placeholder`, `disabled`, `modelValue`, `options`, `min`/`max`, `formatter`, etc. land on the resolved component. `FormControl` does not redeclare control-specific props.
 - **Slots** — every slot you pass is forwarded by name. Which slots are available depends on `type` (`#prefix` / `#suffix` for `TextInput` and the pickers, `#item-prefix` / `#item-label` for `Select` and `Combobox`, and so on — see the target component's docs).
 
+Props a child does not support are not forwarded. `variant` is the one that
+matters: a checkbox draws no container surface, so `type="checkbox"` never
+receives it.
+
+A template ref exposes `focus()`, forwarded to whichever control the `type`
+resolved to.
+
 Because forwarding is generic, `FormControl` does not type-check control-specific props or the `v-model` shape per `type`. The value shape follows the underlying component — `daterange` emits a tuple string from `DateRangePicker`, `multiselect` emits an array, `checkbox` emits a boolean, and so on. When the prop surface starts to drive your decision, reach for the underlying component directly.
 
 ## When to reach past it

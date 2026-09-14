@@ -71,4 +71,22 @@ for triggering side effects only at drag end, not on every step.
 
 <ComponentPreview name="Slider-States" />
 
+## Template ref
+
+`focus()` is the one method every input in the library exposes. It moves focus
+to the component's own interactive element, so a generic form can call it
+without knowing which control it holds.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const field = useTemplateRef('field')
+</script>
+
+<template>
+  <Slider ref="field" v-model="value" />
+</template>
+```
+
 <!-- @include: ./Slider.api.md -->

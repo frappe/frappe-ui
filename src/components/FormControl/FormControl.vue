@@ -1,5 +1,6 @@
 <template>
   <component
+    ref="controlRef"
     :is="resolvedComponent"
     :id="id"
     v-bind="forwardedAttrs"
@@ -13,7 +14,7 @@
   </component>
 </template>
 <script setup lang="ts">
-import { useAttrs, computed, watchEffect } from 'vue'
+import { useAttrs, computed, ref, watchEffect } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
 import { Select } from '../Select'
@@ -24,6 +25,7 @@ import { MultiSelect } from '../MultiSelect'
 import { DatePicker, DateRangePicker, DateTimePicker } from '../DatePicker'
 import { TimePicker } from '../TimePicker'
 import type { FormControlProps } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
 
 defineOptions({
   inheritAttrs: false,
@@ -111,7 +113,11 @@ const forwardedAttrs = computed(() => {
   // `size="lg"` has to mean something for every type it dispatches to.
   out.size =
     props.type === 'checkbox' && props.size === 'lg' ? 'md' : props.size
-  out.variant = props.variant
+
+  // INP-Q8: forward only props the child supports. Checkbox draws no container
+  // surface, so it has no `variant`; forwarding one made an undeclared attr
+  // land on its `<input>` as `variant="subtle"`.
+  if (props.type !== 'checkbox') out.variant = props.variant
 
   if (props.label !== undefined) out.label = props.label
   if (props.description !== undefined) out.description = props.description
@@ -137,6 +143,15 @@ const forwardedAttrs = computed(() => {
   }
 
   return out
+})
+
+// INP-Q5: a generic form holds a `FormControl` ref, not a ref to whichever
+// control the `type` resolved to. Every dispatched component implements
+// `InputExposed`, so the forward is unconditional.
+const controlRef = ref<InputExposed | null>(null)
+
+defineExpose<InputExposed>({
+  focus: (options?: FocusOptions) => controlRef.value?.focus(options),
 })
 
 defineSlots<{

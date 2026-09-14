@@ -306,9 +306,9 @@
   },
   {
     name: 'modelValue',
-    description: 'Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for no selection.',
+    description: 'Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for\nno selection. `DateRangeValue` types both sides of `v-model` (INP-Q12): the\nprop was `string[]`, which let a one-element array in and made a round-trip\nthrough the model fail to type-check.',
     required: false,
-    type: 'string[]',
+    type: 'DateRangeValue',
     default: '[]'
   },
   {

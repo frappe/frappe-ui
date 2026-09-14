@@ -25,3 +25,19 @@ export type RangeSize = 'sm' | 'md'
 
 /** Variant scale for text-style inputs that have a container surface. */
 export type InputVariant = 'subtle' | 'outline' | 'ghost'
+
+/**
+ * The one method every input guarantees on a template ref (INP-Q5, ADR-0012).
+ *
+ * A generic form holds refs to controls it did not choose, so it needs one
+ * action it can always call. `focus()` is that action: it moves focus to the
+ * component's own interactive element, whatever that element is.
+ *
+ * `clear()` and `open()` stay capability-specific. They live on
+ * `SelectionExposed` and `PickerExposed`, so a control never promises an
+ * operation that has no meaning for it.
+ */
+export interface InputExposed {
+  /** Moves focus to the component's interactive element. */
+  focus: (options?: FocusOptions) => void
+}

@@ -317,4 +317,57 @@ describe('Rating', () => {
       cy.get('[role="radiogroup"]').should('have.attr', 'data-disabled', 'true')
     })
   })
+
+  // INP-Q15 / INP-Q16 / INP-Q6.
+  describe('default size, template ref and attribute routing', () => {
+    it('defaults to sm', () => {
+      cy.mount(Rating, { props: { modelValue: 2 } })
+      cy.get('[data-slot="control"]').should('have.attr', 'data-size', 'sm')
+      cy.get('[data-slot="star"]').eq(0).should('have.class', 'size-4')
+    })
+
+    it('renders an invalid size at sm too', () => {
+      cy.mount(Rating, { props: { modelValue: 2, size: 'xl' as never } })
+      cy.get('[data-slot="star"]').eq(0).should('have.class', 'size-4')
+    })
+
+    it('focus() goes to the selected star', () => {
+      cy.mount(Rating, { props: { modelValue: 3 } }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.focused().should('have.attr', 'data-index', '3')
+    })
+
+    it('focus() goes to the first star when the value is empty', () => {
+      cy.mount(Rating, { props: { modelValue: 0 } }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.focused().should('have.attr', 'data-index', '1')
+    })
+
+    it('focus() goes to the root in half-star (slider) mode', () => {
+      cy.mount(Rating, { props: { modelValue: 2.5, step: 0.5 } }).then(
+        (mounted: any) => {
+          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+          vm?.focus?.()
+        },
+      )
+
+      cy.focused().should('have.attr', 'data-slot', 'control')
+    })
+
+    it('puts aria-label and data-* on the control, and only once', () => {
+      cy.mount(Rating, {
+        props: { modelValue: 2 },
+        attrs: { 'data-test': 'score' },
+      })
+
+      cy.get('[data-slot="control"]').should('have.attr', 'data-test', 'score')
+      cy.get('[data-test="score"]').should('have.length', 1)
+    })
+  })
 })

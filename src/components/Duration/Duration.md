@@ -77,7 +77,20 @@ higher unit's value is dropped from the output.
 ## Labeling
 
 Duration implements the shared input labeling contract (`label`, `description`,
-`error`, `required`), forwarded to the underlying `TextInput`.
+`error`, `required`), forwarded to the underlying `TextInput`. The `#label` and
+`#description` slots are forwarded too, so a rich label works here exactly as it
+does on `TextInput`.
+
+```vue
+<Duration v-model="seconds">
+  <template #label="{ required }">
+    Time spent <Badge v-if="required" label="Required" />
+  </template>
+  <template #description>Type `1h 30m`, or `01:30:00`.</template>
+</Duration>
+```
+
+A template ref exposes `focus()`, which focuses the underlying input.
 
 <ComponentPreview name="Duration-States" />
 

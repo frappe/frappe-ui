@@ -6,6 +6,9 @@
  * even after the copies diverge.
  */
 
+import type { Component } from 'vue'
+import type { InputExposed } from '../../../composables/inputTypes'
+
 /**
  * Popover placement relative to the trigger, and alignment along that side.
  *
@@ -17,15 +20,65 @@
 export type { PopoverAlign, PopoverSide } from '../../Popover/types'
 
 /**
+ * One option, in the shape all three components accept.
+ *
+ * Each component keeps its own option type, because each adds something the
+ * others do not have (Combobox's custom rows, MultiSelect's per-item slot
+ * implementations). This is the part they agree on, for code that works
+ * across the family — a wrapper that takes `options` and hands them to
+ * whichever component it renders, or an app's own option builder.
+ *
+ * It is a supertype, not a replacement: a `SelectionOption[]` is accepted by
+ * all three, while each component's own type accepts more.
+ */
+export interface SelectionOption {
+  /** Text shown for the option. */
+  label: string
+
+  /** The value committed to `v-model` when the option is picked. */
+  value: string | number
+
+  /** A `lucide-*` class name or a component, rendered before the label. */
+  icon?: string | Component
+
+  /** Secondary line below the label. */
+  description?: string
+
+  /** Renders the option unselectable. */
+  disabled?: boolean
+
+  /** Dispatches the row to the `#item-<slot>` template slot. */
+  slot?: string
+
+  /** Options carry any extra fields the app puts on them. */
+  [key: string]: any
+}
+
+/**
+ * A titled group of options, in the shape Combobox and MultiSelect accept.
+ * Select has no grouping, so it takes a flat list only.
+ */
+export interface SelectionGroup<TOption = SelectionOption> {
+  /** Distinguishes two groups with the same `group` title. */
+  key?: string | number
+
+  /** The group's heading. */
+  group: string
+
+  /** Renders the group's options without the heading. */
+  hideLabel?: boolean
+
+  /** The options in this group. */
+  options: TOption[]
+}
+
+/**
  * The `defineExpose` shape every selection component shares, so a template
  * ref works the same way whichever picker it points at.
  */
-export interface SelectionExposed {
+export interface SelectionExposed extends InputExposed {
   /** Clears the current selection. It leaves the search query alone. */
   clear: () => void
-
-  /** Moves focus to the component's control. */
-  focus: (options?: FocusOptions) => void
 }
 
 /*

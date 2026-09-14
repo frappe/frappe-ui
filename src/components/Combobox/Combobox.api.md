@@ -260,7 +260,7 @@
   },
   {
     name: 'update:modelValue',
-    description: 'Fired when the committed value changes.',
+    description: 'Fired when the model value changes.',
     type: '[value: ComboboxOptionValue | null]'
   },
   {

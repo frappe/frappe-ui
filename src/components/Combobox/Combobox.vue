@@ -587,6 +587,7 @@ defineSlots<ComboboxSlots>()
 
               <slot name="suffix" v-bind="controlSlotProps">
                 <span
+                  data-slot="chevron"
                   :class="[
                     'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
                     open && 'rotate-180',

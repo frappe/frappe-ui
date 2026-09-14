@@ -55,7 +55,7 @@
     name: 'variant',
     description: 'Visual style variant.',
     required: false,
-    type: 'Variant',
+    type: 'InputVariant',
     default: '"subtle" as Variant'
   },
   {
@@ -179,11 +179,6 @@
 
   const emitsData = [
   {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -194,24 +189,9 @@
     type: '[value: string]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
-  },
-  {
-    name: 'input-invalid',
-    description: '',
-    type: '[input: string]'
-  },
-  {
-    name: 'invalid-change',
-    description: '',
-    type: '[invalid: boolean]'
   }
 ]
 </script>

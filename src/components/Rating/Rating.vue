@@ -34,7 +34,7 @@
       :aria-valuenow="isSliderMode ? savedValue : undefined"
       :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
       data-slot="control"
-      v-bind="dataAttrs"
+      v-bind="{ ...dataAttrs, ...controlAttrs }"
       @mouseleave="onLeave"
       @keydown="onKeydown"
     >
@@ -141,9 +141,17 @@ import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import LucideStar from '~icons/lucide/star'
 import type { InputSize } from '../../composables/inputTypes'
 import type { RatingProps, RatingIconSlotProps } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
+
+// INP-Q6: `class` and `style` land on the labeling wrapper (or on the control
+// when there is no wrapper); every other attribute and listener goes once to
+// the control. Without this, Vue also applied the whole set to the wrapper.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<RatingProps>(), {
-  size: 'md',
+  // INP-Q16: `sm` matches every other input's default. `md` made an omitted
+  // size the odd one out, and an invalid size now resolves to `sm` too.
+  size: 'sm',
   disabled: false,
   step: 1,
   icon: () => LucideStar,
@@ -152,6 +160,12 @@ const props = withDefaults(defineProps<RatingProps>(), {
 const model = defineModel<number>({ default: 0 })
 const slots = useReactiveSlots<typeof declaredSlots>()
 const attrs = useAttrs()
+
+const controlAttrs = computed(() =>
+  Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  ),
+)
 
 const isDisabled = computed(() => props.disabled)
 
@@ -386,6 +400,26 @@ function onKeydown(e: KeyboardEvent) {
     })
   }
 }
+
+// INP-Q15: focus goes to the selected star, or to the first star when nothing
+// is selected — the same element `starTabindex` already makes the single
+// tabstop, so a ref call and a Tab press land in the same place. In slider mode
+// the root itself is the tabstop.
+defineExpose<InputExposed>({
+  focus: (options?: FocusOptions) => {
+    const root = rootRef.value
+    if (!root) return
+    if (isSliderMode.value) {
+      root.focus(options)
+      return
+    }
+    const selected = Math.ceil(savedValue.value)
+    const target = selected > 0 ? selected : 1
+    root
+      .querySelector<HTMLElement>(`[data-index="${target}"]`)
+      ?.focus(options)
+  },
+})
 
 const hasLabeling = computed(() => {
   return Boolean(

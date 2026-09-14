@@ -52,7 +52,11 @@ export * from './components/Radio'
 export * from './components/Select'
 // Shared by Select / MultiSelect / Combobox, so it belongs to the family
 // rather than to any one of their barrels.
-export type { SelectionExposed } from './components/shared/selection/types'
+export type {
+  SelectionExposed,
+  SelectionGroup,
+  SelectionOption,
+} from './components/shared/selection/types'
 export type { StatusTheme } from './components/shared/statusIcon'
 export * from './components/Slider'
 export * from './components/Switch'
@@ -169,6 +173,12 @@ export type {
   ToggleSize,
 } from './composables/inputTypes'
 
+// The one method every input guarantees on a template ref, and the picker
+// family's larger surface on top of it (INP-Q5, ADR-0012). A generic form types
+// its control refs as `InputExposed` and calls `focus()` without a type guard.
+export type { InputExposed } from './composables/inputTypes'
+export type { PickerExposed } from './components/shared/picker/types'
+
 // The labeling props every input shares. A wrapper that forwards an input
 // error types it as `InputLabelingProps['error']`; the library owns no
 // separate name for that value (ADR-0008, VOC-Q4).
@@ -186,7 +196,7 @@ export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'
 
 // Utilities
-export { dayjs, dayjsLocal } from './utils/dayjs'
+export { dayjs, dayjsLocal, type Dayjs } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
 // FileUploadHandler is the class FileUploader is built on; useFileUpload is
 // the recommended composable entry point for headless/custom-UI uploads.

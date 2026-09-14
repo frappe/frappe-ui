@@ -10,7 +10,7 @@
     :reference="anchorEl"
   >
     <template #trigger>
-      <div v-bind="$attrs" @keydown.down.prevent="onArrowDown">
+      <div ref="triggerWrapperRef" v-bind="$attrs" @keydown.down.prevent="onArrowDown">
         <slot name="trigger" v-bind="triggerSlotProps">
           <TextInput
             ref="textInputRef"
@@ -26,6 +26,9 @@
             :placeholder="placeholder"
             :disabled="disabled"
             :readonly="readonly"
+            role="combobox"
+            aria-haspopup="dialog"
+            :aria-expanded="open"
             @focus="onFocus"
             @click="onClick"
             @blur="onBlur"
@@ -37,6 +40,7 @@
             <template #suffix>
               <slot name="suffix" v-bind="triggerSlotProps">
                 <LucideChevronDown
+                  data-slot="chevron"
                   class="h-4 w-4 cursor-pointer"
                   @mousedown.prevent="setOpen(!open)"
                 />
@@ -100,6 +104,7 @@ const inputValue = defineModel<string>('inputValue', { default: '' })
 const typing = defineModel<boolean>('typing', { default: false })
 
 const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
+const triggerWrapperRef = ref<HTMLElement | null>(null)
 const popoverRef = ref<PopoverExposed | null>(null)
 
 // Anchor to the `<input>` itself. Anchoring to the whole labelled field would
@@ -186,5 +191,19 @@ watch(open, (val, prev) => {
 
 defineExpose<PickerShellExposed>({
   open: () => setOpen(true),
+  close,
+  // With a custom `#trigger` there is no `TextInput` to focus, so focus falls
+  // back to the first tabbable node the caller rendered.
+  focus: (options?: FocusOptions) => {
+    if (textInputRef.value) {
+      textInputRef.value.focus(options)
+      return
+    }
+    triggerWrapperRef.value
+      ?.querySelector<HTMLElement>(
+        'input, button, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      ?.focus(options)
+  },
 })
 </script>

@@ -34,9 +34,10 @@
   },
   {
     name: 'modelValue',
-    description: 'The currently selected value.',
+    description: 'The currently selected value. `null` when nothing is selected.',
     required: false,
-    type: 'SelectOptionValue'
+    type: 'SelectOptionValue | null',
+    default: 'null'
   },
   {
     name: 'open',
@@ -182,7 +183,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: SelectOptionValue | undefined]'
+    type: '[value: SelectOptionValue | null]'
   }
 ]
 </script>

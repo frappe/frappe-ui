@@ -317,10 +317,13 @@ interface ComboboxItemSlotsByName {
 export interface ComboboxSlots
   extends ComboboxFixedSlots, ComboboxItemSlotsByName {}
 
+/**
+ * The events the component declares itself. `update:modelValue`,
+ * `update:open` and `update:query` are not here: `defineModel` declares those,
+ * and listing them again published one event twice with two payload types
+ * that could drift apart.
+ */
 export interface ComboboxEmits {
-  /** Fired when the committed value changes. */
-  'update:modelValue': [value: ComboboxOptionValue | null]
-
   /** Fired when the resolved selected option changes. */
   'update:selectedOption': [
     option: ComboboxSelectableOption | ComboboxCustomOption | null,

@@ -12,10 +12,16 @@
 import { describe, expect, it } from 'vitest'
 import * as root from './index'
 import type {
+  DateRangeValue,
+  Dayjs,
   ErrorMessageValue,
   ImperativeDialogAction,
+  InputExposed,
   InputLabelingProps,
+  PickerExposed,
   RouteDestination,
+  SelectionGroup,
+  SelectionOption,
   ToastAction,
   ToastId,
   ToastOptions,
@@ -57,13 +63,19 @@ describe('resources barrel', () => {
  * stops being exported fails to resolve here.
  */
 type PublicTypes = [
+  DateRangeValue,
+  Dayjs,
   ErrorMessageValue,
   ImperativeDialogAction,
+  InputExposed,
   InputLabelingProps,
+  PickerExposed,
   RouteDestination,
   ToastAction,
   ToastId,
   ToastOptions,
+  SelectionGroup,
+  SelectionOption,
 ]
 
 describe('root exports', () => {
@@ -84,16 +96,33 @@ describe('root exports', () => {
     expect(root).not.toHaveProperty('isPrivateUpload')
   })
 
-  it('drops the names v1 removed', () => {
-    for (const name of [
-      // VOC-Q4: the input error prop is typed inline; no owned name replaces it
-      'FrappeUIError',
-      // DAT-Q4
-      'UploadPrivacy',
-      // OVR-Q5: Dialog takes `icon` and `theme` separately now
-      'DialogIcon',
-    ]) {
+  it('drops the value exports v1 removed', () => {
+    for (const name of ['isPrivateUpload', 'dayjsSystem']) {
       expect(root).not.toHaveProperty(name)
     }
   })
 })
+
+/**
+ * Removed *types* leave nothing behind at runtime, so the checks above cannot
+ * see them either. Each import below must fail to resolve; `@ts-expect-error`
+ * turns it into a type error when the name comes back.
+ */
+// @ts-expect-error VOC-Q4: the input error prop is typed inline, with no owned name
+import type { FrappeUIError } from './index'
+// @ts-expect-error DAT-Q4: `private` is the only upload privacy option
+import type { UploadPrivacy } from './index'
+// @ts-expect-error OVR-Q5: Dialog takes `icon` and `theme` separately
+import type { DialogIcon } from './index'
+// @ts-expect-error INP-Q14: calendar internals, published by the old wildcard
+import type { DatePickerViewMode } from './index'
+// @ts-expect-error INP-Q14: calendar internals, published by the old wildcard
+import type { DatePickerDateObj } from './index'
+
+type RemovedTypes = [
+  FrappeUIError,
+  UploadPrivacy,
+  DialogIcon,
+  DatePickerViewMode,
+  DatePickerDateObj,
+]

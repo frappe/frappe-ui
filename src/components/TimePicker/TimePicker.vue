@@ -17,6 +17,9 @@
           :placeholder="placeholder"
           :disabled="disabled"
           :readonly="isReadonly"
+          role="combobox"
+          aria-haspopup="listbox"
+          :aria-expanded="isOpen"
           @focus="onFocus"
           @click="onClickInput"
           @blur="onBlur"
@@ -40,6 +43,7 @@
               v-bind="{ open: isOpen, disabled, setOpen, close }"
             >
               <span
+                data-slot="chevron"
                 class="lucide-chevron-down size-4 cursor-pointer"
                 aria-hidden="true"
                 @mousedown.prevent="setOpen(!isOpen)"
@@ -118,6 +122,7 @@ import type {
   TimePickerProps,
   Variant,
 } from './types'
+import type { PickerExposed } from '../shared/picker/types'
 
 const props = withDefaults(defineProps<TimePickerProps>(), {
   modelValue: '',
@@ -203,7 +208,6 @@ const displayValue = ref<string>(
 
 const isTyping = ref(false)
 const highlightIndex = ref<number>(-1)
-let invalid = false
 
 function optionId(idx: number): string {
   return `tp-${uid}-${idx}`
@@ -318,12 +322,6 @@ watch(displayValue, () => {
   }
 })
 
-function setInvalid(next: boolean) {
-  if (invalid === next) return
-  invalid = next
-  emit('invalid-change', next)
-}
-
 function commit(value: string) {
   const prev = canonicalValue.value
   canonicalValue.value = value
@@ -331,7 +329,6 @@ function commit(value: string) {
   isTyping.value = false
   emit('update:modelValue', value)
   if (value !== prev) emit('change', value)
-  setInvalid(false)
 }
 
 function commitTyped(raw: string) {
@@ -346,7 +343,6 @@ function commitTyped(raw: string) {
   if (raw === formattedCurrent) {
     displayValue.value = formattedCurrent
     isTyping.value = false
-    setInvalid(false)
     return
   }
   const parsed = parseFlexibleTime(raw, resolvedFormat.value)
@@ -354,9 +350,9 @@ function commitTyped(raw: string) {
     !parsed.valid ||
     isOutOfRange(parsed.total, minMinutes.value, maxMinutes.value)
   ) {
-    emit('input-invalid', raw)
-    setInvalid(true)
-    // Revert visible text to the last good value.
+    // Rejected text reverts to the last valid value, which is the whole
+    // report: `input-invalid` and `invalid-change` said the same thing to
+    // nobody, and the flag never reset (INP-Q3).
     displayValue.value = formatTime(canonicalValue.value, resolvedFormat.value)
     isTyping.value = false
     return
@@ -525,11 +521,9 @@ function scrollOnOpen() {
 watch(isOpen, (open) => {
   emit('update:open', open)
   if (open) {
-    emit('open')
     highlightIndex.value = -1
     scrollOnOpen()
   } else {
-    emit('close')
     isTyping.value = false
   }
 })
@@ -543,11 +537,15 @@ watch(
   },
 )
 
-defineExpose({
-  /** Focus the trigger input. Used by DateTimePicker to flow keyboard focus
-   *  from the calendar grid into the time picker after a date is picked. */
-  focus: () => {
-    inputRef.value?.focus()
+// ADR-0012: TimePicker owns its trigger, so `open` and `close` earn a place on
+// the ref. `focus` is the method every input guarantees (INP-Q5); DateTimePicker
+// already uses it to flow keyboard focus from the calendar grid into the time
+// picker after a date is picked.
+defineExpose<PickerExposed>({
+  open: () => setOpen(true),
+  close,
+  focus: (options?: FocusOptions) => {
+    inputRef.value?.focus(options)
   },
 })
 </script>

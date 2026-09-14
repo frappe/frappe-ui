@@ -238,4 +238,40 @@ describe('Switch', () => {
       expectSwitchAfterLabel(false)
     })
   })
+
+  // INP-Q5 / INP-Q6.
+  describe('template ref and attribute routing', () => {
+    it('exposes focus() which focuses the switch', () => {
+      cy.mount(Switch, { props: { label: 'abc' } }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('[data-slot="control"]').should('be.focused')
+    })
+
+    it('puts aria-label and data-* on the control, and only once', () => {
+      cy.mount(Switch, {
+        props: { label: 'abc' },
+        attrs: { 'aria-label': 'Notifications', 'data-test': 'notify' },
+      })
+
+      cy.get('[data-slot="control"]')
+        .should('have.attr', 'aria-label', 'Notifications')
+        .and('have.attr', 'data-test', 'notify')
+      cy.get('[data-test="notify"]').should('have.length', 1)
+    })
+
+    it('puts class and style on the layout wrapper', () => {
+      cy.mount(Switch, {
+        props: { label: 'abc' },
+        attrs: { class: 'my-wrapper', style: 'margin-top: 12px' },
+      })
+
+      cy.get('.my-wrapper')
+        .should('have.length', 1)
+        .and('have.css', 'margin-top', '12px')
+      cy.get('[data-slot="control"]').should('not.have.class', 'my-wrapper')
+    })
+  })
 })

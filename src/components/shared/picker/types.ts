@@ -1,4 +1,8 @@
-import type { InputSize, InputVariant } from '../../../composables/inputTypes'
+import type {
+  InputExposed,
+  InputSize,
+  InputVariant,
+} from '../../../composables/inputTypes'
 import type { InputLabelingProps } from '../../../composables/useInputLabeling'
 
 export interface PickerShellProps {
@@ -79,7 +83,20 @@ export interface PickerShellSlots {
 }
 
 /** Methods available on a `<PickerShell>` template ref. */
-export interface PickerShellExposed {
-  /** Opens the panel. */
+export interface PickerShellExposed extends PickerExposed {}
+
+/**
+ * The template-ref surface every picker shares: `DatePicker`,
+ * `DateRangePicker`, `DateTimePicker` and `TimePicker`.
+ *
+ * `open` and `close` are here because a picker owns its trigger (ADR-0012), so
+ * a parent's script has no other handle on the panel. `focus` comes from
+ * `InputExposed`, which every input implements.
+ */
+export interface PickerExposed extends InputExposed {
+  /** Opens the panel. A disabled picker stays closed. */
   open: () => void
+
+  /** Closes the panel. */
+  close: () => void
 }

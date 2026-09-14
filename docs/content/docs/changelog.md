@@ -1127,6 +1127,131 @@ Two different action shapes shared the name `DialogAction`. The component's
 - Alert `icon: true` means "the theme's auto icon", the same as leaving it
   unset.
 
+### Inputs — `focus()` on every control, `open()`/`close()` on the pickers (additive)
+
+Every input exposes `focus()` on a template ref, typed as the new exported
+`InputExposed`. A generic form holding a ref to a control it did not choose now
+has one action it can always call. `FormControl` forwards `focus()` to whichever
+control its `type` resolved to.
+
+Where focus lands is part of the contract, not an implementation detail. It is
+the element `Tab` reaches: `Slider` focuses the thumb, `RadioGroup` the selected
+option (the first enabled one when nothing is selected), and `Rating` the
+selected star (the first star when the value is empty), except in half-star mode
+where the whole control is one slider.
+
+The three date pickers and `TimePicker` add `open()` and `close()` alongside
+`focus()`, typed as the new exported `PickerExposed`. They render their own
+trigger, so a parent's script has no other handle on the panel. `open()` is a
+no-op while the picker is disabled. `clear()` stays on `Select`, `Combobox` and
+`MultiSelect` and goes nowhere new (ADR-0012).
+
+`Duration` forwards the `#label` and `#description` slots to its `TextInput`.
+They used to be dropped.
+
+### Inputs — attributes route to the control, `class` and `style` to the wrapper (breaking, silent)
+
+An input has a layout wrapper and an interactive element, and the attribute you
+did not declare has to land on one of them. The rule is now the same everywhere:
+`class` and `style` go to the wrapper; `name`, `aria-*`, `data-*` and listeners
+go **once** to the interactive element.
+
+`Checkbox` applied the whole set twice, so `aria-label` also named a `<div>` and
+a caller's `@click` ran twice. `Switch`, `RadioGroup` and `Rating` sent
+everything to the wrapper, so `aria-label` never reached the control at all.
+
+Silent, and worth an audit if you relied on the old placement:
+
+```vue
+<!-- the listener used to fire on the padded row too; now only on the input -->
+<Checkbox padded label="Agree" @click="onClick" />
+```
+
+`TextInput`, `Textarea`, `Password`, `Select`, `Combobox`, `MultiSelect`,
+`Slider`, `FormControl`, `Duration` and the date pickers already followed the
+rule and are unchanged.
+
+### `Select` — nothing selected is `null` (breaking, silent)
+
+`Select` emitted `undefined` for an empty value while `Combobox` emitted `null`,
+so one single-value family had two answers. Both are `null` now. `MultiSelect`
+keeps `[]`, because an empty array is what its consumers iterate.
+
+```js
+// Before — Select
+watch(value, (v) => { if (v === undefined) reset() })
+
+// After
+watch(value, (v) => { if (v === null) reset() })
+```
+
+An empty string is still a real value, so a "None" row with `value: ''` keeps
+round-tripping. `clear()` and the `clear` slot prop both write `null`.
+
+### `Rating` — `size` defaults to `sm` (breaking, silent)
+
+Every other input defaults to `sm`; `Rating` defaulted to `md`. A `<Rating>`
+with no `size` now renders smaller. Pass `size="md"` to keep the old size. An
+unrecognized size resolves to `sm` too, so the default and the fallback agree.
+
+### `TimePicker` — four emits removed (breaking, loud in TS, silent in JS)
+
+`update:open` carries the open and the close, with the state in the payload, so
+`open` and `close` are gone. `input-invalid` and `invalid-change` are gone too:
+typed text that does not parse reverts to the last valid value, which the user
+sees.
+
+```vue
+<!-- Before -->
+<TimePicker @open="onOpen" @close="onClose" @invalid-change="setInvalid" />
+
+<!-- After -->
+<TimePicker @update:open="(open) => (open ? onOpen() : onClose())" />
+```
+
+`TimePickerEmits` is exported, and `Variant` is an alias of the shared
+`InputVariant` rather than a second scale.
+
+### Input types — `SelectionOption`, `SelectionGroup`, `Dayjs`, `DateRangeValue` (additive, with one removal)
+
+- `SelectionOption` and `SelectionGroup` are exported from the root, so a
+  wrapper around any of the three selection components can name its option
+  shape once. The component-specific types stay.
+- `Dayjs` is exported. The date pickers hand one to `formatter`, `disabledDate`
+  and the setter slot props, so the type has to be nameable.
+- `DateRangeValue` types both sides of `DateRangePicker`'s `v-model`. The prop
+  was `string[]`, which let a one-element array in and made a round-trip through
+  the model fail to type-check.
+- `DatePicker`'s barrel lists its public types instead of re-exporting the whole
+  module (P15). `DatePickerViewMode` and `DatePickerDateObj` were calendar
+  internals the wildcard published; they leave the root.
+- `ComboboxEmits` and `MultiSelectEmits` no longer redeclare the model events
+  `defineModel` already declares, and `RadioGroupEmits` says
+  `RadioValue | undefined`, which is what an unbound group starts at.
+
+### Inputs — `control` versus `trigger`, and picker ARIA (additive)
+
+`data-slot="trigger"` belongs to the selection family only: `Select`,
+`Combobox` and `MultiSelect` render a box that shows the selection and opens the
+popover. Every other input, the date and time pickers included, marks its main
+interactive element `data-slot="control"`. A picker's `<input>` is something you
+type into, so it is a control that also opens a panel.
+
+- `FormLabel` carries `data-slot="label"`, the hook `InputLabel` already
+  rendered. One selector now reaches every label in the library.
+- The picker chevron carries `data-slot="chevron"`.
+- The picker `<input>` carries `role="combobox"`, `aria-haspopup`
+  (`dialog` on the date pickers, `listbox` on `TimePicker`) and
+  `aria-expanded`.
+
+### `FormControl` — `variant` is not forwarded to a checkbox (breaking, silent)
+
+A checkbox draws no container surface, so it has no `variant`. `FormControl`
+forwarded one anyway, and it landed on the `<input>` as a stray
+`variant="subtle"` attribute. `type="checkbox"` no longer receives it. The
+`type` routes are unchanged: `date` renders `DatePicker`, `time` renders
+`TimePicker`, and a native date field is `<TextInput type="date" />`.
+
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 
 The sprite-based `Icon`, `IconPicker`, and `spritePlugin` leave

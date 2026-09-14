@@ -10,7 +10,17 @@ Lets users rate items using stars in a simple, interactive way. Provides immedia
 
 ## Sizes
 
+`size` defaults to `sm`, matching every other input. An unrecognized value
+renders `sm` too.
+
 <ComponentPreview name="Rating-Sizes" />
+
+## Template ref
+
+`focus()` moves focus to the selected star, or to the first star when nothing
+is selected. That is the same element `Tab` reaches, so a ref call and the
+keyboard agree. In half-star mode the whole control is one slider, so `focus()`
+focuses the control itself.
 
 ## Half stars
 

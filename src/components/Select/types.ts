@@ -40,8 +40,8 @@ export interface SelectProps extends InputLabelingProps {
   /** If true, disables the select input. */
   disabled?: boolean
 
-  /** The currently selected value. */
-  modelValue?: SelectOptionValue
+  /** The currently selected value. `null` when nothing is selected. */
+  modelValue?: SelectOptionValue | null
 
   /** Controls the visibility of the select menu. */
   open?: boolean
@@ -90,7 +90,7 @@ export interface SelectSlotProps {
   /** Currently selected option, if any. */
   selectedOption: SelectNormalizedOption | null
 
-  /** Clears the current selection (sets the model to `undefined`). */
+  /** Clears the current selection (sets the model to `null`). */
   clear: () => void
 
   /** Sets the menu open state. */
@@ -179,8 +179,8 @@ interface SelectItemSlotsByName {
 export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
 export interface SelectEmits {
-  /** Fired when the selected value changes. */
-  'update:modelValue': [value: SelectOptionValue | undefined]
+  /** Fired when the selected value changes. `null` when the selection is cleared. */
+  'update:modelValue': [value: SelectOptionValue | null]
 
   /** Fired when the open state changes. */
   'update:open': [value: boolean]

@@ -608,4 +608,63 @@ describe('Select', () => {
       cy.get('label').should('not.exist')
     })
   })
+
+  // INP-Q2: one empty value for the single-value half of the family.
+  describe('the empty value is null', () => {
+    it('clear() emits null, not undefined', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: 'def', 'onUpdate:modelValue': onUpdate },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').should('have.been.calledWith', null)
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
+    it('the #trigger slot clear() emits null too', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: 'def', 'onUpdate:modelValue': onUpdate },
+        slots: {
+          trigger: ({ clear }: any) =>
+            h('button', { 'data-cy': 'slot-clear', onClick: clear }, 'Clear'),
+        },
+      })
+
+      cy.get('[data-cy="slot-clear"]').click()
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
+    it('renders the placeholder for null and for undefined alike', () => {
+      cy.mount(Select, { props: { options, modelValue: null } })
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+
+      cy.mount(Select, { props: { options, modelValue: undefined } })
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+    })
+
+    it('still round-trips an empty string as a real value', () => {
+      const withNone = [{ label: 'None', value: '' }, ...options]
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: {
+          options: withNone,
+          modelValue: 'def',
+          'onUpdate:modelValue': onUpdate,
+        },
+      })
+
+      cy.get('[role=combobox]').click()
+      cy.get('[role=option]').contains('None').click()
+      cy.get('@onUpdate').should('have.been.calledWith', '')
+    })
+  })
 })

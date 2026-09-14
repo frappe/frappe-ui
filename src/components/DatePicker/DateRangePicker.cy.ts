@@ -408,4 +408,23 @@ describe('DateRangePicker', () => {
       cy.get('[aria-label="2025-06-28"]').should('exist')
     })
   })
+
+  // INP-Q5 (ADR-0012).
+  describe('template ref', () => {
+    it('open(), close() and focus() drive the picker', () => {
+      let vm: any
+      cy.mount(DateRangePicker).then((mounted: any) => {
+        vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+      })
+
+      cy.get('[role=dialog]').should('not.exist')
+      cy.then(() => vm?.open?.())
+      cy.get('[role=dialog]').should('exist')
+      cy.then(() => vm?.close?.())
+      cy.get('[role=dialog]').should('not.exist')
+
+      cy.then(() => vm?.focus?.())
+      cy.get('input').first().should('be.focused')
+    })
+  })
 })

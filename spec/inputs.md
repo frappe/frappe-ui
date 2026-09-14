@@ -624,6 +624,26 @@ The `useInputLabeling` composable returns a `dataAttrs` object that
 components spread onto their root element so the vocabulary stays
 consistent.
 
+**`control` versus `trigger` (INP-Q10).** Every input marks its main
+interactive element `data-slot="control"`. `trigger` is reserved for the
+selection family — `Select`, `Combobox` and `MultiSelect` — whose box shows the
+selection and opens the popover. The date and time pickers use `control`: their
+`<input>` is something you type into, so it is a control that also opens a
+panel. Both names would otherwise mean "the thing you click", and an app
+styling `[data-slot="control"]` would miss half the inputs.
+
+The pickers add two more hooks on top:
+
+- `data-slot="chevron"` on the trailing chevron, so an app can restyle or hide
+  it without replacing the `#suffix` slot.
+- `role="combobox"`, `aria-haspopup` and `aria-expanded` on the picker
+  `<input>`, so a screen reader announces that the field opens a panel and
+  whether that panel is open. `aria-haspopup` is `dialog` on the date pickers
+  and `listbox` on `TimePicker`, matching what each one opens.
+
+`FormLabel` carries `data-slot="label"`, the same marker `InputLabel` already
+rendered, so one selector reaches every label in the library.
+
 `Switch.labelClasses` and `Checkbox.padding` continue to work alongside
 the `data-*` hooks. They are deprecated, not removed in v1.
 

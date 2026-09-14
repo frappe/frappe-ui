@@ -234,7 +234,7 @@
   },
   {
     name: 'update:modelValue',
-    description: 'Fired when the selection changes.',
+    description: 'Fired when the model value changes.',
     type: '[value: (string | number)[]]'
   },
   {
