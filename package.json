@@ -19,6 +19,7 @@
     "#utils/*": "./src/utils/*"
   },
   "bin": {
+    "base-props-v1": "./scripts/migrate-base-props-v1.js",
     "tokens-v2": "./tailwind/migrate-tokens-v2.js",
     "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js",
     "editor-v1": "./scripts/migrate-editor-v1.js",
@@ -104,6 +105,7 @@
     "tailwind",
     "vitepress",
     "scripts/migrate-shortcuts-v1.js",
+    "scripts/migrate-base-props-v1.js",
     "scripts/migrate-editor-v1.js",
     "experimental",
     "experimental.ts",
@@ -116,6 +118,7 @@
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "MIT",
   "dependencies": {
+    "@vue/compiler-sfc": "^3.5.13",
     "@codemirror/lang-css": "^6.3.0",
     "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.2",

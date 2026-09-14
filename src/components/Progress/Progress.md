@@ -31,8 +31,8 @@ bar. Completing items is the most common source of a progress value.
 
 ## Multi-step form
 
-`intervals` turns the bar into a step indicator — one segment per step, filled
-up to the current one. This is what the interval variant is for.
+Pass the number of segments to `intervals` to turn the bar into a step
+indicator, filled up to the current step. Omit it for a continuous bar.
 
 <ComponentPreview name="Progress-MultiStepForm" />
 

@@ -31,8 +31,9 @@ token renames (`tokens-v2`, see [Tokens](#tokens)), shortcut config
 (`shortcuts-v1`, see [The shortcuts codemod](#the-shortcuts-codemod)),
 destination prop renames (`destinations-v1`, see
 [Destinations](#navigation-destinations)), and the EditorFixedMenu prop rename
-(`editor-v1`, see [Editor](#editor)). Every other component, prop, and slot
-rename is a hand edit.
+(`editor-v1`, see [Editor](#editor)), plus base component prop normalization
+(`base-props-v1`, see [Base component props](#base-component-props)). Every
+other component, prop, and slot rename is a hand edit.
 
 ### Sections
 
@@ -41,7 +42,7 @@ rename is a hand edit.
 - **Inputs and files** — [Inputs](#inputs) · [FileUploader](#fileuploader)
 - **Navigation and layout** — [Destinations](#navigation-destinations) · [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
-- **Display** — [Alert](#alert) · [Icons](#icons) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
+- **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
@@ -1059,6 +1060,7 @@ file's base64 representation yourself is a few lines of
 | Before           | After            |
 | ---------------- | ---------------- |
 | `action.handler` | `action.onClick` |
+| `position`       | `align`          |
 
 This is a **silent break**: `handler` is dropped as an unknown key, so the
 action button still renders and does nothing on click.
@@ -1728,7 +1730,7 @@ differ or were renamed.
 **Breaking, silent:** every icon-name prop across the library (`Button.icon`
 / `iconLeft` / `iconRight`, `Dialog.icon`, `Alert.icon`, `SidebarCard.icon`,
 `Dropdown`/`ContextMenu` item `icon`, `TabButtons` options `icon` /
-`iconLeft`, `TabTrigger.icon` / `iconLeft`, the `Icon` component's `name`
+`iconLeft`, `TabTrigger.icon` / `iconLeft`, the `Icon` component's `icon`
 prop) used to render a bare feather-style name (e.g. `"edit"`,
 `"chevron-down"`) via `FeatherIcon`. That fallback is gone: only a `lucide-*`
 string, an emoji or symbol glyph, or a `Component` renders. Any other string
@@ -3650,6 +3652,32 @@ const options = [
 Moving the import is the smaller change and keeps the current UI. Take this
 rewrite only when you want off the deprecated component.
 
+## Base component props
+
+Run `base-props-v1` over Vue files to migrate statically named component tags.
+Start with a dry run so globally registered app components that reuse these
+names are easy to spot:
+
+```sh
+npx --package frappe-ui@beta base-props-v1 --dry-run src
+npx --package frappe-ui@beta base-props-v1 src
+```
+
+- Icon `name` remains supported. `icon` is the canonical spelling and takes
+  precedence when both are present; the codemod can normalize single `name`
+  props when desired.
+- Replace Progress `intervals` and `intervalCount` with one numeric `intervals`
+  prop. For example, `intervals :interval-count="steps.length"` becomes
+  `:intervals="steps.length"`.
+- Pass only a string or number to Badge `label`; use its default slot for rich
+  content.
+- `DividerAction` now accepts the shared Button fields, including `theme`,
+  `variant`, `size`, and icons.
+- Replace Divider `position` with `align`.
+
+Progress labels and hints now render independently. A `#hint` slot no longer
+needs a `label` or `hint` prop to make its row appear.
+
 ## FAQ
 
 **Will my CSS break?** In two ways. Where component structure changed,
@@ -3663,7 +3691,9 @@ emit no CSS at all, with no build or type error. Run the
 utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
 keyboard shortcuts — it also catches the punctuation keys that a hand
 migration breaks in silence. Run `editor-v1` if you use `EditorFixedMenu`.
-Other family sections name their mechanical tools and remaining hand edits.
+`base-props-v1` handles the Icon, Progress, and Divider changes above. Review
+any sites the codemods report before completing the hand edits named in other
+family sections.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,

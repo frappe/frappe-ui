@@ -15,7 +15,7 @@
           <Divider
             orientation="vertical"
             flex-item
-            position="center"
+            align="center"
             :action="{ label: 'Edit', onClick }"
           />
           <span class="text-base text-ink-gray-7">Panel B</span>

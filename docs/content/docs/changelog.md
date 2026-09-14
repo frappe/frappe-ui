@@ -9,6 +9,23 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Base component contracts for v1 (breaking)
+
+- `Icon` adds the canonical `icon` prop while keeping `name` fully supported.
+  Both accept `string | Component | null`; `icon` takes precedence when both
+  are supplied. No migration is required.
+- `Progress.intervals` is now the numeric segment count and `intervalCount` is
+  removed. Omit `intervals` for a continuous bar. Labels and hints now render
+  independently.
+- `Badge.label` accepts only `string | number`; put rich content in the default
+  slot.
+- `Divider.position` is replaced by `align`; an old `position` value is ignored
+  and the action falls back to the center. `DividerAction` now accepts the
+  shared Button action fields.
+
+The [base component migration guide](/docs/migration#base-component-props)
+includes the codemod and manual steps.
+
 ### Editor suggestion roles and fixed-menu size have explicit names (breaking)
 
 Suggestion configuration now calls the rendered mention node `nodeView` and

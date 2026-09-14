@@ -97,9 +97,11 @@ _Avoid_: `to` as a component prop, `link`, `fallback`
 A button declared via a component's action prop(s), rendered in its footer/toolbar row.
 Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);
 the public names are `DialogAction` (context `{ close }`) and `AlertAction`
-(context `{ dismiss }`, shared with SidebarCard). Gets reactive
-`loading` state while its async `onClick` runs.
-Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
+(context `{ dismiss }`, shared with SidebarCard), plus `DividerAction` (no
+callback context). Dialog, Alert, SidebarCard and TextEditor get reactive
+`loading` state while an async `onClick` runs; Divider forwards the click and
+the caller owns its loading state. Shared by Dialog, Alert, SidebarCard, Divider
+and TextEditor (P6-aligned).
 Charts take no action prop — a chart header renders caller-supplied
 buttons through the `#actions` slot (spec/charts.md).
 
@@ -125,7 +127,12 @@ _Avoid_: `fullWidth`, `block`, `stretch`, `grow`
 **side** (Tabs family):
 Prop naming the edge a component attaches to (`left | right`). Distinct from
 `dir`, which is the `ltr`/`rtl` writing direction.
-_Avoid_: `direction`, `placement` (for a single edge), `align`
+_Avoid_: `direction`, `placement` (for a single edge)
+
+**align**:
+Prop naming placement along a side or rule (`start | center | end`). Used by
+overlays and by Divider actions. Distinct from `side`, which selects the edge.
+_Avoid_: `position`, `placement` (when the side is already known)
 
 **chrome** (informal):
 The auto-rendered visual scaffolding around a component's content — padded card, header

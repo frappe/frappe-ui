@@ -9,5 +9,11 @@ export interface IconProps {
    * Any other string (e.g. a bare feather-style name) is unsupported —
    * it renders nothing and warns once in dev. Falsy values render nothing.
    */
+  icon?: string | Component | null
+
+  /**
+   * Supported alternate name for `icon`. `icon` takes precedence when both
+   * props are supplied.
+   */
   name?: string | Component | null
 }

@@ -59,6 +59,8 @@ Source findings: `rc-api-audit.md`. Status column: **decided**, **open** (questi
 
 All thirteen groups were answered with the "resolve all before RC" option and no comment: M-data (preserving ADR-0013), M-base, M-dialog, M-overlays, M-inputs, M-navigation, M-tabs-tree, M-shells, M-composables, M-editor (preserving serialized prose variable names), M-list, M-charts (delegated to #1139), M-packaging.
 
+**M-base/A Icon override (2026-09-14).** The maintainer said “keep both: icon and name.” Both props accept `string | Component | null`; `icon` is canonical and takes precedence when its value is not `undefined`. `name` remains supported without a warning or required migration. This supersedes the mechanical rename-only outcome recorded in `rc-medium-triage.md`.
+
 The reviewer's note: "this looks like a heavy list of decisions to make, almost every one in medium group is its own grilling session." See `rc-medium-triage.md` for the split into mechanical fixes and real decisions.
 
 ## Low batches and info

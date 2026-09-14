@@ -13,7 +13,7 @@ const knobs: Knob[] = [
     ],
   },
   {
-    name: 'position',
+    name: 'align',
     type: 'tabs',
     default: 'center',
     options: [
@@ -29,7 +29,7 @@ function buildCode(v: Record<string, any>) {
   const attrs: string[] = []
   if (v.orientation !== 'horizontal')
     attrs.push(`orientation="${v.orientation}"`)
-  if (v.position !== 'center') attrs.push(`position="${v.position}"`)
+  if (v.align !== 'center') attrs.push(`align="${v.align}"`)
   if (v.withAction) attrs.push(`:action="{ label: 'Add row' }"`)
   if (!attrs.length) return '<Divider />'
   return ['<Divider', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
@@ -50,7 +50,7 @@ function buildCode(v: Record<string, any>) {
           <span class="text-sm text-ink-gray-6 self-center">Before</span>
           <Divider
             orientation="vertical"
-            :position="values.position"
+            :align="values.align"
             flex-item
             :action="values.withAction ? { label: 'Add row' } : undefined"
           />
@@ -58,7 +58,7 @@ function buildCode(v: Record<string, any>) {
         </template>
         <Divider
           v-else
-          :position="values.position"
+          :align="values.align"
           :action="values.withAction ? { label: 'Add row' } : undefined"
         />
       </div>

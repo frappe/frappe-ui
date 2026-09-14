@@ -55,7 +55,7 @@ Size: **L**. This changes more than 30 component, test, story, documentation, an
 
 Decisions:
 
-- **M-base/A Icon** — Rename Icon `name` to `icon` and accept `string | Component`. Touch `src/components/Icon`, docs, tests, and the base codemod. Migrate 5 Books sites and 1 v0 site. The codemod covers static props and runs on this tree.
+- **M-base/A Icon** — Keep both Icon `name` and the canonical `icon`; both accept `string | Component | null`, and `icon` takes precedence when supplied. Touch `src/components/Icon`, docs, tests, and the base codemod. The 5 Books sites and 1 v0 site require no migration; the codemod may normalize static `name` props and runs on this tree. User override (2026-09-14), superseding the earlier rename-only decision.
 - **M-base/A Progress** — Replace boolean `intervals` plus `intervalCount` with numeric `intervals`. Touch `src/components/Progress`, stories, tests, and docs. App sites are 0. The codemod migrates the 3 own-tree sites.
 - **M-base/A Badge** — Narrow Badge `label` to `string | number`. Touch `src/components/Badge` and generated API docs. App sites are 0. No codemod change is needed.
 - **M-base/A DividerAction** — Derive `DividerAction` from the shared action shape. Touch `src/components/Divider/types.ts` and its public export. App sites are 0.
@@ -64,7 +64,7 @@ Decisions:
 
 Migration guide:
 
-- Replace Icon `name` with `icon`.
+- Icon `name` remains supported; optionally replace it with canonical `icon`.
 - Replace Progress `intervals` and `intervalCount` with one numeric `intervals` prop.
 - Pass only a string or number to Badge `label`.
 - Use the shared action fields when declaring a `DividerAction`.
