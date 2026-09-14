@@ -796,7 +796,8 @@ Changed since `1.0.0-beta.41`, the first beta that shipped the family:
   `resolveChartTheme` are no longer exported. They had no documented use, and
   they are the library's own printing rather than a utility to build on. Read
   the plot-area colors with `useChartTokens`, which re-resolves on a theme flip;
-  `currentColorScheme` was the root `resolvedColorScheme` under another name.
+  `currentColorScheme` was the internal `getResolvedColorScheme` under another
+  name.
 
 The RC API audit ([#1139](https://github.com/frappe/frappe-ui/issues/1139))
 settled the rest before the entry freezes. Every item is loud in TypeScript
@@ -1311,6 +1312,54 @@ surface. It can come back when a second surface needs it.
 names describe regions, not components. The desktop frame has two side regions
 that can appear together and the mobile frame has one bar along the bottom, so
 one shared name would have to mean three things at once.
+
+### `resolvedColorScheme` is a ref on `useColorScheme()` (breaking, loud)
+
+`import { resolvedColorScheme } from 'frappe-ui'` fails. The same name now
+arrives from `useColorScheme()` as a read-only `Ref<'light' | 'dark'>`, so an
+app reads `.value` instead of calling a function, and drops the
+`MutationObserver` it needed to know when to call it again. The ref follows
+`setColorScheme`, and follows the OS setting while the preference is `system`.
+
+`colorScheme` is the preference and can be `system`; `resolvedColorScheme` is
+what the page shows. `ColorScheme` and `ResolvedColorScheme` stay exported.
+Internally the function is `getResolvedColorScheme`, used by charts to pick a
+palette outside a component. It is not part of the package surface.
+
+No codemod: a call has to become a `.value` read, which needs the surrounding
+scope.
+
+### `toggleColorScheme()` flips what is on screen (breaking, silent)
+
+It read the stored preference before, so under `system` on a dark OS it wrote
+`dark` — the value the page was already painted in — and the first press did
+nothing visible. It reads the resolved value now, so one press always moves.
+Apps that shipped their own toggle for this reason can delete it.
+
+### `--mobile-header-height` — removed (breaking, silent)
+
+`PageHeaderMobile` is 52px tall, fixed, and reads no CSS variable for it.
+Setting `--mobile-header-height` changes nothing in the library; the name is
+free for an app to keep using for its own rules. The variable was unprefixed,
+undocumented, and named after no component, which is the shape ADR-0017 exists
+to stop. A header of another height is `PageHeaderBase` with your own class.
+
+The internal title inset follows the ADR's carrier shape and is now
+`--_page-header-mobile-title-inset`.
+
+### PageHeader — every prop type has a name (additive)
+
+`PageHeaderTitleProps`, `PageHeaderMobileProps`, `PageHeaderMobileTitleProps`
+and `PageHeaderBackButtonProps` are exported from the root, so a wrapper
+component can extend them. `PageHeader`, `PageHeaderBase` and
+`PageHeaderTarget` take no props and get no empty interface.
+
+### Documented, not changed: header click-to-top
+
+A single click on the header's empty area scrolls the page to the top, and the
+opt-out attributes keep their names: `data-no-scroll-top` on `PageHeader`, and
+`data-no-sheet-drag` on `BottomSheet`. Both are now documented. There is no
+`data-fui-` prefix rule for data attributes.
 
 ### Sprite icon trio — moved to `frappe-ui/experimental` (breaking)
 

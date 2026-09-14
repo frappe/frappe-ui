@@ -159,3 +159,10 @@ generated media rules.
   three nesting combinations. `tailwind/listColumns.test.js` pins the generated
   rules against custom screens, and `List.ssr.test.ts` pins the server markup.
 - Future families expose CSS knobs only through this shape.
+- **`PageHeaderMobile` had the one pre-existing variable that fit neither
+  shape**: `--mobile-header-height`, unprefixed, undocumented, and named after
+  no component. It is removed and the height is fixed at 52px (VOC-Q7). A hook
+  has to earn its place, and one height on one component is a prop's job if it
+  ever needs to vary. The internal inset the title rides became
+  `--_page-header-mobile-title-inset`, which is the carrier shape rule 3
+  describes.

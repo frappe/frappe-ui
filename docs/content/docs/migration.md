@@ -3032,7 +3032,7 @@ Button), so the light/dark composable gives the word back.
 | `currentTheme`      | `colorScheme` — read-only                        |
 | `setTheme(t)`       | `setColorScheme(t)`                              |
 | `toggleTheme()`     | `toggleColorScheme()`                            |
-| `getSystemTheme()`  | `resolvedColorScheme()`, imported from the root  |
+| `getSystemTheme()`  | `useColorScheme().resolvedColorScheme` — a ref    |
 | `initializeTheme()` | removed — `useColorScheme()` initializes itself  |
 
 The read-only `colorScheme` is the quiet part. The ref was only a third of the
@@ -3817,6 +3817,59 @@ the pane's own `ScrollArea` instead.
 Nothing to change. `DesktopShell` keeps `#rail` and `#sidebar`; `MobileShell`
 keeps `#nav`. The names describe regions, not components, and the two frames
 have different regions, so there is no shared name to move to.
+
+## Color scheme: `resolvedColorScheme` is a ref {#resolved-color-scheme}
+
+`import { resolvedColorScheme } from 'frappe-ui'` fails. The same name is now a
+read-only ref on `useColorScheme()`, so there is no call to make.
+
+```js
+// Before
+import { resolvedColorScheme } from 'frappe-ui'
+const scheme = ref(resolvedColorScheme())
+const observer = new MutationObserver(() => {
+  scheme.value = resolvedColorScheme()
+})
+observer.observe(document.documentElement, { attributeFilter: ['data-theme'] })
+
+// After
+import { useColorScheme } from 'frappe-ui'
+const { resolvedColorScheme } = useColorScheme()
+// resolvedColorScheme.value is 'light' or 'dark'
+```
+
+The observer goes with it. The ref follows `setColorScheme` and follows the OS
+setting while the preference is `system`, which is what the observer was
+watching for. `ColorScheme` and `ResolvedColorScheme` stay exported.
+
+The rename `resolvedColorScheme` to `getResolvedColorScheme` is internal: the
+function is no longer part of the package surface at all. No codemod can do this
+one, because a call has to become a `.value` read.
+
+### `toggleColorScheme()` moves off what is on screen {#toggle-color-scheme}
+
+`toggleColorScheme()` used to read the stored preference. Under `system` on a
+dark OS it wrote `dark`, which the page was already painted in, so the first
+press did nothing visible. It now reads the resolved value, so one press always
+moves: `system` on a dark OS goes to `light`.
+
+Apps that wrote their own toggle for this reason can drop it.
+
+## `--mobile-header-height` is removed {#mobile-header-height}
+
+`PageHeaderMobile` is 52px tall, fixed. It no longer reads
+`--mobile-header-height`, so setting that variable does nothing to the library
+header. Delete the declaration, or keep it if your own CSS reads it — the name
+is yours now.
+
+There is no replacement hook. A header of another height is `PageHeaderBase`
+with your own class:
+
+```vue
+<PageHeaderBase class="flex h-16 items-center border-b px-3">
+  <MyToolbar />
+</PageHeaderBase>
+```
 
 ## PageHeaderMobile family: slot names
 

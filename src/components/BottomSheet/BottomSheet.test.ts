@@ -528,6 +528,37 @@ describe('BottomSheet drag to dismiss', () => {
     app.unmount()
   })
 
+  // SHELL-Q9: the opt-out attribute is public and keeps this name.
+  it('leaves a gesture that starts on data-no-sheet-drag alone', async () => {
+    const { sheet, content, app } = await openSheet()
+    const carousel = document.createElement('div')
+    carousel.setAttribute('data-no-sheet-drag', '')
+    content.appendChild(carousel)
+
+    touch('touchstart', carousel, 0, 300)
+    const move = touch('touchmove', carousel, 0, 320)
+
+    expect(move.defaultPrevented).toBe(false)
+    expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
+  it('also covers a child of a data-no-sheet-drag element', async () => {
+    const { sheet, content, app } = await openSheet()
+    const carousel = document.createElement('div')
+    carousel.setAttribute('data-no-sheet-drag', '')
+    const slide = document.createElement('div')
+    carousel.appendChild(slide)
+    content.appendChild(carousel)
+
+    touch('touchstart', slide, 0, 300)
+    const move = touch('touchmove', slide, 0, 320)
+
+    expect(move.defaultPrevented).toBe(false)
+    expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
   it('drags a sheet that was mounted closed and opened afterwards', async () => {
     const { sheet, content, openUpdates, app } = await openSheet(
       {},

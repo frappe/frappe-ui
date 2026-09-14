@@ -50,12 +50,13 @@ nothing to install.
 <script setup>
 import { useColorScheme } from 'frappe-ui'
 
-const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
+const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
+  useColorScheme()
 </script>
 
 <template>
   <button @click="toggleColorScheme">
-    {{ colorScheme }}
+    {{ resolvedColorScheme === 'dark' ? 'Light mode' : 'Dark mode' }}
   </button>
 </template>
 ```
@@ -63,9 +64,14 @@ const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
 - `colorScheme` — `Ref<'light' | 'dark' | 'system'>`, read-only. It, the
   `<html data-theme>` attribute, and the saved preference always move
   together, so write through `setColorScheme` rather than assigning the ref.
+- `resolvedColorScheme` — `Ref<'light' | 'dark'>`, read-only. What the page is
+  painted in. Under `system` it follows the OS setting while `colorScheme`
+  stays `system`, so this is what a sun-or-moon icon, or a per-scheme asset,
+  reads.
 - `setColorScheme(scheme)` — selects a preference: applies `data-theme` and
   persists it.
-- `toggleColorScheme()` — flips between light and dark.
+- `toggleColorScheme()` — switches to the opposite of what is on screen. Under
+  `system` on a dark OS it selects `light`, so one press always moves.
 
 Switching schemes would otherwise cross-fade every transitioning surface at
 once, which reads as a flash. To suppress it, `useColorScheme` puts a

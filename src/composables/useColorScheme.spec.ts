@@ -3,7 +3,11 @@
  * Unit tests for src/composables/useColorScheme.ts
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { _resetColorScheme, useColorScheme } from './useColorScheme'
+import {
+  _resetColorScheme,
+  getResolvedColorScheme,
+  useColorScheme,
+} from './useColorScheme'
 
 /**
  * jsdom has no `matchMedia`. Install one that reports a fixed OS preference and
@@ -78,6 +82,128 @@ describe('useColorScheme', () => {
 
     toggleColorScheme()
     expect(colorScheme.value).toBe('dark')
+  })
+
+  // SHELL-Q12: the old toggle read the *preference*, so under `system` on a dark
+  // OS it wrote `dark` and the page did not move.
+  it('toggleColorScheme leaves system for the opposite of what is painted', () => {
+    stubSystemScheme(true)
+    const { colorScheme, resolvedColorScheme, toggleColorScheme } =
+      useColorScheme()
+    expect(colorScheme.value).toBe('system')
+    expect(resolvedColorScheme.value).toBe('dark')
+
+    toggleColorScheme()
+
+    expect(colorScheme.value).toBe('light')
+    expect(resolvedColorScheme.value).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+  })
+
+  it('toggleColorScheme from system on a light OS goes dark', () => {
+    stubSystemScheme(false)
+    const { colorScheme, toggleColorScheme } = useColorScheme()
+
+    toggleColorScheme()
+
+    expect(colorScheme.value).toBe('dark')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+  })
+
+  // SHELL-Q11.
+  describe('resolvedColorScheme', () => {
+    it('reports what the page is painted in, not the preference', () => {
+      stubSystemScheme(true)
+      const { colorScheme, resolvedColorScheme } = useColorScheme()
+
+      expect(colorScheme.value).toBe('system')
+      expect(resolvedColorScheme.value).toBe('dark')
+    })
+
+    it('follows setColorScheme', () => {
+      const { resolvedColorScheme, setColorScheme } = useColorScheme()
+      expect(resolvedColorScheme.value).toBe('light')
+
+      setColorScheme('dark')
+
+      expect(resolvedColorScheme.value).toBe('dark')
+    })
+
+    it('follows an OS flip while the preference stays system', () => {
+      const listeners = stubSystemScheme(false)
+      const { colorScheme, resolvedColorScheme } = useColorScheme()
+      expect(resolvedColorScheme.value).toBe('light')
+
+      stubSystemScheme(true)
+      listeners.forEach((fn) => fn())
+
+      expect(resolvedColorScheme.value).toBe('dark')
+      expect(colorScheme.value).toBe('system')
+    })
+
+    it('stays put when the OS flips under an explicit preference', () => {
+      const listeners = stubSystemScheme(false)
+      const { resolvedColorScheme, setColorScheme } = useColorScheme()
+      setColorScheme('light')
+
+      stubSystemScheme(true)
+      listeners.forEach((fn) => fn())
+
+      expect(resolvedColorScheme.value).toBe('light')
+    })
+
+    it('is read-only, like colorScheme', () => {
+      const { resolvedColorScheme } = useColorScheme()
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      // @ts-expect-error assigning is the mistake this guards against
+      resolvedColorScheme.value = 'dark'
+
+      expect(resolvedColorScheme.value).toBe('light')
+      warn.mockRestore()
+    })
+
+    it('one caller sees another caller\'s change', () => {
+      const first = useColorScheme()
+      const second = useColorScheme()
+
+      first.setColorScheme('dark')
+
+      expect(second.resolvedColorScheme.value).toBe('dark')
+    })
+  })
+
+  // The internal getter charts use. It reads the document, so it is right even
+  // in an app that never calls the composable.
+  describe('getResolvedColorScheme', () => {
+    it('reads the data-theme attribute first', () => {
+      stubSystemScheme(true)
+      document.documentElement.setAttribute('data-theme', 'light')
+
+      expect(getResolvedColorScheme()).toBe('light')
+    })
+
+    it('falls back to the dark class', () => {
+      stubSystemScheme(false)
+      document.documentElement.classList.add('dark')
+
+      expect(getResolvedColorScheme()).toBe('dark')
+
+      document.documentElement.classList.remove('dark')
+    })
+
+    it('falls back to the OS setting', () => {
+      stubSystemScheme(true)
+
+      expect(getResolvedColorScheme()).toBe('dark')
+    })
+
+    it('does not initialize the shared state', () => {
+      getResolvedColorScheme()
+
+      expect(localStorage.getItem('theme')).toBeNull()
+      expect(document.documentElement.getAttribute('data-theme')).toBeNull()
+    })
   })
 
   it('shares one state across callers', () => {

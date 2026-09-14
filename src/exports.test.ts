@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest'
 import * as root from './index'
 import type {
+  ColorScheme,
   DateRangeValue,
   Dayjs,
   DesktopShellProps,
@@ -19,7 +20,12 @@ import type {
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
+  PageHeaderBackButtonProps,
+  PageHeaderMobileProps,
+  PageHeaderMobileTitleProps,
+  PageHeaderTitleProps,
   PickerExposed,
+  ResolvedColorScheme,
   RouteDestination,
   ScrollAreaExposed,
   SelectionGroup,
@@ -65,6 +71,7 @@ describe('resources barrel', () => {
  * stops being exported fails to resolve here.
  */
 type PublicTypes = [
+  ColorScheme,
   DateRangeValue,
   Dayjs,
   DesktopShellProps,
@@ -72,7 +79,12 @@ type PublicTypes = [
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
+  PageHeaderBackButtonProps,
+  PageHeaderMobileProps,
+  PageHeaderMobileTitleProps,
+  PageHeaderTitleProps,
   PickerExposed,
+  ResolvedColorScheme,
   RouteDestination,
   ScrollAreaExposed,
   ToastAction,
@@ -108,9 +120,18 @@ describe('root exports', () => {
       'ScrollBar',
       // SHELL-Q7: BottomSheet is the only caller.
       'useSheetDrag',
+      // SHELL-Q11: the getter reads the document once and does not react.
+      'resolvedColorScheme',
+      'getResolvedColorScheme',
     ]) {
       expect(root).not.toHaveProperty(name)
     }
+  })
+
+  it('keeps the color-scheme composable', () => {
+    // SHELL-Q11: the resolved value is a read-only ref on the composable now,
+    // not a root function. `useColorScheme.spec.ts` covers the ref itself.
+    expect(root).toHaveProperty('useColorScheme')
   })
 
   it('keeps the shell exports v1 kept', () => {

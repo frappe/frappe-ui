@@ -1,5 +1,10 @@
 import type { RouteDestination } from '../shared/route'
 
+export interface PageHeaderTitleProps {
+  /** Title text. Overridden by the default slot. */
+  title?: string
+}
+
 export interface PageHeaderMobileProps {
   /** Title shown centered in the header. Overridden by the default slot. */
   title?: string

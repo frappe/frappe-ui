@@ -60,12 +60,14 @@ The preset **replaces** `colors`, `screens`, `borderRadius`, `boxShadow` and `fo
 The scheme lives in `data-theme` on `<html>` (`"light"` or `"dark"`). Semantic tokens flip automatically; reach for a `dark:` variant only for a value with no semantic token.
 
 ```js
-import { useColorScheme, resolvedColorScheme } from 'frappe-ui'
+import { useColorScheme } from 'frappe-ui'
 // module-level singleton every caller shares
-const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
-// colorScheme      Readonly<Ref<'light' | 'dark' | 'system'>>
-// setColorScheme   (scheme) => void — writes data-theme, persists
-resolvedColorScheme() // 'light' | 'dark', with 'system' already resolved
+const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
+  useColorScheme()
+// colorScheme          Readonly<Ref<'light' | 'dark' | 'system'>> — the preference
+// resolvedColorScheme  Readonly<Ref<'light' | 'dark'>> — what the page shows
+// setColorScheme       (scheme) => void — writes data-theme, persists
+// toggleColorScheme    () => void — switches to the opposite of what is on screen
 ```
 
 ### Styling past the prop surface

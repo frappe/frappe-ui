@@ -7,7 +7,6 @@ import {
   DesktopShell,
   PageHeader,
   PageHeaderBase,
-  resolvedColorScheme,
 } from 'frappe-ui'
 import {
   AlignCenter,
@@ -89,7 +88,17 @@ const screenshot = {
   light: `${import.meta.env.BASE_URL}recipes/compose-dashboard-light.png`,
   dark: `${import.meta.env.BASE_URL}recipes/compose-dashboard-dark.png`,
 }
-const scheme = ref(resolvedColorScheme())
+// The docs shell owns `data-theme` on this iframe's <html> (see
+// `.vitepress/theme/Layout.vue`); it bootstraps before paint and syncs live
+// toggles across frames itself. So the recipe reads the attribute rather than
+// `useColorScheme().resolvedColorScheme` — calling the composable here would
+// make a second writer of the same attribute and of the `theme` storage key.
+const paintedScheme = () =>
+  document.documentElement.getAttribute('data-theme') === 'dark'
+    ? 'dark'
+    : 'light'
+
+const scheme = ref(paintedScheme())
 
 const title = ref('Design review: new onboarding flow')
 const content = ref(`
@@ -136,7 +145,7 @@ const content = ref(`
 let themeObserver
 onMounted(() => {
   themeObserver = new MutationObserver(() => {
-    scheme.value = resolvedColorScheme()
+    scheme.value = paintedScheme()
   })
   themeObserver.observe(document.documentElement, {
     attributes: true,

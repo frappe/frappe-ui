@@ -140,10 +140,13 @@ export {
 export { usePageMeta, type PageMeta } from './utils/pageMeta'
 export {
   useColorScheme,
-  resolvedColorScheme,
   type ColorScheme,
   type ResolvedColorScheme,
 } from './composables/useColorScheme'
+// `getResolvedColorScheme` is not exported (SHELL-Q11). It reads the document
+// once and does not react. Components read `useColorScheme().resolvedColorScheme`,
+// which is a ref; charts import the function internally to paint outside a
+// component.
 export {
   shellScrollContainer,
   useShellScrolled,
