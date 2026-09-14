@@ -48,6 +48,38 @@ describe('<Icon />', () => {
     cy.get('[data-cy="custom-icon"]').should('exist')
   })
 
+  it('supports the name prop with string and Component values', () => {
+    const CustomIcon = {
+      render() {
+        return h('svg', { 'data-cy': 'name-component' })
+      },
+    }
+
+    cy.mount(Icon, { props: { name: 'lucide-star' } })
+    cy.get('span').should('have.class', 'lucide-star')
+
+    cy.mount(Icon, { props: { name: CustomIcon } })
+    cy.get('[data-cy="name-component"]').should('exist')
+  })
+
+  it('prefers icon unless it is undefined', () => {
+    cy.mount(Icon, {
+      props: { icon: 'lucide-check', name: 'lucide-star' },
+    })
+    cy.get('span')
+      .should('have.class', 'lucide-check')
+      .and('not.have.class', 'lucide-star')
+
+    cy.mount(Icon, { props: { icon: undefined, name: 'lucide-star' } })
+    cy.get('span').should('have.class', 'lucide-star')
+  })
+
+  it('treats an explicit null icon as the selected empty value', () => {
+    cy.mount(Icon, { props: { icon: null, name: 'lucide-star' } })
+    cy.get('span').should('not.exist')
+    cy.get('svg').should('not.exist')
+  })
+
   it('passes fallthrough attrs to the rendered Component', () => {
     const CustomIcon = {
       name: 'custom-icon',
@@ -62,12 +94,16 @@ describe('<Icon />', () => {
     cy.get('[data-cy="custom-icon"]').should('have.class', 'size-5')
   })
 
-  it('renders nothing when icon is empty or omitted', () => {
+  it('renders nothing when the resolved value is empty or omitted', () => {
     cy.mount(Icon, { props: { icon: '' } })
     cy.get('span').should('not.exist')
     cy.get('svg').should('not.exist')
 
     cy.mount(Icon, { props: {} })
+    cy.get('span').should('not.exist')
+    cy.get('svg').should('not.exist')
+
+    cy.mount(Icon, { props: { name: null } })
     cy.get('span').should('not.exist')
     cy.get('svg').should('not.exist')
   })

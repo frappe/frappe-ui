@@ -3608,7 +3608,9 @@ npx --package frappe-ui@beta base-props-v1 --dry-run src
 npx --package frappe-ui@beta base-props-v1 src
 ```
 
-- Replace Icon `name` with `icon`.
+- Icon `name` remains supported. `icon` is the canonical spelling and takes
+  precedence when both are present; the codemod can normalize single `name`
+  props when desired.
 - Replace Progress `intervals` and `intervalCount` with one numeric `intervals`
   prop. For example, `intervals :interval-count="steps.length"` becomes
   `:intervals="steps.length"`.

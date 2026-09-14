@@ -84,7 +84,7 @@ Any lucide icon renders as a `<span>` carrying the icon class, named `lucide-<ke
 - Size with `size-*` by role: `size-4` default (buttons, sidebar items, header actions), `size-3.5` inline meta beside `text-sm`, `size-5` mobile row leading, `size-6` empty-state glyphs, `size-2` / `size-1.5` status and unread dots.
 - Decorative icons take `aria-hidden="true"`. Icons support labels — reserve icon-only buttons for universal actions, and give the parent an `aria-label` when the icon is the only content.
 - Props named `icon` take the namespaced **string** `"lucide-edit"` or a Vue component: `Button`, `Dropdown` options, `Alert`, `Switch`, `Tabs` items. `Dialog` is the exception — its `icon` is a lucide string or `{ name, theme }` only, and a component renders nothing. `Badge` has no `icon` prop — put the span in its `#prefix` / `#suffix`.
-- `<Icon :icon />` renders a `lucide-*` string, an emoji, or a component. A bare name like `"home"` renders nothing.
+- `<Icon :icon />` renders a `lucide-*` string, an emoji, or a component. `name` remains a supported alternate prop; `icon` wins when both are supplied. A bare value like `"home"` renders nothing.
 
 ## Page anatomy
 

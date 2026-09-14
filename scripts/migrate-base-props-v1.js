@@ -15,7 +15,7 @@ const NodeTypes = {
 const USAGE = `Usage: base-props-v1 [--dry-run] <dir-or-file...>
 
 Renames the v1 base-component props on statically named Vue component tags:
-  Icon name -> icon
+  Icon name -> icon (optional canonical spelling)
   Divider position -> align
   Progress intervals + intervalCount -> numeric intervals`
 
@@ -267,9 +267,12 @@ export function migrateBaseProps(source) {
     if (node.type === NodeTypes.ELEMENT) {
       const component = aliases.get(node.tag)
       if (component === 'Icon') {
-        for (const prop of node.props) {
-          if (propName(prop) === 'name')
-            edits.push(renamePropEdit(prop, 'name', 'icon', 0))
+        const name = node.props.find((prop) => propName(prop) === 'name')
+        const icon = node.props.find((prop) => propName(prop) === 'icon')
+        // Both props are a supported contract. Leave the lower-precedence name
+        // intact instead of creating a duplicate icon binding.
+        if (name && !icon) {
+          edits.push(renamePropEdit(name, 'name', 'icon', 0))
         }
       } else if (component === 'Divider') {
         for (const prop of node.props) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
+import { computed, watchEffect } from 'vue'
 import {
   isEmojiIconString,
   isLucideIconString,
@@ -11,28 +11,35 @@ defineOptions({ inheritAttrs: false })
 
 const props = defineProps<IconProps>()
 
+const resolvedIcon = computed(() =>
+  props.icon !== undefined ? props.icon : props.name,
+)
+
 watchEffect(() => {
-  warnUnsupportedIconString('Icon', 'icon', props.icon)
+  const sourceProp = props.icon !== undefined ? 'icon' : 'name'
+  warnUnsupportedIconString('Icon', sourceProp, resolvedIcon.value)
 })
 </script>
 
 <template>
   <span
-    v-if="typeof icon === 'string' && isLucideIconString(icon)"
-    :class="[icon]"
+    v-if="typeof resolvedIcon === 'string' && isLucideIconString(resolvedIcon)"
+    :class="[resolvedIcon]"
     v-bind="$attrs"
     aria-hidden="true"
   />
   <span
-    v-else-if="typeof icon === 'string' && isEmojiIconString(icon)"
+    v-else-if="
+      typeof resolvedIcon === 'string' && isEmojiIconString(resolvedIcon)
+    "
     class="inline-flex items-center justify-center leading-none"
     v-bind="$attrs"
     aria-hidden="true"
-    >{{ icon }}</span
+    >{{ resolvedIcon }}</span
   >
   <component
-    v-else-if="icon && typeof icon !== 'string'"
-    :is="icon"
+    v-else-if="resolvedIcon && typeof resolvedIcon !== 'string'"
+    :is="resolvedIcon"
     v-bind="$attrs"
     aria-hidden="true"
   />

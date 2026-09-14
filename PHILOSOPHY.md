@@ -360,6 +360,11 @@ The exact data-slot / data-state taxonomy is per component family; each family's
   - Component form: escape hatch for non-lucide icons (brand logos, custom glyphs).
 - The generic **`#prefix` / `#suffix` slots** (P6) are the full-control override — not a parallel `#icon` slot competing with the prop.
 
+**The Icon compatibility exception:** The `Icon` component itself also accepts
+`name?: string | Component | null`. Its canonical `icon` prop accepts the same
+type and wins whenever its value is not `undefined`; `name` remains fully
+supported for existing callers. Other components continue to use only `icon`.
+
 **The Button exception:** Button has a singular `#icon` slot (and `icon` prop with no left/right pair) because square icon-only buttons are a standard, common component.
 
 **The Rating exception:** Rating pairs its `icon` prop with an `#icon` slot. The star glyph *is* the component's content — `#prefix`/`#suffix` don't exist on it — and the slot receives per-star fill state (`state`, `previewValue`, …) that a prop cannot carry, which P7 requires for state-driven rendering (e.g. per-position emoji scales).

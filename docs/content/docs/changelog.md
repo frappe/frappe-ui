@@ -9,10 +9,11 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
-### Base components use one prop shape each (breaking)
+### Base component contracts for v1 (breaking)
 
-- `Icon.name` is replaced by `icon`, which accepts a `lucide-*` string, emoji,
-  symbol, or Vue component. The old `name` attribute renders nothing.
+- `Icon` adds the canonical `icon` prop while keeping `name` fully supported.
+  Both accept `string | Component | null`; `icon` takes precedence when both
+  are supplied. No migration is required.
 - `Progress.intervals` is now the numeric segment count and `intervalCount` is
   removed. Omit `intervals` for a continuous bar. Labels and hints now render
   independently.

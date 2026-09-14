@@ -51,6 +51,17 @@ describe('base props migration', () => {
     expect(migrateBaseProps(source).migrated).toBe(source)
   })
 
+  it('keeps both Icon props and migrates unrelated base props in the file', () => {
+    const source = `<template><Icon name="lucide-star" icon="lucide-check" /><Divider position="end" /></template>`
+    const result = migrateBaseProps(source)
+
+    expect(result.migrated).toBe(
+      `<template><Icon name="lucide-star" icon="lucide-check" /><Divider align="end" /></template>`,
+    )
+    expect(result.changes).toHaveLength(1)
+    expect(result.refusals).toHaveLength(0)
+  })
+
   it('migrates target elements behind structural directives', () => {
     const source = `<template>\n  <Icon v-if="show" name="lucide-x" />\n  <Divider v-else-if="other" position="start" />\n  <template v-if="steps"><Progress intervals interval-count="3" /></template>\n</template>`
     expect(migrateBaseProps(source).migrated).toBe(

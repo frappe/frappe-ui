@@ -9,7 +9,13 @@
     name: 'icon',
     description: 'Icon source. Supported forms:\n- `lucide-*` string  → rendered via the Tailwind mask plugin.\n- emoji / symbol string → rendered as plain text.\n- Vue component → rendered via `<component :is>`.\nAny other string (e.g. a bare feather-style name) is unsupported —\nit renders nothing and warns once in dev. Falsy values render nothing.',
     required: false,
-    type: 'string | Component'
+    type: 'string | Component | null'
+  },
+  {
+    name: 'name',
+    description: 'Supported alternate name for `icon`. `icon` takes precedence when both\nprops are supplied.',
+    required: false,
+    type: 'string | Component | null'
   }
 ]
 </script>
