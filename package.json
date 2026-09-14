@@ -26,7 +26,8 @@
     "tokens-v2": "./tailwind/migrate-tokens-v2.js",
     "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js",
     "editor-v1": "./scripts/migrate-editor-v1.js",
-    "destinations-v1": "./scripts/migrate-destinations-v1.js"
+    "destinations-v1": "./scripts/migrate-destinations-v1.js",
+    "data-v1": "./scripts/migrate-data-v1.js"
   },
   "scripts": {
     "test": "vitest --run",
