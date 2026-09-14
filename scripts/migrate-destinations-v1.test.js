@@ -26,7 +26,10 @@ function tempFile(source) {
 
 describe('destination vocabulary migration', () => {
   it('renames only destination props on the affected components', () => {
-    const source = `<template>
+    const source = `<script setup>
+import { Button, PageHeaderBackButton, ListRow, SidebarItem, SidebarRailItem, MobileNavItem } from 'frappe-ui'
+</script>
+<template>
   <Button link="https://frappe.io" />
   <PageHeaderBackButton :to="home" />
   <ListRow :to="item.route" />
@@ -37,7 +40,10 @@ describe('destination vocabulary migration', () => {
   <Teleport to="body" />
 </template>`
 
-    expect(migrateDestinations(source)).toBe(`<template>
+    expect(migrateDestinations(source)).toBe(`<script setup>
+import { Button, PageHeaderBackButton, ListRow, SidebarItem, SidebarRailItem, MobileNavItem } from 'frappe-ui'
+</script>
+<template>
   <Button href="https://frappe.io" />
   <PageHeaderBackButton :fallback-route="home" />
   <ListRow :route="item.route" />
@@ -73,7 +79,11 @@ import Button from './Button.vue'
   })
 
   it('supports kebab-case component tags and attribute spellings', () => {
-    const source = `<page-header-back-button fallback-to="/old" to="/home" />
+    const source = `<script setup>
+import { PageHeaderBackButton, SidebarItem } from 'frappe-ui'
+</script>
+<template>
+<page-header-back-button fallback-to="/old" to="/home" />
 <sidebar-item :to="route" />`
     const migrated = migrateDestinations(source)
 
@@ -82,7 +92,10 @@ import Button from './Button.vue'
   })
 
   it('handles shorthand and longhand bindings without crossing quoted > characters', () => {
-    const source = `<template>
+    const source = `<script setup>
+import { Button, ListRow, SidebarItem } from 'frappe-ui'
+</script>
+<template>
   <SidebarItem label="Go to home" :to title="1 > 0" />
   <ListRow v-bind:to="item.to" />
   <Button label="Copy link to page" :link.prop="url" />
@@ -100,9 +113,19 @@ import Button from './Button.vue'
     expect(migrated).toContain(`const sample = '<Button link="leave-alone" />'`)
   })
 
+  it('leaves same-named components alone without a frappe-ui import', () => {
+    const source = `<script setup>
+import Button from './Button.vue'
+</script>
+<template><Button link="/custom" /><SidebarItem :to="target" /></template>`
+
+    expect(migrateDestinations(source)).toBe(source)
+  })
+
   it('reports dry runs without writing the file', () => {
     const file = tempFile(
-      '<template><Button link="https://frappe.io" /></template>',
+      `<script setup>import { Button } from 'frappe-ui'</script>
+<template><Button link="https://frappe.io" /></template>`,
     )
     const result = spawnSync(process.execPath, [SCRIPT, '--dry-run', file], {
       encoding: 'utf8',
@@ -115,7 +138,8 @@ import Button from './Button.vue'
 
   it('runs through an installed-bin symlink and rejects unknown options', () => {
     const file = tempFile(
-      '<template><Button link="https://frappe.io" /></template>',
+      `<script setup>import { Button } from 'frappe-ui'</script>
+<template><Button link="https://frappe.io" /></template>`,
     )
     const bin = path.join(path.dirname(file), 'destinations-v1')
     fs.symlinkSync(SCRIPT, bin)
@@ -135,7 +159,8 @@ import Button from './Button.vue'
 
   it('does not follow directory symlinks', () => {
     const file = tempFile(
-      '<template><Button link="https://frappe.io" /></template>',
+      `<script setup>import { Button } from 'frappe-ui'</script>
+<template><Button link="https://frappe.io" /></template>`,
     )
     const dir = path.dirname(file)
     fs.symlinkSync(dir, path.join(dir, 'loop'))

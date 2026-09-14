@@ -21,10 +21,6 @@ const kebab = (name) =>
 
 function componentAliases(source) {
   const aliases = new Map()
-  for (const name of Object.keys(PROP_RENAMES)) {
-    aliases.set(name, name)
-    aliases.set(kebab(name), name)
-  }
   const imports =
     /import\s*\{([^}]+)\}\s*from\s*['"]frappe-ui(?:\/[^'"]*)?['"]/g
   for (const match of source.matchAll(imports)) {
@@ -33,10 +29,14 @@ function componentAliases(source) {
         .trim()
         .replace(/^type\s+/, '')
         .split(/\s+as\s+/)
-      if (PROP_RENAMES[imported]) aliases.set(local || imported, imported)
+      if (PROP_RENAMES[imported]) {
+        const binding = local || imported
+        aliases.set(binding, imported)
+        aliases.set(kebab(binding), imported)
+      }
     }
   }
-  // Local template bindings shadow globally registered components.
+  // Local template bindings shadow imports with the same local name.
   const localImports =
     /import\s+([^'";]+?)\s+from\s*['"](?!frappe-ui(?:\/|['"]))[^'"]+['"]/g
   for (const match of source.matchAll(localImports)) {

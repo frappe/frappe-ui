@@ -76,8 +76,9 @@ components which expect the newer one.
 
 ## Navigation destinations
 
-Run `npx destinations-v1 .` to migrate statically named component props. It
-covers the first three renames below, including bound and shorthand props:
+Run `npx destinations-v1 .` to migrate statically named component props imported
+from `frappe-ui`. It covers the first three renames below, including bound and
+shorthand props:
 
 - Replace component router props named `to` with `route`. Keep `to` only inside
   the route object itself.
@@ -86,8 +87,9 @@ covers the first three renames below, including bound and shorthand props:
 - Replace TabButton `tooltip` with app-owned help UI and convert non-string
   labels to strings.
 
-The codemod deliberately leaves JavaScript and TypeScript data objects, render
-functions, and `v-bind="object"` spreads alone. Review those shapes by hand.
+The codemod deliberately leaves globally registered components, JavaScript and
+TypeScript data objects, render functions, and `v-bind="object"` spreads alone.
+Review those shapes by hand.
 
 ## Dialog
 

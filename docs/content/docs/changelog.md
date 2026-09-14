@@ -1980,8 +1980,9 @@ semantics for assistive technologies.
 Router destinations are now named `route` on `ListRow`, `SidebarItem`,
 `SidebarRailItem`, and `MobileNavItem`. Plain external URLs use `href`, including
 the former Button `link` prop. Run `npx destinations-v1 .` for statically named
-template props, then inspect option objects, render functions, and `v-bind`
-spreads by hand.
+template props on components imported from `frappe-ui`, then inspect globally
+registered components, option objects, render functions, and `v-bind` spreads
+by hand.
 
 TabButton options keep `route`, `href`, and `onClick`, require a string `label`,
 and no longer accept `tooltip`. Move extra help into app-owned UI.
