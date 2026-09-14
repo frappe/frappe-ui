@@ -190,7 +190,7 @@
   },
   {
     name: 'virtual',
-    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. Height comes from the parent List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
+    description: 'Window the rows so only rows near the viewport mount. Height comes from\nthe parent List\'s `rowHeight`; the scroll container is the nearest\nscrollable ancestor.',
     required: false,
     type: 'boolean'
   },
