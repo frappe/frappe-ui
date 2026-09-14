@@ -14,6 +14,7 @@ import { Text } from '@tiptap/extension-text'
 import { PluginKey } from '@tiptap/pm/state'
 import { Typography } from '../../extensions'
 import { MentionExtension } from './mention-extension'
+import { _resetWarnDeprecated } from '../../../../utils/warnDeprecated'
 
 const openEditors: Editor[] = []
 
@@ -60,6 +61,7 @@ function type(editor: Editor, text: string) {
 describe('Mention allowedPrefixes', () => {
   afterEach(() => {
     while (openEditors.length) openEditors.pop()?.destroy()
+    _resetWarnDeprecated()
   })
 
   it('opens at the start of a paragraph and after a space', () => {
@@ -80,7 +82,7 @@ describe('Mention allowedPrefixes', () => {
     ;(extension.config.addExtensions as Function).call(extension)
 
     expect(warn).toHaveBeenCalledWith(
-      '[frappe-ui] Mention: `component` was renamed to `nodeView`.',
+      '[frappe-ui] Mention.component is deprecated. Use Mention.nodeView instead.',
     )
     expect(warn).toHaveBeenCalledTimes(1)
     warn.mockRestore()

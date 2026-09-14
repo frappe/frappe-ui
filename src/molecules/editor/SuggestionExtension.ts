@@ -3,6 +3,7 @@ import Suggestion from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
 import type { Component } from 'vue'
 import type { Editor } from './useEditor'
+import { warnDeprecated } from '#utils/warnDeprecated'
 import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
@@ -30,15 +31,13 @@ export type SuggestionExtensionOptions<TItem = any> = {
   }) => void
 }
 
-let warnedLegacyComponent = false
-
 function buildSuggestionExtension<TItem = any>(
   options: SuggestionExtensionOptions<TItem>,
 ) {
-  if (import.meta.env.DEV && !warnedLegacyComponent && 'component' in options) {
-    warnedLegacyComponent = true
-    console.warn(
-      '[frappe-ui] SuggestionExtension: `component` was renamed to `listComponent`.',
+  if ('component' in options) {
+    warnDeprecated(
+      'SuggestionExtension.component',
+      'SuggestionExtension.listComponent',
     )
   }
   return Extension.create({

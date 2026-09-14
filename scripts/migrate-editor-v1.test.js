@@ -98,10 +98,11 @@ describe('editor v1 migration', () => {
   })
 
   it('refuses object v-bind because the property needs JavaScript context', () => {
-    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template><EditorFixedMenu v-bind="{ buttonSize }" /></template>\n`
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ buttonSize }" />\n  <EditorFixedMenu v-bind="{ 'button-size': menuSize }" />\n</template>\n`
 
     const result = migrateEditor(source, 'Bound.vue')
     expect(result.changed).toBe(false)
+    expect(result.refusals).toHaveLength(2)
     expect(result.refusals[0].message).toContain('object v-bind')
   })
 

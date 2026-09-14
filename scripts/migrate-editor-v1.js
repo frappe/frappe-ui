@@ -181,7 +181,7 @@ function rewriteTag(tag, tagName, filename, offset, source) {
     if (
       attribute.name === 'v-bind' &&
       attribute.value &&
-      /\bbuttonSize\b/.test(attribute.value)
+      /\bbuttonSize\b|['"]button-size['"]\s*:/.test(attribute.value)
     ) {
       refusals.push({
         file: filename,

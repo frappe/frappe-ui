@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createApp, defineComponent, h, nextTick, ref, toRaw } from 'vue'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 const editors: any[] = []
 
@@ -126,6 +127,7 @@ vi.mock('@tiptap/vue-3', () => ({
 
 beforeEach(() => {
   editors.length = 0
+  _resetWarnDeprecated()
 })
 
 describe('frappe-ui/editor minimal primitives', () => {
@@ -177,7 +179,7 @@ describe('frappe-ui/editor minimal primitives', () => {
     } as any)
 
     expect(warn).toHaveBeenCalledWith(
-      '[frappe-ui] SuggestionExtension: `component` was renamed to `listComponent`.',
+      '[frappe-ui] SuggestionExtension.component is deprecated. Use SuggestionExtension.listComponent instead.',
     )
     expect(warn).toHaveBeenCalledTimes(1)
     warn.mockRestore()

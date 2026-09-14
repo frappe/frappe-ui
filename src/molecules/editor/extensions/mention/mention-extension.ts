@@ -14,6 +14,7 @@ import {
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
+import { warnDeprecated } from '#utils/warnDeprecated'
 import {
   insertSuggestionNode,
   filterByQuery,
@@ -32,8 +33,6 @@ export interface MentionSuggestionItem extends BaseSuggestionItem {
 interface MentionSuggestionOptions {
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
 }
-
-let warnedLegacyComponent = false
 
 function createMentionNode(nodeView?: Component) {
   const nodeViewExtension = nodeView
@@ -196,15 +195,8 @@ export const MentionExtension = Extension.create<{
   },
 
   addExtensions() {
-    if (
-      import.meta.env.DEV &&
-      !warnedLegacyComponent &&
-      'component' in this.options
-    ) {
-      warnedLegacyComponent = true
-      console.warn(
-        '[frappe-ui] Mention: `component` was renamed to `nodeView`.',
-      )
+    if ('component' in this.options) {
+      warnDeprecated('Mention.component', 'Mention.nodeView')
     }
     const node = createMentionNode(this.options.nodeView)
     // Inert until configured: only wire the `@` suggestion when an item source
