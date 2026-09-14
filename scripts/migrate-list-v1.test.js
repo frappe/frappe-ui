@@ -40,7 +40,7 @@ describe('row selector migration', () => {
     const { migrated } = migrateList(source)
 
     expect(migrated).toContain("[data-slot='list-row'][data-selected]")
-    expect(migrated).toContain('[data-state=active][data-slot=list-row]')
+    expect(migrated).toContain("[data-state='active'][data-slot=list-row]")
     expect(migrated).toContain("[data-state='selected'] .child")
     expect(migrated).toContain('\n[data-active] {}')
   })
@@ -137,14 +137,20 @@ const example = "<ListGroup><template #header>x</template></ListGroup>"
     expect(migrateList(source).migrated).toBe(source)
   })
 
-  it('leaves same-named components alone without a frappe-ui/list import', () => {
+  it('reports same-named components without a frappe-ui/list import', () => {
     const source = `<script setup>
 import ListGroup from './ListGroup.vue'
 </script>
 <ListGroup><template #header>Local</template></ListGroup>
 <ListHeaderCellSort><template #suffix>Local</template></ListHeaderCellSort>`
 
-    expect(migrateList(source).migrated).toBe(source)
+    const result = migrateList(source)
+
+    expect(result.migrated).toBe(source)
+    expect(result.refusals.map(({ message }) => message)).toEqual([
+      '<ListGroup> #header found but no frappe-ui/list import; check by hand',
+      '<ListHeaderCellSort> #suffix found but no frappe-ui/list import; check by hand',
+    ])
   })
 
   it('renames a conditional static slot', () => {
@@ -156,6 +162,16 @@ import { ListGroup } from 'frappe-ui/list'
     expect(migrateList(source).migrated).toContain(
       '<template v-if="visible" #label>',
     )
+  })
+
+  it('keeps component ancestry across prose comparisons and HTML void tags', () => {
+    const source = `<script setup>
+import { ListGroup } from 'frappe-ui/list'
+</script>
+a < b and c > d
+<ListGroup><img src="group.svg"><template #header>Title</template></ListGroup>`
+
+    expect(migrateList(source).migrated).toContain('<template #label>')
   })
 })
 

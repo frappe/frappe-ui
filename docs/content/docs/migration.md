@@ -1075,7 +1075,7 @@ components, and the two statically named slots below:
 
 | Before | After |
 | --- | --- |
-| `[data-slot="list-row"][data-active]` | `[data-slot="list-row"][data-state="active"]` |
+| `[data-slot='list-row'][data-active]` | `[data-slot='list-row'][data-state='active']` |
 | `[data-slot="list-row"][data-state="selected"]` | `[data-slot="list-row"][data-selected]` |
 | `ListGroup` `#header` | `#label` |
 | `ListHeaderCellSort` `#suffix` | `#sort-indicator` |
@@ -1094,10 +1094,11 @@ Selection and interactivity are independent boolean attributes:
 `data-selected` and `data-interactive`. The sort-indicator slot keeps its
 edge-aware placement, including the leading edge for `align="end"`.
 
-The codemod leaves same-named local or globally registered components alone.
-It exits non-zero and leaves a file unchanged when it finds a dynamic slot
-under either renamed component; replace that slot by hand. These slot renames
-are silent breaks because Vue drops content passed under an unknown name.
+The codemod leaves same-named local or globally registered components alone. If
+one still contains an old slot name, it reports the ambiguity for a manual
+check. It also exits non-zero and leaves a file unchanged when it finds a
+dynamic slot under either renamed component. These slot renames are silent
+breaks because Vue drops content passed under an unknown name.
 
 ## ListView — moved to `frappe-ui/experimental`
 

@@ -20,9 +20,30 @@ const EXTENSIONS = new Set([
   '.vue',
 ])
 const COMPONENTS = new Set(['ListGroup', 'ListHeaderCellSort', 'ListRow'])
+const VOID_ELEMENTS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'source',
+  'track',
+  'wbr',
+])
 
 const kebab = (name) =>
   name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+
+function knownComponent(name) {
+  return [...COMPONENTS].find(
+    (component) => name === component || name === kebab(component),
+  )
+}
 
 function lineAt(source, index) {
   return source.slice(0, index).split('\n').length
@@ -186,7 +207,7 @@ function migrateMarkup(source, aliases) {
       break
     }
     const tag = source.slice(start, end + 1)
-    const close = /^<\s*\/\s*([A-Za-z][\w.-]*)/.exec(tag)
+    const close = /^<\/([A-Za-z][\w.-]*)/.exec(tag)
     if (close) {
       const at = stack.map((entry) => entry.name).lastIndexOf(close[1])
       if (at !== -1) stack.splice(at)
@@ -194,7 +215,7 @@ function migrateMarkup(source, aliases) {
       cursor = end + 1
       continue
     }
-    const open = /^<\s*([A-Za-z][\w.-]*)/.exec(tag)
+    const open = /^<([A-Za-z][\w.-]*)/.exec(tag)
     if (!open) {
       migrated += tag
       cursor = end + 1
@@ -212,31 +233,63 @@ function migrateMarkup(source, aliases) {
       continue
     }
     const component = aliases.get(name)
+    const ambiguousComponent = component ? undefined : knownComponent(name)
     let nextTag = tag
     if (component === 'ListRow') nextTag = replaceListRowUtilities(nextTag)
+    if (
+      ambiguousComponent === 'ListRow' &&
+      /data-\[(?:active|state=selected)\]/.test(tag)
+    ) {
+      refusals.push({
+        line: lineAt(source, start),
+        message:
+          '<ListRow> state utility found but no frappe-ui/list import; check by hand',
+      })
+    }
 
-    const parent = stack.at(-1)?.component
-    if (name === 'template' && parent) {
+    const parentEntry = stack.at(-1)
+    const parent = parentEntry?.component
+    const ambiguousParent = parentEntry?.ambiguousComponent
+    if (name === 'template' && (parent || ambiguousParent)) {
       if (/#\[|v-slot:\[/.test(tag)) {
-        if (parent === 'ListGroup' || parent === 'ListHeaderCellSort') {
+        const owner = parent || ambiguousParent
+        if (owner === 'ListGroup' || owner === 'ListHeaderCellSort') {
           refusals.push({
             line: lineAt(source, start),
-            message: `dynamic slot under <${parent}> must be checked manually`,
+            message: `dynamic slot under <${owner}> must be checked manually`,
           })
         }
       } else if (parent === 'ListGroup') {
         nextTag = replaceStaticSlot(nextTag, 'header', 'label')
       } else if (parent === 'ListHeaderCellSort') {
         nextTag = replaceStaticSlot(nextTag, 'suffix', 'sort-indicator')
+      } else if (
+        ambiguousParent === 'ListGroup' &&
+        /(?:#|v-slot:)header(?=[.\s=/>])|slot\s*=\s*(['"])header\1/.test(tag)
+      ) {
+        refusals.push({
+          line: lineAt(source, start),
+          message:
+            '<ListGroup> #header found but no frappe-ui/list import; check by hand',
+        })
+      } else if (
+        ambiguousParent === 'ListHeaderCellSort' &&
+        /(?:#|v-slot:)suffix(?=[.\s=/>])|slot\s*=\s*(['"])suffix\1/.test(tag)
+      ) {
+        refusals.push({
+          line: lineAt(source, start),
+          message:
+            '<ListHeaderCellSort> #suffix found but no frappe-ui/list import; check by hand',
+        })
       }
     }
 
     migrated += nextTag
     if (
       !/\/\s*>$/.test(tag) &&
-      !['slot', 'img', 'input', 'br', 'hr'].includes(name)
+      !VOID_ELEMENTS.has(name.toLowerCase())
     ) {
-      stack.push({ name, component })
+      stack.push({ name, component, ambiguousComponent })
     }
     cursor = end + 1
   }
@@ -259,11 +312,11 @@ function migrateAnchoredSelectors(source) {
     )
     .replace(
       new RegExp(`(${LIST_ROW_SLOT})\\[data-active\\]`, 'g'),
-      '$1[data-state=active]',
+      "$1[data-state='active']",
     )
     .replace(
       new RegExp(`\\[data-active\\](${LIST_ROW_SLOT})`, 'g'),
-      '[data-state=active]$1',
+      "[data-state='active']$1",
     )
 }
 
