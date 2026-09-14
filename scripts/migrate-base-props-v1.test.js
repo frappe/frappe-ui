@@ -47,8 +47,15 @@ describe('base props migration', () => {
   })
 
   it('leaves a locally shadowed component with the same tag name alone', () => {
-    const source = `<script setup>\nimport Icon from './Icon.vue'\n</script>\n<template><Icon name="sprite-name" /></template>`
+    const source = `<script setup>\nimport { Icon } from './icons'\n</script>\n<template><Icon name="sprite-name" /></template>`
     expect(migrateBaseProps(source).migrated).toBe(source)
+  })
+
+  it('migrates target elements behind structural directives', () => {
+    const source = `<template>\n  <Icon v-if="show" name="lucide-x" />\n  <Divider v-else-if="other" position="start" />\n  <template v-if="steps"><Progress intervals interval-count="3" /></template>\n</template>`
+    expect(migrateBaseProps(source).migrated).toBe(
+      `<template>\n  <Icon v-if="show" icon="lucide-x" />\n  <Divider v-else-if="other" align="start" />\n  <template v-if="steps"><Progress :intervals="3" /></template>\n</template>`,
+    )
   })
 
   it('combines Progress boolean mode and interval count', () => {
@@ -66,9 +73,10 @@ describe('base props migration', () => {
   })
 
   it('refuses an ambiguous dynamic Progress boolean', () => {
-    const source = `<template><Progress :intervals="showSteps" /></template>`
+    const source = `<template>\n  <Progress :intervals="showSteps" />\n  <Progress :intervals="intervals" />\n  <Progress :intervals />\n</template>`
     const result = migrateBaseProps(source)
     expect(result.migrated).toBe(source)
+    expect(result.refusals).toHaveLength(3)
     expect(result.refusals[0].message).toContain(
       'may still be the v0 boolean mode',
     )
@@ -120,5 +128,22 @@ describe('base props migration', () => {
     expect(fs.readFileSync(path.join(dir, 'Example.vue'), 'utf8')).toContain(
       'align="end"',
     )
+  })
+
+  it('does not follow target symlinks', () => {
+    const outside = tempDir({
+      'Outside.vue': `<template><Icon name="lucide-x" /></template>`,
+    })
+    const dir = tempDir({})
+    fs.symlinkSync(outside, path.join(dir, 'linked'), 'dir')
+
+    const result = spawnSync(process.execPath, [SCRIPT, dir], {
+      encoding: 'utf8',
+    })
+
+    expect(result.status).toBe(0)
+    expect(
+      fs.readFileSync(path.join(outside, 'Outside.vue'), 'utf8'),
+    ).toContain(' name=')
   })
 })

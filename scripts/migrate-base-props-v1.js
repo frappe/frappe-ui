@@ -3,7 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { compileTemplate, parse as parseSfc } from '@vue/compiler-sfc'
+import { parse as parseSfc } from '@vue/compiler-sfc'
 
 const NodeTypes = {
   ELEMENT: 1,
@@ -22,6 +22,7 @@ Renames the v1 base-component props on statically named Vue component tags:
 const COMPONENTS = new Set(['Icon', 'Divider', 'Progress'])
 
 function walk(target, visited = new Set()) {
+  if (fs.lstatSync(target).isSymbolicLink()) return []
   const resolved = fs.realpathSync(target)
   if (visited.has(resolved)) return []
   visited.add(resolved)
@@ -45,14 +46,19 @@ function setAlias(aliases, binding, component) {
 function importedComponentAliases(source) {
   const aliases = new Map()
   for (const name of COMPONENTS) setAlias(aliases, name, name)
-  const importPattern =
-    /import\s*\{([\s\S]*?)\}\s*from\s*['"](?:frappe-ui|\.\.?\/[^'"]*)['"]/g
+  const importPattern = /import\s*\{([\s\S]*?)\}\s*from\s*['"]([^'"]+)['"]/g
   for (const match of source.matchAll(importPattern)) {
     for (const part of match[1].split(',')) {
       const binding = part
         .trim()
         .match(/^(Icon|Divider|Progress)(?:\s+as\s+([A-Za-z_$][\w$]*))?$/)
-      if (binding) setAlias(aliases, binding[2] || binding[1], binding[1])
+      if (!binding) continue
+      const name = binding[2] || binding[1]
+      if (match[2] === 'frappe-ui') setAlias(aliases, name, binding[1])
+      else {
+        aliases.delete(name)
+        aliases.delete(kebabCase(name))
+      }
     }
   }
   for (const match of source.matchAll(
@@ -109,7 +115,6 @@ function looksNumericExpression(expression) {
   return (
     /^\d+(?:\.\d+)?$/.test(expression) ||
     /(?:^|\.)(?:length|size)$/.test(expression) ||
-    /(?:count|intervals|segments)$/i.test(expression) ||
     /^(?:Number|parseInt|parseFloat)\s*\(/.test(expression) ||
     /[+*/%]|\?[^:]+:\s*(?:undefined|\d)/.test(expression)
   )
@@ -132,14 +137,19 @@ function progressEdit(element, offset, refusals) {
   }
 
   const condition = boundExpression(intervals)
+  const shorthandBinding =
+    intervals.type === NodeTypes.DIRECTIVE && condition === undefined
   // A dynamic `:intervals` without `intervalCount` may already be the v1
   // numeric API. Leaving it alone makes repeat runs idempotent.
-  if (
-    !count &&
-    condition !== 'true' &&
-    condition !== 'false' &&
-    condition !== undefined
-  ) {
+  if (!count && shorthandBinding) {
+    refusals.push({
+      line: intervals.loc.start.line,
+      message:
+        'Progress shorthand :intervals may still be the v0 boolean mode; replace it with a segment count',
+    })
+    return []
+  }
+  if (!count && condition !== 'true' && condition !== 'false') {
     if (!looksNumericExpression(condition)) {
       refusals.push({
         line: intervals.loc.start.line,
@@ -219,24 +229,7 @@ export function migrateBaseProps(source) {
   if (!block) return { migrated: source, changes: [], refusals: [] }
 
   const aliases = importedComponentAliases(source)
-  const compiled = compileTemplate({
-    source: block.content,
-    filename: 'component.vue',
-    id: 'base-props-v1',
-  })
-  if (compiled.errors.length) {
-    return {
-      migrated: source,
-      changes: [],
-      refusals: [
-        {
-          line: 1,
-          message: `Template parse error: ${String(compiled.errors[0])}`,
-        },
-      ],
-    }
-  }
-  const ast = compiled.ast
+  const ast = block.ast
   const edits = []
   const refusals = []
 
@@ -246,19 +239,15 @@ export function migrateBaseProps(source) {
       if (component === 'Icon') {
         for (const prop of node.props) {
           if (propName(prop) === 'name')
-            edits.push(
-              renamePropEdit(prop, 'name', 'icon', block.loc.start.offset),
-            )
+            edits.push(renamePropEdit(prop, 'name', 'icon', 0))
         }
       } else if (component === 'Divider') {
         for (const prop of node.props) {
           if (propName(prop) === 'position')
-            edits.push(
-              renamePropEdit(prop, 'position', 'align', block.loc.start.offset),
-            )
+            edits.push(renamePropEdit(prop, 'position', 'align', 0))
         }
       } else if (component === 'Progress') {
-        edits.push(...progressEdit(node, block.loc.start.offset, refusals))
+        edits.push(...progressEdit(node, 0, refusals))
       }
     }
     for (const child of node.children || []) visit(child)
