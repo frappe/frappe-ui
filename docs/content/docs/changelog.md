@@ -9,6 +9,12 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Vite directory lookup terminates on Windows
+
+Bench and app discovery now stop at drive-letter and network-share roots instead
+of hanging when no matching directory exists. Root-level Bench layouts are also
+recognized consistently across platforms.
+
 ### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
 
 The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`
