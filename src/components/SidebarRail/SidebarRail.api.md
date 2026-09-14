@@ -33,9 +33,15 @@
   },
   {
     name: 'to',
-    description: 'Navigation target. When set, the item renders as a router link; otherwise\nit renders as a button. A `click` event fires in both cases.',
+    description: 'Router navigation target. When neither `to` nor `href` is set, the item\nrenders as a button. A `click` event fires in both cases.',
     required: false,
     type: 'string | kt | Tt'
+  },
+  {
+    name: 'href',
+    description: 'Plain link destination. Takes precedence over `to` and bypasses the router.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'active',

@@ -46,10 +46,13 @@ export interface SidebarItemProps {
   suffix?: string
 
   /**
-   * Navigation target. When set the row's main area renders as a router link;
-   * otherwise it renders as a button. A click still invokes `onClick`.
+   * Router navigation target. When neither `to` nor `href` is set, the row's
+   * main area renders as a button. A click still invokes `onClick`.
    */
   to?: RouteLocationRaw
+
+  /** Plain link destination. Takes precedence over `to` and bypasses the router. */
+  href?: string
 
   /**
    * Marks the row active (`data-state="active"`). When omitted, active state is

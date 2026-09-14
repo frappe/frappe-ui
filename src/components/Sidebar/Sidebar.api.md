@@ -77,9 +77,15 @@
   },
   {
     name: 'to',
-    description: 'Navigation target. When set the row\'s main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.',
+    description: 'Router navigation target. When neither `to` nor `href` is set, the row\'s\nmain area renders as a button. A click still invokes `onClick`.',
     required: false,
     type: 'string | kt | Tt'
+  },
+  {
+    name: 'href',
+    description: 'Plain link destination. Takes precedence over `to` and bypasses the router.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'active',
