@@ -150,8 +150,14 @@ function progressEdit(element, offset, refusals) {
   }
 
   const condition = boundExpression(intervals)
+  const staticValue =
+    intervals.type === NodeTypes.ATTRIBUTE
+      ? intervals.value?.content
+      : undefined
   const bareBoolean =
     intervals.type === NodeTypes.ATTRIBUTE && intervals.value === undefined
+  const numericStatic =
+    staticValue !== undefined && /^\d+(?:\.\d+)?$/.test(staticValue)
   const shorthandBinding =
     intervals.type === NodeTypes.DIRECTIVE && condition === undefined
   // A dynamic `:intervals` without `intervalCount` may already be the v1
@@ -164,11 +170,18 @@ function progressEdit(element, offset, refusals) {
     })
     return []
   }
-  if (!count && !bareBoolean && condition !== 'true' && condition !== 'false') {
+  if (
+    !count &&
+    !bareBoolean &&
+    staticValue !== 'true' &&
+    !numericStatic &&
+    condition !== 'true' &&
+    condition !== 'false'
+  ) {
     if (!looksNumericExpression(condition)) {
       refusals.push({
         line: intervals.loc.start.line,
-        message: `Progress :intervals="${condition}" may still be the v0 boolean mode; replace it with a segment count`,
+        message: `Progress ${intervals.loc.source} may still be the v0 boolean mode; replace it with a segment count`,
       })
     }
     return []
@@ -177,6 +190,8 @@ function progressEdit(element, offset, refusals) {
   let replacement
   if (condition === 'false') {
     replacement = ''
+  } else if (!count && numericStatic) {
+    replacement = `:intervals="${staticValue}"`
   } else {
     const countValue = count ? countExpression(count) : '6'
     if (!countValue) {
@@ -323,7 +338,9 @@ function main() {
     `\n${dryRun ? '[dry-run] would update' : 'Updated'} ${changed} files`,
   )
   if (refusals.length) {
-    console.error(`\nNot converted — ${refusals.length} sites need a decision:`)
+    console.error(
+      `\nNot converted — ${refusals.length} sites need a decision; affected files were left unchanged:`,
+    )
     for (const refusal of refusals)
       console.error(`  ${refusal.file}:L${refusal.line} ${refusal.message}`)
     process.exit(1)

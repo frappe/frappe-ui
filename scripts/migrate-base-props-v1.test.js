@@ -59,9 +59,9 @@ describe('base props migration', () => {
   })
 
   it('preserves same-name bindings and the default interval count', () => {
-    const source = `<template><Icon :name /><Divider v-bind:position /><Progress intervals /></template>`
+    const source = `<template><Icon :name /><Divider v-bind:position /><Progress intervals /><Progress intervals="true" /><Progress intervals="5" /></template>`
     expect(migrateBaseProps(source).migrated).toBe(
-      `<template><Icon :icon="name" /><Divider v-bind:align="position" /><Progress :intervals="6" /></template>`,
+      `<template><Icon :icon="name" /><Divider v-bind:align="position" /><Progress :intervals="6" /><Progress :intervals="6" /><Progress :intervals="5" /></template>`,
     )
   })
 
@@ -80,13 +80,14 @@ describe('base props migration', () => {
   })
 
   it('refuses an ambiguous dynamic Progress boolean', () => {
-    const source = `<template>\n  <Progress :intervals="showSteps" />\n  <Progress :intervals="intervals" />\n  <Progress :intervals />\n</template>`
+    const source = `<template>\n  <Progress :intervals="showSteps" />\n  <Progress :intervals="intervals" />\n  <Progress :intervals />\n  <Progress intervals="maybe" />\n</template>`
     const result = migrateBaseProps(source)
     expect(result.migrated).toBe(source)
-    expect(result.refusals).toHaveLength(3)
+    expect(result.refusals).toHaveLength(4)
     expect(result.refusals[0].message).toContain(
       'may still be the v0 boolean mode',
     )
+    expect(result.refusals[3].message).toContain('intervals="maybe"')
   })
 
   it('cleans spacing when intervalCount precedes intervals', () => {
@@ -122,6 +123,18 @@ describe('base props migration', () => {
     expect(fs.readFileSync(path.join(dir, 'Example.vue'), 'utf8')).toContain(
       ' icon=',
     )
+  })
+
+  it('reports that a refused file is left unchanged', () => {
+    const source = `<template><Icon name="lucide-x" /><Progress :intervals="enabled" /></template>`
+    const dir = tempDir({ 'Example.vue': source })
+    const result = spawnSync(process.execPath, [SCRIPT, dir], {
+      encoding: 'utf8',
+    })
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('affected files were left unchanged')
+    expect(fs.readFileSync(path.join(dir, 'Example.vue'), 'utf8')).toBe(source)
   })
 
   it('runs through an installed-style binary symlink', () => {
