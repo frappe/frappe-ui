@@ -76,8 +76,7 @@ const toggledDiv = ref(false)
     <div class="p-5 h-fit prose prose-sm">
       <Progress
         :value="progressVal * 30"
-        :intervals="true"
-        :interval-count="3"
+        :intervals="3"
         size="md"
         class="-mb-2"
       />

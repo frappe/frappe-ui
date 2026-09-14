@@ -3,7 +3,7 @@ import Icon from './Icon.vue'
 
 describe('<Icon />', () => {
   it('renders a lucide string as a span with the class', () => {
-    cy.mount(Icon, { props: { name: 'lucide-star' } })
+    cy.mount(Icon, { props: { icon: 'lucide-star' } })
     cy.get('span').should('have.class', 'lucide-star')
     cy.get('span').should('have.attr', 'aria-hidden', 'true')
     cy.get('span').should('be.empty')
@@ -11,7 +11,7 @@ describe('<Icon />', () => {
 
   it('passes through fallthrough class on lucide spans', () => {
     cy.mount(Icon, {
-      props: { name: 'lucide-check' },
+      props: { icon: 'lucide-check' },
       attrs: { class: 'size-4 text-ink-gray-6' },
     })
     cy.get('span')
@@ -21,18 +21,18 @@ describe('<Icon />', () => {
   })
 
   it('renders an emoji string as text content', () => {
-    cy.mount(Icon, { props: { name: '🚀' } })
+    cy.mount(Icon, { props: { icon: '🚀' } })
     cy.get('span').should('have.text', '🚀')
     cy.get('span').should('have.attr', 'aria-hidden', 'true')
   })
 
   it('treats other glyphs (no ASCII letters/digits) as emoji', () => {
-    cy.mount(Icon, { props: { name: '✨' } })
+    cy.mount(Icon, { props: { icon: '✨' } })
     cy.get('span').should('have.text', '✨')
   })
 
   it('renders nothing for an unsupported (non-lucide, non-emoji) string', () => {
-    cy.mount(Icon, { props: { name: 'check' } })
+    cy.mount(Icon, { props: { icon: 'check' } })
     cy.get('span').should('not.exist')
     cy.get('svg').should('not.exist')
   })
@@ -44,7 +44,7 @@ describe('<Icon />', () => {
         return h('svg', { 'data-cy': 'custom-icon' })
       },
     }
-    cy.mount(Icon, { props: { name: CustomIcon } })
+    cy.mount(Icon, { props: { icon: CustomIcon } })
     cy.get('[data-cy="custom-icon"]').should('exist')
   })
 
@@ -56,18 +56,14 @@ describe('<Icon />', () => {
       },
     }
     cy.mount(Icon, {
-      props: { name: CustomIcon },
+      props: { icon: CustomIcon },
       attrs: { class: 'size-5' },
     })
     cy.get('[data-cy="custom-icon"]').should('have.class', 'size-5')
   })
 
-  it('renders nothing when name is falsy', () => {
-    cy.mount(Icon, { props: { name: null } })
-    cy.get('span').should('not.exist')
-    cy.get('svg').should('not.exist')
-
-    cy.mount(Icon, { props: { name: '' } })
+  it('renders nothing when icon is empty or omitted', () => {
+    cy.mount(Icon, { props: { icon: '' } })
     cy.get('span').should('not.exist')
     cy.get('svg').should('not.exist')
 

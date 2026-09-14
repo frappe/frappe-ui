@@ -7,11 +7,8 @@
       :class="actionLineClasses"
     />
     <Button
-      :label="props.action.label"
-      :loading="props.action.loading"
+      v-bind="actionButtonProps"
       class="relative z-10"
-      size="sm"
-      variant="outline"
       @click="actionOnClick"
     />
   </div>
@@ -22,12 +19,19 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { Button } from '../../index'
+import { mergeActionProps } from '../shared/action'
 import type { DividerProps } from './types'
 
 const props = withDefaults(defineProps<DividerProps>(), {
   orientation: 'horizontal',
-  position: 'center',
+  align: 'center',
 })
+
+const actionButtonProps = computed(() =>
+  props.action
+    ? mergeActionProps({ size: 'sm', variant: 'outline' }, props.action)
+    : undefined,
+)
 
 const actionOnClick = computed(() => {
   return props.action?.onClick
@@ -54,7 +58,7 @@ const actionContainerClasses = computed(() => {
       center: 'justify-center',
       start: 'justify-start pl-4',
       end: 'justify-end pr-4',
-    }[props.position]
+    }[props.align]
 
     return [...baseClasses, 'flex w-full min-h-7 items-center', positionClasses]
   }
@@ -64,7 +68,7 @@ const actionContainerClasses = computed(() => {
     center: 'items-center',
     start: 'items-start pt-4',
     end: 'items-end pb-4',
-  }[props.position]
+  }[props.align]
 
   return [...baseClasses, 'flex justify-center', heightClasses, positionClasses]
 })

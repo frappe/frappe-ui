@@ -13,7 +13,7 @@
     default: '"horizontal"'
   },
   {
-    name: 'position',
+    name: 'align',
     description: 'Where the action sits along the rule. Ignored without an `action`, since a\nplain rule has nothing to place.',
     required: false,
     type: '"start" | "center" | "end"',

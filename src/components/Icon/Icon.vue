@@ -12,27 +12,27 @@ defineOptions({ inheritAttrs: false })
 const props = defineProps<IconProps>()
 
 watchEffect(() => {
-  warnUnsupportedIconString('Icon', 'name', props.name)
+  warnUnsupportedIconString('Icon', 'icon', props.icon)
 })
 </script>
 
 <template>
   <span
-    v-if="typeof name === 'string' && isLucideIconString(name)"
-    :class="[name]"
+    v-if="typeof icon === 'string' && isLucideIconString(icon)"
+    :class="[icon]"
     v-bind="$attrs"
     aria-hidden="true"
   />
   <span
-    v-else-if="typeof name === 'string' && isEmojiIconString(name)"
+    v-else-if="typeof icon === 'string' && isEmojiIconString(icon)"
     class="inline-flex items-center justify-center leading-none"
     v-bind="$attrs"
     aria-hidden="true"
-    >{{ name }}</span
+    >{{ icon }}</span
   >
   <component
-    v-else-if="name && typeof name !== 'string'"
-    :is="name"
+    v-else-if="icon && typeof icon !== 'string'"
+    :is="icon"
     v-bind="$attrs"
     aria-hidden="true"
   />

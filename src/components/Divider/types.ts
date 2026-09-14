@@ -1,14 +1,7 @@
-/** The inline action a `Divider` can host on its rule. */
-export interface DividerAction {
-  /** Text of the action button. */
-  label: string
+import type { Action } from '../shared/action'
 
-  /** Called when the action button is clicked. */
-  onClick?: () => any
-
-  /** Shows a spinner in the action button and blocks further clicks. */
-  loading?: boolean
-}
+/** A shared button action with no component-specific callback context. */
+export type DividerAction = Action<void> & { label: string }
 
 export interface DividerProps {
   /** Which way the rule runs. */
@@ -18,7 +11,7 @@ export interface DividerProps {
    * Where the action sits along the rule. Ignored without an `action`, since a
    * plain rule has nothing to place.
    */
-  position?: 'start' | 'center' | 'end'
+  align?: 'start' | 'center' | 'end'
 
   /**
    * Stretches the divider to the cross-axis size of its flex parent

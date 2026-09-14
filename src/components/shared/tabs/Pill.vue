@@ -108,8 +108,8 @@ function hasLabel(label: PillProps['label']) {
 
 <template>
   <span :class="rootClasses" :data-state="active ? 'active' : 'inactive'">
-    <Icon v-if="icon" :name="icon" :class="iconClass" />
-    <Icon v-else-if="iconLeft" :name="iconLeft" :class="iconClass" />
+    <Icon v-if="icon" :icon="icon" :class="iconClass" />
+    <Icon v-else-if="iconLeft" :icon="iconLeft" :class="iconClass" />
 
     <span
       v-if="$slots.prefix"

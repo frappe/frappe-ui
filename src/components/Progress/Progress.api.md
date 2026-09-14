@@ -34,17 +34,9 @@
   },
   {
     name: 'intervals',
-    description: 'Whether to show interval markers on the progress bar',
+    description: 'Number of interval markers to show; omit for a continuous progress bar',
     required: false,
-    type: 'boolean',
-    default: 'false'
-  },
-  {
-    name: 'intervalCount',
-    description: 'Number of intervals to display if `intervals` is true',
-    required: false,
-    type: 'number',
-    default: '6'
+    type: 'number'
   }
 ]
 

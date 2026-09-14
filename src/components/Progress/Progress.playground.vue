@@ -17,8 +17,7 @@ const knobs: Knob[] = [
     ],
   },
   { name: 'hint', type: 'switch', default: true },
-  { name: 'intervals', type: 'switch', default: false },
-  { name: 'intervalCount', type: 'text', default: '6', width: '4rem' },
+  { name: 'intervals', type: 'text', default: '', width: '4rem' },
 ]
 
 function buildCode(v: Record<string, any>) {
@@ -26,11 +25,8 @@ function buildCode(v: Record<string, any>) {
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.hint) attrs.push('hint')
-  if (v.intervals) {
-    attrs.push('intervals')
-    const ic = Number(v.intervalCount)
-    if (ic && ic !== 6) attrs.push(`:interval-count="${ic}"`)
-  }
+  const intervals = Number(v.intervals)
+  if (intervals > 0) attrs.push(`:intervals="${intervals}"`)
   return ['<Progress', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
@@ -44,8 +40,7 @@ function buildCode(v: Record<string, any>) {
           :label="values.label || undefined"
           :size="values.size"
           :hint="values.hint"
-          :intervals="values.intervals"
-          :interval-count="Number(values.intervalCount) || 6"
+          :intervals="Number(values.intervals) || undefined"
         />
       </div>
     </template>

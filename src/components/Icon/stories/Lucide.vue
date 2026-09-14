@@ -4,9 +4,9 @@ import { Icon } from 'frappe-ui'
 
 <template>
   <div class="flex items-center gap-4 text-ink-gray-8">
-    <Icon name="lucide-plus" class="size-5" />
-    <Icon name="lucide-trash-2" class="size-5" />
-    <Icon name="lucide-check" class="size-5" />
-    <Icon name="🎉" class="text-xl" />
+    <Icon icon="lucide-plus" class="size-5" />
+    <Icon icon="lucide-trash-2" class="size-5" />
+    <Icon icon="lucide-check" class="size-5" />
+    <Icon icon="🎉" class="text-xl" />
   </div>
 </template>

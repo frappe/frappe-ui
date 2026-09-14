@@ -6,6 +6,12 @@ components take an icon prop directly and render it through `Icon`
 internally — reach for `Icon` yourself only when you need an icon outside
 of one of those props.
 
+Pass the source through the `icon` prop:
+
+```vue
+<Icon icon="lucide-circle-check" class="size-4" />
+```
+
 ## Lucide string
 
 <ComponentPreview name="Icon-Lucide" />
