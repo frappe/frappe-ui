@@ -147,6 +147,10 @@ function migrateMarkup(source, aliases) {
   return migrated
 }
 
+/**
+ * Rename destination attributes on template components explicitly imported
+ * from frappe-ui, leaving scripts and ambiguous global components unchanged.
+ */
 export function migrateDestinations(source) {
   const aliases = componentAliases(source)
   const templateStart = source.indexOf('<template')
@@ -178,6 +182,7 @@ function filesIn(target, seen = new Set()) {
     })
 }
 
+/** Run the destinations-v1 CLI and return its process exit code. */
 export function run(argv) {
   const dryRun = argv.includes('--dry-run')
   const unknown = argv.find((arg) => arg.startsWith('-') && arg !== '--dry-run')
