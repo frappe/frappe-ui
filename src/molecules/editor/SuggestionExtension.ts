@@ -3,6 +3,7 @@ import Suggestion from '@tiptap/suggestion'
 import { PluginKey } from '@tiptap/pm/state'
 import type { Component } from 'vue'
 import type { Editor } from './useEditor'
+import { warnRemoved } from '#utils/warnDeprecated'
 import {
   createSuggestionRenderer,
   type SuggestionFloatingOptions,
@@ -14,7 +15,7 @@ export type SuggestionExtensionOptions<TItem = any> = {
   name: string
   trigger: string
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
-  component?: Component
+  listComponent?: Component
   floatingOptions?: SuggestionFloatingOptions
   allowSpaces?: boolean
   /**
@@ -33,6 +34,12 @@ export type SuggestionExtensionOptions<TItem = any> = {
 function buildSuggestionExtension<TItem = any>(
   options: SuggestionExtensionOptions<TItem>,
 ) {
+  if ('component' in options) {
+    warnRemoved(
+      'SuggestionExtension.component',
+      'SuggestionExtension.listComponent',
+    )
+  }
   return Extension.create({
     name: options.name,
     addOptions() {
@@ -57,10 +64,10 @@ function buildSuggestionExtension<TItem = any>(
           }) => {
             options.command({ editor, item: props, range })
           },
-          render: options.component
+          render: options.listComponent
             ? () =>
                 createSuggestionRenderer(
-                  options.component as Component,
+                  options.listComponent as Component,
                   options.floatingOptions,
                 )
             : undefined,

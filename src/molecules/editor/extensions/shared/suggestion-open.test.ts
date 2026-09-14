@@ -97,7 +97,7 @@ function makeRealEditor(content = '') {
         pluginKey: key,
         items: () => [],
         command: () => {},
-        component: { render: () => null },
+        listComponent: { render: () => null },
       }),
     ],
     content: content ? `<p>${content}</p>` : '<p></p>',

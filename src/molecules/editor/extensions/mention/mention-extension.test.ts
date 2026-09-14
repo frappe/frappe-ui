@@ -6,7 +6,7 @@
  * (`jane@example.com`). Typography rewrites straight quotes to curly ones, so
  * those prefixes are covered too.
  */
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { Editor, type AnyExtension } from '@tiptap/core'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
@@ -14,6 +14,7 @@ import { Text } from '@tiptap/extension-text'
 import { PluginKey } from '@tiptap/pm/state'
 import { Typography } from '../../extensions'
 import { MentionExtension } from './mention-extension'
+import { _resetWarnDeprecated } from '../../../../utils/warnDeprecated'
 
 const openEditors: Editor[] = []
 
@@ -60,6 +61,7 @@ function type(editor: Editor, text: string) {
 describe('Mention allowedPrefixes', () => {
   afterEach(() => {
     while (openEditors.length) openEditors.pop()?.destroy()
+    _resetWarnDeprecated()
   })
 
   it('opens at the start of a paragraph and after a space', () => {
@@ -70,6 +72,20 @@ describe('Mention allowedPrefixes', () => {
     editor.commands.setContent('<p></p>')
     editor.commands.insertContent('hello @')
     expect(mentionActive(editor)).toBe(true)
+  })
+
+  it('warns in development when Mention receives the old component key', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const extension = MentionExtension.configure({ component: {} } as any)
+
+    ;(extension.config.addExtensions as Function).call(extension)
+    ;(extension.config.addExtensions as Function).call(extension)
+
+    expect(warn).toHaveBeenCalledWith(
+      '[frappe-ui] Mention.component was removed. Use Mention.nodeView instead.',
+    )
+    expect(warn).toHaveBeenCalledTimes(1)
+    warn.mockRestore()
   })
 
   it.each([

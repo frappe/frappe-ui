@@ -9,6 +9,15 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Editor suggestion roles and fixed-menu size have explicit names (breaking)
+
+Suggestion configuration now calls the rendered mention node `nodeView` and
+the suggestion popup `listComponent`; both replace the ambiguous `component`
+key. `EditorFixedMenu.buttonSize` is now `size`, matching the rest of the
+component library. TypeScript reports the removed names, while JavaScript
+consumers should run `editor-v1` for fixed menus and migrate suggestion options
+manually because their replacement depends on the component's role.
+
 ### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
 
 The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`
