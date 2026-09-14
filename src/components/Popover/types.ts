@@ -24,6 +24,28 @@ export interface PopoverProps {
   /** Whether the popover closes on outside interaction (click/focus). */
   dismissible?: boolean
 
+  /**
+   * Whether the content takes focus when it opens. Set to `false` when typing
+   * in the trigger drives the panel, so the caret stays in the input.
+   * Default: `true`.
+   */
+  autoFocus?: boolean
+
+  /**
+   * What opens the popover. `click` toggles it from the trigger element.
+   * `manual` does nothing on click; only `v-model:open` opens and closes it.
+   * In `manual` mode the trigger gets no `aria-expanded` or `aria-controls`.
+   * Default: `click`.
+   */
+  trigger?: 'click' | 'manual'
+
+  /**
+   * Element to position the content against, instead of the trigger. Use it
+   * when the trigger is a labelled field, so the panel sits under the input row
+   * rather than under the description.
+   */
+  reference?: Element
+
   /** Whether the content's min-width matches the trigger width. */
   matchTriggerWidth?: boolean
 
@@ -59,10 +81,12 @@ export interface PopoverSlotProps {
   toggle: (flag?: boolean | Event) => void
 }
 
-/** Methods available on a `<Popover>` template ref. */
+/** What a `<Popover>` template ref exposes. */
 export interface PopoverExposed {
   /** Opens the popover. No-op when it is already open. */
   open: () => void
   /** Closes the popover. No-op when it is already closed. */
   close: () => void
+  /** The content element. `null` while the popover is closed. */
+  contentEl: HTMLElement | null
 }

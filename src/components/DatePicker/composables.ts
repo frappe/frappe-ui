@@ -1,7 +1,8 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { dayjs } from '../../utils/dayjs'
-import { monthStart, getDateValue } from './utils'
+import { generateWeeks, monthStart, getDateValue } from './utils'
+import type { CalendarPanelExposed } from './calendarTypes'
 import type {
   CommonDatePickerProps,
   PopoverAlign,
@@ -131,3 +132,64 @@ export function makeUnavailableCheck(
   }
 }
 
+export interface UseFocusedDateOptions {
+  /** Identity of the current value. The watch fires when it changes. */
+  key: () => string
+  /** The date the view and the roving tabindex follow. */
+  anchor: () => Dayjs | null
+  /** The months on screen, so the seed can scan every pane. */
+  months: () => Array<{ year: number; month: number }>
+  isUnavailable: (date: Dayjs) => boolean
+  focusOn: (date: Dayjs) => void
+  resetView: () => void
+  panels: () => Array<CalendarPanelExposed | null | undefined>
+}
+
+// The panels' roving tabindex is controlled, so the focused date lives here. It
+// is seeded at setup so the first render already has `tabindex=0` on the cell
+// `focus()` will land on.
+export function useFocusedDate(options: UseFocusedDateOptions) {
+  const focusedDate = ref<Dayjs | null>(null)
+  let ownKey: string | null = null
+
+  function seed(): void {
+    const anchor = options.anchor()
+    if (anchor?.isValid() && !options.isUnavailable(anchor)) {
+      focusedDate.value = anchor
+      return
+    }
+    const cells = options
+      .months()
+      .flatMap(({ year, month }) => generateWeeks(year, month, '').flat())
+      .filter((cell) => cell.inMonth && !options.isUnavailable(cell.date))
+    const target = cells.find((cell) => cell.isToday) ?? cells[0]
+    if (target) focusedDate.value = target.date
+  }
+
+  // Only a value set from outside moves the view. The calendar's own click
+  // landed on a visible cell, and following it would move the view after an
+  // out-of-month click or a click in the second pane.
+  watch(
+    options.key,
+    (key) => {
+      if (key === ownKey) return
+      options.resetView()
+      const anchor = options.anchor()
+      if (anchor?.isValid()) options.focusOn(anchor)
+      seed()
+    },
+    { immediate: true },
+  )
+
+  /** Record the value the calendar is committing, so the watch ignores it. */
+  function markOwnCommit(key: string): void {
+    ownKey = key
+  }
+
+  /** Move keyboard focus into the day grid. */
+  function focus(): void {
+    for (const panel of options.panels()) panel?.focusInitialCell()
+  }
+
+  return { focusedDate, markOwnCommit, focus }
+}

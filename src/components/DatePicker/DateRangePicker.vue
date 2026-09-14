@@ -20,20 +20,25 @@
     :disabled="props.disabled"
     :readonly="inputReadonly"
     :display-label="displayLabel"
-    content-class="w-fit"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
     @close="onShellClose"
     @request-focus="onShellRequestFocus"
   >
-    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
-    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+    <template v-if="$slots.trigger" #trigger="ts"
+      ><slot name="trigger" v-bind="ts"
+    /></template>
+    <template v-if="$slots.prefix" #prefix="ts"
+      ><slot name="prefix" v-bind="ts"
+    /></template>
+    <template v-if="$slots.suffix" #suffix="ts"
+      ><slot name="suffix" v-bind="ts"
+    /></template>
 
     <template #default="{ close }">
       <div
-        class="flex"
+        class="flex w-fit"
         :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
       >
         <aside
@@ -54,54 +59,17 @@
             }"
           />
         </aside>
-        <div
-          class="flex"
-          :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
-        >
-          <CalendarPanel
-            ref="leftPanelRef"
-            :view="view"
-            :current-year="currentYear"
-            :current-month="currentMonth"
-            :weeks="weeks"
-            :today-label="isDualPaneActive ? '' : 'Today'"
-            :hide-next="isDualPaneActive"
-            :hide-out-of-month="isDualPaneActive"
-            :center-header="isDualPaneActive"
-            :min="props.min"
-            :max="props.max"
-            v-model:focused-date="focusedDate"
-            @prev="prev"
-            @next="next"
-            @today="handleTodayClick"
-            @cycle-view="cycleView"
-            @select-month="selectMonth"
-            @select-year="selectYear"
-            @select-date="handleDateCellClick"
-            @hover-cell="onCellHover"
-            @navigate="onPanelNavigate"
-          />
-          <CalendarPanel
-            v-if="isDualPaneActive"
-            ref="rightPanelRef"
-            :view="view"
-            :current-year="rightYear"
-            :current-month="rightMonth"
-            :weeks="rightWeeks"
-            hide-prev
-            hide-today
-            hide-out-of-month
-            center-header
-            :min="props.min"
-            :max="props.max"
-            v-model:focused-date="focusedDate"
-            @next="next"
-            @cycle-view="cycleView"
-            @select-date="handleDateCellClick"
-            @hover-cell="onCellHover"
-            @navigate="onPanelNavigate"
-          />
-        </div>
+        <DateRangeCalendar
+          ref="calendarRef"
+          :model-value="[fromDate, toDate]"
+          :dual-pane="props.dualPane"
+          today-label="Today"
+          :min="props.min"
+          :max="props.max"
+          :is-date-unavailable="props.isDateUnavailable"
+          @select="handleRangeSelect"
+          @today="handleRangeSelect"
+        />
       </div>
     </template>
   </PickerShell>
@@ -109,12 +77,11 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { dayjs, dayjsLocal } from '../../utils/dayjs'
-import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import { dayjs } from '../../utils/dayjs'
+import { orderRange, rangeKey, stepRange } from './utils'
+import DateRangeCalendar from './DateRangeCalendar.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
-  useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
   useTypeable,
@@ -128,6 +95,7 @@ import type {
   DateRangePickerSlots,
   DateRangeValue,
 } from './types'
+import type { DateRangeCalendarExposed } from './calendarTypes'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
   modelValue: () => [],
@@ -164,94 +132,25 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
-  seedFocusedDate()
 }
 
 function onShellClose() {
-  resetView()
-  hoverDate.value = null
   if (isTyping.value) {
     commitInput()
     isTyping.value = false
   }
-  focusedDate.value = null
+}
+
+const calendarRef = ref<DateRangeCalendarExposed | null>(null)
+
+function onShellRequestFocus() {
+  // The calendar only mounts with the popover, so wait a tick for it.
+  nextTick(() => calendarRef.value?.focus())
 }
 
 defineExpose({
   open: () => shellRef.value?.open(),
 })
-
-// ── Keyboard focus management ────────────────────────────────────────────────
-
-const leftPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
-const rightPanelRef = ref<{ focusInitialCell: () => void } | null>(null)
-const focusedDate = ref<Dayjs | null>(null)
-
-function seedFocusedDate() {
-  if (focusedDate.value) return
-  // Prefer the existing range start, then today, then first available cell
-  // in the left pane, then in the right pane (dual-pane fallback).
-  if (fromDate.value) {
-    const d = dayjs(fromDate.value)
-    if (!checkUnavailable(d)) {
-      focusedDate.value = d
-      return
-    }
-  }
-  const today = dayjsLocal().startOf('day')
-  if (!checkUnavailable(today)) {
-    focusedDate.value = today
-    return
-  }
-  const leftFirst = weeks.value
-    .flat()
-    .find((c) => c.inMonth && !c.isUnavailable)
-  if (leftFirst) {
-    focusedDate.value = leftFirst.date
-    return
-  }
-  if (props.dualPane) {
-    const rightFirst = rightWeeks.value
-      .flat()
-      .find((c) => c.inMonth && !c.isUnavailable)
-    if (rightFirst) focusedDate.value = rightFirst.date
-  }
-}
-
-function onShellRequestFocus() {
-  // Seed synchronously so panels mount with `props.focusedDate` already
-  // set — important for dual-pane, where two panels otherwise race to seed
-  // and the wrong one wins. Then queue the actual `.focus()` call for
-  // after the popover has rendered.
-  seedFocusedDate()
-  nextTick(() => {
-    leftPanelRef.value?.focusInitialCell()
-    rightPanelRef.value?.focusInitialCell()
-  })
-}
-
-function onPanelNavigate(target: Dayjs) {
-  // In dual-pane mode, the target may already be visible in the sibling
-  // panel (right pane = currentMonth + 1). In that case we don't advance the
-  // view — instead, just push the focused date so the sibling panel's watch
-  // picks it up and focuses its own matching cell.
-  if (props.dualPane) {
-    const inLeft =
-      target.month() === currentMonth.value &&
-      target.year() === currentYear.value
-    const inRight =
-      target.month() === rightMonth.value &&
-      target.year() === rightYear.value
-    if (inLeft || inRight) {
-      focusedDate.value = target
-      return
-    }
-  }
-  // Single-pane (or dual-pane crossing beyond the right edge): advance the
-  // view. After the parent re-renders, the originating panel's shiftFocus
-  // retry will find the cell and emit `update:focusedDate`.
-  focusOn(target)
-}
 
 // ── Positioning / keepOpen ────────────────────────────────────────────────────
 
@@ -260,27 +159,11 @@ const { resolvedSide, resolvedAlign, resolvedOffset } =
 const shouldKeepOpen = useKeepOpen(props)
 const inputReadonly = useTypeable(props)
 
-// ── Calendar state ───────────────────────────────────────────────────────────
-
-const {
-  view,
-  currentYear,
-  currentMonth,
-  prev,
-  next,
-  cycleView,
-  selectMonth,
-  selectYear,
-  focusOn,
-  resetView,
-} = useCalendarView()
+// ── Range state ──────────────────────────────────────────────────────────────
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 const fromDate = ref<string>('')
 const toDate = ref<string>('')
-// Tracks the date under the cursor while the user is mid-selection
-// (start picked, end not yet) so we can preview the in-progress range.
-const hoverDate = ref<Dayjs | null>(null)
 
 const checkUnavailable = makeUnavailableCheck(
   () => props.min,
@@ -318,12 +201,11 @@ function syncFromValue(val?: string[]): void {
   const [f, t] = normalizeIncoming(val)
   fromDate.value = f
   toDate.value = t
-  if (f) focusOn(dayjs(f))
 }
 
 const initialValue = ref<string>('')
 syncFromValue(pickIncoming())
-initialValue.value = serialize(fromDate.value, toDate.value)
+initialValue.value = rangeKey([fromDate.value, toDate.value])
 
 function initFromValue(): void {
   syncFromValue(pickIncoming())
@@ -360,65 +242,6 @@ watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
 
-// ── Calendar grid (with range markers) ───────────────────────────────────────
-
-function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
-  const raw = generateWeeks(year, month, '')
-  const f = fromDate.value ? dayjs(fromDate.value) : null
-  const t = toDate.value ? dayjs(toDate.value) : null
-  // While picking the end date, the hovered cell and everything between
-  // `from` and it render as in-range (light gray) — only committed endpoints
-  // get the dark "selected" treatment. Mouse hover and keyboard focus both
-  // act as the preview anchor; mouse wins when both exist.
-  const previewAnchor = hoverDate.value ?? focusedDate.value
-  const hovering = !t && f && previewAnchor ? previewAnchor : null
-  const hoverEnd = hovering && hovering.isAfter(f!, 'day') ? hovering : null
-  const hoverStart = hovering && hovering.isBefore(f!, 'day') ? hovering : null
-  return raw.map((week) =>
-    week.map((d) => {
-      const isRangeStart = !!(f && d.date.isSame(f, 'day'))
-      const isRangeEnd = !!(t && d.date.isSame(t, 'day'))
-      let inRange = false
-      if (f && t) {
-        inRange = d.date.isAfter(f, 'day') && d.date.isBefore(t, 'day')
-      } else if (hoverEnd && f) {
-        inRange =
-          d.date.isAfter(f, 'day') && !d.date.isAfter(hoverEnd, 'day')
-      } else if (hoverStart && f) {
-        inRange =
-          !d.date.isBefore(hoverStart, 'day') && d.date.isBefore(f, 'day')
-      }
-      return {
-        ...d,
-        isSelected: false,
-        isUnavailable: checkUnavailable(d.date),
-        isRangeStart,
-        isRangeEnd,
-        inRange,
-      }
-    }),
-  )
-}
-
-const weeks = computed<CalendarPanelCell[][]>(() =>
-  buildRangeWeeks(currentYear.value, currentMonth.value),
-)
-
-// ── Dual-pane (right side) ───────────────────────────────────────────────────
-// Dual pane only renders for the day-grid view; cycling to month/year falls
-// back to a single panel to avoid duplicate selectors.
-
-const isDualPaneActive = computed(() => props.dualPane && view.value === 'date')
-
-const rightAnchor = computed(() =>
-  dayjs().year(currentYear.value).month(currentMonth.value).add(1, 'month'),
-)
-const rightYear = computed(() => rightAnchor.value.year())
-const rightMonth = computed(() => rightAnchor.value.month())
-const rightWeeks = computed<CalendarPanelCell[][]>(() =>
-  buildRangeWeeks(rightYear.value, rightMonth.value),
-)
-
 // ── Input commit / selection ─────────────────────────────────────────────────
 
 function commitInput(close = false): void {
@@ -432,7 +255,7 @@ function commitInput(close = false): void {
   if (f && !checkUnavailable(f)) fromDate.value = f.format(DATE_FORMAT)
   if (t && !checkUnavailable(t)) toDate.value = t.format(DATE_FORMAT)
   else if (!t) toDate.value = ''
-  ensureOrder()
+  setOrdered([fromDate.value, toDate.value])
   emitIfChanged()
   inputValue.value = displayLabel.value
   if (close && !shouldKeepOpen.value && fromDate.value && toDate.value) {
@@ -440,50 +263,32 @@ function commitInput(close = false): void {
   }
 }
 
-function selectDate(date: string | Date | Dayjs): void {
-  const d = dayjs(date as any)
-  if (!d.isValid() || checkUnavailable(d)) return
+// The calendar reports every click, including the half-open range after the
+// first one. Emit and close only once both ends are set.
+function handleRangeSelect(range: DateRangeValue) {
+  fromDate.value = range[0] ?? ''
+  toDate.value = range[1] ?? ''
   if (fromDate.value && toDate.value) {
-    fromDate.value = d.format(DATE_FORMAT)
-    toDate.value = ''
-  } else if (fromDate.value && !toDate.value) {
-    toDate.value = d.format(DATE_FORMAT)
-  } else {
-    fromDate.value = d.format(DATE_FORMAT)
-  }
-  ensureOrder()
-}
-function ensureOrder() {
-  if (fromDate.value && toDate.value) {
-    if (dayjs(fromDate.value).isAfter(dayjs(toDate.value))) {
-      const tmp = fromDate.value
-      fromDate.value = toDate.value
-      toDate.value = tmp
-    }
-  }
-}
-
-function handleDateCellClick(date: string | Date | Dayjs) {
-  selectDate(date)
-  if (fromDate.value && toDate.value) {
-    hoverDate.value = null
     emitIfChanged()
     if (!shouldKeepOpen.value) isOpen.value = false
   }
   isTyping.value = false
 }
 
-function onCellHover(d: Dayjs | null) {
-  hoverDate.value = fromDate.value && !toDate.value ? d : null
+function handleDateCellClick(date: string | Date | Dayjs) {
+  const d = dayjs(date as any)
+  if (!d.isValid() || checkUnavailable(d)) return
+  handleRangeSelect(stepRange([fromDate.value, toDate.value], d))
 }
 
-function serialize(from: string, to: string): string {
-  if (!from && !to) return ''
-  return `${from},${to}`
+function setOrdered(range: [string, string]): void {
+  const [from, to] = orderRange(range)
+  fromDate.value = from
+  toDate.value = to
 }
 
 function emitIfChanged() {
-  const next = serialize(fromDate.value, toDate.value)
+  const next = rangeKey([fromDate.value, toDate.value])
   if (next === initialValue.value) return
   const payload: DateRangeValue =
     fromDate.value && toDate.value ? [fromDate.value, toDate.value] : []
@@ -496,7 +301,6 @@ function clearSelection() {
   if (!fromDate.value && !toDate.value) return
   fromDate.value = ''
   toDate.value = ''
-  hoverDate.value = null
   emitIfChanged()
   inputValue.value = ''
 }
@@ -505,34 +309,15 @@ function handleClearClick() {
   clearSelection()
   if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  resetView()
 }
 
-function handleTodayClick() {
-  const now = dayjsLocal().startOf('day')
-  if (checkUnavailable(now)) return
-  fromDate.value = now.format(DATE_FORMAT)
-  toDate.value = now.format(DATE_FORMAT)
-  emitIfChanged()
-  if (!shouldKeepOpen.value) isOpen.value = false
-  isTyping.value = false
-  resetView()
-}
-
-function handleSetRange(
-  range: [string | Date | Dayjs, string | Date | Dayjs],
-) {
+function handleSetRange(range: [string | Date | Dayjs, string | Date | Dayjs]) {
   const a = dayjs(range[0])
   const b = dayjs(range[1])
   if (!a.isValid() || !b.isValid()) return
   if (checkUnavailable(a) || checkUnavailable(b)) return
-  fromDate.value = a.format(DATE_FORMAT)
-  toDate.value = b.format(DATE_FORMAT)
-  ensureOrder()
-  hoverDate.value = null
+  setOrdered([a.format(DATE_FORMAT), b.format(DATE_FORMAT)])
   emitIfChanged()
-  focusOn(dayjs(fromDate.value))
   isTyping.value = false
-  resetView()
 }
 </script>

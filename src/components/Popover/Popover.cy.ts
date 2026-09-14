@@ -90,7 +90,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { bare: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-cy="content"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-cy="content"]')
+        .should('exist')
       cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
@@ -98,7 +100,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { arrow: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-slot="arrow"]')
+        .should('exist')
     })
 
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
@@ -302,6 +306,49 @@ describe('Popover', () => {
       })
     })
 
+    describe('trigger="manual"', () => {
+      it('does not open on a trigger click', () => {
+        cy.mount(Popover, { slots: NewSlots, props: { trigger: 'manual' } })
+
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('not.exist')
+      })
+
+      it('stays open when the trigger is clicked while open', () => {
+        const Harness = defineComponent({
+          setup() {
+            const open = ref(true)
+            return () =>
+              h(
+                Popover,
+                {
+                  trigger: 'manual',
+                  open: open.value,
+                  'onUpdate:open': (value: boolean) => (open.value = value),
+                },
+                {
+                  trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                  default: () => h('div', { 'data-cy': 'content' }, 'manual'),
+                },
+              )
+          },
+        })
+
+        cy.mount(Harness)
+        cy.get('[data-slot="content"]').should('exist')
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('exist')
+      })
+    })
+
+    it('leaves focus on the trigger when autoFocus is false', () => {
+      cy.mount(Popover, { slots: NewSlots, props: { autoFocus: false } })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.focused().should('have.attr', 'data-cy', 'trigger')
+    })
+
     it('exposes open() and close() methods', () => {
       const popoverRef = ref()
       const Harness = defineComponent({
@@ -324,6 +371,73 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('exist')
       cy.then(() => popoverRef.value.close())
       cy.get('[data-slot="content"]').should('not.exist')
+    })
+
+    it('exposes contentEl, null while closed', () => {
+      const popoverRef = ref()
+      const Harness = defineComponent({
+        setup() {
+          return () =>
+            h(
+              Popover,
+              { ref: (el: unknown) => (popoverRef.value = el) },
+              {
+                trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                default: () => h('div', { 'data-cy': 'content' }, 'exposed'),
+              },
+            )
+        },
+      })
+
+      cy.mount(Harness)
+      cy.then(() => expect(popoverRef.value.contentEl).to.equal(null))
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.get('[data-slot="content"]').then(($content) => {
+        expect(popoverRef.value.contentEl).to.equal($content[0])
+      })
+    })
+
+    it('positions the content against `reference` in click mode', () => {
+      const referenceEl = ref<HTMLElement | null>(null)
+      const Harness = defineComponent({
+        setup() {
+          return () =>
+            h('div', [
+              h('div', {
+                ref: (el: unknown) => (referenceEl.value = el as HTMLElement),
+                'data-cy': 'reference',
+                style:
+                  'position: absolute; top: 120px; left: 200px; width: 140px; height: 24px',
+              }),
+              h(
+                Popover,
+                { reference: referenceEl.value ?? undefined },
+                {
+                  trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                  default: () => h('div', { 'data-cy': 'content' }, 'anchored'),
+                },
+              ),
+            ])
+        },
+      })
+
+      cy.mount(Harness)
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+
+      cy.get('[data-cy="reference"]').then(($reference) => {
+        const reference = $reference[0].getBoundingClientRect()
+        cy.get('[data-cy="trigger"]').then(($trigger) => {
+          const trigger = $trigger[0].getBoundingClientRect()
+          cy.get('[data-slot="content"]').then(($content) => {
+            const content = $content[0].getBoundingClientRect()
+            expect(content.left).to.be.closeTo(reference.left, 2)
+            expect(content.top).to.be.closeTo(reference.bottom + 4, 2)
+            expect(Math.abs(content.left - trigger.left)).to.be.greaterThan(2)
+          })
+        })
+      })
     })
   })
 })

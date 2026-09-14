@@ -31,9 +31,12 @@ it is likely to move:
 | [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
 | [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
 | [`CommandPalette`](#commandpalette) | Incubating | gameplan, helpdesk and this site running on it |
+| [`DateCalendar`](#date-calendars) | Incubating | Its API settling |
+| [`DateRangeCalendar`](#date-calendars) | Incubating | Its API settling |
 | [`FloatingWindow`](#floatingwindow) | Incubating | Its API settling |
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
+| [`PickerShell`](#pickershell) | Incubating | Its API settling |
 | [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
 | [`ThemeSwitcher`](#themeswitcher) | Parked | Apps moving to `Select` plus `useColorScheme` |
 | [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
@@ -118,6 +121,22 @@ import {
 
 See the [CommandPalette page](/docs/experimental/commandpalette) for filtering,
 server search, link items and the styling hooks.
+
+## Date calendars
+
+The calendars inside the date pickers, as standalone components. `DateCalendar` holds one date as `v-model`. `DateRangeCalendar` holds a `[from, to]` pair, previews the pending range under the cursor, and shows two months with `dualPane`. Both accept `min`, `max` and `isDateUnavailable`, and expose `focus()`.
+
+```ts
+import { DateCalendar, DateRangeCalendar } from 'frappe-ui/experimental'
+```
+
+Both emit `select` on every click and `today` from the Today button, even when the value does not change. `update:modelValue` alone does not fire for an unchanged value, so listen to these when every click matters, for example to close a popover.
+
+<ComponentPreview name="DatePicker-DateCalendar" />
+
+Setting the value from outside moves the view to that month. Clicking inside the calendar does not move the view.
+
+<ComponentPreview name="DatePicker-DateRangeCalendar" />
 
 ## FloatingWindow
 
@@ -316,6 +335,37 @@ entirely with `#tag`:
 form fields (this example shows a required error until a recipient is added).
 
 <ComponentPreview name="MultiEmailInput-Labeling" csr="true" />
+
+## PickerShell
+
+The input half of the date pickers: a `TextInput`, a `Popover` that the input opens rather than toggles, and the focus wiring between them. Use it to build a picker instead of copying `DatePicker`. Put the panel in `#default` and bind the text with `v-model:input-value`.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { PickerShell } from 'frappe-ui/experimental'
+
+const open = ref(false)
+const text = ref('')
+</script>
+
+<template>
+  <PickerShell
+    v-model:open="open"
+    v-model:input-value="text"
+    side="bottom"
+    align="start"
+    :offset="4"
+    label="Colour"
+  >
+    <template #default="{ close }">
+      <ColourGrid @select="close" />
+    </template>
+  </PickerShell>
+</template>
+```
+
+Style it through the `data-slot` hooks that `TextInput` and [`Popover`](/docs/components/popover) render. There are no class props. The panel is as wide as its content.
 
 ## useInputLabeling
 

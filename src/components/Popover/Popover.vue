@@ -1,16 +1,25 @@
 <template>
   <PopoverRoot v-model:open="isOpen">
     <!--
-      #trigger renders through reka's PopoverTrigger as-child, so click,
-      keyboard and aria wiring come for free on whatever element the consumer
-      passes.
+      The content is positioned against the anchor: `reference` if given, else
+      the trigger element. In `click` mode reka's PopoverTrigger adds click,
+      keyboard and aria wiring to the trigger. In `manual` mode a bare Primitive
+      adds nothing.
     -->
-    <PopoverTrigger ref="triggerRef" as-child data-slot="trigger">
-      <slot name="trigger" v-bind="slotProps" />
-    </PopoverTrigger>
+    <PopoverAnchor :reference="reference" as-child>
+      <component
+        :is="trigger === 'manual' ? Primitive : PopoverTrigger"
+        ref="triggerRef"
+        as-child
+        data-slot="trigger"
+      >
+        <slot name="trigger" v-bind="slotProps" />
+      </component>
+    </PopoverAnchor>
 
     <PopoverPortal :to="portalTarget">
       <PopoverContent
+        ref="contentRef"
         data-slot="content"
         class="z-[100]"
         :side="side"
@@ -24,6 +33,7 @@
         }"
         @interact-outside="onInteractOutside"
         @escape-key-down="onEscapeKeyDown"
+        @open-auto-focus="onOpenAutoFocus"
       >
         <slot v-if="bare" v-bind="slotProps" />
         <PopoverPanel v-else>
@@ -42,11 +52,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import {
+  PopoverAnchor,
   PopoverArrow,
   PopoverContent,
   PopoverPortal,
   PopoverRoot,
   PopoverTrigger,
+  Primitive,
 } from 'reka-ui'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
@@ -63,6 +75,8 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   offset: 4,
   collisionPadding: 10,
   dismissible: true,
+  autoFocus: true,
+  trigger: 'click',
   matchTriggerWidth: false,
   bare: false,
   arrow: false,
@@ -77,6 +91,7 @@ const controlled = computed(() => props.open !== undefined)
 const uncontrolledOpen = ref(false)
 // reka's PopoverTrigger, exposes the trigger DOM node via `$el`.
 const triggerRef = ref<{ $el: Element } | null>(null)
+const contentRef = ref<{ $el: Element } | null>(null)
 
 const isOpen = computed<boolean>({
   get: () => (controlled.value ? Boolean(props.open) : uncontrolledOpen.value),
@@ -99,6 +114,15 @@ const isOpen = computed<boolean>({
 // its old order, after `update:open`.
 watch(isOpen, (value) => (value ? emit('open') : emit('close')))
 
+// PopoverContent keeps its template ref while its DOM mounts and unmounts, so
+// the element is read on demand, not cached. `$el` is reka's positioning
+// wrapper; the content root is the `data-slot` element inside it.
+function getContentEl(): HTMLElement | null {
+  const wrapper = contentRef.value?.$el
+  if (!(wrapper instanceof HTMLElement)) return null
+  return wrapper.querySelector<HTMLElement>('[data-slot="content"]')
+}
+
 function open() {
   if (isOpen.value) return
   isOpen.value = true
@@ -116,7 +140,13 @@ function toggle(flag?: boolean | Event) {
   else close()
 }
 
-defineExpose({ open, close })
+defineExpose({
+  open,
+  close,
+  get contentEl() {
+    return getContentEl()
+  },
+})
 
 // `open` is the state, not a method — the same word the rest of the family's
 // trigger slots use (Dropdown, Select, MultiSelect, HoverCard, Sidebar). The
@@ -127,6 +157,12 @@ const slotProps = computed<PopoverSlotProps>(() => ({
   close,
   toggle,
 }))
+
+// reka focuses the content on open. A panel driven by typing must leave the
+// caret in the input, so `autoFocus: false` cancels that.
+function onOpenAutoFocus(event: Event) {
+  if (!props.autoFocus) event.preventDefault()
+}
 
 // `dismissible` covers both user-initiated dismiss channels, per CONTEXT.md —
 // outside click and Escape. Wiring only the first left `:dismissible="false"`

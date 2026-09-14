@@ -89,6 +89,22 @@ describe('DatePicker', () => {
     cy.get('input').should('have.value', getTodaysDate())
   })
 
+  it('clicking the already-selected date closes the popover', () => {
+    cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+    cy.get('input').dblclick()
+    cy.get('[role=dialog]').should('exist')
+    cy.get('[aria-label="2025-06-15"]').click()
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('today button closes the popover when today is already selected', () => {
+    cy.mount(DatePicker, { props: { modelValue: getTodaysDate() } })
+    cy.get('input').dblclick()
+    cy.get('[role=dialog]').should('exist')
+    cy.get('[aria-label="Today"]').click()
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
   it('clear slot prop removes the value', () => {
     // Consumer renders Clear in the #actions sidebar; verifies clear() + close() wiring.
     cy.mount(DatePicker, {
@@ -168,8 +184,16 @@ describe('DatePicker', () => {
     })
     cy.get('input').dblclick()
     cy.get('[role=dialog]').should('exist')
-    cy.get('[aria-label="2025-06-09"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-21"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-09"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-21"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-15"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -183,8 +207,16 @@ describe('DatePicker', () => {
     })
     cy.get('input').dblclick()
     // 2025-06-14 is a Saturday, 2025-06-15 is a Sunday, 2025-06-16 is a Monday
-    cy.get('[aria-label="2025-06-14"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('[aria-label="2025-06-15"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('[aria-label="2025-06-14"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
+    cy.get('[aria-label="2025-06-15"]').should(
+      'have.attr',
+      'aria-disabled',
+      'true',
+    )
     cy.get('[aria-label="2025-06-16"]').should('not.have.attr', 'aria-disabled')
   })
 
@@ -362,7 +394,8 @@ describe('DatePicker', () => {
         props: {
           modelValue: '2025-06-15',
           // Disable 2025-06-16 only — pressing → from 15 should skip to 17.
-          isDateUnavailable: (d: any) => d.format('YYYY-MM-DD') === '2025-06-16',
+          isDateUnavailable: (d: any) =>
+            d.format('YYYY-MM-DD') === '2025-06-16',
         },
       })
       cy.get('input').focus().type('{downArrow}')
@@ -376,7 +409,10 @@ describe('DatePicker', () => {
       cy.get('input').focus().type('{downArrow}')
       cy.focused().trigger('keydown', { key: 'ArrowRight' })
       cy.focused().should('have.attr', 'data-value', '2025-07-01')
-      cy.get('[aria-label=cycle-calendar-view]').should('contain.text', 'Jul 2025')
+      cy.get('[aria-label=cycle-calendar-view]').should(
+        'contain.text',
+        'Jul 2025',
+      )
     })
   })
 })
