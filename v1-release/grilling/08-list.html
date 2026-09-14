@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>List | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'list'
+      const TITLE = 'List'
+      const INTRO =
+        'Set the permanent contracts for virtual rows, row activation, state hooks, slots, sorting, and the legacy experimental ListView family. The earlier answers are shown here so each one can be confirmed against its migration cost.'
+      const QUESTIONS = [
+        {
+          id: 'LIST-Q1',
+          title: 'ListRows virtual boolean-or-options overload',
+          covers: ['H29'],
+          severity: 'High',
+          tier: 'not measured',
+          what: `<p><code>ListRows</code> renders every item by default. Its <code>virtual</code> prop can be <code>true</code> to use the height supplied by the parent <code>List</code>, or an object to override the height and overscan for this set of rows. Overscan is the number of extra rows mounted beyond the visible window.</p>`,
+          visual: {
+            label: 'Two ways to enable windowing',
+            code: `<List :row-height="40">
+  <ListRows :items="rows" virtual />
+</List>
+
+<List :row-height="40">
+  <ListRows
+    :items="rows"
+    :virtual="{ itemHeight: 48, overscan: 10 }"
+  />
+</List>`,
+          },
+          found: `<p>This is the library's only prop that accepts either a boolean or an options object, so callers must learn a one-off convention. The union is declared at <code>src/molecules/list/ListRows.vue:24-42</code>, and the object fields are declared at <code>src/molecules/list/types.ts:118-124</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H29 choice</div><p>“Ship the boolean-or-object <code>virtual</code> overload”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the overload freezes a merely inconsistent prop shape, but it gives the common case a short <code>virtual</code> flag and keeps advanced settings nearby. Replacing it with separate props or an object-only prop would make the shape more regular, but H29 was not measured, so the number of affected v1-app sites and codemod coverage are unknown. The answer also sets the shape that LIST-Q2 must name and LIST-Q3 must type.</p>`,
+          options: [
+            'Ship virtual as boolean or ListVirtualOptions',
+            'Require virtual to be a ListVirtualOptions object',
+            'Use a virtual boolean plus separate virtualRowHeight and virtualOverscan props',
+            'Keep the current overload and document it as the List-specific convention',
+          ],
+          recommended: 0,
+          why: 'The overload keeps the common case small, preserves the already chosen contract, and does not create an unsafe runtime state.',
+        },
+        {
+          id: 'LIST-Q2',
+          title: 'rowHeight in ListVirtualOptions and useVirtualRows',
+          covers: ['H28'],
+          severity: 'High',
+          tier: 'T1 · 0 sites',
+          dependsOn: 'LIST-Q1',
+          what: `<p><code>List.rowHeight</code>, <code>ListVirtualOptions.itemHeight</code>, and <code>useVirtualRows().itemHeight</code> all describe the same fixed row height in pixels. The height lets the virtualizer calculate which rows fit without mounting every row first. LIST-Q1 decides whether the options object remains public; this question gives that shared quantity one name.</p>`,
+          visual: {
+            label: 'Current versus proposed names',
+            code: `  <List :row-height="40">
+-   <ListRows :virtual="{ itemHeight: 48 }" />
++   <ListRows :virtual="{ rowHeight: 48 }" />
+  </List>
+
+  useVirtualRows(rows, {
+-   itemHeight: 48,
++   rowHeight: 48,
+  })`,
+          },
+          found: `<p>One quantity has two public names. <code>ListProps.rowHeight</code> is at <code>src/molecules/list/types.ts:76-82</code>, while <code>ListVirtualOptions.itemHeight</code> is at <code>src/molecules/list/types.ts:118-123</code> and <code>UseVirtualRowsOptions.itemHeight</code> is at <code>src/molecules/list/useVirtualRows.ts:11-19</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H28 choice</div><p>“<code>rowHeight</code> across List, ListVirtualOptions, useVirtualRows”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping both names freezes a merely inconsistent List API: wrapper code must translate <code>rowHeight</code> to <code>itemHeight</code> for the same number. Renaming costs zero measured v1-app sites, is a T1 mechanical edit, and the migration report says a codemod can handle it. Changing now gives the component, its options, and its composable one term.</p>`,
+          options: [
+            'Rename itemHeight to rowHeight in both public option types',
+            'Use itemHeight everywhere, including List',
+            'Keep itemHeight in virtual APIs and rowHeight on List, then document the split',
+          ],
+          recommended: 0,
+          why: 'It matches the List domain language at zero measured consumer cost and is fully mechanical.',
+        },
+        {
+          id: 'LIST-Q3',
+          title: 'Owned useVirtualRows return types',
+          covers: ['H30'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          dependsOn: 'LIST-Q2',
+          what: `<p><code>useVirtualRows</code> is the lower-level composable behind <code>ListRows virtual</code>. It returns visible row records, wrapper bindings that position the virtual window, and an <code>anchor</code> ref used to find the scroll container. Consumers can call it directly for list layouts that need custom markup.</p>`,
+          visual: {
+            label: 'Proposed owned return shape',
+            code: `export interface VirtualRow<T> {
+  data: T
+  index: number
+}
+
+export interface UseVirtualRowsReturn<T> {
+  rows: Ref<VirtualRow<T>[]>
+  wrapperProps: ComputedRef<Record<string, unknown>>
+  anchor: Ref<HTMLElement | null>
+}
+
+useVirtualRows<T>(...): UseVirtualRowsReturn<T>`,
+          },
+          found: `<p>The function has no declared return type, so its public declaration inherits unnamed types from the installed VueUse version. The VueUse destructuring is at <code>src/molecules/list/useVirtualRows.ts:39-46</code> and the unannotated return is at <code>src/molecules/list/useVirtualRows.ts:63</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H30 choice</div><p>“Define and export owned <code>useVirtualRows</code> return types”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Leaving the inferred return is a trap because a VueUse upgrade can change a frozen frappe-ui signature without a deliberate API edit. Adding owned exported types costs zero measured v1-app sites, is T0, and the report says the change is codemod-able. The owned names should use the height vocabulary chosen in LIST-Q2 and isolate consumers from VueUse declarations.</p>`,
+          options: [
+            'Export VirtualRow and UseVirtualRowsReturn, and annotate the composable return',
+            'Stop exporting useVirtualRows and keep virtualization component-only',
+            'Return plain arrays and elements instead of Vue refs and bindings',
+          ],
+          recommended: 0,
+          why: 'It keeps the useful composable public without freezing a dependency-owned type by accident.',
+        },
+        {
+          id: 'LIST-Q4',
+          title: 'ListRow as prop and activation behavior',
+          covers: ['B15'],
+          severity: 'Medium · real decision',
+          tier: 'T3 · 1 site',
+          what: `<p><code>ListRow</code> can navigate, run an activation handler, mark a row active, or toggle checkbox selection. Today the presence of <code>to</code> or <code>onClick</code> also decides whether the root element is an anchor, button, or div. In a selectable list, a row click toggles selection and returns before the caller's <code>onClick</code> runs.</p>`,
+          visual: {
+            label: 'Current root and click branching',
+            code: `ListRow
+  to is set -> <a>
+  otherwise
+    onClick or active model -> <button>
+    neither -> <div>
+
+on(row click)
+  selectable -> toggle selection, return
+  active model -> set active row
+  call onClick
+  navigate`,
+          },
+          found: `<p><code>onClick</code> controls both semantics and markup, then selectable mode silently swallows the advertised activation callback. The tag branch is at <code>src/molecules/list/ListRow.vue:5-22</code>; the early return is at <code>src/molecules/list/ListRow.vue:46-58</code>; the current prop promise is at <code>src/molecules/list/types.ts:84-99</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B15 choice</div><p>“Add <code>as</code> to ListRow; <code>onClick</code> is activation only and is not swallowed in selectable mode”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>The current behavior is a trap because adding a callback changes the HTML element, while enabling selection stops that callback from firing. The chosen change requires manual review at one v1-app site and is T3 because a newly firing activation can trigger app behavior; a codemod cannot prove that the result is safe. Adding <code>as</code> separates markup from activation, and always firing activation makes selectable and non-selectable rows obey the same callback contract.</p>`,
+          options: [
+            'Add as; make onClick activation-only and fire it after selection handling',
+            'Add as; keep selectable row clicks selection-only and add a separate onActivate callback',
+            'Always render ListRow as a button unless to renders a link',
+          ],
+          recommended: 0,
+          why: 'It removes both hidden behaviors while preserving selection, active-row updates, and navigation as separate actions.',
+        },
+        {
+          id: 'LIST-Q5',
+          title: 'ListRow state data attributes',
+          covers: ['M-list'],
+          severity: 'Medium · mechanical',
+          tier: 'T1 · 2 sites',
+          what: `<p><code>ListRowBase</code> exposes DOM data attributes so apps can style interactive, selected, and active rows without depending on internal classes. The three current hooks use three shapes: a bare interactive flag, a <code>data-state</code> value for selection, and a bare active flag. The list specification already reserves <code>data-state</code> for <code>active</code> or <code>inactive</code>.</p>`,
+          visual: {
+            label: 'Current versus proposed row hooks',
+            code: `- data-interactive
+- data-state="selected"
+- data-active
++ data-state="active | inactive"
++ data-selected
++ data-interactive`,
+          },
+          found: `<p>The row exposes one boolean state as a value and two boolean states as standalone attributes, so selectors do not follow one rule. All three bindings are visible at <code>src/molecules/list/ListRowBase.vue:2-9</code>; the triage selects <code>data-state="active|inactive"</code> for the primary row state.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-list choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the hooks freezes a merely inconsistent selector vocabulary and conflicts with the list specification's meaning of <code>data-state</code>. Normalizing them costs two measured v1-app sites, is T1, and the migration report says a codemod can update the selectors. Using <code>data-state</code> for active status leaves selection and interactivity as separate boolean facts instead of competing values.</p>`,
+          options: [
+            'Use data-state="active|inactive" plus boolean data-selected and data-interactive',
+            'Use separate boolean data-active, data-selected, and data-interactive attributes',
+            'Keep the three current hooks and document their different shapes',
+            'Expose only data-state="active|selected|inactive" and remove the boolean hooks',
+          ],
+          recommended: 0,
+          why: 'It follows the existing list specification and keeps orthogonal selection and interaction states independently selectable in CSS.',
+        },
+        {
+          id: 'LIST-Q6',
+          title: 'ListRows default slot state',
+          covers: ['M-list'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          dependsOn: 'LIST-Q5',
+          what: `<p><code>ListRows</code> loops over an items array and calls its default slot once per item. The slot currently receives the item, index, and resolved row value, but not whether that value is selected or active in the parent <code>List</code>. Callers that build custom row markup must reconstruct those states or rely on <code>ListRow</code> to render them.</p>`,
+          visual: {
+            label: 'Default slot props',
+            code: `<ListRows v-slot="{
+  item,
+  index,
+  value,
++ selected,
++ active,
+}">
+  <ListRow :value="value" />
+</ListRows>`,
+          },
+          found: `<p>The slot declaration and both render paths expose only <code>item</code>, <code>index</code>, and <code>value</code>. See <code>src/molecules/list/ListRows.vue:2-15</code> and <code>src/molecules/list/ListRows.vue:44-47</code>. The medium triage classifies the missing state props as additive work that can wait for 1.1.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-list choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the slot as-is leaves custom row renderers without the same state data that <code>ListRow</code> uses. Adding <code>selected</code> and <code>active</code> is backward-compatible, but this item has no migration row, so its v1-app site count and codemod status are not measured. Shipping now completes the slot contract; waiting keeps RC scope smaller and permits the state names to follow LIST-Q5.</p>`,
+          options: [
+            'Add selected and active slot props before RC',
+            'Wait until 1.1, then add selected and active slot props',
+            'Keep the current slot and document that ListRow owns selection and active state',
+          ],
+          recommended: 0,
+          why: 'The addition does not break existing slots and gives custom renderers the state already owned by List.',
+        },
+        {
+          id: 'LIST-Q7',
+          title: 'ListGroup label prop and override slot',
+          covers: ['M-list'],
+          severity: 'Medium · mechanical',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>ListGroup</code> renders a labelled section of rows. Callers can provide a plain string through the <code>label</code> prop or replace that text with a named slot. The replacement is currently called <code>#header</code>, even though it replaces only the label content inside the group header.</p>`,
+          visual: {
+            label: 'Prop and slot pairing',
+            code: `  <ListGroup label="Open">
+-   <template #header>Open · 12</template>
++   <template #label>Open · 12</template>
+    <ListRow />
+  </ListGroup>`,
+          },
+          found: `<p>The prop and its override use different nouns, unlike the shared rule that names an override slot after the content it replaces. The condition and slot are at <code>src/molecules/list/ListGroup.vue:6-15</code>, and the public declarations are at <code>src/molecules/list/ListGroup.vue:22-37</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-list choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>#header</code> freezes a merely inconsistent and misleading name because the slot cannot replace the header container or its sticky behavior. Renaming to <code>#label</code> costs zero measured v1-app sites, is T1, and the migration report says a codemod can handle it. The new name pairs directly with the prop and matches other label overrides.</p>`,
+          options: [
+            'Rename #header to #label before RC',
+            'Keep #header and document that it replaces only the label',
+            'Make #header replace the complete header container and keep the name',
+          ],
+          recommended: 0,
+          why: 'The accurate name has zero measured consumer cost and needs only a mechanical slot rename.',
+        },
+        {
+          id: 'LIST-Q8',
+          title: 'ListHeaderCellSort suffix placement for align=end',
+          covers: ['M-list'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          what: `<p><code>ListHeaderCellSort</code> renders a sortable column label and a glyph from its <code>#suffix</code> slot. For a start-aligned column the glyph follows the label. For <code>align="end"</code>, the component currently moves that suffix before the label so the text stays flush with the right edge.</p>`,
+          visual: {
+            label: 'Rendered order',
+            code: `align="start"
+  [label] [#suffix glyph]
+
+align="end" today
+  [#suffix glyph] [label] |
+
+literal suffix placement
+  [label] [#suffix glyph] |`,
+          },
+          found: `<p>The audit calls the leading suffix a layout bug because a slot named <code>suffix</code> appears before the label under end alignment. The two render branches are at <code>src/molecules/list/ListHeaderCellSort.vue:22-51</code>, while the prop documentation describes the current edge-alignment reason at <code>src/molecules/list/types.ts:101-115</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-list choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current order makes the name <code>#suffix</code> inconsistent with its rendered position, but it preserves exact right-edge alignment for numeric column labels. Moving the glyph after the label fixes the semantic order and may shift that label inward; this item was not measured, so the affected v1-app sites and codemod coverage are unknown. Renaming the slot to describe a sort glyph avoids the suffix promise but still breaks slot users.</p>`,
+          options: [
+            'Always render #suffix after the label, including align=end',
+            'Rename #suffix to #sort-indicator and keep edge-aware placement',
+            'Keep the current placement and document the align=end exception',
+            'Wait until 1.1 because this is a layout-only fix',
+          ],
+          recommended: 1,
+          why: 'sort-indicator names the slot by its job and preserves the deliberate right-edge alignment without claiming a fixed position.',
+        },
+        {
+          id: 'LIST-Q9',
+          title: 'Experimental ListView export name collisions',
+          covers: ['M-list'],
+          severity: 'Medium · can wait',
+          tier: 'not measured',
+          what: `<p>The stable <code>frappe-ui/list</code> entry point exports composition-based components named <code>List</code>, <code>ListRow</code>, <code>ListRows</code>, and <code>ListHeader</code>. The unstable <code>frappe-ui/experimental</code> entry point exports older config-driven components with the same names and different props. A consumer can therefore import the same identifier from two package paths and get unrelated contracts.</p>`,
+          visual: {
+            label: 'Two families, same local names',
+            code: `import {
+  List,
+  ListRow,
+  ListRows,
+  ListHeader,
+} from 'frappe-ui/list'
+
+import {
+  List as LegacyList,
+  ListRow as LegacyListRow,
+} from 'frappe-ui/experimental'`,
+          },
+          found: `<p>The stable names are exported at <code>src/molecules/list/index.ts:5-12</code>. The experimental barrel exports different <code>List</code>, <code>ListRow</code>, <code>ListRows</code>, and <code>ListHeader</code> implementations at <code>experimental/ListView/index.ts:1-25</code>, and <code>experimental.ts:38-43</code> forwards them.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-list choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the names leaves a confusing but explicitly unstable API: examples and auto-imports can refer to <code>ListRow</code> without revealing which contract they mean. Renaming experimental exports breaks only experimental imports and policy allows that in any minor, but this item has no migration row, so v1-app sites and codemod coverage are not measured. Doing it now reduces ambiguity; waiting avoids spending RC time on an API that has no compatibility promise.</p>`,
+          options: [
+            'Prefix the colliding experimental exports with Legacy before RC',
+            'Export only ListView from experimental and remove its internal part exports',
+            'Wait until 1.1, then rename or remove the experimental collisions',
+            'Keep both families and document the import-path distinction',
+          ],
+          recommended: 2,
+          why: 'The collisions are confined to an unstable entry point and can change in a minor, so they do not need to delay the RC.',
+        },
+        {
+          id: 'LIST-Q10',
+          title: 'Order by tooltip localization hook',
+          covers: ['L-list'],
+          severity: 'Low · can wait',
+          tier: 'not measured',
+          what: `<p><code>ListHeaderCellSort</code> wraps its sort button in a tooltip. After mount, it reads the rendered label text and builds an English instruction such as <code>Order by status</code>. Callers can replace the sort glyph, but they cannot replace or translate this tooltip text.</p>`,
+          visual: {
+            label: 'Current versus additive hook',
+            code: `- <ListHeaderCellSort direction="asc">
+-   Status
+- </ListHeaderCellSort>
++ <ListHeaderCellSort
++   direction="asc"
++   tooltip="Sort by status"
++ >
++   Status
++ </ListHeaderCellSort>`,
+          },
+          found: `<p>The tooltip text is assembled from a hard-coded English template with no prop or slot override. The tooltip binding is at <code>src/molecules/list/ListHeaderCellSort.vue:15-20</code> and the string is created at <code>src/molecules/list/ListHeaderCellSort.vue:97-105</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-list status</div><p>“not answered”</p><div class="source-label">Earlier note</div><p>“can wait for 1.1”</p></div>`,
+          tradeoff: `<p>Keeping the string through v1 leaves an English-only tooltip that applications cannot translate, but it does not mis-type or suppress an existing action. Adding a <code>tooltip</code> prop is backward-compatible; this item was not measured, so its site count and codemod status are unknown. Shipping the hook now enables localization, while waiting keeps a low-severity addition out of the RC.</p>`,
+          options: [
+            'Add a tooltip prop before RC and retain the generated English default',
+            'Add a tooltip slot before RC and retain the generated English default',
+            'Wait until 1.1, keeping and documenting the English-only generated tooltip for v1',
+            'Remove the tooltip until a localization hook exists',
+          ],
+          recommended: 2,
+          why: 'The additive hook can ship in 1.1, while the current tooltip remains usable and does not freeze a false runtime contract.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

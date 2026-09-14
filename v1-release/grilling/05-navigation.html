@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Navigation, tabs and shortcuts | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'navigation'
+      const TITLE = 'Navigation, tabs and shortcuts'
+      const INTRO =
+        'Set the remaining Sidebar, Tabs, TabButtons, SettingsDialog, and keyboard-shortcut contracts. The main navigation names are decided in <a href="01-vocabulary.html">area 01</a>, and Breadcrumbs is covered in <a href="03-overlays-dialogs.html">area 03</a>. Tree is not repeated here: H11 is delegated to issue #1142, including the chosen generic <code>TreeNode&lt;T&gt;</code> from B10.'
+      const QUESTIONS = [
+        {
+          id: 'NAV-Q1',
+          title: 'SettingsDialog keyboardShortcut and emits',
+          covers: ['H10', 'M-tabs-tree', 'L-root'],
+          severity: 'High · Medium · Low',
+          tier: 'T1 · 2 sites',
+          what: `<p><code>SettingsDialog</code> can register a key combination that opens or closes the dialog. Its current <code>shortcut</code> prop is only a boolean and hides the fixed <code>Mod+Shift+,</code> combination. <code>SettingsDialogEmits</code> describes the open-model event for TypeScript consumers, but the component index does not export it.</p>`,
+          visual: {
+            label: 'Current versus decided API',
+            code: `- <SettingsDialog shortcut />
++ <SettingsDialog keyboard-shortcut="Mod+Shift+," />
++ <SettingsDialog :keyboard-shortcut="false" />
+
+- shortcut?: boolean
++ keyboardShortcut?: KeyboardShortcutCombo | false
++ export interface SettingsDialogEmits {
++   'update:open': [value: boolean]
++   'update:tab': [value: string | number | undefined]
++ }`,
+          },
+          found: `<p>The boolean at <code>src/components/SettingsDialog/types.ts:3-8</code> cannot accept a different combination, and <code>src/components/SettingsDialog/SettingsDialog.vue:63-75</code> implements the fixed keys with a separate raw listener. <code>SettingsDialogEmits</code> exists at <code>src/components/SettingsDialog/types.ts:18-21</code> but is omitted from <code>src/components/SettingsDialog/index.ts:10-13</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H10 choice</div><p>“Replace <code>shortcut?: boolean</code> with the shared shortcut vocabulary and composable”</p><div class="source-label">Comment</div><p>“<code>combo</code> is an ambiguous prop name, should be <code>keyboardShortcut</code>; default <code>"Mod+Shift+,"</code>; disable by passing <code>false</code>”</p></div><div class="source-quote"><div class="source-label">M-tabs-tree choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>shortcut</code> freezes a misleading boolean that cannot express the value it controls, and leaves SettingsDialog outside the shared shortcut registry. Changing it touches 2 v1-app sites through a T1 codemod-able rename, while the default preserves current behavior. Exporting the corrected emit type adds no consumer break.</p>`,
+          options: [
+            'Rename shortcut to keyboardShortcut, default it to "Mod+Shift+,", accept false, use the shared composable, and export the corrected emit type',
+            'Rename the prop and support the new value type, but keep the private listener and leave the emit type unexported',
+            'Keep shortcut as a boolean, document the fixed keys, and export the current emit type',
+          ],
+          recommended: 0,
+          why: 'This applies the maintainer’s exact decision, preserves the existing default, and moves one-off shortcut behavior onto the shared contract for two mechanical migrations.',
+        },
+        {
+          id: 'NAV-Q2',
+          title: 'KeyboardShortcut display props and useKeyboardShortcut lifecycle',
+          covers: ['L-shortcuts'],
+          severity: 'Low',
+          tier: 'not measured',
+          what: `<p><code>KeyboardShortcut</code> renders a key combination, while <code>KeyboardShortcutsDialog</code> lists registered combinations. <code>useKeyboardShortcut</code> accepts either one config or an array and ties registrations to a Vue component lifecycle. Calling it outside component setup has no unmount hook, so the registration stays in the module registry.</p>`,
+          visual: {
+            label: 'Public shortcut shapes',
+            code: `<KeyboardShortcut combo="Mod+K" :show-plus="false" />
+<KeyboardShortcutsDialog
+  title="All shortcuts"
+  padding-top="8vh"
+/>
+
+useKeyboardShortcut([
+  { combo: 'Mod+S', description: 'Save', handler: save },
+  { combo: 'Mod+K', description: 'Search', handler: search },
+])`,
+          },
+          found: `<p>The spec omits <code>showPlus</code>, dialog <code>title</code>/<code>paddingTop</code>, and the array overload even though they ship at <code>src/components/KeyboardShortcut/types.ts:1-9</code>, <code>src/components/KeyboardShortcutsDialog/types.ts:1-13</code>, and <code>src/composables/useKeyboardShortcut.ts:279-287</code>. The composable registers first and calls Vue lifecycle hooks without checking setup context at <code>src/composables/useKeyboardShortcut.ts:285-339</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-shortcuts choice</div><p>“can wait for 1.1”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Documenting only the shipped props and array overload can wait because it changes no runtime contract. The missing setup guard is different: an accidental call outside setup leaves a live global registration with no cleanup, so keeping it is a trap rather than a harmless documentation gap. The migration report did not measure this batch; adding a guard should affect only invalid call sites, but those sites were not counted.</p>`,
+          options: [
+            'Add the setup guard before RC and document the shipped props and array overload now',
+            'Add the setup guard before RC and defer the documentation additions to 1.1',
+            'Defer the whole shortcut batch to 1.1',
+          ],
+          recommended: 1,
+          why: 'The guard prevents registrations that can never clean themselves up, while the missing documentation can safely wait as the maintainer proposed.',
+        },
+        {
+          id: 'NAV-Q3',
+          title: 'TabButtons prefix and suffix shorthand',
+          covers: ['H12'],
+          severity: 'High · Cross-cutting',
+          tier: 'not measured',
+          what: `<p><code>TabButtons</code> always receives an <code>options</code> array, so its <code>#prefix</code> and <code>#suffix</code> slots apply to each generated button. <code>Tabs</code> supports both composed children and a <code>tabs</code> shorthand; its per-item shorthand slots use <code>#tab-prefix</code> and <code>#tab-suffix</code>. The choice is whether the two components should share the shorter names or deliberately keep different names.</p>`,
+          visual: {
+            label: 'Current slot names',
+            code: `<TabButtons :options="filters">
+  <template #prefix="{ button, checked }">...</template>
+</TabButtons>
+
+<Tabs :tabs="pages">
+  <template #tab-prefix="{ tab, selected }">...</template>
+</Tabs>
+
+<Tabs>
+  <TabList><TabTrigger value="one"><template #prefix>...</template></TabTrigger></TabList>
+</Tabs>`,
+          },
+          found: `<p>The audit treated the names as drift because the per-item shapes match but the unit prefixes differ at <code>src/components/TabButtons/types.ts:52-57</code> and <code>src/components/Tabs/Tabs.vue:32-43</code>. The current Tabs distinction also avoids confusing root shorthand slots with <code>TabTrigger</code>'s own <code>#prefix</code> slot at <code>src/components/Tabs/TabTrigger.vue:23-30</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H12 choice</div><p>“Keep current TabButtons API as is”</p><div class="source-label">Comment</div><p>“this is intentional, <code>#tab-prefix</code> is shorthand mode”</p></div>`,
+          tradeoff: `<p>Keeping the difference freezes a merely inconsistent pair, but each name is unambiguous in its own component: TabButtons has only generated items, while Tabs has root shorthand and composed triggers. Adding <code>#prefix</code>/<code>#suffix</code> to Tabs would improve visual symmetry but introduce two names for each shorthand slot or require a break that was not measured. Recording the difference makes the maintainer’s intent part of the v1 spec.</p>`,
+          options: [
+            'Keep TabButtons #prefix and #suffix, keep Tabs #tab-prefix and #tab-suffix, and record why they differ in the spec',
+            'Add #prefix and #suffix aliases to Tabs shorthand while keeping the tab-prefixed names',
+            'Rename TabButtons slots to #tab-prefix and #tab-suffix so both components match',
+          ],
+          recommended: 0,
+          why: 'It confirms the maintainer’s decision and preserves a useful distinction between Tabs root shorthand and TabTrigger composition without an unmeasured break.',
+        },
+        {
+          id: 'NAV-Q4',
+          title: 'Sidebar collapsible prop',
+          covers: ['H13'],
+          severity: 'High',
+          tier: 'T2 · 2 sites',
+          what: `<p><code>Sidebar</code> can collapse to a narrow rail, and <code>SidebarSection</code> can collapse a group of items. The root currently disables that ability with the negative prop <code>disableCollapse</code>; the section enables it with the positive prop <code>collapsible</code>. A shared positive name makes the same concept read the same way within the family.</p>`,
+          visual: {
+            label: 'Current versus chosen prop',
+            code: `- <Sidebar :disable-collapse="locked" />
++ <Sidebar :collapsible="!locked" />
+  <SidebarSection collapsible />
+
+- disableCollapse?: boolean
++ collapsible?: boolean`,
+          },
+          found: `<p>The same capability uses opposite names in one family at <code>src/components/Sidebar/types.ts:21-29</code> and <code>src/components/Sidebar/types.ts:150-154</code>. The root also inverts the negative flag in its computed state at <code>src/components/Sidebar/Sidebar.vue:44-47</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H13 choice</div><p>“Positive <code>collapsible</code> on both Sidebar and SidebarSection”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>disableCollapse</code> freezes a merely inconsistent negative flag and preserves double-negation at dynamic call sites. Renaming it affects 2 v1-app sites at T2 because a human must invert each value; a codemod cannot safely infer every expression. Keeping avoids those manual edits, while changing gives the Sidebar family one positive capability name.</p>`,
+          options: [
+            'Keep disableCollapse and document the difference from SidebarSection',
+            'Rename Sidebar.disableCollapse to collapsible and invert both measured call sites',
+            'Add collapsible as an alias and keep disableCollapse through v1',
+          ],
+          recommended: 0,
+          why: 'The orchestrator’s migration rule recommends keeping a consistency-only T2 break, even though the positive name is cleaner.',
+        },
+        {
+          id: 'NAV-Q5',
+          title: 'SidebarHeader menuItems type',
+          covers: ['B8'],
+          severity: 'Medium',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>SidebarHeader</code> passes its <code>menuItems</code> straight to <code>Dropdown</code>. The prop currently repeats a small inline subset of the menu item fields and gives <code>onClick</code> a different signature. <code>MenuOptions</code> is the named type for the data that Dropdown already renders.</p>`,
+          visual: {
+            label: 'Type ownership',
+            code: `SidebarHeader
+  menuItems
+    Dropdown
+      MenuOptions
+
+- menuItems?: { label; icon?; onClick?: () => void }[]
++ menuItems?: MenuOptions`,
+          },
+          found: `<p>The inline, unexported subset is declared at <code>src/components/Sidebar/types.ts:72-93</code> and passed unchanged to Dropdown at <code>src/components/Sidebar/SidebarHeader.vue:6-8</code>. Its callback does not match <code>MenuActionOption.onClick</code> at <code>src/components/Menu/types.ts:52-60</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B8 choice</div><p>“<code>SidebarHeader.menuItems</code> uses <code>MenuOptions</code> and its <code>onClick</code> signature”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the subset is a trap because SidebarHeader rejects valid Dropdown options and promises a different callback for the same data. Changing it has zero measured v1-app migrations and a codemod can handle any explicit annotations. The shared type also makes future Menu corrections reach SidebarHeader instead of leaving another copy behind.</p>`,
+          options: [
+            'Change SidebarHeader.menuItems to MenuOptions and use its corrected event signature',
+            'Export a named SidebarHeaderMenuItem subset with the same event signature as MenuOptions',
+            'Accept both MenuOptions and the existing inline subset',
+          ],
+          recommended: 0,
+          why: 'The header passes the data directly to Dropdown, so using Dropdown’s full named type removes a false restriction at zero measured consumer cost.',
+        },
+        {
+          id: 'NAV-Q6',
+          title: 'SidebarRailItem tile variant',
+          covers: ['B9'],
+          severity: 'Medium',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>SidebarRailItem</code> renders a compact icon or avatar in the left rail. Its <code>variant</code> accepts <code>tile</code> or <code>ghost</code>, while the shared visual vocabulary uses names such as <code>subtle</code> for a filled low-emphasis control. The chosen replacement is <code>subtle</code>.</p>`,
+          visual: {
+            label: 'Current versus chosen variant',
+            code: `- <SidebarRailItem variant="tile" label="Teams" />
++ <SidebarRailItem variant="subtle" label="Teams" />
+
+- variant?: 'tile' | 'ghost'
++ variant?: 'subtle' | 'ghost'
+
+- variant: 'tile'
++ variant: 'subtle'`,
+          },
+          found: `<p>The component adds <code>tile</code> to a shared axis at <code>src/components/SidebarRail/types.ts:35-42</code>, defaults to it at <code>src/components/SidebarRail/SidebarRailItem.vue:99-103</code>, and branches on that name at <code>src/components/SidebarRail/SidebarRailItem.vue:112-127</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B9 choice</div><p>“Map SidebarRailItem <code>tile</code> to <code>subtle</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>tile</code> freezes a merely inconsistent variant name that describes the control’s shape rather than its emphasis. Renaming it has zero measured v1-app sites and is a T1 codemod-able value replacement, though four own-tree sites also change. <code>subtle</code> aligns the public vocabulary while preserving the rendered treatment.</p>`,
+          options: [
+            'Rename tile to subtle and preserve the current rendering',
+            'Keep tile and document it as a SidebarRail-only variant',
+            'Remove tile and make ghost the only rail treatment',
+          ],
+          recommended: 0,
+          why: 'The chosen shared name costs no measured app migration and does not require a visual change.',
+        },
+        {
+          id: 'NAV-Q7',
+          title: 'Sidebar type, navigation, icon, key, and tooltip follow-ups',
+          covers: ['M-navigation'],
+          severity: 'Medium',
+          tier: 'not measured',
+          dependsOn: 'NAV-Q6',
+          what: `<p>The Sidebar family also has several declaration and behavior gaps. The exported props omit the <code>collapsed</code> model, <code>SidebarRailItem</code> lacks its siblings’ route-active inference and plain-anchor fallback, and <code>SidebarItem</code> can print an unsupported icon string as text. The exported injection keys have no public guidance, and SidebarItem sends Tooltip the unsupported prop <code>placement</code> instead of <code>side</code>.</p>`,
+          visual: {
+            label: 'Sidebar follow-up map',
+            code: `SidebarProps
++ collapsed model type
+SidebarRailItem
++ infer active from route
++ plain <a> fallback without router
+SidebarItem
+- print non-lucide icon string
+- <Tooltip placement="right">
++ warn or reject unsupported string
++ <Tooltip side="right">
+sidebarCollapsedKey / sidebarToggleKey
++ document stable use or move to experimental`,
+          },
+          found: `<p>The omissions and behavior split appear at <code>src/components/Sidebar/types.ts:10-30</code>, <code>src/components/SidebarRail/SidebarRailItem.vue:15-24</code>, and <code>src/components/Sidebar/SidebarItemIcon.vue:1-13</code>. The unsupported Tooltip prop is passed at <code>src/components/Sidebar/SidebarItem.vue:30-33</code>, while the keys are exported at <code>src/components/Sidebar/index.ts:20</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-navigation choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Triage</div><p>The later triage puts all five follow-ups in “Can wait for 1.1.” It says to use the accepted <code>route</code> and <code>href</code> names for SidebarRailItem.</p></div>`,
+          tradeoff: `<p>Keeping the current state freezes incomplete TypeScript declarations and undocumented keys, while the wrong Tooltip prop and text icon fallback remain visible bugs. These items were not measured as one migration batch; the model declaration and docs are additive, while tighter icon handling could expose invalid consumer values. Fixing runtime bugs now reduces known bad behavior, and deferring additive declarations does not block a compatible 1.1 release.</p>`,
+          options: [
+            'Fix the Tooltip prop, icon handling, route activity, and anchor fallback before RC; defer additive declarations and key documentation to 1.1',
+            'Resolve all five follow-ups before RC',
+            'Defer all five follow-ups to 1.1 as triaged',
+            'Fix only the unsupported Tooltip prop before RC and defer the rest',
+          ],
+          recommended: 0,
+          why: 'It fixes the known runtime failures before the tag while leaving compatible type and documentation additions for 1.1.',
+        },
+        {
+          id: 'NAV-Q8',
+          title: 'TabButton item fields and label type',
+          covers: ['M-tabs-tree', 'X1', 'X2'],
+          severity: 'Medium · Trap',
+          tier: 'T2 · 5 sites',
+          what: `<p>A <code>TabButton</code> object supplies the value, label, icons, navigation target, and action for one generated control. The accepted cross-cutting decisions allow <code>route</code>, external <code>href</code>, and data-object <code>onClick</code>. The remaining questions are whether an item should carry a separate <code>tooltip</code> field and whether its visible label may be a number when the Tabs contract requires a string.</p>`,
+          visual: {
+            label: 'Proposed TabButton item',
+            code: `interface TabButton {
+  value: TabValue
+- label?: string | number
++ label?: string
+  icon?: TabIcon
+  iconLeft?: TabIcon
+  disabled?: boolean
+- tooltip?: string
+  route?: RouteLocationRaw
+  href?: string
+  onClick?: (event: MouseEvent) => void
+}`,
+          },
+          found: `<p><code>TabButton</code> currently adds <code>tooltip</code>, accepts numeric labels, and carries the three accepted action fields at <code>src/components/TabButtons/types.ts:12-25</code>. The renderer also falls back to tooltip text as the accessible label at <code>src/components/TabButtons/TabButtons.vue:60-73</code>, so removing it needs a manual decision at each affected item.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-tabs-tree choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">X1 choice</div><p>“<code>route</code> for router destinations, <code>href</code> for external URLs everywhere; remove <code>to</code> and <code>link</code> before 1.0.0”</p><div class="source-label">Comment</div><p>“canonical props must be <code>route</code> and <code>href</code>”</p></div><div class="source-quote"><div class="source-label">X2 choice</div><p>“<code>onClick</code> only inside data/action objects; component-level <code>click</code> emits; fix Menu event type”</p><div class="source-label">Comment</div><p>“click emits and onClick prop both behave the same in Vue components if i am not wrong?”</p></div>`,
+          tradeoff: `<p>Keeping numeric labels and the tooltip fallback is a trap because it lets TabButtons accept item shapes that the Tabs family cannot represent, and icon-only accessibility can silently depend on a presentation field. Removing <code>tooltip</code> and narrowing <code>label</code> requires manual review at 5 v1-app sites, so a codemod cannot choose the replacement text. Keeping <code>route</code>, <code>href</code>, and <code>onClick</code> preserves the already-decided navigation and action contracts.</p>`,
+          options: [
+            'Keep route, href, and onClick; remove tooltip; require string labels; manually migrate the 5 sites',
+            'Keep all current fields and document TabButton as intentionally broader than TabItem',
+            'Keep tooltip but require string labels, route, href, and onClick',
+            'Remove tooltip, href, and onClick; require string labels and route-only navigation',
+          ],
+          recommended: 0,
+          why: 'It removes the incompatible item shapes while retaining fields already accepted by the navigation and action decisions.',
+        },
+        {
+          id: 'NAV-Q9',
+          title: 'TabButtons data-state names and redundant type aliases',
+          covers: ['M-tabs-tree', 'L-root'],
+          severity: 'Medium · Low',
+          tier: 'T1 · 0 sites',
+          dependsOn: 'NAV-Q3',
+          what: `<p><code>TabButtons</code> exposes selection through slot props and <code>data-state</code>. Its slots intentionally use the radio-style <code>checked</code> boolean, but its DOM state also says <code>checked</code>/<code>unchecked</code> while Tabs uses <code>active</code>/<code>inactive</code>. <code>TabButtonValue</code> and <code>TabButtonIcon</code> are aliases of the existing <code>TabValue</code> and <code>TabIcon</code> types.</p>`,
+          visual: {
+            label: 'State and type vocabulary',
+            code: `  #prefix="{ button, checked }"
+- data-state="checked | unchecked"
++ data-state="active | inactive"
+
+- TabButtonValue = TabValue
+- TabButtonIcon = TabIcon
++ TabButton.value: TabValue
++ TabButton.icon: TabIcon`,
+          },
+          found: `<p>The slot names and aliases are declared at <code>src/components/TabButtons/types.ts:10-16</code> and <code>src/components/TabButtons/types.ts:48-57</code>. TabButtons is built on <code>RadioGroupRoot</code> at <code>src/components/TabButtons/TabButtons.vue:1-12</code>, while Tabs publishes <code>selected</code> and active-state vocabulary at <code>src/components/Tabs/types.ts:69</code> and <code>src/components/Tabs/TabTrigger.vue:82-87</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-tabs-tree choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">L-root choice</div><p>“Fix all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the DOM state words freezes a misleading styling API based on the internal radio primitive, and keeping the aliases makes consumers choose between duplicate names for the same types. Changing both has zero measured v1-app sites and is a T1 codemod-able cleanup. The <code>checked</code> slot prop stays as the intentional TabButtons shorthand contract confirmed in NAV-Q3.</p>`,
+          options: [
+            'Keep the checked slot prop, change data-state to active and inactive, and remove both redundant aliases',
+            'Change only data-state to active and inactive; keep the checked slot prop and both aliases',
+            'Keep checked and unchecked data-state plus both aliases, and document the Tabs versus TabButtons split',
+            'Use checked and unchecked data-state across both Tabs and TabButtons, and keep both aliases',
+          ],
+          recommended: 0,
+          why: 'It removes misleading implementation vocabulary and duplicate type names with zero measured app migrations.',
+        },
+        {
+          id: 'NAV-Q10',
+          title: 'SidebarCollapseToggle labels',
+          covers: ['L-navigation'],
+          severity: 'Low',
+          tier: 'not measured',
+          dependsOn: 'NAV-Q4',
+          what: `<p><code>SidebarCollapseToggle</code> is the ready-made control for changing the Sidebar collapsed model. It supplies “Expand” or “Collapse” as the <code>SidebarItem</code> label, which also becomes the accessible name and collapsed tooltip. Consumers cannot translate or replace those words without rebuilding the control.</p>`,
+          visual: {
+            label: 'Current label ownership',
+            code: `<SidebarCollapseToggle>
+  <SidebarItem
+    :label="isCollapsed ? 'Expand' : 'Collapse'"
+    @click="toggle"
+  >
+    <template #prefix>
+      <span class="lucide-panel-right-open" />
+    </template>
+  </SidebarItem>
+</SidebarCollapseToggle>`,
+          },
+          found: `<p>The two English labels are hard-coded directly in <code>src/components/Sidebar/SidebarCollapseToggle.vue:1-9</code>. Because <code>SidebarItem</code> derives its tooltip and accessible name from the label at <code>src/components/Sidebar/SidebarItem.vue:147-156</code>, an app cannot override only the visible copy.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-navigation choice</div><p>“can wait for 1.1”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the hard-coded labels freezes an English-only convenience component, but it does not corrupt state or promise a false type. Adding <code>expandLabel</code> and <code>collapseLabel</code> later is compatible, so the migration report did not measure this item. Fixing it now completes localization before the tag; deferring it keeps the RC smaller with no future break.</p>`,
+          options: [
+            'Defer label customization to 1.1 and keep the current English defaults for RC',
+            'Add expandLabel and collapseLabel props before RC, preserving the current defaults',
+            'Add one scoped label slot before RC with collapsed state as a slot prop',
+            'Remove SidebarCollapseToggle and require apps to compose their own control',
+          ],
+          recommended: 0,
+          why: 'The missing customization is additive and can wait for 1.1 without freezing a break or leaving a runtime trap.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

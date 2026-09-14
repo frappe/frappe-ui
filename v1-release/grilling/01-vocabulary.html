@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vocabulary and cross-cutting rules | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'vocabulary'
+      const TITLE = 'Vocabulary and cross-cutting rules'
+      const INTRO =
+        'Set the names and conventions that several component families will share after the v1 API freeze. Each answer should account for both the quality of the permanent API and the measured migration cost.'
+      const QUESTIONS = [
+        {
+          id: 'VOC-Q1',
+          title: 'Navigation props: to, route, link, and href',
+          covers: ['X1', 'H07'],
+          severity: 'Cross-cutting · High',
+          tier: 'T1 · 32 sites',
+          what: `<p>Navigation-capable components accept either a Vue Router destination or an external URL. Today <code>SidebarItem</code>, <code>SidebarRailItem</code>, <code>MobileNavItem</code>, <code>PageHeaderBackButton</code>, and <code>ListRow</code> use <code>to</code>, while <code>Button</code>, <code>Breadcrumbs</code>, <code>Menu</code>, <code>Tabs</code>, and <code>TabButtons</code> use <code>route</code>. <code>Button</code> calls its external URL <code>link</code>, while other components use <code>href</code>.</p>`,
+          visual: {
+            label: 'Current versus proposed consumer usage',
+            code: `- <SidebarItem :to="project" />
++ <SidebarItem :route="project" />
+- <Button link="https://frappe.io" />
++ <Button href="https://frappe.io" />
+  <Breadcrumbs :items="[{ label: 'Frappe', href: url }]" />`,
+          },
+          found: `<p>The same router destination has two prop names, and the same external URL has two names. <code>src/components/Sidebar/types.ts:49-52</code>, <code>src/components/Button/types.ts:41-47</code>, and <code>src/components/Breadcrumbs/types.ts:7-11</code> show the split.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X1 choice</div><p>“<code>route</code> for router destinations, <code>href</code> for external URLs everywhere; remove <code>to</code> and <code>link</code> before 1.0.0”</p><div class="source-label">Comment</div><p>“canonical props must be <code>route</code> and <code>href</code>”</p></div><div class="source-quote"><div class="source-label">H07 choice</div><p>“Rename Button <code>link</code> to <code>href</code>; remove the old name”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the current names freezes a merely inconsistent API: wrapper authors must remember which components use <code>to</code> or <code>route</code>, and <code>link</code> or <code>href</code>. Changing them touches 32 v1-app sites, but the report classifies every edit as a T1 mechanical rename that a codemod can handle. Keeping avoids a broad break now; changing gives v1 one navigation vocabulary.</p>`,
+          options: [
+            'Keep the current names and document the component-by-component split',
+            'Use route for router destinations and href for external URLs; remove to and link',
+            'Use to for router destinations and href for external URLs; remove route and link',
+            'Add route and href as aliases now, then remove to and link in v2',
+          ],
+          recommended: 0,
+          why: 'The inconsistency is real, but 32 otherwise working sites exceed the migration report’s threshold for a consistency-only break.',
+        },
+        {
+          id: 'VOC-Q2',
+          title:
+            'Action callbacks: onClick data fields, click emits, and Menu event type',
+          covers: ['X2', 'H08'],
+          severity: 'Cross-cutting · High',
+          tier: 'T0 · 0 sites',
+          what: `<p>Components can expose activation through a Vue <code>click</code> event, while data objects such as <code>MenuOptions</code> need an <code>onClick</code> function field. Vue delivers both as callbacks at runtime, but declaring an emit makes it part of the component event contract and declaring a prop makes it component input. <code>MenuActionOption.onClick</code> also receives the event that Reka emits when an item is selected.</p>`,
+          visual: {
+            label: 'Data action and component event',
+            code: `const items = [
+  { label: 'Archive', onClick: archive },
+]
+<SidebarRailItem @click="archive" />
+- onClick?: (event: PointerEvent) => void
++ onClick?: (event: Event) => void`,
+          },
+          found: `<p>The naming rule drifts between component families, and Menu promises a <code>PointerEvent</code> even though Reka supplies a synthetic selection event. The false type is declared at <code>src/components/Menu/types.ts:52-60</code> and cast without runtime conversion at <code>src/components/Menu/Menu.vue:34-41</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X2 choice</div><p>“<code>onClick</code> only inside data/action objects; component-level <code>click</code> emits; fix Menu event type”</p><div class="source-label">Comment</div><p>“click emits and onClick prop both behave the same in Vue components if i am not wrong?”</p></div><div class="source-quote"><div class="source-label">H08 choice</div><p>“Change Menu <code>onClick</code> to the actual reka <code>CustomEvent</code> type”</p><div class="source-label">Comment</div><p>“i would like to understand this in detail before deciding”</p></div><div class="source-quote"><div class="source-label">Research</div><p>At runtime, both declarations reach a callback, but Vue documents one under Events and the other under Props. Reka handles pointer and keyboard activation and exposes its selection callback as <code>Event</code>. The runtime object has no pointer coordinates or <code>pointerType</code>; <code>preventDefault()</code> remains useful because it can keep the menu open. The research recommends <code>Event</code>, not the narrower internal <code>CustomEvent</code>.</p></div>`,
+          tradeoff: `<p>The current Menu declaration is a trap because TypeScript permits pointer-only fields that are missing at runtime; keeping it is not a documentation option. Changing the type and using <code>onClick</code> only in data objects has zero measured v1-app migrations and is codemod-able. The result is a clear distinction between component events and callbacks stored in data.</p>`,
+          options: [
+            'Use click emits on components, onClick in data objects, and type Menu actions as Event',
+            'Remove the event argument from Menu action callbacks',
+            'Use onClick props for every component and data object, and type Menu actions as Event',
+          ],
+          recommended: 0,
+          why: 'It removes a false runtime promise at zero measured consumer cost and keeps data-object callbacks distinct from component events.',
+        },
+        {
+          id: 'VOC-Q3',
+          title: 'Delay props: seconds or milliseconds',
+          covers: ['X3'],
+          severity: 'Cross-cutting',
+          tier: 'T3 · 36 sites',
+          what: `<p><code>Tooltip</code> and <code>HoverCard</code> let callers control how long they wait before opening or closing. Their public delay values are seconds and the components multiply them by 1,000 before passing them to Reka. <code>ScrollArea.scrollHideDelay</code> already takes milliseconds.</p>`,
+          visual: {
+            label: 'Current versus proposed delay values',
+            code: `- <Tooltip :hover-delay="0.5" />
+- <HoverCard :leave-delay="0.3" />
++ <Tooltip :hover-delay="500" />
++ <HoverCard :leave-delay="300" />
+  <ScrollArea :scroll-hide-delay="600" />`,
+          },
+          found: `<p>Public time values use two units, so similar-looking numbers can differ by a factor of 1,000. Seconds are documented at <code>src/components/Tooltip/types.ts:10-13</code> and <code>src/components/HoverCard/types.ts:31-41</code>; milliseconds are documented at <code>src/components/ScrollArea/types.ts:2-5</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X3 choice</div><p>“Standardize public delay props on milliseconds; state the unit in docs”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping seconds leaves a merely inconsistent time API and requires every delay prop to document its unit. Changing explicit values and the omitted HoverCard default creates a T3 behavior review across 36 v1-app sites; a codemod cannot prove whether each number or default-dependent use still behaves correctly. Keeping avoids a broad visual-behavior review, while changing makes future delay props predictable.</p>`,
+          options: [
+            'Keep the current units and document seconds or milliseconds on every delay prop',
+            'Change all public delay props to milliseconds before v1',
+            'Add new millisecond-named props and keep the current props through v1',
+          ],
+          recommended: 0,
+          why: 'The inconsistency is documentable, while a unit change requires manual behavior review at 36 sites and cannot be made safe by codemod alone.',
+        },
+        {
+          id: 'VOC-Q4',
+          title:
+            'Public type exports, printable route types, and FrappeUIError',
+          covers: ['X4'],
+          severity: 'Cross-cutting',
+          tier: 'not measured',
+          what: `<p>Consumers import exported TypeScript names to type wrappers, option arrays, emits, and composable results. Several stable public signatures refer to types that the package does not export, while generated route docs print minified aliases such as <code>string | kt | Tt</code>. Input components also accept a small display-error interface named <code>FrappeUIError</code>.</p>`,
+          visual: {
+            label: 'Type contract cleanup',
+            code: `- error?: string | FrappeUIError
++ error?: string | InputErrorValue
+- route: string | kt | Tt
++ route: RouteDestination
++ export type {
++   BreadcrumbItem, InputErrorValue, MenuOptions,
++   TimePickerEmits, RouteDestination,
++ }`,
+          },
+          found: `<p>Stable signature types are unreachable from the relevant public entry point, generated route tables leak minified dependency names, and <code>FrappeUIError</code> is exported only from experimental. The display-error shape is at <code>src/composables/useInputLabeling.ts:6-13</code>, its experimental export is at <code>experimental.ts:12-13</code>, and a leaked generated route type appears at <code>src/components/MobileNav/MobileNav.api.md:32</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X4 choice</div><p>“Export every stable named type used by a public signature; promote <code>FrappeUIError</code>; replace the route type leak with an owned printable type”</p><div class="source-label">Comment</div><p>“not sure about FrappeUIError isn't it just Frappe response error object?”</p></div><div class="source-quote"><div class="source-label">Research</div><p><code>FrappeUIError</code> is not a Frappe response object. It is an interface extending <code>Error</code> with optional <code>messages</code>, so both existing request error shapes satisfy it structurally. No code constructs it, and it is a smaller display contract rather than another transport error. The research recommends renaming it to <code>InputErrorValue</code> and exporting that name.</p></div>`,
+          tradeoff: `<p>Keeping this state is a trap: consumers cannot name public signature types, generated docs expose meaningless dependency aliases, and <code>FrappeUIError</code> suggests a transport error it does not model. This combined item was not measured as X4, though the migration report records zero v1-app sites for the related owned route-type cleanup. Changing it makes the public TypeScript contract usable; existing imports of the experimental name may need a mechanical rename.</p>`,
+          options: [
+            'Export every stable signature type, add an owned route type, and rename FrappeUIError to InputErrorValue',
+            'Export every stable signature type and owned route type, but keep the FrappeUIError name',
+            'Inline structural types in public signatures and fix only the generated route display',
+          ],
+          recommended: 0,
+          why: 'It fixes the unnameable and unreadable type contracts while giving the input-only error shape an accurate name.',
+        },
+        {
+          id: 'VOC-Q5',
+          title: 'Implementation barrels using export *',
+          covers: ['X6'],
+          severity: 'Cross-cutting',
+          tier: 'T0 · 0 sites',
+          what: `<p>The resources and editor entry points are barrels: files that collect names for consumers to import. Four barrel lines currently re-export every name from implementation modules such as <code>local</code>, <code>realtime</code>, <code>extensions</code>, and <code>menu</code>. Adding a new internal export to any of those files therefore also adds public API by accident.</p>`,
+          visual: {
+            label: 'Package barrel',
+            code: `- export * from './local'
+- export * from './realtime'
++ export { saveLocal, deleteLocal, getLocal } from './local'
++ export { onDocUpdate } from './realtime'
+- export * from './extensions'
+- export * from './menu'
++ export { StarterKit, Link, Image } from './extensions'
++ export { Bold, Italic, minimalToolbar } from './menu'`,
+          },
+          found: `<p>The four wildcard exports make future implementation helpers public without a deliberate entry-point change. They are at <code>src/resources/index.ts:6-8</code> and <code>src/molecules/editor/index.ts:36-39</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X6 choice</div><p>“Replace all four implementation-module <code>export *</code> statements with explicit named exports”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping wildcard exports is a trap because unrelated internal work can silently enlarge the frozen v1 API. Replacing them has zero measured v1-app migrations and only changes four lines in this tree; the report marks the work codemod-able. Explicit lists make every later public addition a deliberate reviewable edit.</p>`,
+          options: [
+            'Replace all four implementation wildcard exports with explicit named exports',
+            'Move the implementation modules behind new private files, then explicitly export the current names',
+            'Remove the resources and editor barrel exports until their public lists are reviewed',
+          ],
+          recommended: 0,
+          why: 'It closes an accidental API path with no measured consumer migration.',
+        },
+        {
+          id: 'VOC-Q6',
+          title: 'PageHeaderBackButton fallback route',
+          covers: ['H16'],
+          severity: 'High',
+          tier: 'not measured',
+          dependsOn: 'VOC-Q1',
+          what: `<p><code>PageHeaderBackButton</code> normally sends the router back through in-app history. Its <code>to</code> prop is used only after a cold load when there is no in-app history, so the value is a fallback route rather than the button's normal destination. The chosen name should follow the navigation vocabulary settled in VOC-Q1.</p>`,
+          visual: {
+            label: 'Fallback-only behavior',
+            code: `on(backButtonClick)
+  if inAppHistory exists
+    router.back()
+  else
+-   router.push(props.to)
++   router.push(props.fallbackRoute)`,
+          },
+          found: `<p><code>to</code> usually means “always navigate here,” but this prop is read only by the no-history path. The fallback-only contract is declared at <code>src/components/PageHeader/types.ts:13-18</code> and passed to the back helper at <code>src/components/PageHeader/PageHeaderBackButton.vue:23-25</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H16 choice</div><p>“Rename <code>to</code> to <code>fallback</code>”</p><div class="source-label">Comment</div><p>“should be <code>fallbackRoute</code> instead of <code>fallback</code>?”</p></div><div class="source-quote"><div class="source-label">Research</div><p>With <code>route</code> as the canonical destination name from X1, <code>fallbackRoute</code> says both when the value is used and what kind of value it holds. The research recommends <code>fallbackRoute</code> over <code>fallback</code>.</p></div>`,
+          tradeoff: `<p>Keeping <code>to</code> freezes a misleading API because the prop does not control the normal click destination. H16 has no separate row in the migration report, so its site count is not measured. Renaming to <code>fallbackRoute</code> makes the special behavior clear and follows VOC-Q1 if that question chooses <code>route</code>; choosing <code>fallback</code> is shorter but hides the value kind.</p>`,
+          options: [
+            'Rename to fallbackRoute',
+            'Rename to fallback',
+            'Make route the normal destination and remove fallback-only behavior',
+            'Keep to and document its fallback-only semantics',
+          ],
+          recommended: 0,
+          why: 'fallbackRoute states the condition and value kind, and it follows the proposed route vocabulary from VOC-Q1.',
+        },
+        {
+          id: 'VOC-Q7',
+          title: 'PageHeader mobile-height CSS variable',
+          covers: ['H18'],
+          severity: 'High',
+          tier: 'T1 · 0 sites',
+          what: `<p><code>PageHeaderMobile</code> reads a CSS custom property so applications can override the mobile header height. The current name, <code>--mobile-header-height</code>, does not identify the component that owns it. The proposed name adds the <code>page-header</code> component prefix.</p>`,
+          visual: {
+            label: 'CSS override',
+            code: `- :root { --mobile-header-height: 56px; }
++ :root { --page-header-mobile-height: 56px; }
+
+- h-[var(--mobile-header-height,52px)]
++ h-[var(--page-header-mobile-height,52px)]`,
+          },
+          found: `<p>The variable is an undocumented customization hook with an ownerless name, even though the API rules require component-scoped custom properties. The only own-tree use is <code>src/components/PageHeader/PageHeaderMobile.vue:3</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H18 choice</div><p>“Rename to <code>--page-header-mobile-height</code>; document”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping and documenting the current variable would freeze a merely inconsistent, ownerless name. Renaming has zero measured v1-app sites and is a T1 codemod-able edit, though an untracked runtime override could still exist outside the measured apps. The new name makes ownership clear before the variable becomes supported API.</p>`,
+          options: [
+            'Rename to --page-header-mobile-height and document it',
+            'Keep --mobile-header-height and document it',
+            'Remove the CSS variable and keep the 52px height fixed',
+          ],
+          recommended: 0,
+          why: 'The owner-prefixed name costs zero measured migrations and avoids freezing an ambiguous global CSS hook.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

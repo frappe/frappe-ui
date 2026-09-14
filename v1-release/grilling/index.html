@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>frappe-ui v1 RC — API grilling</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <header class="index-header">
+      <div class="index-header-inner">
+        <h1>frappe-ui v1 RC — API grilling</h1>
+        <p>
+          Open one area at a time. Read the API context and measured trade-off,
+          choose an option, and write the reasoning that should survive the v1
+          freeze. Answers stay in this browser until you copy or clear them.
+        </p>
+        <div class="index-toolbar">
+          <button class="button" type="button" data-copy-all>
+            Copy all answers
+          </button>
+          <span class="answer-count" data-copy-status></span>
+        </div>
+      </div>
+    </header>
+    <main class="index-main">
+      <div class="area-list" data-area-list></div>
+      <p class="delegation-note">
+        Charts (#1139) and Tree (#1142) are delegated to their owners and have
+        no page.
+      </p>
+      <section class="copy-fallback" data-copy-fallback hidden>
+        <label for="copy-all-fallback">Copy the text below</label>
+        <textarea
+          id="copy-all-fallback"
+          readonly
+          data-copy-fallback-text
+        ></textarea>
+      </section>
+    </main>
+    <script src="_shared.js"></script>
+    <script>
+      const AREAS = [
+        {
+          slug: 'vocabulary',
+          file: '01-vocabulary.html',
+          name: 'Vocabulary and cross-cutting rules',
+          description:
+            'Navigation names, action callbacks, delay units, type exports, barrels, and shared CSS vocabulary.',
+        },
+        {
+          slug: 'data-layer',
+          file: '02-data-layer.html',
+          name: 'Data layer: useCall, useDoc, useList, uploads, errors',
+          description:
+            'Failure behavior, return shapes, cache rules, request options, uploads, and error contracts.',
+        },
+        {
+          slug: 'overlays-dialogs',
+          file: '03-overlays-dialogs.html',
+          name: 'Dialog, Toast, Popover, Dropdown, Menu, HoverCard, Tooltip, ContextMenu',
+          description:
+            'Overlay control, slots, events, attributes, defaults, actions, and portal behavior.',
+        },
+        {
+          slug: 'inputs-selection',
+          file: '04-inputs-selection.html',
+          name: 'Select, Combobox, MultiSelect, pickers, TimePicker, form controls',
+          description:
+            'Selection types, open state, picker triggers, validation, emits, and input contracts.',
+        },
+        {
+          slug: 'navigation',
+          file: '05-navigation.html',
+          name: 'Sidebar, SidebarRail, MobileNav, Breadcrumbs, Tabs, TabButtons, SettingsDialog shortcuts',
+          description:
+            'Navigation component names, variants, slots, collapse behavior, and keyboard shortcuts.',
+        },
+        {
+          slug: 'shells-page-header',
+          file: '06-shells-page-header.html',
+          name: 'DesktopShell, MobileShell, PageHeader, ScrollArea, color scheme composables',
+          description:
+            'Shell regions, scroll ownership, header targets, viewport styling, and color-scheme helpers.',
+        },
+        {
+          slug: 'editor',
+          file: '07-editor.html',
+          name: 'Editor, kits, extensions, uploads, suggestions',
+          description:
+            'Editor types, kit boundaries, extension defaults, upload callbacks, and suggestion records.',
+        },
+        {
+          slug: 'list',
+          file: '08-list.html',
+          name: 'List, ListRow, virtual rows, ListGroup',
+          description:
+            'Row activation, height names, virtualization options, slots, state hooks, and return types.',
+        },
+        {
+          slug: 'packaging-tokens',
+          file: '09-packaging-tokens.html',
+          name: 'package.json, Tailwind preset, design tokens, CSS variables',
+          description:
+            'Package dependencies, entry points, Tailwind behavior, token scales, and supported CSS hooks.',
+        },
+      ]
+
+      document.addEventListener('DOMContentLoaded', () => {
+        renderAreas()
+        document
+          .querySelector('[data-copy-all]')
+          .addEventListener('click', copyAllAnswers)
+        window.addEventListener('storage', renderAreas)
+        window.addEventListener('focus', renderAreas)
+      })
+
+      function renderAreas() {
+        document.querySelector('[data-area-list]').innerHTML = AREAS.map(
+          (area) => {
+            const count = localStorage.getItem(
+              `${STORAGE_PREFIX}${area.slug}:__count`,
+            )
+            const progress =
+              count === null
+                ? 'not opened yet'
+                : `${answeredCount(area.slug)} of ${count} answered`
+            return `<article class="area-card"><a href="${area.file}"><span><span class="area-name">${area.name}</span><span class="area-description">${area.description}</span></span><span class="area-progress">${progress}</span></a></article>`
+          },
+        ).join('')
+      }
+
+      function answeredCount(area) {
+        const questions = readJson(`${STORAGE_PREFIX}${area}:__questions`, [])
+        return questions.filter((question) => {
+          const saved = readJson(`${STORAGE_PREFIX}${area}:${question.id}`, {})
+          return Number.isInteger(saved.choice) || Boolean(saved.answer?.trim())
+        }).length
+      }
+
+      async function copyAllAnswers() {
+        const text = AREAS.map((area) => {
+          const questions = readJson(
+            `${STORAGE_PREFIX}${area.slug}:__questions`,
+            [],
+          )
+          return questions.length ? formatAreaAnswers(area.slug, questions) : ''
+        })
+          .filter(Boolean)
+          .join('\n\n')
+        const status = document.querySelector('[data-copy-status]')
+
+        if (!text) {
+          status.textContent = 'No area has been opened yet'
+          return
+        }
+
+        try {
+          await navigator.clipboard.writeText(text)
+          status.textContent = 'Copied'
+          setTimeout(() => {
+            status.textContent = ''
+          }, 1600)
+        } catch {
+          const fallback = document.querySelector('[data-copy-fallback]')
+          const textarea = fallback.querySelector('[data-copy-fallback-text]')
+          fallback.hidden = false
+          textarea.value = text
+          textarea.focus()
+          textarea.select()
+        }
+      }
+    </script>
+  </body>
+</html>

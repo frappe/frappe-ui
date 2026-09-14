@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Packaging, Tailwind and tokens | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'packaging-tokens'
+      const TITLE = 'Packaging, Tailwind and tokens'
+      const INTRO =
+        'Set the install contract and the token rules that applications will rely on after the v1 freeze. These questions separate required package fixes from choices that would change generated CSS or established consumer names.'
+      const QUESTIONS = [
+        {
+          id: 'PKG-Q1',
+          title: 'Runtime dependencies: Tailwind v3 and @floating-ui/vue',
+          covers: ['H33', 'H34'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>frappe-ui/tailwind</code> is a Tailwind v3 preset, so loading it requires the consumer to have Tailwind installed. <code>SidebarRailItemBadge</code>, which is exported from the root package, directly imports <code>autoUpdate</code> and <code>useFloating</code> from <code>@floating-ui/vue</code>. Package metadata must state both runtime requirements instead of relying on this repository's development install or another dependency's hoisted copy.</p>`,
+          visual: {
+            label: 'Required package declarations',
+            code: `"peerDependencies": {
+  "vue": ">=3.5.0",
++ "tailwindcss": ">=3.2.7 <4"
+},
+"dependencies": {
++ "@floating-ui/vue": "^1.1.6"
+}`,
+          },
+          found: `<p><code>package.json:192-210</code> puts Tailwind only in <code>devDependencies</code>, although <code>tailwind/plugin.js:1</code> imports <code>tailwindcss/plugin</code> at load time. <code>src/components/SidebarRail/SidebarRailItemBadge.vue:36-40</code> imports <code>@floating-ui/vue</code>, but <code>package.json:115-190</code> does not declare it.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H33 choice</div><p>“Declare a Tailwind v3 peer dependency; document the supported range”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">H34 choice</div><p>“Declare <code>@floating-ui/vue</code> as a direct dependency”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the metadata as-is is a trap: a clean consumer install can fail because two packages needed by shipped entry points are absent. Both fixes have zero measured v1-app migration sites and need no consumer codemod. Declaring them makes package managers enforce the Tailwind major and install Floating UI directly; it may expose an incompatible Tailwind version during install instead of failing later during the build.</p>`,
+          options: [
+            'Add a Tailwind v3 peer range and add @floating-ui/vue as a direct dependency',
+            'Bundle both packages inside frappe-ui instead of declaring consumer requirements',
+            'Remove the Tailwind preset and SidebarRailItemBadge dependency before v1',
+          ],
+          recommended: 0,
+          why: 'Both shipped entry points already require these packages, and explicit declarations fix clean installs with zero measured consumer edits.',
+        },
+        {
+          id: 'PKG-Q2',
+          title: 'Tailwind preset import: delete the deep-path shim',
+          covers: ['H35'],
+          severity: 'High',
+          tier: 'T1 · 0 sites',
+          what: `<p>The supported Tailwind preset entry is <code>frappe-ui/tailwind</code>, which is listed in the package exports map. The root README instead tells users to require <code>frappe-ui/src/utils/tailwind.config</code>. That source path is blocked by the exports map, and the file at that path is only a deprecated forwarding shim.</p>`,
+          visual: {
+            label: 'Tailwind configuration',
+            code: `module.exports = {
+  presets: [
+-   require('frappe-ui/src/utils/tailwind.config')
++   require('frappe-ui/tailwind')
+  ],
+}
+- src/utils/tailwind.config.js`,
+          },
+          found: `<p>The unsupported instruction is at <code>readme.md:61-70</code>; the shim and its obsolete warning are at <code>src/utils/tailwind.config.js:1-6</code>. The only exported preset path is <code>package.json:74-77</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H35 choice</div><p>“Delete the deprecated Tailwind shim; README points at <code>frappe-ui/tailwind</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the shim and current README is a trap because the documented import is not a supported package export. Removing it affects zero measured v1-app sites; the migration report found one v0 site, and a codemod can replace the literal path. The change leaves one supported preset entry and stops shipping a source-layout alias as API.</p>`,
+          options: [
+            'Delete the shim and replace every documented deep import with frappe-ui/tailwind',
+            'Export the deep source path and keep the shim as a supported v1 alias',
+            'Move the preset to a new package and remove both current paths',
+          ],
+          recommended: 0,
+          why: 'The supported subpath already exists, and the measured v1 apps do not use the blocked deep path.',
+        },
+        {
+          id: 'PKG-Q3',
+          title: 'Sizing utilities: derive width and height from integerSpacing',
+          covers: ['B16'],
+          severity: 'Medium · Real decision',
+          tier: 'not measured',
+          what: `<p>The preset fills missing numeric spacing keys so classes such as <code>p-17</code> and <code>size-17</code> compile. Tailwind 3.4 derives <code>width</code>, <code>height</code>, <code>minWidth</code>, and <code>maxHeight</code> utilities from the spacing scale, so separate numeric blocks repeat the same job. Extending <code>integerSpacing</code> through 128 preserves <code>w-112</code>; <code>w-wizard</code> is a 650px app-screen name and does not belong in a general preset.</p>`,
+          visual: {
+            label: 'Current blocks and proposed preset',
+            code: `- Array.from({ length: 64 }, (_, i) => i + 1)
++ Array.from({ length: 128 }, (_, i) => i + 1)
+  theme: { extend: {
+    spacing: integerSpacing,
+-   width: { 3.5: '0.875rem', 112: '28rem', wizard: '650px' },
+-   height: { 3.5: '0.875rem' },
+-   minWidth: { 40: '10rem', 50: '18rem' },
+-   maxHeight: { 52: '13rem' },
++   // w-*, h-*, min-w-* and max-h-* derive from spacing
+  } }`,
+          },
+          found: `<p>The shared scale stops at 64 in <code>tailwind/preset.js:12-20</code>, while <code>tailwind/plugin.js:288-318</code> adds explicit width, height, minimum-width, and maximum-height values. In particular, <code>minWidth.50</code> is 18rem instead of the spacing scale's 12.5rem, and <code>width.wizard</code> names an application screen.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B16 choice</div><p>“Align <code>minWidth.50</code> and remove <code>width.wizard</code> picked”</p><div class="source-label">Comment</div><p>“instead of adding specific values for width, height, minWidth, maxHeight, can we just generate all values like we did in preset.js with integerSpacing?”</p></div>`,
+          tradeoff: `<p>Keeping and documenting the blocks freezes a merely inconsistent scale: the key <code>50</code> means two sizes, and <code>w-wizard</code> makes one app's layout name permanent. The proposed change was not measured, so the number of affected v1-app sites is unknown; a codemod can replace <code>w-wizard</code>, but it cannot decide the correct app-local 650px name. Deriving all four families from spacing makes numeric keys predictable and retains <code>w-112</code>, while any use of the old 18rem <code>min-w-50</code> or <code>w-wizard</code> needs review.</p>`,
+          options: [
+            'Extend integerSpacing through 128, remove all four explicit sizing blocks, and move 650px to the app that needs it',
+            'Extend integerSpacing through 128 but keep wizard as a named width',
+            'Keep the explicit blocks and document min-w-50 and w-wizard as exceptions',
+            'Remove only minWidth.50 and width.wizard; keep the other repeated blocks',
+          ],
+          recommended: 0,
+          why: 'Tailwind already derives these utility families from spacing, and one 1-to-128 scale keeps w-112 without preserving contradictory or app-specific keys.',
+        },
+        {
+          id: 'PKG-Q4',
+          title: 'CSS variable contracts: prose, charts, focus and PageHeader',
+          covers: ['X7', 'H18', 'M-packaging'],
+          severity: 'Cross-cutting · High',
+          tier: 'Mixed · H18 T1 · 0 sites; X7 not measured',
+          what: `<p>Four custom-property families have different compatibility needs. The editor serializes <code>--prose-color-*</code> and <code>--prose-highlight-*</code> into saved HTML, and Suite parses those exact names, so they are fixed. Chart variables are read only inside frappe-ui and have zero consumer reads; #1139 owns their final names. The old <code>--focus-*</code> shadow values still have 13 reads in Frappe's UI and must remain as legacy output, while Gameplan sets <code>--mobile-header-height</code> and <code>PageHeaderMobile</code> reads it.</p>`,
+          visual: {
+            label: 'Variable family and required treatment',
+            html: `<table><thead><tr><th>Family</th><th>Consumer evidence</th><th>Action</th></tr></thead><tbody><tr><td><code>--prose-*</code></td><td>Stored and parsed by Suite</td><td>Keep exact names</td></tr><tr><td><code>--chart-*</code></td><td>0 reads</td><td>Resolve in #1139</td></tr><tr><td><code>--focus-*</code></td><td>13 Frappe UI reads</td><td>Emit as legacy</td></tr><tr><td><code>--mobile-header-height</code></td><td>Gameplan sets it</td><td>Rename before RC</td></tr></tbody></table>`,
+          },
+          found: `<p>The editor constructs stored variable references at <code>src/molecules/editor/extensions/shared/color-style.ts:120-127</code>, and charts read their ramps at <code>src/charts/tokens.ts:229-257</code>. Legacy focus variables are emitted at <code>tailwind/colorPalette.js:155-174</code>, and the ownerless mobile variable is read at <code>src/components/PageHeader/PageHeaderMobile.vue:1-4</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X7 choice</div><p>“Document the serialized prose variables unchanged; resolve or rename the mobile, chart, and legacy focus variables, then document”</p><div class="source-label">Comment</div><p>“where are these css vars used? let me review them before finalizing”</p></div><div class="source-quote"><div class="source-label">Research</div><p>The six-app census found that Suite stores and parses the prose names, so renaming them would require content migration. No consumer reads any <code>--chart-*</code> variable, and chart decisions are delegated to #1139. Frappe still reads <code>--focus-default</code>; ADR-0005 says frappe-ui itself no longer does. Gameplan defines the mobile-height variable, while the library reads it with a 52px fallback.</p></div>`,
+          tradeoff: `<p>One keep-or-rename rule would mishandle at least one family. Renaming prose variables would break stored content, while keeping the ownerless mobile name would freeze a misleading global hook; H18 has zero measured v1-app sites, though the wider X7 set was not measured as one migration. Keeping the focus names as documented legacy avoids 13 Frappe UI edits, and leaving chart names to #1139 avoids conflicting with the delegated chart contract.</p>`,
+          options: [
+            'Freeze prose names, defer chart names to #1139, keep focus vars as documented legacy, and rename the mobile variable',
+            'Keep and document every current variable name',
+            'Rename every family to a new frappe-ui-prefixed convention before v1',
+            'Treat every variable as private and remove consumer override support',
+          ],
+          recommended: 0,
+          why: 'Each family gets the least disruptive action that matches its real persistence and consumer usage.',
+        },
+        {
+          id: 'PKG-Q5',
+          title: 'Dark mode: semantic tokens and fixed raw shade utilities',
+          covers: ['B17'],
+          severity: 'Medium · Real decision',
+          tier: 'not measured',
+          dependsOn: 'PKG-Q4',
+          what: `<p>The theme plugin exposes two different color tools. Semantic utilities such as <code>bg-surface-gray-2</code>, <code>text-ink-gray-8</code>, and <code>border-outline-gray-2</code> point to CSS variables whose values change under <code>[data-theme="dark"]</code>, so the same class follows the active theme. Raw utilities such as <code>bg-gray-900</code> and <code>text-gray-100</code> always mean one light-palette shade; explicit <code>dark:bg-dark-gray-800</code> selects a fixed dark-palette shade, which the editor uses for swatches and its image viewer. Both mechanisms are public today because <code>frappe-ui/tailwind</code> exposes both maps, but the audit sees a contradiction when component code uses raw shades for ordinary themed UI instead of reserving them for fixed colors.</p>`,
+          visual: {
+            label: 'Theme behavior and current v1-app usage',
+            code: `Semantic, follows [data-theme="dark"]
+  bg-surface-gray-2  -> var(--surface-gray-2)
+  text-ink-gray-8    -> var(--ink-gray-8)
+
+Raw, fixed meaning
+  bg-gray-900        -> lightMode.gray.900
+  dark:bg-dark-gray-800 -> darkMode.gray.800
+
+Seven-app census       raw   semantic
+Gameplan                11       648
+Frappe                   1       403
+CRM                     30      1186
+Helpdesk                 4      1152
+Builder                 120       517
+Books                   963         0
+Wiki                     10       424
+Total                  1139      4330`,
+          },
+          found: `<p><code>tailwind/colorPalette.js:23-61</code> publishes light raw shades under names such as <code>gray</code> and dark raw shades under <code>dark-gray</code>; <code>tailwind/colorPalette.js:78-146</code> builds selector-flipped semantic variables. <code>tailwind/plugin.js:225-286</code> exposes both, while <code>src/molecules/editor/components/font-color/swatches.ts:27-52</code> shows the intended explicit raw-shade use. A current census across the seven v1-app trees found 1,139 raw <code>bg-*</code>/<code>text-*</code> shade occurrences and 4,330 semantic <code>bg-surface-*</code>/<code>text-ink-*</code> occurrences.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B17 choice</div><p>“(no option chosen)”</p><div class="source-label">Comment</div><p>“unsure, need to understand this problem deeply with examples”</p></div>`,
+          tradeoff: `<p>Keeping both without a rule freezes a substandard contract because consumers cannot tell whether raw classes are supported theme UI or fixed-color escape hatches, and the two alpha families place <code>alpha</code> differently. Removing raw shades would require manual classification of 1,139 current consumer occurrences and would break valid fixed swatches; this item has no migration tier in the report and a codemod cannot infer intent. Keeping semantic tokens as the default public mechanism plus documented fixed raw shades preserves both valid jobs, but frappe-ui must stop using raw shades for ordinary theme-following component chrome.</p>`,
+          options: [
+            'Keep semantic tokens for theme-following UI and raw shades only for documented fixed-color use; normalize alpha names',
+            'Keep and document both mechanisms without restricting where raw shades are used',
+            'Remove raw shade utilities and migrate every use to semantic tokens',
+            'Remove semantic tokens and require explicit light and dark raw classes',
+          ],
+          recommended: 0,
+          why: 'It keeps the editor’s valid fixed-color choices while making semantic tokens the clear rule for UI that follows the active theme.',
+        },
+        {
+          id: 'PKG-Q6',
+          title: 'Token corrections: rounded-9 and legacy focus shadows',
+          covers: ['M-packaging'],
+          severity: 'Medium · Mechanical',
+          tier: 'Mixed · rounded-9 T3 · 0 sites; focus not measured',
+          dependsOn: 'PKG-Q4',
+          what: `<p>The numbered radius scale maps Figma's <code>radius/0</code> through <code>radius/9</code> to Tailwind classes. ADR-0006 fixes <code>rounded-9</code> at 100px and reserves 9999px for <code>rounded-full</code>, but the generated token currently gives <code>rounded-9</code> 999px. Separately, ADR-0005 requires the old <code>--focus-*</code> box-shadow strings to remain emitted for compatibility while new frappe-ui code uses <code>--focus-outline-*</code>.</p>`,
+          visual: {
+            label: 'Token output',
+            code: `- "9": "999px",
++ "9": "100px",
+  "full": "9999px"
+
+  --focus-default: 0 0 0 2px ...; /* legacy */
+  --focus-outline-default: 2px solid ...; /* current */`,
+          },
+          found: `<p>The wrong radius value is in <code>tailwind/generated/radius.json:11</code>, while the accepted mapping is <code>spec/adr/0006-numbered-radius-tokens.md:22-38</code>. The focus generator emits both forms at <code>tailwind/colorPalette.js:155-174</code>, as required by <code>spec/adr/0005-focus-ring-2px.md:40-58</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-packaging choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the 999px value is a trap because the shipped class contradicts the accepted 100px token contract; changing it has zero measured consumer sites but is T3 because any own-tree use needs visual review and a codemod cannot approve the result. Removing the legacy focus variables would force at least 13 known Frappe UI reads even though ADR-0005 promises compatibility. Fixing the radius while keeping and documenting legacy focus output follows both ADRs without inventing a new token policy.</p>`,
+          options: [
+            'Set rounded-9 to 100px and keep --focus-* as documented legacy output',
+            'Set rounded-9 to 100px and remove the legacy focus variables now',
+            'Change the ADR so rounded-9 stays 999px and keep the legacy focus variables',
+          ],
+          recommended: 0,
+          why: 'It corrects the false radius token and preserves the explicit backward-compatibility promise for focus variables.',
+        },
+        {
+          id: 'PKG-Q7',
+          title: 'Tailwind theme defaults: replace or extend',
+          covers: ['M-packaging'],
+          severity: 'Medium · Mechanical',
+          tier: 'T3 · 8 sites',
+          what: `<p>A Tailwind preset can replace a core theme section or add values under <code>theme.extend</code>. The plugin currently replaces Tailwind's colors, font sizes, screens, radii, and shadows with frappe-ui's sets. The foundation documentation says the preset extends Tailwind, which means stock utilities should remain available alongside frappe-ui tokens.</p>`,
+          visual: {
+            label: 'Preset contract',
+            code: `theme: {
+- colors: colorPalette,
+- fontSize: buildFontSize(),
+- screens: frappeScreens,
+- borderRadius: buildRadiusConfig(),
+- boxShadow: frappeShadows,
+  extend: {
++   colors: colorPalette,
++   fontSize: buildFontSize(),
++   screens: frappeScreens,
++   borderRadius: buildRadiusConfig(),
++   boxShadow: frappeShadows,
+  },
+}`,
+          },
+          found: `<p>The replacement blocks start at <code>tailwind/plugin.js:225-250</code>, with only later color channels and spacing placed under <code>extend</code>. The audit records the contradiction at <code>v1-release/rc-api-audit.md:302-305</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-packaging choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping replacement semantics freezes a substandard preset contract because the docs say stock Tailwind defaults survive when they do not. Moving the sections under <code>theme.extend</code> affects eight measured v1-app preset sites and needs T3 review; a codemod cannot detect changed CSS generation or class conflicts. Extending matches the stated contract and restores stock utilities, but each consuming app must compare its generated CSS and key collisions before RC.</p>`,
+          options: [
+            'Move colors, font sizes, screens, radii, and shadows under theme.extend and review all eight preset consumers',
+            'Move only non-colliding frappe-ui keys under theme.extend and rename every key that conflicts with a Tailwind default',
+            'Split the package into a replacing preset and an extending preset before v1',
+          ],
+          recommended: 0,
+          why: 'The accepted foundation contract says the preset extends Tailwind, and eight known consumers are a bounded review set before the freeze.',
+        },
+        {
+          id: 'PKG-Q8',
+          title: 'Documented install path for Vue, Vite and Tailwind',
+          covers: ['M-packaging'],
+          severity: 'Medium · Can wait',
+          tier: 'not measured',
+          dependsOn: 'PKG-Q1',
+          what: `<p>A working consumer uses the Vue Vite plugin, the frappe-ui Vite plugin, the Tailwind v3 preset, and frappe-ui's TypeScript base settings. The Vite plugin enables the <code>~icons/lucide/*</code> resolver used by root components, while <code>tsconfig.base.json</code> permits the <code>.ts</code> suffixes shipped from <code>src/index.ts</code>. These pieces form one install contract even though the current documentation presents them separately.</p>`,
+          visual: {
+            label: 'Supported consumer setup',
+            code: `// vite.config.ts
+plugins: [frappeui(), vue()]
+
+// tailwind.config.js
+presets: [frappeUiPreset]
+content: [...frappeUiContent, './src/**/*.{vue,js,ts}']
+
+// tsconfig.json
+"extends": "frappe-ui/tsconfig.base.json"
+// includes allowImportingTsExtensions: true`,
+          },
+          found: `<p><code>vite/index.js:9-29</code> enables the icon resolver by default, while root components import virtual Lucide modules at <code>src/components/shared/picker/PickerShell.vue:68</code> and <code>src/components/Rating/Rating.vue:141</code>. <code>src/index.ts:13-16</code> ships a <code>.ts</code> import and <code>tsconfig.base.json:1-8</code> supplies the required compiler option; the combined contract is called unwritten at <code>v1-release/rc-api-audit.md:294-299</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-packaging choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the setup fragmented freezes a substandard install experience: a consumer can follow one document and still miss the icon resolver or TypeScript setting required by shipped root code. This documentation and compatibility item was not measured, and a codemod cannot repair an unknown build configuration. Writing one canonical setup path avoids accidental failures; supporting <code>lucideIcons: false</code> would also require removing virtual-icon imports from the root entry.</p>`,
+          options: [
+            'Document one canonical Vite, Vue, Tailwind v3, frappe-ui/vite, and TypeScript setup before RC',
+            'Document the setup and also make the root entry work when lucideIcons is false',
+            'Remove the lucideIcons option and document the icon resolver as required',
+            'Defer install-contract documentation and compatibility work to 1.1',
+          ],
+          recommended: 1,
+          why: 'A documented setup should describe a real optional flag, so the root entry must not fail when lucideIcons is explicitly disabled.',
+        },
+        {
+          id: 'PKG-Q9',
+          title: 'Low-risk package hygiene batch before the RC',
+          covers: ['L-packaging'],
+          severity: 'Low',
+          tier: 'not measured',
+          dependsOn: 'PKG-Q1',
+          what: `<p>This batch concerns what npm installs and what TypeScript resolves, not component behavior. It includes missing local beta tags, unused dependencies, shipped files that import <code>vite</code> or <code>vitepress</code> while those packages are development-only, excess tarball contents, missing <code>types</code> conditions for <code>./icons</code> and <code>./tailwind</code>, and a second component named <code>Icon</code> under <code>frappe-ui/experimental</code>. The experimental collision may wait because that subpath is explicitly allowed to change in a minor release.</p>`,
+          visual: {
+            label: 'Package manifest cleanup',
+            code: `+ verify local beta.57 through beta.63 tags
+- remove confirmed dead dependencies
++ declare vite and vitepress where shipped imports require them
+- exclude tests, Cypress, playgrounds and src/mocks
++ add types conditions for ./icons and ./tailwind
+  frappe-ui: Icon
+  frappe-ui/experimental: Icon  // rename may wait`,
+          },
+          found: `<p>The package includes all of <code>src</code>, <code>vite</code>, <code>tailwind</code>, and <code>vitepress</code> at <code>package.json:98-107</code>; <code>vitepress/theme/index.ts:1</code> and <code>vite/index.d.ts:8</code> import development-only tool types. The two subpaths lack <code>types</code> conditions at <code>package.json:71-77</code>, and the colliding experimental export is at <code>experimental/SpriteIcons/index.ts:8</code>. The complete dead-dependency, tag, and tarball findings are recorded at <code>v1-release/rc-api-audit.md:335-339</code>.</p>`,
+          said: `<p>Nothing yet.</p>`,
+          tradeoff: `<p>Keeping the batch freezes avoidable package weight and leaves type resolution and clean installs dependent on package-manager behavior. The batch was not measured, but most changes need no consumer edits; dependency removal and tarball exclusions need pack-and-install tests rather than a codemod. Cleaning runtime declarations, types, and tarball contents before RC reduces install risk, while renaming the experimental <code>Icon</code> can wait without freezing stable API.</p>`,
+          options: [
+            'Fix tags, dependencies, shipped imports, tarball contents, and types conditions before RC; defer the experimental Icon rename',
+            'Fix only clean-install dependencies and types conditions before RC; defer the rest to 1.1',
+            'Resolve the entire batch before RC, including renaming the experimental Icon',
+            'Defer the entire low-risk packaging batch to 1.1',
+          ],
+          recommended: 0,
+          why: 'The stable-package fixes are non-breaking and testable now, while the explicitly experimental name collision does not need to block the RC.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>
