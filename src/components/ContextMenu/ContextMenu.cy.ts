@@ -145,6 +145,17 @@ describe('ContextMenu', () => {
 
     cy.then(() => controls.setOpen(true))
     cy.get('[role=menu]').should('exist')
+    cy.get('[data-cy=controlled-trigger]').should('have.text', 'true')
+    cy.then(() => controls.setOpen(false))
+    cy.get('[role=menu]').should('not.exist')
+    cy.get('[data-cy=controlled-trigger]').should('have.text', 'false')
+    cy.then(() => {
+      const wheel = new WheelEvent('wheel', { cancelable: true })
+      expect(document.dispatchEvent(wheel)).to.equal(true)
+    })
+
+    cy.then(() => controls.setOpen(true))
+    cy.get('[role=menu]').should('exist')
     cy.then(() => controls.close())
     cy.get('[role=menu]').should('not.exist')
   })

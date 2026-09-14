@@ -413,7 +413,8 @@ export function migrateOverlays(source) {
       return
     }
     const component = aliases.get(node.tag)
-    const nextOwner = component || owner
+    const inheritedOwner = node.tagType === 1 && !component ? undefined : owner
+    const nextOwner = component || inheritedOwner
 
     if (component) {
       const delayNames = DELAY_PROPS[component]
@@ -436,7 +437,7 @@ export function migrateOverlays(source) {
           refusals.push({ line: node.loc.start.line, message: '<DateTimePicker> has duplicate or opaque typeable props' })
         } else if (old[0]) {
           const spelling = propName(old[0])
-          edits.push(replacementEdit(old[0], spelling, spelling.includes('-') ? 'typeable' : 'typeable'))
+          edits.push(replacementEdit(old[0], spelling, 'typeable'))
         }
       }
     }
@@ -444,7 +445,7 @@ export function migrateOverlays(source) {
     const slotDirective = node.props.find(
       (prop) => prop.type === NodeTypes.DIRECTIVE && prop.name === 'slot',
     )
-    const slotOwner = component && CONTROL_COMPONENTS.has(component) ? component : owner
+    const slotOwner = component && CONTROL_COMPONENTS.has(component) ? component : inheritedOwner
     if (slotDirective && slotOwner === 'Popover' && legacyPopoverSlot(node)) {
       refusals.push({ line: slotDirective.loc.start.line, message: 'removed Popover slot API must be migrated from #target/#body to #trigger/#default' })
     }

@@ -1430,6 +1430,10 @@ defaults to `"Mod+Shift+,"`, and `false` disables the registration. Unlike
 `Dialog`, `SettingsDialog` has no legacy unnamed-`v-model` binding to keep —
 `open` is the only visibility channel.
 
+`navigation-v1` removes bare and statically true `shortcut` props because the
+new default preserves their behavior. It converts static `false` values and
+reports dynamic boolean expressions for a manual combo-or-`false` decision.
+
 ## Tabs
 
 The monolithic `Tabs` is replaced by a composed family: `Tabs`, `TabList`,
@@ -3740,8 +3744,9 @@ emit no CSS at all, with no build or type error. Run the
 utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
 keyboard shortcuts — it also catches the punctuation keys that a hand
 migration breaks in silence. Run `editor-v1` if you use `EditorFixedMenu`.
-`base-props-v1` handles the Icon, Progress, and Divider changes above. Review
-Run `destinations-v1` for navigation props and `list-v1` for the List family.
+`base-props-v1` handles the Icon, Progress, and Divider changes above. Run
+`destinations-v1` and `navigation-v1` for navigation changes, `overlays-v1`
+for overlays and pickers, and `list-v1` for the List family.
 Review any sites the codemods report before completing the hand edits named in
 other family sections.
 

@@ -36,13 +36,14 @@ const invalidDropdownSlots: DropdownSlots = { project: renderItem }
 // @ts-expect-error ContextMenu has the same closed slot vocabulary.
 const invalidContextMenuSlots: ContextMenuSlots = { groupLabel: renderItem }
 
+void invalidMenuSlots
+void invalidDropdownSlots
+void invalidContextMenuSlots
+
 describe('menu-family slot types', () => {
   it('keep fixed and item-prefixed dynamic slots', () => {
     expectTypeOf(menuSlots).toMatchTypeOf<MenuSlots>()
     expectTypeOf(dropdownSlots).toMatchTypeOf<DropdownSlots>()
     expectTypeOf(contextMenuSlots).toMatchTypeOf<ContextMenuSlots>()
-    expectTypeOf(invalidMenuSlots).toMatchTypeOf<MenuSlots>()
-    expectTypeOf(invalidDropdownSlots).toMatchTypeOf<DropdownSlots>()
-    expectTypeOf(invalidContextMenuSlots).toMatchTypeOf<ContextMenuSlots>()
   })
 })

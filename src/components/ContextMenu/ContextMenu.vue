@@ -75,38 +75,49 @@ const primitives = {
 }
 
 function close() {
-  const content = contentRef.value?.$el
-  if (openModel.value && content) {
-    content.dispatchEvent(
-      new KeyboardEvent('keydown', {
-        key: 'Escape',
-        code: 'Escape',
-        bubbles: true,
-        cancelable: true,
-      }),
-    )
-    return
-  }
-  openModel.value = false
+  setOpen(false)
 }
 
 function setOpen(value: boolean) {
-  if (value && !openModel.value) {
-    const trigger = triggerRef.value?.$el
-    if (trigger) {
-      const bounds = trigger.getBoundingClientRect()
-      trigger.dispatchEvent(
-        new MouseEvent('contextmenu', {
+  if (!value) {
+    // ContextMenuRoot owns a private open ref. It emits model updates but does
+    // not accept an open prop, so close it through the same Escape path as a
+    // keyboard dismissal.
+    const content = contentRef.value?.$el
+    if (content) {
+      content.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Escape',
+          code: 'Escape',
           bubbles: true,
           cancelable: true,
-          clientX: bounds.left,
-          clientY: bounds.bottom,
         }),
       )
       return
     }
+    openModel.value = false
+    return
   }
-  openModel.value = value
+
+  if (openModel.value) return
+
+  // The context-menu primitive needs a pointer coordinate for its virtual
+  // anchor. Open at the trigger's lower-left corner for explicit controls.
+  const trigger = triggerRef.value?.$el
+  if (trigger) {
+    const bounds = trigger.getBoundingClientRect()
+    trigger.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: bounds.left,
+        clientY: bounds.bottom,
+      }),
+    )
+    return
+  }
+
+  openModel.value = true
 }
 
 const triggerSlotProps = computed<ContextMenuTriggerSlotProps>(() => ({

@@ -97,6 +97,13 @@ describe('overlay control migration', () => {
     expect(result.migrated).toContain('<i18n>{"sample":"<template #trigger=\\"{ toggle }\\">"}</i18n>')
   })
 
+  it('does not rename slots owned by nested components', () => {
+    const source = `<template><DatePicker><OtherPicker><template #trigger="{ toggle }"><button @click="toggle()"/></template></OtherPicker></DatePicker></template>`
+    const result = migrateOverlays(source)
+    expect(result.refusals).toEqual([])
+    expect(result.migrated).toBe(source)
+  })
+
   it('lists render-function controls without matching strings or comments', () => {
     const source = `
       import { h } from 'vue'

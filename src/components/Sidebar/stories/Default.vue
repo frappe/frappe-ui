@@ -52,7 +52,7 @@ const sortOptions = [
 
 <template>
   <div class="flex h-[560px] w-fit overflow-hidden rounded-5 border">
-    <Sidebar disable-collapse width="14rem">
+    <Sidebar :collapsible="false" width="14rem">
       <!-- App switcher — the app owns the header. -->
       <div class="flex shrink-0 items-center p-2">
         <button

@@ -124,6 +124,33 @@ describe('HoverCard', () => {
     cy.get('[data-slot="content"]').should('not.exist')
   })
 
+  it('stays open when the trigger is re-entered after an explicit close', () => {
+    let close: (() => void) | undefined
+    cy.mount(HoverCard, {
+      props: { hoverDelay: 30, leaveDelay: 0 },
+      slots: {
+        trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'Trigger'),
+        default: (props) => {
+          close = props.close
+          return h('div', { 'data-cy': 'card' }, 'Card')
+        },
+      },
+    })
+
+    cy.get('[data-cy=trigger]').trigger('pointerenter', {
+      pointerType: 'mouse',
+    })
+    cy.get('[data-cy=card]').should('exist')
+    cy.then(() => close?.())
+    cy.get('[data-cy=card]').should('not.exist')
+    cy.get('[data-cy=trigger]')
+      .trigger('pointerleave', { pointerType: 'mouse' })
+      .trigger('pointerenter', { pointerType: 'mouse' })
+    cy.get('[data-cy=card]').should('exist')
+    cy.wait(50)
+    cy.get('[data-cy=card]').should('exist')
+  })
+
   it('does not forward arbitrary attributes to the content', () => {
     cy.mount(HoverCard, {
       props: { hoverDelay: 0, 'data-consumer-attr': 'ignored' } as any,

@@ -5,8 +5,9 @@ import {
   HoverCardPortal,
   HoverCardRoot,
   HoverCardTrigger,
+  injectHoverCardRootContext,
 } from 'reka-ui'
-import { computed, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import type {
@@ -37,23 +38,32 @@ const openDelay = computed(() => props.hoverDelay)
 const closeDelay = computed(() => props.leaveDelay)
 
 const triggerRef = ref<{ $el: Element } | null>(null)
+const controllerRef = ref<{ setOpen: (value: boolean) => void } | null>(null)
+
+const HoverCardController = defineComponent({
+  setup(_, { expose }) {
+    const context = injectHoverCardRootContext()
+    expose({
+      setOpen(value: boolean) {
+        if (value) {
+          context.onOpen()
+          context.onOpenChange(true)
+        } else {
+          // onClose clears Reka's pending open timer. onDismiss closes now.
+          context.onClose()
+          context.onDismiss()
+        }
+      },
+    })
+    return () => null
+  },
+})
 
 function setOpen(value: boolean) {
-  open.value = value
-
-  // Reka schedules an open when the pointer enters the content. If a content
-  // control closes the card during that delay, the pending callback would
-  // otherwise reopen it immediately. Re-apply the explicit close after the
-  // configured open delay; a later explicit open cancels this callback.
-  const request = ++openRequest
-  if (!value && typeof window !== 'undefined') {
-    window.setTimeout(() => {
-      if (request === openRequest) open.value = false
-    }, props.hoverDelay)
-  }
+  const controller = controllerRef.value
+  if (controller) controller.setOpen(value)
+  else open.value = value
 }
-
-let openRequest = 0
 
 function close() {
   setOpen(false)
@@ -66,9 +76,7 @@ const slotProps = computed<HoverCardSlotProps>(() => ({
 }))
 
 defineExpose<HoverCardExposed>({
-  open: () => {
-    open.value = true
-  },
+  open: () => setOpen(true),
   close,
 })
 
@@ -93,6 +101,7 @@ function onPointerDownOutside(event: Event) {
     :open-delay="openDelay"
     :close-delay="closeDelay"
   >
+    <HoverCardController ref="controllerRef" />
     <HoverCardTrigger ref="triggerRef" as-child data-slot="trigger">
       <slot name="trigger" v-bind="slotProps" />
     </HoverCardTrigger>

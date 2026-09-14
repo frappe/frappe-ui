@@ -75,6 +75,18 @@ function renameProp(prop, from, to, binding = from) {
   return { start: prop.loc.start.offset + relative, end: prop.loc.start.offset + relative + from.length, text: to }
 }
 
+function migrateSettingsShortcut(prop, refusals) {
+  if (prop.type === NodeTypes.ATTRIBUTE || prop.exp?.content.trim() === 'true') {
+    return { start: prop.loc.start.offset, end: prop.loc.end.offset, text: '' }
+  }
+  if (prop.exp?.content.trim() === 'false')
+    return renameProp(prop, propName(prop), 'keyboard-shortcut')
+  refusals.push({
+    line: prop.loc.start.line,
+    message: '<SettingsDialog> dynamic shortcut needs a manual combo or false value',
+  })
+}
+
 function parsePattern(content) {
   try {
     return babelParse(`(${content}) => {}`, { sourceType: 'module', plugins: ['typescript'] }).program.body[0]?.expression?.params?.[0]
@@ -188,13 +200,17 @@ export function migrateNavigation(source) {
       return
     }
     const component = aliases.get(node.tag)
-    const nextOwner = component || owner
+    const inheritedOwner = node.tagType === 1 && !component ? undefined : owner
+    const nextOwner = component || inheritedOwner
     if (component === 'SettingsDialog') {
       const old = node.props.filter((prop) => normalized(propName(prop) || '') === 'shortcut')
       const current = node.props.filter((prop) => normalized(propName(prop) || '') === 'keyboardshortcut')
       if (old.length && (old.length > 1 || current.length || node.props.some(opaqueSpread)))
         refusals.push({ line: node.loc.start.line, message: '<SettingsDialog> shortcut is duplicated or hidden by v-bind' })
-      else if (old[0]) edits.push(renameProp(old[0], propName(old[0]), 'keyboard-shortcut', 'shortcut'))
+      else if (old[0]) {
+        const edit = migrateSettingsShortcut(old[0], refusals)
+        if (edit) edits.push(edit)
+      }
     }
     if (component === 'SidebarRailItem') {
       const variants = node.props.filter((prop) => normalized(propName(prop) || '') === 'variant')
@@ -218,7 +234,7 @@ export function migrateNavigation(source) {
     }
 
     const slot = node.props.find((prop) => prop.type === NodeTypes.DIRECTIVE && prop.name === 'slot')
-    const slotOwner = ['TabButtons', 'Tabs', 'TabTrigger'].includes(component) ? component : owner
+    const slotOwner = ['TabButtons', 'Tabs', 'TabTrigger'].includes(component) ? component : inheritedOwner
     if (slot && slotOwner) {
       const oldName = slotOwner === 'TabButtons' ? 'checked' : 'selected'
       const control = slotControl(slot, oldName, refusals)

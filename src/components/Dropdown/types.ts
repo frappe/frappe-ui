@@ -54,6 +54,9 @@ export interface DropdownProps {
 }
 
 export interface DropdownTriggerSlotProps extends MenuSlotProps {
+  /** Fallthrough attributes passed to the trigger slot at runtime. */
+  [key: string]: any
+
   /** Whether the dropdown menu is currently open. */
   open: boolean
 

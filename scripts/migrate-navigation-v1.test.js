@@ -21,17 +21,37 @@ function tempDir(source) {
 }
 
 describe('navigation prop migration', () => {
-  it('renames settings and rail props, including shorthand bindings', () => {
-    const source = `<template><SettingsDialog :shortcut/><SidebarRailItem variant="tile"/></template>`
+  it('preserves enabled and disabled SettingsDialog shortcut behavior', () => {
+    const source = `<template><SettingsDialog shortcut/><SettingsDialog :shortcut="true"/><SettingsDialog :shortcut="false"/></template>`
     const result = migrateNavigation(source)
-    expect(result.migrated).toBe(`<template><SettingsDialog :keyboard-shortcut="shortcut"/><SidebarRailItem variant="subtle"/></template>`)
+    expect(result.refusals).toEqual([])
+    expect(result.migrated).toBe(`<template><SettingsDialog /><SettingsDialog /><SettingsDialog :keyboard-shortcut="false"/></template>`)
     expect(migrateNavigation(result.migrated).migrated).toBe(result.migrated)
   })
 
-  it('follows aliases and leaves locally imported components alone', () => {
-    const source = `<script setup>import { SettingsDialog as Settings } from 'frappe-ui'; import SidebarRailItem from './local/SidebarRailItem.vue'</script><template><Settings shortcut="Mod+K"/><SidebarRailItem variant="tile"/></template>`
+  it('refuses dynamic boolean shortcut bindings', () => {
+    for (const source of [
+      `<template><SettingsDialog :shortcut/></template>`,
+      `<template><SettingsDialog :shortcut="enabled"/></template>`,
+    ]) {
+      const result = migrateNavigation(source)
+      expect(result.refusals).toEqual([
+        expect.objectContaining({ message: expect.stringContaining('dynamic shortcut') }),
+      ])
+      expect(result.migrated).toBe(source)
+    }
+  })
+
+  it('renames the rail variant', () => {
+    const source = `<template><SidebarRailItem variant="tile"/></template>`
     const result = migrateNavigation(source)
-    expect(result.migrated).toContain('<Settings keyboard-shortcut="Mod+K"/>')
+    expect(result.migrated).toBe(`<template><SidebarRailItem variant="subtle"/></template>`)
+  })
+
+  it('follows aliases and leaves locally imported components alone', () => {
+    const source = `<script setup>import { SettingsDialog as Settings } from 'frappe-ui'; import SidebarRailItem from './local/SidebarRailItem.vue'</script><template><Settings :shortcut="false"/><SidebarRailItem variant="tile"/></template>`
+    const result = migrateNavigation(source)
+    expect(result.migrated).toContain('<Settings :keyboard-shortcut="false"/>')
     expect(result.migrated).toContain('<SidebarRailItem variant="tile"/>')
   })
 
@@ -72,6 +92,13 @@ describe('tab slot migration', () => {
     expect(result.migrated).toContain(`count > 1 ? '<template>' : ''`)
     expect(result.migrated).toContain('<docs>{"selected":"<template>"}</docs>')
     expect(result.migrated).toContain('{{ active }}')
+  })
+
+  it('does not rename slots owned by nested components', () => {
+    const source = `<template><Tabs><OtherTabs><template #item="{ selected }">{{ selected }}</template></OtherTabs></Tabs></template>`
+    const result = migrateNavigation(source)
+    expect(result.refusals).toEqual([])
+    expect(result.migrated).toBe(source)
   })
 
   it('refuses duplicate, computed, and rest slot bindings', () => {

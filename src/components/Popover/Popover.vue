@@ -146,8 +146,7 @@ defineExpose({
   },
 })
 
-// `open` is the state, not a method — the same word the rest of the family's
-// trigger slots use (Dropdown, Select, MultiSelect, HoverCard, Sidebar). The
+// `open` is the state, not a method. It matches the other trigger slots.
 const slotProps = computed<PopoverSlotProps>(() => ({
   open: isOpen.value,
   setOpen,
