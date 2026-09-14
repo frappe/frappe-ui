@@ -19,7 +19,7 @@
     -->
     <component
       :is="linkComponent"
-      v-if="to"
+      v-if="route || href"
       v-bind="linkAttrs"
       :accesskey="accessKey"
       :aria-label="tooltipText || undefined"
@@ -117,7 +117,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, inject, onMounted, ref, useTemplateRef } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  inject,
+  onMounted,
+  ref,
+  useTemplateRef,
+} from 'vue'
 import { RouterLink } from 'vue-router'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarItemIcon from './SidebarItemIcon.vue'
@@ -163,16 +170,20 @@ const globals = getCurrentInstance()?.appContext.config.globalProperties
 const hasRouter = computed(() => Boolean(globals?.$router))
 
 // With a router, render RouterLink; without one, degrade to a plain <a> (with an
-// href only when `to` is a string — we can't resolve a route-location object).
-const linkComponent = computed(() => (hasRouter.value ? RouterLink : 'a'))
+// href only when `route` is a string — we can't resolve a route-location object).
+const linkComponent = computed(() =>
+  props.route && hasRouter.value ? RouterLink : 'a',
+)
 const linkAttrs = computed(() =>
-  hasRouter.value
-    ? { to: props.to }
-    : { href: typeof props.to === 'string' ? props.to : undefined },
+  props.route
+    ? hasRouter.value
+      ? { to: props.route }
+      : { href: typeof props.route === 'string' ? props.route : undefined }
+    : { href: props.href },
 )
 
 const resolvedRoute = computed(() =>
-  props.to && globals?.$router ? globals.$router.resolve(props.to) : null,
+  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
 )
 
 // Explicit `active` wins; otherwise infer from the current route so

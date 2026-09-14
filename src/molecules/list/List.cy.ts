@@ -66,22 +66,24 @@ describe('List (feed mode)', () => {
       })
   })
 
-  it('renders rows as links with `to`, buttons with a click listener, divs otherwise', () => {
+  it('renders rows with `route` or `href` as links, click rows as buttons, and static rows as divs', () => {
     const clicked = cy.spy().as('rowClick')
     cy.mount(
       {
         render: () =>
           h(List, () => [
-            feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
+            feedRow('1', { route: { name: 'Item', params: { id: '1' } } }),
+            feedRow('external', { href: 'https://frappe.io' }),
             feedRow('2', { onClick: clicked }),
             feedRow('3'),
           ]),
       },
       { global: { plugins: [makeRouter()] } },
     )
-    cy.get('a[data-slot=list-row]')
+    cy.get('a[data-slot=list-row]').eq(0)
       .should('have.attr', 'href', '/item/1')
       .and('have.attr', 'data-interactive')
+    cy.get('a[data-slot=list-row]').eq(1).should('have.attr', 'href', 'https://frappe.io')
     cy.get('button[data-slot=list-row]').click()
     cy.get('@rowClick').should('have.been.calledOnce')
     cy.get('div[data-slot=list-row]').should('exist')
@@ -94,7 +96,7 @@ describe('List (feed mode)', () => {
         render: () => [
           h(RouterView),
           h(List, () => [
-            feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
+            feedRow('1', { route: { name: 'Item', params: { id: '1' } } }),
           ]),
         ],
       },

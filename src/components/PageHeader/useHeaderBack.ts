@@ -52,13 +52,13 @@ function whenNavigationSettles(router: Router): Promise<void> {
 }
 
 /**
- * Go back the way the browser's back button would, and fall back to `to` when that
- * is not possible.
+ * Go back the way the browser's back button would, and fall back to
+ * `fallbackRoute` when that is not possible.
  *
  * A back button that always navigates to a fixed destination is not a back button:
  * it drops the user wherever the page author guessed they came from, which is wrong
- * for every other entry path into that page. So history wins, and `to` is only the
- * recovery route for when there is no history to walk.
+ * for every other entry path into that page. So history wins, and
+ * `fallbackRoute` is only the recovery route for when there is no history to walk.
  *
  * The post-navigation check covers entries that bounce: a guard that rejects the pop,
  * or a previous entry that redirects straight back to where we already are. Without
@@ -66,15 +66,15 @@ function whenNavigationSettles(router: Router): Promise<void> {
  */
 export async function navigateBack(
   router: Router,
-  to?: RouteLocationRaw,
+  fallbackRoute?: RouteLocationRaw,
 ): Promise<void> {
-  if (!to) {
+  if (!fallbackRoute) {
     router.back()
     return
   }
 
   if (!hasAppHistory(router)) {
-    await router.push(to)
+    await router.push(fallbackRoute)
     return
   }
 
@@ -84,6 +84,6 @@ export async function navigateBack(
   await settled
 
   if (router.currentRoute.value.fullPath === origin) {
-    await router.push(to)
+    await router.push(fallbackRoute)
   }
 }

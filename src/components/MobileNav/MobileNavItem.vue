@@ -9,7 +9,7 @@
   -->
   <component
     :is="linkComponent"
-    v-if="to && !isCurrent"
+    v-if="(route && !isCurrent) || (!route && href)"
     v-bind="linkAttrs"
     data-slot="mobile-nav-item"
     :data-state="resolvedActive ? 'active' : 'inactive'"
@@ -94,15 +94,19 @@ defineSlots<{
 const globals = getCurrentInstance()?.appContext.config.globalProperties
 const hasRouter = computed(() => Boolean(globals?.$router))
 
-const linkComponent = computed(() => (hasRouter.value ? RouterLink : 'a'))
+const linkComponent = computed(() =>
+  props.route && hasRouter.value ? RouterLink : 'a',
+)
 const linkAttrs = computed(() =>
-  hasRouter.value
-    ? { to: props.to }
-    : { href: typeof props.to === 'string' ? props.to : undefined },
+  props.route
+    ? hasRouter.value
+      ? { to: props.route }
+      : { href: typeof props.route === 'string' ? props.route : undefined }
+    : { href: props.href },
 )
 
 const resolvedRoute = computed(() =>
-  props.to && globals?.$router ? globals.$router.resolve(props.to) : null,
+  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
 )
 
 // Is this item's target the exact current route? Drives scroll-vs-navigate and

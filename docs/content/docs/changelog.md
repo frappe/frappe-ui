@@ -1984,20 +1984,31 @@ leftover `handler` is dropped as an unknown key, so the action button
 renders but does nothing on click. Action mode preserves separator
 semantics for assistive technologies.
 
-### PageHeaderBackButton — `to` is now a fallback (breaking)
+### Navigation destinations use `route` and `href` (breaking)
 
-`to` used to be the destination. Setting it made every tap push that
-route. It is now used only when there is no in-app history to go back
-to, such as a cold load onto a deep link. Every other tap goes back
-through history.
+Router destinations are now named `route` on `ListRow`, `SidebarItem`,
+`SidebarRailItem`, and `MobileNavItem`. Plain external URLs use `href`, including
+the former Button `link` prop. Run `npx destinations-v1 .` for statically named
+template props on components imported from `frappe-ui`, then inspect globally
+registered components, option objects, render functions, and `v-bind` spreads
+by hand.
+
+TabButton options keep `route`, `href`, and `onClick`, require a string `label`,
+and no longer accept `tooltip`. Move extra help into app-owned UI.
+
+#### PageHeaderBackButton — `to` is now `fallbackRoute`
+
+`fallbackRoute` is used only when there is no in-app history to go back to,
+such as a cold load onto a deep link. Every other tap goes back through
+history. The old `to` prop is removed.
 
 A back button that always lands on one fixed route is not a back button.
 It drops the user wherever the page author guessed they came from, which
 is wrong for every other way into the page.
 
-Migration: nothing to do if `to` already named the page users came from.
-It now applies only on a cold load. If you need an unconditional push,
-use a plain `Button` with your own `router.push`.
+Migration: rename `to` to `fallbackRoute` if it already named the page users
+came from. If you need an unconditional push, use a plain `Button` with your
+own `router.push`.
 
 ### Editor — media captions moved off `alt` (breaking)
 

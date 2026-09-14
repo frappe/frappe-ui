@@ -49,11 +49,14 @@ export interface SidebarItemProps {
    * Navigation target. When set the row's main area renders as a router link;
    * otherwise it renders as a button. A click still invokes `onClick`.
    */
-  to?: RouteLocationRaw
+  route?: RouteLocationRaw
+
+  /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
+  href?: string
 
   /**
    * Marks the row active (`data-state="active"`). When omitted, active state is
-   * inferred by matching `to` against the current route.
+   * inferred by matching `route` against the current route.
    */
   active?: boolean
 

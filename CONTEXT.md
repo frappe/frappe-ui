@@ -84,6 +84,15 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 
 ## Shared component vocabulary
 
+**route / href**:
+Navigation-capable components call a Vue Router destination `route` and a plain
+external URL `href`. When both are supplied, `route` wins. Button and TabButton
+open `href` in a new tab; SidebarItem, SidebarRailItem, MobileNavItem, and
+ListRow render it as a native same-tab anchor. The PageHeader back button calls
+its history fallback `fallbackRoute`, because it is used only when there is no
+in-app history.
+_Avoid_: `to` as a component prop, `link`, `fallback`
+
 **action**:
 A button declared via a component's action prop(s), rendered in its footer/toolbar row.
 Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);

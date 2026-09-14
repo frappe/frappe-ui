@@ -21,6 +21,6 @@ const props = withDefaults(defineProps<PageHeaderBackButtonProps>(), {
 const router = useRouter()
 
 function onClick() {
-  navigateBack(router, props.to)
+  navigateBack(router, props.fallbackRoute)
 }
 </script>
