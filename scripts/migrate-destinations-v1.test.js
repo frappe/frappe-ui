@@ -97,16 +97,16 @@ import { Button, ListRow, SidebarItem } from 'frappe-ui'
 </script>
 <template>
   <SidebarItem label="Go to home" :to title="1 > 0" />
-  <ListRow v-bind:to="item.to" />
+  <ListRow v-bind:to />
   <Button label="Copy link to page" :link.prop="url" />
 </template>
 <script>const sample = '<Button link="leave-alone" />'</script>`
     const migrated = migrateDestinations(source)
 
     expect(migrated).toContain(
-      '<SidebarItem label="Go to home" :route title="1 > 0" />',
+      '<SidebarItem label="Go to home" :route="to" title="1 > 0" />',
     )
-    expect(migrated).toContain('<ListRow v-bind:route="item.to" />')
+    expect(migrated).toContain('<ListRow v-bind:route="to" />')
     expect(migrated).toContain(
       '<Button label="Copy link to page" :href.prop="url" />',
     )

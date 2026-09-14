@@ -92,10 +92,19 @@ function renameAttributes(tag, renames) {
     cursor += 1
     const match = tag
       .slice(cursor)
-      .match(/^(v-bind:|[:.]?)([A-Za-z][\w-]*)(?=[.\s=/>])/)
+      .match(
+        /^(v-bind:|[:.]?)([A-Za-z][\w-]*)((?:\.[A-Za-z][\w-]*)*)(?=[\s=/>])/,
+      )
     if (!match) continue
     const replacement = renames[match[2]]
-    migrated += replacement ? `${match[1]}${replacement}` : match[0]
+    if (replacement) {
+      const isShorthandBinding =
+        match[1] && tag[cursor + match[0].length] !== '='
+      migrated += `${match[1]}${replacement}${match[3]}`
+      if (isShorthandBinding) migrated += `="${match[2]}"`
+    } else {
+      migrated += match[0]
+    }
     cursor += match[0].length
   }
   return migrated
