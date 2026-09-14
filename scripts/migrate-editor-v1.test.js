@@ -118,6 +118,33 @@ describe('editor v1 migration', () => {
     expect(result.refusals[0].message).toContain('object v-bind')
   })
 
+  it('refuses old and new size props instead of creating duplicates', () => {
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu size="sm" button-size="lg" />\n  <EditorFixedMenu v-bind="{ size: menuSize }" :buttonSize="legacySize" />\n</template>\n`
+
+    const result = migrateEditor(source, 'Duplicate.vue')
+
+    expect(result.changed).toBe(false)
+    expect(result.migrated).toBe(source)
+    expect(result.refusals).toHaveLength(2)
+    expect(result.refusals[0].message).toContain('duplicate props')
+    expect(result.refusals[1].message).toContain('duplicate props')
+  })
+
+  it('refuses opaque object v-bind spreads and computed properties', () => {
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ ...legacyProps }" />\n  <EditorFixedMenu v-bind="{ [propName]: menuSize }" />\n  <EditorFixedMenu v-bind="attrs" />\n</template>\n`
+
+    const result = migrateEditor(source, 'Opaque.vue')
+
+    expect(result.changed).toBe(false)
+    expect(result.migrated).toBe(source)
+    expect(result.refusals).toHaveLength(3)
+    expect(
+      result.refusals.every(({ message }) =>
+        message.includes('opaque object v-bind'),
+      ),
+    ).toBe(true)
+  })
+
   it('does not refuse legacy words in object values or nested objects', () => {
     const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ label: 'buttonSize', options: { buttonSize } }" button-size="sm" />\n</template>\n`
 
@@ -129,15 +156,15 @@ describe('editor v1 migration', () => {
     )
   })
 
-  it('does not mistake a later shorthand prop for part of object v-bind', () => {
+  it('leaves a later shorthand prop unchanged when an opaque bind is refused', () => {
     const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template><EditorFixedMenu v-bind="attrs" :buttonSize :items="items" /></template>\n`
 
     const result = migrateEditor(source, 'Separate.vue')
 
-    expect(result.refusals).toEqual([])
-    expect(result.migrated).toContain(
-      'v-bind="attrs" :size="buttonSize" :items="items"',
-    )
+    expect(result.changed).toBe(false)
+    expect(result.migrated).toBe(source)
+    expect(result.refusals).toHaveLength(1)
+    expect(result.refusals[0].message).toContain('opaque object v-bind')
   })
 
   it('is idempotent', () => {

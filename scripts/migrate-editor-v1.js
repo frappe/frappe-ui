@@ -186,7 +186,15 @@ function propertyNameText(name) {
   }
 }
 
-function hasLegacyButtonSizeProperty(expression) {
+function mergeObjectBindAnalysis(left, right) {
+  return {
+    hasLegacy: left.hasLegacy || right.hasLegacy,
+    hasSize: left.hasSize || right.hasSize,
+    opaque: left.opaque || right.opaque,
+  }
+}
+
+function analyzeObjectBindExpression(expression) {
   while (
     ts.isParenthesizedExpression(expression) ||
     ts.isAsExpression(expression) ||
@@ -197,9 +205,9 @@ function hasLegacyButtonSizeProperty(expression) {
   }
 
   if (ts.isConditionalExpression(expression)) {
-    return (
-      hasLegacyButtonSizeProperty(expression.whenTrue) ||
-      hasLegacyButtonSizeProperty(expression.whenFalse)
+    return mergeObjectBindAnalysis(
+      analyzeObjectBindExpression(expression.whenTrue),
+      analyzeObjectBindExpression(expression.whenFalse),
     )
   }
   if (
@@ -210,24 +218,43 @@ function hasLegacyButtonSizeProperty(expression) {
       ts.SyntaxKind.AmpersandAmpersandToken,
     ].includes(expression.operatorToken.kind)
   ) {
-    return (
-      hasLegacyButtonSizeProperty(expression.left) ||
-      hasLegacyButtonSizeProperty(expression.right)
+    return mergeObjectBindAnalysis(
+      analyzeObjectBindExpression(expression.left),
+      analyzeObjectBindExpression(expression.right),
     )
   }
-  if (!ts.isObjectLiteralExpression(expression)) return false
+  if (!ts.isObjectLiteralExpression(expression)) {
+    return { hasLegacy: false, hasSize: false, opaque: true }
+  }
 
-  return expression.properties.some((property) => {
-    if (ts.isSpreadAssignment(property)) {
-      return hasLegacyButtonSizeProperty(property.expression)
-    }
-    if (!property.name) return false
-    const name = propertyNameText(property.name)
-    return name === 'buttonSize' || name === 'button-size'
-  })
+  return expression.properties.reduce(
+    (analysis, property) => {
+      if (ts.isSpreadAssignment(property)) {
+        return mergeObjectBindAnalysis(
+          analysis,
+          analyzeObjectBindExpression(property.expression),
+        )
+      }
+      if (!property.name) return analysis
+      if (
+        ts.isComputedPropertyName(property.name) &&
+        !ts.isStringLiteral(property.name.expression)
+      ) {
+        return { ...analysis, opaque: true }
+      }
+      const name = propertyNameText(property.name)
+      return {
+        hasLegacy:
+          analysis.hasLegacy || name === 'buttonSize' || name === 'button-size',
+        hasSize: analysis.hasSize || name === 'size',
+        opaque: analysis.opaque,
+      }
+    },
+    { hasLegacy: false, hasSize: false, opaque: false },
+  )
 }
 
-function objectBindHasLegacyButtonSize(value) {
+function analyzeObjectBind(value) {
   const source = ts.createSourceFile(
     'editor-v1-bind.ts',
     `const bound = (${value})`,
@@ -236,34 +263,67 @@ function objectBindHasLegacyButtonSize(value) {
     ts.ScriptKind.TS,
   )
   const statement = source.statements[0]
-  return Boolean(
+  const initializer =
     statement &&
     ts.isVariableStatement(statement) &&
-    statement.declarationList.declarations[0]?.initializer &&
-    hasLegacyButtonSizeProperty(
-      statement.declarationList.declarations[0].initializer,
-    ),
-  )
+    statement.declarationList.declarations[0]?.initializer
+  if (!initializer || source.parseDiagnostics.length) {
+    return { hasLegacy: false, hasSize: false, opaque: true }
+  }
+  return analyzeObjectBindExpression(initializer)
 }
 
 function rewriteTag(tag, tagName, filename, offset, source) {
   const edits = []
   const refusals = []
-  for (const attribute of attributesIn(tag, tagName.length)) {
-    if (
-      attribute.name === 'v-bind' &&
-      attribute.value &&
-      objectBindHasLegacyButtonSize(attribute.value)
-    ) {
+  const attributes = attributesIn(tag, tagName.length)
+  const objectBinds = attributes
+    .filter((attribute) => attribute.name === 'v-bind' && attribute.value)
+    .map((attribute) => ({
+      attribute,
+      analysis: analyzeObjectBind(attribute.value),
+    }))
+  const legacyAttributes = attributes.filter((attribute) =>
+    /^(?:v-bind:|:)?(?:button-size|buttonSize)$/.test(attribute.name),
+  )
+  const sizeAttributes = attributes.filter((attribute) =>
+    /^(?:v-bind:|:)?size$/.test(attribute.name),
+  )
+
+  if (
+    legacyAttributes.length &&
+    (legacyAttributes.length + sizeAttributes.length > 1 ||
+      objectBinds.some(({ analysis }) => analysis.hasSize))
+  ) {
+    refusals.push({
+      file: filename,
+      line: lineAt(source, offset + legacyAttributes[0].start),
+      message:
+        'EditorFixedMenu carries both `buttonSize` and `size` values. Renaming would produce duplicate props; merge them manually. This file is unchanged.',
+    })
+  }
+
+  for (const { attribute, analysis } of objectBinds) {
+    if (analysis.hasLegacy) {
       refusals.push({
         file: filename,
         line: lineAt(source, offset + attribute.start),
         message:
           'EditorFixedMenu uses an object v-bind containing `buttonSize`; rename that JavaScript property to `size` manually. This file is unchanged.',
       })
-      continue
+    } else if (analysis.opaque) {
+      refusals.push({
+        file: filename,
+        line: lineAt(source, offset + attribute.start),
+        message:
+          'EditorFixedMenu uses an opaque object v-bind that may contain `buttonSize`; inspect it and rename that JavaScript property to `size` manually if needed. This file is unchanged.',
+      })
     }
+  }
 
+  if (refusals.length) return { tag, refusals }
+
+  for (const attribute of legacyAttributes) {
     const match = attribute.name.match(
       /^((?:v-bind:|:)?)(button-size|buttonSize)$/,
     )
@@ -276,7 +336,6 @@ function rewriteTag(tag, tagName, filename, offset, source) {
     edits.push({ start: attribute.start, end: attribute.nameEnd, replacement })
   }
 
-  if (refusals.length) return { tag, refusals }
   for (const edit of edits.reverse()) {
     tag = tag.slice(0, edit.start) + edit.replacement + tag.slice(edit.end)
   }
