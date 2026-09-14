@@ -63,6 +63,83 @@ function tagEnd(source, start) {
   return source.length
 }
 
+function expressionEnd(source, start) {
+  let quote
+  let escaped = false
+  for (let index = start; index < source.length - 1; index++) {
+    const char = source[index]
+    if (quote) {
+      if (escaped) escaped = false
+      else if (char === '\\') escaped = true
+      else if (char === quote) quote = undefined
+    } else if (char === '"' || char === "'" || char === '`') {
+      quote = char
+    } else if (char === '}' && source[index + 1] === '}') {
+      return index + 2
+    }
+  }
+  return source.length
+}
+
+function templateContentRange(source) {
+  let index = 0
+  while (index < source.length) {
+    const start = source.indexOf('<', index)
+    if (start === -1) return
+    if (source.startsWith('<!--', start)) {
+      const end = source.indexOf('-->', start + 4)
+      index = end === -1 ? source.length : end + 3
+      continue
+    }
+
+    const opening = source.slice(start).match(/^<([A-Za-z][\w.-]*)\b/)
+    if (!opening) {
+      index = start + 1
+      continue
+    }
+    const name = opening[1]
+    const contentStart = tagEnd(source, start)
+    if (name !== 'template') {
+      const closing = new RegExp(`</${name}\\s*>`, 'i').exec(
+        source.slice(contentStart),
+      )
+      index = closing
+        ? contentStart + closing.index + closing[0].length
+        : contentStart
+      continue
+    }
+
+    let depth = 1
+    index = contentStart
+    while (index < source.length) {
+      if (source.startsWith('<!--', index)) {
+        const end = source.indexOf('-->', index + 4)
+        index = end === -1 ? source.length : end + 3
+        continue
+      }
+      if (source.startsWith('{{', index)) {
+        index = expressionEnd(source, index + 2)
+        continue
+      }
+      if (source[index] !== '<') {
+        index++
+        continue
+      }
+      const tag = source.slice(index).match(/^<(\/?)template\b/i)
+      if (!tag) {
+        index++
+        continue
+      }
+      const end = tagEnd(source, index)
+      if (tag[1]) depth--
+      else if (!/\/\s*>$/.test(source.slice(index, end))) depth++
+      if (depth === 0) return { start: contentStart, end: index }
+      index = end
+    }
+    return { start: contentStart, end: source.length }
+  }
+}
+
 function attributesIn(tag, tagNameLength) {
   const attributes = []
   let index = 1 + tagNameLength
@@ -146,12 +223,34 @@ export function migrateEditor(source, filename = '<source>') {
 
   const edits = []
   const refusals = []
-  const openingTag = /<([A-Za-z][\w.-]*)\b/g
-  for (const match of source.matchAll(openingTag)) {
+  const template = templateContentRange(source)
+  if (!template) return { migrated: source, changed: false, refusals: [] }
+
+  let index = template.start
+  while (index < template.end) {
+    if (source.startsWith('<!--', index)) {
+      const end = source.indexOf('-->', index + 4)
+      index = end === -1 ? template.end : end + 3
+      continue
+    }
+    if (source.startsWith('{{', index)) {
+      index = expressionEnd(source, index + 2)
+      continue
+    }
+    if (source[index] !== '<') {
+      index++
+      continue
+    }
+    const match = source.slice(index).match(/^<([A-Za-z][\w.-]*)\b/)
+    if (!match) {
+      index++
+      continue
+    }
     const tagName = match[1]
-    if (!tagNames.has(tagName)) continue
-    const start = match.index
+    const start = index
     const end = tagEnd(source, start)
+    index = end
+    if (!tagNames.has(tagName)) continue
     const tag = source.slice(start, end)
     const result = rewriteTag(tag, tagName, filename, start, source)
     refusals.push(...result.refusals)

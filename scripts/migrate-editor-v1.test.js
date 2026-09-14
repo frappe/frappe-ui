@@ -69,6 +69,18 @@ describe('editor v1 migration', () => {
     expect(result.migrated).toContain(' size="sm"')
   })
 
+  it('only changes real elements in the Vue template', () => {
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\nconst example = '<EditorFixedMenu button-size="sm" />'\n</script>\n<template>\n  <!-- <EditorFixedMenu button-size="sm" /> -->\n  <div>{{ '<EditorFixedMenu button-size="sm" />' }}</div>\n  <EditorFixedMenu button-size="sm" />\n</template>\n<docs>\n\`\`\`vue\n<EditorFixedMenu button-size="sm" />\n\`\`\`\n</docs>\n`
+
+    const result = migrateEditor(source, 'Examples.vue')
+
+    expect(result.refusals).toEqual([])
+    expect(result.migrated.match(/<EditorFixedMenu size="sm"/g)).toHaveLength(1)
+    expect(
+      result.migrated.match(/<EditorFixedMenu button-size="sm"/g),
+    ).toHaveLength(4)
+  })
+
   it('handles an aliased import and kebab-case tag', () => {
     const source = `<script setup>\nimport { ref } from 'vue'\nimport { EditorFixedMenu as Toolbar } from 'frappe-ui/editor'\n</script>\n<template><toolbar :button-size="size" /></template>\n`
 
