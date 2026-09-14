@@ -88,9 +88,10 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 A button declared via a component's action prop(s), rendered in its footer/toolbar row.
 Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);
 the public names are `DialogAction` (context `{ close }`) and `AlertAction`
-(context `{ dismiss }`, shared with SidebarCard). Gets reactive
+(context `{ dismiss }`, shared with SidebarCard), plus `DividerAction` (no
+callback context). Gets reactive
 `loading` state while its async `onClick` runs.
-Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
+Shared by Dialog, Alert, SidebarCard, Divider and TextEditor (P6-aligned).
 Charts take no action prop — a chart header renders caller-supplied
 buttons through the `#actions` slot (spec/charts.md).
 

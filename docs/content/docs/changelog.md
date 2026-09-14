@@ -9,6 +9,22 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Base components use one prop shape each (breaking)
+
+- `Icon.name` is replaced by `icon`, which accepts a `lucide-*` string, emoji,
+  symbol, or Vue component. The old `name` attribute renders nothing.
+- `Progress.intervals` is now the numeric segment count and `intervalCount` is
+  removed. Omit `intervals` for a continuous bar. Labels and hints now render
+  independently.
+- `Badge.label` accepts only `string | number`; put rich content in the default
+  slot.
+- `Divider.position` is replaced by `align`; an old `position` value is ignored
+  and the action falls back to the center. `DividerAction` now accepts the
+  shared Button action fields.
+
+The [base component migration guide](/docs/migration#base-component-props)
+includes the codemod and manual steps.
+
 ### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
 
 The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`

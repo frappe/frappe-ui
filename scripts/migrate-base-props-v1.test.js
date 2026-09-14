@@ -58,6 +58,13 @@ describe('base props migration', () => {
     )
   })
 
+  it('preserves same-name bindings and the default interval count', () => {
+    const source = `<template><Icon :name /><Divider v-bind:position /><Progress intervals /></template>`
+    expect(migrateBaseProps(source).migrated).toBe(
+      `<template><Icon :icon="name" /><Divider v-bind:align="position" /><Progress :intervals="6" /></template>`,
+    )
+  })
+
   it('combines Progress boolean mode and interval count', () => {
     const source = `<template>\n  <Progress :intervals="true" :interval-count="steps.length" />\n  <Progress intervals interval-count="5" />\n  <Progress :intervals="enabled" :interval-count="count" />\n</template>`
     expect(migrateBaseProps(source).migrated).toBe(

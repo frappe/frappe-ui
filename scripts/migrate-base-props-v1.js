@@ -90,6 +90,19 @@ function propName(prop) {
 }
 
 function renamePropEdit(prop, from, to, offset) {
+  if (
+    prop.type === NodeTypes.DIRECTIVE &&
+    prop.name === 'bind' &&
+    prop.exp === undefined
+  ) {
+    const renamed = prop.loc.source.replace(from, to)
+    return {
+      start: offset + prop.loc.start.offset,
+      end: offset + prop.loc.end.offset,
+      text: `${renamed}="${from}"`,
+      description: `${from} -> ${to}`,
+    }
+  }
   const relative = prop.loc.source.indexOf(from)
   return {
     start: offset + prop.loc.start.offset + relative,
@@ -137,6 +150,8 @@ function progressEdit(element, offset, refusals) {
   }
 
   const condition = boundExpression(intervals)
+  const bareBoolean =
+    intervals.type === NodeTypes.ATTRIBUTE && intervals.value === undefined
   const shorthandBinding =
     intervals.type === NodeTypes.DIRECTIVE && condition === undefined
   // A dynamic `:intervals` without `intervalCount` may already be the v1
@@ -149,7 +164,7 @@ function progressEdit(element, offset, refusals) {
     })
     return []
   }
-  if (!count && condition !== 'true' && condition !== 'false') {
+  if (!count && !bareBoolean && condition !== 'true' && condition !== 'false') {
     if (!looksNumericExpression(condition)) {
       refusals.push({
         line: intervals.loc.start.line,
