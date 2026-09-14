@@ -190,7 +190,7 @@ export const SlashCommands = createSuggestionExtension<CommandItem>({
       )
     }
   },
-  component: SlashCommandsList,
+  listComponent: SlashCommandsList,
 })
 
 export default SlashCommands

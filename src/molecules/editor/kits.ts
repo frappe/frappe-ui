@@ -55,7 +55,7 @@ type CustomMember = Record<string, any> | false
 type MentionMember =
   | {
       items?: MaybeRefOrGetter<MentionSuggestionItem[]> | null
-      component?: Component
+      nodeView?: Component
     }
   | false
 type TagMember =

@@ -213,6 +213,10 @@ The thin component an app builds on `Editor`, encoding that app's mention source
 local extensions, toolbar preset, and action buttons. frappe-ui ships none — assembled
 editors are app-specific (gameplan's comment editor ≠ helpdesk's).
 
+_Avoid_ (family-wide): `component` for suggestion rendering (`listComponent` names
+the popup and `nodeView` names a document node); `EditorFixedMenu.buttonSize` (it is
+`size`).
+
 ## Flagged ambiguities
 
 - **`v-model` vs `v-model:open` on Dialog**: both are supported indefinitely.

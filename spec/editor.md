@@ -247,7 +247,11 @@ Wraps tiptap's `EditorContent` with the frappe-ui prose scaffolding; class fallt
 A persistent toolbar row rendering a flat `MenuItem[]`. `data-slot="fixed-menu"`.
 
 ```ts
-defineProps<{ editor: Editor | null; items: MenuItem[] }>()
+defineProps<{
+  editor: Editor | null
+  items: MenuItem[]
+  size?: 'xs' | 'sm' // default 'xs'
+}>()
 ```
 
 ### `EditorBubbleMenu`
@@ -353,7 +357,7 @@ const Extension = SuggestionExtension.configure<TItem>({
   name: string
   trigger: string
   items: TItem[] | ((query: string) => TItem[] | Promise<TItem[]>)
-  component?: Component
+  listComponent?: Component
   command: (props: { editor: Editor; item: TItem; range: { from: number; to: number } }) => void
 })
 ```

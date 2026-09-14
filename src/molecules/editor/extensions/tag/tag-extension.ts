@@ -113,7 +113,7 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   name: 'tagSuggestion',
   char: '#',
   pluginKey: new PluginKey('tagSuggestion'),
-  component: SuggestionList,
+  listComponent: SuggestionList,
 
   addOptions() {
     return {

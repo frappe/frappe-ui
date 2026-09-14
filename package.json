@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "1.0.0-beta.66",
+  "version": "1.0.0-beta.67",
   "description": "A set of components and utilities for rapid UI development",
   "engines": {
     "node": ">=20.19.0"
@@ -22,6 +22,7 @@
     "base-props-v1": "./scripts/migrate-base-props-v1.js",
     "tokens-v2": "./tailwind/migrate-tokens-v2.js",
     "shortcuts-v1": "./scripts/migrate-shortcuts-v1.js",
+    "editor-v1": "./scripts/migrate-editor-v1.js",
     "destinations-v1": "./scripts/migrate-destinations-v1.js"
   },
   "scripts": {
@@ -105,6 +106,7 @@
     "vitepress",
     "scripts/migrate-shortcuts-v1.js",
     "scripts/migrate-base-props-v1.js",
+    "scripts/migrate-editor-v1.js",
     "experimental",
     "experimental.ts",
     "tsconfig.base.json"

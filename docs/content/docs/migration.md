@@ -26,13 +26,14 @@ a word, so those are the ones that reach production. Each is marked.
 replacement needs explaining. If your build already names the file and the
 line, the changelog is the faster read.
 
-Four changes have a codemod: the destination prop renames
-(`destinations-v1`, see [Destinations](#navigation-destinations)), Tailwind
+Run the codemod linked from each relevant section. The tools cover Tailwind
 token renames (`tokens-v2`, see [Tokens](#tokens)), shortcut config
-(`shortcuts-v1`, see [The shortcuts codemod](#the-shortcuts-codemod)), and base
-component prop normalization (`base-props-v1`, see
-[Base component props](#base-component-props)). Every other component, prop and
-slot rename is a hand edit.
+(`shortcuts-v1`, see [The shortcuts codemod](#the-shortcuts-codemod)),
+destination prop renames (`destinations-v1`, see
+[Destinations](#navigation-destinations)), and the EditorFixedMenu prop rename
+(`editor-v1`, see [Editor](#editor)), plus base component prop normalization
+(`base-props-v1`, see [Base component props](#base-component-props)). Every
+other component, prop, and slot rename is a hand edit.
 
 ### Sections
 
@@ -2062,7 +2063,7 @@ import {
 | HTML string only                                | `v-model` + `format="json"` for a JSON value                             |
 | `:starterkit-options="{ heading: { levels } }"` | `RichTextKit.configure({ heading: { levels } })` in `:extensions`        |
 | auto-loaded extension set (no opt-out)          | explicit `:extensions` — pick `CommentKit` / `RichTextKit` / `InlineKit` |
-| `:mentions` / `:tags` props                     | `kit.configure({ mention: { items, component }, tag: { items } })`       |
+| `:mentions` / `:tags` props                     | `kit.configure({ mention: { items, nodeView }, tag: { items } })`        |
 | `:bubble-menu="true"`                           | `<EditorBubbleMenu :items="articleToolbar">` in the default slot         |
 | `:floating-menu="true"`                         | `<EditorFloatingMenu :items>`                                            |
 | `<TextEditorFixedMenu :buttons>`                | `<EditorFixedMenu :items>`                                               |
@@ -2114,6 +2115,39 @@ For a fully custom layout (e.g. a title `<textarea>` as a sibling of the body),
 skip `<Editor>` and drive `useEditor` yourself — see
 [Composing primitives](./molecules/editor#composing-primitives) — rendering
 `<EditorContent>` and the menus as siblings of your own markup.
+
+### Editor suggestion and fixed-menu names
+
+Suggestion components now name the role they fill. Replace `component` with
+`nodeView` in `Mention.configure(...)` or a kit's `mention` options. Replace it
+with `listComponent` in `SuggestionExtension.configure(...)`. The mention and
+kit paths are silent runtime breaks for JavaScript consumers; TypeScript catches
+the removed keys. Development builds warn when they see either one.
+
+```ts
+// Before
+Mention.configure({ items: users, component: MentionNode })
+SuggestionExtension.configure({ ...options, component: SuggestionList })
+
+// After
+Mention.configure({ items: users, nodeView: MentionNode })
+SuggestionExtension.configure({ ...options, listComponent: SuggestionList })
+```
+
+`EditorFixedMenu` also renames `buttonSize` to `size`. Run the idempotent
+codemod before checking the two suggestion shapes manually:
+
+```sh
+npx --package frappe-ui@beta editor-v1 --dry-run .
+npx --package frappe-ui@beta editor-v1 .
+```
+
+```vue
+<!-- Before -->
+<EditorFixedMenu button-size="sm" :items="items" />
+<!-- After -->
+<EditorFixedMenu size="sm" :items="items" />
+```
 
 ### Gotchas
 
@@ -3656,9 +3690,10 @@ emit no CSS at all, with no build or type error. Run the
 **Do I have to run the codemods?** Run `tokens-v2` if you use Tailwind
 utilities from the frappe-ui preset. Run `shortcuts-v1` if you register
 keyboard shortcuts — it also catches the punctuation keys that a hand
-migration breaks in silence. `base-props-v1` handles the Icon, Progress, and
-Divider changes above. Review any sites the codemods report before completing
-the remaining component, prop, and slot migrations.
+migration breaks in silence. Run `editor-v1` if you use `EditorFixedMenu`.
+`base-props-v1` handles the Icon, Progress, and Divider changes above. Review
+any sites the codemods report before completing the hand edits named in other
+family sections.
 
 **Report bugs:** [file an issue](https://github.com/frappe/frappe-ui/issues/new)
 with the `v1-beta` label. Include the component name, before/after code,
