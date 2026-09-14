@@ -2096,8 +2096,8 @@ skip `<Editor>` and drive `useEditor` yourself — see
 Suggestion components now name the role they fill. Replace `component` with
 `nodeView` in `Mention.configure(...)` or a kit's `mention` options. Replace it
 with `listComponent` in `SuggestionExtension.configure(...)`. The mention and
-kit paths are silent runtime breaks; TypeScript catches the public
-`SuggestionExtension` key. Development builds warn when they see either one.
+kit paths are silent runtime breaks for JavaScript consumers; TypeScript catches
+the removed keys. Development builds warn when they see either one.
 
 ```ts
 // Before

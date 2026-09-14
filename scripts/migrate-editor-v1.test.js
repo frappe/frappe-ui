@@ -81,6 +81,18 @@ describe('editor v1 migration', () => {
     ).toHaveLength(4)
   })
 
+  it('does not count template text inside an element attribute as a boundary', () => {
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <div title="<template>">\n    <div title="</template>">\n      <EditorFixedMenu button-size="sm" />\n    </div>\n  </div>\n</template>\n<docs>\n<EditorFixedMenu button-size="sm" />\n</docs>\n`
+
+    const result = migrateEditor(source, 'AttributeLiteral.vue')
+
+    expect(result.refusals).toEqual([])
+    expect(result.migrated.match(/<EditorFixedMenu size="sm"/g)).toHaveLength(1)
+    expect(
+      result.migrated.match(/<EditorFixedMenu button-size="sm"/g),
+    ).toHaveLength(1)
+  })
+
   it('handles an aliased import and kebab-case tag', () => {
     const source = `<script setup>\nimport { ref } from 'vue'\nimport { EditorFixedMenu as Toolbar } from 'frappe-ui/editor'\n</script>\n<template><toolbar :button-size="size" /></template>\n`
 
@@ -98,12 +110,23 @@ describe('editor v1 migration', () => {
   })
 
   it('refuses object v-bind because the property needs JavaScript context', () => {
-    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ buttonSize }" />\n  <EditorFixedMenu v-bind="{ 'button-size': menuSize }" />\n</template>\n`
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ buttonSize }" />\n  <EditorFixedMenu v-bind="{ 'button-size': menuSize }" />\n  <EditorFixedMenu v-bind="condition ? { ['button-size']: menuSize } : attrs" />\n</template>\n`
 
     const result = migrateEditor(source, 'Bound.vue')
     expect(result.changed).toBe(false)
-    expect(result.refusals).toHaveLength(2)
+    expect(result.refusals).toHaveLength(3)
     expect(result.refusals[0].message).toContain('object v-bind')
+  })
+
+  it('does not refuse legacy words in object values or nested objects', () => {
+    const source = `<script setup>\nimport { EditorFixedMenu } from 'frappe-ui/editor'\n</script>\n<template>\n  <EditorFixedMenu v-bind="{ label: 'buttonSize', options: { buttonSize } }" button-size="sm" />\n</template>\n`
+
+    const result = migrateEditor(source, 'ObjectValues.vue')
+
+    expect(result.refusals).toEqual([])
+    expect(result.migrated).toContain(
+      `v-bind="{ label: 'buttonSize', options: { buttonSize } }" size="sm"`,
+    )
   })
 
   it('does not mistake a later shorthand prop for part of object v-bind', () => {

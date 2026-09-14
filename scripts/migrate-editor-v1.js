@@ -12,6 +12,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import ts from 'typescript'
 
 const USAGE = 'Usage: editor-v1 [--dry-run] <dir-or-file...>'
 const OPTIONS = new Set(['--dry-run', '--help', '-h'])
@@ -125,15 +126,19 @@ function templateContentRange(source) {
         index++
         continue
       }
-      const tag = source.slice(index).match(/^<(\/?)template\b/i)
+      const tag = source.slice(index).match(/^<(\/?)([A-Za-z][\w.-]*)\b/i)
       if (!tag) {
         index++
         continue
       }
       const end = tagEnd(source, index)
-      if (tag[1]) depth--
-      else if (!/\/\s*>$/.test(source.slice(index, end))) depth++
-      if (depth === 0) return { start: contentStart, end: index }
+      // Skip the whole tag so a literal `<template>` inside an attribute
+      // value is not mistaken for a nested template boundary.
+      if (tag[2].toLowerCase() === 'template') {
+        if (tag[1]) depth--
+        else if (!/\/\s*>$/.test(source.slice(index, end))) depth++
+        if (depth === 0) return { start: contentStart, end: index }
+      }
       index = end
     }
     return { start: contentStart, end: source.length }
@@ -174,6 +179,73 @@ function attributesIn(tag, tagNameLength) {
   return attributes
 }
 
+function propertyNameText(name) {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name)) return name.text
+  if (ts.isComputedPropertyName(name) && ts.isStringLiteral(name.expression)) {
+    return name.expression.text
+  }
+}
+
+function hasLegacyButtonSizeProperty(expression) {
+  while (
+    ts.isParenthesizedExpression(expression) ||
+    ts.isAsExpression(expression) ||
+    ts.isTypeAssertionExpression(expression) ||
+    ts.isSatisfiesExpression(expression)
+  ) {
+    expression = expression.expression
+  }
+
+  if (ts.isConditionalExpression(expression)) {
+    return (
+      hasLegacyButtonSizeProperty(expression.whenTrue) ||
+      hasLegacyButtonSizeProperty(expression.whenFalse)
+    )
+  }
+  if (
+    ts.isBinaryExpression(expression) &&
+    [
+      ts.SyntaxKind.BarBarToken,
+      ts.SyntaxKind.QuestionQuestionToken,
+      ts.SyntaxKind.AmpersandAmpersandToken,
+    ].includes(expression.operatorToken.kind)
+  ) {
+    return (
+      hasLegacyButtonSizeProperty(expression.left) ||
+      hasLegacyButtonSizeProperty(expression.right)
+    )
+  }
+  if (!ts.isObjectLiteralExpression(expression)) return false
+
+  return expression.properties.some((property) => {
+    if (ts.isSpreadAssignment(property)) {
+      return hasLegacyButtonSizeProperty(property.expression)
+    }
+    if (!property.name) return false
+    const name = propertyNameText(property.name)
+    return name === 'buttonSize' || name === 'button-size'
+  })
+}
+
+function objectBindHasLegacyButtonSize(value) {
+  const source = ts.createSourceFile(
+    'editor-v1-bind.ts',
+    `const bound = (${value})`,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  )
+  const statement = source.statements[0]
+  return Boolean(
+    statement &&
+    ts.isVariableStatement(statement) &&
+    statement.declarationList.declarations[0]?.initializer &&
+    hasLegacyButtonSizeProperty(
+      statement.declarationList.declarations[0].initializer,
+    ),
+  )
+}
+
 function rewriteTag(tag, tagName, filename, offset, source) {
   const edits = []
   const refusals = []
@@ -181,7 +253,7 @@ function rewriteTag(tag, tagName, filename, offset, source) {
     if (
       attribute.name === 'v-bind' &&
       attribute.value &&
-      /\bbuttonSize\b|['"]button-size['"]\s*:/.test(attribute.value)
+      objectBindHasLegacyButtonSize(attribute.value)
     ) {
       refusals.push({
         file: filename,
