@@ -31,6 +31,54 @@ to reach for it.
 
 <ComponentPreview name="Dialog-CommandPalette" />
 
+## Icon and theme
+
+`icon` takes a `lucide-*` class name or a Vue component, and `theme` colors the
+badge behind it: `amber`, `blue`, `red` or `green`. Unset, the badge stays
+neutral gray. The two props are independent — a themed dialog with no icon
+renders no badge.
+
+```vue
+<Dialog title="Delete project" icon="lucide-alert-triangle" theme="red" />
+<Dialog title="Invite sent" :icon="MailIcon" theme="green" />
+```
+
+The header renders only when there is a `title` or a `#title` slot. `message`
+is the short paragraph below it, and it renders through reka's
+`DialogDescription`, so screen readers announce it with the dialog. Anything
+longer than a sentence belongs in `#default`, which replaces `message`.
+
+## The parts
+
+`Dialog.Title`, `Dialog.Description` and `Dialog.Close` are reka's own parts,
+re-exported on the component and public. Reach for them inside `#default` when
+you render your own chrome — with `bare`, most of all, where there is no
+auto-header to carry the accessible name.
+
+```vue
+<Dialog v-model:open="open" bare>
+  <div class="p-6">
+    <Dialog.Title class="text-2xl-semibold">Pick a workspace</Dialog.Title>
+    <Dialog.Description>This is where new pages go.</Dialog.Description>
+    <Dialog.Close as-child><Button label="Not now" /></Dialog.Close>
+  </div>
+</Dialog>
+```
+
+## Styling
+
+`paddingTop` overrides the position-based top padding, and takes a number
+(pixels) or any CSS length string: `:padding-top="80"` and
+`padding-top="20vh"` both work.
+
+Style the rest through the `data-slot` hooks:
+
+| Hook                     | Element                          |
+| ------------------------ | --------------------------------- |
+| `[data-slot="content"]`  | the dialog card itself           |
+| `[data-slot="icon"]`     | the header icon badge            |
+| `[data-slot="actions"]`  | the footer action row            |
+
 ## Imperative API
 
 The `dialog.*` helpers cover the confirm-family surface — `confirm` and

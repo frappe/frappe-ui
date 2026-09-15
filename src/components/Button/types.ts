@@ -1,4 +1,4 @@
-import { type RouterLinkProps } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import { type Component, type ExtractPublicPropTypes, type PropType } from 'vue'
 
 export type Theme = 'gray' | 'blue' | 'green' | 'red'
@@ -40,7 +40,7 @@ export const buttonProps = {
   disabled: { type: Boolean, default: false },
   /** Router destination when used as a link */
   route: {
-    type: [String, Object] as PropType<RouterLinkProps['to']>,
+    type: [String, Object] as PropType<RouteDestination>,
     default: undefined,
   },
   /** External URL, opened in a new tab. */

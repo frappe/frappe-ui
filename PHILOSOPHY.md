@@ -311,7 +311,7 @@ setTimeout(close, 5000)
 **Rule:** Components expose customization through two channels:
 
 1. **Slots** — for *content* injection (governed by P6/P7).
-2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size` on rendered DOM so callers and brand themes target them via CSS.
+2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size`, `data-color` on rendered DOM so callers and brand themes target them via CSS. `data-color` carries the component's tone (`theme` prop). It is not `data-theme`: that attribute is the light/dark switch the app sets on the document.
 
 **Forbidden:**
 - Class-name injection props (`triggerClass`, `contentClass`, `itemClass`)
@@ -319,6 +319,8 @@ setTimeout(close, 5000)
 - Pass-through prop blobs (`:popoverProps="{ class }"`)
 
 Root `class` fallthrough — `<MyDropdown class="my-4">` landing on the root via Vue's default attribute inheritance — is fine. P10 forbids *named class props for inner elements*, not the implicit single binding.
+
+**One exception: `ScrollArea.viewportClass`.** The scrolling viewport is an element reka-ui owns inside the root, so root `class` fallthrough cannot reach it, and layout rules that have to sit on the scroller itself (`[&>div]:h-full`, a grid, a min-width) have nowhere else to go. `data-slot="scroll-area-viewport"` covers styling from a stylesheet; it does not cover a Tailwind utility written at the call site. The prop stays, and it stays the only one: a second class prop needs an ADR.
 
 The exact data-slot / data-state taxonomy is per component family; each family's spec defines its own values.
 

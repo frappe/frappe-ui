@@ -1,6 +1,6 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
 import {
-  resolvedColorScheme,
+  getResolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
 import { documentAttributes } from './utils'
@@ -207,7 +207,7 @@ function isTransparent(color: string) {
  * lookup so a subtree that redefines `--chart-*` wins over the document root.
  */
 export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
-  const scheme = resolvedColorScheme()
+  const scheme = getResolvedColorScheme()
   const fallbacks = FALLBACK_TOKENS[scheme]
 
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {

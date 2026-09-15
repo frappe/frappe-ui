@@ -80,7 +80,7 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   },
   {
     name: 'href',

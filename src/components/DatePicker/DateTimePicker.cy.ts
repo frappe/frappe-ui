@@ -251,4 +251,23 @@ describe('DateTimePicker', () => {
       .should('have.class', 'is-open')
       .and('have.text', 'Close')
   })
+
+  // INP-Q5 (ADR-0012).
+  describe('template ref', () => {
+    it('open(), close() and focus() drive the picker', () => {
+      let vm: any
+      cy.mount(DateTimePicker).then((mounted: any) => {
+        vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+      })
+
+      cy.get('[role=dialog]').should('not.exist')
+      cy.then(() => vm?.open?.())
+      cy.get('[role=dialog]').should('exist')
+      cy.then(() => vm?.close?.())
+      cy.get('[role=dialog]').should('not.exist')
+
+      cy.then(() => vm?.focus?.())
+      cy.get('input').first().should('be.focused')
+    })
+  })
 })

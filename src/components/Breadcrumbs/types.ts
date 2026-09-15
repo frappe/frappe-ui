@@ -1,11 +1,11 @@
-import { RouterLinkProps } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 
 export interface BreadcrumbItem {
   /** Text shown for the breadcrumb item */
   label: string
 
   /** Route location used when the item is a link */
-  route?: RouterLinkProps['to']
+  route?: RouteDestination
 
   /** URL used when the item is a plain link, ignored if `route` is set */
   href?: string

@@ -32,27 +32,27 @@ describe('TimePicker', () => {
       })
   })
 
+  // INP-Q3: `open` and `close` are gone. `update:open` carries both, with the
+  // state in the payload, so the open and the close are two calls on one spy.
   it('emit events', () => {
     const onUpdate = cy.spy().as('onUpdate')
     const onChange = cy.spy().as('onChange')
-    const onOpen = cy.spy().as('onOpen')
-    const onClose = cy.spy().as('onClose')
+    const onUpdateOpen = cy.spy().as('onUpdateOpen')
 
     cy.mount(TimePicker, {
       props: {
         'onUpdate:modelValue': onUpdate,
         onChange: onChange,
-        onOpen: onOpen,
-        onClose: onClose,
+        'onUpdate:open': onUpdateOpen,
       },
     })
 
-    cy.get('@onOpen').should('not.have.been.called')
+    cy.get('@onUpdateOpen').should('not.have.been.called')
     cy.get('input').click()
-    cy.get('@onOpen').should('have.been.called')
+    cy.get('@onUpdateOpen').should('have.been.calledWith', true)
     cy.get('[role=option]').eq(0).click()
 
-    cy.get('@onClose').should('have.been.called')
+    cy.get('@onUpdateOpen').should('have.been.calledWith', false)
 
     cy.get('@onUpdate').should('have.been.calledWith', '00:00')
     cy.get('@onChange').should('have.been.calledWith', '00:00')
@@ -217,20 +217,41 @@ describe('TimePicker', () => {
     cy.get('@onUpdate').should('have.been.calledWith', '20:02:18')
   })
 
-  it('invalid typed input does not corrupt the model value', () => {
+  // INP-Q3 removed `input-invalid` and `invalid-change`. The revert of rejected
+  // text to the last valid value is the only signal left, so it is now the only
+  // thing the user has. It is asserted after a typed change, not just after the
+  // initial prop, so a stale "last valid" value would fail here.
+  it('invalid typed input reverts to the last valid value', () => {
     const onUpdate = cy.spy().as('onUpdate')
+    const onInputInvalid = cy.spy().as('onInputInvalid')
+    const onInvalidChange = cy.spy().as('onInvalidChange')
 
     cy.mount(TimePicker, {
       props: {
         modelValue: '08:00',
         format: 'HH:mm:ss',
         'onUpdate:modelValue': onUpdate,
+        'onInput-invalid': onInputInvalid,
+        'onInvalid-change': onInvalidChange,
       },
     })
     cy.get('input').click()
     cy.get('input').type('25:99:99{enter}')
     cy.get('input').should('have.value', '08:00:00')
     cy.get('@onUpdate').should('not.have.been.called')
+
+    cy.get('input').clear()
+    cy.get('input').type('15:30:45{enter}')
+    cy.get('input').should('have.value', '15:30:45')
+
+    cy.get('input').click()
+    cy.get('input').clear()
+    cy.get('input').type('nonsense{enter}')
+    cy.get('input').should('have.value', '15:30:45')
+    cy.get('@onUpdate').should('have.been.calledOnce')
+
+    cy.get('@onInputInvalid').should('not.have.been.called')
+    cy.get('@onInvalidChange').should('not.have.been.called')
   })
 
   it('off-grid typed time gets a formatted label', () => {
@@ -299,6 +320,104 @@ describe('TimePicker', () => {
 
       cy.then(() => setOpen?.(false))
       cy.get('[role=dialog]').should('not.exist')
+    })
+  })
+
+  // INP-Q5 / INP-Q10 (ADR-0012).
+  describe('template ref and picker hooks', () => {
+    it('open() and close() drive the popover', () => {
+      let vm: any
+      cy.mount(TimePicker).then((mounted: any) => {
+        vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+      })
+
+      cy.get('[role=listbox]').should('not.exist')
+      cy.then(() => vm?.open?.())
+      cy.get('[role=listbox]').should('exist')
+      cy.then(() => vm?.close?.())
+      cy.get('[role=listbox]').should('not.exist')
+    })
+
+    it('open() is a no-op while disabled', () => {
+      let vm: any
+      cy.mount(TimePicker, { props: { disabled: true } }).then(
+        (mounted: any) => {
+          vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        },
+      )
+
+      cy.then(() => vm?.open?.())
+      cy.get('[role=listbox]').should('not.exist')
+    })
+
+    it('focus() focuses the trigger input', () => {
+      cy.mount(TimePicker).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('input').should('be.focused')
+    })
+
+    it('marks the input and the chevron with the picker hooks', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input')
+        .should('have.attr', 'data-slot', 'control')
+        .and('have.attr', 'role', 'combobox')
+        .and('have.attr', 'aria-haspopup', 'listbox')
+        .and('have.attr', 'aria-expanded', 'false')
+      cy.get('[data-slot="chevron"]').should('exist')
+      // INP-Q10: a picker's input is a `control`, not a `trigger`. The
+      // `trigger` marker belongs to Popover's own wrapper, so assert the input
+      // itself never carries it.
+      cy.get('input').should('not.have.attr', 'data-slot', 'trigger')
+
+      cy.get('input').click()
+      cy.get('input').should('have.attr', 'aria-expanded', 'true')
+    })
+
+    it('points aria-controls at the open listbox', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').should('not.have.attr', 'aria-controls')
+
+      cy.get('input').click()
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          cy.get(`#${panelId}`).should('have.attr', 'role', 'listbox')
+        })
+    })
+
+    it('keeps aria-activedescendant on the input, not on the listbox', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').click()
+      cy.get('input').type('{downarrow}')
+
+      cy.get('[role=listbox]').should('not.have.attr', 'aria-activedescendant')
+      cy.get('input')
+        .invoke('attr', 'aria-activedescendant')
+        .should('be.a', 'string')
+        .then((optionId) => {
+          cy.get(`#${optionId}`).should('have.attr', 'role', 'option')
+        })
+    })
+
+    it('drops aria-activedescendant when the listbox closes', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').click()
+      cy.get('input').type('{downarrow}')
+      cy.get('input').should('have.attr', 'aria-activedescendant')
+
+      // The options unmount with the panel, so the reference would dangle.
+      cy.get('input').type('{esc}')
+      cy.get('[role=listbox]').should('not.exist')
+      cy.get('input').should('not.have.attr', 'aria-activedescendant')
+      cy.get('input').should('not.have.attr', 'aria-controls')
     })
   })
 })

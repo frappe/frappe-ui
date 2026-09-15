@@ -1,4 +1,4 @@
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import type {
   TabIcon,
   TabsSide,
@@ -18,7 +18,7 @@ export interface TabButton {
   iconLeft?: TabButtonIcon
   disabled?: boolean
   /** Renders the tab as a `<RouterLink>` to the given target. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
   /** Renders the tab as an `<a href>`, opens in a new tab. */
   href?: string
   onClick?: (event: MouseEvent) => void

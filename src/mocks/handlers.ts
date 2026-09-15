@@ -29,7 +29,14 @@ export const handlers = [
   }),
 
   http.post(url('/api/v2/method/post'), async ({ request }) => {
-    const body = await request.json()
+    const body = await readBody(request)
+    // Same rules as the document handlers below: a body value starting with
+    // `slow` delays the response and one ending in `fail` fails it, so a test
+    // can pick the timing and the outcome from the params it submits.
+    await delayIfSlow(...Object.values(body).map(String))
+    if (Object.values(body).some((value) => String(value).endsWith('fail'))) {
+      return methodError('post')
+    }
     return HttpResponse.json({
       data: { success: true, received: body },
     })

@@ -8,7 +8,7 @@
 
 `FrappeResponseError` is a class with required `title` and `type`, plus optional `exception` and `indicator` (`src/data-fetching/useFrappeFetch.ts:6-26`). `useFrappeFetch` constructs it from `response.errors[0]` (`src/data-fetching/useFrappeFetch.ts:115-147`). It has no `messages` field, but it still satisfies `FrappeUIError` because that field is optional.
 
-`FrappeRequestError` is an interface with optional `exc_type`, `exc`, `response`, and `status`, plus required `messages` (`src/utils/frappeRequest.ts:20-26`). `frappeRequest` constructs an `Error`, adds those fields, and guarantees at least one message (`src/utils/frappeRequest.ts:190-215`). It also satisfies `FrappeUIError` structurally, but `FrappeUIError` is not an alias of either request error.
+`FrappeRequestError` (renamed `FrappeResourceError` on 2026-09-16; the facts here describe the tree at audit time) is an interface with optional `exc_type`, `exc`, `response`, and `status`, plus required `messages` (`src/utils/frappeRequest.ts:20-26`). `frappeRequest` constructs an `Error`, adds those fields, and guarantees at least one message (`src/utils/frappeRequest.ts:190-215`). It also satisfies `FrappeUIError` structurally, but `FrappeUIError` is not an alias of either request error.
 
 ```ts
 const inputError: FrappeUIError = requestError // valid structurally
@@ -1194,6 +1194,43 @@ Gameplan's `LIST_FAMILY_SPEC.md` has 2 additional documentation examples,
 counted separately from live sites. No tied dynamic slot, `v-slot:suffix`, or
 legacy `slot="suffix"` form was found. The rename to `#sort-indicator` is fully
 mechanical and preserves the component's edge-aware placement.
+
+## Batch 2 — what the implementation measured
+
+Greps run 2026-09-15 against the three app trees on this box: Gameplan
+(`frappe-bench`), Builder (`builder-bench`) and Suite, which contains Drive.
+Wiki, Helpdesk and CRM are not on this box; their counts stay as recorded.
+
+**SHELL-Q1 / H15 — two apps render `DesktopShell`, not zero.** Gameplan
+`frontend/src/components/DesktopLayout.vue:5` and Suite Drive
+`frontend/src/apps/drive/pages/DriveLayout.vue:10`. Drive already passes
+`:scroll="shellScroll"`, so the prop was live before this batch; only the
+`DesktopShellProps` type was empty. Nothing to migrate in either app.
+
+**SHELL-Q4 / H14 — `viewportClass` sites confirmed.** Gameplan 6 and Builder 1,
+matching the SHELL-Q4 table. Suite has 0. The prop is kept, so none migrate.
+
+**VOC-Q7 — Gameplan owns its copy of `--mobile-header-height`.** It declares the
+variable at `frontend/src/index.css:10` with the value `52px`, the same as the
+fallback the library used, and reads it in three of its own files
+(`CommentsArea.vue:80,540`, `DiscussionView.vue:490`). The library no longer
+reads the name, so Gameplan's declaration and reads keep working unchanged and
+render identically.
+
+**SHELL-Q11 / SHELL-Q12 — no color-scheme sites on this box.** Zero
+`resolvedColorScheme` and zero `toggleColorScheme` occurrences in Gameplan,
+Builder and Suite. Wiki's 3 sites stand as recorded.
+
+**SHELL-Q6 / SHELL-Q7 — confirmed 0.** No `ScrollBar` import or tag, and no
+`useSheetDrag` import, in any of the three trees.
+
+**SHELL-Q9 — confirmed 0.** No `data-no-scroll-top` and no `data-no-sheet-drag`
+in any of the three trees. Both attributes are now documented.
+
+**INP-Q16 — zero `<Rating>` tags in Gameplan, Builder and Suite.** So the
+combined "38 / 9 / 44" row in `rc-migration-effort.md` was TabButtons, not
+Rating: Gameplan's 10 cannot contain a Rating. The row is now split, and the
+Rating half carries the 3 v1 sites INP-Q16 lists.
 
 ## PKG-Q4 and PKG-Q6 — Are the `--focus-<name>` variables legacy? Examples
 

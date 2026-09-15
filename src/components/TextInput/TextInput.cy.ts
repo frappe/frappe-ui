@@ -190,6 +190,40 @@ describe('Textinput', () => {
         })
     })
 
+    it('renders an array of errors as stacked lines', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'helper',
+          error: ['Email is required', 'Password too short'],
+        },
+      })
+      cy.get('input')
+        .should('have.attr', 'aria-invalid', 'true')
+        .and('have.attr', 'data-state', 'invalid')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          cy.get(`#${id}-error`)
+            .should('contain.text', 'Email is required')
+            .and('contain.text', 'Password too short')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('treats an empty array as no error', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Email', description: 'helper', error: [] },
+      })
+      cy.get('input').should('not.have.attr', 'aria-invalid')
+      cy.get('input')
+        .should('have.attr', 'data-state', 'valid')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          cy.get(`#${id}-error`).should('not.exist')
+          cy.get(`#${id}-description`).should('contain.text', 'helper')
+        })
+    })
+
     it('renders required indicator and forwards aria-required', () => {
       cy.mount(TextInput, {
         props: { label: 'Name', required: true },

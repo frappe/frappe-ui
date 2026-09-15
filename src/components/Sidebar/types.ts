@@ -1,5 +1,5 @@
 import type { Component, ComputedRef, InjectionKey } from 'vue'
-import { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import type { AlertAction } from '../Alert'
 import type { StatusTheme } from '../shared/statusIcon'
 import type { MenuOptions } from '../Menu/types'
@@ -50,7 +50,7 @@ export interface SidebarItemProps {
    * Navigation target. When set the row's main area renders as a router link;
    * otherwise it renders as a button. A click still invokes `onClick`.
    */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 
   /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
   href?: string

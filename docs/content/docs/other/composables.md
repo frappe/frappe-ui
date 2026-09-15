@@ -50,12 +50,13 @@ nothing to install.
 <script setup>
 import { useColorScheme } from 'frappe-ui'
 
-const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
+const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
+  useColorScheme()
 </script>
 
 <template>
   <button @click="toggleColorScheme">
-    {{ colorScheme }}
+    {{ resolvedColorScheme === 'dark' ? 'Light mode' : 'Dark mode' }}
   </button>
 </template>
 ```
@@ -63,15 +64,52 @@ const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
 - `colorScheme` — `Ref<'light' | 'dark' | 'system'>`, read-only. It, the
   `<html data-theme>` attribute, and the saved preference always move
   together, so write through `setColorScheme` rather than assigning the ref.
+- `resolvedColorScheme` — `Ref<'light' | 'dark'>`, read-only. What the page is
+  painted in. Under `system` it follows the OS setting while `colorScheme`
+  stays `system`, so this is what a sun-or-moon icon, or a per-scheme asset,
+  reads.
 - `setColorScheme(scheme)` — selects a preference: applies `data-theme` and
   persists it.
-- `toggleColorScheme()` — flips between light and dark.
+- `toggleColorScheme()` — switches to the opposite of what is on screen. Under
+  `system` on a dark OS it selects `light`, so one press always moves.
 
 Switching schemes would otherwise cross-fade every transitioning surface at
 once, which reads as a flash. To suppress it, `useColorScheme` puts a
 `no-transition` class on `<html>` for the two frames around the swap; the
 rule that acts on it ships in `frappe-ui/style.css`. Apps that don't load
 that stylesheet still switch correctly — they just see the cross-fade.
+
+## useResolvedColorScheme
+
+The same `'light' | 'dark'` value, for a component that must not own the
+scheme. It reads the document and follows it; it writes nothing.
+
+```vue
+<script setup>
+import { useResolvedColorScheme } from 'frappe-ui'
+
+const scheme = useResolvedColorScheme()
+</script>
+
+<template>
+  <img :src="scheme === 'dark' ? darkShot : lightShot" alt="" />
+</template>
+```
+
+Use it when something else already owns `data-theme`: an app that bootstraps
+its own theme before paint, a page embedded in a host shell, or a demo in an
+iframe. `useColorScheme()` would make a second writer of the attribute and of
+the `theme` storage key, because its first call applies the saved preference.
+
+- It returns `Readonly<Ref<'light' | 'dark'>>` directly, not an object.
+- It reads `<html data-theme>` first, then Tailwind's `dark` class, then the
+  OS setting, and reacts to all three.
+- It writes no attribute, no class and no `localStorage` key, and it does not
+  start `useColorScheme`'s shared state.
+- Outside the browser it holds `light`.
+
+When your app owns the scheme, read `useColorScheme().resolvedColorScheme`
+instead. It is the same value from the object that sets it.
 
 ## shellScrollContainer / useShellScrolled
 
@@ -107,8 +145,17 @@ const scrolled = useShellScrolled({ threshold: 12 })
 </template>
 ```
 
-`threshold` defaults to `200`. Without a mounted shell, `scrolled` stays
-`false` and the composable warns once in development.
+`threshold` is required, in pixels. There is no default: 200px suited a long
+document and nothing else, and a header border that appeared 200px late read as
+a bug rather than as a missing argument.
+
+The value comes from the nearest enclosing shell. A shell provides its own
+scroll element to its subtree, so a page inside one reads that shell even while
+another is still mounted. The module registry is the fallback for a caller no
+shell encloses.
+
+Without a mounted shell, `scrolled` stays `false` and the composable warns once
+in development.
 
 ## useKeyboardShortcut
 

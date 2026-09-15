@@ -304,10 +304,13 @@ interface MultiSelectItemSlotsByName {
 export interface MultiSelectSlots
   extends MultiSelectFixedSlots, MultiSelectItemSlotsByName {}
 
+/**
+ * The events the component declares itself. `update:modelValue`,
+ * `update:open` and `update:query` are not here: `defineModel` declares those,
+ * and listing them again published one event twice with two payload types
+ * that could drift apart.
+ */
 export interface MultiSelectEmits {
-  /** Fired when the selection changes. */
-  'update:modelValue': [value: Array<string | number>]
-
   /**
    * Fired alongside `update:modelValue` with the original option objects
    * resolved out of `options`, so custom fields on an option survive.

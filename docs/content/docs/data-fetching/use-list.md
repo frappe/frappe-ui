@@ -126,6 +126,7 @@ async function close(name) {
 - `canAbort` — `true` while a fetch that can still be aborted is in flight.
 - `aborted` — `true` if the last fetch was aborted.
 - `execute()` (aliases `fetch()`, `reload()`) — refetches the current page.
+  Resolves even when the fetch fails; read `error` after awaiting it.
 - `abort()` — aborts the in-flight fetch.
 - `next()` / `previous()` — moves `start` by one page and, when `refetch` is
   `false`, fetches it.
@@ -143,7 +144,8 @@ async function close(name) {
     reports on one row.
 
   All three refetch the current page on success when `refetch` is `true` (the
-  default).
+  default). All three **reject** when the write fails, so handle it in a
+  `catch` block. See [the error table](./use-call.md#errors).
 
 ## Shared cache
 

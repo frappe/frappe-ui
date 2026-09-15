@@ -94,10 +94,15 @@ interface InputLabelingProps {
   /**
    * Error message rendered below the input.
    * Sets `aria-invalid="true"` and `data-state="invalid"` on the control.
-   * Accepts an `Error` object; `Error.messages` is rendered as stacked
-   * plain text, `Error.message` is the fallback.
+   * Accepts a string, an array of strings, or an `Error` object;
+   * `Error.messages` is rendered as stacked plain text, `Error.message` is
+   * the fallback.
+   *
+   * This is the same value `ErrorMessage.message` takes, so the two never
+   * disagree. A component that forwards the prop reads it from
+   * `InputLabelingProps['error']`.
    */
-  error?: string | Error
+  error?: ErrorMessageValue
 
   /**
    * Marks the field as required.
@@ -168,8 +173,13 @@ indicator inside their custom label content.
 ### `error` prop rules
 
 - `error: string` renders as a single line of text below the control.
+- `error: string[]` renders one line per entry. Empty entries are dropped.
 - `error: Error` renders `Error.messages` (joined with line breaks via
   `whitespace-pre-line`) when present, otherwise `Error.message`.
+- An empty string, an empty array, and an `Error` with neither `message` nor
+  `messages` all mean no error: no error region, and no `aria-invalid`.
+- One function, `errorLines` in `src/utils/errorLines.ts`, decides this for
+  both `ErrorMessage` and the input family.
 - The error region is rendered as plain text. **`v-html` is not used.**
 - `error` text uses `text-ink-red-5` (matches the required asterisk for
   visual consistency of "needs attention" affordances).
@@ -333,10 +343,9 @@ the model itself is documented at the component file via the
 
 - **`v-html` is preserved as-is for v1.** Removal is deferred — revisit
   post-v1 once consumers are tracked.
-- Type the message prop as `string | Error` cleanly; remove the
-  `(message as any).messages` cast by typing `Error.messages?: string[]`
-  via a small library-level interface. (Internal typing improvement, not a
-  runtime change.)
+- The message prop is typed as `ErrorMessageValue`: a string, an array of
+  strings, or an `Error` that may carry `messages`. The input `error` prop
+  takes the same value, and `errorLines` reads it for both.
 - Most consumers should migrate to the input-level `error` prop. Document
   `ErrorMessage` as the standalone option for contexts where an input is
   not present (e.g. form-level error banners).
@@ -620,6 +629,26 @@ Every input shell renders the canonical `data-*` vocabulary:
 The `useInputLabeling` composable returns a `dataAttrs` object that
 components spread onto their root element so the vocabulary stays
 consistent.
+
+**`control` versus `trigger` (INP-Q10).** Every input marks its main
+interactive element `data-slot="control"`. `trigger` is reserved for the
+selection family — `Select`, `Combobox` and `MultiSelect` — whose box shows the
+selection and opens the popover. The date and time pickers use `control`: their
+`<input>` is something you type into, so it is a control that also opens a
+panel. Both names would otherwise mean "the thing you click", and an app
+styling `[data-slot="control"]` would miss half the inputs.
+
+The pickers add two more hooks on top:
+
+- `data-slot="chevron"` on the trailing chevron, so an app can restyle or hide
+  it without replacing the `#suffix` slot.
+- `role="combobox"`, `aria-haspopup` and `aria-expanded` on the picker
+  `<input>`, so a screen reader announces that the field opens a panel and
+  whether that panel is open. `aria-haspopup` is `dialog` on the date pickers
+  and `listbox` on `TimePicker`, matching what each one opens.
+
+`FormLabel` carries `data-slot="label"`, the same marker `InputLabel` already
+rendered, so one selector reaches every label in the library.
 
 `Switch.labelClasses` and `Checkbox.padding` continue to work alongside
 the `data-*` hooks. They are deprecated, not removed in v1.

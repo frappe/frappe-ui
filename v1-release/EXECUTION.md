@@ -16,13 +16,21 @@ landed in PRs #1151, #1150, and #1149. Combine the remaining sections into
 exactly three sequential PRs:
 
 1. **Batch 1 — overlays, navigation, and list:** items 2, 4, 5, 7, 9, 12, 16.
+   Landed; `main` is at `v1.0.0-beta.69`.
 2. **Batch 2 — data, dialogs, inputs, shells, and headers:** items 8, 10, 11,
-   13, 14.
-3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18.
+   13, 14. Implemented on `v1/rc-batch-2` from
+   `2b990bdb7de35616a4e600e2222a733c51aba5d3`. 45 QIDs, one codemod
+   (`data-v1`). Awaiting review and merge.
+3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18. Not started;
+   base it on `main` after batch 2 merges.
 
 Finish and merge each batch before starting the next. Do not split a batch to
 satisfy an old file-count preference. Include generated docs required by its
 scope.
+
+Every batch adds its codemod to both `bin` and `files` in `package.json`. A bin
+whose file is not published installs as a broken symlink. `destinations-v1` was
+in `bin` only until batch 2 fixed it.
 
 ## Authority
 

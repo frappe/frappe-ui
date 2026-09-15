@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { DateRangePicker } from 'frappe-ui'
+import { DateRangePicker, type DateRangeValue } from 'frappe-ui'
 import { dayjs } from '../../../utils/dayjs'
 import type { Dayjs } from 'dayjs/esm'
 
@@ -8,13 +8,13 @@ const today = dayjs().format('YYYY-MM-DD')
 const oneYearOut = dayjs().add(1, 'year').format('YYYY-MM-DD')
 
 // 1. PTO request — quick presets feel native to HR tools
-const timeOff = ref<string[]>([])
+const timeOff = ref<DateRangeValue>([])
 
 // 2. Hotel booking — dual pane, check-in must be today or later
-const stay = ref<string[]>([])
+const stay = ref<DateRangeValue>([])
 
 // 3. Analytics filter — preset-driven, displays compact format
-const analyticsRange = ref<string[]>([
+const analyticsRange = ref<DateRangeValue>([
   dayjs().subtract(29, 'day').format('YYYY-MM-DD'),
   dayjs().format('YYYY-MM-DD'),
 ])
@@ -44,7 +44,7 @@ const rowCls =
   'w-full rounded-4 px-2 py-1.5 text-left text-base hover:bg-surface-gray-2'
 
 // 4. Project sprint — weekdays only, span limited to ~2 weeks via `max`
-const sprint = ref<string[]>([])
+const sprint = ref<DateRangeValue>([])
 const sprintEnd = dayjs().add(60, 'day').format('YYYY-MM-DD')
 function isWeekend(date: Dayjs) {
   const d = date.day()
@@ -53,7 +53,7 @@ function isWeekend(date: Dayjs) {
 
 // 5. Flight booking — custom #trigger renders two side-by-side inputs
 // that share one popover, so the calendar still visualizes the range.
-const flight = ref<string[]>([])
+const flight = ref<DateRangeValue>([])
 const depart = computed(() =>
   flight.value[0] ? dayjs(flight.value[0]).format('ddd, MMM D') : '',
 )

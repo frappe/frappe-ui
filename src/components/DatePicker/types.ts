@@ -81,9 +81,17 @@ export interface DatePickerProps extends CommonDatePickerProps {
   modelValue?: string
 }
 
+/** A range value: a `[from, to]` tuple in `YYYY-MM-DD` format, or `[]` when cleared. */
+export type DateRangeValue = [string, string] | []
+
 export interface DateRangePickerProps extends CommonDatePickerProps {
-  /** Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for no selection. */
-  modelValue?: string[]
+  /**
+   * Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for
+   * no selection. `DateRangeValue` types both sides of `v-model` (INP-Q12): the
+   * prop was `string[]`, which let a one-element array in and made a round-trip
+   * through the model fail to type-check.
+   */
+  modelValue?: DateRangeValue
 
   /** Render two calendar panels side by side (current month + next month). */
   dualPane?: boolean
@@ -99,9 +107,6 @@ export type DatePickerEmits = {
   /** Fired after the picker commits a normalized value. */
   (event: 'change', value: string): void
 }
-
-/** Emitted range value: a `[from, to]` tuple in `YYYY-MM-DD` format, or `[]` when cleared. */
-export type DateRangeValue = [string, string] | []
 
 export type DateRangePickerEmits = {
   /** Fired when the range value changes. Emits `[from, to]` or `[]` when cleared. */

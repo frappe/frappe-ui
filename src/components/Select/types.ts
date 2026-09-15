@@ -40,8 +40,8 @@ export interface SelectProps extends InputLabelingProps {
   /** If true, disables the select input. */
   disabled?: boolean
 
-  /** The currently selected value. */
-  modelValue?: SelectOptionValue
+  /** The currently selected value. `null` when nothing is selected. */
+  modelValue?: SelectOptionValue | null
 
   /** Controls the visibility of the select menu. */
   open?: boolean
@@ -90,7 +90,7 @@ export interface SelectSlotProps {
   /** Currently selected option, if any. */
   selectedOption: SelectNormalizedOption | null
 
-  /** Clears the current selection (sets the model to `undefined`). */
+  /** Clears the current selection (sets the model to `null`). */
   clear: () => void
 
   /** Sets the menu open state. */
@@ -178,10 +178,16 @@ interface SelectItemSlotsByName {
 
 export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
+/**
+ * The events this interface names for a wrapper to reuse. `update:modelValue`
+ * is not here: `defineModel` declares it, and the generated payload carries
+ * `undefined` because the model prop is optional. Declaring it again published
+ * one event twice with two payload types, so a wrapper that re-bound
+ * `@update:model-value` failed to compile. `ComboboxEmits` and
+ * `MultiSelectEmits` dropped their model events for the same reason. The
+ * runtime event is unchanged: the component emits a value or `null`.
+ */
 export interface SelectEmits {
-  /** Fired when the selected value changes. */
-  'update:modelValue': [value: SelectOptionValue | undefined]
-
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 }

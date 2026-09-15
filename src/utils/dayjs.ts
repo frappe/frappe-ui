@@ -10,6 +10,13 @@ import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import customParseFormat from 'dayjs/esm/plugin/customParseFormat'
 import { getConfig } from './config'
 
+/**
+ * Re-exported so an app can annotate the `Dayjs` values the date pickers hand
+ * to `isDateUnavailable` and `setDate` without depending on dayjs itself
+ * (INP-Q13).
+ */
+export type { Dayjs }
+
 _dayjs.extend(updateLocale)
 _dayjs.extend(relativeTime)
 _dayjs.extend(localizedFormat)

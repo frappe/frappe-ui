@@ -46,6 +46,28 @@ describe('PageHeader', () => {
     cy.get('[data-testid=page] header').should('not.exist')
   })
 
+  // SHELL-Q9: one click, and `data-no-scroll-top` keeps its name.
+  it('honours data-no-scroll-top on a non-interactive element', () => {
+    cy.mount(Layout, {
+      slots: {
+        default: () => [
+          h(PageHeader, null, {
+            default: () => [
+              h('span', { 'data-no-scroll-top': '' }, 'Breadcrumb'),
+              h('span', 'Title'),
+            ],
+          }),
+          h('div', { style: 'height: 2000px' }),
+        ],
+      },
+    })
+    cy.get('[data-testid=page]').scrollTo(0, 500)
+    cy.get('header [data-no-scroll-top]').click()
+    cy.get('[data-testid=page]').should(($el) => {
+      expect($el[0].scrollTop).to.be.greaterThan(0)
+    })
+  })
+
   it('scrolls its scroll container to top on empty-area clicks, ignoring interactive elements', () => {
     cy.mount(Layout, {
       slots: {
@@ -109,6 +131,24 @@ describe('PageHeaderTitle', () => {
 })
 
 describe('PageHeaderMobile', () => {
+  // VOC-Q7: the height is fixed at 52px. `--mobile-header-height` is gone, so
+  // setting it on an ancestor changes nothing.
+  it('is 52px tall and reads no CSS variable for its height', () => {
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', { style: '--mobile-header-height: 120px' }, [
+              h(PageHeaderMobile, { title: 'Discussion' }),
+            ])
+        },
+      }),
+    )
+    cy.get('header').should(($el) => {
+      expect($el[0].getBoundingClientRect().height).to.equal(52)
+    })
+  })
+
   it('renders the #prefix, default, and #suffix slots', () => {
     cy.mount(PageHeaderMobile, {
       slots: {

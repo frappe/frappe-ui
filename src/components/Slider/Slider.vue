@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, normalizeClass, useAttrs } from 'vue'
+import { computed, normalizeClass, ref, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
@@ -9,6 +9,7 @@ import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { SliderEmits, SliderProps, SliderValue } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
 
 const props = withDefaults(defineProps<SliderProps>(), {
   step: 1,
@@ -27,6 +28,19 @@ const attrs = useAttrs()
 
 defineOptions({
   inheritAttrs: false,
+})
+
+// reka-ui's SliderRoot is a generic function component, so `InstanceType` does
+// not apply. The ref only needs `$el`, the rendered root element.
+const rootRef = ref<{ $el: HTMLElement } | null>(null)
+
+// The tabbable element is the thumb, not the root, the same reason every
+// caller `aria-*` is re-routed below. A range slider focuses its first thumb.
+defineExpose<InputExposed>({
+  focus: (options?: FocusOptions) =>
+    rootRef.value?.$el
+      ?.querySelector<HTMLElement>('[role="slider"]')
+      ?.focus(options),
 })
 
 // `role="slider"` sits on the thumb, not the root, so every caller `aria-*`
@@ -288,6 +302,7 @@ const onValueCommit = (value: SliderValue) => {
       </template>
     </InputLabel>
     <SliderRoot
+      ref="rootRef"
       :id="inputId"
       v-model="sliderValue"
       :class="[rootClasses, hasLabeling ? null : normalizeClass(attrs.class)]"

@@ -33,7 +33,7 @@ The `#footer` slot renders below the option list and stays pinned to the bottom 
 <ComponentPreview name="Select-Labeling" />
 
 ## Template Ref
-A template ref exposes `{ clear, focus }` — the same shape as `Combobox` and `MultiSelect`. `clear()` empties the selection; `focus()` moves focus to the trigger.
+A template ref exposes `{ clear, focus }` — the same shape as `Combobox` and `MultiSelect`. `clear()` empties the selection and sets the model to `null`; `focus()` moves focus to the trigger.
 
 ```vue
 <script setup lang="ts">
@@ -60,6 +60,9 @@ function reset() {
   `class="w-full"` when you want a full-width trigger.
 - `Select` accepts flat options only — no groups. Empty and nullish options are
   omitted. Option values are `string | number`.
+- Nothing selected is `null`, the same as `Combobox`. `Select` emitted
+  `undefined` before 1.0.0. An empty string stays a real value, so a "None" row
+  with `value: ''` round-trips.
 - For the common "Sort by" pattern, add a first option with an empty-string
   value and `disabled: true`. It shows as the resting label without becoming
   selectable.

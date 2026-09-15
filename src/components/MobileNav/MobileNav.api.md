@@ -29,7 +29,7 @@
     name: 'route',
     description: 'Navigation target. Renders a router link. Tapping the item while it is\nalready the current route scrolls the shell to the top instead of\nre-navigating.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   },
   {
     name: 'href',

@@ -1,5 +1,9 @@
-import type { InputSize, InputVariant } from '../../../composables/inputTypes'
-import type { FrappeUIError } from '../../../composables/useInputLabeling'
+import type {
+  InputExposed,
+  InputSize,
+  InputVariant,
+} from '../../../composables/inputTypes'
+import type { InputLabelingProps } from '../../../composables/useInputLabeling'
 
 export interface PickerShellProps {
   /** Side of the trigger to render the panel on. Already resolved by the caller. */
@@ -26,8 +30,8 @@ export interface PickerShellProps {
   /** Help text below the input. */
   description?: string
 
-  /** Error message, as a string or `FrappeUIError`. */
-  error?: string | FrappeUIError
+  /** Error message, as a string or an `Error` carrying `messages`. */
+  error?: InputLabelingProps['error']
 
   /** Whether the input is required. */
   required?: boolean
@@ -79,7 +83,20 @@ export interface PickerShellSlots {
 }
 
 /** Methods available on a `<PickerShell>` template ref. */
-export interface PickerShellExposed {
-  /** Opens the panel. */
+export interface PickerShellExposed extends PickerExposed {}
+
+/**
+ * The template-ref surface every picker shares: `DatePicker`,
+ * `DateRangePicker`, `DateTimePicker` and `TimePicker`.
+ *
+ * `open` and `close` are here because a picker owns its trigger (ADR-0012), so
+ * a parent's script has no other handle on the panel. `focus` comes from
+ * `InputExposed`, which every input implements.
+ */
+export interface PickerExposed extends InputExposed {
+  /** Opens the panel. A disabled picker stays closed. */
   open: () => void
+
+  /** Closes the panel. */
+  close: () => void
 }

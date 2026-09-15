@@ -1,16 +1,9 @@
 import { computed } from 'vue'
 import { useId } from '../utils/useId'
+import { errorLines as toErrorLines } from '../utils/errorLines'
+import type { ErrorMessageValue } from '../utils/errorLines'
 import { useSlotTick } from './useSlotTick'
 import type { InputSize, InputVariant, ToggleSize } from './inputTypes'
-
-/**
- * Library-level extension of the standard `Error` type. Frappe's whitelisted
- * methods may return an error with multiple messages on `messages?: string[]`.
- * This is the shape input components render in their error region.
- */
-export interface FrappeUIError extends Error {
-  messages?: string[]
-}
 
 export interface InputLabelingProps {
   /** Label rendered above (or beside, for binary controls) the input. */
@@ -25,11 +18,13 @@ export interface InputLabelingProps {
 
   /**
    * Error message rendered below the input. When set, the control receives
-   * `aria-invalid="true"` and `data-state="invalid"`. May be either a string
-   * or an `Error` object whose `messages?: string[]` is rendered as stacked
-   * lines (with `Error.message` as the fallback).
+   * `aria-invalid="true"` and `data-state="invalid"`. Takes a string, an
+   * array of strings, or an `Error` whose `messages` are rendered as stacked
+   * lines (with `Error.message` as the fallback). This is the same value
+   * `ErrorMessage.message` takes. An empty array and an empty string both
+   * mean no error.
    */
-  error?: string | FrappeUIError
+  error?: ErrorMessageValue
 
   /**
    * Marks the field as required. Renders an asterisk next to the label, with
@@ -81,20 +76,11 @@ export function useInputLabeling(
   const descriptionId = computed(() => `${inputId.value}-description`)
   const errorMessageId = computed(() => `${inputId.value}-error`)
 
-  const hasError = computed(() => {
-    const e = props.error
-    if (e == null) return false
-    if (typeof e === 'string') return e.length > 0
-    return Boolean(e.message || (e.messages && e.messages.length))
-  })
+  // What renders is what counts as an error: an empty array, an empty string
+  // and an `Error` with neither `message` nor `messages` all report none.
+  const errorLines = computed<string[]>(() => toErrorLines(props.error))
 
-  const errorLines = computed<string[]>(() => {
-    const e = props.error
-    if (!e) return []
-    if (typeof e === 'string') return [e]
-    if (e.messages && e.messages.length) return e.messages.slice()
-    return e.message ? [e.message] : []
-  })
+  const hasError = computed(() => errorLines.value.length > 0)
 
   const showDescription = computed(() => {
     return Boolean(props.description) && !hasError.value

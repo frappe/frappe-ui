@@ -38,4 +38,20 @@ const items = [
 ]
 ```
 
+An item also carries any extra field you put on it. `BreadcrumbItem` keeps an
+open index signature, so a crumb can hold the record it came from and the
+`#prefix` / `#suffix` slots can read it back:
+
+```vue
+<Breadcrumbs :items="items">
+  <template #prefix="{ item }">
+    <Avatar v-if="item.user" :image="item.user.avatar" size="sm" />
+  </template>
+</Breadcrumbs>
+```
+
+Both slots are named for where they render, not for what goes in them:
+`#prefix` renders before the crumb's label and `#suffix` after it. Each
+receives `{ item }`, and they render for every crumb.
+
 <!-- @include: ./Breadcrumbs.api.md -->

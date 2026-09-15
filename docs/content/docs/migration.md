@@ -34,7 +34,9 @@ destination prop renames (`destinations-v1`, see
 (`overlays-v1`), navigation props and tab state (`navigation-v1`), and the EditorFixedMenu prop rename
 (`editor-v1`, see [Editor](#editor)), base component prop normalization
 (`base-props-v1`, see [Base component props](#base-component-props)), and List
-row hooks and slot names (`list-v1`, see [List family](#list-family)). The tools
+row hooks and slot names (`list-v1`, see [List family](#list-family)), and the
+`FrappeUI` plugin's `resources` option (`data-v1`, see
+[the plugin](#http-transport-and-the-frappeui-plugin)). The tools
 report ambiguous dynamic syntax for manual review instead of guessing.
 
 ### Sections
@@ -46,7 +48,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
-- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Errors renamed](#errors-renamed) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
@@ -112,7 +114,7 @@ The `options` blob is flattened into top-level props. See the
 | `<template #body-header>`             | `<template #title>` (no direct replacement) |
 | `<template #body>`                    | `bare` prop + default slot       |
 | `onClick: (close) => …`               | `onClick: ({ close }) => …`      |
-| `:icon="{ appearance: 'warning' }"`   | `:icon="{ theme: 'amber' }"`     |
+| `:icon="{ appearance: 'warning' }"`   | `icon="…"` + `theme="amber"`     |
 | `dialogRef.close()`                   | `v-model:open` / `close` slot prop |
 | manual focus hacks / `v-focus`        | `autofocus` attr on a descendant |
 
@@ -149,19 +151,68 @@ For the imperative API, use `dialog.confirm` / `dialog.danger` / `dialog.prompt`
 from `frappe-ui` (callback-based: `onConfirm` resolves to close, throws to stay
 open) and wrap your app root in `<FrappeUIProvider>`.
 
-### `icon.appearance` → `icon.theme`
+### The `icon` object is replaced by `icon` + `theme` {#dialog-icon-theme}
+
+`icon` takes a `lucide-*` class name or a Vue component. The tone moves to its
+own `theme` prop, so the two decisions are separate and an icon component is
+possible at all.
 
 ```vue
 <!-- Before -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', appearance: 'warning' }" ... />
+<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'red' }" ... />
 
 <!-- After -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" ... />
+<Dialog icon="lucide-alert-triangle" theme="red" ... />
+<Dialog :icon="AlertTriangleIcon" theme="red" ... />
 ```
 
-`appearance` is dropped silently — Vue accepts the unknown key with no error,
-so the icon renders with no tone. Map `warning → amber`, `info → blue`,
-`danger → red`, `success → green`.
+The same two keys move on `dialog.confirm`, `dialog.danger` and
+`dialog.prompt`, which already had a top-level `theme`:
+
+```js
+// Before
+dialog.confirm({ title: 'Delete', icon: { name: 'lucide-trash', theme: 'red' } })
+
+// After
+dialog.confirm({ title: 'Delete', icon: 'lucide-trash', theme: 'red' })
+```
+
+**Loud in dev, silent in production.** An object passed to `icon` now renders
+an empty icon badge: the circle paints in the neutral tone with no glyph in it.
+A development build warns once per component and prop:
+
+```
+[frappe-ui] Dialog.icon received a plain object (keys: name, theme). The
+{ name, theme } icon object was removed in 1.0.0. Pass a lucide-* string or a
+component, and set `theme` at the top level. The icon renders empty.
+```
+
+The `theme` inside the old object is ignored, so pass `theme` at the top level.
+The `DialogIcon` type is gone (loud in TypeScript). Coming from v0, the older
+`appearance` key went the same way: map `warning → amber`, `info → blue`,
+`danger → red`, `success → green` and pass it as `theme`.
+
+### `DialogAction` is `ImperativeDialogAction` for `dialog.*`
+
+Two action types existed under one name. The component's `actions` prop takes
+`DialogAction`, whose `onClick` receives `{ close }`. The imperative helpers
+take a different shape, whose `onClick` receives `{ close, setError }` and is
+awaited. That one is exported as `ImperativeDialogAction`.
+
+```ts
+// Before: the name resolved to the component's type, which does not match
+import type { DialogAction } from 'frappe-ui'
+const actions: DialogAction[] = [{ label: 'Delete', onClick: async () => {} }]
+dialog.confirm({ title: 'Delete', actions })
+
+// After
+import type { ImperativeDialogAction } from 'frappe-ui'
+const actions: ImperativeDialogAction[] = [
+  { label: 'Delete', onClick: async () => {} },
+]
+```
+
+Types only; nothing changes at runtime.
 
 ### `theme: 'yellow'` → `theme: 'amber'`
 
@@ -172,7 +223,7 @@ color.
 
 | Before                     | After                     |
 | -------------------------- | ------------------------- |
-| `:icon="{ theme: 'yellow' }"` | `:icon="{ theme: 'amber' }"` |
+| `theme="yellow"`              | `theme="amber"`              |
 | `dialog.confirm({ theme: 'yellow' })` | `dialog.confirm({ theme: 'amber' })` |
 
 This is a **silent break** for JavaScript call sites: `yellow` is no longer a
@@ -273,6 +324,68 @@ Behavior changes that apply even if you don't touch your code:
   `getDaysInMonth`, `isLeapYear`) are deleted — the import fails. Nothing in
   the picker components used them; drop the import.
 
+### `TimePicker` emits: `open`, `close`, `input-invalid`, `invalid-change` {#timepicker-emits}
+
+`update:open` carries the open and the close, with the state in the payload.
+`input-invalid` and `invalid-change` are gone with nothing in their place: typed
+text that does not parse reverts to the last valid value, which the user sees.
+
+```vue
+<!-- Before -->
+<TimePicker
+  @open="onOpen"
+  @close="onClose"
+  @input-invalid="showHint"
+  @invalid-change="setInvalid"
+/>
+
+<!-- After -->
+<TimePicker @update:open="(open) => (open ? onOpen() : onClose())" />
+```
+
+A leftover `@open` is silent in JavaScript: it lands as an inert listener and
+never fires. TypeScript reports it, because `TimePickerEmits` is narrowed (and
+now exported). `Variant` on `TimePicker` is an alias of the shared
+`InputVariant`, not a second scale.
+
+### `DateRangePicker` `v-model` is `DateRangeValue`
+
+The prop was `string[]`, which let a one-element array in. Both sides are
+`DateRangeValue` now — `[from, to]` or `[]`. TypeScript reports a `ref<string[]>`
+bound to the model.
+
+```ts
+// Before
+const range = ref<string[]>([])
+
+// After
+import type { DateRangeValue } from 'frappe-ui'
+const range = ref<DateRangeValue>([])
+```
+
+### Picker template refs, styling hooks and ARIA
+
+All four pickers expose `{ open, close, focus }`. They used to expose `open()`
+alone. `open()` is a no-op while the picker is disabled.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+const picker = useTemplateRef('picker')
+</script>
+
+<template>
+  <DatePicker ref="picker" v-model="date" />
+  <Button label="Pick a date" @click="picker?.open()" />
+</template>
+```
+
+Additive, and worth knowing if you style or test the pickers: the chevron
+carries `data-slot="chevron"`, and the `<input>` carries `role="combobox"`,
+`aria-haspopup` (`dialog` on the date pickers, `listbox` on `TimePicker`) and
+`aria-expanded`. The `<input>` keeps `data-slot="control"` — `trigger` names the
+selection family's box only.
+
 ## MonthPicker
 
 `MonthPicker` is deleted — the import fails.
@@ -330,6 +443,37 @@ Option values are `string | number` everywhere. `Select` no longer accepts
 | -------------------------------- | -------------------------------------------------------- |
 | `displayValue` trigger slot prop | `selectedOption.label`                                   |
 | `data-slot="trigger-value"`      | nothing — it marked an invisible element used to measure |
+| empty value `undefined`          | `null`, the same as `Combobox`                           |
+
+The empty value is a **silent break**. `Select` emitted `undefined` and
+`Combobox` emitted `null`, so one single-value family had two answers for
+"nothing selected". Both are `null` now.
+
+```js
+// Before
+watch(value, (v) => {
+  if (v === undefined) reset()
+})
+
+// After
+watch(value, (v) => {
+  if (v === null) reset()
+})
+```
+
+`clear()` and the `clear` slot prop both write `null`. `MultiSelect` keeps `[]`,
+because an empty array is what its consumers iterate. An empty string is still a
+real value, so a "None" row with `value: ''` round-trips unchanged.
+
+Neither component emits anything on mount, so a model that starts as
+`undefined` stays `undefined` until the user picks an option or clears one.
+Both read `undefined` as "nothing selected", so the placeholder renders either
+way. Initialize the ref with `null` if the value is compared, sent to the
+server, or watched for the empty case.
+
+`SelectionOption` and `SelectionGroup` are exported from the root, so a wrapper
+around any of the three can name its option shape once. The component-specific
+types stay.
 
 ### Combobox
 
@@ -929,6 +1073,123 @@ function focusIt() {
 `Duration` already exposed `focus()`; it now takes the same `options?`
 parameter as the rest of the family.
 
+### `focus()` is on every input {#inputs-focus}
+
+`Checkbox`, `Switch`, `Slider`, `RadioGroup`, `Rating` and `FormControl` expose
+`focus()` too. They exposed nothing before. The shape is declared once as the
+exported `InputExposed`, so a generic form can type a ref to a control it did
+not choose:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { InputExposed } from 'frappe-ui'
+
+const fields = ref<InputExposed[]>([])
+function focusField(index: number) {
+  fields.value[index]?.focus()
+}
+</script>
+```
+
+`FormControl` forwards `focus()` to whichever control its `type` resolved to.
+
+Focus lands on the element `Tab` reaches, not on the container: `Slider` focuses
+the thumb, `RadioGroup` the selected option (the first enabled one when nothing
+is selected), and `Rating` the selected star (the first star when the value is
+empty), except in half-star mode where the whole control is one slider.
+
+### Attributes go to the control, `class` and `style` to the wrapper {#inputs-attrs}
+
+An input has a layout wrapper and an interactive element. `class` and `style` go
+to the wrapper; `name`, `aria-*`, `data-*` and listeners go **once** to the
+interactive element.
+
+This is a silent break in four components:
+
+| Component    | Before                                                      |
+| ------------ | ----------------------------------------------------------- |
+| `Checkbox`   | every attribute applied twice — wrapper **and** `<input>`   |
+| `Switch`     | everything went to the wrapper, nothing to the control      |
+| `RadioGroup` | everything went to the wrapper, nothing to the radio group  |
+| `Rating`     | everything went to the wrapper, nothing to the control      |
+
+Two things to audit. A listener now fires once, from the control:
+
+```vue
+<!-- fired twice before; fires once now, and not from the padded row -->
+<Checkbox padded label="Agree" @click="onClick" />
+```
+
+And a CSS rule written against the wrapper no longer matches a `data-*` you
+passed in. Move the selector to the control, or keep using `class`.
+
+`TextInput`, `Textarea`, `Password`, `Select`, `Combobox`, `MultiSelect`,
+`Slider`, `FormControl`, `Duration` and the date pickers already followed the
+rule and are unchanged.
+
+### `Rating` defaults to `size="sm"` {#rating-size}
+
+Every other input defaults to `sm`. A `<Rating>` with no `size` now renders
+smaller. Pass `size="md"` to keep the old size.
+
+```vue
+<!-- Before: rendered md -->
+<Rating v-model="score" />
+
+<!-- After: same pixels -->
+<Rating v-model="score" size="md" />
+```
+
+Silent, and there is no codemod: an omitted prop is not a token a codemod can
+find, and rewriting every `<Rating>` in an app to pin the old default would be
+worse than the change. Three v1 app sites were already passing a smaller size by
+hand.
+
+### `Duration` forwards `#label` and `#description`
+
+They used to be dropped. If you passed either slot to `Duration`, it renders now
+— check that it does not duplicate a `label` or `description` prop you also set.
+
+### `FormControl` no longer forwards `variant` to a checkbox
+
+A checkbox draws no container surface, so it has no `variant`. The forwarded
+value used to land on the `<input>` as a stray `variant="subtle"` attribute. The
+`type` routes are unchanged: `date` renders `DatePicker`, `time` renders
+`TimePicker`, and a native date field is `<TextInput type="date" />`.
+
+### `data-slot="label"` on `FormLabel`
+
+`FormLabel` carries the hook `InputLabel` already rendered, so one selector
+reaches every label in the library. Additive.
+
+### Input types the root publishes {#input-types}
+
+Additive, except for two removals:
+
+- `InputExposed` — the template-ref shape every input implements.
+- `PickerExposed` — `InputExposed` plus `open` and `close`, for the four
+  pickers.
+- `SelectionOption`, `SelectionGroup` — the shared option shapes.
+- `Dayjs` — the date pickers hand one to `formatter`, `disabledDate` and the
+  setter slot props, so the type has to be nameable.
+- `DateRangeValue` — both sides of `DateRangePicker`'s `v-model`.
+- `InputLabelingProps` — for a wrapper that forwards `label` / `description` /
+  `error` / `required`.
+
+`DatePicker`'s barrel lists its public types instead of re-exporting the whole
+module. `DatePickerViewMode` and `DatePickerDateObj` were calendar internals the
+wildcard published; they leave the root and the import fails. Nothing replaces
+them — they described the calendar's internal state.
+
+`SelectEmits`, `ComboboxEmits` and `MultiSelectEmits` no longer redeclare the
+model events `defineModel` already declares, and `RadioGroupEmits` says
+`RadioValue | undefined`, which is what an unbound group starts at. A handler
+typed against the old shapes still compiles. Type a model handler off the model
+instead: `(value: SelectOptionValue | null | undefined) => void`. The extra
+`undefined` is there because the model prop is optional; neither `Select` nor
+`Combobox` ever emits it.
+
 ## FileUploader
 
 `FileUploader` reached structural bar in `1.0.0`: TypeScript, flat props, and
@@ -958,6 +1219,81 @@ If your app serves an uploaded file with no session — an avatar in an email
 digest, an image embedded on a public page — audit every call that omits
 `private` / `is_private` before upgrading. A file that flips to private
 returns `403` to a session-less request instead of the image.
+
+### Uploads reject an `UploadError` {#uploads-reject-an-uploaderror}
+
+`upload`, `useFileUpload` and `FileUploadHandler` reject with an exported
+`UploadError` instead of a plain `Error`, and `state.error` is typed with it.
+Branch on `error.kind` (`'file-size' | 'network' | 'server' | 'abort'`) rather
+than matching the message text. A server failure also carries `status`,
+`messages` (the parsed server messages) and the raw `response`.
+
+```js
+import { UploadError, upload } from 'frappe-ui'
+
+try {
+  await upload(file, { doctype: 'ToDo', docname: 'TODO-0001' })
+} catch (error) {
+  if (error instanceof UploadError && error.kind === 'file-size') {
+    showError('That file is too large.')
+  } else {
+    throw error
+  }
+}
+```
+
+Existing `catch` blocks keep working: `UploadError` is an `Error` and its
+`message` is unchanged. `FileUploadHandler` no longer leaves the promise open
+when the request aborts; it rejects like the other two paths.
+
+#### An aborted upload rejects an `UploadError`, not a `DOMException` {#upload-abort-error}
+
+Silent break. `upload()` and `useFileUpload()` take an `options.signal`. When
+that signal fired, they rejected with `new DOMException('Upload cancelled',
+'AbortError')`. They now reject an `UploadError` with `kind: 'abort'`. The
+message text is the same, but `error.name` is `'UploadError'` instead of
+`'AbortError'`, and `error instanceof DOMException` is false. A `catch` block
+that tells a cancel from a failure by either of those stops matching, so a
+cancelled upload is reported to the user as an error.
+
+```js
+// Before
+try {
+  await upload(file, { signal: controller.signal })
+} catch (error) {
+  if (error.name === 'AbortError') return // user cancelled
+  showError(error.message)
+}
+
+// After
+import { UploadError } from 'frappe-ui'
+
+try {
+  await upload(file, { signal: controller.signal })
+} catch (error) {
+  if (error instanceof UploadError && error.kind === 'abort') return
+  showError(error.message)
+}
+```
+
+### The `is_private` upload option is removed
+
+`useFileUpload` and `FileUploadHandler` took `private` and `is_private` for the
+same decision, with `private` winning. Only `private` is left, and it is a
+boolean. This is loud in TypeScript and silent in JavaScript, where an
+`is_private` you still pass is ignored and the upload falls back to the private
+default — so a public upload written as `{ is_private: 0 }` becomes private.
+
+```js
+// Before
+await upload(file, { is_private: 0 })
+
+// After
+await upload(file, { private: false })
+```
+
+The `is_private` field on the uploaded file record the server returns is
+unchanged.
 
 ### `uploadArgs` → flat props
 
@@ -1666,6 +2002,91 @@ save, debounce or guard the call site yourself. `data` and `error` follow the
 same newest-wins rule as `useDoctype` above, and `loading` stays `true` until
 every submit settles.
 
+## Data fetching: writes reject, reads resolve {#data-fetching-writes-reject}
+
+One rule now covers every composable: **a write rejects when it fails, a read
+resolves.** A failed write must not let its caller run the success path. A
+failed read leaves the last value on screen and reports through `error`.
+
+| Call                                                     | Before                   | After                  |
+| -------------------------------------------------------- | ------------------------ | ---------------------- |
+| `useCall` `submit()`                                     | resolved with `null`     | rejects                |
+| `useDoc` `setValue.submit()`, `delete.submit()`          | resolved with `null`     | rejects                |
+| a `useDoc` `methods:` member's `submit()`                | resolved with `null`     | rejects                |
+| `execute()` / `fetch()` / `reload()` in every composable | resolved                 | resolves (no change)   |
+
+`useDoctype` and `useList` write methods already rejected — see
+[the section above](#data-fetching-usedoctype-uselist). This change brings the
+rest in line with them.
+
+**Silent.** Nothing fails to build. The success path simply stops running, and
+an unawaited `submit()` becomes an unhandled rejection.
+
+```js
+// Before: the failure fell through to the success path
+const doc = await todo.setValue.submit({ status: 'Closed' })
+if (!doc) return showError(todo.setValue.error)
+toast.success('Saved')
+
+// After
+try {
+  await todo.setValue.submit({ status: 'Closed' })
+  toast.success('Saved')
+} catch (error) {
+  showError(error)
+}
+```
+
+Grep for `.submit(` and check each site. Three patterns need work:
+
+- `if (!result)` after a `submit()` — `null` is a valid response now, not a
+  failure. Move the handling into a `catch`.
+- a `submit()` that is not awaited — add `.catch(...)` or it reaches
+  `window.onunhandledrejection`.
+- a `submit()` inside a `Promise.all` — one rejection now fails the whole
+  batch. Use `Promise.allSettled` if that is not what you want.
+
+`error` and `onError` are unchanged: both still fire, whether the call rejects
+or not. Reads need no change.
+
+### `useDoc` method names cannot shadow the object's own members
+
+A `methods:` key that is already a member of what `useDoc` returns (`doc`,
+`error`, `loading`, `reload`, `setValue`, `delete`, and the rest) used to
+overwrite it silently. It throws at setup now and names the collision. Rename
+the key and keep the server method name:
+
+```js
+// Before: `reload` silently replaced the document's own reload()
+useDoc({ doctype: 'ToDo', name, methods: { reload: 'reload_items' } })
+
+// After
+useDoc({
+  doctype: 'ToDo',
+  name,
+  methods: { reloadItems: { name: 'reload_items' } },
+})
+```
+
+### `useNewDoc` and `useDoc` methods take fewer options
+
+An insert and a document method are writes that run when you call `submit()`.
+`immediate` and `refetch` are fixed to `false` for both, and `useNewDoc` no
+longer accepts `refetch`, `cacheKey` or `staleOnError` at all.
+
+This is loud in TypeScript and silent in JavaScript, where the values are now
+ignored. `refetch: true` was the dangerous one: it re-sent the insert on every
+keystroke in the form bound to `doc`.
+
+```js
+// Before: an insert per edit to the draft
+const draft = useNewDoc('ToDo', { description: '' }, { refetch: true })
+
+// After
+const draft = useNewDoc('ToDo', { description: '' })
+await draft.submit()
+```
+
 ## Data fetching (exports)
 
 `useFrappeFetch` is no longer exported. It is the raw `createFetch` instance
@@ -1710,6 +2131,95 @@ try {
   }
 }
 ```
+
+### `FrappeRequestError` is `FrappeResourceError` {#errors-renamed}
+
+The error type the resource layer raises is renamed. Both errors in the library
+are server responses, so request versus response named nothing; the name says
+the layer that raises it now. Only apps on a v1 beta are affected: v0 never
+exported either name.
+
+| Before                | After                 | Raised by                                                            |
+| --------------------- | --------------------- | -------------------------------------------------------------------- |
+| `FrappeRequestError`  | `FrappeResourceError` | `call`, `frappeRequest`, `createResource` and the other v1 resources |
+| `FrappeResponseError` | `FrappeResponseError` | `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            |
+
+`FrappeResponseError` does not change. The fields on both are the same as
+before, and there is no alias: importing the old name is a build failure.
+
+```ts
+// Before
+import type { FrappeRequestError } from 'frappe-ui'
+
+// After
+import type { FrappeResourceError } from 'frappe-ui'
+```
+
+The two narrow differently, which also does not change. `FrappeResponseError` is
+a class, so `instanceof` works. `FrappeResourceError` is a type over a plain
+`new Error(...)` with fields assigned, so there is no value to test: read the
+field you need.
+
+```ts
+try {
+  await call('frappe.client.get_list', { doctype: 'ToDo' })
+} catch (error) {
+  const e = error as FrappeResourceError
+  if (e.exc_type === 'PermissionError') showPermissionMessage()
+  else throw error
+}
+```
+
+### `FrappeUIError` is removed
+
+The exported error type for an input's `error` prop is gone. The prop is typed
+where it is declared, and a wrapper that forwards it reads the type from
+`InputLabelingProps`, which the root now exports.
+
+```ts
+// Before
+import type { FrappeUIError } from 'frappe-ui'
+defineProps<{ error?: string | FrappeUIError }>()
+
+// After
+import type { InputLabelingProps } from 'frappe-ui'
+defineProps<{ error?: InputLabelingProps['error'] }>()
+```
+
+The prop also accepts a `string[]` now, which is what `ErrorMessage.message`
+takes. One array renders one line per entry, and an empty array means no
+error. Everything that worked before still works: a string, or an `Error`
+that may carry `messages`.
+
+### Upload exports
+
+`UploadError` is exported. Every upload failure rejects with it, and
+`useFileUpload`'s `state.error` holds it — see
+[FileUploader](#uploads-reject-an-uploaderror).
+
+`isPrivateUpload` and the `UploadPrivacy` type are removed. They existed for
+the `is_private` upload option, which is gone; pass `private` instead. This is
+a build failure at the import. No app used either name.
+
+### A destination prop is typed `RouteDestination`
+
+Every prop that takes a router destination (`Button.route`, the Sidebar,
+Tabs, Breadcrumbs and Menu item types, and the rest) is typed
+`RouteDestination` instead of vue-router's `RouteLocationRaw`. The root exports
+`RouteDestination` and `RouteLocationObject`.
+
+The accepted values do not change: a path string, or an object with `name` /
+`params` / `path` / `query` / `hash`. The owned type exists so the generated
+API docs print a readable name rather than vue-router's minified internal
+ones.
+
+### Resource and editor barrels name their exports
+
+`frappe-ui/resources` and `frappe-ui/editor` used `export *` from their
+implementation files, which published every name those files happened to
+export. Both now list what they publish. The names apps import are all still
+there; an import of an internal helper that was never meant to be public fails
+at build time.
 
 ## Tree
 
@@ -2538,6 +3048,23 @@ The plugin used to install the v1 resources Options API mixin by default, so
 app.use(FrappeUI, { resources: true })
 ```
 
+`resources` is a boolean. It used to be typed as an object of resource
+definitions, and the plugin never read what was in it — only whether it was
+set. Passing an object is a type error now, and still installs the mixin at
+runtime, so nothing breaks while you fix it:
+
+```js
+// Before
+app.use(FrappeUI, { resources: { todos: { url: '…' } } })
+
+// After
+app.use(FrappeUI, { resources: true })
+```
+
+`npx -p frappe-ui data-v1 ./src` makes that edit. It rewrites only an object
+literal written inline at the `app.use(FrappeUI, …)` call, and reports any site
+it will not touch (a spread, a computed key, a variable) instead of guessing.
+
 Nothing changes for Composition API code — `createResource`,
 `createListResource` and `createDocumentResource` never went through the plugin.
 You need the option only if you declare a `resources: { … }` block in a
@@ -2595,7 +3122,7 @@ Button), so the light/dark composable gives the word back.
 | `currentTheme`      | `colorScheme` — read-only                        |
 | `setTheme(t)`       | `setColorScheme(t)`                              |
 | `toggleTheme()`     | `toggleColorScheme()`                            |
-| `getSystemTheme()`  | `resolvedColorScheme()`, imported from the root  |
+| `getSystemTheme()`  | `useColorScheme().resolvedColorScheme` — a ref    |
 | `initializeTheme()` | removed — `useColorScheme()` initializes itself  |
 
 The read-only `colorScheme` is the quiet part. The ref was only a third of the
@@ -3296,6 +3823,155 @@ any test or stylesheet that selects `[role='note']`.
 `import { matchesShortcut } from 'frappe-ui'` fails at the build. Its own doc
 comment said it was exported for unit tests only. Register a shortcut with
 `useKeyboardShortcut` instead of matching a `KeyboardEvent` by hand.
+
+## App shells and ScrollArea {#shells}
+
+### `ScrollBar` is no longer exported {#scrollbar-removed}
+
+`import { ScrollBar } from 'frappe-ui'` fails at the build. There is no
+replacement. `ScrollArea` draws its own scrollbars, and `ScrollBar` only ever
+worked inside reka-ui's `ScrollAreaRoot`, which frappe-ui does not export. Use
+`ScrollArea` with `orientation`:
+
+```vue
+<!-- After -->
+<ScrollArea orientation="both">
+  <WideTable />
+</ScrollArea>
+```
+
+`orientation="both"` renders one scrollbar per axis. `ScrollBarProps` is gone
+with the component.
+
+### `useSheetDrag` is no longer exported {#usesheetdrag-removed}
+
+`useSheetDrag`, `UseSheetDrag` and `UseSheetDragOptions` leave the root. Both
+imports fail loudly. `BottomSheet` still uses the composable internally and is
+unchanged, so an app that renders `BottomSheet` has nothing to do. There is no
+standalone replacement in `1.0.0`: the drag thresholds are fixed constants tuned
+for that one surface. It can come back when a second surface needs it.
+
+### `useShellScrolled` needs a `threshold` {#useshellscrolled-threshold}
+
+`threshold` is now required, in pixels.
+
+```js
+// Before — 200px by default
+const scrolled = useShellScrolled()
+
+// After
+const scrolled = useShellScrolled({ threshold: 12 })
+```
+
+A call with no argument is a **type error**, so the build catches it. At runtime
+it warns in development and stays `false`. The old 200px default suited a long
+document and nothing else: a header border that appears 200px late reads as a
+bug rather than as a missing argument.
+
+### A page reads the shell it is inside {#shell-ownership}
+
+No syntax changes. `useShellScrolled()`, and a `PageHeader` teleporting to its
+target, now resolve the **nearest enclosing shell** first, and fall back to the
+`shellScrollContainer` registry only when there is no shell above them.
+
+This only changes what you see while two shells are mounted at once — a
+desktop-to-mobile swap mid-transition, or a test that mounts both. Before, both
+answers came from the registry, which returns the shell that mounted most
+recently, so a header could teleport into the wrong frame. `shellScrollContainer`
+itself is unchanged and is still the way to reach the scroll element from a
+router `scrollBehavior` or any other code outside a component.
+
+### `DesktopShell` takes `:scroll="false"` {#desktopshell-scroll}
+
+New prop, default `true`, nothing to migrate. Pass `false` for a layout whose
+panes own their own overflow, instead of fighting the shell's page scroll:
+
+```vue
+<!-- Before -->
+<DesktopShell>
+  <div class="absolute inset-0 flex h-[calc(100vh-3rem)]">…</div>
+</DesktopShell>
+
+<!-- After -->
+<DesktopShell :scroll="false">
+  <div class="flex min-h-0 flex-1">…</div>
+</DesktopShell>
+```
+
+With `:scroll="false"` the shell has no scroll element, so
+`shellScrollContainer` is `null` and `useShellScrolled()` stays `false`. Read
+the pane's own `ScrollArea` instead.
+
+### Shell slot names stay split {#shell-slots}
+
+Nothing to change. `DesktopShell` keeps `#rail` and `#sidebar`; `MobileShell`
+keeps `#nav`. The names describe regions, not components, and the two frames
+have different regions, so there is no shared name to move to.
+
+## Color scheme: `resolvedColorScheme` is a ref {#resolved-color-scheme}
+
+`import { resolvedColorScheme } from 'frappe-ui'` fails. The same name is now a
+read-only ref on `useColorScheme()`, so there is no call to make.
+
+```js
+// Before
+import { resolvedColorScheme } from 'frappe-ui'
+const scheme = ref(resolvedColorScheme())
+const observer = new MutationObserver(() => {
+  scheme.value = resolvedColorScheme()
+})
+observer.observe(document.documentElement, { attributeFilter: ['data-theme'] })
+
+// After
+import { useColorScheme } from 'frappe-ui'
+const { resolvedColorScheme } = useColorScheme()
+// resolvedColorScheme.value is 'light' or 'dark'
+```
+
+The observer goes with it. The ref follows `setColorScheme` and follows the OS
+setting while the preference is `system`, which is what the observer was
+watching for. `ColorScheme` and `ResolvedColorScheme` stay exported.
+
+The rename `resolvedColorScheme` to `getResolvedColorScheme` is internal: the
+function is no longer part of the package surface at all. No codemod can do this
+one, because a call has to become a `.value` read.
+
+Call `useResolvedColorScheme()` instead when the page you are migrating does
+not own `data-theme`: an app that applies its own theme before paint, or a page
+inside a host shell. It is the same value and it writes nothing, where
+`useColorScheme()` applies the saved preference on its first call and would
+make a second writer of the attribute.
+
+```js
+import { useResolvedColorScheme } from 'frappe-ui'
+const scheme = useResolvedColorScheme()
+// scheme.value is 'light' or 'dark'
+```
+
+### `toggleColorScheme()` moves off what is on screen {#toggle-color-scheme}
+
+`toggleColorScheme()` used to read the stored preference. Under `system` on a
+dark OS it wrote `dark`, which the page was already painted in, so the first
+press did nothing visible. It now reads the resolved value, so one press always
+moves: `system` on a dark OS goes to `light`.
+
+Apps that wrote their own toggle for this reason can drop it.
+
+## `--mobile-header-height` is removed {#mobile-header-height}
+
+`PageHeaderMobile` is 52px tall, fixed. It no longer reads
+`--mobile-header-height`, so setting that variable does nothing to the library
+header. Delete the declaration, or keep it if your own CSS reads it — the name
+is yours now.
+
+There is no replacement hook. A header of another height is `PageHeaderBase`
+with your own class:
+
+```vue
+<PageHeaderBase class="flex h-16 items-center border-b px-3">
+  <MyToolbar />
+</PageHeaderBase>
+```
 
 ## PageHeaderMobile family: slot names
 

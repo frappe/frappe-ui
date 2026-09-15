@@ -99,6 +99,10 @@ import type {
   DateRangeValue,
 } from './types'
 import type { DateRangeCalendarExposed } from './calendarTypes'
+import type {
+  PickerExposed,
+  PickerShellExposed,
+} from '../shared/picker/types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
   modelValue: () => [],
@@ -117,7 +121,7 @@ defineSlots<DateRangePickerSlots>()
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
-const shellRef = ref<{ open: () => void } | null>(null)
+const shellRef = ref<PickerShellExposed | null>(null)
 const isOpen = ref(false)
 
 watch(
@@ -151,8 +155,12 @@ function onShellRequestFocus() {
   nextTick(() => calendarRef.value?.focus())
 }
 
-defineExpose({
+// ADR-0012: a picker owns its trigger, so `open` and `close` earn a place on
+// the ref. `focus` is the method every input guarantees (INP-Q5).
+defineExpose<PickerExposed>({
   open: () => shellRef.value?.open(),
+  close: () => shellRef.value?.close(),
+  focus: (options?: FocusOptions) => shellRef.value?.focus(options),
 })
 
 // ── Positioning / keepOpen ────────────────────────────────────────────────────

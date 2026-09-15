@@ -52,6 +52,9 @@ const local = dayjsLocal('2024-01-15 10:00:00') // 10:00 UTC, shown in the brows
 </script>
 ```
 
+`dayjs` and `dayjsLocal` are the two public helpers. The opposite conversion,
+`dayjsSystem`, is internal to the library and is not exported.
+
 ## call
 
 Calls a whitelisted method on the server and resolves to its `message`. The
@@ -84,9 +87,9 @@ await call(
 </script>
 ```
 
-The rejection is a `FrappeRequestError`: an `Error` with `exc_type`, `exc`,
-`status`, `response`, and `messages` (the server's `_server_messages`, already
-parsed).
+The rejection is a `FrappeResourceError`: a plain `Error` carrying `exc_type`,
+`exc`, `status`, `response`, and `messages` (the server's `_server_messages`,
+already parsed).
 
 ## frappeRequest
 
@@ -109,7 +112,7 @@ on `GET`, JSON body otherwise), `headers`, `signal`, `credentials`,
 `responseType` (`'json'` or `'response'`), and the `onError` /
 `onServerMessages` callbacks. It sets the `Accept`, `Content-Type`,
 `X-Frappe-Site-Name` and CSRF headers, unwraps `message` from the response, and
-throws a `FrappeRequestError` on failure.
+throws a `FrappeResourceError` on failure.
 
 ### Configuration
 
@@ -138,6 +141,27 @@ to `credentials: 'include'`, so the server has to send
 authenticate with a token header instead, pass `credentials: 'omit'` per
 request.
 
+## FrappeResourceError {#frapperequesterror}
+
+The error [`call`](#call), [`frappeRequest`](#frapperequest) and the v1
+[resources](../data-fetching/resource.md) raise. A plain `Error` carrying the
+transport fields of the failed request: `messages` (the server messages array),
+`exc_type`, `exc`, `status` and the raw `response`. The name says the layer that
+raises it: both errors are server responses, so request versus response named
+nothing. The [migration guide](../migration.md#errors-renamed) has the rename.
+
+It is a TypeScript `interface`, not a class: the resource layer throws
+`new Error(...)` and assigns those fields. So it types a caught error
+(`catch (error) { const e = error as FrappeResourceError }` — a catch clause
+variable cannot carry a type annotation) but
+`error instanceof FrappeResourceError` does not compile, and `error.name` is
+`"Error"`. Test a field instead, for example `e.exc_type === 'PermissionError'`.
+
+It stays separate from `FrappeResponseError` below, which the v2 composables
+raise and which is a real class.
+[The error table](../data-fetching/use-call.md#which-error-class) says which API
+raises which.
+
 ## FrappeResponseError
 
 The error [`useCall`](../data-fetching/use-call.md),
@@ -165,9 +189,10 @@ const rename = useCall({
 
 ## FrappeUI plugin
 
-An optional Vue plugin with one option. It installs the v1 resources Options API
-mixin — the `resources: { … }` component option, `this.$resources`, and the
-`$getResource` / `$getDoc` / `$getListResource` / `$refetchResource` helpers.
+An optional Vue plugin with one boolean option. It installs the v1 resources
+Options API mixin — the `resources: { … }` component option, `this.$resources`,
+and the `$getResource` / `$getDoc` / `$getListResource` / `$refetchResource`
+helpers.
 
 ```js
 // main.js
@@ -177,6 +202,12 @@ import { FrappeUI } from 'frappe-ui'
 const app = createApp(App)
 app.use(FrappeUI, { resources: true })
 ```
+
+`resources` is a boolean: `true` installs the mixin, `false` or no options
+leaves it out. Earlier versions typed it as an object and never read what was
+in it. The object form is a type error now. It still installs the mixin at
+runtime, so an app that misses the change keeps working.
+`npx -p frappe-ui data-v1 ./src` rewrites it.
 
 You do not need it otherwise. Components, the imperative `dialog` and `toast`
 APIs, and every Composition API data helper work without installing anything —
@@ -190,9 +221,9 @@ without the [`FileUploader`](../components/fileuploader) component — reach
 for them for a custom trigger, multi-file upload, or a fully headless flow.
 `FileUploader` is the ready-made UI built on top of `FileUploadHandler`.
 
-Uploads default to **private** — an upload with no stated `private` /
-`is_private` resolves to `is_private=1`. Pass `private: false` only for
-intentionally public files.
+Uploads default to **private** — an upload with no stated `private` resolves to
+`is_private=1` on the server. Pass `private: false` only for intentionally
+public files.
 
 ### useFileUpload
 
@@ -213,17 +244,17 @@ async function onFile(file) {
 ```
 
 `upload(file, options)` resets state, uploads the file, and resolves to the
-uploaded file's record (or rejects with an `Error`). `state` — and the
-`isUploading` / `progress` / `error` / `result` computed refs read from it —
-update as the request runs. `reset()` clears `state` back to its initial
-values without uploading anything.
+uploaded file's record (or rejects with an [`UploadError`](#uploaderror)).
+`state` — and the `isUploading` / `progress` / `error` / `result` computed refs
+read from it — update as the request runs. `error` is an `UploadError` or
+`null`. `reset()` clears `state` back to its initial values without uploading
+anything.
 
 `options` (`UploadOptions`):
 
 | Option                       | Type                                       | Notes                                                |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------------------ |
 | `private`                     | `boolean`                                    | Defaults to `true`. Pass `false` for public files.     |
-| `is_private`                  | `boolean \| 0 \| 1 \| '0' \| '1'`             | Alternate spelling; `private` wins if both are set.    |
 | `folder`                      | `string`                                     | Defaults to `Home`.                                    |
 | `doctype` / `docname` / `fieldname` | `string`                               | Attaches the upload to a document field.               |
 | `file_url`                    | `string`                                     | Replaces the file at an existing URL.                  |
@@ -254,7 +285,38 @@ const result = await handler.upload(file, { doctype: 'ToDo' })
 ```
 
 `upload(file, options)` takes the same `UploadOptions` as `useFileUpload` and
-resolves to the uploaded file's record, rejecting on failure. The events fire
-alongside the promise, for callers that want to hook progress without
-awaiting: `start` (request began), `progress` (`{ uploaded, total }`), `error`
-(the raw server error, if any), `finish` (upload succeeded).
+resolves to the uploaded file's record, rejecting with an
+[`UploadError`](#uploaderror) on failure. The events fire alongside the promise,
+for callers that want to hook progress without awaiting: `start` (request
+began), `progress` (`{ uploaded, total }`), `error` (the server's error text, if
+any), `finish` (upload succeeded).
+
+## UploadError
+
+Every upload failure rejects with this class: `upload`, `useFileUpload` and
+`FileUploadHandler` all raise it, and `useFileUpload`'s `state.error` holds it.
+
+| Field      | Type                                              | Notes                                                        |
+| ---------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| `kind`     | `'file-size' \| 'network' \| 'server' \| 'abort'` | What failed. Branch on this instead of matching the message. |
+| `status`   | `number \| undefined`                             | The HTTP status, for `kind: 'server'`.                       |
+| `messages` | `string[]`                                        | The server messages, parsed. Empty for the other kinds.      |
+| `response` | `unknown`                                         | The parsed response body, for `kind: 'server'`.              |
+
+```vue
+<script setup>
+import { upload, UploadError } from 'frappe-ui'
+
+async function send(file) {
+  try {
+    return await upload(file, { doctype: 'ToDo', docname: 'TODO-0001' })
+  } catch (error) {
+    if (error instanceof UploadError && error.kind === 'file-size') {
+      toast.error('That file is too large.')
+      return
+    }
+    throw error
+  }
+}
+</script>
+```

@@ -410,9 +410,9 @@ Same four issues as the DatePicker family:
 
 `TimePicker.vue` previously hardcoded `FeatherIcon[name=chevron-down]` in the suffix slot. This is now a `<span class="lucide-chevron-down">` via the shared Tailwind icon plugin. No further action.
 
-### `readonly` is a new prop
+### `allowCustom` became `typeable`
 
-Unlike the DatePicker family, `TimePicker` did not previously expose `readonly`. The default trigger already wires `:readonly="!props.allowCustom"`. v1 adds a proper `readonly` prop and computes the underlying readonly state as `props.readonly || props.allowCustom === false` so existing call sites keep working under the deprecation window.
+`TimePicker` never exposed `readonly`; the default trigger wired `:readonly="!props.allowCustom"`. v1 ships `typeable` instead, with the same meaning in the positive direction: `typeable: false` blocks typing and still opens the popover.
 
 ### Composables stay inlined (for now)
 
@@ -424,56 +424,49 @@ The DatePicker family extracted `usePopoverPositioning`, `useKeepOpen`, and `use
 type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 type PopoverAlign = 'start' | 'center' | 'end'
 
-interface TimePickerProps {
+/** Alias of the shared `InputVariant`, under the picker's own name. */
+type Variant = InputVariant
+
+interface TimePickerProps extends InputLabelingProps {
   // Value
-  modelValue?: string
-  /** @deprecated use modelValue */
-  value?: string
+  modelValue?: string      // canonical `HH:mm` or `HH:mm:ss`
 
   // Positioning
   side?: PopoverSide       // default: 'bottom'
   align?: PopoverAlign     // default: 'start'
   offset?: number          // default: 4
-  /** @deprecated use side + align */
-  placement?: TimePickerPlacement
 
   // Display
   placeholder?: string
-  variant?: 'outline' | 'subtle'
-  use12Hour?: boolean
+  variant?: Variant
+  size?: InputSize
+  format?: string          // dayjs display format, default: 'HH:mm'
 
   // Interaction
-  readonly?: boolean       // default: false — prevents typing; popover still opens
+  typeable?: boolean       // default: true — false blocks typing, popover still opens
   disabled?: boolean
   keepOpen?: boolean       // default: false (closes after selection)
-  /** @deprecated use keepOpen (inverse) */
-  autoClose?: boolean
+  open?: boolean           // controlled, pairs with `update:open`
+  openOnFocus?: boolean    // default: false
+  openOnClick?: boolean    // default: true
 
   // Options / constraints
   interval?: number
   options?: Array<{ value: string; label?: string }>
   min?: string             // HH:mm[:ss] — minimum selectable time
   max?: string             // HH:mm[:ss] — maximum selectable time
-  scrollMode?: 'center' | 'start' | 'nearest'
-
-  // Deprecated
-  /** @deprecated use readonly */
-  allowCustom?: boolean
-  /** @deprecated use `min` */
-  minTime?: string
-  /** @deprecated use `max` */
-  maxTime?: string
 }
 
 type TimePickerEmits = {
   (e: 'update:modelValue', value: string): void
+  (e: 'update:open', value: boolean): void
   (e: 'change', value: string): void
-  (e: 'input-invalid', input: string): void
-  (e: 'invalid-change', invalid: boolean): void
-  (e: 'open'): void
-  (e: 'close'): void
 }
 ```
+
+`open` and `close` are gone: `update:open` carries both, with the state in the
+payload. `input-invalid` and `invalid-change` are gone too. Typed text that does
+not parse reverts to the last valid value, which the user sees (INP-Q3).
 
 Slots: `prefix`, `suffix` (`suffix` receives `{ open, disabled, setOpen, close }`).
 

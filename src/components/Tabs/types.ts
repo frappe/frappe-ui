@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 
 export type TabValue = string | number
 export type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
@@ -63,7 +63,7 @@ export interface TabTriggerProps {
   disabled?: boolean
 
   /** Renders the trigger as a RouterLink. See route mode in the spec. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 }
 
 export type TabTriggerSlotProps = { active: boolean; disabled: boolean }
@@ -79,7 +79,7 @@ export interface TabItem {
   icon?: TabIcon
   iconLeft?: TabIcon
   disabled?: boolean
-  route?: RouteLocationRaw
+  route?: RouteDestination
   /** Item renders only while this returns true. */
   condition?: () => boolean
   /**

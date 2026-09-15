@@ -16,9 +16,15 @@ stay fixed to the edges.
 
 ## Scroll container
 
-Like `DesktopShell`, the content area registers into the scroll-container
-registry, so `shellScrollContainer` and `useShellScrolled()` resolve it — a
-tapped-active tab or a router `scrollBehavior` can drive it with no app-owned
-global.
+Like `DesktopShell`, the content area is handed to everything the shell renders,
+and registered into the shared registry, so `shellScrollContainer` and
+`useShellScrolled({ threshold })` resolve it — a tapped-active tab or a router
+`scrollBehavior` can drive it with no app-owned global.
+
+## Slot names
+
+`MobileShell` has `#nav`; `DesktopShell` has `#rail` and `#sidebar`. The names
+describe regions, not components. See
+[`DesktopShell`](/docs/components/desktopshell) for why they differ.
 
 <!-- @include: ./MobileShell.api.md -->

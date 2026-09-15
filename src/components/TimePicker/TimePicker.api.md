@@ -23,7 +23,7 @@
     name: 'options',
     description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
-    type: '{ value: string; label?: string; }[] | undefined',
+    type: '{ value: string; label?: string; }[]',
     default: '[]'
   },
   {
@@ -55,7 +55,7 @@
     name: 'variant',
     description: 'Visual style variant.',
     required: false,
-    type: 'Variant',
+    type: 'InputVariant',
     default: '"subtle" as Variant'
   },
   {
@@ -136,9 +136,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -179,11 +179,6 @@
 
   const emitsData = [
   {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
-  {
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
@@ -194,24 +189,9 @@
     type: '[value: string]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
-  },
-  {
-    name: 'input-invalid',
-    description: '',
-    type: '[input: string]'
-  },
-  {
-    name: 'invalid-change',
-    description: '',
-    type: '[invalid: boolean]'
   }
 ]
 </script>

@@ -60,13 +60,17 @@ The preset **replaces** `colors`, `screens`, `borderRadius`, `boxShadow` and `fo
 The scheme lives in `data-theme` on `<html>` (`"light"` or `"dark"`). Semantic tokens flip automatically; reach for a `dark:` variant only for a value with no semantic token.
 
 ```js
-import { useColorScheme, resolvedColorScheme } from 'frappe-ui'
+import { useColorScheme } from 'frappe-ui'
 // module-level singleton every caller shares
-const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
-// colorScheme      Readonly<Ref<'light' | 'dark' | 'system'>>
-// setColorScheme   (scheme) => void — writes data-theme, persists
-resolvedColorScheme() // 'light' | 'dark', with 'system' already resolved
+const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
+  useColorScheme()
+// colorScheme          Readonly<Ref<'light' | 'dark' | 'system'>> — the preference
+// resolvedColorScheme  Readonly<Ref<'light' | 'dark'>> — what the page shows
+// setColorScheme       (scheme) => void — writes data-theme, persists
+// toggleColorScheme    () => void — switches to the opposite of what is on screen
 ```
+
+When something else owns `data-theme` (an app that applies its own theme before paint, a page inside a host shell), read it instead of writing it: `useResolvedColorScheme()` returns the same `Readonly<Ref<'light' | 'dark'>>`, follows the attribute, and writes nothing.
 
 ### Styling past the prop surface
 
@@ -227,7 +231,7 @@ dialog.prompt({
 
 ## Input controls
 
-Every input control **except `FileUploader`** accepts the shared labeling contract `InputLabelingProps`: `label`, `description`, `error` (`string | Error`), `required`, `id`. `Radio` is the one partial: it takes `label`, `description` and `id`, while `required` and `error` sit on `RadioGroup`.
+Every input control **except `FileUploader`** accepts the shared labeling contract `InputLabelingProps`: `label`, `description`, `error` (`string`, `string[]`, or an `Error`), `required`, `id`. `Radio` is the one partial: it takes `label`, `description` and `id`, while `required` and `error` sit on `RadioGroup`.
 
 Text-family sizes are `xs | sm | md | lg` (`InputSize`) — fixed single-line heights of 24 / 28 / 32 / 40px — and variants `subtle | outline | ghost` (`InputVariant`). There is no `xl`. Binary controls (`Checkbox`, `Radio`, `Switch`) take size `xs | sm | md` (`ToggleSize`). Labels, descriptions and `Textarea` text are a fixed 13px at every size; `FormLabel` has no `size` prop.
 

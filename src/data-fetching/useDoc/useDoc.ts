@@ -28,10 +28,32 @@ type TransformMethods<T> = {
 
 interface DocMethodOption<T = any> extends Omit<
   UseCallOptions<T>,
-  'url' | 'baseUrl'
+  'url' | 'baseUrl' | 'immediate' | 'refetch'
 > {
   name: string
 }
+
+/**
+ * Members `useDoc()` returns itself. A `methods:` entry is spread on top of
+ * them, so a colliding name would replace a built-in and break every caller
+ * that reads it — silently, because the object still has the key.
+ */
+const RESERVED_DOC_MEMBERS = new Set([
+  'doc',
+  'error',
+  'loading',
+  'aborted',
+  'canAbort',
+  'isFetching',
+  'isFinished',
+  'execute',
+  'fetch',
+  'reload',
+  'abort',
+  'setValue',
+  'delete',
+  'onSuccess',
+])
 
 interface UseDocOptions<TDoc> {
   doctype: string
@@ -116,6 +138,13 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   let docMethods: Record<string, ReturnType<typeof useIsolatedCall>> = {}
   if (methods) {
     for (let key in methods) {
+      if (RESERVED_DOC_MEMBERS.has(key)) {
+        throw new Error(
+          `[frappe-ui] useDoc({ doctype: '${doctype}' }) declares a method named "${key}", ` +
+            'which is already a member of the object useDoc returns. Rename the method ' +
+            `key — the document method it calls keeps its own name through \`{ ${key}: { name: '…' } }\`.`,
+        )
+      }
       let option: DocMethodOption
       if (typeof methods[key] === 'string') {
         option = {
@@ -126,11 +155,15 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       }
 
       let callOptions: UseCallOptions = {
-        immediate: false,
-        refetch: false,
         method: 'POST',
         ...option,
         baseUrl,
+        // After the spread, not before it: a document method fires on
+        // `submit()` only. With `refetch: true` the params watcher re-sends
+        // the method on every edit to the document and `submit()` sends
+        // nothing at all (DAT-Q6).
+        immediate: false,
+        refetch: false,
         url: computed(
           () =>
             `/api/v2/document/${doctype}/${toValue(name)}/method/${option.name}`,

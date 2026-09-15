@@ -80,7 +80,7 @@
     name: 'route',
     description: 'Navigation target. When set the row\'s main area renders as a router link;\notherwise it renders as a button. A click still invokes `onClick`.',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   },
   {
     name: 'href',

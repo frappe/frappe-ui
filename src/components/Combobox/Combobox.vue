@@ -87,7 +87,12 @@ const slots = useReactiveSlots<ComboboxSlots>()
 // through the proxy.
 const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
-const model = defineModel<ComboboxOptionValue | null>({ default: null })
+// No `default`. A `defineModel` default stays inside the component, so a
+// `v-model` holding `undefined` would leave the parent at `undefined` while
+// this component read `null`. `currentValue` reads both as the empty value,
+// `clear()` emits `null`, and nothing is emitted on mount (INP-Q2). Select
+// does the same.
+const model = defineModel<ComboboxOptionValue | null>()
 // Documented on `open` in `./types.ts`. A JSDoc block here would be appended
 // to that description by `propsgen`, not replace it.
 const open = defineModel<boolean>('open', { default: false })
@@ -158,31 +163,35 @@ const {
   toExternal: toExternalSelectableValue,
 } = useEmptyValueMapping(allSelectableOptions, EMPTY_SELECTABLE_VALUE_PREFIX)
 
+/** The model with `undefined` read as the empty value (INP-Q2). */
+const currentValue = computed<ComboboxOptionValue | null>(
+  () => model.value ?? null,
+)
+
 const internalModelValue = computed(() => {
-  if (model.value === null || model.value === undefined) return undefined
+  if (currentValue.value === null) return undefined
 
   const selectableOption = allSelectableOptions.value.find(
-    (option) => option.value === model.value,
+    (option) => option.value === currentValue.value,
   )
 
   return selectableOption
     ? getSelectableInternalValue(selectableOption)
-    : model.value
+    : currentValue.value
 })
 
 const selectedOption = computed<ComboboxSelectableOption | null>(() => {
-  if (model.value === null || model.value === undefined) return null
+  if (currentValue.value === null) return null
   return (
-    allSelectableOptions.value.find((option) => option.value === model.value) ??
-    null
+    allSelectableOptions.value.find(
+      (option) => option.value === currentValue.value,
+    ) ?? null
   )
 })
 
 const displayValue = computed(() => {
   if (selectedOption.value) return selectedOption.value.label
-  return model.value === null || model.value === undefined
-    ? ''
-    : String(model.value)
+  return currentValue.value === null ? '' : String(currentValue.value)
 })
 
 const triggerClasses = computed(() => [
@@ -587,6 +596,7 @@ defineSlots<ComboboxSlots>()
 
               <slot name="suffix" v-bind="controlSlotProps">
                 <span
+                  data-slot="chevron"
                   :class="[
                     'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
                     open && 'rotate-180',
@@ -740,7 +750,7 @@ defineSlots<ComboboxSlots>()
                   :groups="filteredGroups"
                   :size="size"
                   :query="typedQuery"
-                  :model="model ?? null"
+                  :model="currentValue"
                   :loading="loading"
                   :empty-text="emptyText"
                   :show-empty="showEmpty"

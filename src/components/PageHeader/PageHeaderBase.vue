@@ -1,6 +1,6 @@
 <template>
   <span ref="anchor" hidden />
-  <Teleport defer :to="activeTarget ?? 'body'" :disabled="!activeTarget">
+  <Teleport defer :to="target ?? 'body'" :disabled="!target">
     <header v-bind="$attrs" @click="handleHeaderClick">
       <slot />
     </header>
@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { activeTarget } from './target'
+import { computed, inject, useTemplateRef } from 'vue'
+import { activeTarget, pageHeaderTargetKey } from './target'
 
 defineOptions({
   inheritAttrs: false,
@@ -24,6 +24,11 @@ defineSlots<{
 // declaration site — inside the page's scroll container — so the shell can
 // find that container without being told about it.
 const anchor = useTemplateRef<HTMLElement>('anchor')
+
+// The nearest shell wins; the registry is the fallback for a header that is not
+// a descendant of any shell (SHELL-Q3).
+const provided = inject(pageHeaderTargetKey, null)
+const target = computed(() => provided?.value ?? activeTarget.value)
 
 function handleHeaderClick(event: MouseEvent) {
   const el = event.target as HTMLElement | null

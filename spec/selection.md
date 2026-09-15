@@ -49,7 +49,10 @@ option can carry the whole record it came from.
 
 Values are `string | number`. An empty string is a real value, not "nothing" —
 use it for a "None" or "Any" row and it round-trips correctly. Nothing selected
-is `undefined` on `Select`, `null` on `Combobox`, and `[]` on `MultiSelect`.
+is `null` on `Select` and `Combobox`, and `[]` on `MultiSelect` (INP-Q2).
+`Select` emitted `undefined` before 1.0.0, so one single-value family had two
+empty values; the array component keeps `[]` because an empty array is what its
+consumers iterate.
 
 `icon` takes a Vue component, or a string. Strings starting with `lucide-`
 render as that Lucide icon (`icon: 'lucide-trash-2'`), sized and colored by the
@@ -247,6 +250,14 @@ Not every component renders every part. `Select` has no search box, so it emits
 no `search`, `input`, `loading`, `group`, or `group-label`. `item-list-row` and
 `item-prefix` come from `ItemListRow`, which the pickers render inside rather
 than own.
+
+`trigger` belongs to this family only (INP-Q10). `Select`, `Combobox` and
+`MultiSelect` render a box that shows the selection and opens the popover, and
+that box is the `trigger`. Every other input, the date and time pickers
+included, marks its main interactive element `control` instead: a picker's
+`<input>` is something you type into, so it is a control that also opens a
+panel, not a trigger. The same rule keeps the two names from both meaning "the
+thing you click".
 
 The scrollable list itself carries no marker on any of the three. To change its
 height or scrollbar you currently have to reach through `content-body`.

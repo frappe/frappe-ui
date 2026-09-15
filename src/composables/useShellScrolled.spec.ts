@@ -8,6 +8,7 @@ import {
   defineComponent,
   nextTick,
   onMounted,
+  provide,
   ref,
   watch,
   type ComputedRef,
@@ -17,6 +18,7 @@ import {
   registerShellScrollContainer,
   scrollShellToTop,
   shellScrollContainer,
+  shellScrollElementKey,
   unregisterShellScrollContainer,
   useShellScrolled,
 } from './useShellScrolled'
@@ -35,7 +37,7 @@ function setScrollTop(el: HTMLElement, top: number) {
 }
 
 /** Mount a component that calls `useShellScrolled` and hand back its result. */
-function mountScrolled(options?: { threshold?: number }) {
+function mountScrolled(options: { threshold: number } = { threshold: 100 }) {
   const host = document.createElement('div')
   document.body.appendChild(host)
   let scrolled!: ComputedRef<boolean>
@@ -58,7 +60,7 @@ function mountScrolled(options?: { threshold?: number }) {
 function mountShell(setup: () => void) {
   const Page = defineComponent({
     setup() {
-      useShellScrolled()
+      useShellScrolled({ threshold: 100 })
     },
     template: '<div/>',
   })
@@ -157,20 +159,63 @@ describe('useShellScrolled', () => {
     unmount()
   })
 
-  it('defaults the threshold to 200', async () => {
+  // SHELL-Q10: there is no default. 200px suited a long document and nothing
+  // else, and a border that appears 200px late reads as a bug.
+  it('warns and stays false when threshold is missing', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const el = makeScroller()
     register(el)
-    const { scrolled, unmount } = mountScrolled()
 
-    setScrollTop(el, 199)
+    const { scrolled, unmount } = mountScrolled(
+      {} as unknown as { threshold: number },
+    )
+
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn.mock.calls[0][0]).toMatch(/requires a threshold/)
+
+    setScrollTop(el, 10000)
     await nextTick()
     expect(scrolled().value).toBe(false)
 
-    setScrollTop(el, 201)
-    await nextTick()
-    expect(scrolled().value).toBe(true)
-
     unmount()
+    warn.mockRestore()
+  })
+
+  it('reads the nearest shell before the registry', async () => {
+    // A stale registry entry from a shell that has not torn down yet must not
+    // win over the shell the page is actually inside (SHELL-Q3).
+    const stale = makeScroller()
+    register(stale)
+    const nearest = makeScroller()
+
+    let scrolled!: ComputedRef<boolean>
+    const Page = defineComponent({
+      setup() {
+        scrolled = useShellScrolled({ threshold: 100 })
+      },
+      template: '<div/>',
+    })
+    const Shell = defineComponent({
+      components: { Page },
+      setup() {
+        provide(shellScrollElementKey, ref(nearest))
+      },
+      template: '<div><Page /></div>',
+    })
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const app = createApp(Shell)
+    app.mount(host)
+
+    setScrollTop(stale, 300)
+    await nextTick()
+    expect(scrolled.value).toBe(false)
+
+    setScrollTop(nearest, 300)
+    await nextTick()
+    expect(scrolled.value).toBe(true)
+
+    app.unmount()
   })
 
   it('re-binds to the new container across a layout swap', async () => {

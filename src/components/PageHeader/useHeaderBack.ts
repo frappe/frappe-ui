@@ -1,4 +1,5 @@
-import type { RouteLocationRaw, Router } from 'vue-router'
+import type { Router } from 'vue-router'
+import { toRouteLocationRaw, type RouteDestination } from '../shared/route'
 
 /**
  * How long to wait for `router.back()` to resolve before assuming it went nowhere.
@@ -66,7 +67,7 @@ function whenNavigationSettles(router: Router): Promise<void> {
  */
 export async function navigateBack(
   router: Router,
-  fallbackRoute?: RouteLocationRaw,
+  fallbackRoute?: RouteDestination,
 ): Promise<void> {
   if (!fallbackRoute) {
     router.back()
@@ -74,7 +75,7 @@ export async function navigateBack(
   }
 
   if (!hasAppHistory(router)) {
-    await router.push(fallbackRoute)
+    await router.push(toRouteLocationRaw(fallbackRoute))
     return
   }
 
@@ -84,6 +85,6 @@ export async function navigateBack(
   await settled
 
   if (router.currentRoute.value.fullPath === origin) {
-    await router.push(fallbackRoute)
+    await router.push(toRouteLocationRaw(fallbackRoute))
   }
 }

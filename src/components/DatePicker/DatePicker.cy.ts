@@ -411,4 +411,78 @@ describe('DatePicker', () => {
       )
     })
   })
+
+  // INP-Q5 / INP-Q10 (ADR-0012).
+  describe('template ref and picker hooks', () => {
+    it('open() and close() drive the panel', () => {
+      let vm: any
+      cy.mount(DatePicker).then((mounted: any) => {
+        vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+      })
+
+      cy.get('[role=dialog]').should('not.exist')
+      cy.then(() => vm?.open?.())
+      cy.get('[role=dialog]').should('exist')
+      cy.then(() => vm?.close?.())
+      cy.get('[role=dialog]').should('not.exist')
+    })
+
+    it('open() is a no-op while disabled', () => {
+      let vm: any
+      cy.mount(DatePicker, { props: { disabled: true } }).then(
+        (mounted: any) => {
+          vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        },
+      )
+
+      cy.then(() => vm?.open?.())
+      cy.get('[role=dialog]').should('not.exist')
+    })
+
+    it('focus() focuses the trigger input', () => {
+      cy.mount(DatePicker).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('input').should('be.focused')
+    })
+
+    it('marks the input and the chevron with the picker hooks', () => {
+      cy.mount(DatePicker)
+
+      cy.get('input')
+        .should('have.attr', 'data-slot', 'control')
+        .and('have.attr', 'role', 'combobox')
+        .and('have.attr', 'aria-haspopup', 'dialog')
+        .and('have.attr', 'aria-expanded', 'false')
+      cy.get('[data-slot="chevron"]').should('exist')
+      // INP-Q10: a picker's input is a `control`, not a `trigger`. The
+      // `trigger` marker belongs to Popover's own wrapper, so assert the input
+      // itself never carries it.
+      cy.get('input').should('not.have.attr', 'data-slot', 'trigger')
+
+      cy.get('input').click()
+      cy.get('input').should('have.attr', 'aria-expanded', 'true')
+    })
+
+    it('points aria-controls at the open panel', () => {
+      cy.mount(DatePicker)
+
+      cy.get('input').should('not.have.attr', 'aria-controls')
+
+      cy.get('input').click()
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          // The id names the popover's own `role="dialog"` element. No wrapper
+          // node sits between the panel shell and the calendar.
+          cy.get(`#${panelId}`)
+            .should('have.attr', 'role', 'dialog')
+            .find('[aria-label="Today"]')
+            .should('exist')
+        })
+    })
+  })
 })

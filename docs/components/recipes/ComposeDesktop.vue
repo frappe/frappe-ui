@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useTextareaAutosize } from '@vueuse/core'
 import {
   Breadcrumbs,
@@ -7,7 +7,7 @@ import {
   DesktopShell,
   PageHeader,
   PageHeaderBase,
-  resolvedColorScheme,
+  useResolvedColorScheme,
 } from 'frappe-ui'
 import {
   AlignCenter,
@@ -89,7 +89,13 @@ const screenshot = {
   light: `${import.meta.env.BASE_URL}recipes/compose-dashboard-light.png`,
   dark: `${import.meta.env.BASE_URL}recipes/compose-dashboard-dark.png`,
 }
-const scheme = ref(resolvedColorScheme())
+// The docs shell owns `data-theme` on this iframe's <html> (see
+// `.vitepress/theme/Layout.vue`); it bootstraps before paint and syncs live
+// toggles across frames itself. `useResolvedColorScheme()` is the read-only
+// half of the composable for exactly that case: it follows the attribute and
+// writes neither it nor the `theme` storage key, so the shell stays the one
+// writer. `useColorScheme()` is what an app that owns the scheme calls.
+const scheme = useResolvedColorScheme()
 
 const title = ref('Design review: new onboarding flow')
 const content = ref(`
@@ -130,20 +136,6 @@ const content = ref(`
   <blockquote><p>Let's timebox this to one more revision and ship it behind the <code>new_onboarding</code> flag next week.</p></blockquote>
   <p>Full comments are in the design channel. Add anything I missed before Friday.</p>
 `)
-
-// The docs shell sets `data-theme` on this demo's own <html>, in the iframe as
-// well, so the attribute is what the recipe follows.
-let themeObserver
-onMounted(() => {
-  themeObserver = new MutationObserver(() => {
-    scheme.value = resolvedColorScheme()
-  })
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme'],
-  })
-})
-onBeforeUnmount(() => themeObserver?.disconnect())
 
 // Only this screenshot's path is rewritten, so the draft's text survives the
 // swap and an image the reader inserted is left alone. Re-setting the content

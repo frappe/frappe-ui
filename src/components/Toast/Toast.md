@@ -12,6 +12,34 @@ Toasts come in four visual types — `message`, `info`, `success`, `warning`, an
 
 <ComponentPreview name="Toast-Examples" />
 
+## Duration
+
+A toast dismisses itself after **4000ms**. Pass `duration` to change it for one
+toast, or `duration: Infinity` to keep it until the user acts.
+
+```js
+toast.success('Saved')
+toast.error('Could not save', { duration: 10000 })
+toast.info('Uploading…', { duration: Infinity })
+```
+
+`ToastProvider` takes no props: position, styling and the default duration are
+fixed, so every app's toasts look and behave the same.
+
+## Types
+
+`ToastOptions` is the options object every `toast.*` call takes, `ToastAction`
+is its `action` / `cancel` button, and `ToastId` is what a call returns — pass
+it back as `id` to update that toast in place.
+
+```ts
+import { toast, type ToastId, type ToastOptions } from 'frappe-ui'
+
+function notifySaved(options?: ToastOptions): ToastId {
+  return toast.success('Saved', options)
+}
+```
+
 ## With action
 
 Add an `action` to give the user a way to respond. Combine with `duration: Infinity` for messages that should wait for an explicit decision.
