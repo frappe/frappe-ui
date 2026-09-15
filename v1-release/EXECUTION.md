@@ -22,8 +22,8 @@ exactly three sequential PRs:
    `2b990bdb7de35616a4e600e2222a733c51aba5d3`. 45 QIDs, one codemod
    (`data-v1`). Awaiting review and merge.
 3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18. Implemented
-   on `v1/rc-batch-3`, stacked on `v1/rc-batch-2` at
-   `8e056a42b97a1614ac3a76db7d8393ae70fef194`. 17 QIDs, one codemod
+   on `v1/rc-batch-3`, rebased onto `v1/rc-batch-2` at
+   `44fa233031e3f1ddb1087dbcb41c07c3ca4938fd`. 17 QIDs, one codemod
    (`packaging-v1`). Awaiting review and merge, after batch 2.
 
 Finish and merge each batch before starting the next. Do not split a batch to
