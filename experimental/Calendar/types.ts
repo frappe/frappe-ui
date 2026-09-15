@@ -71,7 +71,7 @@ export interface CalendarRowTag {
   theme?: BadgeProps['theme']
 }
 
-/** What `#event-description` and `#event-suffix` receive. */
+/** What `#event-description`, `#event-suffix` and `#event-participant` receive. */
 export interface CalendarRowSlotProps {
   calendarEvent: CalendarEvent
   /** The day the row belongs to; a multi-day event has one row per day. */

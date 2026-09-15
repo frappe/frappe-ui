@@ -109,6 +109,9 @@
       <template #event-suffix="slotProps">
         <slot name="event-suffix" v-bind="slotProps" />
       </template>
+      <template #event-participant="slotProps">
+        <slot name="event-participant" v-bind="slotProps" />
+      </template>
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />
       </template>
@@ -127,6 +130,9 @@
       </template>
       <template #event-suffix="slotProps">
         <slot name="event-suffix" v-bind="slotProps" />
+      </template>
+      <template #event-participant="slotProps">
+        <slot name="event-participant" v-bind="slotProps" />
       </template>
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />

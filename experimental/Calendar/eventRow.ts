@@ -86,11 +86,13 @@ export function daySpan(event: CalendarEvent, date: Date): string | null {
  * of a stay it is, when the event covers more than one. A consumer's `#event-description` slot
  * receives this as its default, so filling the slot extends this rather than
  * replacing knowledge the row already had.
+ *
+ * Not who is coming: `participant` is a count, and the row sets it at its far
+ * end, where the counts of a day's rows line up under each other.
  */
 export function rowDescription(event: CalendarEvent, date: Date): string {
   const parts: string[] = []
   if (event.venue) parts.push(String(event.venue))
-  if (event.participant) parts.push(String(event.participant))
   const span = daySpan(event, date)
   if (span) parts.push(span)
   return parts.join(' · ')
@@ -139,9 +141,9 @@ export function hasEnded(event: CalendarEvent, date: Date, now: Date): boolean {
 /**
  * Where the event stands against the clock: under way, or near enough to start
  * to be worth saying. One tag, never two — under way and about to start are the
- * same kind of fact, the thing on the day that wants you now — and it reads at
- * the row's far end, where the card aligns it with the tags of every other row
- * rather than pushing one row's time out of the column the rest share.
+ * same kind of fact, the thing on the day that wants you now — and it reads
+ * right after what the row says about the event, as one more thing said about
+ * it, rather than pushing one row's time out of the column the rest share.
  *
  * Two states, not a countdown: blue while it runs, amber in the half hour
  * before it. An hour count would only restate the time written beside it, on

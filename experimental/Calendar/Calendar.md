@@ -108,11 +108,12 @@ Rows have the room a grid pill does not, so they carry a description line and
 tags. `Calendar` fills in the description itself — where the event is, and which
 day of a stay the row is (`Day 2/3`) — and marks a draft by drawing the dot
 beside the title as a ring rather than a disc. Where it stands against the clock
-reads at the row's far end, the one edge a card aligns on other than the time
-column: `Now` in blue while it runs and `Soon` in amber in the hour before it,
-and nothing beyond that: an hour count would only restate the time written
-beside it — and the `#event-description` and `#event-suffix` slots let you say
-the rest.
+reads right after that: `Now` in blue while it runs and `Soon` in amber in the
+hour before it, and nothing beyond that: an hour count would only restate the
+time written beside it. Who is coming (`participant`) stands at the row's far
+end, the one edge a card aligns on other than the time column, so the counts of
+a day's rows line up — and the `#event-description` and `#event-suffix` slots
+let you say the rest.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />
 
@@ -159,12 +160,15 @@ off for that interaction.
 The popover's content is replaceable with the `#event-popover-content` slot,
 which receives `{ calendarEvent, date, isEditMode, close }`.
 
-The Agenda's rows take two more slots: `#event-description` for the line under
-the title, and `#event-suffix` for the tags beside it. Both receive
-`{ calendarEvent, date, description, timing }`, where `description` and `timing`
-are what the calendar derived itself, so you can add to them rather than work
-them out again. The suffix has no tags of its own to hand you — it is yours to
-fill. Grid pills have no room for either and ignore both slots.
+The Agenda's rows take three more slots: `#event-description` for the line
+under the title, `#event-suffix` for the tags beside it, and
+`#event-participant` for the row's far end, where the event's `participant`
+string is shown unless you fill it — with faces in front of the count, say. All
+three receive `{ calendarEvent, date, description, timing }`, where
+`description` and `timing` are what the calendar derived itself, so you can add
+to them rather than work them out again. The suffix has no tags of its own to
+hand you — it is yours to fill. Grid pills have no room for any of these and
+ignore the slots.
 
 `CalendarActiveEvent` exports the ref holding the id of the event whose popover
 is open. Set it from outside to highlight an event, or clear it with an empty

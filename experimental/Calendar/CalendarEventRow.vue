@@ -90,23 +90,50 @@
                consumer's tags go. The one tag a row used to derive said
                "Draft", which the dot beside the title already says by being a
                ring rather than a disc; a word for it as well spent the row's
-               most valuable end on something the row had said at its other. -->
-          <span class="flex shrink-0 items-center gap-1">
+               most valuable end on something the row had said at its other.
+
+               Gone when nothing fills it: the slot is always handed down from
+               the calendar, filled or not, and an empty box is still a flex
+               item — a gap either side of nothing, which put the tag after it
+               twice as far from the description as the description is from
+               the title. -->
+          <span class="flex shrink-0 items-center gap-1 empty:hidden">
             <slot name="event-suffix" v-bind="slotProps" />
           </span>
+          <!-- Where it stands against the clock, right after what the row
+               says about the event: it is one more thing said about it, and
+               read in the same pass. It used to sit beside the time, which is
+               where a reader scanning for "when" is looking — but a card gives
+               the time a fixed column, and a badge in front of it pushes one
+               row's time out of line with the rest. And it used to stand at
+               the row's far end, which put the one word that changes what a
+               reader does the width of the card away from the event it is
+               about. -->
+          <Badge
+            v-if="timing"
+            :theme="timing.theme"
+            :label="timing.label"
+            size="sm"
+            class="shrink-0"
+          />
         </span>
-        <!-- Where it stands against the clock, at the row's far end. It used to
-             sit beside the time, which is where a reader scanning for "when" is
-             looking — but a card gives the time a fixed column, and a badge in
-             front of it pushes one row's time out of line with the rest. The
-             card's right edge is the one other place a row is aligned. -->
-        <Badge
-          v-if="timing"
-          :theme="timing.theme"
-          :label="timing.label"
-          size="sm"
-          class="shrink-0"
-        />
+        <!-- Who is coming, at the row's far end: a count, which is a column's
+             worth of fact rather than a sentence's, and the card's right edge
+             is the one place other than the time column that a row is aligned
+             on — so the counts of a day's rows line up under each other the
+             way their times do. The slot is for a consumer that can put faces
+             to the count — it has the participants, the library has a string —
+             and the count is what it gets when nothing fills it. Centred on
+             the row rather than on its baseline: a face has no baseline, and a
+             stack of them hung off the title's dropped below the line. -->
+        <span
+          v-if="props.event.participant"
+          class="calendar-row-participant flex shrink-0 items-center gap-1.5 self-center whitespace-nowrap text-xs leading-4 text-ink-gray-5"
+        >
+          <slot name="event-participant" v-bind="slotProps">
+            {{ props.event.participant }}
+          </slot>
+        </span>
       </div>
     </template>
 
