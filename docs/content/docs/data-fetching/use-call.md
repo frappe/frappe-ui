@@ -103,27 +103,31 @@ async function rename(name, newName) {
   data, or with `null` when the request fails; read `error` after awaiting it.
 - `submit(params?)` — runs `beforeSubmit`, then sends a request with the given
   params (or the configured `params` if omitted). Resolves with the response
-  data, or **rejects** with the error. It always settles on the request its own
-  params went out on, never on an earlier response. Under `refetch: true` it
-  reuses the request the params change already triggered rather than sending a
-  second one; see [`refetch` and `submit`](#refetch-and-submit).
+  data, or **rejects** with the error. It settles on a request that carried its
+  own params, never on one built before it. Under `refetch: true` that request
+  can be the one the params change already triggered; see
+  [`refetch` and `submit`](#refetch-and-submit).
 - `reset()` — clears any params set by a previous `submit()` call.
 - `abort()` — aborts the in-flight request.
 
 ### `refetch` and `submit` {#refetch-and-submit}
 
 With `refetch: true`, a params change sends a request on its own. `submit()`
-waits for that request instead of adding one, and falls back to sending the
-request itself when the change triggered nothing — a second `submit()` with the
-same object, a `GET` whose params build the same URL, or a `submit()` with no
-argument at all.
+waits for that request instead of adding one, and sends the request itself when
+the change triggered nothing — a second `submit()` with the same object, a `GET`
+whose params build the same URL, or a `submit()` with no argument at all.
+
+Dispatch order decides which request is whose. A request reads the params when
+it is built, so one built after `submit()` assigned its params carries them and
+is that submit's request. One built before is not, even if it is still in
+flight, and the submit sends its own once that one settles.
 
 Two things follow from `refetch` and `submit` sharing one request slot:
 
 - Two `submit()` calls in the same tick become **one** request, carrying the
   params of the later call. Both promises resolve with that one response.
-- A `submit()` made while a request is in flight waits for it, then sends its
-  own.
+- A params change supersedes the request in flight: the new request aborts the
+  old one, and both callers resolve with the superseding response.
 
 Each composable instance has one request slot. When concurrent writes must not
 share one, give each its own `useCall`, or use `useDoc`, whose write methods are

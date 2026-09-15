@@ -1021,11 +1021,12 @@ A failed write must not let its caller fall through to the success path.
   for them.
 - `useCall({ refetch: true }).submit()` obeys the rule too. It used to return
   `undefined` at once and leave the request to the params watcher, so a failed
-  write could neither reject nor resolve with its response. It now waits for
-  that request, and sends the request itself when the params change triggered
-  none — the same object twice, a `GET` whose params build the same URL, or a
-  `submit()` with no argument, which used to send nothing at all. Two submits
-  in the same tick still share one request; the
+  write could neither reject nor resolve with its response. It now settles on a
+  request that carried its params: the one the params change triggered, or one
+  it sends itself when the change triggered none — the same object twice, a
+  `GET` whose params build the same URL, or a `submit()` with no argument, which
+  used to send nothing at all. Two submits in the same tick still share one
+  request, and a params change supersedes the request in flight; the
   [`refetch` and `submit`](/docs/data-fetching/use-call#refetch-and-submit)
   section says what that means.
 

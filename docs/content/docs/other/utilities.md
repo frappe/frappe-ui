@@ -149,10 +149,11 @@ transport fields of the failed request: `messages` (the server messages array),
 `exc_type`, `exc`, `status` and the raw `response`.
 
 It is a TypeScript `interface`, not a class: the request layer throws
-`new Error(...)` and assigns those fields. So it types a catch block
-(`catch (error: FrappeRequestError)`) but `error instanceof FrappeRequestError`
-does not compile, and `error.name` is `"Error"`. Test a field instead, for
-example `error.exc_type === 'PermissionError'`.
+`new Error(...)` and assigns those fields. So it types a caught error
+(`catch (error) { const e = error as FrappeRequestError }` — a catch clause
+variable cannot carry a type annotation) but
+`error instanceof FrappeRequestError` does not compile, and `error.name` is
+`"Error"`. Test a field instead, for example `e.exc_type === 'PermissionError'`.
 
 It stays separate from `FrappeResponseError` below, which the v2 composables
 raise and which is a real class.
