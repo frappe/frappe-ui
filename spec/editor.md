@@ -84,13 +84,16 @@ import {
 
   // Types
   type TiptapEditor,   // the tiptap Editor instance type (the `Editor` name is the component)
-  type JSONContent, type UploadedFile,
+  type JSONContent, type UploadedFile, type UploadFunction,
   type MenuItem, type CommandMenuItem, type MenuGroupItem, type MenuActionContext,
+  type EditorMenuOptions, type EditorMenuPlacement, type EditorMenuShouldShowContext,
   type StarterKitOptions, type CommentKitOptions,
-  type RichTextKitOptions, type InlineKitOptions,
+  type RichTextKitOptions, type InlineKitOptions, type InlineStarterKitOptions,
   type SuggestionExtensionOptions, type SuggestionRange,
   type MentionSuggestionItem, type TagSuggestionItem,
-  type MediaUploadRequestOptions, type MarkdownExtensionOptions,
+  type CommandItem, type SlashCommandsOptions,
+  type MediaUploadRequestOptions, type MediaUploadProgress,
+  type MarkdownExtensionOptions,
 } from 'frappe-ui/editor'
 ```
 
@@ -106,8 +109,8 @@ function useEditor(options: {
   format?: 'html' | 'json' | 'markdown'                     // default 'html', construction-time
   editable?: MaybeRefOrGetter<boolean>                      // reactive — setEditable() on change
   autofocus?: boolean                                       // construction-time
-  uploadFunction?: (file: File) => Promise<UploadedFile>    // construction-time
-  extensions: Extension[]                                   // required, construction-time
+  uploadFunction?: UploadFunction                           // construction-time
+  extensions: Extensions                                    // required, construction-time
   onUpdate?: (editor: Editor) => void
   onFocus?: (editor: Editor, event: FocusEvent) => void
   onBlur?: (editor: Editor, event: FocusEvent) => void
@@ -128,6 +131,8 @@ When the `extensions` list contains an extension named `'collaboration'`, conten
 
 ### Upload plumbing
 
+`uploadFunction` must resolve with an `UploadedFile` carrying a `file_url`; every media node reads it to set `src`. The editor passes a second argument, `MediaUploadRequestOptions` (`signal` and `onProgress`), so a handler can report progress and honor cancellation. A one-parameter handler stays assignable.
+
 When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorage` extension and writes the function to `editor.storage.upload.uploadFunction` after construction. The upload-aware extensions (`Image`, `ImageGroup`, `Video`, `Attachment`, `MediaDrop`, `ContentPaste`) read from that slot. Per-extension override via `Image.configure({ uploadFunction })` wins. `uploadFunction` is shared by several extensions, which is why it's one engine option rather than configured per extension.
 
 ### Naming collision
@@ -143,14 +148,14 @@ const model = defineModel<string | JSONContent | null>()
 
 defineProps<{
   // capability
-  extensions: Extension[]                 // REQUIRED — the complete list; include a kit
+  extensions: Extensions                  // REQUIRED — the complete list; include a kit
 
   // content / behavior knobs (universal, reactive where noted) — no layout props
   format?: 'html' | 'json' | 'markdown'   // default 'html'
   placeholder?: string                    // reactive; threads to the Placeholder extension
   editable?: boolean                      // default true; reactive
   autofocus?: boolean                     // default false
-  uploadFunction?: (file: File) => Promise<UploadedFile>
+  uploadFunction?: UploadFunction
 }>()
 
 defineSlots<{
@@ -215,20 +220,21 @@ RichTextKit.configure({
 })
 ```
 
-- All members are present by default. Data-driven members (`mention`, `tag`, `slashCommands`) are inert until configured with `items`; `false` removes any member.
+- Members are present by default, with two opt-ins: `toc` and `styleClipboard` on `RichTextKit` are `false` until asked for. `mention` and `tag` load their node but stay inert until given `items`. `slashCommands` is different: `{}` shows the built-in command menu, `{ items }` replaces that list, and `false` removes the menu. `false` removes any member.
+- Every member is typed against its extension's real options, so a misspelled key is a compile error. Members whose extension takes no options (`imageViewer`, `emoji`, `toc`) accept `{}` or `false` only.
 - Add your own extension alongside a kit: `[CommentKit, MyExtension]`. To swap a kit member for your own, disable it then add yours: `[CommentKit.configure({ link: false }), MyLink]` (avoids TipTap duplicate-name errors).
 - Kits are the tree-shaking boundary: `CommentKit` never pulls table/toc/slash into the bundle.
 
-**Structure (recommended; confirm in implementation).** Build each kit as `Extension.create({ addExtensions() })` with tiptap's `StarterKit` as the base bundle (paragraph/text, bold/italic/strike/code, lists, blockquote, hr, hardbreak, history). `heading` threads through (`StarterKit.configure({ heading: options.heading })`) and a `starterKit` passthrough option covers other base config or disabling base members. Every non-StarterKit member (`placeholder`, `link`, `image`, `table`, `mention`, …) is a flat option typed `Partial<Opts> | false`. This delivers the flat config above without hand-flattening StarterKit's ~15 sub-members. Note `color` must also register `TextStyle` (its dependency).
+**Structure.** Each kit is an `Extension.create({ addExtensions() })` with the frappe `StarterKit` as the base bundle (paragraph/text, bold/italic/strike/underline, headings, lists, blockquote, hr, hardbreak, history). The frappe `StarterKit` has no `link`, `code`, or `codeBlock` member: the frappe `Link`, `Code`, and `CodeBlock` extensions own those names. `heading` threads through (`StarterKit.configure({ heading: options.heading })`), so the kits' `starterKit` key is typed `Omit<StarterKitOptions, 'heading'>` — setting `heading` there would be overwritten. `InlineKit` has its own `InlineStarterKitOptions`: it registers eight stock extensions or none, so each key accepts `false` only. Every non-StarterKit member (`placeholder`, `link`, `image`, `table`, `mention`, …) is a flat option typed `Partial<Opts> | false`. Note `color` must also register `TextStyle` (its dependency).
 
-Shipped kits (members **tentative** — final lists settle in implementation):
+Shipped kits (frozen at 1.0.0):
 
-| Kit | Members (tentative) | For |
+| Kit | Members | For |
 |---|---|---|
-| `StarterKit` | paragraph, text, bold/italic/strike/code, headings, lists, blockquote, hr, hardbreak, history | the text-editing base |
-| `CommentKit` | StarterKit + Placeholder, Link, Image, ImageGroup, Video, ContentPaste, Emoji, Mention, Tag | comments, chat, replies |
-| `RichTextKit` | CommentKit + Table(+row/cell/header), TaskList/TaskItem, Iframe, Toc, SlashCommands, Color, Highlight, Typography, TextAlign, StyleClipboard | articles, docs, wiki |
-| `InlineKit` | bold/italic/strike/code/link + Placeholder, single-line | rich titles / single-line |
+| `StarterKit` | paragraph, text, bold/italic/strike/underline, headings, lists, blockquote, hr, hardbreak, history. No `code`, `codeBlock`, or `link` | the text-editing base |
+| `CommentKit` | StarterKit + Code, CodeBlock, Placeholder, Link, Image, ImageGroup, ImageViewer, Video, Attachment, MediaDrop, ContentPaste, Emoji, Mention, Tag | comments, chat, replies |
+| `RichTextKit` | CommentKit + Table(+row/cell/header), TaskList/TaskItem, Iframe, SlashCommands, Color, Highlight, Typography, TextAlign. `Toc` and `StyleClipboard` are opt-in | articles, docs, wiki |
+| `InlineKit` | bold/italic/strike/underline/code + Dropcursor, Gapcursor, UndoRedo, Placeholder, Link, single-line document | rich titles / single-line |
 
 ## 4. Building-block components
 
@@ -256,14 +262,26 @@ defineProps<{
 
 ### `EditorBubbleMenu`
 
-Selection-anchored menu. Same `items` shape, plus optional `options` for `shouldShow` / `tippyOptions` (covers the insights site that suppresses the menu inside specific node types).
+Selection-anchored menu. Same `items` shape, plus optional `options`. `EditorMenuOptions` is one owned narrow type shared with `EditorFloatingMenu`: positioning keys plus `shouldShow` (this covers the insights site that suppresses the menu inside specific node types). A key that is not listed is a compile error rather than a setting that does nothing.
 
 ```ts
 defineProps<{
   editor: Editor | null
   items: MenuItem[]
-  options?: { shouldShow?: (...) => boolean; tippyOptions?: Partial<TippyProps> }
+  options?: EditorMenuOptions
 }>()
+
+type EditorMenuOptions = {
+  placement?: EditorMenuPlacement        // 'top' | 'top-start' | … | 'left-end'
+  strategy?: 'absolute' | 'fixed'
+  offset?: number | false
+  flip?: boolean
+  shift?: boolean
+  hide?: boolean
+  inline?: boolean
+  scrollTarget?: HTMLElement | Window
+  shouldShow?: (context: EditorMenuShouldShowContext) => boolean
+}
 ```
 
 ### `EditorFloatingMenu`
@@ -361,6 +379,17 @@ const Extension = SuggestionExtension.configure<TItem>({
   command: (props: { editor: Editor; item: TItem; range: { from: number; to: number } }) => void
 })
 ```
+
+Mention and tag items are `{ label, value }`: `label` is shown and stored on the node, `value` is the stable id. Extra fields are allowed and reach the item slot untouched, so a custom list component can read an avatar or an email off the caller's own object.
+
+```ts
+RichTextKit.configure({
+  mention: { items: [{ label: 'Jane Doe', value: 'jane@example.com' }] },
+  tag: { items: [{ label: 'design', value: 'TAG-0001' }] },
+})
+```
+
+`getMentions()` returns the same `{ label, value }` shape.
 
 Kits are themselves extensions assembled from these. App-specific extensions (gameplan's RichQuote, helpdesk's PreserveVideoControls) are just appended to the array — no special path.
 

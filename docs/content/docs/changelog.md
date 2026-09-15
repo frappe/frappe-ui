@@ -35,6 +35,50 @@ component library. TypeScript reports the removed names, while JavaScript
 consumers should run `editor-v1` for fixed menus and migrate suggestion options
 manually because their replacement depends on the component's role.
 
+### Editor kit, upload and menu options are typed (breaking)
+
+Every kit member, the upload handler and the two floating menus now have a
+named option type. TypeScript reports a misspelled or removed key at the call
+site; the runtime ignores it as it always did.
+
+- **StarterKit drops `code`, `codeBlock` and `link`.** The frappe `Code`,
+  `CodeBlock` and `Link` extensions own those names, so the three keys never
+  reached an extension. Delete them.
+- **A kit's `starterKit` omits `heading`.** The kit's own top-level `heading`
+  member overwrites it. Move the value up one level.
+- **`InlineKit.starterKit` accepts `false` per member only.** InlineKit
+  registers a stock extension or none, so `bold: { HTMLAttributes: … }` was
+  read as "keep bold" and dropped. The new `InlineStarterKitOptions` type says
+  so.
+- **`slashCommands` honours `items`.** `{}` keeps the built-in menu, `false`
+  removes it, and `{ items }` now replaces the built-in list instead of being
+  ignored. `items` takes a ref, a getter or a plain array, and is read on every
+  open.
+- **`toc` and `styleClipboard` are off by default in `RichTextKit`.** Both add
+  UI most editors never expose: a table-of-contents node and a format painter.
+  Add `toc: {}` or `styleClipboard: {}` where you use them. `imageViewer` stays
+  on.
+- **Mention and tag items are `{ label, value }`.** `label` is the text, `value`
+  is the stored id. Extra fields are yours: the list hands your own object to
+  the item slot untouched, so an avatar or a colour still reaches the template.
+  `getMentions()` returns the same two fields.
+- **`UploadedFile.file_url` is required**, and the handler type is exported as
+  `UploadFunction`. A handler may take a second `MediaUploadRequestOptions`
+  argument to report progress; a one-argument handler still compiles.
+- **`EditorBubbleMenu` and `EditorFloatingMenu` share `EditorMenuOptions`.**
+  `placement`, `strategy`, `offset`, `flip`, `shift`, `hide`, `inline`,
+  `scrollTarget` and `shouldShow` are the keys that are read. Anything else was
+  already dropped and is now a compile error.
+- `Editor.extensions` and `useEditor({ extensions })` take TipTap's
+  `Extensions`, so a nested array of extensions is accepted.
+
+New exports: `UploadFunction`, `MediaUploadProgress`, `InlineStarterKitOptions`,
+`CommandItem`, `SlashCommandsOptions`, `EditorMenuOptions`,
+`EditorMenuPlacement`, `EditorMenuShouldShowContext`.
+
+The [editor migration guide](/docs/migration#editor-option-types) lists the
+per-file edits.
+
 ### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
 
 The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`

@@ -2714,6 +2714,112 @@ npx --package frappe-ui@beta editor-v1 .
 <EditorFixedMenu size="sm" :items="items" />
 ```
 
+### Editor option types
+
+Kit members, the upload handler and the two floating menus are typed. Run
+`yarn type-check` (or `vue-tsc`) after upgrading: every edit below is reported
+at the call site.
+
+**Make every constructed `UploadedFile` include `file_url`.** The type is
+exported, and so is the handler type:
+
+```ts
+// Before
+const uploadFunction = async (file: File) => {
+  const doc = await upload(file)
+  return doc // any shape
+}
+// After
+import type { UploadFunction } from 'frappe-ui/editor'
+const uploadFunction: UploadFunction = async (file, options) => {
+  const doc = await upload(file, { onProgress: options?.onProgress })
+  return doc // must carry file_url; extra fields pass through
+}
+```
+
+The second argument is optional. A one-argument handler still compiles.
+
+**Remove dead `code`, `codeBlock` and `link` keys from StarterKit options.**
+The frappe extensions of those names are separate members, so the keys did
+nothing:
+
+```ts
+// Before
+StarterKit.configure({ link: false, codeBlock: false })
+// After
+StarterKit
+```
+
+Inside a kit, move `heading` out of `starterKit`:
+
+```ts
+// Before
+RichTextKit.configure({ starterKit: { heading: { levels: [2, 3] } } })
+// After
+RichTextKit.configure({ heading: { levels: [2, 3] } })
+```
+
+`InlineKit.starterKit` takes `false` per member only:
+
+```ts
+// Before
+InlineKit.configure({ starterKit: { code: { HTMLAttributes: {} } } })
+// After
+InlineKit.configure({ starterKit: { code: false } })
+```
+
+**Add StyleClipboard and Toc explicitly when an editor needs them.**
+`RichTextKit` no longer registers them by default:
+
+```ts
+// Before
+RichTextKit
+// After (only if you call insertTableOfContentsNode or read
+// editor.storage.styleClipboard)
+RichTextKit.configure({ toc: {}, styleClipboard: {} })
+```
+
+`imageViewer` is unchanged and stays on.
+
+**A custom slash-command list now replaces the built-in menu.** `items` was
+accepted and ignored before, so check what you pass:
+
+```ts
+RichTextKit.configure({
+  slashCommands: {}, // built-in menu
+  // slashCommands: { items: myCommands },  // replaces the built-in list
+  // slashCommands: false,                  // no slash menu
+})
+```
+
+**Check Bubble and Floating menu option objects against `EditorMenuOptions`.**
+The read keys are `placement`, `strategy`, `offset`, `flip`, `shift`, `hide`,
+`inline`, `scrollTarget` and `shouldShow`. Anything else was already dropped
+before it reached the positioner and is now a compile error:
+
+```vue
+<!-- Before -->
+<EditorBubbleMenu :options="{ placement: 'top', updateDelay: 250 }" />
+<!-- After -->
+<EditorBubbleMenu :options="{ placement: 'top' }" />
+```
+
+**Update mention and tag data to include `label` and `value`; use the original
+slot item for extra fields.** `label` is the text, `value` is the stored id:
+
+```ts
+// Before
+const mentions = users.map((u) => ({ id: u.name, label: u.full_name, email: u.email }))
+// After
+const mentions = users.map((u) => ({ value: u.name, label: u.full_name, email: u.email }))
+```
+
+The list no longer rewrites your objects, so the item slot receives the one you
+supplied, `email` and all. `getMentions()` returns `{ label, value }` — read
+`value` where you read `id`.
+
+Tags are the same, with `value` optional so a newly typed tag has none yet.
+
 ### Gotchas
 
 - **Tailwind must scan frappe-ui's editor source.** Menu icons are literal

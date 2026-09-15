@@ -435,9 +435,9 @@ export default plugin(
           },
           // prose-v3: zero paragraph margins, user controls spacing with Enter
           // all spacing on 8px grid: 4, 8, 16, 24, 32px
-          // empty <p> = 14px × 1.7 line-height ≈ 23.8px (the user's spacing unit)
+          // empty <p> = 15px × 1.7 line-height ≈ 25.5px (the user's spacing unit)
           //
-          // Base font-size is customizable via `--prose-font-size` (default 14px).
+          // Base font-size is customizable via `--prose-font-size` (default 15px).
           // Every child size is `em`-relative to this base, so overriding the
           // variable rescales the whole editor proportionally — headings, lists,
           // code — while line-height (unitless) and em letter-spacing scale too.
