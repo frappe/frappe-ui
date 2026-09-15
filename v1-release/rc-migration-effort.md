@@ -10,7 +10,7 @@ rg -n -P -U \
   --glob '!.git/**' --glob '!**/frappe-ui/**' PATTERN ROOTS
 ```
 
-The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations are GP, Frappe, CRM, HD, Builder, Books, and Wiki. Counts include tests and app-local documentation. LIST-Q8 additionally measures Suite, which is outside the original report columns; its 3 sites are called out in that row. Identical edits are consolidated under one row to prevent double counting. This applies to X1/H07, X3/the HoverCard mechanical line, X6/the two barrel lines, and H10/the related L-root cleanup. The L-root batch is split by break type because its changes have different tiers.
+The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations are GP, Frappe, CRM, HD, Builder, Books, Wiki, and Suite (which contains Drive). Counts include tests and app-local documentation. The original report measured no Suite tree, so the Suite column reads `-` for not measured on every row except the ones a later pass measured: LIST-Q8 and the batch 2 rows. Each row's app columns sum to its `Total v1-app sites`, with one carried-forward exception listed at the end. Identical edits are consolidated under one row to prevent double counting. This applies to X1/H07, X3/the HoverCard mechanical line, X6/the two barrel lines, and H10/the related L-root cleanup. The L-root batch is split by break type because its changes have different tiers.
 
 ## Summary
 
@@ -93,97 +93,97 @@ The own-tree column covers `src/`, `docs/`, and `spec/`. The app abbreviations a
 
 ## T0: no consumer migration
 
-| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | v0 | Own |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| X2 | Only explicitly annotated Menu handler parameters can fail type-check. None exist. | `onClick\s*:\s*\([^)]*:\s*PointerEvent` in Menu option files | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| X6 + A barrels | Internal barrel declarations change. | `export\s+\*\s+from\s+['"](?:\./)?(?:local|realtime|extensions|menu)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| H06 | This adds a shared type. | imports of `SelectOption|ComboboxOption|MultiSelectOption|SelectionOption|SelectionGroup` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| H15 | This corrects an empty exported props type. Nothing to edit: `scroll` already worked, and Suite Drive already passes it. Measured 2026-09-15: GP `DesktopLayout.vue:5`, Suite Drive `DriveLayout.vue:10` (Suite has no column here). | `\bDesktopShellProps\b|<DesktopShell\b` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| H19 | Existing `#hint` content starts rendering. No caller edit is needed. | Progress blocks containing `#hint|v-slot:hint|slot="hint"` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| H22 | Code already uses 4000ms. The change is docs and additive types. | `\b(?:ExternalToast|ToastOptions)\b|duration\s*:\s*5000` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| H23 | This widens the accepted extensions type. | imports of `Extension|Extensions` tied to `<Editor>` or `useEditor(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
-| H25 | One-argument callbacks remain valid. | `\buploadFunction\s*[:=]|\bMediaUploadProgress\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| H30 | The public composable and its types are removed; no app imports them. | imports of `useVirtualRows|UseVirtualRows(?:Options|Return)?` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| H33 | Only package metadata and docs change. | `\btailwindcss\b` in this package's manifests and contract docs | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| H34 | Only package metadata changes. | `@floating-ui/vue` in this package | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| L-root emit types | No consumer imports the affected emit types. | imports from `frappe-ui` containing `ComboboxEmits|MultiSelectEmits|RadioGroupEmits` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| L-root model types | No consumer imports the affected model types. | imports containing `TextInputProps|DateRangePickerProps|DateRangeValue|FrappeUIError` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| L-root owned types | No consumer imports the leaked third-party types from frappe-ui. | imports containing `Dayjs|RouteLocationRaw`; own search is limited to public signatures | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| L-root additive gaps | These APIs and hooks are additive. | `Rating|Tooltip|PopoverSlots|HoverCardSlots|RatingSlots|ButtonSlots|BadgeSlots|portalTo|PageHeader|SidebarRailItemBadge` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 20 |
-| M-base/A Divider action | No consumer imports `DividerAction`. | imports from `frappe-ui` containing `DividerAction` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-base/A Badge label | No object-valued Badge label exists. | `(?s)<Badge\b(?:(?!>).)*?(?::|v-bind:)?\blabel\s*=\s*['"]?\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-dialog/A Alert icon | No boolean-valued Alert icon exists. | Alert tags with bare `icon` or `:icon="true|false"` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| B1 | Option callbacks are additive. | `\buseDoc\s*\(|\.onSuccess\s*\(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| B3 | Object overloads are additive. | `\b(?:useDoctype|useNewDoc)\s*\(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| B8 | No SidebarHeader menu handler has an explicit incompatible event annotation. | SidebarHeader `menu-items` sites, then `onClick\s*:\s*\([^)]*:\s*PointerEvent` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
-| B10 | The generic preserves valid app fields. | imports from `frappe-ui` containing `TreeNode` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | Suite | v0 | Own |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| X2 | Only explicitly annotated Menu handler parameters can fail type-check. None exist. | `onClick\s*:\s*\([^)]*:\s*PointerEvent` in Menu option files | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| X6 + A barrels | Internal barrel declarations change. | `export\s+\*\s+from\s+['"](?:\./)?(?:local|realtime|extensions|menu)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 4 |
+| H06 | This adds a shared type. | imports of `SelectOption|ComboboxOption|MultiSelectOption|SelectionOption|SelectionGroup` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 8 |
+| H15 | This corrects an empty exported props type. Nothing to edit: `scroll` already worked, and Suite Drive already passes it. Measured 2026-09-15: GP `DesktopLayout.vue:5`, Suite Drive `DriveLayout.vue:10`. | `\bDesktopShellProps\b|<DesktopShell\b` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 4 |
+| H19 | Existing `#hint` content starts rendering. No caller edit is needed. | Progress blocks containing `#hint|v-slot:hint|slot="hint"` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| H22 | Code already uses 4000ms. The change is docs and additive types. | `\b(?:ExternalToast|ToastOptions)\b|duration\s*:\s*5000` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
+| H23 | This widens the accepted extensions type. | imports of `Extension|Extensions` tied to `<Editor>` or `useEditor(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 5 |
+| H25 | One-argument callbacks remain valid. | `\buploadFunction\s*[:=]|\bMediaUploadProgress\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 7 |
+| H30 | The public composable and its types are removed; no app imports them. | imports of `useVirtualRows|UseVirtualRows(?:Options|Return)?` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
+| H33 | Only package metadata and docs change. | `\btailwindcss\b` in this package's manifests and contract docs | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| H34 | Only package metadata changes. | `@floating-ui/vue` in this package | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| L-root emit types | No consumer imports the affected emit types. | imports from `frappe-ui` containing `ComboboxEmits|MultiSelectEmits|RadioGroupEmits` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
+| L-root model types | No consumer imports the affected model types. | imports containing `TextInputProps|DateRangePickerProps|DateRangeValue|FrappeUIError` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 8 |
+| L-root owned types | No consumer imports the leaked third-party types from frappe-ui. | imports containing `Dayjs|RouteLocationRaw`; own search is limited to public signatures | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 15 |
+| L-root additive gaps | These APIs and hooks are additive. | `Rating|Tooltip|PopoverSlots|HoverCardSlots|RatingSlots|ButtonSlots|BadgeSlots|portalTo|PageHeader|SidebarRailItemBadge` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 20 |
+| M-base/A Divider action | No consumer imports `DividerAction`. | imports from `frappe-ui` containing `DividerAction` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| M-base/A Badge label | No object-valued Badge label exists. | `(?s)<Badge\b(?:(?!>).)*?(?::|v-bind:)?\blabel\s*=\s*['"]?\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| M-dialog/A Alert icon | No boolean-valued Alert icon exists. | Alert tags with bare `icon` or `:icon="true|false"` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| B1 | Option callbacks are additive. | `\buseDoc\s*\(|\.onSuccess\s*\(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 8 |
+| B3 | Object overloads are additive. | `\b(?:useDoctype|useNewDoc)\s*\(` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 7 |
+| B8 | No SidebarHeader menu handler has an explicit incompatible event annotation. | SidebarHeader `menu-items` sites, then `onClick\s*:\s*\([^)]*:\s*PointerEvent` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 5 |
+| B10 | The generic preserves valid app fields. | imports from `frappe-ui` containing `TreeNode` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
 
 ## T1: mechanical migration
 
-| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | v0 | Own |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| X1, H07 | Prop names break. | `(?s)<(?:SidebarItem|SidebarRailItem|MobileNavItem|PageHeaderBackButton|ListRow)\b(?:(?!>).)*?(?::|v-bind:)?\bto\s*=|(?s)<Button\b(?:(?!>).)*?(?::|v-bind:)?\blink\s*=` | 23 | 0 | 0 | 0 | 0 | 0 | 9 | 2 | 2 |
-| M-dialog/A Breadcrumb slots | Slot names break. Counts inspect only text inside each Breadcrumbs block. | Find files with `<Breadcrumbs\b`, then inside each block use `#(?:prefix|suffix)\b|v-slot:(?:prefix|suffix)\b|slot=['"](?:prefix|suffix)['"]` | 3 | 0 | 8 | 1 | 0 | 0 | 0 | 1 | 1 |
-| M-dialog/A Dialog statics | Raw statics disappear. Opening tags count once. | `<Dialog\.(?:Title|Description|Close)\b|Dialog\.(?:Title|Description|Close)\s*=` | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| M-base/A Icon prop | The prop name breaks. | `(?s)<Icon\b(?:(?!>).)*?(?::|v-bind:)?\bname\s*=` | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 1 | 3 |
-| H10 + L-root | The prop name and boolean type break. The Books alias `FrappeSettingsDialog` is included. | `(?s)<(?:SettingsDialog|FrappeSettingsDialog)\b(?:(?!>).)*?(?::|v-bind:)?\bshortcut\s*=` | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 6 |
-| M-data/A resources | The ignored object form stops type-checking. | `\bresources\s*:\s*\{` near `FrappeUIPluginOptions` or `app.use` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| M-dialog/A Dialog text | The component prop name breaks. Imperative `dialog.confirm({ message })` is excluded. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bmessage\s*=` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 5 |
-| M-tabs-tree/A Tree slots | Slot-prop destructuring breaks. | Find `<Tree\b` files, then trigger/item templates containing `\b(?:node|level|focused)\b` | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 6 |
-| M-editor/A fixed menu size | The prop name breaks. | `(?s)<EditorFixedMenu\b(?:(?!>).)*?(?::|v-bind:)?\bbutton-size\s*=` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| M-list/A row hooks | CSS selectors break. The 2 Builder candidates are app-authored div hooks, so actual migrations are 0. | In files using ListRow, `data-(?:interactive|active)\b|data-\[state=selected\]|\[data-state=['"]?selected` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
-| M-list/A sort slot | The slot name breaks. Suite's 3 live sites are supplemental to these columns; GP has 2 live sites plus 2 documentation examples. | Find `<ListHeaderCellSort\b`, then inside each block use `#suffix\b|v-slot:suffix\b|slot=['"]suffix['"]` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| H26 | Dead object keys stop type-checking. | In editor-kit config files, `\b(?:code|codeBlock|link)\s*:\s*(?:false|\{)` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 6 |
-| H05 | Removed TimePicker emits and their declarations break. No app listener exists. | In TimePicker sites and types, `@(?:open|close|input-invalid)\b|on(?:Open|Close|InputInvalid)\s*:|e:\s*['"](?:open|close|input-invalid)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| H18 | The library stops reading the variable. GP defines and reads its own copy at 52px (`index.css:10` plus 3 reads), which keeps working unchanged. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| H28 | The object form is removed; height moves to parent `List.rowHeight`. | `virtual\s*=.*\{|itemHeight|ListVirtualOptions|useVirtualRows` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
-| H35 | The unsupported deep path disappears. | `frappe-ui/src/utils/tailwind\.config` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
-| L-root internal exports | Root type imports break. None exist in apps. | imports from `frappe-ui` containing `DatePickerViewMode|DatePickerDateObj` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| L-root aliases | Removed alias imports break. None exist in apps. | imports from `frappe-ui` containing `TabButtonValue|TabButtonIcon|AlertActionContext|AlertActionsSlotProps` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| M-base/A Progress intervals | Two props become one number prop. | `(?s)<Progress\b(?:(?!>).)*?(?::|v-bind:)?\b(?:intervals|interval-count)\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-dialog/A Alert hook | CSS selectors break. | `\[?data-color(?:\]|\s*=|=)` scoped to Alert | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| M-dialog/A Divider align | The prop name breaks. | `(?s)<Divider\b(?:(?!>).)*?(?::|v-bind:)?\bposition\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-overlays/A Popover control | Current `toggle` sites are own-tree only. The codemod separately reports 43 files in Frappe, CRM, HD, and Builder that still use old `#target`/`togglePopover` APIs. | In Popover blocks, trigger templates containing `\btoggle\b`, plus old `#target`/`togglePopover` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| M-inputs/A DateTimePicker | The prop name breaks. | `(?s)<DateTimePicker\b(?:(?!>).)*?(?::|v-bind:)?\ballow-custom-time\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| M-tabs-tree/A Tab state | CSS selectors break. | In TabButtons files, `data-\[state=(?:checked|unchecked)\]|\[data-state=['"]?(?:checked|unchecked)` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| M-shells/A useSheetDrag | Root imports break, with no replacement path. | imports from `frappe-ui` containing `useSheetDrag` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
-| M-shells/A ScrollBar | Root imports and global tags break, with no replacement path. | imports from `frappe-ui` containing `ScrollBar`, plus `<ScrollBar\b|<scroll-bar\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
-| M-list/A ListGroup slot | The slot name breaks. | Find `<ListGroup\b`, then inside each block use `#header\b|v-slot:header\b|slot=['"]header['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| B7 | Picker trigger-slot destructuring breaks. | In DatePicker, DateRangePicker, DateTimePicker, or TimePicker blocks, trigger/suffix templates containing `\btoggle\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| B9 | The variant value breaks. | `(?s)<SidebarRailItem\b(?:(?!>).)*?\bvariant\s*=\s*['"]tile['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 |
-| B12 | Suggestion option keys break. The two meanings require manual context. | In `MentionMember` or `SuggestionExtensionOptions` config, `\bcomponent\s*:` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 9 |
+| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | Suite | v0 | Own |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| X1, H07 | Prop names break. | `(?s)<(?:SidebarItem|SidebarRailItem|MobileNavItem|PageHeaderBackButton|ListRow)\b(?:(?!>).)*?(?::|v-bind:)?\bto\s*=|(?s)<Button\b(?:(?!>).)*?(?::|v-bind:)?\blink\s*=` | 23 | 0 | 0 | 0 | 0 | 0 | 9 | - | 2 | 2 |
+| M-dialog/A Breadcrumb slots | Slot names break. Counts inspect only text inside each Breadcrumbs block. | Find files with `<Breadcrumbs\b`, then inside each block use `#(?:prefix|suffix)\b|v-slot:(?:prefix|suffix)\b|slot=['"](?:prefix|suffix)['"]` | 3 | 0 | 8 | 1 | 0 | 0 | 0 | - | 1 | 1 |
+| M-dialog/A Dialog statics | Raw statics disappear. Opening tags count once. | `<Dialog\.(?:Title|Description|Close)\b|Dialog\.(?:Title|Description|Close)\s*=` | 6 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
+| M-base/A Icon prop | The prop name breaks. | `(?s)<Icon\b(?:(?!>).)*?(?::|v-bind:)?\bname\s*=` | 0 | 0 | 0 | 0 | 0 | 5 | 0 | - | 1 | 3 |
+| H10 + L-root | The prop name and boolean type break. The Books alias `FrappeSettingsDialog` is included. | `(?s)<(?:SettingsDialog|FrappeSettingsDialog)\b(?:(?!>).)*?(?::|v-bind:)?\bshortcut\s*=` | 1 | 0 | 0 | 0 | 0 | 1 | 0 | - | 0 | 6 |
+| M-data/A resources | The ignored object form stops type-checking. | `\bresources\s*:\s*\{` near `FrappeUIPluginOptions` or `app.use` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 7 |
+| M-dialog/A Dialog text | The component prop name breaks. Imperative `dialog.confirm({ message })` is excluded. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bmessage\s*=` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | - | 0 | 5 |
+| M-tabs-tree/A Tree slots | Slot-prop destructuring breaks. | Find `<Tree\b` files, then trigger/item templates containing `\b(?:node|level|focused)\b` | 0 | 0 | 0 | 0 | 0 | 0 | 2 | - | 0 | 6 |
+| M-editor/A fixed menu size | The prop name breaks. | `(?s)<EditorFixedMenu\b(?:(?!>).)*?(?::|v-bind:)?\bbutton-size\s*=` | 1 | 1 | 0 | 0 | 0 | 0 | 0 | - | 0 | 4 |
+| M-list/A row hooks | CSS selectors break. The 2 Builder candidates are app-authored div hooks, so actual migrations are 0. | In files using ListRow, `data-(?:interactive|active)\b|data-\[state=selected\]|\[data-state=['"]?selected` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 9 |
+| M-list/A sort slot | The slot name breaks. GP has 2 live sites plus 2 documentation examples; Suite has 3 live sites. | Find `<ListHeaderCellSort\b`, then inside each block use `#suffix\b|v-slot:suffix\b|slot=['"]suffix['"]` | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 3 |
+| H26 | Dead object keys stop type-checking. | In editor-kit config files, `\b(?:code|codeBlock|link)\s*:\s*(?:false|\{)` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | - | 0 | 6 |
+| H05 | Removed TimePicker emits and their declarations break. No app listener exists. | In TimePicker sites and types, `@(?:open|close|input-invalid)\b|on(?:Open|Close|InputInvalid)\s*:|e:\s*['"](?:open|close|input-invalid)['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 8 |
+| H18 | The library stops reading the variable. GP defines and reads its own copy at 52px (`index.css:10` plus 3 reads), which keeps working unchanged. | `--mobile-header-height\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 1 |
+| H28 | The object form is removed; height moves to parent `List.rowHeight`. | `virtual\s*=.*\{|itemHeight|ListVirtualOptions|useVirtualRows` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 5 |
+| H35 | The unsupported deep path disappears. | `frappe-ui/src/utils/tailwind\.config` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 1 | 1 |
+| L-root internal exports | Root type imports break. None exist in apps. | imports from `frappe-ui` containing `DatePickerViewMode|DatePickerDateObj` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| L-root aliases | Removed alias imports break. None exist in apps. | imports from `frappe-ui` containing `TabButtonValue|TabButtonIcon|AlertActionContext|AlertActionsSlotProps` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 4 |
+| M-base/A Progress intervals | Two props become one number prop. | `(?s)<Progress\b(?:(?!>).)*?(?::|v-bind:)?\b(?:intervals|interval-count)\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| M-dialog/A Alert hook | CSS selectors break. | `\[?data-color(?:\]|\s*=|=)` scoped to Alert | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| M-dialog/A Divider align | The prop name breaks. | `(?s)<Divider\b(?:(?!>).)*?(?::|v-bind:)?\bposition\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| M-overlays/A Popover control | Current `toggle` sites are own-tree only. The codemod separately reports 43 files in Frappe, CRM, HD, and Builder that still use old `#target`/`togglePopover` APIs. | In Popover blocks, trigger templates containing `\btoggle\b`, plus old `#target`/`togglePopover` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 3 |
+| M-inputs/A DateTimePicker | The prop name breaks. | `(?s)<DateTimePicker\b(?:(?!>).)*?(?::|v-bind:)?\ballow-custom-time\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 7 |
+| M-tabs-tree/A Tab state | CSS selectors break. | In TabButtons files, `data-\[state=(?:checked|unchecked)\]|\[data-state=['"]?(?:checked|unchecked)` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| M-shells/A useSheetDrag | Root imports break, with no replacement path. | imports from `frappe-ui` containing `useSheetDrag` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 |
+| M-shells/A ScrollBar | Root imports and global tags break, with no replacement path. | imports from `frappe-ui` containing `ScrollBar`, plus `<ScrollBar\b|<scroll-bar\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7 |
+| M-list/A ListGroup slot | The slot name breaks. | Find `<ListGroup\b`, then inside each block use `#header\b|v-slot:header\b|slot=['"]header['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 1 |
+| B7 | Picker trigger-slot destructuring breaks. | In DatePicker, DateRangePicker, DateTimePicker, or TimePicker blocks, trigger/suffix templates containing `\btoggle\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| B9 | The variant value breaks. | `(?s)<SidebarRailItem\b(?:(?!>).)*?\bvariant\s*=\s*['"]tile['"]` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 4 |
+| B12 | Suggestion option keys break. The two meanings require manual context. | In `MentionMember` or `SuggestionExtensionOptions` config, `\bcomponent\s*:` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | - | 0 | 9 |
 
 ## T2: manual migration per site
 
-| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | v0 | Own |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| H14 | Nothing breaks. SHELL-Q4 keeps the prop; the count is recorded because the earlier 7 missed Builder and Books. Measured 2026-09-15: GP 6 and Builder 1 confirmed on this box. | `(?s)<ScrollArea\b(?:(?!>).)*?(?::|v-bind:)?\bviewport-class\s*=` | 6 | 0 | 0 | 1 | 1 | 2 | 0 | 0 | 11 |
-| M-composables/A getter | The import breaks and each call has to become a `.value` read on `useColorScheme()`. A codemod cannot do it: the replacement needs a binding in the caller's scope. Wiki also deletes the `MutationObserver` the call needed. | `\bresolvedColorScheme\b` | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 13 |
-| H24 | Each imported type site must prove that every constructed result has `file_url`. | imports from `frappe-ui` or `frappe-ui/editor` containing `UploadedFile` | 3 | 1 | 0 | 2 | 0 | 0 | 0 | 0 | 1 |
-| M-editor/A floating options | Each option object must be checked against the owned keys. | `(?s)<Editor(?:Bubble|Floating)Menu\b(?:(?!>).)*?(?::|v-bind:)?\boptions\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 |
-| M-tabs-tree/A TabButton item | Each item needs a decision for removed tooltip text or a non-string label. | In TabButtons files, `\btooltip\s*:|\blabel\s*:\s*(?!['"\x60])` | 0 | 0 | 0 | 3 | 2 | 0 | 0 | 4 | 1 |
-| H27 | Each configured kit must be checked against its real option type. | `\b(?:RichTextKit|InlineKit)\.configure\s*\(` | 2 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 12 |
-| H20 | Each Dialog icon value must be classified as a string, component, or old object. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bicon\s*=|\bDialogIcon\b` | 1 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 19 |
-| H13 | Each dynamic value must be inverted. | `(?s)<Sidebar\b(?:(?!>).)*?(?::|v-bind:)?\bdisable-collapse(?:\s*=|\s|/?>)` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 3 |
-| M-dialog/A paddingTop | Each number needs a CSS unit chosen by a human. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bpadding(?:Top|-top)\s*=\s*['"]?\d` | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 2 |
-| M-editor/A slash commands | Each object must add or validate `items`. | `\bslashCommands\s*:` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
+| Id | What breaks | Pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | Suite | v0 | Own |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| H14 | Nothing breaks. SHELL-Q4 keeps the prop; the count is recorded because the earlier 7 missed Builder and Books. Measured 2026-09-15: GP 6 and Builder 1 confirmed on this box. | `(?s)<ScrollArea\b(?:(?!>).)*?(?::|v-bind:)?\bviewport-class\s*=` | 6 | 0 | 0 | 1 | 1 | 2 | 0 | 0 | 0 | 11 |
+| M-composables/A getter | The import breaks and each call has to become a `.value` read on `useColorScheme()`. A codemod cannot do it: the replacement needs a binding in the caller's scope. Wiki also deletes the `MutationObserver` the call needed. | `\bresolvedColorScheme\b` | 0 | 0 | 0 | 0 | 0 | 0 | 3 | - | 0 | 13 |
+| H24 | Each imported type site must prove that every constructed result has `file_url`. | imports from `frappe-ui` or `frappe-ui/editor` containing `UploadedFile` | 3 | 1 | 0 | 2 | 0 | 0 | 0 | - | 0 | 1 |
+| M-editor/A floating options | Each option object must be checked against the owned keys. | `(?s)<Editor(?:Bubble|Floating)Menu\b(?:(?!>).)*?(?::|v-bind:)?\boptions\s*=` | 0 | 0 | 0 | 0 | 0 | 0 | 6 | - | 0 | 0 |
+| M-tabs-tree/A TabButton item | Each item needs a decision for removed tooltip text or a non-string label. | In TabButtons files, `\btooltip\s*:|\blabel\s*:\s*(?!['"\x60])` | 0 | 0 | 0 | 3 | 2 | 0 | 0 | - | 4 | 1 |
+| H27 | Each configured kit must be checked against its real option type. | `\b(?:RichTextKit|InlineKit)\.configure\s*\(` | 2 | 1 | 1 | 1 | 0 | 0 | 0 | - | 0 | 12 |
+| H20 | Each Dialog icon value must be classified as a string, component, or old object. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bicon\s*=|\bDialogIcon\b` | 1 | 0 | 1 | 1 | 0 | 0 | 0 | - | 0 | 19 |
+| H13 | Each dynamic value must be inverted. | `(?s)<Sidebar\b(?:(?!>).)*?(?::|v-bind:)?\bdisable-collapse(?:\s*=|\s|/?>)` | 1 | 0 | 0 | 1 | 0 | 0 | 0 | - | 0 | 3 |
+| M-dialog/A paddingTop | Each number needs a CSS unit chosen by a human. | `(?s)<Dialog\b(?:(?!>).)*?(?::|v-bind:)?\bpadding(?:Top|-top)\s*=\s*['"]?\d` | 0 | 0 | 0 | 0 | 1 | 0 | 0 | - | 0 | 2 |
+| M-editor/A slash commands | Each object must add or validate `items`. | `\bslashCommands\s*:` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
 
 ## T3: behavior review
 
-| Id | What breaks | Review-set pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | v0 | Own |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| M-overlays/A attributes | Attributes can move to a different DOM element. Review every overlay use. | `<(?:Popover|Dropdown|HoverCard|ContextMenu)\b` | 23 | 9 | 71 | 70 | 26 | 3 | 11 | 123 | 71 |
-| H01 | Error handling changes from a resolved value to rejection. | In files using `useCall|useDoc`, `\.(?:submit|setValue|delete|runDocMethod)\s*\(` | 58 | 0 | 0 | 0 | 0 | 0 | 0 | 25 | 97 |
-| L-root defaults (Rating) | Every Rating with no `size` renders one step smaller. The old combined row counted Ratings that *pass* `size`, which is the set that does not change. Measured 2026-09-15: 0 Rating tags in GP, Builder and Suite. The 3 v1 sites are recorded under INP-Q16 (frappe/ui `RatingField.vue:2`, HD `FilterValueEditor.vue:93`, CRM `CFCondition.vue:265`). | `(?s)<Rating\b(?![^>]*\bsize\s*=)[^>]*>` | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 11 |
-| L-root defaults (TabButtons) | Omitted TabButtons variants can render differently. The per-app counts are the old combined row's, which is safe for GP (measured 0 Rating tags there); for Frappe, CRM and HD a few of them may be Ratings that pass `size`, which do not change. Own tree measured 2026-09-15. | `(?s)<TabButtons\b(?![^>]*\bvariant\s*=)[^>]*>` | 10 | 4 | 2 | 7 | 6 | 0 | 1 | 9 | 37 |
-| X3 + HoverCard A | Explicit values change unit. HoverCards without a delay get a new default. | `\b(?:hoverDelay|hover-delay|leaveDelay|leave-delay)\s*=|(?s)<HoverCard\b(?![^>]*(?:hoverDelay|hover-delay)\s*=)[^>]*>` | 2 | 2 | 9 | 8 | 13 | 2 | 0 | 19 | 30 |
-| M-editor/A prose defaults | Editors without an override render at a new base size. | `(?s)<Editor\b(?![^>]*(?:style|class)[^>]*--prose-font-size)[^>]*>` | 4 | 1 | 2 | 10 | 1 | 0 | 4 | 1 | 73 |
-| M-packaging/A Tailwind extension | Restored Tailwind defaults can change generated CSS. Review every preset consumer. | `frappe-ui/(?:tailwind|src/utils/tailwind\.config)` | 1 | 0 | 3 | 1 | 1 | 1 | 1 | 6 | 16 |
-| H04 | Upload callers can observe new rejection values. The removed alias has no measured call-site use. | `\buseFileUpload\s*\(`; check each `.upload(` catch path and `is_private` option | 2 | 0 | 1 | 1 | 0 | 0 | 3 | 1 | 13 |
-| B14 | Editors lose three default extensions unless they opt in. | `\bRichTextKit\.configure\s*\(|\[RichTextKit\]` | 1 | 1 | 1 | 1 | 0 | 0 | 2 | 0 | 17 |
-| M-tabs-tree/A Tree events | Event names and cancellation payload change. | In Tree blocks, `@(?:drag-start|drag-end)\b|on(?:DragStart|DragEnd)\s*:` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 2 |
-| M-editor/A InlineKit config | Previously ignored StarterKit settings start changing behavior. | InlineKit configuration blocks containing `starterKit\s*:\s*\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| M-packaging/A rounded token | Every `rounded-9` use changes radius. | `\brounded-9\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| Id | What breaks | Review-set pattern | GP | Frappe | CRM | HD | Builder | Books | Wiki | Suite | v0 | Own |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| M-overlays/A attributes | Attributes can move to a different DOM element. Review every overlay use. | `<(?:Popover|Dropdown|HoverCard|ContextMenu)\b` | 23 | 9 | 71 | 70 | 26 | 3 | 11 | - | 123 | 71 |
+| H01 | Error handling changes from a resolved value to rejection. | In files using `useCall|useDoc`, `\.(?:submit|setValue|delete|runDocMethod)\s*\(` | 58 | 0 | 0 | 0 | 0 | 0 | 0 | - | 25 | 97 |
+| L-root defaults (Rating) | Every Rating with no `size` renders one step smaller. The old combined row counted Ratings that *pass* `size`, which is the set that does not change. Measured 2026-09-15: 0 Rating tags in GP, Builder and Suite. The 3 v1 sites are recorded under INP-Q16 (frappe/ui `RatingField.vue:2`, HD `FilterValueEditor.vue:93`, CRM `CFCondition.vue:265`). | `(?s)<Rating\b(?![^>]*\bsize\s*=)[^>]*>` | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 11 |
+| L-root defaults (TabButtons) | Omitted TabButtons variants can render differently. The per-app counts are the old combined row's, which is safe for GP (measured 0 Rating tags there); for Frappe, CRM and HD a few of them may be Ratings that pass `size`, which do not change. Own tree measured 2026-09-15. | `(?s)<TabButtons\b(?![^>]*\bvariant\s*=)[^>]*>` | 10 | 4 | 2 | 7 | 6 | 0 | 1 | - | 9 | 37 |
+| X3 + HoverCard A | Explicit values change unit. HoverCards without a delay get a new default. | `\b(?:hoverDelay|hover-delay|leaveDelay|leave-delay)\s*=|(?s)<HoverCard\b(?![^>]*(?:hoverDelay|hover-delay)\s*=)[^>]*>` | 2 | 2 | 9 | 8 | 13 | 2 | 0 | - | 19 | 30 |
+| M-editor/A prose defaults | Editors without an override render at a new base size. | `(?s)<Editor\b(?![^>]*(?:style|class)[^>]*--prose-font-size)[^>]*>` | 4 | 1 | 2 | 10 | 1 | 0 | 4 | - | 1 | 73 |
+| M-packaging/A Tailwind extension | Restored Tailwind defaults can change generated CSS. Review every preset consumer. | `frappe-ui/(?:tailwind|src/utils/tailwind\.config)` | 1 | 0 | 3 | 1 | 1 | 1 | 1 | - | 6 | 16 |
+| H04 | Upload callers can observe new rejection values. The removed alias has no measured call-site use. | `\buseFileUpload\s*\(`; check each `.upload(` catch path and `is_private` option | 2 | 0 | 1 | 1 | 0 | 0 | 3 | - | 1 | 13 |
+| B14 | Editors lose three default extensions unless they opt in. | `\bRichTextKit\.configure\s*\(|\[RichTextKit\]` | 1 | 1 | 1 | 1 | 0 | 0 | 2 | - | 0 | 17 |
+| M-tabs-tree/A Tree events | Event names and cancellation payload change. | In Tree blocks, `@(?:drag-start|drag-end)\b|on(?:DragStart|DragEnd)\s*:` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | - | 0 | 2 |
+| M-editor/A InlineKit config | Previously ignored StarterKit settings start changing behavior. | InlineKit configuration blocks containing `starterKit\s*:\s*\{` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 2 |
+| M-packaging/A rounded token | Every `rounded-9` use changes radius. | `\brounded-9\b` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | - | 0 | 6 |
 
 The inventory contains 72 candidate changes. The rule calls for 63 breaks and 9 permanent keeps. With LIST-Q5's false positives removed and LIST-Q8's 5 live sites added, and batch 2's four corrections applied, 391 v1-app candidate-site migrations remain. This total sums the per-change site counts, so one source location can count twice when it needs two independent edits.
 
@@ -193,3 +193,5 @@ Batch 2 corrections to the counts above, from `rc-api-decisions.md` and from gre
 - **H15 is 2, not 0.** Two apps render `DesktopShell`: GP `DesktopLayout.vue:5` and Suite Drive `DriveLayout.vue:10`. Neither has anything to edit — `scroll` already worked and Drive already passes it (+2).
 - **H14 is 10, not 7.** The earlier count missed Builder and Books. SHELL-Q4 keeps `viewportClass`, so none of the 10 migrate (+3).
 - **The L-root defaults row split.** Rating is a break with 3 v1 sites (INP-Q16); TabButtons stays a keep and carries the old combined numbers (+3).
+
+One row's app columns do not reproduce its total: L-root defaults (TabButtons) has 38 sites against 30 in the columns. Both numbers are the original report's, carried forward unchanged. It is a keep, so it is outside the 391.

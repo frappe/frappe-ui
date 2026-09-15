@@ -1087,7 +1087,9 @@ or a Vue component, and `theme` (`amber | blue | red | green`) colors the badge
 behind it. The same split applies to `dialog.confirm`, `dialog.danger` and
 `dialog.prompt`, which already had a top-level `theme`.
 
-- **Silent:** an object still passed to `icon` renders no icon.
+- **Silent:** an object still passed to `icon` renders an empty icon badge:
+  the circle paints in the neutral tone, with no glyph in it, and Vue logs a
+  dev warning about a component with no render function.
 - **Loud in TypeScript:** the `DialogIcon` export is removed.
 - `paddingTop` accepts a number again. A unitless length never reached the
   CSSOM, so `:padding-top="80"` removed the position padding and added nothing

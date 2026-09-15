@@ -20,7 +20,7 @@ exactly three sequential PRs:
 2. **Batch 2 — data, dialogs, inputs, shells, and headers:** items 8, 10, 11,
    13, 14. Implemented on `v1/rc-batch-2` from
    `2b990bdb7de35616a4e600e2222a733c51aba5d3`. 45 QIDs, one codemod
-   (`data-v1`), six commits. Awaiting review and merge.
+   (`data-v1`). Awaiting review and merge.
 3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18. Not started;
    base it on `main` after batch 2 merges.
 

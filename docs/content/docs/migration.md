@@ -177,8 +177,11 @@ dialog.confirm({ title: 'Delete', icon: { name: 'lucide-trash', theme: 'red' } }
 dialog.confirm({ title: 'Delete', icon: 'lucide-trash', theme: 'red' })
 ```
 
-**Silent.** An object passed to `icon` renders no icon at all now, and the
-`DialogIcon` type is gone (loud in TypeScript). Coming from v0, the older
+**Silent.** An object passed to `icon` now renders an empty icon badge: the
+circle paints in the neutral tone with no glyph in it, and Vue logs a dev
+warning about a component with no render function. The `theme` inside the old
+object is ignored, so pass `theme` at the top level. The `DialogIcon` type is
+gone (loud in TypeScript). Coming from v0, the older
 `appearance` key went the same way: map `warning → amber`, `info → blue`,
 `danger → red`, `success → green` and pass it as `theme`.
 

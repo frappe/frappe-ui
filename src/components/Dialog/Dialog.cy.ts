@@ -407,6 +407,25 @@ describe('Dialog', () => {
     cy.get('[role=dialog] [data-cy=component-icon]').should('exist')
   })
 
+  it('renders an empty badge for a legacy DialogIcon object', () => {
+    // The removed `{ name, theme }` shape is not a string, so it lands in the
+    // component branch and renders nothing inside the badge. The badge itself
+    // still paints. This is what the migration guide documents.
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        title: 'Heads up',
+        icon: { name: 'lucide-trash', theme: 'red' } as any,
+      },
+    })
+
+    cy.get('[role=dialog] [data-slot=icon]')
+      .should('exist')
+      .and('have.class', 'bg-surface-gray-2')
+      .and('be.empty')
+    cy.get('[role=dialog] .lucide-trash').should('not.exist')
+  })
+
   it('keeps the neutral badge when no theme is set', () => {
     cy.mount(Dialog, {
       props: { open: true, title: 'Heads up', icon: 'lucide-info' },
