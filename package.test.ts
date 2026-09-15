@@ -132,6 +132,30 @@ describe('peer dependencies', () => {
     expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.0 <4')
   })
 
+  /**
+   * CI installs the dev range, so a dev floor below the peer floor means the
+   * suite proves nothing about the version consumers are told to use. On
+   * Tailwind 3.3 the sizing families lose the generated scale silently,
+   * because 3.3 does not read `theme('spacing')` for them.
+   */
+  it('keeps the dev Tailwind floor at or above the peer floor', () => {
+    const floor = (range: string) => {
+      const match = range.match(/(\d+)\.(\d+)\.(\d+)/)
+      if (!match) throw new Error(`no version in range: ${range}`)
+      return [Number(match[1]), Number(match[2]), Number(match[3])]
+    }
+    const dev = floor(pkg.devDependencies.tailwindcss)
+    const peer = floor(pkg.peerDependencies.tailwindcss)
+    expect(
+      dev[0] > peer[0] ||
+        (dev[0] === peer[0] &&
+          (dev[1] > peer[1] || (dev[1] === peer[1] && dev[2] >= peer[2]))),
+      `dev ${pkg.devDependencies.tailwindcss} is below peer ${pkg.peerDependencies.tailwindcss}`,
+    ).toBe(true)
+    // And still inside the peer's upper bound.
+    expect(pkg.devDependencies.tailwindcss.startsWith('^3.')).toBe(true)
+  })
+
   it('declares vite and vitepress as optional peers', () => {
     expect(pkg.peerDependencies.vite).toBeDefined()
     expect(pkg.peerDependencies.vitepress).toBeDefined()

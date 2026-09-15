@@ -260,7 +260,7 @@
     "postcss": "^8.5.10",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.1.13",
-    "tailwindcss": "^3.2.7",
+    "tailwindcss": "^3.4.0",
     "tsx": "^4.20.6",
     "vite": "^7.3.2",
     "vite-plugin-istanbul": "^9.0.0",
