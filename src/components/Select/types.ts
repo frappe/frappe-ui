@@ -179,7 +179,14 @@ interface SelectItemSlotsByName {
 export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
 export interface SelectEmits {
-  /** Fired when the selected value changes. `null` when the selection is cleared. */
+  /**
+   * Fired when the selected value changes. `null` when the selection is
+   * cleared.
+   *
+   * The generated declaration adds `undefined`, because `modelValue` is
+   * optional and carries no default (a `defineModel` default never reaches
+   * the parent). The component never emits `undefined`.
+   */
   'update:modelValue': [value: SelectOptionValue | null]
 
   /** Fired when the open state changes. */

@@ -643,6 +643,34 @@ describe('Select', () => {
       })
     })
 
+    it('leaves an untouched model alone', () => {
+      // A `defineModel` default is local to the child, so writing one here
+      // would leave a parent `v-model` on `undefined` while this component
+      // read `null`, and a caller watching for `null` would never fire.
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+      })
+
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('emits null from clear even when the model started undefined', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
     it('renders the placeholder for null and for undefined alike', () => {
       cy.mount(Select, { props: { options, modelValue: null } })
       cy.get('[role=combobox]').should('have.text', 'Select option')

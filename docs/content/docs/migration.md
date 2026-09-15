@@ -465,6 +465,12 @@ watch(value, (v) => {
 because an empty array is what its consumers iterate. An empty string is still a
 real value, so a "None" row with `value: ''` round-trips unchanged.
 
+Neither component emits anything on mount, so a model that starts as
+`undefined` stays `undefined` until the user picks an option or clears one.
+Both read `undefined` as "nothing selected", so the placeholder renders either
+way. Initialize the ref with `null` if the value is compared, sent to the
+server, or watched for the empty case.
+
 `SelectionOption` and `SelectionGroup` are exported from the root, so a wrapper
 around any of the three can name its option shape once. The component-specific
 types stay.

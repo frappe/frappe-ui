@@ -50,11 +50,12 @@ defineOptions({
   inheritAttrs: false,
 })
 
-// `default: null`, so an unbound Select starts at the same empty value it
-// reports after `clear()`. Combobox already does this; INP-Q2 makes the two
-// agree. Without it the model starts `undefined` and the emitted type carries
-// an `undefined` that nothing ever emits.
-const model = defineModel<SelectOptionValue | null>({ default: null })
+// No `default`. A `defineModel` default does not reach the parent, so a
+// `v-model` holding `undefined` would leave the parent at `undefined` while
+// this component read `null`, and the caller's `v === null` check would never
+// fire. Nothing is emitted on mount. The component normalizes `undefined` to
+// `null` where it reads the value, and `clear()` emits `null` (INP-Q2).
+const model = defineModel<SelectOptionValue | null>()
 const open = defineModel<boolean>('open', { default: false })
 
 const props = withDefaults(defineProps<SelectProps>(), {
@@ -200,8 +201,13 @@ function toExternalValue(value: SelectOptionValue | undefined) {
   return toExternal(value)
 }
 
+/** The model with `undefined` read as the empty value (INP-Q2). */
+const currentValue = computed<SelectOptionValue | null>(
+  () => model.value ?? null,
+)
+
 const internalModel = computed<SelectOptionValue | undefined>({
-  get: () => toInternalValue(model.value),
+  get: () => toInternalValue(currentValue.value),
   set: (value) => {
     model.value = toExternalValue(value)
   },
@@ -209,7 +215,9 @@ const internalModel = computed<SelectOptionValue | undefined>({
 
 const selectedOption = computed(() => {
   return (
-    selectOptions.value.find((option) => option.value === model.value) ?? null
+    selectOptions.value.find(
+      (option) => option.value === currentValue.value,
+    ) ?? null
   )
 })
 
@@ -286,7 +294,7 @@ function usesDynamicItemSlot(option: SelectNormalizedOption) {
 }
 
 function getItemSlotProps(option: SelectNormalizedOption): SelectItemSlotProps {
-  return { item: option, selected: option.value === model.value }
+  return { item: option, selected: option.value === currentValue.value }
 }
 
 function getOptionKey(option: SelectNormalizedOption, index: number) {
@@ -484,7 +492,7 @@ defineExpose(exposed)
                   <ItemListRow
                     v-else
                     :size="itemSize"
-                    :selected="internalOption.option.value === model"
+                    :selected="internalOption.option.value === currentValue"
                     :disabled="internalOption.option.disabled"
                   >
                     <template #prefix>
