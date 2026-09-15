@@ -36,7 +36,9 @@ destination prop renames (`destinations-v1`, see
 (`base-props-v1`, see [Base component props](#base-component-props)), and List
 row hooks and slot names (`list-v1`, see [List family](#list-family)), and the
 `FrappeUI` plugin's `resources` option (`data-v1`, see
-[the plugin](#http-transport-and-the-frappeui-plugin)). The tools
+[the plugin](#http-transport-and-the-frappeui-plugin)), and the Tailwind preset
+path plus the Vite plugin's `lucideIcons` option (`packaging-v1`, see
+[Packaging and tokens](#packaging-and-tokens)). The tools
 report ambiguous dynamic syntax for manual review instead of guessing.
 
 ### Sections
@@ -49,6 +51,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Errors renamed](#errors-renamed) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Packaging** — [Preset path](#preset-path) · [`lucideIcons`](#lucide-icons) · [Focus ring](#focus-ring-outline) · [Sizing changes](#sizing-scale-changes) · [Dependencies](#packaging-dependencies)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
@@ -2571,6 +2574,120 @@ The old `ink-<family>-1` step was white. The new `-1` is a light tint, so
 these sites have no automatic destination. The codemod flags them under
 "needs manual attention". The usual fix is `text-white` (or the literal CSS
 color `white` in hand-written CSS).
+
+## Packaging and tokens {#packaging-and-tokens}
+
+Two loud breaks and three silent ones. Run the codemod first:
+
+```sh
+npx -p frappe-ui packaging-v1 --dry-run .
+npx -p frappe-ui packaging-v1 .
+```
+
+Point it at the project root, not at `src`: it reads the Vite config and the
+source that uses icons in the same run. It rewrites the Tailwind preset path,
+adds `lucideIcons: true` where the app still needs the resolver, and reports
+any plugin call it cannot decide.
+
+### The preset path {#preset-path}
+
+`frappe-ui/src/utils/tailwind.config` is deleted, and no path under
+`frappe-ui/src/...` resolves. A **loud** break: the build stops with
+`Package subpath './src/utils/tailwind.config' is not defined by "exports"`.
+
+```js
+// Before
+import preset from 'frappe-ui/src/utils/tailwind.config'
+// After
+import preset from 'frappe-ui/tailwind'
+```
+
+The same module also exports `content`, the globs that emit classes inside the
+package. Tailwind v3 ignores a preset's own `content`, so spread them into
+yours:
+
+```js
+import preset, { content as frappeUIContent } from 'frappe-ui/tailwind'
+
+export default {
+  presets: [preset],
+  content: [
+    './index.html',
+    './src/**/*.{vue,js,ts}',
+    ...frappeUIContent.map((glob) => `./node_modules/frappe-ui/${glob}`),
+  ],
+}
+```
+
+### `lucideIcons` is off {#lucide-icons}
+
+`frappeui()` no longer installs the `~icons` resolver, `unplugin-auto-import`
+and `unplugin-vue-components`. A **loud** break for an `~icons` import
+(`Failed to resolve import "~icons/lucide/check"`) and a **quiet** one for an
+auto-imported tag: `<LucideCheck />` renders as an unknown element and Vue
+warns in the console.
+
+```js
+// Before
+frappeui({ frappeProxy: true })
+// After
+frappeui({ lucideIcons: true, frappeProxy: true })
+```
+
+Two other ways out, if you would rather not carry the plugins: pass the icon
+name as a class (`<span class="lucide-check size-4" />`, drawn by the preset's
+own icon plugin), or import only the resolver from
+`frappe-ui/vite/lucideIconsPlugin`.
+
+### The focus ring is an outline {#focus-ring-outline}
+
+The `--focus-<name>` variables are removed. They held a `box-shadow` value;
+`--focus-outline-<name>` holds the outline form, which does not change the
+element's size. This is a **silent** break: `box-shadow: var(--focus-red)`
+resolves to nothing and the ring disappears.
+
+```css
+/* Before */
+.my-input:focus-visible {
+  box-shadow: var(--focus-red);
+}
+/* After */
+.my-input:focus-visible {
+  outline: var(--focus-outline-red);
+}
+```
+
+The names are `default`, `red`, `green`, `amber`, `blue` and `violet`. Each is
+2px in light mode and 3px in dark. Grep for `--focus-` and check every hit
+carries the `outline-` segment.
+
+### `rounded-9`, `w-wizard` and `min-w-50` {#sizing-scale-changes}
+
+Three **silent** value changes from the one-scale rewrite:
+
+| Before | After | What to do |
+|---|---|---|
+| `rounded-9` = 999px | 100px | Nothing, unless you used it as a circle. Then use `rounded-full`. |
+| `w-wizard` = 650px | removed | `w-[650px]`, or a width token of your own. |
+| `min-w-50` = 18rem | 12.5rem | `min-w-[18rem]` to keep the old size. |
+
+Everything else on the scale keeps its value, and the scale is now complete:
+integers 1 to 128 and half steps 0.5 to 19.5, for `p-*`, `m-*`, `gap-*`,
+`w-*`, `h-*`, `size-*`, `min-w-*`, `max-w-*` and `min-h-*`.
+
+### Dependencies {#packaging-dependencies}
+
+- Install `tailwindcss` yourself: it is a peer now, `>=3.4.0 <4`. An install on
+  Tailwind v4 fails.
+- `vite` and `vitepress` are optional peers. Nothing changes unless you import
+  `frappe-ui/vite` or `frappe-ui/vitepress` without having them.
+- If your app imported `ora`, `slugify`, `prosemirror-tables`,
+  `@tailwindcss/line-clamp` or a `@tiptap/extension-*` package through
+  frappe-ui, declare it yourself. They are no longer frappe-ui dependencies.
+- In `tsconfig.json`, keep `types: ["vite/client"]`. frappe-ui ships
+  TypeScript source, so your compiler checks it, and it reads
+  `import.meta.env`.
+
 
 ## Editor
 

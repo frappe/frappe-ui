@@ -171,15 +171,23 @@ element of its own. Mount exactly one.
 
 ### TypeScript
 
-frappe-ui ships a base config. Extend it so the subpath types, the `~icons`
-module shim and `allowImportingTsExtensions` all resolve:
+frappe-ui ships a base config. Extend it: it sets `moduleResolution: bundler`
+and `allowImportingTsExtensions`, which the package needs to resolve its own
+subpaths.
 
 ```json
 {
   "extends": "frappe-ui/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
   "include": ["src/**/*.ts", "src/**/*.vue"]
 }
 ```
+
+Keep `types: ["vite/client"]`. The package ships TypeScript source, so your
+compiler checks that source too, and frappe-ui reads `import.meta.env`. Without
+it the check fails with `Property 'env' does not exist on type 'ImportMeta'`.
 
 Import types from the same subpath as the value:
 

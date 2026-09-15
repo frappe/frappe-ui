@@ -79,6 +79,88 @@ New exports: `UploadFunction`, `MediaUploadProgress`, `InlineStarterKitOptions`,
 The [editor migration guide](/docs/migration#editor-option-types) lists the
 per-file edits.
 
+### Package contract: peers, dependencies and the tarball (breaking)
+
+- **`tailwindcss` is a peer dependency, pinned to `>=3.4.0 <4`.** 3.4 is the
+  first version that derives the sizing families from `theme('spacing')`, which
+  the preset depends on, and v4 does not read the JavaScript config the preset
+  is written in. The install now fails instead of half-working at build time.
+- **`vite` and `vitepress` are optional peers.** An app that never imports
+  `frappe-ui/vite` or `frappe-ui/vitepress` installs neither.
+- **`@floating-ui/vue` moved from a transitive install to a direct
+  dependency**, with the five `@codemirror/*` packages and `@lezer/highlight`
+  the CodeEditor imports. They were resolving only because another package
+  happened to install them.
+- **Removed from `dependencies`:** `@tailwindcss/line-clamp` (in Tailwind core
+  since 3.3), `prosemirror-tables`, `ora`, `slugify`, and the
+  `@tiptap/extension-{bubble-menu,color,highlight,image,mention,node-range}`
+  packages, none of which the shipped code imports. `prettier` moved to
+  `devDependencies`.
+- **`frappe-ui/src/utils/tailwind.config` is gone.** Import the preset from
+  `frappe-ui/tailwind`. Nothing under `frappe-ui/src/...` resolves: the
+  `exports` map has no wildcard, so a deep path fails with
+  `Package subpath '…' is not defined`.
+- **`frappe-ui/tailwind`, `frappe-ui/icons` and
+  `frappe-ui/vite/lucideIconsPlugin` now carry a `types` condition.** The
+  preset's declaration says which Tailwind sections it replaces.
+- **The tarball ships no tests.** `*.test.*`, `*.spec.ts`, `*.cy.ts`,
+  `*.story.vue`, `*.playground.vue`, `stories/` and `src/mocks` are excluded:
+  1448 files became 932, and 518 test files became none.
+- **Fix: the internal `#` imports resolve for consumers.** The package ships
+  TypeScript source, so your compiler resolves them through the `imports` map.
+  A type-check of an app that imports `frappe-ui/editor` reported 136
+  unresolved modules; it now reports none.
+
+Run `npx -p frappe-ui packaging-v1 ./src` for the preset path. The
+[packaging migration guide](/docs/migration#packaging-and-tokens) lists the
+manual steps.
+
+### Tailwind preset: one sizing scale, one focus ring form (breaking)
+
+- **Spacing is declared once and every sizing family reads it.** Integers 1 to
+  128 and half steps 0.5 to 19.5, all `n * 0.25rem`. Tailwind 3.4 reads
+  `theme('spacing')` for `width`, `height`, `size`, `minWidth`, `maxWidth` and
+  `minHeight`, so `p-4.5`, `w-112`, `h-13`, `max-h-52` and `gap-7.5` now exist
+  because the scale does, not because someone added that one value. The
+  plugin's hand-written `spacing`, `width`, `height`, `minWidth` and
+  `maxHeight` blocks are deleted. Two classes change with them: `w-wizard`
+  (650px, an app screen name) is removed, use `w-[650px]`; `min-w-50` follows
+  the scale at 12.5rem instead of 18rem, use `min-w-[18rem]` to keep the old
+  size.
+- **The `--focus-<name>` box-shadow variables are removed.** Keep
+  `--focus-outline-<name>` and apply it as an outline:
+  `outline: var(--focus-outline-default)`. The names are `default`, `red`,
+  `green`, `amber`, `blue` and `violet`. One form, 2px in light mode and 3px in
+  dark, so a ring no longer changes the element's size.
+- **`rounded-9` is 100px**, not 999px. It is the pill radius for large
+  surfaces; `rounded-full` (9999px) is still the circle.
+- **Documented, not changed:** the preset replaces Tailwind's `colors`,
+  `fontSize`, `screens`, `borderRadius` and `boxShadow` sections. Stock classes
+  from those five (`text-base` at Tailwind's own size, `2xl:`, `shadow-inner`)
+  are not generated. The alpha suffix in a token name (`gray-3a`) stays as it
+  is.
+- `frappe-ui/tailwind` exports `content`, the source globs that emit classes
+  inside the package. `experimental/FloatingWindow` is now in that list.
+
+### `frappe-ui/vite`: `lucideIcons` is off by default (breaking, loud at build time)
+
+`frappeui()` no longer installs `unplugin-icons`, `unplugin-auto-import` and
+`unplugin-vue-components`. frappe-ui itself draws icons as CSS mask classes
+(`lucide-check`), so the library needs none of them, and every app was paying
+for three plugins and a load of the whole `lucide-static` icon set.
+
+Pass `lucideIcons: true` if your own code writes `<LucideCheck />` or imports
+`~icons/lucide/*`. Without it Vite fails the import with
+`Failed to resolve import "~icons/lucide/check"`, and a `<LucideCheck />` tag
+renders as an unknown element with a Vue warning.
+
+```js
+frappeui({ lucideIcons: true })
+```
+
+`npx -p frappe-ui packaging-v1 .` adds the option when it finds either form in
+the tree you point it at, and reports the plugin call when it cannot tell.
+
 ### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
 
 The rail joins the Sidebar family by name. Nothing else moves. `SidebarRail`
