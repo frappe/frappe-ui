@@ -97,6 +97,32 @@ describe('exports', () => {
   it('has no wildcard subpath, so `frappe-ui/src/...` stays blocked', () => {
     expect(Object.keys(pkg.exports).some((s) => s.includes('*'))).toBe(false)
   })
+
+  /**
+   * `frappe-ui/vite` is hand-written JavaScript with a hand-written `.d.ts`,
+   * so the two can drift. A runtime export the declaration file omits is
+   * invisible to a TypeScript consumer.
+   */
+  it('declares every named export of `frappe-ui/vite`', () => {
+    const js = fs.readFileSync(path.join(root, 'vite/index.js'), 'utf8')
+    const dts = fs.readFileSync(path.join(root, 'vite/index.d.ts'), 'utf8')
+    const named = (source: string) => {
+      const names = new Set<string>()
+      for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
+        for (const part of match[1].split(',')) {
+          const name = part.trim().split(/\s+as\s+/).pop()?.trim()
+          if (name) names.add(name)
+        }
+      }
+      for (const match of source.matchAll(
+        /export\s+declare\s+function\s+(\w+)/g,
+      ))
+        names.add(match[1])
+      return names
+    }
+    const missing = [...named(js)].filter((name) => !named(dts).has(name))
+    expect(missing).toEqual([])
+  })
 })
 
 describe('peer dependencies', () => {

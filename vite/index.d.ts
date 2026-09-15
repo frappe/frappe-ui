@@ -192,3 +192,9 @@ export declare function lucideIcons(
 
 /** The `barrelImports` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `barrelImports` option. */
 export declare function barrelImports(options?: BarrelImportsOptions): Plugin
+
+/**
+ * The `~icons/lucide/*` resolver on its own, without the two unplugins.
+ * `index.js` re-exports it, so the declaration has to be here too.
+ */
+export { lucideIconsPlugin } from './lucideIconsPlugin.js'
