@@ -11,9 +11,11 @@ import {
 import {
   Editor as TiptapEditor,
   type JSONContent,
+  type Extensions,
   Extension,
 } from '@tiptap/core'
 import type { EditorOptions } from '@tiptap/core'
+import type { UploadFunction } from './extensions/shared/media-upload-types'
 
 type Editor = TiptapEditor
 
@@ -22,20 +24,34 @@ export type UseEditorOptions = {
   format?: 'html' | 'json' | 'markdown'
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
-  uploadFunction?: (file: File) => Promise<UploadedFile>
-  extensions: NonNullable<EditorOptions['extensions']>
+  /**
+   * Upload handler for images, videos and attachments. The editor passes an
+   * options bag (abort signal + progress callback) as the second argument;
+   * a one-parameter function stays assignable.
+   */
+  uploadFunction?: UploadFunction
+  /**
+   * Every extension the editor loads. Accepts TipTap's `Extensions`, so
+   * marks and nodes go in the same array as plain extensions.
+   */
+  extensions: Extensions
   onUpdate?: (editor: Editor) => void
   onFocus?: (editor: Editor, event: FocusEvent) => void
   onBlur?: (editor: Editor, event: FocusEvent) => void
   onTransaction?: (editor: Editor) => void
 }
 
-export type UploadedFile = {
-  file_url?: string
-  file_name?: string
-  name?: string
-  [key: string]: unknown
-}
+/**
+ * The upload result contract, re-exported so `frappe-ui/editor` keeps one
+ * `UploadedFile` name. The canonical declaration lives next to the media
+ * upload engine.
+ */
+export type {
+  UploadedFile,
+  UploadFunction,
+  MediaUploadProgress,
+  MediaUploadRequestOptions,
+} from './extensions/shared/media-upload-types'
 
 const UploadStorage = Extension.create({
   name: 'upload',

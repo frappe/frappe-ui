@@ -9,6 +9,8 @@ export {
   type Editor as TiptapEditor,
   type JSONContent,
   type UploadedFile,
+  type UploadFunction,
+  type MediaUploadProgress,
 } from './useEditor'
 
 // The component. Use `TiptapEditor` for the underlying editor instance type.
@@ -30,6 +32,7 @@ export {
   type CommentKitOptions,
   type RichTextKitOptions,
   type InlineKitOptions,
+  type InlineStarterKitOptions,
 } from './kits'
 
 // Individual extensions + StarterKit (frappe-ui default config applied)
@@ -91,6 +94,8 @@ export type {
   MentionSuggestionItem,
   TagSuggestionItem,
   StarterKitOptions,
+  CommandItem,
+  SlashCommandsOptions,
   MediaUploadRequestOptions,
   MarkdownExtensionOptions,
 } from './extensions'
@@ -155,4 +160,7 @@ export type {
   CommandMenuItem,
   MenuGroupItem,
   MenuItem,
+  EditorMenuOptions,
+  EditorMenuPlacement,
+  EditorMenuShouldShowContext,
 } from './menu'

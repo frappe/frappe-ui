@@ -41,6 +41,6 @@ defineEmits<{
 
 const fallbackLabel = computed(() => {
   const item = props.item
-  return item.display ?? item.title ?? item.name ?? ''
+  return item.display ?? item.label ?? item.title ?? item.name ?? ''
 })
 </script>

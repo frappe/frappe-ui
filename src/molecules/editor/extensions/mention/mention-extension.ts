@@ -22,12 +22,17 @@ import {
 } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import './style.css'
 
+/**
+ * One entry in the `@` list.
+ *
+ * `label` is what the list shows and what the mention renders as; `value` is
+ * the stable identifier stored on the node (`data-id`). Extra fields are
+ * allowed and reach the item slot untouched, so an item can carry an avatar
+ * or an email for a custom list component.
+ */
 export interface MentionSuggestionItem extends BaseSuggestionItem {
-  id: string
   label: string
-  value?: string
-  email?: string
-  full_name?: string
+  value: string
 }
 
 interface MentionSuggestionOptions {
@@ -161,14 +166,14 @@ const MentionSuggestionExtension =
       )
       const mentions = toValue(options?.mentions ?? [])
 
-      return filterByQuery(mentions, query, 'label')
-        .slice(0, 10)
-        .map((mention) => ({ ...mention, display: mention.label }))
+      // The matched items are passed through as they came in, so the item
+      // slot receives the caller's own object, extra fields and all.
+      return filterByQuery(mentions, query, 'label').slice(0, 10)
     },
 
     command: ({ editor, range, props }) => {
       insertSuggestionNode(editor, range, 'mention', {
-        id: props.id || props.value,
+        id: props.value,
         label: props.label,
       })
     },
@@ -218,7 +223,7 @@ export const MentionExtension = Extension.create<{
           editor.state.doc.descendants((node: ProseMirrorNode) => {
             if (node.type.name === 'mention') {
               mentions.push({
-                id: node.attrs.id,
+                value: node.attrs.id,
                 label: node.attrs.label,
               })
             }
