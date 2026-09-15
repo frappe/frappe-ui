@@ -2,6 +2,7 @@ import { ref, h, defineComponent } from 'vue'
 import Dialog from './Dialog.vue'
 import Button from '../Button/Button.vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
+import { _resetWarnUnsupportedIconObject } from '../../utils/iconString'
 
 describe('Dialog', () => {
   // ---- Canonical v1 surface --------------------------------------------------
@@ -424,6 +425,42 @@ describe('Dialog', () => {
       .and('have.class', 'bg-surface-gray-2')
       .and('be.empty')
     cy.get('[role=dialog] .lucide-trash').should('not.exist')
+  })
+
+  it('warns once for a legacy DialogIcon object and not for a component', () => {
+    _resetWarnUnsupportedIconObject()
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('warn')
+    })
+
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        title: 'Heads up',
+        icon: { name: 'lucide-trash', theme: 'red' } as any,
+      },
+    })
+
+    cy.get('@warn').should((spy: any) => {
+      const messages = spy.getCalls().map((call: any) => String(call.args[0]))
+      expect(messages.some((m: string) => m.includes('Dialog.icon'))).to.eq(
+        true,
+      )
+    })
+
+    _resetWarnUnsupportedIconObject()
+    const Glyph = defineComponent({ render: () => h('svg') })
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: Glyph },
+    }).then(() => {
+      cy.get('@warn').should((spy: any) => {
+        const messages = spy
+          .getCalls()
+          .map((call: any) => String(call.args[0]))
+          .filter((m: string) => m.includes('Dialog.icon'))
+        expect(messages).to.have.length(1)
+      })
+    })
   })
 
   it('keeps the neutral badge when no theme is set', () => {

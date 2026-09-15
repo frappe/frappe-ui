@@ -53,3 +53,65 @@ export function warnUnsupportedIconString(
 export function _resetWarnUnsupportedIconString() {
   warnedIconStrings.clear()
 }
+
+/**
+ * Keys that only a Vue component carries. A compiled SFC has `__name` and
+ * `render` or `setup`; a `defineComponent` object has `setup` or `render`; an
+ * async component has `__asyncLoader`. A vnode is not a component, but
+ * `<component :is>` renders one, so it is not a mistake either.
+ */
+const COMPONENT_KEYS = [
+  'render',
+  'setup',
+  'template',
+  'ssrRender',
+  'components',
+  'extends',
+  'mixins',
+  'functional',
+  '__file',
+  '__name',
+  '__vccOpts',
+  '__asyncLoader',
+  '__v_isVNode',
+] as const
+
+/**
+ * Whether a value can render as a component. Functions cover function
+ * components and class components; objects need at least one component key.
+ */
+export function isComponentLike(value: unknown): boolean {
+  if (typeof value === 'function') return true
+  if (!value || typeof value !== 'object') return false
+  return COMPONENT_KEYS.some((key) => key in (value as object))
+}
+
+const warnedIconObjects = new Set<string>()
+
+/**
+ * Emit a one-time dev-mode warning when a component receives a plain object
+ * for an icon prop. The removed `{ name, theme }` shape (ADR-0008) lands here:
+ * it is not a string, so it reaches the component branch and paints an empty
+ * badge. Dedups per (component, prop) pair.
+ */
+export function warnUnsupportedIconObject(
+  component: string,
+  prop: string,
+  value: unknown,
+) {
+  if (import.meta.env.PROD) return
+  if (!value || typeof value !== 'object') return
+  if (isComponentLike(value)) return
+  const key = `${component}.${prop}`
+  if (warnedIconObjects.has(key)) return
+  warnedIconObjects.add(key)
+  const keys = Object.keys(value as object).slice(0, 4).join(', ')
+  console.warn(
+    `[frappe-ui] ${component}.${prop} received a plain object (keys: ${keys}). The { name, theme } icon object was removed in 1.0.0. Pass a lucide-* string or a component, and set \`theme\` at the top level. The icon renders empty.`,
+  )
+}
+
+/** Test-only: clear the dedup set so each test sees a fresh warning surface. */
+export function _resetWarnUnsupportedIconObject() {
+  warnedIconObjects.clear()
+}

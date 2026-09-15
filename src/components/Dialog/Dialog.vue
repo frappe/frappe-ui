@@ -174,6 +174,7 @@ import { Button } from '../Button'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import {
   warnUnsupportedIconString,
+  warnUnsupportedIconObject,
   isLucideIconString,
 } from '../../utils/iconString'
 import type {
@@ -258,6 +259,11 @@ const hasIcon = computed(() => Boolean(lucideIcon.value || componentIcon.value))
 watchEffect(() => {
   if (typeof props.icon === 'string') {
     warnUnsupportedIconString('Dialog', 'icon', props.icon)
+  } else if (props.icon) {
+    // The removed `{ name, theme }` object is not a string, so it reaches the
+    // component branch and paints a badge with nothing in it. No shim
+    // (ADR-0008), but the app gets told once.
+    warnUnsupportedIconObject('Dialog', 'icon', props.icon)
   }
 })
 
