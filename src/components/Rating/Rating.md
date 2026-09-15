@@ -43,9 +43,13 @@ to `0`. To opt out, bind manually and drop the `0` update:
 
 ## Custom icon
 
-`icon` accepts either a Vue component — typically an auto-imported lucide
-icon (`import LucideHeart from '~icons/lucide/heart'`) — or a string
-class name (e.g. `"lucide-zap"`).
+`icon` accepts a class name (`icon="lucide-zap"`), which renders as a `<span>`
+carrying that class, or a Vue component. The default is an inline filled star:
+the `lucide-star` class icon is a CSS mask of lucide's outline star, so it
+cannot draw a solid one.
+
+The `~icons/lucide/*` component form below needs `lucideIcons: true` on the
+frappe-ui Vite plugin, which is off by default.
 
 <ComponentPreview name="Rating-CustomIcon" />
 

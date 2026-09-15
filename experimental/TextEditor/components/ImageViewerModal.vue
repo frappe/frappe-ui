@@ -178,15 +178,15 @@ import { useTouchHandler } from '#composables/useTouchHandler'
 import { useImageNavigation } from '#composables/useImageNavigation'
 import { useZoomPan } from '#composables/useZoomPan'
 
-import LucideDownload from '~icons/lucide/download'
-import LucideMaximize from '~icons/lucide/maximize'
-import LucideMinimize from '~icons/lucide/minimize'
-import LucideChevronLeft from '~icons/lucide/chevron-left'
-import LucideChevronRight from '~icons/lucide/chevron-right'
-import LucidePlus from '~icons/lucide/plus'
-import LucideMinus from '~icons/lucide/minus'
-import LucideX from '~icons/lucide/x'
-
+import { classIcon } from '../classIcon'
+const LucideDownload = classIcon('lucide-download')
+const LucideMaximize = classIcon('lucide-maximize')
+const LucideMinimize = classIcon('lucide-minimize')
+const LucideChevronLeft = classIcon('lucide-chevron-left')
+const LucideChevronRight = classIcon('lucide-chevron-right')
+const LucidePlus = classIcon('lucide-plus')
+const LucideMinus = classIcon('lucide-minus')
+const LucideX = classIcon('lucide-x')
 interface ImageInfo {
   src: string
   alt: string | null

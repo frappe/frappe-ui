@@ -13,7 +13,8 @@ npm install frappe-ui@beta vue-router@^4
 - **Tailwind v3.** frappe-ui ships a Tailwind v3 preset (`darkMode`, `theme`, `plugins`, `safelist`). Tailwind v4 ignores that shape and the design tokens never load.
 - **Vite 7, Node `>=20.19.0`.** frappe-ui builds and tests against `vite@^7.3.2` (`package.json` `engines`, `devDependencies`).
 - **`vue-router`.** It is a peer dependency (`vue-router@^4.1.6`). `<Button :route>`, `Breadcrumbs`, `SidebarItem`, `Tabs` and `PageHeaderBackButton` render `RouterLink` or call `useRouter()`, and warn without a router instance.
-- `unplugin-icons`, `unplugin-auto-import`, `unplugin-vue-components` and `lucide-static` are already frappe-ui dependencies. frappe-ui's own vite sub-plugin resolves `~icons/lucide/*` from `lucide-static`, so install none of them yourself.
+- **Icons need no plugin.** frappe-ui draws icons from `lucide-<name>` class names, which the Tailwind plugin generates as CSS masks. The `lucideIcons` Vite sub-plugin is **off by default**; pass `lucideIcons: true` only if the app itself imports `~icons/lucide/*` or writes `<LucideX />` tags. `unplugin-icons`, `unplugin-auto-import`, `unplugin-vue-components` and `lucide-static` are already frappe-ui dependencies, so install none of them yourself.
+- **Tailwind is a peer dependency** (`tailwindcss@>=3.4.0 <4`), and so are `vite` and `vitepress` (both optional). Install Tailwind in the app.
 
 ## Import from the package `exports` subpaths
 
@@ -41,7 +42,7 @@ export default defineConfig({
 })
 ```
 
-Every `frappeui()` sub-plugin except `frappeTypes` is on by default; pass `false` to turn one off, or an options object to configure it. `frontendRoute` is the route the app is served on. It drives the dev-server site banner and the inferred production `indexHtmlPath`.
+Every `frappeui()` sub-plugin except `lucideIcons` and `frappeTypes` is on by default; pass `false` to turn one off, or an options object to configure it. `frontendRoute` is the route the app is served on. It drives the dev-server site banner and the inferred production `indexHtmlPath`.
 
 `frappeProxy`, `jinjaBootData` and `buildConfig` assume a Frappe site around the app. For a prototype that has no Frappe backend, turn those three off:
 
@@ -140,4 +141,4 @@ After `npm run dev`:
 
 - The page renders in the Inter font, on semantic surface colors.
 - The DevTools console is empty — no `Package subpath '…' is not defined`, no `Could not resolve '~icons/lucide/…'`, no `injection "Symbol(router)" not found`.
-- `<Button icon-left="lucide-plus" label="New" />` renders a button with an inline lucide plus icon.
+- `<Button icon-left="lucide-plus" label="New" />` renders a button with a plus icon. It is a `<span>` painted with a CSS mask, not an `<svg>`. An empty square means Tailwind did not scan frappe-ui's source — check the `content` array.

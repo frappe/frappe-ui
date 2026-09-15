@@ -132,7 +132,13 @@ export interface FrappeuiPluginOptions {
   frontendRoute?: string
   /**
    * Lucide icon auto-import support, plus explicit `~icons/lucide/*` imports.
-   * @default true
+   *
+   * Off by default. frappe-ui draws its own icons from `lucide-<name>` class
+   * names, which the Tailwind plugin generates; none of that needs Vite. Turn
+   * it on when your app imports `~icons/lucide/*` or writes `<LucideX />`
+   * tags. A missing import fails the build; a `<LucideX />` tag only warns and
+   * renders nothing.
+   * @default false
    */
   lucideIcons?: boolean | LucideIconsOptions
   /**

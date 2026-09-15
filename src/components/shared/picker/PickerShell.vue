@@ -10,7 +10,11 @@
     :reference="anchorEl"
   >
     <template #trigger>
-      <div ref="triggerWrapperRef" v-bind="$attrs" @keydown.down.prevent="onArrowDown">
+      <div
+        ref="triggerWrapperRef"
+        v-bind="$attrs"
+        @keydown.down.prevent="onArrowDown"
+      >
         <slot name="trigger" v-bind="triggerSlotProps">
           <TextInput
             ref="textInputRef"
@@ -40,9 +44,9 @@
             </template>
             <template #suffix>
               <slot name="suffix" v-bind="triggerSlotProps">
-                <LucideChevronDown
+                <span
                   data-slot="chevron"
-                  class="h-4 w-4 cursor-pointer"
+                  class="lucide-chevron-down h-4 w-4 cursor-pointer"
                   @mousedown.prevent="setOpen(!open)"
                 />
               </slot>
@@ -60,7 +64,6 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
-import LucideChevronDown from '~icons/lucide/chevron-down'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
 import type { PopoverExposed } from '../../Popover/types'
 import type {

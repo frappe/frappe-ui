@@ -36,10 +36,20 @@ export default defineConfig({
 })
 ```
 
-All plugins except `frappeTypes` are **enabled by default**. `frontendRoute`
-and `frappeTypes` require explicit configuration — `frontendRoute` sets the app route,
-and `frappeTypes` needs an `input` map of app names to doctype names. Pass
-custom options to override any plugin, or `false` to disable it.
+All plugins except `lucideIcons` and `frappeTypes` are **enabled by default**.
+`frontendRoute` and `frappeTypes` require explicit configuration —
+`frontendRoute` sets the app route, and `frappeTypes` needs an `input` map of
+app names to doctype names. Pass custom options to override any plugin, or
+`false` to disable it.
+
+| Sub-plugin | Default |
+| --- | --- |
+| `barrelImports` | on |
+| `frappeProxy` | on |
+| `jinjaBootData` | on |
+| `buildConfig` | on |
+| `lucideIcons` | **off** |
+| `frappeTypes` | off |
 
 ---
 
@@ -91,6 +101,11 @@ frappeui({
 
 Integrates [Lucide icons](https://lucide.dev/) with auto-import support and a
 standardized stroke-width of 1.5.
+
+**Off by default (`lucideIcons: false`).** frappe-ui's own components use class
+icons (`<span class="lucide-arrow-right" />`), which the Tailwind plugin draws
+as a CSS mask and which need no Vite plugin. Pass `lucideIcons: true` when your
+app uses either form below.
 
 **Auto-import** — use directly in templates, no import needed:
 
