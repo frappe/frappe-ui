@@ -103,12 +103,31 @@ async function rename(name, newName) {
   data, or with `null` when the request fails; read `error` after awaiting it.
 - `submit(params?)` — runs `beforeSubmit`, then sends a request with the given
   params (or the configured `params` if omitted). Resolves with the response
-  data, or **rejects** with the error. One `submit()` is always one request,
-  `refetch` included: if the new params are what `refetch: true` reacts to,
-  `submit()` waits for that request; if the params do not change, `submit()`
-  sends the request itself.
+  data, or **rejects** with the error. It always settles on the request its own
+  params went out on, never on an earlier response. Under `refetch: true` it
+  reuses the request the params change already triggered rather than sending a
+  second one; see [`refetch` and `submit`](#refetch-and-submit).
 - `reset()` — clears any params set by a previous `submit()` call.
 - `abort()` — aborts the in-flight request.
+
+### `refetch` and `submit` {#refetch-and-submit}
+
+With `refetch: true`, a params change sends a request on its own. `submit()`
+waits for that request instead of adding one, and falls back to sending the
+request itself when the change triggered nothing — a second `submit()` with the
+same object, a `GET` whose params build the same URL, or a `submit()` with no
+argument at all.
+
+Two things follow from `refetch` and `submit` sharing one request slot:
+
+- Two `submit()` calls in the same tick become **one** request, carrying the
+  params of the later call. Both promises resolve with that one response.
+- A `submit()` made while a request is in flight waits for it, then sends its
+  own.
+
+Each composable instance has one request slot. When concurrent writes must not
+share one, give each its own `useCall`, or use `useDoc`, whose write methods are
+isolated per submit.
 
 `execute`/`fetch`/`reload` are one function under three names, and
 `loading`/`isFetching` one ref under two. v1 keeps every alias: apps use all of

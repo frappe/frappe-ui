@@ -88,9 +88,19 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   type FrappeResponse<T> = { data: T }
 
+  // One tick up per request that leaves, whoever sent it: this call's
+  // `execute`, or `useFetch`'s parameter watcher under `refetch: true`.
+  // `submit` reads it to find out whether the watcher already sent its
+  // request. `createFetch` chains a per-call `beforeFetch` after the
+  // factory's, so this does not displace the header and stamping hooks.
+  let dispatches = 0
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
+    beforeFetch() {
+      dispatches += 1
+    },
     // `data` is read back out as `data.value?.data` below (the raw fetch
     // response is `{ data: TResponse }`), so the seed value has to be
     // wrapped the same way — an unwrapped `initialData` would read as
@@ -190,6 +200,13 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   }
 
   onFetchResponse(() => {
+    // This response succeeded, so the call is not in error. `execute` clears
+    // `error` when it starts, but a request this one superseded rejects with
+    // its abort *after* that, and nothing put the ref back. Two overlapping
+    // submits ended with the newer one rejecting on the older one's abort.
+    // `data` is already overwritten by whichever response settled last; the
+    // error half has to follow the same rule.
+    error.value = null
     resolve()
     promise.value = makePromise()
   })
@@ -226,30 +243,36 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       // A throw cancels the submit: the request is not sent and submit() rejects (#990)
       await beforeSubmit(params)
     }
-    // With `refetch: true` the request is sent by `useFetch`'s parameter
-    // watcher, not by this call — but only if the assignment below really
-    // changes the parameters. Read that before assigning.
-    const watcherWillDispatch =
-      refetch && params != null && !Object.is(submitParams.value, params)
     if (params != null) {
       submitParams.value = params
     }
-    if (!watcherWillDispatch) {
-      // Either `refetch` is off, or the parameters did not change and no
-      // watcher will fire. Send the request here so that every `submit()`
-      // sends exactly one request.
-      const response = await execute()
-      // Actions reject, reads resolve. `submit()` writes, so a caller that
-      // does not handle failure must not run its success path (DAT-Q1).
-      // `execute`/`fetch`/`reload` keep resolving; read `error` after them.
-      if (error.value) throw error.value
-      return response
+    if (refetch) {
+      // `refetch: true` gives `useFetch`'s parameter watcher the chance to
+      // send this request. Whether it takes it cannot be read off the
+      // argument: the watcher compares the URL (always) and the payload ref
+      // (body methods only), and `submitParams.value` is a reactive proxy, so
+      // no identity test on the argument can answer it. So count instead of
+      // predicting, and count after the settle, where the number is final —
+      // `beforeFetch` runs a few microtasks into `execute`, so a sample taken
+      // straight after the flush would still be racing it.
+      const sent = dispatches
+      await nextTick()
+      await whenSettled()
+      if (dispatches > sent) {
+        // A request left after this submit started. It read the params this
+        // call had just assigned, so it is this submit's request.
+        if (error.value) throw error.value
+        return data.value?.data ?? null
+      }
+      // Nothing went out. Fall through and send it here, the same way a
+      // submit without `refetch` does.
     }
-    // The watcher is pre-flush, so the request goes out on the next tick.
-    await nextTick()
-    await whenSettled()
+    const response = await execute()
+    // Actions reject, reads resolve. `submit()` writes, so a caller that
+    // does not handle failure must not run its success path (DAT-Q1).
+    // `execute`/`fetch`/`reload` keep resolving; read `error` after them.
     if (error.value) throw error.value
-    return data.value?.data ?? null
+    return response
   }
 
   const reset = () => {

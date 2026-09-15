@@ -1021,12 +1021,19 @@ A failed write must not let its caller fall through to the success path.
   for them.
 - `useCall({ refetch: true }).submit()` obeys the rule too. It used to return
   `undefined` at once and leave the request to the params watcher, so a failed
-  write could not reject. It now sends exactly one request and waits for it:
-  the watcher's request when the params change, its own request when they do
-  not. A `submit()` with no params, which used to send nothing at all, now
-  sends the request.
+  write could neither reject nor resolve with its response. It now waits for
+  that request, and sends the request itself when the params change triggered
+  none — the same object twice, a `GET` whose params build the same URL, or a
+  `submit()` with no argument, which used to send nothing at all. Two submits
+  in the same tick still share one request; the
+  [`refetch` and `submit`](/docs/data-fetching/use-call#refetch-and-submit)
+  section says what that means.
 
-`error`, `onError` and the stores behave exactly as before. This is silent:
+A related fix: a successful response now clears `error`. Two overlapping
+submits used to end with the newer one rejecting on the abort of the request it
+superseded, even though its own request succeeded.
+
+`error`, `onError` and the stores otherwise behave as before. This is silent:
 nothing fails to build, the success path simply stops running, and an
 unawaited `submit()` becomes an unhandled rejection. `null` is a valid
 response now, so `if (!result)` after a `submit()` is no longer a failure

@@ -3,9 +3,25 @@
  */
 
 import { ref } from 'vue'
+import { http, HttpResponse } from 'msw'
 import { useCall } from '../index'
 import { url, waitUntilValueChanges } from '../../mocks/utils'
 import { server } from '../../mocks/node'
+
+/** Counts the requests msw sees while `run` is in flight. */
+async function countRequests(run: () => Promise<unknown>) {
+  let requests = 0
+  const count = () => {
+    requests += 1
+  }
+  server.events.on('request:start', count)
+  try {
+    await run()
+  } finally {
+    server.events.removeListener('request:start', count)
+  }
+  return requests
+}
 
 describe('msw works', () => {
   it('ping responds with pong', async () => {
@@ -384,11 +400,6 @@ describe('useCall', () => {
   })
 
   it('sends one request per submit when refetch is true', async () => {
-    let requests = 0
-    const count = () => {
-      requests += 1
-    }
-    server.events.on('request:start', count)
     const call = useCall<{ success: boolean }, { value: string }>({
       url: url('/api/v2/method/post'),
       method: 'POST',
@@ -396,15 +407,162 @@ describe('useCall', () => {
       immediate: false,
     })
 
-    try {
+    const requests = await countRequests(async () => {
       await call.submit({ value: 'one' })
       await call.submit({ value: 'two' })
       await call.submit()
-    } finally {
-      server.events.removeListener('request:start', count)
-    }
+    })
 
     expect(requests).toBe(3)
+  })
+
+  // Every one of these used to send nothing on the second call, because the
+  // dispatch was guessed from the argument instead of observed.
+  it('sends its own request when the params watcher will not fire', async () => {
+    const post = useCall<{ success: boolean; received: any }, { v: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    // The same object twice: the ref does not change, so no watcher fires.
+    const sameObject = { v: 'same' }
+    const sameObjectRequests = await countRequests(async () => {
+      await post.submit(sameObject)
+      await post.submit(sameObject)
+    })
+    expect(sameObjectRequests).toBe(2)
+
+    // GET watches only the URL. Equal content builds an equal URL, so a fresh
+    // object each time still fires no watcher.
+    const read = useCall<{ value: string }, { value: string }>({
+      url: url('/api/v2/method/get'),
+      refetch: true,
+      immediate: false,
+    })
+    const getRequests = await countRequests(async () => {
+      await read.submit({ value: 'a' })
+      await read.submit({ value: 'a' })
+    })
+    expect(getRequests).toBe(2)
+
+    // No argument at all.
+    const noArgs = useCall<{ success: boolean }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+    expect(await countRequests(() => noArgs.submit())).toBe(1)
+  })
+
+  // The echo handlers answer identical params identically, so a stale
+  // response is invisible to them. This one numbers every answer.
+  it('resolves each refetch submit with its own response, not a stale one', async () => {
+    let served = 0
+    server.use(
+      http.post(url('/api/v2/method/counter'), () => {
+        served += 1
+        return HttpResponse.json({ data: { n: served } })
+      }),
+      http.get(url('/api/v2/method/counter'), () => {
+        served += 1
+        return HttpResponse.json({ data: { n: served } })
+      }),
+    )
+
+    const post = useCall<{ n: number }, { v: string }>({
+      url: url('/api/v2/method/counter'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+    const sameObject = { v: 'same' }
+    await expect(post.submit(sameObject)).resolves.toEqual({ n: 1 })
+    await expect(post.submit(sameObject)).resolves.toEqual({ n: 2 })
+
+    const read = useCall<{ n: number }, { value: string }>({
+      url: url('/api/v2/method/counter'),
+      refetch: true,
+      immediate: false,
+    })
+    await expect(read.submit({ value: 'a' })).resolves.toEqual({ n: 3 })
+    await expect(read.submit({ value: 'a' })).resolves.toEqual({ n: 4 })
+
+    const noArgs = useCall<{ n: number }>({
+      url: url('/api/v2/method/counter'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+    await expect(noArgs.submit()).resolves.toEqual({ n: 5 })
+    await expect(noArgs.submit()).resolves.toEqual({ n: 6 })
+  })
+
+  // Two submits in the same tick share one request: the parameter watcher is
+  // pre-flush, so it coalesces them. Both settle on that one response.
+  it('coalesces two same-tick refetch submits into one request', async () => {
+    const call = useCall<{ success: boolean; received: any }, { v: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    let first: Promise<any>
+    let second: Promise<any>
+    const requests = await countRequests(async () => {
+      first = call.submit({ v: 'first' })
+      second = call.submit({ v: 'second' })
+      await Promise.all([first, second])
+    })
+
+    expect(requests).toBe(1)
+    const last = { success: true, received: { v: 'second' } }
+    await expect(first!).resolves.toEqual(last)
+    await expect(second!).resolves.toEqual(last)
+  })
+
+  it("does not reject a refetch submit with a previous request's error", async () => {
+    const call = useCall<{ success: boolean }, { v: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    await expect(call.submit({ v: 'please fail' })).rejects.toThrow(
+      'ValidationError: post failed',
+    )
+    expect(call.error).toBeTruthy()
+
+    // A fresh submit that succeeds must not inherit that error.
+    await expect(call.submit({ v: 'fine' })).resolves.toEqual({
+      success: true,
+      received: { v: 'fine' },
+    })
+    expect(call.error).toBe(null)
+  })
+
+  // Pre-existing before this round: the newer request aborts the older one,
+  // and the abort rejection lands after the newer execute() cleared `error`.
+  it('does not reject a submit whose own request succeeded', async () => {
+    const call = useCall<{ success: boolean; received: any }, { v: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      immediate: false,
+    })
+
+    const older = call.submit({ v: 'slow-one' })
+    const newer = call.submit({ v: 'quick' })
+
+    await expect(newer).resolves.toEqual({
+      success: true,
+      received: { v: 'quick' },
+    })
+    expect(call.error).toBe(null)
+    await older.catch(() => {})
   })
 
   it('caches data if cacheKey is provided', async () => {
