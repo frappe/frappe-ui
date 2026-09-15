@@ -20,6 +20,8 @@
           role="combobox"
           aria-haspopup="listbox"
           :aria-expanded="isOpen"
+          :aria-controls="isOpen ? panelId : undefined"
+          :aria-activedescendant="activeDescendantId"
           @focus="onFocus"
           @click="onClickInput"
           @blur="onBlur"
@@ -67,11 +69,11 @@
       >
         <div
           ref="panelRef"
+          :id="panelId"
           data-slot="content-body"
           data-motion="instant"
           class="time-picker-panel max-h-48 w-44 overflow-y-auto rounded-6 bg-surface-elevation-2 p-1 text-base shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none"
           role="listbox"
-          :aria-activedescendant="activeDescendantId"
         >
           <button
             v-for="(opt, idx) in displayedOptions"
@@ -208,6 +210,8 @@ const displayValue = ref<string>(
 
 const isTyping = ref(false)
 const highlightIndex = ref<number>(-1)
+
+const panelId = `tp-${uid}-listbox`
 
 function optionId(idx: number): string {
   return `tp-${uid}-${idx}`

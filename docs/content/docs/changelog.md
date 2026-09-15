@@ -1243,7 +1243,10 @@ type into, so it is a control that also opens a panel.
 - The picker chevron carries `data-slot="chevron"`.
 - The picker `<input>` carries `role="combobox"`, `aria-haspopup`
   (`dialog` on the date pickers, `listbox` on `TimePicker`) and
-  `aria-expanded`.
+  `aria-expanded`. While the panel is open it also carries `aria-controls`
+  pointing at the panel element. `TimePicker` puts `aria-activedescendant` on
+  the input, where the ARIA combobox pattern expects it, instead of on the
+  listbox.
 
 ### `FormControl` — `variant` is not forwarded to a checkbox (breaking, silent)
 

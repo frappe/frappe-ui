@@ -376,5 +376,34 @@ describe('TimePicker', () => {
       cy.get('input').click()
       cy.get('input').should('have.attr', 'aria-expanded', 'true')
     })
+
+    it('points aria-controls at the open listbox', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').should('not.have.attr', 'aria-controls')
+
+      cy.get('input').click()
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          cy.get(`#${panelId}`).should('have.attr', 'role', 'listbox')
+        })
+    })
+
+    it('keeps aria-activedescendant on the input, not on the listbox', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').click()
+      cy.get('input').type('{downarrow}')
+
+      cy.get('[role=listbox]').should('not.have.attr', 'aria-activedescendant')
+      cy.get('input')
+        .invoke('attr', 'aria-activedescendant')
+        .should('be.a', 'string')
+        .then((optionId) => {
+          cy.get(`#${optionId}`).should('have.attr', 'role', 'option')
+        })
+    })
   })
 })

@@ -465,5 +465,22 @@ describe('DatePicker', () => {
       cy.get('input').click()
       cy.get('input').should('have.attr', 'aria-expanded', 'true')
     })
+
+    it('points aria-controls at the open panel', () => {
+      cy.mount(DatePicker)
+
+      cy.get('input').should('not.have.attr', 'aria-controls')
+
+      cy.get('input').click()
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          cy.get(`#${panelId}`)
+            .should('exist')
+            .find('[aria-label="Today"]')
+            .should('exist')
+        })
+    })
   })
 })

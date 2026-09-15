@@ -29,6 +29,7 @@
             role="combobox"
             aria-haspopup="dialog"
             :aria-expanded="open"
+            :aria-controls="open ? panelId : undefined"
             @focus="onFocus"
             @click="onClick"
             @blur="onBlur"
@@ -51,7 +52,12 @@
       </div>
     </template>
 
-    <slot v-bind="triggerSlotProps" />
+    <!-- The panel needs an id of its own: `aria-controls` on the combobox has
+         to point at the element the popover renders, and the slot content
+         belongs to the caller. -->
+    <div :id="panelId">
+      <slot v-bind="triggerSlotProps" />
+    </div>
   </Popover>
 </template>
 
@@ -61,6 +67,7 @@ import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
+import { useId } from '../../../utils/useId'
 import type { PopoverExposed } from '../../Popover/types'
 import type {
   PickerShellExposed,
@@ -106,6 +113,8 @@ const typing = defineModel<boolean>('typing', { default: false })
 const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const triggerWrapperRef = ref<HTMLElement | null>(null)
 const popoverRef = ref<PopoverExposed | null>(null)
+
+const panelId = `${useId()}-picker-panel`
 
 // Anchor to the `<input>` itself. Anchoring to the whole labelled field would
 // put the panel below the description.
