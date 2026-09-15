@@ -98,8 +98,10 @@ per-file edits.
   first version that derives the sizing families from `theme('spacing')`, which
   the preset depends on, and v4 does not read the JavaScript config the preset
   is written in. The install now fails instead of half-working at build time.
-- **`vite` and `vitepress` are optional peers.** An app that never imports
-  `frappe-ui/vite` or `frappe-ui/vitepress` installs neither.
+- **`vite` and `vitepress` are optional peers**, with `shiki`,
+  `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
+  imports. An app that never imports `frappe-ui/vite` or `frappe-ui/vitepress`
+  installs none of them.
 - **`@floating-ui/vue` moved from a transitive install to a direct
   dependency**, with the five `@codemirror/*` packages and `@lezer/highlight`
   the CodeEditor imports. They were resolving only because another package

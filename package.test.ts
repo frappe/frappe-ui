@@ -177,13 +177,27 @@ describe('peer dependencies', () => {
     expect(pkg.devDependencies.tailwindcss.startsWith('^3.')).toBe(true)
   })
 
-  it('declares vite and vitepress as optional peers', () => {
-    expect(pkg.peerDependencies.vite).toBeDefined()
-    expect(pkg.peerDependencies.vitepress).toBeDefined()
-    expect(
-      (pkg as unknown as { peerDependenciesMeta: Record<string, unknown> })
-        .peerDependenciesMeta,
-    ).toMatchObject({ vite: { optional: true }, vitepress: { optional: true } })
+  /**
+   * `frappe-ui/vite` and `frappe-ui/vitepress` are the only entries that need
+   * these packages, and `shiki`, `@shikijs/transformers` and
+   * `@vue/compiler-dom` are runtime imports of the vitepress entry. A consumer
+   * of the main entry installs none of them, so every one is optional.
+   */
+  it('declares every build-time entry package as an optional peer', () => {
+    const optional = [
+      'vite',
+      'vitepress',
+      'shiki',
+      '@shikijs/transformers',
+      '@vue/compiler-dom',
+    ]
+    const meta = (
+      pkg as unknown as { peerDependenciesMeta: Record<string, unknown> }
+    ).peerDependenciesMeta
+    for (const name of optional) {
+      expect(pkg.peerDependencies[name], `${name} is not a peer`).toBeDefined()
+      expect(meta).toMatchObject({ [name]: { optional: true } })
+    }
   })
 })
 
@@ -203,17 +217,6 @@ const SHIPPED_ROOTS = [
 
 const NOT_SHIPPED =
   /(\.test\.|\.spec\.|\.cy\.|\.story\.vue|\.playground\.vue|\/stories\/|\/mocks\/)/
-
-/**
- * Packages a shipped file may import without declaring: each one is installed
- * by a declared peer, so it resolves wherever that peer does.
- */
-const VIA_PEER: Record<string, string> = {
-  shiki: 'vitepress',
-  '@shikijs/transformers': 'vitepress',
-  'markdown-it': 'vitepress',
-  '@vue/compiler-dom': 'vue',
-}
 
 function shippedFiles(): string[] {
   const out: string[] = []
@@ -240,6 +243,11 @@ const IMPORT_PATTERNS = [
   /^\s*export\s[^'"]*?from\s*['"]([^'"]+)['"]/gm,
   /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
 ]
+
+// A type-only import is erased at build, so it needs no runtime dependency.
+// An inline `type` specifier (`import { x, type Y } from 'pkg'`) still leaves a
+// runtime import of the package, so only the leading form is skipped here.
+const TYPE_ONLY = /^\s*(?:import|export)\s+type\b/
 
 const BUILTINS = new Set(builtinModules)
 
@@ -279,7 +287,6 @@ describe('shipped imports', () => {
     const declared = new Set([
       ...Object.keys(pkg.dependencies),
       ...Object.keys(pkg.peerDependencies),
-      ...Object.keys(VIA_PEER),
     ])
     const undeclared = new Map<string, string>()
 
@@ -289,6 +296,7 @@ describe('shipped imports', () => {
         pattern.lastIndex = 0
         let match: RegExpExecArray | null
         while ((match = pattern.exec(source))) {
+          if (TYPE_ONLY.test(match[0])) continue
           const name = packageName(match[1])
           if (name && !declared.has(name) && !undeclared.has(name))
             undeclared.set(name, file)

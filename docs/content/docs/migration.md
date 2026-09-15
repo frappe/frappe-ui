@@ -2680,8 +2680,10 @@ integers 1 to 128 and half steps 0.5 to 19.5. Tailwind 3.4 reads
 
 - Install `tailwindcss` yourself: it is a peer now, `>=3.4.0 <4`. An install on
   Tailwind v4 fails.
-- `vite` and `vitepress` are optional peers. Nothing changes unless you import
-  `frappe-ui/vite` or `frappe-ui/vitepress` without having them.
+- `vite` and `vitepress` are optional peers, with `shiki`,
+  `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
+  imports. Nothing changes unless you import `frappe-ui/vite` or
+  `frappe-ui/vitepress` without having them.
 - If your app imported `ora`, `slugify`, `prosemirror-tables`,
   `@tailwindcss/line-clamp` or a `@tiptap/extension-*` package through
   frappe-ui, declare it yourself. They are no longer frappe-ui dependencies.
