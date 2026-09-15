@@ -1,0 +1,218 @@
+/**
+ * The published package manifest.
+ *
+ * These assert what `npm publish` puts in the tarball and what a consumer's
+ * resolver sees: the files list, the `exports` conditions, the bins, and the
+ * rule that every bare import in shipped code is a declared dependency.
+ */
+import { describe, expect, it } from 'vitest'
+import fs from 'node:fs'
+import path from 'node:path'
+import { builtinModules } from 'node:module'
+import { fileURLToPath } from 'node:url'
+
+const root = path.dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(
+  fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+) as {
+  bin: Record<string, string>
+  files: string[]
+  exports: Record<string, Record<string, string>>
+  dependencies: Record<string, string>
+  peerDependencies: Record<string, string>
+  devDependencies: Record<string, string>
+}
+
+/** The negation patterns that keep development files out of the tarball. */
+const EXCLUSIONS = [
+  '!**/*.test.ts',
+  '!**/*.test.js',
+  '!**/*.spec.ts',
+  '!**/*.cy.ts',
+  '!**/*.story.vue',
+  '!**/*.playground.vue',
+  '!**/stories',
+  '!**/test-helpers.ts',
+  '!src/mocks',
+]
+
+describe('files', () => {
+  it('excludes tests, specs, stories, playgrounds and the msw mocks', () => {
+    expect(pkg.files).toEqual(expect.arrayContaining(EXCLUSIONS))
+  })
+
+  it('lists every exclusion after every inclusion', () => {
+    // npm applies the list in order, so an inclusion after a negation would
+    // put the excluded files back.
+    const firstExclusion = pkg.files.findIndex((entry) => entry.startsWith('!'))
+    expect(firstExclusion).toBeGreaterThan(0)
+    expect(
+      pkg.files.slice(firstExclusion).every((e) => e.startsWith('!')),
+    ).toBe(true)
+  })
+
+  it('ships every bin target', () => {
+    const included = pkg.files.filter((entry) => !entry.startsWith('!'))
+    for (const target of Object.values(pkg.bin)) {
+      const relative = target.replace(/^\.\//, '')
+      const shipped = included.some(
+        (entry) => entry === relative || relative.startsWith(`${entry}/`),
+      )
+      expect(shipped, `${relative} is not in "files"`).toBe(true)
+      expect(fs.existsSync(path.join(root, relative))).toBe(true)
+    }
+  })
+
+  it('makes every bin executable from the package root', () => {
+    for (const target of Object.values(pkg.bin)) {
+      const source = fs.readFileSync(
+        path.join(root, target.replace(/^\.\//, '')),
+        'utf8',
+      )
+      expect(source.startsWith('#!')).toBe(true)
+    }
+  })
+})
+
+describe('exports', () => {
+  it('gives every code subpath a types condition', () => {
+    for (const [subpath, conditions] of Object.entries(pkg.exports)) {
+      if (subpath.endsWith('.css') || subpath.endsWith('.json')) continue
+      expect(
+        Object.keys(conditions),
+        `${subpath} has no "types" condition`,
+      ).toContain('types')
+    }
+  })
+
+  it('points every condition at a file that exists', () => {
+    for (const conditions of Object.values(pkg.exports)) {
+      for (const target of Object.values(conditions)) {
+        expect(fs.existsSync(path.join(root, target)), target).toBe(true)
+      }
+    }
+  })
+
+  it('has no wildcard subpath, so `frappe-ui/src/...` stays blocked', () => {
+    expect(Object.keys(pkg.exports).some((s) => s.includes('*'))).toBe(false)
+  })
+})
+
+describe('peer dependencies', () => {
+  it('pins Tailwind to v3.4 or later, below v4', () => {
+    // The preset is a v3 config object, and the spacing scale relies on v3.4
+    // reading `theme('spacing')` for minWidth/maxWidth/minHeight.
+    expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.0 <4')
+  })
+
+  it('declares vite and vitepress as optional peers', () => {
+    expect(pkg.peerDependencies.vite).toBeDefined()
+    expect(pkg.peerDependencies.vitepress).toBeDefined()
+    expect(
+      (pkg as unknown as { peerDependenciesMeta: Record<string, unknown> })
+        .peerDependenciesMeta,
+    ).toMatchObject({ vite: { optional: true }, vitepress: { optional: true } })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Every bare import in shipped code resolves from a declared dependency.
+// ---------------------------------------------------------------------------
+
+const SHIPPED_ROOTS = [
+  'src',
+  'vite',
+  'icons',
+  'tailwind',
+  'vitepress',
+  'experimental',
+  'scripts',
+]
+
+const NOT_SHIPPED =
+  /(\.test\.|\.spec\.|\.cy\.|\.story\.vue|\.playground\.vue|\/stories\/|\/mocks\/)/
+
+/**
+ * Packages a shipped file may import without declaring: each one is installed
+ * by a declared peer, so it resolves wherever that peer does.
+ */
+const VIA_PEER: Record<string, string> = {
+  shiki: 'vitepress',
+  '@shikijs/transformers': 'vitepress',
+  'markdown-it': 'vitepress',
+  '@vue/compiler-dom': 'vue',
+}
+
+function shippedFiles(): string[] {
+  const out: string[] = []
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name)
+      const relative = full.slice(root.length + 1)
+      if (entry.isDirectory()) walk(full)
+      else if (
+        /\.(ts|js|vue|mjs|cjs)$/.test(entry.name) &&
+        !NOT_SHIPPED.test(`/${relative}`)
+      )
+        out.push(relative)
+    }
+  }
+  for (const dir of SHIPPED_ROOTS) walk(path.join(root, dir))
+  out.push('experimental.ts')
+  return out
+}
+
+const IMPORT_PATTERNS = [
+  /^\s*import\s[^'"]*?from\s*['"]([^'"]+)['"]/gm,
+  /^\s*import\s*['"]([^'"]+)['"]/gm,
+  /^\s*export\s[^'"]*?from\s*['"]([^'"]+)['"]/gm,
+  /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
+]
+
+const BUILTINS = new Set(builtinModules)
+
+function packageName(specifier: string): string | null {
+  if (/^[.\/#~]/.test(specifier)) return null
+  if (specifier.startsWith('node:') || specifier.startsWith('virtual:'))
+    return null
+  const parts = specifier.split('/')
+  const name = specifier.startsWith('@')
+    ? parts.slice(0, 2).join('/')
+    : parts[0]
+  // Node builtins written without the `node:` prefix, and the package's own
+  // name (a self-reference, which the `exports` map resolves).
+  if (BUILTINS.has(name) || name === 'frappe-ui') return null
+  return name
+}
+
+describe('shipped imports', () => {
+  it('imports only declared dependencies', () => {
+    const declared = new Set([
+      ...Object.keys(pkg.dependencies),
+      ...Object.keys(pkg.peerDependencies),
+      ...Object.keys(VIA_PEER),
+    ])
+    const undeclared = new Map<string, string>()
+
+    for (const file of shippedFiles()) {
+      const source = fs.readFileSync(path.join(root, file), 'utf8')
+      for (const pattern of IMPORT_PATTERNS) {
+        pattern.lastIndex = 0
+        let match: RegExpExecArray | null
+        while ((match = pattern.exec(source))) {
+          const name = packageName(match[1])
+          if (name && !declared.has(name) && !undeclared.has(name))
+            undeclared.set(name, file)
+        }
+      }
+    }
+
+    expect(Object.fromEntries(undeclared)).toEqual({})
+  })
+
+  it('keeps the packages it only imports at build time out of dependencies', () => {
+    for (const name of ['vite', 'vitepress', 'tailwindcss']) {
+      expect(pkg.dependencies[name]).toBeUndefined()
+    }
+  })
+})

@@ -76,9 +76,11 @@
       "types": "./src/charts/index.ts"
     },
     "./icons": {
+      "types": "./icons/index.ts",
       "import": "./icons/index.ts"
     },
     "./tailwind": {
+      "types": "./tailwind/index.d.ts",
       "import": "./tailwind/index.js",
       "default": "./tailwind/index.js"
     },
@@ -87,6 +89,7 @@
       "import": "./vite/index.js"
     },
     "./vite/lucideIconsPlugin": {
+      "types": "./vite/lucideIconsPlugin.d.ts",
       "import": "./vite/lucideIconsPlugin.js"
     },
     "./vitepress": {
@@ -108,6 +111,8 @@
     "icons",
     "tailwind",
     "vitepress",
+    "experimental",
+    "experimental.ts",
     "scripts/migrate-shortcuts-v1.js",
     "scripts/migrate-base-props-v1.js",
     "scripts/migrate-editor-v1.js",
@@ -116,9 +121,16 @@
     "scripts/migrate-overlays-v1.js",
     "scripts/migrate-destinations-v1.js",
     "scripts/migrate-data-v1.js",
-    "experimental",
-    "experimental.ts",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    "!**/*.test.ts",
+    "!**/*.test.js",
+    "!**/*.spec.ts",
+    "!**/*.cy.ts",
+    "!**/*.story.vue",
+    "!**/*.playground.vue",
+    "!**/stories",
+    "!**/test-helpers.ts",
+    "!src/mocks"
   ],
   "repository": {
     "type": "git",
@@ -138,29 +150,29 @@
     "@codemirror/lang-sql": "^6.8.0",
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/lang-yaml": "^6.1.3",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.43.1",
+    "@lezer/highlight": "^1.2.3",
     "@floating-ui/dom": "^1.7.4",
+    "@floating-ui/vue": "^1.1.9",
     "@tailwindcss/forms": "^0.5.3",
-    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tiptap/core": "^3.26.0",
     "@tiptap/extension-blockquote": "^3.26.0",
     "@tiptap/extension-bold": "^3.26.0",
-    "@tiptap/extension-bubble-menu": "^3.26.0",
     "@tiptap/extension-code": "^3.26.0",
     "@tiptap/extension-code-block": "^3.26.0",
     "@tiptap/extension-code-block-lowlight": "^3.26.0",
-    "@tiptap/extension-color": "^3.26.0",
     "@tiptap/extension-document": "^3.26.0",
     "@tiptap/extension-hard-break": "^3.26.0",
     "@tiptap/extension-heading": "^3.26.0",
-    "@tiptap/extension-highlight": "^3.26.0",
     "@tiptap/extension-horizontal-rule": "^3.26.0",
-    "@tiptap/extension-image": "^3.26.0",
     "@tiptap/extension-italic": "^3.26.0",
     "@tiptap/extension-link": "^3.26.0",
     "@tiptap/extension-list": "^3.26.0",
-    "@tiptap/extension-mention": "^3.26.0",
-    "@tiptap/extension-node-range": "^3.26.0",
     "@tiptap/extension-paragraph": "^3.26.0",
     "@tiptap/extension-placeholder": "^3.26.0",
     "@tiptap/extension-strike": "^3.26.0",
@@ -191,11 +203,7 @@
     "lucide-static": "^1.31.0",
     "magic-string": "^0.30.21",
     "marked": "^15.0.12",
-    "ora": "5.4.1",
-    "prettier": "^3.3.2",
-    "prosemirror-tables": "^1.8.1",
     "reka-ui": "^2.9.9",
-    "slugify": "^1.6.6",
     "socket.io-client": "^4.5.1",
     "tippy.js": "^6.3.7",
     "typescript": "^5.0.2",
@@ -205,8 +213,19 @@
     "vue-sonner": "^2.0.9"
   },
   "peerDependencies": {
+    "tailwindcss": ">=3.4.0 <4",
+    "vite": ">=5",
+    "vitepress": ">=2.0.0-alpha.15",
     "vue": ">=3.5.0",
     "vue-router": "^4.1.6"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    },
+    "vitepress": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.13.10",
@@ -221,6 +240,7 @@
     "msw": "^2.7.0",
     "nyc": "^17.1.0",
     "postcss": "^8.5.10",
+    "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.7",
     "tsx": "^4.20.6",
