@@ -506,16 +506,19 @@ let date = ref(
 )
 let selectedDay = computed(() => currentMonthDates.value[date.value])
 
+/**
+ * The day the calendar is on, whichever view it is in: the one `date` points
+ * at, which every view moves — a step of the month or the week lands it on the
+ * first day in the period, a step of the day on the next one, and a date the
+ * host sets on that date. Reported the same way in every view so a host's mini
+ * month circles the day the reader picked. It used to answer the Month view
+ * with 1 and the Week view with the week's Sunday, and a mini month handed
+ * those circled the 1st, or the Sunday, while the calendar sat on the 11th the
+ * reader had just clicked in it.
+ */
 function computeCurrentDay(): number | null {
-  if (activeView.value === 'Week') {
-    const weekDates = datesInWeeks.value[week.value] || []
-    return weekDates[0] ? weekDates[0].getDate() : null
-  }
-  if (activeView.value === 'Day') {
-    const day = selectedDay.value
-    return day ? new Date(day).getDate() : null
-  }
-  return 1
+  const day = selectedDay.value
+  return day ? new Date(day).getDate() : null
 }
 
 let currentDay = ref(computeCurrentDay())
