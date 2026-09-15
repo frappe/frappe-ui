@@ -115,6 +115,7 @@
       "default": "./vitepress/index.ts"
     },
     "./style.css": {
+      "style": "./src/style.css",
       "import": "./src/style.css"
     },
     "./tsconfig.base.json": {

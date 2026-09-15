@@ -117,6 +117,11 @@ per-file edits.
 - **`frappe-ui/tailwind`, `frappe-ui/icons` and
   `frappe-ui/vite/lucideIconsPlugin` now carry a `types` condition.** The
   preset's declaration says which Tailwind sections it replaces.
+- **`frappe-ui/style.css` also resolves under the `style` condition**
+  (additive). Tailwind v4 looks up package CSS with that condition, and the
+  export listed only `import`, so an `@import "frappe-ui/style.css"` failed
+  with `not exported under the condition "style"`. Both conditions point at the
+  same file, and the file itself is unchanged.
 - **The tarball ships no tests.** `*.test.*`, `*.spec.ts`, `*.cy.ts`,
   `*.story.vue`, `*.playground.vue`, `stories/` and `src/mocks` are excluded:
   1448 files became 932, and 518 test files became none.

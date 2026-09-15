@@ -94,6 +94,23 @@ describe('exports', () => {
     }
   })
 
+  /**
+   * Tailwind v4 resolves package CSS with the `style` condition, so an
+   * `@import "frappe-ui/style.css"` fails with "not exported under the
+   * condition \"style\"" when only `import` is listed. See
+   * .scratch/research/tailwind-v4-1x.md section 3.
+   */
+  it('resolves every CSS subpath under the `style` condition', () => {
+    for (const [subpath, conditions] of Object.entries(pkg.exports)) {
+      if (!subpath.endsWith('.css')) continue
+      expect(
+        Object.keys(conditions),
+        `${subpath} has no "style" condition`,
+      ).toContain('style')
+      expect(conditions.style).toBe(conditions.import ?? conditions.default)
+    }
+  })
+
   it('has no wildcard subpath, so `frappe-ui/src/...` stays blocked', () => {
     expect(Object.keys(pkg.exports).some((s) => s.includes('*'))).toBe(false)
   })
@@ -110,7 +127,11 @@ describe('exports', () => {
       const names = new Set<string>()
       for (const match of source.matchAll(/export\s*\{([^}]*)\}/g)) {
         for (const part of match[1].split(',')) {
-          const name = part.trim().split(/\s+as\s+/).pop()?.trim()
+          const name = part
+            .trim()
+            .split(/\s+as\s+/)
+            .pop()
+            ?.trim()
           if (name) names.add(name)
         }
       }
