@@ -201,6 +201,11 @@ function ensureObserving(): void {
   readDocument()
   // `class` as well as `data-theme`: `getResolvedColorScheme` reads Tailwind's
   // `dark` class too, so an app that flips only the class still moves this ref.
+  // `applyColorScheme` also puts `no-transition` on and off the same element,
+  // so a scheme change re-reads the document twice more. Both re-reads assign
+  // the value the ref already holds, which is not a reactive change, and the
+  // read is two `getAttribute` calls. Filtering them out costs more than it
+  // saves.
   schemeObserver = new MutationObserver(readDocument)
   schemeObserver.observe(document.documentElement, {
     attributes: true,
