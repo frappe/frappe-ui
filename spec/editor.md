@@ -262,7 +262,9 @@ defineProps<{
 
 ### `EditorBubbleMenu`
 
-Selection-anchored menu. Same `items` shape, plus optional `options`. `EditorMenuOptions` is one owned narrow type shared with `EditorFloatingMenu`: positioning keys plus `shouldShow` (this covers the insights site that suppresses the menu inside specific node types). A key that is not listed is a compile error rather than a setting that does nothing.
+Selection-anchored menu. Same `items` shape, plus optional `options`. `EditorMenuOptions` is one owned narrow type shared with `EditorFloatingMenu`: positioning keys plus `shouldShow` (this covers the insights site that suppresses the menu inside specific node types). A key that is not listed is a compile error.
+
+The narrowing is a break. The prop used to take TipTap's own Floating UI bag, so `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`, `onUpdate`, `onDestroy` and the middleware object forms of `offset`, `flip`, `shift`, `hide` and `inline` type-checked and reached Floating UI. v1 drops them: a menu that needs Floating UI middleware configuration is out of scope for this component.
 
 ```ts
 defineProps<{

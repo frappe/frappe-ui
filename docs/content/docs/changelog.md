@@ -67,8 +67,13 @@ site; the runtime ignores it as it always did.
   argument to report progress; a one-argument handler still compiles.
 - **`EditorBubbleMenu` and `EditorFloatingMenu` share `EditorMenuOptions`.**
   `placement`, `strategy`, `offset`, `flip`, `shift`, `hide`, `inline`,
-  `scrollTarget` and `shouldShow` are the keys that are read. Anything else was
-  already dropped and is now a compile error.
+  `scrollTarget` and `shouldShow` are the whole supported contract. The prop
+  used to take TipTap's own Floating UI bag, so `arrow`, `size`,
+  `autoPlacement`, `onShow`, `onHide`, `onUpdate`, `onDestroy` and the
+  middleware object forms of `offset`, `flip`, `shift`, `hide` and `inline`
+  type-checked and reached Floating UI. They are removed. Replace an object
+  form with `true` to keep the middleware on its defaults, or drop the key:
+  `flip: { fallbackPlacements: ['bottom'] }` becomes `flip: true`.
 - `Editor.extensions` and `useEditor({ extensions })` take TipTap's
   `Extensions`, so a nested array of extensions is accepted.
 
@@ -138,17 +143,19 @@ manual steps.
 - **Documented, not changed:** the preset replaces Tailwind's `colors`,
   `fontSize`, `screens`, `borderRadius` and `boxShadow` sections. Stock classes
   from those five (`text-base` at Tailwind's own size, `2xl:`, `shadow-inner`)
-  are not generated. The alpha suffix in a token name (`gray-3a`) stays as it
-  is.
+  are not generated. Alpha token names are unchanged: `alpha` stays a suffix on
+  the group key (`bg-gray-alpha-100`, `bg-surface-alpha-gray-2`).
 - `frappe-ui/tailwind` exports `content`, the source globs that emit classes
-  inside the package. `experimental/FloatingWindow` is now in that list.
+  inside the package. `experimental/FloatingWindow` and `vitepress` are now in
+  that list. Without the `vitepress` glob a docs site on `frappe-ui/vitepress`
+  never emits the theme's own layout classes.
 
 ### `frappe-ui/vite`: `lucideIcons` is off by default (breaking, loud at build time)
 
 `frappeui()` no longer installs `unplugin-icons`, `unplugin-auto-import` and
 `unplugin-vue-components`. frappe-ui itself draws icons as CSS mask classes
-(`lucide-check`), so the library needs none of them, and every app was paying
-for three plugins and a load of the whole `lucide-static` icon set.
+(`lucide-check`), so the library needs none of them, and every app was running
+three extra plugins over every file it built.
 
 Pass `lucideIcons: true` if your own code writes `<LucideCheck />` or imports
 `~icons/lucide/*`. Without it Vite fails the import with

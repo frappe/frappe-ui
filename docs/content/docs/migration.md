@@ -2606,18 +2606,15 @@ import preset from 'frappe-ui/tailwind'
 
 The same module also exports `content`, the globs that emit classes inside the
 package. Tailwind v3 ignores a preset's own `content`, so spread them into
-yours:
+yours. They are already absolute paths, resolved from the installed package, so
+do not prefix them:
 
 ```js
-import preset, { content as frappeUIContent } from 'frappe-ui/tailwind'
+import preset, { content } from 'frappe-ui/tailwind'
 
 export default {
   presets: [preset],
-  content: [
-    './index.html',
-    './src/**/*.{vue,js,ts}',
-    ...frappeUIContent.map((glob) => `./node_modules/frappe-ui/${glob}`),
-  ],
+  content: [...content, './index.html', './src/**/*.{vue,js,ts}'],
 }
 ```
 
@@ -2674,8 +2671,10 @@ Three **silent** value changes from the one-scale rewrite:
 | `min-w-50` = 18rem | 12.5rem | `min-w-[18rem]` to keep the old size. |
 
 Everything else on the scale keeps its value, and the scale is now complete:
-integers 1 to 128 and half steps 0.5 to 19.5, for `p-*`, `m-*`, `gap-*`,
-`w-*`, `h-*`, `size-*`, `min-w-*`, `max-w-*` and `min-h-*`.
+integers 1 to 128 and half steps 0.5 to 19.5. Tailwind 3.4 reads
+`theme('spacing')` for `width`, `height`, `size`, `minWidth`, `maxWidth`,
+`minHeight` and `maxHeight`, so `p-*`, `m-*`, `gap-*`, `w-*`, `h-*`, `size-*`,
+`min-w-*`, `max-w-*`, `min-h-*` and `max-h-*` all read the same numbers.
 
 ### Dependencies {#packaging-dependencies}
 
@@ -2912,16 +2911,39 @@ RichTextKit.configure({
 ```
 
 **Check Bubble and Floating menu option objects against `EditorMenuOptions`.**
-The read keys are `placement`, `strategy`, `offset`, `flip`, `shift`, `hide`,
-`inline`, `scrollTarget` and `shouldShow`. Anything else was already dropped
-before it reached the positioner and is now a compile error:
+The supported keys are `placement`, `strategy`, `offset`, `flip`, `shift`,
+`hide`, `inline`, `scrollTarget` and `shouldShow`.
+
+This one removes working settings. The `options` prop used to be TipTap's own
+Floating UI bag, so the keys below type-checked and reached Floating UI. They
+are now a compile error:
+
+| Removed                                          | What to do                                                            |
+| ------------------------------------------------ | --------------------------------------------------------------------- |
+| `arrow`                                          | Drop it. The menus render no arrow element.                            |
+| `size`                                           | Size the menu with CSS on your own toolbar markup.                     |
+| `autoPlacement`                                  | Set `placement`, and leave `flip` on for the fallback.                 |
+| `onShow`, `onHide`, `onUpdate`, `onDestroy`      | Watch your own state, or use `shouldShow` for the show or hide branch. |
+| `offset: { mainAxis, crossAxis }`                | `offset: <number>`, the main-axis gap.                                 |
+| `flip`, `shift`, `hide`, `inline` in object form | `true` to keep the middleware on its defaults, or drop the key.        |
 
 ```vue
 <!-- Before -->
-<EditorBubbleMenu :options="{ placement: 'top', updateDelay: 250 }" />
+<EditorBubbleMenu
+  :options="{
+    placement: 'top',
+    offset: { mainAxis: 8 },
+    flip: { fallbackPlacements: ['bottom'] },
+    onShow: () => (menuOpen = true),
+  }"
+/>
 <!-- After -->
-<EditorBubbleMenu :options="{ placement: 'top' }" />
+<EditorBubbleMenu :options="{ placement: 'top', offset: 8, flip: true }" />
 ```
+
+`flip: true` keeps Floating UI's default fallback placements, which is the
+opposite side. If a menu genuinely needs middleware configuration, mount
+TipTap's `BubbleMenu` directly and render `EditorFixedMenu` inside it.
 
 **Update mention and tag data to include `label` and `value`; use the original
 slot item for extra fields.** `label` is the text, `value` is the stored id:

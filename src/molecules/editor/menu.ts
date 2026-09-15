@@ -88,9 +88,14 @@ export type EditorMenuShouldShowContext = {
 /**
  * Positioning options shared by `EditorBubbleMenu` and `EditorFloatingMenu`.
  *
- * A narrow owned type, not TipTap's Floating UI bag: only these keys are
- * read, so a key that is not listed here is a compile error instead of a
- * setting that quietly does nothing.
+ * A narrow owned type, not TipTap's Floating UI bag. The keys below are the
+ * whole supported contract, so a key that is not listed is a compile error.
+ *
+ * This is a break, not a tidy-up. The prop used to take TipTap's own bag, so
+ * `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`, `onUpdate`,
+ * `onDestroy` and the middleware object forms of `offset`, `flip`, `shift`,
+ * `hide` and `inline` type-checked and reached Floating UI. They are removed
+ * from the v1 contract.
  */
 export type EditorMenuOptions = {
   placement?: EditorMenuPlacement
