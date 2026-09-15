@@ -70,6 +70,8 @@ const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
 // toggleColorScheme    () => void — switches to the opposite of what is on screen
 ```
 
+When something else owns `data-theme` (an app that applies its own theme before paint, a page inside a host shell), read it instead of writing it: `useResolvedColorScheme()` returns the same `Readonly<Ref<'light' | 'dark'>>`, follows the attribute, and writes nothing.
+
 ### Styling past the prop surface
 
 Target a component's `data-slot` and state attributes. Slots in wide use: `trigger`, `content`, `content-body`, `input`, `control`, `search`, `item`, `item-prefix`, `label`, `prefix`, `action`, `footer`, `empty`. State attributes: `data-state` (values are per component — `open`/`closed`, `active`/`inactive`), `data-disabled`, `data-highlighted`, `data-placeholder`, `data-size`. Both work as Tailwind variants (`data-[state=open]:rotate-180`, `data-[disabled]:opacity-50`) and as plain CSS (`[data-slot='trigger'][data-state='open'] { … }`).

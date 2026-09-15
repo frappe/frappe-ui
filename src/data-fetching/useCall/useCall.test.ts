@@ -353,7 +353,10 @@ describe('useCall', () => {
 
     // The same object twice is not a parameter change either.
     const sameParams = { value: 'same' }
-    const repeated = useCall<{ success: boolean; received: any }, any>({
+    const repeated = useCall<
+      { success: boolean; received: any },
+      { value: string }
+    >({
       url: url('/api/v2/method/post'),
       method: 'POST',
       refetch: true,
@@ -368,7 +371,7 @@ describe('useCall', () => {
       received: { value: 'same' },
     })
 
-    const failing = useCall<{ success: boolean }, any>({
+    const failing = useCall<{ success: boolean }, { value: string }>({
       url: url('/api/v2/method/post'),
       method: 'POST',
       params: { value: 'please fail' },

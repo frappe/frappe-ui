@@ -79,6 +79,38 @@ once, which reads as a flash. To suppress it, `useColorScheme` puts a
 rule that acts on it ships in `frappe-ui/style.css`. Apps that don't load
 that stylesheet still switch correctly — they just see the cross-fade.
 
+## useResolvedColorScheme
+
+The same `'light' | 'dark'` value, for a component that must not own the
+scheme. It reads the document and follows it; it writes nothing.
+
+```vue
+<script setup>
+import { useResolvedColorScheme } from 'frappe-ui'
+
+const scheme = useResolvedColorScheme()
+</script>
+
+<template>
+  <img :src="scheme === 'dark' ? darkShot : lightShot" alt="" />
+</template>
+```
+
+Use it when something else already owns `data-theme`: an app that bootstraps
+its own theme before paint, a page embedded in a host shell, or a demo in an
+iframe. `useColorScheme()` would make a second writer of the attribute and of
+the `theme` storage key, because its first call applies the saved preference.
+
+- It returns `Readonly<Ref<'light' | 'dark'>>` directly, not an object.
+- It reads `<html data-theme>` first, then Tailwind's `dark` class, then the
+  OS setting, and reacts to all three.
+- It writes no attribute, no class and no `localStorage` key, and it does not
+  start `useColorScheme`'s shared state.
+- Outside the browser it holds `light`.
+
+When your app owns the scheme, read `useColorScheme().resolvedColorScheme`
+instead. It is the same value from the object that sets it.
+
 ## shellScrollContainer / useShellScrolled
 
 `shellScrollContainer` is a computed ref pointing at the scroll element of the

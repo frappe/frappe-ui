@@ -128,10 +128,12 @@ describe('root exports', () => {
     }
   })
 
-  it('keeps the color-scheme composable', () => {
+  it('keeps the color-scheme composables', () => {
     // SHELL-Q11: the resolved value is a read-only ref on the composable now,
     // not a root function. `useColorScheme.spec.ts` covers the ref itself.
     expect(root).toHaveProperty('useColorScheme')
+    // The read-only half, for a component whose host owns `data-theme`.
+    expect(root).toHaveProperty('useResolvedColorScheme')
   })
 
   it('keeps the shell exports v1 kept', () => {

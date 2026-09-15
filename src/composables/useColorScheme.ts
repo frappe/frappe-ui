@@ -179,11 +179,75 @@ export function useColorScheme(): {
   }
 }
 
+// The observed half of the module, kept apart from the writer above on
+// purpose: nothing below this line writes `data-theme`, `localStorage` or the
+// preference, and nothing below it calls `ensureInitialized`.
+const observedScheme: Ref<ResolvedColorScheme> = ref('light')
+const observedColorScheme = readonly(observedScheme)
+let observing = false
+let schemeObserver: MutationObserver | null = null
+let osQuery: MediaQueryList | null = null
+const readDocument = () => {
+  observedScheme.value = getResolvedColorScheme()
+}
+
+// One observer for the whole app, started on the first call. Like the OS
+// listener in `ensureInitialized`, it lives for the app's lifetime by design:
+// there is nothing per component to leak, and a component unmounting must not
+// stop the ref another component is still reading.
+function ensureObserving(): void {
+  if (observing || typeof document === 'undefined') return
+  observing = true
+  readDocument()
+  // `class` as well as `data-theme`: `getResolvedColorScheme` reads Tailwind's
+  // `dark` class too, so an app that flips only the class still moves this ref.
+  schemeObserver = new MutationObserver(readDocument)
+  schemeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: [DOM_ATTRIBUTE, 'class'],
+  })
+  // The third input of the same read: with neither the attribute nor the class
+  // set, the resolved scheme is the OS setting.
+  osQuery = window.matchMedia?.('(prefers-color-scheme: dark)') ?? null
+  osQuery?.addEventListener('change', readDocument)
+}
+
+/**
+ * What the page is painted in, as a reactive read-only ref, for a component
+ * that must not own the scheme.
+ *
+ * Reads the document — `data-theme`, then Tailwind's `dark` class, then the OS
+ * setting — and follows it through a `MutationObserver`. It writes nothing:
+ * no `data-theme`, no `localStorage`, and it does not start `useColorScheme`'s
+ * singleton. Use it when something else owns the attribute: an app that
+ * bootstraps its own theme before paint, a page embedded in a host shell, or a
+ * demo inside an iframe.
+ *
+ * ```ts
+ * const scheme = useResolvedColorScheme()
+ * // scheme.value === 'light' | 'dark'
+ * ```
+ *
+ * When the app owns the scheme, read `useColorScheme().resolvedColorScheme`
+ * instead — same value, and the same object that sets it. Outside the browser
+ * the ref holds `light` and no observer is installed.
+ */
+export function useResolvedColorScheme(): Readonly<Ref<ResolvedColorScheme>> {
+  ensureObserving()
+  return observedColorScheme
+}
+
 /** Test-only: forget that the singleton has been initialized. */
 export function _resetColorScheme() {
   initialized = false
   currentScheme.value = 'light'
   currentResolved.value = 'light'
+  observing = false
+  observedScheme.value = 'light'
+  schemeObserver?.disconnect()
+  schemeObserver = null
+  osQuery?.removeEventListener('change', readDocument)
+  osQuery = null
   if (!isBrowser) return
   if (resumeTransitionsFrame !== null) {
     cancelAnimationFrame(resumeTransitionsFrame)

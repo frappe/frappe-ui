@@ -1354,6 +1354,18 @@ palette outside a component. It is not part of the package surface.
 No codemod: a call has to become a `.value` read, which needs the surrounding
 scope.
 
+### `useResolvedColorScheme()` reads the scheme without owning it (addition)
+
+A new root export for a page that must not write `data-theme`: an app that
+applies its own theme before paint, a page inside a host shell, a demo in an
+iframe. It returns the same read-only `Ref<'light' | 'dark'>`, read from the
+document and kept current, and writes no attribute, no class and no storage
+key. `useColorScheme()` applies the saved preference on its first call, so
+calling it for a read alone makes a second writer.
+
+Nothing changes for an app that owns the scheme: keep reading
+`useColorScheme().resolvedColorScheme`.
+
 ### `toggleColorScheme()` flips what is on screen (breaking, silent)
 
 It read the stored preference before, so under `system` on a dark OS it wrote

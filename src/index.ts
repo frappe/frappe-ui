@@ -140,13 +140,15 @@ export {
 export { usePageMeta, type PageMeta } from './utils/pageMeta'
 export {
   useColorScheme,
+  useResolvedColorScheme,
   type ColorScheme,
   type ResolvedColorScheme,
 } from './composables/useColorScheme'
 // `getResolvedColorScheme` is not exported (SHELL-Q11). It reads the document
 // once and does not react. Components read `useColorScheme().resolvedColorScheme`,
 // which is a ref; charts import the function internally to paint outside a
-// component.
+// component. `useResolvedColorScheme()` is the reactive read for anything that
+// must not own the scheme: it observes `data-theme` and writes nothing.
 export {
   shellScrollContainer,
   useShellScrolled,

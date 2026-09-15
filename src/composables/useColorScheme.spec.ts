@@ -7,6 +7,7 @@ import {
   _resetColorScheme,
   getResolvedColorScheme,
   useColorScheme,
+  useResolvedColorScheme,
 } from './useColorScheme'
 
 /**
@@ -302,5 +303,104 @@ describe('useColorScheme', () => {
         false,
       )
     })
+  })
+})
+
+// The read-only half: for a component whose host owns `data-theme`.
+describe('useResolvedColorScheme', () => {
+  /** MutationObserver records deliver on a microtask, so let them land. */
+  const flushObserver = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+  it('reads what the document is painted in right now', () => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+
+    expect(useResolvedColorScheme().value).toBe('dark')
+  })
+
+  it('follows a data-theme flip made by something else', async () => {
+    const scheme = useResolvedColorScheme()
+    expect(scheme.value).toBe('light')
+
+    document.documentElement.setAttribute('data-theme', 'dark')
+    await flushObserver()
+
+    expect(scheme.value).toBe('dark')
+
+    document.documentElement.setAttribute('data-theme', 'light')
+    await flushObserver()
+
+    expect(scheme.value).toBe('light')
+  })
+
+  it('follows the dark class too', async () => {
+    const scheme = useResolvedColorScheme()
+
+    document.documentElement.classList.add('dark')
+    await flushObserver()
+    expect(scheme.value).toBe('dark')
+
+    document.documentElement.classList.remove('dark')
+    await flushObserver()
+    expect(scheme.value).toBe('light')
+  })
+
+  it('writes nothing and does not start the writer', () => {
+    stubSystemScheme(true)
+
+    const scheme = useResolvedColorScheme()
+
+    expect(scheme.value).toBe('dark')
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull()
+    expect(localStorage.getItem('theme')).toBeNull()
+    // The writing composable's own state is untouched, so a later
+    // `useColorScheme()` still restores the stored preference itself.
+    localStorage.setItem('theme', 'light')
+    expect(useColorScheme().colorScheme.value).toBe('light')
+  })
+
+  it('is read-only', () => {
+    const scheme = useResolvedColorScheme()
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    // @ts-expect-error assigning is the mistake this guards against
+    scheme.value = 'dark'
+
+    expect(scheme.value).toBe('light')
+    warn.mockRestore()
+  })
+
+  it('shares one ref across callers', async () => {
+    const first = useResolvedColorScheme()
+    const second = useResolvedColorScheme()
+
+    document.documentElement.setAttribute('data-theme', 'dark')
+    await flushObserver()
+
+    expect(first.value).toBe('dark')
+    expect(second.value).toBe('dark')
+  })
+
+  it('sees the attribute useColorScheme writes', async () => {
+    const scheme = useResolvedColorScheme()
+    const { setColorScheme } = useColorScheme()
+
+    setColorScheme('dark')
+    await flushObserver()
+
+    expect(scheme.value).toBe('dark')
+  })
+
+  it('returns light and installs no observer without a document', () => {
+    const realDocument = globalThis.document
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe')
+    vi.stubGlobal('document', undefined)
+
+    try {
+      expect(useResolvedColorScheme().value).toBe('light')
+      expect(observe).not.toHaveBeenCalled()
+    } finally {
+      vi.stubGlobal('document', realDocument)
+      observe.mockRestore()
+    }
   })
 })
