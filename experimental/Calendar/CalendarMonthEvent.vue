@@ -40,10 +40,13 @@
              way what the fill already says. The title takes some of that back as
              padding — without the bar in front of it, 3px left it against the
              pill's own edge. A pixel shorter at either end than the text beside
-             it, as in the week — a mark set on the pill, not a rule through it. -->
+             it, as in the week — a mark set on the pill, not a rule through it.
+             Hidden on a draft rather than left out, as in the week, so a
+             draft's title stays in line with the pills above and below it. -->
         <div
-          v-if="props.event.fromTime && !props.event.isDraft && !dense"
+          v-if="props.event.fromTime && !dense"
           class="event-border my-px w-[2px] rounded-4 shrink-0"
+          :class="{ invisible: props.event.isDraft }"
         />
         <div
           class="relative flex h-full min-w-0 select-none items-center gap-2 overflow-hidden"

@@ -104,10 +104,16 @@
                  so it reads as a mark set on the pill rather than a rule run
                  through it. Sized by the row's stretch with the margin taken
                  off, not `h-full` with a margin added on, which would run it
-                 past the bottom. -->
+                 past the bottom.
+
+                 Not drawn on a draft, whose dashed outline is its mark, but
+                 its room is kept: pills stack in a column, and a draft whose
+                 title started where the others' bars do was the one pill out
+                 of line. -->
             <div
-              v-if="props.event.fromTime && !props.event.isDraft && !isTight"
+              v-if="props.event.fromTime && !isTight"
               class="event-border my-px w-[2px] rounded-4 shrink-0"
+              :class="{ invisible: props.event.isDraft }"
             />
             <!-- An all-day pill is one line in a box built to hold it, so the
                  line sits in the middle of the box: a 20px line 2px inside a
