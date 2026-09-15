@@ -1446,7 +1446,14 @@ is typed with it.
 - `error.kind` is `'file-size' | 'network' | 'server' | 'abort'`. Branch on it
   instead of matching the message text.
 - A server failure also carries `status`, the parsed `messages` and the raw
-  `response`. An aborted upload rejects instead of leaving the promise open.
+  `response`. `FileUploadHandler` rejects on abort instead of leaving the
+  promise open; `upload` and `useFileUpload` already rejected.
+- **Breaking, silent in JS:** an aborted `upload()` / `useFileUpload()` used to
+  reject `new DOMException('Upload cancelled', 'AbortError')`. It now rejects
+  an `UploadError` with `kind: 'abort'`. `error.name` is `'UploadError'` and
+  `error instanceof DOMException` is false, so a `catch` that tells a cancel
+  from a failure by either one stops matching. `options.signal` is public. See
+  the [migration guide](/docs/migration#upload-abort-error).
 - Existing `catch` blocks keep working: `UploadError` is an `Error` and its
   `message` is unchanged.
 - **Breaking, silent in JS:** the `is_private` upload option is removed;

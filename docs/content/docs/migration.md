@@ -1224,7 +1224,38 @@ try {
 ```
 
 Existing `catch` blocks keep working: `UploadError` is an `Error` and its
-`message` is unchanged. An aborted upload now rejects instead of hanging.
+`message` is unchanged. `FileUploadHandler` no longer leaves the promise open
+when the request aborts; it rejects like the other two paths.
+
+#### An aborted upload rejects an `UploadError`, not a `DOMException` {#upload-abort-error}
+
+Silent break. `upload()` and `useFileUpload()` take an `options.signal`. When
+that signal fired, they rejected with `new DOMException('Upload cancelled',
+'AbortError')`. They now reject an `UploadError` with `kind: 'abort'`. The
+message text is the same, but `error.name` is `'UploadError'` instead of
+`'AbortError'`, and `error instanceof DOMException` is false. A `catch` block
+that tells a cancel from a failure by either of those stops matching, so a
+cancelled upload is reported to the user as an error.
+
+```js
+// Before
+try {
+  await upload(file, { signal: controller.signal })
+} catch (error) {
+  if (error.name === 'AbortError') return // user cancelled
+  showError(error.message)
+}
+
+// After
+import { UploadError } from 'frappe-ui'
+
+try {
+  await upload(file, { signal: controller.signal })
+} catch (error) {
+  if (error instanceof UploadError && error.kind === 'abort') return
+  showError(error.message)
+}
+```
 
 ### The `is_private` upload option is removed
 
