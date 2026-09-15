@@ -121,7 +121,7 @@ template can keep rendering the last value and show `error` instead.
 | Call                                                           | On failure             |
 | -------------------------------------------------------------- | ---------------------- |
 | `submit()`                                                     | rejects                |
-| `doc.setValue()`, `doc.delete()`, a `useDoc` `methods:` member | rejects                |
+| `doc.setValue.submit()`, `doc.delete.submit()`, a `useDoc` `methods:` member | rejects                |
 | `execute()`, `fetch()`, `reload()`, `useList` `reload()`       | resolves, sets `error` |
 
 Every one of them sets `error` and calls `onError`, whether it rejects or not.
