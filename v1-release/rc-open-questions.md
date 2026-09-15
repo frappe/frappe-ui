@@ -1232,6 +1232,68 @@ combined "38 / 9 / 44" row in `rc-migration-effort.md` was TabButtons, not
 Rating: Gameplan's 10 cannot contain a Rating. The row is now split, and the
 Rating half carries the 3 v1 sites INP-Q16 lists.
 
+## Batch 3 — what the implementation measured
+
+Greps and codemod dry runs from 2026-09-15, against the four app trees on this
+box: Gameplan, frappe (`apps/frappe`, which holds `frappe/ui`), Builder and
+Suite. CRM, Helpdesk, Wiki, Books and Insights are not on this box; their
+counts stay as recorded.
+
+**ED-Q6 — 5 mention and tag sites.** Gameplan `frontend/src/components/editor/
+config.ts` builds `{ id, label, value }` for mentions and `{ id, label }` for
+tags, so both lists change (2 edits). frappe `ui/src/components/Composer/
+ComposerEditor.vue:218` maps its options to `{ id, label }` (1 edit). Suite
+passes `allUsers`, whose transform already sets `label` and `value`
+(`drive/js/resources.js:40-46`), so its two kit sites need no edit, but its two
+`getMentions()` readers (`writer/components/FloatingComments.vue:323,353`) post
+the result to its API and need review. Builder has no mention or tag use.
+
+**ED-Q7 — 2 of the 4 setups on this box must opt in.** Gameplan
+`richTextExtensions.ts` wraps the built-in slash registry
+(`collapsible/collapsible-menu.ts:61`), so it needs `toc: {}` or the
+table-of-contents command disappears from its menu; its CommentKit stack
+already adds `Toc` by hand (`commentExtensions.ts:46`), so that one is
+unaffected. Suite `writer/components/CoreEditor.vue:154` reads
+`editor.storage.styleClipboard.styleClipboard`, so it needs `styleClipboard: {}`
+or that line throws. Suite's table of contents is its own
+`@tiptap/extension-table-of-contents`, not the frappe `Toc` node, so it needs no
+`toc`. frappe `ComposerEditor.vue` and Suite `CommentEditor.vue` need neither.
+
+**PKG-Q2 — 0 deep-path sites left.** All four apps already import
+`frappe-ui/tailwind`. `packaging-v1 --dry-run` on each tree confirms it.
+
+**PKG-Q8 — 82 icon imports converted, 1 app config to change.** The conversion
+touched 12 shipped files: `commands.js` 31, `slash-commands-extension.ts` 14,
+`MediaNodeView.vue` 10, `ImageViewerModal.vue` 8, `LinkPopup.vue` 5,
+`IframeNodeView.vue` 4, `FloatingWindow.vue` 3, `ImageGroupNodeView.vue` 2,
+`ImageGroupUploadDialog.vue` 2, `Rating.vue` 1, `Rating/types.ts` 1 and
+`PickerShell.vue` 1. Every `<LucideX />` tag left in shipped code is declared
+locally by `classIcon()`, so no shipped file depends on the auto-import plugin.
+`packaging-v1 --dry-run` reports one config to change, Gameplan
+`frontend/vite.config.ts`; Builder `vite.config.mjs:18`, Suite
+`vite.config.ts:99` and Suite `vite.recorder.config.ts:11` already pass
+`lucideIcons: true`; `apps/frappe` does not use the Vite plugin at all.
+
+**PKG-Q3, PKG-Q4 and PKG-Q6 — 0 app sites.** No `w-wizard`, no `min-w-50`, no
+`rounded-9` and no read of a removed `--focus-<name>` variable in any of the
+four trees. `apps/frappe` reads `var(--focus-default)` 12 times, but it
+declares those variables itself in `frappe/public/css/espresso/effects.css`, so
+this change does not reach them.
+
+**PKG-Q9 — the pack check found one more defect.** `npm pack` plus
+`npm install` into `/tmp/rc3-consumer`: 932 files, 0 test files, all 12
+exported subpaths resolve, `frappe-ui/src/utils/tailwind.config` fails with
+`ERR_PACKAGE_PATH_NOT_EXPORTED`, all 10 bins install and point at shipped
+files, and a Tailwind build through the packed preset emits `p-4.5`,
+`min-w-50` at 12.5rem, `rounded-9` at 100px, 14 `--focus-outline-*`
+declarations and no box-shadow focus variable. `vue-tsc` on the installed
+package first reported 198 errors: 136 were unresolved `#` self-imports,
+because a consumer's compiler reads the `imports` map and adds neither an
+extension nor an `index` segment, and this repo's own `tsconfig.app.json`
+`paths` are not published. Listing the `.ts` and `index.ts` forms in each
+`imports` pattern fixes it. The remaining 22 were `import.meta.env` without
+`vite/client` types, which `getting-started.md` now tells consumers to keep.
+
 ## PKG-Q4 and PKG-Q6 — Are the `--focus-<name>` variables legacy? Examples
 
 **Short answer.** They are superseded inside frappe-ui, but "legacy" and "kept for backward compatibility" are wrong. No release used them alone, and no app reads frappe-ui's copy. Recommendation: remove them before RC.

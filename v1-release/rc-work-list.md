@@ -8,7 +8,9 @@
   batch 3 is items 15, 17, and 18. Section titles below are scope records, not
   separate PR instructions.
 - Batch 1 landed at `v1.0.0-beta.69`. Batch 2 is implemented on `v1/rc-batch-2`:
-  items 8, 10, 11, 13, and 14, covering 45 QIDs. Batch 3 is not started.
+  items 8, 10, 11, 13, and 14, covering 45 QIDs. Batch 3 is implemented on
+  `v1/rc-batch-3`, stacked on batch 2: items 15, 17, and 18, covering 17 QIDs
+  and one codemod (`packaging-v1`).
 - Already landed: one delegated chart workstream, issue #1139 through PR #1141 at `bc0b402820`.
 - Deferred: 8 complete QIDs and 4 parts of QIDs wait for 1.1.
 - Delegated: two workstreams. Charts #1139 is complete. Tree #1142 is still outside this list.
@@ -329,8 +331,8 @@ Decisions:
 - **ED-Q2** — Require `UploadedFile.file_url`, expose `MediaUploadRequestOptions` to upload callbacks, and export `MediaUploadProgress`. Touch editor upload types, `useEditor`, tests, docs, and exports. Manually verify 6 type-use sites.
 - **ED-Q3** — Remove dead StarterKit `code`, `codeBlock`, and `link` keys. Give InlineKit its own starter type and omit `heading` from other kit starter options. Touch `extensions.ts`, `kits.ts`, tests, docs, stories, and ADR-0004. App edits are 0.
 - **ED-Q4** — Type all 18 kit keys, give emoji and slash commands owned types, honor optional slash-command `items`, and restrict InlineKit starter settings to `false`. Touch kit types, extension implementations, tests, docs, and `spec/editor.md`. Seven app setups need no edit.
-- **ED-Q6** — Use `{ label, value }` for mention and tag items and pass the original item to the slot. Touch mention and tag extensions, slot types, tests, and docs. Consumer sites are not measured.
-- **ED-Q7** — Make StyleClipboard and Toc opt-in while keeping ImageViewer on. Touch `kits.ts`, tests, docs, and stories. Review 6 RichTextKit setups for style-copy or table-of-contents use.
+- **ED-Q6** — Use `{ label, value }` for mention and tag items and pass the original item to the slot. Touch mention and tag extensions, slot types, tests, and docs. Measured 2026-09-15: 5 sites on this box. GP `editor/config.ts` builds `{ id, label, value }` for mentions and `{ id, label }` for tags (2 edits); frappe `ComposerEditor.vue:218` maps to `{ id, label }` (1 edit); Suite's list already carries `label` and `value`, and its 2 `getMentions()` readers post the result to its API (2 reviews); Builder has no mention use. CRM, Helpdesk, Wiki and Books are not on this box.
+- **ED-Q7** — Make StyleClipboard and Toc opt-in while keeping ImageViewer on. Touch `kits.ts`, tests, docs, and stories. Measured 2026-09-15 across the 4 setups on this box: 2 must opt in. GP `richTextExtensions.ts` wraps the built-in slash registry, so it needs `toc: {}` or its table-of-contents command disappears; Suite `CoreEditor.vue:154` reads `editor.storage.styleClipboard`, so it needs `styleClipboard: {}` or that line throws. Suite's table of contents is its own `@tiptap/extension-table-of-contents`, so it needs no `toc`. frappe `ComposerEditor.vue` and Suite `CommentEditor.vue` need neither.
 - **ED-Q8** — Use one owned `EditorMenuOptions` type for Bubble and Floating menus. Touch both menu components, menu types, tests, and docs. Manually verify 6 Wiki option sites.
 - **ED-Q10** — Keep the 15px prose default and correct the docs. Touch editor docs only. No migration.
 
@@ -374,11 +376,11 @@ Size: **M**. The change touches about 15 files.
 Decisions:
 
 - **PKG-Q1** — Add `tailwindcss: ">=3.4.0 <4"` as a peer and `@floating-ui/vue` as a direct dependency. Touch `package.json`, lockfile, package docs, and clean-install tests. Consumer versions already satisfy the range.
-- **PKG-Q2** — Delete `src/utils/tailwind.config.js` and replace documented deep imports with `frappe-ui/tailwind`. Touch the shim, README, migration docs, and package tests. One v0 site needs the literal-path codemod.
-- **PKG-Q3** — Generate integer spacing through 128 and half steps through 19.5; remove the four explicit sizing blocks. Touch `tailwind/preset.js`, `tailwind/plugin.js`, tests, and Tailwind docs. No measured class changes value.
+- **PKG-Q2** — Delete `src/utils/tailwind.config.js` and replace documented deep imports with `frappe-ui/tailwind`. Touch the shim, README, migration docs, and package tests. One v0 site needs the literal-path codemod. `packaging-v1` does the rewrite. Measured 2026-09-15: 0 sites left in GP, apps/frappe, Builder and Suite; all four already import `frappe-ui/tailwind`.
+- **PKG-Q3** — Generate integer spacing through 128 and half steps through 19.5; remove the four explicit sizing blocks. Touch `tailwind/preset.js`, `tailwind/plugin.js`, tests, and Tailwind docs. Two classes do change: `w-wizard` (650px) is removed and `min-w-50` follows the scale at 12.5rem instead of 18rem. Measured 2026-09-15: 0 sites for either in GP, apps/frappe, Builder and Suite.
 - **PKG-Q7** — Keep the preset replacing Tailwind colors, font sizes, screens, radii, and shadows; document the replacement. Touch `foundations/tailwind.md`. No migration.
-- **PKG-Q8** — Default `lucideIcons` to `false`, convert shipped root and experimental icon imports, and add missing Tailwind content paths. Touch Vite, PickerShell, Rating, experimental FloatingWindow and TextEditor, tests, docs, and skills. Gameplan needs `lucideIcons: true` at one config site. The packaging codemod handles the config and runs on this tree.
-- **PKG-Q9** — Fix package tags, dependency placement, shipped imports, tarball contents, and type conditions. Touch package metadata, export definitions, build tests, and docs. Verify by packing and installing into a clean app.
+- **PKG-Q8** — Default `lucideIcons` to `false`, convert shipped root and experimental icon imports, and add missing Tailwind content paths. Touch Vite, PickerShell, Rating, experimental FloatingWindow and TextEditor, tests, docs, and skills. Verified 2026-09-15: 91 `~icons/lucide/*` imports converted to class icons, and every remaining `<LucideX />` tag in shipped code is declared locally by `classIcon()`. `packaging-v1 --dry-run` reports GP `frontend/vite.config.ts` as the one config needing the option; Builder and Suite already pass it; apps/frappe does not use the plugin.
+- **PKG-Q9** — Fix package tags, dependency placement, shipped imports, tarball contents, and type conditions. Touch package metadata, export definitions, build tests, and docs. Verify by packing and installing into a clean app. Verified 2026-09-15 with `npm pack` into `/tmp/rc3-consumer`: 932 files, 0 test files, all 12 exported subpaths resolve, the deep Tailwind path is blocked, all 10 bins install, and `vue-tsc` on the installed package reports 0 errors. The pack check found one more defect: the `#` self-imports did not resolve for a consumer, 136 unresolved modules, fixed by listing the `.ts` and `index.ts` forms in the `imports` map.
 
 Migration guide:
 
