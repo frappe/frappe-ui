@@ -279,7 +279,7 @@ type EditorMenuOptions = {
   side?: PopoverSide                     // 'top' | 'right' | 'bottom' | 'left'
   align?: PopoverAlign                   // 'start' | 'center' | 'end'
   strategy?: 'absolute' | 'fixed'
-  offset?: number | false
+  offset?: number
   flip?: boolean
   shift?: boolean
   hide?: boolean

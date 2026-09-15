@@ -93,8 +93,8 @@ export type EditorMenuOptions = {
   /** Alignment along the chosen side. Default `center`. */
   align?: PopoverAlign
   strategy?: 'absolute' | 'fixed'
-  /** Gap in pixels between the menu and its anchor. */
-  offset?: number | false
+  /** Gap in pixels between the menu and its anchor. `0` disables the gap. */
+  offset?: number
   /** Flip to the opposite side when there is no room. Default on. */
   flip?: boolean
   /** Slide along the anchor to stay in view. Default on. */
