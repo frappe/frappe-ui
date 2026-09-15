@@ -17,35 +17,55 @@
              line a narrow column had to give up the name — "W 9" — and set the
              rest at a size that fought the numerals under it; stacked, the
              name is spelled and the date is read at a glance, which is what
-             the row is for, and the row it costs is a row a phone has. -->
+             the row is for, and the row it costs is a row a phone has.
+
+             48px tall when stacked, and padded rather than centred: the
+             name's line is set to 16 and the disc is 20, 2px apart, and the
+             rest is 6 above and 4 below. Not the same above and below, on
+             purpose: the two lines of text are what should stand evenly off
+             the rules, and the disc is not text. It is a 20px box around a
+             numeral on a 16px line, so it reaches 2px past where the line
+             box would end — the bottom pays 2px less so the numeral, not the
+             disc, is what sits as far off the rule below as the name sits
+             off the bar above. Centred, the disc's edge was what got the
+             even air, and the numerals inside it read as sitting high.
+             Wide, one line in 32 stays centred: with nothing under the name
+             there is nothing for it to sit off. -->
         <span
           v-for="date in weeklyDates"
           :key="parseDate(date)"
-          class="relative flex cursor-pointer items-center justify-center text-center text-ink-gray-7"
+          class="group relative flex cursor-pointer items-center text-center text-ink-gray-7"
           :class="
-            isNarrow ? 'h-10 flex-col gap-0.5 text-xs' : 'h-8 gap-1.5 text-base'
+            isNarrow
+              ? 'h-12 flex-col gap-0.5 pb-1 pt-1.5 text-xs'
+              : 'h-8 justify-center gap-1.5 text-base'
           "
           @click="calendarActions.updateActiveView('Day', date)"
         >
-          {{
-            isToday(date) || isNarrow
-              ? dayName(date)
-              : `${dayName(date)} ${date.getDate()}`
-          }}
+          <span :class="isNarrow && 'leading-4'">{{ dayName(date) }}</span>
           <!-- A circle, and the numeral's own line across: the same mark today
                wears in the Month grid and in a month card, so a reader who has
                learnt it in one view has learnt it in all of them. It was a
                rounded square of 25px — a shape of its own, at a size off the
                scale. A size down in a narrow column, where a 24px disc beside
-               the name is most of the day's width. Every stacked date takes
-               the disc's box, filled on today alone, so the numerals of the
-               week sit on one line whether or not one of them is today. -->
+               the name is most of the day's width. Every date takes the
+               disc's box, filled on today alone, so the numerals of the week
+               sit on one line whether or not one of them is today.
+
+               Under the pointer the disc fills gray, as a number in the Month
+               grid does: the whole header is the way into its day, and the
+               bubble on the number is what says so before the click — the
+               same disc today wears, so a hovered day reads as "this could be
+               the marked one". Today's darkens a step instead. `group` on the
+               header rather than hover on the disc, so pointing anywhere at
+               the day lights its number. -->
           <span
-            v-if="isToday(date) || isNarrow"
             class="inline-flex items-center justify-center rounded-full"
             :class="[
               isNarrow ? 'size-5' : 'size-6',
-              isToday(date) && 'bg-surface-gray-10 text-ink-gray-1',
+              isToday(date)
+                ? 'bg-surface-gray-10 text-ink-gray-1 group-hover:bg-surface-gray-9'
+                : 'group-hover:bg-surface-gray-2',
             ]"
           >
             {{ date.getDate() }}
@@ -347,9 +367,7 @@ const lanePitch = computed(() => weekLanePitch(isNarrow.value))
  * The same measure that tells a pill it is tight, so the two are answering the
  * same question.
  */
-const barInset = computed(() =>
-  isNarrow.value ? COLUMN_INSET : PILL_INSET,
-)
+const barInset = computed(() => (isNarrow.value ? COLUMN_INSET : PILL_INSET))
 
 const dayName = (date: Date) => daysList[date.getDay()]
 

@@ -33,7 +33,7 @@
     <div
       ref="scroller"
       class="relative min-h-0 flex-1 overflow-y-auto border-outline-gray-1"
-      :class="config.noBorder ? 'border-t-[0.5px]' : 'rounded-6 border-[0.5px]'"
+      :class="config.noBorder ? 'border-t-[1px]' : 'rounded-6 border-[1px]'"
     >
       <div class="flex min-h-full flex-col">
         <div
@@ -53,29 +53,34 @@
             :class="col > 0 && 'border-l'"
             @click="calendarActions.handleCellClick($event, date)"
           >
-            <!-- The today pill is a 25px box around the number, so it gets a
-                 tighter inset that keeps its digits in the same column as the
-                 bare numbers on the other days.
+            <!-- Every number sits in the same 24px disc, filled only on today
+                 and under the pointer on any other day: a number is the way
+                 into its day, and a bubble that appears where the pointer is
+                 says so before the click does — the same disc today wears,
+                 so the hover reads as "this could be the marked one" rather
+                 than as a button that happened to be round. One box for all of
+                 them keeps the digits in one column whether or not a day is
+                 today; the box gets a 3px inset in place of the 8px a bare
+                 number took, which is what puts its digits where the bare
+                 ones were. A first-of-the-month label is wider than a disc,
+                 so the box is a floor, not a size, and that one is a pill.
 
                  Centred where the cell is narrow, so a date sits under the
                  weekday letter that names its column; a seventh of a phone's
                  width has no margin to hang a number off. Wider, the number
                  keeps to the right, where a month grid has always put it. -->
             <div
-              class="flex shrink-0 items-center text-xs"
-              :class="[
-                isToday(date) ? 'px-[3px]' : 'px-2',
-                isNarrow ? 'justify-center' : 'justify-end',
-              ]"
+              class="flex shrink-0 items-center px-[3px] text-xs"
+              :class="isNarrow ? 'justify-center' : 'justify-end'"
               :style="{ height: `${HEADER_HEIGHT}px` }"
             >
               <button
-                class="cursor-pointer whitespace-nowrap"
-                :class="[
+                class="flex h-6 min-w-6 cursor-pointer items-center justify-center whitespace-nowrap rounded-full px-1.5"
+                :class="
                   isToday(date)
-                    ? 'flex size-6 items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-2'
-                    : 'text-ink-gray-8',
-                ]"
+                    ? 'bg-surface-gray-10 text-ink-gray-2 hover:bg-surface-gray-9'
+                    : 'text-ink-gray-8 hover:bg-surface-gray-2'
+                "
                 @click.stop="openDay(date)"
               >
                 {{ dayLabel(date) }}
@@ -253,9 +258,7 @@ const DENSE_LANE_GAP = 2
  */
 const CELL_INSET = 4
 
-const cellInset = computed(() =>
-  isNarrow.value ? COLUMN_INSET : CELL_INSET,
-)
+const cellInset = computed(() => (isNarrow.value ? COLUMN_INSET : CELL_INSET))
 
 const lanePitch = computed(
   () =>
