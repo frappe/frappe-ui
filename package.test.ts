@@ -17,6 +17,7 @@ const pkg = JSON.parse(
 ) as {
   bin: Record<string, string>
   files: string[]
+  imports: Record<string, string[]>
   exports: Record<string, Record<string, string>>
   dependencies: Record<string, string>
   peerDependencies: Record<string, string>
@@ -185,6 +186,23 @@ function packageName(specifier: string): string | null {
   return name
 }
 
+/**
+ * Resolve a `#` specifier the way a consumer's resolver does: match a pattern
+ * key, then try each target in order and take the first file that exists.
+ */
+function resolveSelfImport(specifier: string): string | null {
+  for (const [pattern, targets] of Object.entries(pkg.imports)) {
+    const [prefix, suffix] = pattern.split('*')
+    if (suffix !== '' || !specifier.startsWith(prefix)) continue
+    const rest = specifier.slice(prefix.length)
+    for (const target of targets) {
+      const file = path.join(root, target.replace('*', rest))
+      if (fs.existsSync(file) && fs.statSync(file).isFile()) return file
+    }
+  }
+  return null
+}
+
 describe('shipped imports', () => {
   it('imports only declared dependencies', () => {
     const declared = new Set([
@@ -208,6 +226,43 @@ describe('shipped imports', () => {
     }
 
     expect(Object.fromEntries(undeclared)).toEqual({})
+  })
+
+  it('resolves every `#` self-import through the imports map', () => {
+    // The package ships TypeScript source, so a consumer's compiler resolves
+    // these specifiers itself. It reads `imports` (the repo's own tsconfig
+    // `paths` is not published), and it does not add an extension or an
+    // `index` segment on its own, so each pattern lists those forms.
+    const unresolved = new Map<string, string>()
+
+    for (const file of shippedFiles()) {
+      const source = fs.readFileSync(path.join(root, file), 'utf8')
+      for (const pattern of IMPORT_PATTERNS) {
+        pattern.lastIndex = 0
+        let match: RegExpExecArray | null
+        while ((match = pattern.exec(source))) {
+          const specifier = match[1]
+          if (!specifier.startsWith('#')) continue
+          if (resolveSelfImport(specifier)) continue
+          if (!unresolved.has(specifier)) unresolved.set(specifier, file)
+        }
+      }
+    }
+
+    expect(Object.fromEntries(unresolved)).toEqual({})
+  })
+
+  it('lists the plain path first in every imports pattern', () => {
+    // Node and Vite take the first entry in the array and do not check that the
+    // file exists, so the plain path has to lead or `#components/Button/Button.vue`
+    // resolves to `Button.vue.ts`. TypeScript does check, and falls through to
+    // the `.ts` and `index.ts` forms it needs.
+    for (const [pattern, targets] of Object.entries(pkg.imports)) {
+      expect([pattern, targets[0]]).toEqual([
+        pattern,
+        pattern.replace('#', './src/'),
+      ])
+    }
   })
 
   it('keeps the packages it only imports at build time out of dependencies', () => {
