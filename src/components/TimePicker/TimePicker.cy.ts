@@ -405,5 +405,19 @@ describe('TimePicker', () => {
           cy.get(`#${optionId}`).should('have.attr', 'role', 'option')
         })
     })
+
+    it('drops aria-activedescendant when the listbox closes', () => {
+      cy.mount(TimePicker)
+
+      cy.get('input').click()
+      cy.get('input').type('{downarrow}')
+      cy.get('input').should('have.attr', 'aria-activedescendant')
+
+      // The options unmount with the panel, so the reference would dangle.
+      cy.get('input').type('{esc}')
+      cy.get('[role=listbox]').should('not.exist')
+      cy.get('input').should('not.have.attr', 'aria-activedescendant')
+      cy.get('input').should('not.have.attr', 'aria-controls')
+    })
   })
 })

@@ -29,7 +29,7 @@
             role="combobox"
             aria-haspopup="dialog"
             :aria-expanded="open"
-            :aria-controls="open ? panelId : undefined"
+            :aria-controls="panelId"
             @focus="onFocus"
             @click="onClick"
             @blur="onBlur"
@@ -52,12 +52,7 @@
       </div>
     </template>
 
-    <!-- The panel needs an id of its own: `aria-controls` on the combobox has
-         to point at the element the popover renders, and the slot content
-         belongs to the caller. -->
-    <div :id="panelId">
-      <slot v-bind="triggerSlotProps" />
-    </div>
+    <slot v-bind="triggerSlotProps" />
   </Popover>
 </template>
 
@@ -67,7 +62,6 @@ import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import LucideChevronDown from '~icons/lucide/chevron-down'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
-import { useId } from '../../../utils/useId'
 import type { PopoverExposed } from '../../Popover/types'
 import type {
   PickerShellExposed,
@@ -114,7 +108,10 @@ const textInputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const triggerWrapperRef = ref<HTMLElement | null>(null)
 const popoverRef = ref<PopoverExposed | null>(null)
 
-const panelId = `${useId()}-picker-panel`
+// `aria-controls` on the combobox has to name the panel. reka already puts an
+// id on the `role="dialog"` element it renders, so read that one instead of
+// wrapping the caller's content in a node of our own.
+const panelId = ref<string>()
 
 // Anchor to the `<input>` itself. Anchoring to the whole labelled field would
 // put the panel below the description.
@@ -178,6 +175,9 @@ watch(open, (val, prev) => {
   if (val === prev) return
   if (val) {
     emit('open')
+    nextTick(() => {
+      panelId.value = popoverRef.value?.contentEl?.id || undefined
+    })
     // Custom triggers (e.g. a button) have no typing context — once the
     // popover is open the user wants to interact with the content. Signal
     // the parent to move focus there. The default `TextInput` trigger
@@ -192,6 +192,7 @@ watch(open, (val, prev) => {
       document.activeElement,
     )
     emit('close')
+    panelId.value = undefined
     if (hadFocusInside) {
       nextTick(() => textInputRef.value?.focus())
     }

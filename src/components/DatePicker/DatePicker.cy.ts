@@ -476,8 +476,10 @@ describe('DatePicker', () => {
         .invoke('attr', 'aria-controls')
         .should('be.a', 'string')
         .then((panelId) => {
+          // The id names the popover's own `role="dialog"` element. No wrapper
+          // node sits between the panel shell and the calendar.
           cy.get(`#${panelId}`)
-            .should('exist')
+            .should('have.attr', 'role', 'dialog')
             .find('[aria-label="Today"]')
             .should('exist')
         })

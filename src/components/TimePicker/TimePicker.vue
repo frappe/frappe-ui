@@ -21,7 +21,7 @@
           aria-haspopup="listbox"
           :aria-expanded="isOpen"
           :aria-controls="isOpen ? panelId : undefined"
-          :aria-activedescendant="activeDescendantId"
+          :aria-activedescendant="isOpen ? activeDescendantId : undefined"
           @focus="onFocus"
           @click="onClickInput"
           @blur="onBlur"
