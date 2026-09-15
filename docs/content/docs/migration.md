@@ -3898,11 +3898,11 @@ The rename `resolvedColorScheme` to `getResolvedColorScheme` is internal: the
 function is no longer part of the package surface at all. No codemod can do this
 one, because a call has to become a `.value` read.
 
-If the page you are migrating does not own `data-theme` — an app that applies
-its own theme before paint, or a page inside a host shell — call
-`useResolvedColorScheme()` instead. It is the same value, and it writes
-nothing, where `useColorScheme()` applies the saved preference on its first
-call and would make a second writer of the attribute.
+Call `useResolvedColorScheme()` instead when the page you are migrating does
+not own `data-theme`: an app that applies its own theme before paint, or a page
+inside a host shell. It is the same value and it writes nothing, where
+`useColorScheme()` applies the saved preference on its first call and would
+make a second writer of the attribute.
 
 ```js
 import { useResolvedColorScheme } from 'frappe-ui'

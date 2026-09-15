@@ -378,7 +378,9 @@ describe('useCall', () => {
       refetch: true,
       immediate: false,
     })
-    await expect(failing.submit()).rejects.toThrow('ValidationError: post failed')
+    await expect(failing.submit()).rejects.toThrow(
+      'ValidationError: post failed',
+    )
   })
 
   it('sends one request per submit when refetch is true', async () => {
