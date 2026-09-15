@@ -229,7 +229,7 @@ dialog.prompt({
 
 ## Input controls
 
-Every input control **except `FileUploader`** accepts the shared labeling contract `InputLabelingProps`: `label`, `description`, `error` (`string | Error`), `required`, `id`. `Radio` is the one partial: it takes `label`, `description` and `id`, while `required` and `error` sit on `RadioGroup`.
+Every input control **except `FileUploader`** accepts the shared labeling contract `InputLabelingProps`: `label`, `description`, `error` (`string`, `string[]`, or an `Error`), `required`, `id`. `Radio` is the one partial: it takes `label`, `description` and `id`, while `required` and `error` sit on `RadioGroup`.
 
 Text-family sizes are `xs | sm | md | lg` (`InputSize`) — fixed single-line heights of 24 / 28 / 32 / 40px — and variants `subtle | outline | ghost` (`InputVariant`). There is no `xl`. Binary controls (`Checkbox`, `Radio`, `Switch`) take size `xs | sm | md` (`ToggleSize`). Labels, descriptions and `Textarea` text are a fixed 13px at every size; `FormLabel` has no `size` prop.
 

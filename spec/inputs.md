@@ -343,10 +343,9 @@ the model itself is documented at the component file via the
 
 - **`v-html` is preserved as-is for v1.** Removal is deferred — revisit
   post-v1 once consumers are tracked.
-- Type the message prop as `string | Error` cleanly; remove the
-  `(message as any).messages` cast by typing `Error.messages?: string[]`
-  via a small library-level interface. (Internal typing improvement, not a
-  runtime change.)
+- The message prop is typed as `ErrorMessageValue`: a string, an array of
+  strings, or an `Error` that may carry `messages`. The input `error` prop
+  takes the same value, and `errorLines` reads it for both.
 - Most consumers should migrate to the input-level `error` prop. Document
   `ErrorMessage` as the standalone option for contexts where an input is
   not present (e.g. form-level error banners).
