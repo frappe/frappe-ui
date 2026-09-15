@@ -12,31 +12,41 @@
              read as a day switched off rather than as a Saturday, and a week
              whose columns are named and dated does not have to say which two of
              them are the weekend twice. -->
-        <!-- A day is its name and its date on one line at every width. What a
-             narrow column changes is the size the line is set at, and then how
-             much of the name is spelled — the numeral stays, since it is the
-             half a reader counts by. Stacking the two was the other way out of
-             it, and it left the week a row taller for no reading gained. -->
+        <!-- A day is its name and its date on one line where the column has
+             the width, and the date under the name where it does not. On one
+             line a narrow column had to give up the name — "W 9" — and set the
+             rest at a size that fought the numerals under it; stacked, the
+             name is spelled and the date is read at a glance, which is what
+             the row is for, and the row it costs is a row a phone has. -->
         <span
           v-for="date in weeklyDates"
           :key="parseDate(date)"
-          class="relative flex h-8 cursor-pointer items-center justify-center text-center text-ink-gray-7"
-          :class="isNarrow ? 'gap-1 text-xs' : 'gap-1.5 text-base'"
+          class="relative flex cursor-pointer items-center justify-center text-center text-ink-gray-7"
+          :class="
+            isNarrow ? 'h-10 flex-col gap-0.5 text-xs' : 'h-8 gap-1.5 text-base'
+          "
           @click="calendarActions.updateActiveView('Day', date)"
         >
           {{
-            isToday(date) ? dayName(date) : `${dayName(date)} ${date.getDate()}`
+            isToday(date) || isNarrow
+              ? dayName(date)
+              : `${dayName(date)} ${date.getDate()}`
           }}
           <!-- A circle, and the numeral's own line across: the same mark today
                wears in the Month grid and in a month card, so a reader who has
                learnt it in one view has learnt it in all of them. It was a
                rounded square of 25px — a shape of its own, at a size off the
                scale. A size down in a narrow column, where a 24px disc beside
-               the name is most of the day's width. -->
+               the name is most of the day's width. Every stacked date takes
+               the disc's box, filled on today alone, so the numerals of the
+               week sit on one line whether or not one of them is today. -->
           <span
-            v-if="isToday(date)"
-            class="inline-flex items-center justify-center rounded-full bg-surface-gray-10 text-ink-gray-1"
-            :class="isNarrow ? 'size-5' : 'size-6'"
+            v-if="isToday(date) || isNarrow"
+            class="inline-flex items-center justify-center rounded-full"
+            :class="[
+              isNarrow ? 'size-5' : 'size-6',
+              isToday(date) && 'bg-surface-gray-10 text-ink-gray-1',
+            ]"
           >
             {{ date.getDate() }}
           </span>
@@ -301,17 +311,13 @@ const isCollapsed = ref(true)
  * is measured because it is the day columns' own width, gutter already taken
  * off, and it is laid out before the grid under it has anything in it.
  *
- * 64px is where "Wed 30" stops fitting at `text-base`: the name and the date
- * come to some 50px, and on today, whose date is a 24px circle beside the name,
- * to some 60. Below it the line is set at `text-xs` with a 20px circle, which
- * asks 50.
- *
- * 50px is where even that stops fitting, and the name comes down to its
- * initial: "W 9", and "W" beside the circle on today, which any column the grid
- * can draw has room for.
+ * 64px is where "Wed 30" stops fitting on one line at `text-base`: the name and
+ * the date come to some 50px, and on today, whose date is a 24px circle beside
+ * the name, to some 60. Below it the date goes under the name, set at
+ * `text-xs` with a 20px circle, which asks 26 of any column — a width every
+ * column the grid can draw has.
  */
 const NARROW_COLUMN = 64
-const TIGHT_COLUMN = 50
 
 const { width: headWidth } = useElementSize(headRef)
 
@@ -321,9 +327,6 @@ const columnWidth = computed(
 
 const isNarrow = computed(
   () => !!headWidth.value && columnWidth.value < NARROW_COLUMN,
-)
-const isTight = computed(
-  () => !!headWidth.value && columnWidth.value < TIGHT_COLUMN,
 )
 
 /**
@@ -341,16 +344,14 @@ const lanePitch = computed(() => weekLanePitch(isNarrow.value))
  * beside the bars rather than being one reads it, or it starts on a different
  * line to them.
  *
- * `isNarrow` and not `isTight`: a pill is told it is tight by this view, from
- * the same measure, so the two have to be answering the same question.
+ * The same measure that tells a pill it is tight, so the two are answering the
+ * same question.
  */
 const barInset = computed(() =>
   isNarrow.value ? COLUMN_INSET : PILL_INSET,
 )
 
-/** As much of the day's name as its column has room for. */
-const dayName = (date: Date) =>
-  isTight.value ? daysList[date.getDay()].slice(0, 1) : daysList[date.getDay()]
+const dayName = (date: Date) => daysList[date.getDay()]
 
 const hourHeight = props.config.hourHeight
 const minuteHeight = hourHeight / 60
