@@ -5,10 +5,14 @@
  * the line starts to compile. The runtime body only keeps the fixtures alive.
  */
 import { describe, expectTypeOf, it } from 'vitest'
+import type { EditorState } from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 import type { PopoverAlign, PopoverSide } from '#components/Popover/types'
 import type {
   CommentKitOptions,
+  TiptapEditor as MenuEditor,
   EditorMenuOptions,
+  EditorMenuShouldShowContext,
   InlineKitOptions,
   MentionSuggestionItem,
   RichTextKitOptions,
@@ -133,6 +137,26 @@ const menuPlacement: EditorMenuOptions = { placement: 'top-start' }
 // @ts-expect-error Only the listed positioning keys are read.
 const menuUnknownKey: EditorMenuOptions = { updateDelay: 250 }
 
+/**
+ * Both TipTap menus pass `from` and `to` on every call:
+ * `@tiptap/extension-floating-menu/dist/index.js:214-223` and
+ * `@tiptap/extension-bubble-menu/dist/index.js:348-356`. `element` is the
+ * bubble menu's alone, so it stays optional.
+ */
+const menuContext: EditorMenuShouldShowContext = {
+  editor: null as unknown as MenuEditor,
+  view: null as unknown as EditorView,
+  state: null as unknown as EditorState,
+  from: 1,
+  to: 4,
+}
+// @ts-expect-error `from` and `to` are always supplied, so they are required.
+const menuContextNoRange: EditorMenuShouldShowContext = {
+  editor: null as unknown as MenuEditor,
+  view: null as unknown as EditorView,
+  state: null as unknown as EditorState,
+}
+
 void starterKitCode
 void starterKitCodeBlock
 void starterKitLink
@@ -151,6 +175,7 @@ void menuBadSide
 void menuBadAlign
 void menuPlacement
 void menuUnknownKey
+void menuContextNoRange
 
 describe('editor option types', () => {
   it('accepts the documented shapes', () => {
@@ -175,5 +200,6 @@ describe('editor option types', () => {
     expectTypeOf(uploadLegacy).toMatchTypeOf<UploadFunction>()
     expectTypeOf(uploaded).toMatchTypeOf<UploadedFile>()
     expectTypeOf(menuOptions).toMatchTypeOf<EditorMenuOptions>()
+    expectTypeOf(menuContext).toMatchTypeOf<EditorMenuShouldShowContext>()
   })
 })
