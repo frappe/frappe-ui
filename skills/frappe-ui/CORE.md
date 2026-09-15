@@ -346,7 +346,9 @@ Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` deskto
 
 ## `Editor` (`frappe-ui/editor`)
 
-TipTap-based rich text. `extensions` is **required**. The kits (`RichTextKit`, `CommentKit`, `InlineKit`) are extension **instances** — pass them uncalled; use `Kit.configure({...})` to set options. Also `format` (`html | json | markdown`, default `html`), `placeholder`, `editable`, `autofocus`, `uploadFunction`.
+TipTap-based rich text. `extensions` is **required**. The kits (`RichTextKit`, `CommentKit`, `InlineKit`) are extension **instances** — pass them uncalled; use `Kit.configure({...})` to set options. Also `format` (`html | json | markdown`, default `html`), `placeholder`, `editable`, `autofocus`, `uploadFunction` (must resolve with a `file_url`).
+
+Every kit member takes its extension's real options, so a misspelled key fails type-check. `RichTextKit` keeps `toc` and `styleClipboard` off — pass `toc: {}` or `styleClipboard: {}` to add them. `slashCommands: {}` keeps the built-in menu and `{ items }` replaces it. Mention and tag items are `{ label, value }`; extra fields on an item reach the item slot untouched.
 
 `Editor` is **renderless**: its template is one slot exposing `{ editor, isEmpty }` and it draws no UI, so a self-closing `<Editor … />` renders nothing. Put the chrome in the default slot:
 

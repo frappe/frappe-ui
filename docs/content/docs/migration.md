@@ -36,7 +36,9 @@ destination prop renames (`destinations-v1`, see
 (`base-props-v1`, see [Base component props](#base-component-props)), and List
 row hooks and slot names (`list-v1`, see [List family](#list-family)), and the
 `FrappeUI` plugin's `resources` option (`data-v1`, see
-[the plugin](#http-transport-and-the-frappeui-plugin)). The tools
+[the plugin](#http-transport-and-the-frappeui-plugin)), and the Tailwind preset
+path plus the Vite plugin's `lucideIcons` option (`packaging-v1`, see
+[Packaging and tokens](#packaging-and-tokens)). The tools
 report ambiguous dynamic syntax for manual review instead of guessing.
 
 ### Sections
@@ -49,6 +51,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Errors renamed](#errors-renamed) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Packaging** — [Preset path](#preset-path) · [`lucideIcons`](#lucide-icons) · [Focus ring](#focus-ring-outline) · [Sizing changes](#sizing-scale-changes) · [Dependencies](#packaging-dependencies)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
@@ -2572,6 +2575,123 @@ these sites have no automatic destination. The codemod flags them under
 "needs manual attention". The usual fix is `text-white` (or the literal CSS
 color `white` in hand-written CSS).
 
+## Packaging and tokens {#packaging-and-tokens}
+
+Two loud breaks and three silent ones. Run the codemod first:
+
+```sh
+npx -p frappe-ui packaging-v1 --dry-run .
+npx -p frappe-ui packaging-v1 .
+```
+
+Point it at the project root, not at `src`: it reads the Vite config and the
+source that uses icons in the same run. It rewrites the Tailwind preset path,
+adds `lucideIcons: true` where the app still needs the resolver, and reports
+any plugin call it cannot decide.
+
+### The preset path {#preset-path}
+
+The `frappe-ui/src/utils/tailwind.config` shim is deleted, and no path under
+`frappe-ui/src/...` resolves. A **loud** break: the build stops with
+`Package subpath './src/utils/tailwind.config' is not defined by "exports"`.
+The `exports` map refused that path before this release; the file is now gone
+as well.
+
+```js
+// Before
+import preset from 'frappe-ui/src/utils/tailwind.config'
+// After
+import preset from 'frappe-ui/tailwind'
+```
+
+The same module also exports `content`, the globs that emit classes inside the
+package. Tailwind v3 ignores a preset's own `content`, so spread them into
+yours. They are already absolute paths, resolved from the installed package, so
+do not prefix them:
+
+```js
+import preset, { content } from 'frappe-ui/tailwind'
+
+export default {
+  presets: [preset],
+  content: [...content, './index.html', './src/**/*.{vue,js,ts}'],
+}
+```
+
+### `lucideIcons` is off {#lucide-icons}
+
+`frappeui()` no longer installs the `~icons` resolver, `unplugin-auto-import`
+and `unplugin-vue-components`. A **loud** break for an `~icons` import
+(`Failed to resolve import "~icons/lucide/check"`) and a **quiet** one for an
+auto-imported tag: `<LucideCheck />` renders as an unknown element and Vue
+warns in the console.
+
+```js
+// Before
+frappeui({ frappeProxy: true })
+// After
+frappeui({ lucideIcons: true, frappeProxy: true })
+```
+
+Two other ways out, if you would rather not carry the plugins: pass the icon
+name as a class (`<span class="lucide-check size-4" />`, drawn by the preset's
+own icon plugin), or import only the resolver from
+`frappe-ui/vite/lucideIconsPlugin`.
+
+### The focus ring is an outline {#focus-ring-outline}
+
+The `--focus-<name>` variables are removed. They held a `box-shadow` value;
+`--focus-outline-<name>` holds the outline form, which does not change the
+element's size. This is a **silent** break: `box-shadow: var(--focus-red)`
+resolves to nothing and the ring disappears.
+
+```css
+/* Before */
+.my-input:focus-visible {
+  box-shadow: var(--focus-red);
+}
+/* After */
+.my-input:focus-visible {
+  outline: var(--focus-outline-red);
+}
+```
+
+The names are `default`, `red`, `green`, `amber`, `blue` and `violet`. Each is
+2px in light mode and 3px in dark. Grep for `--focus-` and check every hit
+carries the `outline-` segment.
+
+### `rounded-9`, `w-wizard` and `min-w-50` {#sizing-scale-changes}
+
+Three **silent** value changes from the one-scale rewrite:
+
+| Before | After | What to do |
+|---|---|---|
+| `rounded-9` = 999px | 100px | Nothing, unless you used it as a circle. Then use `rounded-full`. |
+| `w-wizard` = 650px | removed | `w-[650px]`, or a width token of your own. |
+| `min-w-50` = 18rem | 12.5rem | `min-w-[18rem]` to keep the old size. |
+
+Everything else on the scale keeps its value, and the scale is now complete:
+integers 1 to 128 and half steps 0.5 to 19.5. Tailwind 3.4 reads
+`theme('spacing')` for `width`, `height`, `size`, `minWidth`, `maxWidth`,
+`minHeight` and `maxHeight`, so `p-*`, `m-*`, `gap-*`, `w-*`, `h-*`, `size-*`,
+`min-w-*`, `max-w-*`, `min-h-*` and `max-h-*` all read the same numbers.
+
+### Dependencies {#packaging-dependencies}
+
+- Install `tailwindcss` yourself: it is a peer now, `>=3.4.0 <4`. An install on
+  Tailwind v4 fails.
+- `vite` and `vitepress` are optional peers, with `shiki`,
+  `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
+  imports. Nothing changes unless you import `frappe-ui/vite` or
+  `frappe-ui/vitepress` without having them.
+- If your app imported `ora`, `slugify`, `prosemirror-tables`,
+  `@tailwindcss/line-clamp` or a `@tiptap/extension-*` package through
+  frappe-ui, declare it yourself. They are no longer frappe-ui dependencies.
+- In `tsconfig.json`, keep `types: ["vite/client"]`. frappe-ui ships
+  TypeScript source, so your compiler checks it, and it reads
+  `import.meta.env`.
+
+
 ## Editor
 
 The v0 monolith `<TextEditor>` (imported from `frappe-ui`) is replaced by the
@@ -2713,6 +2833,158 @@ npx --package frappe-ui@beta editor-v1 .
 <!-- After -->
 <EditorFixedMenu size="sm" :items="items" />
 ```
+
+### Editor option types
+
+Kit members, the upload handler and the two floating menus are typed. Run
+`yarn type-check` (or `vue-tsc`) after upgrading: every edit below is reported
+at the call site.
+
+**Make every constructed `UploadedFile` include `file_url`.** The type is
+exported, and so is the handler type:
+
+```ts
+// Before
+const uploadFunction = async (file: File) => {
+  const doc = await upload(file)
+  return doc // any shape
+}
+// After
+import type { UploadFunction } from 'frappe-ui/editor'
+const uploadFunction: UploadFunction = async (file, options) => {
+  const doc = await upload(file, { onProgress: options?.onProgress })
+  return doc // must carry file_url; extra fields pass through
+}
+```
+
+The second argument is optional. A one-argument handler still compiles.
+
+**Remove dead `code`, `codeBlock` and `link` keys from StarterKit options.**
+The frappe extensions of those names are separate members, so the keys did
+nothing:
+
+```ts
+// Before
+StarterKit.configure({ link: false, codeBlock: false })
+// After
+StarterKit
+```
+
+Inside a kit, move `heading` out of `starterKit`:
+
+```ts
+// Before
+RichTextKit.configure({ starterKit: { heading: { levels: [2, 3] } } })
+// After
+RichTextKit.configure({ heading: { levels: [2, 3] } })
+```
+
+`InlineKit.starterKit` takes `false` per member only:
+
+```ts
+// Before
+InlineKit.configure({ starterKit: { code: { HTMLAttributes: {} } } })
+// After
+InlineKit.configure({ starterKit: { code: false } })
+```
+
+**Add StyleClipboard and Toc explicitly when an editor needs them.**
+`RichTextKit` no longer registers them by default:
+
+```ts
+// Before
+RichTextKit
+// After (only if you call insertTableOfContentsNode or read
+// editor.storage.styleClipboard)
+RichTextKit.configure({ toc: {}, styleClipboard: {} })
+```
+
+`imageViewer` is unchanged and stays on.
+
+**A custom slash-command list now replaces the built-in menu.** `items` was
+accepted and ignored before, so check what you pass:
+
+```ts
+RichTextKit.configure({
+  slashCommands: {}, // built-in menu
+  // slashCommands: { items: myCommands },  // replaces the built-in list
+  // slashCommands: false,                  // no slash menu
+})
+```
+
+**Check Bubble and Floating menu option objects against `EditorMenuOptions`.**
+The supported keys are `side`, `align`, `strategy`, `offset`, `flip`, `shift`,
+`hide`, `inline`, `scrollTarget` and `shouldShow`.
+
+**`placement` becomes `side` plus `align`.** The menus now position the way
+`Popover`, `Select`, `Dropdown`, `HoverCard` and the pickers do, with the same
+`PopoverSide` and `PopoverAlign` values. Split the hyphen:
+
+```vue
+<!-- Before -->
+<EditorBubbleMenu :options="{ placement: 'top-start' }" />
+<!-- After -->
+<EditorBubbleMenu :options="{ side: 'top', align: 'start' }" />
+
+<!-- Before -->
+<EditorFloatingMenu :options="{ placement: 'bottom' }" />
+<!-- After -->
+<EditorFloatingMenu :options="{ side: 'bottom' }" />
+```
+
+`align` defaults to `center`, which is the unaligned variant. Set neither axis
+and TipTap's own default still applies: `top` for the bubble menu and `right`
+for the floating menu. The exported `EditorMenuPlacement` type is removed;
+import `PopoverSide` and `PopoverAlign` from `frappe-ui` if you need to name
+the values.
+
+The rest of this one removes working settings. The `options` prop used to be
+TipTap's own Floating UI bag, so the keys below type-checked and reached
+Floating UI. They are now a compile error:
+
+| Removed                                          | What to do                                                            |
+| ------------------------------------------------ | --------------------------------------------------------------------- |
+| `placement`                                      | `side` plus `align`, as above.                                         |
+| `arrow`                                          | Drop it. The menus render no arrow element.                            |
+| `size`                                           | Size the menu with CSS on your own toolbar markup.                     |
+| `autoPlacement`                                  | Set `side`, and leave `flip` on for the fallback.                      |
+| `onShow`, `onHide`, `onUpdate`, `onDestroy`      | Watch your own state, or use `shouldShow` for the show or hide branch. |
+| `offset: { mainAxis, crossAxis }`                | `offset: <number>`, the main-axis gap.                                 |
+| `flip`, `shift`, `hide`, `inline` in object form | `true` to keep the middleware on its defaults, or drop the key.        |
+
+```vue
+<!-- Before -->
+<EditorBubbleMenu
+  :options="{
+    placement: 'top',
+    offset: { mainAxis: 8 },
+    flip: { fallbackPlacements: ['bottom'] },
+    onShow: () => (menuOpen = true),
+  }"
+/>
+<!-- After -->
+<EditorBubbleMenu :options="{ side: 'top', offset: 8, flip: true }" />
+```
+
+`flip: true` keeps Floating UI's default fallback placements, which is the
+opposite side. If a menu genuinely needs middleware configuration, mount
+TipTap's `BubbleMenu` directly and render `EditorFixedMenu` inside it.
+
+**Update mention and tag data to include `label` and `value`; use the original
+slot item for extra fields.** `label` is the text, `value` is the stored id:
+
+```ts
+// Before
+const mentions = users.map((u) => ({ id: u.name, label: u.full_name, email: u.email }))
+// After
+const mentions = users.map((u) => ({ value: u.name, label: u.full_name, email: u.email }))
+```
+
+The list no longer rewrites your objects, so the item slot receives the one you
+supplied, `email` and all. `getMentions()` returns `{ label, value }` — read
+`value` where you read `id`.
+
+Tags are the same, with `value` optional so a newly typed tag has none yet.
 
 ### Gotchas
 

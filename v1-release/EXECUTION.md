@@ -21,8 +21,10 @@ exactly three sequential PRs:
    13, 14. Implemented on `v1/rc-batch-2` from
    `2b990bdb7de35616a4e600e2222a733c51aba5d3`. 45 QIDs, one codemod
    (`data-v1`). Awaiting review and merge.
-3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18. Not started;
-   base it on `main` after batch 2 merges.
+3. **Batch 3 — editor, packaging, and tokens:** items 15, 17, 18. Implemented
+   on `v1/rc-batch-3`, rebased onto `v1/rc-batch-2` at
+   `44fa233031e3f1ddb1087dbcb41c07c3ca4938fd`. 17 QIDs, one codemod
+   (`packaging-v1`). Awaiting review and merge, after batch 2.
 
 Finish and merge each batch before starting the next. Do not split a batch to
 satisfy an old file-count preference. Include generated docs required by its
@@ -30,7 +32,9 @@ scope.
 
 Every batch adds its codemod to both `bin` and `files` in `package.json`. A bin
 whose file is not published installs as a broken symlink. `destinations-v1` was
-in `bin` only until batch 2 fixed it.
+in `bin` only until batch 2 fixed it. Batch 3 added `package.test.ts`, which
+asserts the bin, the files list, the exports conditions and the dependency
+declarations on every publish-affecting change.
 
 ## Authority
 

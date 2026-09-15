@@ -10,14 +10,20 @@ function frappeuiPlugin(options = {}) {
   let plugins = []
   const frontendRoute = options.frontendRoute
 
-  const lucideIconsOpt = options.lucideIcons ?? true
+  // Off by default: frappe-ui itself uses class icons (`lucide-<name>`, drawn
+  // as a CSS mask by the Tailwind plugin), so nothing in the library needs the
+  // resolver. Pass `lucideIcons: true` if YOUR app imports `~icons/lucide/*`
+  // or writes `<LucideX />` tags.
+  const lucideIconsOpt = options.lucideIcons ?? false
   const barrelImportsOpt = options.barrelImports ?? true
 
   if (barrelImportsOpt) {
     // Keep `import { Button } from 'frappe-ui'` in source, but resolve it to
     // the declaring module so dev never has to serve the whole barrel.
     plugins.push(
-      barrelImports(typeof barrelImportsOpt === 'object' ? barrelImportsOpt : {}),
+      barrelImports(
+        typeof barrelImportsOpt === 'object' ? barrelImportsOpt : {},
+      ),
     )
   }
   const frappeProxyOpt = options.frappeProxy ?? true

@@ -138,7 +138,7 @@ import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
-import LucideStar from '~icons/lucide/star'
+import RatingStar from './RatingStar.vue'
 import type { InputSize } from '../../composables/inputTypes'
 import type { RatingProps, RatingIconSlotProps } from './types'
 import type { InputExposed } from '../../composables/inputTypes'
@@ -154,7 +154,7 @@ const props = withDefaults(defineProps<RatingProps>(), {
   size: 'sm',
   disabled: false,
   step: 1,
-  icon: () => LucideStar,
+  icon: () => RatingStar,
 })
 
 const model = defineModel<number>({ default: 0 })

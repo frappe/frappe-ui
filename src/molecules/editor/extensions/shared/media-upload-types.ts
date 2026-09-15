@@ -39,11 +39,18 @@ declare module '@tiptap/core' {
   }
 }
 
-/** Result of a successful upload. Must carry a `file_url`. */
+/**
+ * Result of a successful upload. `file_url` is required: every media node
+ * reads it to set `src`, so a result without one inserts a broken node.
+ *
+ * The index signature keeps server fields the editor does not know about, so
+ * an upload handler can return the raw File document.
+ */
 export interface UploadedFile extends Partial<FrappeUploadedFile> {
   file_url: string
   width?: number | null
   height?: number | null
+  [key: string]: unknown
 }
 
 export interface MediaUploadProgress {

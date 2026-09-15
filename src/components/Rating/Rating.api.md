@@ -34,10 +34,10 @@
   },
   {
     name: 'icon',
-    description: 'Icon to render for each star. Accepts a Vue component (e.g. an auto-imported\nlucide icon: `import Heart from \'~icons/lucide/heart\'`).\nThe component receives `fill="currentColor"` so closed-path SVGs render filled.\nDefaults to a filled lucide-star.',
+    description: 'Icon to render for each star. Accepts a class-icon name\n(`icon="lucide-heart"`), which renders as a `<span>` carrying that class,\nor a Vue component. A component receives `fill="currentColor"` so\nclosed-path SVGs render filled.\n\nDefaults to an inline filled star. The `lucide-star` class icon is a mask\nof lucide\'s outline star, so it cannot draw a solid one.',
     required: false,
     type: 'string | Component',
-    default: 'LucideStar'
+    default: 'RatingStar'
   },
   {
     name: 'size',

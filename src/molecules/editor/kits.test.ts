@@ -3,10 +3,12 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { getSchema, resolveExtensions, Mark } from '@tiptap/core'
+import { Editor, getSchema, resolveExtensions, Mark } from '@tiptap/core'
 import type { AnyExtension } from '@tiptap/core'
+import { ref } from 'vue'
 import { CommentKit, RichTextKit, InlineKit } from './kits'
 import { StarterKit, Mention, Tag, Link, Code, CodeBlock } from './extensions'
+import type { CommandItem } from './extensions'
 
 function schemaOf(...extensions: AnyExtension[]) {
   const schema = getSchema(extensions)
@@ -19,6 +21,26 @@ function schemaOf(...extensions: AnyExtension[]) {
 
 function extensionNames(extension: AnyExtension) {
   return new Set(resolveExtensions([extension]).map((e) => e.name))
+}
+
+/**
+ * Run the slash suggester's `items` against a live editor built from the kit.
+ * A real editor is needed because each command's `isAvailable` tests the
+ * loaded schema.
+ */
+function slashItems(kit: AnyExtension, query: string): CommandItem[] {
+  const editor = new Editor({
+    extensions: [kit],
+    element: null as unknown as HTMLElement,
+  })
+  try {
+    const slash = editor.extensionManager.extensions.find(
+      (e) => e.name === 'slashCommands',
+    )
+    return slash?.options.suggestion.items({ query, editor }) ?? []
+  } finally {
+    editor.destroy()
+  }
 }
 
 describe('editor kits', () => {
@@ -83,16 +105,20 @@ describe('editor kits', () => {
     // Named color: the frappe Color extension is `namedColor`, not stock `color`.
     expect(names.has('namedColor')).toBe(true)
     expect(names.has('textAlign')).toBe(true)
-    expect(names.has('styleClipboard')).toBe(true)
   })
 
-  it('drops StyleClipboard when removed with `false`', () => {
-    expect(extensionNames(RichTextKit).has('styleClipboard')).toBe(true)
-    expect(
-      extensionNames(RichTextKit.configure({ styleClipboard: false })).has(
-        'styleClipboard',
-      ),
-    ).toBe(false)
+  it('leaves StyleClipboard and Toc out until they are asked for', () => {
+    const stock = extensionNames(RichTextKit)
+    expect(stock.has('styleClipboard')).toBe(false)
+    expect(stock.has('tocNode')).toBe(false)
+    // ImageViewer is the exception: it stays on.
+    expect(stock.has('imageViewer')).toBe(true)
+
+    const opted = extensionNames(
+      RichTextKit.configure({ styleClipboard: {}, toc: {} }),
+    )
+    expect(opted.has('styleClipboard')).toBe(true)
+    expect(opted.has('tocNode')).toBe(true)
   })
 
   it('removes a member with `false`', () => {
@@ -151,6 +177,33 @@ describe('editor kits', () => {
       CustomLink,
     )
     expect(marks.has('link')).toBe(true)
+  })
+
+  it('keeps the built-in slash menu for `{}` and replaces it for `{ items }`', () => {
+    const builtIn = slashItems(RichTextKit, '')
+    expect(builtIn.length).toBeGreaterThan(1)
+
+    const items = [
+      {
+        title: 'Only one',
+        icon: '',
+        command: () => {},
+      },
+    ]
+    const replaced = slashItems(
+      RichTextKit.configure({ slashCommands: { items } }),
+      '',
+    )
+    expect(replaced.map((item) => item.title)).toEqual(['Only one'])
+  })
+
+  it('reads a reactive slash-command list on every open', () => {
+    const items = ref([{ title: 'First', icon: '', command: () => {} }])
+    const kit = RichTextKit.configure({ slashCommands: { items } })
+    expect(slashItems(kit, '').map((item) => item.title)).toEqual(['First'])
+
+    items.value = [{ title: 'Second', icon: '', command: () => {} }]
+    expect(slashItems(kit, '').map((item) => item.title)).toEqual(['Second'])
   })
 
   it('InlineKit produces single-line rich text (marks + link, no block tools)', () => {

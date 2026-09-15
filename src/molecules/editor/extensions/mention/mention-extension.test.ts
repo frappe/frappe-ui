@@ -25,7 +25,7 @@ function makeEditor(extra: AnyExtension[] = []) {
       Paragraph,
       Text,
       MentionExtension.configure({
-        items: [{ id: 'jane', label: 'Jane' }],
+        items: [{ value: 'jane', label: 'Jane' }],
       }),
       ...extra,
     ],

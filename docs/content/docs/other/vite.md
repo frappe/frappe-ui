@@ -120,10 +120,15 @@ frappeui({
 
 ## Lucide Icons
 
-Integrates [Lucide icons](https://lucide.dev) with auto-import support. See
-the [Icons](./icons) page for how to use icons in your templates — this
-sub-plugin is what powers the `~icons/lucide/*` import and `<LucideName />`
-auto-import forms.
+**Off by default.** frappe-ui draws its own icons from `lucide-<name>` class
+names, which the Tailwind plugin generates as CSS masks, so nothing in the
+library needs this sub-plugin. Turn it on when YOUR app imports
+`~icons/lucide/*` or writes `<LucideName />` tags. See the [Icons](./icons)
+page for the three forms.
+
+```ts
+frappeui({ lucideIcons: true })
+```
 
 ```ts
 frappeui({
@@ -133,6 +138,11 @@ frappeui({
   },
 })
 ```
+
+Leaving it off when the app needs it fails in two ways: an
+`import … from '~icons/lucide/x'` fails the build, while a `<LucideX />` tag
+compiles and renders nothing, with a "Failed to resolve component" warning in
+development only.
 
 ## Frappe Types
 

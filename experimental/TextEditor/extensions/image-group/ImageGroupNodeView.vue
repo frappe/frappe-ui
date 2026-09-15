@@ -49,8 +49,9 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { NodeViewWrapper, type Editor } from '@tiptap/vue-3'
 import type { NodeViewProps } from '@tiptap/vue-3'
-import LucideX from '~icons/lucide/x'
-import LucideEdit from '~icons/lucide/edit'
+import { classIcon } from '../../classIcon'
+const LucideX = classIcon('lucide-x')
+const LucideEdit = classIcon('lucide-edit')
 import Button from '#components/Button/Button.vue'
 import Select from '#components/Select/Select.vue'
 import ImageViewerModal from '../../components/ImageViewerModal.vue'

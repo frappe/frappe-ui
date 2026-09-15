@@ -267,9 +267,9 @@ import Button from '#components/Button/Button.vue'
 import Select from '#components/Select/Select.vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { UploadedFile } from '#utils/useFileUpload'
-import LucideX from '~icons/lucide/x'
-import LucideImagePlus from '~icons/lucide/image-plus'
-
+import { classIcon } from '../../classIcon'
+const LucideX = classIcon('lucide-x')
+const LucideImagePlus = classIcon('lucide-image-plus')
 interface UploadResult {
   success: boolean
   file?: UploadedFile

@@ -7,21 +7,21 @@ import {
 import SlashCommandsList from './SlashCommandsList.vue'
 import { Component as VueComponent } from 'vue'
 
-import Heading2 from '~icons/lucide/heading-2'
-import Heading3 from '~icons/lucide/heading-3'
-import List from '~icons/lucide/list'
-import ListOrdered from '~icons/lucide/list-ordered'
-import ListTask from '~icons/lucide/list-checks'
-import Code from '~icons/lucide/code'
-import Quote from '~icons/lucide/quote'
-import Image from '~icons/lucide/image'
-import Video from '~icons/lucide/video'
-import GalleryVertical from '~icons/lucide/gallery-vertical'
-import Link from '~icons/lucide/link'
-import Minus from '~icons/lucide/minus'
-import Table from '~icons/lucide/table-2'
-import TableOfContents from '~icons/lucide/table-of-contents'
-
+import { classIcon } from '../../classIcon'
+const Heading2 = classIcon('lucide-heading-2')
+const Heading3 = classIcon('lucide-heading-3')
+const List = classIcon('lucide-list')
+const ListOrdered = classIcon('lucide-list-ordered')
+const ListTask = classIcon('lucide-list-checks')
+const Code = classIcon('lucide-code')
+const Quote = classIcon('lucide-quote')
+const Image = classIcon('lucide-image')
+const Video = classIcon('lucide-video')
+const GalleryVertical = classIcon('lucide-gallery-vertical')
+const Link = classIcon('lucide-link')
+const Minus = classIcon('lucide-minus')
+const Table = classIcon('lucide-table-2')
+const TableOfContents = classIcon('lucide-table-of-contents')
 export const SlashCommandSuggestionKey = new PluginKey<any>(
   'slashCommandSuggestion',
 )

@@ -91,12 +91,25 @@ Instead, list each option as a complete literal:
 If your icon name is genuinely data-driven (e.g. coming from an API or a
 config object built at runtime), use the import-based approach below.
 
-## Also supported: `~icons/lucide/*` imports
+## Opt-in: `~icons/lucide/*` imports
 
-The Vite plugin resolves `~icons/lucide/<name>` to a Vue component. Useful
-when you need an actual SVG node — for example, when the icon name is
-dynamic, or when something downstream expects a component reference rather
-than a class string.
+::: warning Turn the plugin on first
+This form needs `lucideIcons: true` on the frappe-ui Vite plugin. It is
+**off by default**, because frappe-ui itself draws every icon from a class
+name and needs nothing from Vite.
+
+```js
+// vite.config.js
+frappeui({ lucideIcons: true })
+```
+
+Without it, an import fails the build and a `<LucideMenu />` tag renders
+nothing with only a "Failed to resolve component" warning in development.
+:::
+
+The plugin resolves `~icons/lucide/<name>` to a Vue component. Useful when you
+need an actual SVG node — for example, when the icon name is dynamic, or when
+something downstream expects a component reference rather than a class string.
 
 ```vue
 <script setup>
@@ -127,9 +140,9 @@ icon as an inline `<svg>` element. The component is bundled into your JS
 like any other module, so each icon you import adds a few hundred bytes
 to the bundle.
 
-## Also supported: auto-imported `<LucideName />`
+## Opt-in: auto-imported `<LucideName />`
 
-For convenience, every Lucide icon is also available as a global Vue
+With `lucideIcons: true`, every Lucide icon is also available as a global Vue
 component named `<Lucide<PascalName> />` — no import needed.
 
 ```vue
@@ -152,16 +165,17 @@ an inline `<svg>`.
 
 ## Which one should I use?
 
-| Situation                                   | Use                          |
-| ------------------------------------------- | ---------------------------- |
-| Static icon in a template                   | Class — `lucide-menu`        |
-| Icon name from props/data with a known set  | Class — list each literal    |
-| Icon name truly dynamic (loops, API data)   | `~icons/lucide/*` import     |
-| Passing an icon as a prop value             | `~icons/lucide/*` import     |
-| Inside an `<svg>` (need real SVG children)  | `~icons/lucide/*` import     |
-| Quick prototyping in a template             | `<LucideName />` auto-import |
+| Situation                                   | Use                                        |
+| ------------------------------------------- | ------------------------------------------ |
+| Static icon in a template                   | Class — `lucide-menu`                      |
+| Icon name from props/data with a known set  | Class — list each literal                  |
+| Passing an icon as a prop value             | Class — the props accept the string        |
+| Icon name truly dynamic (loops, API data)   | `~icons/lucide/*` import (`lucideIcons: true`) |
+| Inside an `<svg>` (need real SVG children)  | `~icons/lucide/*` import (`lucideIcons: true`) |
+| Quick prototyping in a template             | `<LucideName />` auto-import (`lucideIcons: true`) |
 
-In most components you write, the class form is the right answer.
+The class form is the right answer in most components you write, and it is the
+only form that needs no build configuration.
 
 ## Using icons in Frappe UI components
 

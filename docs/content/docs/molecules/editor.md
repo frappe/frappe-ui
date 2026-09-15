@@ -65,7 +65,7 @@ When no kit-and-slot recipe fits, drop to `useEditor` and render the primitives 
 
 ## Customizing size
 
-`EditorContent` applies `prose-v3` typography by default, with a `14px` base. Every size in the scale — headings, lists, code, blockquotes — is `em`-relative to that base, so you change the whole editor's size by overriding one CSS variable, `--prose-font-size`. Line spacing (unitless `line-height`) scales with it automatically.
+`EditorContent` applies `prose-v3` typography by default, with a `15px` base. Every size in the scale — headings, lists, code, blockquotes — is `em`-relative to that base, so you change the whole editor's size by overriding one CSS variable, `--prose-font-size`. Line spacing (unitless `line-height`) scales with it automatically.
 
 ```vue
 <!-- scale the editor to a 16px base; headings and spacing follow -->
@@ -133,14 +133,29 @@ Configurable extension bundles — pass one (or more) to `:extensions`. Configur
 | Export         | What it bundles                                                                                                                |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `CommentKit`   | StarterKit base + link, image, video, paste handling, emoji, `@` mention, `#` tag. For comments and chat.                      |
-| `RichTextKit`  | Everything in `CommentKit` plus tables, task lists, iframe embeds, table of contents, slash commands, color, highlight, typography, and text alignment. |
+| `RichTextKit`  | Everything in `CommentKit` plus tables, task lists, iframe embeds, slash commands, color, highlight, typography, and text alignment. `Toc` and `StyleClipboard` are opt-in: pass `toc: {}` or `styleClipboard: {}`. |
 | `InlineKit`    | Single-line document (one block, Enter disabled) with inline marks + link only. For titles and names.                          |
 
-Option types: `CommentKitOptions`, `RichTextKitOptions`, `InlineKitOptions`.
+Option types: `CommentKitOptions`, `RichTextKitOptions`, `InlineKitOptions`. Every member is typed against its extension's real options, so a misspelled key is a compile error.
+
+```ts
+// Add the table of contents and the format painter.
+RichTextKit.configure({ toc: {}, styleClipboard: {} })
+
+// Replace the built-in slash menu. `slashCommands: {}` keeps it.
+RichTextKit.configure({ slashCommands: { items: myCommands } })
+
+// Mention and tag items are `{ label, value }`. Extra fields reach the
+// item slot untouched.
+RichTextKit.configure({
+  mention: { items: [{ label: 'Jane Doe', value: 'jane@example.com' }] },
+  tag: { items: [{ label: 'design', value: 'TAG-0001' }] },
+})
+```
 
 ### Extensions
 
-Individual TipTap extensions with frappe-ui defaults already applied. Use these to assemble a custom extension list (or alongside a kit). `StarterKit` already ships `link`, `code`, and `codeBlock`, so disable them (`StarterKit.configure({ link: false })`) before adding the frappe versions to avoid duplicate-name warnings — the kits do this for you.
+Individual TipTap extensions with frappe-ui defaults already applied. Use these to assemble a custom extension list (or alongside a kit). `StarterKit` has no `link`, `code`, or `codeBlock` member, so you can add the frappe `Link`, `Code`, and `CodeBlock` extensions next to it with no duplicate-name warning.
 
 | Group       | Exports                                                              |
 | ----------- | ------------------------------------------------------------------- |

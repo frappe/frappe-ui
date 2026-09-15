@@ -43,6 +43,11 @@ import { theme } from 'frappe-ui/vitepress'
 export default theme
 ```
 
+`frappe-ui/vitepress` imports `shiki`, `@shikijs/transformers` and
+`@vue/compiler-dom`. Your `vitepress` and `vue` installs supply all three, so
+frappe-ui declares them as optional peers. With pnpm in strict mode, add the
+three packages to your site's own `devDependencies`.
+
 `DefineDocsConfigOptions` isn't reproduced here since it's expected to
 change — read it directly from `vitepress/index.node.ts` in the frappe-ui
 source.

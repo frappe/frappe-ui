@@ -37,7 +37,7 @@ The default focus ring is applied **globally** in the plugin's base layer, imple
 }
 ```
 
-- `colorPalette.js#generateEffectVariables` emits `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped) alongside the legacy `--focus-<name>` shadow strings.
+- `colorPalette.js#generateEffectVariables` emits `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped). It is the only emitted form.
 - The `.focus-ring{-<name>}` utilities are outline-based too. They exist for **themed overrides** (`focus-visible:focus-ring-red`) and **non-focus states** (`data-[state=open]:focus-ring`, `focus-within:focus-ring` on wrapper patterns).
 - Components do NOT declare a default focus ring; the base rule covers them. Utility classes (specificity ≥ (0,2,0), later layer) always beat the base rule, so:
   - suppress with `focus-visible:outline-none` (e.g. Dialog panel, ghost inputs),
@@ -55,5 +55,5 @@ The default focus ring is applied **globally** in the plugin's base layer, imple
 - `outline-none` on a focusable element now suppresses the design-system ring, not just the UA one. Use it deliberately.
 - Wrapper patterns (`focus-within:focus-ring`) keep `outline-none` on the inner input so only the wrapper shows the ring.
 - Programmatically-focused containers (dialog/menu panels) keep `focus:outline-none` / `focus-visible:outline-none` to avoid rings on script focus.
-- The `--focus-<name>` box-shadow variables remain emitted for backward compatibility but are no longer used by frappe-ui itself.
+- The `--focus-<name>` box-shadow variables are **not** emitted. Nothing in frappe-ui ever read them, and both forms first shipped together in `v1.0.0-beta.5`, so there is no release that had the shadow form alone. An app that reads one writes `outline: var(--focus-outline-<name>)` instead of `box-shadow: var(--focus-<name>)`.
 - Pre-existing `focus:ring-2` usages (Autocomplete, DatePicker CalendarPanel) are drift; migrate opportunistically by deleting them (the global rule takes over).

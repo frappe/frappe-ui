@@ -16,7 +16,10 @@ function withAlphaPlaceholder(value) {
 
 function mapShades(shades) {
   return Object.fromEntries(
-    Object.entries(shades).map(([shade, value]) => [shade, withAlphaPlaceholder(value)]),
+    Object.entries(shades).map(([shade, value]) => [
+      shade,
+      withAlphaPlaceholder(value),
+    ]),
   )
 }
 
@@ -127,7 +130,10 @@ function generateCSSVariables() {
 
 function generateSemanticColors() {
   const output = Object.fromEntries(
-    Object.keys(colorsData.themedVariables.light).map((category) => [category, {}]),
+    Object.keys(colorsData.themedVariables.light).map((category) => [
+      category,
+      {},
+    ]),
   )
 
   // Generate semantic colors
@@ -146,12 +152,17 @@ function generateSemanticColors() {
   return output
 }
 
-// Emit `--elevation-*` and `--focus-*` CSS variables. Elevation uses the
-// Figma `light/*` values in both modes (matches how Espresso 2.0 actually
+// Emit `--elevation-*` and `--focus-outline-*` CSS variables. Elevation uses
+// the Figma `light/*` values in both modes (matches how Espresso 2.0 actually
 // applies shadows in dark mode — see the dark-mode page in Figma, which
 // references `elevation/light/*` exclusively). Focus rings still mode-swap.
 // Theme-independent entries (e.g. `elevation.custom.status`) land in
 // `:root` only.
+//
+// The focus source values are box-shadows; only the outline form is emitted
+// (ADR-0005). A box-shadow ring collides with `shadow-*` on the same element
+// and forced-colors mode drops it, so nothing in frappe-ui ever read
+// `--focus-<name>`.
 function generateEffectVariables() {
   const output = {
     ':root': {},
@@ -165,12 +176,11 @@ function generateEffectVariables() {
     output[':root'][`--elevation-${name}`] = value
   }
   for (const [name, value] of Object.entries(effectsData.focus.light)) {
-    output[':root'][`--focus-${name}`] = value
     output[':root'][`--focus-outline-${name}`] = shadowToOutline(value)
   }
   for (const [name, value] of Object.entries(effectsData.focus.dark)) {
-    output['[data-theme="dark"]'][`--focus-${name}`] = value
-    output['[data-theme="dark"]'][`--focus-outline-${name}`] = shadowToOutline(value)
+    output['[data-theme="dark"]'][`--focus-outline-${name}`] =
+      shadowToOutline(value)
   }
 
   return output

@@ -78,7 +78,11 @@ import {
 } from './extensions/mention/mention-extension'
 import { TagComposite, type TagSuggestionItem } from './extensions/tag'
 import EmojiExtension from './extensions/emoji/emoji-extension'
-import { SlashCommands } from './extensions/slash-commands/slash-commands-extension'
+import {
+  SlashCommands,
+  type CommandItem,
+  type SlashCommandsOptions,
+} from './extensions/slash-commands/slash-commands-extension'
 import { TocNodeExtension } from './extensions/toc-node'
 import { ContentPasteExtension } from './extensions/content-paste'
 import StyleClipboardExtension from './extensions/copy-styles'
@@ -91,12 +95,17 @@ export type { MentionSuggestionItem, TagSuggestionItem }
 
 type StarterKitMember<O> = Partial<O> | false
 
+/**
+ * Options for the frappe StarterKit.
+ *
+ * `code`, `codeBlock`, and `link` are NOT members: the kit never registers
+ * TipTap's versions, because the frappe `Code`, `CodeBlock`, and `Link`
+ * extensions replace them and a duplicate name would collide.
+ */
 export interface StarterKitOptions {
   blockquote?: StarterKitMember<BlockquoteOptions>
   bold?: StarterKitMember<BoldOptions>
   bulletList?: StarterKitMember<BulletListOptions>
-  code?: false
-  codeBlock?: false
   document?: false
   dropcursor?: StarterKitMember<DropcursorOptions>
   gapcursor?: false
@@ -104,7 +113,6 @@ export interface StarterKitOptions {
   heading?: StarterKitMember<HeadingOptions>
   horizontalRule?: StarterKitMember<HorizontalRuleOptions>
   italic?: StarterKitMember<ItalicOptions>
-  link?: false
   listItem?: StarterKitMember<ListItemOptions>
   listJoin?: false
   listKeymap?: StarterKitMember<ListKeymapOptions>
@@ -321,6 +329,7 @@ export const Tag = TagComposite
 
 export const Emoji = EmojiExtension
 export { SlashCommands }
+export type { CommandItem, SlashCommandsOptions }
 export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension
 export const StyleClipboard = StyleClipboardExtension

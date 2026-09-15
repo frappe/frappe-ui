@@ -18,6 +18,8 @@ describe('SlashCommands', () => {
       schema: { marks: { link: {} }, nodes: {} },
       commands: { openLinkEditor: vi.fn() },
       chain: vi.fn(() => chain),
+      // `items` looks the extension up by name to read a configured list.
+      extensionManager: { extensions: [] },
     }
     const options = (SlashCommands as any).config.addOptions.call({})
     const [item] = options.suggestion.items({ query: 'link', editor })

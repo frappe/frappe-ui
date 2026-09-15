@@ -11,14 +11,14 @@ import {
 } from 'frappe-ui/editor'
 
 const people = [
-  { id: 'faris', label: 'Faris Ansari' },
-  { id: 'mary', label: 'Mary Thomas' },
-  { id: 'alex', label: 'Alex Kim' },
+  { value: 'faris', label: 'Faris Ansari' },
+  { value: 'mary', label: 'Mary Thomas' },
+  { value: 'alex', label: 'Alex Kim' },
 ]
 
 const tags = [
-  { id: 'launch', label: 'launch' },
-  { id: 'design', label: 'design' },
+  { value: 'launch', label: 'launch' },
+  { value: 'design', label: 'design' },
 ]
 
 const extensions = [

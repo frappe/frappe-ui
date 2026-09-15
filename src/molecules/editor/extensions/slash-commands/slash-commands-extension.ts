@@ -9,7 +9,11 @@ import {
   headingMeta,
   type EditorCommandMeta,
 } from '#molecules/editor/commands'
-import { filterByQuery } from '#molecules/editor/extensions/shared/suggestion-helpers'
+import {
+  filterByQuery,
+  getSuggestionOptions,
+} from '#molecules/editor/extensions/shared/suggestion-helpers'
+import { toValue, type MaybeRefOrGetter } from 'vue'
 import { PLATFORM_CONFIGS } from '#molecules/editor/extensions/iframe/iframe-embed-utils'
 import { allowlistPermitsHosts } from '#molecules/editor/extensions/iframe/iframe-allowlist'
 import { openTableSizePicker } from '#molecules/editor/components/table-size-picker/tableSizePickerController'
@@ -29,6 +33,17 @@ export interface CommandItem extends BaseSuggestionItem {
 type CommandExecutionProps = {
   editor: Editor
   range: Range
+}
+
+/**
+ * Options for the slash-command menu.
+ *
+ * With no `items` (or `items: null`) the built-in command registry is used.
+ * Passing `items` REPLACES that registry with the given list; the same
+ * filtering, `isAvailable` pruning and grouping apply.
+ */
+export interface SlashCommandsOptions {
+  items?: MaybeRefOrGetter<CommandItem[]> | null
 }
 
 function slashCommand(
@@ -169,9 +184,16 @@ export const SlashCommands = createSuggestionExtension<CommandItem>({
   name: 'slashCommands',
   char: '/',
   pluginKey: SlashCommandSuggestionKey,
+  addOptions: () => ({ items: null }),
   items: ({ query, editor }) => {
+    const configured = toValue(
+      getSuggestionOptions<SlashCommandsOptions>(editor, 'slashCommands')
+        ?.items ?? null,
+    )
     return filterByQuery(
-      getCommands().filter((item) => item.isAvailable?.(editor) !== false),
+      (configured ?? getCommands()).filter(
+        (item) => item.isAvailable?.(editor) !== false,
+      ),
       query,
       'title',
     )

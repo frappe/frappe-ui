@@ -19,10 +19,13 @@ export interface RatingProps extends InputLabelingProps {
   disabled?: boolean
 
   /**
-   * Icon to render for each star. Accepts a Vue component (e.g. an auto-imported
-   * lucide icon: `import Heart from '~icons/lucide/heart'`).
-   * The component receives `fill="currentColor"` so closed-path SVGs render filled.
-   * Defaults to a filled lucide-star.
+   * Icon to render for each star. Accepts a class-icon name
+   * (`icon="lucide-heart"`), which renders as a `<span>` carrying that class,
+   * or a Vue component. A component receives `fill="currentColor"` so
+   * closed-path SVGs render filled.
+   *
+   * Defaults to an inline filled star. The `lucide-star` class icon is a mask
+   * of lucide's outline star, so it cannot draw a solid one.
    */
   icon?: string | Component
 

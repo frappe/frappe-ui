@@ -36,7 +36,10 @@
             <template #default="{ item: slotItem }">
               <slot :item="slotItem" :index="index">
                 <span>{{
-                  slotItem.display || slotItem.title || slotItem.name
+                  slotItem.display ||
+                  slotItem.label ||
+                  slotItem.title ||
+                  slotItem.name
                 }}</span>
               </slot>
             </template>

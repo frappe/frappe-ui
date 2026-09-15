@@ -14,30 +14,34 @@ const enabled = ref(true)
 // exact class name in source. A computed `focus-ring-${name}` would never be
 // generated, so the colored variants previously rendered nothing.
 const RINGS = [
-  { label: 'focus-ring', variable: '--focus-default', ringClass: 'focus-ring' },
+  {
+    label: 'focus-ring',
+    variable: '--focus-outline-default',
+    ringClass: 'focus-ring',
+  },
   {
     label: 'focus-ring-red',
-    variable: '--focus-red',
+    variable: '--focus-outline-red',
     ringClass: 'focus-ring-red',
   },
   {
     label: 'focus-ring-green',
-    variable: '--focus-green',
+    variable: '--focus-outline-green',
     ringClass: 'focus-ring-green',
   },
   {
     label: 'focus-ring-amber',
-    variable: '--focus-amber',
+    variable: '--focus-outline-amber',
     ringClass: 'focus-ring-amber',
   },
   {
     label: 'focus-ring-blue',
-    variable: '--focus-blue',
+    variable: '--focus-outline-blue',
     ringClass: 'focus-ring-blue',
   },
   {
     label: 'focus-ring-violet',
-    variable: '--focus-violet',
+    variable: '--focus-outline-violet',
     ringClass: 'focus-ring-violet',
   },
 ] as const

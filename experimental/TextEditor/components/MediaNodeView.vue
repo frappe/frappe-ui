@@ -7,17 +7,17 @@ import { LoadingIndicator } from '#components/LoadingIndicator'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
 import { localFileMap } from '../extensions/image/image-extension'
 import { ErrorMessage } from '#components/ErrorMessage'
-import LucideAlignLeft from '~icons/lucide/align-left'
-import LucideAlignCenter from '~icons/lucide/align-center'
-import LucideAlignRight from '~icons/lucide/align-right'
-import LucideWrapText from '~icons/lucide/wrap-text'
-import LucideFloatLeft from '~icons/lucide/align-horizontal-justify-start'
-import LucideFloatRight from '~icons/lucide/align-horizontal-justify-end'
-import LucideNoFloat from '~icons/lucide/align-vertical-space-around'
-import LucideCaptions from '~icons/lucide/captions'
-import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
-import LucideRotateCw from '~icons/lucide/rotate-cw'
-
+import { classIcon } from '../classIcon'
+const LucideAlignLeft = classIcon('lucide-align-left')
+const LucideAlignCenter = classIcon('lucide-align-center')
+const LucideAlignRight = classIcon('lucide-align-right')
+const LucideWrapText = classIcon('lucide-wrap-text')
+const LucideFloatLeft = classIcon('lucide-align-horizontal-justify-start')
+const LucideFloatRight = classIcon('lucide-align-horizontal-justify-end')
+const LucideNoFloat = classIcon('lucide-align-vertical-space-around')
+const LucideCaptions = classIcon('lucide-captions')
+const LucideMoveDiagonal2 = classIcon('lucide-move-diagonal-2')
+const LucideRotateCw = classIcon('lucide-rotate-cw')
 const props = defineProps(nodeViewProps)
 
 const mediaRef = ref<HTMLImageElement | HTMLVideoElement | null>(null)

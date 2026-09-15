@@ -12,11 +12,44 @@ export default {
 }
 ```
 
-The preset sets `darkMode`, the integer spacing scale (`1`–`64`, filling the
-gaps in Tailwind's default scale), the `prose` / `prose-v3` typography
-safelist, and four plugins (`@tailwindcss/forms`, `@tailwindcss/typography`,
-the theme plugin, the Lucide icon plugin). That's the whole exported surface —
-a default export (the preset) and the named `content` export below.
+The preset sets `darkMode`, the spacing scale, the `prose` / `prose-v3`
+typography safelist, and four plugins (`@tailwindcss/forms`,
+`@tailwindcss/typography`, the theme plugin, the Lucide icon plugin). That's
+the whole exported surface — a default export (the preset) and the named
+`content` export below.
+
+Requires **Tailwind `>=3.4.0 <4`**. It is a peer dependency. Tailwind v4 reads
+none of this shape, so the design tokens never load there.
+
+## What the preset replaces
+
+Five theme sections are **replaced**, not extended:
+
+| Section | What you get | What you lose |
+| --- | --- | --- |
+| `colors` | the frappe-ui palette (`ink-*`, `surface-*`, `outline-*`, and the raw ramps) | Tailwind's stock palette (`slate`, `sky`, `emerald`, …) |
+| `fontSize` | the type scale (`text-sm`, `text-base`, `text-lg`, …, at frappe-ui's values) | Tailwind's sizes and their paired line heights |
+| `screens` | `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px | `2xl:` |
+| `borderRadius` | the numbered scale (`rounded-4`, `rounded-9`, …) | `rounded-sm` … `rounded-3xl` |
+| `boxShadow` | the elevation scale (`shadow-sm` … `shadow-2xl`, each a `--elevation-*` variable) | `shadow-inner` |
+
+A class from a replaced section is simply not generated. `2xl:flex` and
+`shadow-inner` compile to nothing, with no error. Everything else (`spacing`,
+`textColor`, `backgroundColor`, and the rest) is **extended**, so Tailwind's
+own values stay.
+
+## The spacing scale
+
+Every integer from `1` to `128` and every half step from `0.5` to `19.5`, all
+at the canonical `0.25rem` step. Stock Tailwind has gaps above `12` (`13`,
+`15`, `17`, `18`, `19`, `21`… are undefined), so `h-17` and `size-17` silently
+do not compile there.
+
+The scale is declared once. Tailwind 3.4 reads `theme('spacing')` for `width`,
+`height`, `size`, `minWidth`, `maxWidth`, `minHeight` and `maxHeight`, so
+`w-17`, `min-w-40`, `max-h-52` and `size-3.5` all come from the same numbers.
+The list styling hooks read it too: `list-gap-3` and `list-row-px-2.5` take
+any spacing key.
 
 ## Why you have to list `content` yourself
 
@@ -46,14 +79,22 @@ console.log(content)
 // [
 //   '.../frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/icons/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}',
+//   '.../frappe-ui/experimental/Accordion/**/*.{vue,js,ts,jsx,tsx}',
+//   … one glob per re-exported experimental directory, then vitepress
 // ]
 ```
 
-The rest of `experimental/` is not covered — it carries no stability promise.
-`SpriteIcons` is the one exception: it holds a previously supported surface
-(`Icon`, `IconPicker`, `spritePlugin`, moved out of `frappe-ui/icons`), so its
-classes stay compiled until it is removed.
+One rule decides what is listed under `experimental/`: every directory the
+`frappe-ui/experimental` barrel re-exports. Today that is `Accordion`,
+`Calendar`, `Charts`, `CodeEditor`, `CommandPalette`, `FloatingWindow`,
+`ListView`, `MultiEmailInput`, `SpriteIcons`, `TextEditor` and
+`ThemeSwitcher`. Importing any of them pulls that directory's classes into
+your build, so they have to be scanned. A test derives the list from the
+barrel, so the two cannot drift. Directories the barrel does not re-export
+stay out, because nothing you can import reaches them.
+
+`vitepress/**` is listed for the same reason on its own subpath: a docs site
+built on `frappe-ui/vitepress` has no other way to emit the theme's classes.
 
 The paths are resolved against wherever `frappe-ui` is actually installed
 (`node_modules`, a monorepo symlink, a local workspace checkout), so they work

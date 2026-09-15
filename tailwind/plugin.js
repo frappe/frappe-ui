@@ -192,6 +192,17 @@ let componentStyles = {
   '.form-checkbox': {
     '@apply rounded-5 bg-surface-gray-2 text-ink-blue-4 focus:ring-0': {},
   },
+}
+
+// The dark-theme checkmark and dash the forms plugin draws in the light ink.
+// These live in the base layer, not in `addComponents`, because their keys are
+// attribute selectors: Tailwind v4 reads a v3 preset through `@config` and
+// rejects any `addComponents` key that is not a single class name, which fails
+// the whole build. The cascade is unchanged either way. The selector is
+// (0,3,0), above both the forms base rule `input:where([type='checkbox'])
+// :checked` (0,1,1) and the forms class rule `.form-checkbox:checked` (0,2,0).
+// So the rules still win in v3, and the v4 `@config` path still builds.
+let darkCheckboxStyles = {
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
   },
@@ -207,6 +218,7 @@ export default plugin(
     // breakpoints, so list tracks and `md:hidden` cells switch at the same
     // width. See tailwind/listColumns.js.
     addBase(listColumnRules(theme('screens')))
+    addBase(darkCheckboxStyles)
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
@@ -284,37 +296,6 @@ export default plugin(
         divideColor: {
           outline: semanticColors.outline,
           'outline-alpha': semanticColors['outline-alpha'],
-        },
-        spacing: {
-          4.5: '1.125rem',
-          5.5: '1.375rem',
-          6.5: '1.625rem',
-          7.5: '1.875rem',
-          8.5: '2.125rem',
-          9.5: '2.375rem',
-          10.5: '2.625rem',
-          11.5: '2.875rem',
-          12.5: '3.125rem',
-          13: '3.25rem',
-          13.5: '3.375rem',
-          14.5: '3.625rem',
-          15: '3.75rem',
-          15.5: '3.875rem',
-        },
-        width: {
-          3.5: '0.875rem',
-          112: '28rem',
-          wizard: '650px',
-        },
-        height: {
-          3.5: '0.875rem',
-        },
-        minWidth: {
-          40: '10rem',
-          50: '18rem',
-        },
-        maxHeight: {
-          52: '13rem',
         },
         typography: (theme) => ({
           DEFAULT: {
@@ -435,9 +416,9 @@ export default plugin(
           },
           // prose-v3: zero paragraph margins, user controls spacing with Enter
           // all spacing on 8px grid: 4, 8, 16, 24, 32px
-          // empty <p> = 14px × 1.7 line-height ≈ 23.8px (the user's spacing unit)
+          // empty <p> = 15px × 1.7 line-height ≈ 25.5px (the user's spacing unit)
           //
-          // Base font-size is customizable via `--prose-font-size` (default 14px).
+          // Base font-size is customizable via `--prose-font-size` (default 15px).
           // Every child size is `em`-relative to this base, so overriding the
           // variable rescales the whole editor proportionally — headings, lists,
           // code — while line-height (unitless) and em letter-spacing scale too.

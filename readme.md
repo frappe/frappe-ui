@@ -37,7 +37,7 @@ In 2019, I began building [Frappe Books](https://github.com/frappe/books) which 
 
 ## Usage
 
-Requires **Node `>=20.19.0`**.
+Requires **Node `>=20.19.0`**, Vite, Vue 3 and Tailwind CSS v3.4.
 
 ```sh
 npm install frappe-ui
@@ -45,45 +45,48 @@ npm install frappe-ui
 yarn add frappe-ui
 ```
 
-Now, import the FrappeUI plugin and components in your Vue app's `main.js`:
+Add the frappe-ui Vite plugin in `vite.config.js`:
 
 ```js
-import { createApp } from 'vue'
-import { FrappeUI } from 'frappe-ui'
-import App from './App.vue'
-import './index.css'
+import vue from '@vitejs/plugin-vue'
+import frappeui from 'frappe-ui/vite'
 
-let app = createApp(App)
-app.use(FrappeUI)
-app.mount('#app')
-```
-
-In your `tailwind.config.js` file, include the frappe-ui preset:
-
-```js
-module.exports = {
-  presets: [
-    require('frappe-ui/src/utils/tailwind.config')
-  ],
-  ...
+export default {
+  plugins: [frappeui(), vue()],
 }
 ```
 
-Now, you can import needed components and start using it:
+Add the preset and frappe-ui's source globs in `tailwind.config.js`:
 
-```html
-<template>
-  <button>Click me</button>
-</template>
-<script>
-  import { Button } from 'frappe-ui'
-  export default {
-    components: {
-      Button,
-    },
-  }
-</script>
+```js
+import frappeUIPreset, { content } from 'frappe-ui/tailwind'
+
+export default {
+  presets: [frappeUIPreset],
+  content: ['./index.html', './src/**/*.{vue,js,ts}', ...content],
+}
 ```
+
+Import the stylesheet once, from your CSS entry:
+
+```css
+@import 'frappe-ui/style.css';
+```
+
+Now use the components:
+
+```vue
+<script setup>
+import { Button } from 'frappe-ui'
+</script>
+
+<template>
+  <Button variant="solid" icon-left="lucide-plus">Click me</Button>
+</template>
+```
+
+The full setup, including TypeScript and the Frappe dev-server proxy, is on the
+[Getting Started](https://ui.frappe.io/docs/getting-started) page.
 
 ## Claude Code skill
 

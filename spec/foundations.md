@@ -25,7 +25,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 | Source of truth | Figma file `espresso-2.0` |
 | Typography model | Atomic size/weight/line-height tokens from Figma export, plus named-style utilities for composite styles |
 | Named typography utilities | `text-{size}-medium` for sizes whose medium-variant tracking is confirmed in Figma. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
-| Focus indicator | `focus-visible:ring-2` + themed `ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
+| Focus indicator | A global `:focus-visible` outline from `--focus-outline-default`, retheme with `focus-visible:focus-ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
 | Radius scale | Numbered tokens `rounded-0`…`rounded-9` are canonical. Named aliases (`rounded`, `rounded-md`, …) are removed. See [ADR-0006](./adr/0006-numbered-radius-tokens.md) |
 | Color themes | Figma defines `default` (gray) and `red`. `blue` and `green` are code-only extensions (see below) |
 | Component size scale | Figma defines `sm` / `md` / `lg`. `xs`, `xl`, and `2xl` are code-only extensions |
@@ -73,16 +73,21 @@ Confirmed against Figma typography variables on `2026-05-24`:
 
 ## Focus ring
 
-All interactive components use `focus-visible:ring-2` paired with a themed `ring-<color>`:
+A global `:focus-visible` rule in the plugin's base layer draws the ring, so a
+component declares nothing. Retheme with `focus-visible:focus-ring-<color>`,
+suppress with `focus-visible:outline-none`.
 
-| Theme | Ring color | Figma |
+| Utility | Variable | Figma |
 |---|---|---|
-| gray (default) | `ring-outline-gray-3` | `focus/light/default` |
-| red    | `ring-outline-red-3`   | `focus/light/red` |
-| blue   | `ring-blue-400`         | code-only |
-| green  | `ring-outline-green-3`  | code-only |
+| `focus-ring` (default) | `--focus-outline-default` | `focus/light/default` |
+| `focus-ring-red` | `--focus-outline-red` | `focus/light/red` |
+| `focus-ring-green` | `--focus-outline-green` | `focus/light/green` |
+| `focus-ring-amber` | `--focus-outline-amber` | `focus/light/amber` |
+| `focus-ring-blue` | `--focus-outline-blue` | `focus/light/blue` |
+| `focus-ring-violet` | `--focus-outline-violet` | `focus/light/violet` |
 
-The ring is outset, no offset, no blur — matches Figma's 2px drop-shadow spec exactly.
+The ring is an `outline`, outset, no offset, no blur: 2px light, 3px dark. The
+matching `--focus-<name>` box-shadow variables are not emitted.
 
 See [ADR-0005](./adr/0005-focus-ring-2px.md).
 
@@ -136,6 +141,28 @@ Figma espresso v2 defines two component color themes:
 Both are exported via [`tailwind/colors.json`](../tailwind/colors.json) → [`tailwind/generated/colors.json`](../tailwind/generated/colors.json) and resolved to CSS variables by [`tailwind/colorPalette.js`](../tailwind/colorPalette.js).
 
 Solid/subtle/outline/ghost ramps for these two themes are pixel-accurate to Figma.
+
+### Semantic tokens are the default
+
+Semantic tokens (`surface-*`, `ink-*`, `outline-*`) flip under
+`[data-theme="dark"]`, so one class is correct in both modes. Raw shades
+(`gray-3`, `dark-gray-3`) are fixed colors and are reserved for values that
+must not follow the theme, such as the editor's font-color swatches. The dark
+raw ramp is not a mirror of the light one: it runs in reverse and has an extra
+`450` step.
+
+### The `alpha` name
+
+`alpha` is a suffix on the group key, which is how Figma names it. Raw families
+are `{hue}-alpha-{shade}` (`gray-alpha-100`) and semantic families are
+`{category}-alpha-{hue}-{step}` (`surface-alpha-gray-2`). No rename is planned:
+the names match Figma and Frappe's own espresso variables, and the position
+carries no meaning a rename would recover. The overlay ramps
+(`white-overlay-*`, `black-overlay-*`) keep their word, which Figma spells
+`alpha`.
+
+Tailwind's `/50` modifier applies to the semantic alpha classes only. The raw
+alpha and overlay values already carry an alpha channel.
 
 ## Code-only extensions
 
