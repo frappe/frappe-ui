@@ -42,8 +42,8 @@ const typeDefinition = computed(() => {
       <summary
         class="flex rounded-4 cursor-pointer list-none items-center gap-2 py-2 text-sm font-medium text-ink-gray-6 transition-colors hover:text-ink-gray-9"
       >
-        <LucideChevronRight
-          class="size-4 shrink-0 transition-transform group-open:rotate-90"
+        <span
+          class="lucide-chevron-right size-4 shrink-0 transition-transform group-open:rotate-90"
         />
         Show types
       </summary>

@@ -58,4 +58,9 @@ export const content = [
   glob('experimental/Charts/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/CommandPalette/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/FloatingWindow/**/*.{vue,js,ts,jsx,tsx}'),
+  // `vitepress/**` (the shared docs theme) carries no stability promise
+  // either, but every class it renders, including its `lucide-*` icons, comes
+  // from this package. A docs site on `frappe-ui/vitepress` has no other way
+  // to emit them.
+  glob('vitepress/**/*.{vue,js,ts}'),
 ]
