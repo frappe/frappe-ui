@@ -147,6 +147,37 @@ describe('lucideIcons on the Vite plugin', () => {
     )
   })
 
+  it('leaves a binding shadowed inside a bare block alone', () => {
+    const source = [
+      `import frappeui from 'frappe-ui/vite'`,
+      `{`,
+      `  const frappeui = otherPlugin`,
+      `  frappeui({ frappeProxy: true })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migratePackaging(source, 'vite.config.ts', withIcons).migrated).toBe(
+      source,
+    )
+  })
+
+  it('leaves a binding shadowed by a catch parameter alone', () => {
+    const source = [
+      `import frappeui from 'frappe-ui/vite'`,
+      `try {`,
+      `  run()`,
+      `} catch (frappeui) {`,
+      `  frappeui({ frappeProxy: true })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migratePackaging(source, 'vite.config.ts', withIcons).migrated).toBe(
+      source,
+    )
+  })
+
   it('still migrates a sibling scope that does not shadow the import', () => {
     const source = [
       `import frappeui from 'frappe-ui/vite'`,
@@ -371,6 +402,26 @@ describe('command line', () => {
     })
 
     expect(result.status).toBe(0)
+    expect(fs.readFileSync(path.join(outside, 'outside.js'), 'utf8')).toContain(
+      'frappe-ui/src/utils/tailwind.config',
+    )
+  })
+
+  it('says why a symlinked target reads nothing', () => {
+    const outside = tempDir({
+      'outside.js': `const preset = require('frappe-ui/src/utils/tailwind.config')\n`,
+    })
+    const dir = tempDir({})
+    const link = path.join(dir, 'linked')
+    fs.symlinkSync(outside, link, 'dir')
+
+    const result = spawnSync(process.execPath, [SCRIPT, link], {
+      encoding: 'utf8',
+    })
+
+    expect(result.status).toBe(0)
+    expect(result.stderr).toContain('it is a symlink')
+    expect(result.stdout).toContain('Updated 0 files')
     expect(fs.readFileSync(path.join(outside, 'outside.js'), 'utf8')).toContain(
       'frappe-ui/src/utils/tailwind.config',
     )

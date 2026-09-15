@@ -114,7 +114,15 @@ function declaredNames(node) {
   }
 
   for (const parameter of node.parameters ?? []) addBindingName(parameter.name)
-  const body = ts.isSourceFile(node) ? node : node.body
+  // `catch (error)` binds its parameter through `variableDeclaration`, not
+  // `parameters`.
+  if (ts.isCatchClause(node) && node.variableDeclaration) {
+    addBindingName(node.variableDeclaration.name)
+  }
+  // A source file and a bare block hold their own statements. Everything else
+  // that opens a scope keeps them under `body`, which is undefined for a
+  // block, so read the node itself in those two cases.
+  const body = ts.isSourceFile(node) || ts.isBlock(node) ? node : node.body
   if (body && 'statements' in body) {
     for (const statement of body.statements) addStatement(statement)
   }
@@ -429,6 +437,13 @@ function main() {
     if (!fs.existsSync(target)) {
       console.error(`Invalid path: ${target}`)
       process.exit(1)
+    }
+    // `walk` never follows a symlink, so a symlinked target reads nothing and
+    // the run would otherwise end in a bare "Updated 0 files".
+    if (fs.lstatSync(target).isSymbolicLink()) {
+      console.error(
+        `Skipped ${target}: it is a symlink, and this codemod does not follow symlinks. Pass the real path.`,
+      )
     }
   }
 
