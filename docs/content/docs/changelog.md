@@ -66,20 +66,28 @@ site; the runtime ignores it as it always did.
   `UploadFunction`. A handler may take a second `MediaUploadRequestOptions`
   argument to report progress; a one-argument handler still compiles.
 - **`EditorBubbleMenu` and `EditorFloatingMenu` share `EditorMenuOptions`.**
-  `placement`, `strategy`, `offset`, `flip`, `shift`, `hide`, `inline`,
-  `scrollTarget` and `shouldShow` are the whole supported contract. The prop
-  used to take TipTap's own Floating UI bag, so `arrow`, `size`,
-  `autoPlacement`, `onShow`, `onHide`, `onUpdate`, `onDestroy` and the
-  middleware object forms of `offset`, `flip`, `shift`, `hide` and `inline`
-  type-checked and reached Floating UI. They are removed. Replace an object
-  form with `true` to keep the middleware on its defaults, or drop the key:
-  `flip: { fallbackPlacements: ['bottom'] }` becomes `flip: true`.
+  `side`, `align`, `strategy`, `offset`, `flip`, `shift`, `hide`, `inline`,
+  `scrollTarget` and `shouldShow` are the whole supported contract.
+- **The menus position with `side` and `align`**, the same two axes as
+  `Popover` and every overlay built on it, with the same `PopoverSide` and
+  `PopoverAlign` types. `placement` and `EditorMenuPlacement` are removed:
+  `placement: 'top-start'` becomes `side: 'top', align: 'start'`, and a bare
+  `placement: 'bottom'` becomes `side: 'bottom'`. Setting neither still leaves
+  TipTap's own default in place, `top` for the bubble menu and `right` for the
+  floating menu.
+- **The rest of TipTap's Floating UI bag is gone.** The prop used to take that
+  bag whole, so `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`,
+  `onUpdate`, `onDestroy` and the middleware object forms of `offset`, `flip`,
+  `shift`, `hide` and `inline` type-checked and reached Floating UI. They are
+  removed. Replace an object form with `true` to keep the middleware on its
+  defaults, or drop the key: `flip: { fallbackPlacements: ['bottom'] }` becomes
+  `flip: true`.
 - `Editor.extensions` and `useEditor({ extensions })` take TipTap's
   `Extensions`, so a nested array of extensions is accepted.
 
 New exports: `UploadFunction`, `MediaUploadProgress`, `InlineStarterKitOptions`,
 `CommandItem`, `SlashCommandsOptions`, `EditorMenuOptions`,
-`EditorMenuPlacement`, `EditorMenuShouldShowContext`.
+`EditorMenuShouldShowContext`.
 
 The [editor migration guide](/docs/migration#editor-option-types) lists the
 per-file edits.

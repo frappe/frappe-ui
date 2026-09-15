@@ -2911,18 +2911,41 @@ RichTextKit.configure({
 ```
 
 **Check Bubble and Floating menu option objects against `EditorMenuOptions`.**
-The supported keys are `placement`, `strategy`, `offset`, `flip`, `shift`,
+The supported keys are `side`, `align`, `strategy`, `offset`, `flip`, `shift`,
 `hide`, `inline`, `scrollTarget` and `shouldShow`.
 
-This one removes working settings. The `options` prop used to be TipTap's own
-Floating UI bag, so the keys below type-checked and reached Floating UI. They
-are now a compile error:
+**`placement` becomes `side` plus `align`.** The menus now position the way
+`Popover`, `Select`, `Dropdown`, `HoverCard` and the pickers do, with the same
+`PopoverSide` and `PopoverAlign` values. Split the hyphen:
+
+```vue
+<!-- Before -->
+<EditorBubbleMenu :options="{ placement: 'top-start' }" />
+<!-- After -->
+<EditorBubbleMenu :options="{ side: 'top', align: 'start' }" />
+
+<!-- Before -->
+<EditorFloatingMenu :options="{ placement: 'bottom' }" />
+<!-- After -->
+<EditorFloatingMenu :options="{ side: 'bottom' }" />
+```
+
+`align` defaults to `center`, which is the unaligned variant. Set neither axis
+and TipTap's own default still applies: `top` for the bubble menu and `right`
+for the floating menu. The exported `EditorMenuPlacement` type is removed;
+import `PopoverSide` and `PopoverAlign` from `frappe-ui` if you need to name
+the values.
+
+The rest of this one removes working settings. The `options` prop used to be
+TipTap's own Floating UI bag, so the keys below type-checked and reached
+Floating UI. They are now a compile error:
 
 | Removed                                          | What to do                                                            |
 | ------------------------------------------------ | --------------------------------------------------------------------- |
+| `placement`                                      | `side` plus `align`, as above.                                         |
 | `arrow`                                          | Drop it. The menus render no arrow element.                            |
 | `size`                                           | Size the menu with CSS on your own toolbar markup.                     |
-| `autoPlacement`                                  | Set `placement`, and leave `flip` on for the fallback.                 |
+| `autoPlacement`                                  | Set `side`, and leave `flip` on for the fallback.                      |
 | `onShow`, `onHide`, `onUpdate`, `onDestroy`      | Watch your own state, or use `shouldShow` for the show or hide branch. |
 | `offset: { mainAxis, crossAxis }`                | `offset: <number>`, the main-axis gap.                                 |
 | `flip`, `shift`, `hide`, `inline` in object form | `true` to keep the middleware on its defaults, or drop the key.        |
@@ -2938,7 +2961,7 @@ are now a compile error:
   }"
 />
 <!-- After -->
-<EditorBubbleMenu :options="{ placement: 'top', offset: 8, flip: true }" />
+<EditorBubbleMenu :options="{ side: 'top', offset: 8, flip: true }" />
 ```
 
 `flip: true` keeps Floating UI's default fallback placements, which is the

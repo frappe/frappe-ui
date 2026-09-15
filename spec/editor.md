@@ -86,7 +86,7 @@ import {
   type TiptapEditor,   // the tiptap Editor instance type (the `Editor` name is the component)
   type JSONContent, type UploadedFile, type UploadFunction,
   type MenuItem, type CommandMenuItem, type MenuGroupItem, type MenuActionContext,
-  type EditorMenuOptions, type EditorMenuPlacement, type EditorMenuShouldShowContext,
+  type EditorMenuOptions, type EditorMenuShouldShowContext,
   type StarterKitOptions, type CommentKitOptions,
   type RichTextKitOptions, type InlineKitOptions, type InlineStarterKitOptions,
   type SuggestionExtensionOptions, type SuggestionRange,
@@ -264,7 +264,9 @@ defineProps<{
 
 Selection-anchored menu. Same `items` shape, plus optional `options`. `EditorMenuOptions` is one owned narrow type shared with `EditorFloatingMenu`: positioning keys plus `shouldShow` (this covers the insights site that suppresses the menu inside specific node types). A key that is not listed is a compile error.
 
-The narrowing is a break. The prop used to take TipTap's own Floating UI bag, so `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`, `onUpdate`, `onDestroy` and the middleware object forms of `offset`, `flip`, `shift`, `hide` and `inline` type-checked and reached Floating UI. v1 drops them: a menu that needs Floating UI middleware configuration is out of scope for this component.
+Position is `side` + `align`, the two axes `Popover` and every overlay built on it already use, typed with the same `PopoverSide` and `PopoverAlign`. The components join them into Floating UI's single `placement` string, with `align: 'center'` as the bare side. Setting neither leaves TipTap's default: `top` here, `right` for `EditorFloatingMenu`.
+
+The narrowing is a break. The prop used to take TipTap's own Floating UI bag, so `placement`, `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`, `onUpdate`, `onDestroy` and the middleware object forms of `offset`, `flip`, `shift`, `hide` and `inline` type-checked and reached Floating UI. v1 drops them: `placement` in favour of the two axes, and the rest because a menu that needs Floating UI middleware configuration is out of scope for this component.
 
 ```ts
 defineProps<{
@@ -274,7 +276,8 @@ defineProps<{
 }>()
 
 type EditorMenuOptions = {
-  placement?: EditorMenuPlacement        // 'top' | 'top-start' | … | 'left-end'
+  side?: PopoverSide                     // 'top' | 'right' | 'bottom' | 'left'
+  align?: PopoverAlign                   // 'start' | 'center' | 'end'
   strategy?: 'absolute' | 'fixed'
   offset?: number | false
   flip?: boolean
