@@ -106,14 +106,21 @@ the three months themselves, not the days the padding reaches into.
 
 Rows have the room a grid pill does not, so they carry a description line and
 tags. `Calendar` fills in the description itself — where the event is, and which
-day of a stay the row is (`Day 2/3`) — and marks a draft by drawing the dot
-beside the title as a ring rather than a disc. Where it stands against the clock
+day of a stay the row is (`Day 2/3`) — and marks a draft as a pill does, an
+outline in its colour on the plain ground rather than a tinted block. Where it stands against the clock
 reads right after that: `Now` in blue while it runs and `Soon` in amber in the
 hour before it, and nothing beyond that: an hour count would only restate the
 time written beside it. Who is coming (`participant`) stands at the row's far
 end, the one edge a card aligns on other than the time column, so the counts of
 a day's rows line up — and the `#event-description` and `#event-suffix` slots
 let you say the rest.
+
+Drawn narrower than 640px — a phone, or a pane a sidebar has squeezed — the list
+stacks. A day's name becomes a band over its rows rather than a column beside
+them, and each row takes two lines: the title, its tags and who is coming on the
+first, the time and the description on the second. The list measures its own
+width for this, so a calendar in a narrow pane reads the same way a phone's
+does.
 
 <ComponentPreview name="Calendar-Agenda" csr="true" />
 
