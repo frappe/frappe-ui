@@ -79,16 +79,22 @@ console.log(content)
 // [
 //   '.../frappe-ui/src/**/*.{vue,js,ts,jsx,tsx}',
 //   '.../frappe-ui/icons/**/*.{vue,js,ts,jsx,tsx}',
-//   '.../frappe-ui/experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}',
-//   … one glob per parked family
+//   '.../frappe-ui/experimental/Accordion/**/*.{vue,js,ts,jsx,tsx}',
+//   … one glob per re-exported experimental directory, then vitepress
 // ]
 ```
 
-The rest of `experimental/` is not covered — it carries no stability promise.
-The exceptions are the parked families: surfaces that were supported at the
-root and now live in `experimental/` while apps migrate (`SpriteIcons`,
-`TextEditor`, `Calendar`, `Charts`, `CommandPalette`, `FloatingWindow`). Their
-classes stay compiled until they are removed.
+One rule decides what is listed under `experimental/`: every directory the
+`frappe-ui/experimental` barrel re-exports. Today that is `Accordion`,
+`Calendar`, `Charts`, `CodeEditor`, `CommandPalette`, `FloatingWindow`,
+`ListView`, `MultiEmailInput`, `SpriteIcons`, `TextEditor` and
+`ThemeSwitcher`. Importing any of them pulls that directory's classes into
+your build, so they have to be scanned. A test derives the list from the
+barrel, so the two cannot drift. Directories the barrel does not re-export
+stay out, because nothing you can import reaches them.
+
+`vitepress/**` is listed for the same reason on its own subpath: a docs site
+built on `frappe-ui/vitepress` has no other way to emit the theme's classes.
 
 The paths are resolved against wherever `frappe-ui` is actually installed
 (`node_modules`, a monorepo symlink, a local workspace checkout), so they work
