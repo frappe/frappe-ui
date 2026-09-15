@@ -15,8 +15,12 @@
     @close="unregisterDeleteShortcut"
   >
     <template #trigger>
+      <!-- gap-3: the dot is the row's only colour and the title its heaviest
+           text, and at 10px the two sat as one token, "•Title", against a time
+           column with air to spare on its right. 12px lets the dot stand on its
+           own between them. -->
       <div
-        class="calendar-row flex w-full items-baseline gap-2.5 px-3.5 py-2.5 text-left"
+        class="calendar-row flex w-full items-baseline gap-3 px-3.5 py-2.5 text-left"
         :class="{
           active: activeEvent == (props.event?.id || props.event?.name),
           past: isPast,
@@ -112,6 +116,7 @@
           <Badge
             v-if="timing"
             :theme="timing.theme"
+            :variant="timing.variant"
             :label="timing.label"
             size="sm"
             class="shrink-0"

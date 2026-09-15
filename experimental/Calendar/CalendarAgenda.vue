@@ -64,6 +64,12 @@
              above it, which is the grouping — a label belongs to what follows
              it.
 
+             text-lg, two sizes over the day names in the gutter: a size over
+             them, at the same weight the days are a step short of, it read as
+             one more day label, and a week's start went by unnoticed when
+             scrolling. A heading has to be the largest thing on the card by a
+             margin the eye catches without reading.
+
              ml-[3px] does the same for the horizontal. The card's text column
              starts at 15px — its own 1px border, then the gutter's 14px of
              padding — and the label's fill is inset 12, so 3px of margin is
@@ -74,7 +80,7 @@
         <button
           type="button"
           data-strip-week
-          class="calendar-week-label mb-1.5 ml-[3px] inline-flex cursor-pointer items-baseline gap-2 rounded-4 px-3 py-1.5 text-base-semibold text-ink-gray-9 hover:bg-surface-gray-2"
+          class="calendar-week-label mb-1.5 ml-[3px] inline-flex cursor-pointer items-baseline gap-2 rounded-4 px-3 py-1.5 text-lg-semibold text-ink-gray-9 hover:bg-surface-gray-2"
           :class="{ past: week.isPast }"
           @click="openWeek(week.start)"
         >
@@ -85,7 +91,7 @@
         </button>
 
         <div
-          class="overflow-hidden rounded-5 border border-outline-gray-2 bg-surface-base"
+          class="overflow-hidden rounded-5 border border-outline-gray-1 bg-surface-base"
         >
           <!-- One day, as a row of its week: the day in a column down the
                left, its events in the wider one beside it.
@@ -139,7 +145,7 @@
               'border-t': index,
               'border-outline-blue-2':
                 index && (row.isToday || !!week.days[index - 1]?.isToday),
-              'border-outline-gray-2':
+              'border-outline-gray-1':
                 index && !row.isToday && !week.days[index - 1]?.isToday,
             }"
           >
@@ -168,7 +174,7 @@
               :class="{
                 'border-outline-blue-2 bg-surface-blue-1 hover:bg-surface-blue-2':
                   row.isToday,
-                'border-outline-gray-2 hover:bg-surface-gray-1': !row.isToday,
+                'border-outline-gray-1 hover:bg-surface-gray-1': !row.isToday,
                 past: row.isPast,
               }"
               @click="openDay(row.date)"

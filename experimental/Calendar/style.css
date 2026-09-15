@@ -112,11 +112,15 @@
     background-color: var(--surface-gray-1);
   }
 }
-/* Selected: gray, at the lightest step there is. Blue belongs to today — that band and the dot in it — and a blue
-   row would have read as more of the same rather than as the one row open,
-   most of all inside today's own card where the two would have touched. */
+/* Selected: gray, a step past hover's. At hover's own step the open row could
+   only be told from a hovered one by staying put when the pointer left, and in
+   the dark theme the lightest step barely lifts off the base. Blue belongs to
+   today — that band and the dot in it — and a blue row would have read as
+   more of the same rather than as the one row open, most of all inside today's
+   own card where the two would have touched. After the hover rule, so the open
+   row keeps its own fill under the pointer. */
 .calendar-row.active {
-  background-color: var(--surface-gray-1);
+  background-color: var(--surface-gray-2);
 }
 /* Behind you: the row stays legible but stops asking for attention, the same
    way a pill in the grid does once its time has passed.

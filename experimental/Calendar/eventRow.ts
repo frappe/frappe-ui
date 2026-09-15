@@ -155,7 +155,11 @@ export function rowTiming(
   date: Date,
   now: Date,
 ): CalendarRowTag | null {
-  if (isUnderWay(event, date, now)) return { label: 'Now', theme: 'blue' }
+  // Solid where Soon is subtle: Now is the one tag that says the thing is
+  // happening as you read, and a tint of the row's own blue — today's band is
+  // the same blue — sank into the row it was meant to lift out of it.
+  if (isUnderWay(event, date, now))
+    return { label: 'Now', theme: 'blue', variant: 'solid' }
 
   const until = minutesUntil(event, date, now)
   if (until > 0 && until <= SOON_MINUTES)

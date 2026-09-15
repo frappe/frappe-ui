@@ -23,10 +23,12 @@ describe('rowTiming', () => {
   const date = new Date('2026-08-20T00:00:00')
   const standup = at('standup', '10:00', '11:00')
 
+  // Solid, where the other tag is not: the one that has to be seen first.
   it('marks an event under way', () => {
     expect(rowTiming(standup, date, now('10:30'))).toEqual({
       label: 'Now',
       theme: 'blue',
+      variant: 'solid',
     })
   })
 

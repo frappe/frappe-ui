@@ -69,6 +69,8 @@ export interface CalendarEvent {
 export interface CalendarRowTag {
   label: string
   theme?: BadgeProps['theme']
+  /** Badge's own; `solid` for the one tag that has to be seen before it is read. */
+  variant?: BadgeProps['variant']
 }
 
 /** What `#event-description`, `#event-suffix` and `#event-participant` receive. */
