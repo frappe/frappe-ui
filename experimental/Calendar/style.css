@@ -64,8 +64,14 @@
    hovering gives it, mixed from the event's own colour rather than taken from
    the palette, which has no step above `bgActive`. The pointer is usually on the
    open event, so the two states are rarely seen apart; what separates them is
-   that the open one stays where it is when the pointer leaves. */
-.event.active {
+   that the open one stays where it is when the pointer leaves.
+
+   Under the pointer as well, spelled out: a draft's hover rule above carries
+   three classes to this one's two, and the open draft — which the pointer is
+   on, having just opened it — went back to its white ground and looked like
+   the one draft that was not open. */
+.event.active,
+.event.active:hover {
   background-color: color-mix(in srgb, var(--border) 10%, var(--bg-active));
 }
 .event .past,
