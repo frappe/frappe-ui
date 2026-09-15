@@ -40,6 +40,8 @@ function glob(pattern) {
 //   until #942, parked while apps migrate to `frappe-ui/charts`)
 // - `experimental/CommandPalette` (a supported root surface until its removal
 //   in `1.0.0`; the seven-part family here is where its consumers port to)
+// - `experimental/FloatingWindow` (re-exported from `frappe-ui/experimental`,
+//   so any import of that subpath pulls its classes into the app build)
 /**
  * Source globs that emit Tailwind classes in frappe-ui. Spread into your
  * app's `tailwind.config.js` `content` array:
@@ -55,4 +57,5 @@ export const content = [
   glob('experimental/Calendar/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/Charts/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/CommandPalette/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/FloatingWindow/**/*.{vue,js,ts,jsx,tsx}'),
 ]
