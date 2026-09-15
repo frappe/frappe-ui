@@ -94,13 +94,15 @@ interface InputLabelingProps {
   /**
    * Error message rendered below the input.
    * Sets `aria-invalid="true"` and `data-state="invalid"` on the control.
-   * Accepts an `Error` object; `Error.messages` is rendered as stacked
-   * plain text, `Error.message` is the fallback.
+   * Accepts a string, an array of strings, or an `Error` object;
+   * `Error.messages` is rendered as stacked plain text, `Error.message` is
+   * the fallback.
    *
-   * The type is written inline. No exported alias names it, so a component
-   * that forwards the prop reads it from `InputLabelingProps['error']`.
+   * This is the same value `ErrorMessage.message` takes, so the two never
+   * disagree. A component that forwards the prop reads it from
+   * `InputLabelingProps['error']`.
    */
-  error?: string | (Error & { messages?: string[] })
+  error?: ErrorMessageValue
 
   /**
    * Marks the field as required.
@@ -171,8 +173,13 @@ indicator inside their custom label content.
 ### `error` prop rules
 
 - `error: string` renders as a single line of text below the control.
+- `error: string[]` renders one line per entry. Empty entries are dropped.
 - `error: Error` renders `Error.messages` (joined with line breaks via
   `whitespace-pre-line`) when present, otherwise `Error.message`.
+- An empty string, an empty array, and an `Error` with neither `message` nor
+  `messages` all mean no error: no error region, and no `aria-invalid`.
+- One function, `errorLines` in `src/utils/errorLines.ts`, decides this for
+  both `ErrorMessage` and the input family.
 - The error region is rendered as plain text. **`v-html` is not used.**
 - `error` text uses `text-ink-red-5` (matches the required asterisk for
   visual consistency of "needs attention" affordances).

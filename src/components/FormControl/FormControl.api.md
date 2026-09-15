@@ -21,7 +21,7 @@
     name: 'error',
     description: 'Error message shown below the input. Sets aria-invalid on the control.',
     required: false,
-    type: 'string | (Error & { messages?: string[]; })'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'type',

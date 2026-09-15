@@ -1058,8 +1058,8 @@ No code change. Two facts the docs now state:
 
 - **`FrappeUIError` is removed** from `frappe-ui` and `frappe-ui/experimental`.
   An input's `error` prop is typed where it is declared. Forward it with
-  `InputLabelingProps['error']`, which the root now exports. The accepted
-  runtime values are unchanged.
+  `InputLabelingProps['error']`, which the root now exports. Everything the
+  prop accepted before is still accepted.
 - **`RouteDestination` and `RouteLocationObject` are exported.** Every prop
   that takes a router destination is typed with them instead of vue-router's
   `RouteLocationRaw`. Same accepted values; the generated API docs can print
@@ -1079,6 +1079,12 @@ test that fails when the lists drift. Every name apps import is still there.
 Frappe's whitelisted methods return) renders one line per message instead of
 `[object Object]`. A single string and a plain `Error` render as before. The
 prop type is exported as `ErrorMessageValue`. Additive.
+
+Every input takes the same value on its `error` prop, so
+`<TextInput :error="['Email is required', 'Password too short']" />` renders
+both lines and sets `aria-invalid`. An empty array means no error. One
+function decides this for the whole library, so the error region and the
+input state can never disagree.
 
 ### Dialog — `icon` takes a string or a component, tone moves to `theme` (breaking)
 

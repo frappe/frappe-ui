@@ -1,12 +1,7 @@
-/**
- * One message, several messages, or an `Error`. An `Error` renders its
- * `messages` when it has any (Frappe's whitelisted methods return several),
- * and its `message` otherwise.
- */
-export type ErrorMessageValue =
-  | string
-  | string[]
-  | (Error & { messages?: string | string[] })
+// Defined next to `errorLines`, the one function that reads it. The input
+// family shares the same type through `InputLabelingProps['error']`.
+export type { ErrorMessageValue } from '../../utils/errorLines'
+import type { ErrorMessageValue } from '../../utils/errorLines'
 
 export interface ErrorMessageProps {
   /** The error message to display. */

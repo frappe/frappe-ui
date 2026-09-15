@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import DOMPurify from 'dompurify'
 import { computed } from 'vue'
+import { errorLines } from '../../utils/errorLines'
 import type { ErrorMessageProps } from './types'
 
 const props = defineProps<ErrorMessageProps>()
@@ -24,23 +25,8 @@ const escapeMap: Record<string, string> = {
 
 // Every shape collapses to a list of lines, and every line renders. An
 // `Error` with several `messages` used to render only the first one it could
-// coerce to a string.
-const lines = computed<string[]>(() => {
-  const value = props.message
-  if (!value) return []
-  if (typeof value === 'string') return [value]
-  if (Array.isArray(value)) return value.filter(Boolean).map(String)
-  // An empty `messages` array is not an answer, so fall through to `message`.
-  // `useInputLabeling` guards on length the same way.
-  const messages = value.messages
-  if (Array.isArray(messages) && messages.length) {
-    const lines = messages.filter(Boolean).map(String)
-    if (lines.length) return lines
-  } else if (typeof messages === 'string' && messages) {
-    return [messages]
-  }
-  return value.message ? [value.message] : []
-})
+// coerce to a string. `useInputLabeling` reads the same function.
+const lines = computed<string[]>(() => errorLines(props.message))
 
 // DOMPurify needs a real DOM, so `sanitize` doesn't exist during SSR
 // (`isSupported` is false). Escape instead — a server-rendered string can't

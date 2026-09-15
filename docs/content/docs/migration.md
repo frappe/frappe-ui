@@ -2139,8 +2139,10 @@ import type { InputLabelingProps } from 'frappe-ui'
 defineProps<{ error?: InputLabelingProps['error'] }>()
 ```
 
-The runtime value the prop accepts is unchanged: a string, or an `Error` that
-may carry `messages`.
+The prop also accepts a `string[]` now, which is what `ErrorMessage.message`
+takes. One array renders one line per entry, and an empty array means no
+error. Everything that worked before still works: a string, or an `Error`
+that may carry `messages`.
 
 ### Upload exports
 
