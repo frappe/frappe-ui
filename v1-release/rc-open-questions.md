@@ -1289,7 +1289,7 @@ declares those variables itself in `frappe/public/css/espresso/effects.css`, so
 this change does not reach them.
 
 **PKG-Q9 — the pack check found one more defect.** `npm pack` plus
-`npm install` into `/tmp/rc3-consumer`: 932 files, 0 test files, all 12
+`npm install` into `/tmp/rc3-consumer`: 934 files, 0 test files, all 12
 exported subpaths resolve, `frappe-ui/src/utils/tailwind.config` fails with
 `ERR_PACKAGE_PATH_NOT_EXPORTED`, all 10 bins install and point at shipped
 files, and a Tailwind build through the packed preset emits `p-4.5`,
