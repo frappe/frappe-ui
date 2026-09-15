@@ -89,3 +89,56 @@ describe('radius scale', () => {
     }
   })
 })
+
+/**
+ * The dark-theme checkbox marks are attribute selectors, so they must stay in
+ * the base layer: Tailwind v4 loads a v3 preset through `@config` and fails
+ * the build on an `addComponents` key that is not a single class name. These
+ * tests compile the real preset, so a move back into `addComponents`, or a
+ * dropped rule, fails here instead of in a consumer's v4 build.
+ */
+describe('dark-theme checkbox marks', () => {
+  const compile = async () => {
+    const { default: postcss } = await import('postcss')
+    const { default: tailwindcss } = await import('tailwindcss')
+    const result = await postcss([
+      tailwindcss({
+        presets: [preset],
+        content: [
+          {
+            raw: '<input type="checkbox" class="form-checkbox" /><input class="form-input" /><p class="text-ink-gray-8"></p>',
+          },
+        ],
+      }),
+    ]).process('@tailwind base;@tailwind components;@tailwind utilities;', {
+      from: undefined,
+    })
+    return result.css
+  }
+
+  it('emits both marks with their background images', async () => {
+    const css = await compile()
+    expect(css).toContain(
+      `[data-theme='dark'] [type='checkbox']:checked {\n  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");\n}`,
+    )
+    expect(css).toContain(
+      `[data-theme='dark'] [type='checkbox']:indeterminate {\n  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='%230F0F0F' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");\n}`,
+    )
+  })
+
+  it('keeps them in the base layer, after the forms plugin', async () => {
+    const css = await compile()
+    const at = (needle) => {
+      const index = css.indexOf(needle)
+      expect(index, `missing: ${needle}`).toBeGreaterThan(-1)
+      return index
+    }
+    // Between the forms plugin's own base rule and the first component rule.
+    expect(at(`input:where([type='checkbox']):checked`)).toBeLessThan(
+      at(`[data-theme='dark'] [type='checkbox']:checked`),
+    )
+    expect(
+      at(`[data-theme='dark'] [type='checkbox']:indeterminate`),
+    ).toBeLessThan(at('.form-input'))
+  })
+})

@@ -192,6 +192,17 @@ let componentStyles = {
   '.form-checkbox': {
     '@apply rounded-5 bg-surface-gray-2 text-ink-blue-4 focus:ring-0': {},
   },
+}
+
+// The dark-theme checkmark and dash the forms plugin draws in the light ink.
+// These live in the base layer, not in `addComponents`, because their keys are
+// attribute selectors: Tailwind v4 reads a v3 preset through `@config` and
+// rejects any `addComponents` key that is not a single class name, which fails
+// the whole build. The cascade is unchanged either way. The selector is
+// (0,3,0), above both the forms base rule `input:where([type='checkbox'])
+// :checked` (0,1,1) and the forms class rule `.form-checkbox:checked` (0,2,0).
+// See .scratch/research/tailwind-v4-1x.md sections 3, 4 and 7.
+let darkCheckboxStyles = {
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
   },
@@ -207,6 +218,7 @@ export default plugin(
     // breakpoints, so list tracks and `md:hidden` cells switch at the same
     // width. See tailwind/listColumns.js.
     addBase(listColumnRules(theme('screens')))
+    addBase(darkCheckboxStyles)
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
