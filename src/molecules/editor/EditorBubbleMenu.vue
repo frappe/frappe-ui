@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { BubbleMenu } from '@tiptap/vue-3/menus'
 import MenuItems from './MenuItems.vue'
+import { editorMenuPlacement } from './menu-placement'
 import type { EditorMenuOptions, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 import { useResolvedEditor } from './editor-context'
@@ -21,10 +22,17 @@ const props = defineProps<{
 const editor = useResolvedEditor(() => props.editor)
 const shouldShow = computed(() => props.options?.shouldShow)
 // `shouldShow` is a separate prop on TipTap's component, so it never goes
-// into the positioning bag.
+// into the positioning bag. `side` and `align` become Floating UI's single
+// `placement` string; TipTap's own default for this menu is `top`.
 const floatingOptions = computed<TiptapFloatingOptions>(() => {
-  const { shouldShow: _shouldShow, ...positioning } = props.options ?? {}
-  return positioning
+  const {
+    shouldShow: _shouldShow,
+    side: _side,
+    align: _align,
+    ...positioning
+  } = props.options ?? {}
+  const placement = editorMenuPlacement(props.options, 'top')
+  return placement ? { ...positioning, placement } : positioning
 })
 </script>
 

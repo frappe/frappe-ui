@@ -5,6 +5,7 @@
  * the line starts to compile. The runtime body only keeps the fixtures alive.
  */
 import { describe, expectTypeOf, it } from 'vitest'
+import type { PopoverAlign, PopoverSide } from '#components/Popover/types'
 import type {
   CommentKitOptions,
   EditorMenuOptions,
@@ -111,12 +112,24 @@ const uploaded: UploadedFile = { file_url: '/files/a.png', anything: 1 }
 // --- ED-Q8: one menu options type -------------------------------------------
 
 const menuOptions: EditorMenuOptions = {
-  placement: 'top-start',
+  side: 'top',
+  align: 'start',
   offset: 8,
   shouldShow: ({ editor, from, to }) => from !== to && editor.isEditable,
 }
-// @ts-expect-error `placement` is a fixed set of values.
-const menuBadPlacement: EditorMenuOptions = { placement: 'above' }
+// The two axes are the library's own, shared with every other overlay.
+expectTypeOf<EditorMenuOptions['side']>().toEqualTypeOf<
+  PopoverSide | undefined
+>()
+expectTypeOf<EditorMenuOptions['align']>().toEqualTypeOf<
+  PopoverAlign | undefined
+>()
+// @ts-expect-error `side` is a fixed set of values.
+const menuBadSide: EditorMenuOptions = { side: 'above' }
+// @ts-expect-error `align` is a fixed set of values.
+const menuBadAlign: EditorMenuOptions = { align: 'middle' }
+// @ts-expect-error `placement` is replaced by `side` and `align`.
+const menuPlacement: EditorMenuOptions = { placement: 'top-start' }
 // @ts-expect-error Only the listed positioning keys are read.
 const menuUnknownKey: EditorMenuOptions = { updateDelay: 250 }
 
@@ -134,7 +147,9 @@ void inlineStarterHeading
 void mentionNoValue
 void tagNoLabel
 void uploadNoUrl
-void menuBadPlacement
+void menuBadSide
+void menuBadAlign
+void menuPlacement
 void menuUnknownKey
 
 describe('editor option types', () => {

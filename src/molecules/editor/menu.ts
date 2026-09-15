@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { PopoverAlign, PopoverSide } from '#components/Popover/types'
 import type { Editor } from './useEditor'
 import {
   commandMeta,
@@ -56,21 +57,6 @@ export type MenuGroupItem = {
 
 export type MenuItem = CommandMenuItem | MenuGroupItem | { type: 'separator' }
 
-/** Where a floating menu sits relative to its anchor. */
-export type EditorMenuPlacement =
-  | 'top'
-  | 'top-start'
-  | 'top-end'
-  | 'right'
-  | 'right-start'
-  | 'right-end'
-  | 'bottom'
-  | 'bottom-start'
-  | 'bottom-end'
-  | 'left'
-  | 'left-start'
-  | 'left-end'
-
 /** What `shouldShow` is given on every position update. */
 export type EditorMenuShouldShowContext = {
   editor: Editor
@@ -98,7 +84,14 @@ export type EditorMenuShouldShowContext = {
  * from the v1 contract.
  */
 export type EditorMenuOptions = {
-  placement?: EditorMenuPlacement
+  /**
+   * Side of the selection to render the menu on. Same vocabulary as every
+   * other overlay in the library. Unset keeps TipTap's own default, `top` for
+   * the bubble menu and `right` for the floating menu.
+   */
+  side?: PopoverSide
+  /** Alignment along the chosen side. Default `center`. */
+  align?: PopoverAlign
   strategy?: 'absolute' | 'fixed'
   /** Gap in pixels between the menu and its anchor. */
   offset?: number | false

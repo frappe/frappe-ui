@@ -161,6 +161,5 @@ export type {
   MenuGroupItem,
   MenuItem,
   EditorMenuOptions,
-  EditorMenuPlacement,
   EditorMenuShouldShowContext,
 } from './menu'
