@@ -2591,9 +2591,11 @@ any plugin call it cannot decide.
 
 ### The preset path {#preset-path}
 
-`frappe-ui/src/utils/tailwind.config` is deleted, and no path under
+The `frappe-ui/src/utils/tailwind.config` shim is deleted, and no path under
 `frappe-ui/src/...` resolves. A **loud** break: the build stops with
 `Package subpath './src/utils/tailwind.config' is not defined by "exports"`.
+The `exports` map refused that path before this release; the file is now gone
+as well.
 
 ```js
 // Before

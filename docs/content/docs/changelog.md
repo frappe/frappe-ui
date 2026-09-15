@@ -96,10 +96,11 @@ per-file edits.
   `@tiptap/extension-{bubble-menu,color,highlight,image,mention,node-range}`
   packages, none of which the shipped code imports. `prettier` moved to
   `devDependencies`.
-- **`frappe-ui/src/utils/tailwind.config` is gone.** Import the preset from
-  `frappe-ui/tailwind`. Nothing under `frappe-ui/src/...` resolves: the
-  `exports` map has no wildcard, so a deep path fails with
-  `Package subpath '…' is not defined`.
+- **The `frappe-ui/src/utils/tailwind.config` shim is deleted.** Import the
+  preset from `frappe-ui/tailwind`. The `exports` map already refused that path,
+  so an app still on it fails with `Package subpath '…' is not defined`; the
+  file is now gone too. Nothing under `frappe-ui/src/...` resolves, because the
+  map has no wildcard.
 - **`frappe-ui/tailwind`, `frappe-ui/icons` and
   `frappe-ui/vite/lucideIconsPlugin` now carry a `types` condition.** The
   preset's declaration says which Tailwind sections it replaces.
