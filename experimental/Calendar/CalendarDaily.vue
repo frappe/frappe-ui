@@ -4,9 +4,17 @@
 
        The corner goes with the border. `overflow-y-auto` clips to the radius, so
        a rounded box with no border of its own still cut 12px off either end of
-       the rule the all-day row draws along its top — a top border with a gap at
+       the rule the all-day row drew along its top — a top border with a gap at
        each end, against nothing that explained the gap. Bordered, the radius has
-       an edge to round and the clip lands on it. -->
+       an edge to round and the clip lands on it.
+
+       Unbordered, the view draws no rule along its own top at all: `noBorder`
+       is a host saying the view is the page rather than a pane on it, and the
+       page's own chrome — a phone's title bar — draws the edge between itself
+       and the view. The all-day row used to draw one there, which made the
+       day the one view whose top edge was ruled twice once the bar drew its
+       own. The rule between the all-day row and the hours below stays: that
+       one is the view's. -->
   <div
     class="flex flex-col flex-1 overflow-y-auto border-outline-gray-1"
     :class="config.noBorder ? '' : 'rounded-6 border-[1px]'"
@@ -14,7 +22,7 @@
     <!-- Full day events -->
     <div
       class="flex shrink-0 h-fit"
-      :class="[config.noBorder ? 'border-t-[1px]' : 'border-b-[1px]']"
+      :class="[config.noBorder ? '' : 'border-b-[1px]']"
     >
       <!-- The same rule the hour gutter draws below, carried up through the
            all-day row so the day's left edge is one line. Same width as that
