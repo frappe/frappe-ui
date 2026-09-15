@@ -103,9 +103,10 @@ async function rename(name, newName) {
   data, or with `null` when the request fails; read `error` after awaiting it.
 - `submit(params?)` — runs `beforeSubmit`, then sends a request with the given
   params (or the configured `params` if omitted). Resolves with the response
-  data, or **rejects** with the error. It settles on a request that carried its
-  own params, never on one built before it. Under `refetch: true` that request
-  can be the one the params change already triggered; see
+  data, or **rejects** with the error. It never settles on a request built
+  before it; it settles on one that carried its own params, or on a later one
+  that superseded it. Under `refetch: true` that request can be the one the
+  params change already triggered; see
   [`refetch` and `submit`](#refetch-and-submit).
 - `reset()` — clears any params set by a previous `submit()` call.
 - `abort()` — aborts the in-flight request.
