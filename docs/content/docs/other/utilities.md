@@ -87,9 +87,9 @@ await call(
 </script>
 ```
 
-The rejection is a `FrappeRequestError`: an `Error` with `exc_type`, `exc`,
-`status`, `response`, and `messages` (the server's `_server_messages`, already
-parsed).
+The rejection is a `FrappeRequestError`: a plain `Error` carrying `exc_type`,
+`exc`, `status`, `response`, and `messages` (the server's `_server_messages`,
+already parsed).
 
 ## frappeRequest
 
@@ -144,12 +144,18 @@ request.
 ## FrappeRequestError
 
 The error [`call`](#call), [`frappeRequest`](#frapperequest) and the v1
-[resources](../data-fetching/resource.md) raise. An `Error` with the transport
-fields of the failed request: `messages` (the server messages array), `exc_type`,
-`exc`, `status` and the raw `response`.
+[resources](../data-fetching/resource.md) raise. A plain `Error` carrying the
+transport fields of the failed request: `messages` (the server messages array),
+`exc_type`, `exc`, `status` and the raw `response`.
 
-It stays a separate class from `FrappeResponseError` below, which the v2
-composables raise.
+It is a TypeScript `interface`, not a class: the request layer throws
+`new Error(...)` and assigns those fields. So it types a catch block
+(`catch (error: FrappeRequestError)`) but `error instanceof FrappeRequestError`
+does not compile, and `error.name` is `"Error"`. Test a field instead, for
+example `error.exc_type === 'PermissionError'`.
+
+It stays separate from `FrappeResponseError` below, which the v2 composables
+raise and which is a real class.
 [The error table](../data-fetching/use-call.md#which-error-class) says which API
 raises which.
 

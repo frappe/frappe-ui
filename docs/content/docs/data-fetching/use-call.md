@@ -157,21 +157,35 @@ try {
 }
 ```
 
-### Which error class
+### Which error you get {#which-error-class}
 
-Each class is a plain `Error` subtype. Which one you get depends on the API that
-made the request, not on the failure:
+Which one you get depends on the API that made the request, not on the failure.
+All three are plain `Error` objects:
 
-| API                                                                  | Error class                                                        | Extra fields                                        |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------- |
-| `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            | [`FrappeResponseError`](../other/utilities.md#frapperesponseerror) | `title`, `type`, `exception`, `indicator`           |
-| `call`, `frappeRequest`, `createResource` and the other v1 resources | [`FrappeRequestError`](../other/utilities.md#frapperequesterror)   | `messages`, `exc_type`, `exc`, `status`, `response` |
-| `upload`, `useFileUpload`, `FileUploadHandler`                       | [`UploadError`](../other/utilities.md#uploaderror)                 | `kind`, `status`, `messages`, `response`            |
+| API                                                                  | Error                                                              | Kind        | Extra fields                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- | --------------------------------------------------- |
+| `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            | [`FrappeResponseError`](../other/utilities.md#frapperesponseerror) | class       | `title`, `type`, `exception`, `indicator`           |
+| `call`, `frappeRequest`, `createResource` and the other v1 resources | [`FrappeRequestError`](../other/utilities.md#frapperequesterror)   | type only   | `messages`, `exc_type`, `exc`, `status`, `response` |
+| `upload`, `useFileUpload`, `FileUploadHandler`                       | [`UploadError`](../other/utilities.md#uploaderror)                 | class       | `kind`, `status`, `messages`, `response`            |
 
-The two Frappe classes stay separate on purpose: the v2 composables read the
+The two Frappe errors stay separate on purpose: the v2 composables read the
 parsed error page (`title`, `indicator`), and the v1 request layer keeps the raw
-transport fields (`status`, `response`). Narrow a catch block with
-`error instanceof FrappeResponseError` before reading either set.
+transport fields (`status`, `response`).
+
+The `Kind` column decides how you narrow a catch block.
+`FrappeResponseError` and `UploadError` are classes, so `instanceof` works:
+
+```js
+if (error instanceof FrappeResponseError) console.log(error.title)
+```
+
+`FrappeRequestError` is a TypeScript type over a plain `Error`, not a
+constructor. There is no value to test, so `error instanceof FrappeRequestError`
+does not compile. Check the field you need instead:
+
+```js
+if (error.exc_type === 'PermissionError') showPermissionMessage()
+```
 
 ## Caching
 

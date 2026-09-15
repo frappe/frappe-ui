@@ -1065,10 +1065,12 @@ that say otherwise are gone.
 No code change. Two facts the docs now state:
 
 - `FrappeResponseError` (the v2 composables) and `FrappeRequestError` (`call`,
-  `frappeRequest`, v1 resources) stay separate classes with different fields,
-  and `UploadError` is the third.
+  `frappeRequest`, v1 resources) stay separate, with different fields, and
+  `UploadError` is the third.
   [A table](/docs/data-fetching/use-call#which-error-class) says which API
-  raises which.
+  raises which. It also says which of the three you can narrow with
+  `instanceof`: `FrappeRequestError` is a TypeScript type over a plain `Error`,
+  not a class, so only the other two have a value to test.
 - `execute`/`fetch`/`reload` and `loading`/`isFetching` stay as aliases of one
   another. It is the one place the library publishes two names for one thing.
   The docs use `reload()` and `loading`.
