@@ -118,15 +118,29 @@ function declaredNames(node) {
   }
 
   for (const parameter of node.parameters ?? []) addBindingName(parameter.name)
-  const body = ts.isSourceFile(node) ? node : node.body
+  // `catch (error)` binds its parameter through `variableDeclaration`, not
+  // `parameters`.
+  if (ts.isCatchClause(node) && node.variableDeclaration) {
+    addBindingName(node.variableDeclaration.name)
+  }
+  // A source file and a bare block hold their own statements. Everything else
+  // that opens a scope keeps them under `body`, which is undefined for a
+  // block, so read the node itself in those two cases.
+  const body = ts.isSourceFile(node) || ts.isBlock(node) ? node : node.body
   if (body && 'statements' in body) {
     for (const statement of body.statements) addStatement(statement)
   }
-  if (ts.isForStatement(node) && node.initializer) {
-    if (ts.isVariableDeclarationList(node.initializer)) {
-      for (const declaration of node.initializer.declarations) {
-        addBindingName(declaration.name)
-      }
+  // `for (…;;)`, `for…of` and `for…in` all bind their loop variable in the
+  // loop's own scope, through `initializer`.
+  if (
+    (ts.isForStatement(node) ||
+      ts.isForOfStatement(node) ||
+      ts.isForInStatement(node)) &&
+    node.initializer &&
+    ts.isVariableDeclarationList(node.initializer)
+  ) {
+    for (const declaration of node.initializer.declarations) {
+      addBindingName(declaration.name)
     }
   }
   return names

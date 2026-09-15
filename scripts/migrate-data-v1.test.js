@@ -95,6 +95,57 @@ describe('data migration', () => {
     expect(migrateData(source, 'main.ts').migrated).toBe(source)
   })
 
+  it('leaves a catch parameter that shadows the import alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `try {`,
+      `  boot()`,
+      `} catch (FrappeUI) {`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
+  it('leaves a binding declared in a bare block alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `{`,
+      `  const FrappeUI = otherPlugin`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
+  it('leaves a for…of loop variable that shadows the import alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `for (const FrappeUI of plugins) {`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
+  it('leaves a for…in loop variable that shadows the import alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `for (const FrappeUI in plugins) {`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
   it('still migrates a sibling scope that does not shadow the import', () => {
     const source = [
       `import { FrappeUI } from 'frappe-ui'`,
