@@ -194,7 +194,9 @@ export function paintedEventHeight(
  * `over` is the events the pill is actually drawn on: those in earlier columns
  * and the one before it in its own, whose painted extent its own crosses —
  * judged in pixels, as the pills are, given `minuteHeight`; without it, in
- * minutes. The pill draws its cut against each of them from their geometry.
+ * minutes. The pill draws its cut against each of them from their geometry,
+ * and they are the laid-out events, each carrying its own `over`: where a pill
+ * beneath was itself set in from the pill beneath it, the one on top must know.
  * Two pills that only share an edge are not over each other.
  */
 export function findOverlappingEventsCount(
@@ -242,43 +244,29 @@ export function findOverlappingEventsCount(
   const crosses = (a: [number, number], b: [number, number]) =>
     a[0] < b[1] && b[0] < a[1]
 
-  // flattening halls and events
-  return declined.concat(
-    result
-      .map((hall, hallIdx) =>
-        hall.map((event, eventIdx) => {
-          // Everything drawn beneath this pill: the earlier columns, which run
-          // under it in full, and the event before it in its own.
-          const beneath = result
-            .slice(0, hallIdx)
-            .map((earlier, earlierIdx) =>
-              earlier.map((other, otherIdx) => ({
-                ...other,
-                hallNumber: earlierIdx,
-                idx: otherIdx,
-              })),
-            )
-            .flat()
-            .concat(
-              hall
-                .slice(Math.max(eventIdx - 1, 0), eventIdx)
-                .map((other) => ({
-                  ...other,
-                  hallNumber: hallIdx,
-                  idx: eventIdx - 1,
-                })),
-            )
-          const own = painted(event)
-          return {
-            ...event,
-            hallNumber: hallIdx,
-            idx: eventIdx,
-            over: beneath.filter((other) => crosses(painted(other), own)),
-          }
-        }),
-      )
-      .flat(),
-  )
+  // flattening halls and events — in order, so that everything beneath a pill
+  // is laid out, with its own `over`, by the time the pill looks for it
+  const placed: CalendarEvent[][] = []
+  for (const [hallIdx, hall] of result.entries()) {
+    const placedHall: CalendarEvent[] = []
+    placed.push(placedHall)
+    for (const [eventIdx, event] of hall.entries()) {
+      // Everything drawn beneath this pill: the earlier columns, which run
+      // under it in full, and the event before it in its own.
+      const beneath = placed
+        .slice(0, hallIdx)
+        .flat()
+        .concat(placedHall.slice(Math.max(eventIdx - 1, 0), eventIdx))
+      const own = painted(event)
+      placedHall.push({
+        ...event,
+        hallNumber: hallIdx,
+        idx: eventIdx,
+        over: beneath.filter((other) => crosses(painted(other), own)),
+      })
+    }
+  }
+  return declined.concat(placed.flat())
 }
 
 // Helpers

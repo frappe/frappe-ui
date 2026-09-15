@@ -104,4 +104,18 @@ describe('findOverlappingEventsCount', () => {
     expect(overIds(events.c)).toEqual(['a', 'b'])
     expect(overIds(events.b)).toEqual([])
   })
+
+  // The events beneath come as they were laid out, each on its own events
+  // beneath: a third pill on the same line steps down from where the second
+  // is actually drawn, which is a step down from the first.
+  it('hands a pill the events beneath it as laid out, on their own', () => {
+    const events = laidOutOnGrid([
+      at('a', '10:00', '11:00'),
+      at('b', '10:00', '10:30'),
+      at('c', '10:00', '10:15'),
+    ])
+    expect(overIds(events.c)).toEqual(['a', 'b'])
+    const bUnderC = (events.c.over as CalendarEvent[])[1]
+    expect(overIds(bUnderC)).toEqual(['a'])
+  })
 })

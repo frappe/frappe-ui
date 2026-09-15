@@ -7,7 +7,7 @@
     and outside-click still close it.
   -->
   <!-- The cut between this pill and each event it is drawn over: a rounded
-       rect 2.5px larger than this pill on every side, in the page's own
+       rect 2px larger than this pill on every side, in the page's own
        colour, clipped to the exact rounded shape of the pill beneath — so what
        shows is a ring of even width, only where it lies on the other event,
        and never on the grid. Its own element rather than a shadow on the pill:
@@ -418,8 +418,16 @@ const placedToTime = () =>
 const pillInset = computed(() => props.inset ?? PILL_INSET)
 const wrapperInset = computed(() => pillInset.value - PILL_MARGIN)
 
-/** The ring's width, and the pill's corner radius it runs concentric with. */
-const CUT = 2.5
+/**
+ * The ring's width, and the pill's corner radius it runs concentric with.
+ *
+ * A whole pixel: the pill's edges fall on fractions of the column, and the
+ * ring's edges are set off them by this, so they land on the same fraction and
+ * round the same way — every side of the ring as wide as every other. At 2.5
+ * the two were half a pixel out of phase, and the ring came out 3px on the
+ * left and 2 on the right.
+ */
+const CUT = 2
 const PILL_RADIUS = 8
 
 /**
@@ -442,28 +450,79 @@ const PILL_RADIUS = 8
  * turned, and the other pill's fill showed in the wedge between the two, cut
  * off square by its own edge; no shape of corner mends a shared edge.
  *
+ * Down the column the same, for the same reason: a pill laid over another that
+ * starts on the same line, or ends on it, is set in from that edge by a ring's
+ * width, so the ring lies on the pill beneath there too — a pill that shares
+ * its top with the one under it had a cut down both sides and along the
+ * bottom, and none along the top, where the ring lay on the grid and was cut
+ * off. Only where the edges meet: a pill that starts above the one beneath, or
+ * ends below it, has nothing under its ring there and needs no cut. The pills
+ * beneath are taken as they are drawn, set in from their own, so a third pill
+ * on the same line steps down from the second as the second did from the
+ * first.
+ *
  * A right edge rather than a width, so that the pills resolve the same `7%`
  * against the same column: as `left + width`, 20% + 73% and 3px + 93% came out
  * a sixty-fourth of a pixel apart, a device pixel on a good screen.
  */
-const timedBox = (startMinutes: number, minutes: number, hall?: number) => {
+const timedBox = (
+  startMinutes: number,
+  minutes: number,
+  hall?: number,
+  over: CalendarEvent[] = [],
+) => {
   // Whole pixels, so the pill and the ring drawn round it snap to the same
   // line: a quarter past the hour is 12.5px down a 50px hour, and a pill on a
   // half pixel rounds one way while a ring set 2px off it rounds the other,
   // and the ring came out 2px on one side and 3 on the next.
   const height = Math.round(paintedEventHeight(minutes, minuteHeight))
-  const top = Math.round(
+  let top = Math.round(
     Math.min(startMinutes * minuteHeight, 24 * config.hourHeight - height),
   )
+  let bottom = top + height
+  // Set in from every pill beneath whose edge this one's ring would fall off.
+  // Each step can put the edge on another pill's line, so it goes round until
+  // none does.
+  const beneath = over.map((other) =>
+    timedBox(
+      other.startTime || 0,
+      (other.endTime || 0) - (other.startTime || 0),
+      other.hallNumber,
+      other.over || [],
+    ),
+  )
+  for (let moved = true; moved; ) {
+    moved = false
+    for (const other of beneath) {
+      if (other.top <= top && top < other.top + CUT) {
+        top = other.top + CUT
+        moved = true
+      }
+      if (other.bottom - CUT < bottom && bottom <= other.bottom) {
+        bottom = other.bottom - CUT
+        moved = true
+      }
+    }
+  }
   const hallNumber = hall || 0
   return {
     top,
-    height,
+    bottom,
+    height: bottom - top,
     hallNumber,
     left: (extra = 0) => `calc(${hallNumber * 20}% + ${pillInset.value + extra}px)`,
     right: (extra = 0) => `calc(7% + ${hallNumber * 2 * CUT - extra}px)`,
   }
 }
+
+/** This pill's own box, on the pills it is over. */
+const ownBox = () =>
+  timedBox(
+    calculateMinutes(placedFromTime()),
+    calculateDiff(placedFromTime(), placedToTime()),
+    calendarEvent.value.hallNumber,
+    (calendarEvent.value.over || []) as CalendarEvent[],
+  )
 
 /**
  * One cut per event this pill lies on — see the template. Nothing while the
@@ -474,11 +533,7 @@ const cuts = computed(() => {
   if (isAllDay.value || isResizing.value || isRepositioning.value) return []
   const over = (calendarEvent.value.over || []) as CalendarEvent[]
   if (!over.length) return []
-  const own = timedBox(
-    calculateMinutes(placedFromTime()),
-    calculateDiff(placedFromTime(), placedToTime()),
-    calendarEvent.value.hallNumber,
-  )
+  const own = ownBox()
   // The pill's own box, a ring's width larger on every side, its corners
   // concentric with the pill's: a ring of one width all the way round. It is
   // never on an edge of the pill beneath — see `timedBox` — so it is whole
@@ -495,6 +550,7 @@ const cuts = computed(() => {
       other.startTime || 0,
       (other.endTime || 0) - (other.startTime || 0),
       other.hallNumber,
+      other.over || [],
     )
     // `inset()` clips this element — the whole column — to the other pill's
     // box: its top and bottom in pixels from the column's edges, its left and
@@ -527,11 +583,7 @@ const containerStyle = computed<CSSProperties>(() => {
     }
   }
 
-  const { top, height, hallNumber } = timedBox(
-    calculateMinutes(placedFromTime()),
-    calculateDiff(placedFromTime(), placedToTime()),
-    calendarEvent.value.hallNumber,
-  )
+  const { top, height, hallNumber } = ownBox()
 
   // Inset by the same measure an all-day bar is, so the two read off one left
   // edge: the all-day pill above and the events under it are the same day's,
