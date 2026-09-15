@@ -146,6 +146,45 @@ describe('data migration', () => {
     expect(migrateData(source, 'main.ts').migrated).toBe(source)
   })
 
+  it('leaves a binding declared in a braceless case clause alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `switch (mode) {`,
+      `  case 'custom':`,
+      `    const FrappeUI = otherPlugin`,
+      `    app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
+  it('leaves a named function expression that shadows the import alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `const install = function FrappeUI() {`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
+  it('leaves a binding declared in a namespace body alone', () => {
+    const source = [
+      `import { FrappeUI } from 'frappe-ui'`,
+      `namespace setup {`,
+      `  const FrappeUI = otherPlugin`,
+      `  app.use(FrappeUI, { resources: { a } })`,
+      `}`,
+      ``,
+    ].join('\n')
+
+    expect(migrateData(source, 'main.ts').migrated).toBe(source)
+  })
+
   it('still migrates a sibling scope that does not shadow the import', () => {
     const source = [
       `import { FrappeUI } from 'frappe-ui'`,

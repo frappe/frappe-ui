@@ -123,12 +123,30 @@ function declaredNames(node) {
   if (ts.isCatchClause(node) && node.variableDeclaration) {
     addBindingName(node.variableDeclaration.name)
   }
-  // A source file and a bare block hold their own statements. Everything else
-  // that opens a scope keeps them under `body`, which is undefined for a
-  // block, so read the node itself in those two cases.
-  const body = ts.isSourceFile(node) || ts.isBlock(node) ? node : node.body
+  // A named function expression binds its own name inside its body, and
+  // nowhere else. `const f = function FrappeUI() { … }` shadows the import.
+  if (
+    (ts.isFunctionExpression(node) || ts.isClassExpression(node)) &&
+    node.name
+  ) {
+    names.add(node.name.text)
+  }
+  // A source file, a bare block and a namespace body hold their own
+  // statements. Everything else that opens a scope keeps them under `body`,
+  // which is undefined for those, so read the node itself in those cases.
+  const body =
+    ts.isSourceFile(node) || ts.isBlock(node) || ts.isModuleBlock(node)
+      ? node
+      : node.body
   if (body && 'statements' in body) {
     for (const statement of body.statements) addStatement(statement)
+  }
+  // `switch` bodies share one scope across every clause, and a clause without
+  // braces keeps its statements on the clause, not on a block.
+  if (ts.isCaseBlock(node)) {
+    for (const clause of node.clauses) {
+      for (const statement of clause.statements) addStatement(statement)
+    }
   }
   // `for (…;;)`, `for…of` and `for…in` all bind their loop variable in the
   // loop's own scope, through `initializer`.
@@ -157,6 +175,9 @@ function opensScope(node) {
     ts.isGetAccessorDeclaration(node) ||
     ts.isSetAccessorDeclaration(node) ||
     ts.isBlock(node) ||
+    ts.isCaseBlock(node) ||
+    ts.isModuleBlock(node) ||
+    ts.isClassExpression(node) ||
     ts.isForStatement(node) ||
     ts.isForOfStatement(node) ||
     ts.isForInStatement(node) ||
