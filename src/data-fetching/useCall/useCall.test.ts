@@ -8,6 +8,26 @@ import { useCall } from '../index'
 import { url, waitUntilValueChanges } from '../../mocks/utils'
 import { server } from '../../mocks/node'
 
+/**
+ * Records the body of every request that reaches the network while `run` is
+ * in flight. msw's `request:start` misses a request aborted the moment it
+ * left, and this pair of tests is about exactly those.
+ */
+async function recordRequests(run: () => Promise<unknown>) {
+  const bodies: string[] = []
+  const original = globalThis.fetch
+  globalThis.fetch = (input: any, init: any) => {
+    bodies.push(String(init?.body ?? ''))
+    return original(input, init)
+  }
+  try {
+    await run()
+  } finally {
+    globalThis.fetch = original
+  }
+  return bodies
+}
+
 /** Counts the requests msw sees while `run` is in flight. */
 async function countRequests(run: () => Promise<unknown>) {
   let requests = 0
@@ -563,6 +583,66 @@ describe('useCall', () => {
     })
     expect(call.error).toBe(null)
     await older.catch(() => {})
+  })
+
+  // A request minted before the submit assigned its params is not the
+  // submit's request, even when it is still in flight: it read the params of
+  // the moment it left, which are not these. `fetch()` and `submit()` in the
+  // same tick shared one request until the dispatch number was taken at the
+  // top of `execute` instead of a microtask into it.
+  it('does not adopt a request that started before it', async () => {
+    let served = 0
+    server.use(
+      http.post(url('/api/v2/method/counter'), () => {
+        served += 1
+        return HttpResponse.json({ data: { n: served } })
+      }),
+    )
+
+    const call = useCall<{ n: number }>({
+      url: url('/api/v2/method/counter'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    let submitted: Promise<any>
+    const requests = await recordRequests(async () => {
+      call.fetch()
+      submitted = call.submit()
+      await submitted
+    })
+
+    expect(requests).toHaveLength(2)
+    await expect(submitted!).resolves.toEqual({ n: 2 })
+  })
+
+  // The other half of the same rule. `immediate: true` sends its request in a
+  // microtask, so a submit in the same tick is ahead of it: the request reads
+  // the params the submit has already assigned, so it is the submit's own
+  // request and the submit settles on it.
+  it('settles a same-tick submit on the immediate request', async () => {
+    const call = useCall<{ success: boolean; received: any }, { v: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      params: { v: 'initial' },
+      refetch: true,
+    })
+
+    let submitted: Promise<any>
+    const requests = await recordRequests(async () => {
+      submitted = call.submit({ v: 'submitted' })
+      await submitted
+    })
+
+    await expect(submitted!).resolves.toEqual({
+      success: true,
+      received: { v: 'submitted' },
+    })
+    // The params watcher sends a second one and aborts the first. Both carry
+    // the submitted params: neither was built before the submit assigned
+    // them, which is what the submit settles on.
+    expect(requests).toEqual(['{"v":"submitted"}', '{"v":"submitted"}'])
   })
 
   it('caches data if cacheKey is provided', async () => {

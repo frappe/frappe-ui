@@ -1,8 +1,10 @@
 import { computed, nextTick, reactive, readonly, ref, unref, watch } from 'vue'
 import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
 import {
+  currentDispatchSeq,
   FrappeResponseError,
   getDispatchStamp,
+  getRequestDispatchSeq,
   useFrappeFetch,
 } from '../useFrappeFetch'
 import { LOCAL_WRITE, type WriteStamp } from '../writeGate'
@@ -88,18 +90,23 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   type FrappeResponse<T> = { data: T }
 
-  // One tick up per request that leaves, whoever sent it: this call's
-  // `execute`, or `useFetch`'s parameter watcher under `refetch: true`.
-  // `submit` reads it to find out whether the watcher already sent its
-  // request. `createFetch` chains a per-call `beforeFetch` after the
-  // factory's, so this does not displace the header and stamping hooks.
-  let dispatches = 0
+  // The dispatch number of the newest request this call has sent, whoever
+  // sent it: this call's `execute`, or `useFetch`'s parameter watcher under
+  // `refetch: true`. `submit` compares it with the number it read before it
+  // waited. The number itself is minted in `useFrappeFetch`, at the top of
+  // `execute`; counting here instead would be a tick late, because
+  // `createFetch` chains a per-call `beforeFetch` after the factory's, and a
+  // submit in the same tick would have taken its reading by then.
+  let lastDispatch = 0
 
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
-    beforeFetch() {
-      dispatches += 1
+    beforeFetch({ options }) {
+      const seq = getRequestDispatchSeq(options)
+      if (seq !== undefined && seq > lastDispatch) {
+        lastDispatch = seq
+      }
     },
     // `data` is read back out as `data.value?.data` below (the raw fetch
     // response is `{ data: TResponse }`), so the seed value has to be
@@ -251,21 +258,21 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       // send this request. Whether it takes it cannot be read off the
       // argument: the watcher compares the URL (always) and the payload ref
       // (body methods only), and `submitParams.value` is a reactive proxy, so
-      // no identity test on the argument can answer it. So count instead of
-      // predicting, and count after the settle, where the number is final —
-      // `beforeFetch` runs a few microtasks into `execute`, so a sample taken
-      // straight after the flush would still be racing it.
-      const sent = dispatches
+      // no identity test on the argument can answer it. Ask the requests
+      // instead. Every request reads the url and the payload at the top of
+      // `execute`, which is also where it takes its dispatch number, so any
+      // request numbered above this reading carries the params assigned
+      // above and is this submit's request. One numbered below it is not,
+      // even if it is still in flight.
+      const sentBefore = currentDispatchSeq()
       await nextTick()
       await whenSettled()
-      if (dispatches > sent) {
-        // A request left after this submit started. It read the params this
-        // call had just assigned, so it is this submit's request.
+      if (lastDispatch > sentBefore) {
         if (error.value) throw error.value
         return data.value?.data ?? null
       }
-      // Nothing went out. Fall through and send it here, the same way a
-      // submit without `refetch` does.
+      // Nothing went out with these params. Fall through and send it here,
+      // the same way a submit without `refetch` does.
     }
     const response = await execute()
     // Actions reject, reads resolve. `submit()` writes, so a caller that
