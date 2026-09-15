@@ -70,3 +70,22 @@ describe('list styling-hook sugar', () => {
     expect(theme.spacing[16.5]).toBe('4.125rem')
   })
 })
+
+describe('radius scale', () => {
+  it('reads every step from a CSS variable', () => {
+    expect(theme.borderRadius[4]).toBe('var(--radius-4) /* 8px */')
+  })
+
+  it('makes rounded-9 the largest real corner, not a second pill', () => {
+    // ADR-0006 and spec/foundations.md both define radius/9 as 100px.
+    // `rounded-full` (9999px) is the pill.
+    expect(theme.borderRadius[9]).toBe('var(--radius-9) /* 100px */')
+    expect(theme.borderRadius.full).toBe('var(--radius-full) /* 9999px */')
+  })
+
+  it('has no named aliases left', () => {
+    for (const alias of ['sm', 'DEFAULT', 'md', 'lg', 'xl', '2xl']) {
+      expect(theme.borderRadius[alias], alias).toBeUndefined()
+    }
+  })
+})

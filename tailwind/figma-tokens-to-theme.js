@@ -39,7 +39,13 @@ const COLOR_FAMILIES = [
 // below silently skips it, so it never emitted a token. Not listed, so the
 // dead branch isn't there to skip going forward (#940).
 const ALPHA_FAMILIES = ['gray-alpha']
-const SEMANTIC_CATEGORIES = ['surface', 'surface-alpha', 'ink', 'outline', 'outline-alpha']
+const SEMANTIC_CATEGORIES = [
+  'surface',
+  'surface-alpha',
+  'ink',
+  'outline',
+  'outline-alpha',
+]
 
 // Named aliases layered on top of Figma's numeric radius keys.
 // Matched by px value, so the alias stays correct if Figma shifts.
@@ -51,6 +57,12 @@ const RADIUS_NAME_BY_PX = {
 }
 // Preserved from current plugin.js — Figma doesn't model `full`.
 const RADIUS_EXTRA = { full: '9999px' }
+// Overrides applied after the Figma values.
+// `radius/9` exports as 999px, which is a second pill radius next to
+// `rounded-full` (9999px). ADR-0006 and spec/foundations.md both define it as
+// 100px: the largest real corner on the scale, not a pill. Keep the override
+// until the Figma variable is corrected.
+const RADIUS_OVERRIDE = { 9: '100px' }
 
 // Real Figma variable-font weights. Only Regular is customized (420); the rest
 // are standard. NOTE: do NOT source these from the `text.styles` export — its
@@ -109,7 +121,9 @@ export function hexToOklch(hex) {
 
 // Literal color values pass through here; alias references don't.
 export function toOklch(value) {
-  return typeof value === 'string' && value.startsWith('#') ? hexToOklch(value) : value
+  return typeof value === 'string' && value.startsWith('#')
+    ? hexToOklch(value)
+    : value
 }
 
 function readTokens(filename) {
@@ -147,8 +161,12 @@ function buildColors() {
         : {}),
     },
     themedVariables: {
-      light: Object.fromEntries(SEMANTIC_CATEGORIES.map((category) => [category, {}])),
-      dark: Object.fromEntries(SEMANTIC_CATEGORIES.map((category) => [category, {}])),
+      light: Object.fromEntries(
+        SEMANTIC_CATEGORIES.map((category) => [category, {}]),
+      ),
+      dark: Object.fromEntries(
+        SEMANTIC_CATEGORIES.map((category) => [category, {}]),
+      ),
     },
   }
 
@@ -278,7 +296,7 @@ function buildRadius() {
     const name = RADIUS_NAME_BY_PX[px]
     if (name) radius[name] = px
   }
-  return radius
+  return { ...radius, ...RADIUS_OVERRIDE }
 }
 
 // ---------- TYPOGRAPHY ----------
@@ -319,16 +337,22 @@ const DROPPED_SIZES = ['tiny', '13xl', '14xl', '15xl', '16xl']
 function buildTypography() {
   const styles = readTokens('text.styles.tokens.json')
   const text = Object.fromEntries(
-    Object.entries(styles.text || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
+    Object.entries(styles.text || {}).filter(
+      ([key]) => !DROPPED_SIZES.includes(key),
+    ),
   )
   // Same filter as `text` above — paragraph has no dropped-size entries today
   // (it tops out at `4xl` and never had a `tiny`), but this keeps it that way
   // if Figma ever adds one (#940).
   const paragraphStyles = Object.fromEntries(
-    Object.entries(styles.paragraph || {}).filter(([key]) => !DROPPED_SIZES.includes(key)),
+    Object.entries(styles.paragraph || {}).filter(
+      ([key]) => !DROPPED_SIZES.includes(key),
+    ),
   )
 
-  const fontFamily = { text: text.base?.regular?.$value.fontFamily || 'Inter Variable' }
+  const fontFamily = {
+    text: text.base?.regular?.$value.fontFamily || 'Inter Variable',
+  }
 
   const fontWeight = {
     regular: FONT_WEIGHT_MAP.regular,
@@ -345,7 +369,10 @@ function buildTypography() {
   const WEIGHTS = ['regular', 'medium', 'semibold', 'bold', 'black']
   const trackingOf = (variants) =>
     Object.fromEntries(
-      WEIGHTS.filter((w) => variants[w]).map((w) => [w, lsToEm(variants[w].$value.letterSpacing)]),
+      WEIGHTS.filter((w) => variants[w]).map((w) => [
+        w,
+        lsToEm(variants[w].$value.letterSpacing),
+      ]),
     )
 
   // Base size utilities (`text-<size>`), from each size's `regular` variant.
@@ -362,7 +389,8 @@ function buildTypography() {
         fontWeight: String(FONT_WEIGHT_MAP.regular),
       },
     ]
-    if (v.textTransform && v.textTransform !== 'none') textTransform[key] = v.textTransform
+    if (v.textTransform && v.textTransform !== 'none')
+      textTransform[key] = v.textTransform
     tracking.text[key] = trackingOf(variants)
   }
 
@@ -377,7 +405,14 @@ function buildTypography() {
     tracking.paragraph[key] = trackingOf(variants)
   }
 
-  return { fontFamily, fontWeight, fontSize, textTransform, paragraph, tracking }
+  return {
+    fontFamily,
+    fontWeight,
+    fontSize,
+    textTransform,
+    paragraph,
+    tracking,
+  }
 }
 
 // ---------- EFFECTS (shadows) ----------
@@ -460,12 +495,16 @@ function main() {
   // colors.json is consumed from tailwind/ (top-level) by colorPalette.js, while
   // the generator emits to tailwind/generated/. Copy it up so `yarn sync-tokens`
   // is the single source of truth (no manual copy step).
-  fs.copyFileSync(path.join(OUT_DIR, 'colors.json'), path.join(__dirname, 'colors.json'))
+  fs.copyFileSync(
+    path.join(OUT_DIR, 'colors.json'),
+    path.join(__dirname, 'colors.json'),
+  )
 
   console.log('✓ done')
 }
 
 const scriptPath = fileURLToPath(import.meta.url)
 const invokedPath = process.argv[1]
-const isCLI = invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
+const isCLI =
+  invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
 if (isCLI) main()
