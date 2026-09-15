@@ -124,7 +124,7 @@ per-file edits.
   same file, and the file itself is unchanged.
 - **The tarball ships no tests.** `*.test.*`, `*.spec.ts`, `*.cy.ts`,
   `*.story.vue`, `*.playground.vue`, `stories/` and `src/mocks` are excluded:
-  1448 files became 932, and 518 test files became none.
+  1449 files became 934, and 520 test, story, playground, mock and helper files became none.
 - **Fix: the internal `#` imports resolve for consumers.** The package ships
   TypeScript source, so your compiler resolves them through the `imports` map.
   A type-check of an app that imports `frappe-ui/editor` reported 136
