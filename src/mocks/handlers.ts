@@ -29,7 +29,13 @@ export const handlers = [
   }),
 
   http.post(url('/api/v2/method/post'), async ({ request }) => {
-    const body = await request.json()
+    const body = await readBody(request)
+    // Same rule as the document handlers below: a body value ending in
+    // `fail` fails the request, so a test can pick success or failure from
+    // the params it submits.
+    if (Object.values(body).some((value) => String(value).endsWith('fail'))) {
+      return methodError('post')
+    }
     return HttpResponse.json({
       data: { success: true, received: body },
     })

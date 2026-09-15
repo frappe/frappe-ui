@@ -5,6 +5,7 @@
 import { ref } from 'vue'
 import { useCall } from '../index'
 import { url, waitUntilValueChanges } from '../../mocks/utils'
+import { server } from '../../mocks/node'
 
 describe('msw works', () => {
   it('ping responds with pong', async () => {
@@ -291,6 +292,114 @@ describe('useCall', () => {
 
     await expect(call.submit()).resolves.toMatchObject({ success: true })
     expect(call.error).toBe(null)
+  })
+
+  // `refetch: true` hands the dispatch to the parameter watcher. `submit()`
+  // still has to answer for that request (DAT-Q1).
+  it('rejects a failed submit when refetch is true', async () => {
+    const call = useCall<{ success: boolean }, { value: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    await expect(call.submit({ value: 'please fail' })).rejects.toThrow(
+      'ValidationError: post failed',
+    )
+    expect(call.error).toBeTruthy()
+    expect(call.loading).toBe(false)
+  })
+
+  it('resolves a successful submit with the response when refetch is true', async () => {
+    const call = useCall<
+      { success: boolean; received: any },
+      { value: string }
+    >({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    await expect(call.submit({ value: 'first' })).resolves.toEqual({
+      success: true,
+      received: { value: 'first' },
+    })
+    expect(call.data).toEqual({ success: true, received: { value: 'first' } })
+
+    // A second submit with new params goes through the watcher again.
+    await expect(call.submit({ value: 'second' })).resolves.toEqual({
+      success: true,
+      received: { value: 'second' },
+    })
+    expect(call.error).toBe(null)
+  })
+
+  // No parameter change means no watcher, so `submit()` sends the request
+  // itself. One request per call either way, and it still rejects on failure.
+  it('sends the request itself when refetch is true and the params do not change', async () => {
+    const call = useCall<{ success: boolean; received: any }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    await expect(call.submit()).resolves.toEqual({
+      success: true,
+      received: {},
+    })
+
+    // The same object twice is not a parameter change either.
+    const sameParams = { value: 'same' }
+    const repeated = useCall<{ success: boolean; received: any }, any>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+    await expect(repeated.submit(sameParams)).resolves.toEqual({
+      success: true,
+      received: { value: 'same' },
+    })
+    await expect(repeated.submit(sameParams)).resolves.toEqual({
+      success: true,
+      received: { value: 'same' },
+    })
+
+    const failing = useCall<{ success: boolean }, any>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      params: { value: 'please fail' },
+      refetch: true,
+      immediate: false,
+    })
+    await expect(failing.submit()).rejects.toThrow('ValidationError: post failed')
+  })
+
+  it('sends one request per submit when refetch is true', async () => {
+    let requests = 0
+    const count = () => {
+      requests += 1
+    }
+    server.events.on('request:start', count)
+    const call = useCall<{ success: boolean }, { value: string }>({
+      url: url('/api/v2/method/post'),
+      method: 'POST',
+      refetch: true,
+      immediate: false,
+    })
+
+    try {
+      await call.submit({ value: 'one' })
+      await call.submit({ value: 'two' })
+      await call.submit()
+    } finally {
+      server.events.removeListener('request:start', count)
+    }
+
+    expect(requests).toBe(3)
   })
 
   it('caches data if cacheKey is provided', async () => {

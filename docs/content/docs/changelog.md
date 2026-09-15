@@ -1019,6 +1019,12 @@ A failed write must not let its caller fall through to the success path.
   composable. Read `error` after awaiting them.
 - `useDoctype` and `useList` write methods already rejected. Nothing changes
   for them.
+- `useCall({ refetch: true }).submit()` obeys the rule too. It used to return
+  `undefined` at once and leave the request to the params watcher, so a failed
+  write could not reject. It now sends exactly one request and waits for it:
+  the watcher's request when the params change, its own request when they do
+  not. A `submit()` with no params, which used to send nothing at all, now
+  sends the request.
 
 `error`, `onError` and the stores behave exactly as before. This is silent:
 nothing fails to build, the success path simply stops running, and an

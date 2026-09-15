@@ -1,4 +1,4 @@
-import { computed, reactive, readonly, ref, unref } from 'vue'
+import { computed, nextTick, reactive, readonly, ref, unref, watch } from 'vue'
 import { AfterFetchContext, UseFetchOptions } from '@vueuse/core'
 import {
   FrappeResponseError,
@@ -199,15 +199,45 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     promise.value = makePromise()
   })
 
+  /**
+   * Resolves when the request that is in flight right now has settled.
+   * `isFetching` is the only signal that tracks the *newest* request:
+   * `useFetch` clears it in a `finally` that a superseded request skips, so
+   * a submit waiting here cannot be answered by an older request the new one
+   * aborted. The response events cannot tell the two apart.
+   */
+  function whenSettled(): Promise<void> {
+    if (!isFetching.value) return Promise.resolve()
+    return new Promise<void>((res) => {
+      const stop = watch(
+        isFetching,
+        (fetching) => {
+          if (fetching) return
+          stop()
+          res()
+        },
+        { flush: 'sync' },
+      )
+    })
+  }
+
   const submit = async (params?: TParams) => {
     if (beforeSubmit) {
       // A throw cancels the submit: the request is not sent and submit() rejects (#990)
       await beforeSubmit(params)
     }
+    // With `refetch: true` the request is sent by `useFetch`'s parameter
+    // watcher, not by this call — but only if the assignment below really
+    // changes the parameters. Read that before assigning.
+    const watcherWillDispatch =
+      refetch && params != null && !Object.is(submitParams.value, params)
     if (params != null) {
       submitParams.value = params
     }
-    if (!refetch) {
+    if (!watcherWillDispatch) {
+      // Either `refetch` is off, or the parameters did not change and no
+      // watcher will fire. Send the request here so that every `submit()`
+      // sends exactly one request.
       const response = await execute()
       // Actions reject, reads resolve. `submit()` writes, so a caller that
       // does not handle failure must not run its success path (DAT-Q1).
@@ -215,6 +245,11 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       if (error.value) throw error.value
       return response
     }
+    // The watcher is pre-flush, so the request goes out on the next tick.
+    await nextTick()
+    await whenSettled()
+    if (error.value) throw error.value
+    return data.value?.data ?? null
   }
 
   const reset = () => {
