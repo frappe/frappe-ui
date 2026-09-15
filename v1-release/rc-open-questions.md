@@ -1262,13 +1262,21 @@ or that line throws. Suite's table of contents is its own
 **PKG-Q2 — 0 deep-path sites left.** All four apps already import
 `frappe-ui/tailwind`. `packaging-v1 --dry-run` on each tree confirms it.
 
-**PKG-Q8 — 82 icon imports converted, 1 app config to change.** The conversion
-touched 12 shipped files: `commands.js` 31, `slash-commands-extension.ts` 14,
-`MediaNodeView.vue` 10, `ImageViewerModal.vue` 8, `LinkPopup.vue` 5,
-`IframeNodeView.vue` 4, `FloatingWindow.vue` 3, `ImageGroupNodeView.vue` 2,
-`ImageGroupUploadDialog.vue` 2, `Rating.vue` 1, `Rating/types.ts` 1 and
-`PickerShell.vue` 1. Every `<LucideX />` tag left in shipped code is declared
-locally by `classIcon()`, so no shipped file depends on the auto-import plugin.
+**PKG-Q8 — 83 icon imports and 1 auto-imported tag converted, 1 app config to
+change.** The conversion touched 13 shipped files: `commands.js` 31,
+`slash-commands-extension.ts` 14, `MediaNodeView.vue` 10,
+`ImageViewerModal.vue` 8, `LinkPopup.vue` 5, `IframeNodeView.vue` 4,
+`FloatingWindow.vue` 3, `ImageGroupNodeView.vue` 2,
+`ImageGroupUploadDialog.vue` 2, `PrevNextBtns.vue` 2, `Rating.vue` 1 and
+`PickerShell.vue` 1, plus the `<LucideChevronRight />` tag at
+`PropsTable.vue:45`. The two `vitepress/` files are not broken by the flip,
+because `defineDocsConfig` calls `lucideIcons()` itself
+(`vitepress/index.node.ts:179`); they are converted so the shared docs theme
+stops needing the unplugins at all. `vitepress/**` joins `tailwind/content.js`
+in the same change, without which a consumer docs site never emits the theme's
+own layout classes such as `lg:grid-cols-[220px_1fr]`. Every other
+`<LucideX />` tag left in shipped code is declared locally by `classIcon()`, so
+no shipped file depends on the auto-import plugin.
 `packaging-v1 --dry-run` reports one config to change, Gameplan
 `frontend/vite.config.ts`; Builder `vite.config.mjs:18`, Suite
 `vite.config.ts:99` and Suite `vite.recorder.config.ts:11` already pass
@@ -1285,8 +1293,8 @@ this change does not reach them.
 exported subpaths resolve, `frappe-ui/src/utils/tailwind.config` fails with
 `ERR_PACKAGE_PATH_NOT_EXPORTED`, all 10 bins install and point at shipped
 files, and a Tailwind build through the packed preset emits `p-4.5`,
-`min-w-50` at 12.5rem, `rounded-9` at 100px, 14 `--focus-outline-*`
-declarations and no box-shadow focus variable. `vue-tsc` on the installed
+`min-w-50` at 12.5rem, `rounded-9` at 100px, 12 `--focus-outline-*`
+declarations (6 names in each theme) and no box-shadow focus variable. `vue-tsc` on the installed
 package first reported 198 errors: 136 were unresolved `#` self-imports,
 because a consumer's compiler reads the `imports` map and adds neither an
 extension nor an `index` segment, and this repo's own `tsconfig.app.json`
