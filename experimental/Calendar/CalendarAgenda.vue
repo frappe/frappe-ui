@@ -117,7 +117,8 @@
           class="calendar-week-label inline-flex cursor-pointer rounded-3 py-1.5 text-ink-gray-8 hover:bg-surface-gray-2"
           :class="{
             past: week.isPast,
-            'mb-2 flex-col items-start px-3.5 text-lg-semibold': isNarrow,
+            'mb-2 flex-col items-start gap-0.5 px-3.5 text-lg-semibold':
+              isNarrow,
             'mb-1.5 ml-[7px] items-baseline gap-2 px-2 text-base-semibold':
               !isNarrow,
           }"
@@ -161,17 +162,18 @@
                the part that can carry "go there" without taking the click a row
                already has. Pressing it opens that day in the Day view.
 
-               Today's gutter is drawn like every other day's: no wash, no
-               pill, no ink or weight of its own, and no "Today" in place of
-               the weekday — nor "Yesterday" or "Tomorrow" either side of it.
-               Every day reads the same way, weekday then date. The list
-               opens on today, and the rows behind it are faded, so which day
-               is now is said by where the list starts and where the fading
-               stops; every mark tried on the gutter itself — a blue wash
-               boxed in blue rules, a black pill, blue ink, a heavier weight,
-               an underline — was one more thing on the line the eye only
-               scans, saying what the scroll position already had. No gutter
-               carries a fill of
+               Today's gutter is drawn like every other day's — no wash, no
+               pill, no ink or weight of its own — and says one thing more:
+               its name is "Today", and the weekday it would have opened with
+               moves in front of the date, "Today  Tue, 15 Sep". The day
+               either side of it is not named; a "Tomorrow" is a word for a
+               day the reader has to work out, where "Today" is the one day
+               they already know. Every mark tried on the words themselves —
+               a blue wash boxed in blue rules, a black pill, blue ink, a
+               heavier weight, an underline, a dot — was one more thing on
+               the line the eye only scans; a word in the slot the eye is
+               scanning is the one mark that is read rather than seen. No
+               gutter carries a fill of
                its own, and none carries a rule down its edge either: the rows
                beside it are tinted blocks with edges of their own, and a rule
                between a column of text and a column of blocks was a third
@@ -242,7 +244,7 @@
               class="calendar-day-header flex shrink-0 cursor-pointer items-baseline gap-2 text-left"
               :class="{
                 'px-3.5 py-1': isNarrow,
-                'm-1.5 w-42 rounded-3 px-2 py-1.5 hover:bg-surface-gray-1':
+                'm-1.5 w-42 rounded-3 px-2 py-1.5 hover:bg-surface-gray-2':
                   !isNarrow,
                 past: row.isPast,
               }"
@@ -271,8 +273,16 @@
                    the day back to 52px and the blank beside a lone event back
                    with it; a clipped word says the same thing the visible ones
                    do. -->
-              <span class="shrink-0 text-sm-medium leading-5 text-ink-gray-8">
-                {{ weekday(row.date) }}
+              <!-- The weekday a size up on the phone, level with the block
+                   titles under it: at the desktop's 13px, beside 14px titles,
+                   the day read as a caption on the blocks rather than the
+                   heading over them. The date keeps the desktop's size, a step
+                   under the name it follows. -->
+              <span
+                class="shrink-0 leading-5 text-ink-gray-8"
+                :class="isNarrow ? 'text-base-medium' : 'text-sm-medium'"
+              >
+                {{ row.isToday ? 'Today' : weekday(row.date) }}
               </span>
               <span class="min-w-0 truncate text-sm leading-5 text-ink-gray-5">
                 {{ dayLabel(row) }}
@@ -329,7 +339,7 @@ import {
   type AgendaRow,
   type AgendaWeek,
 } from './agendaDays'
-import { daysListFull, monthList, parseDate } from './calendarUtils'
+import { daysList, daysListFull, monthList, parseDate } from './calendarUtils'
 import { shortMonth } from './monthStrip'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
@@ -577,18 +587,26 @@ const openWeek = (start: Date) => {
 const weekday = (date: Date) => daysListFull[date.getDay()]
 
 /**
- * "7 Sep", after the weekday every day opens with. No day is named instead —
- * not today, nor the day either side of it: a "Today" in the weekday's slot
- * made three days read differently from the rest of a list whose point is that
- * every day reads the same, and today is found where the list opens.
+ * "7 Sep", after the weekday every day opens with — and on today, whose slot
+ * the word "Today" takes, the weekday comes first: "Tue, 15 Sep", so no day
+ * loses the word it is called by. Short, where every other day spells its
+ * weekday out: on this line the weekday is not the thing looked up — "Today"
+ * is — and spelled out it ran the gutter to its edge on a Wednesday. Only
+ * today: a "Tomorrow" or "Yesterday"
+ * is a word for a day the reader has to work out, where "Today" is the one
+ * day they already know, and naming three days made three days read
+ * differently from the rest of a list whose point is that every day reads
+ * the same.
  *
  * The month is abbreviated, as it is in the week label above: the reader is
  * inside a span the header has already named, so "September" spelled out is the
  * longest word in the gutter saying the least. The weekday is not — it is the
  * thing the line is looked up by, and "Wed" is a lookup of its own.
  */
-const dayLabel = (row: AgendaRow) =>
-  `${row.date.getDate()} ${shortMonth(row.date)}`
+const dayLabel = (row: AgendaRow) => {
+  const date = `${row.date.getDate()} ${shortMonth(row.date)}`
+  return row.isToday ? `${daysList[row.date.getDay()]}, ${date}` : date
+}
 
 /** "Sep 13 – 19" — the days the week covers, which is its name. */
 const weekLabel = (week: AgendaWeek) => agendaRangeLabel(week.start, week.end)
