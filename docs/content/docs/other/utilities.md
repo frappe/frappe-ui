@@ -87,7 +87,7 @@ await call(
 </script>
 ```
 
-The rejection is a `FrappeRequestError`: a plain `Error` carrying `exc_type`,
+The rejection is a `FrappeResourceError`: a plain `Error` carrying `exc_type`,
 `exc`, `status`, `response`, and `messages` (the server's `_server_messages`,
 already parsed).
 
@@ -112,7 +112,7 @@ on `GET`, JSON body otherwise), `headers`, `signal`, `credentials`,
 `responseType` (`'json'` or `'response'`), and the `onError` /
 `onServerMessages` callbacks. It sets the `Accept`, `Content-Type`,
 `X-Frappe-Site-Name` and CSRF headers, unwraps `message` from the response, and
-throws a `FrappeRequestError` on failure.
+throws a `FrappeResourceError` on failure.
 
 ### Configuration
 
@@ -141,18 +141,20 @@ to `credentials: 'include'`, so the server has to send
 authenticate with a token header instead, pass `credentials: 'omit'` per
 request.
 
-## FrappeRequestError
+## FrappeResourceError {#frapperequesterror}
 
 The error [`call`](#call), [`frappeRequest`](#frapperequest) and the v1
 [resources](../data-fetching/resource.md) raise. A plain `Error` carrying the
 transport fields of the failed request: `messages` (the server messages array),
-`exc_type`, `exc`, `status` and the raw `response`.
+`exc_type`, `exc`, `status` and the raw `response`. The name says the layer that
+raises it: both errors are server responses, so request versus response named
+nothing. The [migration guide](../migration.md#errors-renamed) has the rename.
 
-It is a TypeScript `interface`, not a class: the request layer throws
+It is a TypeScript `interface`, not a class: the resource layer throws
 `new Error(...)` and assigns those fields. So it types a caught error
-(`catch (error) { const e = error as FrappeRequestError }` — a catch clause
+(`catch (error) { const e = error as FrappeResourceError }` — a catch clause
 variable cannot carry a type annotation) but
-`error instanceof FrappeRequestError` does not compile, and `error.name` is
+`error instanceof FrappeResourceError` does not compile, and `error.name` is
 `"Error"`. Test a field instead, for example `e.exc_type === 'PermissionError'`.
 
 It stays separate from `FrappeResponseError` below, which the v2 composables

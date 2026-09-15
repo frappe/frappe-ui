@@ -17,6 +17,7 @@ import type {
   Dayjs,
   DesktopShellProps,
   ErrorMessageValue,
+  FrappeResourceError,
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
@@ -76,6 +77,7 @@ type PublicTypes = [
   Dayjs,
   DesktopShellProps,
   ErrorMessageValue,
+  FrappeResourceError,
   ImperativeDialogAction,
   InputExposed,
   InputLabelingProps,
@@ -110,6 +112,13 @@ describe('root exports', () => {
   it('exports the upload error and no privacy resolver', () => {
     expect(root).toHaveProperty('UploadError')
     expect(root).not.toHaveProperty('isPrivateUpload')
+  })
+
+  it('keeps the error class the v2 composables raise', () => {
+    // DAT-Q3 follow-up: only the resource layer's error was renamed, and it
+    // is a type, so the class is the one runtime name to check.
+    expect(root).toHaveProperty('FrappeResponseError')
+    expect(root).not.toHaveProperty('FrappeResourceError')
   })
 
   it('drops the value exports v1 removed', () => {
@@ -166,6 +175,8 @@ import type { ScrollBarProps } from './index'
 import type { UseSheetDrag } from './index'
 // @ts-expect-error SHELL-Q7: useSheetDrag is internal to BottomSheet
 import type { UseSheetDragOptions } from './index'
+// @ts-expect-error DAT-Q3 follow-up: the resource layer's error is `FrappeResourceError`
+import type { FrappeRequestError } from './index'
 
 type RemovedTypes = [
   FrappeUIError,
@@ -176,4 +187,5 @@ type RemovedTypes = [
   ScrollBarProps,
   UseSheetDrag,
   UseSheetDragOptions,
+  FrappeRequestError,
 ]

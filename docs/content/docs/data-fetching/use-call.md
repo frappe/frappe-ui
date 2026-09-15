@@ -170,12 +170,13 @@ All three are plain `Error` objects:
 | API                                                                  | Error                                                              | Kind        | Extra fields                                        |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- | --------------------------------------------------- |
 | `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            | [`FrappeResponseError`](../other/utilities.md#frapperesponseerror) | class       | `title`, `type`, `exception`, `indicator`           |
-| `call`, `frappeRequest`, `createResource` and the other v1 resources | [`FrappeRequestError`](../other/utilities.md#frapperequesterror)   | type only   | `messages`, `exc_type`, `exc`, `status`, `response` |
+| `call`, `frappeRequest`, `createResource` and the other v1 resources | [`FrappeResourceError`](../other/utilities.md#frapperequesterror)  | type only   | `messages`, `exc_type`, `exc`, `status`, `response` |
 | `upload`, `useFileUpload`, `FileUploadHandler`                       | [`UploadError`](../other/utilities.md#uploaderror)                 | class       | `kind`, `status`, `messages`, `response`            |
 
 The two Frappe errors stay separate on purpose: the v2 composables read the
-parsed error page (`title`, `indicator`), and the v1 request layer keeps the raw
-transport fields (`status`, `response`).
+parsed error page (`title`, `indicator`), and the resource layer keeps the raw
+transport fields (`status`, `response`). Each is named for the layer that raises
+it; both are server responses, so request versus response named nothing.
 
 The `Kind` column decides how you narrow a catch block.
 `FrappeResponseError` and `UploadError` are classes, so `instanceof` works:
@@ -184,9 +185,10 @@ The `Kind` column decides how you narrow a catch block.
 if (error instanceof FrappeResponseError) console.log(error.title)
 ```
 
-`FrappeRequestError` is a TypeScript type over a plain `Error`, not a
-constructor. There is no value to test, so `error instanceof FrappeRequestError`
-does not compile. Check the field you need instead:
+`FrappeResourceError` is a TypeScript type over a plain `Error`, not a
+constructor. There is no value to test, so
+`error instanceof FrappeResourceError` does not compile. Check the field you
+need instead:
 
 ```js
 if (error.exc_type === 'PermissionError') showPermissionMessage()

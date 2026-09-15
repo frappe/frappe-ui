@@ -18,7 +18,7 @@ export * from './resources/index.ts'
 // `frappeRequest` and the v1 resources are built on, with none of the Frappe
 // response handling a consumer wants.
 export { default as call } from './utils/call'
-export { frappeRequest, type FrappeRequestError } from './utils/frappeRequest'
+export { frappeRequest, type FrappeResourceError } from './utils/frappeRequest'
 
 // Base components
 export * from './components/Alert'

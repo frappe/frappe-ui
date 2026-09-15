@@ -1061,16 +1061,31 @@ that say otherwise are gone.
 - Both force `immediate: false, refetch: false` at runtime, so a JavaScript app
   that still passes them is safe; the values are ignored.
 
+### Data fetching — `FrappeRequestError` is renamed `FrappeResourceError` (breaking, loud)
+
+The error type the resource layer raises — `call`, `frappeRequest`,
+`createResource` and the other v1 resources — is now `FrappeResourceError`. Both
+errors in the library are server responses, so request versus response named
+nothing; each is named for the layer that raises it instead. Only the v1 betas
+ever exported the old name: v0.1.278 did not export it at all.
+
+- `FrappeResponseError`, which the v2 composables raise, does not change.
+- The fields do not change, and neither does how you narrow either one:
+  `FrappeResponseError` is a class, `FrappeResourceError` is a type over a plain
+  `Error`, so read a field such as `exc_type`.
+- There is no alias (ADR-0008), so importing the old name fails the build.
+  [The migration guide](/docs/migration#errors-renamed) has the before/after.
+
 ### Data fetching (v2) — error classes and read aliases documented
 
 No code change. Two facts the docs now state:
 
-- `FrappeResponseError` (the v2 composables) and `FrappeRequestError` (`call`,
+- `FrappeResponseError` (the v2 composables) and `FrappeResourceError` (`call`,
   `frappeRequest`, v1 resources) stay separate, with different fields, and
   `UploadError` is the third.
   [A table](/docs/data-fetching/use-call#which-error-class) says which API
   raises which. It also says which of the three you can narrow with
-  `instanceof`: `FrappeRequestError` is a TypeScript type over a plain `Error`,
+  `instanceof`: `FrappeResourceError` is a TypeScript type over a plain `Error`,
   not a class, so only the other two have a value to test.
 - `execute`/`fetch`/`reload` and `loading`/`isFetching` stay as aliases of one
   another. It is the one place the library publishes two names for one thing.
@@ -2520,8 +2535,8 @@ set either: `call` now goes to the configured base URL with
 `credentials: 'include'`, and `_server_messages` from a `call` now reach
 `serverMessagesHandler`.
 
-**`FrappeRequestError` is now exported.** `frappeRequest` threw it but
-nothing exported it, so a consumer could not type a `catch`.
+**`FrappeResourceError` is now exported.** `frappeRequest` threw it but nothing
+exported it, so a consumer could not type a `catch`.
 
 ### `frappeRequest` — `onError` fired twice per failure (fix)
 
@@ -2659,7 +2674,7 @@ query.
 **`FrappeResponseError` is now exported.** The composables raise it on a Frappe
 error response and put it on `.error`, and `submit()` rejects with it, but
 nothing exported the class, so a consumer could not narrow the error. Same gap
-`FrappeRequestError` closed for `frappeRequest`.
+`FrappeResourceError` closed for `frappeRequest`.
 
 ### Data fetching (v2) — docs, and the sidebar splits from Resources
 

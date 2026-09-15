@@ -1,20 +1,16 @@
-import { frappeRequest, type FrappeRequestError } from './frappeRequest'
+import { frappeRequest, type FrappeResourceError } from './frappeRequest'
 
 export interface CallOptions {
   headers?: Record<string, string>
   onError?: (context: {
     response: Response
     status: number
-    error: CallError
+    // `call` used to build its own near-identical error object; the two have
+    // always carried the same fields, and the `CallError` alias that said so
+    // was a second name for one type, so it is gone.
+    error: FrappeResourceError
   }) => void
 }
-
-/**
- * What `call` rejects with. Structurally the error `frappeRequest` throws —
- * `call` used to build its own near-identical error object, and the two have
- * always carried the same fields.
- */
-export type CallError = FrappeRequestError
 
 /**
  * POST to a whitelisted Frappe method and return its `message`.

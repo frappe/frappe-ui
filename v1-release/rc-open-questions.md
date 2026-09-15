@@ -8,7 +8,7 @@
 
 `FrappeResponseError` is a class with required `title` and `type`, plus optional `exception` and `indicator` (`src/data-fetching/useFrappeFetch.ts:6-26`). `useFrappeFetch` constructs it from `response.errors[0]` (`src/data-fetching/useFrappeFetch.ts:115-147`). It has no `messages` field, but it still satisfies `FrappeUIError` because that field is optional.
 
-`FrappeRequestError` is an interface with optional `exc_type`, `exc`, `response`, and `status`, plus required `messages` (`src/utils/frappeRequest.ts:20-26`). `frappeRequest` constructs an `Error`, adds those fields, and guarantees at least one message (`src/utils/frappeRequest.ts:190-215`). It also satisfies `FrappeUIError` structurally, but `FrappeUIError` is not an alias of either request error.
+`FrappeRequestError` (renamed `FrappeResourceError` on 2026-09-16; the facts here describe the tree at audit time) is an interface with optional `exc_type`, `exc`, `response`, and `status`, plus required `messages` (`src/utils/frappeRequest.ts:20-26`). `frappeRequest` constructs an `Error`, adds those fields, and guarantees at least one message (`src/utils/frappeRequest.ts:190-215`). It also satisfies `FrappeUIError` structurally, but `FrappeUIError` is not an alias of either request error.
 
 ```ts
 const inputError: FrappeUIError = requestError // valid structurally

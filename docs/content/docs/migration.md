@@ -48,7 +48,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
 - **Editor and charts** — [Editor](#editor) · [Charts](#charts)
-- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
+- **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Errors renamed](#errors-renamed) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
@@ -2129,6 +2129,44 @@ try {
   } else {
     throw e
   }
+}
+```
+
+### `FrappeRequestError` is `FrappeResourceError` {#errors-renamed}
+
+The error type the resource layer raises is renamed. Both errors in the library
+are server responses, so request versus response named nothing; the name says
+the layer that raises it now. Only apps on a v1 beta are affected: v0 never
+exported either name.
+
+| Before                | After                 | Raised by                                                            |
+| --------------------- | --------------------- | -------------------------------------------------------------------- |
+| `FrappeRequestError`  | `FrappeResourceError` | `call`, `frappeRequest`, `createResource` and the other v1 resources |
+| `FrappeResponseError` | `FrappeResponseError` | `useCall`, `useDoc`, `useList`, `useDoctype`, `useNewDoc`            |
+
+`FrappeResponseError` does not change. The fields on both are the same as
+before, and there is no alias: importing the old name is a build failure.
+
+```ts
+// Before
+import type { FrappeRequestError } from 'frappe-ui'
+
+// After
+import type { FrappeResourceError } from 'frappe-ui'
+```
+
+The two narrow differently, which also does not change. `FrappeResponseError` is
+a class, so `instanceof` works. `FrappeResourceError` is a type over a plain
+`new Error(...)` with fields assigned, so there is no value to test: read the
+field you need.
+
+```ts
+try {
+  await call('frappe.client.get_list', { doctype: 'ToDo' })
+} catch (error) {
+  const e = error as FrappeResourceError
+  if (e.exc_type === 'PermissionError') showPermissionMessage()
+  else throw error
 }
 ```
 
