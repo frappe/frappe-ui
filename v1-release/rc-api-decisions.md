@@ -344,7 +344,7 @@ Source: `grilling/07-editor.html`. ED-Q3, ED-Q4, and ED-Q5 asked for facts; the 
 | ED-Q5 | B12 | decided | Rename the fields to `nodeView` and `listComponent`, in both `SuggestionExtension` and `createSuggestionExtension` | if we go with the rename, how many call sites do we need to migrate? <br>Research: 2 app sites (gameplan 1, helpdesk 1); own tree 10 declaration sites and 8 callers. <br>Follow-up (2026-09-14): "sure" |
 | ED-Q6 | B13 | decided | Use `{ label, value }` and pass the original item to the item slot | (none) |
 | ED-Q7 | B14 | decided (page recommendation partly taken) | StyleClipboard and Toc become opt-in; ImageViewer stays on by default | make styleclipboard and Toc optional, keep imageviewer |
-| ED-Q8 | M-editor/A | decided | Export one owned narrow options type for both menu components | (none) |
+| ED-Q8 | M-editor/A | decided | Export one owned narrow options type for both menu components | (none) <br>Follow-up (2026-09-16): maintainer confirmed the narrow type after a consumer census (Gameplan, Builder, Suite, frappe/ui, Wiki, CRM, Helpdesk, Books, Insights, LMS): only Wiki passes Floating UI function forms of `flip`, `shift`, `hide` and `placement`, and Suite passes `getReferencedVirtualElement`, which TipTap never read from the bag. The runtime still spreads unknown keys through; the type stays narrow |
 | ED-Q9 | M-editor/A | decided | Rename `buttonSize` to `size` before RC | (none) |
 | ED-Q10 | M-editor/A | decided | Freeze 15px as the v1 default and correct the documentation | (none) |
 | ED-Q11 | M-editor/C | deferred to 1.1 | Defer EditorDropZone context fallback, `data-slot`, and the missing type exports to 1.1 and record them | (none) |
