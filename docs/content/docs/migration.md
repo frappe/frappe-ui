@@ -1182,10 +1182,13 @@ module. `DatePickerViewMode` and `DatePickerDateObj` were calendar internals the
 wildcard published; they leave the root and the import fails. Nothing replaces
 them — they described the calendar's internal state.
 
-`ComboboxEmits` and `MultiSelectEmits` no longer redeclare the model events
-`defineModel` already declares, and `RadioGroupEmits` says
+`SelectEmits`, `ComboboxEmits` and `MultiSelectEmits` no longer redeclare the
+model events `defineModel` already declares, and `RadioGroupEmits` says
 `RadioValue | undefined`, which is what an unbound group starts at. A handler
-typed against the old shapes still compiles.
+typed against the old shapes still compiles. Type a model handler off the model
+instead: `(value: SelectOptionValue | null | undefined) => void`. The extra
+`undefined` is there because the model prop is optional; neither `Select` nor
+`Combobox` ever emits it.
 
 ## FileUploader
 

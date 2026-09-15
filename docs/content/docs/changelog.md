@@ -121,18 +121,20 @@ description moved off `ink-gray-3` (1.69:1) to match the disabled label.
   `Textarea` height, so a `lg` `Textarea` is a roomier box of the same 13px
   prose. The `Textarea` *value* colour is unchanged.
 
-### Combobox and MultiSelect — `update:open` and `update:query` leave the emit interfaces (breaking in TS only)
+### Selection emit interfaces drop the model events (breaking in TS only)
 
 `ComboboxEmits` and `MultiSelectEmits` no longer declare `'update:open'` and
-`'update:query'`. Both components declare those events through `defineModel`,
-and declaring them twice collapsed `$emit`'s signature to
-`(event, ...args: unknown[])` — a typed `@update:open` listener would not
-compile.
+`'update:query'`, and `SelectEmits` no longer declares `'update:modelValue'`.
+Each component declares those events through `defineModel`, and declaring them
+twice collapsed `$emit`'s signature to `(event, ...args: unknown[])` — a typed
+`@update:open` listener would not compile. `SelectEmits` also disagreed with
+the generated payload, which carries `undefined` because the model prop is
+optional, so a wrapper that re-bound `@update:model-value` failed to compile.
 
-**The runtime events are unchanged.** `v-model:open`, `v-model:query`, and
-`@update:open` / `@update:query` listeners all fire exactly as before, and both
-events are still listed in the API tables. Only these four interface *members*
-are gone:
+**The runtime events are unchanged.** `v-model`, `v-model:open`,
+`v-model:query` and the matching listeners all fire exactly as before, and
+every event is still listed in the API tables. Only these five interface
+*members* are gone:
 
 | Removed member | Still emitted at runtime |
 | --- | --- |
@@ -140,10 +142,14 @@ are gone:
 | `ComboboxEmits['update:query']` | yes |
 | `MultiSelectEmits['update:open']` | yes |
 | `MultiSelectEmits['update:query']` | yes |
+| `SelectEmits['update:modelValue']` | yes |
 
 You are affected only if you indexed those interfaces by hand, as in
-`type Handler = ComboboxEmits['update:open']`. Type the handler off the model
-instead: `(value: boolean) => void`.
+`type Handler = ComboboxEmits['update:open']`, or passed one to `defineEmits`
+in a wrapper. Type the handler off the model instead: `(value: boolean) => void`
+for `open`, `(value: SelectOptionValue | null | undefined) => void` for a
+selection model. The `undefined` is there because the model prop is optional;
+the component never emits it.
 
 ### Editor — mentions open after brackets and quotes
 
@@ -1235,7 +1241,8 @@ sees.
 - `DatePicker`'s barrel lists its public types instead of re-exporting the whole
   module (P15). `DatePickerViewMode` and `DatePickerDateObj` were calendar
   internals the wildcard published; they leave the root.
-- `ComboboxEmits` and `MultiSelectEmits` no longer redeclare the model events
+- `SelectEmits`, `ComboboxEmits` and `MultiSelectEmits` no longer redeclare the
+  model events
   `defineModel` already declares, and `RadioGroupEmits` says
   `RadioValue | undefined`, which is what an unbound group starts at.
 

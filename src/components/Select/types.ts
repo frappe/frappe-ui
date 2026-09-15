@@ -178,17 +178,16 @@ interface SelectItemSlotsByName {
 
 export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
+/**
+ * The events this interface names for a wrapper to reuse. `update:modelValue`
+ * is not here: `defineModel` declares it, and the generated payload carries
+ * `undefined` because the model prop is optional. Declaring it again published
+ * one event twice with two payload types, so a wrapper that re-bound
+ * `@update:model-value` failed to compile. `ComboboxEmits` and
+ * `MultiSelectEmits` dropped their model events for the same reason. The
+ * runtime event is unchanged: the component emits a value or `null`.
+ */
 export interface SelectEmits {
-  /**
-   * Fired when the selected value changes. `null` when the selection is
-   * cleared.
-   *
-   * The generated declaration adds `undefined`, because `modelValue` is
-   * optional and carries no default (a `defineModel` default never reaches
-   * the parent). The component never emits `undefined`.
-   */
-  'update:modelValue': [value: SelectOptionValue | null]
-
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 }

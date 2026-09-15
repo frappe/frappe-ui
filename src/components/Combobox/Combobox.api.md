@@ -9,8 +9,7 @@
     name: 'modelValue',
     description: 'Committed value. `null` when nothing is selected.',
     required: false,
-    type: 'ComboboxOptionValue | null',
-    default: 'null'
+    type: 'ComboboxOptionValue | null'
   },
   {
     name: 'options',
@@ -261,7 +260,7 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: ComboboxOptionValue | null]'
+    type: '[value: ComboboxOptionValue | null | undefined]'
   },
   {
     name: 'update:query',

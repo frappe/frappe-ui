@@ -24,9 +24,9 @@ describe('Combobox', () => {
     })
 
     it('leaves an untouched model alone', () => {
-      // Nothing is emitted on mount. Combobox keeps its `null` model default,
-      // which never leaves the component, so a parent that starts at
-      // `undefined` stays there until the user picks or clears (INP-Q2).
+      // Nothing is emitted on mount. There is no model default to write back,
+      // so a parent that starts at `undefined` stays there until the user
+      // picks or clears (INP-Q2). Select behaves the same.
       cy.mount(Combobox, {
         props: {
           options: fruits,
@@ -38,6 +38,26 @@ describe('Combobox', () => {
 
       cy.get('[role="combobox"]').should('have.value', '')
       cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('emits null from clear even when the model started undefined', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          modelValue: undefined,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+          'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
+        },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+      cy.get('@onSelectedOption').should('have.been.calledWith', null)
     })
 
     it('forwards `id` to the input element', () => {
