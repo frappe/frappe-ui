@@ -27,6 +27,17 @@ later open, so focus moves into the panel.
   controlled path that already bypassed the disabled guard. The imperative
   `open()` is still a no-op while disabled.
 
+### List — select-all follows items that change in place (fix)
+
+`<ListRows>` refreshed the header's select-all universe only when `items` was
+replaced with a different array. A row pushed in or spliced out, an entry swapped
+in place, a mutated id, or a changed `rowKey` left select-all working from stale
+values — checking rows that were gone and missing rows that were there. It now
+tracks the same identities the rows render with.
+
+Selection itself is still yours: a removed row's value stays in
+`v-model:selection` until you drop it.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of
