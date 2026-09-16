@@ -1,6 +1,6 @@
 import Tree from './Tree.vue'
 import { defineComponent, h, ref } from 'vue'
-import type { DropInfo, TreeNode } from './types'
+import type { DropInfo, TreeExposed, TreeNode } from './types'
 import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 // Fresh data per test. The tree never writes to these objects; a few tests
@@ -125,7 +125,7 @@ describe('Tree', () => {
     // A bound model round-trips through the parent, so the prop lags a render.
     // Consecutive calls must still accumulate rather than overwrite.
     const keys = ref<string[]>([])
-    const tree = ref<any>(null)
+    const tree = ref<TreeExposed | null>(null)
     const Parent = defineComponent({
       setup: () => () =>
         h(Tree, {
@@ -138,15 +138,15 @@ describe('Tree', () => {
     })
     cy.mount(Parent)
     cy.then(() => {
-      tree.value.expand('root')
-      tree.value.expand('a')
+      tree.value!.expand('root')
+      tree.value!.expand('a')
     })
     cy.then(() => expect(keys.value).to.deep.eq(['root', 'a']))
     cy.contains('Node A-1').should('exist')
   })
 
   it('expandAll keeps keys whose children have not loaded', () => {
-    const tree = ref<any>(null)
+    const tree = ref<TreeExposed | null>(null)
     const keys = ref<string[]>(['lazy'])
     const data = ref<TreeNode[]>([{ id: 'lazy', label: 'Lazy' }])
     cy.mount({
@@ -159,7 +159,7 @@ describe('Tree', () => {
           'onUpdate:expanded': (value: string[]) => (keys.value = value),
         }),
     })
-    cy.then(() => tree.value.expandAll())
+    cy.then(() => tree.value!.expandAll())
     // `lazy` has no children yet, so expandAll cannot see it — it must survive.
     cy.then(() => expect(keys.value).to.include('lazy'))
     cy.then(() => {
@@ -220,19 +220,19 @@ describe('Tree', () => {
   })
 
   it('expands and collapses everything through the exposed methods', () => {
-    const tree = ref<any>(null)
+    const tree = ref<TreeExposed | null>(null)
     cy.mount({
       render: () => h(Tree, { ref: tree, nodes: makeNodes(), nodeKey: 'id' }),
     })
     cy.contains('Node A').should('not.exist')
-    cy.then(() => tree.value.expandAll())
+    cy.then(() => tree.value!.expandAll())
     cy.contains('Node A-1').should('exist')
-    cy.then(() => tree.value.collapseAll())
+    cy.then(() => tree.value!.collapseAll())
     cy.contains('Node A').should('not.exist')
-    cy.then(() => tree.value.expand('root'))
+    cy.then(() => tree.value!.expand('root'))
     cy.contains('Node A').should('exist')
     cy.contains('Node A-1').should('not.exist')
-    cy.then(() => tree.value.toggle('root'))
+    cy.then(() => tree.value!.toggle('root'))
     cy.contains('Node A').should('not.exist')
   })
 
@@ -339,7 +339,7 @@ describe('Tree', () => {
   })
 
   it('freezes expand/collapse and drag when disabled', () => {
-    const tree = ref<any>(null)
+    const tree = ref<TreeExposed | null>(null)
     cy.mount({
       render: () =>
         h(Tree, {
@@ -355,9 +355,9 @@ describe('Tree', () => {
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
     // `disabled` freezes interaction, not the imperative API.
-    cy.then(() => tree.value.expand('a'))
+    cy.then(() => tree.value!.expand('a'))
     cy.contains('Node A-1').should('exist')
-    cy.then(() => tree.value.collapseAll())
+    cy.then(() => tree.value!.collapseAll())
     cy.contains('Node A').should('not.exist')
     cy.contains('[role="treeitem"]', 'Root').should(
       'have.attr',

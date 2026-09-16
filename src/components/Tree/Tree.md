@@ -103,7 +103,8 @@ const expanded = ref(['src'])
 Every toggle assigns a **new array**, so shallow watchers, immutable stores and
 undo logs see the change. Nothing is written onto your nodes.
 
-The component ref carries the imperative half:
+The component ref carries the imperative half. Its type is exported as
+`TreeExposed`:
 
 | Method          | Effect                             |
 | --------------- | ---------------------------------- |

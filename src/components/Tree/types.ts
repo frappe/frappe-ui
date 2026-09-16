@@ -133,6 +133,24 @@ export interface TreeContext {
 
 export const TreeContextKey: InjectionKey<TreeContext> = Symbol('TreeContext')
 
+/**
+ * What a `<Tree>` template ref exposes. These write the `expanded` model, so
+ * they are programmatic — `disabled`, which freezes user interaction, does not
+ * block them.
+ */
+export interface TreeExposed {
+  /** Opens the node with this key. Accepts a key whose children have not loaded yet. */
+  expand: (key: TreeKey) => void
+  /** Closes the node with this key. */
+  collapse: (key: TreeKey) => void
+  /** Flips the node with this key. */
+  toggle: (key: TreeKey) => void
+  /** Opens every node that has children, keeping any keys already open. */
+  expandAll: () => void
+  /** Closes every node. */
+  collapseAll: () => void
+}
+
 export interface TreeNodeSlotProps {
   node: TreeNode
   level: number

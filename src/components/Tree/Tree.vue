@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
+import type { WatchStopHandle } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { usePortalTarget } from '../../composables/usePortalTarget'
@@ -64,6 +65,7 @@ import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
   type DropInfo,
+  type TreeExposed,
   type TreeKey,
   type TreeNode,
   type TreeNodeSlotProps,
@@ -200,16 +202,12 @@ function expandAll() {
   writeKeys([...keys])
 }
 
-defineExpose({
-  /** Open the node with this key. */
-  expand: (key: TreeKey) => setKeyExpanded(key, true),
-  /** Close the node with this key. */
-  collapse: (key: TreeKey) => setKeyExpanded(key, false),
-  /** Flip the node with this key. */
-  toggle: (key: TreeKey) => setKeyExpanded(key, !expandedSet.value.has(key)),
-  /** Open every node that has children, keeping any keys already open. */
+// Documented on `TreeExposed` in `./types.ts`.
+defineExpose<TreeExposed>({
+  expand: (key) => setKeyExpanded(key, true),
+  collapse: (key) => setKeyExpanded(key, false),
+  toggle: (key) => setKeyExpanded(key, !expandedSet.value.has(key)),
   expandAll,
-  /** Close every node. */
   collapseAll: () => writeKeys([]),
 })
 
@@ -222,9 +220,11 @@ if (import.meta.env.DEV) {
       (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
     )
   // Deep, because a lazy tree assigns `children` in place — the path most
-  // likely to bring in stale nodes. The flag keeps the walk to one pass.
+  // likely to bring in stale nodes. A deep watch re-traverses the forest on
+  // every trigger, so stop it as soon as it has warned; it only warns once.
   let reported = false
-  watch(
+  let stop: WatchStopHandle | undefined
+  stop = watch(
     roots,
     (nodes) => {
       if (reported || !carriesExpanded(nodes)) return
@@ -233,9 +233,12 @@ if (import.meta.env.DEV) {
         "Tree's per-node `expanded` field",
         "`v-model:expanded` with the node's key",
       )
+      // `undefined` on the immediate pass, which the call below covers.
+      stop?.()
     },
     { immediate: true, deep: true },
   )
+  if (reported) stop()
 }
 
 // --- focus -----------------------------------------------------------------

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Button, Tree } from 'frappe-ui'
-import type { TreeNode } from '../types'
+import type { TreeExposed, TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
   {
@@ -35,7 +35,7 @@ const nodes = ref<TreeNode[]>([
 const expanded = ref<string[]>(['guest'])
 
 // `expandAll` / `collapseAll` write the same model through a template ref.
-const tree = ref<InstanceType<typeof Tree> | null>(null)
+const tree = ref<TreeExposed | null>(null)
 </script>
 
 <template>
