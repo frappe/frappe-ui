@@ -7,6 +7,7 @@ import type {
   SuggestionProps,
   SuggestionKeyDownProps,
 } from '@tiptap/suggestion'
+import { computePosition } from '@floating-ui/dom'
 import { createSuggestionRenderer } from './suggestion-renderer'
 
 // Every `new VueRenderer(...)` the renderer creates lands here so tests can
@@ -60,12 +61,38 @@ vi.mock('@tiptap/vue-3', () => {
   return { VueRenderer: FakeVueRenderer }
 })
 
+// `deferred` parks each computePosition resolver so a test can settle
+// overlapping runs out of order; off by default so other tests stay synchronous.
+const position = vi.hoisted(() => ({
+  deferred: false,
+  resolvers: [] as ((value: { x: number; y: number }) => void)[],
+}))
+
 vi.mock('@floating-ui/dom', () => ({
-  computePosition: vi.fn(async () => ({ x: 10, y: 20 })),
+  computePosition: vi.fn(() =>
+    position.deferred
+      ? new Promise<{ x: number; y: number }>((resolve) => {
+          position.resolvers.push(resolve)
+        })
+      : Promise.resolve({ x: 10, y: 20 }),
+  ),
   flip: vi.fn(() => ({})),
   offset: vi.fn(() => ({})),
   shift: vi.fn(() => ({})),
 }))
+
+// jsdom has no ResizeObserver, so the renderer's feature check would skip the
+// observer entirely without this.
+class FakeResizeObserver {
+  static instances: FakeResizeObserver[] = []
+  observe = vi.fn()
+  disconnect = vi.fn()
+  constructor(public callback: () => void) {
+    FakeResizeObserver.instances.push(this)
+  }
+}
+
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 const FakeComponent = {} as never
 
@@ -87,6 +114,11 @@ describe('createSuggestionRenderer', () => {
   beforeEach(() => {
     instances.length = 0
     document.body.innerHTML = ''
+    position.deferred = false
+    position.resolvers.length = 0
+    FakeResizeObserver.instances.length = 0
+    vi.mocked(computePosition).mockClear()
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
   })
 
   it('mounts the VueRenderer wrapper (renderer.el), not its null firstElementChild', () => {
@@ -152,5 +184,38 @@ describe('createSuggestionRenderer', () => {
     api.onStart(makeProps())
     expect(api.onKeyDown(keyDown('ArrowDown'))).toBe(true)
     expect(instances[0].onKeyDownSpy).toHaveBeenCalled()
+  })
+
+  it('ignores a computePosition run that settles after a newer one', async () => {
+    position.deferred = true
+    const api = createSuggestionRenderer(FakeComponent)
+    api.onStart(makeProps())
+    api.onUpdate(makeProps())
+    const wrapper = instances[0].el
+
+    expect(position.resolvers).toHaveLength(2)
+    // Newer run lands first, then the superseded one tries to overwrite it.
+    position.resolvers[1]({ x: 99, y: 99 })
+    await flush()
+    position.resolvers[0]({ x: 10, y: 20 })
+    await flush()
+
+    expect(wrapper?.style.left).toBe('99px')
+    expect(wrapper?.style.top).toBe('99px')
+  })
+
+  it('repositions when the popup resizes and disconnects on exit', () => {
+    const api = createSuggestionRenderer(FakeComponent)
+    api.onStart(makeProps())
+
+    const observer = FakeResizeObserver.instances[0]
+    expect(observer.observe).toHaveBeenCalledWith(instances[0].el)
+
+    const before = vi.mocked(computePosition).mock.calls.length
+    observer.callback()
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(before + 1)
+
+    api.onExit()
+    expect(observer.disconnect).toHaveBeenCalled()
   })
 })
