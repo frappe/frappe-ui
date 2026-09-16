@@ -85,10 +85,14 @@ component plus parts plus a kit. The prebuilt labeled field moves to `@framework
 8. **Content is the unnamed `v-model`** (P2). It has two channels: `update:modelValue` fires live,
    and `change` fires on blur as the commit point.
 
-9. **`CodeKit` is one configurable bundle.** It carries `basicSetup`'s members plus the
-   `highlight`, `keymap`, and `chrome` members, with `lineNumbers` defaulting to false. It exists
-   because `basicSetup` is a flat array from which no member can be removed, which is why Builder
-   hand-assembled 20 extensions. The kit is a value you pass or ignore, not a component default.
+9. **`CodeKit` is one configurable bundle with eight members.** Five are the ones real consumers
+   toggle: `lineNumbers` (default false), `foldGutter`, `autocompletion`, `search`, `placeholder`.
+   Three are ours: `chrome`, `highlight`, `keymap`. Everything else `basicSetup` carries stays a
+   fixed base inside the kit, not a member and not a name frappe-ui owns. The kit exists because
+   `basicSetup` is a flat array from which no member can be removed, which is why Builder
+   hand-assembled 20 extensions. A member is a name that freezes at the tag, so a member nobody
+   toggles is cost with no benefit. Adding a member later is additive, removing one is not. The
+   kit is a value you pass or ignore, not a component default.
 
 10. **`loadLanguage(key)` survives.** The ten `@codemirror/lang-*` packages move from hard
     dependencies to optional peer dependencies. Today every app that installs frappe-ui downloads
