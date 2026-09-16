@@ -2268,7 +2268,8 @@ prop warns, and only in dev; a production build renders an empty tree. Grep for
 `v-model:expanded` is an array of the **keys** of the open nodes. A key that is
 absent means collapsed, so a tree with no bound model renders its roots and
 nothing else. Drop any `expanded` field you set on node data — it is no longer
-read, and nothing warns.
+read. A dev build warns once when it finds one, and once more if you still pass
+the old boolean to `v-model:expanded`; production is silent either way.
 
 ```vue
 <!-- Before — the tree wrote `expanded` back onto your objects -->

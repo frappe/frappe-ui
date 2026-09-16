@@ -129,6 +129,11 @@ const siblingsOf = (parent: TreeNode | null) =>
 // prop one render later. `pending` holds what we last wrote so two writes in
 // the same tick both land, and is dropped on the next tick — if the caller
 // rejected the write, their value is authoritative again.
+//
+// One tick is the whole window on purpose: a caller that is slow (a store
+// action, a debounced setter) and a caller that refuses the write look
+// identical from here, and a component that quietly diverges from a bound
+// model is the worse of the two failures.
 const pending = ref<TreeKey[] | null>(null)
 
 const currentKeys = computed(() => {
@@ -207,6 +212,27 @@ defineExpose({
   /** Close every node. */
   collapseAll: () => writeKeys([]),
 })
+
+// The per-node `expanded` field went with the boolean model. `TreeNode` has an
+// index signature, so a beta caller keeping it gets no type error — and no
+// runtime effect either, leaving the node silently shut. Warn on the data.
+if (import.meta.env.DEV) {
+  const carriesExpanded = (nodes: TreeNode[]): boolean =>
+    nodes.some(
+      (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
+    )
+  watch(
+    roots,
+    (nodes) => {
+      if (carriesExpanded(nodes))
+        warnRemoved(
+          "Tree's per-node `expanded` field",
+          "`v-model:expanded` with the node's key",
+        )
+    },
+    { immediate: true },
+  )
+}
 
 // --- focus -----------------------------------------------------------------
 function focus(key: TreeKey) {

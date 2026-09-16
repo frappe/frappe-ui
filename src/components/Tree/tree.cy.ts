@@ -1,6 +1,7 @@
 import Tree from './Tree.vue'
 import { defineComponent, h, ref } from 'vue'
 import type { DropInfo, TreeNode } from './types'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
 // Fresh data per test. The tree never writes to these objects; a few tests
 // assert exactly that.
@@ -22,6 +23,12 @@ function makeNodes(): TreeNode[] {
 }
 
 describe('Tree', () => {
+  // `warned` in warnDeprecated.ts is module-level, so a warning tripped by one
+  // test would silence the next.
+  beforeEach(() => {
+    _resetWarnDeprecated()
+  })
+
   it('renders only the roots when no key is expanded', () => {
     cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
     cy.contains('Root').should('exist')
@@ -177,6 +184,18 @@ describe('Tree', () => {
     cy.get('@warn').should(
       'have.been.calledWithMatch',
       /boolean `v-model:expanded`/,
+    )
+  })
+
+  it('warns on the removed per-node expanded field', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const nodes = makeNodes()
+    nodes[0].expanded = true
+    cy.mount(Tree, { props: { nodes, nodeKey: 'id', expanded: ['root'] } })
+    cy.contains('Node A').should('exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /per-node `expanded` field/,
     )
   })
 
