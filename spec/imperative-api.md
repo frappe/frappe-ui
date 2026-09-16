@@ -11,8 +11,19 @@ reviewed component by component before the v1 freeze. The fourth never has.
 
 This document covers that fourth one. In code it's the `defineExpose` call.
 
-There are 31 of them across `src/`. Four have types. The rest were written one
-component at a time with no shared rule, and it shows.
+**How to read this.** §1 is the audit that produced the rules: its counts and
+call-site tables are **historical**, measured against `1.0.0-beta.25` and the
+app bench at sign-off, and they are evidence for the decisions rather than a
+description of the library today. §2 and §3 are the current contract. §4 lists
+the two members that do not meet it yet. The task list at the end records what
+has shipped, each item checked against the source.
+
+*Historical:* the audit found 31 `defineExpose` calls across `src/`, four of
+them typed. The rest were written one component at a time with no shared rule,
+and it showed. Today `src/` has 39 calls: 32 declare their type at the call
+site, `Select` declares it on the object it publishes (§4), and six declare
+none — `Editor` (§4), `Popover` (which does export `PopoverExposed`),
+`PageHeaderTarget`, and the three editor suggestion lists.
 
 ## Not covered here
 
@@ -32,7 +43,12 @@ This document applies the same thinking to the rest of the library.
 
 ---
 
-## 1. What's wrong today
+## 1. What was wrong (historical audit)
+
+Everything in this section describes the library as it stood at
+`1.0.0-beta.25`, with call-site counts taken from the app bench at sign-off. It
+is kept as the evidence behind §2, not as a current report. Where a finding has
+since been fixed, the fix is noted inline and in the task list.
 
 ### 1.1 `open` means two different things
 
@@ -122,10 +138,16 @@ even though both the library (`IframeInsertDialog.vue:104`) and userland
 is the shape to copy: `MultiSelect.vue:242-250` resolves the element through a
 template ref specifically so the internal id stays internal.
 
-Things you'd expect to be able to focus, but can't: `TextInput`, `Textarea`,
+Things you'd expect to be able to focus, but couldn't: `TextInput`, `Textarea`,
 `Password`, `FileUploader`, `Checkbox`, `Switch`, `Slider`, `Rating`, all three
 date pickers, `Tree`, `TabButtons`. The first two are the most-used inputs in
 the library.
+
+**Where that list stands now.** Every component on it has shipped
+`focus(options?)` except two: `FileUploader`, which hands back nothing at all by
+decision (§2.7), and `Tree`, which exposes `expand` / `collapse` / `toggle` /
+`expandAll` / `collapseAll` and no `focus` (`Tree/types.ts:141-152`). `Tree` is
+the one open item in the task list's focus sweep.
 
 ### 1.4 Opening and closing is inconsistent
 
@@ -144,11 +166,15 @@ The first three write `defineExpose<SomeType>(...)`. Dialog writes
 first publishes exactly the declared type. The second publishes whatever the
 object happens to contain and just checks it against the type — so adding a
 stray member to Dialog's object would silently grow the public surface with no
-error. For an API we're about to freeze, that matters.
+error. For an API we're about to freeze, that matters. **Fixed:** `Dialog` no
+longer calls `defineExpose` at all (§2.8), and no `defineExpose` in `src/` uses
+`satisfies` today.
 
-`Select.vue:277-278` is a third shape — `const exposed: SelectionExposed = {...}`
-then `defineExpose(exposed)`. It behaves correctly, because the annotated const
-is what gets published, but it is a third way to write one thing.
+`Select.vue` is a third shape — `const exposed: SelectionExposed = {...}` then
+`defineExpose(exposed)`. It behaves correctly, because the annotated constant is
+what gets published, but it is a third way to write one thing. It still ships
+that way (`Select.vue:306-307`); §4 explains why that is a style difference and
+not a defect.
 
 **One type that promises something the code never delivers:**
 
@@ -157,7 +183,7 @@ is what gets published, but it is a third way to write one thing.
   **`Dropdown.vue` never calls `defineExpose`**. `close()` exists
   (`Dropdown.vue:86-88`) but only as a slot prop. So writing
   `ref<DropdownExposed>()` and calling `.close()` compiles cleanly and crashes
-  at runtime.
+  at runtime. **Fixed:** `DropdownExposed` no longer exists anywhere in `src/`.
 
 The second one is already fixed: `SelectExposed {}` was an exported empty type,
 and [`selection.md`](./selection.md) has since replaced it with the shared
@@ -272,7 +298,8 @@ exceptions** — a computed with a noun name, declared in the component's type.
 Today those are `Editor.isEmpty` and the chart family's `chart`
 ([ADR-0016](./adr/0016-charts-expose-echarts-instance.md)). A computed is safe
 here precisely because assigning to an unwrapped computed fails loudly instead of
-silently corrupting state.
+silently corrupting state. The charts meet that shape; `Editor.isEmpty` does not
+— it ships as a writable `ref`, which is the open item in §4.
 
 ### 2.3 Policy: handing back a DOM element
 
@@ -420,34 +447,53 @@ Applied:
 
 ### 2.7 What each component ends up with
 
-| Component | Today | After | Breaking |
-| --- | --- | --- | --- |
-| `Select` | `{ clear, focus }` | unchanged | No — already shipped |
-| `MultiSelect` | `{ clear, focus }` | unchanged | No — already shipped |
-| `Combobox` | `{ clear, focus }` | unchanged | No — `reset` → `clear` already shipped |
-| `TextInput` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** |
-| `Textarea` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** |
-| `Password` | nothing | `{ focus, inputElement }` | No |
-| `Duration` | `{ focus }` | unchanged | No |
-| `FileUploader` | `{ inputRef }` | **nothing** — see below | **Yes — signed off** |
-| `Dialog` | `{ close }` | **nothing** — see §2.8 | **Yes — signed off** |
-| `Popover` | `{ open, close }` | unchanged — the model to copy | No |
-| `HoverCard` | `{ open, close }` | same, plus a type | No |
-| `Dropdown` | nothing (but promises `close`) | nothing; `DropdownExposed` deleted | Yes — loud, removes a type nobody could use |
-| `DatePicker` | `{ open }` | `{ open, close, focus }` | No |
-| `DateRangePicker` | `{ open }` | `{ open, close, focus }` | No |
-| `DateTimePicker` | `{ open }` | `{ open, close, focus }` | No |
-| `TimePicker` | `{ focus }` | `{ open, close, focus }` | No |
-| `ScrollArea` | `{ viewportElement }` | same, plus a type | No |
-| `SettingsBody` | `{ viewportElement }` | same, sharing ScrollArea's type | No |
-| `Editor` | `{ editor, isEmpty }` | same, plus a type | No |
-| The seven echarts-backed charts | `{ chart }` | unchanged — [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) | No |
-| `Autocomplete`, `TextEditor` | various | deleted with the component | Policy |
-| `CalendarPanel`, `PickerShell`, editor lists | various | internal, shared types | No |
-| everything else you can type in or tab to | nothing | `{ focus }` | No |
+"Before" is the beta.25 audit. "Shipped" is what `src/` does today, each row
+checked against the source.
 
-The last row is §1.3's list: `Checkbox`, `Switch`, `Slider`, `Rating`, `Tree`,
-`TabButtons`. Each one gets `focus()` inside its own family's sweep.
+| Component | Before | Contract | Breaking | Shipped |
+| --- | --- | --- | --- | --- |
+| `Select` | `{ clear, focus }` | unchanged | No — already shipped | Yes — `Select.vue:306-307`, see §4 on the form |
+| `MultiSelect` | `{ clear, focus }` | unchanged | No — already shipped | Yes — `MultiSelect.vue:348` |
+| `Combobox` | `{ clear, focus }` | unchanged | No — `reset` → `clear` already shipped | Yes — `Combobox.vue:456` |
+| `TextInput` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** | Yes — `TextInput.vue:186` |
+| `Textarea` | `{ el }` | `{ focus, inputElement }` | **Yes — rename, signed off** | Yes — `Textarea.vue:197` |
+| `Password` | nothing | `{ focus, inputElement }` | No | Yes — `Password.vue:88` |
+| `Duration` | `{ focus }` | unchanged | No | Yes — `Duration.vue:129` |
+| `FileUploader` | `{ inputRef }` | **nothing** — see below | **Yes — signed off** | Yes — no `defineExpose` left |
+| `Dialog` | `{ close }` | **nothing** — see §2.8 | **Yes — signed off** | Yes — no `defineExpose` left |
+| `Popover` | `{ open, close }` | `{ open, close }`, plus the `contentEl` getter it now ships | No | Partly — `contentEl` is open against §2.3, see §4 |
+| `HoverCard` | `{ open, close }` | same, plus a type | No | Yes — `HoverCard.vue:84`, `HoverCardExposed` |
+| `Dropdown` | nothing (but promises `close`) | nothing; `DropdownExposed` deleted | Yes — loud, removes a type nobody could use | Yes — no such type in `src/` |
+| `DatePicker` | `{ open }` | `{ open, close, focus }` | No | Yes — `DatePicker.vue:154`, `PickerExposed` |
+| `DateRangePicker` | `{ open }` | `{ open, close, focus }` | No | Yes — `DateRangePicker.vue:162` |
+| `DateTimePicker` | `{ open }` | `{ open, close, focus }` | No | Yes — `DateTimePicker.vue:167` |
+| `TimePicker` | `{ focus }` | `{ open, close, focus }` | No | Yes — `TimePicker.vue:562` |
+| `ScrollArea` | `{ viewportElement }` | same, plus a type | No | Yes — `ScrollArea.vue:45` |
+| `SettingsBody` | `{ viewportElement }` | same, sharing ScrollArea's type | No | Partly — typed at `SettingsBody.vue:26`, but `SettingsBodyExposed` is a second identical declaration, not the shared one |
+| `Editor` | `{ editor, isEmpty }` | same, plus a type | No | No — untyped, and `isEmpty` is writable, see §4 |
+| The seven echarts-backed charts | `{ chart }` | unchanged — [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) | No | Yes — all seven `defineExpose<ChartExposedRefs>({ chart: computed(...) })` |
+| `Autocomplete`, `TextEditor` | various | deleted with the component | Policy | Partly — `Autocomplete` is deleted; `TextEditor` was parked in `frappe-ui/experimental` instead (#974) and still hands back `{ editor, rootRef }` |
+| `CalendarPanel`, `PickerShell`, editor lists | various | internal, shared types | No | Partly — typed and out of every entry point, but none carries the `@internal` marker §2.6 requires |
+| everything else you can type in or tab to | nothing | `{ focus }` | No | All but `Tree` — see below |
+
+The last row is §1.3's list. `Checkbox` (`Checkbox.vue:108`), `Switch`
+(`Switch.vue:103`), `Slider` (`Slider.vue:39`) and `Rating` (`Rating.vue:408`)
+each ship `defineExpose<InputExposed>`, and `TabButtons` ships
+`defineExpose<TabButtonsExposed>` (`TabButtons.vue:320`). `Tree` is the one left:
+it hands back the five expansion verbs and no `focus`.
+
+**`TabButtons` — shipped.** `TabButtonsExposed extends InputExposed`
+(`TabButtons/types.ts:59`) is re-exported from `TabButtons/index.ts:6` and, through
+`src/index.ts`, from the package root, so the surface is exactly
+`{ focus(options?: FocusOptions): void }`. `focus()` moves focus to the selected
+enabled option, or to the first enabled one when nothing is selected — the group
+is a single tabstop, so that is where a `Tab` press lands. It targets the
+rendered `[data-slot="tab-button"]`, not the track or the `Pill` inside it.
+Disabled options are never focused: a disabled `route` or `href` option renders
+as a disabled `<button>` rather than a link, and the lookup skips
+`[data-disabled]` either way. An empty group, or one whose every option is
+disabled, is a no-op. `FocusOptions` is forwarded untouched, `preventScroll`
+included.
 
 **`FileUploader` hands back nothing.** `inputRef` is removed with nothing in its
 place. The spec originally proposed `{ open, clear }` here; both fail §2.0.
@@ -521,45 +567,113 @@ verb, or a third element role, still needs an ADR.
 edits happen inside the sweep that owns each component, as
 [at-bar](./at-bar.md) item 8.
 
+## 4. Open against this contract
+
+Two shipped members do not meet the rules above. Both are recorded here and
+neither is settled by this document: the runtime stays as it is until a decision
+lands.
+
+**`Editor` — pending.** §2.2 allows `isEmpty` as one of two documented state
+exceptions, but only as a readonly computed declared in a named `*Exposed` type.
+`Editor.vue:98` ships `defineExpose({ editor, isEmpty })`: an inferred shape,
+with `isEmpty` a writable `ref` (`Editor.vue:52`), and `frappe-ui/editor` exports
+no `EditorExposed` type. Which contract gives way — this policy or the shipped
+members — is undecided. [`editor.md`](./editor.md) records the same conflict
+against the same members; the two are meant to agree. Until it is decided, those
+members are the shipped contract and stay as they are. Nothing here renames,
+removes, or re-types them, and no exception is written to make the gap go away.
+
+**`Popover.contentEl` — pending.** §2.3 allows one element per component, named
+`<role>Element` from a fixed list (`inputElement`, `viewportElement`), and rules
+out wrapper and content elements. `Popover.vue:141-147` publishes `contentEl`, a
+property getter for the portaled content element, declared in the exported
+`PopoverExposed` (`Popover/types.ts:85`). It is read-only for the caller, and it
+is documented and tested, but it is neither on the role list nor a role that list
+admits as written. Either §2.3 grows a content-element role by ADR or the member
+goes through a removal. [`popover.md`](./popover.md) records it as unresolved on
+the same terms. Until the decision lands, neither this document nor `Popover.vue`
+changes, and §2.7's `Popover` row carries the member as shipped.
+
+**`Select`'s expose shape is not a defect.** `Select.vue:306-307` writes
+`const exposed: SelectionExposed = { clear, focus }` and then
+`defineExpose(exposed)`. §2.5 prefers `defineExpose<SelectionExposed>(...)`, and
+that preference holds for new code, but the annotated constant is what gets
+published, so the surface is exactly `SelectionExposed`. The `satisfies` hole in
+§1.5 does not apply here. This is a difference in syntax, not a behavior bug, and
+it needs no refactor.
+
 ## Task list
 
 Each item is done by the sweep that owns the component, as
-[at-bar](./at-bar.md) item 8 — not as one pass.
+[at-bar](./at-bar.md) item 8 — not as one pass. Checked items were verified in
+`src/` on this branch; the rest name what is left.
 
 **Types**
-- [ ] Add a `<Component>Exposed` type wherever something is handed back
-- [ ] Delete `DialogExposed` and its `satisfies` call (`Dialog.vue:324`)
-- [ ] Delete `DropdownExposed` (`Dropdown/types.ts:80-83`)
-- [ ] Move `Select.vue:277-278` to `defineExpose<SelectionExposed>(...)`
+- [ ] Add a `<Component>Exposed` type wherever something is handed back — 32 of
+      the 39 `defineExpose` calls in `src/` declare one at the call site. Left:
+      `Editor` (§4), `Popover` (which does export `PopoverExposed`),
+      `PageHeaderTarget` (`{ el }`, internal by intent on an exported
+      component), and the three editor suggestion lists
+- [x] Delete `DialogExposed` and its `satisfies` call — `Dialog.vue` has no
+      `defineExpose`, and `DialogExposed` is gone from `src/`
+- [x] Delete `DropdownExposed` — no occurrence anywhere in `src/`
+- [ ] Move `Select.vue:306-307` to `defineExpose<SelectionExposed>(...)` — open
+      as a style preference only; the shipped form is type-safe (§4)
 - [ ] Rename `SuggestionListExpose` → `SuggestionListExposed`; stop exporting it
-- [ ] Add the shared input type, the shared scroll-viewport type, and the shared
-      picker type
+      — still `Expose`, still re-exported at
+      `extensions/suggestion/index.ts:6`
+- [x] Add the shared input type and the shared picker type — `TextInputExposed`
+      (`TextInput/types.ts:44-49`) covers `TextInput`, `Textarea` and
+      `Password`; `PickerExposed` (`shared/picker/types.ts:96-102`) covers the
+      three date pickers and `TimePicker`
+- [ ] Add the shared scroll-viewport type — `ScrollAreaExposed`
+      (`ScrollArea/types.ts:15`) and `SettingsBodyExposed`
+      (`SettingsDialog/types.ts:28`) are two identical declarations, not one
 
 **Verbs**
-- [ ] Add `focus(options?)` to every input and focusable control in §1.3
-- [ ] Add `open()` / `close()` to the three date pickers and `TimePicker`
-- [ ] Replace every look-up-by-ID focus with a template ref
+- [ ] Add `focus(options?)` to every input and focusable control in §1.3 — every
+      one of them ships it except `Tree`, which hands back the five expansion
+      verbs and no `focus` (`FileUploader` hands back nothing by decision)
+- [x] Add `open()` / `close()` to the three date pickers and `TimePicker` — all
+      four `defineExpose<PickerExposed>` (`DatePicker.vue:154`,
+      `DateRangePicker.vue:162`, `DateTimePicker.vue:167`, `TimePicker.vue:562`)
+- [x] Replace every look-up-by-ID focus with a template ref — no
+      `getElementById` call remains in `src/`; the one match is a comment in
+      `MultiSelect.vue:262`
 
 **Elements**
-- [ ] Rename `el` → `inputElement` on `TextInput` and `Textarea`; make it a
-      computed, type it precisely
-- [ ] Add `inputElement` to `Password`
-- [ ] Type `ScrollArea` / `SettingsBody`'s `viewportElement`
+- [x] Rename `el` → `inputElement` on `TextInput` and `Textarea`; make it a
+      computed, type it precisely — `TextInput.vue:186`, `Textarea.vue:197`,
+      both through the getter form §2.3 allows, typed `HTMLInputElement | null`
+      and `HTMLTextAreaElement | null`
+- [x] Add `inputElement` to `Password` — `Password.vue:88`
+- [x] Type `ScrollArea` / `SettingsBody`'s `viewportElement` — `ScrollArea.vue:45`,
+      `SettingsBody.vue:26`; sharing one type is still open, above
 
 **Removals**
-- [ ] Remove `FileUploader.inputRef`, with nothing in its place
-- [ ] Remove `defineExpose` from `Dialog`
+- [x] Remove `FileUploader.inputRef`, with nothing in its place — no
+      `defineExpose` in `FileUploader.vue`
+- [x] Remove `defineExpose` from `Dialog` — none in `Dialog.vue`
 
 **Internal**
-- [ ] Mark `CalendarPanel`, `PickerShell`, and the six editor lists `@internal`
-- [ ] Add a shared `CalendarPanelExposed`; delete the three hand-written copies
+- [ ] Mark `CalendarPanel`, `PickerShell`, and the editor lists `@internal` —
+      their types are declared and reach no entry point, but no `@internal`
+      marker exists on the type or the call (`CalendarPanel.vue:388`,
+      `PickerShell.vue:217`, and the three suggestion lists — six at the time of
+      the audit, three today)
+- [x] Add a shared `CalendarPanelExposed`; delete the three hand-written copies
+      — `DatePicker/calendarTypes.ts:141-143`, imported by `DateCalendar.vue:79`
+      and `DateRangeCalendar.vue:144-145`; no hand-written copy is left
 
 **Migration guide** — silent breaks needing a before/after under
 [ADR-0011](./adr/0011-at-bar-checklist.md)'s test:
 - [ ] `el._value` → the model value (crm 1, helpdesk 2, all vendored
-      `Autocomplete` forks)
-- [ ] `Combobox.reset()` → `clear()` (builder 1)
-- [ ] `el.select()` / `el.blur()` → `inputElement.select()` / `.blur()` (crm 5)
+      `Autocomplete` forks) — no entry in `migration.md`
+- [x] `Combobox.reset()` → `clear()` (builder 1) — `migration.md`, Combobox table
+- [x] `el.select()` / `el.blur()` → `inputElement.select()` / `.blur()` (crm 5) —
+      covered by the `.el` → `.inputElement` row and the "`TextInput`,
+      `Textarea`, `Password` — ref surface" section in `migration.md`
 
 Loud breaks needing only a changelog line: `DialogExposed`, `DropdownExposed`,
-`FileUploader.inputRef`.
+`FileUploader.inputRef`. All three have one in
+[`changelog.md`](../docs/content/docs/changelog.md).

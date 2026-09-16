@@ -368,6 +368,61 @@ describe('Dropdown', () => {
     cy.get('[data-slot=empty]').should('contain.text', 'Nothing here')
   })
 
+  it('lets a custom suffix replace the built-in switch and chevron', () => {
+    // The suffix region holds one thing. A suffix that renders something owns
+    // it; a suffix that renders nothing hands it back to the shell.
+    const suffixOptions = [
+      { label: 'Notifications', switch: true, switchValue: true },
+      { label: 'Share', submenu: [{ label: 'Copy link' }] },
+    ]
+    const suffix = () => h('span', { 'data-cy': 'suffix' }, 'S')
+
+    // A nonempty template #item-suffix replaces both built-in controls.
+    cy.mount(Dropdown, {
+      props: { options: suffixOptions },
+      slots: { 'item-suffix': suffix },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot="item-suffix"] [data-cy="suffix"]').should(
+      'have.length',
+      2,
+    )
+    cy.get('[role=switch]').should('not.exist')
+    cy.get('.lucide-chevron-right').should('not.exist')
+
+    // A nonempty item.slots.suffix does the same with no template slot bound.
+    cy.mount(Dropdown, {
+      props: {
+        options: suffixOptions.map((option) => ({
+          ...option,
+          slots: { suffix },
+        })),
+      },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot="item-suffix"] [data-cy="suffix"]').should(
+      'have.length',
+      2,
+    )
+    cy.get('[role=switch]').should('not.exist')
+    cy.get('.lucide-chevron-right').should('not.exist')
+
+    // Both suffixes render nothing, so the switch and the chevron come back.
+    cy.mount(Dropdown, {
+      props: {
+        options: suffixOptions.map((option) => ({
+          ...option,
+          slots: { suffix: () => null },
+        })),
+      },
+      slots: { 'item-suffix': () => null },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-cy="suffix"]').should('not.exist')
+    cy.get('[role=switch]').should('exist')
+    cy.get('[data-slot="item-suffix"] .lucide-chevron-right').should('exist')
+  })
+
   it('does not render the removed { group, items } shape', () => {
     cy.mount(Dropdown, {
       props: {

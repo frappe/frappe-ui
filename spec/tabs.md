@@ -136,12 +136,17 @@ Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
   borders, and visibility belong to the call site. The v0
   `[&_[role='tablist']]` selectors and the hidden-tablist hack are no longer
   needed
-- no component in the family ships layout defaults. v0 forced `flex flex-1
-  overflow-hidden flex-col` on the root, `overflow-x-auto` on the list, and
-  `flex flex-col overflow-auto` on every panel. A `Tabs` that force-grows to
-  fill its parent is wrong everywhere the tabs are not the whole screen, and
-  apps fought those defaults more often than they used them. Scrolling is the
-  call site's decision; the migration guide carries the recipe for both modes
+- composed mode ships no layout defaults. The root renders no layout classes
+  at all, and a `TabPanel` is a bare element. `TabList` carries only what its
+  own track needs — the display mode, and `self-start` on the pill tracks so
+  they hug their content. v0 instead forced `flex flex-1 overflow-hidden
+  flex-col` on the root, `overflow-x-auto` on the list, and `flex flex-col
+  overflow-auto` on every panel. A `Tabs` that force-grows to fill its parent
+  is wrong everywhere the tabs are not the whole screen, and apps fought those
+  defaults more often than they used them. Scrolling is the call site's
+  decision; the migration guide carries the recipe for both modes.
+  [Shorthand mode](#shorthand-mode) is the one exception, and only for the
+  parts it generates itself
 - every variant supports both orientations. `side` applies only when
   `variant = 'browser-tab'` and the root is `vertical`, matching v0
   `TabButtons`
@@ -234,10 +239,16 @@ Shorthand slots:
   forwarded into every generated trigger
 - `#tab-label="{ tab, active, disabled }"` — replaces the label region of
   every generated trigger
-- `#tab-panel="{ tab }"` — the panel body for the selected tab
+- `#tab-panel="{ tab }"` — the panel body for the selected tab. It is the one
+  slot the v1 family kept from v0 under its old name. Without it, shorthand
+  mode renders triggers only, which is what route mode wants
 
 Rules:
 
+- shorthand mode is the only place the family sets layout: with `tabs` bound,
+  the root gets `flex flex-col`, or `flex-row` when `vertical` is set, so the
+  generated list and panel stack. The component wrote both elements, so it
+  owns how they sit together. Composed mode still gets nothing
 - `condition()` is evaluated before rendering; items that return false are
   omitted. The model fallback rule above handles the selected tab
   disappearing
@@ -262,18 +273,39 @@ A trigger with `route` renders as a `RouterLink`.
   URL must not select one, and one on its own does not turn route mode on
 - lists may mix route and non-route triggers. A non-route trigger has nothing
   to navigate, so clicking it selects it and emits `update:modelValue`, even
-  while a route matches elsewhere. Selection returns to the route on the next
-  navigation, or when that trigger turns disabled or unmounts. Those exits are
-  final: re-enabling the trigger, or a `condition` flipping back, does not let
-  the tab reclaim selection without another click
+  while a route matches elsewhere. That local selection lasts until the route
+  moves
+- "moves" means a navigation that landed, not a change in which tab matches.
+  `/inbox` → `/inbox?filter=unread`, `/inbox#recent`, and `/inbox/42` all keep
+  the same tab matched, and all three end the local selection. A navigation
+  that did not land keeps it: aborted by a guard, cancelled by a newer
+  navigation, or a duplicate of the URL already showing. A redirected
+  navigation ends it, because the redirect target lands
+- clicking a routed trigger ends the local selection at the click, before
+  navigation completes. It therefore works even when the click repeats the
+  current URL and no navigation lands
+- the other two exits are the clicked trigger turning disabled, and it
+  unmounting. All three exits are final: re-enabling the trigger, or a
+  `condition` flipping back, does not let the tab reclaim selection without
+  another click
+- `Tabs` works with no router installed. The reset listener is registered only
+  when a router is present, and is removed when the component unmounts
 - when no route matches, selection falls back to the first selectable
   non-route trigger. An all-route list starts with nothing selected —
   highlighting a trigger would claim a route the app is not on
 - a `route` added after the trigger mounts does nothing — `useLink` runs at
   setup only. DEV warns; remount with a `:key` to change it
 - panels are usually omitted in route mode; the app places a `<router-view>`
-- if the root also binds `v-model`, the model wins and `route` is only a
-  navigation side effect
+- a bound `v-model` turns route mode off entirely: navigation neither changes
+  the selection nor emits. `route` is then only the side effect of clicking
+  the trigger, which emits its value like any other trigger
+
+The reset now responds to navigation only, which narrows one case. A change in
+which tab matches, with no navigation behind it — a trigger's `route` prop
+changing, or a routed trigger mounting that already matches the current URL —
+no longer discards the local click. It used to, because the reset watched the
+matched value; that is the same watch that missed query, hash, and child-route
+navigation.
 
 This replaces the hand-rolled route sync in press (`TabsWithRouter`), crm and
 helpdesk (hash + localStorage managers), and gameplan (route-name maps). Hash
@@ -401,8 +433,9 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 
 - the index-based `modelValue` — the model is the trigger `value`
 - the `as` prop — composition covers container rendering
-- the `#tab-item` and `#tab-panel` slots — `TabTrigger` slots and `TabPanel`
-  replace them
+- the `#tab-item` slot — `TabTrigger`'s own slots replace it. `#tab-panel`
+  stays, on its v0 name, as the shorthand-mode panel body; composed mode uses
+  `TabPanel` instead
 - `Tab.route` as a string — `route` is a `RouteLocationRaw` on `TabTrigger`
   and `TabItem`
 - `Tab.label` as the implied value — `value` is required
@@ -410,6 +443,19 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
   `#suffix` slot covers trailing content
 
 ## Changelog
+
+### 2026-09-17 (route reset)
+
+- **The mixed-list reset follows navigation, not the matched tab.** Route
+  mode dropped the local click when the value the route selected changed, so
+  `/inbox` → `/inbox?filter=unread`, `/inbox#recent`, and `/inbox/42` left it
+  standing while the URL moved under it. The root now listens to the router's
+  `afterEach` and clears the click on any navigation that landed, ignoring the
+  ones that failed. It injects the router rather than calling `useRouter`,
+  which warns in the far more common case of no router at all, and it drops
+  the listener on unmount. The narrowing is in
+  [Route mode](#route-mode): a matched-tab change with no navigation behind it
+  now keeps the click.
 
 ### 2026-08-12 (shadow clip)
 

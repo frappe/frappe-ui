@@ -11,6 +11,22 @@ Current API contracts and durable design decisions for `frappe-ui`.
 
 If these disagree, update the lower-authority document or mark it historical.
 
+### A later decision beats older text
+
+A decision accepted after a spec was written supersedes what the spec says, from
+the moment it is accepted. It does not live on in the plan, issue or review
+thread that carried it: promote it into the spec, and rewrite the sentence it
+contradicts rather than adding a second one beside it. Text that is kept for the
+record is labeled historical, so a reader can tell a contract from a description
+of how the contract used to read.
+
+### Implementation is evidence, not authority
+
+Read the source before writing a contract — a spec that disagrees with shipped
+behavior is worth nothing. But the code is not the spec. When the two differ,
+either the code is a bug or the spec is stale, and somebody has to decide which.
+Copying the current behavior into the spec is how a bug becomes the contract.
+
 ## Foundations
 
 - [`foundations.md`](./foundations.md) — typography, focus, radius, color themes; Figma source-of-truth rules.
@@ -26,6 +42,8 @@ If these disagree, update the lower-authority document or mark it historical.
 - [`hover-card.md`](./hover-card.md)
 - [`selection.md`](./selection.md) — `Select`, `Combobox`, `MultiSelect`
 - [`dropdown.md`](./dropdown.md) — the action menu
+- [`tabs.md`](./tabs.md) — the `Tabs` family (`Tabs`, `TabList`, `TabTrigger`,
+  `TabPanel`), and its boundary with `TabButtons`
 - [`item-list-row.md`](./item-list-row.md) — the row shell both families use
 - [`shortcuts.md`](./shortcuts.md) — `useKeyboardShortcut`,
   `KeyboardShortcutsDialog`, `KeyboardShortcut`: the combo grammar, precedence,

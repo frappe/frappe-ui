@@ -5,7 +5,7 @@ Status: accepted direction for `frappe-ui` v1.
 This document defines the exact public API for `HoverCard`. It is part of the
 overlay/floating stabilization workstream listed in
 [`v1-release/plan.md`](../v1-release/plan.md) and is the companion split-out of
-the deprecated `Popover` `trigger="hover"` mode (issue #773, P8).
+the removed `Popover` `trigger="hover"` mode (issue #773, P8).
 
 `HoverCard` is built directly on reka-ui's `HoverCard*` primitives and shares
 the floating-panel shell + motion machinery with `Popover` via the shared
@@ -33,17 +33,20 @@ documents for HoverCard.
 ## Relationship to `Popover` `trigger="hover"`
 
 `Popover` historically supported `trigger="hover"` with hand-rolled
-`hoverDelay` / `leaveDelay` timers (milliseconds). In v1 that hand-rolled timer code is **deleted** and the
-hover affordance moves to this component.
+`hoverDelay` / `leaveDelay` timers, measured in **seconds**. In v1 that timer
+code is **deleted** and the hover affordance moves to this component.
 
-- `Popover` keeps `trigger="hover"` working through `v1.x` for back-compat, but
-  emits a **one-time** dev-mode `warnDeprecated` pointing at `HoverCard`.
-- The deprecated path maps `hoverDelay` → `openDelay` and `leaveDelay` →
-  `closeDelay` (both use milliseconds — see the mapping table below). No behavior
-  change for existing callers in `v1.x`.
-- New code uses `<HoverCard>` directly.
+- `trigger="hover"` was removed from `Popover` before `1.0.0` under
+  [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md). There is no alias
+  and no warning: Vue drops an unknown prop silently, so a `Popover` still
+  passing `trigger="hover"` renders an ordinary click popover.
+- `Popover`'s `trigger` prop now selects `click` or `manual`.
+- `HoverCard`'s `hoverDelay` / `leaveDelay` map to reka's `openDelay` /
+  `closeDelay` and are in **milliseconds**. A v0 `0.5` becomes `500`.
 
-See the `Popover` spec ("Deprecations") for the full Popover back-compat table.
+See [`popover.md`](./popover.md) and
+[`migration.md`](../docs/content/docs/migration.md#popover-hovercard-tooltip)
+for the full removal table.
 
 ## Decisions at a glance
 
@@ -54,23 +57,26 @@ See the `Popover` spec ("Deprecations") for the full Popover back-compat table.
 | Delay units | **Milliseconds** (`hoverDelay` / `leaveDelay`), consistent with `Tooltip` and reka |
 | Visibility model | `v-model:open` (canonical) |
 | Positioning | `side` / `align` / `offset` / `collisionPadding` / `portalTo`, same vocabulary and defaults as `Popover` |
-| Shell | Shared `PopoverPanel` — owns `data-slot="content"` + rounded/elevated/ring visuals only, no behavior |
+| Shell | Shared `PopoverPanel` — owns `data-slot="content-body"` + rounded/elevated/ring visuals only, no behavior |
 | Motion | Shared `PopoverPanel` motion. One rhythm across the library — an `80ms` fade on open, nothing on close |
 | Styling | No class-injection props. Stable `data-slot` / `data-state` / `data-motion` hooks only |
-| Trigger slot | `#trigger` via reka `HoverCardTrigger as-child` — aria + hover/focus wiring is automatic |
+| Trigger slot | `#trigger` via reka `HoverCardTrigger as-child` — hover/focus wiring is automatic; there is no aria association |
 
 ## Exact public API for v1
 
 ### Types
 
-```ts
-type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
-type PopoverAlign = 'start' | 'center' | 'end'
+The types live in `src/components/HoverCard/types.ts`, and `PopoverSide` /
+`PopoverAlign` are imported from `Popover`'s types rather than redeclared. The
+shape below is a summary.
 
+```ts
 type HoverCardSlotProps = {
-  /** Imperatively open the card. */
-  open: () => void
-  /** Imperatively close the card. */
+  /** Whether the card is currently open. */
+  open: boolean
+  /** Sets the card open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the card. */
   close: () => void
 }
 
@@ -80,10 +86,10 @@ interface HoverCardProps {
   align?: PopoverAlign
   offset?: number
   collisionPadding?: number
-  portalTo?: string | HTMLElement
-  /** Seconds from pointer-enter on the trigger until the card opens. */
+  portalTo?: PortalTarget
+  /** Milliseconds from pointer-enter on the trigger until the card opens. */
   hoverDelay?: number
-  /** Seconds from pointer-leave (trigger or content) until the card closes. */
+  /** Milliseconds from pointer-leave (trigger or content) until the card closes. */
   leaveDelay?: number
   /** Render a reka HoverCardArrow, styled to match the panel surface. */
   arrow?: boolean
@@ -97,10 +103,11 @@ Defaults (aligned with `Popover` for positioning, `Tooltip` for delays):
 - `align = 'start'`
 - `offset = 4`
 - `collisionPadding = 10`
-- `portalTo = 'body'` — the fallback when neither the prop nor an embedding
-  host names a target. See [`portal-target.md`](./portal-target.md).
+- `portalTo` unset — the fallback when neither the prop nor an embedding
+  host names a target is `body`. See [`portal-target.md`](./portal-target.md).
 - `hoverDelay = 300`
 - `leaveDelay = 300`
+- `arrow = false`
 
 Notes:
 
@@ -129,7 +136,7 @@ keyboard shortcuts on a hover card's open/close, so the surface stays minimal.
 
 | Slot | Scope | Purpose |
 |---|---|---|
-| `#trigger` | `{ open, setOpen, close }` | Rendered through reka `HoverCardTrigger as-child`. Hover/focus + `aria-describedby` wiring is automatic. The slot must render a single element root (as-child contract). |
+| `#trigger` | `{ open, setOpen, close }` | Rendered through reka `HoverCardTrigger as-child`. Hover and focus wiring is automatic. The slot must render a single element root (as-child contract). |
 | `#default` | `{ open, setOpen, close }` | Card content, rendered inside the shared `PopoverPanel` shell. |
 
 Slot rules:
@@ -144,22 +151,29 @@ Slot rules:
 ### Exposed
 
 ```ts
-defineExpose({
-  open: () => void,
-  close: () => void,
-})
+interface HoverCardExposed {
+  open: () => void
+  close: () => void
+}
 ```
 
-Mirrors `Popover`'s exposed surface.
+`HoverCard` exposes only these two. `Popover` also publishes `contentEl`; a
+hover card has no caller needing the element, so it is not mirrored here.
 
 ## Accessibility and semantics
 
-- Trigger and content use reka's HoverCard a11y: the content is associated with
-  the trigger via `aria-describedby` (reka wires this on the trigger when the
-  card is open). Do not hand-roll aria — let the primitive own it.
+- **There is no automatic `aria-describedby`.** reka's `HoverCardTrigger`
+  (2.9.9, `node_modules/reka-ui/src/HoverCard/HoverCardTrigger.vue`) adds
+  `data-state` and the pointer/focus handlers and nothing else, and reka's own
+  documentation says the card "is intended for sighted users only, the content
+  will be inaccessible to keyboard users". Nothing links the trigger to the
+  content for a screen reader. Do not describe this component as accessible by
+  association.
 - HoverCard is **sighted-pointer + focus** only. It is not keyboard-openable and
   is invisible to touch. Treat its content as progressive enhancement; never put
   primary information or the only copy of an action inside it.
+- If the same information must reach every user, put it somewhere reachable and
+  let the card be the shortcut.
 - The trigger remains a normal interactive element (link/button) for its own
   click semantics; the hover card layers a preview on top without intercepting
   that interaction.
@@ -197,8 +211,9 @@ No class-injection props (`popoverClass` and friends do not exist on this
 component). Stable hooks only:
 
 - `data-slot="trigger"` on the trigger element
-- `data-slot="content"` on the positioned content (from `PopoverPanel`)
-- `data-slot="content-body"` on the inner shell
+- `data-slot="content"` on the portaled reka `HoverCardContent`
+- `data-slot="content-body"` on the `PopoverPanel` shell that owns the visuals
+- `data-slot="arrow"` on the arrow, when `arrow` is set
 - `data-state="open" | "closed"` (supplied by reka `HoverCardContent`)
 - `data-motion="instant"` on the content-body
 
@@ -206,7 +221,7 @@ component). Stable hooks only:
 
 ```vue
 <!-- Author card on hover -->
-<HoverCard :hover-delay="0.4" side="top" align="start">
+<HoverCard :hover-delay="400" side="top" align="start">
   <template #trigger>
     <a href="/u/jane" class="font-medium underline">Jane Doe</a>
   </template>
@@ -237,23 +252,25 @@ component). Stable hooks only:
 ### From `Popover` `trigger="hover"`
 
 ```vue
-<!-- before — deprecated, warns once -->
+<!-- before — v0 Popover, removed in 1.0.0 -->
 <Popover trigger="hover" :hover-delay="0.2" :leave-delay="0.5" placement="top-start">
   <template #target><a href="/u/jane">Jane Doe</a></template>
   <template #body><AuthorCard :user="jane" /></template>
 </Popover>
 
 <!-- after -->
-<HoverCard :hover-delay="0.2" :leave-delay="0.5" side="top" align="start">
+<HoverCard :hover-delay="200" :leave-delay="500" side="top" align="start">
   <template #trigger><a href="/u/jane">Jane Doe</a></template>
   <template #default><AuthorCard :user="jane" /></template>
 </HoverCard>
 ```
 
-Mapping applied by the migration (and by `Popover`'s `v1.x` back-compat shim
-internally):
+The delays change unit, so leaving `0.2` in place is silent: reka reads it as
+0.2 milliseconds and the card opens instantly.
 
-| `Popover` (deprecated hover) | `HoverCard` |
+Mapping to apply by hand. There is no shim; the old props are gone.
+
+| `Popover` v0 (removed hover mode) | `HoverCard` |
 |---|---|
 | `trigger="hover"` | (implicit — HoverCard only opens on hover) |
 | `hoverDelay` (seconds) | `hoverDelay` (milliseconds; multiply by 1000) |
@@ -269,6 +286,24 @@ Revisit in `1.x` only with a concrete use case:
 
 - `dismissible` / outside-click behavior (hover cards close on pointer-leave).
 - `matchTriggerWidth`.
-- An arrow element (reka `HoverCardArrow` is available; not exposed yet).
 - A shared open-delay group analogous to `TooltipProvider` / `TooltipGroup`.
 - Mobile/touch open affordance (HoverCard is intentionally pointer/focus only).
+
+## Changelog
+
+### 2026-09-17
+
+Spec corrections only. No runtime behavior changed.
+
+- **Delays are milliseconds everywhere.** The prop comments said seconds and
+  the examples passed `0.2` / `0.4` / `0.5`, which reka reads as fractions of a
+  millisecond. They now read `200` / `400` / `500`.
+- **The slot `open` is a boolean.** It was typed as a method. `setOpen` writes
+  the state; `close()` is `setOpen(false)`.
+- **`arrow` is documented.** It shipped while "Out of scope for v1" still
+  listed an arrow as unavailable.
+- **No automatic `aria-describedby`.** Neither the installed reka-ui (2.9.9)
+  nor reka's documentation wires the content to the trigger. The old claim made
+  the card sound more accessible than it is.
+- **`trigger="hover"` on `Popover` is removed, not deprecated.** There is no
+  shim; the migration table is a by-hand mapping.
