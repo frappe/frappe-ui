@@ -221,16 +221,20 @@ if (import.meta.env.DEV) {
     nodes.some(
       (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
     )
+  // Deep, because a lazy tree assigns `children` in place — the path most
+  // likely to bring in stale nodes. The flag keeps the walk to one pass.
+  let reported = false
   watch(
     roots,
     (nodes) => {
-      if (carriesExpanded(nodes))
-        warnRemoved(
-          "Tree's per-node `expanded` field",
-          "`v-model:expanded` with the node's key",
-        )
+      if (reported || !carriesExpanded(nodes)) return
+      reported = true
+      warnRemoved(
+        "Tree's per-node `expanded` field",
+        "`v-model:expanded` with the node's key",
+      )
     },
-    { immediate: true },
+    { immediate: true, deep: true },
   )
 }
 

@@ -2247,9 +2247,11 @@ drag-and-drop are new.
 
 Nothing here fails loudly. `:node` and `:options` become fall-through
 attributes, and content passed to the old `#node` / `#label` / `#icon` slots is
-discarded — the default row renders in its place. Only the now-required `nodes`
-prop warns, and only in dev; a production build renders an empty tree. Grep for
-`:node=`, `:options=`, `#node`, `#label` and `#icon` on `Tree` specifically.
+discarded — the default row renders in its place. A production build renders an
+empty tree. Three things warn, and only in dev: the now-required `nodes` prop,
+the removed per-node `expanded` field, and the removed boolean form of
+`v-model:expanded` (see below). Grep for `:node=`, `:options=`, `#node`,
+`#label` and `#icon` on `Tree` specifically.
 
 ```vue
 <!-- Before -->

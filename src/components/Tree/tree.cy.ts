@@ -199,6 +199,26 @@ describe('Tree', () => {
     )
   })
 
+  it('warns when a late-arriving child carries the removed field', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const data = ref<TreeNode[]>([{ id: 'root', label: 'Root' }])
+    cy.mount({
+      render: () =>
+        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: ['root'] }),
+    })
+    cy.get('@warn').should('not.have.been.called')
+    cy.then(() => {
+      // Assigned in place, so `roots` keeps its identity — only a deep watch
+      // sees it. This is the lazy-load path.
+      data.value[0].children = [{ id: 'late', label: 'Late', expanded: true }]
+    })
+    cy.contains('Late').should('exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /per-node `expanded` field/,
+    )
+  })
+
   it('expands and collapses everything through the exposed methods', () => {
     const tree = ref<any>(null)
     cy.mount({
@@ -319,18 +339,26 @@ describe('Tree', () => {
   })
 
   it('freezes expand/collapse and drag when disabled', () => {
-    cy.mount(Tree, {
-      props: {
-        nodes: makeNodes(),
-        nodeKey: 'id',
-        expanded: ['root'],
-        disabled: true,
-        draggable: true,
-      },
+    const tree = ref<any>(null)
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root'],
+          disabled: true,
+          draggable: true,
+        }),
     })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
+    // `disabled` freezes interaction, not the imperative API.
+    cy.then(() => tree.value.expand('a'))
+    cy.contains('Node A-1').should('exist')
+    cy.then(() => tree.value.collapseAll())
+    cy.contains('Node A').should('not.exist')
     cy.contains('[role="treeitem"]', 'Root').should(
       'have.attr',
       'data-disabled',
