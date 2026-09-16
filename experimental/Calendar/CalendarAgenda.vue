@@ -333,7 +333,7 @@ import './style.css'
 import { computed, inject, nextTick, onMounted, ref, watch } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import {
-  agendaRange,
+  agendaMonths,
   agendaRangeLabel,
   agendaWeeks,
   type AgendaRow,
@@ -549,7 +549,7 @@ watch([positionKey, () => weeks.value.length, listWidth], () => {
 // spent, so "7 September" names an implementation detail (today) rather than
 // anything the reader chose; "September" is the span they actually asked for.
 const spanLabel = computed(() => {
-  const { start, end } = agendaRange(props.anchor)
+  const { start, end } = agendaMonths(props.anchor)
   const name = (d: Date) => monthList[d.getMonth()]
   return start.getFullYear() === end.getFullYear()
     ? `${name(start)} and ${name(end)}`

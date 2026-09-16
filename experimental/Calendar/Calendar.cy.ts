@@ -1,6 +1,8 @@
 import { h } from 'vue'
 import Calendar from './Calendar.vue'
 import type { CalendarEvent } from './types'
+import { agendaMonths } from './agendaDays'
+import { monthList } from './calendarUtils'
 
 function monthYear(offsetDays = 0) {
   const date = new Date()
@@ -527,10 +529,19 @@ describe('Calendar', () => {
       })
       cy.contains('Nothing on between').should('not.exist')
 
+      // Named by the months the header names, not the week-padded dates the
+      // list happens to start and end on.
+      const { start, end } = agendaMonths(new Date())
+      const name = (d: Date) =>
+        start.getFullYear() === end.getFullYear()
+          ? monthList[d.getMonth()]
+          : `${monthList[d.getMonth()]} ${d.getFullYear()}`
       cy.mount(Calendar, {
         props: { events: [], config: { defaultMode: 'Agenda' } },
       })
-      cy.contains('Nothing on between').should('exist')
+      cy.contains(`Nothing on between ${name(start)} and ${name(end)}.`).should(
+        'exist',
+      )
     })
 
     it('renders the row slots, the participant one without the field', () => {

@@ -145,7 +145,7 @@ export function hasEnded(event: CalendarEvent, date: Date, now: Date): boolean {
  * right after what the row says about the event, as one more thing said about
  * it, rather than pushing one row's time out of the column the rest share.
  *
- * Two states, not a countdown: blue while it runs, amber in the half hour
+ * Two states, not a countdown: blue while it runs, amber in the hour
  * before it. An hour count would only restate the time written beside it, on
  * every row within reach of it, which is how the two that change what a reader
  * does stop standing out.
