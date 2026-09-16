@@ -1,6 +1,11 @@
 const warned = new Set<string>()
 
-function warnOnce(key: string, message: string) {
+/**
+ * Dev-only `console.warn`, deduped by `key`. For a break that cannot be
+ * phrased as "X was removed, use Y" — e.g. one reported from data the caller
+ * may legitimately own.
+ */
+export function warnOnce(key: string, message: string) {
   if (import.meta.env.PROD) return
   if (warned.has(key)) return
   warned.add(key)

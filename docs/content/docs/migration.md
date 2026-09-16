@@ -2239,7 +2239,7 @@ drag-and-drop are new.
 | `node.collapsed` / internal collapse             | `v-model:expanded="keys"` (keys of the open nodes)  |
 | `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars      |
 | `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`          |
-| `:options="{ defaultCollapsed: true }"`          | `v-model:expanded="[]"` (the default)               |
+| `:options="{ defaultCollapsed: true }"`          | nothing — collapsed is the default                  |
 | `:options="{ defaultCollapsed: false }"`         | `treeRef.expandAll()`                               |
 | `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`             |
 | `#label`                                         | `#item-label`                                       |

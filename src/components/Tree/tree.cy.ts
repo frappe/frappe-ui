@@ -195,7 +195,7 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
     cy.get('@warn').should(
       'have.been.calledWithMatch',
-      /per-node `expanded` field/,
+      /carries an `expanded` field/,
     )
   })
 
@@ -215,7 +215,7 @@ describe('Tree', () => {
     cy.contains('Late').should('exist')
     cy.get('@warn').should(
       'have.been.calledWithMatch',
-      /per-node `expanded` field/,
+      /carries an `expanded` field/,
     )
   })
 

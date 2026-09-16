@@ -60,7 +60,7 @@ import type { WatchStopHandle } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { usePortalTarget } from '../../composables/usePortalTarget'
-import { warnRemoved } from '../../utils/warnDeprecated'
+import { warnOnce, warnRemoved } from '../../utils/warnDeprecated'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
@@ -214,6 +214,10 @@ defineExpose<TreeExposed>({
 // The per-node `expanded` field went with the boolean model. `TreeNode` has an
 // index signature, so a beta caller keeping it gets no type error — and no
 // runtime effect either, leaving the node silently shut. Warn on the data.
+//
+// `expanded` is also a plausible column name, and a node is allowed arbitrary
+// extra fields, so this reports what it found rather than telling the caller
+// what they did.
 if (import.meta.env.DEV) {
   const carriesExpanded = (nodes: TreeNode[]): boolean =>
     nodes.some(
@@ -229,9 +233,11 @@ if (import.meta.env.DEV) {
     (nodes) => {
       if (reported || !carriesExpanded(nodes)) return
       reported = true
-      warnRemoved(
-        "Tree's per-node `expanded` field",
-        "`v-model:expanded` with the node's key",
+      warnOnce(
+        'Tree.node.expanded',
+        '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
+          'Tree does not read it — expansion is `v-model:expanded`, an array ' +
+          'of node keys. Ignore this if the field is your own data.',
       )
       // `undefined` on the immediate pass, which the call below covers.
       stop?.()
