@@ -1,8 +1,6 @@
 import { h } from 'vue'
 import Calendar from './Calendar.vue'
 import type { CalendarEvent } from './types'
-import { agendaMonths } from './agendaDays'
-import { monthList } from './calendarUtils'
 
 function monthYear(offsetDays = 0) {
   const date = new Date()
@@ -530,18 +528,13 @@ describe('Calendar', () => {
       cy.contains('Nothing on between').should('not.exist')
 
       // Named by the months the header names, not the week-padded dates the
-      // list happens to start and end on.
-      const { start, end } = agendaMonths(new Date())
-      const name = (d: Date) =>
-        start.getFullYear() === end.getFullYear()
-          ? monthList[d.getMonth()]
-          : `${monthList[d.getMonth()]} ${d.getFullYear()}`
+      // list happens to start and end on. The clock is pinned so the sentence
+      // is the same one every day: the span from August runs to October.
+      cy.clock(new Date(2026, 7, 20), ['Date'])
       cy.mount(Calendar, {
         props: { events: [], config: { defaultMode: 'Agenda' } },
       })
-      cy.contains(`Nothing on between ${name(start)} and ${name(end)}.`).should(
-        'exist',
-      )
+      cy.contains('Nothing on between August and October.').should('exist')
     })
 
     it('renders the row slots, the participant one without the field', () => {
