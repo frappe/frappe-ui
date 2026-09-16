@@ -145,7 +145,6 @@ Everything on the `frappe-ui/experimental` subpath: parked v0 families and incub
 - [Overview](https://ui.frappe.io/docs/experimental): what is parked, what is incubating, and why.
 - [Accordion](https://ui.frappe.io/docs/experimental/accordion): sections behind labelled headers that expand and collapse.
 - [Calendar](https://ui.frappe.io/docs/experimental/calendar): date and event view with Month, Week and Day modes.
-- [CodeEditor](https://ui.frappe.io/docs/experimental/codeeditor): CodeMirror 6 field with highlighting and an optional sanitized preview; CodeMirror is lazy-loaded.
 - [CommandPalette](https://ui.frappe.io/docs/experimental/commandpalette): searchable command list in a dialog, composed from `CommandPaletteInput`, `CommandPaletteList`, `CommandPaletteGroup`, `CommandPaletteItem`, `CommandPaletteEmpty` and `CommandPaletteFooter`.
 - [ListView](https://ui.frappe.io/docs/experimental/listview): the parked v0 list family. New code uses `frappe-ui/list`.
 

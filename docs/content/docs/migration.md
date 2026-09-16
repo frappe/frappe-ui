@@ -49,7 +49,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
 - **Navigation and layout** — [Destinations](#navigation-destinations) · [Sidebar](#sidebar) · [Tabs](#tabs) · [TabButtons](#tabbuttons) · [PageHeaderMobile](#pageheadermobile-family-slot-names) · [Divider](#divider)
 - **Keyboard** — [useShortcut](#useshortcut-is-now-usekeyboardshortcut) · [KeyboardShortcutsModal](#keyboardshortcutsmodal-is-now-keyboardshortcutsdialog) · [The shortcuts codemod](#the-shortcuts-codemod) · [KeyboardShortcut](#keyboardshortcut)
 - **Display** — [Alert](#alert) · [Icons](#icons) · [Base component props](#base-component-props) · [List family](#list-family) · [Tree](#tree) · [Card, ListItem, Toast](#card-listitem-standalone-toast-removed)
-- **Editor and charts** — [Editor](#editor) · [Charts](#charts)
+- **Editor and charts** — [Editor](#editor) · [Code editor](#code-editor) · [Charts](#charts)
 - **Data and transport** — [useDoctype / useList](#data-fetching-usedoctype-uselist) · [Writes reject](#data-fetching-writes-reject) · [Data-fetching exports](#data-fetching-exports) · [HTTP transport and the plugin](#http-transport-and-the-frappeui-plugin) · [`beforeSubmit`](#usecall-a-throwing-beforesubmit-now-cancels-the-submit) · [Errors renamed](#errors-renamed) · [Composables and directives](#composables-and-directives-renamed) · [pageMetaPlugin](#pagemetaplugin-removed)
 - **Packaging** — [Preset path](#preset-path) · [`lucideIcons`](#lucide-icons) · [Focus ring](#focus-ring-outline) · [Sizing changes](#sizing-scale-changes) · [Dependencies](#packaging-dependencies)
 - **Tokens and CSS** — [Tokens](#tokens) · [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) · [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
@@ -61,7 +61,7 @@ report ambiguous dynamic syntax for manual review instead of guessing.
   [ThemeSwitcher](#themeswitcher), which
   stays deprecated at its new path. The v0 `TextEditor` family moved the same
   way — see [Editor](#editor).
-- **Removed subpaths** — [`frappe-ui/code-editor`](#frappe-ui-code-editor-removed) · [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
+- **Removed subpaths** — [`frappe-ui/frappe` and `frappe-ui/drive`](#frappe-ui-frappe-and-frappe-ui-drive-removed)
 
 ## Requirements
 
@@ -3057,23 +3057,71 @@ Delete the manual imports; there is nothing to add back:
 The build fails loudly (`Missing "./list-style.css" specifier in "frappe-ui"
 package`) until the lines are gone.
 
-## `frappe-ui/code-editor` (removed)
+## Code editor {#code-editor}
 
-The subpath is gone. `CodeEditor`, `CodePreview` and `loadLanguage` move to
-`frappe-ui/experimental` (P14 — no stability promise). The components are
-unchanged; one import line changes per file. The build fails loudly until it
-does:
+The experimental `CodeEditor` and `CodePreview` are deleted. The code editor is
+now a family at `frappe-ui/code-editor`, built the same way the editor family
+is: an engine, a renderless component, one part, and a kit. Every import breaks
+loudly.
 
 ```ts
 // Before
-import { CodeEditor, CodePreview, loadLanguage } from 'frappe-ui/code-editor'
+import { CodeEditor, CodePreview, loadLanguage } from 'frappe-ui/experimental'
 
 // After
-import { CodeEditor, CodePreview, loadLanguage } from 'frappe-ui/experimental'
+import {
+  CodeEditor,
+  CodeEditorContent,
+  CodeKit,
+  loadLanguage,
+} from 'frappe-ui/code-editor'
 ```
 
-The types move with them: `CodeLanguage`, `CodeEditorProps`, `CodeEditorEmits`
-and `CodePreviewProps`.
+**frappe-ui ships no labeled field.** The old component drew a label, a
+description, an error and a required marker. The new `CodeEditor` renders
+nothing at all: it owns the view and the `v-model`, and your app draws the
+chrome around it. Write one thin field component and reuse it at every call
+site. The Desk/FormLayout field lives in `@framework/ui`.
+
+| v0 | v1 |
+| --- | --- |
+| `language="json"` | `:extensions="[CodeKit, json()]"` |
+| `variant` / `size` props | CSS var sets on your wrapper |
+| `placeholder="SELECT 1"` | `CodeKit.configure({ placeholder: 'SELECT 1' })` |
+| `disabled` | `:editable="false"` |
+| `label` / `description` / `error` / `required` | drawn by your field |
+| `--cm-max-height` | `--code-max-height` |
+| automatic JSON lint | `[lintGutter(), linter(jsonParseLinter())]` in `extensions` |
+| `@overflow` on the field | `@overflow` on `<CodeEditorContent>` |
+| `CodePreview` | copy it into your app; it is a markdown renderer, not an editor |
+
+The types `CodeLanguage`, `CodeEditorProps`, `CodeEditorEmits` and
+`CodePreviewProps` are gone. `LanguageKey`, `CodeEditorOptions`,
+`CodeEditorExposed` and `CodeKitOptions` are the new ones.
+
+A minimal port:
+
+```vue
+<script setup>
+import { CodeEditor, CodeEditorContent, CodeKit } from 'frappe-ui/code-editor'
+import { json } from '@codemirror/lang-json'
+
+const value = ref('{}')
+</script>
+
+<template>
+  <CodeEditor v-model="value" :extensions="[CodeKit, json()]">
+    <CodeEditorContent class="min-h-40" />
+  </CodeEditor>
+</template>
+```
+
+**Install the language packages you use.** The ten `@codemirror/lang-*` packages
+and `@codemirror/lint` are optional peer dependencies now, so an app downloads
+only what it renders. `loadLanguage('sql')` throws an error naming the package
+when it is missing.
+
+Full API: [the code editor docs](/docs/molecules/code-editor).
 
 ## `hljs-theme.css` and `tailwind/tokens.js` (removed)
 

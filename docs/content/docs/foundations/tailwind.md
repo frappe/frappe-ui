@@ -86,7 +86,7 @@ console.log(content)
 
 One rule decides what is listed under `experimental/`: every directory the
 `frappe-ui/experimental` barrel re-exports. Today that is `Accordion`,
-`Calendar`, `Charts`, `CodeEditor`, `CommandPalette`, `FloatingWindow`,
+`Calendar`, `Charts`, `CommandPalette`, `FloatingWindow`,
 `ListView`, `MultiEmailInput`, `SpriteIcons`, `TextEditor` and
 `ThemeSwitcher`. Importing any of them pulls that directory's classes into
 your build, so they have to be scanned. A test derives the list from the

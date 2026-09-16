@@ -10,17 +10,6 @@ export {
   InputError,
 } from './src/components/InputLabeling'
 export { useInputLabeling } from './src/composables/useInputLabeling'
-export {
-  CodeEditor,
-  CodePreview,
-  loadLanguage,
-} from './experimental/CodeEditor'
-export type {
-  CodeLanguage,
-  CodeEditorProps,
-  CodeEditorEmits,
-  CodePreviewProps,
-} from './experimental/CodeEditor'
 // Calendar family. Moved out of root (#1020, redirect of #989) — parked
 // here, unstable, with its public API unchanged, until a redesigned
 // calendar family replaces it. Migration is the import-path change only.
