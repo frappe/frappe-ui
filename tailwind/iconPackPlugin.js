@@ -99,7 +99,12 @@ export function iconPackPlugin({
             'flex-shrink': '0',
           }
           if (defaultColor) rules.color = defaultColor
-          return rules
+          // Only the class form is a mask. lucide-vue-next stamps the SVGs it
+          // renders with the same `lucide-<name>` class, so a bare rule matched
+          // those too: it pinned them to 1em and painted this shape over them,
+          // and a `size` or stroke set on the component did nothing. `:where()`
+          // keeps the selector at class specificity, so `size-*` still wins.
+          return { '&:where(:not(svg))': rules }
         },
       },
       { values, type: 'any' },
