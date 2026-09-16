@@ -5,7 +5,7 @@
     <button
       v-if="item.status !== 'uploading'"
       type="button"
-      class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+      class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus:opacity-100"
       aria-label="Remove image"
       @click.stop="$emit('remove')"
     >
@@ -44,7 +44,7 @@
       :class="
         editing || caption
           ? 'opacity-100'
-          : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+          : 'opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100'
       "
     >
       <div

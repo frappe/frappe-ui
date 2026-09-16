@@ -45,7 +45,7 @@ const cardActions = [
           variant="ghost"
           icon="lucide-ellipsis"
           label="Deal options"
-          class="opacity-0 transition group-hover:opacity-100"
+          class="opacity-0 transition group-hover:opacity-100 [@media(hover:none)]:opacity-100"
         />
       </Dropdown>
     </div>

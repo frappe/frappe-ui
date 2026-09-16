@@ -20,7 +20,7 @@
     >
       <div class="relative">
         <div
-          class="absolute left-1 top-1 z-10 rounded-4 bg-white/80 p-1 text-ink-gray-6 opacity-100 shadow-sm sm:opacity-0 sm:group-hover:opacity-100"
+          class="absolute left-1 top-1 z-10 rounded-4 bg-white/80 p-1 text-ink-gray-6 opacity-0 shadow-sm group-hover:opacity-100 [@media(hover:none)]:opacity-100"
           aria-hidden="true"
         >
           <span class="lucide-grip size-3" />
