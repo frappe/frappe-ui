@@ -275,29 +275,41 @@ if (import.meta.env.DEV) {
       (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
     )
 
-  const report = () =>
+  let reported = false
+  let stopRoots: WatchStopHandle | undefined
+  let stopFlat: WatchStopHandle | undefined
+
+  const report = () => {
+    reported = true
     warnOnce(
       'Tree.node.expanded',
       '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
         'Tree does not read it — expansion is `v-model:expanded`, an array ' +
         'of node keys. Ignore this if the field is your own data.',
     )
+    // Both are `undefined` on the immediate pass; the call below covers it.
+    stopRoots?.()
+    stopFlat?.()
+  }
 
-  // One traversal at mount, then done. It has to cover nodes under a closed
-  // ancestor: the caller this exists for kept `expanded` on their data and
-  // bound no model, so their tree is shut and only its roots render.
-  if (carriesExpanded(roots.value)) {
-    report()
-  } else {
-    // Children that arrive later. `flat` is already computed for rendering,
-    // so this costs no extra traversal, where a deep watch on `nodes` would
-    // re-walk the forest on every edit for the life of the component.
-    let stop: WatchStopHandle | undefined
-    stop = watch(flat, (rows) => {
-      if (!rows.some((row) => 'expanded' in row.node)) return
-      report()
-      stop?.()
-    })
+  // One walk per `nodes` load, covering nodes under a closed ancestor: the
+  // caller this exists for kept `expanded` on their data and bound no model,
+  // so their tree is shut and only its roots render. Not deep — an in-place
+  // `children =` keeps the array identity, and `flat` catches that instead at
+  // no extra traversal, since it is already computed for rendering.
+  stopRoots = watch(
+    roots,
+    (nodes) => {
+      if (!reported && carriesExpanded(nodes)) report()
+    },
+    { immediate: true },
+  )
+  stopFlat = watch(flat, (rows) => {
+    if (!reported && rows.some((row) => 'expanded' in row.node)) report()
+  })
+  if (reported) {
+    stopRoots()
+    stopFlat()
   }
 }
 

@@ -233,6 +233,27 @@ describe('Tree', () => {
     )
   })
 
+  it('warns when the tree loads its nodes after mount', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const data = ref<TreeNode[]>([])
+    cy.mount({
+      render: () => h(Tree, { nodes: data.value, nodeKey: 'id' }),
+    })
+    cy.get('@warn').should('not.have.been.called')
+    cy.then(() => {
+      const nodes = makeNodes()
+      ;(nodes[0].children as TreeNode[])[0].expanded = true
+      data.value = nodes
+    })
+    // Nothing is expanded, so the node carrying the field never renders.
+    cy.contains('Root').should('exist')
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
   it('stays quiet when expandAll or collapseAll change nothing', () => {
     const tree = ref<TreeExposed | null>(null)
     const keys = ref<string[]>(['root', 'a'])
