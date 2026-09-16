@@ -40,6 +40,11 @@ export function createSuggestionRenderer(
   let isActive = false
   // Monotonic token; a stale onUpdate from a superseded query bails.
   let renderToken = 0
+  // Monotonic token; a stale computePosition settling later bails.
+  let positionToken = 0
+  // `flip()` positions from the height it measured, and not every height
+  // change arrives through `onUpdate` (async row content, late fonts).
+  let resizeObserver: ResizeObserver | null = null
 
   function getListExpose(): SuggestionListExpose | null {
     const ref = renderer?.ref as SuggestionListExpose | null | undefined
@@ -52,6 +57,7 @@ export function createSuggestionRenderer(
     const rect = getReferenceClientRect()
     if (!rect) return
     const reference = { getBoundingClientRect: () => rect }
+    const token = ++positionToken
     void computePosition(reference, floatingEl, {
       placement: floatingOptions?.placement ?? 'bottom-start',
       middleware: [
@@ -60,7 +66,7 @@ export function createSuggestionRenderer(
         shift({ padding: 8 }),
       ],
     }).then(({ x, y }) => {
-      if (!floatingEl) return
+      if (!floatingEl || token !== positionToken) return
       Object.assign(floatingEl.style, {
         position: 'absolute',
         left: `${x}px`,
@@ -94,6 +100,11 @@ export function createSuggestionRenderer(
     document.body.appendChild(floatingEl)
     getReferenceClientRect = props.clientRect as () => DOMRect | null
     updatePosition()
+
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => updatePosition())
+      resizeObserver.observe(floatingEl)
+    }
   }
 
   return {
@@ -139,6 +150,9 @@ export function createSuggestionRenderer(
     onExit() {
       isActive = false
       renderToken++
+      positionToken++
+      resizeObserver?.disconnect()
+      resizeObserver = null
       floatingEl?.remove()
       renderer?.destroy()
       floatingEl = null
