@@ -115,7 +115,8 @@ The component ref carries the imperative half:
 
 These are programmatic, so `disabled` — which freezes user interaction — does
 not block them. `expand(key)` also accepts a key whose children have not loaded
-yet; the node opens as soon as they arrive.
+yet; the node opens as soon as they arrive, and `expandAll()` adds to the open
+keys rather than replacing them, so such a key is never dropped.
 
 Clicking a row, or pressing `Enter`/`Space` on it, toggles that node.
 

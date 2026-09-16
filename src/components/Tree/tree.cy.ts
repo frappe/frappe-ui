@@ -1,5 +1,5 @@
 import Tree from './Tree.vue'
-import { h, ref } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import type { DropInfo, TreeNode } from './types'
 
 // Fresh data per test. The tree never writes to these objects; a few tests
@@ -112,6 +112,72 @@ describe('Tree', () => {
     cy.contains('Node A').should('not.exist')
     cy.contains('[data-slot="row"]', 'Root').click()
     cy.contains('Node A').should('exist')
+  })
+
+  it('keeps every key when calls stack up under a bound v-model', () => {
+    // A bound model round-trips through the parent, so the prop lags a render.
+    // Consecutive calls must still accumulate rather than overwrite.
+    const keys = ref<string[]>([])
+    const tree = ref<any>(null)
+    const Parent = defineComponent({
+      setup: () => () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => (keys.value = value),
+        }),
+    })
+    cy.mount(Parent)
+    cy.then(() => {
+      tree.value.expand('root')
+      tree.value.expand('a')
+    })
+    cy.then(() => expect(keys.value).to.deep.eq(['root', 'a']))
+    cy.contains('Node A-1').should('exist')
+  })
+
+  it('expandAll keeps keys whose children have not loaded', () => {
+    const tree = ref<any>(null)
+    const keys = ref<string[]>(['lazy'])
+    const data = ref<TreeNode[]>([{ id: 'lazy', label: 'Lazy' }])
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: data.value,
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => (keys.value = value),
+        }),
+    })
+    cy.then(() => tree.value.expandAll())
+    // `lazy` has no children yet, so expandAll cannot see it — it must survive.
+    cy.then(() => expect(keys.value).to.include('lazy'))
+    cy.then(() => {
+      data.value = [
+        {
+          id: 'lazy',
+          label: 'Lazy',
+          children: [{ id: 'late', label: 'Late' }],
+        },
+      ]
+    })
+    cy.contains('Late').should('exist')
+  })
+
+  it('warns instead of throwing on the removed boolean model', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true as any },
+    })
+    cy.contains('Root').should('exist')
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /boolean `v-model:expanded`/,
+    )
   })
 
   it('expands and collapses everything through the exposed methods', () => {

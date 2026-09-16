@@ -59,6 +59,7 @@ import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { warnRemoved } from '../../utils/warnDeprecated'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
@@ -122,16 +123,44 @@ const siblingsOf = (parent: TreeNode | null) =>
 // --- expansion ------------------------------------------------------------
 // Expansion lives in the `expanded` model as a list of keys, never on the nodes
 // themselves. A key that is absent means collapsed.
-const expandedSet = computed(() => new Set(expandedKeys.value))
+//
+// `defineModel` keeps its own copy only while the model is unbound; under a
+// bound `v-model:expanded` a write travels out as an emit and comes back as a
+// prop one render later. `pending` holds what we last wrote so two writes in
+// the same tick both land, and is dropped on the next tick — if the caller
+// rejected the write, their value is authoritative again.
+const pending = ref<TreeKey[] | null>(null)
+
+const currentKeys = computed(() => {
+  const keys = pending.value ?? expandedKeys.value
+  if (Array.isArray(keys)) return keys
+  // A beta caller still passing the old expand-all boolean. Warn instead of
+  // throwing `TypeError: true is not iterable` out of the render.
+  warnRemoved(
+    "Tree's boolean `v-model:expanded`",
+    "an array of the open nodes' keys",
+  )
+  return []
+})
+
+const expandedSet = computed(() => new Set(currentKeys.value))
 const isExpanded = (node: TreeNode) => expandedSet.value.has(keyOf(node))
 
 // Always assign a fresh array — an in-place push would skip `update:expanded`
 // and leave shallow watchers and immutable stores behind.
+function writeKeys(keys: TreeKey[]) {
+  pending.value = keys
+  expandedKeys.value = keys
+  nextTick(() => (pending.value = null))
+}
+
 function setKeyExpanded(key: TreeKey, value: boolean) {
   if (expandedSet.value.has(key) === value) return
-  expandedKeys.value = value
-    ? [...expandedKeys.value, key]
-    : expandedKeys.value.filter((k) => k !== key)
+  writeKeys(
+    value
+      ? [...currentKeys.value, key]
+      : currentKeys.value.filter((k) => k !== key),
+  )
 }
 
 // The interaction path: a row toggle, a chevron click, a keyboard arrow.
@@ -157,10 +186,13 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
 // Key-based and programmatic, so `disabled` (which freezes user interaction)
 // does not block them. `expand` accepts a key whose children have not loaded
 // yet — the node opens as soon as they arrive.
+
+// Adds to the open keys rather than replacing them, so a key waiting on
+// children that have not loaded survives an expand-all.
 function expandAll() {
-  const keys: TreeKey[] = []
-  eachCollapsible(roots.value, (node) => keys.push(keyOf(node)))
-  expandedKeys.value = keys
+  const keys = new Set(currentKeys.value)
+  eachCollapsible(roots.value, (node) => keys.add(keyOf(node)))
+  writeKeys([...keys])
 }
 
 defineExpose({
@@ -170,10 +202,10 @@ defineExpose({
   collapse: (key: TreeKey) => setKeyExpanded(key, false),
   /** Flip the node with this key. */
   toggle: (key: TreeKey) => setKeyExpanded(key, !expandedSet.value.has(key)),
-  /** Open every node that has children. */
+  /** Open every node that has children, keeping any keys already open. */
   expandAll,
   /** Close every node. */
-  collapseAll: () => (expandedKeys.value = []),
+  collapseAll: () => writeKeys([]),
 })
 
 // --- focus -----------------------------------------------------------------
