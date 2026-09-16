@@ -56,11 +56,11 @@
 
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, toRef, watch } from 'vue'
-import type { WatchStopHandle } from 'vue'
 import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
+import { useWarnLegacyExpanded } from './useWarnLegacyExpanded'
 import { usePortalTarget } from '../../composables/usePortalTarget'
-import { warnOnce, warnRemoved } from '../../utils/warnDeprecated'
+import { warnRemoved } from '../../utils/warnDeprecated'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
   TreeContextKey,
@@ -262,56 +262,9 @@ const flat = computed(() => {
   return out
 })
 
-// The per-node `expanded` field went with the boolean model. `TreeNode` has an
-// index signature, so a beta caller keeping it gets no type error — and no
-// runtime effect either, leaving the node silently shut. Warn on the data.
-//
-// `expanded` is also a plausible column name, and a node is allowed arbitrary
-// extra fields, so this reports what it found rather than telling the caller
-// what they did.
-if (import.meta.env.DEV) {
-  const carriesExpanded = (nodes: TreeNode[]): boolean =>
-    nodes.some(
-      (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
-    )
-
-  let reported = false
-  let stopRoots: WatchStopHandle | undefined
-  let stopFlat: WatchStopHandle | undefined
-
-  const report = () => {
-    reported = true
-    warnOnce(
-      'Tree.node.expanded',
-      '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
-        'Tree does not read it — expansion is `v-model:expanded`, an array ' +
-        'of node keys. Ignore this if the field is your own data.',
-    )
-    // Both are `undefined` on the immediate pass; the call below covers it.
-    stopRoots?.()
-    stopFlat?.()
-  }
-
-  // One walk per `nodes` load, covering nodes under a closed ancestor: the
-  // caller this exists for kept `expanded` on their data and bound no model,
-  // so their tree is shut and only its roots render. Not deep — an in-place
-  // `children =` keeps the array identity, and `flat` catches that instead at
-  // no extra traversal, since it is already computed for rendering.
-  stopRoots = watch(
-    roots,
-    (nodes) => {
-      if (!reported && carriesExpanded(nodes)) report()
-    },
-    { immediate: true },
-  )
-  stopFlat = watch(flat, (rows) => {
-    if (!reported && rows.some((row) => 'expanded' in row.node)) report()
-  })
-  if (reported) {
-    stopRoots()
-    stopFlat()
-  }
-}
+// Guarded here as well as inside, so the call, the import and the composable
+// all leave the production bundle rather than shipping as dead code.
+if (import.meta.env.DEV) useWarnLegacyExpanded(roots, flat, childrenOf)
 
 // --- drag & drop ----------------------------------------------------------
 const dragDrop = useTreeDragDrop({
