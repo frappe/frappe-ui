@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import fastGlob from 'fast-glob'
 import { content } from './content.js'
 
 const packageRoot = path.resolve(
@@ -38,20 +39,31 @@ function globbedDirectories(prefix) {
     .sort()
 }
 
+const withoutNegation = (glob) => (glob.startsWith('!') ? glob.slice(1) : glob)
+
 describe('content globs', () => {
   it('covers every directory the experimental barrel re-exports', () => {
     expect(globbedDirectories('experimental')).toEqual(reExportedDirectories())
   })
 
   it('finds something to scan behind every glob', () => {
-    for (const glob of content) {
+    for (const glob of content.map(withoutNegation)) {
       const directory = glob.slice(0, glob.indexOf('/**'))
       expect(fs.existsSync(directory), directory).toBe(true)
     }
   })
 
+  it('keeps story files out of scan', async () => {
+    const includedFiles = await fastGlob(content.filter((glob) => glob[0] !== '!'))
+    const scannedFiles = await fastGlob(content)
+
+    expect(includedFiles.some((file) => file.includes('/stories/'))).toBe(true)
+    expect(scannedFiles.length).toBeGreaterThan(0)
+    expect(scannedFiles.some((file) => file.includes('/stories/'))).toBe(false)
+  })
+
   it('resolves every glob against this package, not the consumer', () => {
-    for (const glob of content) {
+    for (const glob of content.map(withoutNegation)) {
       expect(path.isAbsolute(glob), glob).toBe(true)
       expect(glob.startsWith(packageRoot), glob).toBe(true)
       // Tailwind's scanner reads a backslash as an escape, not a separator.
