@@ -138,7 +138,7 @@ const sortOptions = [
                       size="xs"
                       icon="lucide-more-horizontal text-ink-gray-5"
                       :label="`${space.title} options`"
-                      class="absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100"
+                      class="absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100 [@media(hover:none)]:opacity-100"
                       :class="open ? 'opacity-100' : ''"
                     />
                   </template>

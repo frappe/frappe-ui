@@ -164,6 +164,8 @@ describe('hover', () => {
   }
 
   it('applies only where hovering is possible', async () => {
+    // Reaches every app on the preset, so a dropped flag should fail here.
+    expect(preset.future.hoverOnlyWhenSupported).toBe(true)
     const css = await compile('<div class="hover:opacity-50">')
     expect(css).toMatch(
       /@media \(hover: hover\) and \(pointer: fine\) \{\s*\.hover\\:opacity-50:hover \{/,
