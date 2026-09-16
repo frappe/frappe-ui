@@ -1,0 +1,247 @@
+/*
+ * Code editor styles.
+ *
+ * Two blocks, and the difference between them is the whole styling model.
+ *
+ * The first is layout: it makes the appended CodeMirror DOM fill and scroll
+ * inside `<CodeEditorContent>`. It carries no frappe look and no colour.
+ *
+ * The second is the frappe chrome, and every rule in it is scoped under
+ * `.frappe-code` — the class the `codeChrome` extension adds to the editor's
+ * root. Omit the extension and none of it reaches your editor. Nothing here is
+ * ambient.
+ *
+ * Knobs are CSS custom properties (ADR-0017). Public hooks are unprefixed
+ * `--code-*` with their defaults in the `var()` fallback at the use site, so a
+ * consumer can set them on the editor or on any ancestor. Internal variables
+ * take the `--_code-` prefix and may change in any release.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Layout
+ * ------------------------------------------------------------------------- */
+
+/* `:where()` drops these to zero specificity on purpose. The cap is equally a
+ * `--code-max-height` value and a `max-h-*` class on the part, and a rule that
+ * outranked the class would decide the winner by stylesheet order. This way the
+ * consumer's own selector always wins, whatever it is. */
+:where([data-slot='code-editor-content']) {
+  display: flex;
+  flex-direction: column;
+  /* The height cap that drives the overflow signal. `none` when unset, so the
+   * editor grows to fit. */
+  max-height: var(--code-max-height, none);
+}
+
+:where([data-slot='code-editor-content'] > .cm-editor) {
+  flex: 1 1 auto;
+  /* Without this a flex item refuses to shrink below its content height, and
+   * the cap above would never clip anything. */
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * frappe chrome — only with the `codeChrome` extension
+ * ------------------------------------------------------------------------- */
+
+.cm-editor.frappe-code {
+  background-color: var(--code-bg, var(--surface-gray-2));
+  border: 1px solid var(--code-border, transparent);
+  border-radius: var(--code-radius, var(--radius-md, 0.5rem));
+  color: var(--ink-gray-8);
+  font-size: var(--code-font-size, 13px);
+  /* Clips the scroller and the gutter to the rounded corners. */
+  overflow: hidden;
+}
+
+.cm-editor.frappe-code.cm-focused {
+  /* CodeMirror draws its own focus outline. Replace it with the frappe ring. */
+  outline: none;
+  box-shadow: 0 0 0 2px var(--code-focus-ring, var(--outline-gray-3));
+}
+
+.frappe-code .cm-scroller {
+  overflow: auto;
+}
+
+.frappe-code .cm-content {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  caret-color: var(--ink-gray-8);
+  padding: var(--code-padding, 6px 8px);
+  min-height: var(--code-min-height, auto);
+}
+
+/* CodeMirror pads every line as well as the content box. Zero it, or the two
+ * insets stack and `--code-padding` stops being the only one that matters. */
+.frappe-code .cm-line {
+  padding: 0;
+}
+
+.frappe-code .cm-cursor,
+.frappe-code .cm-dropCursor {
+  border-left-color: var(--ink-gray-8);
+}
+
+/* The gutter is sticky and the content scrolls under it, so it cannot stay
+ * transparent: horizontally-scrolled code would bleed through behind the line
+ * numbers. It takes the editor surface, and drops the default divider so it
+ * reads as part of that surface. */
+.frappe-code .cm-gutters {
+  background-color: var(--code-bg, var(--surface-gray-2));
+  border-right: none;
+  color: var(--ink-gray-5);
+}
+
+/* Scroll shadow. A pseudo-element rather than a `box-shadow` on `.cm-gutters`
+ * itself, because CodeMirror stretches the gutter past the last line — a
+ * gutter shadow would run down into the empty area below and read as one
+ * floating in space. `--_code-text-height` (set by `<CodeEditorContent>`) caps
+ * it to the actual code. */
+.frappe-code .cm-gutters::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: var(--_code-text-height, 100%);
+  transform: translateX(100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.16), transparent);
+}
+
+.frappe-code.code-scrolled-x .cm-gutters::after {
+  opacity: 1;
+}
+
+/* A fixed gray on the active row cannot stay visible across every surface the
+ * row sits on. A low-alpha `--ink-gray-9` overlay darkens (light) or lightens
+ * (dark, where the token flips to near-white) whatever is beneath it by a
+ * constant amount, and being mostly transparent it lets the selection show
+ * through. */
+.frappe-code .cm-activeLine,
+.frappe-code .cm-activeLineGutter {
+  background-color: color-mix(in srgb, var(--ink-gray-9) 7%, transparent);
+}
+
+.frappe-code .cm-activeLineGutter {
+  color: var(--ink-gray-7);
+}
+
+/* Fold marker. CodeMirror renders a bare text caret pinned to the cell's
+ * top-left. Center it and swap the glyph for a masked chevron, so it inherits
+ * the gutter's `currentColor` and flips with the colour scheme instead of
+ * baking a fill. */
+.frappe-code .cm-foldGutter .cm-gutterElement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.frappe-code .cm-foldGutter .cm-gutterElement:hover {
+  color: var(--ink-gray-8);
+}
+
+.frappe-code .cm-foldGutter .cm-gutterElement > span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  font-size: 0;
+  background-color: currentColor;
+  transition: transform 0.12s ease;
+  mask-image: var(--_code-fold-chevron);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 14px 14px;
+  -webkit-mask-image: var(--_code-fold-chevron);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 14px 14px;
+}
+
+/* The marker carries no open/closed class, but its `title` differs — so rotate
+ * it to point right when the line is folded. */
+.frappe-code .cm-foldGutter .cm-gutterElement > span[title='Unfold line'] {
+  transform: rotate(-90deg);
+}
+
+/* The fold gutter otherwise reserves a column even when nothing on screen can
+ * fold (plain text, a flat markdown doc). Collapse it until a real chevron
+ * appears. The catch: CodeMirror sizes the gutter with an always-present hidden
+ * spacer element, so a naive `:has(> span)` is always true. Excluding the
+ * inline `visibility: hidden` leaves only the chevrons on foldable lines, and
+ * `:has` re-evaluates live as folds come and go. */
+.frappe-code
+  .cm-foldGutter:not(
+    :has(.cm-gutterElement:not([style*='visibility']) > span)
+  ) {
+  width: 0;
+  overflow: hidden;
+}
+
+.frappe-code
+  .cm-foldGutter:not(:has(.cm-gutterElement:not([style*='visibility']) > span))
+  .cm-gutterElement {
+  padding: 0;
+}
+
+/* Same for the lint gutter, which a consumer adds with the JSON-lint recipe: it
+ * holds a fixed column for diagnostic markers, but valid input has none. The
+ * column springs back the moment the linter reports an error. */
+.frappe-code .cm-gutter-lint:not(:has(.cm-lint-marker)) {
+  width: 0;
+}
+
+.frappe-code .cm-gutter-lint:not(:has(.cm-lint-marker)) .cm-gutterElement {
+  padding: 0;
+}
+
+/* Completion and hover popups default to a light box. Theme them off the
+ * elevated popover surface so they follow the colour scheme instead of
+ * flashing white. */
+.frappe-code .cm-tooltip {
+  background-color: var(--surface-elevation-2);
+  border: 1px solid var(--surface-gray-3);
+  border-radius: var(--code-radius, var(--radius-md, 0.5rem));
+  color: var(--ink-gray-8);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  overflow: hidden;
+}
+
+.frappe-code .cm-tooltip-autocomplete > ul {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.frappe-code .cm-tooltip-autocomplete > ul > li {
+  color: var(--ink-gray-7);
+  padding: 2px 6px;
+}
+
+.frappe-code .cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background-color: var(--surface-gray-3);
+  color: var(--ink-gray-9);
+}
+
+.frappe-code .cm-completionIcon {
+  color: var(--ink-gray-5);
+}
+
+.frappe-code .cm-completionMatchedText {
+  color: var(--ink-blue-5);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.frappe-code .cm-completionDetail {
+  color: var(--ink-gray-5);
+  font-style: italic;
+}
+
+/* lucide `chevron-down`, used as a mask so the fold marker inherits
+ * `currentColor`. Declared last so the rules above read without it. */
+.cm-editor.frappe-code {
+  --_code-fold-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}

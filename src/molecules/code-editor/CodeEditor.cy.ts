@@ -1,0 +1,249 @@
+import './style.css'
+
+import { defineComponent, h, ref, type Ref } from 'vue'
+import { CodeEditor, CodeEditorContent, CodeKit, useCodeEditor } from './index'
+
+const CONTENT = '[data-slot="code-editor-content"]'
+
+/**
+ * Mounts `<CodeEditor>` with the content part in its slot, plus a button to
+ * click when a test needs the editor blurred by something that is not the
+ * editor. `change` and `overflow` are aliased spies.
+ */
+function mountCodeEditor(
+  options: {
+    content?: string
+    editable?: boolean
+    contentClass?: string
+    maxHeight?: string
+  } = {},
+) {
+  const value = ref(options.content ?? '')
+  const onChange = cy.spy().as('change')
+  const onOverflow = cy.spy().as('overflow')
+
+  const TestHost = defineComponent({
+    setup() {
+      return () =>
+        h('div', { class: 'w-[420px] p-4' }, [
+          h(
+            CodeEditor,
+            {
+              modelValue: value.value,
+              'onUpdate:modelValue': (next: string) => {
+                value.value = next
+              },
+              extensions: [CodeKit],
+              editable: options.editable ?? true,
+              onChange,
+            },
+            {
+              default: () => [
+                h(CodeEditorContent, {
+                  class: options.contentClass,
+                  style: options.maxHeight
+                    ? { '--code-max-height': options.maxHeight }
+                    : undefined,
+                  onOverflow,
+                }),
+              ],
+            },
+          ),
+          h('button', { type: 'button' }, 'outside'),
+        ])
+    },
+  })
+
+  cy.mount(TestHost)
+  return value
+}
+
+/**
+ * Presses a key on the editor's contenteditable and reports whether the
+ * default was cancelled.
+ *
+ * `cy.type()` has never supported `{tab}` (cypress-io/cypress#299), and the
+ * `defaultPrevented` flag is the assertion that matters anyway: a Tab the
+ * editor consumes is a Tab the browser does not turn into a focus move.
+ */
+function press(key: string, init: KeyboardEventInit = {}) {
+  return cy.get('.cm-content').then(($el) => {
+    const event = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true,
+      ...init,
+    })
+    $el[0].dispatchEvent(event)
+    return event.defaultPrevented
+  })
+}
+
+describe('code editor browser behavior', () => {
+  // `<CodeEditorContent>` writes `--_code-text-height` and toggles a class from
+  // inside its own ResizeObserver callback. It skips a write that changes
+  // nothing, but a real resize still writes, and Chrome then reports
+  // "ResizeObserver loop completed with undelivered notifications". It is a
+  // notification, not a thrown error: the overflow signal below is asserted in
+  // full. Cypress fails a test on any uncaught exception, so this one message is
+  // let through, and nothing else.
+  Cypress.on('uncaught:exception', (error) =>
+    error.message.includes('ResizeObserver loop') ? false : undefined,
+  )
+
+  it('updates the model on every keystroke and commits once on blur', () => {
+    const value = mountCodeEditor()
+
+    cy.get('.cm-content').click().type('SELECT')
+    // `update:modelValue` is the live channel: it fires on every doc change.
+    cy.then(() => expect(value.value).to.eq('SELECT'))
+    cy.get('@change').should('not.have.been.called')
+
+    cy.get('.cm-content').type(' 1')
+    cy.then(() => expect(value.value).to.eq('SELECT 1'))
+
+    // `change` is the commit point, and it carries the committed value.
+    cy.get('button').click()
+    cy.get('@change').should('have.been.calledOnce')
+    cy.get('@change').should('have.been.calledWith', 'SELECT 1')
+  })
+
+  it('signals overflow across the height cap, and only on the transitions', () => {
+    mountCodeEditor({ maxHeight: '80px' })
+
+    cy.get(CONTENT).should('not.have.attr', 'data-overflowing')
+
+    cy.get('.cm-content')
+      .click()
+      .type('1{enter}2{enter}3{enter}4{enter}5{enter}6{enter}7{enter}8')
+
+    cy.get(CONTENT).should('have.attr', 'data-overflowing', 'true')
+    cy.get('@overflow').should('have.been.calledWith', true)
+
+    cy.get('.cm-content').type('{selectall}{backspace}')
+
+    cy.get(CONTENT).should('not.have.attr', 'data-overflowing')
+    cy.get('@overflow').should('have.been.calledWith', false)
+    // Two crossings, two emits: every keystroke in between changed the height
+    // without changing the answer.
+    cy.get('@overflow').should('have.callCount', 2)
+  })
+
+  it('caps the box from a class as well as from --code-max-height', () => {
+    // The recommended field pattern swaps `max-h-*` classes to expand, so the
+    // package's own layout rule must never outrank one. It is written at zero
+    // specificity for exactly this.
+    mountCodeEditor({ contentClass: 'max-h-[80px]' })
+
+    cy.get(CONTENT).should('not.have.attr', 'data-overflowing')
+    cy.get('.cm-content')
+      .click()
+      .type('1{enter}2{enter}3{enter}4{enter}5{enter}6{enter}7{enter}8')
+
+    cy.get(CONTENT).should('have.css', 'max-height', '80px')
+    cy.get(CONTENT).should('have.attr', 'data-overflowing', 'true')
+    cy.get('@overflow').should('have.been.calledWith', true)
+  })
+
+  it('indents with Tab and dedents with Shift-Tab instead of moving focus', () => {
+    const value = mountCodeEditor({ content: 'SELECT 1' })
+
+    cy.get('.cm-content').click()
+    press('Tab', { keyCode: 9, which: 9 }).should('eq', true)
+    cy.then(() => expect(value.value).to.eq('  SELECT 1'))
+    cy.focused().should('have.class', 'cm-content')
+
+    press('Tab', { keyCode: 9, which: 9, shiftKey: true }).should('eq', true)
+    cy.then(() => expect(value.value).to.eq('SELECT 1'))
+    cy.focused().should('have.class', 'cm-content')
+  })
+
+  it('blurs the editor on Escape, the WCAG 2.1.2 way out', () => {
+    mountCodeEditor({ content: 'SELECT 1' })
+
+    cy.get('.cm-content').click()
+    cy.get('.cm-editor').should('have.class', 'cm-focused')
+
+    // Without this a keyboard user who tabbed in could never tab out, because
+    // Tab now indents.
+    cy.get('.cm-content').type('{esc}')
+
+    cy.get('.cm-editor').should('not.have.class', 'cm-focused')
+    cy.focused().should('not.exist')
+  })
+
+  it('falls `class` through to the content part root', () => {
+    mountCodeEditor({ contentClass: 'min-h-40 rounded-md' })
+
+    cy.get(CONTENT)
+      .should('have.class', 'min-h-40')
+      .and('have.class', 'rounded-md')
+      // The box is the part's own root, and the view lives inside it.
+      .find('.cm-editor')
+      .should('exist')
+  })
+
+  it('renders a non-editable view with `editable: false`', () => {
+    mountCodeEditor({ content: 'SELECT 1', editable: false })
+
+    cy.get('.cm-content')
+      .should('have.attr', 'contenteditable', 'false')
+      .and('contain.text', 'SELECT 1')
+  })
+
+  it('drives the content part straight from useCodeEditor, with no wrapper', () => {
+    // The L4 path: the composable plus the part, and no `<CodeEditor>` in
+    // sight. This is what the optional `editor` prop exists for.
+    let content!: Ref<string>
+
+    const TestHost = defineComponent({
+      setup() {
+        content = ref('SELECT 1')
+        const editor = useCodeEditor({
+          content,
+          extensions: [CodeKit],
+        })
+        return () =>
+          h('div', { class: 'w-[420px] p-4' }, [
+            h(CodeEditorContent, { editor: editor.value, class: 'min-h-20' }),
+          ])
+      },
+    })
+
+    cy.mount(TestHost)
+
+    cy.get(CONTENT).find('.cm-content').should('contain.text', 'SELECT 1')
+    cy.get('.cm-content').click().type(' WHERE x')
+    cy.then(() => expect(content.value).to.eq('SELECT 1 WHERE x'))
+  })
+
+  it('lets an explicit `:editor="null"` beat the injected view', () => {
+    const TestHost = defineComponent({
+      setup() {
+        return () =>
+          h('div', { class: 'w-[420px] p-4' }, [
+            h(
+              CodeEditor,
+              { modelValue: 'SELECT 1', extensions: [CodeKit] },
+              {
+                default: () => [
+                  h(CodeEditorContent, { 'data-testid': 'injected' }),
+                  h(CodeEditorContent, {
+                    'data-testid': 'explicit-null',
+                    editor: null,
+                  }),
+                ],
+              },
+            ),
+          ])
+      },
+    })
+
+    cy.mount(TestHost)
+
+    // The first part takes the provided view.
+    cy.get('[data-testid="injected"]').find('.cm-editor').should('exist')
+    // The second was handed `null` on purpose, so it stays an empty box.
+    cy.get('[data-testid="explicit-null"]').should('be.empty')
+  })
+})
