@@ -127,7 +127,7 @@
           <div
             v-for="(date, col) in weeklyDates"
             :key="parseDate(date)"
-            class="cell -my-2 flex w-full cursor-pointer flex-col border-outline-gray-1"
+            class="cell -my-2 flex w-full flex-col border-outline-gray-1"
             :class="col === weeklyDates.length - 1 ? '' : 'border-r-[1px]'"
             :data-date-attr="date"
             @click.prevent="
@@ -227,7 +227,7 @@
               >
                 <!-- Time Grid -->
                 <div
-                  class="cell relative flex cursor-pointer text-ink-gray-8"
+                  class="cell relative flex text-ink-gray-8"
                   v-for="(time, i) in timeArray"
                   :key="time"
                   :data-time-attr="i == 0 ? '' : time"

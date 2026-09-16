@@ -719,3 +719,28 @@ describe('BottomSheet drag to dismiss', () => {
     app.unmount()
   })
 })
+
+describe('BottomSheet accessibility wiring', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  /*
+   * A sheet is titled and carries no description. reka warns once per open
+   * DialogContent that has neither a Description nor an explicit opt-out, so
+   * an app with a few sheets logged a warning for every one of them.
+   */
+  it('opens without reka warning about a missing description', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { app } = await openSheet({}, { startClosed: true })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await nextTick()
+
+    const described = warn.mock.calls.filter((args) =>
+      String(args[0]).includes('Description'),
+    )
+    expect(described).toEqual([])
+    app.unmount()
+  })
+})

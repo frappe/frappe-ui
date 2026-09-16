@@ -13,8 +13,14 @@
         cap, so a short sheet still hugs its content, and `dvh` keeps the cap
         honest when a mobile URL bar collapses.
       -->
+      <!--
+        A sheet has a title and no description. reka warns for every open
+        DialogContent without one; an explicit undefined `aria-describedby`
+        is its documented way to say there is none.
+      -->
       <DialogContent
         data-slot="content"
+        :aria-describedby="undefined"
         class="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
         :aria-label="title || 'Bottom sheet'"
         @escape-key-down="onDismissAttempt"
