@@ -211,42 +211,6 @@ defineExpose<TreeExposed>({
   collapseAll: () => writeKeys([]),
 })
 
-// The per-node `expanded` field went with the boolean model. `TreeNode` has an
-// index signature, so a beta caller keeping it gets no type error — and no
-// runtime effect either, leaving the node silently shut. Warn on the data.
-//
-// `expanded` is also a plausible column name, and a node is allowed arbitrary
-// extra fields, so this reports what it found rather than telling the caller
-// what they did.
-if (import.meta.env.DEV) {
-  const carriesExpanded = (nodes: TreeNode[]): boolean =>
-    nodes.some(
-      (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
-    )
-  // Deep, because a lazy tree assigns `children` in place — the path most
-  // likely to bring in stale nodes. A deep watch re-traverses the forest on
-  // every trigger, so stop it as soon as it has warned; it only warns once.
-  let reported = false
-  let stop: WatchStopHandle | undefined
-  stop = watch(
-    roots,
-    (nodes) => {
-      if (reported || !carriesExpanded(nodes)) return
-      reported = true
-      warnOnce(
-        'Tree.node.expanded',
-        '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
-          'Tree does not read it — expansion is `v-model:expanded`, an array ' +
-          'of node keys. Ignore this if the field is your own data.',
-      )
-      // `undefined` on the immediate pass, which the call below covers.
-      stop?.()
-    },
-    { immediate: true, deep: true },
-  )
-  if (reported) stop()
-}
-
 // --- focus -----------------------------------------------------------------
 function focus(key: TreeKey) {
   focusedKey.value = key
@@ -286,6 +250,41 @@ const flat = computed(() => {
   walk(roots.value, null, 1)
   return out
 })
+
+// The per-node `expanded` field went with the boolean model. `TreeNode` has an
+// index signature, so a beta caller keeping it gets no type error — and no
+// runtime effect either, leaving the node silently shut. Warn on the data.
+//
+// `expanded` is also a plausible column name, and a node is allowed arbitrary
+// extra fields, so this reports what it found rather than telling the caller
+// what they did.
+//
+// Watching `flat` rather than `nodes` deep: `flat` is already computed for
+// rendering, so this costs no extra traversal, where a deep watch would
+// re-walk the forest on every edit — for the life of any tree that never
+// trips it, which is most of them. The trade is that a node under a closed
+// ancestor is reported when it first renders instead of at mount.
+if (import.meta.env.DEV) {
+  let reported = false
+  let stop: WatchStopHandle | undefined
+  stop = watch(
+    flat,
+    (rows) => {
+      if (reported || !rows.some((row) => 'expanded' in row.node)) return
+      reported = true
+      warnOnce(
+        'Tree.node.expanded',
+        '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
+          'Tree does not read it — expansion is `v-model:expanded`, an array ' +
+          'of node keys. Ignore this if the field is your own data.',
+      )
+      // `undefined` on the immediate pass, which the call below covers.
+      stop?.()
+    },
+    { immediate: true },
+  )
+  if (reported) stop()
+}
 
 // --- drag & drop ----------------------------------------------------------
 const dragDrop = useTreeDragDrop({
