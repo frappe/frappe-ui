@@ -181,8 +181,6 @@ import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { daysList, parseDate } from './calendarUtils'
 import {
-  LANE_HEIGHT,
-  LANE_PITCH,
   COLUMN_INSET,
   COLUMN_RULE,
   barsInColumn,
@@ -191,6 +189,8 @@ import {
   isSpan,
   layoutRow,
   shiftEventDays,
+  weekLaneHeight,
+  weekLanePitch,
 } from './eventSpan'
 import { shortMonth, stripWeeks } from './monthStrip'
 import { useNow } from './composables/useNow'
@@ -229,24 +229,14 @@ const HEADER_HEIGHT = 28
 const isNarrow = useBreakpoints(breakpointsTailwind).smaller('sm')
 
 /**
- * A bar's height, and the pitch of the lanes it is laid in.
- *
- * A bar and a single day's pill are the same thing said two ways, so they have
- * to be the same height: 20px is what a dense pill comes to — its 16px line and
- * 2px either side — where a bar kept the 30px the desktop lays its lanes at, two
- * rows of events at two heights in one cell.
+ * A bar's height, and the pitch of the lanes it is laid in: the week's own, at
+ * either size, since a bar and a single day's pill are the same thing said two
+ * ways and a month cell stacks both under one date. 28px and 4 between where
+ * the cell has the room the desktop gives it; 20 and 2 where a cell holds three
+ * rows and a count.
  */
-const DENSE_LANE_HEIGHT = 20
-
-const laneHeight = computed(() =>
-  isNarrow.value ? DENSE_LANE_HEIGHT : LANE_HEIGHT,
-)
-/**
- * The air between one row of a cell and the next, which the lanes carry as the
- * difference between their height and their pitch. Two pixels where a cell holds
- * three rows and a count; four where a cell has the room the desktop gives it.
- */
-const DENSE_LANE_GAP = 2
+const laneHeight = computed(() => weekLaneHeight(isNarrow.value))
+const lanePitch = computed(() => weekLanePitch(isNarrow.value))
 
 /**
  * How far inside its cell an event is drawn, in pixels — the stacked pills and
@@ -259,12 +249,6 @@ const DENSE_LANE_GAP = 2
 const CELL_INSET = 4
 
 const cellInset = computed(() => (isNarrow.value ? COLUMN_INSET : CELL_INSET))
-
-const lanePitch = computed(
-  () =>
-    laneHeight.value +
-    (isNarrow.value ? DENSE_LANE_GAP : LANE_PITCH - LANE_HEIGHT),
-)
 
 /**
  * The fewest rows a cell will draw, however little room it has. Below three,

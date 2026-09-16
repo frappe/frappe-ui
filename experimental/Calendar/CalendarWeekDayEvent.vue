@@ -1,11 +1,4 @@
 <template>
-  <!--
-    Controlled rather than trigger-driven: a single click opens the popover only
-    after a 200ms wait, so a double click can edit the event instead, and a
-    mousedown can start a reposition drag. Reka's trigger toggles on click with
-    no such delay, so `update:open` is honoured only on the way down — Escape
-    and outside-click still close it.
-  -->
   <!-- The cut between this pill and each event it is drawn over: a rounded
        rect 2px larger than this pill on every side, in the page's own
        colour, clipped to the exact rounded shape of the pill beneath — so what
@@ -23,258 +16,227 @@
   >
     <div class="absolute bg-surface-base" :style="cut.ring" />
   </div>
-  <Popover
-    :open="isPopoverOpen"
+  <CalendarEventPopover
+    v-model:open="isPopoverOpen"
     :side="popoverSide"
-    align="center"
-    @update:open="(value) => !value && (isPopoverOpen = false)"
+    :calendar-event="calendarEvent"
+    :date="date"
     @open="registerDeleteShortcut"
     @close="unregisterDeleteShortcut"
+    @edit="handleEventEdit"
+    @delete="handleEventDelete"
   >
-    <!--
-      The positioning wrapper is explicit now. It used to arrive as an attr on
-      <Popover>, which the legacy anchor put on a wrapper it rendered itself;
-      #trigger is as-child and renders no wrapper of its own.
-    -->
-    <template #trigger>
-      <div class="flex" :style="containerStyle">
-        <!-- Flat: the tint is the event and the bar is its calendar, and a drop
-             shadow under each one made a grid of hours look like a pile of
-             cards. What the shadow was really doing — telling two overlapping
-             events of one calendar apart — an event laid over another does,
-             by carrying a ring of the page's own colour, so the edge it lands
-             on is a cut rather than a join.
+    <!-- The positioning wrapper is explicit: the popover's trigger is as-child
+         and renders no wrapper of its own. -->
+    <div class="flex" :style="containerStyle">
+      <!-- Flat: the tint is the event and the bar is its calendar, and a drop
+           shadow under each one made a grid of hours look like a pile of
+           cards. What the shadow was really doing — telling two overlapping
+           events of one calendar apart — an event laid over another does,
+           by carrying a ring of the page's own colour, so the edge it lands
+           on is a cut rather than a join.
 
-             .stop as well as .prevent on the click below: the grid cell under
-             this pill reads a click as "make an event here", and a click on an
-             event is not that. It was covered up rather than handled — a pill
-             that opens a popover sets isAnyPopoverOpen, which the cell then
-             declines on — so it surfaced only where the popover never opens,
-             which is a phone: every tap on an event opened a new-event form
-             behind the sheet it had just asked for. -->
-        <div
-          ref="eventRef"
-          class="event mx-px rounded-4 transition-all duration-75 shrink-0"
-          :class="{
-            // An all-day pill is read as a row of the day's own list, so it is
-            // exactly the height of one — a lane's — rather than as tall as its
-            // own padding and line happen to come to. The week's lane is the
-            // shorter of the two: a bar there is one line read across the row,
-            // where the day's pill stands in a stack of them. A timed pill is as
-            // tall as its event is long, and only needs a floor to stay legible
-            // when that is minutes.
-            'h-full': isAllDay && !!bar,
-            'h-7': isAllDay && !bar,
-            'min-h-6': !isAllDay,
-            active: activeEvent == (props.event?.id || props.event?.name),
-            'rounded-l-none': bar && !bar.isStart,
-            'rounded-r-none': bar && !bar.isEnd,
-            'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
-            'rounded-t-none': !isAllDay && props.event.segIsStart === false,
-            'event-draft': !!props.event.isDraft,
-          }"
-          :style="innerStyle"
-          @click.stop.prevent="
-            handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
-          "
-          @dblclick.prevent="handleEventEdit($event)"
-          @mousedown="
-            handleRepositionMouseDown(
-              $event,
-              isPopoverOpen,
-              () => (isPopoverOpen = false),
-            )
-          "
-        >
-          <div class="flex gap-1.5 h-full" :class="padClass">
-            <!-- The calendar's own colour, down the pill's left edge — and the
-                 first thing a tight pill gives up: the bar and the air beside it
-                 are 8px of a pill some 40px wide, a fifth of it spent saying
-                 what the fill it is drawn on says already. Where the column has
-                 room — a desktop week, the day at any size — those 8px cost
-                 nothing and the stripe is worth having.
+           .stop as well as .prevent on the click below: the grid cell under
+           this pill reads a click as "make an event here", and a click on an
+           event is not that. It was covered up rather than handled — a pill
+           that opens a popover sets isAnyPopoverOpen, which the cell then
+           declines on — so it surfaced only where the popover never opens,
+           which is a phone: every tap on an event opened a new-event form
+           behind the sheet it had just asked for. -->
+      <div
+        ref="eventRef"
+        class="event mx-px rounded-4 transition-all duration-75 shrink-0"
+        :class="{
+          // An all-day pill is read as a row of the day's own list, so it is
+          // exactly the height of one — a lane's — rather than as tall as its
+          // own padding and line happen to come to. The week's lane is the
+          // shorter of the two: a bar there is one line read across the row,
+          // where the day's pill stands in a stack of them. A timed pill is as
+          // tall as its event is long, and only needs a floor to stay legible
+          // when that is minutes.
+          'h-full': isAllDay && !!bar,
+          'h-7': isAllDay && !bar,
+          'min-h-6': !isAllDay,
+          active: activeEvent == (props.event?.id || props.event?.name),
+          'rounded-l-none': bar && !bar.isStart,
+          'rounded-r-none': bar && !bar.isEnd,
+          'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
+          'rounded-t-none': !isAllDay && props.event.segIsStart === false,
+          'event-draft': !!props.event.isDraft,
+        }"
+        :style="innerStyle"
+        @click.stop.prevent="
+          handleEventClick($event, () => (isPopoverOpen = !isPopoverOpen))
+        "
+        @dblclick.prevent="handleEventEdit($event)"
+        @mousedown="
+          handleRepositionMouseDown(
+            $event,
+            isPopoverOpen,
+            () => (isPopoverOpen = false),
+          )
+        "
+      >
+        <div class="flex gap-1.5 h-full" :class="padClass">
+          <!-- The calendar's own colour, down the pill's left edge — and the
+               first thing a tight pill gives up: the bar and the air beside it
+               are 8px of a pill some 40px wide, a fifth of it spent saying
+               what the fill it is drawn on says already. Where the column has
+               room — a desktop week, the day at any size — those 8px cost
+               nothing and the stripe is worth having.
 
-                 By the view's answer rather than by the pill's own width, as
-                 everything else in the tight tier is: a narrow week draws
-                 single-day pills and bars three days wide in one row, and a
-                 stripe on the wide ones alone read as two kinds of event.
+               By the view's answer rather than by the pill's own width, as
+               everything else in the tight tier is: a narrow week draws
+               single-day pills and bars three days wide in one row, and a
+               stripe on the wide ones alone read as two kinds of event.
 
-                 A pixel shorter at either end than the text beside it — 5px in
-                 from the pill's edge where the padding alone would put it 4 —
-                 so it reads as a mark set on the pill rather than a rule run
-                 through it. Sized by the row's stretch with the margin taken
-                 off, not `h-full` with a margin added on, which would run it
-                 past the bottom.
+               A pixel shorter at either end than the text beside it — 5px in
+               from the pill's edge where the padding alone would put it 4 —
+               so it reads as a mark set on the pill rather than a rule run
+               through it. Sized by the row's stretch with the margin taken
+               off, not `h-full` with a margin added on, which would run it
+               past the bottom.
 
-                 Not drawn on a draft, whose dashed outline is its mark, but
-                 its room is kept: pills stack in a column, and a draft whose
-                 title started where the others' bars do was the one pill out
-                 of line. -->
+               Not drawn on a draft, whose dashed outline is its mark, but
+               its room is kept: pills stack in a column, and a draft whose
+               title started where the others' bars do was the one pill out
+               of line. -->
+          <div
+            v-if="props.event.fromTime && !isTight"
+            class="event-border my-px w-[2px] rounded-4 shrink-0"
+            :class="{ invisible: props.event.isDraft }"
+          />
+          <!-- An all-day pill is one line in a box built to hold it, so the
+               line sits in the middle of the box: a 20px line 2px inside a
+               24px bar has nowhere else to be, and asking for the top left it
+               a pixel high at the least convenient moment. A timed pill is as
+               tall as its event, which is usually taller than what it has to
+               say, and that starts at the top. -->
+          <!-- `min-w-0 flex-1`: as wide as the row has room for, whatever
+               is in it. Its width is what the floors below are read against,
+               and read off a box sized to its content, a title hidden for
+               want of room left the box no width, no width read as not yet
+               measured, the title came back, and the pill blinked. -->
+          <div
+            ref="contentRef"
+            class="relative flex h-full min-w-0 flex-1 select-none gap-2 overflow-hidden"
+            :class="isAllDay ? 'items-center' : 'items-start'"
+          >
+            <div v-if="config.showIcon && eventIcon">
+              <component :is="eventIcon" class="h-4 w-4" />
+            </div>
+            <!-- A short event has one line's worth of height, so the time
+                 sits beside the title there instead of under it, where it
+                 would be cut off. -->
             <div
-              v-if="props.event.fromTime && !isTight"
-              class="event-border my-px w-[2px] rounded-4 shrink-0"
-              :class="{ invisible: props.event.isDraft }"
-            />
-            <!-- An all-day pill is one line in a box built to hold it, so the
-                 line sits in the middle of the box: a 20px line 2px inside a
-                 24px bar has nowhere else to be, and asking for the top left it
-                 a pixel high at the least convenient moment. A timed pill is as
-                 tall as its event, which is usually taller than what it has to
-                 say, and that starts at the top. -->
-            <!-- `min-w-0 flex-1`: as wide as the row has room for, whatever
-                 is in it. Its width is what the floors below are read against,
-                 and read off a box sized to its content, a title hidden for
-                 want of room left the box no width, no width read as not yet
-                 measured, the title came back, and the pill blinked. -->
-            <div
-              ref="contentRef"
-              class="relative flex h-full min-w-0 flex-1 select-none gap-2 overflow-hidden"
-              :class="isAllDay ? 'items-center' : 'items-start'"
+              class="flex min-w-0 overflow-hidden"
+              :class="
+                isCompact ? 'items-baseline gap-1.5' : 'w-full flex-col gap-0.5'
+              "
             >
-              <div v-if="config.showIcon && eventIcon">
-                <component :is="eventIcon" class="h-4 w-4" />
-              </div>
-              <!-- A short event has one line's worth of height, so the time
-                   sits beside the title there instead of under it, where it
-                   would be cut off. -->
-              <div
-                class="flex min-w-0 overflow-hidden"
-                :class="
+              <!-- Declined: struck through and muted; the fill and bar stay,
+                   so the event still reads as the one you said no to. -->
+              <!-- `break-words` so a word wider than the pill breaks and
+                   carries on underneath rather than running off the edge and
+                   being clipped: at a tight pill's width most titles have a
+                   word in them that no line can hold, and half of one against
+                   the pill's edge reads as a rendering fault where a broken
+                   one reads as a word that did not fit. It costs nothing
+                   where a line does hold, which is every wider pill. -->
+              <!-- Not drawn at all where the row has no room for even a
+                   letter and an ellipsis — see `showTitle` — since what a
+                   narrower row shows is the sliver of a letter, which reads
+                   as a fault, and an empty pill reads as a pill too narrow
+                   to say anything, which it is. -->
+              <p
+                v-if="showTitle"
+                ref="eventTitleRef"
+                class="event-title break-words"
+                :class="[
+                  // A size down where the pill is tight, with the line height
+                  // that goes with it: 20px of leading under a 12px face
+                  // wasted one of the two or three lines such a pill has.
+                  //
+                  // A title with room to wrap sets its lines snug, ~18px on
+                  // the 13px face: at the 20 a one-line pill keeps, its lines
+                  // sat further from each other than the last of them sat
+                  // from the time, and the pair read as two things. Snug
+                  // puts the two distances within a pixel. The one-line
+                  // pills — compact, all-day — keep 20, which is what their
+                  // lanes are built round.
+                  isTight
+                    ? 'text-xs-medium leading-4'
+                    : isCompact || isAllDay
+                      ? 'text-sm-medium leading-5'
+                      : 'text-sm-medium leading-snug',
+                  // One line only where the pill has one line's height. A
+                  // narrow pill is not a short one: it wraps into whatever
+                  // height it has, and the clamp is reckoned from what is
+                  // left after the time line, so the range keeps its end
+                  // either way.
+                  // In the compact row the title gives up its characters
+                  // before the time gives up any: it shrinks a hundred times
+                  // as readily, which is the only order flex knows, and only
+                  // once it is down to its floor does the time start to go.
+                  // The floor is one letter and an ellipsis — 24px holds a W
+                  // and the dots at this size — so the row always says what
+                  // the event is, if only by its initial, and never shows an
+                  // ellipsis on its own, or the sliver of a letter that a
+                  // title squeezed to nothing was.
                   isCompact
-                    ? 'items-baseline gap-1.5'
-                    : 'w-full flex-col gap-0.5'
+                    ? `${TITLE_FLOOR_CLASS} shrink-[100] truncate`
+                    : lineClampClass,
+                  props.event.isDeclined
+                    ? 'line-through text-ink-gray-5'
+                    : 'text-ink-gray-8',
+                ]"
+              >
+                {{ props.event.title || '[No title]' }}
+              </p>
+              <!-- Under the title the range wraps into the lines the title
+                   leaves — see `timeClampClass` — and beside it, in the
+                   compact row, it is one line, and gone altogether where
+                   the title's floor leaves it less than a digit and an
+                   ellipsis — see `showTime`.
+                   `truncate`, so a range with nowhere left to go ends in an
+                   ellipsis rather than at the pill's edge: a glyph sliced
+                   down the middle reads as a bug where "10:15 am – 12:30 p…"
+                   reads as a range that did not fit. One size, whatever the
+                   pill's width: a cascaded or sidebar-squeezed pill is the
+                   same event at the same distance from the reader, and its
+                   type does not get smaller for being in a narrower column —
+                   only the tight tier, which the view hands in, sets type
+                   down, and it drops the time altogether. In the compact
+                   row this fires only after the title is down to
+                   its initial — see the title's shrink — since a pill too
+                   narrow for both has to cut one, and a range with its end
+                   gone still says when the event starts. -->
+              <p
+                ref="eventTimeRef"
+                v-if="!isAllDay && !isTight && showTime"
+                class="event-subtitle text-xs"
+                :class="
+                  isCompact ? `${TIME_FLOOR_CLASS} truncate` : timeClampClass
                 "
               >
-                <!-- Declined: struck through and muted; the fill and bar stay,
-                     so the event still reads as the one you said no to. -->
-                <!-- `break-words` so a word wider than the pill breaks and
-                     carries on underneath rather than running off the edge and
-                     being clipped: at a tight pill's width most titles have a
-                     word in them that no line can hold, and half of one against
-                     the pill's edge reads as a rendering fault where a broken
-                     one reads as a word that did not fit. It costs nothing
-                     where a line does hold, which is every wider pill. -->
-                <!-- Not drawn at all where the row has no room for even a
-                     letter and an ellipsis — see `showTitle` — since what a
-                     narrower row shows is the sliver of a letter, which reads
-                     as a fault, and an empty pill reads as a pill too narrow
-                     to say anything, which it is. -->
-                <p
-                  v-if="showTitle"
-                  ref="eventTitleRef"
-                  class="event-title break-words"
-                  :class="[
-                    // A size down where the pill is tight, with the line height
-                    // that goes with it: 20px of leading under a 12px face
-                    // wasted one of the two or three lines such a pill has.
-                    //
-                    // A title with room to wrap sets its lines snug, ~18px on
-                    // the 13px face: at the 20 a one-line pill keeps, its lines
-                    // sat further from each other than the last of them sat
-                    // from the time, and the pair read as two things. Snug
-                    // puts the two distances within a pixel. The one-line
-                    // pills — compact, all-day — keep 20, which is what their
-                    // lanes are built round.
-                    isTight
-                      ? 'text-xs-medium leading-4'
-                      : isCompact || isAllDay
-                        ? 'text-sm-medium leading-5'
-                        : 'text-sm-medium leading-snug',
-                    // One line only where the pill has one line's height. A
-                    // narrow pill is not a short one: it wraps into whatever
-                    // height it has, and the clamp is reckoned from what is
-                    // left after the time line, so the range keeps its end
-                    // either way.
-                    // In the compact row the title gives up its characters
-                    // before the time gives up any: it shrinks a hundred times
-                    // as readily, which is the only order flex knows, and only
-                    // once it is down to its floor does the time start to go.
-                    // The floor is one letter and an ellipsis — 24px holds a W
-                    // and the dots at this size — so the row always says what
-                    // the event is, if only by its initial, and never shows an
-                    // ellipsis on its own, or the sliver of a letter that a
-                    // title squeezed to nothing was.
-                    isCompact
-                      ? `${TITLE_FLOOR_CLASS} shrink-[100] truncate`
-                      : lineClampClass,
-                    props.event.isDeclined
-                      ? 'line-through text-ink-gray-5'
-                      : 'text-ink-gray-8',
-                  ]"
-                >
-                  {{ props.event.title || '[No title]' }}
-                </p>
-                <!-- Under the title the range wraps into the lines the title
-                     leaves — see `timeClampClass` — and beside it, in the
-                     compact row, it is one line, and gone altogether where
-                     the title's floor leaves it less than a digit and an
-                     ellipsis — see `showTime`.
-                     `truncate`, so a range with nowhere left to go ends in an
-                     ellipsis rather than at the pill's edge: a glyph sliced
-                     down the middle reads as a bug where "10:15 am – 12:30 p…"
-                     reads as a range that did not fit. One size, whatever the
-                     pill's width: a cascaded or sidebar-squeezed pill is the
-                     same event at the same distance from the reader, and its
-                     type does not get smaller for being in a narrower column —
-                     only the tight tier, which the view hands in, sets type
-                     down, and it drops the time altogether. In the compact
-                     row this fires only after the title is down to
-                     its initial — see the title's shrink — since a pill too
-                     narrow for both has to cut one, and a range with its end
-                     gone still says when the event starts. -->
-                <p
-                  ref="eventTimeRef"
-                  v-if="!isAllDay && !isTight && showTime"
-                  class="event-subtitle text-xs"
-                  :class="
-                    isCompact ? `${TIME_FLOOR_CLASS} truncate` : timeClampClass
-                  "
-                >
-                  {{ timeLabel }}
-                </p>
-              </div>
+                {{ timeLabel }}
+              </p>
             </div>
           </div>
-          <div
-            v-if="
-              config.isEditMode && !isAllDay && props.event.segIsEnd !== false
-            "
-            class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
-            @mousedown="handleResizeMouseDown"
-          />
         </div>
-      </div>
-    </template>
-
-    <template #default="{ close }">
-      <slot
-        name="event-popover-content"
-        :calendarEvent
-        :date
-        :isEditMode="config.isEditMode"
-        :close
-      >
-        <EventModalContent
-          :calendarEvent="calendarEvent"
-          :date="date"
-          :isEditMode="config.isEditMode"
-          @close="close"
-          @edit="
-            (e) => {
-              close()
-              handleEventEdit(e)
-            }
+        <div
+          v-if="
+            config.isEditMode && !isAllDay && props.event.segIsEnd !== false
           "
-          @delete="
-            () => {
-              close()
-              handleEventDelete()
-            }
-          "
+          class="absolute -bottom-1 h-3 w-full cursor-ns-resize"
+          @mousedown="handleResizeMouseDown"
         />
-      </slot>
+      </div>
+    </div>
+    <template #event-popover-content="slotProps">
+      <slot name="event-popover-content" v-bind="slotProps" />
     </template>
-  </Popover>
+  </CalendarEventPopover>
 
   <NewEventModal v-model="showEventModal" :event="updatedEvent" />
 </template>
@@ -284,9 +246,8 @@ import './style.css'
 
 import { ref, inject, computed, reactive, type CSSProperties } from 'vue'
 import { useElementSize } from '@vueuse/core'
-import EventModalContent from './EventModalContent.vue'
+import CalendarEventPopover from './CalendarEventPopover.vue'
 import NewEventModal from './NewEventModal.vue'
-import Popover from '#components/Popover/Popover.vue'
 import type { PopoverSide } from '#components/Popover/types'
 import { useEventBase } from './useEventBase'
 import {
@@ -516,7 +477,8 @@ const timedBox = (
     bottom,
     height: bottom - top,
     hallNumber,
-    left: (extra = 0) => `calc(${hallNumber * 20}% + ${pillInset.value + extra}px)`,
+    left: (extra = 0) =>
+      `calc(${hallNumber * 20}% + ${pillInset.value + extra}px)`,
     right: (extra = 0) => `calc(7% + ${hallNumber * 2 * CUT - extra}px)`,
   }
 }
@@ -565,7 +527,6 @@ const cuts = computed(() => {
     return { id: `${other.id}-${other.hallNumber}-${other.idx}`, clip, ring }
   })
 })
-
 
 const containerStyle = computed<CSSProperties>(() => {
   if (props.bar) {
@@ -738,7 +699,9 @@ const titleLines = computed(() => {
   const timeLine = eventTimeRef.value ? lineHeightOf(eventTimeRef.value) : 0
   return Math.max(
     1,
-    Math.floor((contentHeight() - timeLine) / lineHeightOf(eventTitleRef.value)),
+    Math.floor(
+      (contentHeight() - timeLine) / lineHeightOf(eventTitleRef.value),
+    ),
   )
 })
 
@@ -764,7 +727,9 @@ const timeClampClass = computed(() => {
   const titleLine = lineHeightOf(eventTitleRef.value)
   const natural = Math.round(eventTitleRef.value.scrollHeight / titleLine)
   const taken = Math.min(natural, titleLines.value) * titleLine
-  return clampClass((contentHeight() - taken) / lineHeightOf(eventTimeRef.value))
+  return clampClass(
+    (contentHeight() - taken) / lineHeightOf(eventTimeRef.value),
+  )
 })
 
 // ── Compact row ───────────────────────────────────────────────────────────

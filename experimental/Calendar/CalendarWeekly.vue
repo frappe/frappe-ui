@@ -196,19 +196,15 @@
         ref="gridRef"
       >
         <div class="flex">
-          <!-- Time List form 0 - 24. `shrink-0`, or the flex row squeezes the
-             gutter out of line with the all-day label above it; and the rule is
-             this column's right edge, not the first day's left, so the two land
-             on the same pixel. -->
+          <!-- The hour gutter, a spacer as tall as the 24 hours beside it: the
+             labels hang off the first day column's rows (see `.calendar-column`
+             in style.css). `shrink-0`, or the flex row squeezes it out of line
+             with the all-day label above; and the rule is this column's right
+             edge, not the first day's left, so the two land on the same pixel. -->
           <div
-            class="grid w-14 shrink-0 grid-cols-1 border-r-[1px] border-outline-gray-1"
-          >
-            <span
-              v-for="time in 24"
-              class="flex items-end justify-center text-center text-sm text-ink-gray-5"
-              :style="{ height: `${hourHeight}px` }"
-            />
-          </div>
+            class="w-14 shrink-0 border-r-[1px] border-outline-gray-1"
+            :style="{ height: `${24 * hourHeight}px` }"
+          />
 
           <!-- Grid -->
           <div class="relative z-0 flex w-full flex-col">
@@ -275,15 +271,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, computed, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
-import {
-  twelveHoursFormat,
-  twentyFourHoursFormat,
-  parseDate,
-  daysList,
-} from './calendarUtils'
+import { parseDate, daysList } from './calendarUtils'
 import {
   COLUMN_INSET,
   PILL_INSET,
@@ -296,6 +287,7 @@ import {
 
 import { Button } from '#components/Button'
 import useCalendarData from './composables/useCalendarData'
+import { useHourGrid } from './composables/useHourGrid'
 import { useNow } from './composables/useNow'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
@@ -341,12 +333,10 @@ const NARROW_COLUMN = 64
 
 const { width: headWidth } = useElementSize(headRef)
 
-const columnWidth = computed(
-  () => headWidth.value / (props.weeklyDates.length || 7),
-)
-
 const isNarrow = computed(
-  () => !!headWidth.value && columnWidth.value < NARROW_COLUMN,
+  () =>
+    !!headWidth.value &&
+    headWidth.value / (props.weeklyDates.length || 7) < NARROW_COLUMN,
 )
 
 /**
@@ -371,62 +361,13 @@ const barInset = computed(() => (isNarrow.value ? COLUMN_INSET : PILL_INSET))
 
 const dayName = (date: Date) => daysList[date.getDay()]
 
-const hourHeight = props.config.hourHeight
-const minuteHeight = hourHeight / 60
-
-const timeArray =
-  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
-
-/**
- * The time a click asks for: the mark it landed nearest, less the half hour that
- * puts that mark in the middle of the event rather than at its start.
- *
- * The row it was in is an hour tall and carries three marks — its own line, the
- * half hour, and the line below it — so where in the row the click fell is the
- * finer thing it already knows and the row label alone throws away. The top and
- * bottom quarters go to the lines that bound the row and the middle half to the
- * half hour, which is the widest target of the three because it is the one with
- * no line to aim at.
- *
- * Centred, not started, because a click is a point and an event is an hour: the
- * point is where the reader is looking, and an hour hung below it puts the thing
- * they were pointing at at its very top edge. So a click on the 7 line asks for
- * 6:30, which draws an event through the 7 it was aimed at; the middle of the
- * row asks for 7, which is the row itself; and the 8 line asks for 7:30.
- *
- * Half hours, not quarters: a quarter of a 72px row is an 18px target, under
- * what a thumb can be asked to hit.
- *
- * A whole hour hands back the row's own label, unchanged, so what a consumer
- * parses is what it always parsed. A half hour is spelled out in the format the
- * grid is read in: "7:30 am" beside "7 am", "07:30" beside "07:00".
- */
-const LAST_START = 23 * 60 + 30
-
-function slotTime(e: MouseEvent, hour: number): string {
-  const row = e.currentTarget as HTMLElement | null
-  const fraction = row
-    ? (e.clientY - row.getBoundingClientRect().top) / hourHeight
-    : 0
-  const minutes = fraction < 0.25 ? 0 : fraction < 0.75 ? 30 : 60
-
-  // Both ends are the day's own: midnight has nothing above it to centre on,
-  // and the last row's line below it belongs to the day after — the date came
-  // with the cell, so neither can be reached from here.
-  const start = Math.min(Math.max(hour * 60 + minutes - 30, 0), LAST_START)
-  const startHour = Math.floor(start / 60)
-  if (start % 60 === 0) return timeArray[startHour]!
-
-  if (props.config.timeFormat === '24h')
-    return `${String(startHour).padStart(2, '0')}:30`
-  return `${((startHour + 11) % 12) + 1}:30 ${startHour < 12 ? 'am' : 'pm'}`
-}
-
-const timedEvents = computed(
-  () => useCalendarData(props.events, minuteHeight).timedEvents.value,
+const { hourHeight, minuteHeight, timeArray, slotTime } = useHourGrid(
+  props.config,
+  gridRef,
 )
-const allDayEvents = computed(
-  () => useCalendarData(props.events).allDayEvents.value,
+const { timedEvents, allDayEvents } = useCalendarData(
+  () => props.events,
+  minuteHeight,
 )
 
 const allDayRow = computed(() =>
@@ -478,10 +419,4 @@ const calendarActions = inject(CALENDAR_ACTIONS_KEY)
 if (!calendarActions) {
   throw new Error('CalendarWeekly must be rendered inside Calendar.')
 }
-
-onMounted(() => {
-  const currentHour = new Date().getHours()
-  const scrollToHour = props.config.scrollToHour || currentHour
-  gridRef.value?.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
-})
 </script>

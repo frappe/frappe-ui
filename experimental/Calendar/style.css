@@ -23,6 +23,8 @@
   font-weight: 400;
 }
 
+/* An event wherever it is drawn: a pill in the grids, and a row in the Agenda,
+   which is a pill lying down and takes every rule here. */
 .event {
   background-color: var(--bg);
 }
@@ -50,9 +52,9 @@
    specificity — over `.event.active`, and the one event a reader had just opened
    was the one that did not look open. */
 @media (hover: hover) {
-  /* Pointed at: one step deeper in the event's own colour. `bgHover` is the same
-     step as `bg` in the palette, so hovering an event changed nothing — the pill
-     a reader was about to click looked exactly like every pill they were not. */
+  /* Pointed at: one step deeper in the event's own colour. The palette's own
+     hover step was the same as its rest, so hovering an event changed nothing —
+     the pill a reader was about to click looked like every pill they were not. */
   .event:hover {
     background-color: var(--bg-active);
   }
@@ -74,72 +76,14 @@
 .event.active:hover {
   background-color: color-mix(in srgb, var(--border) 10%, var(--bg-active));
 }
-.event .past,
-.event.past {
+/* Behind you: the event fades whole. Not the open one: the event the reader
+   has chosen is not behind them. */
+.event.past:not(.active) {
   opacity: 0.5;
 }
 
 /* ── Listed events: the Agenda's rows ─────────────────────────────────────── */
 
-/* A row is a pill lying down: it takes the pill's fill in its calendar's
-   colour and the pill's bar inside its left edge, so the Agenda's days read as
-   the Week's do — the one set of events, tinted the same wherever they are
-   seen. The block carries its own edges, so the rows need no hairline between
-   them and the gutter no rule beside them: the list is tinted blocks on a
-   plain ground, 4px apart, the way the grid is. */
-.calendar-row {
-  background-color: var(--bg);
-}
-/* The bar is an element in the block, as the pill's is, not a border on it: a
-   border ran the block's full height and squared off at its corners, and read
-   as an edge the block had been given rather than a mark set inside it. */
-.calendar-row-bar {
-  background-color: var(--border);
-}
-/* The muted ink inside a block — its description and its count — is the
-   pill's subtitle ink, not the list's gray: gray on a tinted ground reads as
-   dirt, and the calendar's own darker step reads as the same colour, quiet.
-   The time is not muted: it ranks a step over these, see the row. */
-.calendar-row-muted {
-  color: var(--subtext);
-}
-/* A draft, in a row's vocabulary: exactly what it is in a pill's. An outline
-   in the event's colour on the plain ground rather than a fill, so it reads as
-   not yet real — and no bar, which the template hides for a draft, keeping
-   its room so the time stays in its column. */
-.calendar-row.event-draft {
-  background-color: var(--surface-base);
-  outline: 1px dashed var(--border);
-  outline-offset: -1px;
-}
-/* Hover and selected are steps of the calendar's own colour, not the list's
-   grays: a gray wash over a tinted block muddied it, and the tint's own next
-   rung is what a pill in the grid does under the pointer. Hover is that rung;
-   selected is one past it, so the open row can be told from a pointed-at one
-   at a glance and not only by staying put when the pointer leaves. The ramp
-   has no third rung to name, so the step is the colour's own border ink
-   folded into the second — the same mix an open pill takes under the pointer.
-
-   The selected rule comes after the hover rule and matches hovered or not:
-   the open row is at its own step whatever the pointer does. A further step
-   under the pointer had the open row darkening on approach, which reads as
-   "press me" on the one row that is already pressed. */
-@media (hover: hover) {
-  .calendar-row:hover {
-    background-color: var(--bg-active);
-  }
-}
-.calendar-row.active,
-.calendar-row.active:hover {
-  background-color: color-mix(in srgb, var(--border) 10%, var(--bg-active));
-}
-/* Behind you: the block fades whole, as a pill in the grid does once its time
-   has passed. It used to fade only its contents, to hold the hairline it drew
-   at one weight — there is no hairline now, and a block's fill is its own to
-   fade. Not the open one: the row the reader has chosen is not behind them. */
-.calendar-row.past:not(.active) {
-  opacity: 0.5;
-}
 /* A day already spent says so from its header too — a date in full ink over a
    card of faded rows reads as the live one. Its ink alone, for the reason the
    rows fade their contents: the band's wash and the rules closing it are the
@@ -170,6 +114,6 @@
    2/3". Drawn by the description rather than as a span between them so that
    an empty description, hidden by the rule above, takes its separator with it:
    a consumer fills the slot for every row and has nothing to say on some. */
-.calendar-row.narrow .calendar-row-description::before {
+.event.narrow .calendar-row-description::before {
   content: '· ';
 }

@@ -1,7 +1,7 @@
 import { ref, inject, computed, watch, reactive, onUnmounted } from 'vue'
 import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import { activeEvent } from './composables/useCalendarData'
-import { colorMap, colorMapDark } from './calendarUtils'
+import { colorMap } from './calendarUtils'
 import {
   CALENDAR_ACTIONS_KEY,
   CALENDAR_CONFIG_KEY,
@@ -17,8 +17,8 @@ import {
  * Everything but the colour itself is mixed into `--surface-base`, so the fills
  * are a wash of it on whatever the page's own ground is and follow the theme
  * without the colour having to know there is one. The steps are the ones the
- * palette uses between `bg`, `bgHover` and `borderActive`, so an event in a
- * calendar's own colour sits at the same weights as one in green.
+ * palette uses between `bg` and `bgActive`, so an event in a calendar's own
+ * colour sits at the same weights as one in green.
  *
  * It used to fall back to green, which said the calendar was a calendar and
  * nothing about which.
@@ -26,11 +26,8 @@ import {
 const derivedColor = (value: string): CalendarColor => ({
   color: value,
   border: value,
-  borderActive: `color-mix(in srgb, ${value} 30%, var(--surface-base))`,
-  text: value,
   subtext: 'var(--ink-gray-6)',
   bg: `color-mix(in srgb, ${value} 10%, var(--surface-base))`,
-  bgHover: `color-mix(in srgb, ${value} 16%, var(--surface-base))`,
   bgActive: `color-mix(in srgb, ${value} 16%, var(--surface-base))`,
 })
 
@@ -75,23 +72,12 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
 
   // ── Theming ──────────────────────────────────────────────────────────────
 
-  const getTheme = () => {
-    const theme = document.documentElement.getAttribute('data-theme')
-    if (theme) return theme
-    return document.documentElement.classList.contains('htw-dark')
-      ? 'dark'
-      : 'light'
-  }
-
+  // The palette is tokens, so one map serves both themes.
   function color(colorValue?: string): CalendarColor {
-    const map = getTheme() === 'dark' ? colorMapDark : colorMap
     if (!colorValue?.startsWith('#'))
-      return map[colorValue || 'green'] || map['green']!
+      return colorMap[colorValue || 'green'] || colorMap['green']!
     const legacyColorName = legacyColorNamesByHex[colorValue.toLowerCase()]
-    if (legacyColorName) return map[legacyColorName]!
-    for (const value of Object.values(map)) {
-      if (value.color === colorValue) return value
-    }
+    if (legacyColorName) return colorMap[legacyColorName]!
     return derivedColor(colorValue)
   }
 
@@ -100,12 +86,10 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     return {
       '--bg': _color.bg,
       '--subtext': _color.subtext,
-      '--bg-hover': _color.bgHover,
       '--bg-active': _color.bgActive,
       // On the root, not only the colour bar: a draft's dashed outline reads
       // it there, and a draft has no bar.
       '--border': _color.border,
-      '--border-active': _color.borderActive,
     }
   })
 

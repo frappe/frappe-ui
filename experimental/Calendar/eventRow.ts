@@ -4,7 +4,7 @@ import {
   formattedDuration,
   parseDate,
 } from './calendarUtils'
-import { daysBetween, eventDays, isAllDayLike, isOvernight } from './eventSpan'
+import { daysBetween, eventDays, isOvernight } from './eventSpan'
 import type { CalendarEvent, CalendarRowTag, CalendarTimeFormat } from './types'
 
 /**

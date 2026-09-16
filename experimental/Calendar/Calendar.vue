@@ -103,15 +103,6 @@
       :current-date="selectedDay"
       :config="overrideConfig"
     >
-      <template #event-description="slotProps">
-        <slot name="event-description" v-bind="slotProps" />
-      </template>
-      <template #event-suffix="slotProps">
-        <slot name="event-suffix" v-bind="slotProps" />
-      </template>
-      <template #event-participant="slotProps">
-        <slot name="event-participant" v-bind="slotProps" />
-      </template>
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />
       </template>
@@ -120,7 +111,6 @@
     <CalendarAgenda
       v-else-if="activeView === 'Agenda'"
       :events="events"
-      :config="overrideConfig"
       :anchor="agendaAnchor"
       :jump="agendaJump"
       :loading="loading"
@@ -155,7 +145,6 @@ import {
   ref,
   watch,
   nextTick,
-  type Component,
 } from 'vue'
 import { Button } from '#components/Button'
 import { TabButtons } from '#components/TabButtons'
@@ -301,27 +290,17 @@ function handleShortcuts(e: KeyboardEvent) {
   if (isOverlayOpen()) return
   if (isTargetEditable(e)) return
 
-  if (e.key.toLowerCase() === 'm') {
-    activeView.value = 'Month'
-  }
-  if (e.key.toLowerCase() === 'w') {
-    activeView.value = 'Week'
-  }
-  if (e.key.toLowerCase() === 'a') {
-    activeView.value = 'Agenda'
-  }
-  if (e.key.toLowerCase() === 'd') {
-    activeView.value = 'Day'
-  }
-  if (e.key.toLowerCase() === 't') {
-    setCalendarDate()
-  }
-  if (e.key === 'ArrowLeft') {
-    decrement()
-  }
-  if (e.key === 'ArrowRight') {
-    increment()
-  }
+  const view = viewShortcuts[e.key.toLowerCase()]
+  if (view) activeView.value = view
+  if (e.key.toLowerCase() === 't') setCalendarDate()
+  if (e.key === 'ArrowLeft') decrement()
+  if (e.key === 'ArrowRight') increment()
+}
+const viewShortcuts: Record<string, CalendarMode> = {
+  m: 'Month',
+  w: 'Week',
+  a: 'Agenda',
+  d: 'Day',
 }
 
 provide(ACTIVE_VIEW_KEY, activeView)

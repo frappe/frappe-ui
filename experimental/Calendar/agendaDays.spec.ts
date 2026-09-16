@@ -48,8 +48,7 @@ const events: CalendarEvent[] = [
 ]
 
 /** Anchored on the day it is read, which is how the view uses it. */
-const rowsFrom = (today: string) =>
-  agendaRows(events, d(today), undefined, d(today))
+const rowsFrom = (today: string) => agendaRows(events, d(today), d(today))
 
 describe('agendaRange', () => {
   // Aug 1 2026 is a Saturday, so its week opens on Jul 26; Oct 31 is a
@@ -108,7 +107,7 @@ describe('agendaRows', () => {
   })
 
   it('marks no row today when the window does not reach it', () => {
-    const rows = agendaRows(events, d('2026-08-01'), undefined, d('2026-06-15'))
+    const rows = agendaRows(events, d('2026-08-01'), d('2026-06-15'))
     expect(rows[0]!.key).toBe('2026-08-20')
     expect(rows.some((r) => r.isToday)).toBe(false)
   })
@@ -139,51 +138,9 @@ describe('agendaRows', () => {
     const rows = agendaRows(
       [...events, october],
       d('2026-08-20'),
-      undefined,
       d('2026-08-20'),
     )
     expect(rows[rows.length - 1]!.key).toBe('2026-10-30')
-  })
-
-  it('marks the first row of each month it lists', () => {
-    const october: CalendarEvent = {
-      id: 'later',
-      fromDate: '2026-10-02',
-      toDate: '2026-10-02',
-      fromTime: '09:00',
-      toTime: '10:00',
-    }
-    const rows = agendaRows(
-      [...events, october],
-      d('2026-08-20'),
-      undefined,
-      d('2026-08-20'),
-    )
-    const opens = rows.filter((r) => r.opensMonth).map((r) => r.key)
-    // The first row of the list opens its own month; September has nothing on
-    // it at all, so the next is October's.
-    expect(opens).toEqual(['2026-08-20', '2026-10-02'])
-  })
-
-  it('names the day either side of today', () => {
-    // Read on Aug 21: the 20th is yesterday, the 22nd tomorrow, and the 23rd
-    // onwards are dates and nothing more.
-    const rows = rowsFrom('2026-08-21')
-    const named = rows.map((r) => [
-      r.key,
-      r.isYesterday,
-      r.isToday,
-      r.isTomorrow,
-    ])
-    expect(named).toEqual([
-      ['2026-08-20', true, false, false],
-      ['2026-08-21', false, true, false],
-      ['2026-08-22', false, false, true],
-      ['2026-08-23', false, false, false],
-      ['2026-08-24', false, false, false],
-      ['2026-08-25', false, false, false],
-      ['2026-08-26', false, false, false],
-    ])
   })
 
   it('marks the days already behind the reader', () => {
@@ -200,29 +157,12 @@ describe('agendaRows', () => {
     expect(rows.find((r) => r.key === '2026-08-24')!.isPast).toBe(false)
     expect(rows.find((r) => r.key === '2026-08-26')!.isPast).toBe(false)
   })
-
-  // The library's default weekend is Sunday alone; Saturday only counts when
-  // the config says so.
-  it('marks weekends the config names', () => {
-    const rows = rowsFrom('2026-08-20')
-    expect(rows.find((r) => r.key === '2026-08-23')!.isWeekend).toBe(true)
-    expect(rows.find((r) => r.key === '2026-08-22')!.isWeekend).toBe(false)
-
-    const both = agendaRows(
-      events,
-      d('2026-08-20'),
-      { weekends: ['sunday', 'saturday'] },
-      d('2026-08-20'),
-    )
-    expect(both.find((r) => r.key === '2026-08-22')!.isWeekend).toBe(true)
-    expect(both.find((r) => r.key === '2026-08-21')!.isWeekend).toBe(false)
-  })
 })
 
 describe('agendaWeeks', () => {
   /** The weeks as their start and the days in each, which is all the grouping questions need. */
   const shape = (today: string) =>
-    agendaWeeks(events, d(today), undefined, d(today)).map((w) => [
+    agendaWeeks(events, d(today), d(today)).map((w) => [
       w.key,
       w.days.map((day) => day.key),
     ])
@@ -251,7 +191,6 @@ describe('agendaWeeks', () => {
         },
       ],
       d('2026-08-27'),
-      undefined,
       d('2026-08-27'),
     )
     expect(
@@ -266,12 +205,7 @@ describe('agendaWeeks', () => {
   it('marks the weeks that are wholly behind the reader', () => {
     // Read on Aug 24, a Monday: the week of the 16th ended on Saturday the
     // 22nd, and the week the 24th falls in has not.
-    const weeks = agendaWeeks(
-      events,
-      d('2026-08-24'),
-      undefined,
-      d('2026-08-24'),
-    )
+    const weeks = agendaWeeks(events, d('2026-08-24'), d('2026-08-24'))
     expect(weeks.map((w) => [w.key, w.isPast, w.isCurrent])).toEqual([
       ['2026-08-16', true, false],
       ['2026-08-23', false, true],
@@ -281,19 +215,12 @@ describe('agendaWeeks', () => {
   it('leaves out a week with nothing in it', () => {
     // Never an empty card: a week is drawn because it has days, and a day
     // because it has events.
-    const weeks = agendaWeeks(
-      events,
-      d('2026-08-20'),
-      undefined,
-      d('2026-08-20'),
-    )
+    const weeks = agendaWeeks(events, d('2026-08-20'), d('2026-08-20'))
     expect(weeks.every((w) => w.days.length)).toBe(true)
   })
 
   it('has nothing to draw when no day is listed', () => {
-    expect(
-      agendaWeeks([], d('2026-08-20'), undefined, d('2026-08-20')),
-    ).toEqual([])
+    expect(agendaWeeks([], d('2026-08-20'), d('2026-08-20'))).toEqual([])
   })
 })
 

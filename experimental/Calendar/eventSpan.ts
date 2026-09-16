@@ -19,16 +19,11 @@ const DAY_MINUTES = 24 * 60
  * pill's 28, which read as two kinds of row in one lane.
  */
 export const LANE_HEIGHT = 28
-export const LANE_PITCH = LANE_HEIGHT + 4
 
 /**
  * The air between one all-day bar and the next, and between the row's edge and
  * the bars inside it — the same 4px the day view's all-day lane puts between its
- * own rows of pills.
- *
- * The week's row has one thing in it per lane and room to breathe; a month cell
- * has a day's worth stacked under a date and keeps the tighter `LANE_PITCH`.
- * Same bars, different room, so the two are spelled apart.
+ * own rows of pills, and a month cell between the rows it stacks.
  */
 export const ALL_DAY_LANE_GAP = 4
 export const NARROW_ALL_DAY_LANE_GAP = 2

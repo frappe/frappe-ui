@@ -1,9 +1,4 @@
-import type {
-  CalendarColor,
-  CalendarConfig,
-  CalendarEvent,
-  CalendarTimeFormat,
-} from './types'
+import type { CalendarColor, CalendarEvent, CalendarTimeFormat } from './types'
 
 export function getCalendarDates(month: number, year: number): Date[] {
   let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -72,24 +67,6 @@ export function getCalendarDates(month: number, year: number): Date[] {
   }
 }
 
-export function groupBy<T>(
-  obj: T[],
-  fn: (value: T) => string | number,
-): Record<string, T[]> {
-  if (typeof fn !== 'function') throw new Error(`${fn} should be a function`)
-  return obj.reduce(
-    (acc, value) => {
-      const group = String(fn(value))
-      if (!acc[group]) {
-        acc[group] = []
-      }
-      acc[group].push(value)
-      return acc
-    },
-    {} as Record<string, T[]>,
-  )
-}
-
 export function calculateMinutes(time: string): number {
   let [hours, minutes] = time.split(':')
   return parseInt(hours) * 60 + parseInt(minutes)
@@ -134,16 +111,6 @@ export function parseDateEventPopupFormat(
     options.weekday = weekDay
   }
   return date.toLocaleDateString('en-US', options)
-}
-
-export function parseDateWithComma(date: Date, showDay = false): string {
-  return parseDateEventPopupFormat(date, showDay).split(' ').join(', ')
-}
-
-export function parseDateWithDay(date: Date, fullDay = false): string {
-  return fullDay
-    ? daysListFull[date.getDay()] + ', ' + date.getDate()
-    : daysList[date.getDay()] + ' ' + date.getDate()
 }
 
 export function calculateDiff(from: string, to: string): number {
@@ -207,7 +174,7 @@ export function findOverlappingEventsCount(
   // there, and it sits full width beneath them. Grid events all carry the same
   // z-index, so "beneath" is DOM order — the declined go first, before the
   // events they underlie.
-  const declined = events
+  const declined: CalendarEvent[] = events
     .filter((event) => event.isDeclined)
     .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
   events = events.filter((event) => !event.isDeclined)
@@ -386,115 +353,52 @@ export const colorMap: Record<string, CalendarColor> = {
   amber: {
     color: 'var(--ink-amber-6)',
     border: 'var(--ink-amber-6)',
-    borderActive: 'var(--outline-amber-2)',
-    text: 'var(--ink-amber-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-amber-1)',
-    bgHover: 'var(--surface-amber-1)',
     bgActive: 'var(--surface-amber-2)',
   },
   violet: {
     color: 'var(--ink-violet-6)',
     border: 'var(--ink-violet-6)',
-    borderActive: 'var(--outline-violet-2)',
-    text: 'var(--ink-violet-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-violet-1)',
-    bgHover: 'var(--surface-violet-1)',
     bgActive: 'var(--surface-violet-2)',
   },
   pink: {
     color: 'var(--ink-pink-6)',
     border: 'var(--ink-pink-6)',
-    borderActive: 'var(--outline-pink-2)',
-    text: 'var(--ink-pink-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-pink-1)',
-    bgHover: 'var(--surface-pink-1)',
     bgActive: 'var(--surface-pink-2)',
   },
   cyan: {
     color: 'var(--ink-cyan-6)',
     border: 'var(--ink-cyan-6)',
-    borderActive: 'var(--outline-cyan-2)',
-    text: 'var(--ink-cyan-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-cyan-1)',
-    bgHover: 'var(--surface-cyan-1)',
     bgActive: 'var(--surface-cyan-2)',
   },
   blue: {
     color: 'var(--ink-blue-6)',
     border: 'var(--ink-blue-6)',
-    borderActive: 'var(--outline-blue-2)',
-    text: 'var(--ink-blue-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-blue-1)',
-    bgHover: 'var(--surface-blue-1)',
     bgActive: 'var(--surface-blue-2)',
   },
   orange: {
     color: 'var(--ink-orange-6)',
     border: 'var(--outline-orange-1)',
-    borderActive: 'var(--outline-orange-2)',
-    text: 'var(--ink-orange-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-orange-1)',
-    bgHover: 'var(--surface-orange-1)',
     bgActive: 'var(--surface-orange-2)',
   },
   green: {
     color: 'var(--ink-green-6)',
     border: 'var(--ink-green-6)',
-    borderActive: 'var(--outline-green-2)',
-    text: 'var(--ink-green-6)',
     subtext: 'var(--ink-gray-6)',
     bg: 'var(--surface-green-1)',
-    bgHover: 'var(--surface-green-1)',
     bgActive: 'var(--surface-green-2)',
   },
-}
-
-export const colorMapDark: Record<string, CalendarColor> = colorMap
-
-// config.weekends can be array of numbers [0-6] (0=Sun) or weekday names (e.g., 'Saturday').
-// Falls back to [0] (Sunday) if not provided / invalid.
-const _weekdayNameToIndex = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-}
-
-export function getWeekendDays(
-  config?: Partial<CalendarConfig> & { weekendDays?: Array<number | string> },
-): number[] {
-  // Support both weekendDays (preferred) and weekends (legacy) keys
-  const raw = config?.weekendDays || config?.weekends
-  if (!raw || !Array.isArray(raw) || raw.length === 0) return [0]
-  return raw
-    .map((d) => {
-      if (typeof d === 'number') return d
-      if (typeof d === 'string') {
-        const key = d.trim().toLowerCase()
-        if (Object.prototype.hasOwnProperty.call(_weekdayNameToIndex, key))
-          return _weekdayNameToIndex[key as keyof typeof _weekdayNameToIndex]
-      }
-      return null
-    })
-    .filter((v): v is number => v !== null && v >= 0 && v <= 6)
-}
-
-export function isWeekend(
-  date: Date | string,
-  config?: CalendarConfig,
-): boolean {
-  const day = new Date(date).getDay()
-  const weekendDays = getWeekendDays(config)
-  return weekendDays.includes(day)
 }
 
 // Format single month & year (e.g., "August, 2025")

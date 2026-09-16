@@ -86,12 +86,11 @@ const events = ref([
   <div class="h-[600px]">
     <Calendar :events="events" :config="config">
       <!-- What the library cannot know: this app's own reading of an event. -->
-      <template #event-suffix="{ tags, calendarEvent }">
+      <template #event-suffix="{ calendarEvent }">
         <Badge
-          v-for="tag in tags"
-          :key="tag.label"
-          :theme="tag.theme"
-          :label="tag.label"
+          v-if="calendarEvent.venue === 'Meet'"
+          theme="blue"
+          label="Remote"
           size="sm"
         />
         <Badge

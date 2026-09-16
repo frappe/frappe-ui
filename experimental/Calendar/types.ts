@@ -5,18 +5,15 @@ export type CalendarMode = 'Day' | 'Week' | 'Month' | 'Agenda'
 export type CalendarTimeFormat = '12h' | '24h'
 
 /**
- * One event colour. Selection deepens the fill by a step and rings the pill in
- * `borderActive`; it never repaints the text, so there is no active ink here to
- * fall out of step with the fill it sits on.
+ * One event colour: the bar, the fill, the fill a step deeper for hover and
+ * selection, and the muted ink inside. Selection never repaints the text, so
+ * there is no active ink here to fall out of step with the fill it sits on.
  */
 export interface CalendarColor {
   color: string
   border: string
-  borderActive: string
-  text: string
   subtext: string
   bg: string
-  bgHover: string
   bgActive: string
 }
 

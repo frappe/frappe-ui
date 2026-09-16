@@ -145,15 +145,13 @@
              either way. At the 80px this was on a desktop the same label sat
              35px in, stranded in a margin a third as wide again as the word it
              was holding. -->
+        <!-- A spacer: the hour labels hang off the day column's rows (see
+             `.calendar-column` in style.css), so the gutter has nothing of its
+             own to draw but its rule, and is as tall as the 24 hours beside it. -->
         <div
-          class="grid w-14 shrink-0 self-start grid-cols-1 border-r-[1px] border-outline-gray-1"
-        >
-          <span
-            v-for="time in 24"
-            class="flex h-[72px] items-end justify-center text-center text-sm text-ink-gray-5"
-            :style="{ height: `${hourHeight}px` }"
-          />
-        </div>
+          class="w-14 shrink-0 self-start border-r-[1px] border-outline-gray-1"
+          :style="{ height: `${24 * hourHeight}px` }"
+        />
 
         <!-- Calendar Grid / Right Column -->
         <div class="grid h-full w-full grid-cols-1 pb-2">
@@ -179,9 +177,7 @@
               />
             </div>
             <CalendarWeekDayEvent
-              v-for="(calendarEvent, idx) in timedEvents[
-                parseDate(currentDate)
-              ]"
+              v-for="calendarEvent in timedEvents[parseDate(currentDate)]"
               :event="calendarEvent"
               :key="calendarEvent.id"
               :date="currentDate"
@@ -212,12 +208,9 @@ import {
 } from 'vue'
 import CalendarTimeMarker from './CalendarTimeMarker.vue'
 import { Button } from '#components/Button'
-import {
-  parseDate,
-  twelveHoursFormat,
-  twentyFourHoursFormat,
-} from './calendarUtils'
+import { parseDate } from './calendarUtils'
 import useCalendarData from './composables/useCalendarData'
+import { useHourGrid } from './composables/useHourGrid'
 import { PILL_INSET, PILL_MARGIN, eventDays } from './eventSpan'
 import CalendarWeekDayEvent from './CalendarWeekDayEvent.vue'
 import {
@@ -231,13 +224,15 @@ const props = defineProps<{
   config: CalendarConfig
   currentDate: Date
 }>()
-const timedEvents = computed(
-  () => useCalendarData(props.events, minuteHeight).timedEvents.value,
-)
-const allDayEvents = computed(
-  () => useCalendarData(props.events).allDayEvents.value,
-)
 const gridRef = ref<HTMLElement | null>(null)
+const { hourHeight, minuteHeight, timeArray, slotTime } = useHourGrid(
+  props.config,
+  gridRef,
+)
+const { timedEvents, allDayEvents } = useCalendarData(
+  () => props.events,
+  minuteHeight,
+)
 
 /**
  * How far inside the day its pills are drawn: the standard gap, at every size.
@@ -245,9 +240,6 @@ const gridRef = ref<HTMLElement | null>(null)
  * has the reason a narrow week has to come down from it.
  */
 const pillInset = PILL_INSET
-
-const hourHeight = props.config.hourHeight
-const minuteHeight = hourHeight / 60
 
 const isCollapsed = ref(true)
 // Every all-day-row event covering this day, a multi-day one included.
@@ -307,7 +299,7 @@ const measureLane = () => {
   // never reaches an element to be found by. What the lane holds is the pills
   // and, at the end, the button — which is a Button, single-rooted, and does
   // carry its mark.
-  const nodes = [...lane.children].filter(
+  const nodes = Array.from(lane.children).filter(
     (node): node is HTMLElement => node instanceof HTMLElement,
   )
   const more = nodes.find((node) => node.matches('[data-all-day-more]')) ?? null
@@ -394,60 +386,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => laneObserver?.disconnect())
-
-const timeArray =
-  props.config.timeFormat == '24h' ? twentyFourHoursFormat : twelveHoursFormat
-
-/**
- * The time a click asks for: the mark it landed nearest, less the half hour that
- * puts that mark in the middle of the event rather than at its start.
- *
- * The row it was in is an hour tall and carries three marks — its own line, the
- * half hour, and the line below it — so where in the row the click fell is the
- * finer thing it already knows and the row label alone throws away. The top and
- * bottom quarters go to the lines that bound the row and the middle half to the
- * half hour, which is the widest target of the three because it is the one with
- * no line to aim at.
- *
- * Centred, not started, because a click is a point and an event is an hour: the
- * point is where the reader is looking, and an hour hung below it puts the thing
- * they were pointing at at its very top edge. So a click on the 7 line asks for
- * 6:30, which draws an event through the 7 it was aimed at; the middle of the
- * row asks for 7, which is the row itself; and the 8 line asks for 7:30.
- *
- * Half hours, not quarters: a quarter of a 72px row is an 18px target, under
- * what a thumb can be asked to hit.
- *
- * A whole hour hands back the row's own label, unchanged, so what a consumer
- * parses is what it always parsed. A half hour is spelled out in the format the
- * grid is read in: "7:30 am" beside "7 am", "07:30" beside "07:00".
- */
-const LAST_START = 23 * 60 + 30
-
-function slotTime(e: MouseEvent, hour: number): string {
-  const row = e.currentTarget as HTMLElement | null
-  const fraction = row
-    ? (e.clientY - row.getBoundingClientRect().top) / hourHeight
-    : 0
-  const minutes = fraction < 0.25 ? 0 : fraction < 0.75 ? 30 : 60
-
-  // Both ends are the day's own: midnight has nothing above it to centre on,
-  // and the last row's line below it belongs to the day after — the date came
-  // with the cell, so neither can be reached from here.
-  const start = Math.min(Math.max(hour * 60 + minutes - 30, 0), LAST_START)
-  const startHour = Math.floor(start / 60)
-  if (start % 60 === 0) return timeArray[startHour]!
-
-  if (props.config.timeFormat === '24h')
-    return `${String(startHour).padStart(2, '0')}:30`
-  return `${((startHour + 11) % 12) + 1}:30 ${startHour < 12 ? 'am' : 'pm'}`
-}
-
-onMounted(() => {
-  const currentHour = new Date().getHours()
-  const scrollToHour = props.config.scrollToHour || currentHour
-  gridRef.value?.scrollBy(0, scrollToHour * 60 * minuteHeight - 10)
-})
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)
 

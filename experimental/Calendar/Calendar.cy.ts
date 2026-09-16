@@ -204,7 +204,9 @@ describe('Calendar', () => {
     cy.get('[data-strip-date]').first().contains('Aug 1').should('exist')
   })
 
-  it('stacks the days on a narrow screen', () => {
+  // A phone's month is the same grid a size down, not a stack: the rows stay
+  // and a stay still runs as one bar across its days.
+  it('keeps the grid on a narrow screen', () => {
     cy.viewport(390, 800)
     cy.mount(Calendar, {
       props: {
@@ -220,10 +222,8 @@ describe('Calendar', () => {
       },
     })
 
-    // No week-row grid; a row per day, with a stay saying which day it is on.
-    cy.get('[data-week-row]').should('not.exist')
-    cy.contains('.event', 'Offsite').should('have.length.at.least', 1)
-    cy.contains('Day 1 of 3').should('exist')
+    cy.get('[data-week-row]').should('have.length.at.least', 4)
+    cy.contains('.event', 'Offsite').should('exist')
   })
 
   // Carried over: an event that began yesterday and has not finished. The Day
@@ -525,9 +525,15 @@ describe('Calendar', () => {
       cy.contains('Nothing on between').should('exist')
     })
 
-    it('renders the #event-description and #event-suffix slots on a row', () => {
+    it('renders the row slots, the participant one without the field', () => {
+      // One event with a `participant`, one without: the slot is the consumer's
+      // to fill on either, so the row renders it for both.
+      const unattended = { ...events[1], participant: undefined }
       cy.mount(Calendar, {
-        props: { events, config: { defaultMode: 'Agenda' } },
+        props: {
+          events: [events[0], unattended],
+          config: { defaultMode: 'Agenda' },
+        },
         slots: {
           'event-description': (props: any) =>
             h(
@@ -536,12 +542,16 @@ describe('Calendar', () => {
               `at ${props.date.getDate()}`,
             ),
           'event-suffix': (props: any) =>
-            h('span', { 'data-cy': 'row-suffix' }, String(props.tags.length)),
+            h('span', { 'data-cy': 'row-suffix' }, props.calendarEvent.title),
+          'event-participant': (props: any) =>
+            h('span', { 'data-cy': 'row-participant' }, props.calendarEvent.id),
         },
       })
 
       cy.get('[data-cy=row-description]').first().should('contain.text', 'at')
-      cy.get('[data-cy=row-suffix]').should('exist')
+      cy.get('[data-cy=row-suffix]').should('have.length', 2)
+      cy.get('[data-cy=row-participant]').should('have.length', 2)
+      cy.contains('[data-cy=row-participant]', 'EV-002').should('exist')
     })
   })
 })

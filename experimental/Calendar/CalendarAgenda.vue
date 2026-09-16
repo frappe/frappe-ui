@@ -124,7 +124,7 @@
           }"
           @click="openWeek(week.start)"
         >
-          {{ weekName(week) ?? weekLabel(week) }}
+          {{ weekName(week) ?? agendaRangeLabel(week.start, week.end) }}
           <span
             v-if="weekName(week)"
             :class="
@@ -344,15 +344,10 @@ import { shortMonth } from './monthStrip'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
 import { Spinner } from '#components/Spinner'
-import {
-  CALENDAR_ACTIONS_KEY,
-  type CalendarConfig,
-  type CalendarEvent,
-} from './types'
+import { CALENDAR_ACTIONS_KEY, type CalendarEvent } from './types'
 
 const props = defineProps<{
   events?: CalendarEvent[]
-  config: CalendarConfig
   /** The day the list runs from. */
   anchor: Date
   /** Whether the events for this span are still on their way. */
@@ -404,7 +399,7 @@ const isNarrow = computed(
 const now = useNow()
 
 const weeks = computed(() =>
-  agendaWeeks(props.events ?? [], props.anchor, props.config, now.value),
+  agendaWeeks(props.events ?? [], props.anchor, now.value),
 )
 
 const isEmpty = computed(() => !weeks.value.length)
@@ -499,9 +494,9 @@ const positionList = () => {
   }
 
   const todayKey = parseDate(now.value)
-  const target = [
-    ...box.querySelectorAll<HTMLElement>('[data-strip-date]'),
-  ].find((el) => (el.dataset.stripDate ?? '') >= todayKey)
+  const target = Array.from(
+    box.querySelectorAll<HTMLElement>('[data-strip-date]'),
+  ).find((el) => (el.dataset.stripDate ?? '') >= todayKey)
   // Nothing ahead: the span is behind the reader, so leave it where it opened
   // rather than jumping to the bottom.
   if (!target) return
@@ -607,9 +602,6 @@ const dayLabel = (row: AgendaRow) => {
   const date = `${row.date.getDate()} ${shortMonth(row.date)}`
   return row.isToday ? `${daysList[row.date.getDay()]}, ${date}` : date
 }
-
-/** "Sep 13 – 19" — the days the week covers, which is its name. */
-const weekLabel = (week: AgendaWeek) => agendaRangeLabel(week.start, week.end)
 
 /**
  * The word for a week near enough to have one — the one under way and the one

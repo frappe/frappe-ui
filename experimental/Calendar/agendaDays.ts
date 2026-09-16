@@ -1,10 +1,7 @@
-import { getWeekendDays, parseDate } from './calendarUtils'
+import { parseDate } from './calendarUtils'
 import { eventsOn } from './eventSpan'
 import { shortMonth, weekStart } from './monthStrip'
 import type { CalendarEvent } from './types'
-
-/** Whatever names the weekend — the view hands it the whole config. */
-type WeekendConfig = Parameters<typeof getWeekendDays>[0]
 
 /**
  * The Agenda view is three months as a list of days.
@@ -30,23 +27,13 @@ export interface AgendaRow {
   key: string
   /** Everything occupying the day, spans included; never empty. */
   events: CalendarEvent[]
-  /**
-   * The first row of its month. The window spans three, and a list that runs
-   * 24, 1, 8 with nothing between them has crossed one without saying so.
-   */
-  opensMonth: boolean
   isToday: boolean
-  /** The day after today, which reads "Tomorrow". */
-  isTomorrow: boolean
-  /** The day before it, which reads "Yesterday". */
-  isYesterday: boolean
   /**
    * The day is behind the reader. The rows of such a day already dim
    * themselves; the day's header says it too, so a day spent reads as spent
    * from its heading rather than only from the events under it.
    */
   isPast: boolean
-  isWeekend: boolean
 }
 
 /** The three months the view is anchored on, from the 1st to the last day. */
@@ -97,14 +84,10 @@ export function agendaRange(anchor: Date): { start: Date; end: Date } {
 export function agendaRows(
   events: CalendarEvent[],
   anchor: Date,
-  config?: WeekendConfig,
   today: Date = new Date(),
 ): AgendaRow[] {
   const { start, end } = agendaRange(anchor)
   const todayKey = parseDate(today)
-  const tomorrowKey = parseDate(addDays(today, 1))
-  const yesterdayKey = parseDate(addDays(today, -1))
-  const weekendDays = getWeekendDays(config)
   const rows: AgendaRow[] = []
 
   // Walked date by date rather than by day-of-month: the window spans three
@@ -118,17 +101,12 @@ export function agendaRows(
     if (!onThisDay.length) continue
 
     const key = parseDate(date)
-    const previous = rows[rows.length - 1]
     rows.push({
       date,
       key,
       events: onThisDay,
-      opensMonth: !previous || previous.date.getMonth() !== date.getMonth(),
       isToday: key === todayKey,
-      isTomorrow: key === tomorrowKey,
-      isYesterday: key === yesterdayKey,
       isPast: key < todayKey,
-      isWeekend: weekendDays.includes(date.getDay()),
     })
   }
 
@@ -179,10 +157,9 @@ function addDays(date: Date, days: number): Date {
 export function agendaWeeks(
   events: CalendarEvent[],
   anchor: Date,
-  config?: WeekendConfig,
   today: Date = new Date(),
 ): AgendaWeek[] {
-  const rows = agendaRows(events, anchor, config, today)
+  const rows = agendaRows(events, anchor, today)
   const currentWeek = parseDate(weekStart(today))
   const nextWeek = parseDate(addDays(weekStart(today), 7))
   const lastWeek = parseDate(addDays(weekStart(today), -7))
