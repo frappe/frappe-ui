@@ -74,9 +74,10 @@ across the top of the row; single-day events sit beneath them in their cells
 with the title wrapping to a second line, so every event is shown — there is no
 "n more".
 
-Below the `sm` breakpoint the days stack instead: a row per day, a heading where
-each month begins, and a week strip above to keep your place. Clicking a date
-number in either layout opens that day in the Day view.
+Below the `sm` breakpoint it is the same grid a size down: shorter pills, a
+tighter lane, and a cell that shows what fits in it with a `+n` count for the
+rest — a full week trades its last lane of bars for those counts. Clicking a
+date number at either width opens that day in the Day view.
 
 `rangeChange` reports the strip's full extent for the Month view — the padding
 days of the first and last weeks included — so a data source that fetches by

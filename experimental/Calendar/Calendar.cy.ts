@@ -409,6 +409,14 @@ describe('Calendar', () => {
     cy.get('[aria-label=cycle-calendar-view]').should('exist')
   })
 
+  // `Calendar` forwards the slot to every view whether or not the consumer
+  // filled it; an empty forward still yields to the popover's own content.
+  it('renders the default popover content when the slot is not filled', () => {
+    cy.mount(Calendar, { props: { events } })
+    cy.contains('Design review').click()
+    cy.get('[data-slot=content]').should('contain.text', 'Jane Doe')
+  })
+
   it('renders the #event-popover-content slot inside the event popover', () => {
     cy.mount(Calendar, {
       props: { events },

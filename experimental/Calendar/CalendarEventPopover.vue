@@ -67,7 +67,7 @@ const emit = defineEmits<{
   'update:open': [open: boolean]
   open: []
   close: []
-  edit: [e: MouseEvent]
+  edit: [e?: MouseEvent]
   delete: []
 }>()
 
