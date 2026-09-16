@@ -1,0 +1,28 @@
+{
+  "strictness": 2,
+  "commentTypes": ["logic", "syntax"],
+  "autoReview": ["open"],
+  "triggerOnDrafts": false,
+  "excludeAuthors": ["dependabot[bot]", "renovate[bot]", "github-actions[bot]"],
+  "ignoreKeywords": "WIP\n[skip review]",
+  "ignorePatterns": "node_modules/**\ndist/**\ncoverage/**\n.nyc_output/**\nyarn.lock\ndocs/.vitepress/cache/**\ndocs/.vitepress/dist/**\n**/auto-imports.d.ts\n**/components.d.ts\ndocs/css/shiki.css\ndocs/content/docs/components/*.md\n!docs/content/docs/components/legacy.md\ndocs/content/docs/experimental/*.md\ndocs/content/docs/charts/*.md\ndocs/content/docs/molecules/list.md\ncypress/screenshots/**",
+  "statusCheck": true,
+  "shouldUpdateDescription": false,
+  "summarySection": {
+    "included": true,
+    "collapsible": true,
+    "defaultOpen": false
+  },
+  "issuesTableSection": { "included": false },
+  "sequenceDiagramSection": { "included": false },
+  "context": {
+    "repos": [
+      "frappe/gameplan",
+      "frappe/crm",
+      "frappe/lms",
+      "frappe/builder",
+      "frappe/drive",
+      "frappe/insights"
+    ]
+  }
+}

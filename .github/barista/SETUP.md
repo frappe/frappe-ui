@@ -4,6 +4,28 @@ Barista is a pair of GitHub Actions workflows that use Claude (via the official 
 
 It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls against a maintainer's Claude Max subscription.
 
+## Shared review guidance
+
+Greptile and Barista read [`.greptile/rules.md`](../../.greptile/rules.md).
+Edit that file to change review policy. Keep API vocabulary and contracts in
+`CONTEXT.md`, `PHILOSOPHY.md`, and `spec/`; the review policy links to them.
+[`.greptile/files.json`](../../.greptile/files.json) lists context files by scope.
+
+[`.greptile/config.json`](../../.greptile/config.json) configures Greptile to
+review opened, reopened, and ready PRs, without automatic reviews on every push.
+It skips drafts and release-bot PRs, keeps summaries compact, and leaves PR
+descriptions unchanged. Related repositories require access through Greptile's
+existing credentials. The settings use the documented
+[Greptile directory format](https://www.greptile.com/docs/code-review/greptile-config-reference).
+
+The Barista command retains its own tools, invocation details, and comment
+format. Issue triage and fix workflows remain Barista operations. The shared
+changelog rule is review guidance, not a deterministic required check.
+CodeRabbit's repository configuration has been removed. Disabling an installed
+CodeRabbit app requires a separate change to its repository or organization settings.
+The standalone `.semgrep.yml` remains available, but Greptile does not run it
+through these settings.
+
 ## What gets created on each trigger
 
 ### Issue triage (`barista-triage.yml`)
@@ -18,7 +40,7 @@ It posts as **`barista[bot]`** (a custom GitHub App), and bills Claude API calls
 
 | Trigger | Action |
 | --- | --- |
-| `pull_request` opened / synchronize / reopened / ready_for_review | Read PR + diff → investigate affected files → post one review comment with verdict (Looks good / Minor nits / Concerns) |
+| `pull_request` opened / reopened / ready_for_review | Read PR + diff → investigate affected files → post one review comment with verdict (Looks good / Minor nits / Concerns) |
 | `issue_comment.created` on a PR (only if comment contains `/barista review` AND author is a maintainer) | Re-review, optionally focused on what the maintainer asked about |
 | `workflow_dispatch` (manual) | Re-review a specific PR number for debugging |
 

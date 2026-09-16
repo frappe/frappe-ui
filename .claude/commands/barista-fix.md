@@ -97,5 +97,5 @@ Nothing else.
 - **One commit, one push, one PR.** Don't iterate.
 - **Stay on the branch you were given.** `BRANCH` is reset to `BASE` at the start of every `/barista fix` run, so a re-run replaces the previous attempt. Don't create extra branches.
 - **Bail loudly.** If anything makes you less than confident — denylist hit, unclear repro, large diff, would need to make design calls — comment why and don't push. Half-finished PRs are worse than no PR.
-- **Public API changes**: re-read the `barista-review` canonical-vocabulary section before you touch a `types.ts`, `defineProps`, or `defineEmits`. If the fix is a rename, prefer the deprecation-alias path (`P13`) over an outright rename.
+- **Public API changes**: read `.greptile/rules.md` and the applicable specs before changing public types, props, or emits. Apply the release-specific compatibility policy in PHILOSOPHY and ADR-0008; do not restore aliases removed by an accepted pre-v1 decision.
 - Tool budget cap: ~15 read/grep/glob, ~5 git calls, ~3 image fetches, ~3 gh.ts search calls, plus the writes (Edit/Write as needed for one focused change, one `open-pr.ts`, one `add-comment.ts`).

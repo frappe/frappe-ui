@@ -1,0 +1,148 @@
+{
+  "files": [
+    { "path": "CONTEXT.md", "description": "Shared API vocabulary." },
+    {
+      "path": "PHILOSOPHY.md",
+      "description": "API design principles and compatibility rules, including their exceptions."
+    },
+    {
+      "path": "spec/README.md",
+      "description": "Index of family contracts and decision records."
+    },
+    {
+      "path": "spec/adr/0008-no-deprecated-members-in-1-0-0.md",
+      "description": "Approved pre-v1 removal policy; avoid requiring obsolete compatibility shims."
+    },
+    {
+      "path": "spec/at-bar.md",
+      "description": "Completion criteria for public components.",
+      "scope": ["src/components/**", "src/molecules/**", "src/charts/**"]
+    },
+    {
+      "path": "spec/inputs.md",
+      "description": "Input-family intent; reconcile historical sections against current types and accepted decisions.",
+      "scope": [
+        "src/components/TextInput/**",
+        "src/components/Textarea/**",
+        "src/components/Password/**",
+        "src/components/Checkbox/**",
+        "src/components/Switch/**",
+        "src/components/Rating/**",
+        "src/components/Slider/**",
+        "src/components/FormControl/**",
+        "src/composables/inputTypes.ts",
+        "src/composables/useInputLabeling.ts"
+      ]
+    },
+    {
+      "path": "spec/selection.md",
+      "scope": [
+        "src/components/Select/**",
+        "src/components/Combobox/**",
+        "src/components/MultiSelect/**"
+      ]
+    },
+    {
+      "path": "spec/dropdown.md",
+      "scope": [
+        "src/components/Dropdown/**",
+        "src/components/ContextMenu/**",
+        "src/components/Menu/**"
+      ]
+    },
+    {
+      "path": "spec/dialog.md",
+      "scope": ["src/components/Dialog/**", "src/utils/dialog.ts"]
+    },
+    {
+      "path": "spec/popover.md",
+      "description": "Popover intent; distinguish obsolete compatibility sections from current contracts.",
+      "scope": ["src/components/Popover/**"]
+    },
+    { "path": "spec/hover-card.md", "scope": ["src/components/HoverCard/**"] },
+    {
+      "path": "spec/date-picker.md",
+      "description": "Picker contracts; old execution checklists are historical.",
+      "scope": [
+        "src/components/DatePicker/**",
+        "src/components/TimePicker/**",
+        "src/components/shared/picker/**"
+      ]
+    },
+    {
+      "path": "spec/toast.md",
+      "scope": ["src/components/Toast/**", "src/utils/toast.ts"]
+    },
+    {
+      "path": "spec/tabs.md",
+      "scope": ["src/components/Tabs/**", "src/components/TabButtons/**"]
+    },
+    {
+      "path": "spec/item-list-row.md",
+      "scope": [
+        "src/components/ItemListRow/**",
+        "src/components/Menu/**",
+        "src/components/Select/**",
+        "src/components/Combobox/**",
+        "src/components/MultiSelect/**"
+      ]
+    },
+    {
+      "path": "spec/shortcuts.md",
+      "scope": [
+        "src/components/KeyboardShortcut/**",
+        "src/components/KeyboardShortcutsDialog/**",
+        "src/composables/useKeyboardShortcut*"
+      ]
+    },
+    {
+      "path": "spec/imperative-api.md",
+      "scope": ["src/components/**", "src/molecules/**"]
+    },
+    {
+      "path": "spec/portal-target.md",
+      "scope": ["src/components/**", "src/composables/usePortalTarget*"]
+    },
+    {
+      "path": "spec/editor.md",
+      "scope": ["src/molecules/editor/**", "experimental/TextEditor/**"]
+    },
+    { "path": "spec/charts.md", "scope": ["src/charts/**"] },
+    {
+      "path": "spec/foundations.md",
+      "scope": [
+        "tailwind/**",
+        "espresso-v2-design-tokens/**",
+        "src/style.css",
+        "src/fonts/**"
+      ]
+    },
+    {
+      "path": "spec/adr/0013-v1-resources-implementation-freeze.md",
+      "scope": ["src/resources/**", "src/data-fetching/**"]
+    },
+    {
+      "path": "spec/adr/0010-subpath-export-rule.md",
+      "scope": [
+        "package.json",
+        "src/index.ts",
+        "experimental.ts",
+        "src/**/index.ts"
+      ]
+    },
+    {
+      "path": "docs/content/docs/migration.md",
+      "description": "Consumer migration instructions for intentional API changes.",
+      "scope": [
+        "scripts/migrate-*",
+        "tailwind/migrate-*",
+        "docs/content/docs/migration.md"
+      ]
+    },
+    {
+      "path": "docs/content/docs/changelog.md",
+      "description": "Consumer-facing changelog policy and existing entry style.",
+      "scope": ["docs/content/docs/changelog.md", "package.json"]
+    }
+  ]
+}
