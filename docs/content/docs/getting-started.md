@@ -197,7 +197,8 @@ import { Editor, type RichTextKitOptions } from 'frappe-ui/editor'
 ```
 
 Only the paths in the package `exports` map resolve: `frappe-ui`,
-`frappe-ui/list`, `frappe-ui/editor`, `frappe-ui/charts`, `frappe-ui/icons`,
+`frappe-ui/list`, `frappe-ui/editor`, `frappe-ui/code-editor`,
+`frappe-ui/charts`, `frappe-ui/icons`,
 `frappe-ui/experimental`, `frappe-ui/tailwind`, `frappe-ui/vite`,
 `frappe-ui/vite/lucideIconsPlugin`, `frappe-ui/vitepress`, `frappe-ui/style.css`
 and `frappe-ui/tsconfig.base.json`. Anything else (`frappe-ui/src/...`) fails
