@@ -1,18 +1,19 @@
 import type { Component, InjectionKey, Ref } from 'vue'
+import type { BadgeProps } from '#components/Badge/types'
 
-export type CalendarMode = 'Day' | 'Week' | 'Month'
+export type CalendarMode = 'Day' | 'Week' | 'Month' | 'Agenda'
 export type CalendarTimeFormat = '12h' | '24h'
 
+/**
+ * One event colour: the bar, the fill, the fill a step deeper for hover and
+ * selection, and the muted ink inside. Selection never repaints the text, so
+ * there is no active ink here to fall out of step with the fill it sits on.
+ */
 export interface CalendarColor {
   color: string
   border: string
-  borderActive: string
-  text: string
-  textActive?: string
   subtext: string
-  subtextActive: string
   bg: string
-  bgHover: string
   bgActive: string
 }
 
@@ -52,7 +53,32 @@ export interface CalendarEvent {
   endTime?: number
   hallNumber?: number
   idx?: number
+  /** The events this pill is drawn on, with their own place in the layout — see `findOverlappingEventsCount`. */
+  over?: CalendarEvent[]
   [key: string]: unknown
+}
+
+/**
+ * A tag on a listed event — the Agenda's rows carry these where a grid pill has
+ * no room for them. Rendered as a `Badge`, so `theme` is Badge's own and a
+ * consumer's tags in `#event-suffix` sit beside the timing tag as equals.
+ */
+export interface CalendarRowTag {
+  label: string
+  theme?: BadgeProps['theme']
+  /** Badge's own; `solid` for the one tag that has to be seen before it is read. */
+  variant?: BadgeProps['variant']
+}
+
+/** What `#event-description`, `#event-suffix` and `#event-participant` receive. */
+export interface CalendarRowSlotProps {
+  calendarEvent: CalendarEvent
+  /** The day the row belongs to; a multi-day event has one row per day. */
+  date: Date
+  /** The library's own description, so a filled slot extends rather than re-derives. */
+  description: string
+  /** Where the event stands against the clock, shown beside the time. */
+  timing: CalendarRowTag | null
 }
 
 /**
@@ -138,6 +164,16 @@ export interface CalendarPublicProps {
   /** Events to render. Each needs an `id`, a title, and date/time fields. */
   events: CalendarEvent[]
 
+  /**
+   * Whether the events for the visible range are still on their way.
+   *
+   * Only the Agenda reads it, and only to tell an empty list apart from one that
+   * has not arrived: a grid with nothing in it still draws the days, where a list
+   * with nothing in it is a blank panel, and saying "nothing on" of a range still
+   * being fetched is saying something that may not be true.
+   */
+  loading?: boolean
+
   /** Behavior overrides, merged over the defaults. */
   config?: Partial<CalendarConfig>
 
@@ -145,7 +181,11 @@ export interface CalendarPublicProps {
    * Replaces the default single-click behavior (opening the event
    * popover) with your own handler.
    */
-  onClick?: (data: { e: MouseEvent; calendarEvent: CalendarEvent }) => void
+  onClick?: (data: {
+    /** A key event when the row was activated from the keyboard. */
+    e: MouseEvent | KeyboardEvent
+    calendarEvent: CalendarEvent
+  }) => void
 
   /**
    * Replaces the default double-click behavior (opening the edit

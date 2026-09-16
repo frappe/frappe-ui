@@ -311,8 +311,8 @@ Typing `@` after an opening bracket or quote (`(@jane`, `[@jane`, `"@jane`) now 
 The Month view no longer draws a fixed 5- or 6-row grid that hid whatever
 did not fit behind an "n more" button. Its week rows grow to fit their
 events and the view scrolls when they outgrow it, and titles wrap instead of
-truncating. Below the `sm` breakpoint the days stack in a list instead of a
-grid.
+truncating. Below the `sm` breakpoint it is the same grid a size down, and a
+cell shows what fits in it with a `+n` count for the rest.
 
 - **Behavior change:** `rangeChange` for the `Month` view now reports the
   grid's extent — the padding days of its first and last weeks included —

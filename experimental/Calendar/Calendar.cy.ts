@@ -204,7 +204,9 @@ describe('Calendar', () => {
     cy.get('[data-strip-date]').first().contains('Aug 1').should('exist')
   })
 
-  it('stacks the days on a narrow screen', () => {
+  // A phone's month is the same grid a size down, not a stack: the rows stay
+  // and a stay still runs as one bar across its days.
+  it('keeps the grid on a narrow screen', () => {
     cy.viewport(390, 800)
     cy.mount(Calendar, {
       props: {
@@ -220,10 +222,42 @@ describe('Calendar', () => {
       },
     })
 
-    // No week-row grid; a row per day, with a stay saying which day it is on.
-    cy.get('[data-week-row]').should('not.exist')
-    cy.contains('.event', 'Offsite').should('have.length.at.least', 1)
-    cy.contains('Day 1 of 3').should('exist')
+    cy.get('[data-week-row]').should('have.length.at.least', 4)
+    cy.contains('.event', 'Offsite').should('exist')
+  })
+
+  // Carried over: an event that began yesterday and has not finished. The Day
+  // view is showing today, which is neither the day it starts nor a day it owns
+  // outright, and it still has to be on screen.
+  it('shows an event carried over from yesterday in the day view', () => {
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-CARRY',
+            title: 'Afterparty',
+            fromDate: monthYear(-1),
+            toDate: today,
+            fromTime: '23:00',
+            toTime: '02:00',
+            color: 'violet',
+          },
+          {
+            id: 'EV-LONG',
+            title: 'Conference',
+            fromDate: monthYear(-1),
+            toDate: monthYear(1),
+            fromTime: '09:00',
+            toTime: '17:00',
+            color: 'cyan',
+          },
+        ],
+        config: { defaultMode: 'Day' },
+      },
+    })
+
+    cy.contains('Afterparty').should('exist')
+    cy.contains('Conference').should('exist')
   })
 
   it('puts a multi-day event in the all-day row and splits an overnight one', () => {
@@ -264,7 +298,7 @@ describe('Calendar', () => {
       .filter(':contains("Release night")')
       .should('have.length', 2)
       .each(($piece) => {
-        expect($piece.text()).to.contain('10 pm - 2 am')
+        expect($piece.text()).to.contain('10 pm – 2 am')
       })
   })
 
@@ -293,6 +327,13 @@ describe('Calendar', () => {
     // m -> back to Month view
     cy.get('body').type('m')
     cy.contains('All day').should('not.exist')
+
+    // a -> Agenda, which lists days rather than drawing a grid. Mounted with
+    // no events, so it is the empty month it reports.
+    cy.get('body').type('a')
+    cy.contains('Nothing on between').should('exist')
+    cy.contains('All day').should('not.exist')
+    cy.get('body').type('m')
 
     // ArrowRight moves forward, t returns to today
     cy.contains('button', 'Today')
@@ -368,6 +409,14 @@ describe('Calendar', () => {
     cy.get('[aria-label=cycle-calendar-view]').should('exist')
   })
 
+  // `Calendar` forwards the slot to every view whether or not the consumer
+  // filled it; an empty forward still yields to the popover's own content.
+  it('renders the default popover content when the slot is not filled', () => {
+    cy.mount(Calendar, { props: { events } })
+    cy.contains('Design review').click()
+    cy.get('[data-slot=content]').should('contain.text', 'Jane Doe')
+  })
+
   it('renders the #event-popover-content slot inside the event popover', () => {
     cy.mount(Calendar, {
       props: { events },
@@ -386,5 +435,135 @@ describe('Calendar', () => {
       'have.text',
       'custom: Design review',
     )
+  })
+
+  describe('Agenda view', () => {
+    // Two events either side of a three-day hole, both inside the window.
+    const spread: CalendarEvent[] = [
+      {
+        id: 'AG-1',
+        title: 'Kickoff',
+        fromDate: monthYear(1),
+        toDate: monthYear(1),
+        fromTime: '10:00',
+        toTime: '11:00',
+      },
+      {
+        id: 'AG-2',
+        title: 'Retro',
+        fromDate: monthYear(5),
+        toDate: monthYear(5),
+        fromTime: '15:00',
+        toTime: '16:00',
+      },
+    ]
+
+    it('lists only the days that have something on them', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      cy.contains('Kickoff').should('exist')
+      cy.contains('Retro').should('exist')
+      // The days between the two hold nothing, so they are not listed at all.
+      cy.get('[data-strip-date]').should('have.length', 2)
+    })
+
+    it('groups the cards by week', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      // Whichever days of the week the 1st and the 5th land on, the cards sit
+      // under at least one week label.
+      cy.get('[data-strip-week]').should('exist')
+      // Each of these days holds one event, which the row itself already says.
+      cy.contains('1 event').should('not.exist')
+    })
+
+    it('lists the days already spent, and marks today among them', () => {
+      // The 1st of the month under way: already spent unless today is the 1st,
+      // in which case it is today — listed either way, which is the point.
+      const firstOfMonth = (() => {
+        const now = new Date()
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+      })()
+
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'AG-PAST',
+              title: 'Month opener',
+              fromDate: firstOfMonth,
+              toDate: firstOfMonth,
+              fromTime: '09:00',
+              toTime: '09:15',
+            },
+            {
+              id: 'AG-TODAY',
+              title: 'Today standup',
+              fromDate: monthYear(),
+              toDate: monthYear(),
+              fromTime: '10:00',
+              toTime: '10:15',
+            },
+          ],
+          config: { defaultMode: 'Agenda' },
+        },
+      })
+
+      // The month runs whole, so a day behind today is still part of it — the
+      // view scrolls to today rather than cutting the month short at it.
+      cy.contains('Month opener').should('exist')
+      cy.get('[data-today]').should('exist')
+    })
+
+    // A list is a blank panel whether the span is empty or the events have not
+    // arrived, and only one of the two is worth saying out loud.
+    it('waits before saying a span has nothing on it', () => {
+      cy.mount(Calendar, {
+        props: { events: [], loading: true, config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between').should('not.exist')
+
+      // Named by the months the header names, not the week-padded dates the
+      // list happens to start and end on. The clock is pinned so the sentence
+      // is the same one every day: the span from August runs to October.
+      cy.clock(new Date(2026, 7, 20), ['Date'])
+      cy.mount(Calendar, {
+        props: { events: [], config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between August and October.').should('exist')
+    })
+
+    it('renders the row slots, the participant one without the field', () => {
+      // One event with a `participant`, one without: the slot is the consumer's
+      // to fill on either, so the row renders it for both.
+      const unattended = { ...events[1], participant: undefined }
+      cy.mount(Calendar, {
+        props: {
+          events: [events[0], unattended],
+          config: { defaultMode: 'Agenda' },
+        },
+        slots: {
+          'event-description': (props: any) =>
+            h(
+              'span',
+              { 'data-cy': 'row-description' },
+              `at ${props.date.getDate()}`,
+            ),
+          'event-suffix': (props: any) =>
+            h('span', { 'data-cy': 'row-suffix' }, props.calendarEvent.title),
+          'event-participant': (props: any) =>
+            h('span', { 'data-cy': 'row-participant' }, props.calendarEvent.id),
+        },
+      })
+
+      cy.get('[data-cy=row-description]').first().should('contain.text', 'at')
+      cy.get('[data-cy=row-suffix]').should('have.length', 2)
+      cy.get('[data-cy=row-participant]').should('have.length', 2)
+      cy.contains('[data-cy=row-participant]', 'EV-002').should('exist')
+    })
   })
 })

@@ -5,6 +5,7 @@ import {
   daySegments,
   daysBetween,
   eventDays,
+  eventsOn,
   isAllDayLike,
   isOvernight,
   layoutRow,
@@ -333,5 +334,52 @@ describe('stripPlacement', () => {
       fromTime: '10:00',
       toTime: '11:00',
     })
+  })
+})
+
+describe('eventsOn', () => {
+  const afterparty: CalendarEvent = {
+    id: 'afterparty',
+    fromDate: '2026-08-17',
+    toDate: '2026-08-18',
+    fromTime: '23:00',
+    toTime: '02:00',
+  }
+  const evening: CalendarEvent = {
+    id: 'evening',
+    fromDate: '2026-08-18',
+    toDate: '2026-08-18',
+    fromTime: '17:00',
+    toTime: '18:00',
+  }
+  const allDay: CalendarEvent = {
+    id: 'mural',
+    fromDate: '2026-08-18',
+    toDate: '2026-08-18',
+    isFullDay: true,
+  }
+
+  it('orders a day by when each event starts on it', () => {
+    const ids = eventsOn([evening, afterparty], new Date(2026, 7, 18)).map(
+      (e) => e.id,
+    )
+    // The afterparty began at 11 pm yesterday, so on the 18th it is already
+    // under way when the day opens — before the evening meeting, not after it.
+    expect(ids).toEqual(['afterparty', 'evening'])
+  })
+
+  it('keeps it in clock order on the day it starts', () => {
+    const ids = eventsOn([afterparty, evening], new Date(2026, 7, 17)).map(
+      (e) => e.id,
+    )
+    expect(ids).toEqual(['afterparty'])
+  })
+
+  it('leaves all-day events at the top', () => {
+    const ids = eventsOn(
+      [evening, afterparty, allDay],
+      new Date(2026, 7, 18),
+    ).map((e) => e.id)
+    expect(ids).toEqual(['mural', 'afterparty', 'evening'])
   })
 })

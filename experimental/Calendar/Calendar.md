@@ -1,6 +1,6 @@
 # Calendar
 
-A date and event view for schedules, with Month, Week, and Day modes.
+A date and event view for schedules, with Month, Week, Day, and Agenda modes.
 
 > **Parked** — `Calendar` left the root export in `1.0.0` and now ships from
 > [`frappe-ui/experimental`](/docs/experimental) with its public API unchanged.
@@ -19,10 +19,9 @@ import type { CalendarEvent, CalendarConfig } from 'frappe-ui/experimental'
 ## Custom Header
 
 Pass a `#header` slot to replace the default toolbar. The slot receives the
-current title (`currentMonthYear`), the active view (`activeView`), the
-enabled view options (`enabledModes`), and navigation functions
-(`increment`, `decrement`, `updateActiveView`, `setCalendarDate`,
-`onMonthYearChange`).
+current title (`currentMonthYear`), the active view (`activeView`), the enabled
+view options (`enabledModes`), and navigation functions (`increment`,
+`decrement`, `updateActiveView`, `setCalendarDate`, `onMonthYearChange`).
 
 <ComponentPreview name="Calendar-CustomHeader" csr="true" />
 
@@ -45,43 +44,86 @@ Each entry in `events` is a `CalendarEvent`:
 }
 ```
 
-An event runs from `fromDate fromTime` to `toDate toTime`, dates inclusive.
-One whose `toDate` is later than its `fromDate` spans those days: the Month
-view draws it as a single bar across them, and the Week view puts it in the
-all-day row. A timed event that crosses midnight but is shorter than a day
-(an evening running late) stays in the time grid, cut at midnight into a
-piece per day. A timed event ending at `00:00` stops as that day begins, so
-it does not occupy it. Dragging a spanning event moves both ends together.
+An event runs from `fromDate fromTime` to `toDate toTime`, dates inclusive. One
+whose `toDate` is later than its `fromDate` spans those days: the Month view
+draws it as a single bar across them, and the Week view puts it in the all-day
+row. A timed event that crosses midnight but is shorter than a day (an evening
+running late) stays in the time grid, cut at midnight into a piece per day. A
+timed event ending at `00:00` stops as that day begins, so it does not occupy
+it. Dragging a spanning event moves both ends together.
 
 `isFullDay` events ignore their times and cover `fromDate`..`toDate` whole.
 
-The calendar keeps an internal copy of `events` and refreshes it when the
-prop changes. Edits made inside the calendar (create, drag, resize, delete)
-mutate the copy and come back through the `create`, `update`, and `delete`
-emits — persist them and refresh your source of truth from there.
+The calendar keeps an internal copy of `events` and refreshes it when the prop
+changes. Edits made inside the calendar (create, drag, resize, delete) mutate
+the copy and come back through the `create`, `update`, and `delete` emits —
+persist them and refresh your source of truth from there.
 
-`CalendarColorMap` exports the color palette (`amber`, `violet`, `pink`,
-`cyan`, `blue`, `orange`, `green`) with the CSS variables used per state, for
-building matching UI such as a color picker.
+`CalendarColorMap` exports the color palette (`amber`, `violet`, `pink`, `cyan`,
+`blue`, `orange`, `green`) with the CSS variables used per state, for building
+matching UI such as a color picker.
 
 ## Month view
 
 The Month view is a strip of week rows covering the month in view, and it
-scrolls when the rows outgrow the calendar's height. The arrows, Today, and
-the month picker move the month and scroll the strip to their date.
+scrolls when the rows outgrow the calendar's height. The arrows, Today, and the
+month picker move the month and scroll the strip to their date.
 
 Each row is as tall as its busiest day needs. Multi-day events run as bars
-across the top of the row; single-day events sit beneath them in their
-cells with the title wrapping to a second line, so every event is shown —
-there is no "n more".
+across the top of the row; single-day events sit beneath them in their cells
+with the title wrapping to a second line, so every event is shown — there is no
+"n more".
 
-Below the `sm` breakpoint the days stack instead: a row per day, a heading
-where each month begins, and a week strip above to keep your place. Clicking a date number in either layout
-opens that day in the Day view.
+Below the `sm` breakpoint it is the same grid a size down: shorter pills, a
+tighter lane, and a cell that shows what fits in it with a `+n` count for the
+rest — a full week trades its last lane of bars for those counts. Clicking a
+date number at either width opens that day in the Day view.
 
-`rangeChange` reports the strip's full extent for the Month view — the
-padding days of the first and last weeks included — so a data source that
-fetches by range has events for every cell.
+`rangeChange` reports the strip's full extent for the Month view — the padding
+days of the first and last weeks included — so a data source that fetches by
+range has events for every cell.
+
+## Agenda view
+
+The Agenda view is three months as a list of days, each day a card: its name,
+its date, how much is on it once that is more than one thing, then its events as
+rows. A day with nothing on it is not listed — an empty row says nothing the
+dates either side of it do not, and neither does a line counting how many were
+skipped. Cards are grouped under the week they fall in, which replaces the month
+dividers a flat list needs. Today's card carries a dot before its name; it, the
+day before it and the day after say so in words beside their dates, and a day
+already spent fades its header. An event that has ended is dimmed, the way a
+pill in the grid is once its time has passed. An event under way says so with
+its own tag.
+
+The window covers the month in view and the two after it, padded out to whole
+weeks at either end the way the Month view's strip is — the list groups its days
+under the week they fall in, and a week is either listed or it is not. A single
+month would be 31 days on the 1st and one day on the 31st, which is why it is
+three. The arrows step a month at a time, so each move keeps two thirds of what
+was on screen, and `rangeChange` reports exactly the span listed, padding
+included, so a data source fetching by range agrees with it. The header names
+the three months themselves, not the days the padding reaches into.
+
+Rows have the room a grid pill does not, so they carry a description line and
+tags. `Calendar` fills in the description itself — where the event is, and which
+day of a stay the row is (`Day 2/3`) — and marks a draft as a pill does, an
+outline in its colour on the plain ground rather than a tinted block. Where it stands against the clock
+reads right after that: `Now` in blue while it runs and `Soon` in amber in the
+hour before it, and nothing beyond that: an hour count would only restate the
+time written beside it. Who is coming (`participant`) stands at the row's far
+end, the one edge a card aligns on other than the time column, so the counts of
+a day's rows line up — and the `#event-description` and `#event-suffix` slots
+let you say the rest.
+
+Drawn narrower than 640px — a phone, or a pane a sidebar has squeezed — the list
+stacks. A day's name becomes a band over its rows rather than a column beside
+them, and each row takes two lines: the title, its tags and who is coming on the
+first, the time and the description on the second. The list measures its own
+width for this, so a calendar in a narrow pane reads the same way a phone's
+does.
+
+<ComponentPreview name="Calendar-Agenda" csr="true" />
 
 ## Config
 
@@ -90,7 +132,7 @@ defaults:
 
 ```ts
 {
-  defaultMode: 'Month',   // 'Day' | 'Week' | 'Month'
+  defaultMode: 'Month',   // 'Day' | 'Week' | 'Month' | 'Agenda'
   disableModes: [],       // views removed from the view switcher
   isEditMode: false,      // create / drag / resize / delete
   enableShortcuts: true,  // keyboard shortcuts (below)
@@ -108,8 +150,8 @@ defaults:
 
 ## Keyboard shortcuts
 
-With `enableShortcuts` on: `m` / `w` / `d` switch views, `t` jumps to today,
-`←` / `→` navigate, and `Delete` removes the event whose popover is open
+With `enableShortcuts` on: `m` / `w` / `d` / `a` switch views, `t` jumps to
+today, `←` / `→` navigate, and `Delete` removes the event whose popover is open
 (edit mode only).
 
 They stay out of the way of whatever is on top: nothing fires while a field has
@@ -119,17 +161,26 @@ focus, or while a dialog, popover, menu or select is open anywhere on the page.
 
 By default, a single click on an event opens its detail popover and a double
 click opens the edit modal (edit mode only). Clicking an empty cell opens the
-new-event modal in edit mode. Each behavior is replaceable with the
-`onClick`, `onDblClick`, and `onCellClick` callback props — passing one turns
-the default off for that interaction.
+new-event modal in edit mode. Each behavior is replaceable with the `onClick`,
+`onDblClick`, and `onCellClick` callback props — passing one turns the default
+off for that interaction.
 
 The popover's content is replaceable with the `#event-popover-content` slot,
 which receives `{ calendarEvent, date, isEditMode, close }`.
 
-`CalendarActiveEvent` exports the ref holding the id of the event whose
-popover is open. Set it from outside to highlight an event, or clear it with
-an empty string. The ref is module-level: every `<Calendar>` on the page
-shares it.
+The Agenda's rows take three more slots: `#event-description` for the line
+under the title, `#event-suffix` for the tags beside it, and
+`#event-participant` for the row's far end, where the event's `participant`
+string is shown unless you fill it — with faces in front of the count, say. All
+three receive `{ calendarEvent, date, description, timing }`, where
+`description` and `timing` are what the calendar derived itself, so you can add
+to them rather than work them out again. The suffix has no tags of its own to
+hand you — it is yours to fill. Grid pills have no room for any of these and
+ignore the slots.
+
+`CalendarActiveEvent` exports the ref holding the id of the event whose popover
+is open. Set it from outside to highlight an event, or clear it with an empty
+string. The ref is module-level: every `<Calendar>` on the page shares it.
 
 ## Template ref
 

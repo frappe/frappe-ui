@@ -1,11 +1,10 @@
-import { monthList, parseDate } from './calendarUtils'
-import { eventDayCount, eventDays } from './eventSpan'
-import type { CalendarEvent } from './types'
+import { monthList } from './calendarUtils'
 
 /**
  * The Month view is a strip of week rows, each as tall as it needs to be.
- * These helpers describe that strip: which weeks make up a month, what a row
- * is called, and which events land where.
+ * These helpers describe that strip: which weeks make up a month and what a
+ * row is called. Which events land on a day is not strip geometry — that lives
+ * in `eventSpan`, with the rest of the "where does an event sit" questions.
  */
 
 function addDays(date: Date, days: number): Date {
@@ -40,50 +39,4 @@ export function stripRange(month: number, year: number) {
 
 export function shortMonth(date: Date): string {
   return monthList[date.getMonth()]!.slice(0, 3)
-}
-
-/** Whether the event covers more than one day, and so draws as a bar. */
-export function isSpan(event: CalendarEvent): boolean {
-  return eventDayCount(event) > 1
-}
-
-function minutes(time?: string): number {
-  if (!time) return 0
-  const [h, m] = time.split(':')
-  return parseInt(h!) * 60 + parseInt(m || '0')
-}
-
-/** Full-day events first, then by start time, then a stable tiebreak. */
-export function sortByStart(events: CalendarEvent[]): CalendarEvent[] {
-  return [...events].sort((a, b) => {
-    const fullA = a.isFullDay ? 0 : 1
-    const fullB = b.isFullDay ? 0 : 1
-    if (fullA !== fullB) return fullA - fullB
-    const timeA = minutes(a.fromTime)
-    const timeB = minutes(b.fromTime)
-    if (timeA !== timeB) return timeA - timeB
-    return String(a.id ?? '').localeCompare(String(b.id ?? ''))
-  })
-}
-
-/** Single-day events that fall on `date`. */
-export function dayEvents(
-  events: CalendarEvent[],
-  date: Date,
-): CalendarEvent[] {
-  const key = parseDate(date)
-  return sortByStart(
-    events.filter((e) => !isSpan(e) && eventDays(e).start === key),
-  )
-}
-
-/** Every event that occupies `date`, spans included. */
-export function eventsOn(events: CalendarEvent[], date: Date): CalendarEvent[] {
-  const key = parseDate(date)
-  return sortByStart(
-    events.filter((e) => {
-      const { start, end } = eventDays(e)
-      return start <= key && key <= end
-    }),
-  )
 }

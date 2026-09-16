@@ -2,7 +2,13 @@
   <!-- No overflow-hidden here: each view scrolls itself, and clipping at the
        root only cut the focus outline off the header's buttons. -->
   <div class="flex h-full flex-col">
+    <!-- v-if on the slot, not a fallback inside it: `renderSlot` falls back whenever a
+         slot renders nothing, so a consumer passing an empty <template #header /> — a
+         phone, which draws its own — got this header anyway and had to cover it with an
+         element that renders nothing. Asking whether the slot was passed at all is the
+         question that was being asked. -->
     <slot
+      v-if="$slots.header"
       name="header"
       v-bind="{
         currentMonthYear,
@@ -17,7 +23,8 @@
         onMonthYearChange,
         selectedMonthDate,
       }"
-    >
+    />
+    <template v-else>
       <div class="mb-2 flex justify-between">
         <!-- left side  -->
         <!-- Year, Month -->
@@ -63,7 +70,7 @@
           />
         </div>
       </div>
-    </slot>
+    </template>
 
     <CalendarMonthly
       v-if="activeView === 'Month'"
@@ -96,16 +103,31 @@
       :current-date="selectedDay"
       :config="overrideConfig"
     >
-      <template #header="{ parseDateWithDay, currentDate, fullDay }">
-        <slot
-          name="daily-header"
-          v-bind="{ parseDateWithDay, currentDate, fullDay }"
-        />
-      </template>
       <template #event-popover-content="slotProps">
         <slot name="event-popover-content" v-bind="slotProps" />
       </template>
     </CalendarDaily>
+
+    <CalendarAgenda
+      v-else-if="activeView === 'Agenda'"
+      :events="events"
+      :anchor="agendaAnchor"
+      :jump="agendaJump"
+      :loading="loading"
+    >
+      <template #event-description="slotProps">
+        <slot name="event-description" v-bind="slotProps" />
+      </template>
+      <template #event-suffix="slotProps">
+        <slot name="event-suffix" v-bind="slotProps" />
+      </template>
+      <template #event-participant="slotProps">
+        <slot name="event-participant" v-bind="slotProps" />
+      </template>
+      <template #event-popover-content="slotProps">
+        <slot name="event-popover-content" v-bind="slotProps" />
+      </template>
+    </CalendarAgenda>
 
     <NewEventModal
       v-if="showEventModal"
@@ -123,7 +145,6 @@ import {
   ref,
   watch,
   nextTick,
-  type Component,
 } from 'vue'
 import { Button } from '#components/Button'
 import { TabButtons } from '#components/TabButtons'
@@ -136,18 +157,18 @@ import {
 } from './calendarUtils'
 import { dayjs } from '#utils/dayjs'
 import { isTargetEditable } from '#composables/useKeyboardShortcut'
-import DayIcon from './Icon/DayIcon.vue'
-import WeekIcon from './Icon/WeekIcon.vue'
-import MonthIcon from './Icon/MonthIcon.vue'
 import DatePicker from '#components/DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
 import CalendarWeekly from './CalendarWeekly.vue'
 import CalendarDaily from './CalendarDaily.vue'
+import CalendarAgenda from './CalendarAgenda.vue'
 import NewEventModal from './NewEventModal.vue'
 import useEventModal from './composables/useEventModal'
 import { isAnyPopoverOpen } from './useEventBase'
 import { stripPlacement } from './eventSpan'
 import { stripRange } from './monthStrip'
+import { activeEvent } from './composables/useCalendarData'
+import { agendaMonths, agendaRange } from './agendaDays'
 import {
   ACTIVE_VIEW_KEY,
   CALENDAR_ACTIONS_KEY,
@@ -172,6 +193,9 @@ const emit = defineEmits<{
     payload: { view: CalendarMode; startDate: string; endDate: string },
   ]
 }>()
+
+/** Bumped by setCalendarDate; the Agenda scrolls back to its anchor on every bump. */
+const agendaJump = ref(0)
 
 const defaultConfig: CalendarConfig = {
   scrollToHour: 15,
@@ -266,24 +290,17 @@ function handleShortcuts(e: KeyboardEvent) {
   if (isOverlayOpen()) return
   if (isTargetEditable(e)) return
 
-  if (e.key.toLowerCase() === 'm') {
-    activeView.value = 'Month'
-  }
-  if (e.key.toLowerCase() === 'w') {
-    activeView.value = 'Week'
-  }
-  if (e.key.toLowerCase() === 'd') {
-    activeView.value = 'Day'
-  }
-  if (e.key.toLowerCase() === 't') {
-    setCalendarDate()
-  }
-  if (e.key === 'ArrowLeft') {
-    decrement()
-  }
-  if (e.key === 'ArrowRight') {
-    increment()
-  }
+  const view = viewShortcuts[e.key.toLowerCase()]
+  if (view) activeView.value = view
+  if (e.key.toLowerCase() === 't') setCalendarDate()
+  if (e.key === 'ArrowLeft') decrement()
+  if (e.key === 'ArrowRight') increment()
+}
+const viewShortcuts: Record<string, CalendarMode> = {
+  m: 'Month',
+  w: 'Week',
+  a: 'Agenda',
+  d: 'Day',
 }
 
 provide(ACTIVE_VIEW_KEY, activeView)
@@ -388,6 +405,9 @@ function handleCellClick(
     return
   }
 
+  // Clicking the list or the grid itself is how you let go of the event.
+  activeEvent.value = ''
+
   const data: CalendarCellClickData = {
     e,
     view: activeView.value,
@@ -406,14 +426,21 @@ function handleCellClick(
 type CalendarActionOption = {
   label: CalendarMode
   value: CalendarMode
-  iconLeft: Component
+  iconLeft: string
 }
 
-// Calendar View Options
+// Calendar View Options.
+//
+// Named lucide icons rather than four SVGs of the library's own: the set draws each
+// view as the shape of what it lays out — one pane, columns, a grid, a stack of
+// rows. Being lucide they also carry the same weight and
+// optical size as every other icon on the page, which hand-drawn glyphs at a fixed
+// 16px did not.
 const actionOptions: CalendarActionOption[] = [
-  { label: 'Day', value: 'Day', iconLeft: DayIcon },
-  { label: 'Week', value: 'Week', iconLeft: WeekIcon },
-  { label: 'Month', value: 'Month', iconLeft: MonthIcon },
+  { label: 'Day', value: 'Day', iconLeft: 'lucide-square-square' },
+  { label: 'Week', value: 'Week', iconLeft: 'lucide-columns-3' },
+  { label: 'Month', value: 'Month', iconLeft: 'lucide-grid-3x3' },
+  { label: 'Agenda', value: 'Agenda', iconLeft: 'lucide-rows-3' },
 ]
 let enabledModes = actionOptions.filter(
   (mode) => !overrideConfig.disableModes.includes(mode.value),
@@ -458,16 +485,19 @@ let date = ref(
 )
 let selectedDay = computed(() => currentMonthDates.value[date.value])
 
+/**
+ * The day the calendar is on, whichever view it is in: the one `date` points
+ * at, which every view moves — a step of the month or the week lands it on the
+ * first day in the period, a step of the day on the next one, and a date the
+ * host sets on that date. Reported the same way in every view so a host's mini
+ * month circles the day the reader picked. It used to answer the Month view
+ * with 1 and the Week view with the week's Sunday, and a mini month handed
+ * those circled the 1st, or the Sunday, while the calendar sat on the 11th the
+ * reader had just clicked in it.
+ */
 function computeCurrentDay(): number | null {
-  if (activeView.value === 'Week') {
-    const weekDates = datesInWeeks.value[week.value] || []
-    return weekDates[0] ? weekDates[0].getDate() : null
-  }
-  if (activeView.value === 'Day') {
-    const day = selectedDay.value
-    return day ? new Date(day).getDate() : null
-  }
-  return 1
+  const day = selectedDay.value
+  return day ? new Date(day).getDate() : null
 }
 
 let currentDay = ref(computeCurrentDay())
@@ -500,7 +530,13 @@ const incrementClickEvents: Record<CalendarMode, () => void> = {
   Month: incrementMonth,
   Week: incrementWeek,
   Day: incrementDay,
+  // The Agenda's window is anchored on a month and covers three, so its arrows
+  // step one — each move keeps two thirds of what was on screen.
+  Agenda: incrementMonth,
 }
+
+/** The day the Agenda is anchored on: whatever day the calendar is sitting on. */
+const agendaAnchor = computed(() => selectedDay.value ?? new Date())
 
 // decrementMonth lands on the month's last day, which is right for stepping
 // back a day across a month edge but scrolls the Month strip to its bottom;
@@ -515,6 +551,9 @@ const decrementClickEvents: Record<CalendarMode, () => void> = {
   Month: decrementMonthView,
   Week: decrementWeek,
   Day: decrementDay,
+  // Lands on the 1st rather than the last day, which is where the window's
+  // first month wants to start reading.
+  Agenda: decrementMonthView,
 }
 
 function incrementMonth() {
@@ -666,6 +705,18 @@ const currentMonthYear = computed(() => {
     }
   }
 
+  // The Agenda is anchored on whole months, so it names them rather than the
+  // dates its ends happen to land on — `agendaMonths`, not the listed range,
+  // which pads to whole weeks and would have the title naming a month for the
+  // sake of the two days of it the first week reaches back into.
+  if (activeView.value === 'Agenda') {
+    const { start, end } = agendaMonths(agendaAnchor.value)
+    const short = (d: Date) => monthList[d.getMonth()].slice(0, 3)
+    return start.getFullYear() === end.getFullYear()
+      ? `${short(start)} – ${short(end)} ${end.getFullYear()}`
+      : `${short(start)} ${start.getFullYear()} – ${short(end)} ${end.getFullYear()}`
+  }
+
   // Non-week views or empty week fallback
   if (activeView.value !== 'Week')
     return formatMonthYear(currentMonth.value, currentYear.value)
@@ -695,6 +746,10 @@ function isCurrentMonthDate(date?: Date) {
 function setCalendarDate(d?: Date | string) {
   const dt = d ? new Date(d) : new Date()
   if (dt.toString() === 'Invalid Date') return
+  // Counted, not compared: the Agenda reads this to know it has been sent somewhere,
+  // which is not the same as its anchor changing — Today, pressed halfway down the
+  // list on the day it is already anchored on, moves nothing and means everything.
+  agendaJump.value++
   currentYear.value = dt.getFullYear()
   currentMonth.value = dt.getMonth()
   currentDate.value = dt
@@ -732,6 +787,17 @@ function getVisibleRange() {
     return {
       startDate: start.format('YYYY-MM-DD'),
       endDate: end.format('YYYY-MM-DD'),
+    }
+  }
+
+  // The Agenda reports what it actually lists — three months from where it is
+  // anchored, less the days already spent — so a consumer's fetch window and
+  // its "new event" anchor agree with what is on screen.
+  if (activeView.value === 'Agenda') {
+    const { start, end } = agendaRange(agendaAnchor.value)
+    return {
+      startDate: dayjs(start).format('YYYY-MM-DD'),
+      endDate: dayjs(end).format('YYYY-MM-DD'),
     }
   }
 

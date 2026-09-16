@@ -13,6 +13,12 @@
     default: '[]'
   },
   {
+    name: 'loading',
+    description: 'Whether the events for the visible range are still on their way.\n\nOnly the Agenda reads it, and only to tell an empty list apart from one that\nhas not arrived: a grid with nothing in it still draws the days, where a list\nwith nothing in it is a blank panel, and saying "nothing on" of a range still\nbeing fetched is saying something that may not be true.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'config',
     description: 'Behavior overrides, merged over the defaults.',
     required: false,
@@ -23,7 +29,7 @@
     name: 'onClick',
     description: 'Replaces the default single-click behavior (opening the event\npopover) with your own handler.',
     required: false,
-    type: '((data: { e: MouseEvent; calendarEvent: CalendarEvent; }) => void)'
+    type: '((data: { e: MouseEvent | KeyboardEvent; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onDblClick',
@@ -48,12 +54,22 @@
   {
     name: 'event-popover-content',
     description: '',
-    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
+    type: '{ calendarEvent: CalendarEvent; date: Date; isEditMode: boolean; close: () => void; }'
   },
   {
-    name: 'daily-header',
+    name: 'event-description',
     description: '',
-    type: '{ parseDateWithDay: any; currentDate: any; fullDay: any; }'
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
+  },
+  {
+    name: 'event-suffix',
+    description: '',
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
+  },
+  {
+    name: 'event-participant',
+    description: '',
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
   }
 ]
 

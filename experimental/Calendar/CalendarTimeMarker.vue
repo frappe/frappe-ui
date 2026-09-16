@@ -5,7 +5,11 @@
     v-if="parseDate(date) === parseDate(now)"
   >
     <Tooltip :text="dayjs(now).format('ddd, MMM D, YYYY h:mm a')">
-      <div class="current-time relative h-0.5 bg-[#E03636] rounded-4" />
+      <!-- A step lighter than the palette's full red, and from the palette
+           rather than a hex of its own: a line across every day, all day, is
+           the one red thing on the grid, and at full strength it was the first
+           thing on the page. It follows the theme with the rest. -->
+      <div class="current-time relative h-0.5 bg-surface-red-6 rounded-4" />
     </Tooltip>
   </div>
 </template>
@@ -38,15 +42,19 @@ const setCurrentTime = computed(() => {
 })
 </script>
 <style scoped>
+/* A dot at the line's head, centred on it, rather than a tick across it: the
+   line says when, and the dot says where it starts — a point, which is what
+   "now" is. Pulled half its width left so it sits on the day's rule, the way the
+   line runs from it. */
 .current-time::before {
   content: '';
   display: block;
-  width: 2px;
-  height: 12px;
-  border-radius: 8px;
-  background-color: #e03636;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: var(--surface-red-6);
   position: absolute;
-  left: 0;
-  top: -5px;
+  left: -4px;
+  top: -3px;
 }
 </style>

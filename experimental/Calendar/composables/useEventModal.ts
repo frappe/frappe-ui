@@ -35,7 +35,9 @@ export default function useEventModal() {
     newEvent.toDate = formattedDate
     newEvent.isFullDay = isFullDay
 
-    if (view === 'Month') {
+    // A month cell and an agenda row are both a day with no hour attached, so
+    // neither hands the modal a time to start from.
+    if (view === 'Month' || view === 'Agenda') {
       showEventModal.value = true
       return
     }
