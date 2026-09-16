@@ -101,3 +101,25 @@ The paths are resolved against wherever `frappe-ui` is actually installed
 regardless of your app's working directory. When `frappe-ui` adds a new
 source directory that emits classes, bumping the dependency picks up the new
 glob automatically — you don't need to touch your `tailwind.config.js` again.
+
+## Hover styles
+
+The preset sets `future.hoverOnlyWhenSupported`, so `hover:` compiles to
+`@media (hover: hover) { &:hover }` and applies only on a device that can
+point at something. Without it a phone applies `:hover` on tap and keeps it
+until the next tap lands elsewhere, so a ghost button a thumb touched stayed
+filled. A laptop with a touchscreen answers `(hover: hover)` and keeps both.
+
+That leaves a rule for anything shown only on hover: it needs a touch path,
+because the sticky tap-hover was the only route a phone ever had to it. Either
+a tap already reaches what the reveal is for — tapping a sortable header sorts
+it and its glyph appears, tapping a playing video pauses it and its controls
+appear — or the device that cannot hover shows it outright:
+
+```html
+<button class="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+```
+
+Do not stand a breakpoint in for hover: `sm:opacity-0 sm:group-hover:opacity-100`
+hides the control from a tablet and shows it to a narrow desktop window, and
+neither is the device the rule is about.

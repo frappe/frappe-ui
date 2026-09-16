@@ -14,7 +14,7 @@
         <div v-for="(img, idx) in images" :key="img.attrs.src + idx"
           class="relative aspect-square w-full h-full overflow-hidden bg-surface-base group">
           <button v-if="isEditable" type="button"
-            class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
+            class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus:opacity-100"
             aria-label="Remove image" @click.stop="removeImage(idx)">
             <LucideX class="w-4 h-4 text-gray-700" />
           </button>
@@ -26,7 +26,7 @@
 
           <!-- Caption overlay (visible when there's alt text) -->
           <div v-if="img.attrs.alt"
-            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
+            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-[2px] opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
             <div class="p-2">
               <div class="text-white text-xs truncate" :title="img.attrs.alt">
                 {{ img.attrs.alt }}

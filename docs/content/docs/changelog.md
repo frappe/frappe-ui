@@ -9,6 +9,22 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — `hover:` applies only where hovering is possible
+
+The preset sets `future.hoverOnlyWhenSupported`, so every `hover:` utility
+compiles to `@media (hover: hover) { &:hover }`. A phone applied `:hover` on
+tap and kept it until the next tap landed elsewhere, so every ghost button a
+thumb touched stayed filled behind it.
+
+- **Behavior change:** touch screens no longer see hover styles at all. This
+  reaches your app's own `hover:` classes, not just the library's.
+- **Migration:** anything shown *only* on hover — `opacity-0
+  group-hover:opacity-100`, a `hidden` that hover undoes — is now unreachable
+  on touch unless a tap also reaches it. Give it a touch path: add
+  `[@media(hover:none)]:opacity-100` so a device that cannot hover shows it
+  outright, as the library's own editor controls now do. See
+  [Tailwind setup](/docs/foundations/tailwind#hover-styles).
+
 ### Base component contracts for v1 (breaking)
 
 - `Icon` adds the canonical `icon` prop while keeping `name` fully supported.
