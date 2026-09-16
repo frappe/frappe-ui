@@ -9,6 +9,26 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
+
+`expanded` was a boolean that expanded everything, and the open/closed state of
+each node was the `expanded` field on the node object, written by the component
+(#1142). A library must not write to the data its caller passes in: it defeats
+`readonly` and frozen data, it writes through to a store, and a shallow watcher
+never sees it.
+
+`expanded` is now `TreeKey[]`, the keys of the open nodes, replaced wholesale on
+every toggle. The per-node `expanded` field is gone. `expand`, `collapse`,
+`toggle`, `expandAll` and `collapseAll` on the component ref cover what the
+boolean did; their type is exported as `TreeExposed`.
+
+- **Default inverts:** an unbound tree used to open every node under
+  `:expanded="true"` and now renders its roots only.
+- **Silent break:** a node keeping `expanded: true` still type-checks —
+  `TreeNode` has an index signature — and the node stays shut. Dev mode warns
+  on the leftover field, and on the removed boolean model. See the
+  [migration guide](/docs/migration#tree).
+
 ### Tailwind preset — `hover:` applies only where hovering is possible
 
 The preset sets `future.hoverOnlyWhenSupported`, so every `hover:` utility

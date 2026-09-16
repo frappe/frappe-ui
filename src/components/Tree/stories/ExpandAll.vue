@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Button, Tree } from 'frappe-ui'
-import type { TreeNode } from '../types'
+import type { TreeExposed, TreeNode } from '../types'
 
 const nodes = ref<TreeNode[]>([
   {
@@ -31,18 +31,30 @@ const nodes = ref<TreeNode[]>([
   },
 ])
 
-// `expanded` mirrors whether every node is open (nodes start expanded), so the
-// label stays in sync even when rows are toggled individually.
-const expanded = ref(true)
+// The model holds the keys of the open nodes, so it doubles as a readout.
+const expanded = ref<string[]>(['guest'])
+
+// `expandAll` / `collapseAll` write the same model through a template ref.
+const tree = ref<TreeExposed | null>(null)
 </script>
 
 <template>
   <div class="flex flex-col gap-3">
-    <Button class="self-start" @click="expanded = !expanded">
-      {{ expanded ? 'Collapse all' : 'Expand all' }}
-    </Button>
-    <div class="w-80">
-      <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+    <div class="flex gap-2">
+      <Button @click="tree?.expandAll()">Expand all</Button>
+      <Button @click="tree?.collapseAll()">Collapse all</Button>
+      <Button @click="tree?.toggle('documents')">Toggle Documents</Button>
     </div>
+    <div class="w-80">
+      <Tree
+        ref="tree"
+        :nodes="nodes"
+        node-key="name"
+        v-model:expanded="expanded"
+      />
+    </div>
+    <p class="text-sm text-ink-gray-5">
+      expanded: {{ expanded.length ? expanded.join(', ') : '(none)' }}
+    </p>
   </div>
 </template>

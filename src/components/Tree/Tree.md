@@ -6,17 +6,16 @@ guides visually link parents to their children.
 
 ## Default
 
-The simplest tree — pass `nodes` and tell it which field is the key. Nodes are
-expanded by default; here **Documents** carries `expanded: false` to start
-collapsed.
+The simplest tree — pass `nodes`, tell it which field is the key, and bind
+`v-model:expanded` to the keys you want open. Everything else starts collapsed.
 
 <ComponentPreview name="Tree-Example" />
 
 ## Expand / collapse all
 
-Bind `v-model:expanded` to a boolean for a master switch — toggling it opens or
-closes every node. It's two-way, so it also reflects whether all nodes are
-currently open as the user toggles rows individually.
+`expandAll()` and `collapseAll()` on the component ref write the same `expanded`
+model, so a button can open or close the whole tree without the caller walking
+the nodes itself.
 
 <ComponentPreview name="Tree-ExpandAll" />
 
@@ -65,10 +64,12 @@ const nodes = ref([
     ],
   },
 ])
+
+const expanded = ref(['src'])
 </script>
 
 <template>
-  <Tree :nodes="nodes" node-key="name" />
+  <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
 </template>
 ```
 
@@ -82,16 +83,41 @@ passed through to the slots, so you can render avatars, roles, badges, etc.
 To display a field other than `label`, use the `#item-label` slot rather than
 remapping.
 
+A node carries your data only. The tree never writes to the objects you pass in.
+
 ## Expansion
 
-Each node owns its own state via an `expanded` field — the source of truth the
-tree reads and writes as rows toggle, so expansion travels with your data. Nodes
-are **expanded by default**; set `expanded: false` to start one collapsed.
+`v-model:expanded` holds the **keys of the open nodes**. A key that is absent
+means collapsed, so an unbound tree renders its roots and nothing else.
 
-`v-model:expanded` is a separate, optional boolean **switch** for the whole
-tree: toggle it to open or close everything at once (see
-[Expand / collapse all](#expand-collapse-all)). It's two-way, reflecting whether
-all nodes are currently open.
+```vue
+<script setup>
+const expanded = ref(['src'])
+</script>
+
+<template>
+  <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+</template>
+```
+
+Every toggle assigns a **new array**, so shallow watchers, immutable stores and
+undo logs see the change. Nothing is written onto your nodes.
+
+The component ref carries the imperative half. Its type is exported as
+`TreeExposed`:
+
+| Method          | Effect                             |
+| --------------- | ---------------------------------- |
+| `expand(key)`   | Opens that node                    |
+| `collapse(key)` | Closes that node                   |
+| `toggle(key)`   | Flips that node                    |
+| `expandAll()`   | Opens every node that has children |
+| `collapseAll()` | Closes everything                  |
+
+These are programmatic, so `disabled` — which freezes user interaction — does
+not block them. `expand(key)` also accepts a key whose children have not loaded
+yet; the node opens as soon as they arrive, and `expandAll()` adds to the open
+keys rather than replacing them, so such a key is never dropped.
 
 Clicking a row, or pressing `Enter`/`Space` on it, toggles that node.
 
