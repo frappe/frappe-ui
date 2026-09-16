@@ -38,6 +38,22 @@ tracks the same identities the rows render with.
 Selection itself is still yours: a removed row's value stays in
 `v-model:selection` until you drop it.
 
+### Tabs — a clicked tab clears on the next navigation that lands (fix)
+
+In route mode, clicking a non-route tab selects it until the route moves. "Moves"
+was read as "a different tab matches", so navigating within one routed tab —
+`/inbox` → `/inbox?filter=unread`, `/inbox#recent`, `/inbox/42` — left the
+clicked tab selected. Any navigation that lands now clears it.
+
+- A navigation that did not land keeps the clicked tab: aborted by a guard,
+  cancelled by a newer navigation, or a duplicate of the URL already showing. A
+  redirect clears it, because the redirect target lands.
+- **Narrowing:** the reset keys on navigation alone, so a matched-tab change
+  without one — a trigger's `route` prop changing, or a routed trigger mounting
+  that matches the current URL — no longer discards the click. It used to.
+- Tabs still works with no router installed; the listener is registered only when
+  a router is present and is removed on unmount.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of

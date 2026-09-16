@@ -2,12 +2,15 @@
 import {
   computed,
   getCurrentInstance,
+  inject,
+  onUnmounted,
   provide,
   ref,
   shallowRef,
   watch,
 } from 'vue'
 import { TabsRoot } from 'reka-ui'
+import { routerKey } from 'vue-router'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
 import TabPanel from './TabPanel.vue'
@@ -212,9 +215,27 @@ function triggerFor(value: TabValue) {
   return triggers.value.find((t) => t.value() === value)
 }
 
-watch(routeSelected, () => {
-  routeOverride.value = null
-})
+// The override lasts until the route moves. "Moves" is a navigation that
+// landed, not a change of matched tab: `/inbox` → `/inbox?filter=unread`,
+// `#recent`, or `/inbox/42` all keep the same tab matched, and each is still
+// a new URL the clicked tab does not stand for. Watching the matched value
+// missed all three.
+//
+// A navigation that did not land — aborted by a guard, cancelled by a newer
+// one, or a duplicate of the current URL — leaves `failure` set and changed
+// nothing the user can see, so it must not throw away their click.
+//
+// `inject` rather than `useRouter`: Tabs is used with no router at all far
+// more often than with one, and `useRouter` warns when the injection is
+// missing.
+const router = inject(routerKey, null)
+if (router) {
+  const stopRouteReset = router.afterEach((_to, _from, failure) => {
+    if (failure) return
+    routeOverride.value = null
+  })
+  onUnmounted(stopRouteReset)
+}
 
 // Turning the clicked trigger disabled ends the override for good, rather
 // than parking it: re-enabling the tab must not hand selection back without
