@@ -142,3 +142,44 @@ describe('dark-theme checkbox marks', () => {
     ).toBeLessThan(at('.form-input'))
   })
 })
+
+/**
+ * `future.hoverOnlyWhenSupported` puts every `hover:` under a media query, so
+ * a phone never wears one — and so anything shown only on hover needs a touch
+ * path, which the library writes as `[@media(hover:none)]:opacity-100`. These
+ * compile the real preset: the gate has to be there, and the touch rule has to
+ * come late enough in the sheet to win.
+ */
+describe('hover', () => {
+  const compile = async (html) => {
+    const { default: postcss } = await import('postcss')
+    const { default: tailwindcss } = await import('tailwindcss')
+    const result = await postcss([
+      tailwindcss({
+        presets: [preset],
+        content: [{ raw: html, extension: 'html' }],
+      }),
+    ]).process('@tailwind utilities', { from: undefined })
+    return result.css
+  }
+
+  it('applies only where hovering is possible', async () => {
+    const css = await compile('<div class="hover:opacity-50">')
+    expect(css).toMatch(
+      /@media \(hover: hover\) and \(pointer: fine\) \{\s*\.hover\\:opacity-50:hover \{/,
+    )
+    expect(css).not.toMatch(/^\.hover\\:opacity-50:hover/m)
+  })
+
+  it('lets a reveal show outright where hovering is not', async () => {
+    const css = await compile(
+      '<div class="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">',
+    )
+    const base = css.indexOf('.opacity-0 {')
+    const touch = css.indexOf('@media(hover:none) {')
+    expect(base).toBeGreaterThan(-1)
+    // Later in the sheet at the same specificity, so it wins where it applies.
+    expect(touch).toBeGreaterThan(base)
+    expect(css.slice(touch)).toMatch(/opacity-100 \{\s*opacity: 1/)
+  })
+})

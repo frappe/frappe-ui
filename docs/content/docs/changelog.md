@@ -12,7 +12,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 ### Tailwind preset — `hover:` applies only where hovering is possible
 
 The preset sets `future.hoverOnlyWhenSupported`, so every `hover:` utility
-compiles to `@media (hover: hover) { &:hover }`. A phone applied `:hover` on
+compiles under `@media (hover: hover) and (pointer: fine)`. A phone applied `:hover` on
 tap and kept it until the next tap landed elsewhere, so every ghost button a
 thumb touched stayed filled behind it.
 

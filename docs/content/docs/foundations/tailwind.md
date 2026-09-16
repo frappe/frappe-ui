@@ -104,9 +104,9 @@ glob automatically — you don't need to touch your `tailwind.config.js` again.
 
 ## Hover styles
 
-The preset sets `future.hoverOnlyWhenSupported`, so `hover:` compiles to
-`@media (hover: hover) { &:hover }` and applies only on a device that can
-point at something. Without it a phone applies `:hover` on tap and keeps it
+The preset sets `future.hoverOnlyWhenSupported`, so `hover:` compiles under
+`@media (hover: hover) and (pointer: fine)` and applies only on a device that
+can point at something. Without it a phone applies `:hover` on tap and keeps it
 until the next tap lands elsewhere, so a ghost button a thumb touched stayed
 filled. A laptop with a touchscreen answers `(hover: hover)` and keeps both.
 
