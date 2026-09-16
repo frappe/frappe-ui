@@ -219,6 +219,45 @@ describe('Tree', () => {
     )
   })
 
+  it('warns about the removed field on a node that never renders', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const nodes = makeNodes()
+    ;(nodes[0].children as TreeNode[])[0].expanded = false
+    // Nothing is expanded, so only Root renders — the mount walk has to reach
+    // the rest anyway. This is the shut tree a beta caller actually sees.
+    cy.mount(Tree, { props: { nodes, nodeKey: 'id' } })
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
+  it('stays quiet when expandAll or collapseAll change nothing', () => {
+    const tree = ref<TreeExposed | null>(null)
+    const keys = ref<string[]>(['root', 'a'])
+    const onUpdate = cy.stub().as('update')
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => {
+            keys.value = value
+            onUpdate(value)
+          },
+        }),
+    })
+    // `root` and `a` are the only collapsible nodes, so both are already open.
+    cy.then(() => tree.value!.expandAll())
+    cy.then(() => tree.value!.collapseAll())
+    cy.then(() => tree.value!.collapseAll())
+    cy.get('@update').should('have.been.calledOnce')
+    cy.get('@update').should('have.been.calledWith', [])
+  })
+
   it('expands and collapses everything through the exposed methods', () => {
     const tree = ref<TreeExposed | null>(null)
     cy.mount({

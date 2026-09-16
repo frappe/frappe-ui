@@ -155,7 +155,18 @@ const isExpanded = (node: TreeNode) => expandedSet.value.has(keyOf(node))
 
 // Always assign a fresh array — an in-place push would skip `update:expanded`
 // and leave shallow watchers and immutable stores behind.
+// `expandAll`/`collapseAll` write a whole set, so they need the no-change guard
+// that `setKeyExpanded` does for itself — a caller that persists on every
+// `update:expanded` should not get a round trip for nothing.
+function sameAsCurrent(keys: TreeKey[]) {
+  return (
+    keys.length === currentKeys.value.length &&
+    keys.every((key) => expandedSet.value.has(key))
+  )
+}
+
 function writeKeys(keys: TreeKey[]) {
+  if (sameAsCurrent(keys)) return
   pending.value = keys
   expandedKeys.value = keys
   nextTick(() => (pending.value = null))
@@ -258,32 +269,36 @@ const flat = computed(() => {
 // `expanded` is also a plausible column name, and a node is allowed arbitrary
 // extra fields, so this reports what it found rather than telling the caller
 // what they did.
-//
-// Watching `flat` rather than `nodes` deep: `flat` is already computed for
-// rendering, so this costs no extra traversal, where a deep watch would
-// re-walk the forest on every edit — for the life of any tree that never
-// trips it, which is most of them. The trade is that a node under a closed
-// ancestor is reported when it first renders instead of at mount.
 if (import.meta.env.DEV) {
-  let reported = false
-  let stop: WatchStopHandle | undefined
-  stop = watch(
-    flat,
-    (rows) => {
-      if (reported || !rows.some((row) => 'expanded' in row.node)) return
-      reported = true
-      warnOnce(
-        'Tree.node.expanded',
-        '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
-          'Tree does not read it — expansion is `v-model:expanded`, an array ' +
-          'of node keys. Ignore this if the field is your own data.',
-      )
-      // `undefined` on the immediate pass, which the call below covers.
+  const carriesExpanded = (nodes: TreeNode[]): boolean =>
+    nodes.some(
+      (node) => 'expanded' in node || carriesExpanded(childrenOf(node)),
+    )
+
+  const report = () =>
+    warnOnce(
+      'Tree.node.expanded',
+      '[frappe-ui] Tree: a node in `nodes` carries an `expanded` field. ' +
+        'Tree does not read it — expansion is `v-model:expanded`, an array ' +
+        'of node keys. Ignore this if the field is your own data.',
+    )
+
+  // One traversal at mount, then done. It has to cover nodes under a closed
+  // ancestor: the caller this exists for kept `expanded` on their data and
+  // bound no model, so their tree is shut and only its roots render.
+  if (carriesExpanded(roots.value)) {
+    report()
+  } else {
+    // Children that arrive later. `flat` is already computed for rendering,
+    // so this costs no extra traversal, where a deep watch on `nodes` would
+    // re-walk the forest on every edit for the life of the component.
+    let stop: WatchStopHandle | undefined
+    stop = watch(flat, (rows) => {
+      if (!rows.some((row) => 'expanded' in row.node)) return
+      report()
       stop?.()
-    },
-    { immediate: true },
-  )
-  if (reported) stop()
+    })
+  }
 }
 
 // --- drag & drop ----------------------------------------------------------
