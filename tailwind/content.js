@@ -58,4 +58,5 @@ export const content = [
   glob('experimental/ThemeSwitcher/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('vitepress/**/*.{vue,js,ts}'),
+  '!' + glob('**/stories/**'),
 ]
