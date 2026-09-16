@@ -118,12 +118,16 @@ const sortOptions = [
               <!--
                 Count and options menu share one cell: the count fades out on row
                 hover/focus while the "…" menu fades in. The group is
-                SidebarItem's root (`group/sidebar-item`).
+                SidebarItem's root (`group/sidebar-item`). Where nothing can
+                hover the trade never happens, so the cell widens and holds
+                both side by side instead of one over the other.
               -->
-              <div class="relative mr-1 flex size-7 shrink-0 items-center justify-end">
+              <div
+                class="relative mr-1 flex size-7 shrink-0 items-center justify-end [@media(hover:none)]:w-auto [@media(hover:none)]:gap-1"
+              >
                 <span
                   v-if="space.unread > 0"
-                  class="absolute right-1 text-xs text-ink-gray-5 transition-opacity group-hover/sidebar-item:opacity-0 group-focus-within/sidebar-item:opacity-0"
+                  class="absolute right-1 text-xs text-ink-gray-5 transition-opacity group-hover/sidebar-item:opacity-0 group-focus-within/sidebar-item:opacity-0 [@media(hover:none)]:static [@media(hover:none)]:opacity-100"
                 >
                   {{ space.unread }}
                 </span>
@@ -138,7 +142,7 @@ const sortOptions = [
                       size="xs"
                       icon="lucide-more-horizontal text-ink-gray-5"
                       :label="`${space.title} options`"
-                      class="absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100 [@media(hover:none)]:opacity-100"
+                      class="absolute right-0 -mr-0.5 opacity-0 group-hover/sidebar-item:opacity-100 group-focus-within/sidebar-item:opacity-100 [@media(hover:none)]:static [@media(hover:none)]:opacity-100"
                       :class="open ? 'opacity-100' : ''"
                     />
                   </template>
