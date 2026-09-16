@@ -9,6 +9,24 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Pickers — `open` is honored at mount (fix)
+
+`DatePicker`, `DateRangePicker`, `DateTimePicker` and `TimePicker` seeded their
+own open state to `false` and only watched `open` for later changes, so a parent
+that mounted one with `open` already `true` got a closed panel.
+
+The initial value is now read on the first render, and the panel opens fully
+initialized: the calendar shows the bound date, `TimePicker` scrolls to the bound
+time, and the trigger's `aria-controls` points at the panel. Mounting open emits
+no `update:open`. A custom `#trigger` gets the same `requestFocus` it gets on any
+later open, so focus moves into the panel.
+
+- **Behavior change:** if you passed `open` as a constant `true` and relied on it
+  being ignored, the panel now opens. Drop the prop or bind it to your own state.
+- `open: true` together with `disabled: true` shows the panel, matching the
+  controlled path that already bypassed the disabled guard. The imperative
+  `open()` is still a no-op while disabled.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of

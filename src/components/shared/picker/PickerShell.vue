@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
@@ -174,19 +174,23 @@ const triggerSlotProps = computed<PickerShellTriggerSlotProps>(() => ({
 
 const hasCustomTrigger = computed(() => !!slots.trigger)
 
+function onOpened() {
+  emit('open')
+  nextTick(() => {
+    panelId.value = popoverRef.value?.contentEl?.id || undefined
+  })
+  // Custom triggers (e.g. a button) have no typing context — once the
+  // popover is open the user wants to interact with the content. Signal
+  // the parent to move focus there. The default `TextInput` trigger
+  // keeps its focus so the user can type, and only the explicit ↓
+  // handler emits `requestFocus`.
+  if (hasCustomTrigger.value) emit('requestFocus')
+}
+
 watch(open, (val, prev) => {
   if (val === prev) return
   if (val) {
-    emit('open')
-    nextTick(() => {
-      panelId.value = popoverRef.value?.contentEl?.id || undefined
-    })
-    // Custom triggers (e.g. a button) have no typing context — once the
-    // popover is open the user wants to interact with the content. Signal
-    // the parent to move focus there. The default `TextInput` trigger
-    // keeps its focus so the user can type, and only the explicit ↓
-    // handler emits `requestFocus`.
-    if (hasCustomTrigger.value) emit('requestFocus')
+    onOpened()
   } else {
     // Restore focus to the trigger input if the popover content had focus
     // (Esc, date selection in auto-close mode). Click-outside leaves focus
@@ -200,6 +204,14 @@ watch(open, (val, prev) => {
       nextTick(() => textInputRef.value?.focus())
     }
   }
+})
+
+// A shell mounted with `open` already true never crosses the watch above, so
+// the open-time work — the panel id behind `aria-controls`, the parent's draft
+// initialization, focus for a custom trigger — runs here instead. No
+// `update:open`: the parent is the one that asked for an open panel.
+onMounted(() => {
+  if (open.value) onOpened()
 })
 
 defineExpose<PickerShellExposed>({

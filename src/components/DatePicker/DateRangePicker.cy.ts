@@ -427,4 +427,93 @@ describe('DateRangePicker', () => {
       cy.get('input').first().should('be.focused')
     })
   })
+
+  // A parent that mounts a picker with `open` already true gets an open panel.
+  // The prop is only watched for changes, so the initial value used to be
+  // dropped (plans/001, step 1).
+  describe('initial open state', () => {
+    it('mounts open when `open` starts true', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'], open: true },
+      })
+
+      cy.get('[role=dialog]').should('exist')
+      // The panel shows the bound range, not an unseeded month.
+      cy.get('[aria-label=cycle-calendar-view]').should('have.text', 'Jun 2025')
+      cy.get('[aria-label="2025-06-10"]').should(
+        'have.attr',
+        'aria-selected',
+        'true',
+      )
+      cy.get('[aria-label="2025-06-20"]').should(
+        'have.attr',
+        'aria-selected',
+        'true',
+      )
+      cy.get('input').should('have.value', '2025-06-10 to 2025-06-20')
+      // A panel that is merely displayed is not open: the trigger has to point
+      // at it too.
+      cy.get('input').should('have.attr', 'aria-expanded', 'true')
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          cy.get(`#${panelId}`).should('have.attr', 'role', 'dialog')
+        })
+    })
+
+    it('stays closed when `open` starts false', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'], open: false },
+      })
+      cy.get('[role=dialog]').should('not.exist')
+      cy.get('input').should('have.attr', 'aria-expanded', 'false')
+    })
+
+    it('stays closed when `open` is omitted', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'] },
+      })
+      cy.get('[role=dialog]').should('not.exist')
+    })
+
+    it('follows the parent from false to true and back', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'], open: false },
+      }).then(({ wrapper }) => {
+        cy.get('[role=dialog]').should('not.exist')
+        cy.then(() => wrapper.setProps({ open: true }))
+        cy.get('[role=dialog]').should('exist')
+        cy.then(() => wrapper.setProps({ open: false }))
+        cy.get('[role=dialog]').should('not.exist')
+      })
+    })
+
+    it('still opens from the trigger with no `open` bound', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'] },
+      })
+      cy.get('input').click()
+      cy.get('[role=dialog]').should('exist')
+    })
+
+    it('emits no `update:open` while mounting open', () => {
+      cy.mount(DateRangePicker, {
+        props: {
+          modelValue: ['2025-06-10', '2025-06-20'],
+          open: true,
+          'onUpdate:open': cy.spy().as('onUpdateOpen'),
+        },
+      })
+
+      cy.get('[role=dialog]').should('exist')
+      cy.get('@onUpdateOpen').should('not.have.been.called')
+
+      // The first emit is the picker's own close, so nothing looped on mount.
+      cy.get('[aria-label="2025-06-12"]').click()
+      cy.get('[aria-label="2025-06-15"]').click()
+      cy.get('[role=dialog]').should('not.exist')
+      cy.get('@onUpdateOpen').should('have.been.calledOnceWith', false)
+    })
+  })
 })
