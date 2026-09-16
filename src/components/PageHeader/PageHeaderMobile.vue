@@ -19,7 +19,7 @@
            truncate here covers a plain-text title; a PageHeaderMobileTitle caps
            itself at this width and ellipsises its own text, so the two never race. -->
       <h1
-        class="mx-[var(--_page-header-mobile-title-inset)] min-w-0 flex-1 truncate text-center text-xl-semibold leading-tight text-ink-gray-9"
+        class="mx-[var(--\_page-header-mobile-title-inset)] min-w-0 flex-1 truncate text-center text-xl-semibold leading-tight text-ink-gray-9"
       >
         <slot>{{ title }}</slot>
       </h1>

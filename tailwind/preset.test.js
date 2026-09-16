@@ -8,6 +8,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import resolveConfig from 'tailwindcss/resolveConfig.js'
+import { content } from './content.js'
 import preset from './preset.js'
 
 const theme = resolveConfig({ content: [], presets: [preset] }).theme
@@ -184,4 +185,27 @@ describe('hover', () => {
     expect(touch).toBeGreaterThan(base)
     expect(css.slice(touch)).toMatch(/opacity-100 \{\s*opacity: 1/)
   })
+})
+
+/**
+ * Tailwind reads an underscore in an arbitrary value as a space, so a class
+ * like `mx-[var(--_x)]` compiles to `var(-- x)`: not a variable reference in
+ * any browser, and a hard error in lightningcss, which is what every consumer
+ * minifying with rolldown-vite hit. The escape is `--\_x`. This compiles the
+ * sources the shipped `content` export hands consumers — the same list, so
+ * a slip anywhere an app would scan fails here.
+ */
+describe('arbitrary values', () => {
+  it('keep every custom property name whole', async () => {
+    const { default: postcss } = await import('postcss')
+    const { default: tailwindcss } = await import('tailwindcss')
+    const { css } = await postcss([
+      tailwindcss({
+        presets: [preset],
+        content,
+      }),
+    ]).process('@tailwind utilities', { from: undefined })
+    expect(css).toMatch(/var\(--_page-header-mobile-title-inset\)/)
+    expect(css).not.toMatch(/var\(--\s/)
+  }, 60_000)
 })
