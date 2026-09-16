@@ -54,6 +54,15 @@ clicked tab selected. Any navigation that lands now clears it.
 - Tabs still works with no router installed; the listener is registered only when
   a router is present and is removed on unmount.
 
+### TabButtons — `focus()` on the component ref
+
+A template ref now exposes `focus(options?)`, the method every focusable control
+in the library shares. It focuses the selected option, or the first enabled one
+when nothing is selected. Disabled options are skipped, including `route` and
+`href` options that render disabled, and a group with no options or with every
+option disabled does nothing. `FocusOptions` is forwarded, `preventScroll`
+included. The type is exported as `TabButtonsExposed`.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of

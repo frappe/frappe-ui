@@ -1,3 +1,4 @@
+import type { InputExposed } from '../../composables/inputTypes'
 import type { RouteDestination } from '../shared/route'
 import type {
   TabIcon,
@@ -47,6 +48,15 @@ export interface TabButtonsProps {
 export interface TabButtonsEmits {
   'update:modelValue': [value: TabButtonValue]
 }
+
+/**
+ * What a `<TabButtons>` template ref hands back. `focus()` moves focus to the
+ * selected option, or to the first enabled one when nothing is selected —
+ * the same element a `Tab` press reaches, since the group is one tabstop.
+ * A group with no options, or with every option disabled, has nothing to
+ * focus and the call does nothing.
+ */
+export interface TabButtonsExposed extends InputExposed {}
 
 export interface TabButtonsSlots {
   /** Slot before the tab button label. */

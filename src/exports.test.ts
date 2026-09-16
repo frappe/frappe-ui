@@ -31,6 +31,7 @@ import type {
   ScrollAreaExposed,
   SelectionGroup,
   SelectionOption,
+  TabButtonsExposed,
   ToastAction,
   ToastId,
   ToastOptions,
@@ -94,6 +95,7 @@ type PublicTypes = [
   ToastOptions,
   SelectionGroup,
   SelectionOption,
+  TabButtonsExposed,
 ]
 
 describe('root exports', () => {

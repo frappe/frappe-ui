@@ -1,5 +1,50 @@
 import { defineComponent, h, ref } from 'vue'
+import { createMemoryHistory, createRouter, type Router } from 'vue-router'
 import TabButtons from './TabButtons.vue'
+import type { TabButtonsProps } from './types'
+
+// Mounts the component next to a plain button that calls `focus()` through a
+// template ref, so the assertions run against a real ref call rather than a
+// reimplementation of the lookup.
+function mountWithFocusTrigger(
+  props: TabButtonsProps,
+  options: { focusOptions?: FocusOptions; router?: Router } = {},
+) {
+  const Harness = defineComponent({
+    setup() {
+      const tabsRef = ref<InstanceType<typeof TabButtons> | null>(null)
+
+      return () =>
+        h('div', [
+          h(TabButtons, { ...props, ref: tabsRef }),
+          h(
+            'button',
+            {
+              'data-cy': 'focus',
+              onClick: () => tabsRef.value?.focus(options.focusOptions),
+            },
+            'Focus',
+          ),
+        ])
+    },
+  })
+
+  return cy.mount(
+    Harness,
+    options.router ? { global: { plugins: [options.router] } } : undefined,
+  )
+}
+
+function routerWithInboxAndSent() {
+  return createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/inbox', component: { template: '<div />' } },
+      { path: '/sent', component: { template: '<div />' } },
+    ],
+  })
+}
 
 describe('<TabButtons />', () => {
   it('updates the selected value', () => {
@@ -291,6 +336,170 @@ describe('<TabButtons />', () => {
       const br = $btn[0].getBoundingClientRect()
       expect(ir.x, 'x').to.be.closeTo(br.x, 0.5)
       expect(ir.width, 'width').to.be.closeTo(br.width, 0.5)
+    })
+  })
+
+  // INP-Q5: the one method every focusable control exposes.
+  describe('template ref', () => {
+    const options = [
+      { label: 'Day', value: 'day' },
+      { label: 'Week', value: 'week' },
+      { label: 'Month', value: 'month' },
+    ]
+
+    it('focuses the selected option', () => {
+      mountWithFocusTrigger({ options, modelValue: 'week' })
+
+      cy.get('[data-cy="focus"]').click()
+
+      // The rendered tab takes focus — not the track around it, and not the
+      // Pill inside it.
+      cy.focused()
+        .should('match', 'button[data-slot="tab-button"]')
+        .and('have.attr', 'data-value', 'week')
+    })
+
+    it('focuses the first enabled option when nothing is selected', () => {
+      mountWithFocusTrigger({
+        options: [
+          { label: 'Day', value: 'day', disabled: true },
+          { label: 'Week', value: 'week' },
+          { label: 'Month', value: 'month' },
+        ],
+      })
+
+      cy.get('[data-slot="tab-button"][data-state="active"]').should(
+        'not.exist',
+      )
+      cy.get('[data-cy="focus"]').click()
+
+      cy.focused().should('have.attr', 'data-value', 'week')
+    })
+
+    it('skips a disabled selected option', () => {
+      mountWithFocusTrigger({
+        options: [
+          { label: 'Day', value: 'day', disabled: true },
+          { label: 'Week', value: 'week' },
+        ],
+        modelValue: 'day',
+      })
+
+      cy.get('[data-slot="tab-button"][data-value="day"]').should(
+        'have.attr',
+        'data-state',
+        'active',
+      )
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.focused().should('have.attr', 'data-value', 'week')
+    })
+
+    it('does nothing when there are no options', () => {
+      mountWithFocusTrigger({ options: [] })
+
+      cy.get('[data-slot="tab-button"]').should('not.exist')
+      cy.get('[data-cy="focus"]').click()
+
+      // Focus stays where the caller left it.
+      cy.get('[data-cy="focus"]').should('have.focus')
+    })
+
+    it('does nothing when every option is disabled', () => {
+      mountWithFocusTrigger({
+        options: [
+          { label: 'Day', value: 'day', disabled: true },
+          { label: 'Week', value: 'week', disabled: true },
+        ],
+        modelValue: 'day',
+      })
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.get('[data-cy="focus"]').should('have.focus')
+    })
+
+    it('focuses the link a route option renders', () => {
+      const router = routerWithInboxAndSent()
+      cy.wrap(router.push('/inbox'))
+
+      mountWithFocusTrigger(
+        {
+          options: [
+            { label: 'Inbox', value: 'inbox', route: '/inbox' },
+            { label: 'Sent', value: 'sent', route: '/sent' },
+          ],
+          modelValue: 'sent',
+        },
+        { router },
+      )
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.focused()
+        .should('match', 'a[data-slot="tab-button"]')
+        .and('have.attr', 'href', '/sent')
+    })
+
+    it('focuses the anchor an href option renders', () => {
+      mountWithFocusTrigger({
+        options: [
+          { label: 'Guide', value: 'guide', href: 'https://example.com/guide' },
+        ],
+        modelValue: 'guide',
+      })
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.focused()
+        .should('match', 'a[data-slot="tab-button"]')
+        .and('have.attr', 'href', 'https://example.com/guide')
+    })
+
+    it('skips a disabled route option, which renders as a disabled button', () => {
+      const router = routerWithInboxAndSent()
+      cy.wrap(router.push('/inbox'))
+
+      mountWithFocusTrigger(
+        {
+          options: [
+            { label: 'Inbox', value: 'inbox', route: '/inbox', disabled: true },
+            { label: 'Sent', value: 'sent', route: '/sent' },
+          ],
+          modelValue: 'inbox',
+        },
+        { router },
+      )
+
+      // A disabled option never becomes a link, so nothing can follow it.
+      cy.get('[data-slot="tab-button"][data-value="inbox"]')
+        .should('match', 'button')
+        .and('be.disabled')
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.focused()
+        .should('match', 'a[data-slot="tab-button"]')
+        .and('have.attr', 'data-value', 'sent')
+    })
+
+    it('forwards FocusOptions to the element it focuses', () => {
+      mountWithFocusTrigger(
+        { options, modelValue: 'week' },
+        { focusOptions: { preventScroll: true } },
+      )
+
+      cy.get('[data-slot="tab-button"][data-value="week"]').then(($tab) => {
+        cy.spy($tab[0], 'focus').as('tabFocus')
+      })
+
+      cy.get('[data-cy="focus"]').click()
+
+      cy.get('@tabFocus').should('have.been.calledWith', {
+        preventScroll: true,
+      })
+      cy.focused().should('have.attr', 'data-value', 'week')
     })
   })
 })
