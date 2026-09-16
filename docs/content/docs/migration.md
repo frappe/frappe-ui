@@ -2227,22 +2227,23 @@ at build time.
 ## Tree
 
 The Tree was rebuilt from a single recursive `node` renderer into a stateful
-forest. It takes a `nodes` array and scopes its per-row slots as `#item-*`. Each
-node still owns its expansion via an `expanded` field, now defaulting to open —
-set `expanded: false` to collapse one (v0 used `defaultCollapsed`). The
-`options` blob is gone — sizing moves to CSS variables. Keyboard navigation,
-`role="tree"` ARIA, and opt-in drag-and-drop are new.
+forest. It takes a `nodes` array and scopes its per-row slots as `#item-*`.
+Expansion moved off the nodes and into a keyed `v-model:expanded`, so the tree
+never writes to the objects you pass in. The `options` blob is gone — sizing
+moves to CSS variables. Keyboard navigation, `role="tree"` ARIA, and opt-in
+drag-and-drop are new.
 
-| Before                                           | After                                                           |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| `:node="root"` (single root object)              | `:nodes="[root]"` (array of roots)                              |
-| `node.collapsed` / internal collapse             | `node.expanded` (inverted, on each node)                        |
-| `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars                  |
-| `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`                      |
-| `:options="{ defaultCollapsed: true }"`          | `expanded: false` per node, or `v-model:expanded` to toggle all |
-| `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`                         |
-| `#label`                                         | `#item-label`                                                   |
-| `#icon`                                          | built-in chevron; override via `#item`                          |
+| Before                                           | After                                               |
+| ------------------------------------------------ | --------------------------------------------------- |
+| `:node="root"` (single root object)              | `:nodes="[root]"` (array of roots)                  |
+| `node.collapsed` / internal collapse             | `v-model:expanded="keys"` (keys of the open nodes)  |
+| `:options="{ rowHeight, indentWidth }"`          | `--tree-row-height` / `--tree-indent` CSS vars      |
+| `:options="{ showIndentationGuides }"`           | `guides="connectors" \| "lines" \| "none"`          |
+| `:options="{ defaultCollapsed: true }"`          | `v-model:expanded="[]"` (the default)               |
+| `:options="{ defaultCollapsed: false }"`         | `treeRef.expandAll()`                               |
+| `#node="{ node, isCollapsed, toggleCollapsed }"` | `#item="{ node, expanded, toggle, … }"`             |
+| `#label`                                         | `#item-label`                                       |
+| `#icon`                                          | built-in chevron; override via `#item`              |
 
 Nothing here fails loudly. `:node` and `:options` become fall-through
 attributes, and content passed to the old `#node` / `#label` / `#icon` slots is
@@ -2257,13 +2258,49 @@ prop warns, and only in dev; a production build renders an empty tree. Grep for
 </Tree>
 
 <!-- After -->
-<Tree :nodes="[root]" node-key="name">
+<Tree :nodes="[root]" node-key="name" v-model:expanded="expanded">
   <template #item-label="{ node }">{{ node.title }}</template>
 </Tree>
 ```
 
-`v-model:expanded` is a boolean expand/collapse-all switch (bind it to a
-button), not a per-node value.
+### Expansion is keyed, and the tree stops writing to your nodes
+
+`v-model:expanded` is an array of the **keys** of the open nodes. A key that is
+absent means collapsed, so a tree with no bound model renders its roots and
+nothing else. Drop any `expanded` field you set on node data — it is no longer
+read, and nothing warns.
+
+```vue
+<!-- Before — the tree wrote `expanded` back onto your objects -->
+<Tree :nodes="nodes" node-key="name" />
+
+<!-- After — expansion lives in your state, as keys -->
+<script setup>
+const expanded = ref(['src', 'src/components'])
+</script>
+<Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+```
+
+Every toggle assigns a new array rather than mutating one in place, so shallow
+watchers, immutable stores and undo logs see the change.
+
+The old boolean expand/collapse-all switch is gone. Call `expandAll()` /
+`collapseAll()` on the component ref instead:
+
+```vue
+<script setup>
+const tree = ref(null)
+const expanded = ref([])
+</script>
+
+<template>
+  <Button @click="tree.expandAll()">Expand all</Button>
+  <Tree ref="tree" :nodes="nodes" node-key="name" v-model:expanded="expanded" />
+</template>
+```
+
+`expand(key)`, `collapse(key)` and `toggle(key)` are exposed too. All five are
+programmatic, so `disabled` does not block them.
 
 Drag-and-drop is opt-in: set `draggable`, gate drops with
 `:move="({ node, target, position }) => …"`, and persist from

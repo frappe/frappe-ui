@@ -34,6 +34,8 @@ const nodes = ref<TreeNode[]>([
   },
 ])
 
+const expanded = ref(['james', 'wade'])
+
 function addReport(node: TreeNode) {
   console.log('add report under', node.id)
 }
@@ -41,7 +43,12 @@ function addReport(node: TreeNode) {
 
 <template>
   <div class="w-96" style="--tree-row-height: 48px">
-    <Tree :nodes="nodes" node-key="id" guides="none">
+    <Tree
+      :nodes="nodes"
+      node-key="id"
+      guides="none"
+      v-model:expanded="expanded"
+    >
       <!-- Avatar on the left -->
       <template #item-prefix="{ node }">
         <Avatar

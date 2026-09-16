@@ -102,7 +102,7 @@ defineSlots<{
 
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
-const expanded = defineModel<boolean>('expanded', { default: false })
+const expandedKeys = defineModel<TreeKey[]>('expanded', { default: () => [] })
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -120,19 +120,29 @@ const siblingsOf = (parent: TreeNode | null) =>
   parent ? childrenOf(parent) : roots.value
 
 // --- expansion ------------------------------------------------------------
-// Per-node state lives on the node itself. Expanded by default — a node is only
-// closed when it explicitly carries `expanded: false`.
-const isExpanded = (node: TreeNode) => node.expanded !== false
+// Expansion lives in the `expanded` model as a list of keys, never on the nodes
+// themselves. A key that is absent means collapsed.
+const expandedSet = computed(() => new Set(expandedKeys.value))
+const isExpanded = (node: TreeNode) => expandedSet.value.has(keyOf(node))
 
-function setExpanded(node: TreeNode, value: boolean) {
-  if (props.disabled || !hasChildren(node)) return
-  node.expanded = value
-  syncModel()
+// Always assign a fresh array — an in-place push would skip `update:expanded`
+// and leave shallow watchers and immutable stores behind.
+function setKeyExpanded(key: TreeKey, value: boolean) {
+  if (expandedSet.value.has(key) === value) return
+  expandedKeys.value = value
+    ? [...expandedKeys.value, key]
+    : expandedKeys.value.filter((k) => k !== key)
 }
 
-const toggle = (node: TreeNode) => setExpanded(node, !isExpanded(node))
-const expand = (node: TreeNode) => setExpanded(node, true)
-const collapse = (node: TreeNode) => setExpanded(node, false)
+// The interaction path: a row toggle, a chevron click, a keyboard arrow.
+function setExpanded(node: TreeNode, value: boolean) {
+  if (props.disabled || !hasChildren(node)) return
+  setKeyExpanded(keyOf(node), value)
+}
+
+const toggleNode = (node: TreeNode) => setExpanded(node, !isExpanded(node))
+const expandNode = (node: TreeNode) => setExpanded(node, true)
+const collapseNode = (node: TreeNode) => setExpanded(node, false)
 
 function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   for (const node of nodes) {
@@ -143,31 +153,28 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   }
 }
 
-// Write `value` into every collapsible node's `expanded` field.
-function setAll(value: boolean) {
-  eachCollapsible(roots.value, (node) => (node.expanded = value))
+// --- imperative API -------------------------------------------------------
+// Key-based and programmatic, so `disabled` (which freezes user interaction)
+// does not block them. `expand` accepts a key whose children have not loaded
+// yet — the node opens as soon as they arrive.
+function expandAll() {
+  const keys: TreeKey[] = []
+  eachCollapsible(roots.value, (node) => keys.push(keyOf(node)))
+  expandedKeys.value = keys
 }
 
-// True when every collapsible node is open (drives the two-way switch).
-function allExpanded() {
-  let total = 0
-  let open = 0
-  eachCollapsible(roots.value, (node) => {
-    total++
-    if (isExpanded(node)) open++
-  })
-  return total > 0 ? open === total : expanded.value
-}
-
-// Reflect the per-node state back onto the switch without re-triggering setAll.
-let syncing = false
-function syncModel() {
-  const all = allExpanded()
-  if (expanded.value === all) return
-  syncing = true
-  expanded.value = all
-  syncing = false
-}
+defineExpose({
+  /** Open the node with this key. */
+  expand: (key: TreeKey) => setKeyExpanded(key, true),
+  /** Close the node with this key. */
+  collapse: (key: TreeKey) => setKeyExpanded(key, false),
+  /** Flip the node with this key. */
+  toggle: (key: TreeKey) => setKeyExpanded(key, !expandedSet.value.has(key)),
+  /** Open every node that has children. */
+  expandAll,
+  /** Close every node. */
+  collapseAll: () => (expandedKeys.value = []),
+})
 
 // --- focus -----------------------------------------------------------------
 function focus(key: TreeKey) {
@@ -238,28 +245,12 @@ const { onKeydown } = useTreeKeyboard({
   focusedKey,
   labelOf,
   focus,
-  expand,
-  collapse,
-  toggle,
+  expand: expandNode,
+  collapse: collapseNode,
+  toggle: toggleNode,
 })
 
 // --- lifecycle ------------------------------------------------------------
-// The switch applies to every node when toggled. Skip the initial `false` so a
-// tree's per-node `expanded` data is respected on first render.
-watch(
-  expanded,
-  (value, old) => {
-    if (syncing) return
-    if (old === undefined && value === false) return
-    setAll(value)
-  },
-  { immediate: true, flush: 'sync' },
-)
-
-// Keep the switch reflecting the real per-node state, including initial data
-// and async-loaded nodes.
-watch(roots, syncModel, { immediate: true })
-
 // Keep focus valid if the focused node disappears from the tree.
 watch(flat, (rows) => {
   if (focusedKey.value != null && !rows.some((r) => r.key === focusedKey.value))
@@ -278,7 +269,7 @@ provide(TreeContextKey, {
   childrenOf,
   hasChildren,
   isExpanded,
-  toggle,
+  toggle: toggleNode,
   focus,
   registerItem,
   unregisterItem,

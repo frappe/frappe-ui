@@ -32,6 +32,7 @@ const nodes = ref<TreeNode[]>([
 ])
 
 const disabled = ref(false)
+const expanded = ref(['guest', 'downloads', 'archive', 'documents'])
 
 // Folders (nodes with a `children` array) can receive drops; files cannot.
 function move({ target, position }: MoveContext) {
@@ -69,7 +70,9 @@ function onDragEnd(info: DropInfo | null) {
     const parent = hit?.list[hit.index]
     if (parent) {
       if (!parent.children) parent.children = []
-      parent.expanded = true
+      // Open the new parent so the moved node stays visible.
+      if (!expanded.value.includes(info.to as string))
+        expanded.value = [...expanded.value, info.to as string]
       dest = parent.children
     }
   }
@@ -84,6 +87,7 @@ function onDragEnd(info: DropInfo | null) {
       <Tree
         :nodes="nodes"
         node-key="name"
+        v-model:expanded="expanded"
         :disabled="disabled"
         draggable
         :move="move"

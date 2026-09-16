@@ -2,8 +2,8 @@ import Tree from './Tree.vue'
 import { h, ref } from 'vue'
 import type { DropInfo, TreeNode } from './types'
 
-// Fresh data per test — the tree mutates `node.expanded`, so a shared const
-// would leak expansion state between tests.
+// Fresh data per test. The tree never writes to these objects; a few tests
+// assert exactly that.
 function makeNodes(): TreeNode[] {
   return [
     {
@@ -22,34 +22,39 @@ function makeNodes(): TreeNode[] {
 }
 
 describe('Tree', () => {
-  it('renders nodes expanded by default', () => {
+  it('renders only the roots when no key is expanded', () => {
     cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
-    cy.contains('Node A').should('exist')
-    cy.contains('Node A-1').should('exist')
-  })
-
-  it('starts a node collapsed when flagged expanded: false', () => {
-    const nodes = makeNodes()
-    nodes[0].expanded = false
-    cy.mount(Tree, { props: { nodes, nodeKey: 'id' } })
     cy.contains('Root').should('exist')
     cy.contains('Node A').should('not.exist')
   })
 
-  it('expands all via the v-model:expanded switch', () => {
-    const nodes = makeNodes()
-    nodes[0].expanded = false // start collapsed; the switch should override it
-    cy.mount(Tree, { props: { nodes, nodeKey: 'id', expanded: true } })
+  it('opens exactly the nodes named in v-model:expanded', () => {
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
-    cy.contains('Node A-1').should('exist')
     cy.contains('Node B').should('exist')
+    cy.contains('Node A-1').should('not.exist')
   })
 
-  it('expands late-arriving nodes while the switch is on', () => {
+  it('follows the model when the caller changes the keys', () => {
+    const keys = ref<string[]>([])
+    cy.mount({
+      render: () =>
+        h(Tree, { nodes: makeNodes(), nodeKey: 'id', expanded: keys.value }),
+    })
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => {
+      keys.value = ['root', 'a']
+    })
+    cy.contains('Node A-1').should('exist')
+  })
+
+  it('opens a key whose children arrive later', () => {
     const data = ref<TreeNode[]>([])
     cy.mount({
       render: () =>
-        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: true }),
+        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: ['root', 'a'] }),
     })
     cy.contains('Node A').should('not.exist')
     cy.then(() => {
@@ -59,23 +64,38 @@ describe('Tree', () => {
     cy.contains('Node A-1').should('exist')
   })
 
-  it('reflects the switch back to the model when a row toggles', () => {
+  it('emits a fresh array on toggle and leaves the nodes untouched', () => {
+    const nodes = makeNodes()
+    const keys = ['root']
     const onUpdate = cy.stub().as('update')
     cy.mount(Tree, {
       props: {
-        nodes: makeNodes(),
+        nodes,
         nodeKey: 'id',
-        expanded: true,
+        expanded: keys,
         'onUpdate:expanded': onUpdate,
       },
     })
-    // Collapsing one node means "not all expanded" → switch flips to false.
     cy.contains('[data-slot="row"]', 'Node A').click()
-    cy.get('@update').should('have.been.calledWith', false)
+    cy.get('@update').should('have.been.calledWith', ['root', 'a'])
+    cy.get('@update').then((stub: any) => {
+      // A new array, so a shallow watcher on the caller's state fires.
+      expect(stub.firstCall.args[0]).to.not.equal(keys)
+      expect(keys).to.deep.eq(['root'])
+      // And nothing was written onto the caller's node objects.
+      expect(Object.keys(nodes[0])).to.deep.eq(['id', 'label', 'children'])
+      expect(Object.keys((nodes[0].children as TreeNode[])[0])).to.deep.eq([
+        'id',
+        'label',
+        'children',
+      ])
+    })
   })
 
   it('toggles via the chevron', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('not.exist')
@@ -84,7 +104,9 @@ describe('Tree', () => {
   })
 
   it('toggles expansion by clicking the row', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
     cy.contains('[data-slot="row"]', 'Root').click()
     cy.contains('Node A').should('not.exist')
@@ -92,9 +114,26 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
   })
 
+  it('expands and collapses everything through the exposed methods', () => {
+    const tree = ref<any>(null)
+    cy.mount({
+      render: () => h(Tree, { ref: tree, nodes: makeNodes(), nodeKey: 'id' }),
+    })
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => tree.value.expandAll())
+    cy.contains('Node A-1').should('exist')
+    cy.then(() => tree.value.collapseAll())
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => tree.value.expand('root'))
+    cy.contains('Node A').should('exist')
+    cy.contains('Node A-1').should('not.exist')
+    cy.then(() => tree.value.toggle('root'))
+    cy.contains('Node A').should('not.exist')
+  })
+
   it('exposes ARIA tree semantics', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
     })
     cy.get('[role="tree"]').should('exist')
     cy.get('[role="treeitem"]').should('have.length', 4)
@@ -109,11 +148,13 @@ describe('Tree', () => {
   })
 
   it('navigates with the keyboard', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
+    })
     // Root is the only tabbable item initially.
     cy.get('[role="treeitem"]').first().focus()
     cy.focused().should('contain', 'Root')
-    // Tree starts expanded; Down steps into the first child.
+    // Root and Node A are open; Down steps into the first child.
     cy.focused().trigger('keydown', { key: 'ArrowDown' })
     cy.focused().should('contain', 'Node A')
     // Left collapses the expanded node, Left again steps to the parent.
@@ -123,7 +164,9 @@ describe('Tree', () => {
   })
 
   it('toggles expansion with Enter/Space', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.get('[role="treeitem"]').first().focus()
     cy.focused().should('contain', 'Root')
     cy.focused().trigger('keydown', { key: 'Enter' })
@@ -150,7 +193,7 @@ describe('Tree', () => {
 
   it('renders custom item-label and item-prefix/item-suffix slots', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
       slots: {
         'item-label': ({ node }: any) =>
           h('span', { 'data-cy': `label-${node.id}` }, `label-${node.label}`),
@@ -181,7 +224,7 @@ describe('Tree', () => {
 
   it('indents nested groups', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
     })
     cy.get('[role="group"]')
       .first()
@@ -195,6 +238,7 @@ describe('Tree', () => {
       props: {
         nodes: makeNodes(),
         nodeKey: 'id',
+        expanded: ['root'],
         disabled: true,
         draggable: true,
       },
@@ -216,7 +260,7 @@ describe('Tree', () => {
       props: {
         nodes: makeNodes(),
         nodeKey: 'id',
-        expanded: true,
+        expanded: ['root', 'a'],
         guides: 'connectors',
       },
     })
@@ -229,7 +273,7 @@ describe('Tree', () => {
       return {
         nodes: makeNodes(),
         nodeKey: 'id',
-        expanded: true,
+        expanded: ['root', 'a'],
         draggable: true,
         onDragEnd,
         ...extra,

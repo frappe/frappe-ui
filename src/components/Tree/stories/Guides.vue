@@ -31,6 +31,8 @@ const nodes = ref<TreeNode[]>([
   },
 ])
 
+const expanded = ref(['guest', 'downloads', 'download.zip', 'documents'])
+
 const guides = ref<'connectors' | 'lines' | 'none'>('connectors')
 const guideOptions = [
   { label: 'Connectors', value: 'connectors' },
@@ -43,7 +45,12 @@ const guideOptions = [
   <div class="flex flex-col gap-4">
     <TabButtons v-model="guides" :options="guideOptions" />
     <div class="w-80">
-      <Tree :nodes="nodes" node-key="name" :guides="guides" />
+      <Tree
+        :nodes="nodes"
+        node-key="name"
+        :guides="guides"
+        v-model:expanded="expanded"
+      />
     </div>
   </div>
 </template>

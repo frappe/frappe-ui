@@ -7,16 +7,14 @@ export type TreeKey = string | number
  * A tree node. Carries a display `label`, nested `children`, and a unique id
  * under the field named by the `nodeKey` prop. Any extra fields are preserved
  * and passed through to slots.
+ *
+ * A node holds your data only. Expansion state lives outside it, in the
+ * `expanded` model, so the tree never writes to the objects you pass in.
  */
 export type TreeNode = {
   [key: string]: unknown
   label?: string
   children?: TreeNode[]
-  /**
-   * Whether this node is expanded — the per-node source of truth. Expanded by
-   * default; set `false` to start it collapsed.
-   */
-  expanded?: boolean
 }
 
 /** Where a dragged node lands relative to the hovered target. */
@@ -92,12 +90,13 @@ export interface TreeProps {
   disabled?: boolean
 
   /**
-   * Expand/collapse-all switch. Toggling it writes that value into every node's
-   * `expanded` field. Two-way: it also reflects whether all collapsible nodes are
-   * currently open, so a bound button stays in sync. Per-node state lives on the
-   * nodes themselves (`node.expanded`).
+   * Keys of the expanded nodes. Two-way via `v-model:expanded` — the tree
+   * replaces the array as rows toggle and never writes to your nodes. A key
+   * that is absent means that node is collapsed, so the default renders only
+   * the roots.
+   * @default []
    */
-  expanded?: boolean
+  expanded?: TreeKey[]
 }
 
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */

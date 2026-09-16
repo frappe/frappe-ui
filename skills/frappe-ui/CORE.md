@@ -342,7 +342,7 @@ Row heights: `:row-height="40"` dense table → 44–60 medium → `h-15` deskto
 
 ## `Tree`
 
-`<Tree :nodes :node-key="'key'" draggable :move guides />`. A node is `{ [nodeKey]: id, label?, children?, expanded? }` — `expanded` is per node and defaults to open. `guides`: `connectors | lines | none`.
+`<Tree :nodes :node-key="'key'" v-model:expanded draggable :move guides />`. A node is `{ [nodeKey]: id, label?, children? }` — data only; the tree never writes to it. `v-model:expanded` is an **array of the open nodes' keys**; absent means collapsed, so an unbound tree shows only its roots. The ref exposes `expand(key)`, `collapse(key)`, `toggle(key)`, `expandAll()`, `collapseAll()`. `guides`: `connectors | lines | none`.
 
 ## `Editor` (`frappe-ui/editor`)
 
