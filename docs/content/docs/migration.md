@@ -1797,7 +1797,7 @@ rather than waiting for the build to tell you.
 | `#prefix` / `#label` / `#suffix` / `#panel` alongside `:tabs` | `#tab-prefix` / `#tab-label` / `#tab-suffix` / `#tab-panel` — every shorthand slot carries the `tab-` prefix; composed `TabTrigger` keeps plain `#prefix` / `#suffix`. An unknown slot name renders nothing, nothing throws |
 | extra fields on a `tabs` item (`{ value, content }`) | `data: { content }`, read as `tab.data.content` — extra keys are now a type error |
 | `<template #tab-panel="{ tab }">`           | `<TabPanel :value>` children; the shorthand slot is `#tab-panel`, back on its v0 name (it was briefly `#panel` in the betas) |
-| `Tab.route` string + hand-rolled route sync | `route: RouteLocationRaw` on the trigger; selection derives from the route |
+| `Tab.route` string + hand-rolled route sync | `route: RouteDestination` on the trigger; selection derives from the route |
 | stale-index clamps for conditional tabs     | built in: a stale model falls back to the first visible trigger and emits  |
 | `[&_[role='tablist']]:px-4` class blobs     | `<TabList class="px-4">` — the app owns the element                        |
 | built-in flex and overflow defaults          | none — see Scrolling below; the tabs stop scrolling and overflow instead   |

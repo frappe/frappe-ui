@@ -38,19 +38,22 @@ tracks the same identities the rows render with.
 Selection itself is still yours: a removed row's value stays in
 `v-model:selection` until you drop it.
 
-### Tabs — a clicked tab clears on the next navigation that lands (fix)
+### Tabs — a clicked tab clears when the route leaves its page (fix)
 
 In route mode, clicking a non-route tab selects it until the route moves. "Moves"
-was read as "a different tab matches", so navigating within one routed tab —
-`/inbox` → `/inbox?filter=unread`, `/inbox#recent`, `/inbox/42` — left the
-clicked tab selected. Any navigation that lands now clears it.
+was read as "a different tab matches", so opening a child route under one routed
+tab — `/inbox` → `/inbox/42` — left the clicked tab selected on a page it does
+not stand for. A navigation that lands on a different path now clears it too.
 
 - A navigation that did not land keeps the clicked tab: aborted by a guard,
   cancelled by a newer navigation, or a duplicate of the URL already showing. A
   redirect clears it, because the redirect target lands.
-- **Narrowing:** the reset keys on navigation alone, so a matched-tab change
-  without one — a trigger's `route` prop changing, or a routed trigger mounting
-  that matches the current URL — no longer discards the click. It used to.
+- **The trade:** a query-only or hash-only navigation that keeps the same tab
+  matched — `/inbox` → `/inbox?page=2` — no longer clears the click. A panel
+  that keeps its own state in the URL writes exactly that, and clearing there
+  threw the user out of the panel they were standing in. A matched-tab change
+  with no navigation behind it — a trigger's `route` prop changing, or a routed
+  trigger mounting that matches the current URL — does still clear it.
 - Tabs still works with no router installed; the listener is registered only when
   a router is present and is removed on unmount.
 
