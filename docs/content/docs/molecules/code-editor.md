@@ -290,7 +290,11 @@ until the next `extensions` or `editable` change rebuilds the configuration.
 Replace the document with the `dispatch` above.
 
 From a parent's script, reach the view through a template ref. `<CodeEditor>`
-exposes it as `editor` (type `CodeEditorExposed`).
+exposes it as `editor` (type `CodeEditorExposed`). It is the view, not a ref:
+Vue unwraps a handed-back ref at the expose boundary, so write
+`el.value?.editor?.focus()`. The composable is the other way round —
+`useCodeEditor` returns a `ShallowRef`, because a composable crosses no
+boundary.
 
 **JSON linting** is two lines in the extension array. The `json` language welds
 no linter on, because the library no longer inspects the language:

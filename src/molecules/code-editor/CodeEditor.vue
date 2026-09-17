@@ -3,6 +3,7 @@ import type { Extension } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import { useCodeEditor } from './useCodeEditor'
 import { provideCodeEditor } from './code-editor-context'
+import type { CodeEditorExposed } from './types'
 
 const model = defineModel<string>({ default: '' })
 
@@ -62,7 +63,15 @@ provideCodeEditor(editor)
 // live view — to focus it, insert at the cursor, or open the search panel — with
 // no other surface that gets there. The exposed member is the view itself, so no
 // new verbs join the imperative surface.
-defineExpose({ editor })
+//
+// A getter, and typed: Vue unwraps a handed-back ref at the proxy boundary, so
+// `defineExpose({ editor })` would document a ref the caller never sees and
+// leave that ref writable from outside. Same shape as `TextInput.vue`.
+defineExpose<CodeEditorExposed>({
+  get editor() {
+    return editor.value
+  },
+})
 </script>
 
 <template>

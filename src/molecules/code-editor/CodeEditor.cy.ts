@@ -210,6 +210,41 @@ describe('code editor browser behavior', () => {
     cy.get('.cm-editor').should('not.have.class', 'cm-focused')
   })
 
+  it('hands a template ref the view itself, not a ref to it', () => {
+    // Vue unwraps a handed-back ref at the proxy boundary. The exposed type
+    // says so, and this is the runtime half: `.editor` is the view, and
+    // `.editor.value` does not exist.
+    let exposed!: { editor: EditorView | null }
+
+    const TestHost = defineComponent({
+      setup() {
+        const editorRef = ref<{ editor: EditorView | null } | null>(null)
+        return () => {
+          exposed = editorRef.value as { editor: EditorView | null }
+          return h('div', { class: 'w-[420px] p-4' }, [
+            h(
+              CodeEditor,
+              { ref: editorRef, modelValue: 'SELECT 1', extensions: [CodeKit] },
+              { default: () => [h(CodeEditorContent)] },
+            ),
+          ])
+        }
+      },
+    })
+
+    cy.mount(TestHost)
+
+    cy.get('.cm-content').should('contain.text', 'SELECT 1')
+    cy.then(() => {
+      expect(exposed.editor).to.have.property('state')
+      expect(exposed.editor!.state.doc.toString()).to.eq('SELECT 1')
+      // The documented call. On the old shape this reached `undefined` and the
+      // optional chain swallowed it.
+      exposed.editor!.focus()
+    })
+    cy.get('.cm-editor').should('have.class', 'cm-focused')
+  })
+
   it('falls `class` through to the content part root', () => {
     mountCodeEditor({ contentClass: 'min-h-40 rounded-md' })
 

@@ -8,7 +8,7 @@
  * consumer cannot import is not a contract.
  */
 import { describe, expectTypeOf, it } from 'vitest'
-import { ref } from 'vue'
+import { ref, type ShallowRef } from 'vue'
 import type { Extension } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import {
@@ -107,7 +107,10 @@ const keymapOptions: CodeKitOptions['keymap'] = { tab: false }
 
 // --- the exposed surface and the language keys ------------------------------
 
-const exposed: CodeEditorExposed = { editor: useCodeEditor({ extensions: [] }) }
+// The component's exposed shape is what a template ref reads, after Vue's
+// proxy unwraps it. The composable returns the ref itself: no boundary crossed.
+const exposed: CodeEditorExposed = { editor: null }
+const engineRef = useCodeEditor({ extensions: [] })
 const language: LanguageKey = 'scss'
 // @ts-expect-error `typescript` is not a key; `javascript` covers it.
 const unknownLanguage: LanguageKey = 'typescript'
@@ -145,9 +148,19 @@ describe('code editor option types', () => {
 
   it('returns the view ref and nothing else', () => {
     expectTypeOf(useCodeEditor).returns.toEqualTypeOf<
-      CodeEditorExposed['editor']
+      ShallowRef<EditorView | null>
     >()
-    expectTypeOf(exposed.editor.value).toEqualTypeOf<EditorView | null>()
+    expectTypeOf(engineRef.value).toEqualTypeOf<EditorView | null>()
+  })
+
+  it('exposes the view unwrapped, the way a template ref reads it', () => {
+    // Vue unwraps a handed-back ref at the proxy boundary. A declared
+    // `ShallowRef` here would compile `el.value?.editor.value?.focus()` and do
+    // nothing at runtime.
+    expectTypeOf<
+      InstanceType<typeof CodeEditor>['editor']
+    >().toEqualTypeOf<EditorView | null>()
+    expectTypeOf(exposed.editor).toEqualTypeOf<EditorView | null>()
   })
 
   it('takes raw CodeMirror extensions, with no frappe-ui wrapper type', () => {

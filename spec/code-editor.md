@@ -237,7 +237,17 @@ defineEmits<{
 
 // Sanctioned template-ref escape hatch (ADR-0012): a parent's script reaches
 // the live view without owning its lifecycle.
-defineExpose<{ editor: ShallowRef<EditorView | null> }>()
+//
+// Unwrapped, and through a getter: Vue unwraps a handed-back ref at the proxy
+// boundary, so a declared `ShallowRef` would describe a shape no caller reads
+// and would leave the engine's ref writable from outside
+// (`spec/imperative-api.md` sections 2.2 and 2.5). `useCodeEditor` still
+// returns the ref: a composable crosses no boundary.
+defineExpose<CodeEditorExposed>({
+  get editor() {
+    return editor.value
+  },
+})
 ```
 
 There is no `placeholder` prop. Placeholder text is a `CodeKit` member (§10),
