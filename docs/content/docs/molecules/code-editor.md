@@ -144,17 +144,21 @@ Content is the unnamed `v-model`, and there are two channels:
 
 - **`update:modelValue`** fires on every document change. This is what `v-model`
   binds.
-- **`change`** fires on blur. This is the commit point.
+- **`change`** fires on a blur that follows an edit. This is the commit point.
+  Focusing the editor and clicking away without typing emits nothing, so a
+  handler that saves or clears a dirty marker does not run on a document nobody
+  touched.
 
 ```vue
 <CodeEditor v-model="value" :extensions="extensions" @change="save">
 ```
 
 Note the divergence from `frappe-ui/editor`, where `change` fires on every
-content update. CodeMirror's contenteditable fires no native `change` event, so
-the commit has to be emitted, and blur is when it happens. Use `change` for work
-that must not run under the user's caret: pretty-printing JSON, saving, clearing
-a dirty marker.
+content update. Only the timing differs: on both families a `change` means the
+document changed. CodeMirror's contenteditable fires no native `change` event,
+so the commit has to be emitted, and blur is when it happens. Use `change` for
+work that must not run under the user's caret: pretty-printing JSON, saving,
+clearing a dirty marker.
 
 Writing `v-model` from outside does not replace the document. The engine diffs
 the two strings and dispatches one change covering the differing middle span, so
@@ -326,7 +330,7 @@ Ten keys: `json`, `html`, `javascript`, `python`, `sql`, `markdown`, `css`,
 A missing package throws an error that names the one to install:
 
 ```
-[frappe-ui] loadLanguage('sql') needs @codemirror/lang-sql. Install it: yarn add @codemirror/lang-sql
+[frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
 ```
 
 ## Exports

@@ -324,7 +324,12 @@ twice from the sibling family.
 Two channels:
 
 - `update:modelValue` fires on every doc change. This is what `v-model` binds.
-- `change` fires on blur. This is the commit point.
+- `change` fires on a blur that follows an edit. This is the commit point. A
+  blur with no edit behind it emits nothing: `change` means the document
+  changed, the same as it does on `frappe-ui/editor`, and a save or a dirty
+  marker must not run on a document nobody touched. The engine tracks it with a
+  flag set by the update listener and cleared on focus and on commit, so an
+  external `v-model` write never counts as an edit.
 
 The evidence for two channels is in the consumers. framework-ui pretty-prints
 JSON on blur, and would reformat under the user's caret on every keystroke if it
@@ -332,9 +337,10 @@ used the live channel. Builder commits the script and clears its dirty dot on
 blur. The composable takes the same pair as `onUpdate` and `onChange`.
 
 Note the divergence from `frappe-ui/editor`, where `change` fires on every
-content update. CodeMirror's contenteditable fires no native `change` event, so
-nothing falls through to the consumer from the DOM. The blur-commit semantic has
-to be emitted, and this is the name for it.
+content update. The timing is the whole divergence: on both families a `change`
+means the document changed. CodeMirror's contenteditable fires no native
+`change` event, so nothing falls through to the consumer from the DOM. The
+blur-commit semantic has to be emitted, and this is the name for it.
 
 **External-write contract.** When `v-model` is written from outside, the engine
 does not replace the document. It computes the longest common prefix and the
@@ -585,7 +591,7 @@ it.
 `loadLanguage` fails with an error that names the package to install:
 
 ```
-loadLanguage('sql') needs @codemirror/lang-sql. Install it: yarn add @codemirror/lang-sql
+loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
 ```
 
 The precedent is commit `33bd680`, which declared the vitepress entry's

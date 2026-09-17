@@ -91,14 +91,21 @@ describe('loadLanguage', () => {
     })
     const { loadLanguage: load } = await import('./languages')
 
-    const error = await load('sql').catch((thrown: unknown) => thrown)
+    const { message, cause } = (await load('sql').catch(
+      (thrown: unknown) => thrown,
+    )) as Error
 
-    expect((error as Error).message).toBe(
-      "[frappe-ui] loadLanguage('sql') needs @codemirror/lang-sql. " +
-        'Install it: yarn add @codemirror/lang-sql',
+    expect(message).toMatch(
+      /^\[frappe-ui] loadLanguage\('sql'\) could not load @codemirror\/lang-sql: /,
     )
-    // Replacing the message without keeping the cause would hide a real failure
-    // inside the language package behind an install hint that is not it.
-    expect((error as Error).cause).toBeInstanceOf(Error)
+    expect(message).toMatch(
+      /If it is not installed: yarn add @codemirror\/lang-sql$/,
+    )
+    // The reason rides in the message, not only in `cause`: most reporters log
+    // `message` alone, and a lazy chunk that 404s after a deploy must not read
+    // as a package nobody installed. (Under `vi.doMock` the reason is vitest's
+    // own wrapper message, which is why this matches rather than compares.)
+    expect(cause).toBeInstanceOf(Error)
+    expect(message).toContain((cause as Error).message)
   })
 })

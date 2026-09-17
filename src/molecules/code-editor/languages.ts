@@ -86,8 +86,13 @@ export async function loadLanguage(key?: string): Promise<Extension | null> {
     return await build(languageKey)
   } catch (error) {
     const pkg = PACKAGES[languageKey]
+    // The reason rides in the message, not only in `cause`: most error
+    // reporters log `message` alone, and a lazy chunk that 404s after a deploy
+    // would otherwise read as a package that was never installed.
+    const reason = error instanceof Error ? error.message : String(error)
     throw new Error(
-      `[frappe-ui] loadLanguage('${languageKey}') needs ${pkg}. Install it: yarn add ${pkg}`,
+      `[frappe-ui] loadLanguage('${languageKey}') could not load ${pkg}: ${reason}. ` +
+        `If it is not installed: yarn add ${pkg}`,
       { cause: error },
     )
   }
