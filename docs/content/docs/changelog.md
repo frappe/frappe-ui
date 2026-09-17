@@ -9,6 +9,67 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — the design tokens are exported as data
+
+`frappe-ui/tailwind` now exports the tokens by name, beside the preset and
+`content`: `colors`, `cssVariables`, `fontFamily`, `fontSize`, `fontWeight`,
+`radius`, `screens`, `semanticColors`, `shadows`, `spacing`, `textTransform`
+and `tracking`.
+
+Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
+string, a plain number. Nothing carries a Tailwind sentinel, so no
+`<alpha-value>` and no `color-mix(...)` reaches a consumer that wants a value
+rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
+`plugin.js`.
+
+There is no new subpath. The names sit on the existing `frappe-ui/tailwind`
+entry point, which pulls no Vue, so a Node script reads tokens without the
+component tree. Per ADR-0010 the surface is additive-only until `2.0.0`.
+
+- `semanticColors` is `{ light, dark }` with resolved values, keyed by
+  category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).
+- `fontSize` entries are objects `{ fontSize, lineHeight, letterSpacing,
+  fontWeight }`, not Tailwind's `[size, meta]` tuple. Both families ship:
+  `base` for text, `p-base` for paragraph.
+- `cssVariables` is keyed by the selector each property belongs on: `':root'`
+  and `'[data-theme="dark"]'`.
+
+This is additive, and it is the replacement for the removed
+`tailwind/tokens.js`. The names and shapes differ from that module; the
+[migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed)
+gives the before and after, and
+[Tailwind Setup](/docs/foundations/tailwind#the-token-exports) documents each
+export.
+
+### Tailwind tokens — one committed source, no vendored Figma export
+
+The token files moved. `tailwind/generated/*.json` is now
+`tailwind/tokens/*.json` (`colors`, `radius`, `typography`, `effects`), and
+those four files are the canonical token source. The importer
+`tailwind/figma-tokens-to-theme.js` is now `tailwind/tokens/build.js`, still
+run by `yarn sync-tokens`. No token value changed.
+
+No package export pointed at any of these paths, so nothing a consumer can
+import moves. A fork or a script that reads the files from `node_modules`
+needs the new path.
+
+- **`tailwind/colors.json` is deleted.** It was byte-identical to the
+  generated copy. A hand-edit to it took effect in the build and was silently
+  reverted by the next sync.
+- **`espresso-v2-design-tokens/` is deleted.** The raw Figma export never
+  shipped (it was not in `files`), it changed six times in four months, and
+  four of its ten files were never read. It also does not describe what
+  frappe-ui uses: `build.js` overrides the radius `9` value, overrules a
+  corrupt font-weight column, drops five sizes, and converts every colour to
+  oklch. The export is an input, so it now goes in a gitignored
+  `.figma-export/` drop directory that the person running the sync fills.
+- **`tailwind/tokens/provenance.json` is new.** It holds the Figma file id and
+  a sha256 per input file, which records which export produced the committed
+  values.
+
+To re-sync: export into `.figma-export/`, run `yarn sync-tokens`, review the
+diff on `tailwind/tokens/*.json`, commit.
+
 ### Pickers — `open` is honored at mount (breaking, silent)
 
 `DatePicker`, `DateRangePicker`, `DateTimePicker` and `TimePicker` seeded their
@@ -1956,14 +2017,22 @@ class the editor and list molecules emit.
 ### Tailwind preset — `tokens.js` export removed (breaking)
 
 The `./tailwind/tokens.js` export is removed outright, with no deprecation
-window. It had zero importers anywhere and re-exported `colorPalette.js` via
-`export *`, the implementation-module re-export pattern disallowed by P15.
-Use the preset (`frappe-ui/tailwind`) directly.
+window. It re-exported `colorPalette.js` via `export *`, the
+implementation-module re-export pattern disallowed by P15.
 
 This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
 the freeze that requires a deprecation window starts at the tag, not before
-it. Zero call sites is also why it's a same-release removal rather than a
-carried-forward deprecation: there is no consumer for a warning to reach.
+it.
+
+**Correction.** This entry said the export had zero importers anywhere. That
+was wrong. `frappe/studio` imports it at
+`frontend/src/utils/espressoTokens.ts`. A code search across `org:frappe`
+finds Studio as the only consumer, and Studio pins `frappe-ui@1.0.0-beta.25`,
+so the break has not reached it. The advice to use the preset directly was
+also wrong: the preset is a Tailwind `Config` and carries no readable values.
+The tokens are exported by name from `frappe-ui/tailwind` again, in a new
+shape. See the Unreleased entry above and the
+[migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed).
 
 ### Tailwind preset — unused token vocabulary and utilities removed (breaking)
 

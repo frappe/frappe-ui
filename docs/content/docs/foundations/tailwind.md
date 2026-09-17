@@ -14,9 +14,9 @@ export default {
 
 The preset sets `darkMode`, the spacing scale, the `prose` / `prose-v3`
 typography safelist, and four plugins (`@tailwindcss/forms`,
-`@tailwindcss/typography`, the theme plugin, the Lucide icon plugin). That's
-the whole exported surface — a default export (the preset) and the named
-`content` export below.
+`@tailwindcss/typography`, the theme plugin, the Lucide icon plugin). Beside
+the preset, `frappe-ui/tailwind` exports the `content` glob list and the design
+tokens as data. Both are covered below.
 
 Requires **Tailwind `>=3.4.0 <4`**. It is a peer dependency. Tailwind v4 reads
 none of this shape, so the design tokens never load there.
@@ -101,6 +101,77 @@ The paths are resolved against wherever `frappe-ui` is actually installed
 regardless of your app's working directory. When `frappe-ui` adds a new
 source directory that emits classes, bumping the dependency picks up the new
 glob automatically — you don't need to touch your `tailwind.config.js` again.
+
+## The token exports
+
+`frappe-ui/tailwind` also exports the design tokens as data. Every value is
+framework-neutral: a resolved `oklch(...)` colour, a plain px string, a plain
+number. No Tailwind sentinel reaches them, so nothing carries `<alpha-value>`
+or a `color-mix(...)` wrapper that renders as an empty swatch outside Tailwind.
+
+The entry point is build-time and pulls in no Vue, so a Node script, a codegen
+step or a design tool reads tokens without loading the component tree.
+
+A style picker is the common case. Build the options from
+`semanticColors.light`, and point each value at the matching CSS variable. A
+themed page then flips the colour, and anything else falls back to the light
+value:
+
+```js
+import { semanticColors } from 'frappe-ui/tailwind'
+
+const backgroundOptions = Object.entries(semanticColors.light.surface).map(
+  ([name, value]) => ({
+    label: name,
+    value: `var(--surface-${name}, ${value})`,
+  }),
+)
+// [
+//   { label: 'base', value: 'var(--surface-base, oklch(1 0 0))' },
+//   { label: 'gray-1', value: 'var(--surface-gray-1, oklch(0.979 0 0))' },
+//   … one option per semantic surface
+// ]
+```
+
+| Export | Shape |
+| --- | --- |
+| `colors` | `{ light, dark, overlay, neutral }`. Primitive ramps keyed by step: `colors.light.gray[500]`. |
+| `semanticColors` | `{ light, dark }`, each keyed by category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`) and then by name. |
+| `cssVariables` | Every token as a custom property, keyed by the selector it belongs on: `':root'` and `'[data-theme="dark"]'`. |
+| `radius` | px per key: `0` to `9`, plus `none` and `full`. |
+| `shadows` | `{ elevation: { light, dark, custom }, focus: { light, dark } }`. Each entry is a composed `box-shadow` string. |
+| `fontSize` | One object per size: `{ fontSize, lineHeight, letterSpacing, fontWeight }`. `base` is the text family, `p-base` the paragraph family. |
+| `fontWeight` | Numbers. `regular` is 420, not 400. |
+| `fontFamily` | `{ text: 'Inter Variable' }`. |
+| `tracking` | Letter-spacing per size and weight, for the `text` and `paragraph` families separately. |
+| `textTransform` | Text-transform per size. Empty today. |
+| `spacing` | The spacing scale above, in rem. |
+| `screens` | The four breakpoint minimums. |
+
+`semanticColors` splits by theme because a consumer outside a frappe-ui page
+has no `[data-theme]` to resolve against and must pick a side. Inside a themed
+page, read the `--<category>-<name>` variables instead. They flip on their own.
+
+`fontSize` entries are objects, not Tailwind's `[size, meta]` tuple. The tuple
+is a Tailwind convention and this data does not speak Tailwind. `plugin.js`
+converts on the way into the theme.
+
+The names are additive-only until 2.0.0: names may be added, none renamed or
+removed.
+
+## Where the tokens come from
+
+The committed source is `tailwind/tokens/*.json` (`colors`, `radius`,
+`typography`, `effects`). `yarn sync-tokens` runs `tailwind/tokens/build.js`,
+which reads a raw Figma export from a gitignored `.figma-export/` directory and
+writes those four files. The raw export is an input, not a record, so it is not
+committed. `tailwind/tokens/provenance.json` holds the Figma file id and a
+sha256 per input file, which says which export produced the current values.
+
+`build.js` also holds every rule where frappe-ui overrules the export: the
+radius `9` value, the font-weight map, the dropped sizes, and the conversion of
+every colour to oklch. Read the values from `tailwind/tokens/*.json`, not from
+an export.
 
 ## Hover styles
 

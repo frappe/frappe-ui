@@ -9,7 +9,7 @@ Figma espresso v2 specifies the keyboard focus indicator as a 2px outset drop-sh
 - gray: `0 0 0 2px #C9C9C9E5` (~90% opacity gray)
 - red: `0 0 0 2px #FA9C9DE5` (~90% opacity red)
 
-The Figma variables expose these as `focus/light/*` (2px) and `focus/dark/*` (3px), synced into `tailwind/generated/effects.json`.
+The Figma variables expose these as `focus/light/*` (2px) and `focus/dark/*` (3px), synced into `tailwind/tokens/effects.json`.
 
 The historical implementation in `frappe-ui` components used Tailwind's `focus-visible:ring` utility, which defaults to a **3px** ring width. The result was a focus indicator 50% wider than the design intended, with subtly different color (`outline-gray-3` = `#c7c7c7` vs Figma's `#C9C9C9`).
 
@@ -37,7 +37,7 @@ The default focus ring is applied **globally** in the plugin's base layer, imple
 }
 ```
 
-- `colorPalette.js#generateEffectVariables` emits `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped). It is the only emitted form.
+- `tokens.js#cssVariables` holds `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped), and `plugin.js` emits it into the base layer. It is the only emitted form.
 - The `.focus-ring{-<name>}` utilities are outline-based too. They exist for **themed overrides** (`focus-visible:focus-ring-red`) and **non-focus states** (`data-[state=open]:focus-ring`, `focus-within:focus-ring` on wrapper patterns).
 - Components do NOT declare a default focus ring; the base rule covers them. Utility classes (specificity ≥ (0,2,0), later layer) always beat the base rule, so:
   - suppress with `focus-visible:outline-none` (e.g. Dialog panel, ghost inputs),

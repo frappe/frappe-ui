@@ -6,7 +6,7 @@
 
 Figma espresso v2 exposes border-radius as a numbered scale: `radius/0`, `radius/1`, … `radius/9`. The numbers are positions on the scale, not abstract sizes — `radius/4` is the 5th step (`8px`), `radius/5` is the 6th step (`10px`), and so on. The scale is dense and ordered: there are five distinct values in the 0–12px range alone.
 
-The pre-Figma Tailwind preset used named radii — `sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl` — inherited from Tailwind's house scale but with rebound pixel values (`rounded-md` = 10px, not Tailwind's 6px; `rounded-lg` = 12px, not Tailwind's 8px). The current `tailwind/generated/radius.json` ships both: numbered tokens (`0`–`9`, `full`) **and** named aliases (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`).
+The pre-Figma Tailwind preset used named radii — `sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl` — inherited from Tailwind's house scale but with rebound pixel values (`rounded-md` = 10px, not Tailwind's 6px; `rounded-lg` = 12px, not Tailwind's 8px). The current `tailwind/tokens/radius.json` ships both: numbered tokens (`0`–`9`, `full`) **and** named aliases (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`).
 
 This creates two problems:
 
@@ -17,7 +17,7 @@ This creates two problems:
 
 Numbered radius tokens (`rounded-0` … `rounded-9`, plus `rounded-full`) are the **canonical** way to set border-radius in `frappe-ui`. All new code must use them.
 
-Named aliases (`rounded-sm`, `rounded` / `rounded-DEFAULT`, `rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-2xl`) remain in [`tailwind/generated/radius.json`](../../tailwind/generated/radius.json) as **deprecated migration aliases**. Existing usages must be migrated. New usages are not permitted.
+Named aliases (`rounded-sm`, `rounded` / `rounded-DEFAULT`, `rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-2xl`) remain in [`tailwind/tokens/radius.json`](../../tailwind/tokens/radius.json) as **deprecated migration aliases**. Existing usages must be migrated. New usages are not permitted.
 
 The canonical mapping:
 
@@ -41,7 +41,7 @@ The canonical mapping:
 
 The "next breaking release" arrived: `1.0.0` removes the deprecated aliases (#998, decided in #993; ADR-0008 forbids shipping deprecated members at the tag). This supersedes the "remain as deprecated migration aliases" language above:
 
-- `tailwind/generated/radius.json` now ships only the numbered scale plus `none` and `full`. The alias keys (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`) are gone; an unmigrated alias emits no CSS (silent break — the preset replaces Tailwind's `borderRadius` scale). The alias `--radius-sm/md/lg/xl/2xl` CSS variables go with them.
+- `tailwind/tokens/radius.json` now ships only the numbered scale plus `none` and `full`. The alias keys (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`) are gone; an unmigrated alias emits no CSS (silent break — the preset replaces Tailwind's `borderRadius` scale). The alias `--radius-sm/md/lg/xl/2xl` CSS variables go with them.
 - The codemod exists now: `tailwind/migrate-tokens-v2.js` (`tokens-v2`) performs the renames from the table above, directional and variant-prefixed forms included, and has a `--radius-only` mode for already-migrated codebases.
 - The internal migration is complete (#997 swept `src/`, docs, and stories).
 
@@ -58,7 +58,7 @@ The "next breaking release" arrived: `1.0.0` removes the deprecated aliases (#99
 
 - All component code in `src/` migrates to numbered tokens. `Button.vue` is the first migration; pattern is mechanical (`rounded` → `rounded-4`, `rounded-md` → `rounded-5`, …).
 - Component specs and foundation docs use numbered tokens in examples.
-- Named aliases (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`) are kept in [`tailwind/generated/radius.json`](../../tailwind/generated/radius.json) so consumer apps don't break, but they're flagged for migration in [`foundations.md`](../foundations.md#radius) and should be removed in the next breaking release.
+- Named aliases (`sm`, `DEFAULT`, `md`, `lg`, `xl`, `2xl`) are kept in [`tailwind/tokens/radius.json`](../../tailwind/tokens/radius.json) so consumer apps don't break, but they're flagged for migration in [`foundations.md`](../foundations.md#radius) and should be removed in the next breaking release.
 - `rounded` (bare, = `rounded-DEFAULT` = 8px) is the most common drift surface in the codebase — components that use it must migrate to `rounded-4`. The two render identically; the migration is purely vocabulary.
 - ESLint rule or codemod to flag named aliases in `src/` is not built today; greppable. A future task can automate.
-- The Figma export pipeline ([`tailwind/figma-tokens-to-theme.js`](../../tailwind/figma-tokens-to-theme.js)) is unchanged — numbered tokens already come straight from `radius.*` Figma tokens. The deprecated aliases live in `RADIUS_EXTRA` (or equivalent) in the build script; they should be moved to a clearly-marked deprecated section.
+- The Figma export pipeline ([`tailwind/tokens/build.js`](../../tailwind/tokens/build.js)) is unchanged — numbered tokens already come straight from `radius.*` Figma tokens. The deprecated aliases live in `RADIUS_EXTRA` (or equivalent) in the build script; they should be moved to a clearly-marked deprecated section.

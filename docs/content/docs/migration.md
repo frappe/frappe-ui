@@ -3077,13 +3077,57 @@ and `CodePreviewProps`.
 
 ## `hljs-theme.css` and `tailwind/tokens.js` (removed)
 
-Two exports with no importers left are gone. Both breaks are loud — the
-specifier stops resolving.
+Both subpaths are gone. Both breaks are loud: the specifier stops resolving.
 
 | Removed                        | Replacement                                                     |
 | ------------------------------ | ---------------------------------------------------------------- |
 | `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
-| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind`, the preset, imported directly              |
+| `frappe-ui/tailwind/tokens.js` | the named token exports on `frappe-ui/tailwind`                  |
+
+The preset is not a replacement for the tokens. It is a Tailwind `Config`, and
+its colours, radii and sizes are built inside `plugin.js` when Tailwind calls
+the plugin, so you cannot read a value out of it. Import the tokens by name
+from the same entry point instead:
+
+```js
+// Before
+import {
+  borderRadius,
+  boxShadow,
+  fontSize,
+  generateCSSVariables,
+  generateSemanticColors,
+} from 'frappe-ui/tailwind/tokens.js'
+
+// After
+import {
+  radius,
+  shadows,
+  fontSize,
+  cssVariables,
+  semanticColors,
+} from 'frappe-ui/tailwind'
+```
+
+The names moved, and so did the shapes:
+
+| Before | After | What changed |
+| ------ | ----- | ------------ |
+| `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
+| `boxShadow` | `shadows` | Renamed and nested: `{ elevation: { light, dark, custom }, focus: { light, dark } }`, not a flat map with `none` and `DEFAULT`. |
+| `generateCSSVariables()` | `cssVariables` | A constant, not a function. Keyed by selector: `':root'` and `'[data-theme="dark"]'`. |
+| `generateSemanticColors()` | `semanticColors` | A constant, not a function. `{ light, dark }` with resolved `oklch(...)` values, in place of theme-agnostic `color-mix(...)` strings. |
+| `fontSize` | `fontSize` | Same name. Each entry is an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple. |
+
+The old module re-exported `colorPalette.js`, so its colours carried Tailwind
+sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
+`generateColorPalette()`, and a `color-mix(...)` wrapper around
+`calc(<alpha-value> * 100%)` from `generateSemanticColors()`. A colour picker
+handed either one renders an empty swatch. The new exports carry no sentinel.
+
+`colors`, `fontFamily`, `fontWeight`, `screens`, `spacing`, `textTransform`
+and `tracking` are exported from `frappe-ui/tailwind` too. See
+[Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 
