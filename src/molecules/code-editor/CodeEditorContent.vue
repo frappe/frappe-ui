@@ -31,12 +31,17 @@ const emit = defineEmits<{
 const resolved = useResolvedCodeEditor(() => props.editor)
 const rootEl = useTemplateRef<HTMLElement>('rootEl')
 const overflowing = ref(false)
+// Both flags live on the part's own root, never on `view.dom`. CodeMirror owns
+// that element's `class` attribute: it builds one string from `cm-editor`,
+// `cm-focused`, the theme classes and every `editorAttributes` value, then
+// writes it with `setAttribute`, which drops anything added from outside. A
+// class set here would survive until the next focus, blur or theme change.
+const scrolledX = ref(false)
 
 let mounted: EditorView | null = null
 let observer: ResizeObserver | null = null
-// Last values written to the DOM. `measure` runs inside a ResizeObserver
+// Last value written to the DOM. `measure` runs inside a ResizeObserver
 // callback, so writing a style it already holds is how an observer loop starts.
-let scrolledX = false
 let textHeight = ''
 
 function measure() {
@@ -50,16 +55,12 @@ function measure() {
     emit('overflow', next)
   }
 
-  // Drive the gutter's horizontal-scroll shadow (see style.css). The shadow is
-  // capped to the bottom of the last line rather than the full gutter height:
-  // CodeMirror stretches the gutter past the code, and a shadow running down
-  // into the empty area below reads as one floating in space.
-  const nextScrolledX = scroller.scrollLeft > 0
-  if (nextScrolledX !== scrolledX) {
-    scrolledX = nextScrolledX
-    view.dom.classList.toggle('code-scrolled-x', nextScrolledX)
-  }
+  // Drives the gutter's horizontal-scroll shadow (see style.css).
+  scrolledX.value = scroller.scrollLeft > 0
 
+  // The shadow is capped to the bottom of the last line rather than the full
+  // gutter height: CodeMirror stretches the gutter past the code, and a shadow
+  // running down into the empty area below reads as one floating in space.
   const nextTextHeight = `${view.lineBlockAt(view.state.doc.length).bottom}px`
   if (nextTextHeight !== textHeight) {
     textHeight = nextTextHeight
@@ -70,11 +71,6 @@ function measure() {
 function unmountView() {
   if (!mounted) return
   mounted.scrollDOM.removeEventListener('scroll', measure)
-  // The class lives on the view, and the part never owns the view. Left set, it
-  // rides to the next part or back to this one, where `scrollLeft` is 0 after a
-  // re-attach: `measure` then agrees with the cache below, never toggles, and
-  // the gutter shadow stays lit with nothing scrolled.
-  mounted.dom.classList.remove('code-scrolled-x')
   mounted.dom.remove()
   mounted = null
   // The observer holds the departed view's `contentDOM` and `scrollDOM`. It has
@@ -83,9 +79,10 @@ function unmountView() {
   // destroying the view on unmount).
   observer?.disconnect()
   observer = null
-  // The cached values belong to the view that just left, not to the next one.
-  scrolledX = false
+  // The cached value belongs to the view that just left, not to the next one.
   textHeight = ''
+  // An empty box scrolls nowhere.
+  scrolledX.value = false
   // An empty box overflows nothing. Without this the part keeps
   // `data-overflowing` set, and the consumer that drew an expand affordance off
   // the last `true` never hears it go away.
@@ -136,5 +133,6 @@ onBeforeUnmount(() => unmountView())
     ref="rootEl"
     data-slot="code-editor-content"
     :data-overflowing="overflowing ? 'true' : undefined"
+    :data-scrolled-x="scrolledX ? 'true' : undefined"
   />
 </template>

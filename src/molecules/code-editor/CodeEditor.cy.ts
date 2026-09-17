@@ -289,17 +289,40 @@ describe('code editor browser behavior', () => {
       view.scrollDOM.scrollLeft = 200
       view.scrollDOM.dispatchEvent(new Event('scroll'))
     })
-    cy.get('.cm-editor').should('have.class', 'code-scrolled-x')
+    cy.get(CONTENT).should('have.attr', 'data-scrolled-x', 'true')
 
     cy.get('button').click()
 
     cy.get(CONTENT).should('not.have.attr', 'data-overflowing')
+    cy.get(CONTENT).should('not.have.attr', 'data-scrolled-x')
     cy.get('@overflow').should('have.been.calledWith', false)
-    // The view outlives the part, and it leaves with the class off — otherwise
-    // a re-attach at `scrollLeft` 0 would keep the shadow lit.
-    cy.then(
-      () => expect(view.dom.classList.contains('code-scrolled-x')).to.be.false,
+    // The view outlives the part, so nothing the part set may ride away on it.
+    cy.then(() =>
+      expect(view.dom.getAttribute('class')).to.not.contain('scrolled'),
     )
+  })
+
+  it('keeps the horizontal scroll flag across a focus change', () => {
+    // CodeMirror owns `view.dom`'s `class` attribute and rewrites the whole
+    // string on focus and blur. A flag kept there would disappear while the
+    // code was still scrolled right, and the cache would never re-toggle it.
+    mountCodeEditor({ content: `SELECT ${'x'.repeat(200)}`, maxHeight: '80px' })
+
+    // `focus()` and `blur()` rather than clicks: the long line makes the
+    // contenteditable wider than the box, and Cypress refuses to click what it
+    // cannot see the centre of.
+    cy.get('.cm-content').focus()
+    cy.get('.cm-editor').should('have.class', 'cm-focused')
+    cy.get('.cm-scroller').then(($el) => {
+      $el[0].scrollLeft = 200
+      $el[0].dispatchEvent(new Event('scroll'))
+    })
+    cy.get(CONTENT).should('have.attr', 'data-scrolled-x', 'true')
+
+    cy.get('.cm-content').blur()
+
+    cy.get('.cm-editor').should('not.have.class', 'cm-focused')
+    cy.get(CONTENT).should('have.attr', 'data-scrolled-x', 'true')
   })
 
   it('releases the resize observer when the view goes away', () => {

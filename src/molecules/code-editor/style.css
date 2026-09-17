@@ -111,7 +111,12 @@
   background: linear-gradient(to right, rgb(0 0 0 / 0.16), transparent);
 }
 
-.frappe-code.code-scrolled-x .cm-gutters::after {
+/* The flag sits on the part's own root, not on the editor: CodeMirror rewrites
+ * `view.dom`'s whole `class` attribute on every focus, theme or
+ * `editorAttributes` change, which drops anything set on it from outside. */
+[data-slot='code-editor-content'][data-scrolled-x]
+  .frappe-code
+  .cm-gutters::after {
   opacity: 1;
 }
 

@@ -231,6 +231,11 @@ and no selector matches "this element is scrolling". frappe-ui draws no expand
 affordance itself. It emits the boolean and sets the attribute. The button, the
 pill and the dialog belong to your app.
 
+The part also sets `data-scrolled-x="true"` while the code is scrolled sideways.
+The frappe chrome uses it to fade a shadow in beside the gutter. It is an
+internal flag, not part of the frozen surface: read it if it helps, but it can
+change in a minor release.
+
 ## Build your own field
 
 This is the pattern to copy: a label, an expand button driven by `@overflow`,
