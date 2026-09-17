@@ -34,7 +34,10 @@ const overflowing = ref(false)
 const kit = CodeKit.configure({ lineNumbers: {}, placeholder: '{}' })
 
 const language = shallowRef(null)
-loadLanguage('json').then((extension) => (language.value = extension))
+loadLanguage('json')
+  .then((extension) => (language.value = extension))
+  // The throw names the package to install. Swallow it and nobody reads it.
+  .catch((error) => console.error(error))
 
 // The language arrives after mount. `extensions` is reactive, so it lands with
 // no remount and no lost history.
@@ -68,8 +71,12 @@ function prettyPrint(text) {
       <p class="text-p-sm text-ink-gray-5">
         Click outside the editor to commit. Valid JSON is pretty-printed.
       </p>
+      <!-- `|| expanded` is the load-bearing half: expanding raises the cap far
+           enough that the content no longer crosses it, `overflow(false)`
+           fires, and a button bound to `overflowing` alone would take the way
+           back with it. -->
       <Button
-        v-if="overflowing"
+        v-if="overflowing || expanded"
         :label="expanded ? 'Collapse' : 'Expand'"
         @click="expanded = !expanded"
       />
