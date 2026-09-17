@@ -295,6 +295,28 @@ describe('List (select all)', () => {
       })
   })
 
+  it('follows a selection array the consumer mutates in place', () => {
+    // Membership is read off a Set derived from `selection`, so the derivation
+    // has to track the array's contents, not just the array identity.
+    const { selection } = mountSelectAll()
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'false',
+    )
+    cy.then(() => {
+      selection.value.push('1', '2', '3')
+    })
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'true',
+    )
+    cy.get('[data-slot=list-row]')
+      .first()
+      .should('have.attr', 'data-selected', 'true')
+  })
+
   it('clicking mixed promotes to all selected', () => {
     const { selection } = mountSelectAll(['2'])
     cy.get('[data-slot=list-header-checkbox]')
