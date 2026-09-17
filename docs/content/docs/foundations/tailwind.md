@@ -112,10 +112,10 @@ a `color-mix(...)` wrapper that renders as an empty swatch outside Tailwind.
 
 It is its own entry point, not part of `frappe-ui/tailwind`, because the preset
 statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
-`@tailwindcss/typography`. Reading a radius value should not cost three Tailwind
-packages. The token module imports nothing but its own JSON, so it loads under
-plain Node as well as under a bundler — a codegen step, a design tool or a
-script needs no build setup.
+`@tailwindcss/typography`. None of the three resolve under plain Node, so the
+preset entry only loads inside a bundler. The token module imports nothing but
+its own JSON and loads anywhere — a codegen step, a design tool or a script
+needs no build setup.
 
 A style picker is the common case. Build the options from
 `semanticColors.light`, and point each value at the matching CSS variable. A

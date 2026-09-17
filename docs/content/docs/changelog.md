@@ -23,10 +23,10 @@ rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
 
 The tokens get their own subpath because `frappe-ui/tailwind` statically
 imports `tailwindcss/plugin`, `@tailwindcss/forms` and
-`@tailwindcss/typography`. Reading a radius value should not cost those three
-(P15 limb (a), cost isolation). The token module imports nothing but its own
-JSON, so it loads under plain Node as well as under a bundler. Per ADR-0010
-the surface is additive-only until `2.0.0`.
+`@tailwindcss/typography`. None of the three resolve under plain Node, so that
+entry only loads inside a bundler. The token module imports nothing but its own
+JSON and loads anywhere. Per ADR-0010 build-time entries are additive-only
+until `2.0.0`, so a second one is allowed and neither may be renamed.
 
 - `semanticColors` is `{ light, dark }` with resolved values, keyed by
   category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).

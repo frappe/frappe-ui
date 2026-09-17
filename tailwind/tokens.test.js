@@ -36,9 +36,9 @@ describe('public surface', () => {
 
   // The tokens sit on their own subpath because `frappe-ui/tailwind`
   // statically imports tailwindcss/plugin, @tailwindcss/forms and
-  // @tailwindcss/typography. Reading a token value must not cost those
-  // three, and they are why only this module loads under plain Node
-  // (P15 limb (a), cost isolation).
+  // @tailwindcss/typography, none of which resolve under plain Node. Both
+  // are build-time entries, which ADR-0010 freezes additive-only until
+  // 2.0.0 — this path may not be renamed.
   it('is reachable at frappe-ui/tailwind/tokens', () => {
     expect(pkg.exports['./tailwind/tokens']).toEqual({
       types: './tailwind/tokens.d.ts',
