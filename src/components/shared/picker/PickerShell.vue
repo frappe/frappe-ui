@@ -92,9 +92,12 @@ const emit = defineEmits<{
   /** Signal that the parent should move keyboard focus into the popover
    *  content (e.g. into a calendar grid). Fired:
    *  - When the user presses ↓ on the trigger.
-   *  - When the popover opens with a custom trigger (no `TextInput` to type
-   *    into, so focus should jump straight into the content).
-   *  The default trigger keeps focus on the `TextInput` for typing. */
+   *  - When a gesture opens the popover and the trigger is a custom one (no
+   *    `TextInput` to type into, so focus should jump straight into the
+   *    content).
+   *  The default trigger keeps focus on the `TextInput` for typing. A shell
+   *  that is already open on its first render never fires this: nobody asked
+   *  for focus to move. */
   (e: 'requestFocus'): void
 }>()
 
@@ -174,7 +177,11 @@ const triggerSlotProps = computed<PickerShellTriggerSlotProps>(() => ({
 
 const hasCustomTrigger = computed(() => !!slots.trigger)
 
-function onOpened() {
+// `moveFocus` is false on the mount path. Every other route into `onOpened`
+// follows a gesture, and a panel the user just opened should take focus; a
+// panel that is simply part of the first render follows no gesture, so moving
+// focus would take it from wherever the page put it.
+function onOpened(moveFocus = true) {
   emit('open')
   nextTick(() => {
     panelId.value = popoverRef.value?.contentEl?.id || undefined
@@ -184,7 +191,7 @@ function onOpened() {
   // the parent to move focus there. The default `TextInput` trigger
   // keeps its focus so the user can type, and only the explicit ↓
   // handler emits `requestFocus`.
-  if (hasCustomTrigger.value) emit('requestFocus')
+  if (moveFocus && hasCustomTrigger.value) emit('requestFocus')
 }
 
 watch(open, (val, prev) => {
@@ -208,10 +215,12 @@ watch(open, (val, prev) => {
 
 // A shell mounted with `open` already true never crosses the watch above, so
 // the open-time work — the panel id behind `aria-controls`, the parent's draft
-// initialization, focus for a custom trigger — runs here instead. No
-// `update:open`: the parent is the one that asked for an open panel.
+// initialization — runs here instead. No `update:open`: the parent is the one
+// that asked for an open panel. Focus stays put: the default trigger does not
+// take focus at mount either, because `:auto-focus="false"` cancels reka's
+// mount autofocus, and a page has no way to know the panel was coming.
 onMounted(() => {
-  if (open.value) onOpened()
+  if (open.value) onOpened(false)
 })
 
 defineExpose<PickerShellExposed>({

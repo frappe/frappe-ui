@@ -1,4 +1,4 @@
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import DatePicker from './DatePicker.vue'
 import type {
   DatePickerActionsSlotProps,
@@ -558,6 +558,62 @@ describe('DatePicker', () => {
       cy.get('[aria-label="2025-06-16"]').click()
       cy.get('[role=dialog]').should('not.exist')
       cy.get('@onUpdateOpen').should('have.been.calledOnceWith', false)
+    })
+
+    // Mounting open follows no gesture, so it must not take focus from the
+    // page. The default `TextInput` trigger already behaves this way — the
+    // shell passes `:auto-focus="false"` to the popover, so reka's mount
+    // autofocus is cancelled — and a custom `#trigger` now matches it.
+    it('leaves focus alone when mounting open with a custom #trigger', () => {
+      // The picker renders behind a flag the outside input flips, so focus is
+      // parked on a real element when the open panel appears. Mounting the
+      // picker straight away would only prove focus stayed on `<body>`.
+      const Harness = defineComponent({
+        setup() {
+          const show = ref(false)
+          return () =>
+            h('div', [
+              h('input', {
+                'data-cy': 'outside',
+                onInput: () => (show.value = true),
+              }),
+              show.value
+                ? h(
+                    DatePicker,
+                    { modelValue: '2025-06-15', open: true },
+                    {
+                      trigger: () =>
+                        h('button', { 'data-cy': 'pick' }, 'Pick'),
+                    },
+                  )
+                : null,
+            ])
+        },
+      })
+
+      cy.mount(Harness)
+      cy.get('[data-cy=outside]').focus().type('x')
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[aria-label="2025-06-15"]').should('exist')
+      cy.focused().should('have.attr', 'data-cy', 'outside')
+    })
+
+    it('moves focus into the calendar on a later open from a custom #trigger', () => {
+      cy.mount(DatePicker, {
+        props: { modelValue: '2025-06-15' },
+        slots: {
+          trigger: ({ open, setOpen }: DatePickerTriggerSlotProps) =>
+            h(
+              'button',
+              { 'data-cy': 'pick', onClick: () => setOpen(!open) },
+              'Pick',
+            ),
+        },
+      })
+
+      cy.get('[data-cy=pick]').click()
+      cy.get('[role=dialog]').should('exist')
+      cy.focused().should('have.attr', 'data-value', '2025-06-15')
     })
   })
 })

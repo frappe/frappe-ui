@@ -141,9 +141,8 @@ The panel comes up fully initialized, not just displayed:
 - The trigger's `aria-controls` points at the panel.
 
 Both follow from running the open-time work at mount as well as on the
-open watch. `PickerShell` runs `emit('open')`, the panel id lookup, and the
-`requestFocus` signal from `onMounted`; `TimePicker` runs its own `onOpened()`
-there.
+open watch. `PickerShell` runs `emit('open')` and the panel id lookup from
+`onMounted`; `TimePicker` runs its own `onOpened()` there.
 
 Seeding emits no `update:open` at mount. The parent asked for an open panel, so
 telling it the panel is open carries no information and would invite a loop.
@@ -151,8 +150,13 @@ Later controlled updates and uncontrolled trigger use are unchanged: a parent
 flipping `open` from `false` to `true` and back still works, and a picker with
 no `open` bound still opens from its trigger.
 
-With a custom `#trigger`, mounting open emits `requestFocus`, so focus moves
-into the panel exactly as it does for a later open.
+Mounting open moves no focus. Focus stays wherever the page put it, with a
+custom `#trigger` as well as with the default one: `PickerShell` passes
+`:auto-focus="false"` to the popover, which cancels reka's mount autofocus, and
+it holds back the `requestFocus` signal on the mount path. Every other route
+into the open state follows a gesture — the ↓ key, a click on a custom trigger,
+a parent flipping `open` — and those still move focus into the panel when the
+trigger is a custom one.
 
 ### `open` and `disabled` disagree
 

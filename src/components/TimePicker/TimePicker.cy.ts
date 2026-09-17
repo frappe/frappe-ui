@@ -445,6 +445,12 @@ describe('TimePicker', () => {
         .then((panelId) => {
           cy.get(`#${panelId}`).should('have.attr', 'role', 'listbox')
         })
+      // Mounting open follows no gesture, so the panel takes no focus.
+      cy.document().then((doc) => {
+        expect(
+          (doc.activeElement as HTMLElement | null)?.closest('[role=listbox]'),
+        ).to.equal(null)
+      })
     })
 
     it('stays closed when `open` starts false', () => {

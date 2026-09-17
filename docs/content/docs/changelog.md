@@ -18,8 +18,9 @@ that mounted one with `open` already `true` got a closed panel.
 The initial value is now read on the first render, and the panel opens fully
 initialized: the calendar shows the bound date, `TimePicker` scrolls to the bound
 time, and the trigger's `aria-controls` points at the panel. Mounting open emits
-no `update:open`. A custom `#trigger` gets the same `requestFocus` it gets on any
-later open, so focus moves into the panel.
+no `update:open`, and it moves no focus: the panel is on the page from the first
+render, so focus stays wherever you put it. Opening the panel later still moves
+focus into it when the trigger is a custom `#trigger`.
 
 - **Behavior change:** if you passed `open` as a constant `true` and relied on it
   being ignored, the panel now opens. Drop the prop or bind it to your own state.

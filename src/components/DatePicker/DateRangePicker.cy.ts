@@ -515,5 +515,42 @@ describe('DateRangePicker', () => {
       cy.get('[role=dialog]').should('not.exist')
       cy.get('@onUpdateOpen').should('have.been.calledOnceWith', false)
     })
+
+    // Mounting open follows no gesture, so nothing inside the panel takes
+    // focus — the default trigger does not either.
+    it('moves no focus into the panel when mounting open with a custom #trigger', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'], open: true },
+        slots: {
+          trigger: () => h('button', { 'data-cy': 'pick' }, 'Pick'),
+        },
+      })
+
+      cy.get('[role=dialog]').should('exist')
+      cy.get('[aria-label="2025-06-10"]').should('exist')
+      cy.document().then((doc) => {
+        expect(
+          (doc.activeElement as HTMLElement | null)?.closest('[role=dialog]'),
+        ).to.equal(null)
+      })
+    })
+
+    it('moves focus into the calendar on a later open from a custom #trigger', () => {
+      cy.mount(DateRangePicker, {
+        props: { modelValue: ['2025-06-10', '2025-06-20'] },
+        slots: {
+          trigger: ({ open, setOpen }: DatePickerTriggerSlotProps) =>
+            h(
+              'button',
+              { 'data-cy': 'pick', onClick: () => setOpen(!open) },
+              'Pick',
+            ),
+        },
+      })
+
+      cy.get('[data-cy=pick]').click()
+      cy.get('[role=dialog]').should('exist')
+      cy.focused().should('have.attr', 'data-value', '2025-06-10')
+    })
   })
 })
