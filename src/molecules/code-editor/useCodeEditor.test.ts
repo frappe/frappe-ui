@@ -243,6 +243,26 @@ describe('useCodeEditor reactivity', () => {
     expect(content.value).toBe('start')
   })
 
+  it('skips the reconfigure when a new array holds the same members', async () => {
+    const hoisted = EditorState.tabSize.of(8)
+    const extensions = shallowRef<Extension[]>([hoisted])
+    const { view } = mountEngine({ extensions })
+    const dispatch = vi.spyOn(view, 'dispatch')
+
+    // What a parent re-render looks like from here: a different array, the
+    // same extension values inside it.
+    extensions.value = [hoisted]
+    await flush()
+    expect(dispatch).not.toHaveBeenCalled()
+
+    // A fresh member is a real swap, even when it configures the same thing.
+    // This is the limit of the guard, and why the docs tell consumers to build
+    // the array once instead of inline in the template.
+    extensions.value = [EditorState.tabSize.of(8)]
+    await flush()
+    expect(dispatch).toHaveBeenCalledTimes(1)
+  })
+
   it('maps editable onto readOnly and the editable facet, reactively', async () => {
     const editable = ref(true)
     const { view } = mountEngine({ extensions: [], editable })

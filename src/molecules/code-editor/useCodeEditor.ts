@@ -155,10 +155,14 @@ export function useCodeEditor(
   // Re-apply the array itself, then the `editable` sugar. Both rebuild the
   // whole configuration, so a change to either carries the other along.
   //
-  // The array is compared member by member, not by reference: an inline
-  // `:extensions="[CodeKit, json()]"` hands over a fresh array on every render
-  // of the parent, and reconfiguring on each one would re-parse the document
-  // for nothing.
+  // The array is compared member by member, not by reference: a parent render
+  // hands over a fresh array holding the same extension values, and
+  // reconfiguring on that would re-parse the document for nothing.
+  //
+  // The members themselves still have to be stable. `:extensions="[CodeKit,
+  // json()]"` written inline builds a new `json()` every render, and that is a
+  // real swap the guard cannot absorb. The docs say to hoist the array or wrap
+  // it in `computed()`.
   let applied = toValue(options.extensions)
   watch(
     () => toValue(options.extensions),

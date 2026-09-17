@@ -128,6 +128,13 @@ mount, with no remount.
 
 <ComponentPreview name="CodeEditor-Languages" csr="true" />
 
+Build the array once. A new array holding the same extension values is ignored,
+so a parent re-render costs nothing, but the members are compared by identity:
+`:extensions="[CodeKit, json()]"` written inline in a template builds a fresh
+`json()` on every render, and each one reconfigures the editor. Hoist the array
+to a module constant, or wrap it in a `computed()` that only recomputes when the
+language actually changes.
+
 This diverges from `frappe-ui/editor`, where `extensions` is construction-time.
 TipTap cannot swap extensions on a live editor; CodeMirror is built to.
 
