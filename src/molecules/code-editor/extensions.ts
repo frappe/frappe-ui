@@ -1,5 +1,6 @@
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { indentWithTab } from '@codemirror/commands'
+import { searchPanelOpen } from '@codemirror/search'
 import { Prec, type Extension } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
@@ -107,8 +108,15 @@ export const codeHighlight: Extension = Prec.highest(
  * standard way out of that trap.
  *
  * `Prec.high` puts both bindings above the default keymaps, so a kit member can
- * never shadow them by landing earlier in the array. The search panel keeps its
- * own Escape: that binding is scoped to `search-panel`, which this one is not.
+ * never shadow them by landing earlier in the array.
+ *
+ * That precedence is why the blur is conditional. `searchKeymap` declares
+ * `{key: 'Escape', run: closeSearchPanel, scope: 'editor search-panel'}` —
+ * two scopes, and CodeMirror registers the binding under both. In the `editor`
+ * scope this one runs first, so returning `true` with a panel open would blur
+ * the editor, leave the panel up, and fire the blur commit as a side effect.
+ * Falling through hands Escape back to `closeSearchPanel`, and the next Escape
+ * blurs.
  */
 export const codeKeymap: Extension = Prec.high(
   keymap.of([
@@ -116,6 +124,7 @@ export const codeKeymap: Extension = Prec.high(
     {
       key: 'Escape',
       run: (view) => {
+        if (searchPanelOpen(view.state)) return false
         view.contentDOM.blur()
         return true
       },

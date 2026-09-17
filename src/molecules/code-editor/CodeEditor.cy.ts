@@ -186,6 +186,30 @@ describe('code editor browser behavior', () => {
     cy.focused().should('not.exist')
   })
 
+  it('closes the search panel on Escape before it blurs', () => {
+    // `searchKeymap` binds Escape in the `editor` scope as well as
+    // `search-panel`, and the frappe keymap sits above it at `Prec.high`. An
+    // unconditional blur would leave the panel open, drop focus, and fire the
+    // blur commit on the way out.
+    mountCodeEditor({ content: 'SELECT 1' })
+
+    cy.get('.cm-content').click()
+    press('f', { keyCode: 70, which: 70, ctrlKey: true }).should('eq', true)
+    cy.get('.cm-search').should('exist')
+
+    // Escape from the code, not from the panel: the panel's own field runs in
+    // the `search-panel` scope, where this binding is absent.
+    cy.get('.cm-content').click().type('{esc}')
+
+    cy.get('.cm-search').should('not.exist')
+    cy.get('.cm-editor').should('have.class', 'cm-focused')
+    cy.get('@change').should('not.have.been.called')
+
+    // The next one is the WCAG exit again.
+    cy.get('.cm-content').type('{esc}')
+    cy.get('.cm-editor').should('not.have.class', 'cm-focused')
+  })
+
   it('falls `class` through to the content part root', () => {
     mountCodeEditor({ contentClass: 'min-h-40 rounded-md' })
 
