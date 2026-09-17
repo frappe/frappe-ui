@@ -216,6 +216,36 @@ describe('peer dependencies', () => {
       expect(meta).toMatchObject({ [name]: { optional: true } })
     }
   })
+
+  /**
+   * The language packages are a fourth copy of the same ten, after
+   * `languages.ts`, `vite/codeLanguages.js` and the devDependencies. Read them
+   * out of `languages.ts` rather than listing them again: an eleventh language
+   * added there with no peer range ships as a hard resolve failure for every
+   * consumer, and this repo stays green because it installs all ten.
+   */
+  it('declares every language loadLanguage imports as an optional peer', () => {
+    const source = fs.readFileSync(
+      path.join(root, 'src/molecules/code-editor/languages.ts'),
+      'utf8',
+    )
+    // `[a-z0-9-]` rather than `[a-z]`: a package name with a digit is the
+    // silent miss this test exists to catch.
+    const languages = new Set(
+      [...source.matchAll(/'(@codemirror\/lang-[a-z0-9-]+)'/g)].map(
+        (match) => match[1],
+      ),
+    )
+    const meta = (
+      pkg as unknown as { peerDependenciesMeta: Record<string, unknown> }
+    ).peerDependenciesMeta
+
+    expect(languages.size).toBe(10)
+    for (const name of languages) {
+      expect(pkg.peerDependencies[name], `${name} is not a peer`).toBeDefined()
+      expect(meta).toMatchObject({ [name]: { optional: true } })
+    }
+  })
 })
 
 // ---------------------------------------------------------------------------

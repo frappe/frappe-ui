@@ -2,6 +2,34 @@
 
 **Status**: accepted
 
+## Amendment (2026-09-17): `frappe-ui/code-editor` returns, on all three limbs
+
+The table below originally read `frappe-ui/code-editor` as **none / Removed**. That verdict
+was correct for the thing that existed then: a labeled form field, sibling to `Textarea`, whose
+only dependency (CodeMirror) sat entirely behind `await import()`. Two facts have changed, so
+the row is rewritten.
+
+The component was redesigned. It is no longer a form field. It is a parts family: a
+`useCodeEditor` engine, a renderless `<CodeEditor>`, a `<CodeEditorContent>` part, and a
+`CodeKit` bundle, with capability supplied through a required, consumer-owned `extensions`
+array of raw CodeMirror values. That array is an open registry under limb (b), on the same
+footing as `frappe-ui/editor`. The engine now imports CodeMirror statically, because the
+consumer's own extensions array already pulls CodeMirror into the chunk, so the dynamic import
+isolated nothing at the call site and only made the view null until it resolved. That is limb
+(a). The family's names also collide: `Extension` already means a TipTap type on
+`frappe-ui/editor`, and `CodeEditor` is a name root would have to avoid forever. That is limb
+(c).
+
+`CodePreview` leaves the package entirely and becomes `@framework/ui`'s, so the `marked`
+argument this ADR used to justify the pair moving together no longer applies. `marked` stays a
+frappe-ui dependency regardless: `frappe-ui/editor`'s ContentPaste extension imports
+`markdownToHTML` from `src/utils/markdown.ts`.
+
+Nothing about the rule itself changes. The same three limbs produce a different answer because
+the code changed under them, which is what a generative rule is for. See
+[ADR-0019](./0019-code-editor-family-composition-model.md) for the decision and
+[`../code-editor.md`](../code-editor.md) for the API.
+
 ## Context
 
 `frappe-ui` ships a root export plus subpaths — `experimental`, `frappe`, `editor`,
@@ -62,8 +90,8 @@ separate category, decided on their own terms.
 | `frappe-ui/list` | b | An extensible parts family with a composition model — individual parts that work together and grow by adding more parts, the same footing as `editor` and `charts` (maintainer call, 2026-08-09). The original `1.0.0` basis was limb (c): `List`, `ListHeader`, `ListRow`, `ListRows` collided with the legacy `ListView` family at root. That collision dissolved when [#985](https://github.com/frappe/frappe-ui/issues/985) moved `ListView` to `frappe-ui/experimental` — the "fresh decision for that moment" this row reserved is this amendment. |
 | `frappe-ui/icons` | c | A flat namespace of bare `*Icon` names (`HelpIcon`, `CircleCheckIcon`, …). Until [#904](https://github.com/frappe/frappe-ui/issues/904) it also carried `Icon`, which collided outright with root's `Icon`; the remaining names don't collide today, but folding them into root would seed it with generic icon names root must then avoid forever — limb (c)'s "or would as root grows" clause. The original basis was limb (a): `spritePlugin` statically imported the full `lucide-static` sprite. That ended when #904 moved the sprite trio (`Icon`, `IconPicker`, `spritePlugin`) to `frappe-ui/experimental`. |
 | `frappe-ui/charts` (in flight, #890) | a | Statically imports `echarts/core`. Rule-compliant as designed. |
-| `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. Now also home to `CodeEditor` and `CodePreview` (see below). |
-| `frappe-ui/code-editor` | none | Removed. `CodeEditor`'s only dependency (CodeMirror) is entirely behind `await import()` — nothing static. It is a form-field sibling of `Textarea`/`TextInput` (its own prop types are derived from the shared `InputVariant`/`InputSize` union), not a family with a composition model. `CodePreview` statically imports `marked`, which would otherwise re-enter root's dependency graph the moment ADR-0008 deletes the deprecated `TextEditor` re-export (`marked`'s only other path to root). Rather than fold `CodeEditor` into root and leave `CodePreview` behind on a single-purpose subpath, both move to `frappe-ui/experimental` together — P14 carries no stability promise, so the pair can grow into a fuller code-editing parts family later, against real usage, without needing a `2.0.0`. |
+| `frappe-ui/experimental` | P14 | Its own rule; not judged by these limbs. It briefly held `CodeEditor` and `CodePreview`; the 2026-09-17 amendment takes both out. `CodeEditor` returns as a family at its own subpath and the experimental pair is deleted, with no deprecation window (P14). `CodePreview` moves to `@framework/ui`. |
+| `frappe-ui/code-editor` | a + b + c | **Returns** (amendment above, ADR-0019). Limb (a): `useCodeEditor` imports CodeMirror statically, because the consumer's `extensions` array already does and a dynamic import isolates nothing. Limb (b): `extensions` takes raw CodeMirror `Extension` values, so a consumer adds capability the library never defined. Limb (c): `Extension` already means a TipTap type on `frappe-ui/editor`, and `CodeEditor` is a name root would have to avoid forever. The field shape that failed all three limbs moves to `@framework/ui`. |
 | `frappe-ui/frappe`, `frappe-ui/drive`, `frappe-ui/drive/*` | none | Removed in [#924](https://github.com/frappe/frappe-ui/issues/924), per #867's decision (rule 6: frappe-ui is a dumb library), not this rule's limbs. The smart members moved to `@framework/ui`; the rest deleted. |
 | `frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/tsconfig.base.json`, `frappe-ui/tailwind/tokens`, `frappe-ui/hljs-theme.css` | — | Build-time/tooling category, decided by #887: **a build-time entry freezes additive-only** — options, tokens, utilities, and compiler options may be added in a minor; nothing may be renamed or removed before `2.0.0` (PHILOSOPHY.md P15). Ships: `tailwind` (gains a `content` export), `vite` (gains types), `tsconfig.base.json` (cleaned, #938), and `vitepress` under its own rule (P14 — no stability promise, exempt from the additive-only rule too). Removed: `hljs-theme.css` (removed in #938; the file goes with the deprecated `TextEditor`), and the `src/utils/tailwind.config.js` shim (deleted for `1.0.0`; it was never in the `exports` map, so the map already refused it, and the preset is `frappe-ui/tailwind`). The map has no wildcard subpath, so no path under `frappe-ui/src/...` is importable at all; `package.test.ts` asserts that. **Correction on `tailwind/tokens.js`.** It was removed in [#936](https://github.com/frappe/frappe-ui/issues/936) as an `export *` leak of `colorPalette.js`, on the stated ground of "zero importers anywhere". That ground was false. `frappe/studio` imports it at `frontend/src/utils/espressoTokens.ts` (`import { borderRadius, boxShadow, fontSize, generateCSSVariables, generateSemanticColors } from "frappe-ui/tailwind/tokens.js"`). Studio pins `1.0.0-beta.25`, so the removal has not broken it yet. A code search across `org:frappe` finds Studio as the only consumer. The subpath is restored as `frappe-ui/tailwind/tokens` (no `.js`), exporting `colors`, `cssVariables`, `fontFamily`, `fontSize`, `fontWeight`, `radius`, `screens`, `semanticColors`, `shadows`, `spacing`, `textTransform` and `tracking` — framework-neutral data rather than functions, and without Tailwind's `<alpha-value>` sentinels. Both entries are build-time, so the three limbs do not judge either of them and the split is decided on this category's own terms. `frappe-ui/tailwind` statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and `@tailwindcss/typography`; none of the three resolve under plain Node, so that entry only loads inside a bundler. The token module imports nothing but its own JSON and loads anywhere. Putting the names on `frappe-ui/tailwind` was tried first and rejected for exactly that reason: the entry that advertised tokens could not deliver them to the consumer that asked. A second build-time entry is additive, which this category allows. |
 

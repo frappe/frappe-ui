@@ -94,6 +94,7 @@ function buildSidebar(): SidebarSection[] {
       text: 'Molecules',
       items: [
         { text: 'Editor', link: '/docs/molecules/editor' },
+        { text: 'CodeEditor', link: '/docs/molecules/code-editor' },
         { text: 'List', link: '/docs/molecules/list' },
       ],
     },
@@ -243,6 +244,10 @@ const config = defineDocsConfig({
     '@utils': path.resolve(repoRoot, 'src/utils'),
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
+    'frappe-ui/code-editor': path.resolve(
+      repoRoot,
+      'src/molecules/code-editor',
+    ),
     'frappe-ui/list': path.resolve(repoRoot, 'src/molecules/list'),
     'frappe-ui': path.resolve(repoRoot, 'src'),
     'dayjs/esm': 'dayjs',

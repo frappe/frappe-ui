@@ -172,6 +172,13 @@ export interface FrappeuiPluginOptions {
    * @default false
    */
   frappeTypes?: FrappeTypesOptions | false
+  /**
+   * Stubs the optional `@codemirror/lang-*` peers this app did not install, so
+   * `frappe-ui/code-editor` builds with the languages it renders and no more.
+   * A stubbed package throws its install hint when `loadLanguage` reaches it.
+   * @default true
+   */
+  codeLanguages?: boolean
 }
 
 /**
@@ -192,6 +199,9 @@ export declare function lucideIcons(
 
 /** The `barrelImports` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `barrelImports` option. */
 export declare function barrelImports(options?: BarrelImportsOptions): Plugin
+
+/** The `codeLanguages` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `codeLanguages` option. */
+export declare function codeLanguages(): Plugin
 
 /**
  * The `~icons/lucide/*` resolver on its own, without the two unplugins.

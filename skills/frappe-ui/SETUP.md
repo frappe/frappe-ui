@@ -50,7 +50,7 @@ Every `frappeui()` sub-plugin except `lucideIcons` and `frappeTypes` is on by de
 frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false })
 ```
 
-Leave `optimizeDeps` alone. The plugin declares its own `optimizeDeps.include` (`highlight.js/lib/core`, `reka-ui`, `vue-sonner`, `dompurify`), and its `barrelImports` sub-plugin expects Vite to pre-bundle an installed frappe-ui as one chunk.
+Leave `optimizeDeps` alone. The plugin declares its own `optimizeDeps.include` (`highlight.js/lib/core`, `reka-ui`, `vue-sonner`, `dompurify`) and its own `optimizeDeps.esbuildOptions.plugins` entry, which is how `codeLanguages` stubs a `@codemirror/lang-*` package the app did not install. Its `barrelImports` sub-plugin also expects Vite to pre-bundle an installed frappe-ui as one chunk. Your own `esbuildOptions.plugins` survive: `mergeConfig` concatenates that array.
 
 ### Prototyping against a non-Frappe backend
 

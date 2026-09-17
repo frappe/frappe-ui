@@ -228,6 +228,82 @@ _Avoid_ (family-wide): `component` for suggestion rendering (`listComponent` nam
 the popup and `nodeView` names a document node); `EditorFixedMenu.buttonSize` (it is
 `size`).
 
+## Code editor family
+
+Vocabulary for the code editor; the API is specified in
+[`spec/code-editor.md`](./spec/code-editor.md). Separate from the Editor family above:
+different engine (CodeMirror 6, not TipTap), different subpath, no shared names.
+
+**`frappe-ui/code-editor`** (subpath):
+The single subpath where the whole code-editor family lives: the `useCodeEditor` engine,
+`CodeEditor`, `CodeEditorContent`, `CodeKit`, the `codeChrome` and `codeHighlight`
+extensions, and `loadLanguage`. Earned on all three ADR-0010 limbs (static CodeMirror,
+open extension registry, colliding names). There are no code-editor exports from
+top-level `frappe-ui` and none from `frappe-ui/editor`.
+_Avoid_: importing the code-editor surface from `frappe-ui` (top-level) or from
+`frappe-ui/experimental` (the old `CodeEditor`/`CodePreview` pair is deleted, ADR-0019);
+shipping a ready-made assembled code editor from the library.
+
+**CodeEditor**:
+The single v1 code-editor component (a molecule), built on `useCodeEditor` and
+**renderless**. It owns the `EditorView` lifecycle and the content `v-model`, provides the
+view to its parts, and renders no UI of its own. Capability is the required `extensions`
+array. Content is the unnamed `v-model` with two channels: `update:modelValue` live and
+`change` on blur as the commit point. Spec:
+[`spec/code-editor.md`](./spec/code-editor.md).
+_Avoid_: confusing it with `@framework/ui`'s `CodeEditorField` (formerly its own
+`CodeEditor`), which is the labeled, assembled field an app renders; a `language` prop or
+feature booleans (pass extensions); `variant`/`size` props (they are CSS vars on the
+consumer's wrapper).
+
+**CodeEditorContent**:
+The part that renders the editor box and mounts CodeMirror's DOM. Takes an optional
+`editor` prop that falls back to the view `CodeEditor` provides, the same shape
+`EditorContent` uses. The only part: CodeMirror owns all of its own DOM, so the family has
+no menu parts.
+_Avoid_: menu or toolbar parts in this family; reaching into CodeMirror's DOM from the
+outside instead of passing an extension.
+
+**useCodeEditor**:
+The engine composable. Owns the `EditorView` lifecycle, binds content, re-applies
+`extensions`, and destroys on unmount. Returns the view unwrapped as
+`ShallowRef<EditorView | null>`, the house pattern `useEditor` and `useChart` already use.
+_Avoid_: wrapping the view in a facade object; exposing a `Compartment`.
+
+**kit** (Code editor family):
+`CodeKit`, one configurable bundle of CodeMirror extensions: `basicSetup`'s members plus
+the `highlight`, `keymap` and `chrome` members, with `lineNumbers` off by default. It
+exists because `basicSetup` is a flat array from which no member can be removed. Same role
+as the Editor family's **kit** entry above (capability defaults, the tree-shaking
+boundary), on a different engine.
+_Avoid_: defaulting the kit onto the component; passing `basicSetup` alongside `CodeKit`.
+
+**chrome** (Code editor family):
+The opt-in frappe look. The `codeChrome` extension adds one class, and the family's
+stylesheet is scoped under it, so an app that omits the extension gets none of that CSS.
+One of three independently removable layers: CodeMirror's base, `codeChrome`,
+`codeHighlight`. Painted through the `--code-*` hooks (ADR-0017): `--code-bg`,
+`--code-border`, `--code-radius`, `--code-focus-ring`, `--code-font-size`,
+`--code-padding`, `--code-min-height`, `--code-max-height`.
+_Avoid_: shipping ambient CSS that every importer must override; a `theme` or `variant`
+prop; reconfiguring anything for dark mode (the hooks resolve `var(--ink-*)` and
+`var(--surface-*)`).
+
+**extensions** (Code editor family):
+The required capability array of raw CodeMirror `Extension` values. **Reactive here**:
+`MaybeRefOrGetter<Extension[]>`, re-applied with a top-level `StateEffect.reconfigure`. In
+the Editor family it is construction-time, because TipTap cannot swap extensions at
+runtime and CodeMirror can. Real runtime cases drive it: Desk picks the language from
+`df.options`, Builder's `activeScript.script_type` changes.
+_Avoid_: assuming either family's rule applies to the other; a `Compartment` in app code.
+
+**loadLanguage**:
+`loadLanguage(key)` dynamically imports one `@codemirror/lang-*` package and returns its
+extension. The ten language packages are **optional peer dependencies**, so the app that
+calls it installs the package it names.
+_Avoid_: listing a language package as a hard dependency; a `language` prop that hides
+this call.
+
 ## Flagged ambiguities
 
 - **`v-model` vs `v-model:open` on Dialog**: both are supported indefinitely.
