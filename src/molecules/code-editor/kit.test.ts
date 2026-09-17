@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, afterEach } from 'vitest'
+import { acceptCompletion, completionStatus } from '@codemirror/autocomplete'
 import { highlightingFor } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
 import { tags } from '@lezer/highlight'
@@ -206,6 +207,29 @@ describe('CodeKit', () => {
     expect(keyBindings(bare).some((binding) => binding.key === 'Tab')).toBe(
       false,
     )
+  })
+
+  it('lets `autocompletion: { defaultKeymap: false }` take the keys back', () => {
+    // `autocompletion()` installs `completionKeymap` itself, at
+    // `Prec.highest`, gated on this option. A second copy in the kit would
+    // keep Enter, Escape, the arrows and Ctrl-Space bound whatever the option
+    // said, and would beat a replacement keymap appended after the kit.
+    const on = mountEditorView([CodeKit]).state
+    expect(
+      keyBindings(on).some((binding) => binding.run === acceptCompletion),
+    ).toBe(true)
+
+    const off = mountEditorView([
+      CodeKit.configure({ autocompletion: { defaultKeymap: false } }),
+    ]).state
+    expect(
+      keyBindings(off).some((binding) => binding.run === acceptCompletion),
+    ).toBe(false)
+    // Ctrl-Space is the completion member's alone: nothing else in the kit
+    // binds it, so its absence is the whole keymap leaving.
+    expect(boundKeys(off).has('Ctrl-Space')).toBe(false)
+    // The completion state itself is still installed. Only the keys are gone.
+    expect(completionStatus(off)).toBeNull()
   })
 
   it('has no lint member, so `@codemirror/lint` never enters the kit', () => {

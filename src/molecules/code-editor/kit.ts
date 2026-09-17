@@ -2,7 +2,6 @@ import {
   autocompletion,
   closeBrackets,
   closeBracketsKeymap,
-  completionKeymap,
 } from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import {
@@ -134,14 +133,16 @@ function build(options: CodeKitOptions): Extension[] {
   if (options.lineNumbers !== false) list.push(lineNumbers(options.lineNumbers))
   if (options.foldGutter !== false) list.push(foldGutter(options.foldGutter))
 
-  // Each of these keymaps drives state the matching extension installs, so it
-  // travels with its member rather than sitting in the fixed base.
+  // No `keymap.of(completionKeymap)` beside this one. `autocompletion()`
+  // installs that keymap itself, at `Prec.highest`, gated on its own
+  // `defaultKeymap` option — which is there so a consumer can take Escape,
+  // Enter, the arrows and Ctrl-Space back. A copy here would outlive
+  // `defaultKeymap: false` and beat any replacement appended after the kit.
   if (options.autocompletion !== false) {
-    list.push(
-      autocompletion(options.autocompletion),
-      keymap.of(completionKeymap),
-    )
+    list.push(autocompletion(options.autocompletion))
   }
+  // `search()` is the opposite case: it binds nothing on its own, so its keymap
+  // travels with the member rather than sitting in the fixed base.
   if (options.search !== false) {
     list.push(search(options.search), keymap.of(searchKeymap))
   }
