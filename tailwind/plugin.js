@@ -1,36 +1,24 @@
 import plugin from 'tailwindcss/plugin'
+import { generateColorPalette, generateSemanticColors } from './colorPalette.js'
 import {
-  generateColorPalette,
-  generateSemanticColors,
-  generateCSSVariables,
-  generateEffectVariables,
-} from './colorPalette.js'
-import radiusTokens from './tokens/radius.json'
-import typographyTokens from './tokens/typography.json'
-import effectsData from './tokens/effects.json'
+  cssVariables,
+  fontSize as fontSizeTokens,
+  fontWeight as fontWeightTokens,
+  radius as radiusTokens,
+  screens as screenTokens,
+  shadows as effectsData,
+  textTransform as textTransformTokens,
+  tracking as trackingTokens,
+} from './tokens.js'
 import { listColumnRules } from './listColumns.js'
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
-let cssVariables = mergeVariableLayers(
-  generateCSSVariables(),
-  generateEffectVariables(),
-  generateRadiusVariables(),
-)
 
-// Emit `--radius-{key}` for every radius token (the numbered scale plus the
-// kept `none` / `full` names — the deprecated size aliases were removed in
-// 1.0.0 per ADR-0006, #998) so the values are inspectable as real CSS
-// variables. `borderRadius` is rewired below to consume these vars, so
-// `rounded-4` and `--radius-4` stay in sync.
-function generateRadiusVariables() {
-  const vars = {}
-  for (const [key, value] of Object.entries(radiusTokens)) {
-    vars[`--radius-${key}`] = value
-  }
-  return { ':root': vars }
-}
-
+// `--radius-{key}` is emitted for every token by tokens.js#cssVariables, and
+// `borderRadius` below consumes those vars, so `rounded-4` and `--radius-4`
+// stay in sync by construction.
+//
 // Each value carries a trailing `/* {px} */` comment so editor tooling
 // (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
 // the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
@@ -39,18 +27,6 @@ function buildRadiusConfig() {
   const out = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
     out[key] = `var(--radius-${key}) /* ${value} */`
-  }
-  return out
-}
-
-// Merge two `{ selector: { var: value } }` objects into one, preserving any
-// vars already declared under the same selector.
-function mergeVariableLayers(...layers) {
-  const out = {}
-  for (const layer of layers) {
-    for (const [selector, vars] of Object.entries(layer)) {
-      out[selector] = { ...(out[selector] || {}), ...vars }
-    }
   }
   return out
 }
@@ -65,24 +41,17 @@ function mergeVariableLayers(...layers) {
 // were corrupt export data.
 const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 
+// tokens.js holds each style as a plain object — it does not speak Tailwind.
+// Tailwind's `fontSize` theme wants the `[size, meta]` tuple. Convert here.
+// Both families are already present: `base` is the text style, `p-base` the
+// paragraph one (same size, looser line-height, its own letter-spacing).
 function buildFontSize() {
-  const out = {}
-  // Each size's regular variant already carries lineHeight, letterSpacing and
-  // fontWeight from the text-styles export (see tokens/build.js).
-  for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
-    out[key] = [size, { ...meta }]
-  }
-  // Paragraph variants (`text-p-<size>`): same size, the paragraph style's
-  // looser line-height and its own letter-spacing.
-  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
-    if (!out[key]) continue
-    const [size, meta] = out[key]
-    out[`p-${key}`] = [
-      size,
-      { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing },
-    ]
-  }
-  return out
+  return Object.fromEntries(
+    Object.entries(fontSizeTokens).map(([key, { fontSize, ...meta }]) => [
+      key,
+      [fontSize, meta],
+    ]),
+  )
 }
 
 // Focus ring utilities backed by `--focus-outline-*` CSS vars (theme-flipped
@@ -107,41 +76,39 @@ function buildFocusRingUtilities() {
 
 function buildTextStyleUtilities() {
   const out = {}
-  const t = typographyTokens
   const groups = [
     {
       className: (s, w) => `.text-${s}-${w}`,
-      tracking: t.tracking?.text || {},
-      lineHeight: (s) => t.fontSize[s]?.[1].lineHeight,
+      tracking: trackingTokens?.text || {},
+      style: (s) => fontSizeTokens[s],
     },
     {
       className: (s, w) => `.text-p-${s}-${w}`,
-      tracking: t.tracking?.paragraph || {},
-      lineHeight: (s) => t.paragraph?.[s]?.lineHeight,
+      tracking: trackingTokens?.paragraph || {},
+      style: (s) => fontSizeTokens[`p-${s}`],
     },
   ]
   for (const group of groups) {
     for (const [size, byWeight] of Object.entries(group.tracking)) {
-      const entry = t.fontSize[size]
-      if (!entry) continue
-      const [fontSize] = entry
-      const lineHeight = group.lineHeight(size)
-      const transform = t.textTransform?.[size]
+      const style = group.style(size)
+      if (!style) continue
+      const transform = textTransformTokens?.[size]
       for (const weight of WEIGHT_VARIANTS) {
         if (!(weight in byWeight)) continue
         out[group.className(size, weight)] = {
-          fontSize,
-          lineHeight,
-          fontWeight: String(t.fontWeight[weight]),
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          fontWeight: String(fontWeightTokens[weight]),
           letterSpacing: byWeight[weight],
           ...(transform ? { textTransform: transform } : {}),
         }
       }
     }
   }
-  // `tiny` is an uppercase eyebrow style; the bare regular utility needs the
-  // text-transform too (Tailwind's fontSize tuple can't express it).
-  for (const [size, transform] of Object.entries(t.textTransform || {})) {
+  // An uppercase eyebrow style needs the text-transform on its bare regular
+  // utility too — Tailwind's fontSize tuple can't express one. Empty today:
+  // `tiny`, the only such style, was dropped in #940.
+  for (const [size, transform] of Object.entries(textTransformTokens || {})) {
     out[`.text-${size}`] = {
       ...(out[`.text-${size}`] || {}),
       textTransform: transform,
@@ -253,12 +220,7 @@ export default plugin(
         },
       },
       fontSize: buildFontSize(),
-      screens: {
-        sm: '640px',
-        md: '768px',
-        lg: '1024px',
-        xl: '1280px',
-      },
+      screens: screenTokens,
       extend: {
         textColor: {
           ink: semanticColors.ink,

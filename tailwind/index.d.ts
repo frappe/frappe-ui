@@ -15,3 +15,27 @@ export default preset
  * not merge a preset's `content`, so spread these into your own `content`.
  */
 export declare const content: string[]
+
+/**
+ * The design tokens, as data — framework-neutral values with no Tailwind
+ * sentinels in them. Read these when you need a token outside a Tailwind
+ * class: a style picker, exported markup, a canvas renderer, codegen.
+ *
+ * This entry point pulls no Vue, so a Node script can import tokens without
+ * the component tree. Per ADR-0010 the surface is additive-only until 2.0.0.
+ */
+export {
+  colors,
+  cssVariables,
+  fontFamily,
+  fontSize,
+  fontWeight,
+  radius,
+  screens,
+  semanticColors,
+  shadows,
+  spacing,
+  textTransform,
+  tracking,
+} from './tokens.js'
+export type { TextStyle, VariableMap } from './tokens.js'

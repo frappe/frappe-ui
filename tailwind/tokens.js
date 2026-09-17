@@ -1,0 +1,281 @@
+/**
+ * The design tokens, as data.
+ *
+ * This is the one module that turns `./tokens/*.json` into shaped values, and
+ * the only one a consumer outside frappe-ui should read. Everything here is
+ * framework-neutral: resolved `oklch(...)` strings, plain px, plain numbers.
+ * Nothing carries a Tailwind sentinel.
+ *
+ * That last rule is load-bearing. `colorPalette.js` wraps these same values in
+ * `oklch(L C H / <alpha-value>)` and `color-mix(... calc(<alpha-value> *
+ * 100%) ...)` so Tailwind's `/50` opacity modifier works. Those strings mean
+ * nothing anywhere else — a colour picker fed `<alpha-value>` renders an empty
+ * swatch. The Tailwind-only shaping lives one layer up, in `colorPalette.js`
+ * and `plugin.js`, and never leaks back down here.
+ *
+ * Exported through `frappe-ui/tailwind`, alongside the preset. That entry
+ * point is build-time and pulls no Vue, so a Node script (codegen, docs,
+ * a design tool) can read tokens without the component tree.
+ *
+ * Per ADR-0010 this surface is additive-only until 2.0.0: names may be added,
+ * none may be renamed or removed.
+ */
+
+import colorsData from './tokens/colors.json'
+import effectsData from './tokens/effects.json'
+import radiusTokens from './tokens/radius.json'
+import typographyTokens from './tokens/typography.json'
+
+// ---------- COLORS ----------
+
+/**
+ * Primitive colour ramps, split by theme. These are the raw scales, not the
+ * semantic vocabulary — `colors.light.gray[500]`, not `surface-gray-2`.
+ * Reach for `semanticColors` unless you specifically want a ramp step.
+ */
+export const colors = {
+  light: colorsData.lightMode,
+  dark: colorsData.darkMode,
+  overlay: colorsData.overlay,
+  neutral: colorsData.neutral,
+}
+
+// `themedVariables` stores each semantic entry as an unresolved pointer into
+// the ramps above (`"lightMode/gray/50"`, `"neutral/white"`). Follow it.
+function resolveColorReference(reference) {
+  const [mode, color, shade] = reference.split('/')
+  if (mode === 'lightMode') return colorsData.lightMode[color][shade]
+  if (mode === 'darkMode') return colorsData.darkMode[color][shade]
+  if (mode === 'overlay') return colorsData.overlay[color][shade]
+  if (mode === 'neutral') return colorsData.neutral[color]
+  return null
+}
+
+function resolveThemedLayer(layer) {
+  return Object.fromEntries(
+    Object.entries(layer).map(([category, entries]) => [
+      category,
+      Object.fromEntries(
+        Object.entries(entries).map(([name, reference]) => [
+          name,
+          resolveColorReference(reference),
+        ]),
+      ),
+    ]),
+  )
+}
+
+/**
+ * The semantic vocabulary — `surface`, `surface-alpha`, `ink`, `outline`,
+ * `outline-alpha` — resolved to real colours, per theme:
+ *
+ *   semanticColors.light.surface['gray-2']  // 'oklch(0.964 0 0)'
+ *   semanticColors.dark.ink.base            // …
+ *
+ * Split by theme rather than theme-agnostic, because a consumer outside a
+ * frappe-ui page has no `[data-theme]` to resolve against and needs to pick a
+ * side. Inside a themed page, prefer the `--<category>-<name>` variables from
+ * `cssVariables`, which flip on their own.
+ */
+export const semanticColors = {
+  light: resolveThemedLayer(colorsData.themedVariables.light),
+  dark: resolveThemedLayer(colorsData.themedVariables.dark),
+}
+
+// ---------- RADIUS ----------
+
+/**
+ * Numbered radius scale `0`–`9` plus `none` and `full`, in px. The named
+ * aliases (`sm`, `md`, `lg`, …) were removed in 1.0.0 — see ADR-0006.
+ */
+export const radius = radiusTokens
+
+// ---------- SHADOWS ----------
+
+/**
+ * Elevation and focus shadows as composed CSS `box-shadow` strings.
+ *
+ * `elevation.light` is used in both themes — Espresso 2.0 references
+ * `elevation/light/*` on its dark-mode page too — so `elevation.dark` exists
+ * for completeness and is not what frappe-ui renders. Focus does mode-swap.
+ */
+export const shadows = effectsData
+
+// ---------- TYPOGRAPHY ----------
+
+/**
+ * One entry per size, in both families. `fontSize.base` is the text family;
+ * `fontSize['p-base']` is the paragraph family, same size with a looser
+ * line-height and its own letter-spacing.
+ *
+ * Objects, not Tailwind's `[size, meta]` tuple form — the tuple is a Tailwind
+ * convention and this module does not speak Tailwind. `plugin.js` converts.
+ *
+ * `letterSpacing` here is the regular weight's. Tracking varies by weight and
+ * CSS letter-spacing cannot follow `font-weight`, so per-weight values live in
+ * `tracking` and ship as self-contained `text-<size>-<weight>` classes.
+ */
+export const fontSize = buildFontSize()
+
+function buildFontSize() {
+  const out = {}
+  for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
+    out[key] = { fontSize: size, ...meta }
+  }
+  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
+    if (!out[key]) continue
+    out[`p-${key}`] = { ...out[key], ...p }
+  }
+  return out
+}
+
+/**
+ * `regular` is 420, not 400. Inter's 400 reads too light at frappe-ui's sizes,
+ * and 420 is the one real customisation in the scale — the rest are stock
+ * Inter weights.
+ */
+export const fontWeight = typographyTokens.fontWeight
+
+export const fontFamily = typographyTokens.fontFamily
+
+/**
+ * Letter-spacing per (size, weight), for the `text` and `paragraph` families
+ * separately. The only token property that varies by weight.
+ */
+export const tracking = typographyTokens.tracking
+
+/**
+ * Per-size text-transform. Empty today — `tiny`, the uppercase eyebrow style
+ * that was its only entry, was dropped in #940. The name stays because the
+ * Figma text-styles export still carries the property and a future eyebrow
+ * style would repopulate it.
+ */
+export const textTransform = typographyTokens.textTransform
+
+// ---------- SIZING ----------
+
+/**
+ * Every integer 1–128 plus every half step 0.5–19.5, at the canonical 0.25rem
+ * step. Stock Tailwind's numeric scale has gaps above 12 (13, 15, 17… are
+ * undefined), so `h-17` silently compiles to nothing. Values on the keys
+ * Tailwind already defines match its own formula, so filling them is a no-op;
+ * the win is the in-between steps.
+ *
+ * This is the ONE place sizing is declared. Tailwind reads `theme('spacing')`
+ * for width, height, size, min/max of both, which is why nothing else
+ * declares a sizing block.
+ */
+export const spacing = Object.fromEntries(
+  [
+    ...Array.from({ length: 20 }, (_, i) => i + 0.5),
+    ...Array.from({ length: 128 }, (_, i) => i + 1),
+  ]
+    .sort((a, b) => a - b)
+    .map((n) => [n, `${n * 0.25}rem`]),
+)
+
+/** Breakpoint minimums. Not in the Figma export — decided in code. */
+export const screens = {
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+}
+
+// ---------- CSS VARIABLES ----------
+
+// Focus tokens arrive as single-layer `0 0 0 <spread> <color>` shadows.
+// Re-express as an `outline` shorthand so the focus ring never collides with
+// a `shadow-*` utility on the same element and survives forced-colors mode
+// (ADR-0005). Only the outline form is emitted; nothing reads `--focus-<name>`.
+function shadowToOutline(shadow) {
+  const parts = shadow.trim().split(/\s+/)
+  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
+}
+
+function mergeLayers(...layers) {
+  const out = {}
+  for (const layer of layers) {
+    for (const [selector, vars] of Object.entries(layer)) {
+      out[selector] = { ...(out[selector] || {}), ...vars }
+    }
+  }
+  return out
+}
+
+function colorVariables() {
+  const root = {}
+  const dark = {}
+
+  for (const [category, entries] of Object.entries(semanticColors.light)) {
+    for (const [name, value] of Object.entries(entries)) {
+      root[`--${category}-${name}`] = value
+    }
+  }
+  for (const [category, entries] of Object.entries(semanticColors.dark)) {
+    for (const [name, value] of Object.entries(entries)) {
+      dark[`--${category}-${name}`] = value
+    }
+  }
+  // Every ramp step is also addressable directly, so a component can reach a
+  // primitive the semantic vocabulary doesn't name.
+  for (const [family, shades] of Object.entries(colors.light)) {
+    for (const [shade, value] of Object.entries(shades)) {
+      root[`--${family}-${shade}`] = value
+    }
+  }
+  for (const [family, shades] of Object.entries(colors.dark)) {
+    for (const [shade, value] of Object.entries(shades)) {
+      dark[`--dark-${family}-${shade}`] = value
+    }
+  }
+
+  return { ':root': root, '[data-theme="dark"]': dark }
+}
+
+function effectVariables() {
+  const root = {}
+  const dark = {}
+
+  for (const [step, value] of Object.entries(shadows.elevation.light)) {
+    root[`--elevation-${step}`] = value
+  }
+  for (const [name, value] of Object.entries(shadows.elevation.custom)) {
+    root[`--elevation-${name}`] = value
+  }
+  for (const [name, value] of Object.entries(shadows.focus.light)) {
+    root[`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+  for (const [name, value] of Object.entries(shadows.focus.dark)) {
+    dark[`--focus-outline-${name}`] = shadowToOutline(value)
+  }
+
+  return { ':root': root, '[data-theme="dark"]': dark }
+}
+
+function radiusVariables() {
+  const vars = {}
+  for (const [key, value] of Object.entries(radius)) {
+    vars[`--radius-${key}`] = value
+  }
+  return { ':root': vars }
+}
+
+/**
+ * Every token as a CSS custom property, keyed by the selector it belongs on:
+ *
+ *   cssVariables[':root']['--surface-base']
+ *   cssVariables['[data-theme="dark"]']['--surface-base']
+ *
+ * `plugin.js` emits these into the base layer, which is how a frappe-ui page
+ * gets them. Read this map directly when you need a token's value in a
+ * context that doesn't load frappe-ui's stylesheet — exported markup, an
+ * email template, a canvas renderer.
+ *
+ * Elevation sits under `:root` only. It does not flip by theme; see `shadows`.
+ */
+export const cssVariables = mergeLayers(
+  colorVariables(),
+  effectVariables(),
+  radiusVariables(),
+)
