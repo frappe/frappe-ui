@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hexToOklch, toOklch } from './figma-tokens-to-theme.js'
+import { hexToOklch, toOklch } from './build.js'
 
 describe('hexToOklch', () => {
   it('converts a 6-digit hex', () => {

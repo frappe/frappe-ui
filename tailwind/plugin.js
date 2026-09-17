@@ -5,9 +5,9 @@ import {
   generateCSSVariables,
   generateEffectVariables,
 } from './colorPalette.js'
-import radiusTokens from './generated/radius.json'
-import typographyTokens from './generated/typography.json'
-import effectsData from './generated/effects.json'
+import radiusTokens from './tokens/radius.json'
+import typographyTokens from './tokens/typography.json'
+import effectsData from './tokens/effects.json'
 import { listColumnRules } from './listColumns.js'
 
 let colorPalette = generateColorPalette()
@@ -68,7 +68,7 @@ const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 function buildFontSize() {
   const out = {}
   // Each size's regular variant already carries lineHeight, letterSpacing and
-  // fontWeight from the text-styles export (see figma-tokens-to-theme.js).
+  // fontWeight from the text-styles export (see tokens/build.js).
   for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
     out[key] = [size, { ...meta }]
   }

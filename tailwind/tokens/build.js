@@ -1,22 +1,40 @@
 /**
- * Generator: reads the W3C Design Tokens Community Group JSON exported from
- * Figma (espresso-v2-design-tokens/) and emits theme JSON files that the
- * tailwind plugin can consume.
+ * Importer: reads the W3C Design Tokens Community Group JSON exported from
+ * Figma and writes the committed token files.
  *
- *   Inputs:  espresso-v2-design-tokens/*.tokens.json
- *   Outputs: tailwind/generated/{colors,radius,typography}.json
+ *   Input:   .figma-export/*.tokens.json  (gitignored — see below)
+ *   Output:  tailwind/tokens/{colors,radius,typography,effects}.json
+ *            tailwind/tokens/provenance.json
  *
- * Run with: yarn sync-tokens
+ * The raw export is NOT committed. It is a drop directory, not a record: it
+ * ships nothing, it changed six times in four months, and it does not say
+ * what frappe-ui actually uses. The committed record is the output above, and
+ * this file is where frappe-ui deliberately overrules the export —
+ * RADIUS_OVERRIDE, FONT_WEIGHT_MAP, DROPPED_SIZES, DROPPED_CUSTOM_ELEVATIONS,
+ * the hex→oklch conversion and the shadow layer reversal. Those are code-side
+ * opinions, which is why they live in a tested Node script rather than in a
+ * Figma plugin that no CI can run.
+ *
+ * To re-sync: export from Figma into `.figma-export/`, run `yarn sync-tokens`,
+ * review the diff on tailwind/tokens/*.json, commit. Keep a token sync and an
+ * edit to this file in separate commits — that separation is the only thing
+ * that tells a reviewer whether a value moved because Figma moved or because
+ * the rules here did.
  */
 
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT = path.resolve(__dirname, '..')
-const TOKENS_DIR = path.join(REPO_ROOT, 'espresso-v2-design-tokens')
-const OUT_DIR = path.join(__dirname, 'generated')
+const REPO_ROOT = path.resolve(__dirname, '..', '..')
+const TOKENS_DIR = path.join(REPO_ROOT, '.figma-export')
+const OUT_DIR = __dirname
+
+// Figma file the export must come from, recorded in provenance.json so a
+// stale drop directory is visible in review rather than silently generated.
+const FIGMA_FILE = 'kMYnZ9ougpSSQBdjZCgtdX'
 
 // Color families mirrored from Figma's "🔵 Colour primitives" collection.
 // Each appears under `light.<family>` and `dark.<family>` plus their alpha pair.
@@ -126,12 +144,20 @@ export function toOklch(value) {
     : value
 }
 
-function readTokens(filename) {
-  return JSON.parse(fs.readFileSync(path.join(TOKENS_DIR, filename), 'utf8'))
-}
+// Every export file this run actually read, with its hash. Only the files
+// reached through readTokens land here, so provenance.json lists the six
+// inputs that matter rather than whatever happens to sit in the drop
+// directory (a stock Figma export also carries gradients, layout grids and a
+// typography variable collection that nothing below consumes).
+const inputsRead = new Map()
 
-function ensureOutDir() {
-  fs.mkdirSync(OUT_DIR, { recursive: true })
+function readTokens(filename) {
+  const raw = fs.readFileSync(path.join(TOKENS_DIR, filename), 'utf8')
+  inputsRead.set(
+    filename,
+    'sha256:' + crypto.createHash('sha256').update(raw).digest('hex'),
+  )
+  return JSON.parse(raw)
 }
 
 function writeJSON(filename, data) {
@@ -476,29 +502,44 @@ function shadowToCss(layers) {
     .join(', ')
 }
 
+// ---------- PROVENANCE ----------
+
+// The raw export is not committed, so the outputs alone cannot answer "which
+// export produced this?". Record the answer: the Figma file and a hash per
+// input file. A re-run against a stale drop directory then shows up as an
+// unchanged `inputs` block beside a changed output, instead of passing
+// silently.
+//
+// No date field: mtime survives neither `cp` nor a fresh clone, and a wrong
+// date is worse than none. The commit that carries this file is the date.
+function buildProvenance() {
+  const files = [...inputsRead.keys()].sort()
+  return {
+    figmaFile: FIGMA_FILE,
+    inputs: Object.fromEntries(files.map((f) => [f, inputsRead.get(f)])),
+  }
+}
+
 // ---------- MAIN ----------
 
 function main() {
   if (!fs.existsSync(TOKENS_DIR)) {
-    console.error(`✗ tokens directory not found: ${TOKENS_DIR}`)
+    console.error(
+      `✗ no Figma export found at ${path.relative(REPO_ROOT, TOKENS_DIR)}/\n` +
+        `  Export the espresso 2.0 token set from Figma into that directory,\n` +
+        `  then re-run. The directory is gitignored on purpose; see the header\n` +
+        `  of this file.`,
+    )
     process.exit(1)
   }
 
   console.log(`Reading tokens from ${path.relative(REPO_ROOT, TOKENS_DIR)}/`)
-  ensureOutDir()
 
   writeJSON('colors.json', buildColors())
   writeJSON('radius.json', buildRadius())
   writeJSON('typography.json', buildTypography())
   writeJSON('effects.json', buildEffects())
-
-  // colors.json is consumed from tailwind/ (top-level) by colorPalette.js, while
-  // the generator emits to tailwind/generated/. Copy it up so `yarn sync-tokens`
-  // is the single source of truth (no manual copy step).
-  fs.copyFileSync(
-    path.join(OUT_DIR, 'colors.json'),
-    path.join(__dirname, 'colors.json'),
-  )
+  writeJSON('provenance.json', buildProvenance())
 
   console.log('✓ done')
 }

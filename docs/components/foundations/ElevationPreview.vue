@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { TabButtons, useColorScheme } from 'frappe-ui'
-import effects from '../../../tailwind/generated/effects.json'
+import effects from '../../../tailwind/tokens/effects.json'
 
 // The six shadow steps, all sat on one elevated surface so the scale reads as
 // shadow-only. In light mode `surface-elevation-2` is white, so depth comes

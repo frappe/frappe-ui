@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   variant: 'subtle',
 })
 
-// The semantic scale (Figma export → tailwind/generated/colors.json) is
+// The semantic scale (Figma export → tailwind/tokens/colors.json) is
 // consistent across all themes — gray is the only exception (`-7` is its
 // saturated step, since gray needs more headroom). Tailwind's JIT needs
 // literal class names so the per-theme strings are inlined below.

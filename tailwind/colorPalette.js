@@ -1,6 +1,6 @@
 import tailwindColors from 'tailwindcss/colors'
-import colorsData from './colors.json'
-import effectsData from './generated/effects.json'
+import colorsData from './tokens/colors.json'
+import effectsData from './tokens/effects.json'
 
 // Tailwind v3 can only apply the `/<opacity>` modifier (e.g. `bg-blue-900/30`)
 // when the color value exposes an alpha slot. Hex did this implicitly; a bare
