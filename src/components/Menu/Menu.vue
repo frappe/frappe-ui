@@ -94,7 +94,7 @@ async function handleItemSelect(item: MenuOption, event: Event) {
             <component
               :is="primitives.SubContent"
               data-slot="content"
-              :class="menuClasses.content"
+              :class="[menuClasses.content, menuClasses.contentMaxWidth]"
               :side-offset="4"
             >
               <Menu
