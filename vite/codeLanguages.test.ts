@@ -197,7 +197,9 @@ describe('codeLanguages', () => {
       'utf8',
     )
     const imported = new Set(
-      [...source.matchAll(/'(@codemirror\/lang-[a-z]+)'/g)].map(
+      // `[a-z0-9-]` rather than `[a-z]`: a package name with a digit is the
+      // silent miss this test exists to catch.
+      [...source.matchAll(/'(@codemirror\/lang-[a-z0-9-]+)'/g)].map(
         (match) => match[1],
       ),
     )
