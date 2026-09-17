@@ -109,6 +109,19 @@ describe('code editor browser behavior', () => {
     cy.get('@change').should('have.been.calledWith', 'SELECT 1')
   })
 
+  it('emits no commit when the user focuses and leaves without typing', () => {
+    mountCodeEditor({ content: 'SELECT 1' })
+
+    cy.get('.cm-content').click()
+    cy.get('button').click()
+    cy.get('@change').should('not.have.been.called')
+
+    // An edit behind the blur is what makes it a commit.
+    cy.get('.cm-content').click().type('0')
+    cy.get('button').click()
+    cy.get('@change').should('have.been.calledOnce')
+  })
+
   it('signals overflow across the height cap, and only on the transitions', () => {
     mountCodeEditor({ maxHeight: '80px' })
 

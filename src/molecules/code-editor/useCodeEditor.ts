@@ -96,17 +96,23 @@ export function useCodeEditor(
   // dispatch an external write we must not echo it straight back out.
   let applyingExternalUpdate = false
 
+  // Set by an edit the user made, cleared when the commit goes out. An external
+  // write is the consumer's own value and never sets it.
+  let dirty = false
+
   const updateListener = EditorView.updateListener.of((update) => {
     // An external write is already the consumer's own value. Reporting it back
     // as an update would echo it: `update:modelValue` firing in answer to a
     // `v-model` write, and `onChange` handlers running on their own output.
     if (!update.docChanged || applyingExternalUpdate) return
+    dirty = true
     if (options.content) options.content.value = update.state.doc.toString()
     options.onUpdate?.(update.view)
   })
 
   const eventHandlers = EditorView.domEventHandlers({
     focus: (event, view) => {
+      dirty = false
       options.onFocus?.(view, event)
     },
     // Blur is the commit point. CodeMirror's contenteditable fires no native
@@ -114,8 +120,16 @@ export function useCodeEditor(
     // has to be emitted, and this is where it happens. `onChange` runs first so
     // a consumer that normalizes the value on commit (JSON pretty-print) has
     // done it by the time `onBlur` runs.
+    //
+    // Only a blur that follows an edit commits. `change` means the document
+    // changed, the same as it does on `frappe-ui/editor`; only the timing
+    // differs. Firing on a bare focus-and-leave would save a document nobody
+    // touched and clear a dirty marker nobody set.
     blur: (event, view) => {
-      options.onChange?.(view)
+      if (dirty) {
+        dirty = false
+        options.onChange?.(view)
+      }
       options.onBlur?.(view, event)
     },
   })

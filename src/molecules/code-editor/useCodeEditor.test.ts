@@ -330,6 +330,42 @@ describe('useCodeEditor callbacks', () => {
     expect(view.state.doc.toString()).toBe('SELECT 1')
   })
 
+  it('skips the commit when the blur follows no edit', () => {
+    // Focusing a field and clicking away is not a commit. The docs point
+    // `change` at saving and at clearing a dirty marker, and both would run on
+    // a document nobody touched.
+    const onChange = vi.fn()
+    const { view } = mountEngine({ extensions: [], onChange })
+
+    view.contentDOM.dispatchEvent(new FocusEvent('focus'))
+    view.contentDOM.dispatchEvent(new FocusEvent('blur'))
+    expect(onChange).not.toHaveBeenCalled()
+
+    view.contentDOM.dispatchEvent(new FocusEvent('focus'))
+    view.dispatch({ changes: { from: 0, insert: 'a' } })
+    view.contentDOM.dispatchEvent(new FocusEvent('blur'))
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    // The edit was committed by the blur above, so the next one has nothing to
+    // commit.
+    view.contentDOM.dispatchEvent(new FocusEvent('focus'))
+    view.contentDOM.dispatchEvent(new FocusEvent('blur'))
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not commit an external write the consumer made itself', async () => {
+    const content: Ref<string> = ref('')
+    const onChange = vi.fn()
+    const { view } = mountEngine({ content, extensions: [], onChange })
+
+    view.contentDOM.dispatchEvent(new FocusEvent('focus'))
+    content.value = 'SELECT 1'
+    await flush()
+    view.contentDOM.dispatchEvent(new FocusEvent('blur'))
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('forwards the focus and blur events', () => {
     const onFocus = vi.fn()
     const onBlur = vi.fn()
