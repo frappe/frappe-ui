@@ -216,3 +216,34 @@ frappeui({
   },
 })
 ```
+
+### Code Languages
+
+Lets an app build `frappe-ui/code-editor` with only the `@codemirror/lang-*`
+packages it installed. **On by default (`codeLanguages: true`).**
+
+`loadLanguage(key)` reaches ten language packages through literal dynamic
+imports, and they are optional peer dependencies. Rollup resolves every one of
+those imports while it builds, so one package the app did not install ends the
+build:
+
+```
+[vite]: Rollup failed to resolve import "@codemirror/lang-sql"
+```
+
+The plugin replaces an absent package with a stub that throws when
+`loadLanguage` reaches it. The build succeeds, and the error names the package
+to install:
+
+```
+[frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
+```
+
+Only frappe-ui's own imports are stubbed. An app that imports a language package
+itself still fails its build, because nothing catches that one.
+
+```javascript
+frappeui({ codeLanguages: false })
+```
+
+Turning it off means installing all ten packages.

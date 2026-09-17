@@ -337,6 +337,31 @@ A missing package throws an error that names the one to install:
 [frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
 ```
 
+### Building with only the packages you installed
+
+The ten imports are literal, so Rollup resolves every one of them while it
+builds the graph. A package you did not install ends the build before
+`loadLanguage` can say anything:
+
+```
+[vite]: Rollup failed to resolve import "@codemirror/lang-sql"
+```
+
+frappe-ui's Vite plugin answers that. It replaces an absent package with a stub
+that throws when `loadLanguage` reaches it, so the build succeeds and the error
+is the install hint above.
+
+```js
+// vite.config.js
+import frappeui from 'frappe-ui/vite'
+
+export default { plugins: [frappeui()] }
+```
+
+It is on by default. Pass `frappeui({ codeLanguages: false })` to turn it off,
+or import `codeLanguages` on its own if you compose your own plugin list. An app
+that builds without it must install all ten packages.
+
 ## Exports
 
 Everything below is importable from `frappe-ui/code-editor`. There are no

@@ -3006,7 +3006,8 @@ Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 - **Breaking:** the ten `@codemirror/lang-*` packages and `@codemirror/lint` move
   from dependencies to optional peer dependencies. Every app used to download
   all eleven. Install the ones you render; `loadLanguage` throws an error naming
-  the missing package.
+  the missing package. `frappe-ui/vite` stubs the language packages an app did
+  not install, so the build no longer fails on a language nobody renders.
 
   See [the code editor docs](/docs/molecules/code-editor) and
   [migration](/docs/migration#code-editor).
