@@ -72,6 +72,12 @@ function unmountView() {
   mounted.scrollDOM.removeEventListener('scroll', measure)
   mounted.dom.remove()
   mounted = null
+  // The observer holds the departed view's `contentDOM` and `scrollDOM`. It has
+  // to go here rather than next to the re-observe below, because the part can
+  // lose its view without gaining another one (`:editor="null"`, or the engine
+  // destroying the view on unmount).
+  observer?.disconnect()
+  observer = null
   // The cached values belong to the view that just left, not to the next one.
   scrolledX = false
   textHeight = ''
@@ -90,7 +96,6 @@ function mountView(view: EditorView | null) {
   mounted = view
   view.scrollDOM.addEventListener('scroll', measure, { passive: true })
 
-  observer?.disconnect()
   if (typeof ResizeObserver !== 'undefined') {
     // `contentDOM` catches doc edits and folds; `scrollDOM` catches the cap
     // itself changing and wrapping reflow on a width change. Neither alone
@@ -108,11 +113,7 @@ watch(resolved, async (view) => {
   await nextTick()
   mountView(view)
 })
-onBeforeUnmount(() => {
-  observer?.disconnect()
-  observer = null
-  unmountView()
-})
+onBeforeUnmount(() => unmountView())
 </script>
 
 <template>

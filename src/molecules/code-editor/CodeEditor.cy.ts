@@ -1,5 +1,6 @@
 import './style.css'
 
+import type { EditorView } from '@codemirror/view'
 import { defineComponent, h, ref, type Ref } from 'vue'
 import { CodeEditor, CodeEditorContent, CodeKit, useCodeEditor } from './index'
 
@@ -245,5 +246,76 @@ describe('code editor browser behavior', () => {
     cy.get('[data-testid="injected"]').find('.cm-editor').should('exist')
     // The second was handed `null` on purpose, so it stays an empty box.
     cy.get('[data-testid="explicit-null"]').should('be.empty')
+  })
+
+  it('releases the resize observer when the view goes away', () => {
+    // The part can lose its view without gaining another one. An observer left
+    // attached would retain the departed view's `contentDOM` and `scrollDOM`
+    // until the part itself unmounted.
+    const live = new Map<ResizeObserver, Element[]>()
+    const watchers = (target: Element) =>
+      [...live.values()].filter((targets) => targets.includes(target)).length
+
+    let view!: EditorView
+
+    const TestHost = defineComponent({
+      setup() {
+        const editor = useCodeEditor({
+          content: ref('SELECT 1'),
+          extensions: [CodeKit],
+        })
+        view = editor.value!
+        const attached = ref(true)
+        return () =>
+          h('div', { class: 'w-[420px] p-4' }, [
+            h(CodeEditorContent, {
+              editor: attached.value ? editor.value : null,
+              class: 'min-h-20',
+            }),
+            h(
+              'button',
+              { type: 'button', onClick: () => (attached.value = false) },
+              'detach',
+            ),
+          ])
+      },
+    })
+
+    cy.window().then((win) => {
+      const Native = win.ResizeObserver
+      // Track what each observer watches, against the real implementation
+      // rather than by reading private state off the component. CodeMirror
+      // keeps its own observer on `scrollDOM`, so counting calls alone would
+      // mix the two.
+      class Tracking extends Native {
+        observe(target: Element, options?: ResizeObserverOptions) {
+          live.set(this, [...(live.get(this) ?? []), target])
+          super.observe(target, options)
+        }
+        disconnect() {
+          live.delete(this)
+          super.disconnect()
+        }
+      }
+      win.ResizeObserver = Tracking as typeof win.ResizeObserver
+    })
+
+    cy.mount(TestHost)
+    cy.get('.cm-editor').should('exist')
+    cy.then(() => {
+      expect(watchers(view.contentDOM), 'contentDOM before detach').to.eq(1)
+      // The part's, plus the view's own.
+      expect(watchers(view.scrollDOM), 'scrollDOM before detach').to.eq(2)
+    })
+
+    cy.get('button').click()
+
+    cy.get('.cm-editor').should('not.exist')
+    cy.then(() => {
+      expect(watchers(view.contentDOM), 'contentDOM after detach').to.eq(0)
+      // The view outlives the part: the engine owns it, and its own observer
+      // stays. Only the part's is gone.
+      expect(watchers(view.scrollDOM), 'scrollDOM after detach').to.eq(1)
+    })
   })
 })
