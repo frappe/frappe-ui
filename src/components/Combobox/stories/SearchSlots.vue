@@ -42,12 +42,6 @@ function clearSearch(setQuery: (value: string) => void, focus: () => void) {
       >
         <span class="lucide-x size-3.5" />
       </button>
-      <kbd
-        v-else
-        class="shrink-0 rounded-4 border border-outline-gray-2 bg-surface-gray-1 px-1.5 py-0.5 text-p-xs text-ink-gray-5"
-      >
-        ⌘ K
-      </kbd>
     </template>
   </Combobox>
 </template>
