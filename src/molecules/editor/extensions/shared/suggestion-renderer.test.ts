@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type {
   SuggestionProps,
   SuggestionKeyDownProps,
@@ -68,7 +68,10 @@ const position = vi.hoisted(() => ({
   resolvers: [] as ((value: { x: number; y: number }) => void)[],
 }))
 
-vi.mock('@floating-ui/dom', () => ({
+// Only `computePosition` is faked; `autoUpdate` stays real so its scroll and
+// resize wiring is what the tests exercise.
+vi.mock('@floating-ui/dom', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@floating-ui/dom')>()),
   computePosition: vi.fn(() =>
     position.deferred
       ? new Promise<{ x: number; y: number }>((resolve) => {
@@ -81,13 +84,14 @@ vi.mock('@floating-ui/dom', () => ({
   shift: vi.fn(() => ({})),
 }))
 
-// jsdom has no ResizeObserver, so the renderer's feature check would skip the
-// observer entirely without this.
+// jsdom has no ResizeObserver, so `autoUpdate` would drop `elementResize`
+// without this.
 class FakeResizeObserver {
   static instances: FakeResizeObserver[] = []
   observe = vi.fn()
+  unobserve = vi.fn()
   disconnect = vi.fn()
-  constructor(public callback: () => void) {
+  constructor(public callback: (entries: unknown[]) => void) {
     FakeResizeObserver.instances.push(this)
   }
 }
@@ -111,6 +115,19 @@ function keyDown(key: string): SuggestionKeyDownProps {
 }
 
 describe('createSuggestionRenderer', () => {
+  // `autoUpdate` puts scroll/resize listeners on window, so a renderer left
+  // running would answer the next test's scroll too.
+  const renderers: ReturnType<typeof createSuggestionRenderer>[] = []
+  function makeRenderer() {
+    const api = createSuggestionRenderer(FakeComponent)
+    renderers.push(api)
+    return api
+  }
+
+  afterEach(() => {
+    renderers.splice(0).forEach((api) => api.onExit())
+  })
+
   beforeEach(() => {
     instances.length = 0
     document.body.innerHTML = ''
@@ -122,7 +139,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('mounts the VueRenderer wrapper (renderer.el), not its null firstElementChild', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
 
     const renderer = instances[0]
@@ -134,7 +151,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('removes the wrapper and destroys the renderer on exit', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     const renderer = instances[0]
     const wrapper = renderer.el
@@ -146,7 +163,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('late-attaches on update when onStart had no caret rect yet', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps({ clientRect: null }))
     const renderer = instances[0]
     expect(document.body.contains(renderer.el)).toBe(false)
@@ -157,7 +174,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('keeps previous items during a transient loading update', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps({ items: [{ label: 'a' }] } as never))
     const renderer = instances[0]
 
@@ -173,14 +190,14 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('returns false on Escape so the suggestion plugin runs onExit', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     expect(api.onKeyDown(keyDown('Escape'))).toBe(false)
     expect(instances[0].onKeyDownSpy).not.toHaveBeenCalled()
   })
 
   it('delegates other keys to the suggestion list', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     expect(api.onKeyDown(keyDown('ArrowDown'))).toBe(true)
     expect(instances[0].onKeyDownSpy).toHaveBeenCalled()
@@ -188,7 +205,7 @@ describe('createSuggestionRenderer', () => {
 
   it('ignores a computePosition run that settles after a newer one', async () => {
     position.deferred = true
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     api.onUpdate(makeProps())
     const wrapper = instances[0].el
@@ -204,18 +221,23 @@ describe('createSuggestionRenderer', () => {
     expect(wrapper?.style.top).toBe('99px')
   })
 
-  it('repositions when the popup resizes and disconnects on exit', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+  it('repositions on popup resize and page scroll, and stops on exit', () => {
+    const api = makeRenderer()
     api.onStart(makeProps())
 
     const observer = FakeResizeObserver.instances[0]
     expect(observer.observe).toHaveBeenCalledWith(instances[0].el)
 
-    const before = vi.mocked(computePosition).mock.calls.length
-    observer.callback()
-    expect(vi.mocked(computePosition).mock.calls.length).toBe(before + 1)
+    let calls = vi.mocked(computePosition).mock.calls.length
+    observer.callback([])
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
+
+    window.dispatchEvent(new Event('scroll'))
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
 
     api.onExit()
     expect(observer.disconnect).toHaveBeenCalled()
+    window.dispatchEvent(new Event('scroll'))
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(calls)
   })
 })

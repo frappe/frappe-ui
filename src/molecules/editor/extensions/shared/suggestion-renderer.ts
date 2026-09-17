@@ -5,6 +5,7 @@ import type {
 } from '@tiptap/suggestion'
 import type { Component } from 'vue'
 import {
+  autoUpdate,
   computePosition,
   flip,
   offset,
@@ -42,9 +43,7 @@ export function createSuggestionRenderer(
   let renderToken = 0
   // Monotonic token; a stale computePosition settling later bails.
   let positionToken = 0
-  // `flip()` positions from the height it measured, and not every height
-  // change arrives through `onUpdate` (async row content, late fonts).
-  let resizeObserver: ResizeObserver | null = null
+  let cleanupAutoUpdate: (() => void) | null = null
 
   function getListExpose(): SuggestionListExpose | null {
     const ref = renderer?.ref as SuggestionListExpose | null | undefined
@@ -99,12 +98,19 @@ export function createSuggestionRenderer(
     floatingEl.style.position = 'absolute'
     document.body.appendChild(floatingEl)
     getReferenceClientRect = props.clientRect as () => DOMRect | null
-    updatePosition()
 
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => updatePosition())
-      resizeObserver.observe(floatingEl)
-    }
+    // Positions once, then keeps the popup on the caret through scroll, window
+    // resize and its own height changes (`flip()` measures a height that async
+    // rows and late fonts change after the fact).
+    cleanupAutoUpdate = autoUpdate(
+      {
+        getBoundingClientRect: () =>
+          getReferenceClientRect?.() ?? new DOMRect(),
+        contextElement: props.editor?.view?.dom as HTMLElement | undefined,
+      },
+      floatingEl,
+      updatePosition,
+    )
   }
 
   return {
@@ -151,8 +157,8 @@ export function createSuggestionRenderer(
       isActive = false
       renderToken++
       positionToken++
-      resizeObserver?.disconnect()
-      resizeObserver = null
+      cleanupAutoUpdate?.()
+      cleanupAutoUpdate = null
       floatingEl?.remove()
       renderer?.destroy()
       floatingEl = null
