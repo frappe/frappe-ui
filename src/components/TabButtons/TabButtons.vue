@@ -26,6 +26,7 @@ import type { BrowserTabBase } from '../shared/tabs/pillTypes'
 import type {
   TabButton,
   TabButtonsEmits,
+  TabButtonsExposed,
   TabButtonsProps,
   TabButtonsSlots,
   TabButtonValue,
@@ -147,15 +148,19 @@ const indicatorRect = ref<{
 // slides in on mount.
 const indicatorAnimated = ref(false)
 
+// The rendered tab itself — the `<button>`, `<a href>` or `<RouterLink>` that
+// takes focus and that the indicator measures. Not the track around it, and
+// not the `Pill` inside it.
+const TAB_BUTTON = '[data-slot="tab-button"]'
+const ACTIVE_TAB_BUTTON = `${TAB_BUTTON}[data-state="active"]`
+
 function measureIndicator() {
   const track = trackRef.value
   if (!track || !hasIndicator.value) {
     indicatorRect.value = null
     return
   }
-  const checked = track.querySelector<HTMLElement>(
-    '[data-slot="tab-button"][data-state="active"]',
-  )
+  const checked = track.querySelector<HTMLElement>(ACTIVE_TAB_BUTTON)
   if (!checked) {
     indicatorRect.value = null
     return
@@ -306,6 +311,24 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
   }
   return { type: 'button' as const, disabled: button.disabled }
 }
+
+// INP-Q5: the group is one tabstop, so focus goes to the selected option, or
+// to the first enabled one when nothing is selected — where a Tab press lands.
+// A disabled option is skipped whichever form it renders as: `tabElement`
+// gives a disabled `route`/`href` option a real disabled `<button>`, which
+// cannot take focus at all. With nothing left to focus the call does nothing.
+defineExpose<TabButtonsExposed>({
+  focus: (options?: FocusOptions) => {
+    const track = trackRef.value
+    if (!track) return
+    const target =
+      track.querySelector<HTMLElement>(
+        `${ACTIVE_TAB_BUTTON}:not([data-disabled])`,
+      ) ??
+      track.querySelector<HTMLElement>(`${TAB_BUTTON}:not([data-disabled])`)
+    target?.focus(options)
+  },
+})
 </script>
 
 <template>

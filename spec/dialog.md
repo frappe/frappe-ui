@@ -31,7 +31,7 @@ Apps reach for the imperative `dialog.*` helpers when they need a one-off confir
 | Color vocabulary | `theme` with color names (`'amber' \| 'blue' \| 'red' \| 'green'`). No semantic axis. (`Alert.theme` uses its own palette: `gray \| blue \| green \| amber \| red`.) |
 | Slots | Canonical only: `#default`, `#title`, `#actions`. Legacy slots were removed (ADR-0008). |
 | Imperative API | Callback-based `dialog.confirm`, `dialog.danger`, `dialog.prompt`. `onConfirm` resolving auto-closes; throwing keeps the dialog open with the thrown message rendered inline. Each helper returns a synchronous `DialogHandle` for programmatic dismissal. |
-| Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<Toasts />`. `<Dialogs />` is still exported for callers who don't use the provider. |
+| Mount mechanism | `<FrappeUIProvider>` renders `<Dialogs />` next to `<ToastProvider />`. `<Dialogs />` is still exported for callers who don't use the provider. |
 
 ## Exact public API for v1
 
@@ -96,9 +96,11 @@ interface DialogProps {
 
 | Slot | Scope | Purpose |
 |---|---|---|
-| `#default` | — | Main content, rendered inside the padded card. |
-| `#title` | — | Title area; accepts arbitrary content (extra buttons next to title, etc.). |
+| `#default` | `{ close }` | Main content, rendered inside the padded card. In `bare` mode it fills the modal shell and still receives `close`. |
+| `#title` | `{ close }` | Title area; accepts arbitrary content (extra buttons next to title, etc.). |
 | `#actions` | `{ close, actions }` | Footer override; `actions` is the reactive action list (with `loading`) so callers can re-lay-out the auto-rendered buttons. |
+
+Every slot receives `close`. The scoped payloads are `DialogSlotProps` and `DialogActionsSlotProps` in `src/components/Dialog/types.ts`.
 
 **Slot precedence rules:**
 
@@ -154,8 +156,8 @@ The lifecycle is driven by `onConfirm` / `onCancel` callbacks. `onConfirm` resol
 
 ### Mount
 
-Wrap the app once with `<FrappeUIProvider>` — it already hosts the toast
-viewport and now also renders `<Dialogs />` for the imperative API:
+Wrap the app once with `<FrappeUIProvider>` — it renders `<ToastProvider />`
+for the toast viewport and `<Dialogs />` for the imperative dialog API:
 
 ```vue
 <!-- App.vue -->
@@ -169,9 +171,9 @@ in the app and inherit `provide/inject` (router, Pinia, theme) from the
 host app — no separate Vue instance, no internal-API touches.
 
 Apps that don't use `FrappeUIProvider` can mount `<Dialogs />` directly
-in their root template instead. There is no `DialogsPlugin` — keeping
-mounts in the component tree avoids the `createApp` + `_context` shim
-pattern used by some other libraries.
+in their root template instead; it stays exported for that case. There is
+no `DialogsPlugin` — keeping mounts in the component tree avoids the
+`createApp` + `_context` shim pattern used by some other libraries.
 
 ### Types
 
@@ -288,7 +290,9 @@ declare const dialog: {
 
 The confirm/submit button shows a loading spinner for as long as the `onConfirm` promise is pending. When `actions[]` is supplied, each action tracks its own loading state — the clicked button spins; every other button disables until it settles.
 
-`onCancel` fires on Cancel click, Escape, outside-click, or close-button click (whenever the dialog's `open` flag flips to `false` via dismissal). Set `dismissible: false` to disable Escape / outside-click / close-button.
+`onCancel` fires on Cancel click, Escape, outside-click, or close-button click (whenever the dialog's `open` flag flips to `false` via dismissal).
+
+Every helper defaults `dismissible` to `true`, like the component. The caller sets `dismissible: false` for a forced-response dialog; the helper then passes `showCloseButton: false` too, so Escape, outside-click, and the close button all go away together.
 
 Each helper returns `{ close }` synchronously, so callers can dismiss the dialog from outside the callback chain — e.g., from a socket event or route change.
 
@@ -399,7 +403,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 |---|---|
 | `options` blob prop | Flat top-level props |
 | `disableOutsideClickToClose` | `dismissible` (inverted) |
-| `icon: { appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` | `icon: { theme: 'amber' \| 'blue' \| 'red' \| 'green' }` |
+| `icon: { name, appearance: 'warning' \| 'info' \| 'danger' \| 'success' }` object | `icon` (string or component) + `theme: 'amber' \| 'blue' \| 'red' \| 'green'` |
 | `#body-content`, `#body-main` slots | `#default` |
 | `#body-title` slot | `#title` |
 | `#body-header` slot | (no replacement — use `#title` for extras) |
@@ -408,7 +412,7 @@ Every surface in the table below was deleted before 1.0.0, per [ADR-0008](./adr/
 | `confirmDialog()` helper | `dialog.confirm()` |
 | `ConfirmDialog.vue` component | deleted — `dialog.confirm()` renders its own internal dialog, not this component |
 
-`<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<Toasts />`. Apps that already mount it in their template continue to work; rendering it twice is safe — only the first mounted host renders the stack, whether the extra host is nested or a sibling; the others warn in dev. When the rendering host unmounts, the claim hands over to the next mounted host, so the stack never loses its renderer.
+`<Dialogs />` is **not** deprecated — it remains exported and is now rendered by `<FrappeUIProvider>` alongside `<ToastProvider />`. Apps that already mount it in their template continue to work; rendering it twice is safe — only the first mounted host renders the stack, whether the extra host is nested or a sibling; the others warn in dev. When the rendering host unmounts, the claim hands over to the next mounted host, so the stack never loses its renderer.
 
 ## Migration notes
 
@@ -419,12 +423,15 @@ already spells it that way — `Alert` and `SidebarCard` (`StatusTheme`), `Badge
 and `Avatar` — and `Dialog` itself rendered `yellow` with the `amber` tokens
 (`bg-surface-amber-2` / `text-ink-amber-5`), so only the word changes.
 
+The icon object is gone with it: `icon` is now a `lucide-*` class name or a
+component, and `theme` is its own prop.
+
 ```vue
 <!-- before -->
 <Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'yellow' }" />
 
 <!-- after -->
-<Dialog :icon="{ name: 'lucide-alert-triangle', theme: 'amber' }" />
+<Dialog icon="lucide-alert-triangle" theme="amber" />
 ```
 
 The same applies to the `theme` argument of `dialog.confirm` / `dialog.danger`.

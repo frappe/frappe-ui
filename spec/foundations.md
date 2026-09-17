@@ -6,7 +6,7 @@ This document defines the foundation layer of the design system — typography, 
 
 Architectural calls in this spec are recorded as ADRs:
 
-- [`adr/0007-typography-style-utilities.md`](./adr/0007-typography-style-utilities.md) — why named typography utilities (`text-{size}-medium`) exist instead of per-component overrides.
+- [`adr/0007-typography-style-utilities.md`](./adr/0007-typography-style-utilities.md) — why named typography utilities (`text-{size}-{weight}`) exist instead of per-component overrides.
 - [`adr/0005-focus-ring-2px.md`](./adr/0005-focus-ring-2px.md) — why focus rings are 2px.
 - [`adr/0006-numbered-radius-tokens.md`](./adr/0006-numbered-radius-tokens.md) — why numbered radius tokens (`rounded-1`…`rounded-9`) are canonical and named aliases are deprecated.
 
@@ -23,8 +23,8 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 | Decision | Direction |
 |---|---|
 | Source of truth | Figma file `espresso-2.0` |
-| Typography model | Atomic size/weight/line-height tokens from Figma export, plus named-style utilities for composite styles |
-| Named typography utilities | `text-{size}-medium` for sizes whose medium-variant tracking is confirmed in Figma. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
+| Typography model | Size, line-height and per-weight letter-spacing, generated from the Figma text-styles export. Weight names are mapped in code |
+| Named typography utilities | `text-{size}-{weight}` and `text-p-{size}-{weight}`, generated for every exported style. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
 | Focus indicator | A global `:focus-visible` outline from `--focus-outline-default`, retheme with `focus-visible:focus-ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
 | Radius scale | Numbered tokens `rounded-0`…`rounded-9` are canonical. Named aliases (`rounded`, `rounded-md`, …) are removed. See [ADR-0006](./adr/0006-numbered-radius-tokens.md) |
 | Color themes | Figma defines `default` (gray) and `red`. `blue` and `green` are code-only extensions (see below) |
@@ -34,42 +34,67 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 
 ### Token model
 
-Atomic tokens are exported from Figma to [`tailwind/generated/typography.json`](../tailwind/generated/typography.json):
+The type scale is generated from the Figma **text-styles** export
+(`espresso-v2-design-tokens/text.styles.tokens.json`) by
+[`tailwind/figma-tokens-to-theme.js`](../tailwind/figma-tokens-to-theme.js),
+which writes [`tailwind/generated/typography.json`](../tailwind/generated/typography.json).
+The variable export (`Typography.Desktop`) is not used for it: it rounds
+line-heights to px and drops per-size letter-spacing.
+
+The generated file holds:
 
 - `fontFamily` — `text: 'Inter Variable'`
-- `fontSize` — keyed by size name (`tiny`, `2xs`, `xs`, `sm`, `base`, `md`, `lg`, `xl`, `2xl`, `3xl`, …), each paired with a `lineHeight`
-- `fontWeight` — named weights: `regular: 400`, `medium: 500`, `semibold: 600`, `bold: 700`, `black: 800`
+- `fontSize` — one entry per size, each carrying the regular style's `lineHeight` as a unitless ratio, its `letterSpacing` in `em`, and `fontWeight`. The scale is `2xs` 11px, `xs` 12, `sm` 13, `base` 14, `md` 15, `lg` 16, `xl` 17, `2xl` 18, `3xl` 20, `4xl` 24, then `5xl`–`12xl` at 26, 28, 32, 40, 44, 48, 52, 56. `tiny` and `13xl`–`16xl` are dropped as unused (#940)
+- `paragraph` — the paragraph family's looser `lineHeight` and its own `letterSpacing`, for `2xs` through `4xl`
+- `tracking` — letter-spacing per (size, weight), for the text family and the paragraph family separately. This is the only property that varies by weight
+- `fontWeight` — `regular: 420`, `medium: 500`, `semibold: 600`, `bold: 700`, `black: 800`
 
-Letter-spacing is **not** exported from Figma — it is encoded by hand in [`tailwind/plugin.js`](../tailwind/plugin.js) via `FONT_SIZE_AUGMENT` (for the regular-weight variant of each size) and `FONT_SIZE_MEDIUM_TRACKING` (for the medium-weight variant).
+Weights are the one part not read from the export. `FONT_WEIGHT_MAP` in the
+generator holds them, because the export's weight column is corrupt: the body
+styles use Inter's Thin named instance with a `wght`-axis override, which the
+exporter discards. Regular's **420** is the only real customization; the rest are
+the standard Inter weights.
 
 ### Named style utilities
 
-Figma models typography as named styles (`text/base/regular`, `text/base/medium`, `text/lg/medium`, …) where medium-weight text is tracked tighter than regular at the same size. To preserve this in CSS, `tailwind/plugin.js` emits component utilities:
+Figma models typography as named styles (`text/base/regular`, `text/base/medium`,
+`paragraph/base/medium`, …), and text of one size is tracked differently per
+weight. CSS letter-spacing cannot follow `font-weight`, so
+`buildTextStyleUtilities()` in [`tailwind/plugin.js`](../tailwind/plugin.js)
+emits a self-contained component class for each one:
 
-| Utility | font-size | line-height | weight | letter-spacing | Figma |
-|---|---|---|---|---|---|
-| `text-base-medium` | 14px | 16px | 500 | 0.015em (1.5%) | `text/base/medium` |
-| `text-md-medium`   | 15px | 17px | 500 | 0.015em (1.5%) | `text/md/medium` |
-| `text-lg-medium`   | 16px | 18px | 500 | 0.015em (1.5%) | `text/lg/medium` |
+| Family | Utilities | Sizes |
+|---|---|---|
+| Text | `text-{size}` (regular), `text-{size}-{medium,semibold,bold}` | `2xs` … `12xl` |
+| Paragraph | `text-p-{size}` (regular), `text-p-{size}-{medium,semibold,bold}` | `2xs` … `4xl` |
 
-Regular-weight tracking is carried by the base `text-{size}` utility — there is no `text-{size}-regular` because it would be a redundant alias.
+Each weighted class sets `font-size`, `line-height`, `font-weight` and that
+weight's `letter-spacing`. Regular is the bare utility, which already carries
+weight 420 and the regular tracking, so there is no `text-{size}-regular`. No
+`black` class is emitted: it was removed in #998 with zero usage, and the exported
+weight behind it was corrupt.
 
-**Migration guidance**: components using `text-{size} font-medium` should migrate to `text-{size}-medium` where the named utility exists. Bare `text-{size} font-medium` continues to render correctly but drifts ~0.07–0.08px tighter than Figma intends.
+Generated values, as an illustration of the shape:
+
+| Utility | font-size | line-height | weight | letter-spacing |
+|---|---|---|---|---|
+| `text-base` | 14px | 1.15 | 420 | 0.02em |
+| `text-base-medium` | 14px | 1.15 | 500 | 0.015em |
+| `text-p-base` | 14px | 1.5 | 420 | 0.02em |
+| `text-p-base-medium` | 14px | 1.5 | 500 | 0.015em |
+
+**Migration guidance**: use one class, not two. `text-{size} font-{weight}` keeps
+the regular tracking and so does not match the named style. The `tokens-v2`
+codemod ([`tailwind/migrate-tokens-v2.js`](../tailwind/migrate-tokens-v2.js))
+merges a co-located size and weight class in a static class list, and drops
+`font-normal` because the bare utility is already regular. Adding a `font-*`
+class after a weighted class reintroduces the same mismatch.
 
 See [ADR-0007](./adr/0007-typography-style-utilities.md) for the reasoning and the alternatives considered.
 
-### Verified font-size tokens
-
-Confirmed against Figma typography variables on `2026-05-24`:
-
-| Tailwind size | font-size | line-height | Figma variable |
-|---|---|---|---|
-| `text-base`         | 14px | 16px | `text/base/regular` (with weight 420, ls 2%) |
-| `text-base-medium`  | 14px | 16px | `text/base/medium` (weight 500, ls 1.5%) |
-| `text-md`           | 15px | 17px | `text/md/regular` (with weight 420, ls 2%) |
-| `text-md-medium`    | 15px | 17px | `text/md/medium` (weight 500, ls 1.5%) |
-| `text-lg`           | 16px | 18px | (no Figma usage in component scope yet) |
-| `text-lg-medium`    | 16px | 18px | `text/lg/medium` (weight 500, ls 1.5%) |
+**Historical.** Before `b8c232a6dc`, only `text-base-medium`, `text-md-medium` and
+`text-lg-medium` existed, hand-encoded in `plugin.js` from Figma observation, and
+letter-spacing was not read from the export at all. Those maps are gone.
 
 ## Focus ring
 
@@ -172,10 +197,13 @@ Extensions to the Figma spec that the library ships **intentionally**, not as dr
 |---|---|---|
 | `xs`, `xl`, `2xl` button sizes | `Button.vue` `sizeClasses` | Sizes outside Figma's `sm`/`md`/`lg` scale. `xs` (24px, `text-xs`, `rounded-3`) covers compact toolbars/badges-as-buttons; `xl`/`2xl` are pre-espresso-v2 sizes preserved for back-compat. No Figma reference — use at own risk; visual treatment may shift if Figma adds these later. |
 | `blue`, `green`, (and other) themes | `Button.vue` `buttonClasses`, plus `Badge`, `Alert`, `Toast`, etc. | Semantic theming surface that pre-dates espresso v2. Figma currently only models `default` + `red` for components, but the underlying color ramps (blue, green, yellow, …) are first-class in the token export. |
-| Letter-spacing per size | `tailwind/plugin.js` `FONT_SIZE_AUGMENT` | Figma exports `font.size`, `font.weight`, `font.line-height`, `font.family` — letter-spacing is composed in Figma styles but not in the token JSON. Encoded by hand. |
-| Medium-variant tracking | `tailwind/plugin.js` `FONT_SIZE_MEDIUM_TRACKING` | Same — Figma composes it in named styles; we re-derive per size. Only sizes whose medium tracking is confirmed in Figma are listed. |
+| Font weights | `tailwind/figma-tokens-to-theme.js` `FONT_WEIGHT_MAP` | The text-styles export's weight column is corrupt, so the five weights are named in code instead. Only regular's 420 differs from a standard Inter weight. |
+| `radius/9` = 100px | `tailwind/figma-tokens-to-theme.js` `RADIUS_OVERRIDE` | The token exports as 999px, a second pill radius beside `rounded-full`. Held at 100px until the Figma variable is corrected (ADR-0006). |
 
 If Figma adds any of these later, the extensions become drift and should be reconciled.
+
+Letter-spacing was a code-only extension until `b8c232a6dc`. It now comes from the
+text-styles export, per size and per weight, and the hand-encoded maps are gone.
 
 ## Verification process
 
@@ -188,7 +216,8 @@ When verifying a component against Figma:
    - **Component drift** — the component uses the wrong token. Fix in the component.
    - **Intentional extension** — must be listed in [§ Code-only extensions](#code-only-extensions). Add it there.
 
-Latest full-component verifications:
+Historical record of full-component verifications. Each row states what was true
+on its date, not what is checked today:
 
 | Component | Figma node | Date | Notes |
 |---|---|---|---|

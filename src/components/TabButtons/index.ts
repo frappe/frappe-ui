@@ -3,6 +3,7 @@ export type {
   TabButton,
   TabButtonIcon,
   TabButtonsEmits,
+  TabButtonsExposed,
   TabButtonsProps,
   TabButtonsSlots,
   TabButtonValue,

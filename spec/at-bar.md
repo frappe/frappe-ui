@@ -16,11 +16,15 @@ This follows the map's Rule 2: exported at `1.0.0` means frozen until `2.0.0`, s
 export is either reviewed to bar or removed before the tag. Code a consumer cannot reach
 is internal, carries no freeze, and needs nothing from this list.
 
-In practice that is almost everything. Of the 73 directories under `src/components`, only
-`Menu/` and `types/` contribute nothing to any entry point. Two more —
-`InputLabeling/` and `shared/` — export types but no components, so items 1, 3, 4, 5
-and 8 are N/A for them and items 0, 2, 6, 7 and 9 still apply. **An exported type is
-public surface and freezes like any other member.**
+In practice that is almost everything. **An exported type is public surface and freezes
+like any other member**, so a family that ships types and no component still answers items
+0, 2, 6, 7 and 9; items 1, 3, 4, 5 and 8 are N/A for it.
+
+*Historical, from the first audit:* 73 directories under `src/components`, of which only
+`Menu/` and `types/` reached no entry point, plus `InputLabeling/` and `shared/` exporting
+types but no components. Both the count (57 directories today) and the list have moved —
+`InputLabeling`'s public type now comes from `composables/useInputLabeling`. Count the
+exports in the family you are sweeping instead of reusing these numbers.
 
 Non-component exports (composables, utilities, plugins) are in scope with a shorter
 list; the N/A column says which items drop.
@@ -55,18 +59,25 @@ If the call is **keep**, everything below has to be true.
 | 9 | A changelog line, and a migration before/after when the [break is silent](#item-9-silent-vs-loud-breaks) | nothing was removed or renamed |
 
 Item 8 counts `defineExpose` **and** setup-context `expose()`. Both reach the same
-surface, and a census that greps only for `defineExpose` misses the other: `Button`
-moved to `expose()` in `8b4aa3c43`, seven weeks before ADR-0012 was written, so its
-`rootRef` survived the sweep that should have caught it (#1094 item 3).
+surface, and a census that greps only for `defineExpose` misses the other. *Historical:*
+`Button` moved to `expose()` in `8b4aa3c43`, seven weeks before ADR-0012 was written, so
+its `rootRef` survived the sweep that should have caught it (#1094 item 3). `Button.vue`
+exposes nothing today; the rule stands because either form can put a member back.
+
+Two shipped members are open against that policy — `Editor`'s `isEmpty` and `Popover`'s
+`contentEl`, both listed in [`imperative-api.md`](./imperative-api.md) §4. A sweep that
+meets one records it as **pending** and names the open decision. It does not mark item 8
+done, and it does not change the member to close the gap.
 
 An item is either **done** or **written down as N/A**. It is never skipped. If you find
 yourself wanting to skip one, you have hit the [out-of-session rule](#when-a-family-cannot-reach-bar-in-one-session).
 
 ## Item 3: the five behaviors
 
-A `.cy.ts` file existing is not the bar — today those files range from 5 cases
-(`Tabs`) to 29 (`Select`), which is exactly the incomparability this document exists to
-remove. The bar is five named behaviors, each a yes or no:
+A `.cy.ts` file existing is not the bar. *Historical:* when this was written those files
+ranged from 5 cases (`Tabs`) to 29 (`Select`) — the incomparability this document exists
+to remove. Both specs have since grown, so use the spread as the argument, not the
+numbers. The bar is five named behaviors, each a yes or no:
 
 1. **Renders** with default props.
 2. **`v-model` round-trip** — a value set by the parent shows up, and a change inside
@@ -88,14 +99,18 @@ table list every prop" is not a reviewer's job.
 Two things are:
 
 - **Descriptions.** The generator emits an empty description cell when the source carries
-  no JSDoc. As of writing, **194 of 953 documented members ship with a blank description**.
-  Filling a family's share of those is part of its sweep, not a separate pass.
+  no JSDoc. Every prop, slot and emit in the family needs one, and filling them is part of
+  its sweep, not a separate pass. (*Historical:* the first audit counted 194 of 953
+  documented members with a blank description. Re-count the family you are sweeping.)
 - **Prose and examples.** The text around the table, and the playground and story code, has
   to describe what the component actually does now.
 
-Table freshness is CI's job, not the sweeper's — `yarn docs:gen` currently runs in no
-workflow, so the committed `.api.md` files can drift from the source silently. That job is
-tracked separately; do not spend sweep time hand-checking generated tables.
+Table freshness is CI's job, not the sweeper's. The **API Tables** job in
+`.github/workflows/tests.yml` runs `yarn docs:check` (`propsgen.ts --check`) on every pull
+request and on pushes to `main`. It compares each committed `.api.md` against a fresh run,
+row by row, keyed by name — row order is not compared — and fails the build on any
+difference. So do not spend sweep time hand-checking generated tables: change the source,
+run `yarn docs:gen`, and commit what it writes. Never hand-edit a generated table.
 
 ## Item 6: recording the audit
 

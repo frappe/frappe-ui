@@ -109,8 +109,11 @@ Guaranteed slot props:
 ```ts
 type DropdownTriggerSlotProps = {
   open: boolean
+  setOpen: (value: boolean) => void
   close: () => void
   disabled: boolean
+  // the dropdown's fallthrough attributes are spread in too
+  [key: string]: any
 }
 
 type DropdownItemSlotProps = {
@@ -119,10 +122,18 @@ type DropdownItemSlotProps = {
   selected: boolean
 }
 
-type DropdownGroupLabelSlotProps = {
+type DropdownGroupSlotProps = {
   group: DropdownGroupOption
 }
 ```
+
+`open` is the current state, not a method. `setOpen(value)` writes it and
+`close()` is shorthand for `setOpen(false)`. A disabled trigger ignores
+`setOpen(true)`.
+
+These names are the source of truth in `src/components/Dropdown/types.ts`,
+which re-exports the shared shapes from `src/components/Menu/types.ts`. Read
+them there rather than trusting a copy.
 
 Supported slots:
 
@@ -159,8 +170,11 @@ Exact slot rules:
 - submenu and switch rows keep their shell-owned structure even when `#item`
   exists
 - `#item-prefix`, `#item-label`, and `#item-suffix` apply at every menu depth
-- on submenu rows, `#item-suffix` renders before the built-in submenu chevron
-- on switch rows, `#item-suffix` renders before the built-in switch control
+- a custom suffix **replaces** the built-in control. On a submenu row it
+  replaces the chevron; on a switch row it replaces the switch. The suffix
+  region has one occupant, and the app's content is it
+- a suffix that renders nothing (`null`, `undefined`, a comment, whitespace)
+  counts as absent, so the built-in control comes back
 
 ## Exact option shape for v1
 
@@ -191,8 +205,8 @@ interface DropdownBaseOption {
 
 interface DropdownActionOption extends DropdownBaseOption {
   label: string
-  route?: RouteLocationRaw
-  onClick?: (event: PointerEvent) => void
+  route?: RouteDestination
+  onClick?: (event: Event) => void
   submenu?: never
   switch?: never
   switchValue?: never
@@ -235,6 +249,15 @@ type DropdownOption =
 type DropdownOptions = Array<DropdownOption | DropdownGroupOption>
 ```
 
+These are aliases. `src/components/Dropdown/types.ts` re-exports the shared
+`Menu/types.ts` shapes under `Dropdown*` names, so `ContextMenu` and `Dropdown`
+cannot drift apart. `RouteDestination` (a path string or a route object) comes
+from `src/components/shared/route.ts`.
+
+`onClick` takes a plain `Event`, not a `PointerEvent`. The menu primitive
+emits its own `CustomEvent` when a row is selected, by pointer or by keyboard,
+and that is what the handler receives.
+
 The group entry is `{ group, options }`, matching `Combobox`, `MultiSelect`,
 and `Select`. Dropdown's previous `{ group, items }` shape and the `component:`
 escape-hatch row were removed before `1.0.0` per
@@ -254,11 +277,20 @@ Notes:
 - keep `onClick` and `condition` as canonical names
 
 `icon` takes a Vue component or a string, the same as in the selection
-pickers. Strings starting with `lucide-` render as that Lucide icon
-(`icon: 'lucide-pen'`), sized and colored by the component — `text-ink-red-5`
-on a `theme: 'red'` row, `text-ink-gray-6` otherwise. Write the class out in
-full; a name built at runtime is invisible to Tailwind's scanner and renders
-nothing. Other strings still route to `FeatherIcon` for back-compat.
+pickers. Three forms are supported:
+
+- a Vue component
+- a `lucide-*` string (`icon: 'lucide-pen'`), rendered as that Lucide icon and
+  sized and colored by the component — `text-ink-red-5` on a `theme: 'red'`
+  row, `text-ink-gray-6` otherwise. Write the class out in full; a name built
+  at runtime is invisible to Tailwind's scanner and renders nothing
+- an emoji or symbol glyph (`icon: '🚀'`), rendered as plain text
+
+Any other string — a bare Feather name such as `'pen'` — renders nothing and
+warns once per component and prop in dev. The `FeatherIcon` fallback was
+removed before `1.0.0` under
+[ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md). See
+`src/utils/iconString.ts` for the classifier and the warning.
 
 ## Rendering and behavior rules
 
@@ -341,18 +373,30 @@ Label region:
 3. `item.slots.label`
 4. default: `label` plus optional `description`
 
-Suffix region:
+Suffix region (a custom suffix **replaces** the built-in control, it is not
+added next to it):
 
-1. `#item-suffix` slot
-2. `item.slots.suffix`
-3. default: empty for leaf action rows; submenu chevron or switch control
-   is appended after the suffix region on submenu / switch rows
+1. `#item-suffix` slot, if it renders something
+2. `item.slots.suffix`, if it renders something
+3. default: the switch control on a switch row, the chevron on a submenu row,
+   and nothing on a leaf action row
+
+"Renders something" is `hasRenderableContent` in `src/utils/vnode.ts`: `null`,
+`undefined`, `false`, a comment, and whitespace-only text all count as nothing,
+so a conditional suffix that returns `null` falls through to the next step.
+
+A custom suffix owns the whole suffix region. If a switch row needs a custom
+suffix *and* a switch, the slot has to render the `Switch` itself, wired to
+`item.switchValue` and `item.onClick`. This is the accepted contract, confirmed
+2026-09-17; the earlier append wording in this spec was never implemented.
 
 Notes:
 
-- submenu and switch rows keep their shell-owned affordances even when a
-  full-row renderer is provided elsewhere — the full-row escape hatch
-  applies to leaf action rows only, matching the existing `#item` rule
+- replacement is scoped to the suffix region. The row shell, the prefix, and
+  the label are untouched, and the row keeps its menu semantics
+- submenu and switch rows keep their shell-owned **row structure** even when a
+  full-row renderer is provided elsewhere — the full-row escape hatch applies
+  to leaf action rows only, matching the existing `#item` rule
 
 ## Styling hooks
 
@@ -414,6 +458,8 @@ selection-and-menus sweep
 - `{ group, items }` group entries — `{ group, options }` replaces them
 - `component:` option rows and the `DropdownComponentOption` type —
   `slots: { item: fn }` replaces them
+- the `FeatherIcon` fallback for bare icon-name strings — a `lucide-*` string,
+  an emoji glyph, or a component; anything else warns and renders nothing
 - `DropdownExposed` — described a template-ref surface that never existed;
   per [ADR-0012](./adr/0012-template-ref-surface.md), `Dropdown` exposes
   nothing (`v-model:open` and the `close` slot prop cover it)
@@ -425,7 +471,6 @@ For rows authored in JavaScript where no template is in reach, per-region
 
 ```ts
 import { h } from 'vue'
-import LucideCheck from '~icons/lucide/check'
 import Avatar from '@/components/Avatar.vue'
 
 const options = users.map((user) => ({
@@ -436,10 +481,14 @@ const options = users.map((user) => ({
     prefix: ({ item }) =>
       h(Avatar, { image: item.image, class: 'size-4' }),
     suffix: ({ selected }) =>
-      selected ? h(LucideCheck, { class: 'size-4' }) : null,
+      selected ? h('span', { class: 'lucide-check size-4' }) : null,
   },
 }))
 ```
+
+The `null` branch matters: on a submenu or switch row, a suffix that renders
+something takes the region over, and the chevron or the switch is not drawn.
+Returning `null` hands the region back.
 
 `slots.item` takes over the whole row instead — reserve it for deeply custom
 rows, destructive full-width special rows, and similar exceptional content:
@@ -455,6 +504,22 @@ rows, destructive full-width special rows, and similar exceptional content:
 ```
 
 ## Changelog
+
+### 2026-09-17
+
+Spec corrections only. No runtime behavior changed.
+
+- **A custom suffix replaces the built-in control; it is not appended.** The
+  spec promised the opposite in two places. The maintainer confirmed
+  replacement on 2026-09-17, and `MenuItemContent.vue` has implemented it all
+  along. Covered by a regression test in `Dropdown.cy.ts`.
+- **`onClick` takes an `Event`.** It was written as `PointerEvent`, but the
+  menu primitive hands the handler a `CustomEvent`.
+- **The `FeatherIcon` string fallback is gone.** It was removed before
+  `1.0.0`; an unsupported icon string warns and renders nothing. Emoji glyphs
+  are supported and were undocumented.
+- **The trigger slot gets `setOpen`.** The slot-props type block omitted it,
+  even though the supported-slots list already named it.
 
 ### 2026-08-08
 
@@ -479,7 +544,8 @@ rows, destructive full-width special rows, and similar exceptional content:
   directly in an item definition — no component import needed. Strings
   starting with `lucide-` are rendered as a `<span>` styled via the Tailwind
   CSS-mask plugin. Other strings still route to FeatherIcon (back-compat).
-  Component values continue to work unchanged.
+  Component values continue to work unchanged. *(Historical: the FeatherIcon
+  fallback was removed before `1.0.0`.)*
 
 - **Group labels toned to `text-ink-gray-4`.** Separator group headings are
   now visually quieter so they recede behind the action items.

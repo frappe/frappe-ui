@@ -755,6 +755,221 @@ describe('Tabs', () => {
       .should('have.attr', 'data-state', 'active')
   })
 
+  // A clicked non-route trigger holds selection until the route leaves the
+  // page it was clicked from: a navigation that lands on a different path, or
+  // a change in the tab the URL matches. A query-only or hash-only write that
+  // keeps the same tab matched holds it. The cases below share one mixed list
+  // and differ only in where they navigate.
+  function mixedRouter() {
+    return createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        {
+          path: '/inbox',
+          component: { template: '<router-view />' },
+          children: [
+            { path: '', component: { template: '<div />' } },
+            { path: ':id', component: { template: '<div />' } },
+          ],
+        },
+        { path: '/sent', component: { template: '<div />' } },
+      ],
+    })
+  }
+
+  const MixedList = defineComponent({
+    render: () =>
+      h(Tabs, null, () => [
+        h(TabList, { variant: 'underline' }, () => [
+          h(TabTrigger, { value: 'inbox', label: 'Inbox', route: '/inbox' }),
+          h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+          h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+        ]),
+      ]),
+  })
+
+  function mountMixedAt(router: ReturnType<typeof mixedRouter>, path: string) {
+    cy.wrap(router.push(path))
+    cy.mount(MixedList, { global: { plugins: [router] } })
+  }
+
+  function expectTabState(label: string, state: 'active' | 'inactive') {
+    cy.contains('[role=tab]', label)
+      .find('[data-state]')
+      .should('have.attr', 'data-state', state)
+  }
+
+  for (const [name, first, second] of [
+    [
+      'the panel writes its own state to the query',
+      { query: { page: '2' } },
+      { query: { page: '3' } },
+    ],
+    [
+      'the panel writes its own state to the hash',
+      { hash: '#recent' },
+      { hash: '#older' },
+    ],
+  ] as const) {
+    it(`keeps a local selection when ${name}`, () => {
+      const router = mixedRouter()
+      mountMixedAt(router, '/inbox')
+
+      cy.contains('[role=tab]', 'Drafts').click()
+      expectTabState('Drafts', 'active')
+
+      // The Drafts panel paginates through the URL. The path and the matched
+      // tab both stay put, so this is the panel talking about itself —
+      // clearing here would throw the user out of the panel they are standing
+      // in and back onto Inbox.
+      cy.then(() => router.push(first))
+      expectTabState('Drafts', 'active')
+      expectTabState('Inbox', 'inactive')
+
+      // And held across the next page of the same panel.
+      cy.then(() => router.push(second))
+      expectTabState('Drafts', 'active')
+      expectTabState('Inbox', 'inactive')
+    })
+  }
+
+  it('ends a local selection when a child route opens under the same tab', () => {
+    const router = mixedRouter()
+    mountMixedAt(router, '/inbox')
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    expectTabState('Drafts', 'active')
+
+    // Inbox still matches at `/inbox/42`, but the path changed: this is a
+    // different page, not the Drafts panel talking about itself.
+    cy.then(() => router.push('/inbox/42'))
+    expectTabState('Inbox', 'active')
+    expectTabState('Drafts', 'inactive')
+  })
+
+  it('ends a local selection when navigation lands on another tab', () => {
+    const router = mixedRouter()
+    mountMixedAt(router, '/inbox')
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    expectTabState('Drafts', 'active')
+
+    cy.then(() => router.push('/sent'))
+    expectTabState('Sent', 'active')
+    expectTabState('Drafts', 'inactive')
+  })
+
+  it('ends a local selection when the tab the URL matches changes', () => {
+    const router = mixedRouter()
+    const inboxRoute = ref('/inbox')
+    const Harness = defineComponent({
+      render: () =>
+        h(Tabs, null, () => [
+          h(TabList, { variant: 'underline' }, () => [
+            h(TabTrigger, {
+              value: 'inbox',
+              label: 'Inbox',
+              route: inboxRoute.value,
+            }),
+            h(TabTrigger, { value: 'sent', label: 'Sent', route: '/sent' }),
+            h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+          ]),
+        ]),
+    })
+
+    cy.wrap(router.push('/sent'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    expectTabState('Drafts', 'active')
+
+    // Repointing Inbox at the URL already showing makes Inbox the matched tab
+    // — it comes first in document order. No navigation happens here, so the
+    // path test cannot see it; the matched tab changing has to end the click
+    // on its own.
+    cy.then(() => {
+      inboxRoute.value = '/sent'
+    })
+    expectTabState('Inbox', 'active')
+    expectTabState('Drafts', 'inactive')
+    cy.then(() => {
+      expect(router.currentRoute.value.fullPath).to.equal('/sent')
+    })
+  })
+
+  it('keeps a local selection when a navigation does not land', () => {
+    const router = mixedRouter()
+    router.beforeEach((to) => to.path !== '/sent')
+    mountMixedAt(router, '/inbox')
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    expectTabState('Drafts', 'active')
+
+    // An aborted navigation changed nothing the user can see, so it must not
+    // throw away what they picked.
+    cy.then(() => router.push('/sent'))
+    expectTabState('Drafts', 'active')
+    cy.then(() => {
+      expect(router.currentRoute.value.fullPath).to.equal('/inbox')
+    })
+
+    // Neither does a duplicate push of the URL already showing.
+    cy.then(() => router.push('/inbox'))
+    expectTabState('Drafts', 'active')
+  })
+
+  it('hands selection back when a routed trigger the route already matches is clicked', () => {
+    const router = mixedRouter()
+    mountMixedAt(router, '/inbox')
+
+    cy.contains('[role=tab]', 'Drafts').click()
+    expectTabState('Drafts', 'active')
+
+    // The URL is already `/inbox`, so this click is a duplicate navigation
+    // and never lands. The click itself has to end the override.
+    cy.contains('[role=tab]', 'Inbox').click()
+    expectTabState('Inbox', 'active')
+    expectTabState('Drafts', 'inactive')
+    cy.then(() => {
+      expect(router.currentRoute.value.fullPath).to.equal('/inbox')
+    })
+  })
+
+  it('leaves a bound model alone when the route changes', () => {
+    const router = mixedRouter()
+    const onUpdate = cy.stub().as('update')
+    const Harness = defineComponent({
+      render: () =>
+        h(
+          Tabs,
+          { modelValue: 'drafts', 'onUpdate:modelValue': onUpdate },
+          () => [
+            h(TabList, { variant: 'underline' }, () => [
+              h(TabTrigger, {
+                value: 'inbox',
+                label: 'Inbox',
+                route: '/inbox',
+              }),
+              h(TabTrigger, { value: 'drafts', label: 'Drafts' }),
+            ]),
+          ],
+        ),
+    })
+
+    // A bound model turns route mode off entirely: navigation neither
+    // changes the selection nor emits.
+    cy.wrap(router.push('/inbox'))
+    cy.mount(Harness, { global: { plugins: [router] } })
+    expectTabState('Drafts', 'active')
+
+    cy.then(() => router.push('/inbox?filter=unread'))
+    expectTabState('Drafts', 'active')
+    cy.then(() => router.push('/sent'))
+    expectTabState('Drafts', 'active')
+    cy.get('@update').should('not.have.been.called')
+  })
+
   it('skips disabled triggers with the keyboard and on click', () => {
     cy.mount(Tabs, {
       props: {

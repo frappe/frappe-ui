@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   PopoverAnchor,
   PopoverContent,
@@ -195,7 +195,9 @@ function onInteractOutside(event: Event) {
 }
 const uid = Math.random().toString(36).slice(2, 9)
 
-const isOpen = ref(false)
+// Seeded from the prop, so a parent that mounts the picker with `open` already
+// true gets an open panel. The watch below only sees later changes.
+const isOpen = ref(props.open === true)
 
 // Canonical 24-hour value (`HH:mm` or `HH:mm:ss`) — the source of truth.
 const canonicalValue = ref<string>(
@@ -522,14 +524,26 @@ function scrollOnOpen() {
   })
 }
 
+function onOpened() {
+  highlightIndex.value = -1
+  scrollOnOpen()
+}
+
 watch(isOpen, (open) => {
   emit('update:open', open)
   if (open) {
-    highlightIndex.value = -1
-    scrollOnOpen()
+    onOpened()
   } else {
     isTyping.value = false
   }
+})
+
+// A picker mounted with `open` already true never crosses the watch above, so
+// the open-time work — the highlight seed and the scroll to the current value —
+// runs here instead. No `update:open`: the parent is the one that asked for an
+// open panel.
+onMounted(() => {
+  if (isOpen.value) onOpened()
 })
 
 watch(

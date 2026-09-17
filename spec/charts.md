@@ -118,10 +118,11 @@ A chart with one measure and no value axis takes `format` at the chart level,
 because there is one unit and nowhere else to put it: the donut, the funnel, the
 heatmap and the number card.
 
-A measure with no axis of its own takes the chart-level formatter too. That is
-what `ScatterChartProps.format` is for — the size column sits on no scale, so
-the two axis formatters have nothing to say about it. Its two coordinates still
-format from `xAxis` and `yAxis`.
+The scatter carries both. `ScatterChartProps.format` prints every number the
+chart shows — x, y and size — and `xAxis.format` and `yAxis.format` override it
+on their own axis. The chart-level one is the fallback because the size column
+sits on no scale, so no axis formatter can reach it; an axis that states its own
+units overrides the fallback there.
 
 `tooltipColumns[].format` is the one other place, and it is the same rule: a
 tooltip column is drawn on no axis, so it carries its own.

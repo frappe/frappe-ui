@@ -182,8 +182,28 @@ nothing, gets the muted disabled styling and a `data-disabled` attribute. It
 also does not count for `MultiSelect`'s Select All. An option that becomes
 disabled while selected stays selected — it only stops being interactive.
 
-`loading` on `Combobox` and `MultiSelect` swaps the results for a loading
-state. `Select` has no `loading`; its list is static.
+`loading` tells the picker a fetch is in flight. `Select` has no `loading`; its
+list is static.
+
+`Combobox` replaces the results with a loading row for as long as `loading` is
+true, in both trigger modes.
+
+`MultiSelect` splits on whether the search row is showing.
+
+- With the search row visible — the default — a spinner appears in it, to the
+  right of the input, and the options you passed keep rendering and stay
+  selectable. The user can go on picking from the previous results while the
+  next ones arrive.
+- With `hideSearch`, there is no search row to put the spinner in, so the
+  loading row replaces the results the way `Combobox`'s does.
+
+Both components suppress the empty state while `loading` is true, so an
+in-flight fetch never reads as "No results".
+
+These are the defaults, and they are what `1.0.0` ships. Making the choice
+configurable is deferred: any later prop has to leave both defaults as they
+are. In the meantime the popover carries `data-loading` while loading, so an
+app that wants a different treatment can style one.
 
 `emptyText` sets the copy shown when there is nothing to display, and `#empty`
 replaces it entirely — it receives `{ query }` on the two searchable
@@ -242,14 +262,15 @@ without replacing anything:
 | `item-prefix` | the row's leading region |
 | `item-label` | the row's label region |
 | `item-suffix` | the row's trailing region |
-| `loading` | the loading indicator |
+| `loading` | the loading row that replaces the results |
 | `empty` | the empty state |
 | `footer` | the pinned footer below the list |
 
 Not every component renders every part. `Select` has no search box, so it emits
-no `search`, `input`, `loading`, `group`, or `group-label`. `item-list-row` and
-`item-prefix` come from `ItemListRow`, which the pickers render inside rather
-than own.
+no `search`, `input`, `loading`, `group`, or `group-label`. `MultiSelect` emits
+`loading` only under `hideSearch`; its search-row spinner is inside `search`
+and carries no marker of its own. `item-list-row` and `item-prefix` come from
+`ItemListRow`, which the pickers render inside rather than own.
 
 `trigger` belongs to this family only (INP-Q10). `Select`, `Combobox` and
 `MultiSelect` render a box that shows the selection and opens the popover, and
@@ -299,9 +320,16 @@ labelling it would freeze it into this contract.)
 Grouping `Select` later would be additive and would use the same
 `{ group, options }` shape.
 
-All three share `size` (`sm`/`md`/`lg`/`xl`), `variant`
-(`subtle`/`outline`/`ghost`), `placeholder`, `disabled`, `emptyText`, the
+All three share `size`, `variant`, `placeholder`, `disabled`, `emptyText`, the
 labeling props, and the four positioning props.
+
+`size` is `InputSize` from
+[`src/composables/inputTypes.ts`](../src/composables/inputTypes.ts) —
+`xs | sm | md | lg`, the 24/28/32/40px scale every text-style input uses.
+`Combobox` and `MultiSelect` re-export it under their own names,
+`ComboboxSize` and `MultiSelectSize`, so a consumer can name the type without
+reaching past the component. `variant` is `InputVariant`:
+`subtle | outline | ghost`.
 
 ## Select
 

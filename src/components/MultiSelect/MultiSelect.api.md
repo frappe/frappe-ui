@@ -70,7 +70,7 @@
   },
   {
     name: 'loading',
-    description: 'Replaces the results with a loading state.',
+    description: 'Marks a fetch as in flight. With the search row showing, a spinner appears\nin it and the options you passed stay selectable; under `hide-search` a\nloading row replaces the results instead.',
     required: false,
     type: 'boolean',
     default: 'false'

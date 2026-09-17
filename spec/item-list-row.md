@@ -43,8 +43,14 @@ Those concerns belong to the higher-level component that composes the row.
 ### Shared types
 
 ```ts
-type ItemListSize = 'sm' | 'md' | 'lg' | 'xl'
+type ItemListSize = InputSize
 ```
+
+`ItemListSize` is `InputSize` from
+[`src/composables/inputTypes.ts`](../src/composables/inputTypes.ts) under the
+row's own name: `xs | sm | md | lg`, the 24/28/32/40px scale. The rows a
+selection menu is built from have to line up with the trigger above them, so
+the two cannot drift apart. The row implements all four values.
 
 `ItemListSize` is exported and reused by the higher-level selection
 components so that their `size` prop maps cleanly to the row size.

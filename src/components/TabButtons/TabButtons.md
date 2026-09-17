@@ -64,6 +64,33 @@ items.
 
 <ComponentPreview name="TabButtons-PrefixSuffix" />
 
+## Template ref
+
+`focus()` is the one method every focusable control in the library exposes. It
+moves focus to the selected option, or to the first enabled one when nothing is
+selected — the same tab a `Tab` press reaches, since the group is one tabstop.
+It takes the native `FocusOptions`, so `focus({ preventScroll: true })` moves
+focus without scrolling the tab into view.
+
+Disabled options are skipped. A group with no options, or with every option
+disabled, has nothing to focus and the call does nothing.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const view = useTemplateRef('view')
+
+function reset() {
+  view.value?.focus()
+}
+</script>
+
+<template>
+  <TabButtons ref="view" v-model="value" :options="options" />
+</template>
+```
+
 ## Styling a single tab
 
 Each tab exposes data-attribute hooks for styling:

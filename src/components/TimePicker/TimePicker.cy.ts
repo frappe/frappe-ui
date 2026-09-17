@@ -420,4 +420,84 @@ describe('TimePicker', () => {
       cy.get('input').should('not.have.attr', 'aria-controls')
     })
   })
+
+  // A parent that mounts a picker with `open` already true gets an open panel.
+  // The prop is only watched for changes, so the initial value used to be
+  // dropped (plans/001, step 1).
+  describe('initial open state', () => {
+    it('mounts open when `open` starts true', () => {
+      cy.mount(TimePicker, { props: { modelValue: '22:00', open: true } })
+
+      cy.get('[role=listbox]').should('exist')
+      cy.get('input').should('have.value', '22:00')
+      // The bound option is marked, and the list is scrolled to it rather than
+      // left at the top of the day.
+      cy.get('[role=option][aria-selected=true]').should('have.text', '22:00')
+      cy.get('[data-slot="content-body"]').should(($panel) => {
+        expect($panel[0].scrollTop).to.be.greaterThan(0)
+      })
+      // A panel that is merely displayed is not open: the trigger has to point
+      // at it too.
+      cy.get('input').should('have.attr', 'aria-expanded', 'true')
+      cy.get('input')
+        .invoke('attr', 'aria-controls')
+        .should('be.a', 'string')
+        .then((panelId) => {
+          cy.get(`#${panelId}`).should('have.attr', 'role', 'listbox')
+        })
+      // Mounting open follows no gesture, so the panel takes no focus.
+      cy.document().then((doc) => {
+        expect(
+          (doc.activeElement as HTMLElement | null)?.closest('[role=listbox]'),
+        ).to.equal(null)
+      })
+    })
+
+    it('stays closed when `open` starts false', () => {
+      cy.mount(TimePicker, { props: { modelValue: '22:00', open: false } })
+      cy.get('[role=listbox]').should('not.exist')
+      cy.get('input').should('have.attr', 'aria-expanded', 'false')
+    })
+
+    it('stays closed when `open` is omitted', () => {
+      cy.mount(TimePicker, { props: { modelValue: '22:00' } })
+      cy.get('[role=listbox]').should('not.exist')
+    })
+
+    it('follows the parent from false to true and back', () => {
+      cy.mount(TimePicker, {
+        props: { modelValue: '22:00', open: false },
+      }).then(({ wrapper }) => {
+        cy.get('[role=listbox]').should('not.exist')
+        cy.then(() => wrapper.setProps({ open: true }))
+        cy.get('[role=listbox]').should('exist')
+        cy.then(() => wrapper.setProps({ open: false }))
+        cy.get('[role=listbox]').should('not.exist')
+      })
+    })
+
+    it('still opens from the trigger with no `open` bound', () => {
+      cy.mount(TimePicker, { props: { modelValue: '22:00' } })
+      cy.get('input').click()
+      cy.get('[role=listbox]').should('exist')
+    })
+
+    it('emits no `update:open` while mounting open', () => {
+      cy.mount(TimePicker, {
+        props: {
+          modelValue: '22:00',
+          open: true,
+          'onUpdate:open': cy.spy().as('onUpdateOpen'),
+        },
+      })
+
+      cy.get('[role=listbox]').should('exist')
+      cy.get('@onUpdateOpen').should('not.have.been.called')
+
+      // The first emit is the picker's own close, so nothing looped on mount.
+      cy.get('[role=option]').eq(0).click()
+      cy.get('[role=listbox]').should('not.exist')
+      cy.get('@onUpdateOpen').should('have.been.calledOnceWith', false)
+    })
+  })
 })

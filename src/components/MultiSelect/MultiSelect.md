@@ -37,7 +37,9 @@ Use `#search-prefix` and `#search-suffix` to add content around the popover's se
 <ComponentPreview name="MultiSelect-SearchSlots" />
 
 ## Server Search
-Fetch options from a server as the user types. Bind `v-model:query`, debounce the request, and feed the results back into `:options`. The `:loading` prop swaps the result body for a loading state. Four things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, merge currently-selected items into the options array so chips stay resolvable after the query narrows the list, and clear the query yourself when the popover opens — see the note below on who owns it.
+Fetch options from a server as the user types. Bind `v-model:query`, debounce the request, and feed the results back into `:options`. Four things to watch for: pass `:filterable="false"` so the client doesn't substring-filter what the server already matched, drop stale responses with a request id so a slower earlier query can't overwrite the latest results, merge currently-selected items into the options array so chips stay resolvable after the query narrows the list, and clear the query yourself when the popover opens — see the note below on who owns it.
+
+The `:loading` prop shows a spinner in the search row and leaves the options you passed rendering and selectable, so the user can go on picking from the previous results while the next ones arrive. Under `hide-search` there is no search row to put the spinner in, so a loading row replaces the results instead. Either way the empty state is suppressed while loading, so an in-flight fetch never reads as "No results". The popover carries a bare `data-loading` attribute while the fetch is open, so you can style the wait yourself.
 
 <ComponentPreview name="MultiSelect-AsyncOptions" />
 
