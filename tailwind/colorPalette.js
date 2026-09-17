@@ -34,7 +34,8 @@ function mapShades(shades) {
 // Declared in the order Tailwind should emit their utilities. Key order in
 // `theme.colors` is CSS source order, so two colour utilities on the same
 // element resolve by it — which makes this list behaviour, not decoration.
-// Families in the export but not named here still land, after these.
+// Families in the export but not named here still land, after the two
+// overlay ramps that follow this list.
 const FAMILY_ORDER = [
   'gray',
   'blue',

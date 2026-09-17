@@ -13,9 +13,11 @@
  * swatch. The Tailwind-only shaping lives one layer up, in `colorPalette.js`
  * and `plugin.js`, and never leaks back down here.
  *
- * Exported through `frappe-ui/tailwind`, alongside the preset. That entry
- * point is build-time and pulls no Vue, so a Node script (codegen, docs,
- * a design tool) can read tokens without the component tree.
+ * Exported as `frappe-ui/tailwind/tokens`, its own entry point. It imports
+ * nothing but the JSON beside it, so a Node script (codegen, docs, a design
+ * tool) can read tokens with no bundler and no component tree. The preset at
+ * `frappe-ui/tailwind` cannot: it statically imports three Tailwind packages
+ * that plain Node does not resolve.
  *
  * Per ADR-0010 this surface is additive-only until 2.0.0: names may be added,
  * none may be renamed or removed.

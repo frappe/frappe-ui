@@ -32,8 +32,11 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..')
 const TOKENS_DIR = path.join(REPO_ROOT, '.figma-export')
 const OUT_DIR = __dirname
 
-// Figma file the export must come from, recorded in provenance.json so a
-// stale drop directory is visible in review rather than silently generated.
+// The Figma file the export is meant to come from. Figma's export carries no
+// file id anywhere, not even in manifest.json, so nothing here can check this
+// — it is a note recorded in provenance.json for whoever re-syncs next.
+// What does catch a stale drop is `inputs` below: a sha256 per file read, so
+// re-running against an older export moves those hashes in the diff.
 const FIGMA_FILE = 'kMYnZ9ougpSSQBdjZCgtdX'
 
 // Color families mirrored from Figma's "🔵 Colour primitives" collection.

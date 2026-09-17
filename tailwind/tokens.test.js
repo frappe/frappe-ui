@@ -1,5 +1,5 @@
 /**
- * The public token surface (`frappe-ui/tailwind`).
+ * The public token surface (`frappe-ui/tailwind/tokens`).
  *
  * The load-bearing rule here is the sentinel check: Tailwind's `<alpha-value>`
  * placeholder and the `color-mix` wrapper are compile-time artefacts that mean
