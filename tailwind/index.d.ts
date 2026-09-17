@@ -16,10 +16,7 @@ export default preset
  */
 export declare const content: string[]
 
-/**
- * The design tokens live at `frappe-ui/tailwind/tokens`, not here. This entry
- * statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
- * `@tailwindcss/typography`; the token module imports nothing. Reading a
- * token value must not cost three Tailwind packages, and only the token
- * module loads under plain Node.
- */
+// The design tokens live at `frappe-ui/tailwind/tokens`, not here. This entry
+// statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
+// `@tailwindcss/typography`, none of which resolve under plain Node. The
+// token module imports nothing but its own JSON and loads anywhere.

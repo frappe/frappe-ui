@@ -553,7 +553,7 @@ export * from './components/Button'
 
 Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.
 
-**Build-time and tooling entries are a separate category.** `tailwind`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
+**Build-time and tooling entries are a separate category.** `tailwind`, `tailwind/tokens`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
 
 **A build-time entry freezes additive-only at `1.0.0`.** Options, tokens, utilities, and compiler options may be *added* in a minor. Nothing may be renamed or removed before `2.0.0`.
 

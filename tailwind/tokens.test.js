@@ -49,7 +49,7 @@ describe('public surface', () => {
 
   it('imports nothing outside its own token JSON', () => {
     const src = readFileSync(new URL('./tokens.js', import.meta.url), 'utf8')
-    const specifiers = [...src.matchAll(/^import .* from '([^']+)'/gm)].map(
+    const specifiers = [...src.matchAll(/from\s+'([^']+)'/g)].map(
       (m) => m[1],
     )
     expect(specifiers.every((s) => s.startsWith('./tokens/'))).toBe(true)

@@ -55,7 +55,7 @@ function buildFontSize() {
 }
 
 // Focus ring utilities backed by `--focus-outline-*` CSS vars (theme-flipped
-// in colorPalette.js#generateEffectVariables). Implemented as `outline`, not
+// in tokens.js#cssVariables). Implemented as `outline`, not
 // box-shadow, so rings never collide with shadow/ring utilities on the same
 // element and survive forced-colors mode. The default ring is applied
 // globally via `:focus-visible` (see globalStyles); these utilities are for

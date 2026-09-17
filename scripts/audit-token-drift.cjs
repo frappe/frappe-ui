@@ -96,7 +96,8 @@ const FIGMA_DIR = '.figma-export'
 function figmaKeySet() {
   const light = path.join(FIGMA_DIR, 'Styles.Light.tokens.json')
   const dark = path.join(FIGMA_DIR, 'Styles.Dark.tokens.json')
-  if (!fs.existsSync(path.join(ROOT, light))) return null
+  const present = [light, dark].every((p) => fs.existsSync(path.join(ROOT, p)))
+  if (!present) return null
   const fl = loadJSON(light)
   const fd = loadJSON(dark)
   const set = {}
@@ -194,7 +195,8 @@ function main() {
   if (!figma) {
     console.log(
       `\n## 3. Legacy tokens (in code, absent from Figma) — skipped\n\n` +
-        `_no Figma export in \`${FIGMA_DIR}/\`; drop one there and re-run_`,
+        `_no Figma style export in \`${FIGMA_DIR}/\` (needs both ` +
+        `Styles.Light.tokens.json and Styles.Dark.tokens.json); drop one there and re-run_`,
     )
     return
   }

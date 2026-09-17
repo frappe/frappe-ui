@@ -666,7 +666,7 @@ const EXTENSIONS = new Set([
   '.vue', '.ts', '.tsx', '.js', '.jsx', '.md', '.css', '.scss', '.html',
 ])
 const SKIP_DIRS = new Set([
-  'node_modules', '.git', 'dist', 'cache', 'generated', 'espresso-v2-design-tokens',
+  'node_modules', '.git', 'dist', 'cache', 'generated',
 ])
 
 // Symlinks — directories and files alike — are followed only while their real

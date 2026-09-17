@@ -509,9 +509,10 @@ function shadowToCss(layers) {
 
 // The raw export is not committed, so the outputs alone cannot answer "which
 // export produced this?". Record the answer: the Figma file and a hash per
-// input file. A re-run against a stale drop directory then shows up as an
-// unchanged `inputs` block beside a changed output, instead of passing
-// silently.
+// input file. Re-running against a stale drop directory then moves those
+// hashes in the diff, instead of passing silently. The reverse reading holds
+// too: outputs that change while `inputs` stands still means a rule in this
+// file moved, not Figma.
 //
 // No date field: mtime survives neither `cp` nor a fresh clone, and a wrong
 // date is worse than none. The commit that carries this file is the date.
