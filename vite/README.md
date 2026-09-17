@@ -239,8 +239,10 @@ to install:
 [frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
 ```
 
-Only frappe-ui's own imports are stubbed. An app that imports a language package
-itself still fails its build, because nothing catches that one.
+Only frappe-ui's own imports are stubbed. The plugin finds that module by
+resolving `frappe-ui/code-editor` in your app, so an app file of its own at
+`src/code-editor/languages.js` is left alone, and so is a language package the
+app imports itself. Both still fail the build, because nothing catches those.
 
 ```javascript
 frappeui({ codeLanguages: false })

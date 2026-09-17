@@ -612,9 +612,10 @@ graph and an absent package ends the build (`Rollup failed to resolve import`)
 before `loadLanguage` runs. `frappe-ui/vite`'s `codeLanguages` plugin, on by
 default, replaces an absent package with a module that throws
 `Cannot find module '<pkg>'` when it is evaluated. The build then succeeds and
-the runtime error is the install hint above. It stubs frappe-ui's own imports
-only; an app that imports a language package itself still fails its build,
-because nothing catches that one.
+the runtime error is the install hint above. It stubs frappe-ui's own module
+only, found by resolving `frappe-ui/code-editor` in the app; an app that imports
+a language package itself still fails its build, because nothing catches that
+one.
 
 `loadLanguage` stays because two consumers already wrote the same
 key-to-language switch by hand: framework-ui's `Fields/fieldtypeToLanguage.ts`

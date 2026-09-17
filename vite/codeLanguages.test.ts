@@ -38,8 +38,25 @@ export async function loadLanguage(key) {
 }
 `
 
+/**
+ * A stand-in for the installed package. The plugin resolves
+ * `frappe-ui/code-editor` to find the module it stubs for, so the fixture has
+ * to carry the same subpath export the real package does.
+ */
+const FRAPPE_UI = {
+  'node_modules/frappe-ui/package.json': JSON.stringify({
+    name: 'frappe-ui',
+    version: '0.0.0',
+    type: 'module',
+    exports: { './code-editor': './src/molecules/code-editor/index.js' },
+  }),
+  'node_modules/frappe-ui/src/molecules/code-editor/index.js':
+    "export { loadLanguage } from './languages.js'",
+  'node_modules/frappe-ui/src/molecules/code-editor/languages.js': LANGUAGES,
+}
+
 const MAIN = `
-import { loadLanguage } from './code-editor/languages.js'
+import { loadLanguage } from 'frappe-ui/code-editor'
 window.load = loadLanguage
 `
 
@@ -66,10 +83,7 @@ async function bundle(root: string, plugins = [codeLanguages()]) {
 
 describe('codeLanguages', () => {
   it('builds when the language package is absent', async () => {
-    const root = project({
-      'src/main.js': MAIN,
-      'src/code-editor/languages.js': LANGUAGES,
-    })
+    const root = project({ 'src/main.js': MAIN, ...FRAPPE_UI })
 
     const code = await bundle(root)
 
@@ -79,10 +93,7 @@ describe('codeLanguages', () => {
   it('is the reason that build works', async () => {
     // Without the plugin the same project is the bug this fixes: Rollup
     // resolves the arm of the switch and ends the build.
-    const root = project({
-      'src/main.js': MAIN,
-      'src/code-editor/languages.js': LANGUAGES,
-    })
+    const root = project({ 'src/main.js': MAIN, ...FRAPPE_UI })
 
     await expect(bundle(root, [])).rejects.toThrow(
       /failed to resolve import "@codemirror\/lang-json"/i,
@@ -92,7 +103,7 @@ describe('codeLanguages', () => {
   it('leaves an installed package alone', async () => {
     const root = project({
       'src/main.js': MAIN,
-      'src/code-editor/languages.js': LANGUAGES,
+      ...FRAPPE_UI,
       'node_modules/@codemirror/lang-json/package.json': JSON.stringify({
         name: '@codemirror/lang-json',
         version: '0.0.0',
@@ -113,6 +124,32 @@ describe('codeLanguages', () => {
     // Nothing catches that one, so a build failure is the honest answer.
     const root = project({
       'src/main.js': "import '@codemirror/lang-json'",
+      ...FRAPPE_UI,
+    })
+
+    await expect(bundle(root)).rejects.toThrow(
+      /failed to resolve import "@codemirror\/lang-json"/i,
+    )
+  })
+
+  it("does not stub an app's own file of the same name", async () => {
+    // An app is free to keep its own `src/code-editor/languages.js`. Stubbing
+    // a package that file needs would hide a dependency it must install.
+    const root = project({
+      'src/main.js': "import './code-editor/languages.js'",
+      'src/code-editor/languages.js': LANGUAGES,
+      ...FRAPPE_UI,
+    })
+
+    await expect(bundle(root)).rejects.toThrow(
+      /failed to resolve import "@codemirror\/lang-json"/i,
+    )
+  })
+
+  it('does nothing when frappe-ui is not installed', async () => {
+    const root = project({
+      'src/main.js': "import './code-editor/languages.js'",
+      'src/code-editor/languages.js': LANGUAGES,
     })
 
     await expect(bundle(root)).rejects.toThrow(
@@ -123,10 +160,9 @@ describe('codeLanguages', () => {
   it('does not stub a package loadLanguage cannot reach', async () => {
     const root = project({
       'src/main.js': MAIN,
-      'src/code-editor/languages.js': LANGUAGES.replace(
-        'lang-json',
-        'lang-rust',
-      ),
+      ...FRAPPE_UI,
+      'node_modules/frappe-ui/src/molecules/code-editor/languages.js':
+        LANGUAGES.replace('lang-json', 'lang-rust'),
     })
 
     await expect(bundle(root)).rejects.toThrow(
