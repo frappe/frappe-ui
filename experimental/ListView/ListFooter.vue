@@ -4,7 +4,9 @@
       <slot name="left">
         <TabButtons
           v-model="pageLengthCount"
-          :buttons="pageLengthOptions.map((o) => ({ label: o, value: o }))"
+          :options="
+            pageLengthOptions.map((o) => ({ label: String(o), value: o }))
+          "
         />
       </slot>
       <slot name="right">
@@ -27,7 +29,7 @@
 </template>
 <script setup>
 import TabButtons from '#components/TabButtons/TabButtons.vue'
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -51,7 +53,9 @@ const pageLengthCount = computed({
   set: (value) => emit('update:modelValue', value),
 })
 
-const pageLengthOptions = ref(props.options.pageLengthOptions || [20, 50, 100])
+const pageLengthOptions = computed(
+  () => props.options.pageLengthOptions || [20, 50, 100],
+)
 
 const showLoadMore = computed(() => {
   return (

@@ -80,7 +80,7 @@ watch(mode, () => nextTick(readValues))
 
 <template>
   <div class="grid gap-14">
-    <TabButtons :buttons="modeButtons" v-model="mode" class="w-fit" />
+    <TabButtons :options="modeButtons" v-model="mode" class="w-fit" />
 
     <section
       v-for="ramp in RAMPS"
