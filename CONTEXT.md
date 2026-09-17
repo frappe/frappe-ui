@@ -5,10 +5,16 @@ the library's APIs, docs, and stories share — the canonical meaning of cross-c
 terms (`open`, `variant`, `theme`, `dismissible`, `atom`, …) and the names to avoid.
 
 The design **rules** that use this vocabulary live in [`PHILOSOPHY.md`](./PHILOSOPHY.md)
-(`P1`–`P14`). Per-component **API contracts** live in [`spec/`](./spec/) — this doc
+(`P1`–`P15`). Per-component **API contracts** live in [`spec/`](./spec/) — this doc
 defines terms, not APIs. Release execution and history live in
 [`v1-release/`](./v1-release/). The published docs in `docs/` are the vitepress site
 and host neither specs nor ADRs.
+
+[`spec/README.md`](./spec/README.md) ranks these documents and carries two rules
+that apply here too. A decision accepted later supersedes the older text, and has
+to be promoted into the spec — or into this file, when it is a name — rather than
+left in the thread that decided it. Shipped code is evidence of what a contract
+says, never the contract itself.
 
 ## Composition
 
@@ -177,8 +183,11 @@ Vocabulary for the editor; the API is specified in [`spec/editor.md`](./spec/edi
 **`frappe-ui/editor`** (subpath):
 The single subpath where the entire editor family lives — the `useEditor` engine,
 `Editor`, building-block components, kits, extensions, menu items, and presets. The
-only subsystem that exports from a subpath rather than top-level; there are no editor
-exports from top-level `frappe-ui`.
+whole family is there and nowhere else: root exports nothing from it. It is one of
+several runtime subpaths (`editor`, `list`, `charts`, `icons`, `experimental`),
+beside the build-time entries; what earns one is
+[ADR-0010](./spec/adr/0010-subpath-export-rule.md). The v0 `TextEditor` family sits
+on `frappe-ui/experimental`, not here.
 _Avoid_: importing the editor surface from `frappe-ui` (top-level); shipping ready-made
 assembled editors (`CommentEditor`/`RichTextEditor`) from the library.
 
@@ -201,10 +210,12 @@ given `items`. The unit of capability defaults and the tree-shaking boundary.
 `StarterKit`, `CommentKit`, `RichTextKit`, `InlineKit`.
 
 **format** (Editor family):
-The content-format axis of an editor: `'html' | 'json'` (default `'html'`), set on
-`Editor` or `useEditor`. Content flows through the unnamed `v-model` (P2); `format`
-decides whether it emits HTML strings or `JSONContent` objects — there is no separate
-`v-model:html`/`v-model:json`.
+The content-format axis of an editor: `'html' | 'json' | 'markdown'` (default
+`'html'`), set on `Editor` or `useEditor`. Content flows through the unnamed
+`v-model` (P2); `format` decides whether it emits an HTML string, a `JSONContent`
+object, or a Markdown string — there is no separate `v-model:html`/`v-model:json`.
+`'markdown'` needs the `Markdown` extension in `extensions`, which is why it is a
+separate import: a development build warns when it is missing.
 _Avoid_: type-sniffing modelValue at runtime; a boolean (`:json="true"`); separate
 v-models per format.
 

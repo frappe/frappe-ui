@@ -84,7 +84,7 @@ punctuation name or a named key when the shortcut has to work there.
 
 ```ts
 interface KeyboardShortcutConfig {
-  combo: KeyboardShortcutCombo
+  combo: MaybeRefOrGetter<KeyboardShortcutCombo>
   description: string
   group?: string // default 'General'
   handler?: (e: KeyboardEvent) => void
@@ -104,6 +104,12 @@ The exported type is a union of two shapes, so the compiler enforces the mode:
 
 `useKeyboardShortcut` returns `void`. Registrations are removed on unmount, and
 while the component is deactivated inside a `<KeepAlive>` tree.
+
+`combo` and `enabled` are both `MaybeRefOrGetter`, so a ref or a computed value
+works as well as a literal. The combo is read again on every keypress and every
+time the dialog lists the registry, so an app that lets the user rebind a
+shortcut changes the ref instead of re-registering. The value a ref carries is
+still `KeyboardShortcutCombo`, so the compile-time check stays.
 
 ### Hold mode
 
@@ -252,10 +258,10 @@ icons, `bg` mode draws them as text.
 Both the composable and the display read one grammar. They check it at different
 times, on purpose.
 
-| Surface               | `combo` type            | Check                                   |
-| --------------------- | ----------------------- | --------------------------------------- |
-| `useKeyboardShortcut` | `KeyboardShortcutCombo` | Compile time, plus a dev warning in JS  |
-| `KeyboardShortcut`    | `string`                | Runtime: renders as written, warns once |
+| Surface               | `combo` type                             | Check                                   |
+| --------------------- | ---------------------------------------- | --------------------------------------- |
+| `useKeyboardShortcut` | `MaybeRefOrGetter<KeyboardShortcutCombo>` | Compile time, plus a dev warning in JS  |
+| `KeyboardShortcut`    | `string`                                 | Runtime: renders as written, warns once |
 
 The config is strictly typed because a bad combo there fires nothing and says
 nothing. The display prop takes `string` because callers compute it: crm binds

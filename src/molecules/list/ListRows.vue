@@ -90,13 +90,19 @@ const { rows, wrapperProps, anchor } = useVirtualRows(
 // every row's value — even the virtualized ones that aren't mounted. Uses the
 // same `getItemValue` as the render `:key` and scoped `value` slot prop, so
 // row identity has one source.
-watch(
-  () => props.items,
-  (items) => {
-    context?.setAllValues(items.map((item, i) => getItemValue(item, i)))
-  },
-  { immediate: true },
+//
+// Deriving it through a computed keeps the two in step: the watcher then tracks
+// what identity is actually made of — the array's entries, the active `rowKey`,
+// and the item fields that key reads — so a push, a splice, a swapped entry, a
+// renamed id or a different `rowKey` all move the universe. Watching
+// `props.items` alone only sees the array swapped for another one, and an item
+// field nothing reads for identity stays untracked: this is not a deep watch.
+const itemValues = computed(() =>
+  props.items.map((item, i) => getItemValue(item, i)),
 )
+watch(itemValues, (values) => context?.setAllValues(values), {
+  immediate: true,
+})
 onBeforeUnmount(() => context?.setAllValues([]))
 
 function getItemValue(item: T, index: number) {

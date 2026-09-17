@@ -8,9 +8,10 @@ primitive built on reka-ui's `PopoverRoot`. It shares the positioning props
 (`side`, `align`, `offset`, `portalTo`) and the popover motion described in
 [`selection.md`](./selection.md).
 
-The hover-on-trigger behavior is split out into a separate `HoverCard`
-component (see [HoverCard split](#hovercard-split)); `Popover` keeps
-`trigger="hover"` working through `v1.x` as a deprecated alias.
+The hover-on-trigger behavior lives in a separate `HoverCard` component (see
+[HoverCard split](#hovercard-split)). `Popover`'s `trigger` prop now selects
+`click` or `manual`; `trigger="hover"` was removed before `1.0.0`, with no
+alias and no warning.
 
 ## Role
 
@@ -63,6 +64,9 @@ not clean enough to justify in this rebuild.
 
 ### Types
 
+The types live in `src/components/Popover/types.ts`. Read them there; the
+shape below is a summary.
+
 ```ts
 type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 type PopoverAlign = 'start' | 'center' | 'end'
@@ -72,53 +76,44 @@ interface PopoverProps {
   side?: PopoverSide
   align?: PopoverAlign
   offset?: number
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
   collisionPadding?: number
   dismissible?: boolean
+  autoFocus?: boolean
+  trigger?: 'click' | 'manual'
+  reference?: Element
   matchTriggerWidth?: boolean
   bare?: boolean
   arrow?: boolean
-
-  // --- deprecated, kept working through v1.x ---
-  /** @deprecated use `v-model:open` */
-  show?: boolean
-  /** @deprecated use `side` + `align`; split on '-', bare side => align 'center' */
-  placement?:
-    | 'top' | 'top-start' | 'top-end'
-    | 'right' | 'right-start' | 'right-end'
-    | 'bottom' | 'bottom-start' | 'bottom-end'
-    | 'left' | 'left-start' | 'left-end'
-  /** @deprecated use `dismissible` */
-  hideOnBlur?: boolean
-  /** @deprecated renamed to `matchTriggerWidth` */
-  matchTargetWidth?: boolean
-  /** @deprecated use the separate `HoverCard` component */
-  trigger?: 'click' | 'hover'
-  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (milliseconds) */
-  hoverDelay?: number
-  /** @deprecated only used with `trigger="hover"`; moved to HoverCard (milliseconds) */
-  leaveDelay?: number
-  /** @deprecated no class-injection; use data-slot CSS hooks */
-  popoverClass?: string | object | Array<string | object>
-  /** @deprecated motion is on by default; no-op */
-  transition?: 'default' | null
 }
 ```
 
 Defaults:
 
-- `open = false`
+- `open = undefined` — the popover is uncontrolled and starts closed. Bind
+  `open` and it becomes controlled: the popover shows what the parent says,
+  and `update:open` is a request the parent may decline
 - `side = 'bottom'`
 - `align = 'start'`
 - `offset = 4`
-- `portalTo = 'body'` — the fallback when neither the prop nor an embedding
-  host names a target. See [`portal-target.md`](./portal-target.md).
+- `portalTo` unset — the fallback when neither the prop nor an embedding
+  host names a target is `body`. See [`portal-target.md`](./portal-target.md).
 - `collisionPadding = 10`
-- `dismissible = true`
+- `dismissible = true` — covers both user dismiss channels, outside
+  interaction and `Escape`
+- `autoFocus = true` — when `false`, the content does not take focus on open,
+  so a panel driven by typing leaves the caret in the trigger's input
+- `trigger = 'click'` — `manual` does nothing on click; only `v-model:open`
+  opens and closes it, and the trigger gets no `aria-expanded` or
+  `aria-controls`
+- `reference` unset — the content is positioned against the trigger. Pass an
+  element to position against that instead, for a labelled field where the
+  panel should sit under the input row rather than under the description. It
+  works in both trigger modes
 - `matchTriggerWidth = false`
 - `bare = false` — when `true`, `#default` renders without the PopoverPanel shell
   (no background, border, shadow, rounding); the content brings its own surface.
-  Mirrors Dialog's `bare`. The deprecated `#body` slot maps to this behavior.
+  Mirrors Dialog's `bare`
 - `arrow = false` — when `true`, renders a reka `PopoverArrow` inside
   `PopoverContent`, styled `fill-surface-elevation-2` to match the shell.
   `data-slot="arrow"`.
@@ -131,8 +126,7 @@ State conventions:
 - visibility is controlled with `v-model:open`
 - `Popover` does not own any value/selection state
 - `matchTriggerWidth` sets `minWidth: var(--reka-popover-trigger-width)` on the
-  content (matches min width to the trigger, not a hard width); it keeps using
-  the same reka CSS variable as before
+  content (matches min width to the trigger, not a hard width)
 
 ### Emits
 
@@ -145,10 +139,12 @@ interface PopoverEmits {
 }
 ```
 
-- `update:open` is canonical and fires once per toggle (no double-emit)
-- `open` / `close` fire after the open state settles, matching the boolean
-- the old `update:show` is removed; the deprecated `show` prop is supported via
-  silent back-compat mapping (see below), not via a `update:show` emit
+- `update:open` is canonical and fires once per toggle (no double-emit). It is
+  the *request*, so it fires even when a controlled parent declines it
+- `open` / `close` report the state the popover actually reached. A controlled
+  parent that declines a request gets no `open` event, so nothing an `@open`
+  handler set up is left without its matching `@close`
+- `update:show` is removed, along with the `show` prop
 
 ### Slots
 
@@ -156,98 +152,74 @@ Guaranteed slot props:
 
 ```ts
 type PopoverSlotProps = {
-  open: () => void
+  open: boolean
+  setOpen: (value: boolean) => void
   close: () => void
-}
-
-// Deprecated #target preserves the old, wider contract:
-type PopoverTargetSlotProps = {
-  togglePopover: (flag?: boolean | Event) => void
-  updatePosition: () => void // no-op, kept for source compatibility
-  open: () => void
-  close: () => void
-  isOpen: boolean
 }
 ```
+
+`open` is the current state, not a method. `setOpen(value)` writes it and
+`close()` is shorthand for `setOpen(false)`. On `Popover` alone, `open` used to
+be a method; it is now the boolean, matching `Dropdown`, `Select`,
+`MultiSelect`, `HoverCard`, and `Sidebar`.
 
 Supported slots:
 
 - `#trigger="{ open, setOpen, close }"`
   - rendered via reka `PopoverTrigger` **as-child**: click, keyboard, and aria
-    wiring are automatic. Do **not** hand-wire `@click` here.
+    wiring are automatic. Do **not** hand-wire `@click` here. Under
+    `trigger="manual"` the trigger renders through a bare `Primitive` instead
+    and wires nothing.
 - `#default="{ open, setOpen, close }"`
   - panel content, rendered inside the standard `PopoverPanel` shell (or bare,
     with no shell, when the `bare` prop is set)
-- `#body` / `#body-main`
-  - compatibility aliases with the same `{ open, setOpen, close }` props. `#body` is a
-    full body override and renders **bare** (no shell), matching its v0 contract
-    — equivalent to `#default` + `bare`. `#body-main` renders inside the shell.
-- `#target="{ togglePopover, updatePosition, isOpen, open, close }"`
-  - **deprecated.** Rendered via reka `PopoverAnchor` **as-child** with the old
-    manual-wiring contract preserved: nothing is auto-wired, the consumer calls
-    `togglePopover` / `open` / `close` itself. `updatePosition` is a no-op.
 
 Exact slot rules:
 
-- `#trigger` wins over `#target`
-- `#default` wins over `#body`, which wins over `#body-main`
-- the deprecated `#target` keeps its manual contract so existing
-  `@click="togglePopover"` consumers do not double-toggle when migrated to a
-  real `PopoverTrigger`
-- the shell is provided by `PopoverPanel` for shelled content (`#default`
-  without `bare`, and `#body-main`). Bare content — `#default` + `bare`, or the
-  legacy `#body` override — renders directly in `PopoverContent` with no shell,
-  so consumers bringing their own surface don't get a panel-in-a-panel
+- these are the only two slots. `#target`, `#body`, and `#body-main` were
+  removed before `1.0.0`; see
+  [`migration.md`](../docs/content/docs/migration.md#popover-hovercard-tooltip)
+- the shell is provided by `PopoverPanel` for shelled content. With `bare`,
+  `#default` renders directly in `PopoverContent` with no shell, so consumers
+  bringing their own surface don't get a panel-in-a-panel
+- `<Popover>` does not inherit attributes: it renders no element of its own, so
+  a `class` on the component lands nowhere. Put it on the element inside
+  `#trigger`
 
 ### Exposed
 
 ```ts
-defineExpose<{ open: () => void; close: () => void }>()
+interface PopoverExposed {
+  open: () => void
+  close: () => void
+  /** The content element. `null` while the popover is closed. */
+  contentEl: HTMLElement | null
+}
 ```
 
-Only `open()` and `close()`. `togglePopover` / `updatePosition` remain
-slot-prop-only on the deprecated `#target` slot and are not exposed.
+`open()` and `close()` are no-ops when the popover is already in that state.
+`contentEl` is a property getter that reads the element on demand, so it is
+read-only for the caller and reports `null` while the content is unmounted.
 
-## Back-compat and precedence
-
-Rule (shared with the rest of the family):
-
-- when **both** the old and the new surface are bound, the **new one wins** and
-  a **one-time** dev warning fires (via `warnDeprecated`)
-- when **only the old** surface is bound, it is **silently** mapped to the new
-  one — no warning
-
-Mapping table:
-
-| Old surface | New surface | Mapping |
-|---|---|---|
-| `show` / `v-model:show` | `open` / `v-model:open` | direct |
-| `placement="bottom-start"` | `side="bottom"` + `align="start"` | split on `'-'`; bare side (e.g. `"bottom"`) → `align: "center"` |
-| `hideOnBlur` | `dismissible` | direct (same boolean meaning) |
-| `matchTargetWidth` | `matchTriggerWidth` | rename, same `--reka-popover-trigger-width` behavior |
-| `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) | `<HoverCard>` | keeps working; one-time warn points at `HoverCard`. Delays use **milliseconds**. |
-| `popoverClass` | `data-slot` CSS hooks | no-op + warn |
-| `transition="default"` | default motion | no-op (motion is on by default) |
-| `#target` | `#trigger` | old manual contract preserved on `#target` |
-| `#body` | `#default` + `bare` | full override; renders bare (no shell) |
-| `#body-main` | `#default` | renders inside the shell |
-
-Use the existing `warnDeprecated(name, replacement, docHref?)` helper at
-`src/utils/warnDeprecated.ts`: it is a no-op in production, fires once per
-`name`, and has `_resetWarnDeprecated()` for tests.
-
-`placement` precedence detail: if `placement` is bound together with `side`
-and/or `align`, the explicit `side`/`align` win for whichever axis they set, and
-a one-time warning fires; if only `placement` is bound, it is split silently.
+**Unresolved:** `contentEl` does not fit the shared element policy in
+[`imperative-api.md`](./imperative-api.md). That policy names elements
+`<role>Element` from a fixed list (`inputElement`, `viewportElement`), rules out
+wrapper and content elements, and its table still records `Popover` as
+`{ open, close }`. `contentEl` is shipped, documented, and tested
+(`Popover.cy.ts`, "exposes contentEl, null while closed"). Either the policy
+grows a content-element role by ADR or the member goes through a deprecation —
+that decision is **pending**, and until it lands neither this spec nor
+`Popover.vue` changes.
 
 ## Styling hooks
 
-No class-injection props. `popoverClass` is a deprecated no-op (+ warn).
-Stable hooks instead:
+No class-injection props. `popoverClass` was removed before `1.0.0`. Stable
+hooks instead:
 
-- `data-slot="trigger"` — on the trigger element (`PopoverTrigger` /
-  deprecated `PopoverAnchor`)
-- `data-slot="content"` — on the `PopoverPanel` shell
+- `data-slot="trigger"` — on the trigger element
+- `data-slot="content"` — on the portaled reka `PopoverContent`
+- `data-slot="content-body"` — on the `PopoverPanel` shell that owns the visuals
+- `data-slot="arrow"` — on the arrow, when `arrow` is set
 - `data-state="open" | "closed"` — driven by the reka popover primitive
 - `data-motion="instant"` — on the content-body
 
@@ -268,7 +240,7 @@ instantly, with only a short fade to smooth the paint.
 - the rhythm is the same for pointer and keyboard opens; the content-body
   always carries `data-motion="instant"`
 - `prefers-reduced-motion: reduce` disables the content animation
-- `transition="default"` is a deprecated no-op (motion is on by default)
+- there is no motion prop. `transition` was removed before `1.0.0`
 
 A panel that appears at a fixed spot has nothing to scale from, so an entrance
 animation only adds latency. Every surface in the library uses this rhythm,
@@ -280,13 +252,23 @@ animation only adds latency. Every surface in the library uses this rhythm,
 
 - `#trigger` is a real `PopoverTrigger` with auto click/keyboard/aria wiring
   (`aria-expanded`, `aria-controls`, toggle on Enter/Space)
-- the deprecated `#target` is a `PopoverAnchor` with no auto wiring — the
-  consumer owns interaction, matching legacy behavior
+- `trigger="manual"` renders the trigger through a bare `Primitive` instead, so
+  there is no click toggle and no `aria-expanded` / `aria-controls`. A manual
+  popover needs its own pattern — the combobox wiring, say, or use `Combobox`,
+  which has it
+- the content is a reka `PopoverContent` with `role="dialog"`. There is no
+  automatic `aria-describedby` between trigger and content; label the content
+  yourself when it needs one
 - focus management, escape handling, and outside-pointer dismissal are
   delegated to the reka popover primitive
-- `dismissible = false` prevents outside-interaction dismissal
-  (`onInteractOutside` → `preventDefault`); interacting with the trigger itself
-  is also prevented from triggering a close-then-reopen flicker
+- `autoFocus = false` cancels reka's focus-on-open (`onOpenAutoFocus` →
+  `preventDefault`) so the caret stays in a trigger the user is typing in
+- `dismissible = false` prevents both dismiss channels: outside interaction
+  (`onInteractOutside` → `preventDefault`) and `Escape`
+  (`onEscapeKeyDown` → `preventDefault`). Wiring only the first left
+  `:dismissible="false"` closing on `Escape` anyway
+- interacting with the trigger itself never dismisses from outside, so the
+  trigger's own toggle decides the final state with no close-then-reopen flicker
 
 ## HoverCard split
 
@@ -294,48 +276,48 @@ A separate `<HoverCard>` component is built on reka `HoverCard` primitives. It
 owns hover-reveal behavior and deletes the hand-rolled timer code from the
 legacy `Popover`:
 
-- `hoverDelay` / `leaveDelay` in **milliseconds** (consistent with `Tooltip`)
+- `hoverDelay` / `leaveDelay` in **milliseconds** (consistent with `Tooltip`),
+  both defaulting to `300`
 - standard `side` / `align` / `offset` / `portalTo` / `collisionPadding`
 - renders content inside the shared `PopoverPanel` shell
 
-On `Popover`, `trigger="hover"` (plus `hoverDelay` / `leaveDelay`) keeps working
-through `v1.x` with a one-time `warnDeprecated` pointing at `HoverCard`.
+`trigger="hover"` on `Popover` was removed, not aliased. See
+[`hover-card.md`](./hover-card.md).
 
-## Keep supported in v1.x
+## Current public surface
 
-These stay supported:
-
-- `v-model:open`
+- `v-model:open`, `@open` / `@close`
 - `side`, `align`, `offset`, `portalTo`, `collisionPadding`
-- `dismissible`
-- `matchTriggerWidth`
+- `dismissible`, `autoFocus`, `trigger`, `reference`
+- `matchTriggerWidth`, `bare`, `arrow`
 - `#trigger`, `#default`
-- deprecated-but-working: `show`, `placement`, `hideOnBlur`, `matchTargetWidth`,
-  `trigger="hover"` (+ `hoverDelay` / `leaveDelay`), `popoverClass`,
-  `transition`, `#target`, `#body`, `#body-main`
-- `@open` / `@close` emits
+- template ref: `open()`, `close()`, `contentEl`
 
-## Deprecate
+## Removed before `1.0.0`
 
-Keep working, but deprecate:
+Removed under [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md). There
+is no alias and no warning: Vue drops an unknown prop or slot silently, so
+check every `<Popover>` in an app. The before/after table lives in
+[`migration.md`](../docs/content/docs/migration.md#popover-hovercard-tooltip).
 
-- `show` / `v-model:show` → `v-model:open`
-- `placement` → `side` + `align`
+- `show` / `v-model:show` and the `update:show` emit → `v-model:open`
+- `placement` and the `PopoverPlacement` type → `side` + `align`
 - `hideOnBlur` → `dismissible`
 - `matchTargetWidth` → `matchTriggerWidth`
-- `trigger="hover"` → `<HoverCard>`
+- `trigger="hover"` (+ `hoverDelay` / `leaveDelay`) → `<HoverCard>`, with the
+  delays now in milliseconds
 - `popoverClass` → `data-slot` CSS hooks
-- `transition` → default motion (no-op)
-- `#target` → `#trigger`
-- `#body` / `#body-main` → `#default`
+- `transition` → built-in motion
+- `#target` → `#trigger`; `#body` → `#default` + `bare`; `#body-main` →
+  `#default`
+- the `togglePopover` and `updatePosition` slot props → `setOpen`; reka
+  repositions on its own
+- the `isOpen` slot prop → `open`, which is now the boolean
+- `NestedPopover` → `Popover`
 
-Do **not** deprecate:
+## Migration path (historical)
 
-- `side`, `align`, `offset`, `portalTo`, `collisionPadding`
-- `dismissible`
-- `@open` / `@close`
-
-## Migration path
+These before-examples use the removed v0 API on purpose.
 
 ### Trigger: `#target` + manual wiring → `#trigger`
 
@@ -366,8 +348,8 @@ New:
 ```
 
 The `#trigger` slot is an as-child `PopoverTrigger`: drop the `@click`. Keeping
-`@click="togglePopover"` on `#trigger` would double-toggle — that wiring belongs
-only on the deprecated `#target` slot.
+`@click="togglePopover"` on `#trigger` would double-toggle: the handler and
+reka's own toggle cancel each other and the panel stays shut.
 
 ### Controlled visibility
 
@@ -397,11 +379,14 @@ Old:
 New:
 
 ```vue
-<HoverCard :hover-delay="0.5" :leave-delay="0.5">
+<HoverCard :hover-delay="500" :leave-delay="500">
   <template #trigger>...</template>
   <template #default>...</template>
 </HoverCard>
 ```
+
+v0's delays were seconds. `HoverCard`'s are milliseconds, so multiply by 1000:
+`0.5` becomes `500`.
 
 ### Custom panel chrome via `popoverClass` → CSS hooks
 
@@ -414,14 +399,38 @@ Old:
 New: target the stable hook instead of injecting a class.
 
 ```css
-[data-slot='content'] {
+[data-slot='content-body'] {
   width: 16rem;
 }
 ```
 
 ## Changelog
 
+### 2026-09-17
+
+Spec corrections only. No runtime behavior changed.
+
+- **The v0 API is removed, not deprecated.** This spec promised `show`,
+  `placement`, `hideOnBlur`, `matchTargetWidth`, `trigger="hover"`,
+  `popoverClass`, `transition`, `#target`, `#body`, and `#body-main` would keep
+  working through `v1.x`. ADR-0008 postdates that promise and wins. The old
+  names now appear only in the labelled historical examples.
+- **The slot `open` is a boolean.** The slot-props block typed it as a method.
+  `setOpen` writes the state; `close()` is `setOpen(false)`.
+- **`autoFocus`, `trigger="manual"`, and `reference` are documented.** All
+  three shipped without reaching this spec.
+- **`contentEl` is documented, and its conflict with the shared element policy
+  is recorded as unresolved.**
+- **`dismissible` covers `Escape` as well as outside interaction.**
+- **The styling hooks name the right elements.** `data-slot="content"` is the
+  portaled reka content; the shell is `data-slot="content-body"`.
+- **No automatic `aria-describedby`.** The content is `role="dialog"`; nothing
+  wires a description onto the trigger.
+
 ### v1.0.0 rebuild
+
+*Historical. This entry was written while the old API was still planned as a
+deprecated alias; the aliases were dropped before `1.0.0` shipped.*
 
 - **Rebuilt on reka `PopoverTrigger` (as-child).** `#trigger` auto-wires click,
   keyboard, and aria; no more manual `togglePopover` on the trigger.

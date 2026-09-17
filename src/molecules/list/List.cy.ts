@@ -295,6 +295,28 @@ describe('List (select all)', () => {
       })
   })
 
+  it('follows a selection array the consumer mutates in place', () => {
+    // Membership is read off a Set derived from `selection`, so the derivation
+    // has to track the array's contents, not just the array identity.
+    const { selection } = mountSelectAll()
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'false',
+    )
+    cy.then(() => {
+      selection.value.push('1', '2', '3')
+    })
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'true',
+    )
+    cy.get('[data-slot=list-row]')
+      .first()
+      .should('have.attr', 'data-selected', 'true')
+  })
+
   it('clicking mixed promotes to all selected', () => {
     const { selection } = mountSelectAll(['2'])
     cy.get('[data-slot=list-header-checkbox]')
@@ -387,6 +409,215 @@ describe('List (select all)', () => {
       .click()
       .then(() => {
         expect([...selection.value].sort()).to.deep.equal(['1', '2', '3'])
+      })
+  })
+})
+
+describe('List (select all, changing items)', () => {
+  // The select-all universe is derived from the same row identities the rows
+  // render with, so it has to follow every way `items` can change: a push or
+  // splice into the array already passed, an entry swapped in place, an id
+  // mutated on an item, a different rowKey, or a wholly new array. Each mount
+  // here keeps one `ref` array, so the prop the component sees never changes
+  // identity.
+  type LiveItem = { id: string; code?: string }
+
+  function mountLive(options: {
+    items: LiveItem[]
+    selection?: string[]
+    rowKey?: string
+  }) {
+    const selection = ref<string[]>(options.selection ?? [])
+    const items = ref<LiveItem[]>(options.items)
+    const rowKey = ref<string | undefined>(options.rowKey)
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [
+            h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+            h(
+              ListRows,
+              { items: items.value, rowKey: rowKey.value },
+              {
+                default: ({ value }: { value: string }) =>
+                  h(ListRow, { value }, () => h(ListCell, () => value)),
+              },
+            ),
+          ],
+        ),
+    })
+    return { selection, items, rowKey }
+  }
+
+  function header() {
+    return cy.get('[data-slot=list-header-checkbox]')
+  }
+
+  it('covers a row pushed into the same array', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+    })
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+
+    cy.then(() => items.value.push({ id: '3' }))
+    // The pushed row is unselected, so "all" has to fall back to "some".
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '3'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+  })
+
+  it('drops a spliced-out row from the universe, keeping its selected value', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }, { id: '3' }],
+      selection: ['3'],
+    })
+    header().should('have.attr', 'aria-checked', 'mixed')
+
+    cy.then(() => items.value.splice(2, 1))
+    // Nothing that is still listed is selected.
+    header().should('have.attr', 'aria-checked', 'false')
+    // Selection is the consumer's — the removed row's value stays in it.
+    cy.then(() => expect(selection.value).to.deep.equal(['3']))
+
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.deep.equal(['3', '1', '2'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+  })
+
+  it('follows an entry replaced in place', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }, { id: '3' }],
+    })
+    cy.then(() => items.value.splice(1, 1, { id: '9' }))
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '3', '9'])
+      })
+  })
+
+  it('follows a mutated identity field', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+      selection: ['1'],
+    })
+    header().should('have.attr', 'aria-checked', 'mixed')
+
+    cy.then(() => (items.value[0].id = '7'))
+    // '1' no longer names a listed row.
+    header().should('have.attr', 'aria-checked', 'false')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '7'])
+      })
+  })
+
+  it('follows a rowKey change', () => {
+    const { selection, rowKey } = mountLive({
+      items: [
+        { id: '1', code: 'a' },
+        { id: '2', code: 'b' },
+      ],
+      selection: ['a'],
+    })
+    // Keyed by id, 'a' is not a row value at all.
+    header().should('have.attr', 'aria-checked', 'false')
+
+    cy.then(() => (rowKey.value = 'code'))
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['a', 'b'])
+      })
+  })
+
+  it('follows a wholly replaced array', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+    })
+    cy.then(() => (items.value = [{ id: '4' }, { id: '5' }]))
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['4', '5'])
+      })
+  })
+
+  it('keeps the whole item list in the universe while virtualization hides rows', () => {
+    const selection = ref<string[]>([])
+    const items = ref(
+      Array.from({ length: 100 }, (_, i) => ({ id: String(i + 1) })),
+    )
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'virtual-viewport',
+          },
+          h(
+            List,
+            {
+              selectable: true,
+              rowHeight: 40,
+              columns: ['minmax(0,1fr)'],
+              selection: selection.value,
+              'onUpdate:selection': (next: string[]) =>
+                (selection.value = next),
+            },
+            () => [
+              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+              h(
+                ListRows,
+                { items: items.value, virtual: true },
+                {
+                  default: ({ value }: { value: string }) =>
+                    h(ListRow, { value }, () => h(ListCell, () => value)),
+                },
+              ),
+            ],
+          ),
+        ),
+    })
+
+    cy.get('[data-slot=list-row]').should('have.length.lessThan', 100)
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.have.length(100)
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+
+    // A row appended while it is out of the rendered window still joins the
+    // universe, so select-all reaches it.
+    cy.then(() => items.value.push({ id: '101' }))
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.have.length(101)
+        expect(selection.value).to.include('101')
       })
   })
 })

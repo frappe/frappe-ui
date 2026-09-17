@@ -90,7 +90,11 @@ export interface MultiSelectProps extends InputLabelingProps {
   /** Hides the in-popover search input. */
   hideSearch?: boolean
 
-  /** Replaces the results with a loading state. */
+  /**
+   * Marks a fetch as in flight. With the search row showing, a spinner appears
+   * in it and the options you passed stay selectable; under `hide-search` a
+   * loading row replaces the results instead.
+   */
   loading?: boolean
 
   /**

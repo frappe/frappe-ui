@@ -129,8 +129,13 @@ if (import.meta.env.DEV) {
   )
 }
 
+// Membership is asked once per rendered row and once per universe entry on
+// every select-all recompute, so scanning the `selection` array each time costs
+// rows x selection. The Set is rebuilt only when `selection` itself changes.
+const selectionSet = computed(() => new Set(selection.value))
+
 function isSelected(value: string) {
-  return selection.value.includes(value)
+  return selectionSet.value.has(value)
 }
 
 function toggleSelection(value: string) {
@@ -157,9 +162,11 @@ function setAllValues(values: string[]) {
 const selectAllState = computed<'none' | 'some' | 'all'>(() => {
   const universe = allValues.value
   if (!universe.length) return 'none'
-  const selectedCount = universe.filter((value) =>
-    selection.value.includes(value),
-  ).length
+  const selected = selectionSet.value
+  let selectedCount = 0
+  for (const value of universe) {
+    if (selected.has(value)) selectedCount++
+  }
   if (selectedCount === 0) return 'none'
   return selectedCount === universe.length ? 'all' : 'some'
 })

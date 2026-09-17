@@ -9,6 +9,64 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Pickers — `open` is honored at mount (breaking, silent)
+
+`DatePicker`, `DateRangePicker`, `DateTimePicker` and `TimePicker` seeded their
+own open state to `false` and only watched `open` for later changes, so a parent
+that mounted one with `open` already `true` got a closed panel.
+
+The initial value is now read on the first render, and the panel opens fully
+initialized: the calendar shows the bound date, `TimePicker` scrolls to the bound
+time, and the trigger's `aria-controls` points at the panel. Mounting open emits
+no `update:open`, and it moves no focus: the panel is on the page from the first
+render, so focus stays wherever you put it. Opening the panel later still moves
+focus into it when the trigger is a custom `#trigger`.
+
+- **Behavior change:** if you passed `open` as a constant `true` and relied on it
+  being ignored, the panel now opens. Drop the prop or bind it to your own state.
+- `open: true` together with `disabled: true` shows the panel, matching the
+  controlled path that already bypassed the disabled guard. The imperative
+  `open()` is still a no-op while disabled.
+
+### List — select-all follows items that change in place (fix)
+
+`<ListRows>` refreshed the header's select-all universe only when `items` was
+replaced with a different array. A row pushed in or spliced out, an entry swapped
+in place, a mutated id, or a changed `rowKey` left select-all working from stale
+values — checking rows that were gone and missing rows that were there. It now
+tracks the same identities the rows render with.
+
+Selection itself is still yours: a removed row's value stays in
+`v-model:selection` until you drop it.
+
+### Tabs — a clicked tab clears when the route leaves its page (fix)
+
+In route mode, clicking a non-route tab selects it until the route moves. "Moves"
+was read as "a different tab matches", so opening a child route under one routed
+tab — `/inbox` → `/inbox/42` — left the clicked tab selected on a page it does
+not stand for. A navigation that lands on a different path now clears it too.
+
+- A navigation that did not land keeps the clicked tab: aborted by a guard,
+  cancelled by a newer navigation, or a duplicate of the URL already showing. A
+  redirect clears it, because the redirect target lands.
+- **The trade:** a query-only or hash-only navigation that keeps the same tab
+  matched — `/inbox` → `/inbox?page=2` — no longer clears the click. A panel
+  that keeps its own state in the URL writes exactly that, and clearing there
+  threw the user out of the panel they were standing in. A matched-tab change
+  with no navigation behind it — a trigger's `route` prop changing, or a routed
+  trigger mounting that matches the current URL — does still clear it.
+- Tabs still works with no router installed; the listener is registered only when
+  a router is present and is removed on unmount.
+
+### TabButtons — `focus()` on the component ref
+
+A template ref now exposes `focus(options?)`, the method every focusable control
+in the library shares. It focuses the selected option, or the first enabled one
+when nothing is selected. Disabled options are skipped, including `route` and
+`href` options that render disabled, and a group with no options or with every
+option disabled does nothing. `FocusOptions` is forwarded, `preventScroll`
+included. The type is exported as `TabButtonsExposed`.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of

@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
@@ -92,9 +92,12 @@ const emit = defineEmits<{
   /** Signal that the parent should move keyboard focus into the popover
    *  content (e.g. into a calendar grid). Fired:
    *  - When the user presses ↓ on the trigger.
-   *  - When the popover opens with a custom trigger (no `TextInput` to type
-   *    into, so focus should jump straight into the content).
-   *  The default trigger keeps focus on the `TextInput` for typing. */
+   *  - When a gesture opens the popover and the trigger is a custom one (no
+   *    `TextInput` to type into, so focus should jump straight into the
+   *    content).
+   *  The default trigger keeps focus on the `TextInput` for typing. A shell
+   *  that is already open on its first render never fires this: nobody asked
+   *  for focus to move. */
   (e: 'requestFocus'): void
 }>()
 
@@ -174,19 +177,27 @@ const triggerSlotProps = computed<PickerShellTriggerSlotProps>(() => ({
 
 const hasCustomTrigger = computed(() => !!slots.trigger)
 
+// `moveFocus` is false on the mount path. Every other route into `onOpened`
+// follows a gesture, and a panel the user just opened should take focus; a
+// panel that is simply part of the first render follows no gesture, so moving
+// focus would take it from wherever the page put it.
+function onOpened(moveFocus = true) {
+  emit('open')
+  nextTick(() => {
+    panelId.value = popoverRef.value?.contentEl?.id || undefined
+  })
+  // Custom triggers (e.g. a button) have no typing context — once the
+  // popover is open the user wants to interact with the content. Signal
+  // the parent to move focus there. The default `TextInput` trigger
+  // keeps its focus so the user can type, and only the explicit ↓
+  // handler emits `requestFocus`.
+  if (moveFocus && hasCustomTrigger.value) emit('requestFocus')
+}
+
 watch(open, (val, prev) => {
   if (val === prev) return
   if (val) {
-    emit('open')
-    nextTick(() => {
-      panelId.value = popoverRef.value?.contentEl?.id || undefined
-    })
-    // Custom triggers (e.g. a button) have no typing context — once the
-    // popover is open the user wants to interact with the content. Signal
-    // the parent to move focus there. The default `TextInput` trigger
-    // keeps its focus so the user can type, and only the explicit ↓
-    // handler emits `requestFocus`.
-    if (hasCustomTrigger.value) emit('requestFocus')
+    onOpened()
   } else {
     // Restore focus to the trigger input if the popover content had focus
     // (Esc, date selection in auto-close mode). Click-outside leaves focus
@@ -200,6 +211,16 @@ watch(open, (val, prev) => {
       nextTick(() => textInputRef.value?.focus())
     }
   }
+})
+
+// A shell mounted with `open` already true never crosses the watch above, so
+// the open-time work — the panel id behind `aria-controls`, the parent's draft
+// initialization — runs here instead. No `update:open`: the parent is the one
+// that asked for an open panel. Focus stays put: the default trigger does not
+// take focus at mount either, because `:auto-focus="false"` cancels reka's
+// mount autofocus, and a page has no way to know the panel was coming.
+onMounted(() => {
+  if (open.value) onOpened(false)
 })
 
 defineExpose<PickerShellExposed>({

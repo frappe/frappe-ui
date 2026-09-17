@@ -114,7 +114,9 @@ defineSlots<DatePickerSlots>()
 // ── Popover open state ───────────────────────────────────────────────────────
 
 const shellRef = ref<PickerShellExposed | null>(null)
-const isOpen = ref(false)
+// Seeded from the prop, so a parent that mounts the picker with `open` already
+// true gets an open panel. The watch below only sees later changes.
+const isOpen = ref(props.open === true)
 
 watch(
   () => props.open,
