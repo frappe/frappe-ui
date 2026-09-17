@@ -607,15 +607,18 @@ loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@co
 The precedent is commit `33bd680`, which declared the vitepress entry's
 transitive imports as optional peers for the same reason.
 
-The ten imports are literal, so Rollup resolves all ten while it builds the
-graph and an absent package ends the build (`Rollup failed to resolve import`)
-before `loadLanguage` runs. `frappe-ui/vite`'s `codeLanguages` plugin, on by
-default, replaces an absent package with a module that throws
-`Cannot find module '<pkg>'` when it is evaluated. The build then succeeds and
-the runtime error is the install hint above. It stubs frappe-ui's own module
-only, found by resolving `frappe-ui/code-editor` in the app; an app that imports
-a language package itself still fails its build, because nothing catches that
-one.
+The ten imports are literal, so Vite resolves all ten ahead of time. An absent
+package ends the production build (`Rollup failed to resolve import`) and ends
+`vite dev`, which exits during dependency pre-bundling (`Error during dependency
+optimization`), both before `loadLanguage` runs. `frappe-ui/vite`'s
+`codeLanguages` plugin, on by default, replaces an absent package with a module
+that throws `Cannot find module '<pkg>'` when it is evaluated. It covers the
+Rollup graph through `resolveId` and pre-bundling through an esbuild twin in
+`optimizeDeps.esbuildOptions.plugins`, which is the only hook that step runs.
+The build and the dev server then succeed and the runtime error is the install
+hint above. It stubs frappe-ui's own module only, found by resolving
+`frappe-ui/code-editor` in the app; an app that imports a language package
+itself still fails its build, because nothing catches that one.
 
 `loadLanguage` stays because two consumers already wrote the same
 key-to-language switch by hand: framework-ui's `Fields/fieldtypeToLanguage.ts`

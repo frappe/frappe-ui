@@ -22,12 +22,33 @@
  * resolving `frappe-ui/code-editor` in the app rather than by its path. An app
  * that imports `@codemirror/lang-sql` itself still fails its build, which is the
  * honest answer: nothing guards that import.
+ *
+ * The same job has to be done twice. `resolveId` covers the Rollup graph, which
+ * is the production build and every dev request the server transforms. It
+ * cannot cover Vite's dependency pre-bundling: that step is esbuild, and it
+ * resolves through `vite:resolve` alone, with no user plugin hooks. `frappe-ui`
+ * is a bare specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent
+ * language there does not degrade — esbuild fails the optimize step and the dev
+ * server exits:
+ *
+ *     Error during dependency optimization:
+ *     ✘ [ERROR] Could not resolve "@codemirror/lang-json"
+ *
+ * So the plugin also contributes an esbuild twin through
+ * `optimizeDeps.esbuildOptions.plugins`, which does the same resolve-then-stub
+ * with esbuild's hooks.
  */
 
 import { dirname, join } from 'node:path'
 
-/** The ten packages `loadLanguage` can reach, and nothing else. */
-const OPTIONAL_LANGUAGES = new Set([
+/**
+ * The ten packages `loadLanguage` can reach, and nothing else. A language added
+ * to `languages.ts` and not added here leaves the plugin silently short, and
+ * this repo would not notice: it carries all ten as devDependencies. The test
+ * reads the set out of `languages.ts` and compares it, which is why this is
+ * exported.
+ */
+export const OPTIONAL_LANGUAGES = new Set([
   '@codemirror/lang-css',
   '@codemirror/lang-html',
   '@codemirror/lang-javascript',
@@ -41,6 +62,19 @@ const OPTIONAL_LANGUAGES = new Set([
 ])
 
 const VIRTUAL_PREFIX = '\0frappe-ui:absent-language:'
+
+/** esbuild has no `\0` convention; it separates virtual modules by namespace. */
+const NAMESPACE = 'frappe-ui-absent-language'
+
+/** Marks a `build.resolve` call as ours, so the hook does not re-enter itself. */
+const SKIP = 'frappeuiCodeLanguages'
+
+/** The module body a stub gets. Evaluating it is the missing package. */
+function stub(pkg) {
+  // The message matches Node's and Vite's own wording for a module that is not
+  // there, because that is what happened.
+  return `throw new Error(${JSON.stringify(`Cannot find module '${pkg}'`)})\n`
+}
 
 /** Drop the query Vite appends, the extension, and Windows separators. */
 function moduleKey(id) {
@@ -102,12 +136,71 @@ export function codeLanguages() {
 
     load(id) {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null
-      const pkg = id.slice(VIRTUAL_PREFIX.length)
-      // The message matches Node's and Vite's own wording for a module that is
-      // not there, because that is what happened.
-      return `throw new Error(${JSON.stringify(
-        `Cannot find module '${pkg}'`,
-      )})\n`
+      return stub(id.slice(VIRTUAL_PREFIX.length))
+    },
+
+    config() {
+      return { optimizeDeps: { esbuildOptions: { plugins: [esbuildTwin()] } } }
+    },
+  }
+}
+
+/**
+ * The pre-bundling half. Same rule, esbuild's hooks: stub a language package
+ * that does not resolve, but only for frappe-ui's own `languages` module.
+ */
+function esbuildTwin() {
+  return {
+    name: 'frappeui-code-languages',
+    setup(build) {
+      let languagesModule
+
+      /** frappe-ui's `languages` module, or `null` if frappe-ui is absent. */
+      async function resolveLanguagesModule() {
+        if (!languagesModule) {
+          languagesModule = build
+            .resolve('frappe-ui/code-editor', {
+              kind: 'import-statement',
+              resolveDir: build.initialOptions.absWorkingDir ?? process.cwd(),
+              pluginData: { [SKIP]: true },
+            })
+            .then(({ path, errors }) =>
+              path && errors.length === 0
+                ? join(dirname(moduleKey(path)), 'languages').replace(
+                    /\\/g,
+                    '/',
+                  )
+                : null,
+            )
+            .catch(() => null)
+        }
+        return languagesModule
+      }
+
+      build.onResolve({ filter: /^@codemirror\/lang-/ }, async (args) => {
+        if (args.pluginData?.[SKIP]) return null
+        if (!OPTIONAL_LANGUAGES.has(args.path) || !args.importer) return null
+        if (moduleKey(args.importer) !== (await resolveLanguagesModule())) {
+          return null
+        }
+
+        // `build.resolve` reports the absence in `errors` and does not raise
+        // it, so asking is safe. Its errors are ours to report or drop.
+        const resolved = await build.resolve(args.path, {
+          kind: args.kind,
+          importer: args.importer,
+          resolveDir: dirname(args.importer),
+          pluginData: { [SKIP]: true },
+        })
+        if (resolved.path && resolved.errors.length === 0) return null
+
+        return { path: args.path, namespace: NAMESPACE }
+      })
+
+      build.onLoad({ filter: /.*/, namespace: NAMESPACE }, (args) => ({
+        contents: stub(args.path),
+        loader: 'js',
+      }))
     },
   }
 }

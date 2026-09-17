@@ -7,9 +7,10 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { build, type RollupOutput } from 'vite'
+import { readFileSync, readdirSync } from 'node:fs'
+import { build, optimizeDeps, resolveConfig, type RollupOutput } from 'vite'
 import { afterAll, describe, expect, it } from 'vitest'
-import { codeLanguages } from './codeLanguages.js'
+import { codeLanguages, OPTIONAL_LANGUAGES } from './codeLanguages.js'
 
 const roots: string[] = []
 
@@ -185,4 +186,138 @@ describe('codeLanguages', () => {
   it('ignores an id it did not create', () => {
     expect(codeLanguages().load('/app/src/main.js')).toBeNull()
   })
+
+  it('covers every package languages.ts imports', () => {
+    // Two hardcoded lists have to agree. An eleventh language in `languages.ts`
+    // and not in the set would leave a consumer with the raw Rollup failure
+    // this plugin exists to prevent, and this repo would stay green: it carries
+    // all ten as devDependencies.
+    const source = readFileSync(
+      join(import.meta.dirname, '../src/molecules/code-editor/languages.ts'),
+      'utf8',
+    )
+    const imported = new Set(
+      [...source.matchAll(/'(@codemirror\/lang-[a-z]+)'/g)].map(
+        (match) => match[1],
+      ),
+    )
+
+    expect(imported.size).toBe(10)
+    expect([...imported].sort()).toEqual([...OPTIONAL_LANGUAGES].sort())
+  })
+})
+
+/**
+ * Vite pre-bundles bare specifiers with esbuild, and that step runs no Rollup
+ * plugin hooks. `frappe-ui/code-editor` is a bare specifier, so the optimizer
+ * reaches `languages.ts` on its own, and an absent package there kills the dev
+ * server instead of degrading. The plugin's esbuild twin covers it.
+ */
+describe('codeLanguages in dependency pre-bundling', () => {
+  async function optimize(root: string, plugins = [codeLanguages()]) {
+    const config = await resolveConfig(
+      {
+        root,
+        configFile: false,
+        logLevel: 'silent',
+        plugins,
+        optimizeDeps: {
+          include: ['frappe-ui/code-editor'],
+          // esbuild prints its own errors, and the failing case expects one.
+          esbuildOptions: { logLevel: 'silent' },
+        },
+      },
+      'serve',
+    )
+    return optimizeDeps(config, true)
+  }
+
+  /**
+   * Every chunk the optimizer wrote, concatenated. The directory comes off the
+   * metadata rather than from the root: a project without a `package.json`
+   * caches in `.vite`, not in `node_modules/.vite`.
+   */
+  function optimized(metadata: Awaited<ReturnType<typeof optimizeDeps>>) {
+    const dir = dirname(metadata.optimized['frappe-ui/code-editor'].file)
+    return readdirSync(dir)
+      .filter((name) => name.endsWith('.js'))
+      .map((name) => readFileSync(join(dir, name), 'utf8'))
+      .join('\n')
+  }
+
+  it('pre-bundles when the language package is absent', async () => {
+    const root = project(FRAPPE_UI)
+
+    const metadata = await optimize(root)
+
+    expect(Object.keys(metadata.optimized)).toContain('frappe-ui/code-editor')
+    expect(optimized(metadata)).toContain(
+      "Cannot find module '@codemirror/lang-json'",
+    )
+  }, 30000)
+
+  it('is the reason dev works', async () => {
+    // Without the twin, esbuild ends the optimize step and `vite dev` exits.
+    const root = project(FRAPPE_UI)
+
+    await expect(optimize(root, [])).rejects.toThrow(
+      /Could not resolve "@codemirror\/lang-json"/,
+    )
+  }, 30000)
+
+  it('leaves an installed package alone', async () => {
+    const root = project({
+      ...FRAPPE_UI,
+      'node_modules/@codemirror/lang-json/package.json': JSON.stringify({
+        name: '@codemirror/lang-json',
+        version: '0.0.0',
+        type: 'module',
+        main: 'index.js',
+      }),
+      'node_modules/@codemirror/lang-json/index.js':
+        "export const json = () => 'the real parser'",
+    })
+
+    const metadata = await optimize(root)
+
+    expect(optimized(metadata)).toContain('the real parser')
+    expect(optimized(metadata)).not.toContain(
+      "Cannot find module '@codemirror/lang-json'",
+    )
+  }, 30000)
+
+  it("does not stub another package's loader", async () => {
+    // The importer gate holds in the optimizer too: only frappe-ui's own
+    // module is stubbed, whatever a package names its files.
+    const root = project({
+      ...FRAPPE_UI,
+      'node_modules/other-ui/package.json': JSON.stringify({
+        name: 'other-ui',
+        version: '0.0.0',
+        type: 'module',
+        exports: { './code-editor': './src/molecules/code-editor/index.js' },
+      }),
+      'node_modules/other-ui/src/molecules/code-editor/index.js':
+        "export { loadLanguage } from './languages.js'",
+      'node_modules/other-ui/src/molecules/code-editor/languages.js': LANGUAGES,
+    })
+
+    const config = await resolveConfig(
+      {
+        root,
+        configFile: false,
+        logLevel: 'silent',
+        plugins: [codeLanguages()],
+        optimizeDeps: {
+          include: ['other-ui/code-editor'],
+          esbuildOptions: { logLevel: 'silent' },
+        },
+      },
+      'serve',
+    )
+
+    await expect(optimizeDeps(config, true)).rejects.toThrow(
+      /Could not resolve "@codemirror\/lang-json"/,
+    )
+  }, 30000)
 })

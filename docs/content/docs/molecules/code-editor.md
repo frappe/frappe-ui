@@ -339,17 +339,24 @@ A missing package throws an error that names the one to install:
 
 ### Building with only the packages you installed
 
-The ten imports are literal, so Rollup resolves every one of them while it
-builds the graph. A package you did not install ends the build before
-`loadLanguage` can say anything:
+The ten imports are literal, so Vite resolves every one of them ahead of time. A
+package you did not install ends the production build before `loadLanguage` can
+say anything:
 
 ```
 [vite]: Rollup failed to resolve import "@codemirror/lang-sql"
 ```
 
-frappe-ui's Vite plugin answers that. It replaces an absent package with a stub
-that throws when `loadLanguage` reaches it, so the build succeeds and the error
-is the install hint above.
+and it ends `vite dev`, which exits during dependency pre-bundling:
+
+```
+Error during dependency optimization:
+✘ [ERROR] Could not resolve "@codemirror/lang-sql"
+```
+
+frappe-ui's Vite plugin answers both. It replaces an absent package with a stub
+that throws when `loadLanguage` reaches it, so the build and the dev server
+succeed and the error is the install hint above.
 
 ```js
 // vite.config.js
