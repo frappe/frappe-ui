@@ -20,10 +20,12 @@ has shipped, each item checked against the source.
 
 *Historical:* the audit found 31 `defineExpose` calls across `src/`, four of
 them typed. The rest were written one component at a time with no shared rule,
-and it showed. Today `src/` has 39 calls: 32 declare their type at the call
-site, `Select` declares it on the object it publishes (§4), and six declare
+and it showed. Today `src/**/*.vue` has 39 calls: 32 declare their type at the
+call site, `Select` declares it on the object it publishes (§4), and six declare
 none — `Editor` (§4), `Popover` (which does export `PopoverExposed`),
-`PageHeaderTarget`, and the three editor suggestion lists.
+`PageHeaderTarget`, and the three editor suggestion lists. (Counted at
+`3069f6de`, on real call sites only: a plain text search also matches four
+comments that name `defineExpose`.)
 
 ## Not covered here
 
