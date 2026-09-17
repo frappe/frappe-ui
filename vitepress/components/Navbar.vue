@@ -4,10 +4,9 @@
 // shared Layout renders this in its `#navbar` slot by default; consumers can
 // inject extra controls via the `#actions` slot, swap the brand via `#brand`,
 // or replace search via `#search` — or override the whole `#navbar` slot.
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useData, withBase } from 'vitepress'
-import { Button, Select, useColorScheme } from 'frappe-ui'
-import type { ColorScheme } from 'frappe-ui'
+import { Button, useColorScheme } from 'frappe-ui'
 
 import Search from './Docs/Search.vue'
 
@@ -26,27 +25,37 @@ const docsLink = computed(
 // The header only needs a border once content sits behind it.
 const scrolled = ref(false)
 const onScroll = () => (scrolled.value = window.scrollY > 0)
+
+// Smart light/dark toggle: one click flips to the opposite of whatever theme is
+// currently showing, so it works even while following the system default.
+const { colorScheme, setColorScheme } = useColorScheme()
+
+const isDark = ref(false)
+const resolveDark = () => {
+  if (colorScheme.value === 'dark') return true
+  if (colorScheme.value === 'light') return false
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+}
+const syncDark = () => (isDark.value = resolveDark())
+watch(colorScheme, syncDark)
+
+function toggleTheme() {
+  setColorScheme(isDark.value ? 'light' : 'dark')
+}
+
+// Keep the icon in sync when following the system default and the OS flips.
+let media: MediaQueryList | undefined
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
+  syncDark()
+  media = window.matchMedia?.('(prefers-color-scheme: dark)')
+  media?.addEventListener?.('change', syncDark)
 })
-onUnmounted(() => window.removeEventListener('scroll', onScroll))
-
-// A picker rather than a light/dark toggle: `system` is the default scheme, and
-// a two-state toggle gives no way back to it once the reader has picked a side.
-const { colorScheme, setColorScheme } = useColorScheme()
-
-const themeOptions = [
-  { label: 'Light', value: 'light', icon: 'lucide-sun' },
-  { label: 'Dark', value: 'dark', icon: 'lucide-moon-star' },
-  { label: 'System', value: 'system', icon: 'lucide-monitor' },
-]
-
-const themeIcon = computed(
-  () =>
-    themeOptions.find((option) => option.value === colorScheme.value)?.icon ??
-    'lucide-monitor',
-)
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+  media?.removeEventListener?.('change', syncDark)
+})
 </script>
 
 <template>
@@ -111,22 +120,19 @@ const themeIcon = computed(
         </template>
       </Button>
 
-      <Select
-        :model-value="colorScheme"
-        :options="themeOptions"
-        size="sm"
-        aria-label="Theme"
-        side="bottom"
-        align="end"
-        class="!h-7 !w-7 !min-h-7 !px-0 !rounded-4 justify-center"
-        @update:model-value="
-          (value) => value && setColorScheme(value as ColorScheme)
-        "
+      <Button
+        variant="ghost"
+        :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+        @click="toggleTheme"
       >
-        <template #trigger>
-          <span :class="themeIcon" class="size-4" aria-hidden="true" />
+        <template #icon>
+          <span
+            :class="isDark ? 'lucide-moon-star' : 'lucide-sun'"
+            class="size-4"
+            aria-hidden="true"
+          />
         </template>
-      </Select>
+      </Button>
     </nav>
   </header>
 </template>
