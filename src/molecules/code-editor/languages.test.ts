@@ -50,14 +50,24 @@ describe('loadLanguage', () => {
     expect(state.doc.toString()).toBe('a')
   })
 
-  it.each(['plain', 'plaintext', 'rust', '', undefined, 'JSON'])(
-    'resolves %s to null rather than guessing',
-    async (key) => {
-      // Unknown keys are plain text, and the match is case-sensitive: Desk
-      // hands over `df.options` unnormalized.
-      await expect(loadLanguage(key)).resolves.toBeNull()
-    },
-  )
+  // `constructor` and `toString` come off `Object.prototype`: a `key in PACKAGES`
+  // guard lets them through, and they resolve to `undefined` rather than `null`.
+  it.each([
+    'plain',
+    'plaintext',
+    'rust',
+    '',
+    undefined,
+    'JSON',
+    'constructor',
+    'toString',
+    'valueOf',
+    'hasOwnProperty',
+  ])('resolves %s to null rather than guessing', async (key) => {
+    // Unknown keys are plain text, and the match is case-sensitive: Desk
+    // hands over `df.options` unnormalized.
+    await expect(loadLanguage(key)).resolves.toBeNull()
+  })
 
   it('maps scss to lang-sass in brace mode', async () => {
     // There is no `@codemirror/lang-scss`. `indented: false` is what selects

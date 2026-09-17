@@ -76,7 +76,11 @@ async function build(key: LanguageKey): Promise<Extension> {
  * reads it off `df.options`).
  */
 export async function loadLanguage(key?: string): Promise<Extension | null> {
-  if (!key || !(key in PACKAGES)) return null
+  // `Object.hasOwn`, not `key in PACKAGES`: `in` walks the prototype chain, so
+  // `constructor` and `toString` would pass the guard, match no `case` in
+  // `build`, and resolve to `undefined` instead of the promised `null`. Desk
+  // hands `df.options` over unnormalized.
+  if (!key || !Object.hasOwn(PACKAGES, key)) return null
   const languageKey = key as LanguageKey
   try {
     return await build(languageKey)
