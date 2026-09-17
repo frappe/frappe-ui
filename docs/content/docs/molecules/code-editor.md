@@ -369,7 +369,12 @@ There is no placeholder wrapper: `@codemirror/view` already exports
 
 ### Types
 
-`CodeEditorOptions`, `CodeEditorExposed`, `CodeKitOptions`, `LanguageKey`.
+`CodeEditorOptions`, `CodeEditorExposed`, `CodeKitOptions`, `CodeKitExtension`,
+`LanguageKey`.
+
+`CodeKitExtension` is what `CodeKit` and `CodeKit.configure()` are: an
+`Extension` with a `.configure()` on it. Annotate a variable, a prop or a
+factory return with it.
 
 ## Migration from `frappe-ui/experimental`
 

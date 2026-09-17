@@ -9,19 +9,20 @@ new subpath, `frappe-ui/code-editor`. It supersedes the field-shaped
 `CodeEditor` in `frappe-ui/experimental`.
 
 The decisions come from an audit of every code-editor call site in frappe
-(Desk), frappe's `ui/` package (`@framework/ui`), and builder.
-The architectural shape is decided in
+(Desk), frappe's `ui/` package (`@framework/ui`), and builder. The architectural
+shape is decided in
 [ADR-0019](./adr/0019-code-editor-family-composition-model.md), which applies
 [ADR-0004](./adr/0004-editor-family-composition-model.md)'s composition model to
-a second engine. The sibling document is [`editor.md`](./editor.md).
-Vocabulary is in [`../CONTEXT.md`](../CONTEXT.md); design rules cited as `P1`
-to `P15` live in [`../PHILOSOPHY.md`](../PHILOSOPHY.md).
+a second engine. The sibling document is [`editor.md`](./editor.md). Vocabulary
+is in [`../CONTEXT.md`](../CONTEXT.md); design rules cited as `P1` to `P15` live
+in [`../PHILOSOPHY.md`](../PHILOSOPHY.md).
 
 ## Scope
 
 This spec covers:
 
-- the `frappe-ui/code-editor` subpath surface (engine, component, content part, kit, extensions, language loader)
+- the `frappe-ui/code-editor` subpath surface (engine, component, content part,
+  kit, extensions, language loader)
 - the public API of `useCodeEditor`, `<CodeEditor>`, and `<CodeEditorContent>`
 - the three-layer styling model and its CSS custom-property hooks
 - the reactive `extensions` contract and the content commit model
@@ -30,23 +31,37 @@ This spec covers:
 
 Out of scope:
 
-- a labeled field. The Desk/FormLayout field lives in `@framework/ui` (`apps/frappe/ui`), not here
+- a labeled field. The Desk/FormLayout field lives in `@framework/ui`
+  (`apps/frappe/ui`), not here
 - `CodePreview`. It leaves frappe-ui with this change, see §16
-- the final CSS custom-property hook list. §11's table is provisional, see Open questions
+- the final CSS custom-property hook list. §11's table is provisional, see Open
+  questions
 
 ## Decision summary
 
-- one new subpath: `frappe-ui/code-editor`. Nothing at root, nothing on `frappe-ui/editor`
-- **no labeled field and no assembled editor**. The library ships the engine, the parts, the kit, and the extensions. Each app builds its own field
-- capability is a **required `extensions` array of raw CodeMirror `Extension` values**. No `language` prop, no feature booleans
-- CodeMirror is a **static** import in the engine. No `await import()` inside the library for the engine
-- `<CodeEditor>` is **renderless**. `<CodeEditorContent>` renders the box and appends `view.dom`. There are no menu parts, because CodeMirror owns its own DOM
+- one new subpath: `frappe-ui/code-editor`. Nothing at root, nothing on
+  `frappe-ui/editor`
+- **no labeled field and no assembled editor**. The library ships the engine,
+  the parts, the kit, and the extensions. Each app builds its own field
+- capability is a **required `extensions` array of raw CodeMirror `Extension`
+  values**. No `language` prop, no feature booleans
+- CodeMirror is a **static** import in the engine. No `await import()` inside
+  the library for the engine
+- `<CodeEditor>` is **renderless**. `<CodeEditorContent>` renders the box and
+  appends `view.dom`. There are no menu parts, because CodeMirror owns its own
+  DOM
 - `useCodeEditor` returns `ShallowRef<EditorView | null>` and nothing else
-- `extensions` is **reactive**. The engine re-applies it with a top-level `StateEffect.reconfigure`. No `Compartment` in the public API
-- styling is three independently removable layers: CodeMirror's base styles, the `codeChrome` extension, the `codeHighlight` extension. No `variant` prop, no `size` prop
-- content is the unnamed `v-model`. `update:modelValue` fires on every doc change, `change` fires on blur and is the commit point
-- `CodeKit` is one configurable bundle in the `.configure()` mold. It has eight members, and each is removable with `false`
-- the ten `@codemirror/lang-*` packages move from `dependencies` to optional `peerDependencies`. `loadLanguage(key)` still dynamic-imports them
+- `extensions` is **reactive**. The engine re-applies it with a top-level
+  `StateEffect.reconfigure`. No `Compartment` in the public API
+- styling is three independently removable layers: CodeMirror's base styles, the
+  `codeChrome` extension, the `codeHighlight` extension. No `variant` prop, no
+  `size` prop
+- content is the unnamed `v-model`. `update:modelValue` fires on every doc
+  change, `change` fires on blur and is the commit point
+- `CodeKit` is one configurable bundle in the `.configure()` mold. It has eight
+  members, and each is removable with `false`
+- the ten `@codemirror/lang-*` packages move from `dependencies` to optional
+  `peerDependencies`. `loadLanguage(key)` still dynamic-imports them
 
 **The governing principle: ship a small surface, grow it later.** Every name in
 the public surface freezes at the `1.0.0` tag. P15 states it: an export at
@@ -62,32 +77,33 @@ import {
   useCodeEditor,
 
   // Components
-  CodeEditor,         // renderless: owns the view, provides it, exposes it
-  CodeEditorContent,  // the box; appends view.dom
+  CodeEditor, // renderless: owns the view, provides it, exposes it
+  CodeEditorContent, // the box; appends view.dom
 
   // Kit: one configurable extension bundle
   CodeKit,
 
   // Individual extensions (each also a CodeKit member)
-  codeChrome,         // frappe chrome class + the CSS var contract
-  codeHighlight,      // frappe syntax colours (tags need an extension)
-  codeKeymap,         // Tab/Shift-Tab indent, Escape blurs
+  codeChrome, // frappe chrome class + the CSS var contract
+  codeHighlight, // frappe syntax colours (tags need an extension)
+  codeKeymap, // Tab/Shift-Tab indent, Escape blurs
 
   // Languages
-  loadLanguage,       // dynamic-imports the matching @codemirror/lang-* package
+  loadLanguage, // dynamic-imports the matching @codemirror/lang-* package
 
   // Types
   type CodeEditorOptions,
   type CodeEditorExposed,
   type CodeKitOptions,
+  type CodeKitExtension,
   type LanguageKey,
 } from 'frappe-ui/code-editor'
 ```
 
 frappe-ui re-exports nothing from CodeMirror. `Extension`, `EditorView`,
-`EditorState` and every language package are imported by the consumer from
-their own packages. `@codemirror/state` and `@codemirror/view` are direct
-dependencies of this subpath, so they are already installed.
+`EditorState` and every language package are imported by the consumer from their
+own packages. `@codemirror/state` and `@codemirror/view` are direct dependencies
+of this subpath, so they are already installed.
 
 There are three standalone extension exports, and they are frappe's own:
 `codeChrome`, `codeHighlight`, `codeKeymap`. frappe-ui ships no placeholder
@@ -102,9 +118,13 @@ There are no code-editor exports from top-level `frappe-ui` and none from
 [ADR-0010](./adr/0010-subpath-export-rule.md) earns a subpath on three limbs
 (P15). This family takes all three:
 
-- **(a) cost isolation.** The engine statically imports `@codemirror/state` and `@codemirror/view`. Root must not carry them.
-- **(b) extensible registry.** `extensions` accepts any CodeMirror `Extension`, including third-party ones the library never defined.
-- **(c) name collision.** `Editor`, `EditorContent`, `Extension`, `Compartment`, `Code` and `CodeBlock` already mean TipTap things at root and on `frappe-ui/editor`.
+- **(a) cost isolation.** The engine statically imports `@codemirror/state` and
+  `@codemirror/view`. Root must not carry them.
+- **(b) extensible registry.** `extensions` accepts any CodeMirror `Extension`,
+  including third-party ones the library never defined.
+- **(c) name collision.** `Editor`, `EditorContent`, `Extension`, `Compartment`,
+  `Code` and `CodeBlock` already mean TipTap things at root and on
+  `frappe-ui/editor`.
 
 ADR-0010's table currently records `frappe-ui/code-editor` as removed, on the
 basis that CodeMirror was entirely behind `await import()` and that `CodeEditor`
@@ -139,9 +159,9 @@ for the engine.
 The reason is that the deferral bought nothing. A consumer's `extensions` array
 imports `@codemirror/lang-sql` and friends at module scope, which pulls
 CodeMirror into that consumer's chunk anyway. The dynamic import only moved the
-cost, and it charged for it: today's implementation carries module-scope `let
-cmView` / `let cmState` handles, a `langSeq` staleness token for stale async
-language builds, and a window on every render where `view` is `null`.
+cost, and it charged for it: today's implementation carries module-scope
+`let cmView` / `let cmState` handles, a `langSeq` staleness token for stale
+async language builds, and a window on every render where `view` is `null`.
 
 Apps that want the bytes deferred defer the component, not the library:
 
@@ -158,20 +178,20 @@ and destroys the view on unmount.
 
 ```ts
 function useCodeEditor(options: {
-  content?: Ref<string>                              // two-way, see §8
-  extensions: MaybeRefOrGetter<Extension[]>          // REQUIRED, reactive
-  editable?: MaybeRefOrGetter<boolean>               // default true, reactive
-  autofocus?: boolean                                // construction-time
-  onUpdate?: (view: EditorView) => void              // every doc change
-  onChange?: (view: EditorView) => void              // blur, the commit point
+  content?: Ref<string> // two-way, see §8
+  extensions: MaybeRefOrGetter<Extension[]> // REQUIRED, reactive
+  editable?: MaybeRefOrGetter<boolean> // default true, reactive
+  autofocus?: boolean // construction-time
+  onUpdate?: (view: EditorView) => void // every doc change
+  onChange?: (view: EditorView) => void // blur, the commit point
   onFocus?: (view: EditorView, event: FocusEvent) => void
   onBlur?: (view: EditorView, event: FocusEvent) => void
 }): ShallowRef<EditorView | null>
 ```
 
-**Content binds as `content?: Ref<string>`.** This is decided, not a proposal. It
-mirrors `useEditor` on `frappe-ui/editor`. A getter plus a callback would diverge
-from the sibling family a second time for no benefit.
+**Content binds as `content?: Ref<string>`.** This is decided, not a proposal.
+It mirrors `useEditor` on `frappe-ui/editor`. A getter plus a callback would
+diverge from the sibling family a second time for no benefit.
 
 `extensions` is required. There is no implicit default list. Pass at least
 `[CodeKit]`, or hand-assemble. This is what keeps the engine free of baked-in
@@ -199,9 +219,9 @@ element of its own.
 const model = defineModel<string>()
 
 defineProps<{
-  extensions: Extension[]          // REQUIRED, reactive
-  editable?: boolean               // default true, reactive
-  autofocus?: boolean              // default false
+  extensions: Extension[] // REQUIRED, reactive
+  editable?: boolean // default true, reactive
+  autofocus?: boolean // default false
 }>()
 
 defineSlots<{
@@ -209,8 +229,8 @@ defineSlots<{
 }>()
 
 defineEmits<{
-  'update:modelValue': [value: string]   // every doc change
-  change: [value: string]                // blur: the commit point
+  'update:modelValue': [value: string] // every doc change
+  change: [value: string] // blur: the commit point
   focus: [event: FocusEvent]
   blur: [event: FocusEvent]
 }>()
@@ -220,8 +240,8 @@ defineEmits<{
 defineExpose<{ editor: ShallowRef<EditorView | null> }>()
 ```
 
-There is no `placeholder` prop. Placeholder text is a `CodeKit` member
-(§10), because capability travels in the extension array. Without the kit, pass
+There is no `placeholder` prop. Placeholder text is a `CodeKit` member (§10),
+because capability travels in the extension array. Without the kit, pass
 CodeMirror's own `placeholder('SELECT 1')` from `@codemirror/view`.
 
 The provide/inject mechanism is the one the editor family already uses
@@ -243,7 +263,7 @@ Class fallthrough is the normal root `class=""` binding, no class-name prop
 
 ```ts
 defineProps<{
-  editor?: EditorView | null       // optional: falls back to the injected view
+  editor?: EditorView | null // optional: falls back to the injected view
 }>()
 
 defineEmits<{
@@ -268,12 +288,12 @@ is two components long and the editor family's is seven.
 
 ## 7. Reactivity
 
-| Option | Reactive? | Notes |
-|---|---|---|
-| Content (`v-model`) | yes, two-way | the defining reactive surface, §8 |
-| `extensions` | yes | top-level `StateEffect.reconfigure` on change |
-| `editable` | yes | sugar over `EditorState.readOnly` + `EditorView.editable` |
-| `autofocus` | no | one-shot at mount |
+| Option              | Reactive?    | Notes                                                     |
+| ------------------- | ------------ | --------------------------------------------------------- |
+| Content (`v-model`) | yes, two-way | the defining reactive surface, §8                         |
+| `extensions`        | yes          | top-level `StateEffect.reconfigure` on change             |
+| `editable`          | yes          | sugar over `EditorState.readOnly` + `EditorView.editable` |
+| `autofocus`         | no           | one-shot at mount                                         |
 
 `extensions` is `MaybeRefOrGetter<Extension[]>`. The engine watches it and
 dispatches a single top-level reconfigure:
@@ -297,9 +317,9 @@ Desk picks the language at runtime from `df.options`, and Builder's
 ## 8. Content and the commit point
 
 Content is the primary value: the unnamed `v-model` on the component, a
-`Ref<string>` option on the composable (P2). The composable's binding is decided:
-`content?: Ref<string>`, mirroring `useEditor`. No benefit in diverging twice
-from the sibling family.
+`Ref<string>` option on the composable (P2). The composable's binding is
+decided: `content?: Ref<string>`, mirroring `useEditor`. No benefit in diverging
+twice from the sibling family.
 
 Two channels:
 
@@ -357,9 +377,9 @@ removed through `.configure()`:
 
 ```ts
 CodeKit.configure({
-  lineNumbers: {},                 // turn a default-off member on
-  placeholder: 'SELECT 1',         // member takes its text
-  autocompletion: false,           // remove a member
+  lineNumbers: {}, // turn a default-off member on
+  placeholder: 'SELECT 1', // member takes its text
+  autocompletion: false, // remove a member
   foldGutter: false,
 })
 ```
@@ -369,13 +389,28 @@ CodeKit.configure({
 `chrome` (`codeChrome`), `highlight` (`codeHighlight`), `keymap` (`codeKeymap`).
 
 - Members are removable with `false`.
-- Every member is typed with the real options type of the extension it wraps, so a misspelled key is a compile error. This is ADR-0004's 2026-09-15 amendment applied here.
-- `highlight` is the syntax-highlighting slot. It carries the frappe tag colours instead of CodeMirror's `defaultHighlightStyle`, so there is one member there, not two.
-- `keymap` is `codeKeymap`: Tab and Shift-Tab indent and dedent, Escape blurs the editor. Escape is a WCAG 2.1.2 obligation: without it a keyboard user who tabs into the editor cannot tab out.
-- Two defaults differ from `basicSetup`: `lineNumbers` is `false` (Builder's default, and what the Desk field shows), and `placeholder` carries no text.
-- The three frappe members are also exported standalone: `codeChrome`, `codeHighlight`, `codeKeymap`. Placeholder text gets no standalone export, because `@codemirror/view` already exports `placeholder()`. The kit still keeps a `placeholder` member, and that is not an oversight: the member takes text, while the standalone exports are extensions.
-- **Export names are camelCase values.** `codeChrome`, `codeHighlight` and `codeKeymap` match CodeMirror's own `lineNumbers()` and `history()`, not the editor family's PascalCase tiptap objects. `CodeKit` stays PascalCase, as a kit.
-- **`lint` is not a member.** That is what keeps `@codemirror/lint` an optional peer (§13), and it matches the JSON-lint non-goal in §14.
+- Every member is typed with the real options type of the extension it wraps, so
+  a misspelled key is a compile error. This is ADR-0004's 2026-09-15 amendment
+  applied here.
+- `highlight` is the syntax-highlighting slot. It carries the frappe tag colours
+  instead of CodeMirror's `defaultHighlightStyle`, so there is one member there,
+  not two.
+- `keymap` is `codeKeymap`: Tab and Shift-Tab indent and dedent, Escape blurs
+  the editor. Escape is a WCAG 2.1.2 obligation: without it a keyboard user who
+  tabs into the editor cannot tab out.
+- Two defaults differ from `basicSetup`: `lineNumbers` is `false` (Builder's
+  default, and what the Desk field shows), and `placeholder` carries no text.
+- The three frappe members are also exported standalone: `codeChrome`,
+  `codeHighlight`, `codeKeymap`. Placeholder text gets no standalone export,
+  because `@codemirror/view` already exports `placeholder()`. The kit still
+  keeps a `placeholder` member, and that is not an oversight: the member takes
+  text, while the standalone exports are extensions.
+- **Export names are camelCase values.** `codeChrome`, `codeHighlight` and
+  `codeKeymap` match CodeMirror's own `lineNumbers()` and `history()`, not the
+  editor family's PascalCase tiptap objects. `CodeKit` stays PascalCase, as a
+  kit.
+- **`lint` is not a member.** That is what keeps `@codemirror/lint` an optional
+  peer (§13), and it matches the JSON-lint non-goal in §14.
 
 **Everything else `basicSetup` carries stays in the kit as a fixed base.** A
 fixed-base extension is not a member and is not configurable: `history`,
@@ -406,9 +441,9 @@ documented right below.
 whether you used it. All three of these are first-class:
 
 ```ts
-extensions: [CodeKit, sql()]                        // the kit
-extensions: [basicSetup, sql()]                     // CodeMirror's own bundle
-extensions: [history(), keymap.of(defaultKeymap), sql(), myExtension]  // hand-assembled
+extensions: [CodeKit, sql()] // the kit
+extensions: [basicSetup, sql()] // CodeMirror's own bundle
+extensions: [history(), keymap.of(defaultKeymap), sql(), myExtension] // hand-assembled
 ```
 
 A configurable kit exists, rather than documentation pointing at `basicSetup`,
@@ -418,11 +453,11 @@ exactly why Builder hand-assembled 20 extensions in
 
 ## 11. Styling: three removable layers
 
-| Layer | Ships as | Removable by |
-|---|---|---|
-| CodeMirror base styles | CodeMirror itself | not removable, and not ours |
-| frappe chrome | the `codeChrome` extension | omitting the extension |
-| frappe syntax colours | the `codeHighlight` extension | omitting the extension |
+| Layer                  | Ships as                      | Removable by                |
+| ---------------------- | ----------------------------- | --------------------------- |
+| CodeMirror base styles | CodeMirror itself             | not removable, and not ours |
+| frappe chrome          | the `codeChrome` extension    | omitting the extension      |
+| frappe syntax colours  | the `codeHighlight` extension | omitting the extension      |
 
 **Nothing is ambient.** `codeChrome` adds one class to the editor's root and the
 package stylesheet scopes every frappe rule under it. If you do not pass the
@@ -438,15 +473,15 @@ so they are settable on the editor or on any ancestor:
 **This table is provisional.** This spec does not freeze it. The list is settled
 by the `@framework/ui` field spike, see Open questions.
 
-| Hook (provisional) | Controls |
-|---|---|
-| `--code-bg` | the surface behind the code |
-| `--code-border` | the box border colour |
-| `--code-radius` | the box corner radius |
-| `--code-focus-ring` | the focus ring colour |
-| `--code-font-size` | the code font size |
-| `--code-padding` | the content inset |
-| `--code-min-height` | the content min-height |
+| Hook (provisional)  | Controls                      |
+| ------------------- | ----------------------------- |
+| `--code-bg`         | the surface behind the code   |
+| `--code-border`     | the box border colour         |
+| `--code-radius`     | the box corner radius         |
+| `--code-focus-ring` | the focus ring colour         |
+| `--code-font-size`  | the code font size            |
+| `--code-padding`    | the content inset             |
+| `--code-min-height` | the content min-height        |
 | `--code-max-height` | the height cap that drives §9 |
 
 `--code-max-height` replaces today's `--cm-max-height`. The vendor-style `--cm-`
@@ -459,8 +494,13 @@ take the `--_code-` prefix and may change in any release. Today's
 consumer's wrapper applies:
 
 ```css
-.my-code-field[data-variant='outline'] { --code-border: var(--outline-gray-3); }
-.my-code-field[data-size='sm']        { --code-font-size: 12px; --code-padding: 6px 8px; }
+.my-code-field[data-variant='outline'] {
+  --code-border: var(--outline-gray-3);
+}
+.my-code-field[data-size='sm'] {
+  --code-font-size: 12px;
+  --code-padding: 6px 8px;
+}
 ```
 
 **Dark mode needs no reconfiguration at all.** Both the hooks and the highlight
@@ -498,7 +538,7 @@ view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: next } })
 view.setState(EditorState.create({ doc: next, extensions }))
 
 // open the search panel
-openSearchPanel(view)          // from @codemirror/search
+openSearchPanel(view) // from @codemirror/search
 ```
 
 **JSON linting.** The `json` language no longer welds a linter on. It is two
@@ -533,7 +573,8 @@ Keys, unchanged: `json`, `html`, `javascript`, `python`, `sql`, `markdown`,
 installs frappe-ui downloads all ten, whether or not it ever renders a code
 editor. `@codemirror/lint` moves with them, and it stays optional: `CodeKit` has
 no `lint` member and carries no `lintKeymap`, so the kit never imports
-`@codemirror/lint` (§10). Only an app that follows §12's lint recipe installs it.
+`@codemirror/lint` (§10). Only an app that follows §12's lint recipe installs
+it.
 
 `loadLanguage` fails with an error that names the package to install:
 
@@ -544,9 +585,9 @@ loadLanguage('sql') needs @codemirror/lang-sql. Install it: yarn add @codemirror
 The precedent is commit `33bd680`, which declared the vitepress entry's
 transitive imports as optional peers for the same reason.
 
-`loadLanguage` stays because two consumers already wrote the same key-to-language
-switch by hand: framework-ui's `Fields/fieldtypeToLanguage.ts` and Builder's
-`createCodeMirrorState.ts`.
+`loadLanguage` stays because two consumers already wrote the same
+key-to-language switch by hand: framework-ui's `Fields/fieldtypeToLanguage.ts`
+and Builder's `createCodeMirrorState.ts`.
 
 ## 14. Non-goals
 
@@ -554,16 +595,16 @@ Each of these is absorbed by the `extensions` array, which is why none of them
 is a library feature. The consumer named after each is the one that has it
 today.
 
-| Non-goal | Who has it | What they pass |
-|---|---|---|
-| vim / emacs keymaps | Desk (`User.code_editor_type`) | `@replit/codemirror-vim` |
-| server-fed completions | frappe (`get_autocompletion_items`), Builder (`builder.api.get_codemirror_completions`) | `autocompletion({ override })` |
-| a custom search panel | Builder (mounts a Vue component) | `search({ createPanel })` |
-| Ctrl-S save, Ctrl-Enter execute | Desk, Builder | `keymap.of([...])` |
-| indentation markers | Builder | a third-party extension |
-| JSON linting | framework-ui | §12's two-line recipe |
-| diff view | nobody | Desk's "Compare Versions" is server-computed HTML, not an editor feature |
-| multi-file tabs | nobody | Builder fakes it with `TabButtons` outside the editor |
+| Non-goal                        | Who has it                                                                              | What they pass                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| vim / emacs keymaps             | Desk (`User.code_editor_type`)                                                          | `@replit/codemirror-vim`                                                 |
+| server-fed completions          | frappe (`get_autocompletion_items`), Builder (`builder.api.get_codemirror_completions`) | `autocompletion({ override })`                                           |
+| a custom search panel           | Builder (mounts a Vue component)                                                        | `search({ createPanel })`                                                |
+| Ctrl-S save, Ctrl-Enter execute | Desk, Builder                                                                           | `keymap.of([...])`                                                       |
+| indentation markers             | Builder                                                                                 | a third-party extension                                                  |
+| JSON linting                    | framework-ui                                                                            | §12's two-line recipe                                                    |
+| diff view                       | nobody                                                                                  | Desk's "Compare Versions" is server-computed HTML, not an editor feature |
+| multi-file tabs                 | nobody                                                                                  | Builder fakes it with `TabButtons` outside the editor                    |
 
 JSON linting is the one deliberate regression. Today `buildLanguageExtension`
 welds `lintGutter()` and `linter(jsonParseLinter())` on whenever the language is
@@ -588,7 +629,10 @@ import { CodeEditor, CodeEditorContent, CodeKit } from 'frappe-ui/code-editor'
 
 const model = defineModel<string>()
 const props = defineProps<{
-  label?: string; description?: string; error?: string; required?: boolean
+  label?: string
+  description?: string
+  error?: string
+  required?: boolean
   language?: Extension
   variant?: 'subtle' | 'outline'
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -600,7 +644,9 @@ const extensions = computed(() => [CodeKit, props.language].filter(Boolean))
 
 function onChange(value: string) {
   if (!isJson.value) return
-  try { model.value = JSON.stringify(JSON.parse(value), null, 2) } catch {}
+  try {
+    model.value = JSON.stringify(JSON.parse(value), null, 2)
+  } catch {}
 }
 </script>
 
@@ -615,8 +661,11 @@ function onChange(value: string) {
       />
     </CodeEditor>
 
-    <Button v-if="overflowing" :label="expanded ? 'Collapse' : 'Expand'"
-            @click="expanded = !expanded" />
+    <Button
+      v-if="overflowing"
+      :label="expanded ? 'Collapse' : 'Expand'"
+      @click="expanded = !expanded"
+    />
     <p v-if="error">{{ error }}</p>
     <p v-else-if="description">{{ description }}</p>
   </div>
@@ -637,9 +686,13 @@ The full component lives in frappe/frappe, not here.
 the family lands. P14 allows this with no deprecation window: `experimental`
 carries no stability promise.
 
-- `CodeEditor` is replaced by this family. The field shape it had moves to `@framework/ui`.
-- `CodePreview` leaves frappe-ui entirely and becomes framework-ui's. It is a markdown renderer, not a code editor, and it never belonged to this family.
-- `marked` stays a frappe-ui dependency regardless, because `frappe-ui/editor`'s `ContentPaste` extension imports `markdownToHTML` from `src/utils/markdown.ts`.
+- `CodeEditor` is replaced by this family. The field shape it had moves to
+  `@framework/ui`.
+- `CodePreview` leaves frappe-ui entirely and becomes framework-ui's. It is a
+  markdown renderer, not a code editor, and it never belonged to this family.
+- `marked` stays a frappe-ui dependency regardless, because `frappe-ui/editor`'s
+  `ContentPaste` extension imports `markdownToHTML` from
+  `src/utils/markdown.ts`.
 
 **No codemod ships.** The only importer anywhere is framework-ui's
 `Fields/CodeEditorField.vue`, and it is rewritten by hand. That file currently
@@ -649,21 +702,22 @@ census must include frappe's `ui/` package) is what found it.
 
 What changes for that one call site:
 
-| v0 | v1 |
-|---|---|
-| `language="json"` | `:extensions="[CodeKit, json()]"` |
-| `variant` / `size` props | CSS var sets on the wrapper (§11) |
-| `placeholder="SELECT 1"` | `CodeKit.configure({ placeholder: 'SELECT 1' })` |
-| `label` / `description` / `error` / `required` | drawn by the app's field |
-| `--cm-max-height` | `--code-max-height` |
-| automatic JSON lint | §12's two-line recipe |
-| `@overflow` on the field | `@overflow` on `<CodeEditorContent>` |
+| v0                                             | v1                                               |
+| ---------------------------------------------- | ------------------------------------------------ |
+| `language="json"`                              | `:extensions="[CodeKit, json()]"`                |
+| `variant` / `size` props                       | CSS var sets on the wrapper (§11)                |
+| `placeholder="SELECT 1"`                       | `CodeKit.configure({ placeholder: 'SELECT 1' })` |
+| `label` / `description` / `error` / `required` | drawn by the app's field                         |
+| `--cm-max-height`                              | `--code-max-height`                              |
+| automatic JSON lint                            | §12's two-line recipe                            |
+| `@overflow` on the field                       | `@overflow` on `<CodeEditorContent>`             |
 
 ## Open questions
 
 One question is left, and it is blocked, not merely open.
 
-1. **The CSS custom-property hook list in §11 is provisional.** This spec does not freeze it.
+1. **The CSS custom-property hook list in §11 is provisional.** This spec does
+   not freeze it.
 
 It is settled by writing `@framework/ui`'s field against the family, and seeing
 which knobs `subtle` versus `outline`, and `xs|sm|md|lg`, actually need.
@@ -681,11 +735,17 @@ names (§10), and the composable's content binding (§4, §8).
 
 ## Related documents
 
-- [`editor.md`](./editor.md): the sibling family, same composition model, different engine
+- [`editor.md`](./editor.md): the sibling family, same composition model,
+  different engine
 - [`../PHILOSOPHY.md`](../PHILOSOPHY.md): design rules (P1 to P15)
 - [`../CONTEXT.md`](../CONTEXT.md): vocabulary
-- [`adr/0019-code-editor-family-composition-model.md`](./adr/0019-code-editor-family-composition-model.md): this family's architectural shape
-- [`adr/0004-editor-family-composition-model.md`](./adr/0004-editor-family-composition-model.md): one engine, one component, kits, no ready-mades
-- [`adr/0010-subpath-export-rule.md`](./adr/0010-subpath-export-rule.md): what earns a subpath
-- [`adr/0012-template-ref-surface.md`](./adr/0012-template-ref-surface.md): what earns a `defineExpose` member
-- [`adr/0017-css-variable-styling-hooks.md`](./adr/0017-css-variable-styling-hooks.md): CSS hook naming
+- [`adr/0019-code-editor-family-composition-model.md`](./adr/0019-code-editor-family-composition-model.md):
+  this family's architectural shape
+- [`adr/0004-editor-family-composition-model.md`](./adr/0004-editor-family-composition-model.md):
+  one engine, one component, kits, no ready-mades
+- [`adr/0010-subpath-export-rule.md`](./adr/0010-subpath-export-rule.md): what
+  earns a subpath
+- [`adr/0012-template-ref-surface.md`](./adr/0012-template-ref-surface.md): what
+  earns a `defineExpose` member
+- [`adr/0017-css-variable-styling-hooks.md`](./adr/0017-css-variable-styling-hooks.md):
+  CSS hook naming

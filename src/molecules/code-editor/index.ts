@@ -14,7 +14,7 @@ export { default as CodeEditor } from './CodeEditor.vue'
 export { default as CodeEditorContent } from './CodeEditorContent.vue'
 
 // Kit — one configurable extension bundle
-export { CodeKit, type CodeKitOptions } from './kit'
+export { CodeKit, type CodeKitOptions, type CodeKitExtension } from './kit'
 
 // Individual extensions (each also a CodeKit member). No placeholder wrapper:
 // `@codemirror/view` already exports `placeholder()`, so one would add a name

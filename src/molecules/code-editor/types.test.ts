@@ -18,6 +18,7 @@ import {
   useCodeEditor,
   type CodeEditorExposed,
   type CodeEditorOptions,
+  type CodeKitExtension,
   type CodeKitOptions,
   type LanguageKey,
 } from './index'
@@ -80,6 +81,11 @@ const configured = CodeKit.configure({
   foldGutter: { openText: '▾' },
 })
 
+// A kit is a named shape, so a variable, a prop or a factory return can be
+// annotated without reaching for `typeof CodeKit`.
+const namedKit: CodeKitExtension = CodeKit.configure({ search: false })
+const kitFactory = (): CodeKitExtension => CodeKit
+
 // @ts-expect-error A misspelled member must not pass silently.
 const kitTypo = CodeKit.configure({ lineNumber: {} })
 // @ts-expect-error `lint` is not a member; `@codemirror/lint` stays optional.
@@ -133,6 +139,8 @@ describe('code editor option types', () => {
     void chromeOff
     void contentNull
     void configured
+    expectTypeOf(namedKit).toEqualTypeOf<CodeKitExtension>()
+    expectTypeOf(kitFactory()).toEqualTypeOf<CodeKitExtension>()
   })
 
   it('returns the view ref and nothing else', () => {
