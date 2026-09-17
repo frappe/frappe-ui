@@ -9,7 +9,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
-### Pickers — `open` is honored at mount (fix)
+### Pickers — `open` is honored at mount (breaking, silent)
 
 `DatePicker`, `DateRangePicker`, `DateTimePicker` and `TimePicker` seeded their
 own open state to `false` and only watched `open` for later changes, so a parent
