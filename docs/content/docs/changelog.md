@@ -11,10 +11,9 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ### Tailwind preset — the design tokens are exported as data
 
-`frappe-ui/tailwind` now exports the tokens by name, beside the preset and
-`content`: `colors`, `cssVariables`, `fontFamily`, `fontSize`, `fontWeight`,
-`radius`, `screens`, `semanticColors`, `shadows`, `spacing`, `textTransform`
-and `tracking`.
+`frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,
+`cssVariables`, `fontFamily`, `fontSize`, `fontWeight`, `radius`, `screens`,
+`semanticColors`, `shadows`, `spacing`, `textTransform` and `tracking`.
 
 Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
 string, a plain number. Nothing carries a Tailwind sentinel, so no
@@ -22,9 +21,12 @@ string, a plain number. Nothing carries a Tailwind sentinel, so no
 rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
 `plugin.js`.
 
-There is no new subpath. The names sit on the existing `frappe-ui/tailwind`
-entry point, which pulls no Vue, so a Node script reads tokens without the
-component tree. Per ADR-0010 the surface is additive-only until `2.0.0`.
+The tokens get their own subpath because `frappe-ui/tailwind` statically
+imports `tailwindcss/plugin`, `@tailwindcss/forms` and
+`@tailwindcss/typography`. Reading a radius value should not cost those three
+(P15 limb (a), cost isolation). The token module imports nothing but its own
+JSON, so it loads under plain Node as well as under a bundler. Per ADR-0010
+the surface is additive-only until `2.0.0`.
 
 - `semanticColors` is `{ light, dark }` with resolved values, keyed by
   category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).
@@ -2030,8 +2032,8 @@ was wrong. `frappe/studio` imports it at
 finds Studio as the only consumer, and Studio pins `frappe-ui@1.0.0-beta.25`,
 so the break has not reached it. The advice to use the preset directly was
 also wrong: the preset is a Tailwind `Config` and carries no readable values.
-The tokens are exported by name from `frappe-ui/tailwind` again, in a new
-shape. See the Unreleased entry above and the
+The subpath is back as `frappe-ui/tailwind/tokens`, without the `.js` and in
+a new shape. See the Unreleased entry above and the
 [migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed).
 
 ### Tailwind preset — unused token vocabulary and utilities removed (breaking)

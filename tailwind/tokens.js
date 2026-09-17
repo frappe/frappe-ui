@@ -21,10 +21,10 @@
  * none may be renamed or removed.
  */
 
-import colorsData from './tokens/colors.json'
-import effectsData from './tokens/effects.json'
-import radiusTokens from './tokens/radius.json'
-import typographyTokens from './tokens/typography.json'
+import colorsData from './tokens/colors.json' with { type: 'json' }
+import effectsData from './tokens/effects.json' with { type: 'json' }
+import radiusTokens from './tokens/radius.json' with { type: 'json' }
+import typographyTokens from './tokens/typography.json' with { type: 'json' }
 
 // ---------- COLORS ----------
 

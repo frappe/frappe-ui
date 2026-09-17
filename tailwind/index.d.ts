@@ -17,25 +17,9 @@ export default preset
 export declare const content: string[]
 
 /**
- * The design tokens, as data — framework-neutral values with no Tailwind
- * sentinels in them. Read these when you need a token outside a Tailwind
- * class: a style picker, exported markup, a canvas renderer, codegen.
- *
- * This entry point pulls no Vue, so a Node script can import tokens without
- * the component tree. Per ADR-0010 the surface is additive-only until 2.0.0.
+ * The design tokens live at `frappe-ui/tailwind/tokens`, not here. This entry
+ * statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
+ * `@tailwindcss/typography`; the token module imports nothing. Reading a
+ * token value must not cost three Tailwind packages, and only the token
+ * module loads under plain Node.
  */
-export {
-  colors,
-  cssVariables,
-  fontFamily,
-  fontSize,
-  fontWeight,
-  radius,
-  screens,
-  semanticColors,
-  shadows,
-  spacing,
-  textTransform,
-  tracking,
-} from './tokens.js'
-export type { TextStyle, VariableMap } from './tokens.js'

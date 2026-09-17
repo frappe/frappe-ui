@@ -535,11 +535,23 @@ function main() {
 
   console.log(`Reading tokens from ${path.relative(REPO_ROOT, TOKENS_DIR)}/`)
 
-  writeJSON('colors.json', buildColors())
-  writeJSON('radius.json', buildRadius())
-  writeJSON('typography.json', buildTypography())
-  writeJSON('effects.json', buildEffects())
-  writeJSON('provenance.json', buildProvenance())
+  // Build every output before writing any of them. A malformed or missing
+  // input throws from the builder it reaches, and writing as we went would
+  // leave the earlier files overwritten beside stale later ones — an
+  // inconsistent token set, committed by whoever ran the sync and did not
+  // read the stack trace. provenance.json is built last: it reports the
+  // inputs the builders actually read.
+  const outputs = {
+    'colors.json': buildColors(),
+    'radius.json': buildRadius(),
+    'typography.json': buildTypography(),
+    'effects.json': buildEffects(),
+  }
+  outputs['provenance.json'] = buildProvenance()
+
+  for (const [filename, data] of Object.entries(outputs)) {
+    writeJSON(filename, data)
+  }
 
   console.log('✓ done')
 }

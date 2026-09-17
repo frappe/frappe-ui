@@ -7,9 +7,12 @@
  * swatch. If shaping ever leaks back down from colorPalette.js into tokens.js,
  * that test fails before a consumer finds out.
  */
+import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import pkg from '../package.json' with { type: 'json' }
 import * as tokens from './tokens.js'
-import * as entry from './index.js'
 
 const PUBLIC_NAMES = [
   'colors',
@@ -27,15 +30,51 @@ const PUBLIC_NAMES = [
 ]
 
 describe('public surface', () => {
-  it('re-exports every token from frappe-ui/tailwind', () => {
-    for (const name of PUBLIC_NAMES) {
-      expect(entry[name], name).toBe(tokens[name])
-    }
+  it('exports every token name', () => {
+    expect(Object.keys(tokens).sort()).toEqual([...PUBLIC_NAMES].sort())
   })
 
-  it('still ships the preset as the default export', () => {
-    expect(entry.default.plugins).toBeInstanceOf(Array)
-    expect(entry.content).toBeInstanceOf(Array)
+  // The tokens sit on their own subpath because `frappe-ui/tailwind`
+  // statically imports tailwindcss/plugin, @tailwindcss/forms and
+  // @tailwindcss/typography. Reading a token value must not cost those
+  // three, and they are why only this module loads under plain Node
+  // (P15 limb (a), cost isolation).
+  it('is reachable at frappe-ui/tailwind/tokens', () => {
+    expect(pkg.exports['./tailwind/tokens']).toEqual({
+      types: './tailwind/tokens.d.ts',
+      import: './tailwind/tokens.js',
+      default: './tailwind/tokens.js',
+    })
+  })
+
+  it('imports nothing outside its own token JSON', () => {
+    const src = readFileSync(new URL('./tokens.js', import.meta.url), 'utf8')
+    const specifiers = [...src.matchAll(/^import .* from '([^']+)'/gm)].map(
+      (m) => m[1],
+    )
+    expect(specifiers.every((s) => s.startsWith('./tokens/'))).toBe(true)
+  })
+})
+
+describe('native node', () => {
+  // Vitest transforms JSON imports, so it cannot see a missing import
+  // attribute — only a real node process can. The docs promise a plain Node
+  // script can read tokens from this entry point, so spawn one.
+  it('loads under plain node, with no bundler', () => {
+    const entryPath = fileURLToPath(new URL('./tokens.js', import.meta.url))
+    const out = execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `import { radius, semanticColors } from ${JSON.stringify(entryPath)}
+         console.log(radius['4'], semanticColors.light.surface.base)`,
+      ],
+      { encoding: 'utf8' },
+    ).trim()
+    expect(out).toBe(
+      `${tokens.radius['4']} ${tokens.semanticColors.light.surface.base}`,
+    )
   })
 })
 

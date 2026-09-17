@@ -14,9 +14,10 @@ export default {
 
 The preset sets `darkMode`, the spacing scale, the `prose` / `prose-v3`
 typography safelist, and four plugins (`@tailwindcss/forms`,
-`@tailwindcss/typography`, the theme plugin, the Lucide icon plugin). Beside
-the preset, `frappe-ui/tailwind` exports the `content` glob list and the design
-tokens as data. Both are covered below.
+`@tailwindcss/typography`, the theme plugin, the Lucide icon plugin). Beside the
+preset, `frappe-ui/tailwind` exports the `content` glob list, covered below. The
+design tokens are a separate entry point,
+[`frappe-ui/tailwind/tokens`](#the-token-exports).
 
 Requires **Tailwind `>=3.4.0 <4`**. It is a peer dependency. Tailwind v4 reads
 none of this shape, so the design tokens never load there.
@@ -25,46 +26,46 @@ none of this shape, so the design tokens never load there.
 
 Five theme sections are **replaced**, not extended:
 
-| Section | What you get | What you lose |
-| --- | --- | --- |
-| `colors` | the frappe-ui palette (`ink-*`, `surface-*`, `outline-*`, and the raw ramps) | Tailwind's stock palette (`slate`, `sky`, `emerald`, …) |
-| `fontSize` | the type scale (`text-sm`, `text-base`, `text-lg`, …, at frappe-ui's values) | Tailwind's sizes and their paired line heights |
-| `screens` | `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px | `2xl:` |
-| `borderRadius` | the numbered scale (`rounded-4`, `rounded-9`, …) | `rounded-sm` … `rounded-3xl` |
-| `boxShadow` | the elevation scale (`shadow-sm` … `shadow-2xl`, each a `--elevation-*` variable) | `shadow-inner` |
+| Section        | What you get                                                                      | What you lose                                           |
+| -------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `colors`       | the frappe-ui palette (`ink-*`, `surface-*`, `outline-*`, and the raw ramps)      | Tailwind's stock palette (`slate`, `sky`, `emerald`, …) |
+| `fontSize`     | the type scale (`text-sm`, `text-base`, `text-lg`, …, at frappe-ui's values)      | Tailwind's sizes and their paired line heights          |
+| `screens`      | `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px                                  | `2xl:`                                                  |
+| `borderRadius` | the numbered scale (`rounded-4`, `rounded-9`, …)                                  | `rounded-sm` … `rounded-3xl`                            |
+| `boxShadow`    | the elevation scale (`shadow-sm` … `shadow-2xl`, each a `--elevation-*` variable) | `shadow-inner`                                          |
 
 A class from a replaced section is simply not generated. `2xl:flex` and
 `shadow-inner` compile to nothing, with no error. Everything else (`spacing`,
-`textColor`, `backgroundColor`, and the rest) is **extended**, so Tailwind's
-own values stay.
+`textColor`, `backgroundColor`, and the rest) is **extended**, so Tailwind's own
+values stay.
 
 ## The spacing scale
 
-Every integer from `1` to `128` and every half step from `0.5` to `19.5`, all
-at the canonical `0.25rem` step. Stock Tailwind has gaps above `12` (`13`,
-`15`, `17`, `18`, `19`, `21`… are undefined), so `h-17` and `size-17` silently
-do not compile there.
+Every integer from `1` to `128` and every half step from `0.5` to `19.5`, all at
+the canonical `0.25rem` step. Stock Tailwind has gaps above `12` (`13`, `15`,
+`17`, `18`, `19`, `21`… are undefined), so `h-17` and `size-17` silently do not
+compile there.
 
 The scale is declared once. Tailwind 3.4 reads `theme('spacing')` for `width`,
 `height`, `size`, `minWidth`, `maxWidth`, `minHeight` and `maxHeight`, so
 `w-17`, `min-w-40`, `max-h-52` and `size-3.5` all come from the same numbers.
-The list styling hooks read it too: `list-gap-3` and `list-row-px-2.5` take
-any spacing key.
+The list styling hooks read it too: `list-gap-3` and `list-row-px-2.5` take any
+spacing key.
 
 ## Why you have to list `content` yourself
 
-Tailwind v3 does not merge a preset's `content` into your app's config — it
-only reads the top-level `content.files` array. A preset can ship `theme` and
-`plugins`, which do merge, but not `content`. This is a Tailwind v3
-limitation, not a choice `frappe-ui` makes.
+Tailwind v3 does not merge a preset's `content` into your app's config — it only
+reads the top-level `content.files` array. A preset can ship `theme` and
+`plugins`, which do merge, but not `content`. This is a Tailwind v3 limitation,
+not a choice `frappe-ui` makes.
 
 That means every app consuming `frappe-ui` has to know which of its source
 folders emit Tailwind classes and list them itself. Left hand-maintained, that
-list drifts: two apps on `frappe-ui@1.0.0-beta` only glob
-`src/components/**`, missing `src/molecules/` entirely — every utility class
-the editor and list molecules emit never gets compiled into those apps' CSS.
-The exported list mirrors this repo's own `tailwind.config.js` `content`
-array, so the two can't drift apart from each other either.
+list drifts: two apps on `frappe-ui@1.0.0-beta` only glob `src/components/**`,
+missing `src/molecules/` entirely — every utility class the editor and list
+molecules emit never gets compiled into those apps' CSS. The exported list
+mirrors this repo's own `tailwind.config.js` `content` array, so the two can't
+drift apart from each other either.
 
 ## The `content` export
 
@@ -87,30 +88,34 @@ console.log(content)
 One rule decides what is listed under `experimental/`: every directory the
 `frappe-ui/experimental` barrel re-exports. Today that is `Accordion`,
 `Calendar`, `Charts`, `CodeEditor`, `CommandPalette`, `FloatingWindow`,
-`ListView`, `MultiEmailInput`, `SpriteIcons`, `TextEditor` and
-`ThemeSwitcher`. Importing any of them pulls that directory's classes into
-your build, so they have to be scanned. A test derives the list from the
-barrel, so the two cannot drift. Directories the barrel does not re-export
-stay out, because nothing you can import reaches them.
+`ListView`, `MultiEmailInput`, `SpriteIcons`, `TextEditor` and `ThemeSwitcher`.
+Importing any of them pulls that directory's classes into your build, so they
+have to be scanned. A test derives the list from the barrel, so the two cannot
+drift. Directories the barrel does not re-export stay out, because nothing you
+can import reaches them.
 
 `vitepress/**` is listed for the same reason on its own subpath: a docs site
 built on `frappe-ui/vitepress` has no other way to emit the theme's classes.
 
 The paths are resolved against wherever `frappe-ui` is actually installed
 (`node_modules`, a monorepo symlink, a local workspace checkout), so they work
-regardless of your app's working directory. When `frappe-ui` adds a new
-source directory that emits classes, bumping the dependency picks up the new
-glob automatically — you don't need to touch your `tailwind.config.js` again.
+regardless of your app's working directory. When `frappe-ui` adds a new source
+directory that emits classes, bumping the dependency picks up the new glob
+automatically — you don't need to touch your `tailwind.config.js` again.
 
 ## The token exports
 
-`frappe-ui/tailwind` also exports the design tokens as data. Every value is
+`frappe-ui/tailwind/tokens` exports the design tokens as data. Every value is
 framework-neutral: a resolved `oklch(...)` colour, a plain px string, a plain
-number. No Tailwind sentinel reaches them, so nothing carries `<alpha-value>`
-or a `color-mix(...)` wrapper that renders as an empty swatch outside Tailwind.
+number. No Tailwind sentinel reaches them, so nothing carries `<alpha-value>` or
+a `color-mix(...)` wrapper that renders as an empty swatch outside Tailwind.
 
-The entry point is build-time and pulls in no Vue, so a Node script, a codegen
-step or a design tool reads tokens without loading the component tree.
+It is its own entry point, not part of `frappe-ui/tailwind`, because the preset
+statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
+`@tailwindcss/typography`. Reading a radius value should not cost three Tailwind
+packages. The token module imports nothing but its own JSON, so it loads under
+plain Node as well as under a bundler — a codegen step, a design tool or a
+script needs no build setup.
 
 A style picker is the common case. Build the options from
 `semanticColors.light`, and point each value at the matching CSS variable. A
@@ -118,7 +123,7 @@ themed page then flips the colour, and anything else falls back to the light
 value:
 
 ```js
-import { semanticColors } from 'frappe-ui/tailwind'
+import { semanticColors } from 'frappe-ui/tailwind/tokens'
 
 const backgroundOptions = Object.entries(semanticColors.light.surface).map(
   ([name, value]) => ({
@@ -133,24 +138,24 @@ const backgroundOptions = Object.entries(semanticColors.light.surface).map(
 // ]
 ```
 
-| Export | Shape |
-| --- | --- |
-| `colors` | `{ light, dark, overlay, neutral }`. Primitive ramps keyed by step: `colors.light.gray[500]`. |
-| `semanticColors` | `{ light, dark }`, each keyed by category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`) and then by name. |
-| `cssVariables` | Every token as a custom property, keyed by the selector it belongs on: `':root'` and `'[data-theme="dark"]'`. |
-| `radius` | px per key: `0` to `9`, plus `none` and `full`. |
-| `shadows` | `{ elevation: { light, dark, custom }, focus: { light, dark } }`. Each entry is a composed `box-shadow` string. |
-| `fontSize` | One object per size: `{ fontSize, lineHeight, letterSpacing, fontWeight }`. `base` is the text family, `p-base` the paragraph family. |
-| `fontWeight` | Numbers. `regular` is 420, not 400. |
-| `fontFamily` | `{ text: 'Inter Variable' }`. |
-| `tracking` | Letter-spacing per size and weight, for the `text` and `paragraph` families separately. |
-| `textTransform` | Text-transform per size. Empty today. |
-| `spacing` | The spacing scale above, in rem. |
-| `screens` | The four breakpoint minimums. |
+| Export           | Shape                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `colors`         | `{ light, dark, overlay, neutral }`. Primitive ramps keyed by step: `colors.light.gray[500]`.                                         |
+| `semanticColors` | `{ light, dark }`, each keyed by category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`) and then by name.           |
+| `cssVariables`   | Every token as a custom property, keyed by the selector it belongs on: `':root'` and `'[data-theme="dark"]'`.                         |
+| `radius`         | px per key: `0` to `9`, plus `none` and `full`.                                                                                       |
+| `shadows`        | `{ elevation: { light, dark, custom }, focus: { light, dark } }`. Each entry is a composed `box-shadow` string.                       |
+| `fontSize`       | One object per size: `{ fontSize, lineHeight, letterSpacing, fontWeight }`. `base` is the text family, `p-base` the paragraph family. |
+| `fontWeight`     | Numbers. `regular` is 420, not 400.                                                                                                   |
+| `fontFamily`     | `{ text: 'Inter Variable' }`.                                                                                                         |
+| `tracking`       | Letter-spacing per size and weight, for the `text` and `paragraph` families separately.                                               |
+| `textTransform`  | Text-transform per size. Empty today.                                                                                                 |
+| `spacing`        | The spacing scale above, in rem.                                                                                                      |
+| `screens`        | The four breakpoint minimums.                                                                                                         |
 
-`semanticColors` splits by theme because a consumer outside a frappe-ui page
-has no `[data-theme]` to resolve against and must pick a side. Inside a themed
-page, read the `--<category>-<name>` variables instead. They flip on their own.
+`semanticColors` splits by theme because a consumer outside a frappe-ui page has
+no `[data-theme]` to resolve against and must pick a side. Inside a themed page,
+read the `--<category>-<name>` variables instead. They flip on their own.
 
 `fontSize` entries are objects, not Tailwind's `[size, meta]` tuple. The tuple
 is a Tailwind convention and this data does not speak Tailwind. `plugin.js`
@@ -182,15 +187,18 @@ until the next tap lands elsewhere, so a ghost button a thumb touched stayed
 filled. A laptop with a touchscreen answers `(hover: hover)` and keeps both.
 
 That leaves a rule for anything shown only on hover: it needs a touch path,
-because the sticky tap-hover was the only route a phone ever had to it. Either
-a tap already reaches what the reveal is for — tapping a sortable header sorts
-it and its glyph appears, tapping a playing video pauses it and its controls
-appear — or the device that cannot hover shows it outright:
+because the sticky tap-hover was the only route a phone ever had to it. Either a
+tap already reaches what the reveal is for — tapping a sortable header sorts it
+and its glyph appears, tapping a playing video pauses it and its controls appear
+— or the device that cannot hover shows it outright:
 
 ```html
-<button class="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+<button
+  class="opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+></button>
 ```
 
-Do not stand a breakpoint in for hover: `sm:opacity-0 sm:group-hover:opacity-100`
-hides the control from a tablet and shows it to a narrow desktop window, and
-neither is the device the rule is about.
+Do not stand a breakpoint in for hover:
+`sm:opacity-0 sm:group-hover:opacity-100` hides the control from a tablet and
+shows it to a narrow desktop window, and neither is the device the rule is
+about.

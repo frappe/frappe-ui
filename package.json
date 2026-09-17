@@ -101,6 +101,11 @@
       "import": "./tailwind/index.js",
       "default": "./tailwind/index.js"
     },
+    "./tailwind/tokens": {
+      "types": "./tailwind/tokens.d.ts",
+      "import": "./tailwind/tokens.js",
+      "default": "./tailwind/tokens.js"
+    },
     "./vite": {
       "types": "./vite/index.d.ts",
       "import": "./vite/index.js"

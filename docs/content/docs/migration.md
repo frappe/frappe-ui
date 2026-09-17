@@ -3082,12 +3082,15 @@ Both subpaths are gone. Both breaks are loud: the specifier stops resolving.
 | Removed                        | Replacement                                                     |
 | ------------------------------ | ---------------------------------------------------------------- |
 | `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
-| `frappe-ui/tailwind/tokens.js` | the named token exports on `frappe-ui/tailwind`                  |
+| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind/tokens`, same subpath without the extension |
 
-The preset is not a replacement for the tokens. It is a Tailwind `Config`, and
-its colours, radii and sizes are built inside `plugin.js` when Tailwind calls
-the plugin, so you cannot read a value out of it. Import the tokens by name
-from the same entry point instead:
+The subpath is back, minus the `.js`. Drop the extension and the names change;
+the specifier is otherwise the one you had.
+
+An earlier revision of this guide sent you to the preset. That was wrong. The
+preset is a Tailwind `Config`, and its colours, radii and sizes are built
+inside `plugin.js` when Tailwind calls the plugin, so you cannot read a value
+out of it.
 
 ```js
 // Before
@@ -3106,7 +3109,7 @@ import {
   fontSize,
   cssVariables,
   semanticColors,
-} from 'frappe-ui/tailwind'
+} from 'frappe-ui/tailwind/tokens'
 ```
 
 The names moved, and so did the shapes:
@@ -3126,7 +3129,7 @@ sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
 handed either one renders an empty swatch. The new exports carry no sentinel.
 
 `colors`, `fontFamily`, `fontWeight`, `screens`, `spacing`, `textTransform`
-and `tracking` are exported from `frappe-ui/tailwind` too. See
+and `tracking` are exported from the same subpath. See
 [Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
