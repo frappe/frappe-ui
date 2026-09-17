@@ -29,7 +29,6 @@ it is likely to move:
 | [`Accordion`](#accordion) | Incubating | Its API settling |
 | [`Calendar`](#calendar) | Parked | A redesigned calendar family |
 | [Charts (v1)](#charts-v1) | Parked | Apps moving to [`frappe-ui/charts`](/docs/charts/overview) |
-| [`CodeEditor`](#codeeditor) | Incubating | Its API settling |
 | [`CommandPalette`](#commandpalette) | Incubating | gameplan, helpdesk and this site running on it |
 | [`DateCalendar`](#date-calendars) | Incubating | Its API settling |
 | [`DateRangeCalendar`](#date-calendars) | Incubating | Its API settling |
@@ -86,19 +85,6 @@ import { AxisChart } from 'frappe-ui/experimental'
 ```
 
 See the [migration guide](/docs/migration) for the before/after.
-
-## CodeEditor
-
-A CodeMirror 6 code field with syntax highlighting and an optional sanitized
-preview (`CodePreview`). CodeMirror is lazy-loaded, so importing the barrel
-pulls in no editor code until a field actually mounts.
-
-```ts
-import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
-```
-
-See the [CodeEditor page](/docs/experimental/codeeditor) for languages, sizes,
-variants, and the labeling contract.
 
 ## CommandPalette
 

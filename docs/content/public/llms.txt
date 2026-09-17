@@ -6,7 +6,7 @@ Built on Vue 3, TailwindCSS, Headless UI, reka-ui, TipTap, echarts, and lucide i
 
 Three cross-cutting conventions to know before reading anything else:
 
-- **Not everything is on the root entry.** The package ships one export per family: `frappe-ui` (components, data fetching, utilities), `frappe-ui/list`, `frappe-ui/charts`, `frappe-ui/editor`, `frappe-ui/experimental`, `frappe-ui/icons`, `frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/style.css`. Importing a list or a chart from `'frappe-ui'` does not resolve.
+- **Not everything is on the root entry.** The package ships one export per family: `frappe-ui` (components, data fetching, utilities), `frappe-ui/list`, `frappe-ui/charts`, `frappe-ui/editor`, `frappe-ui/code-editor`, `frappe-ui/experimental`, `frappe-ui/icons`, `frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vitepress`, `frappe-ui/style.css`. Importing a list or a chart from `'frappe-ui'` does not resolve.
 - **Color = `variant` + `theme`.** `variant` is visual style (`solid | subtle | outline | ghost`); `theme` is color tone (`gray | blue | red | green | …`). No `intent` / `severity` / `appearance` axis.
 - **Icons are CSS classes.** Render as `<span class="lucide-<name> size-4" aria-hidden="true" />`. Frappe-ui props that accept icons take the namespaced string `"lucide-edit"`.
 
@@ -105,6 +105,7 @@ Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Pro
 ## Molecules
 
 - [Editor](https://ui.frappe.io/docs/molecules/editor): TipTap-based rich editor, from the `frappe-ui/editor` subpath (heavy, and not SSR-safe, so use only when needed).
+- [CodeEditor](https://ui.frappe.io/docs/molecules/code-editor): CodeMirror 6 family, from the `frappe-ui/code-editor` subpath: the `useCodeEditor` engine, a renderless `CodeEditor`, `CodeEditorContent`, the `CodeKit` bundle, and `loadLanguage` for the ten optional `@codemirror/lang-*` peers. Renderless: the label, the field chrome and the expand affordance belong to the app.
 - [List](https://ui.frappe.io/docs/molecules/list): the list family, from the `frappe-ui/list` subpath: `List`, `ListHeader`, `ListHeaderCell`, `ListHeaderCellSort`, `ListRows`, `ListRow`, `ListCell`, `ListGroup`. Feed or table mode.
 
 ## Foundations
@@ -145,7 +146,6 @@ Everything on the `frappe-ui/experimental` subpath: parked v0 families and incub
 - [Overview](https://ui.frappe.io/docs/experimental): what is parked, what is incubating, and why.
 - [Accordion](https://ui.frappe.io/docs/experimental/accordion): sections behind labelled headers that expand and collapse.
 - [Calendar](https://ui.frappe.io/docs/experimental/calendar): date and event view with Month, Week and Day modes.
-- [CodeEditor](https://ui.frappe.io/docs/experimental/codeeditor): CodeMirror 6 field with highlighting and an optional sanitized preview; CodeMirror is lazy-loaded.
 - [CommandPalette](https://ui.frappe.io/docs/experimental/commandpalette): searchable command list in a dialog, composed from `CommandPaletteInput`, `CommandPaletteList`, `CommandPaletteGroup`, `CommandPaletteItem`, `CommandPaletteEmpty` and `CommandPaletteFooter`.
 - [ListView](https://ui.frappe.io/docs/experimental/listview): the parked v0 list family. New code uses `frappe-ui/list`.
 

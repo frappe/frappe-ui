@@ -3033,19 +3033,42 @@ were a thin wrapper over a `resize` listener that the library never used itself.
 Copy the ~20 lines into your app, or use `@vueuse/core`'s `useWindowSize` /
 `useMediaQuery`.
 
-### `code-editor` subpath — folded into `experimental` (breaking)
+### Code editor — a new family at `frappe-ui/code-editor` (breaking, loud)
 
-- **Breaking:** `frappe-ui/code-editor` is removed. `CodeEditor`, `CodePreview`,
-  and `loadLanguage` move to `frappe-ui/experimental` (ADR-0010). One downstream
-  file imported the old subpath; the fix is a one-line import change.
+- **Breaking:** the `CodeEditor` and `CodePreview` pair is deleted from
+  `frappe-ui/experimental` with no deprecation window (P14). A CodeMirror 6
+  family ships at `frappe-ui/code-editor` instead: the `useCodeEditor` engine, a
+  renderless `CodeEditor`, `CodeEditorContent`, `CodeKit`, the `codeChrome`,
+  `codeHighlight` and `codeKeymap` extensions, and `loadLanguage`.
 
   ```ts
   // before
-  import { CodeEditor, CodePreview } from 'frappe-ui/code-editor'
+  import { CodeEditor, loadLanguage } from 'frappe-ui/experimental'
 
   // after
-  import { CodeEditor, CodePreview } from 'frappe-ui/experimental'
+  import { CodeEditor, CodeEditorContent, CodeKit } from 'frappe-ui/code-editor'
   ```
+
+  The library ships no labeled field. Each app builds its own thin component on
+  `<CodeEditor>`, the way each app already builds its own editor component. The
+  Desk/FormLayout field lives in `@framework/ui`.
+
+- **Breaking:** capability is a required `extensions` array of raw CodeMirror
+  extensions. The `language`, `variant`, `size` and `placeholder` props are
+  gone, and so are the label, description, error and required props.
+  `--cm-max-height` becomes `--code-max-height`.
+
+- **Breaking:** `CodePreview` leaves frappe-ui. It is a markdown renderer, not a
+  code editor, and it becomes `@framework/ui`'s.
+
+- **Breaking:** the ten `@codemirror/lang-*` packages and `@codemirror/lint` move
+  from dependencies to optional peer dependencies. Every app used to download
+  all eleven. Install the ones you render; `loadLanguage` throws an error naming
+  the missing package. `frappe-ui/vite` stubs the language packages an app did
+  not install, so the build no longer fails on a language nobody renders.
+
+  See [the code editor docs](/docs/molecules/code-editor) and
+  [migration](/docs/migration#code-editor).
 
 ### `experimental` barrel — tidy and `FrappeUIError`
 

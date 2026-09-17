@@ -107,6 +107,10 @@
       "path": "spec/editor.md",
       "scope": ["src/molecules/editor/**", "experimental/TextEditor/**"]
     },
+    {
+      "path": "spec/code-editor.md",
+      "scope": ["src/molecules/code-editor/**"]
+    },
     { "path": "spec/charts.md", "scope": ["src/charts/**"] },
     {
       "path": "spec/foundations.md",
