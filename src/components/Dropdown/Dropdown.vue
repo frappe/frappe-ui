@@ -28,7 +28,10 @@
       <DropdownMenuContent
         data-slot="content"
         data-motion="instant"
-        :class="menuClasses.content"
+        :class="[
+          menuClasses.content,
+          !matchTriggerWidth && menuClasses.contentMaxWidth,
+        ]"
         :side="side"
         :align="align"
         :side-offset="offset"

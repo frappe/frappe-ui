@@ -10,7 +10,7 @@
         ref="contentRef"
         data-slot="content"
         data-motion="instant"
-        :class="menuClasses.content"
+        :class="[menuClasses.content, menuClasses.contentMaxWidth]"
       >
         <Menu
           :groups="groups"

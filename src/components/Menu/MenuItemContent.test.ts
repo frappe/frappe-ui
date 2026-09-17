@@ -32,7 +32,10 @@ describe('MenuItemContent', () => {
     app.unmount()
   })
 
-  it('enforces max-width containment on menu content container', () => {
-    expect(menuClasses.content).toContain('max-w-[min(26rem,calc(100vw-2rem))]')
+  it('defines max-width containment without clamping matchTriggerWidth', () => {
+    expect(menuClasses.contentMaxWidth).toBe(
+      'max-w-[min(26rem,calc(100vw-2rem))]',
+    )
+    expect(menuClasses.content).not.toContain('max-w-')
   })
 })
