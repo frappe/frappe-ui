@@ -248,6 +248,60 @@ describe('code editor browser behavior', () => {
     cy.get('[data-testid="explicit-null"]').should('be.empty')
   })
 
+  it('clears the overflow state and the scroll class when the view goes away', () => {
+    // Both belong to a view the part is showing. The part never owns the view,
+    // so what it set on the way in it has to unset on the way out.
+    const onOverflow = cy.spy().as('overflow')
+    let view!: EditorView
+
+    const TestHost = defineComponent({
+      setup() {
+        const editor = useCodeEditor({
+          // Tall enough to overflow the cap, and wide enough to scroll sideways.
+          content: ref(`SELECT ${'x'.repeat(200)}\n2\n3\n4\n5\n6\n7\n8\n9\n10`),
+          extensions: [CodeKit],
+        })
+        view = editor.value!
+        const attached = ref(true)
+        return () =>
+          h('div', { class: 'w-[420px] p-4' }, [
+            h(CodeEditorContent, {
+              editor: attached.value ? editor.value : null,
+              style: { '--code-max-height': '80px' },
+              onOverflow,
+            }),
+            h(
+              'button',
+              { type: 'button', onClick: () => (attached.value = false) },
+              'detach',
+            ),
+          ])
+      },
+    })
+
+    cy.mount(TestHost)
+
+    cy.get(CONTENT).should('have.attr', 'data-overflowing', 'true')
+    cy.get('@overflow').should('have.been.calledWith', true)
+
+    // Scroll right, so the gutter shadow is lit when the view leaves.
+    cy.then(() => {
+      view.scrollDOM.scrollLeft = 200
+      view.scrollDOM.dispatchEvent(new Event('scroll'))
+    })
+    cy.get('.cm-editor').should('have.class', 'code-scrolled-x')
+
+    cy.get('button').click()
+
+    cy.get(CONTENT).should('not.have.attr', 'data-overflowing')
+    cy.get('@overflow').should('have.been.calledWith', false)
+    // The view outlives the part, and it leaves with the class off — otherwise
+    // a re-attach at `scrollLeft` 0 would keep the shadow lit.
+    cy.then(
+      () => expect(view.dom.classList.contains('code-scrolled-x')).to.be.false,
+    )
+  })
+
   it('releases the resize observer when the view goes away', () => {
     // The part can lose its view without gaining another one. An observer left
     // attached would retain the departed view's `contentDOM` and `scrollDOM`

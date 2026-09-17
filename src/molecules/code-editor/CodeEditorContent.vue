@@ -70,6 +70,11 @@ function measure() {
 function unmountView() {
   if (!mounted) return
   mounted.scrollDOM.removeEventListener('scroll', measure)
+  // The class lives on the view, and the part never owns the view. Left set, it
+  // rides to the next part or back to this one, where `scrollLeft` is 0 after a
+  // re-attach: `measure` then agrees with the cache below, never toggles, and
+  // the gutter shadow stays lit with nothing scrolled.
+  mounted.dom.classList.remove('code-scrolled-x')
   mounted.dom.remove()
   mounted = null
   // The observer holds the departed view's `contentDOM` and `scrollDOM`. It has
@@ -81,6 +86,13 @@ function unmountView() {
   // The cached values belong to the view that just left, not to the next one.
   scrolledX = false
   textHeight = ''
+  // An empty box overflows nothing. Without this the part keeps
+  // `data-overflowing` set, and the consumer that drew an expand affordance off
+  // the last `true` never hears it go away.
+  if (overflowing.value) {
+    overflowing.value = false
+    emit('overflow', false)
+  }
 }
 
 function mountView(view: EditorView | null) {
