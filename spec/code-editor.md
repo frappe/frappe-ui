@@ -534,12 +534,18 @@ view.state.doc.toString()
 // replace the document, keeping history
 view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: next } })
 
-// replace the document, dropping history
-view.setState(EditorState.create({ doc: next, extensions }))
-
 // open the search panel
 openSearchPanel(view) // from @codemirror/search
 ```
+
+**Never call `view.setState()`.** It replaces the whole state configuration, and
+the engine's own extensions are not in the array you passed: the update listener
+behind `v-model`, the focus and blur handlers behind `change`, and the
+`readOnly` and `editable` facets behind the `editable` prop. The view keeps
+rendering and the colours survive, so the failure is quiet: typing stops writing
+the model, `change` stops firing, and `editable: false` reverts to editable,
+until the next `extensions` or `editable` change rebuilds the configuration.
+Replace the document with the `dispatch` above.
 
 **JSON linting.** The `json` language no longer welds a linter on. It is two
 lines in the extension array:
