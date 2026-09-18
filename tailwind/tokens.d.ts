@@ -555,11 +555,11 @@ export declare const shadows: {
   none: string
   sm: string
   base: string
+  DEFAULT: string
   md: string
   lg: string
   xl: string
   '2xl': string
-  DEFAULT: string
 }
 
 /**

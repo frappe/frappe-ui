@@ -221,6 +221,15 @@ describe('shadows', () => {
     expect(tokens.shadows.DEFAULT).toBe(tokens.shadows.base)
   })
 
+  // Key order is behaviour: plugin.js builds theme.boxShadow in this order,
+  // and theme key order is CSS source order. DEFAULT last would let `.shadow`
+  // beat `.shadow-xl` on the same element.
+  it('keeps DEFAULT right after base', () => {
+    expect(Object.keys(tokens.shadows)).toEqual([
+      'none', 'sm', 'base', 'DEFAULT', 'md', 'lg', 'xl', '2xl',
+    ])
+  })
+
   // The dark elevation ramp stays in effects.js. Espresso 2.0 references
   // `elevation/light/*` on its dark page too, so it is not what we render.
   it('ships only the light elevation ramp', () => {

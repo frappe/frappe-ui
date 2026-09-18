@@ -112,11 +112,19 @@ export const radius = radiusTokens
  * frappe-ui renders and is not exported. Focus is a separate shape, and a
  * different CSS property: see `focusRing`.
  */
-export const shadows = {
-  none: 'none',
-  ...effectsData.elevation.light,
-  DEFAULT: effectsData.elevation.light.base,
-  ...effectsData.elevation.custom,
+export const shadows = buildShadows()
+
+// `DEFAULT` sits right after `base`, where the theme literal always had it.
+// `plugin.js` builds `theme.boxShadow` in this key order, and theme key order
+// is CSS source order: with `DEFAULT` last, `class="shadow shadow-xl"` would
+// resolve to `.shadow`, not `.shadow-xl`.
+function buildShadows() {
+  const out = { none: 'none' }
+  for (const [step, value] of Object.entries(effectsData.elevation.light)) {
+    out[step] = value
+    if (step === 'base') out.DEFAULT = value
+  }
+  return { ...out, ...effectsData.elevation.custom }
 }
 
 // Focus tokens arrive as single-layer `0 0 0 <spread> <color>` shadows.
