@@ -272,10 +272,13 @@ per-file edits.
 
 ### Package contract: peers, dependencies and the tarball (breaking)
 
-- **`tailwindcss` is a peer dependency, pinned to `>=3.4.0 <4`.** 3.4 is the
+- **`tailwindcss` is a peer dependency, pinned to `>=3.4.2 <4`.** 3.4 is the
   first version that derives the sizing families from `theme('spacing')`, which
   the preset depends on, and v4 does not read the JavaScript config the preset
   is written in. The install now fails instead of half-working at build time.
+  The floor is 3.4.2, not 3.4.0: the preset uses `import.meta.url`, and the
+  config loader in 3.4.0 and 3.4.1 cannot transform it, so the config fails to
+  load with a `SyntaxError`.
 - **`vite` and `vitepress` are optional peers**, with `shiki`,
   `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
   imports. An app that never imports `frappe-ui/vite` or `frappe-ui/vitepress`

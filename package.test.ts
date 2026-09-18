@@ -153,8 +153,10 @@ describe('exports', () => {
 describe('peer dependencies', () => {
   it('pins Tailwind to v3.4 or later, below v4', () => {
     // The preset is a v3 config object, and the spacing scale relies on v3.4
-    // reading `theme('spacing')` for minWidth/maxWidth/minHeight.
-    expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.0 <4')
+    // reading `theme('spacing')` for minWidth/maxWidth/minHeight. The floor is
+    // 3.4.2 because 3.4.0 and 3.4.1 cannot load a config that uses
+    // `import.meta`, which lucideIconsPlugin.js and content.js both do.
+    expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.2 <4')
   })
 
   /**

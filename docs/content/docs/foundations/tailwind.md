@@ -19,7 +19,7 @@ preset, `frappe-ui/tailwind` exports the `content` glob list, covered below. The
 design tokens are a separate entry point,
 [`frappe-ui/tailwind/tokens`](#the-token-exports).
 
-Requires **Tailwind `>=3.4.0 <4`**. It is a peer dependency. Tailwind v4 reads
+Requires **Tailwind `>=3.4.2 <4`**. It is a peer dependency. Tailwind v4 reads
 none of this shape, so the design tokens never load there.
 
 ## What the preset replaces

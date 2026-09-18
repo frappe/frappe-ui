@@ -14,7 +14,7 @@ npm install frappe-ui@beta vue-router@^4
 - **Vite 7, Node `>=20.19.0`.** frappe-ui builds and tests against `vite@^7.3.2` (`package.json` `engines`, `devDependencies`).
 - **`vue-router`.** It is a peer dependency (`vue-router@^4.1.6`). `<Button :route>`, `Breadcrumbs`, `SidebarItem`, `Tabs` and `PageHeaderBackButton` render `RouterLink` or call `useRouter()`, and warn without a router instance.
 - **Icons need no plugin.** frappe-ui draws icons from `lucide-<name>` class names, which the Tailwind plugin generates as CSS masks. The `lucideIcons` Vite sub-plugin is **off by default**; pass `lucideIcons: true` only if the app itself imports `~icons/lucide/*` or writes `<LucideX />` tags. `unplugin-icons`, `unplugin-auto-import`, `unplugin-vue-components` and `lucide-static` are already frappe-ui dependencies, so install none of them yourself.
-- **Tailwind is a peer dependency** (`tailwindcss@>=3.4.0 <4`), and so are `vite` and `vitepress` (both optional). Install Tailwind in the app.
+- **Tailwind is a peer dependency** (`tailwindcss@>=3.4.2 <4`), and so are `vite` and `vitepress` (both optional). Install Tailwind in the app.
 
 ## Import from the package `exports` subpaths
 

@@ -2749,7 +2749,7 @@ integers 1 to 128 and half steps 0.5 to 19.5. Tailwind 3.4 reads
 
 ### Dependencies {#packaging-dependencies}
 
-- Install `tailwindcss` yourself: it is a peer now, `>=3.4.0 <4`. An install on
+- Install `tailwindcss` yourself: it is a peer now, `>=3.4.2 <4`. An install on
   Tailwind v4 fails.
 - `vite` and `vitepress` are optional peers, with `shiki`,
   `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
