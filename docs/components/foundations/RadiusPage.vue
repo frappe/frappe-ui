@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import radius from '../../../tailwind/generated/radius.json'
+import radius from '../../../tailwind/tokens/radius.js'
 
 const NUMERIC_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 // Display order for the unified scale: numerics in order, then `full`.

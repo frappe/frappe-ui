@@ -517,6 +517,23 @@ describe('tokens v2 migration', () => {
     )
     expect(result.flagged.map((f) => f.token)).toEqual(['text-base-black'])
   })
+
+  // The token data used to live in `tailwind/generated/*.json`, which walk()
+  // skips by directory name and EXTENSIONS skips by extension. It is now
+  // `tailwind/tokens/*.js`, which the codemod walks like any consumer source.
+  // A retired name written there as prose reads as a usage and gets rewritten.
+  // Widening SKIP_DIRS is not the answer: a bare `tokens` entry would skip any
+  // consumer folder of that name. Keep the names out of the files instead.
+  it('finds nothing to rewrite in frappe-ui own token source', () => {
+    const dir = fileURLToPath(new URL('./tokens', import.meta.url))
+    for (const name of fs.readdirSync(dir)) {
+      if (!name.endsWith('.js') || name.endsWith('.test.js')) continue
+      const content = fs.readFileSync(path.join(dir, name), 'utf8')
+      const result = migrateTokens(content, { mode: 'full' })
+      expect(result.replacements, name).toEqual([])
+      expect(result.merges, name).toEqual([])
+    }
+  })
 })
 
 function writeTempFile(content) {

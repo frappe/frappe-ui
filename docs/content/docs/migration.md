@@ -2749,7 +2749,7 @@ integers 1 to 128 and half steps 0.5 to 19.5. Tailwind 3.4 reads
 
 ### Dependencies {#packaging-dependencies}
 
-- Install `tailwindcss` yourself: it is a peer now, `>=3.4.0 <4`. An install on
+- Install `tailwindcss` yourself: it is a peer now, `>=3.4.2 <4`. An install on
   Tailwind v4 fails.
 - `vite` and `vitepress` are optional peers, with `shiki`,
   `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
@@ -3170,13 +3170,62 @@ Full API: [the code editor docs](/docs/molecules/code-editor).
 
 ## `hljs-theme.css` and `tailwind/tokens.js` (removed)
 
-Two exports with no importers left are gone. Both breaks are loud — the
-specifier stops resolving.
+Both subpaths are gone. Both breaks are loud: the specifier stops resolving.
 
 | Removed                        | Replacement                                                     |
-| ------------------------------ | --------------------------------------------------------------- |
-| `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting |
-| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind`, the preset, imported directly             |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
+| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind/tokens` — new specifier **and** new names |
+
+The subpath is back, minus the `.js`. That is not the whole change. Two things
+move: the specifier, and every name behind it except `fontSize`. Dropping the
+extension alone leaves you importing names the module does not export, and the
+import fails to link. Rewrite the specifier and the import list together.
+
+An earlier revision of this guide sent you to the preset. That was wrong. The
+preset is a Tailwind `Config`, and its colours, radii and sizes are built
+inside `plugin.js` when Tailwind calls the plugin, so you cannot read a value
+out of it.
+
+```js
+// Before
+import {
+  borderRadius,
+  boxShadow,
+  fontSize,
+  generateCSSVariables,
+  generateSemanticColors,
+} from 'frappe-ui/tailwind/tokens.js'
+
+// After
+import {
+  radius,
+  shadows,
+  fontSize,
+  cssVariables,
+  semanticColors,
+} from 'frappe-ui/tailwind/tokens'
+```
+
+The names moved, and so did the shapes:
+
+| Before | After | What changed |
+| ------ | ----- | ------------ |
+| `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
+| `boxShadow` | `shadows` | Renamed. Still a flat map of composed `box-shadow` strings, with the same six elevation values plus `none`. Two things move: `DEFAULT` now sits right after `base` instead of last, and the `status` key is gone. It came from `elevation.custom`, which the Figma export stopped filling. |
+| `generateCSSVariables()[':root']` | `cssVariables.light` | A constant, not a function, and keyed by theme rather than by selector. `generateCSSVariables()['[data-theme="dark"]']` is `cssVariables.dark`, which still holds the same dark layer: the re-valued semantic and focus properties, plus the dark ramps under `--dark-*` names. |
+| `generateSemanticColors()` | `semanticColors.light` or `semanticColors.dark` | A constant, not a function, and one level deeper: the old return was theme-agnostic `color-mix(...)` strings, so it had no theme key. Pick a side, and get resolved `oklch(...)` values. |
+| `fontSize` | `fontSize` | The one name that survives. Each entry is now an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple, so a call site that destructured `const [size, meta] = fontSize.base` breaks. |
+
+The old module re-exported `colorPalette.js`, so its colours carried Tailwind
+sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
+`generateColorPalette()`, and a `color-mix(...)` wrapper around
+`calc(<alpha-value> * 100%)` from `generateSemanticColors()`. A colour picker
+handed either one renders an empty swatch. The new exports carry no sentinel.
+
+`colors`, `focusRing`, `fontFamily`, `fontWeight`, `screens`, `spacing` and
+`tracking` are exported from the same subpath. See
+[Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 

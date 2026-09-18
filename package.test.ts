@@ -144,13 +144,19 @@ describe('exports', () => {
     const missing = [...named(js)].filter((name) => !named(dts).has(name))
     expect(missing).toEqual([])
   })
+
+  // `frappe-ui/tailwind/tokens` had the same hazard until its `.d.ts` became a
+  // generated file. `tailwind/tokens/build.test.js` now holds that guard, and
+  // compares the whole file rather than the export names.
 })
 
 describe('peer dependencies', () => {
   it('pins Tailwind to v3.4 or later, below v4', () => {
     // The preset is a v3 config object, and the spacing scale relies on v3.4
-    // reading `theme('spacing')` for minWidth/maxWidth/minHeight.
-    expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.0 <4')
+    // reading `theme('spacing')` for minWidth/maxWidth/minHeight. The floor is
+    // 3.4.2 because 3.4.0 and 3.4.1 cannot load a config that uses
+    // `import.meta`, which lucideIconsPlugin.js and content.js both do.
+    expect(pkg.peerDependencies.tailwindcss).toBe('>=3.4.2 <4')
   })
 
   /**

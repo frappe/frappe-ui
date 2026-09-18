@@ -142,7 +142,7 @@ const OUTLINE_ALPHA_RENAMES = {
 
 // `tiny` and `13xl`-`16xl` were removed as unused vocabulary in #940 — no
 // utility ships for them anymore. Must stay in sync with `DROPPED_SIZES` in
-// `figma-tokens-to-theme.js`. Filtered out of the shift tables below so the
+// `tokens/build.js`. Filtered out of the shift tables below so the
 // codemod can never *rename a class onto one of these dead sizes*; see the
 // "no destination" handling further down for reporting pre-existing usage.
 const DEAD_SIZES = ['tiny', '13xl', '14xl', '15xl', '16xl']
@@ -666,7 +666,7 @@ const EXTENSIONS = new Set([
   '.vue', '.ts', '.tsx', '.js', '.jsx', '.md', '.css', '.scss', '.html',
 ])
 const SKIP_DIRS = new Set([
-  'node_modules', '.git', 'dist', 'cache', 'generated', 'espresso-v2-design-tokens',
+  'node_modules', '.git', 'dist', 'cache', 'generated',
 ])
 
 // Symlinks — directories and files alike — are followed only while their real

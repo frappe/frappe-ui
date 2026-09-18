@@ -4,7 +4,7 @@ Two paths: the starter template, or a manual setup you can paste into an
 existing Vite app.
 
 Requires **Node `>=20.19.0`**, **Vite**, **Vue 3** and **Tailwind CSS
-`>=3.4.0 <4`**. `vue`, `vue-router` and `tailwindcss` are peer dependencies;
+`>=3.4.2 <4`**. `vue`, `vue-router` and `tailwindcss` are peer dependencies;
 install them in your app.
 
 ## Quick start

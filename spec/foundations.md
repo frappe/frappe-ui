@@ -12,9 +12,24 @@ Architectural calls in this spec are recorded as ADRs:
 
 ## Source of truth
 
-Figma is the source of truth. The current design file is **espresso 2.0**: <https://www.figma.com/design/kMYnZ9ougpSSQBdjZCgtdX/espresso-2.0>
+Figma is where token values are **decided**. The current design file is **espresso 2.0**: <https://www.figma.com/design/kMYnZ9ougpSSQBdjZCgtdX/espresso-2.0>
 
-Token export lives in [`espresso-v2-design-tokens/`](../espresso-v2-design-tokens/) and is consumed by [`tailwind/figma-tokens-to-theme.js`](../tailwind/figma-tokens-to-theme.js), which writes the generated theme JSON to [`tailwind/generated/`](../tailwind/generated/).
+[`tailwind/tokens/`](../tailwind/tokens/) is where they are **recorded**. Four files hold the Figma tokens: `colors.js`, `radius.js`, `typography.js` and `effects.js`. They are the canonical source. [`tailwind/tokens.js`](../tailwind/tokens.js) reads them, and adds `spacing` and `screens`, which Figma does not define.
+
+[`tailwind/tokens/build.js`](../tailwind/tokens/build.js) writes those four files from the Figma export. It also writes [`provenance.json`](../tailwind/tokens/provenance.json): the Figma file id and a sha256 per input file. The raw export is not committed; it is an input, not a record. `provenance.json` answers which export produced the current values.
+
+`build.js` overrules the export in places, so the export alone does not state what frappe-ui uses. `RADIUS_OVERRIDE` and `FONT_WEIGHT_MAP` change values; both are listed in [§ Code-only extensions](#code-only-extensions) and enforced in `build.js`. `DROPPED_SIZES` and `DROPPED_CUSTOM_ELEVATIONS` drop tokens with no call sites (#940). The hex-to-oklch conversion and the shadow layer reversal change format, not value.
+
+### Re-syncing from Figma
+
+1. Export from Figma into `.figma-export/`. The directory is gitignored.
+2. Run `yarn sync-tokens`. It writes the four token files, `provenance.json`, and `tailwind/tokens.d.ts`.
+3. Review the diff on `tailwind/tokens/*.js`. A key added or removed also moves `tokens.d.ts`; a value that only changed does not.
+4. Commit.
+
+`tokens.d.ts` is generated from `tokens.js`, not from the export, so an edit to `tokens.js` alone re-syncs with `yarn sync-token-types`. A committed file that differs from the generator's output fails `tailwind/tokens/build.test.js`.
+
+Keep a token sync and an edit to `build.js` in separate commits. That separation is the only remaining signal that tells a reviewer whether a value moved because Figma moved or because the rules in `build.js` moved.
 
 Anything in this repo that diverges from Figma is either (a) drift to be fixed, or (b) an intentional code-only extension explicitly listed in [§ Code-only extensions](#code-only-extensions). There is no third category.
 
@@ -22,7 +37,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 
 | Decision | Direction |
 |---|---|
-| Source of truth | Figma file `espresso-2.0` |
+| Source of truth | Values decided in Figma file `espresso-2.0`, recorded in `tailwind/tokens/*.js` |
 | Typography model | Size, line-height and per-weight letter-spacing, generated from the Figma text-styles export. Weight names are mapped in code |
 | Named typography utilities | `text-{size}-{weight}` and `text-p-{size}-{weight}`, generated for every exported style. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
 | Focus indicator | A global `:focus-visible` outline from `--focus-outline-default`, retheme with `focus-visible:focus-ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
@@ -35,9 +50,9 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 ### Token model
 
 The type scale is generated from the Figma **text-styles** export
-(`espresso-v2-design-tokens/text.styles.tokens.json`) by
-[`tailwind/figma-tokens-to-theme.js`](../tailwind/figma-tokens-to-theme.js),
-which writes [`tailwind/generated/typography.json`](../tailwind/generated/typography.json).
+(`text.styles.tokens.json`) by
+[`tailwind/tokens/build.js`](../tailwind/tokens/build.js),
+which writes [`tailwind/tokens/typography.js`](../tailwind/tokens/typography.js).
 The variable export (`Typography.Desktop`) is not used for it: it rounds
 line-heights to px and drops per-size letter-spacing.
 
@@ -122,7 +137,7 @@ Numbered radius tokens are the canonical way to set border-radius. See [ADR-0006
 
 ### Canonical (use these)
 
-Generated from Figma `radius.*` tokens into [`tailwind/generated/radius.json`](../tailwind/generated/radius.json):
+Generated from Figma `radius.*` tokens into [`tailwind/tokens/radius.js`](../tailwind/tokens/radius.js):
 
 | Tailwind | px | Figma token |
 |---|---|---|
@@ -163,7 +178,7 @@ Figma espresso v2 defines two component color themes:
 - **`default`** — the gray ramp (`surface-gray-*`, `ink-gray-*`, `outline-gray-*`)
 - **`red`** — the red ramp (`surface-red-*`, `ink-red-*`, `outline-red-*`)
 
-Both are exported via [`tailwind/colors.json`](../tailwind/colors.json) → [`tailwind/generated/colors.json`](../tailwind/generated/colors.json) and resolved to CSS variables by [`tailwind/colorPalette.js`](../tailwind/colorPalette.js).
+Both are recorded in [`tailwind/tokens/colors.js`](../tailwind/tokens/colors.js) and resolved to CSS variables by `cssVariables` in [`tailwind/tokens.js`](../tailwind/tokens.js). [`tailwind/colorPalette.js`](../tailwind/colorPalette.js) shapes the same values for the Tailwind theme.
 
 Solid/subtle/outline/ghost ramps for these two themes are pixel-accurate to Figma.
 
@@ -197,8 +212,8 @@ Extensions to the Figma spec that the library ships **intentionally**, not as dr
 |---|---|---|
 | `xs`, `xl`, `2xl` button sizes | `Button.vue` `sizeClasses` | Sizes outside Figma's `sm`/`md`/`lg` scale. `xs` (24px, `text-xs`, `rounded-3`) covers compact toolbars/badges-as-buttons; `xl`/`2xl` are pre-espresso-v2 sizes preserved for back-compat. No Figma reference — use at own risk; visual treatment may shift if Figma adds these later. |
 | `blue`, `green`, (and other) themes | `Button.vue` `buttonClasses`, plus `Badge`, `Alert`, `Toast`, etc. | Semantic theming surface that pre-dates espresso v2. Figma currently only models `default` + `red` for components, but the underlying color ramps (blue, green, yellow, …) are first-class in the token export. |
-| Font weights | `tailwind/figma-tokens-to-theme.js` `FONT_WEIGHT_MAP` | The text-styles export's weight column is corrupt, so the five weights are named in code instead. Only regular's 420 differs from a standard Inter weight. |
-| `radius/9` = 100px | `tailwind/figma-tokens-to-theme.js` `RADIUS_OVERRIDE` | The token exports as 999px, a second pill radius beside `rounded-full`. Held at 100px until the Figma variable is corrected (ADR-0006). |
+| Font weights | `tailwind/tokens/build.js` `FONT_WEIGHT_MAP` | The text-styles export's weight column is corrupt, so the five weights are named in code instead. Only regular's 420 differs from a standard Inter weight. |
+| `radius/9` = 100px | `tailwind/tokens/build.js` `RADIUS_OVERRIDE` | The token exports as 999px, a second pill radius beside `rounded-full`. Held at 100px until the Figma variable is corrected (ADR-0006). |
 
 If Figma adds any of these later, the extensions become drift and should be reconciled.
 

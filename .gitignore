@@ -59,3 +59,10 @@ cypress/screenshots
 
 # Emitted by the composite tsconfig.node.json project on every type-check.
 *.tsbuildinfo
+
+# Raw Figma token export, dropped here by whoever runs the sync. It is an
+# input to `yarn sync-tokens`, not a record of anything: the committed record
+# is tailwind/tokens/*.js, and build.js holds every place frappe-ui
+# deliberately overrules the export (radius 9, font weights, dropped sizes,
+# the oklch conversion). See docs/content/docs/foundations/tailwind.md.
+.figma-export/

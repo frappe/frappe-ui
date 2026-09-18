@@ -1,5 +1,5 @@
 import preset from './tailwind/preset'
-import typography from './tailwind/generated/typography.json'
+import typography from './tailwind/tokens/typography.js'
 
 // The Typography docs page applies `text-<size>-<weight>` / `text-p-<size>-<weight>`
 // (and the bare regular `text-<size>`) via a computed class from its weight

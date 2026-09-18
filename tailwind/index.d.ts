@@ -15,3 +15,7 @@ export default preset
  * not merge a preset's `content`, so spread these into your own `content`.
  */
 export declare const content: string[]
+
+// The design tokens live at `frappe-ui/tailwind/tokens`, not here. This entry
+// statically imports `tailwindcss/plugin`, which plain Node does not resolve.
+// The token module imports nothing but its own data modules and loads anywhere.

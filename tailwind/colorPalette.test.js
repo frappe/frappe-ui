@@ -1,48 +1,47 @@
 /**
- * The CSS variables the plugin's base layer emits.
- *
- * Only the outline form of the focus ring ships (ADR-0005). The box-shadow
- * form collided with `shadow-*` on the same element and forced-colors mode
- * dropped it, and nothing in frappe-ui ever read it.
+ * The Tailwind-only shaping layer. `tokens.test.js` covers the values; this
+ * covers the two transforms that exist purely so Tailwind's `/<opacity>`
+ * modifier works.
  */
 import { describe, expect, it } from 'vitest'
-import { generateEffectVariables } from './colorPalette.js'
+import { generateColorPalette, generateSemanticColors } from './colorPalette.js'
+import { colors, semanticColors } from './tokens.js'
 
-const effects = generateEffectVariables()
-const light = effects[':root']
-const dark = effects['[data-theme="dark"]']
+const palette = generateColorPalette()
+const semantic = generateSemanticColors()
 
-const FOCUS_NAMES = ['default', 'red', 'green', 'amber', 'blue', 'violet']
-
-describe('focus variables', () => {
-  it('emits an outline variable per theme color, in both modes', () => {
-    for (const name of FOCUS_NAMES) {
-      expect(light[`--focus-outline-${name}`], `light ${name}`).toMatch(
-        /^\d+px solid /,
-      )
-      expect(dark[`--focus-outline-${name}`], `dark ${name}`).toMatch(
-        /^\d+px solid /,
-      )
-    }
-  })
-
-  it('emits no box-shadow form', () => {
-    const shadowForm = Object.keys({ ...light, ...dark }).filter(
-      (name) =>
-        name.startsWith('--focus-') && !name.startsWith('--focus-outline-'),
+describe('alpha placeholder', () => {
+  it('opens an alpha slot on solid oklch values', () => {
+    expect(palette.gray['500']).toBe(
+      colors.light.gray['500'].replace(/\)$/, ' / <alpha-value>)'),
     )
-    expect(shadowForm).toEqual([])
   })
 
-  it('keeps the 2px light / 3px dark width', () => {
-    expect(light['--focus-outline-default']).toMatch(/^2px solid /)
-    expect(dark['--focus-outline-default']).toMatch(/^3px solid /)
+  // Overlay ramps are deliberately translucent. Tailwind cannot compose a
+  // modifier onto an existing alpha channel, so they pass through untouched.
+  it('leaves values that already carry alpha alone', () => {
+    expect(palette['white-overlay']['50']).toBe(colors.overlay.white['50'])
+    expect(palette['white-overlay']['50']).not.toContain('<alpha-value>')
+  })
+
+  it('exposes dark ramps under a dark- prefix', () => {
+    expect(palette['dark-gray']['500']).toContain('<alpha-value>')
   })
 })
 
-describe('elevation variables', () => {
-  it('uses the light values in both modes', () => {
-    expect(light['--elevation-sm']).toBeDefined()
-    expect(dark['--elevation-sm']).toBeUndefined()
+describe('semantic colors', () => {
+  // A `var(...)` reference has no alpha slot, so `bg-surface-base/50` would be
+  // ignored without the color-mix wrapper. The light value rides along as the
+  // var's fallback so the colour still renders where the stylesheet is absent.
+  it('wraps the CSS variable with its light value as fallback', () => {
+    expect(semantic.surface.base).toBe(
+      `color-mix(in srgb, var(--surface-base, ${semanticColors.light.surface.base}) calc(<alpha-value> * 100%), transparent)`,
+    )
+  })
+
+  it('covers every category the token layer defines', () => {
+    expect(Object.keys(semantic).sort()).toEqual(
+      Object.keys(semanticColors.light).sort(),
+    )
   })
 })

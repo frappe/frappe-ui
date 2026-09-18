@@ -56,8 +56,8 @@ Three alternatives were considered:
 
 ## Consequences
 
-- The values are generated, not hand-written. `tailwind/figma-tokens-to-theme.js`
-  reads the Figma text-styles export into `tailwind/generated/typography.json`,
+- The values are generated, not hand-written. `tailwind/tokens/build.js`
+  reads the Figma text-styles export into `tailwind/tokens/typography.js`,
   and `buildTextStyleUtilities()` in `tailwind/plugin.js` emits one class per
   (size, weight) from `tracking.text` and `tracking.paragraph`. Adding a style is
   a token re-export, not a code edit.

@@ -532,7 +532,7 @@ import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
 
 **`export *` only from a curated barrel.** An entry point may `export *` from an `index.ts` whose export list was reviewed — a component family's barrel, `data-fetching/`, `experimental.ts`. It may never `export *` from an implementation module. The two look identical in a diff and behave completely differently: a barrel's export list is the reviewed decision, while an implementation module exports whatever it happens to need exported next, and a helper added months later joins the public API with no review, no docs, and — after `1.0.0` — a freeze until `2.0.0`.
 
-This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. `tailwind/tokens.js` reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)).
+This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. The `tailwind/tokens.js` of the time reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)): it `export *`-ed `colorPalette.js`, an implementation module. The `tailwind/tokens.js` that ships today is the curated kind. It spells out every token it exports, and `colorPalette.js` is not exported at all.
 
 The rule is a one-line grep, and the fix is mechanical — spell the members out:
 
@@ -553,7 +553,7 @@ export * from './components/Button'
 
 Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.
 
-**Build-time and tooling entries are a separate category.** `tailwind`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
+**Build-time and tooling entries are a separate category.** `tailwind`, `tailwind/tokens`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
 
 **A build-time entry freezes additive-only at `1.0.0`.** Options, tokens, utilities, and compiler options may be *added* in a minor. Nothing may be renamed or removed before `2.0.0`.
 

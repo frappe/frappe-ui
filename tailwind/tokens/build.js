@@ -1,22 +1,51 @@
 /**
- * Generator: reads the W3C Design Tokens Community Group JSON exported from
- * Figma (espresso-v2-design-tokens/) and emits theme JSON files that the
- * tailwind plugin can consume.
+ * Importer: reads the W3C Design Tokens Community Group JSON exported from
+ * Figma and writes the committed token files.
  *
- *   Inputs:  espresso-v2-design-tokens/*.tokens.json
- *   Outputs: tailwind/generated/{colors,radius,typography}.json
+ *   Input:   .figma-export/*.tokens.json  (gitignored — see below)
+ *   Output:  tailwind/tokens/{colors,radius,typography,effects}.js
+ *            tailwind/tokens/provenance.json
+ *            tailwind/tokens.d.ts  (via build-types.js, from the new data)
  *
- * Run with: yarn sync-tokens
+ * The raw export is NOT committed. It is a drop directory, not a record: it
+ * ships nothing, it changed six times in four months, and it does not say
+ * what frappe-ui actually uses. The committed record is the output above, and
+ * this file is where frappe-ui deliberately overrules the export —
+ * RADIUS_OVERRIDE, FONT_WEIGHT_MAP, DROPPED_SIZES, DROPPED_CUSTOM_ELEVATIONS,
+ * the hex→oklch conversion and the shadow layer reversal. Those are code-side
+ * opinions, which is why they live in a tested Node script rather than in a
+ * Figma plugin that no CI can run.
+ *
+ * To re-sync: export from Figma into `.figma-export/`, run `yarn sync-tokens`,
+ * review the diff on tailwind/tokens/*.js, commit. Keep a token sync and an
+ * edit to this file in separate commits — that separation is the only thing
+ * that tells a reviewer whether a value moved because Figma moved or because
+ * the rules here did.
+ *
+ * `yarn sync-tokens` also rewrites `tailwind/tokens.d.ts`, which is generated
+ * from the token data. An edit to `tokens.js` that adds or renames a key needs
+ * that file rewritten but needs no Figma export: run `yarn sync-token-types`.
  */
 
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+// Imports no token data of its own: it reads `tokens.js` through a dynamic
+// import, which main() reaches only after the new data files are on disk.
+import { writeTokenTypes } from './build-types.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const REPO_ROOT = path.resolve(__dirname, '..')
-const TOKENS_DIR = path.join(REPO_ROOT, 'espresso-v2-design-tokens')
-const OUT_DIR = path.join(__dirname, 'generated')
+const REPO_ROOT = path.resolve(__dirname, '..', '..')
+const TOKENS_DIR = path.join(REPO_ROOT, '.figma-export')
+const OUT_DIR = __dirname
+
+// The Figma file the export is meant to come from. Figma's export carries no
+// file id anywhere, not even in manifest.json, so nothing here can check this
+// — it is a note recorded in provenance.json for whoever re-syncs next.
+// What does catch a stale drop is `inputs` below: a sha256 per file read, so
+// re-running against an older export moves those hashes in the diff.
+const FIGMA_FILE = 'kMYnZ9ougpSSQBdjZCgtdX'
 
 // Color families mirrored from Figma's "🔵 Colour primitives" collection.
 // Each appears under `light.<family>` and `dark.<family>` plus their alpha pair.
@@ -80,7 +109,7 @@ const FONT_WEIGHT_MAP = {
 // ---------- HEX → OKLCH ----------
 
 // Figma exports every color as hex (8-digit when it carries alpha), but
-// colors.json ships oklch (fa18b8ade). Convert at generation time so a
+// colors.js ships oklch (fa18b8ade). Convert at generation time so a
 // routine `yarn sync-tokens` can't revert the palette to hex (#986).
 // Math from Björn Ottosson's OKLab reference implementation.
 
@@ -126,14 +155,48 @@ export function toOklch(value) {
     : value
 }
 
+// Every export file this run actually read, with its hash. Only the files
+// reached through readTokens land here, so provenance.json lists the six
+// inputs that matter rather than whatever happens to sit in the drop
+// directory (a stock Figma export also carries gradients, layout grids and a
+// typography variable collection that nothing below consumes).
+const inputsRead = new Map()
+
 function readTokens(filename) {
-  return JSON.parse(fs.readFileSync(path.join(TOKENS_DIR, filename), 'utf8'))
+  const raw = fs.readFileSync(path.join(TOKENS_DIR, filename), 'utf8')
+  inputsRead.set(
+    filename,
+    'sha256:' + crypto.createHash('sha256').update(raw).digest('hex'),
+  )
+  return JSON.parse(raw)
 }
 
-function ensureOutDir() {
-  fs.mkdirSync(OUT_DIR, { recursive: true })
+// The four token files are JS modules, not JSON. An import attribute
+// (`with { type: 'json' }`) is the only way to read JSON from an ES module,
+// and the older config loaders in the supported peer range cannot parse it:
+// a consumer's tailwind.config.js reaches tokens.js through the preset.
+// A plain module has no such rule and can carry the header below.
+//
+// The body stays `JSON.stringify(data, null, 2)`, so a token diff reads the
+// same as it did when these were .json files.
+export function serializeTokenModule(data) {
+  return (
+    '// Generated by tailwind/tokens/build.js via `yarn sync-tokens`.\n' +
+    '// Do not edit by hand.\n\n' +
+    'export default ' +
+    JSON.stringify(data, null, 2) +
+    '\n'
+  )
 }
 
+function writeTokenModule(filename, data) {
+  const filepath = path.join(OUT_DIR, filename)
+  fs.writeFileSync(filepath, serializeTokenModule(data))
+  console.log(`  wrote ${path.relative(REPO_ROOT, filepath)}`)
+}
+
+// provenance.json stays JSON. Nothing imports it; it is read by a person, or
+// by `git diff`.
 function writeJSON(filename, data) {
   const filepath = path.join(OUT_DIR, filename)
   fs.writeFileSync(filepath, JSON.stringify(data, null, 2) + '\n')
@@ -142,7 +205,7 @@ function writeJSON(filename, data) {
 
 // ---------- COLORS ----------
 
-// Build colors.json in the shape colorPalette.js already consumes:
+// Build colors.js in the shape colorPalette.js already consumes:
 //   { lightMode, darkMode, overlay, neutral, themedVariables: { light, dark } }
 function buildColors() {
   const primitives = readTokens('Colour primitives.Light.tokens.json')
@@ -197,10 +260,11 @@ function buildColors() {
   return colors
 }
 
-// No legacy aliases: retired names (surface-white, surface-modal,
-// outline-gray-modals, …) are intentionally NOT emitted so straggler usage
-// fails visibly instead of silently keeping old styles alive. Migrate old
-// code with tailwind/migrate-tokens-v2.js.
+// No legacy aliases: the retired v1 names are intentionally NOT emitted, so
+// straggler usage fails visibly instead of silently keeping old styles alive.
+// TOKEN_RENAMES in tailwind/migrate-tokens-v2.js holds the full list; run that
+// codemod on old code. Do not spell a retired name anywhere in this directory:
+// the codemod walks it, and would rewrite the prose as if it were a usage.
 
 function mapShades(family) {
   const out = {}
@@ -255,7 +319,7 @@ function collectSemanticCategory(styles, category, target) {
 }
 
 // Convert a DTCG alias string like "{light.gray.50}" into the reference shape
-// stored in colors.json today: "lightMode/gray/50". Non-aliases (literal hex)
+// stored in colors.js today: "lightMode/gray/50". Non-aliases (literal hex)
 // convert to oklch like every other resolved value.
 function aliasToReference(value) {
   if (typeof value !== 'string') return value
@@ -386,7 +450,7 @@ function buildTypography() {
       {
         lineHeight: pctToRatio(v.lineHeight),
         letterSpacing: lsToEm(v.letterSpacing),
-        fontWeight: String(FONT_WEIGHT_MAP.regular),
+        fontWeight: FONT_WEIGHT_MAP.regular,
       },
     ]
     if (v.textTransform && v.textTransform !== 'none')
@@ -476,29 +540,62 @@ function shadowToCss(layers) {
     .join(', ')
 }
 
+// ---------- PROVENANCE ----------
+
+// The raw export is not committed, so the outputs alone cannot answer "which
+// export produced this?". Record the answer: the Figma file and a hash per
+// input file. Re-running against a stale drop directory then moves those
+// hashes in the diff, instead of passing silently. The reverse reading holds
+// too: outputs that change while `inputs` stands still means a rule in this
+// file moved, not Figma.
+//
+// No date field: mtime survives neither `cp` nor a fresh clone, and a wrong
+// date is worse than none. The commit that carries this file is the date.
+function buildProvenance() {
+  const files = [...inputsRead.keys()].sort()
+  return {
+    figmaFile: FIGMA_FILE,
+    inputs: Object.fromEntries(files.map((f) => [f, inputsRead.get(f)])),
+  }
+}
+
 // ---------- MAIN ----------
 
-function main() {
+async function main() {
   if (!fs.existsSync(TOKENS_DIR)) {
-    console.error(`✗ tokens directory not found: ${TOKENS_DIR}`)
+    console.error(
+      `✗ no Figma export found at ${path.relative(REPO_ROOT, TOKENS_DIR)}/\n` +
+        `  Export the espresso 2.0 token set from Figma into that directory,\n` +
+        `  then re-run. The directory is gitignored on purpose; see the header\n` +
+        `  of this file.`,
+    )
     process.exit(1)
   }
 
   console.log(`Reading tokens from ${path.relative(REPO_ROOT, TOKENS_DIR)}/`)
-  ensureOutDir()
 
-  writeJSON('colors.json', buildColors())
-  writeJSON('radius.json', buildRadius())
-  writeJSON('typography.json', buildTypography())
-  writeJSON('effects.json', buildEffects())
+  // Build every output before writing any of them. A malformed or missing
+  // input throws from the builder it reaches, and writing as we went would
+  // leave the earlier files overwritten beside stale later ones — an
+  // inconsistent token set, committed by whoever ran the sync and did not
+  // read the stack trace. provenance.json is built last: it reports the
+  // inputs the builders actually read.
+  const outputs = {
+    'colors.js': buildColors(),
+    'radius.js': buildRadius(),
+    'typography.js': buildTypography(),
+    'effects.js': buildEffects(),
+  }
+  const provenance = buildProvenance()
 
-  // colors.json is consumed from tailwind/ (top-level) by colorPalette.js, while
-  // the generator emits to tailwind/generated/. Copy it up so `yarn sync-tokens`
-  // is the single source of truth (no manual copy step).
-  fs.copyFileSync(
-    path.join(OUT_DIR, 'colors.json'),
-    path.join(__dirname, 'colors.json'),
-  )
+  for (const [filename, data] of Object.entries(outputs)) {
+    writeTokenModule(filename, data)
+  }
+  writeJSON('provenance.json', provenance)
+
+  // Last, and off the files just written: the declaration file is generated
+  // from the token data, so it has to see this run's values.
+  await writeTokenTypes()
 
   console.log('✓ done')
 }
@@ -507,4 +604,4 @@ const scriptPath = fileURLToPath(import.meta.url)
 const invokedPath = process.argv[1]
 const isCLI =
   invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
-if (isCLI) main()
+if (isCLI) await main()

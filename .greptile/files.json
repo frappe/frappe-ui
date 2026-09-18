@@ -116,7 +116,6 @@
       "path": "spec/foundations.md",
       "scope": [
         "tailwind/**",
-        "espresso-v2-design-tokens/**",
         "src/style.css",
         "src/fonts/**"
       ]

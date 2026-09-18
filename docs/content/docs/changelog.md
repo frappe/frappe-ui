@@ -9,6 +9,101 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Tailwind preset — the design tokens are exported as data
+
+`frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,
+`cssVariables`, `focusRing`, `fontFamily`, `fontSize`, `fontWeight`, `radius`,
+`screens`, `semanticColors`, `shadows`, `spacing` and `tracking`. One type ships
+with them: `TextStyle`, the shape of a single `fontSize` entry.
+
+Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
+string, a plain number. Nothing carries a Tailwind sentinel, so no
+`<alpha-value>` and no `color-mix(...)` reaches a consumer that wants a value
+rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
+`plugin.js`.
+
+The tokens get their own subpath because `frappe-ui/tailwind` statically
+imports `tailwindcss/plugin`, which plain Node does not resolve. That is enough
+to keep the preset entry inside a bundler. The token module imports nothing but
+the four data modules beside it and loads anywhere. Per ADR-0010 build-time entries
+are additive-only until `2.0.0`, so a second one is allowed and neither may be
+renamed.
+
+- `semanticColors` is `{ light, dark }` with resolved values, keyed by
+  category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).
+- `fontSize` entries are objects `{ fontSize, lineHeight, letterSpacing,
+  fontWeight }`, not Tailwind's `[size, meta]` tuple. Both families ship:
+  `base` for text, `p-base` for paragraph.
+- `shadows` is a flat map of composed `box-shadow` strings, keyed like the
+  `shadow-*` utilities: `none`, `sm` through `2xl`, and `DEFAULT`. Only the
+  light elevation ramp ships, because that is the one both themes render.
+- `focusRing` is `{ light, dark }` and holds `outline` shorthands, not
+  box-shadows: frappe-ui draws focus with `outline` (ADR-0005).
+- `cssVariables` is keyed by theme: `light` goes on `:root`, `dark` on
+  `[data-theme="dark"]`. `dark` re-values the semantic and focus properties
+  and adds the dark ramps under `--dark-*` names. The light ramps, elevation
+  and radius are in `light` only, because they do not flip by theme.
+- Keys are typed literally, so a wrong key does not compile and an editor
+  completes the real names. Values stay `string`, or `number` for a font
+  weight, so a token sync moves values and never a type. A font weight is a
+  number in both places: `fontSize.base.fontWeight === fontWeight.regular`.
+
+This is additive, and it is the replacement for the removed
+`tailwind/tokens.js`. The names and shapes differ from that module; the
+[migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed)
+gives the before and after, and
+[Tailwind Setup](/docs/foundations/tailwind#the-token-exports) documents each
+export.
+
+### Tailwind tokens — one committed source, no vendored Figma export
+
+The token files moved. `tailwind/generated/*.json` is now
+`tailwind/tokens/*.js` (`colors`, `radius`, `typography`, `effects`), and those
+four files are the canonical token source. The importer
+`tailwind/figma-tokens-to-theme.js` is now `tailwind/tokens/build.js`, still
+run by `yarn sync-tokens`.
+
+One token value changed, and only its type: each `fontSize` entry now carries
+the number `420` for `fontWeight`, where it carried the string `"420"` before.
+`fontWeight.regular` was already a number, so `fontSize.base.fontWeight ===
+fontWeight.regular` is now true. The resolved preset theme carries the number
+too: `theme.fontSize.base[1].fontWeight` is `420`, not `'420'`. Tailwind writes
+`font-weight: 420` from either, so the compiled CSS is byte-identical. Every
+other value is unchanged.
+
+No package export pointed at any of these paths, so nothing a consumer can
+import moves. A fork or a script that reads the files from `node_modules` by
+path needs the new path, and the new extension.
+
+- **`tailwind/colors.json` is deleted.** It was byte-identical to the
+  generated copy. A hand-edit to it took effect in the build and was silently
+  reverted by the next sync.
+- **`espresso-v2-design-tokens/` is deleted.** The raw Figma export never
+  shipped (it was not in `files`), it changed six times in four months, and
+  four of its ten files were never read. It also does not describe what
+  frappe-ui uses: `build.js` overrides the radius `9` value, overrules a
+  corrupt font-weight column, drops five sizes, and converts every colour to
+  oklch. The export is an input, so it now goes in a gitignored
+  `.figma-export/` drop directory that the person running the sync fills.
+- **`tailwind/tokens/provenance.json` is new.** It holds the Figma file id and
+  a sha256 per input file, which records which export produced the committed
+  values.
+- **The four token files are JS modules, not JSON.** They are
+  `tailwind/tokens/*.js`, each an `export default` of the same data under a
+  generated-file header. Reading JSON from an ES module needs an import
+  attribute (`with { type: 'json' }`), and the oldest config loaders in the
+  supported peer range cannot parse one. A consumer's `tailwind.config.js`
+  reaches this data through the preset, so the attribute is gone. Values are
+  unchanged.
+
+  A script that reads `tailwind/generated/*.json` or `tailwind/colors.json`
+  out of `node_modules` by path has no file to read. Import the values
+  instead: `import { semanticColors } from 'frappe-ui/tailwind/tokens'`. Raven,
+  wiki and the LMS tests read by path today.
+
+To re-sync: export into `.figma-export/`, run `yarn sync-tokens`, review the
+diff on `tailwind/tokens/*.js`, commit.
+
 ### Pickers — `open` is honored at mount (breaking, silent)
 
 `DatePicker`, `DateRangePicker`, `DateTimePicker` and `TimePicker` seeded their
@@ -188,10 +283,13 @@ per-file edits.
 
 ### Package contract: peers, dependencies and the tarball (breaking)
 
-- **`tailwindcss` is a peer dependency, pinned to `>=3.4.0 <4`.** 3.4 is the
+- **`tailwindcss` is a peer dependency, pinned to `>=3.4.2 <4`.** 3.4 is the
   first version that derives the sizing families from `theme('spacing')`, which
   the preset depends on, and v4 does not read the JavaScript config the preset
   is written in. The install now fails instead of half-working at build time.
+  The floor is 3.4.2, not 3.4.0: the preset uses `import.meta.url`, and the
+  config loader in 3.4.0 and 3.4.1 cannot transform it, so the config fails to
+  load with a `SyntaxError`.
 - **`vite` and `vitepress` are optional peers**, with `shiki`,
   `@shikijs/transformers` and `@vue/compiler-dom`, which `frappe-ui/vitepress`
   imports. An app that never imports `frappe-ui/vite` or `frappe-ui/vitepress`
@@ -1956,14 +2054,22 @@ class the editor and list molecules emit.
 ### Tailwind preset — `tokens.js` export removed (breaking)
 
 The `./tailwind/tokens.js` export is removed outright, with no deprecation
-window. It had zero importers anywhere and re-exported `colorPalette.js` via
-`export *`, the implementation-module re-export pattern disallowed by P15.
-Use the preset (`frappe-ui/tailwind`) directly.
+window. It re-exported `colorPalette.js` via `export *`, the
+implementation-module re-export pattern disallowed by P15.
 
 This ships before the `1.0.0` tag, while the library "evolves freely" (P13) —
 the freeze that requires a deprecation window starts at the tag, not before
-it. Zero call sites is also why it's a same-release removal rather than a
-carried-forward deprecation: there is no consumer for a warning to reach.
+it.
+
+**Correction.** This entry said the export had zero importers anywhere. That
+was wrong. `frappe/studio` imports it at
+`frontend/src/utils/espressoTokens.ts`. A code search across `org:frappe`
+finds Studio as the only consumer, and Studio pins `frappe-ui@1.0.0-beta.25`,
+so the break has not reached it. The advice to use the preset directly was
+also wrong: the preset is a Tailwind `Config` and carries no readable values.
+The subpath is back as `frappe-ui/tailwind/tokens`, without the `.js` and in
+a new shape. See the Unreleased entry above and the
+[migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed).
 
 ### Tailwind preset — unused token vocabulary and utilities removed (breaking)
 

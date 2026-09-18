@@ -10,7 +10,12 @@
     "experimental/**/*.d.ts",
     "experimental/**/*.tsx",
     "experimental/**/*.vue",
-    "vite/index.d.ts"
+    "vite/index.d.ts",
+    // The generated token declarations and the type test that proves their
+    // keys are literal. Nothing under src/ imports either, so `yarn
+    // type-check` is the only thing that reads them.
+    "tailwind/tokens.d.ts",
+    "tailwind/tokens.types.test.ts"
   ],
   "exclude": [
     "src/**/*.cy.ts",
