@@ -42,8 +42,9 @@ renamed.
 - `cssVariables` is keyed by theme: `light` goes on `:root`, `dark` on
   `[data-theme="dark"]` and holds only the properties that change.
 - Keys are typed literally, so a wrong key does not compile and an editor
-  completes the real names. Values stay `string`, or `number` for `fontWeight`,
-  so a token sync moves values and never a type.
+  completes the real names. Values stay `string`, or `number` for a font
+  weight, so a token sync moves values and never a type. A font weight is a
+  number in both places: `fontSize.base.fontWeight === fontWeight.regular`.
 
 This is additive, and it is the replacement for the removed
 `tailwind/tokens.js`. The names and shapes differ from that module; the

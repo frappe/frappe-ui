@@ -166,7 +166,8 @@ removed.
 
 Every key is typed as a literal, so your editor completes the real names and
 `semanticColors.light.surface.typo` does not compile. Values stay `string`
-(`fontWeight` is `number`), which keeps a token sync out of your build: it
+(a font weight is a `number`, in `fontWeight` and in each `fontSize` entry),
+which keeps a token sync out of your build: it
 moves values, never types.
 
 ## Where the tokens come from

@@ -449,7 +449,7 @@ function buildTypography() {
       {
         lineHeight: pctToRatio(v.lineHeight),
         letterSpacing: lsToEm(v.letterSpacing),
-        fontWeight: String(FONT_WEIGHT_MAP.regular),
+        fontWeight: FONT_WEIGHT_MAP.regular,
       },
     ]
     if (v.textTransform && v.textTransform !== 'none')

@@ -18,7 +18,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.01em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "xs": [
@@ -26,7 +26,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "sm": [
@@ -34,7 +34,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "base": [
@@ -42,7 +42,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "md": [
@@ -50,7 +50,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "lg": [
@@ -58,7 +58,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "xl": [
@@ -66,7 +66,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "2xl": [
@@ -74,7 +74,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.01em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "3xl": [
@@ -82,7 +82,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.005em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "4xl": [
@@ -90,7 +90,7 @@ export default {
       {
         "lineHeight": "1.15",
         "letterSpacing": "0.005em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "5xl": [
@@ -98,7 +98,7 @@ export default {
       {
         "lineHeight": "1.6",
         "letterSpacing": "0.01em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "6xl": [
@@ -106,7 +106,7 @@ export default {
       {
         "lineHeight": "1.6",
         "letterSpacing": "0.01em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "7xl": [
@@ -114,7 +114,7 @@ export default {
       {
         "lineHeight": "1.6",
         "letterSpacing": "0.02em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "8xl": [
@@ -122,7 +122,7 @@ export default {
       {
         "lineHeight": "1.4",
         "letterSpacing": "0em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "9xl": [
@@ -130,7 +130,7 @@ export default {
       {
         "lineHeight": "1.4",
         "letterSpacing": "0em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "10xl": [
@@ -138,7 +138,7 @@ export default {
       {
         "lineHeight": "1.4",
         "letterSpacing": "0em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "11xl": [
@@ -146,7 +146,7 @@ export default {
       {
         "lineHeight": "1.4",
         "letterSpacing": "0em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ],
     "12xl": [
@@ -154,7 +154,7 @@ export default {
       {
         "lineHeight": "1.4",
         "letterSpacing": "0.005em",
-        "fontWeight": "420"
+        "fontWeight": 420
       }
     ]
   },

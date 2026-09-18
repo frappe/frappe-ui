@@ -58,12 +58,14 @@ describe('token key types', () => {
     expectTypeOf(fontWeight.regular).toEqualTypeOf<number>()
   })
 
-  it('keeps TextStyle exported, with string members', () => {
+  // `fontWeight` is a number here and in the `fontWeight` export, so
+  // `fontSize.base.fontWeight === fontWeight.regular` holds.
+  it('keeps TextStyle exported, with a numeric fontWeight', () => {
     expectTypeOf<TextStyle>().toEqualTypeOf<{
       fontSize: string
       lineHeight: string
       letterSpacing: string
-      fontWeight: string
+      fontWeight: number
     }>()
   })
 })
