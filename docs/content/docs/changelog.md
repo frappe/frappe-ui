@@ -13,7 +13,8 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 `frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,
 `cssVariables`, `focusRing`, `fontFamily`, `fontSize`, `fontWeight`, `radius`,
-`screens`, `semanticColors`, `shadows`, `spacing` and `tracking`.
+`screens`, `semanticColors`, `shadows`, `spacing` and `tracking`. One type ships
+with them: `TextStyle`, the shape of a single `fontSize` entry.
 
 Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
 string, a plain number. Nothing carries a Tailwind sentinel, so no
@@ -22,10 +23,9 @@ rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
 `plugin.js`.
 
 The tokens get their own subpath because `frappe-ui/tailwind` statically
-imports `tailwindcss/plugin`, `@tailwindcss/forms` and
-`@tailwindcss/typography`. None of the three resolve under plain Node, so that
-entry only loads inside a bundler. The token module imports nothing but the
-four data modules beside it and loads anywhere. Per ADR-0010 build-time entries
+imports `tailwindcss/plugin`, which plain Node does not resolve. That is enough
+to keep the preset entry inside a bundler. The token module imports nothing but
+the four data modules beside it and loads anywhere. Per ADR-0010 build-time entries
 are additive-only until `2.0.0`, so a second one is allowed and neither may be
 renamed.
 
@@ -59,7 +59,15 @@ The token files moved. `tailwind/generated/*.json` is now
 `tailwind/tokens/*.js` (`colors`, `radius`, `typography`, `effects`), and those
 four files are the canonical token source. The importer
 `tailwind/figma-tokens-to-theme.js` is now `tailwind/tokens/build.js`, still
-run by `yarn sync-tokens`. No token value changed.
+run by `yarn sync-tokens`.
+
+One token value changed, and only its type: each `fontSize` entry now carries
+the number `420` for `fontWeight`, where it carried the string `"420"` before.
+`fontWeight.regular` was already a number, so `fontSize.base.fontWeight ===
+fontWeight.regular` is now true. The resolved preset theme carries the number
+too: `theme.fontSize.base[1].fontWeight` is `420`, not `'420'`. Tailwind writes
+`font-weight: 420` from either, so the compiled CSS is byte-identical. Every
+other value is unchanged.
 
 No package export pointed at any of these paths, so nothing a consumer can
 import moves. A fork or a script that reads the files from `node_modules` by

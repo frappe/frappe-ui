@@ -3212,7 +3212,7 @@ The names moved, and so did the shapes:
 | Before | After | What changed |
 | ------ | ----- | ------------ |
 | `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
-| `boxShadow` | `shadows` | Renamed. Still a flat map with `none` and `DEFAULT`, but each value is the composed `box-shadow` string, not a `var(--elevation-*)` reference. The focus rings moved to `focusRing`. |
+| `boxShadow` | `shadows` | Renamed. Still a flat map of composed `box-shadow` strings, with the same six elevation values plus `none`. Two things move: `DEFAULT` now sits right after `base` instead of last, and the `status` key is gone. It came from `elevation.custom`, which the Figma export stopped filling. |
 | `generateCSSVariables()[':root']` | `cssVariables.light` | A constant, not a function, and keyed by theme rather than by selector. `generateCSSVariables()['[data-theme="dark"]']` is `cssVariables.dark`, which still holds only the properties that change. |
 | `generateSemanticColors()` | `semanticColors.light` or `semanticColors.dark` | A constant, not a function, and one level deeper: the old return was theme-agnostic `color-mix(...)` strings, so it had no theme key. Pick a side, and get resolved `oklch(...)` values. |
 | `fontSize` | `fontSize` | The one name that survives. Each entry is now an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple, so a call site that destructured `const [size, meta] = fontSize.base` breaks. |

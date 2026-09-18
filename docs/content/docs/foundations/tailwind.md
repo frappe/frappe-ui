@@ -111,11 +111,10 @@ number. No Tailwind sentinel reaches them, so nothing carries `<alpha-value>` or
 a `color-mix(...)` wrapper that renders as an empty swatch outside Tailwind.
 
 It is its own entry point, not part of `frappe-ui/tailwind`, because the preset
-statically imports `tailwindcss/plugin`, `@tailwindcss/forms` and
-`@tailwindcss/typography`. None of the three resolve under plain Node, so the
-preset entry only loads inside a bundler. The token module imports nothing but
-its own JSON and loads anywhere — a codegen step, a design tool or a script
-needs no build setup.
+statically imports `tailwindcss/plugin`, which plain Node does not resolve. That
+one import keeps the preset entry inside a bundler. The token module imports
+nothing but the four data modules beside it and loads anywhere — a codegen step,
+a design tool or a script needs no build setup.
 
 A style picker is the common case. Build the options from
 `semanticColors.light`, and point each value at the matching CSS variable. A
@@ -160,6 +159,9 @@ read the `--<category>-<name>` variables instead. They flip on their own.
 `fontSize` entries are objects, not Tailwind's `[size, meta]` tuple. The tuple
 is a Tailwind convention and this data does not speak Tailwind. `plugin.js`
 converts on the way into the theme.
+
+One type ships with the values: `TextStyle`, the shape of a single `fontSize`
+entry. Import it with `import type { TextStyle } from 'frappe-ui/tailwind/tokens'`.
 
 The names are additive-only until 2.0.0: names may be added, none renamed or
 removed.

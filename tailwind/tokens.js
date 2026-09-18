@@ -16,8 +16,8 @@
  * Exported as `frappe-ui/tailwind/tokens`, its own entry point. It imports
  * nothing but the four data modules beside it, so a Node script (codegen,
  * docs, a design tool) can read tokens with no bundler and no component tree.
- * The preset at `frappe-ui/tailwind` cannot: it statically imports three
- * Tailwind packages that plain Node does not resolve.
+ * The preset at `frappe-ui/tailwind` cannot: it statically imports
+ * `tailwindcss/plugin`, which plain Node does not resolve.
  *
  * Those four are plain modules, not JSON. Reading JSON from an ES module
  * needs an import attribute, and the oldest config loaders in the supported
