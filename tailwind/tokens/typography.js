@@ -16,7 +16,7 @@ export default {
     "2xs": [
       "11px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.01em",
         "fontWeight": 420
       }
@@ -24,7 +24,7 @@ export default {
     "xs": [
       "12px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -32,7 +32,7 @@ export default {
     "sm": [
       "13px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -40,7 +40,7 @@ export default {
     "base": [
       "14px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -48,7 +48,7 @@ export default {
     "md": [
       "15px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -56,7 +56,7 @@ export default {
     "lg": [
       "16px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -64,7 +64,7 @@ export default {
     "xl": [
       "17px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.02em",
         "fontWeight": 420
       }
@@ -72,7 +72,7 @@ export default {
     "2xl": [
       "18px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.01em",
         "fontWeight": 420
       }
@@ -80,7 +80,7 @@ export default {
     "3xl": [
       "20px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.005em",
         "fontWeight": 420
       }
@@ -88,7 +88,7 @@ export default {
     "4xl": [
       "24px",
       {
-        "lineHeight": "1.15",
+        "lineHeight": "1.35",
         "letterSpacing": "0.005em",
         "fontWeight": 420
       }

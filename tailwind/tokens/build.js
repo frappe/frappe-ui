@@ -11,7 +11,8 @@
  * ships nothing, it changed six times in four months, and it does not say
  * what frappe-ui actually uses. The committed record is the output above, and
  * this file is where frappe-ui deliberately overrules the export —
- * RADIUS_OVERRIDE, FONT_WEIGHT_MAP, DROPPED_SIZES, DROPPED_CUSTOM_ELEVATIONS,
+ * RADIUS_OVERRIDE, FONT_WEIGHT_MAP, TEXT_LINE_HEIGHT_OVERRIDE, DROPPED_SIZES,
+ * DROPPED_CUSTOM_ELEVATIONS,
  * the hex→oklch conversion and the shadow layer reversal. Those are code-side
  * opinions, which is why they live in a tested Node script rather than in a
  * Figma plugin that no CI can run.
@@ -379,6 +380,14 @@ const pctToRatio = (v) => String(round(parseFloat(v) / 100, 4)) // "115%" -> "1.
 // letter-spacing % of font size === em. `paragraph/5xl` exports as "0.5px" by an
 // exporter bug (should be "0.5%"); parseFloat keeps the number and we treat it
 // as a percent regardless of unit, which yields the intended value either way.
+// The UI text styles, sizes 2xs to 4xl, export at 115%, which cramps
+// any text that wraps. frappe-ui ships them at 135%. Single-line chrome opts
+// back to 1.15 with `leading-tighter` (tailwind/plugin.js). The paragraph and
+// display styles export other values and are not touched. Keep the override
+// until the Figma text styles move to 135%.
+const TEXT_LINE_HEIGHT_OVERRIDE = { '115%': '135%' }
+export const textLineHeight = (v) =>
+  pctToRatio(TEXT_LINE_HEIGHT_OVERRIDE[v] ?? v)
 const lsToEm = (v) => `${round(parseFloat(v) / 100, 5)}em` // "2%" -> "0.02em"
 
 function round(n, places) {
@@ -448,7 +457,7 @@ function buildTypography() {
     fontSize[key] = [
       v.fontSize,
       {
-        lineHeight: pctToRatio(v.lineHeight),
+        lineHeight: textLineHeight(v.lineHeight),
         letterSpacing: lsToEm(v.letterSpacing),
         fontWeight: FONT_WEIGHT_MAP.regular,
       },
