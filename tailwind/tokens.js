@@ -95,13 +95,54 @@ export const radius = radiusTokens
 // ---------- SHADOWS ----------
 
 /**
- * Elevation and focus shadows as composed CSS `box-shadow` strings.
+ * The box-shadows frappe-ui renders, as one flat map of composed
+ * `box-shadow` strings. Keyed the way the `shadow-*` utilities are: `none`,
+ * the six elevation steps, and `DEFAULT` for the bare `shadow` class.
  *
- * `elevation.light` is used in both themes — Espresso 2.0 references
- * `elevation/light/*` on its dark-mode page too — so `elevation.dark` exists
- * for completeness and is not what frappe-ui renders. Focus does mode-swap.
+ * Real values, not `var(--elevation-*)` references, so a consumer that has no
+ * frappe-ui stylesheet can still paint the shadow. `plugin.js` reads the key
+ * list from here and points each Tailwind key at its variable.
+ *
+ * Only the light steps ship. Espresso 2.0 references `elevation/light/*` on
+ * its dark-mode page too, so `elevation.dark` in `effects.json` is not what
+ * frappe-ui renders and is not exported. Focus is a separate shape, and a
+ * different CSS property: see `focusRing`.
  */
-export const shadows = effectsData
+export const shadows = {
+  none: 'none',
+  ...effectsData.elevation.light,
+  DEFAULT: effectsData.elevation.light.base,
+  ...effectsData.elevation.custom,
+}
+
+// Focus tokens arrive as single-layer `0 0 0 <spread> <color>` shadows.
+// Re-express as an `outline` shorthand so the focus ring never collides with
+// a `shadow-*` utility on the same element and survives forced-colors mode
+// (ADR-0005). Only the outline form is emitted; nothing reads `--focus-<name>`.
+function shadowToOutline(shadow) {
+  const parts = shadow.trim().split(/\s+/)
+  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
+}
+
+function toOutlines(layer) {
+  return Object.fromEntries(
+    Object.entries(layer).map(([name, value]) => [name, shadowToOutline(value)]),
+  )
+}
+
+/**
+ * The focus ring per theme, one entry per colour (`default`, `red`, `green`,
+ * `amber`, `blue`, `violet`).
+ *
+ * Each value is an `outline` shorthand — `'2px solid #c9c9c9e5'` — not a
+ * box-shadow. frappe-ui draws focus with `outline` (ADR-0005), and these are
+ * the exact strings behind `--focus-outline-<name>`. Light rings are 2px,
+ * dark ones 3px, which is why this one does mode-swap and `shadows` does not.
+ */
+export const focusRing = {
+  light: toOutlines(effectsData.focus.light),
+  dark: toOutlines(effectsData.focus.dark),
+}
 
 // ---------- TYPOGRAPHY ----------
 
@@ -178,15 +219,6 @@ export const screens = {
 
 // ---------- CSS VARIABLES ----------
 
-// Focus tokens arrive as single-layer `0 0 0 <spread> <color>` shadows.
-// Re-express as an `outline` shorthand so the focus ring never collides with
-// a `shadow-*` utility on the same element and survives forced-colors mode
-// (ADR-0005). Only the outline form is emitted; nothing reads `--focus-<name>`.
-function shadowToOutline(shadow) {
-  const parts = shadow.trim().split(/\s+/)
-  return `${parts[3]} solid ${parts.slice(4).join(' ')}`
-}
-
 function mergeLayers(...layers) {
   const out = {}
   for (const layer of layers) {
@@ -231,17 +263,19 @@ function effectVariables() {
   const root = {}
   const dark = {}
 
-  for (const [step, value] of Object.entries(shadows.elevation.light)) {
+  // Off `effectsData`, not off `shadows`: `shadows` carries `none` and
+  // `DEFAULT`, which are Tailwind key names with no variable of their own.
+  for (const [step, value] of Object.entries(effectsData.elevation.light)) {
     root[`--elevation-${step}`] = value
   }
-  for (const [name, value] of Object.entries(shadows.elevation.custom)) {
+  for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
     root[`--elevation-${name}`] = value
   }
-  for (const [name, value] of Object.entries(shadows.focus.light)) {
-    root[`--focus-outline-${name}`] = shadowToOutline(value)
+  for (const [name, value] of Object.entries(focusRing.light)) {
+    root[`--focus-outline-${name}`] = value
   }
-  for (const [name, value] of Object.entries(shadows.focus.dark)) {
-    dark[`--focus-outline-${name}`] = shadowToOutline(value)
+  for (const [name, value] of Object.entries(focusRing.dark)) {
+    dark[`--focus-outline-${name}`] = value
   }
 
   return { ':root': root, '[data-theme="dark"]': dark }

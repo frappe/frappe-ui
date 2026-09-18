@@ -3210,7 +3210,7 @@ The names moved, and so did the shapes:
 | Before | After | What changed |
 | ------ | ----- | ------------ |
 | `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
-| `boxShadow` | `shadows` | Renamed and nested: `{ elevation: { light, dark, custom }, focus: { light, dark } }`, not a flat map with `none` and `DEFAULT`. |
+| `boxShadow` | `shadows` | Renamed. Still a flat map with `none` and `DEFAULT`, but each value is the composed `box-shadow` string, not a `var(--elevation-*)` reference. The focus rings moved to `focusRing`. |
 | `generateCSSVariables()` | `cssVariables` | A constant, not a function. Keyed by selector: `':root'` and `'[data-theme="dark"]'`. |
 | `generateSemanticColors()` | `semanticColors` | A constant, not a function. `{ light, dark }` with resolved `oklch(...)` values, in place of theme-agnostic `color-mix(...)` strings. |
 | `fontSize` | `fontSize` | Same name. Each entry is an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple. |
@@ -3221,8 +3221,8 @@ sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
 `calc(<alpha-value> * 100%)` from `generateSemanticColors()`. A colour picker
 handed either one renders an empty swatch. The new exports carry no sentinel.
 
-`colors`, `fontFamily`, `fontWeight`, `screens`, `spacing` and `tracking`
-are exported from the same subpath. See
+`colors`, `focusRing`, `fontFamily`, `fontWeight`, `screens`, `spacing` and
+`tracking` are exported from the same subpath. See
 [Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)

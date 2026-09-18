@@ -28,9 +28,13 @@ export declare const cssVariables: VariableMap
 
 export declare const radius: Record<string, string>
 
-export declare const shadows: {
-  elevation: { light: Ramp; dark: Ramp; custom: Ramp }
-  focus: { light: Ramp; dark: Ramp }
+/** Composed `box-shadow` strings, keyed like the `shadow-*` utilities. */
+export declare const shadows: Record<string, string>
+
+/** `outline` shorthands per theme: `'2px solid #c9c9c9e5'`. */
+export declare const focusRing: {
+  light: Record<string, string>
+  dark: Record<string, string>
 }
 
 export declare const fontSize: Record<string, TextStyle>

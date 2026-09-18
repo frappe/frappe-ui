@@ -144,7 +144,8 @@ const backgroundOptions = Object.entries(semanticColors.light.surface).map(
 | `semanticColors` | `{ light, dark }`, each keyed by category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`) and then by name.           |
 | `cssVariables`   | Every token as a custom property, keyed by the selector it belongs on: `':root'` and `'[data-theme="dark"]'`.                         |
 | `radius`         | px per key: `0` to `9`, plus `none` and `full`.                                                                                       |
-| `shadows`        | `{ elevation: { light, dark, custom }, focus: { light, dark } }`. Each entry is a composed `box-shadow` string.                       |
+| `shadows`        | A flat map of composed `box-shadow` strings, keyed like the `shadow-*` utilities: `none`, `sm` … `2xl`, and `DEFAULT`.                |
+| `focusRing`      | `{ light, dark }`, each an `outline` shorthand per colour: `'2px solid #c9c9c9e5'`. frappe-ui draws focus as an outline.              |
 | `fontSize`       | One object per size: `{ fontSize, lineHeight, letterSpacing, fontWeight }`. `base` is the text family, `p-base` the paragraph family. |
 | `fontWeight`     | Numbers. `regular` is 420, not 400.                                                                                                   |
 | `fontFamily`     | `{ text: 'Inter Variable' }`.                                                                                                         |

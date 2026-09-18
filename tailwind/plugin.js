@@ -2,11 +2,12 @@ import plugin from 'tailwindcss/plugin'
 import { generateColorPalette, generateSemanticColors } from './colorPalette.js'
 import {
   cssVariables,
+  focusRing as focusRingTokens,
   fontSize as fontSizeTokens,
   fontWeight as fontWeightTokens,
   radius as radiusTokens,
   screens as screenTokens,
-  shadows as effectsData,
+  shadows as shadowTokens,
   tracking as trackingTokens,
 } from './tokens.js'
 import typographyTokens from './tokens/typography.json' with { type: 'json' }
@@ -27,6 +28,21 @@ let semanticColors = generateSemanticColors()
 // (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
 // the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
 // `rounded` utility no longer exists — use `rounded-4`.
+// The `shadow-*` key list is declared once, in tokens.js#shadows, so a new
+// elevation step reaches both the token map and the utility from one edit.
+// The theme values stay `var(--elevation-*)` so a themed page can retune a
+// step at runtime. `none` and `DEFAULT` are Tailwind key names, not tokens:
+// `none` has no variable and `DEFAULT` shares the `base` one.
+function buildBoxShadowConfig() {
+  const out = {}
+  for (const key of Object.keys(shadowTokens)) {
+    if (key === 'none') out[key] = 'none'
+    else if (key === 'DEFAULT') out[key] = 'var(--elevation-base)'
+    else out[key] = `var(--elevation-${key})`
+  }
+  return out
+}
+
 function buildRadiusConfig() {
   const out = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
@@ -68,7 +84,7 @@ function buildFontSize() {
 // Tailwind IntelliSense picks them up.
 function buildFocusRingUtilities() {
   const out = {}
-  for (const name of Object.keys(effectsData.focus.light)) {
+  for (const name of Object.keys(focusRingTokens.light)) {
     const className = name === 'default' ? '.focus-ring' : `.focus-ring-${name}`
     out[className] = {
       outline: `var(--focus-outline-${name})`,
@@ -208,16 +224,7 @@ export default plugin(
     theme: {
       colors: colorPalette,
       borderRadius: buildRadiusConfig(),
-      boxShadow: {
-        none: 'none',
-        sm: 'var(--elevation-sm)',
-        base: 'var(--elevation-base)',
-        DEFAULT: 'var(--elevation-base)',
-        md: 'var(--elevation-md)',
-        lg: 'var(--elevation-lg)',
-        xl: 'var(--elevation-xl)',
-        '2xl': 'var(--elevation-2xl)',
-      },
+      boxShadow: buildBoxShadowConfig(),
       container: {
         padding: {
           xl: '5rem',

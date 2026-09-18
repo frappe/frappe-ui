@@ -12,8 +12,8 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 ### Tailwind preset — the design tokens are exported as data
 
 `frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,
-`cssVariables`, `fontFamily`, `fontSize`, `fontWeight`, `radius`, `screens`,
-`semanticColors`, `shadows`, `spacing` and `tracking`.
+`cssVariables`, `focusRing`, `fontFamily`, `fontSize`, `fontWeight`, `radius`,
+`screens`, `semanticColors`, `shadows`, `spacing` and `tracking`.
 
 Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
 string, a plain number. Nothing carries a Tailwind sentinel, so no
@@ -33,6 +33,11 @@ until `2.0.0`, so a second one is allowed and neither may be renamed.
 - `fontSize` entries are objects `{ fontSize, lineHeight, letterSpacing,
   fontWeight }`, not Tailwind's `[size, meta]` tuple. Both families ship:
   `base` for text, `p-base` for paragraph.
+- `shadows` is a flat map of composed `box-shadow` strings, keyed like the
+  `shadow-*` utilities: `none`, `sm` through `2xl`, and `DEFAULT`. Only the
+  light elevation ramp ships, because that is the one both themes render.
+- `focusRing` is `{ light, dark }` and holds `outline` shorthands, not
+  box-shadows: frappe-ui draws focus with `outline` (ADR-0005).
 - `cssVariables` is keyed by the selector each property belongs on: `':root'`
   and `'[data-theme="dark"]'`.
 

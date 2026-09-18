@@ -37,7 +37,7 @@ The default focus ring is applied **globally** in the plugin's base layer, imple
 }
 ```
 
-- `tokens.js#cssVariables` holds `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped), and `plugin.js` emits it into the base layer. It is the only emitted form.
+- `tokens.js#cssVariables` holds `--focus-outline-<name>` (`<spread> solid <color>`, theme-flipped), and `plugin.js` emits it into the base layer. It is the only emitted form. The public `focusRing` export carries the same outline strings, keyed `{ light, dark }`.
 - The `.focus-ring{-<name>}` utilities are outline-based too. They exist for **themed overrides** (`focus-visible:focus-ring-red`) and **non-focus states** (`data-[state=open]:focus-ring`, `focus-within:focus-ring` on wrapper patterns).
 - Components do NOT declare a default focus ring; the base rule covers them. Utility classes (specificity ≥ (0,2,0), later layer) always beat the base rule, so:
   - suppress with `focus-visible:outline-none` (e.g. Dialog panel, ghost inputs),

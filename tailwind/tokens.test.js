@@ -12,11 +12,13 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import pkg from '../package.json' with { type: 'json' }
+import effects from './tokens/effects.json' with { type: 'json' }
 import * as tokens from './tokens.js'
 
 const PUBLIC_NAMES = [
   'colors',
   'cssVariables',
+  'focusRing',
   'fontFamily',
   'fontSize',
   'fontWeight',
@@ -134,6 +136,61 @@ describe('fontSize', () => {
   it('has no p- variant for a size the paragraph family does not define', () => {
     expect(tokens.fontSize['12xl']).toBeDefined()
     expect(tokens.fontSize['p-12xl']).toBeUndefined()
+  })
+})
+
+describe('shadows', () => {
+  it('is flat, and keyed like the shadow-* utilities', () => {
+    expect(Object.keys(tokens.shadows).sort()).toEqual(
+      ['none', 'DEFAULT', 'sm', 'base', 'md', 'lg', 'xl', '2xl'].sort(),
+    )
+    expect(tokens.shadows.elevation).toBeUndefined()
+    expect(tokens.shadows.focus).toBeUndefined()
+  })
+
+  // The point of the map: a consumer with no frappe-ui stylesheet can paint
+  // these. A `var(--elevation-*)` reference would resolve to nothing there.
+  it('holds real box-shadow strings, not var() references', () => {
+    for (const [key, value] of Object.entries(tokens.shadows)) {
+      expect(typeof value, key).toBe('string')
+      expect(value, key).not.toContain('var(')
+    }
+    expect(tokens.shadows.none).toBe('none')
+  })
+
+  it('points DEFAULT at the base step', () => {
+    expect(tokens.shadows.DEFAULT).toBe(tokens.shadows.base)
+  })
+
+  // The dark elevation ramp stays in effects.json. Espresso 2.0 references
+  // `elevation/light/*` on its dark page too, so it is not what we render.
+  it('ships only the light elevation ramp', () => {
+    expect(tokens.shadows.base).toBe(effects.elevation.light.base)
+  })
+})
+
+describe('focusRing', () => {
+  const NAMES = ['default', 'red', 'green', 'amber', 'blue', 'violet']
+
+  it('carries both themes, every colour', () => {
+    expect(Object.keys(tokens.focusRing).sort()).toEqual(['dark', 'light'])
+    expect(Object.keys(tokens.focusRing.light).sort()).toEqual([...NAMES].sort())
+    expect(Object.keys(tokens.focusRing.dark).sort()).toEqual([...NAMES].sort())
+  })
+
+  // ADR-0005: frappe-ui draws focus as an outline, so the export is the
+  // outline shorthand, matching `--focus-outline-<name>` exactly.
+  it('is the outline shorthand, 2px light and 3px dark', () => {
+    expect(tokens.focusRing.light.default).toMatch(/^2px solid /)
+    expect(tokens.focusRing.dark.default).toMatch(/^3px solid /)
+    for (const name of NAMES) {
+      expect(tokens.cssVariables[':root'][`--focus-outline-${name}`]).toBe(
+        tokens.focusRing.light[name],
+      )
+      expect(
+        tokens.cssVariables['[data-theme="dark"]'][`--focus-outline-${name}`],
+      ).toBe(tokens.focusRing.dark[name])
+    }
   })
 })
 
