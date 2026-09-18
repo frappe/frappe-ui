@@ -197,6 +197,64 @@ describe('fontSize', () => {
   })
 })
 
+describe('tracking', () => {
+  // `buildTextStyleUtilities` in plugin.js walks `tracking`, not `fontSize`,
+  // and looks each size up in `fontSize` (`text` reads `<size>`, `paragraph`
+  // reads `p-<size>`). A tracking size with no fontSize entry emits no class,
+  // so the two key sets have to line up or utilities go missing silently.
+  it('has the two families plugin.js walks', () => {
+    expect(Object.keys(tokens.tracking).sort()).toEqual(['paragraph', 'text'])
+  })
+
+  it('names a size fontSize also defines, in both families', () => {
+    for (const size of Object.keys(tokens.tracking.text)) {
+      expect(tokens.fontSize[size], `text ${size}`).toBeDefined()
+    }
+    for (const size of Object.keys(tokens.tracking.paragraph)) {
+      expect(tokens.fontSize[`p-${size}`], `paragraph ${size}`).toBeDefined()
+    }
+  })
+
+  // The bare `text-<size>` utility carries the regular tracking; the three
+  // heavier weights each ship their own class.
+  it('carries a value per weight variant', () => {
+    for (const group of ['text', 'paragraph']) {
+      for (const [size, byWeight] of Object.entries(tokens.tracking[group])) {
+        expect(Object.keys(byWeight), `${group} ${size}`).toEqual(
+          expect.arrayContaining(['regular', 'medium', 'semibold', 'bold']),
+        )
+        for (const value of Object.values(byWeight)) {
+          expect(value, `${group} ${size}`).toMatch(/^-?[\d.]+em$/)
+        }
+      }
+    }
+  })
+})
+
+describe('fontFamily', () => {
+  // One family, and it is Figma's name for the variable font. frappe-ui's own
+  // CSS declares the @font-face as `InterVar` (src/fonts/Inter/inter.css) and
+  // plugin.js writes that name into the base layer, so this export is a label
+  // for a design tool, not a stack to paste into `font-family`.
+  it('names the one text family', () => {
+    expect(tokens.fontFamily).toEqual({ text: 'Inter Variable' })
+  })
+})
+
+describe('screens', () => {
+  // Decided in code, not synced from Figma. The preset REPLACES Tailwind's
+  // screens, so `2xl:` does not compile against this preset.
+  it('is the four breakpoint minimums, in ascending order', () => {
+    expect(tokens.screens).toEqual({
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+    })
+    expect(Object.keys(tokens.screens)).toEqual(['sm', 'md', 'lg', 'xl'])
+  })
+})
+
 describe('shadows', () => {
   it('is flat, and keyed like the shadow-* utilities', () => {
     expect(Object.keys(tokens.shadows).sort()).toEqual(

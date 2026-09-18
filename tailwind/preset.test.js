@@ -64,6 +64,35 @@ describe('sizing reads the spacing scale', () => {
   })
 })
 
+/**
+ * Key order in `theme.boxShadow` is CSS source order. With `DEFAULT` last,
+ * `class="shadow shadow-xl"` resolves to `.shadow`, so the order is asserted
+ * here as well as in tokens.js#shadows. Nothing else checked the resolved
+ * theme, so deleting the `DEFAULT` branch in buildBoxShadowConfig left every
+ * tailwind test green.
+ */
+describe('boxShadow theme', () => {
+  it('points every key at its elevation variable, in order', () => {
+    expect(Object.keys(theme.boxShadow)).toEqual([
+      'none',
+      'sm',
+      'base',
+      'DEFAULT',
+      'md',
+      'lg',
+      'xl',
+      '2xl',
+    ])
+    expect(theme.boxShadow.none).toBe('none')
+    // `DEFAULT` is a Tailwind key name, not an elevation step: it shares the
+    // `base` variable so `shadow` and `shadow-base` paint the same thing.
+    expect(theme.boxShadow.DEFAULT).toBe('var(--elevation-base)')
+    for (const key of ['sm', 'base', 'md', 'lg', 'xl', '2xl']) {
+      expect(theme.boxShadow[key], key).toBe(`var(--elevation-${key})`)
+    }
+  })
+})
+
 describe('list styling-hook sugar', () => {
   it('offers a utility for every spacing key', () => {
     // `list-gap-*` and `list-row-px-*` are generated from `theme('spacing')`
