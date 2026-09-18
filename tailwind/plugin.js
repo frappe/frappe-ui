@@ -20,14 +20,6 @@ const textTransformTokens = typographyTokens.textTransform
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
 
-// `--radius-{key}` is emitted for every token by tokens.js#cssVariables, and
-// `borderRadius` below consumes those vars, so `rounded-4` and `--radius-4`
-// stay in sync by construction.
-//
-// Each value carries a trailing `/* {px} */` comment so editor tooling
-// (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
-// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
-// `rounded` utility no longer exists — use `rounded-4`.
 // The `shadow-*` key list is declared once, in tokens.js#shadows, so a new
 // elevation step reaches both the token map and the utility from one edit.
 // The theme values stay `var(--elevation-*)` so a themed page can retune a
@@ -43,6 +35,14 @@ function buildBoxShadowConfig() {
   return out
 }
 
+// `--radius-{key}` is emitted for every token by tokens.js#cssVariables, and
+// `borderRadius` consumes those vars, so `rounded-4` and `--radius-4` stay in
+// sync by construction.
+//
+// Each value carries a trailing `/* {px} */` comment so editor tooling
+// (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
+// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
+// `rounded` utility no longer exists, so write `rounded-4`.
 function buildRadiusConfig() {
   const out = {}
   for (const [key, value] of Object.entries(radiusTokens)) {
