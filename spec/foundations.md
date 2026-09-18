@@ -14,7 +14,7 @@ Architectural calls in this spec are recorded as ADRs:
 
 Figma is where token values are **decided**. The current design file is **espresso 2.0**: <https://www.figma.com/design/kMYnZ9ougpSSQBdjZCgtdX/espresso-2.0>
 
-[`tailwind/tokens/`](../tailwind/tokens/) is where they are **recorded**. Four files hold the Figma tokens: `colors.json`, `radius.json`, `typography.json` and `effects.json`. They are the canonical source. [`tailwind/tokens.js`](../tailwind/tokens.js) reads them, and adds `spacing` and `screens`, which Figma does not define.
+[`tailwind/tokens/`](../tailwind/tokens/) is where they are **recorded**. Four files hold the Figma tokens: `colors.js`, `radius.js`, `typography.js` and `effects.js`. They are the canonical source. [`tailwind/tokens.js`](../tailwind/tokens.js) reads them, and adds `spacing` and `screens`, which Figma does not define.
 
 [`tailwind/tokens/build.js`](../tailwind/tokens/build.js) writes those four files from the Figma export. It also writes [`provenance.json`](../tailwind/tokens/provenance.json): the Figma file id and a sha256 per input file. The raw export is not committed; it is an input, not a record. `provenance.json` answers which export produced the current values.
 
