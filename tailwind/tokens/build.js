@@ -260,10 +260,11 @@ function buildColors() {
   return colors
 }
 
-// No legacy aliases: retired names (surface-white, surface-modal,
-// outline-gray-modals, …) are intentionally NOT emitted so straggler usage
-// fails visibly instead of silently keeping old styles alive. Migrate old
-// code with tailwind/migrate-tokens-v2.js.
+// No legacy aliases: the retired v1 names are intentionally NOT emitted, so
+// straggler usage fails visibly instead of silently keeping old styles alive.
+// TOKEN_RENAMES in tailwind/migrate-tokens-v2.js holds the full list; run that
+// codemod on old code. Do not spell a retired name anywhere in this directory:
+// the codemod walks it, and would rewrite the prose as if it were a usage.
 
 function mapShades(family) {
   const out = {}
