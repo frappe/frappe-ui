@@ -86,12 +86,12 @@ const ALIASES = [
   {
     path: 'cssVariables.light',
     name: 'LightVariables',
-    doc: 'Every custom property. Goes on `:root`.',
+    doc: 'The `:root` layer: every property except the dark ramps.',
   },
   {
     path: 'cssVariables.dark',
     name: 'DarkVariables',
-    doc: 'Only the properties dark mode changes. Goes on `[data-theme="dark"]`.',
+    doc: 'The `[data-theme="dark"]` layer: the semantic and focus properties re-valued, plus the dark ramps.',
   },
 ]
 

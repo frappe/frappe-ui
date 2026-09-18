@@ -285,10 +285,37 @@ describe('cssVariables', () => {
     expect(Object.keys(tokens.cssVariables).sort()).toEqual(['dark', 'light'])
   })
 
-  // `dark` is an override layer: anything it leaves out keeps the light value.
-  it('keeps dark to the properties that change', () => {
-    expect(Object.keys(dark).length).toBeLessThan(Object.keys(light).length)
+  // Neither layer is a subset of the other, so a plain size comparison proves
+  // nothing. What holds: every semantic property `dark` re-values is also in
+  // `light`, and the keys `dark` alone has are the dark ramps.
+  it('re-values semantic properties light already declares', () => {
+    const semantic = Object.keys(dark).filter((name) =>
+      /^--(surface|ink|outline)-/.test(name),
+    )
+    expect(semantic.length).toBeGreaterThan(0)
+    expect(semantic.filter((name) => !(name in light))).toEqual([])
     expect(dark['--surface-base']).not.toBe(light['--surface-base'])
+  })
+
+  it('gives every dark-only property a --dark- name', () => {
+    const darkOnly = Object.keys(dark).filter((name) => !(name in light))
+    expect(darkOnly.length).toBeGreaterThan(0)
+    expect(darkOnly.filter((name) => !name.startsWith('--dark-'))).toEqual([])
+  })
+
+  // Elevation and radius do not flip, so they are declared once on `:root`.
+  it('keeps elevation and radius out of dark', () => {
+    expect(
+      Object.keys(dark).filter((name) =>
+        /^--(elevation|radius)-/.test(name),
+      ),
+    ).toEqual([])
+    expect(
+      Object.keys(light).some((name) => name.startsWith('--elevation-')),
+    ).toBe(true)
+    expect(
+      Object.keys(light).some((name) => name.startsWith('--radius-')),
+    ).toBe(true)
   })
 
   it('emits a focus outline per theme color, in both modes', () => {

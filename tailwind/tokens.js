@@ -315,14 +315,18 @@ function radiusVariables() {
  *   cssVariables.light['--surface-base']
  *   cssVariables.dark['--surface-base']
  *
- * `light` is the full set, and goes on `:root`. `dark` holds only the
- * properties that change, and goes on `[data-theme="dark"]`; anything absent
- * from it keeps the `light` value. `plugin.js` emits both into the base
- * layer, which is how a frappe-ui page gets them. Read this map directly when
- * you need a token's value somewhere that does not load frappe-ui's
- * stylesheet, such as exported markup or a canvas renderer.
+ * `light` goes on `:root`, `dark` on `[data-theme="dark"]`. Neither is a
+ * subset of the other. `dark` re-values the semantic and focus properties
+ * that `light` already declares, and adds the dark ramps under their own
+ * `--dark-*` names. Those are the only keys it has that `light` lacks.
+ * `light` additionally carries the light ramps (`--gray-500`), elevation and
+ * radius. None of those three flip by theme, so a property `dark` leaves out
+ * keeps its `:root` value.
  *
- * Elevation is light-only. It does not flip by theme; see `shadows`.
+ * `plugin.js` emits both into the base layer, which is how a frappe-ui page
+ * gets them. Read this map directly when you need a token's value somewhere
+ * that does not load frappe-ui's stylesheet, such as exported markup or a
+ * canvas renderer.
  */
 export const cssVariables = mergeLayers(
   colorVariables(),

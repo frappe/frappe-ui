@@ -131,7 +131,7 @@ type TrackingByWeight = {
   black: string
 }
 
-/** Every custom property. Goes on `:root`. */
+/** The `:root` layer: every property except the dark ramps. */
 type LightVariables = Record<
   | '--surface-base' | '--surface-gray-1' | '--surface-gray-2'
   | '--surface-gray-3' | '--surface-gray-4' | '--surface-gray-5'
@@ -298,7 +298,9 @@ type LightVariables = Record<
   string
 >
 
-/** Only the properties dark mode changes. Goes on `[data-theme="dark"]`. */
+/**
+ * The `[data-theme="dark"]` layer: the semantic and focus properties re-valued, plus the dark ramps.
+ */
 type DarkVariables = Record<
   | '--surface-base' | '--surface-gray-1' | '--surface-gray-2'
   | '--surface-gray-3' | '--surface-gray-4' | '--surface-gray-5'
@@ -693,14 +695,18 @@ export declare const screens: {
  *   cssVariables.light['--surface-base']
  *   cssVariables.dark['--surface-base']
  *
- * `light` is the full set, and goes on `:root`. `dark` holds only the
- * properties that change, and goes on `[data-theme="dark"]`; anything absent
- * from it keeps the `light` value. `plugin.js` emits both into the base
- * layer, which is how a frappe-ui page gets them. Read this map directly when
- * you need a token's value somewhere that does not load frappe-ui's
- * stylesheet, such as exported markup or a canvas renderer.
+ * `light` goes on `:root`, `dark` on `[data-theme="dark"]`. Neither is a
+ * subset of the other. `dark` re-values the semantic and focus properties
+ * that `light` already declares, and adds the dark ramps under their own
+ * `--dark-*` names. Those are the only keys it has that `light` lacks.
+ * `light` additionally carries the light ramps (`--gray-500`), elevation and
+ * radius. None of those three flip by theme, so a property `dark` leaves out
+ * keeps its `:root` value.
  *
- * Elevation is light-only. It does not flip by theme; see `shadows`.
+ * `plugin.js` emits both into the base layer, which is how a frappe-ui page
+ * gets them. Read this map directly when you need a token's value somewhere
+ * that does not load frappe-ui's stylesheet, such as exported markup or a
+ * canvas renderer.
  */
 export declare const cssVariables: {
   light: LightVariables

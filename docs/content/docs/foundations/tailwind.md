@@ -141,7 +141,7 @@ const backgroundOptions = Object.entries(semanticColors.light.surface).map(
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `colors`         | `{ light, dark, overlay, neutral }`. Primitive ramps keyed by step: `colors.light.gray[500]`.                                         |
 | `semanticColors` | `{ light, dark }`, each keyed by category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`) and then by name.           |
-| `cssVariables`   | Every token as a custom property, keyed by theme: `light` and `dark`. `dark` holds only the properties that change.                   |
+| `cssVariables`   | Every token as a custom property, keyed by theme. `light` goes on `:root`; `dark` goes on `[data-theme="dark"]` and holds the re-valued semantic and focus properties plus the dark ramps. |
 | `radius`         | px per key: `0` to `9`, plus `none` and `full`.                                                                                       |
 | `shadows`        | A flat map of composed `box-shadow` strings, keyed like the `shadow-*` utilities: `none`, `sm` … `2xl`, and `DEFAULT`.                |
 | `focusRing`      | `{ light, dark }`, each an `outline` shorthand per colour: `'2px solid #c9c9c9e5'`. frappe-ui draws focus as an outline.              |

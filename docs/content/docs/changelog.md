@@ -40,7 +40,9 @@ renamed.
 - `focusRing` is `{ light, dark }` and holds `outline` shorthands, not
   box-shadows: frappe-ui draws focus with `outline` (ADR-0005).
 - `cssVariables` is keyed by theme: `light` goes on `:root`, `dark` on
-  `[data-theme="dark"]` and holds only the properties that change.
+  `[data-theme="dark"]`. `dark` re-values the semantic and focus properties
+  and adds the dark ramps under `--dark-*` names. The light ramps, elevation
+  and radius are in `light` only, because they do not flip by theme.
 - Keys are typed literally, so a wrong key does not compile and an editor
   completes the real names. Values stay `string`, or `number` for a font
   weight, so a token sync moves values and never a type. A font weight is a

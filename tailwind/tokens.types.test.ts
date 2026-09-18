@@ -28,7 +28,7 @@ const wrongRadius = radius['10']
 const wrongAlias = radius.md
 // @ts-expect-error Spacing has no half step above 19.5.
 const wrongSpacing = spacing['20.5']
-// @ts-expect-error `dark` is an override layer, and elevation never flips.
+// @ts-expect-error Elevation never flips by theme, so `dark` has no key for it.
 const wrongVariable = cssVariables.dark['--elevation-sm']
 
 type Unused =
