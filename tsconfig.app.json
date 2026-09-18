@@ -11,9 +11,9 @@
     "experimental/**/*.tsx",
     "experimental/**/*.vue",
     "vite/index.d.ts",
-    // The hand-written and the generated declaration files, plus the type test
-    // that proves the token keys are literal. Nothing under src/ imports them,
-    // so `yarn type-check` is the only thing that reads either.
+    // The generated token declarations and the type test that proves their
+    // keys are literal. Nothing under src/ imports either, so `yarn
+    // type-check` is the only thing that reads them.
     "tailwind/tokens.d.ts",
     "tailwind/tokens.types.test.ts"
   ],

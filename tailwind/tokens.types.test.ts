@@ -4,7 +4,8 @@
  * `tokens.d.ts` is generated, so every key here is checked against the real
  * module by `tokens/build.test.js`. What that test cannot show is the point of
  * generating the file: a misspelled key has to stop compiling, and a value has
- * to stay `string` so a token sync is not a breaking type change.
+ * to keep its type (`string`, or `number` for a font weight) so a token sync
+ * is not a breaking type change.
  *
  * `vue-tsc` runs this, not vitest: `yarn type-check` reads it through
  * `tsconfig.app.json`. The `@ts-expect-error` lines below fail that command if

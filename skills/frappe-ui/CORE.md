@@ -49,7 +49,7 @@ Radius is numbered `rounded-0` … `rounded-9`, plus `rounded-none` and `rounded
 
 Shadow: `shadow-sm` input on focus, resting card, active nav item · `shadow-base` / `shadow` active tab indicator · `shadow-md` slider thumb, rare · `shadow-lg` bottom sheets, drag labels · `shadow-xl` dialogs, toasts, tooltips · `shadow-2xl` popovers, dropdowns, menus. Pair a shadow with a `bg-surface-elevation-*` background.
 
-For exact values read `node_modules/frappe-ui/tailwind/tokens/radius.js` and `effects.js`, both short and both a plain `export default`; the tables above already carry what you need from `colors.js` (1173 lines) and `plugin.js` (632).
+For exact values read `node_modules/frappe-ui/tailwind/tokens/radius.js` and `effects.js`, both short and both a plain `export default`; the tables above already carry what you need from `colors.js` (1176 lines) and `plugin.js` (649).
 
 ### What the preset replaces
 

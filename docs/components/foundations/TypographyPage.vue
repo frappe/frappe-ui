@@ -6,7 +6,7 @@ import typography from '../../../tailwind/tokens/typography.js'
 type SizeMeta = {
   lineHeight?: string
   letterSpacing?: string
-  fontWeight?: string
+  fontWeight?: number
 }
 type SizeEntry = [string, SizeMeta]
 type Weight = 'regular' | 'medium' | 'semibold' | 'bold'
