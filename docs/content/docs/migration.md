@@ -3175,10 +3175,12 @@ Both subpaths are gone. Both breaks are loud: the specifier stops resolving.
 | Removed                        | Replacement                                                     |
 | ------------------------------ | ---------------------------------------------------------------- |
 | `frappe-ui/hljs-theme.css`     | none — `frappe-ui/editor` ships its own code-block highlighting  |
-| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind/tokens`, same subpath without the extension |
+| `frappe-ui/tailwind/tokens.js` | `frappe-ui/tailwind/tokens` — new specifier **and** new names |
 
-The subpath is back, minus the `.js`. Drop the extension and the names change;
-the specifier is otherwise the one you had.
+The subpath is back, minus the `.js`. That is not the whole change. Two things
+move: the specifier, and every name behind it except `fontSize`. Dropping the
+extension alone leaves you importing names the module does not export, and the
+import fails to link. Rewrite the specifier and the import list together.
 
 An earlier revision of this guide sent you to the preset. That was wrong. The
 preset is a Tailwind `Config`, and its colours, radii and sizes are built
@@ -3211,9 +3213,9 @@ The names moved, and so did the shapes:
 | ------ | ----- | ------------ |
 | `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
 | `boxShadow` | `shadows` | Renamed. Still a flat map with `none` and `DEFAULT`, but each value is the composed `box-shadow` string, not a `var(--elevation-*)` reference. The focus rings moved to `focusRing`. |
-| `generateCSSVariables()` | `cssVariables` | A constant, not a function. Keyed by theme: `light` goes on `:root`, `dark` on `[data-theme="dark"]` and holds only the overrides. |
-| `generateSemanticColors()` | `semanticColors` | A constant, not a function. `{ light, dark }` with resolved `oklch(...)` values, in place of theme-agnostic `color-mix(...)` strings. |
-| `fontSize` | `fontSize` | Same name. Each entry is an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple. |
+| `generateCSSVariables()[':root']` | `cssVariables.light` | A constant, not a function, and keyed by theme rather than by selector. `generateCSSVariables()['[data-theme="dark"]']` is `cssVariables.dark`, which still holds only the properties that change. |
+| `generateSemanticColors()` | `semanticColors.light` or `semanticColors.dark` | A constant, not a function, and one level deeper: the old return was theme-agnostic `color-mix(...)` strings, so it had no theme key. Pick a side, and get resolved `oklch(...)` values. |
+| `fontSize` | `fontSize` | The one name that survives. Each entry is now an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple, so a call site that destructured `const [size, meta] = fontSize.base` breaks. |
 
 The old module re-exported `colorPalette.js`, so its colours carried Tailwind
 sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
