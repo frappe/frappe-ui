@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
-import typography from '../../../tailwind/tokens/typography.json'
+import typography from '../../../tailwind/tokens/typography.js'
 
 type SizeMeta = {
   lineHeight?: string

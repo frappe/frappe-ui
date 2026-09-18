@@ -8,12 +8,16 @@
  * that test fails before a consumer finds out.
  */
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import pkg from '../package.json' with { type: 'json' }
-import effects from './tokens/effects.json' with { type: 'json' }
+import effects from './tokens/effects.js'
 import * as tokens from './tokens.js'
+
+const pkg = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+)
 
 const PUBLIC_NAMES = [
   'colors',
@@ -55,19 +59,61 @@ describe('public surface', () => {
     })
   })
 
-  it('imports nothing outside its own token JSON', () => {
+  it('imports nothing outside its own token modules', () => {
     const src = readFileSync(new URL('./tokens.js', import.meta.url), 'utf8')
-    const specifiers = [...src.matchAll(/from\s+'([^']+)'/g)].map(
-      (m) => m[1],
-    )
+    const specifiers = [...src.matchAll(/from\s+'([^']+)'/g)].map((m) => m[1])
     expect(specifiers.every((s) => s.startsWith('./tokens/'))).toBe(true)
+  })
+
+  // An import attribute is the only way to read JSON from an ES module, and
+  // the oldest config loaders in the supported peer range cannot parse one:
+  // esbuild 0.19 under vite 5.0, jiti 1.x under tailwindcss 3.4. A consumer's
+  // tailwind.config.js reaches this directory through the preset, so one
+  // attribute anywhere under it breaks that consumer's build. The token data
+  // ships as .js modules for this reason.
+  //
+  // Both patterns are anchored on syntax, not the bare keyword: a quoted
+  // specifier for the static form, `with:` for the dynamic one. Prose in a
+  // comment (this one) is left alone.
+  const STATIC_ATTRIBUTE = /['"]\s*(with|assert)\s*\{\s*type:/
+  const DYNAMIC_ATTRIBUTE = /\b(with|assert):\s*\{\s*type:/
+
+  it('uses no import attribute anywhere under tailwind/', () => {
+    const dir = fileURLToPath(new URL('.', import.meta.url))
+    // This file holds the fixtures below, which are attributes on purpose.
+    const self = fileURLToPath(import.meta.url)
+    const offenders = []
+    const walk = (d) => {
+      for (const entry of readdirSync(d, { withFileTypes: true })) {
+        const full = join(d, entry.name)
+        if (entry.isDirectory()) walk(full)
+        else if (full !== self && /\.(js|ts|mjs|cjs)$/.test(entry.name)) {
+          const src = readFileSync(full, 'utf8')
+          if (STATIC_ATTRIBUTE.test(src) || DYNAMIC_ATTRIBUTE.test(src)) {
+            offenders.push(full)
+          }
+        }
+      }
+    }
+    walk(dir)
+    expect(offenders).toEqual([])
+  })
+
+  it('the import-attribute guard actually matches both forms', () => {
+    expect(
+      STATIC_ATTRIBUTE.test("import a from './a.json' with { type: 'json' }"),
+    ).toBe(true)
+    expect(
+      DYNAMIC_ATTRIBUTE.test("import('./a.json', { with: { type: 'json' } })"),
+    ).toBe(true)
+    expect(STATIC_ATTRIBUTE.test("import a from './a.js'")).toBe(false)
   })
 })
 
 describe('native node', () => {
-  // Vitest transforms JSON imports, so it cannot see a missing import
-  // attribute — only a real node process can. The docs promise a plain Node
-  // script can read tokens from this entry point, so spawn one.
+  // Vitest rewrites the module graph, so it cannot see a specifier or a
+  // syntax plain Node rejects. The docs promise a plain Node script can read
+  // tokens from this entry point, so spawn one.
   it('loads under plain node, with no bundler', () => {
     const entryPath = fileURLToPath(new URL('./tokens.js', import.meta.url))
     const out = execFileSync(
@@ -162,7 +208,7 @@ describe('shadows', () => {
     expect(tokens.shadows.DEFAULT).toBe(tokens.shadows.base)
   })
 
-  // The dark elevation ramp stays in effects.json. Espresso 2.0 references
+  // The dark elevation ramp stays in effects.js. Espresso 2.0 references
   // `elevation/light/*` on its dark page too, so it is not what we render.
   it('ships only the light elevation ramp', () => {
     expect(tokens.shadows.base).toBe(effects.elevation.light.base)

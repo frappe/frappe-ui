@@ -24,9 +24,10 @@ rather than a class. Tailwind-only shaping stays in `colorPalette.js` and
 The tokens get their own subpath because `frappe-ui/tailwind` statically
 imports `tailwindcss/plugin`, `@tailwindcss/forms` and
 `@tailwindcss/typography`. None of the three resolve under plain Node, so that
-entry only loads inside a bundler. The token module imports nothing but its own
-JSON and loads anywhere. Per ADR-0010 build-time entries are additive-only
-until `2.0.0`, so a second one is allowed and neither may be renamed.
+entry only loads inside a bundler. The token module imports nothing but the
+four data modules beside it and loads anywhere. Per ADR-0010 build-time entries
+are additive-only until `2.0.0`, so a second one is allowed and neither may be
+renamed.
 
 - `semanticColors` is `{ light, dark }` with resolved values, keyed by
   category (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).
@@ -51,14 +52,14 @@ export.
 ### Tailwind tokens — one committed source, no vendored Figma export
 
 The token files moved. `tailwind/generated/*.json` is now
-`tailwind/tokens/*.json` (`colors`, `radius`, `typography`, `effects`), and
-those four files are the canonical token source. The importer
+`tailwind/tokens/*.js` (`colors`, `radius`, `typography`, `effects`), and those
+four files are the canonical token source. The importer
 `tailwind/figma-tokens-to-theme.js` is now `tailwind/tokens/build.js`, still
 run by `yarn sync-tokens`. No token value changed.
 
 No package export pointed at any of these paths, so nothing a consumer can
-import moves. A fork or a script that reads the files from `node_modules`
-needs the new path.
+import moves. A fork or a script that reads the files from `node_modules` by
+path needs the new path, and the new extension.
 
 - **`tailwind/colors.json` is deleted.** It was byte-identical to the
   generated copy. A hand-edit to it took effect in the build and was silently
@@ -73,9 +74,21 @@ needs the new path.
 - **`tailwind/tokens/provenance.json` is new.** It holds the Figma file id and
   a sha256 per input file, which records which export produced the committed
   values.
+- **The four token files are JS modules, not JSON.** They are
+  `tailwind/tokens/*.js`, each an `export default` of the same data under a
+  generated-file header. Reading JSON from an ES module needs an import
+  attribute (`with { type: 'json' }`), and the oldest config loaders in the
+  supported peer range cannot parse one. A consumer's `tailwind.config.js`
+  reaches this data through the preset, so the attribute is gone. Values are
+  unchanged.
+
+  A script that reads `tailwind/generated/*.json` or `tailwind/colors.json`
+  out of `node_modules` by path has no file to read. Import the values
+  instead: `import { semanticColors } from 'frappe-ui/tailwind/tokens'`. Raven,
+  wiki and the LMS tests read by path today.
 
 To re-sync: export into `.figma-export/`, run `yarn sync-tokens`, review the
-diff on `tailwind/tokens/*.json`, commit.
+diff on `tailwind/tokens/*.js`, commit.
 
 ### Pickers — `open` is honored at mount (breaking, silent)
 

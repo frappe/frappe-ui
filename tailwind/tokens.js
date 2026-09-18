@@ -1,7 +1,7 @@
 /**
  * The design tokens, as data.
  *
- * This is the one module that turns `./tokens/*.json` into shaped values, and
+ * This is the one module that turns `./tokens/*.js` into shaped values, and
  * the only one a consumer outside frappe-ui should read. Everything here is
  * framework-neutral: resolved `oklch(...)` strings, plain px, plain numbers.
  * Nothing carries a Tailwind sentinel.
@@ -14,19 +14,23 @@
  * and `plugin.js`, and never leaks back down here.
  *
  * Exported as `frappe-ui/tailwind/tokens`, its own entry point. It imports
- * nothing but the JSON beside it, so a Node script (codegen, docs, a design
- * tool) can read tokens with no bundler and no component tree. The preset at
- * `frappe-ui/tailwind` cannot: it statically imports three Tailwind packages
- * that plain Node does not resolve.
+ * nothing but the four data modules beside it, so a Node script (codegen,
+ * docs, a design tool) can read tokens with no bundler and no component tree.
+ * The preset at `frappe-ui/tailwind` cannot: it statically imports three
+ * Tailwind packages that plain Node does not resolve.
+ *
+ * Those four are plain modules, not JSON. Reading JSON from an ES module
+ * needs an import attribute, and the oldest config loaders in the supported
+ * peer range cannot parse one. See `tokens/build.js`.
  *
  * Per ADR-0010 this surface is additive-only until 2.0.0: names may be added,
  * none may be renamed or removed.
  */
 
-import colorsData from './tokens/colors.json' with { type: 'json' }
-import effectsData from './tokens/effects.json' with { type: 'json' }
-import radiusTokens from './tokens/radius.json' with { type: 'json' }
-import typographyTokens from './tokens/typography.json' with { type: 'json' }
+import colorsData from './tokens/colors.js'
+import effectsData from './tokens/effects.js'
+import radiusTokens from './tokens/radius.js'
+import typographyTokens from './tokens/typography.js'
 
 // ---------- COLORS ----------
 
@@ -104,7 +108,7 @@ export const radius = radiusTokens
  * list from here and points each Tailwind key at its variable.
  *
  * Only the light steps ship. Espresso 2.0 references `elevation/light/*` on
- * its dark-mode page too, so `elevation.dark` in `effects.json` is not what
+ * its dark-mode page too, so `elevation.dark` in `effects.js` is not what
  * frappe-ui renders and is not exported. Focus is a separate shape, and a
  * different CSS property: see `focusRing`.
  */

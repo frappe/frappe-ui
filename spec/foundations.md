@@ -24,7 +24,7 @@ Figma is where token values are **decided**. The current design file is **espres
 
 1. Export from Figma into `.figma-export/`. The directory is gitignored.
 2. Run `yarn sync-tokens`.
-3. Review the diff on `tailwind/tokens/*.json`.
+3. Review the diff on `tailwind/tokens/*.js`.
 4. Commit.
 
 Keep a token sync and an edit to `build.js` in separate commits. That separation is the only remaining signal that tells a reviewer whether a value moved because Figma moved or because the rules in `build.js` moved.
@@ -35,7 +35,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 
 | Decision | Direction |
 |---|---|
-| Source of truth | Values decided in Figma file `espresso-2.0`, recorded in `tailwind/tokens/*.json` |
+| Source of truth | Values decided in Figma file `espresso-2.0`, recorded in `tailwind/tokens/*.js` |
 | Typography model | Size, line-height and per-weight letter-spacing, generated from the Figma text-styles export. Weight names are mapped in code |
 | Named typography utilities | `text-{size}-{weight}` and `text-p-{size}-{weight}`, generated for every exported style. See [ADR-0007](./adr/0007-typography-style-utilities.md) |
 | Focus indicator | A global `:focus-visible` outline from `--focus-outline-default`, retheme with `focus-visible:focus-ring-<color>`. No offset, no blur. See [ADR-0005](./adr/0005-focus-ring-2px.md) |
@@ -50,7 +50,7 @@ Anything in this repo that diverges from Figma is either (a) drift to be fixed, 
 The type scale is generated from the Figma **text-styles** export
 (`text.styles.tokens.json`) by
 [`tailwind/tokens/build.js`](../tailwind/tokens/build.js),
-which writes [`tailwind/tokens/typography.json`](../tailwind/tokens/typography.json).
+which writes [`tailwind/tokens/typography.js`](../tailwind/tokens/typography.js).
 The variable export (`Typography.Desktop`) is not used for it: it rounds
 line-heights to px and drops per-size letter-spacing.
 
@@ -135,7 +135,7 @@ Numbered radius tokens are the canonical way to set border-radius. See [ADR-0006
 
 ### Canonical (use these)
 
-Generated from Figma `radius.*` tokens into [`tailwind/tokens/radius.json`](../tailwind/tokens/radius.json):
+Generated from Figma `radius.*` tokens into [`tailwind/tokens/radius.js`](../tailwind/tokens/radius.js):
 
 | Tailwind | px | Figma token |
 |---|---|---|
@@ -176,7 +176,7 @@ Figma espresso v2 defines two component color themes:
 - **`default`** — the gray ramp (`surface-gray-*`, `ink-gray-*`, `outline-gray-*`)
 - **`red`** — the red ramp (`surface-red-*`, `ink-red-*`, `outline-red-*`)
 
-Both are recorded in [`tailwind/tokens/colors.json`](../tailwind/tokens/colors.json) and resolved to CSS variables by `cssVariables` in [`tailwind/tokens.js`](../tailwind/tokens.js). [`tailwind/colorPalette.js`](../tailwind/colorPalette.js) shapes the same values for the Tailwind theme.
+Both are recorded in [`tailwind/tokens/colors.js`](../tailwind/tokens/colors.js) and resolved to CSS variables by `cssVariables` in [`tailwind/tokens.js`](../tailwind/tokens.js). [`tailwind/colorPalette.js`](../tailwind/colorPalette.js) shapes the same values for the Tailwind theme.
 
 Solid/subtle/outline/ghost ramps for these two themes are pixel-accurate to Figma.
 

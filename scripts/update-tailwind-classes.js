@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import colors from '../tailwind/tokens/colors.json' with { type: 'json' }
+import colors from '../tailwind/tokens/colors.js'
 
 function generateClassMap() {
   const classMap = {

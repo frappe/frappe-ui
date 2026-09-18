@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { TabButtons, Tooltip, useColorScheme } from 'frappe-ui'
-import colors from '../../../tailwind/tokens/colors.json'
+import colors from '../../../tailwind/tokens/colors.js'
 
 type Mode = 'light' | 'dark'
 

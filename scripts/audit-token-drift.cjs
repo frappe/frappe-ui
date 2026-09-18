@@ -2,7 +2,7 @@
 /**
  * Token drift audit for the Espresso v2 migration.
  *
- * Reads the committed tokens (tailwind/tokens/colors.json) and, when a raw
+ * Reads the committed tokens (tailwind/tokens/colors.js) and, when a raw
  * Figma export is present in .figma-export/, the Figma style set too. The
  * export is no longer committed, so section 3 is skipped without one.
  * Compares the resolved values of every themed token (surface/ink/outline)
@@ -29,9 +29,11 @@ const BASELINE = process.argv[2] || 'v0.1.278'
 const GROUPS = ['surface', 'ink', 'outline']
 const MODES = ['light', 'dark']
 
-// colors.json moved twice: tailwind/colors.json -> tailwind/generated/ ->
-// tailwind/tokens/. A baseline ref predates the current path, so try each.
+// The colors file moved three times: tailwind/colors.json ->
+// tailwind/generated/ -> tailwind/tokens/colors.json -> tailwind/tokens/colors.js.
+// A baseline ref predates the current path, so try each.
 const COLORS_PATHS = [
+  'tailwind/tokens/colors.js',
   'tailwind/tokens/colors.json',
   'tailwind/generated/colors.json',
   'tailwind/colors.json',
@@ -40,18 +42,28 @@ const COLORS_PATHS = [
 function loadJSON(p) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'))
 }
+// The .js form is `export default ` + the same JSON body build.js always
+// wrote, under a header comment. Cut to the first brace and the rest parses
+// as JSON, which keeps this script free of a bundler at any ref.
+function parseColors(source, file) {
+  const text = file.endsWith('.js') ? source.slice(source.indexOf('{')) : source
+  return JSON.parse(text)
+}
 function loadColors() {
   for (const p of COLORS_PATHS) {
-    if (fs.existsSync(path.join(ROOT, p))) return loadJSON(p)
+    const full = path.join(ROOT, p)
+    if (fs.existsSync(full)) return parseColors(fs.readFileSync(full, 'utf8'), p)
   }
-  throw new Error(`no colors.json found; looked in ${COLORS_PATHS.join(', ')}`)
+  throw new Error(`no colors file found; looked in ${COLORS_PATHS.join(', ')}`)
 }
 function loadFromRef(ref, paths) {
   for (const p of paths) {
     try {
-      return JSON.parse(
-        execSync(`git show ${ref}:${p}`, { cwd: ROOT, stdio: ['pipe', 'pipe', 'ignore'] }).toString(),
-      )
+      const source = execSync(`git show ${ref}:${p}`, {
+        cwd: ROOT,
+        stdio: ['pipe', 'pipe', 'ignore'],
+      }).toString()
+      return parseColors(source, p)
     } catch (e) {
       continue
     }
@@ -73,7 +85,7 @@ function resolveRef(ref, palette) {
   return { missing: ref }
 }
 
-// All themed tokens resolved to hex for a given colors.json object.
+// All themed tokens resolved to hex for a given colors object.
 function resolveAll(colors) {
   const out = {}
   for (const mode of MODES) {

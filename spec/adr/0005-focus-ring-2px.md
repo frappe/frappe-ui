@@ -9,7 +9,7 @@ Figma espresso v2 specifies the keyboard focus indicator as a 2px outset drop-sh
 - gray: `0 0 0 2px #C9C9C9E5` (~90% opacity gray)
 - red: `0 0 0 2px #FA9C9DE5` (~90% opacity red)
 
-The Figma variables expose these as `focus/light/*` (2px) and `focus/dark/*` (3px), synced into `tailwind/tokens/effects.json`.
+The Figma variables expose these as `focus/light/*` (2px) and `focus/dark/*` (3px), synced into `tailwind/tokens/effects.js`.
 
 The historical implementation in `frappe-ui` components used Tailwind's `focus-visible:ring` utility, which defaults to a **3px** ring width. The result was a focus indicator 50% wider than the design intended, with subtly different color (`outline-gray-3` = `#c7c7c7` vs Figma's `#C9C9C9`).
 

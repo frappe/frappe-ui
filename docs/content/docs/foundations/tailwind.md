@@ -166,8 +166,11 @@ removed.
 
 ## Where the tokens come from
 
-The committed source is `tailwind/tokens/*.json` (`colors`, `radius`,
-`typography`, `effects`). `yarn sync-tokens` runs `tailwind/tokens/build.js`,
+The committed source is `tailwind/tokens/*.js` (`colors`, `radius`,
+`typography`, `effects`) — plain modules, each an `export default` of its data.
+They are not JSON, because reading JSON from an ES module needs an import
+attribute that the oldest supported config loaders cannot parse.
+`yarn sync-tokens` runs `tailwind/tokens/build.js`,
 which reads a raw Figma export from a gitignored `.figma-export/` directory and
 writes those four files. The raw export is an input, not a record, so it is not
 committed. `tailwind/tokens/provenance.json` holds the Figma file id and a
@@ -175,7 +178,7 @@ sha256 per input file, which says which export produced the current values.
 
 `build.js` also holds every rule where frappe-ui overrules the export: the
 radius `9` value, the font-weight map, the dropped sizes, and the conversion of
-every colour to oklch. Read the values from `tailwind/tokens/*.json`, not from
+every colour to oklch. Read the values from `tailwind/tokens/*.js`, not from
 an export.
 
 ## Hover styles
