@@ -184,12 +184,12 @@ describe('focusRing', () => {
     expect(tokens.focusRing.light.default).toMatch(/^2px solid /)
     expect(tokens.focusRing.dark.default).toMatch(/^3px solid /)
     for (const name of NAMES) {
-      expect(tokens.cssVariables[':root'][`--focus-outline-${name}`]).toBe(
+      expect(tokens.cssVariables.light[`--focus-outline-${name}`]).toBe(
         tokens.focusRing.light[name],
       )
-      expect(
-        tokens.cssVariables['[data-theme="dark"]'][`--focus-outline-${name}`],
-      ).toBe(tokens.focusRing.dark[name])
+      expect(tokens.cssVariables.dark[`--focus-outline-${name}`]).toBe(
+        tokens.focusRing.dark[name],
+      )
     }
   })
 })
@@ -208,9 +208,21 @@ describe('spacing', () => {
 })
 
 describe('cssVariables', () => {
-  const light = tokens.cssVariables[':root']
-  const dark = tokens.cssVariables['[data-theme="dark"]']
+  const light = tokens.cssVariables.light
+  const dark = tokens.cssVariables.dark
   const FOCUS_NAMES = ['default', 'red', 'green', 'amber', 'blue', 'violet']
+
+  // Keyed by theme, not by selector. `plugin.js` picks the selector each
+  // theme lands on, because that choice is Tailwind's, not the token data's.
+  it('has exactly the two theme keys', () => {
+    expect(Object.keys(tokens.cssVariables).sort()).toEqual(['dark', 'light'])
+  })
+
+  // `dark` is an override layer: anything it leaves out keeps the light value.
+  it('keeps dark to the properties that change', () => {
+    expect(Object.keys(dark).length).toBeLessThan(Object.keys(light).length)
+    expect(dark['--surface-base']).not.toBe(light['--surface-base'])
+  })
 
   it('emits a focus outline per theme color, in both modes', () => {
     for (const name of FOCUS_NAMES) {

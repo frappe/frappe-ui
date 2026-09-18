@@ -220,22 +220,22 @@ export const screens = {
 // ---------- CSS VARIABLES ----------
 
 function mergeLayers(...layers) {
-  const out = {}
+  const out = { light: {}, dark: {} }
   for (const layer of layers) {
-    for (const [selector, vars] of Object.entries(layer)) {
-      out[selector] = { ...(out[selector] || {}), ...vars }
+    for (const [theme, vars] of Object.entries(layer)) {
+      out[theme] = { ...out[theme], ...vars }
     }
   }
   return out
 }
 
 function colorVariables() {
-  const root = {}
+  const light = {}
   const dark = {}
 
   for (const [category, entries] of Object.entries(semanticColors.light)) {
     for (const [name, value] of Object.entries(entries)) {
-      root[`--${category}-${name}`] = value
+      light[`--${category}-${name}`] = value
     }
   }
   for (const [category, entries] of Object.entries(semanticColors.dark)) {
@@ -247,7 +247,7 @@ function colorVariables() {
   // primitive the semantic vocabulary doesn't name.
   for (const [family, shades] of Object.entries(colors.light)) {
     for (const [shade, value] of Object.entries(shades)) {
-      root[`--${family}-${shade}`] = value
+      light[`--${family}-${shade}`] = value
     }
   }
   for (const [family, shades] of Object.entries(colors.dark)) {
@@ -256,29 +256,29 @@ function colorVariables() {
     }
   }
 
-  return { ':root': root, '[data-theme="dark"]': dark }
+  return { light, dark }
 }
 
 function effectVariables() {
-  const root = {}
+  const light = {}
   const dark = {}
 
   // Off `effectsData`, not off `shadows`: `shadows` carries `none` and
   // `DEFAULT`, which are Tailwind key names with no variable of their own.
   for (const [step, value] of Object.entries(effectsData.elevation.light)) {
-    root[`--elevation-${step}`] = value
+    light[`--elevation-${step}`] = value
   }
   for (const [name, value] of Object.entries(effectsData.elevation.custom)) {
-    root[`--elevation-${name}`] = value
+    light[`--elevation-${name}`] = value
   }
   for (const [name, value] of Object.entries(focusRing.light)) {
-    root[`--focus-outline-${name}`] = value
+    light[`--focus-outline-${name}`] = value
   }
   for (const [name, value] of Object.entries(focusRing.dark)) {
     dark[`--focus-outline-${name}`] = value
   }
 
-  return { ':root': root, '[data-theme="dark"]': dark }
+  return { light, dark }
 }
 
 function radiusVariables() {
@@ -286,21 +286,23 @@ function radiusVariables() {
   for (const [key, value] of Object.entries(radius)) {
     vars[`--radius-${key}`] = value
   }
-  return { ':root': vars }
+  return { light: vars }
 }
 
 /**
- * Every token as a CSS custom property, keyed by the selector it belongs on:
+ * Every token as a CSS custom property, keyed by theme:
  *
- *   cssVariables[':root']['--surface-base']
- *   cssVariables['[data-theme="dark"]']['--surface-base']
+ *   cssVariables.light['--surface-base']
+ *   cssVariables.dark['--surface-base']
  *
- * `plugin.js` emits these into the base layer, which is how a frappe-ui page
- * gets them. Read this map directly when you need a token's value in a
- * context that doesn't load frappe-ui's stylesheet — exported markup, an
- * email template, a canvas renderer.
+ * `light` is the full set, and goes on `:root`. `dark` holds only the
+ * properties that change, and goes on `[data-theme="dark"]`; anything absent
+ * from it keeps the `light` value. `plugin.js` emits both into the base
+ * layer, which is how a frappe-ui page gets them. Read this map directly when
+ * you need a token's value somewhere that does not load frappe-ui's
+ * stylesheet, such as exported markup or a canvas renderer.
  *
- * Elevation sits under `:root` only. It does not flip by theme; see `shadows`.
+ * Elevation is light-only. It does not flip by theme; see `shadows`.
  */
 export const cssVariables = mergeLayers(
   colorVariables(),

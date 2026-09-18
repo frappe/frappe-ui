@@ -38,8 +38,8 @@ until `2.0.0`, so a second one is allowed and neither may be renamed.
   light elevation ramp ships, because that is the one both themes render.
 - `focusRing` is `{ light, dark }` and holds `outline` shorthands, not
   box-shadows: frappe-ui draws focus with `outline` (ADR-0005).
-- `cssVariables` is keyed by the selector each property belongs on: `':root'`
-  and `'[data-theme="dark"]'`.
+- `cssVariables` is keyed by theme: `light` goes on `:root`, `dark` on
+  `[data-theme="dark"]` and holds only the properties that change.
 
 This is additive, and it is the replacement for the removed
 `tailwind/tokens.js`. The names and shapes differ from that module; the

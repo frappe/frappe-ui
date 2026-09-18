@@ -200,7 +200,13 @@ let darkCheckboxStyles = {
 
 export default plugin(
   function ({ addBase, addComponents, matchUtilities, theme }) {
-    addBase({ ...globalStyles(theme), ...cssVariables })
+    // tokens.js keys the variables by theme; the selector each theme lands on
+    // is a Tailwind concern, so it is decided here.
+    addBase({
+      ...globalStyles(theme),
+      ':root': cssVariables.light,
+      '[data-theme="dark"]': cssVariables.dark,
+    })
     // Resolves <List :columns="{ base, md, … }"> against this app's own
     // breakpoints, so list tracks and `md:hidden` cells switch at the same
     // width. See tailwind/listColumns.js.

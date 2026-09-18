@@ -3211,7 +3211,7 @@ The names moved, and so did the shapes:
 | ------ | ----- | ------------ |
 | `borderRadius` | `radius` | Renamed. The numbered scale in px, `0` to `9` plus `none` and `full`. |
 | `boxShadow` | `shadows` | Renamed. Still a flat map with `none` and `DEFAULT`, but each value is the composed `box-shadow` string, not a `var(--elevation-*)` reference. The focus rings moved to `focusRing`. |
-| `generateCSSVariables()` | `cssVariables` | A constant, not a function. Keyed by selector: `':root'` and `'[data-theme="dark"]'`. |
+| `generateCSSVariables()` | `cssVariables` | A constant, not a function. Keyed by theme: `light` goes on `:root`, `dark` on `[data-theme="dark"]` and holds only the overrides. |
 | `generateSemanticColors()` | `semanticColors` | A constant, not a function. `{ light, dark }` with resolved `oklch(...)` values, in place of theme-agnostic `color-mix(...)` strings. |
 | `fontSize` | `fontSize` | Same name. Each entry is an object `{ fontSize, lineHeight, letterSpacing, fontWeight }`, not a `[size, meta]` tuple. |
 

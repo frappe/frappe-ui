@@ -9,9 +9,6 @@ export interface TextStyle {
   fontWeight: string
 }
 
-/** CSS custom properties keyed by the selector they belong on. */
-export type VariableMap = Record<string, Record<string, string>>
-
 export declare const colors: {
   light: Record<string, Ramp>
   dark: Record<string, Ramp>
@@ -24,7 +21,11 @@ export declare const semanticColors: {
   dark: Record<string, Record<string, string>>
 }
 
-export declare const cssVariables: VariableMap
+/** CSS custom properties per theme. `dark` holds only the overrides. */
+export declare const cssVariables: {
+  light: Record<string, string>
+  dark: Record<string, string>
+}
 
 export declare const radius: Record<string, string>
 
