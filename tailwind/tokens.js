@@ -146,14 +146,6 @@ export const fontFamily = typographyTokens.fontFamily
  */
 export const tracking = typographyTokens.tracking
 
-/**
- * Per-size text-transform. Empty today — `tiny`, the uppercase eyebrow style
- * that was its only entry, was dropped in #940. The name stays because the
- * Figma text-styles export still carries the property and a future eyebrow
- * style would repopulate it.
- */
-export const textTransform = typographyTokens.textTransform
-
 // ---------- SIZING ----------
 
 /**

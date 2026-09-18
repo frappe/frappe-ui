@@ -37,7 +37,6 @@ export declare const fontSize: Record<string, TextStyle>
 export declare const fontWeight: Record<string, number>
 export declare const fontFamily: Record<string, string>
 export declare const tracking: Record<string, Record<string, Ramp>>
-export declare const textTransform: Record<string, string>
 
 export declare const spacing: Record<string, string>
 export declare const screens: Record<string, string>

@@ -13,7 +13,7 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 `frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,
 `cssVariables`, `fontFamily`, `fontSize`, `fontWeight`, `radius`, `screens`,
-`semanticColors`, `shadows`, `spacing`, `textTransform` and `tracking`.
+`semanticColors`, `shadows`, `spacing` and `tracking`.
 
 Every value is framework-neutral: a resolved `oklch(...)` colour, a plain px
 string, a plain number. Nothing carries a Tailwind sentinel, so no

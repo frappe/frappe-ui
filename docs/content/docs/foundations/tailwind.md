@@ -149,7 +149,6 @@ const backgroundOptions = Object.entries(semanticColors.light.surface).map(
 | `fontWeight`     | Numbers. `regular` is 420, not 400.                                                                                                   |
 | `fontFamily`     | `{ text: 'Inter Variable' }`.                                                                                                         |
 | `tracking`       | Letter-spacing per size and weight, for the `text` and `paragraph` families separately.                                               |
-| `textTransform`  | Text-transform per size. Empty today.                                                                                                 |
 | `spacing`        | The spacing scale above, in rem.                                                                                                      |
 | `screens`        | The four breakpoint minimums.                                                                                                         |
 

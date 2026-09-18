@@ -25,13 +25,19 @@ const PUBLIC_NAMES = [
   'semanticColors',
   'shadows',
   'spacing',
-  'textTransform',
   'tracking',
 ]
 
 describe('public surface', () => {
   it('exports every token name', () => {
     expect(Object.keys(tokens).sort()).toEqual([...PUBLIC_NAMES].sort())
+  })
+
+  // `textTransform` was an empty object for its whole life: `tiny`, the
+  // uppercase eyebrow style behind it, went away in #940. plugin.js reads the
+  // property from typography.json instead.
+  it('does not export textTransform', () => {
+    expect('textTransform' in tokens).toBe(false)
   })
 
   // The tokens sit on their own subpath because `frappe-ui/tailwind`

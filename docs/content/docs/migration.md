@@ -3221,8 +3221,8 @@ sentinels. A consumer got `oklch(L C H / <alpha-value>)` from
 `calc(<alpha-value> * 100%)` from `generateSemanticColors()`. A colour picker
 handed either one renders an empty swatch. The new exports carry no sentinel.
 
-`colors`, `fontFamily`, `fontWeight`, `screens`, `spacing`, `textTransform`
-and `tracking` are exported from the same subpath. See
+`colors`, `fontFamily`, `fontWeight`, `screens`, `spacing` and `tracking`
+are exported from the same subpath. See
 [Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)

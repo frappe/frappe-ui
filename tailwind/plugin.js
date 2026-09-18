@@ -7,10 +7,14 @@ import {
   radius as radiusTokens,
   screens as screenTokens,
   shadows as effectsData,
-  textTransform as textTransformTokens,
   tracking as trackingTokens,
 } from './tokens.js'
+import typographyTokens from './tokens/typography.json' with { type: 'json' }
 import { listColumnRules } from './listColumns.js'
+
+// Read straight from the JSON. `textTransform` is not a public token export:
+// it is empty, and the one style that filled it went away in #940.
+const textTransformTokens = typographyTokens.textTransform
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
