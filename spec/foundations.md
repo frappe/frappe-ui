@@ -23,9 +23,11 @@ Figma is where token values are **decided**. The current design file is **espres
 ### Re-syncing from Figma
 
 1. Export from Figma into `.figma-export/`. The directory is gitignored.
-2. Run `yarn sync-tokens`.
-3. Review the diff on `tailwind/tokens/*.js`.
+2. Run `yarn sync-tokens`. It writes the four token files, `provenance.json`, and `tailwind/tokens.d.ts`.
+3. Review the diff on `tailwind/tokens/*.js`. A key added or removed also moves `tokens.d.ts`; a value that only changed does not.
 4. Commit.
+
+`tokens.d.ts` is generated from `tokens.js`, not from the export, so an edit to `tokens.js` alone re-syncs with `yarn sync-token-types`. A committed file that differs from the generator's output fails `tailwind/tokens/build.test.js`.
 
 Keep a token sync and an edit to `build.js` in separate commits. That separation is the only remaining signal that tells a reviewer whether a value moved because Figma moved or because the rules in `build.js` moved.
 

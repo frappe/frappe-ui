@@ -41,6 +41,9 @@ renamed.
   box-shadows: frappe-ui draws focus with `outline` (ADR-0005).
 - `cssVariables` is keyed by theme: `light` goes on `:root`, `dark` on
   `[data-theme="dark"]` and holds only the properties that change.
+- Keys are typed literally, so a wrong key does not compile and an editor
+  completes the real names. Values stay `string`, or `number` for `fontWeight`,
+  so a token sync moves values and never a type.
 
 This is additive, and it is the replacement for the removed
 `tailwind/tokens.js`. The names and shapes differ from that module; the

@@ -164,6 +164,11 @@ converts on the way into the theme.
 The names are additive-only until 2.0.0: names may be added, none renamed or
 removed.
 
+Every key is typed as a literal, so your editor completes the real names and
+`semanticColors.light.surface.typo` does not compile. Values stay `string`
+(`fontWeight` is `number`), which keeps a token sync out of your build: it
+moves values, never types.
+
 ## Where the tokens come from
 
 The committed source is `tailwind/tokens/*.js` (`colors`, `radius`,
@@ -175,6 +180,11 @@ which reads a raw Figma export from a gitignored `.figma-export/` directory and
 writes those four files. The raw export is an input, not a record, so it is not
 committed. `tailwind/tokens/provenance.json` holds the Figma file id and a
 sha256 per input file, which says which export produced the current values.
+
+`tailwind/tokens.d.ts` is generated too, from the token module rather than the
+export. `yarn sync-tokens` rewrites it last, off the values it just wrote. An
+edit to `tokens.js` that adds or renames a key needs no Figma export: run
+`yarn sync-token-types`, which writes that file alone.
 
 `build.js` also holds every rule where frappe-ui overrules the export: the
 radius `9` value, the font-weight map, the dropped sizes, and the conversion of

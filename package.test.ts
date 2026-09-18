@@ -145,22 +145,9 @@ describe('exports', () => {
     expect(missing).toEqual([])
   })
 
-  /**
-   * Same hazard on `frappe-ui/tailwind/tokens`: hand-written JavaScript, a
-   * hand-written `.d.ts`. A token a consumer cannot see in TypeScript may as
-   * well not be exported.
-   */
-  it('declares every named export of `frappe-ui/tailwind/tokens`', () => {
-    const js = fs.readFileSync(path.join(root, 'tailwind/tokens.js'), 'utf8')
-    const dts = fs.readFileSync(path.join(root, 'tailwind/tokens.d.ts'), 'utf8')
-    const runtime = [...js.matchAll(/^export const (\w+)/gm)].map((m) => m[1])
-    const declared = new Set(
-      [...dts.matchAll(/^export declare const (\w+)/gm)].map((m) => m[1]),
-    )
-    expect(runtime.length).toBeGreaterThan(0)
-    expect(runtime.filter((name) => !declared.has(name))).toEqual([])
-    expect([...declared].filter((name) => !runtime.includes(name))).toEqual([])
-  })
+  // `frappe-ui/tailwind/tokens` had the same hazard until its `.d.ts` became a
+  // generated file. `tailwind/tokens/build.test.js` now holds that guard, and
+  // compares the whole file rather than the export names.
 })
 
 describe('peer dependencies', () => {

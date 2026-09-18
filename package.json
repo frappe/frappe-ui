@@ -69,7 +69,8 @@
     "docs:gen": "tsx docs/scripts/propsgen.ts",
     "docs:gen:all": "yarn docs:gen --all",
     "docs:check": "tsx docs/scripts/propsgen.ts --check",
-    "sync-tokens": "node tailwind/tokens/build.js"
+    "sync-tokens": "node tailwind/tokens/build.js",
+    "sync-token-types": "node tailwind/tokens/build-types.js"
   },
   "exports": {
     ".": {

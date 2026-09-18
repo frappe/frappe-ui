@@ -2,6 +2,8 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import * as tokens from '../tokens.js'
+import { generateTokenTypes } from './build-types.js'
 import { hexToOklch, serializeTokenModule, toOklch } from './build.js'
 import colors from './colors.js'
 import effects from './effects.js'
@@ -38,8 +40,10 @@ describe('serializeTokenModule', () => {
   }
 
   it('covers every generated file in this directory', () => {
+    // `build.js`, `build-types.js` and their tests are the generators. Every
+    // other .js here is token data, and every one of those is checked below.
     const onDisk = readdirSync(dir).filter(
-      (f) => f.endsWith('.js') && !f.startsWith('build.'),
+      (f) => f.endsWith('.js') && !/^build[-.]/.test(f),
     )
     expect(onDisk.sort()).toEqual(Object.keys(generated).sort())
   })
@@ -63,5 +67,41 @@ describe('serializeTokenModule', () => {
         '\n' +
         'export default {\n  "a": 1\n}\n',
     )
+  })
+})
+
+describe('generateTokenTypes', () => {
+  const committed = readFileSync(
+    fileURLToPath(new URL('../tokens.d.ts', import.meta.url)),
+    'utf8',
+  )
+
+  // The declaration file is generated, so a hand-edit to it, a token added to
+  // tokens.js, and a sync that moves a key all fail here until the file is
+  // regenerated. `yarn sync-token-types` writes it.
+  it('matches the committed tokens.d.ts byte for byte', async () => {
+    expect(await generateTokenTypes()).toBe(committed)
+  })
+
+  // What the old hand-written file could get wrong: an export with no
+  // declaration is invisible to a TypeScript consumer.
+  it('declares every named export of tokens.js', () => {
+    const declared = [...committed.matchAll(/^export declare const (\w+)/gm)]
+      .map((match) => match[1])
+      .sort()
+    expect(declared).toEqual(Object.keys(tokens).sort())
+  })
+
+  // Keys are the contract, values are data. A sync that moves an oklch string
+  // or a px value must not move a type, or every consumer recompiles for it.
+  // Checked past the JSDoc, which quotes example values on purpose.
+  it('types values as string, never as a value literal', () => {
+    const types = committed
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\/\/.*$/gm, '')
+    expect(types).not.toContain('oklch(')
+    expect(types).not.toContain('px solid')
+    expect(types).not.toMatch(/'[\d.]+rem'/)
+    expect(types).not.toMatch(/'[\d.]+px'/)
   })
 })

@@ -5,6 +5,7 @@
  *   Input:   .figma-export/*.tokens.json  (gitignored — see below)
  *   Output:  tailwind/tokens/{colors,radius,typography,effects}.js
  *            tailwind/tokens/provenance.json
+ *            tailwind/tokens.d.ts  (via build-types.js, from the new data)
  *
  * The raw export is NOT committed. It is a drop directory, not a record: it
  * ships nothing, it changed six times in four months, and it does not say
@@ -20,12 +21,19 @@
  * edit to this file in separate commits — that separation is the only thing
  * that tells a reviewer whether a value moved because Figma moved or because
  * the rules here did.
+ *
+ * `yarn sync-tokens` also rewrites `tailwind/tokens.d.ts`, which is generated
+ * from the token data. An edit to `tokens.js` that adds or renames a key needs
+ * that file rewritten but needs no Figma export: run `yarn sync-token-types`.
  */
 
 import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+// Imports no token data of its own: it reads `tokens.js` through a dynamic
+// import, which main() reaches only after the new data files are on disk.
+import { writeTokenTypes } from './build-types.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.resolve(__dirname, '..', '..')
@@ -552,7 +560,7 @@ function buildProvenance() {
 
 // ---------- MAIN ----------
 
-function main() {
+async function main() {
   if (!fs.existsSync(TOKENS_DIR)) {
     console.error(
       `✗ no Figma export found at ${path.relative(REPO_ROOT, TOKENS_DIR)}/\n` +
@@ -584,6 +592,10 @@ function main() {
   }
   writeJSON('provenance.json', provenance)
 
+  // Last, and off the files just written: the declaration file is generated
+  // from the token data, so it has to see this run's values.
+  await writeTokenTypes()
+
   console.log('✓ done')
 }
 
@@ -591,4 +603,4 @@ const scriptPath = fileURLToPath(import.meta.url)
 const invokedPath = process.argv[1]
 const isCLI =
   invokedPath && fs.realpathSync(invokedPath) === fs.realpathSync(scriptPath)
-if (isCLI) main()
+if (isCLI) await main()
