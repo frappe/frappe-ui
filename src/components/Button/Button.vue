@@ -321,7 +321,12 @@ export default defineComponent({
       }
       return h(
         'span',
-        { class: ['truncate', { 'sr-only': isIconButton.value }] },
+        {
+          class: [
+            'truncate leading-tighter',
+            { 'sr-only': isIconButton.value },
+          ],
+        },
         slots.default?.() ?? props.label,
       )
     }

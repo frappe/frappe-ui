@@ -1,5 +1,9 @@
 <template>
-  <div data-slot="list-header" role="row" class="h-8 text-sm text-ink-gray-5">
+  <div
+    data-slot="list-header"
+    role="row"
+    class="h-8 text-sm leading-tighter text-ink-gray-5"
+  >
     <slot />
     <Transition
       enter-active-class="transition-transform duration-75 ease-out"

@@ -167,7 +167,7 @@ function handleSwitchChange(value: boolean) {
         :content="itemSlotsLabelContent"
       />
       <div v-else class="min-w-0">
-        <div :class="['truncate', getMenuTextColor(item)]">
+        <div :class="['truncate leading-tighter', getMenuTextColor(item)]">
           {{ item.label }}
         </div>
         <div v-if="item.description" class="truncate text-p-sm text-ink-gray-5">

@@ -51,10 +51,14 @@
                  inherited size and text at another puts the baseline at a
                  different offset in an app whose layout sets a smaller base
                  size, and the header text sat a px lower there. -->
-            <div class="truncate text-base-medium text-ink-gray-8">
+            <div
+              class="truncate text-base-medium leading-tighter text-ink-gray-8"
+            >
               {{ props.title }}
             </div>
-            <div class="mt-0.5 truncate text-sm text-ink-gray-6">
+            <div
+              class="mt-0.5 truncate text-sm leading-tighter text-ink-gray-6"
+            >
               {{ props.subtitle }}
             </div>
           </div>

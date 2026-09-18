@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex select-none items-center gap-1 overflow-clip rounded-full whitespace-nowrap"
+    class="inline-flex select-none items-center gap-1 overflow-clip rounded-full leading-tighter whitespace-nowrap"
     :class="classes"
   >
     <div

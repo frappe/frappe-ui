@@ -362,7 +362,7 @@ defineExpose(exposed)
           >
             <SelectValue
               :placeholder="placeholder"
-              class="max-w-full truncate opacity-0"
+              class="max-w-full truncate leading-tighter opacity-0"
               :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
             >
               <template v-if="selectedOption">
@@ -400,7 +400,7 @@ defineExpose(exposed)
           <div class="grid min-w-0 text-left truncate">
             <SelectValue
               :placeholder="placeholder"
-              class="col-start-1 row-start-1 max-w-full truncate"
+              class="col-start-1 row-start-1 max-w-full truncate leading-tighter"
               :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
             >
               <template v-if="selectedOption">
@@ -540,7 +540,7 @@ defineExpose(exposed)
                           name="item-label"
                           v-bind="getItemSlotProps(internalOption.option)"
                         >
-                          <div class="truncate">
+                          <div class="truncate leading-tighter">
                             {{ internalOption.option.label }}
                           </div>
                           <div

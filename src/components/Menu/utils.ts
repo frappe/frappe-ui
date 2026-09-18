@@ -18,7 +18,8 @@ export const menuClasses = {
   content:
     'menu-content z-[100] min-w-40 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
-  groupLabel: 'flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4',
+  groupLabel:
+    'flex h-7 items-center px-2 text-sm font-medium leading-tighter text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
   itemIconPlaceholder: 'size-4 shrink-0',
   chevronIcon: 'size-4 shrink-0',

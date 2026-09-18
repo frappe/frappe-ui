@@ -239,6 +239,13 @@ export default plugin(
       fontSize: buildFontSize(),
       screens: screenTokens,
       extend: {
+        // `leading-tighter` pins text to 1.15. It is the opt-out for
+        // single-line chrome whose height must not move: buttons, badges,
+        // labels, table headers. It sits between Tailwind's `leading-none` (1)
+        // and `leading-tight` (1.25). Tailwind's `leading-tight` does not change.
+        lineHeight: {
+          tighter: '1.15',
+        },
         textColor: {
           ink: semanticColors.ink,
         },

@@ -69,7 +69,7 @@ defineSlots<{
       <slot name="prefix" />
     </div>
 
-    <div data-slot="item-label" class="min-w-0 flex-1">
+    <div data-slot="item-label" class="min-w-0 flex-1 leading-tighter">
       <slot name="label">
         <slot />
       </slot>

@@ -7,7 +7,7 @@
     <div
       v-if="label || $slots.label"
       data-slot="list-group-header"
-      class="flex h-8 items-center text-sm-medium text-ink-gray-5"
+      class="flex h-8 items-center text-sm-medium leading-tighter text-ink-gray-5"
       :class="sticky && 'sticky top-0 z-10 bg-surface-base'"
     >
       <slot name="label">{{ label }}</slot>

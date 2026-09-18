@@ -158,7 +158,7 @@
             v-for="y in years"
             type="button"
             :key="y"
-            class="w-full text-ink-gray-8 h-7 shrink-0 rounded-4 py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            class="w-full text-ink-gray-8 h-7 shrink-0 rounded-4 py-1 text-sm leading-tighter text-center cursor-pointer transition-colors duration-100"
             :class="
               y === currentYear
                 ? 'bg-surface-gray-2 hover:bg-surface-gray-3'
@@ -181,7 +181,7 @@
             v-for="(m, i) in months"
             type="button"
             :key="m"
-            class="w-full text-ink-gray-8 shrink-0 h-7 rounded-4 py-1 text-sm text-center cursor-pointer transition-colors duration-100"
+            class="w-full text-ink-gray-8 shrink-0 h-7 rounded-4 py-1 text-sm leading-tighter text-center cursor-pointer transition-colors duration-100"
             :class="
               i === currentMonth
                 ? 'bg-surface-gray-2 hover:bg-surface-gray-3'

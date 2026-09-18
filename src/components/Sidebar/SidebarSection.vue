@@ -16,7 +16,7 @@
         <h3> inside it strips the heading from the accessibility tree.
       -->
       <h3
-        class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
+        class="h-4 text-sm leading-tighter text-ink-gray-5 transition-all duration-300 ease-in-out"
         :class="
           isSidebarCollapsed
             ? 'w-0 overflow-hidden opacity-0'

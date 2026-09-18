@@ -66,7 +66,9 @@
         <slot name="item-prefix" v-bind="itemSlotProps" />
 
         <slot name="item-label" v-bind="itemSlotProps">
-          <span class="truncate text-base text-ink-gray-8">{{ label }}</span>
+          <span class="truncate text-base leading-tighter text-ink-gray-8">{{
+            label
+          }}</span>
         </slot>
 
         <span class="ml-auto flex items-center">
