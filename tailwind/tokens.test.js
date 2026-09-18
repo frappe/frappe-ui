@@ -183,6 +183,19 @@ describe('fontSize', () => {
     expect(tokens.fontSize['12xl']).toBeDefined()
     expect(tokens.fontSize['p-12xl']).toBeUndefined()
   })
+
+  // A p- entry takes exactly two properties from the paragraph family. A third
+  // key in the export must not reach the built style on its own.
+  it('takes only lineHeight and letterSpacing from the paragraph family', () => {
+    for (const key of Object.keys(tokens.fontSize)) {
+      if (!key.startsWith('p-')) continue
+      const base = tokens.fontSize[key.slice(2)]
+      const p = tokens.fontSize[key]
+      expect(Object.keys(p).sort(), key).toEqual(Object.keys(base).sort())
+      expect(p.fontSize, key).toBe(base.fontSize)
+      expect(p.fontWeight, key).toBe(base.fontWeight)
+    }
+  })
 })
 
 describe('shadows', () => {

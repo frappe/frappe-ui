@@ -169,9 +169,17 @@ function buildFontSize() {
   for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
     out[key] = { fontSize: size, ...meta }
   }
+  // Only these two. The paragraph family is the text family at a looser
+  // line-height with its own tracking, and nothing else. Spreading the whole
+  // paragraph entry would let a third key added to the Figma export reshape
+  // every `p-*` style with no code change and no review.
   for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
     if (!out[key]) continue
-    out[`p-${key}`] = { ...out[key], ...p }
+    out[`p-${key}`] = {
+      ...out[key],
+      lineHeight: p.lineHeight,
+      letterSpacing: p.letterSpacing,
+    }
   }
   return out
 }
