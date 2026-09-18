@@ -9,6 +9,31 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Typography — `text-*` line height is 1.35 (breaking, silent)
+
+The tight text styles, `text-2xs` to `text-4xl` and their `-medium`, `-semibold`
+and `-bold` variants, move from line-height 1.15 to 1.35. At 14px one line of
+`text-base` is 18.9px, not 16.1px. Text that wraps now has room between its
+lines. The `text-p-*` styles and `text-5xl` and up do not change.
+
+`leading-tighter` is a new class that sets 1.15. It is the opt-out:
+`text-base leading-tighter` keeps the old 1.15 box. `leading-tight` keeps
+Tailwind's 1.25.
+
+- **frappe-ui components keep their height.** Their single-line label text
+  carries `leading-tighter`: Button, Badge, Breadcrumbs, the input, Select,
+  Combobox and MultiSelect triggers, menu items and group labels, picker cells,
+  `FormLabel`, `InputLabel`, `ItemListRow`, `MobileNavItem`, the `SettingsRow`
+  title, Sidebar, Tree items, tabs and the list header. A bare `Switch` no
+  longer takes its height from the parent's line-height.
+- **Who is affected:** app code with single-line text in a tight style. A
+  fixed-height box can clip or push its text off-centre. Repeated rows grow by
+  2.4 to 5px each: menus, kanban cards, timelines, search results, tree rows.
+  Text does not re-wrap, because line height does not move line breaks.
+- **How to fix:** add `leading-tighter` to single-line chrome in a fixed-height
+  box. Use `text-p-*` for long prose. See the
+  [migration guide](/docs/migration#line-height).
+
 ### Tailwind preset — the design tokens are exported as data
 
 `frappe-ui/tailwind/tokens` exports the tokens by name: `colors`,

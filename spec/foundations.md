@@ -93,8 +93,8 @@ Generated values, as an illustration of the shape:
 
 | Utility | font-size | line-height | weight | letter-spacing |
 |---|---|---|---|---|
-| `text-base` | 14px | 1.15 | 420 | 0.02em |
-| `text-base-medium` | 14px | 1.15 | 500 | 0.015em |
+| `text-base` | 14px | 1.35 | 420 | 0.02em |
+| `text-base-medium` | 14px | 1.35 | 500 | 0.015em |
 | `text-p-base` | 14px | 1.5 | 420 | 0.02em |
 | `text-p-base-medium` | 14px | 1.5 | 500 | 0.015em |
 
@@ -110,6 +110,31 @@ See [ADR-0007](./adr/0007-typography-style-utilities.md) for the reasoning and t
 **Historical.** Before `b8c232a6dc`, only `text-base-medium`, `text-md-medium` and
 `text-lg-medium` existed, hand-encoded in `plugin.js` from Figma observation, and
 letter-spacing was not read from the export at all. Those maps are gone.
+
+### Line height
+
+| Class | line-height | Use |
+|---|---|---|
+| `text-2xs` … `text-4xl` | 1.35 | UI text, including text that can wrap |
+| `text-5xl` … `text-12xl` | 1.4 – 1.6 | Display |
+| `text-p-*` | 1.4 – 1.6 | Long prose |
+| `leading-none` | 1 | Tailwind default |
+| `leading-tighter` | 1.15 | Opt-out for single-line chrome in a fixed-height box |
+| `leading-tight` | 1.25 | Tailwind default, unchanged |
+| `leading-snug` … `leading-loose` | 1.375 – 2 | Tailwind defaults |
+
+`leading-tighter` is set in `tailwind/plugin.js`. It adds a step between
+Tailwind's `leading-none` and `leading-tight`. Components put it on the label
+text of their single-line chrome, so a button, badge, input, menu item, sidebar
+item or list header keeps the height it had at 1.15. Put it on the element that
+carries the text, not on a wrapper whose child sets its own `text-*` style.
+
+The tight styles used to be 1.15. The
+[changelog](../docs/content/docs/changelog.md) records the break.
+
+The Figma text styles still export 115%. `TEXT_LINE_HEIGHT_OVERRIDE` in
+[`tailwind/tokens/build.js`](../tailwind/tokens/build.js) maps it to 135% for
+the UI sizes. Remove the override when the Figma styles move to 135%.
 
 ## Focus ring
 
