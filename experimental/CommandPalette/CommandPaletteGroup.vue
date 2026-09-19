@@ -9,7 +9,7 @@
       v-if="label"
       as="div"
       data-slot="command-palette-group-label"
-      class="mb-2.5 px-4.5 text-base text-ink-gray-5"
+      class="mb-2.5 px-4.5 text-base leading-tighter text-ink-gray-5"
     >
       {{ label }}
     </ListboxGroupLabel>
