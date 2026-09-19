@@ -17,7 +17,12 @@ The two shapes did not match. The editor type is now `UploadedMedia`. The root
 
 - **`upload` fits `uploadFunction`.** The root `UploadedFile` is a type alias
   now, not an interface. So `useEditor({ uploadFunction: upload })` compiles.
-  Before, TypeScript reported TS2322: the index signature was missing.
+  Before, TypeScript reported TS2322: the index signature was missing. Bare
+  `upload` stores a private file attached to nothing, so
+  [pass an owner document or `private: false`](/docs/migration#editor-option-types).
+- **`UploadedFile` no longer merges.** A type alias does not take declaration
+  merging, so `declare module 'frappe-ui'` cannot add fields to it. Extend it
+  instead: `type MyFile = UploadedFile & { ... }`.
 - **Who is affected:** code that imports `UploadedFile` from
   `frappe-ui/editor`. TypeScript reports the missing export.
 - **How to fix:** rename the import to `UploadedMedia`. See the

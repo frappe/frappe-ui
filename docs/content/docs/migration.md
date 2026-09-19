@@ -2965,10 +2965,9 @@ const uploadFunction: UploadFunction = async (file, options) => {
 
 The second argument is optional. A one-argument handler still compiles.
 
-**On `1.0.0-beta.76` or older, rename the editor's `UploadedFile` to
-`UploadedMedia`.** The root `frappe-ui` export `UploadedFile` is the File
-document that `upload()` resolves with. It keeps its name. TypeScript reports
-the old editor import:
+**Rename the editor's `UploadedFile` import to `UploadedMedia`.** The root
+`frappe-ui` export `UploadedFile` is the File document that `upload()` resolves
+with. It keeps its name. TypeScript reports the old editor import:
 
 ```ts
 // Before
@@ -2977,11 +2976,23 @@ import type { UploadedFile } from 'frappe-ui/editor'
 import type { UploadedMedia } from 'frappe-ui/editor'
 ```
 
-`upload` from `frappe-ui` now fits `uploadFunction` as is:
+`upload` from `frappe-ui` now fits `uploadFunction` with no cast. Do not pass it
+bare. Bare `upload` stores a private file attached to nothing, and only the
+uploader can load it. Attach the file to the document that holds the content.
+The file stays private, and anyone who can read that document can read it. Or
+pass `private: false` when the content is public anyway:
 
 ```ts
 import { upload } from 'frappe-ui'
-useEditor({ extensions, uploadFunction: upload })
+import type { UploadFunction } from 'frappe-ui/editor'
+
+const uploadFunction: UploadFunction = (file, options) =>
+  upload(file, {
+    doctype: 'Blog Post', // or `private: false` for public content
+    docname: post.name,
+    signal: options?.signal,
+    onProgress: options?.onProgress,
+  })
 ```
 
 **Remove dead `code`, `codeBlock` and `link` keys from StarterKit options.** The
