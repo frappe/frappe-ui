@@ -36,4 +36,8 @@ The `badge` count shows as a pill (`badgeStyle="count"`) or a dot
 a dot surfaces the real number in the tooltip. The badge pill teleports to
 `<body>` so an `overflow-hidden` scroll container can't clip it.
 
+Attributes you write on `SidebarRailItem` land on the clickable cell — the
+`<button>` or the link — not on the tooltip wrapper, and a `class` adds to the
+cell's own classes.
+
 <!-- @include: ./SidebarRail.api.md -->

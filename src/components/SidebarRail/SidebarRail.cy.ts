@@ -180,6 +180,28 @@ describe('<SidebarRailItem />', () => {
       .and('not.contain.text', '3 unread')
   })
 
+  it('passes fallthrough attrs to the cell, merging class with its own', () => {
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Search', icon: 'lucide-search' },
+      attrs: { class: 'my-cell', 'data-testid': 'search-cell' },
+    })
+    cy.get('button[data-slot=sidebar-rail-item]')
+      .should('have.attr', 'data-testid', 'search-cell')
+      .and('have.class', 'my-cell')
+      // The component's own classes survive the merge.
+      .and('have.class', 'rounded-[7px]')
+
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Docs', icon: 'lucide-book-open', href: '/docs' },
+      attrs: { class: 'my-cell', 'data-testid': 'docs-cell' },
+    })
+    cy.get('a[data-slot=sidebar-rail-item]')
+      .should('have.attr', 'data-testid', 'docs-cell')
+      .and('have.attr', 'href', '/docs')
+      .and('have.class', 'my-cell')
+      .and('have.class', 'rounded-[7px]')
+  })
+
   it('folds the unread count into the accessible label', () => {
     cy.mount(SidebarRailItem, {
       props: { label: 'Notifications', icon: 'lucide-bell', badge: 3 },
