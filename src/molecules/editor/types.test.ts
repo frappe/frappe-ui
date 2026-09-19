@@ -8,6 +8,10 @@ import { describe, expectTypeOf, it } from 'vitest'
 import type { EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import type { PopoverAlign, PopoverSide } from '#components/Popover/types'
+import {
+  upload,
+  type UploadedFile as FrappeUploadedFile,
+} from '#utils/useFileUpload'
 import type {
   CommentKitOptions,
   TiptapEditor as MenuEditor,
@@ -19,7 +23,7 @@ import type {
   StarterKitOptions,
   TagSuggestionItem,
   UploadFunction,
-  UploadedFile,
+  UploadedMedia,
 } from './index'
 
 // --- ED-Q3: StarterKit keys -------------------------------------------------
@@ -111,7 +115,16 @@ const uploadLegacy: UploadFunction = async () => ({ file_url: '/files/a.png' })
 // @ts-expect-error Every upload result must carry a `file_url`.
 const uploadNoUrl: UploadFunction = async () => ({ file_name: 'a.png' })
 
-const uploaded: UploadedFile = { file_url: '/files/a.png', anything: 1 }
+const uploaded: UploadedMedia = { file_url: '/files/a.png', anything: 1 }
+// The root File document fits the editor's upload result.
+const frappeFile: FrappeUploadedFile = {
+  file_name: 'a.png',
+  file_size: 1,
+  file_url: '/files/a.png',
+}
+
+// frappe-ui's own uploader fits the editor's upload contract.
+const uploadFrappe: UploadFunction = upload
 
 // --- ED-Q8: one menu options type -------------------------------------------
 
@@ -171,6 +184,7 @@ void inlineStarterHeading
 void mentionNoValue
 void tagNoLabel
 void uploadNoUrl
+void uploadFrappe
 void menuBadSide
 void menuBadAlign
 void menuPlacement
@@ -198,7 +212,9 @@ describe('editor option types', () => {
     expectTypeOf(tagWithValue).toMatchTypeOf<TagSuggestionItem>()
     expectTypeOf(uploadWithOptions).toMatchTypeOf<UploadFunction>()
     expectTypeOf(uploadLegacy).toMatchTypeOf<UploadFunction>()
-    expectTypeOf(uploaded).toMatchTypeOf<UploadedFile>()
+    expectTypeOf(uploaded).toMatchTypeOf<UploadedMedia>()
+    expectTypeOf(upload).toMatchTypeOf<UploadFunction>()
+    expectTypeOf(frappeFile).toMatchTypeOf<UploadedMedia>()
     expectTypeOf(menuOptions).toMatchTypeOf<EditorMenuOptions>()
     expectTypeOf(menuContext).toMatchTypeOf<EditorMenuShouldShowContext>()
   })

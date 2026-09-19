@@ -46,7 +46,7 @@ declare module '@tiptap/core' {
  * The index signature keeps server fields the editor does not know about, so
  * an upload handler can return the raw File document.
  */
-export interface UploadedFile extends Partial<FrappeUploadedFile> {
+export interface UploadedMedia extends Partial<FrappeUploadedFile> {
   file_url: string
   width?: number | null
   height?: number | null
@@ -72,7 +72,7 @@ export interface MediaUploadRequestOptions {
 export type UploadFunction = (
   file: File,
   options?: MediaUploadRequestOptions,
-) => Promise<UploadedFile>
+) => Promise<UploadedMedia>
 
 /**
  * Effective upload options. Mirrors the legacy extension option shape: the only
@@ -88,7 +88,7 @@ export interface MediaUploadOptions {
 /** Outcome of a no-doc-mutation single-file upload. */
 export interface UploadResult {
   success: boolean
-  file?: UploadedFile
+  file?: UploadedMedia
   error?: Error
 }
 

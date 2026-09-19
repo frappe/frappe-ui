@@ -43,11 +43,11 @@ export type UseEditorOptions = {
 
 /**
  * The upload result contract, re-exported so `frappe-ui/editor` keeps one
- * `UploadedFile` name. The canonical declaration lives next to the media
+ * `UploadedMedia` name. The canonical declaration lives next to the media
  * upload engine.
  */
 export type {
-  UploadedFile,
+  UploadedMedia,
   UploadFunction,
   MediaUploadProgress,
   MediaUploadRequestOptions,

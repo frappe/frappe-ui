@@ -192,4 +192,4 @@ Pre-curated `MenuItem[]` arrays. Items whose extension isn't loaded hide themsel
 
 ### Types
 
-`Editor`, `JSONContent`, `UploadedFile`, `MenuItem`, `CommandMenuItem`, `MenuGroupItem`, `MenuActionContext`, `MentionSuggestionItem`, `TagSuggestionItem`, `SuggestionExtensionOptions`, `SuggestionRange`, and the kit option types listed above.
+`Editor`, `JSONContent`, `UploadedMedia`, `MenuItem`, `CommandMenuItem`, `MenuGroupItem`, `MenuActionContext`, `MentionSuggestionItem`, `TagSuggestionItem`, `SuggestionExtensionOptions`, `SuggestionRange`, and the kit option types listed above.
