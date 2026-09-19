@@ -2,11 +2,12 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type {
   SuggestionProps,
   SuggestionKeyDownProps,
 } from '@tiptap/suggestion'
+import { computePosition } from '@floating-ui/dom'
 import { createSuggestionRenderer } from './suggestion-renderer'
 
 // Every `new VueRenderer(...)` the renderer creates lands here so tests can
@@ -60,12 +61,42 @@ vi.mock('@tiptap/vue-3', () => {
   return { VueRenderer: FakeVueRenderer }
 })
 
-vi.mock('@floating-ui/dom', () => ({
-  computePosition: vi.fn(async () => ({ x: 10, y: 20 })),
+// `deferred` parks each computePosition resolver so a test can settle
+// overlapping runs out of order; off by default so other tests stay synchronous.
+const position = vi.hoisted(() => ({
+  deferred: false,
+  resolvers: [] as ((value: { x: number; y: number }) => void)[],
+}))
+
+// Only `computePosition` is faked; `autoUpdate` stays real so its scroll and
+// resize wiring is what the tests exercise.
+vi.mock('@floating-ui/dom', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@floating-ui/dom')>()),
+  computePosition: vi.fn(() =>
+    position.deferred
+      ? new Promise<{ x: number; y: number }>((resolve) => {
+          position.resolvers.push(resolve)
+        })
+      : Promise.resolve({ x: 10, y: 20 }),
+  ),
   flip: vi.fn(() => ({})),
   offset: vi.fn(() => ({})),
   shift: vi.fn(() => ({})),
 }))
+
+// jsdom has no ResizeObserver, so `autoUpdate` would drop `elementResize`
+// without this.
+class FakeResizeObserver {
+  static instances: FakeResizeObserver[] = []
+  observe = vi.fn()
+  unobserve = vi.fn()
+  disconnect = vi.fn()
+  constructor(public callback: (entries: unknown[]) => void) {
+    FakeResizeObserver.instances.push(this)
+  }
+}
+
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 const FakeComponent = {} as never
 
@@ -84,13 +115,31 @@ function keyDown(key: string): SuggestionKeyDownProps {
 }
 
 describe('createSuggestionRenderer', () => {
+  // `autoUpdate` puts scroll/resize listeners on window, so a renderer left
+  // running would answer the next test's scroll too.
+  const renderers: ReturnType<typeof createSuggestionRenderer>[] = []
+  function makeRenderer() {
+    const api = createSuggestionRenderer(FakeComponent)
+    renderers.push(api)
+    return api
+  }
+
+  afterEach(() => {
+    renderers.splice(0).forEach((api) => api.onExit())
+  })
+
   beforeEach(() => {
     instances.length = 0
     document.body.innerHTML = ''
+    position.deferred = false
+    position.resolvers.length = 0
+    FakeResizeObserver.instances.length = 0
+    vi.mocked(computePosition).mockClear()
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
   })
 
   it('mounts the VueRenderer wrapper (renderer.el), not its null firstElementChild', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
 
     const renderer = instances[0]
@@ -102,7 +151,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('removes the wrapper and destroys the renderer on exit', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     const renderer = instances[0]
     const wrapper = renderer.el
@@ -114,7 +163,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('late-attaches on update when onStart had no caret rect yet', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps({ clientRect: null }))
     const renderer = instances[0]
     expect(document.body.contains(renderer.el)).toBe(false)
@@ -125,7 +174,7 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('keeps previous items during a transient loading update', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps({ items: [{ label: 'a' }] } as never))
     const renderer = instances[0]
 
@@ -141,16 +190,54 @@ describe('createSuggestionRenderer', () => {
   })
 
   it('returns false on Escape so the suggestion plugin runs onExit', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     expect(api.onKeyDown(keyDown('Escape'))).toBe(false)
     expect(instances[0].onKeyDownSpy).not.toHaveBeenCalled()
   })
 
   it('delegates other keys to the suggestion list', () => {
-    const api = createSuggestionRenderer(FakeComponent)
+    const api = makeRenderer()
     api.onStart(makeProps())
     expect(api.onKeyDown(keyDown('ArrowDown'))).toBe(true)
     expect(instances[0].onKeyDownSpy).toHaveBeenCalled()
+  })
+
+  it('ignores a computePosition run that settles after a newer one', async () => {
+    position.deferred = true
+    const api = makeRenderer()
+    api.onStart(makeProps())
+    api.onUpdate(makeProps())
+    const wrapper = instances[0].el
+
+    expect(position.resolvers).toHaveLength(2)
+    // Newer run lands first, then the superseded one tries to overwrite it.
+    position.resolvers[1]({ x: 99, y: 99 })
+    await flush()
+    position.resolvers[0]({ x: 10, y: 20 })
+    await flush()
+
+    expect(wrapper?.style.left).toBe('99px')
+    expect(wrapper?.style.top).toBe('99px')
+  })
+
+  it('repositions on popup resize and page scroll, and stops on exit', () => {
+    const api = makeRenderer()
+    api.onStart(makeProps())
+
+    const observer = FakeResizeObserver.instances[0]
+    expect(observer.observe).toHaveBeenCalledWith(instances[0].el)
+
+    let calls = vi.mocked(computePosition).mock.calls.length
+    observer.callback([])
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
+
+    window.dispatchEvent(new Event('scroll'))
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
+
+    api.onExit()
+    expect(observer.disconnect).toHaveBeenCalled()
+    window.dispatchEvent(new Event('scroll'))
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(calls)
   })
 })
