@@ -15,7 +15,7 @@ import {
 import type { MediaDimensions } from '#molecules/editor/extensions/shared/media-dimensions'
 import type {
   InsertMode,
-  UploadedFile,
+  UploadedMedia,
 } from '#molecules/editor/extensions/shared/media-upload-types'
 
 /** Optional intrinsic dimensions (null when the probe failed). */
@@ -120,7 +120,7 @@ export function applyUploadSuccess(
   view: EditorView,
   nodeName: string,
   uploadId: string,
-  uploaded: UploadedFile,
+  uploaded: UploadedMedia,
 ): void {
   const pos = findNodeByUploadId(view, nodeName, uploadId)
   if (pos === null) return

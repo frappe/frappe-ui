@@ -83,7 +83,7 @@ export interface UploadState {
   result: UploadedFile | null
 }
 
-export interface UploadedFile {
+export type UploadedFile = {
   file_name: string
   file_size: number
   file_url: string

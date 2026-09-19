@@ -2862,6 +2862,7 @@ import {
 | hand-rolled `textEditorMenuButtons` array       | `commentToolbar` / `articleToolbar` / `minimalToolbar` presets           |
 | `#top` / `#bottom` / `#editor` slots            | one default slot — you render `EditorContent` + menus yourself           |
 | `:uploadFunction` (optional, frappe default)    | `:upload-function` (required to enable uploads)                          |
+| `UploadedFile` from `frappe-ui/editor` (beta)   | `UploadedMedia`                                                          |
 
 ### Compose, don't configure
 
@@ -2945,7 +2946,7 @@ Kit members, the upload handler and the two floating menus are typed. Run
 `yarn type-check` (or `vue-tsc`) after upgrading: every edit below is reported
 at the call site.
 
-**Make every constructed `UploadedFile` include `file_url`.** The type is
+**Make every constructed `UploadedMedia` include `file_url`.** The type is
 exported, and so is the handler type:
 
 ```ts
@@ -2963,6 +2964,25 @@ const uploadFunction: UploadFunction = async (file, options) => {
 ```
 
 The second argument is optional. A one-argument handler still compiles.
+
+**On `1.0.0-beta.76` or older, rename the editor's `UploadedFile` to
+`UploadedMedia`.** The root `frappe-ui` export `UploadedFile` is the File
+document that `upload()` resolves with. It keeps its name. TypeScript reports
+the old editor import:
+
+```ts
+// Before
+import type { UploadedFile } from 'frappe-ui/editor'
+// After
+import type { UploadedMedia } from 'frappe-ui/editor'
+```
+
+`upload` from `frappe-ui` now fits `uploadFunction` as is:
+
+```ts
+import { upload } from 'frappe-ui'
+useEditor({ extensions, uploadFunction: upload })
+```
 
 **Remove dead `code`, `codeBlock` and `link` keys from StarterKit options.** The
 frappe extensions of those names are separate members, so the keys did nothing:

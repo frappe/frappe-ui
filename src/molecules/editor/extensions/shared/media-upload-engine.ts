@@ -48,7 +48,7 @@ import type {
   MediaUploadEngine,
   MediaUploadOptions,
   MediaUploadRequestOptions,
-  UploadedFile,
+  UploadedMedia,
   UploadResult,
 } from '#molecules/editor/extensions/shared/media-upload-types'
 
@@ -58,7 +58,7 @@ export type {
   MediaUploadOptions,
   MediaUploadRequestOptions,
   UploadFunction,
-  UploadedFile,
+  UploadedMedia,
   UploadResult,
 } from '#molecules/editor/extensions/shared/media-upload-types'
 
@@ -97,7 +97,7 @@ export async function uploadFile(
   file: File,
   options: MediaUploadOptions,
   requestOptions?: MediaUploadRequestOptions,
-): Promise<UploadedFile> {
+): Promise<UploadedMedia> {
   if (!options.uploadFunction) {
     throw new Error('uploadFunction option is not provided')
   }

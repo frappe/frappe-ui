@@ -3,7 +3,7 @@
  * content-paste path stop each declaring their own `UploadResult` /
  * `MediaUploadOptions` interfaces.
  *
- * `UploadResult`, `MediaUploadOptions` and `UploadedFile` are OWNED by the image
+ * `UploadResult`, `MediaUploadOptions` and `UploadedMedia` are OWNED by the image
  * cluster's `media-upload-types.ts` (the engine's canonical type surface); they
  * are re-exported here so consumers have one stable import for the whole upload
  * value-type vocabulary. The only type added here is {@link ExistingImage},
@@ -13,7 +13,7 @@ export type {
   MediaUploadOptions,
   UploadFunction,
   UploadResult,
-  UploadedFile,
+  UploadedMedia,
 } from '#molecules/editor/extensions/shared/media-upload-types'
 
 /**

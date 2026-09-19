@@ -9,6 +9,20 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### The editor's `UploadedFile` is now `UploadedMedia` (breaking)
+
+`frappe-ui` and `frappe-ui/editor` both exported a type named `UploadedFile`.
+The two shapes did not match. The editor type is now `UploadedMedia`. The root
+`UploadedFile` keeps its name and its shape.
+
+- **`upload` fits `uploadFunction`.** The root `UploadedFile` is a type alias
+  now, not an interface. So `useEditor({ uploadFunction: upload })` compiles.
+  Before, TypeScript reported TS2322: the index signature was missing.
+- **Who is affected:** code that imports `UploadedFile` from
+  `frappe-ui/editor`. TypeScript reports the missing export.
+- **How to fix:** rename the import to `UploadedMedia`. See the
+  [migration guide](/docs/migration#editor-option-types).
+
 ### Typography — `text-*` line height is 1.35 (breaking, silent)
 
 The tight text styles, `text-2xs` to `text-4xl` and their `-medium`, `-semibold`
@@ -276,7 +290,7 @@ site; the runtime ignores it as it always did.
   is the stored id. Extra fields are yours: the list hands your own object to
   the item slot untouched, so an avatar or a colour still reaches the template.
   `getMentions()` returns the same two fields.
-- **`UploadedFile.file_url` is required**, and the handler type is exported as
+- **`UploadedMedia.file_url` is required**, and the handler type is exported as
   `UploadFunction`. A handler may take a second `MediaUploadRequestOptions`
   argument to report progress; a one-argument handler still compiles.
 - **`EditorBubbleMenu` and `EditorFloatingMenu` share `EditorMenuOptions`.**

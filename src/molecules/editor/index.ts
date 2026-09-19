@@ -8,7 +8,7 @@ export {
   useEditor,
   type Editor as TiptapEditor,
   type JSONContent,
-  type UploadedFile,
+  type UploadedMedia,
   type UploadFunction,
   type MediaUploadProgress,
 } from './useEditor'

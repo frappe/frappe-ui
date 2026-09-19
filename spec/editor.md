@@ -85,7 +85,7 @@ import {
 
   // Types
   type TiptapEditor,   // the tiptap Editor instance type (the `Editor` name is the component)
-  type JSONContent, type UploadedFile, type UploadFunction,
+  type JSONContent, type UploadedMedia, type UploadFunction,
   type MenuItem, type CommandMenuItem, type MenuGroupItem, type MenuActionContext,
   type EditorMenuOptions, type EditorMenuShouldShowContext,
   type StarterKitOptions, type CommentKitOptions,
@@ -132,7 +132,7 @@ When the `extensions` list contains an extension named `'collaboration'`, conten
 
 ### Upload plumbing
 
-`uploadFunction` must resolve with an `UploadedFile` carrying a `file_url`; every media node reads it to set `src`. The editor passes a second argument, `MediaUploadRequestOptions` (`signal` and `onProgress`), so a handler can report progress and honor cancellation. A one-parameter handler stays assignable.
+`uploadFunction` must resolve with an `UploadedMedia` carrying a `file_url`; every media node reads it to set `src`. The editor passes a second argument, `MediaUploadRequestOptions` (`signal` and `onProgress`), so a handler can report progress and honor cancellation. A one-parameter handler stays assignable.
 
 When `uploadFunction` is set, `useEditor` prepends a tiny internal `UploadStorage` extension and writes the function to `editor.storage.upload.uploadFunction` after construction. The upload-aware extensions (`Image`, `ImageGroup`, `Video`, `Attachment`, `MediaDrop`, `ContentPaste`) read from that slot. Per-extension override via `Image.configure({ uploadFunction })` wins. `uploadFunction` is shared by several extensions, which is why it's one engine option rather than configured per extension.
 
