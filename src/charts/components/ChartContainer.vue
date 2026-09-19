@@ -20,7 +20,7 @@
              the title line taller than the text it sits beside. -->
         <div
           v-if="title"
-          class="flex items-center gap-1 text-p-base text-ink-gray-8"
+          class="flex items-center gap-1.5 text-p-base text-ink-gray-8"
         >
           <span class="min-w-0 truncate">{{ title }}</span>
           <span

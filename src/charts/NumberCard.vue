@@ -66,7 +66,7 @@
         <!-- The font-size class is on the row, not on the title span, so slot
              content sized in `em` follows the card's smaller title. Zero
              height for the same reason `#actions` has it. -->
-        <div class="flex min-w-0 items-center gap-1 text-sm text-ink-gray-5">
+        <div class="flex min-w-0 items-center gap-1.5 text-sm text-ink-gray-5">
           <span class="min-w-0 truncate">{{ title }}</span>
           <span
             v-if="$slots['title-suffix']"
