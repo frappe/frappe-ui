@@ -26,4 +26,12 @@ printed in the color of the trend under it. It is one color for one mark, the
 way `seriesConfig[key].color` names a series' own. It does not restyle the card,
 and the delta keeps the tone that says which way the number moved.
 
+## The title row
+
+`#actions` goes at the end of the row and `#title-suffix` right after the title
+text. Neither adds height to the row: both centre on the title, so the number
+stays where it is. The card's title is smaller than a chart's and
+`#title-suffix` renders in it, so the same mark sized in `em` comes out smaller
+here than on a `ChartContainer`.
+
 <!-- @include: ./NumberCard.api.md -->

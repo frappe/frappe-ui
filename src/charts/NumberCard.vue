@@ -63,8 +63,17 @@
       :class="{ 'pb-10': showSparkline }"
     >
       <div class="flex min-w-0 items-center justify-between gap-3">
-        <div class="min-w-0 truncate text-sm text-ink-gray-5">
-          {{ title }}
+        <!-- The font-size class is on the row, not on the title span, so slot
+             content sized in `em` follows the card's smaller title. Zero
+             height for the same reason `#actions` has it. -->
+        <div class="flex min-w-0 items-center gap-1 text-sm text-ink-gray-5">
+          <span class="min-w-0 truncate">{{ title }}</span>
+          <span
+            v-if="$slots['title-suffix']"
+            class="flex h-0 shrink-0 items-center"
+          >
+            <slot name="title-suffix" />
+          </span>
         </div>
         <!-- Zero height, so whatever the app puts here — a Badge, a button —
              reserves its width and centres on the title without setting the

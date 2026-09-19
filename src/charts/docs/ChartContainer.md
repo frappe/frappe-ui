@@ -26,6 +26,12 @@ while a name that shortens still reads.
 The header row is one title line tall. An action taller than that is centred on
 the title instead of making the row taller.
 
+`#title-suffix` goes at the other end, right after the title text — for a mark
+that belongs to the name rather than to the card, like a lock on a chart whose
+rows are filtered per reader. The title truncates around it and it keeps its
+width. It renders in the title's font size, so a mark sized in `em` follows the
+title wherever the title is smaller, as it is on a `NumberCard`.
+
 ## Value-axis titles
 
 `yAxisTitle` titles the primary value axis and `y2AxisTitle` the second one.

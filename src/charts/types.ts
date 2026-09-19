@@ -1125,6 +1125,16 @@ export type ChartActionsSlot = {
   actions?: () => unknown
 }
 
+/** A mark on the title itself, e.g. a lock on a chart filtered per reader. */
+export type ChartTitleSuffixSlot = {
+  /**
+   * A mark right after the title, on the same line. The title truncates
+   * around it and it keeps its width. It renders in the title's font size, so
+   * content sized in `em` is smaller on a NumberCard than on a chart.
+   */
+  'title-suffix'?: () => unknown
+}
+
 export type AxisChartEmits = {
   /** The legend switched a series off or back on. Carries the new list. */
   'update:hiddenSeries': [value: string[]]
@@ -1260,6 +1270,7 @@ export type ScatterChartSlots = ChartActionsSlot &
 
 /** No tooltip slot: a card with no plot has nothing to hover. */
 export type NumberCardSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /** Replaces `deltaCaption`, e.g. with a Dropdown that changes the period. */
     caption?: (props: { caption?: string }) => unknown
@@ -1271,6 +1282,7 @@ export type ChartCardSlots = {
 }
 
 export type ChartContainerSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /** The plot itself, drawn into a box the container sizes and states. */
     default: () => unknown

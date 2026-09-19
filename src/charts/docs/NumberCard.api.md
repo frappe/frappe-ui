@@ -138,6 +138,11 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'caption',
     description: 'Replaces `deltaCaption`, e.g. with a Dropdown that changes the period.',
     type: '{ caption?: string | undefined; }'

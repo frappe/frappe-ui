@@ -14,8 +14,21 @@
       class="flex items-start justify-between gap-3"
     >
       <div class="min-w-0">
-        <div v-if="title" class="truncate text-p-base text-ink-gray-8">
-          {{ title }}
+        <!-- The font-size class is on the row, not on the title span, so slot
+             content sized in `em` reads the title's size rather than the
+             card's. `1lh` is one line of that size, so the mark cannot make
+             the title line taller than the text it sits beside. -->
+        <div
+          v-if="title"
+          class="flex items-center gap-1 text-p-base text-ink-gray-8"
+        >
+          <span class="min-w-0 truncate">{{ title }}</span>
+          <span
+            v-if="$slots['title-suffix']"
+            class="flex h-[1lh] shrink-0 items-center"
+          >
+            <slot name="title-suffix" />
+          </span>
         </div>
         <div v-if="subtitle" class="truncate text-p-sm text-ink-gray-5">
           {{ subtitle }}
