@@ -2958,7 +2958,11 @@ const uploadFunction = async (file: File) => {
 // After
 import type { UploadFunction } from 'frappe-ui/editor'
 const uploadFunction: UploadFunction = async (file, options) => {
-  const doc = await upload(file, { onProgress: options?.onProgress })
+  const doc = await upload(file, {
+    doctype: 'Blog Post', // attach it, see below
+    docname: post.name,
+    onProgress: options?.onProgress,
+  })
   return doc // must carry file_url; extra fields pass through
 }
 ```
