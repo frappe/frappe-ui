@@ -3,10 +3,57 @@
  */
 
 import { ref } from 'vue'
+import { http, HttpResponse } from 'msw'
+import { server } from '../../mocks/node'
 import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
 import { useList } from '../index'
 
 describe('useList', () => {
+  it('sends repeated field conditions and refetches when a tuple value changes', async () => {
+    const received: unknown[] = []
+    server.use(
+      http.get(`${baseUrl}/api/v2/document/Invoice`, ({ request }) => {
+        received.push(
+          JSON.parse(new URL(request.url).searchParams.get('filters')!),
+        )
+        return HttpResponse.json({ data: [{ name: 'invoice-1' }] })
+      }),
+    )
+    const minimum = ref(100)
+    const invoices = useList({
+      baseUrl,
+      doctype: 'Invoice',
+      filters: [
+        ['amount', '>', minimum],
+        ['amount', '<', 500],
+      ],
+      immediate: false,
+    })
+    await invoices.fetch()
+    expect(received).toEqual([
+      [
+        ['amount', '>', 100],
+        ['amount', '<', 500],
+      ],
+    ])
+    expect(invoices.data).toEqual([{ name: 'invoice-1' }])
+
+    minimum.value = 200
+    await expect
+      .poll(() => received)
+      .toEqual([
+        [
+          ['amount', '>', 100],
+          ['amount', '<', 500],
+        ],
+        [
+          ['amount', '>', 200],
+          ['amount', '<', 500],
+        ],
+      ])
+    await expect.poll(() => invoices.loading).toBe(false)
+  })
+
   it('it returns expected object', async () => {
     interface User {
       name: string
