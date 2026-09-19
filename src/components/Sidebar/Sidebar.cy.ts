@@ -241,6 +241,48 @@ describe('<SidebarHeader />', () => {
     cy.get('[role=menuitem]').should('have.length', menuItems.length)
   })
 
+  it('is a dropdown trigger with a chevron only when there are menuItems', () => {
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems } })
+    cy.get('[data-slot=sidebar-header] button').should('exist')
+    cy.get('[data-slot=sidebar-header] .lucide-chevron-down').should('exist')
+
+    // Nothing to open: no button, no chevron, no tab stop.
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM' } })
+    cy.get('[data-slot=sidebar-header]').should('contain.text', 'Frappe CRM')
+    cy.get('[data-slot=sidebar-header] button').should('not.exist')
+    cy.get('[data-slot=sidebar-header] .lucide-chevron-down').should(
+      'not.exist',
+    )
+
+    // An empty array is the same as no menu at all.
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems: [] } })
+    cy.get('[data-slot=sidebar-header] button').should('not.exist')
+  })
+
+  it('keeps the logo and title in the same place with and without menuItems', () => {
+    cy.viewport(1280, 720)
+    // `.text-base-medium` is the title line, `.size-7` the logo box.
+    const boxes = (selector: string) =>
+      cy
+        .get(`[data-slot=sidebar-header] ${selector}`)
+        .then(($el) => $el[0].getBoundingClientRect())
+
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems } })
+    boxes('.text-base-medium').then((title) => {
+      boxes('.size-7').then((logo) => {
+        cy.mount(SidebarHeader, { props: { title: 'Frappe CRM' } })
+        boxes('.text-base-medium').then((plainTitle) => {
+          expect(plainTitle.x).to.eq(title.x)
+          expect(plainTitle.y).to.eq(title.y)
+        })
+        boxes('.size-7').then((plainLogo) => {
+          expect(plainLogo.x).to.eq(logo.x)
+          expect(plainLogo.y).to.eq(logo.y)
+        })
+      })
+    })
+  })
+
   it('renders the #prefix slot filling the default logo box', () => {
     cy.mount(SidebarHeader, {
       props: { title: 'Frappe CRM' },

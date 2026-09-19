@@ -53,6 +53,10 @@ or the title's first letter; `showLogo: false` drops the box entirely for a
 flush-left title. `menuItems` renders inside the trigger's
 dropdown — the same structured-options shape `Dropdown` itself takes.
 
+Without `menuItems` the header is a plain static block: no button, no chevron,
+no hover background, no tab stop. The logo and the title keep the same
+position, so adding a menu later does not move them.
+
 ## SidebarSection
 
 A collapsible group. It owns only the label row and the collapse chrome —

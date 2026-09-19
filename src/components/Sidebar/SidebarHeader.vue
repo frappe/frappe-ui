@@ -4,7 +4,55 @@
        the sidebar gutter (px-2) itself — so consumers drop it straight into
        <Sidebar> without a wrapping padding div. -->
   <div data-slot="sidebar-header" class="flex h-12 shrink-0 items-center px-1">
-    <Dropdown :options="props.menuItems" match-trigger-width>
+    <!-- The logo + title block. Declared once (this renders nothing) and
+         reused by both branches below, so the interactive and the static
+         header cannot drift apart. -->
+    <DefineIdentity>
+      <div
+        v-if="showLogo"
+        class="size-7 shrink-0 rounded-[6px] overflow-hidden"
+      >
+        <slot name="prefix">
+          <img
+            v-if="typeof props.logo === 'string'"
+            :src="props.logo"
+            class="w-full h-full object-cover"
+            alt="Logo"
+          />
+          <div
+            v-else-if="!props.logo"
+            class="w-full h-full bg-surface-gray-4 flex items-center justify-center text-ink-gray-7"
+          >
+            {{ props.title.charAt(0).toUpperCase() }}
+          </div>
+          <component v-else :is="props.logo" class="w-full h-full" />
+        </slot>
+      </div>
+      <div
+        class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
+        :class="
+          isCollapsed
+            ? 'ml-0 w-0 overflow-hidden opacity-0'
+            : showLogo
+              ? 'ml-2 w-auto opacity-100'
+              : 'ml-0 w-auto opacity-100'
+        "
+      >
+        <!-- The size sits on the line itself, not on a span inside a
+           leading-none div: a line box built from a strut at the
+           inherited size and text at another puts the baseline at a
+           different offset in an app whose layout sets a smaller base
+           size, and the header text sat a px lower there. -->
+        <div class="truncate text-base-medium leading-tighter text-ink-gray-8">
+          {{ props.title }}
+        </div>
+        <div class="mt-0.5 truncate text-sm leading-tighter text-ink-gray-6">
+          {{ props.subtitle }}
+        </div>
+      </div>
+    </DefineIdentity>
+
+    <Dropdown v-if="hasMenu" :options="props.menuItems" match-trigger-width>
       <template v-slot="{ open }">
         <button
           class="flex h-10 items-center rounded-4 px-1.5 duration-300 ease-in-out"
@@ -16,52 +64,7 @@
                 : 'w-full hover:bg-surface-gray-3'
           "
         >
-          <div
-            v-if="showLogo"
-            class="size-7 shrink-0 rounded-[6px] overflow-hidden"
-          >
-            <slot name="prefix">
-              <img
-                v-if="typeof props.logo === 'string'"
-                :src="props.logo"
-                class="w-full h-full object-cover"
-                alt="Logo"
-              />
-              <div
-                v-else-if="!props.logo"
-                class="w-full h-full bg-surface-gray-4 flex items-center justify-center text-ink-gray-7"
-              >
-                {{ props.title.charAt(0).toUpperCase() }}
-              </div>
-              <component v-else :is="props.logo" class="w-full h-full" />
-            </slot>
-          </div>
-          <div
-            class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
-            :class="
-              isCollapsed
-                ? 'ml-0 w-0 overflow-hidden opacity-0'
-                : showLogo
-                  ? 'ml-2 w-auto opacity-100'
-                  : 'ml-0 w-auto opacity-100'
-            "
-          >
-            <!-- The size sits on the line itself, not on a span inside a
-                 leading-none div: a line box built from a strut at the
-                 inherited size and text at another puts the baseline at a
-                 different offset in an app whose layout sets a smaller base
-                 size, and the header text sat a px lower there. -->
-            <div
-              class="truncate text-base-medium leading-tighter text-ink-gray-8"
-            >
-              {{ props.title }}
-            </div>
-            <div
-              class="mt-0.5 truncate text-sm leading-tighter text-ink-gray-6"
-            >
-              {{ props.subtitle }}
-            </div>
-          </div>
+          <ReuseIdentity />
           <div
             class="duration-300 ease-in-out"
             :class="
@@ -75,10 +78,24 @@
         </button>
       </template>
     </Dropdown>
+
+    <!--
+      No menu items, nothing to open: a plain div, with the trigger's box but
+      no chevron, no hover background and no tab stop. The identity block keeps
+      the same x/y either way, so adding menu items later does not move it.
+    -->
+    <div
+      v-else
+      class="flex h-10 items-center rounded-4 px-1.5 duration-300 ease-in-out"
+      :class="isCollapsed ? 'w-auto' : 'w-full'"
+    >
+      <ReuseIdentity />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { createReusableTemplate } from '@vueuse/core'
 import { computed, inject } from 'vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
 import { SidebarHeaderProps, sidebarCollapsedKey } from './types'
@@ -95,9 +112,12 @@ defineSlots<{
   prefix?: () => any
 }>()
 
+const [DefineIdentity, ReuseIdentity] = createReusableTemplate()
+
 const isCollapsed = inject(
   sidebarCollapsedKey,
   computed(() => false),
 )
 const showLogo = computed(() => props.showLogo !== false)
+const hasMenu = computed(() => Boolean(props.menuItems?.length))
 </script>

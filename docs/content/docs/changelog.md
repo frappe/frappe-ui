@@ -9,6 +9,18 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `SidebarHeader` without `menuItems` is no longer a button
+
+A header with no `menuItems` rendered a dropdown trigger anyway: it took focus,
+showed a hover background and a chevron, and opened an empty menu. It now
+renders a plain `<div>` with the same box, minus the chevron and the tab stop.
+The logo and the title sit at the same coordinates either way.
+
+- **Who is affected:** apps that style or query the header's inner `<button>`,
+  or that relied on the chevron to signal a menu that was never there.
+- **How to fix:** nothing, unless a selector targets that button. Pass
+  `menuItems` to get the trigger back.
+
 ### `SidebarItem.icon` takes the same strings as every other icon (breaking, silent)
 
 `SidebarItem` rendered its `icon` prop through a private `SidebarItemIcon`
