@@ -594,7 +594,7 @@ const spaceActions = [
           <!-- The app owns the scroll region: ScrollArea keeps the thin,
                auto-hiding overlay scrollbar. -->
           <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-            <nav class="space-y-0.5">
+            <div class="space-y-0.5">
               <SidebarItem>
                 <template #prefix>
                   <span class="lucide-home size-4" aria-hidden="true" />
@@ -607,7 +607,7 @@ const spaceActions = [
                 </template>
                 <span class="flex-1 truncate text-sm">Search</span>
               </SidebarItem>
-            </nav>
+            </div>
 
             <div class="mt-4 flex h-7 items-center justify-between">
               <SidebarLabel>Spaces</SidebarLabel>
@@ -621,7 +621,7 @@ const spaceActions = [
               </div>
             </div>
 
-            <nav class="mt-0.5 space-y-0.5">
+            <div class="mt-0.5 space-y-0.5">
               <SidebarItem
                 v-for="space in spaces"
                 :key="space.name"
@@ -641,7 +641,7 @@ const spaceActions = [
                   </span>
                 </template>
               </SidebarItem>
-            </nav>
+            </div>
           </ScrollArea>
         </Sidebar>
       </template>

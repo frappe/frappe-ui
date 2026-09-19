@@ -9,6 +9,19 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `Sidebar` is the `<nav>` landmark; sections are groups
+
+`Sidebar`'s root element is a `<nav>`, labelled `Main`. The new `ariaLabel`
+prop renames it. `SidebarSection`'s body is a `<div role="group">`, not a
+nested `<nav>`, and it takes its accessible name from the section's heading —
+before, only a `collapsible` section was named.
+
+- **Who is affected:** apps whose sidebar body wraps rows in their own `<nav>`,
+  and CSS or tests selecting `nav` inside the sidebar.
+- **How to fix:** turn app-written `<nav>` wrappers inside `Sidebar` into
+  `div`s, so the page reports one navigation landmark. Select
+  `[data-slot="sidebar-section"] [role="group"]` for a section body.
+
 ### `SidebarHeader` without `menuItems` is no longer a button
 
 A header with no `menuItems` rendered a dropdown trigger anyway: it took focus,

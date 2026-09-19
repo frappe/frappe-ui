@@ -27,6 +27,13 @@
     default: '"3rem"'
   },
   {
+    name: 'ariaLabel',
+    description: 'Accessible name of the `<nav>` landmark. Default: `\'Main\'`. Give a second\nsidebar on the same page its own name, and translate it in a localised\napp — the library ships no translation layer.',
+    required: false,
+    type: 'string',
+    default: '"Main"'
+  },
+  {
     name: 'collapsed',
     description: 'v-model. Whether the sidebar is collapsed. Left unset, it collapses automatically below the `sm` breakpoint.',
     required: false,

@@ -12,6 +12,18 @@ There are no layout slots and no built-in scrolling in composition mode. Put a
 header as a direct child, wrap the middle list in your own `overflow-y-auto`
 container, and push a footer down with `mt-auto`.
 
+## Accessibility
+
+`Sidebar` renders the `<nav>` landmark, named `Main` through `aria-label`. Set
+`ariaLabel` to rename it — do that when a page holds a second sidebar, and to
+translate the name in a localised app. It is the only landmark the family
+emits: keep your own wrappers inside the slot as plain `div`s, or the page
+reports two navigations where it has one.
+
+`SidebarSection` gives its body `role="group"`, named by the section's `<h3>`
+whenever `label` is set, collapsible or not. A collapsible section's trigger
+keeps `aria-expanded` and `aria-controls` on the body.
+
 ## Collapse
 
 `Sidebar` owns collapse. Bind `v-model:collapsed` to control it, or leave it

@@ -28,6 +28,13 @@ export type SidebarProps = {
 
   /** Collapsed width as a CSS length. */
   collapsedWidth?: string
+
+  /**
+   * Accessible name of the `<nav>` landmark. Default: `'Main'`. Give a second
+   * sidebar on the same page its own name, and translate it in a localised
+   * app — the library ships no translation layer.
+   */
+  ariaLabel?: string
 }
 
 export interface SidebarItemProps {

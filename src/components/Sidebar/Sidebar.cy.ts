@@ -33,6 +33,32 @@ describe('<Sidebar /> composition', () => {
     cy.get('[data-slot=sidebar-item]').should('contain.text', 'Design')
   })
 
+  it('is the one nav landmark, named `Main` by default', () => {
+    cy.mount(Sidebar, {
+      props: { collapsible: false },
+      slots: {
+        default: () => [
+          h(SidebarSection, { label: 'Spaces' }, () =>
+            h(SidebarItem, { label: 'Design' }),
+          ),
+          h(SidebarSection, { label: 'More', collapsible: true }, () =>
+            h(SidebarItem, { label: 'Junk' }),
+          ),
+        ],
+      },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('nav').should('have.length', 1)
+    cy.get('nav[data-slot=sidebar]').should('have.attr', 'aria-label', 'Main')
+
+    cy.mount(Sidebar, { props: { ariaLabel: 'Workspace' } })
+    cy.get('nav[data-slot=sidebar]').should(
+      'have.attr',
+      'aria-label',
+      'Workspace',
+    )
+  })
+
   it('v-model round-trip: `collapsed` drives data-state, and the toggle writes it back', () => {
     cy.viewport(1280, 720)
     const collapsed = ref(false)
@@ -107,6 +133,30 @@ describe('<SidebarSection />', () => {
     cy.get("[aria-label='Junk']").should('be.visible')
   })
 
+  it('names its body group from the label, collapsible or not', () => {
+    for (const collapsible of [true, false]) {
+      cy.mount(SidebarSection, {
+        props: { label: 'More', collapsible },
+        slots: { default: () => h(SidebarItem, { label: 'Junk' }) },
+      })
+      cy.get('[data-slot=sidebar-section] [role=group]')
+        .should('have.attr', 'aria-labelledby')
+        .then((id) => {
+          // The accessible name resolves to the <h3>'s text.
+          cy.get(`h3#${id}`).should('contain.text', 'More')
+        })
+    }
+
+    // No label, no name to give: the group stays anonymous.
+    cy.mount(SidebarSection, {
+      slots: { default: () => h(SidebarItem, { label: 'Junk' }) },
+    })
+    cy.get('[data-slot=sidebar-section] [role=group]').should(
+      'not.have.attr',
+      'aria-labelledby',
+    )
+  })
+
   it('keyboard: the collapsible trigger is a focusable, labeled toggle button', () => {
     cy.mount(SidebarSection, {
       props: { label: 'More', collapsible: true },
@@ -159,16 +209,15 @@ describe('<SidebarItem />', () => {
   })
 
   it('renders the `icon` prop through the shared Icon: lucide, emoji, component', () => {
-    cy.mount(SidebarItem, { props: { label: 'Design', icon: 'lucide-palette' } })
+    cy.mount(SidebarItem, {
+      props: { label: 'Design', icon: 'lucide-palette' },
+    })
     cy.get('[data-slot=sidebar-item] span.lucide-palette')
       .should('have.class', 'size-4')
       .and('have.class', 'text-ink-gray-6')
 
     cy.mount(SidebarItem, { props: { label: 'Launch', icon: '🚀' } })
-    cy.get('[data-slot=sidebar-item] span.size-4').should(
-      'contain.text',
-      '🚀',
-    )
+    cy.get('[data-slot=sidebar-item] span.size-4').should('contain.text', '🚀')
 
     const StarIcon = { render: () => h('svg', { 'data-test': 'star-icon' }) }
     cy.mount(SidebarItem, { props: { label: 'Starred', icon: StarIcon } })

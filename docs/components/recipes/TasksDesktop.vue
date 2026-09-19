@@ -834,7 +834,7 @@ function addComment() {
           />
 
           <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-            <nav class="space-y-0.5">
+            <div class="space-y-0.5">
               <SidebarItem>
                 <template #prefix>
                   <span class="lucide-inbox size-4" aria-hidden="true" />
@@ -859,7 +859,7 @@ function addComment() {
                 </template>
                 <span class="flex-1 truncate text-sm">Search</span>
               </SidebarItem>
-            </nav>
+            </div>
 
             <div class="mt-4 flex h-7 items-center justify-between">
               <SidebarLabel>Projects</SidebarLabel>
@@ -870,7 +870,7 @@ function addComment() {
                 label="New project"
               />
             </div>
-            <nav class="mt-0.5 space-y-0.5">
+            <div class="mt-0.5 space-y-0.5">
               <SidebarItem
                 v-for="project in projects"
                 :key="project.name"
@@ -893,7 +893,7 @@ function addComment() {
                   />
                 </template>
               </SidebarItem>
-            </nav>
+            </div>
           </ScrollArea>
         </Sidebar>
       </template>
