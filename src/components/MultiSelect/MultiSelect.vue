@@ -375,7 +375,7 @@ defineSlots<MultiSelectSlots>()
       @update:modelValue="handleRootModelValueChange"
       @update:open="handleRootOpenChange"
     >
-      <ComboboxAnchor as-child @click="handleTriggerClick">
+      <ComboboxAnchor as-child @pointerdown="handleTriggerClick">
         <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
 
         <!--
