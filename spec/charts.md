@@ -160,10 +160,11 @@ ramp itself.
 The slot vocabulary is P6's: `actions`, `loading`, `error` and `empty` come from
 the shared list, and the family adds five slots for parts only a chart has.
 `legend` and `tooltip` are regions of the chrome, on the container and on every
-plot that draws one. `title-suffix` is a region of the title, on the two
-components that draw one: it takes the `suffix` the list header cell already
-uses for a trailing adornment, qualified because `NumberCard` spends `suffix`
-on the string after its reading. The last two belong to one component each,
+plot that draws one. `title-suffix` is a region of the title, drawn by the
+container and the card and forwarded by every plot that heads one: it takes the
+`suffix` the list header cell already uses for a trailing adornment, qualified
+because `NumberCard` spends `suffix` on the string after its reading. The last
+two belong to one component each,
 because only one component has the part:
 
 - `center` on `DonutChart` — the readout in the hole of the ring, which reads

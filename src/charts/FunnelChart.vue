@@ -8,6 +8,9 @@
     :dir="dir"
   >
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
+    <template v-if="$slots['title-suffix']" #title-suffix>
+      <slot name="title-suffix" />
+    </template>
 
     <!-- The container owns the three states, so an app that wants a retry
          button beside the message or a skeleton of its own reaches them here

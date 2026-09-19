@@ -540,6 +540,15 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-header"]').should('contain.text', 'Week')
     })
 
+    // The mark belongs to the title, so it is forwarded to the container
+    // rather than folded into `#actions` at the far end of the row.
+    it('forwards a title suffix to the header', () => {
+      mountChart({ title: 'Revenue' }, {
+        'title-suffix': () => h('span', { id: 'lock' }, '*'),
+      } as any)
+      cy.get('[data-slot="chart-header"] #lock').should('exist')
+    })
+
     it('replaces the tooltip body with the app’s own', () => {
       // Opened from the keyboard rather than a hover: the cursor lands on a
       // known category, so the slot props are January's every run.

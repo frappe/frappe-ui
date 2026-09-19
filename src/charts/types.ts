@@ -1146,6 +1146,7 @@ export type AxisChartEmits = {
 }
 
 export type AxisChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds one entry per visible series at
@@ -1175,6 +1176,7 @@ export type DonutChartEmits = {
 }
 
 export type DonutChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the readout in the middle of the ring. Reads the total, or the
@@ -1204,6 +1206,7 @@ export type FunnelChartEmits = {
 }
 
 export type FunnelChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the stage's value and its two
@@ -1222,6 +1225,7 @@ export type HeatmapChartEmits = {
 }
 
 export type HeatmapChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the hovered cell alone, and
@@ -1240,6 +1244,7 @@ export type SankeyChartEmits = {
 }
 
 export type SankeyChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the hovered band or node alone.
@@ -1259,6 +1264,7 @@ export type ScatterChartEmits = {
 }
 
 export type ScatterChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the point's two measures, and
