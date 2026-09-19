@@ -22,7 +22,7 @@ const email = ref('alex@example.com')
     description="How you appear across the community."
   />
   <SettingsBody>
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-6 pt-3.5">
       <div class="flex items-center gap-4">
         <Avatar size="3xl" label="Alex Rivera" />
         <div class="flex gap-2">

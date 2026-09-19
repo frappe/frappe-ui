@@ -1,13 +1,13 @@
 <template>
   <!-- Fixed (non-scrolling) header region of a panel. -->
-  <div class="shrink-0 px-[4.4rem] pt-10">
+  <div class="shrink-0 px-10 pt-9">
     <slot>
       <div class="flex items-start justify-between gap-4">
         <div class="flex min-w-0 flex-col gap-1">
-          <h2 v-if="title" class="text-lg font-semibold text-ink-gray-8">
+          <h2 v-if="title" class="text-lg-semibold text-ink-gray-8">
             {{ title }}
           </h2>
-          <p v-if="description" class="text-base text-ink-gray-6">
+          <p v-if="description" class="text-p-base text-ink-gray-6">
             {{ description }}
           </p>
         </div>
