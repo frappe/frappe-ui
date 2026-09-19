@@ -29,8 +29,10 @@ A single row. It renders a container with a navigable main area and a **sibling*
 trailing zone, so an options menu in `#suffix` isn't nested inside the link
 (which anchors and buttons disallow).
 
-- `#prefix` — a leading icon or avatar (falls back to the `icon` prop: a lucide
-  class, text, or a component).
+- `#prefix` — a leading icon or avatar (falls back to the `icon` prop: a
+  `lucide-*` class, an emoji, or a component — the same values `Icon` takes).
+  Any other string renders nothing and warns in dev, so put initials or a text
+  glyph in `#prefix`.
 - default slot — the label region (falls back to the `label` prop). Put inline
   adornments like a lock icon here next to the text.
 - `#suffix` — the trailing zone: an unread count, an options `…` menu, etc.

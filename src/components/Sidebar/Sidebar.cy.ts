@@ -158,6 +158,29 @@ describe('<SidebarItem />', () => {
     cy.get('[data-slot=sidebar-item][data-state=active]').should('exist')
   })
 
+  it('renders the `icon` prop through the shared Icon: lucide, emoji, component', () => {
+    cy.mount(SidebarItem, { props: { label: 'Design', icon: 'lucide-palette' } })
+    cy.get('[data-slot=sidebar-item] span.lucide-palette')
+      .should('have.class', 'size-4')
+      .and('have.class', 'text-ink-gray-6')
+
+    cy.mount(SidebarItem, { props: { label: 'Launch', icon: '🚀' } })
+    cy.get('[data-slot=sidebar-item] span.size-4').should(
+      'contain.text',
+      '🚀',
+    )
+
+    const StarIcon = { render: () => h('svg', { 'data-test': 'star-icon' }) }
+    cy.mount(SidebarItem, { props: { label: 'Starred', icon: StarIcon } })
+    cy.get('[data-test=star-icon]')
+      .should('have.class', 'size-4')
+      .and('have.class', 'text-ink-gray-6')
+
+    // A bare name is not a supported icon string: nothing renders.
+    cy.mount(SidebarItem, { props: { label: 'Home', icon: 'home' } })
+    cy.get('[data-slot=sidebar-item]').should('not.contain.text', 'home')
+  })
+
   it('renders #prefix, default, and #suffix slots', () => {
     cy.mount(SidebarItem, {
       slots: {

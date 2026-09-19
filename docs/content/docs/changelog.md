@@ -9,6 +9,20 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `SidebarItem.icon` takes the same strings as every other icon (breaking, silent)
+
+`SidebarItem` rendered its `icon` prop through a private `SidebarItemIcon`
+component, which printed any non-lucide string as literal text. It now uses the
+shared `Icon`, so a `lucide-*` class, an emoji and a component render exactly as
+before, at the same `size-4 text-ink-gray-6`.
+
+- **Who is affected:** rows with a plain-text `icon`, e.g. `icon="home"` or
+  `icon="AB"`. The text used to show; it now renders nothing and warns once in
+  dev, the same as `Icon`, `Button` and `MobileNavItem`.
+- **How to fix:** pass a `lucide-*` class for a glyph, or put initials and
+  other text in the `#prefix` slot:
+  `<SidebarItem><template #prefix>AB</template></SidebarItem>`.
+
 ### The editor's `UploadedFile` is now `UploadedMedia` (breaking)
 
 `frappe-ui` and `frappe-ui/editor` both exported a type named `UploadedFile`.

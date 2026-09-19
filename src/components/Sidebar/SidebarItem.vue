@@ -38,7 +38,7 @@
              square and back (the whole row is already the hit target). -->
         <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
-            <SidebarItemIcon :icon="icon" />
+            <Icon :icon="icon" class="size-4 text-ink-gray-6" />
           </slot>
         </span>
       </Tooltip>
@@ -79,7 +79,7 @@
              square and back (the whole row is already the hit target). -->
         <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
-            <SidebarItemIcon :icon="icon" />
+            <Icon :icon="icon" class="size-4 text-ink-gray-6" />
           </slot>
         </span>
       </Tooltip>
@@ -130,8 +130,8 @@ import {
   useTemplateRef,
 } from 'vue'
 import { RouterLink } from 'vue-router'
+import Icon from '../Icon/Icon.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import SidebarItemIcon from './SidebarItemIcon.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
 // `active` must default to `undefined`, not Vue's implicit boolean `false` —
