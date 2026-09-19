@@ -78,7 +78,7 @@ dynamic syntax for manual review instead of guessing.
 - **Packaging** — [Preset path](#preset-path) · [`lucideIcons`](#lucide-icons) ·
   [Focus ring](#focus-ring-outline) · [Sizing changes](#sizing-scale-changes) ·
   [Dependencies](#packaging-dependencies)
-- **Tokens and CSS** — [Tokens](#tokens) ·
+- **Tokens and CSS** — [Tokens](#tokens) · [Line height](#line-height) ·
   [Family stylesheets](#family-stylesheets-list-style-css-editor-style-css) ·
   [`hljs-theme.css` and `tailwind/tokens.js`](#hljs-theme-css-and-tailwind-tokens-js-removed)
 - **Moved, not removed** — these five families changed an import path and
@@ -2645,6 +2645,42 @@ The old `ink-<family>-1` step was white. The new `-1` is a light tint, so these
 sites have no automatic destination. The codemod flags them under "needs manual
 attention". The usual fix is `text-white` (or the literal CSS color `white` in
 hand-written CSS).
+
+### Tight text styles are 1.35 {#line-height}
+
+This is a **silent** break. The `text-*` styles from `text-2xs` to `text-4xl`,
+with every weight variant, move from line-height 1.15 to 1.35. Each line of text
+is 0.2em taller: 2.4px at 12px, 2.8px at 14px, 4.8px at 24px. The `text-p-*`
+styles and `text-5xl` and up do not change.
+
+`leading-tighter` is a new class that sets 1.15, the old default.
+`leading-tight` keeps Tailwind's 1.25.
+
+frappe-ui components keep their height. Your own markup can move:
+
+- **A row sized by its content grows.** A menu, a list of search results or a
+  stack of cards grows by 2.4 to 5px for each row.
+- **A fixed-height box can clip or push its text off-centre.** For example
+  `h-4`, a `min-h-*` that the text used to fill, or an offset such as
+  `top-[41px]` that you measured from the old line.
+- **Code that reads the value** breaks, for example a chart layout that
+  hard-codes 1.15.
+
+Add `leading-tighter` to single-line chrome in a fixed-height box:
+
+```vue
+<!-- Before: the row is 28px, a 16.1px line and 12px of padding -->
+<button class="flex w-full items-center px-2 py-1.5 text-base">
+  {{ item.label }}
+</button>
+
+<!-- After: leading-tighter keeps the 16.1px line, so the row stays 28px -->
+<button class="flex w-full items-center px-2 py-1.5 text-base leading-tighter">
+  {{ item.label }}
+</button>
+```
+
+For long prose, use `text-p-*`: its line height is 1.4 to 1.6.
 
 ## Packaging and tokens {#packaging-and-tokens}
 

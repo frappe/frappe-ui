@@ -16,7 +16,7 @@
       <button
         ref="button"
         type="button"
-        class="group inline-flex h-7 min-w-0 items-center gap-1 rounded-4 text-sm-medium text-ink-gray-5 transition-colors"
+        class="group inline-flex h-7 min-w-0 items-center gap-1 rounded-4 text-sm-medium leading-tighter text-ink-gray-5 transition-colors"
         @click="emit('click', $event)"
       >
         <!-- End-aligned: the glyph leads so the label stays flush with the
@@ -35,7 +35,7 @@
         <span v-if="$slots.prefix" class="shrink-0">
           <slot name="prefix" :direction="direction ?? null" />
         </span>
-        <span class="truncate"><slot /></span>
+        <span class="truncate leading-tighter"><slot /></span>
         <!-- A built-in arrow derived from `direction` by default, so the common
              case needs no glyph wiring; supply #sort-indicator to override. The cell
              owns the reveal: an inactive column's glyph shows on hover. -->

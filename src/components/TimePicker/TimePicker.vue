@@ -82,7 +82,7 @@
             :id="optionId(idx)"
             type="button"
             role="option"
-            class="group flex h-7 w-full items-center rounded-4 px-2 text-left tabular-nums"
+            class="group flex h-7 w-full items-center rounded-4 px-2 text-left leading-tighter tabular-nums"
             :class="rowClass(opt, idx)"
             :aria-selected="canonicalValue === opt.value || undefined"
             @click="selectOption(opt.value)"

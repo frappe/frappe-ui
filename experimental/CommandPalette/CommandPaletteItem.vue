@@ -13,7 +13,7 @@
       data-slot="command-palette-item"
       :data-state="active ? 'active' : undefined"
       :data-disabled="disabled ? '' : undefined"
-      class="mx-2.5 flex min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
+      class="mx-2.5 flex min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium leading-tighter text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
       v-bind="$attrs"
     >
       <slot name="prefix" v-bind="slotProps" />

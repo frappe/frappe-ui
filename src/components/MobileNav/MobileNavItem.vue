@@ -26,7 +26,7 @@
       />
     </slot>
     <span
-      class="text-xs-medium"
+      class="text-xs-medium leading-tighter"
       :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
     >
       {{ label }}
@@ -51,7 +51,7 @@
       />
     </slot>
     <span
-      class="text-xs-medium"
+      class="text-xs-medium leading-tighter"
       :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
     >
       {{ label }}

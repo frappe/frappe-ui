@@ -252,7 +252,7 @@ const inputClasses = computed(() => {
     paddingClasses,
     variantClasses,
     textColor.value,
-    'transition-colors w-full dark:[color-scheme:dark]',
+    'leading-tighter transition-colors w-full dark:[color-scheme:dark]',
   ]
 })
 

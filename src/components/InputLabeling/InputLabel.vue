@@ -41,7 +41,7 @@ const labelClasses = computed(() => {
   // Disabled wins over `color` — a dimmed label is a state, not a choice, so
   // callers shouldn't have to remember to swap the colour themselves.
   return [
-    'block text-sm',
+    'block text-sm leading-tighter',
     props.disabled
       ? 'text-ink-gray-4'
       : props.color === 'gray-7'

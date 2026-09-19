@@ -52,7 +52,9 @@
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
           <slot
-            ><span class="truncate text-sm">{{ label }}</span></slot
+            ><span class="truncate text-sm leading-tighter">{{
+              label
+            }}</span></slot
           >
         </span>
       </span>
@@ -91,7 +93,9 @@
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
           <slot
-            ><span class="truncate text-sm">{{ label }}</span></slot
+            ><span class="truncate text-sm leading-tighter">{{
+              label
+            }}</span></slot
           >
         </span>
       </span>

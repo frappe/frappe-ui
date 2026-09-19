@@ -4,7 +4,12 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import * as tokens from '../tokens.js'
 import { generateTokenTypes } from './build-types.js'
-import { hexToOklch, serializeTokenModule, toOklch } from './build.js'
+import {
+  hexToOklch,
+  serializeTokenModule,
+  textLineHeight,
+  toOklch,
+} from './build.js'
 import colors from './colors.js'
 import effects from './effects.js'
 import radius from './radius.js'
@@ -27,6 +32,22 @@ describe('hexToOklch', () => {
 describe('toOklch', () => {
   it('passes alias references through untouched', () => {
     expect(toOklch('{light.gray.50}')).toBe('{light.gray.50}')
+  })
+})
+
+describe('textLineHeight', () => {
+  it('ships the 115% UI text styles at 1.35', () => {
+    expect(textLineHeight('115%')).toBe('1.35')
+  })
+
+  it('passes every other line height through', () => {
+    expect(textLineHeight('160%')).toBe('1.6')
+    expect(textLineHeight('140%')).toBe('1.4')
+  })
+
+  it('matches the committed UI text sizes', () => {
+    for (const size of ['2xs', 'sm', 'base', '4xl'])
+      expect(typography.fontSize[size][1].lineHeight).toBe('1.35')
   })
 })
 

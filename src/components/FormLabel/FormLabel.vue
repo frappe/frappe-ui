@@ -1,5 +1,9 @@
 <template>
-  <label class="block text-sm text-ink-gray-6" :for="id" data-slot="label">
+  <label
+    class="block text-sm leading-tighter text-ink-gray-6"
+    :for="id"
+    data-slot="label"
+  >
     {{ label }}
     <RequiredIndicator :required="required" />
   </label>

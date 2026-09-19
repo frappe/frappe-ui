@@ -148,6 +148,8 @@ const paragraphSample =
         <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Text sizes</h2>
         <p class="text-p-sm text-ink-gray-5 m-0">
           Sizes for UI text like labels, controls, table cells, and body copy.
+          Add <code class="text-ink-gray-8">leading-tighter</code> for a 1.15
+          line in a fixed-height box.
         </p>
       </div>
       <div

@@ -12,7 +12,7 @@
       auto-focus
       autocomplete="off"
       :placeholder="placeholder"
-      class="w-full border-none bg-transparent py-3 px-0 text-base text-ink-gray-8 placeholder-ink-gray-4 focus:ring-0"
+      class="w-full border-none bg-transparent py-3 px-0 text-base leading-tighter text-ink-gray-8 placeholder-ink-gray-4 focus:ring-0"
       v-bind="$attrs"
     />
     <slot name="suffix" />

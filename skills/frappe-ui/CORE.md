@@ -35,7 +35,7 @@ Five colour categories. `ink`, `surface` and `outline` cover almost every case; 
 
 ### Type
 
-`InterVar` is the `<html>` font. Two parallel scales share pixel sizes and differ in line-height. `text-*` (line-height 1.15 through `text-4xl`, loosening to 1.4–1.6 at `text-5xl` and up) is for single-line labels: headings, button text, badges, table cells, stat values, timestamps. `text-p-*` (line-height 1.4–1.6) is for text that wraps: paragraphs, descriptions, helper text.
+`InterVar` is the `<html>` font. Two parallel scales share pixel sizes and differ in line-height. `text-*` (line-height 1.35 through `text-4xl`, loosening to 1.4–1.6 at `text-5xl` and up) is for single-line labels: headings, button text, badges, table cells, stat values, timestamps. In a fixed-height box, such as a custom row or a toolbar label, add `leading-tighter` (1.15) so the box does not grow; frappe-ui components already do. `leading-tight` keeps Tailwind's 1.25. `text-p-*` (line-height 1.4–1.6) is for text that wraps: paragraphs, descriptions, helper text.
 
 Sizes, each with a `text-p-*` twin: `2xs` 11px · `xs` 12px · `sm` 13px · `base` 14px (default) · `md` 15px · `lg` 16px · `xl` 17px · `2xl` 18px · `3xl` 20px · `4xl` 24px. `text-5xl` … `text-12xl` (26–56px) are display only — the paragraph scale stops at `text-p-4xl`.
 

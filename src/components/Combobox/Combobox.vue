@@ -587,7 +587,7 @@ defineSlots<ComboboxSlots>()
 
               <span
                 :class="[
-                  'min-w-0 flex-1 truncate text-left font-normal',
+                  'min-w-0 flex-1 truncate text-left font-normal leading-tighter',
                   !selectedOption && 'text-ink-gray-4',
                 ]"
               >

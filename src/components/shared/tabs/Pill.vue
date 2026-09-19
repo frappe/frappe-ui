@@ -76,7 +76,9 @@ const rootClasses = computed(() => [
   'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap outline-none transition-[background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none',
   // Shipped v1 subtle typography (overrides Figma): 13px regular at both
   // sizes, never medium.
-  props.variant === 'subtle' ? 'text-sm leading-[16.1px]' : 'text-base',
+  props.variant === 'subtle'
+    ? 'text-sm leading-[16.1px]'
+    : 'text-base leading-tighter',
   props.active ? 'text-ink-gray-8' : 'text-ink-gray-5',
   // Figma: md ghost/browser labels use text/base/medium (500, 0.015em);
   // md underline and all sm labels stay regular. The selected state

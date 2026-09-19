@@ -189,7 +189,10 @@ const controlPosition = computed(() => props.controlPosition ?? 'end')
 const switchGroupClasses = computed(() => {
   const hasLabel = props.label || slots.label
   const hasDescription = props.description || slots.description
-  if (!hasLabel && !hasDescription) return undefined
+  // A bare switch still gets `flex`: in a plain block the inline-flex control
+  // sits on a text line, and that line takes its height from the parent's
+  // line-height. In a 28px menu row that made the row 29px.
+  if (!hasLabel && !hasDescription) return 'flex'
 
   // `flex-row-reverse` / `justify-*` are inline-axis aware, so this flips
   // correctly under RTL without any physical left/right values.

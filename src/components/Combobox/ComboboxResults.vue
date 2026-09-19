@@ -140,7 +140,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
             <ComboboxLabel
               v-if="group.group && !group.hideLabel"
               data-slot="group-label"
-              class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
+              class="flex h-7 items-center px-2 text-sm-medium leading-tighter text-ink-gray-4"
             >
               <component
                 :is="ItemSlotRender"
@@ -245,7 +245,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
                   />
 
                   <div v-else class="min-w-0">
-                    <div class="truncate">{{ item.label }}</div>
+                    <div class="truncate leading-tighter">{{ item.label }}</div>
                     <div
                       v-if="item.description"
                       class="truncate text-p-sm text-ink-gray-5"

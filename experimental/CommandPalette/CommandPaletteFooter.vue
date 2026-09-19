@@ -1,7 +1,7 @@
 <template>
   <div
     data-slot="command-palette-footer"
-    class="flex shrink-0 items-center gap-4 border-t border-outline-gray-1 px-4.5 py-2 text-sm text-ink-gray-6 dark:border-outline-gray-2"
+    class="flex shrink-0 items-center gap-4 border-t border-outline-gray-1 px-4.5 py-2 text-sm leading-tighter text-ink-gray-6 dark:border-outline-gray-2"
   >
     <slot v-bind="slotProps" />
   </div>

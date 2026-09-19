@@ -4,7 +4,7 @@
       <component
         :is="resolvedFor ? 'label' : 'div'"
         :for="resolvedFor"
-        class="text-base-medium block text-ink-gray-8"
+        class="text-base-medium leading-tighter block text-ink-gray-8"
         :class="{ 'cursor-pointer': resolvedFor }"
       >
         {{ title }}
