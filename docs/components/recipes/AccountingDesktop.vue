@@ -382,7 +382,7 @@ const pnlColumns = computed(() => [
               <div class="flex h-7 items-center">
                 <SidebarLabel>{{ group.label }}</SidebarLabel>
               </div>
-              <nav class="mt-0.5 space-y-0.5">
+              <div class="mt-0.5 space-y-0.5">
                 <SidebarItem
                   v-for="item in group.items"
                   :key="item.key"
@@ -406,7 +406,7 @@ const pnlColumns = computed(() => [
                     />
                   </template>
                 </SidebarItem>
-              </nav>
+              </div>
             </div>
           </ScrollArea>
         </Sidebar>

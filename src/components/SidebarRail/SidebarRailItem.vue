@@ -10,11 +10,16 @@
       literal v-else because a raw 'button' string can resolve to the globally
       registered <Button> in consumer apps. The inner content is identical in
       both branches.
+
+      $attrs is spread before the component's own attributes, so a caller
+      cannot overwrite data-slot / data-state, which tests and app CSS select
+      on. `class` is exempt: Vue merges class and style whatever the order, so
+      a caller's class adds to `cellClasses` instead of replacing it.
     -->
     <component
       :is="linkComponent"
       v-if="route || href"
-      v-bind="linkAttrs"
+      v-bind="{ ...linkAttrs, ...$attrs }"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="resolvedActive ? 'active' : 'inactive'"
@@ -36,6 +41,7 @@
     <button
       v-else
       type="button"
+      v-bind="$attrs"
       data-slot="sidebar-rail-item"
       :data-variant="variant"
       :data-state="resolvedActive ? 'active' : 'inactive'"
@@ -72,6 +78,11 @@ import Icon from '../Icon/Icon.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarRailItemBadge from './SidebarRailItemBadge.vue'
 import type { SidebarRailItemProps } from './types'
+
+// The root is <Tooltip>, which drops what it receives. Without this, every
+// fallthrough attribute a caller writes on <SidebarRailItem> is lost; the two
+// branches below re-bind them onto the real clickable cell instead.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<SidebarRailItemProps>(), {
   variant: 'subtle',

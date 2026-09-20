@@ -27,6 +27,13 @@
     default: '"3rem"'
   },
   {
+    name: 'ariaLabel',
+    description: 'Accessible name of the `<nav>` landmark. Default: `\'Main\'`. Give a second\nsidebar on the same page its own name, and translate it in a localised\napp — the library ships no translation layer.',
+    required: false,
+    type: 'string',
+    default: '"Main"'
+  },
+  {
     name: 'collapsed',
     description: 'v-model. Whether the sidebar is collapsed. Left unset, it collapses automatically below the `sm` breakpoint.',
     required: false,
@@ -66,7 +73,7 @@
   },
   {
     name: 'icon',
-    description: 'Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.\nIgnored when the `#prefix` slot is used.',
+    description: 'Leading icon: a `lucide-*` class, an emoji, or a component. Any other\nstring renders nothing and warns in dev — put initials in the `#prefix`\nslot instead. Ignored when the `#prefix` slot is used.',
     required: false,
     type: 'string | Component'
   },

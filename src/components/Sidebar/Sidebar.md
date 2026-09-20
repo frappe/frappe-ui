@@ -12,6 +12,18 @@ There are no layout slots and no built-in scrolling in composition mode. Put a
 header as a direct child, wrap the middle list in your own `overflow-y-auto`
 container, and push a footer down with `mt-auto`.
 
+## Accessibility
+
+`Sidebar` renders the `<nav>` landmark, named `Main` through `aria-label`. Set
+`ariaLabel` to rename it — do that when a page holds a second sidebar, and to
+translate the name in a localised app. It is the only landmark the family
+emits: keep your own wrappers inside the slot as plain `div`s, or the page
+reports two navigations where it has one.
+
+`SidebarSection` gives its body `role="group"`, named by the section's `<h3>`
+whenever `label` is set, collapsible or not. A collapsible section's trigger
+keeps `aria-expanded` and `aria-controls` on the body.
+
 ## Collapse
 
 `Sidebar` owns collapse. Bind `v-model:collapsed` to control it, or leave it
@@ -29,8 +41,10 @@ A single row. It renders a container with a navigable main area and a **sibling*
 trailing zone, so an options menu in `#suffix` isn't nested inside the link
 (which anchors and buttons disallow).
 
-- `#prefix` — a leading icon or avatar (falls back to the `icon` prop: a lucide
-  class, text, or a component).
+- `#prefix` — a leading icon or avatar (falls back to the `icon` prop: a
+  `lucide-*` class, an emoji, or a component — the same values `Icon` takes).
+  Any other string renders nothing and warns in dev, so put initials or a text
+  glyph in `#prefix`.
 - default slot — the label region (falls back to the `label` prop). Put inline
   adornments like a lock icon here next to the text.
 - `#suffix` — the trailing zone: an unread count, an options `…` menu, etc.
@@ -41,6 +55,13 @@ Set `route` to render a router link or `href` for a native same-tab anchor;
 `route` against the current route. A click invokes `onClick` (bound from
 `@click`) in every case.
 
+Attributes you write on `SidebarItem` split in two. `class`, `style` and event
+listeners stay on the row container, so a row background or a drag-and-drop
+ring covers the `#suffix` zone and a `@dragover` / `@drop` there still fires.
+Every other attribute (`target`, `rel`, `id`, `title`, `data-*`, `aria-*`)
+lands on the link or the button inside, the element it describes. Your
+`aria-label` replaces the one derived from the label text.
+
 ## SidebarHeader
 
 The app-switcher / workspace-identity row. A fixed 48px region that lines up
@@ -50,6 +71,10 @@ overflow-hidden` frame — wide content clips), falling back to the `logo` prop,
 or the title's first letter; `showLogo: false` drops the box entirely for a
 flush-left title. `menuItems` renders inside the trigger's
 dropdown — the same structured-options shape `Dropdown` itself takes.
+
+Without `menuItems` the header is a plain static block: no button, no chevron,
+no hover background, no tab stop. The logo and the title keep the same
+position, so adding a menu later does not move them.
 
 ## SidebarSection
 

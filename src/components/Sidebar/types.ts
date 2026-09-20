@@ -28,6 +28,13 @@ export type SidebarProps = {
 
   /** Collapsed width as a CSS length. */
   collapsedWidth?: string
+
+  /**
+   * Accessible name of the `<nav>` landmark. Default: `'Main'`. Give a second
+   * sidebar on the same page its own name, and translate it in a localised
+   * app — the library ships no translation layer.
+   */
+  ariaLabel?: string
 }
 
 export interface SidebarItemProps {
@@ -38,8 +45,9 @@ export interface SidebarItemProps {
   accessKey?: string
 
   /**
-   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.
-   * Ignored when the `#prefix` slot is used.
+   * Leading icon: a `lucide-*` class, an emoji, or a component. Any other
+   * string renders nothing and warns in dev — put initials in the `#prefix`
+   * slot instead. Ignored when the `#prefix` slot is used.
    */
   icon?: string | Component
 

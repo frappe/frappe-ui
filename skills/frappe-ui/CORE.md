@@ -102,7 +102,7 @@ Gray first: ink-gray on surface-base, colour only where it encodes information. 
       <Sidebar width="14rem" class="border-r">
         <SidebarHeader title subtitle :show-logo :menu-items />
         <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-          <nav class="space-y-0.5">…SidebarLabel / SidebarItem…</nav>
+          <div class="space-y-0.5">…SidebarLabel / SidebarItem…</div>
         </ScrollArea>
       </Sidebar>
     </template>

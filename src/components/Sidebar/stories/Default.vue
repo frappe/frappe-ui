@@ -98,7 +98,7 @@ const sortOptions = [
           </div>
         </div>
 
-        <nav class="mt-0.5 space-y-0.5">
+        <div class="mt-0.5 space-y-0.5">
           <SidebarItem
             v-for="space in spaces"
             :key="space.id"
@@ -150,7 +150,7 @@ const sortOptions = [
               </div>
             </template>
           </SidebarItem>
-        </nav>
+        </div>
       </ScrollArea>
     </Sidebar>
   </div>

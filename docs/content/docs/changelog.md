@@ -9,6 +9,61 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `SidebarItem` attributes land on the link or the button (breaking, silent)
+
+A `SidebarItem` is a row container holding the link or the button, with the
+`#suffix` zone next to it. Every attribute written on the component used to
+stop at that container, so `target`, `rel`, `id`, `title`, `data-*` and
+`aria-*` never reached the control. They now land on the control. `class`,
+`style` and event listeners stay on the container, which is what a row
+background, a drag-and-drop ring and a `@drop` over the suffix need.
+
+- **Who is affected:** apps that select a row by an attribute they pass in
+  (`data-testid`, `id`), and apps that set `aria-label` on a row.
+- **How to fix:** select the container by `[data-slot="sidebar-item"]` and the
+  control by `[data-slot="sidebar-item"] > a` or `> button`. An `aria-label`
+  you pass now wins over the one derived from the label text, so drop any
+  workaround that worked around the old one.
+
+### `Sidebar` is the `<nav>` landmark; sections are groups
+
+`Sidebar`'s root element is a `<nav>`, labelled `Main`. The new `ariaLabel`
+prop renames it. `SidebarSection`'s body is a `<div role="group">`, not a
+nested `<nav>`, and it takes its accessible name from the section's heading —
+before, only a `collapsible` section was named.
+
+- **Who is affected:** apps whose sidebar body wraps rows in their own `<nav>`,
+  and CSS or tests selecting `nav` inside the sidebar.
+- **How to fix:** turn app-written `<nav>` wrappers inside `Sidebar` into
+  `div`s, so the page reports one navigation landmark. Select
+  `[data-slot="sidebar-section"] [role="group"]` for a section body.
+
+### `SidebarHeader` without `menuItems` is no longer a button
+
+A header with no `menuItems` rendered a dropdown trigger anyway: it took focus,
+showed a hover background and a chevron, and opened an empty menu. It now
+renders a plain `<div>` with the same box, minus the chevron and the tab stop.
+The logo and the title sit at the same coordinates either way.
+
+- **Who is affected:** apps that style or query the header's inner `<button>`,
+  or that relied on the chevron to signal a menu that was never there.
+- **How to fix:** nothing, unless a selector targets that button. Pass
+  `menuItems` to get the trigger back.
+
+### `SidebarItem.icon` takes the same strings as every other icon (breaking, silent)
+
+`SidebarItem` rendered its `icon` prop through a private `SidebarItemIcon`
+component, which printed any non-lucide string as literal text. It now uses the
+shared `Icon`, so a `lucide-*` class, an emoji and a component render exactly as
+before, at the same `size-4 text-ink-gray-6`.
+
+- **Who is affected:** rows with a plain-text `icon`, e.g. `icon="home"` or
+  `icon="AB"`. The text used to show; it now renders nothing and warns once in
+  dev, the same as `Icon`, `Button` and `MobileNavItem`.
+- **How to fix:** pass a `lucide-*` class for a glyph, or put initials and
+  other text in the `#prefix` slot:
+  `<SidebarItem><template #prefix>AB</template></SidebarItem>`.
+
 ### The editor's `UploadedFile` is now `UploadedMedia` (breaking)
 
 `frappe-ui` and `frappe-ui/editor` both exported a type named `UploadedFile`.

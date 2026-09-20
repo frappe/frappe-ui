@@ -2,6 +2,7 @@
   <div
     data-slot="sidebar-item"
     :data-state="resolvedActive ? 'active' : 'inactive'"
+    v-bind="rootAttrs"
     class="group/sidebar-item flex h-7 items-center rounded-4 transition"
     :class="
       resolvedActive
@@ -16,13 +17,18 @@
       RouterLink component object or the 'a' string is safe; only a raw 'button'
       string collides with the globally-registered <Button>, so that stays a
       literal <button v-else>. The inner content is identical in both branches.
+
+      `controlAttrs` is spread before `linkAttrs` and before the component's own
+      attributes, so a caller cannot overwrite `href` / `to`, `aria-current` or
+      the classes. `aria-label` is the exception: `ariaLabel` returns the
+      caller's value when there is one.
     -->
     <component
       :is="linkComponent"
       v-if="route || href"
-      v-bind="linkAttrs"
+      v-bind="{ ...controlAttrs, ...linkAttrs }"
       :accesskey="accessKey"
-      :aria-label="tooltipText || undefined"
+      :aria-label="ariaLabel"
       :aria-current="resolvedActive ? 'page' : undefined"
       class="flex h-full min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
@@ -38,7 +44,7 @@
              square and back (the whole row is already the hit target). -->
         <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
-            <SidebarItemIcon :icon="icon" />
+            <Icon :icon="icon" class="size-4 text-ink-gray-6" />
           </slot>
         </span>
       </Tooltip>
@@ -63,8 +69,9 @@
     <button
       v-else
       type="button"
+      v-bind="controlAttrs"
       :accesskey="accessKey"
-      :aria-label="tooltipText || undefined"
+      :aria-label="ariaLabel"
       class="flex h-full text-left min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
@@ -79,7 +86,7 @@
              square and back (the whole row is already the hit target). -->
         <span class="grid shrink-0 place-items-center">
           <slot name="prefix">
-            <SidebarItemIcon :icon="icon" />
+            <Icon :icon="icon" class="size-4 text-ink-gray-6" />
           </slot>
         </span>
       </Tooltip>
@@ -127,12 +134,40 @@ import {
   inject,
   onMounted,
   ref,
+  useAttrs,
   useTemplateRef,
 } from 'vue'
 import { RouterLink } from 'vue-router'
+import Icon from '../Icon/Icon.vue'
 import Tooltip from '../Tooltip/Tooltip.vue'
-import SidebarItemIcon from './SidebarItemIcon.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
+
+// The root <div> is a wrapper, not the control: the link/button and the
+// #suffix zone are siblings inside it. Without this, every fallthrough
+// attribute stopped at the wrapper, so `target`, `rel`, `data-*` and `aria-*`
+// never reached the element they describe.
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
+
+// The split. `class`, `style` and event listeners belong to the whole row, so
+// they stay on the wrapper: a row background or a drag-and-drop ring has to
+// cover the #suffix zone, and so does a listener. Mail and Drive make a folder
+// row a drop target with `@dragover` / `@drop` while the suffix holds the
+// unread count and the options menu. On the inner control those events would
+// miss that strip. Everything else describes the control and goes there.
+// `onClick` is a declared prop, so it is never in `attrs`; it stays bound to
+// the control through `handleClick`.
+const isRootAttr = (key: string) =>
+  key === 'class' || key === 'style' || /^on[A-Z]/.test(key)
+
+const rootAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => isRootAttr(key))),
+)
+
+const controlAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !isRootAttr(key))),
+)
 
 // `active` must default to `undefined`, not Vue's implicit boolean `false` —
 // "not passed" and "passed false" are different states here: absence falls
@@ -165,6 +200,15 @@ onMounted(() => {
   slotLabel.value = labelEl.value?.textContent?.trim() ?? ''
 })
 const tooltipText = computed(() => props.label || slotLabel.value)
+
+// A caller's `aria-label` wins over the derived one. It is the more specific
+// name, and it is the only way to name a row whose visible text is not its
+// full name (a folder row that also announces its unread count). Every other
+// attribute the component computes is bound after `controlAttrs`, so a caller
+// cannot overwrite it.
+const ariaLabel = computed(
+  () => (attrs['aria-label'] as string) || tooltipText.value || undefined,
+)
 
 // Read the router/route off global properties instead of useRouter()/useRoute()
 // so this component works — without warnings or crashes — when mounted outside a

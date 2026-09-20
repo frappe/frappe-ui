@@ -1745,6 +1745,8 @@ the full API.
 | `SidebarHeader`'s `#logo` slot             | `#prefix` slot                                                         |
 | `Sidebar.disableCollapse`                  | `Sidebar.collapsible` with the boolean inverted                        |
 | `SidebarRailItem variant="tile"`           | `variant="subtle"`                                                     |
+| `SidebarItem icon="AB"` (plain text)       | `<template #prefix>AB</template>`                                      |
+| `target` / `data-*` on a `SidebarItem`     | now on the inner `<a>` / `<button>`                                    |
 
 Every removal here is a **silent break**. A dropped prop (`header`, `sections`,
 `items`, `isActive`) becomes a fall-through attribute on the component's root
