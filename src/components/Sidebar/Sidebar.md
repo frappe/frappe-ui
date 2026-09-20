@@ -55,6 +55,13 @@ Set `route` to render a router link or `href` for a native same-tab anchor;
 `route` against the current route. A click invokes `onClick` (bound from
 `@click`) in every case.
 
+Attributes you write on `SidebarItem` split in two. `class`, `style` and event
+listeners stay on the row container, so a row background or a drag-and-drop
+ring covers the `#suffix` zone and a `@dragover` / `@drop` there still fires.
+Every other attribute (`target`, `rel`, `id`, `title`, `data-*`, `aria-*`)
+lands on the link or the button inside, the element it describes. Your
+`aria-label` replaces the one derived from the label text.
+
 ## SidebarHeader
 
 The app-switcher / workspace-identity row. A fixed 48px region that lines up

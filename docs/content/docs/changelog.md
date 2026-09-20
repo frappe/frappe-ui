@@ -9,6 +9,22 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `SidebarItem` attributes land on the link or the button (breaking, silent)
+
+A `SidebarItem` is a row container holding the link or the button, with the
+`#suffix` zone next to it. Every attribute written on the component used to
+stop at that container, so `target`, `rel`, `id`, `title`, `data-*` and
+`aria-*` never reached the control. They now land on the control. `class`,
+`style` and event listeners stay on the container, which is what a row
+background, a drag-and-drop ring and a `@drop` over the suffix need.
+
+- **Who is affected:** apps that select a row by an attribute they pass in
+  (`data-testid`, `id`), and apps that set `aria-label` on a row.
+- **How to fix:** select the container by `[data-slot="sidebar-item"]` and the
+  control by `[data-slot="sidebar-item"] > a` or `> button`. An `aria-label`
+  you pass now wins over the one derived from the label text, so drop any
+  workaround that worked around the old one.
+
 ### `Sidebar` is the `<nav>` landmark; sections are groups
 
 `Sidebar`'s root element is a `<nav>`, labelled `Main`. The new `ariaLabel`

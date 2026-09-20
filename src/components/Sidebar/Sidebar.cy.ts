@@ -262,6 +262,91 @@ describe('<SidebarItem />', () => {
     cy.get('@options').should('have.been.calledOnce')
   })
 
+  it('sends class and style to the row, every other attr to the control', () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Docs', href: 'https://frappe.io/docs' },
+      attrs: {
+        class: 'my-row',
+        style: 'opacity: 0.5',
+        'data-testid': 'docs-link',
+        target: '_blank',
+        rel: 'noopener',
+      },
+    })
+    cy.get('[data-slot=sidebar-item]')
+      .should('have.class', 'my-row')
+      // The component's own classes survive the merge.
+      .and('have.class', 'rounded-4')
+    // `have.css` and `not.have.attr` swap the subject for the value they read,
+    // so each one ends its chain.
+    cy.get('[data-slot=sidebar-item]').should('have.css', 'opacity', '0.5')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'target')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'data-testid')
+    cy.get('[data-slot=sidebar-item] > a')
+      .should('have.attr', 'data-testid', 'docs-link')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'rel', 'noopener')
+      .and('have.attr', 'href', 'https://frappe.io/docs')
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Action' },
+      attrs: {
+        class: 'my-row',
+        style: 'opacity: 0.5',
+        'data-testid': 'action-button',
+        title: 'Run it',
+      },
+    })
+    cy.get('[data-slot=sidebar-item]').should('have.class', 'my-row')
+    cy.get('[data-slot=sidebar-item]').should('have.css', 'opacity', '0.5')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'data-testid')
+    cy.get('[data-slot=sidebar-item] > button')
+      .should('have.attr', 'data-testid', 'action-button')
+      .and('have.attr', 'title', 'Run it')
+  })
+
+  it("a caller's aria-label replaces the one derived from the label", () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Junk', route: '/junk' },
+      attrs: { 'aria-label': 'Junk, 4 unread' },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should(
+      'have.attr',
+      'aria-label',
+      'Junk, 4 unread',
+    )
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Junk' },
+      attrs: { 'aria-label': 'Junk, 4 unread' },
+    })
+    cy.get('[data-slot=sidebar-item] > button').should(
+      'have.attr',
+      'aria-label',
+      'Junk, 4 unread',
+    )
+  })
+
+  it('keeps listeners on the row, so a #suffix drop target still fires', () => {
+    // Mail and Drive make a whole folder row a drop target. The suffix holds
+    // the unread count and the options menu, so the listener has to sit on the
+    // row and not on the link inside it.
+    const onDragover = cy.stub().as('dragover')
+    const onMouseenter = cy.stub().as('mouseenter')
+    cy.mount(SidebarItem, {
+      props: { label: 'Inbox', route: '/inbox' },
+      attrs: { onDragover, onMouseenter },
+      slots: { suffix: () => h('span', { 'data-test': 'count' }, '4') },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should('not.have.attr', 'ondragover')
+    cy.get('[data-test=count]').trigger('dragover')
+    cy.get('@dragover').should('have.been.calledOnce')
+    cy.get('[data-slot=sidebar-item]').trigger('mouseenter')
+    cy.get('@mouseenter').should('have.been.calledOnce')
+  })
+
   it('is keyboard reachable and shows a visible focus-visible outline', () => {
     cy.mount(SidebarItem, { props: { label: 'Design', route: '/design' } })
     cy.get('a')
