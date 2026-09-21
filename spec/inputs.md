@@ -698,8 +698,11 @@ Every input shell renders the canonical `data-*` vocabulary:
 - `data-size` — current `size` value
 - `data-variant` — current `variant` value (where applicable)
 - `data-state` — `"valid" | "invalid" | "checked" | "unchecked" | …`
-- `data-disabled` — `"true"` when disabled, absent otherwise
-- `data-required` — `"true"` when required, absent otherwise
+- `data-disabled` — present when disabled, absent otherwise
+- `data-required` — present when required, absent otherwise
+
+Select the two booleans by presence (`[data-disabled]`). Their value is not
+part of the contract (P10).
 
 The `useInputLabeling` composable returns a `dataAttrs` object that
 components spread onto their root element so the vocabulary stays

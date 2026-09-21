@@ -221,8 +221,8 @@ Per P10, every part carries a `data-slot`.
 `group`, `group-title`, `shortcut`, `description`, `shortcut-keys`. The empty
 element also carries `data-state="empty"` or `data-state="no-results"`.
 
-`KeyboardShortcut`: `keyboard-shortcut` on the root, with `data-bg="true"` when
-`bg` is set; `key` on each key, with `data-key-type`; `separator` on the `+`
+`KeyboardShortcut`: `keyboard-shortcut` on the root, with `data-bg` when `bg`
+is set; `key` on each key, with `data-key-type`; `separator` on the `+`
 glyphs; `alt-combos` on the alternatives, inside the root.
 
 ### `bg` is not the `variant` axis

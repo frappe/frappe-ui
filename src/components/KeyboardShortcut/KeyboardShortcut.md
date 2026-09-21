@@ -37,11 +37,11 @@ and Alt as icons, `bg` mode draws them as text.
 
 ## Styling hooks
 
-The root carries `data-slot="keyboard-shortcut"`, and `data-bg="true"` when `bg`
-is set. Each key carries `data-slot="key"` with a `data-key-type` of `cmd`,
-`ctrl`, `shift`, `alt` or `key`. The `+` separators carry
-`data-slot="separator"`, and alternative combos sit in `data-slot="alt-combos"`
-inside the root. Style through those instead of a class prop (P10):
+The root carries `data-slot="keyboard-shortcut"`, and `data-bg` when `bg` is
+set. Each key carries `data-slot="key"` with a `data-key-type` of `cmd`, `ctrl`,
+`shift`, `alt` or `key`. The `+` separators carry `data-slot="separator"`, and
+alternative combos sit in `data-slot="alt-combos"` inside the root. Style
+through those instead of a class prop (P10):
 
 ```css
 [data-slot='keyboard-shortcut'][data-bg] [data-slot='key'] {

@@ -324,6 +324,8 @@ Root `class` fallthrough — `<MyDropdown class="my-4">` landing on the root via
 
 The exact data-slot / data-state taxonomy is per component family; each family's spec defines its own values.
 
+**Boolean states are presence-only.** A boolean attribute such as `data-disabled`, `data-required` or `data-loading` is present when the state is on and absent when it is off. Select it by presence: `[data-disabled]` in CSS, `data-[disabled]:` in Tailwind. The value is not part of the contract. Some components write `""` and some write `"true"`, and a 1.x release can change either. A selector such as `[data-disabled="true"]` is off-contract.
+
 **Why:**
 - Class-injection props leak the internal DOM tree into the public API. Every restructure breaks every caller. `data-slot` keeps the *contract* stable.
 - N class props become N² as components grow (`triggerHoverClass`, `triggerDisabledClass`, …). data-* + CSS scales without growing the prop surface.
