@@ -3,6 +3,7 @@ import { docKey, writeGate, type WriteStamp } from '../writeGate'
 export interface ListInstanceMethods {
   updateRow: (doc: Partial<{ name: string }> & Record<string, unknown>) => void
   removeRow: (name: string) => void
+  revertRow: (doc: Doc, expected: Record<string, unknown>) => void
 }
 
 interface Doc {
@@ -52,6 +53,15 @@ class ListStore {
     this.byDocType[doctype].forEach((list) => {
       list.updateRow(doc)
     })
+  }
+
+  /**
+   * Reverts an optimistic `useDoc().setValue` write. A row field is restored
+   * only while it still holds `expected`'s value, so a refetched row is kept.
+   * A local write, so it takes no stamp.
+   */
+  revertRow(doctype: string, doc: Doc, expected: Record<string, unknown>) {
+    this.byDocType[doctype]?.forEach((list) => list.revertRow(doc, expected))
   }
 
   /**

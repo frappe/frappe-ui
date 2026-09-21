@@ -399,6 +399,23 @@ describe('a sequence is recorded only by a write that landed', () => {
 
     expect(storedEmail()).toBe('old@example.com')
   })
+
+  it("a failed useDoc().setValue's optimistic write does not gate out an older success", async () => {
+    await seedUser1()
+    const list = makeList()
+    const doc = makeDoc()
+
+    const [older, newer] = await inDispatchOrder(
+      () =>
+        list.setValue.submit({ name: 'user1', email: 'slow-old@example.com' }),
+      () => doc.setValue.submit({ email: 'quickfail' }),
+    )
+
+    await expect(newer).rejects.toThrow('setValue user1 failed')
+    await older
+
+    expect(storedEmail()).toBe('slow-old@example.com')
+  })
 })
 
 describe('one instance, two submits: the store gate decides, not submit order', () => {
@@ -565,7 +582,10 @@ describe('invalidation is not a delete', () => {
       {
         doctype: 'User',
         name: 'user1',
-        email: 'poison',
+        email: 'old@example.com',
+        // A field the save does not send, so its optimistic write keeps the
+        // doc poisoned. The response echoes only what was sent.
+        poison: true,
       },
       LOCAL_WRITE,
     )
@@ -575,7 +595,7 @@ describe('invalidation is not a delete', () => {
       baseUrl,
       immediate: false,
       transform: (d) => {
-        if (d.email === 'poison') throw new Error('bad doc')
+        if ('poison' in d) throw new Error('bad doc')
         return d
       },
     })

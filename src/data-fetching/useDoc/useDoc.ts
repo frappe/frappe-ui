@@ -13,6 +13,7 @@ import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
+import { unrefObject } from '../utils'
 import { listStore } from '../useList/listStore'
 
 // Transform method signatures into useCall return type
@@ -54,6 +55,13 @@ const RESERVED_DOC_MEMBERS = new Set([
   'delete',
   'onSuccess',
 ])
+
+/**
+ * For each doc object an optimistic `setValue` wrote: the confirmed values,
+ * from before the chain of pending submits that led to it, of every field
+ * that chain set. A failed submit restores them.
+ */
+const baseValues = new WeakMap<object, Record<string, unknown>>()
 
 interface UseDocOptions<TDoc> {
   doctype: string
@@ -188,6 +196,79 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       listStore.updateRow(doctype, data, stamp)
     },
   })
+
+  // Optimistic, like the legacy `createDocumentResource`: the submitted values
+  // land in the stores at once (in list rows, only the fields the loaded doc
+  // has), and the response replaces them through `onStoreWrite`. A failed
+  // submit reverts them.
+  //
+  // The optimistic write and the revert are `LOCAL_WRITE`: neither records a
+  // sequence in the gate. Recording would gate out an older save still in
+  // flight, and if this submit then fails, the stores would end on a value the
+  // server does not hold. The cost: an older response that settles first shows
+  // its value until this one lands.
+  //
+  // The revert is guarded by identity, not by value. Every publish stores a
+  // new doc object, so if the store no longer holds the object this submit
+  // wrote, a response or fetch has replaced it and there is nothing to revert,
+  // whatever values it holds. A list reload does not go through `docStore`,
+  // so each row field is guarded on its own value too (`listStore.revertRow`).
+  //
+  // The casts only resolve `submit`'s conditional type, which TypeScript
+  // cannot evaluate while `TDoc` is still generic.
+  type SetValueSubmit = (values?: Partial<TDoc>) => Promise<TDoc | null>
+  const submitSetValue = setValue.submit as SetValueSubmit
+  const optimisticSubmit: SetValueSubmit = async (values) => {
+    const revert = values ? writeOptimistic(values) : null
+    try {
+      return await submitSetValue(values)
+    } catch (e) {
+      revert?.()
+      throw e
+    }
+  }
+  setValue.submit = optimisticSubmit as typeof setValue.submit
+
+  function writeOptimistic(submitted: Partial<TDoc>) {
+    // Unwrapped the way `useIsolatedCall` sends them, so a Ref value does not
+    // land in the doc or the row.
+    const values = unrefObject(submitted as Parameters<typeof unrefObject>[0])
+    const nameStr = toValue(name)?.trim()
+    if (!nameStr) return null
+    const getStored = () =>
+      docStore.getDoc(doctype, nameStr, { staleOnError }).value
+    const stored = getStored()
+    // Nothing loaded to merge into. The response still lands as before.
+    if (!stored) return null
+    const docName = stored.name
+    // Submits that overlap build on each other's objects, so the base carries
+    // the confirmed value of every field the chain has touched.
+    const base = { ...baseValues.get(stored) }
+    for (const field in values) {
+      if (field !== 'name' && !(field in base)) base[field] = stored[field]
+    }
+    docStore.setDoc({ ...stored, ...values, name: docName }, LOCAL_WRITE)
+    const written = getStored()
+    if (written) baseValues.set(written, base)
+    // Rows get only fields the confirmed doc has. A row may hold a field the
+    // doc lacks (a partial doc), and the base has no value to revert it to.
+    const rowValues: { name: string } & Record<string, unknown> = {
+      name: docName,
+    }
+    for (const field in values) {
+      if (base[field] !== undefined) rowValues[field] = values[field]
+    }
+    listStore.updateRow(doctype, rowValues, LOCAL_WRITE)
+
+    return () => {
+      const current = getStored()
+      if (!written || current !== written) return
+      // The whole chain reverts: with this object still stored, no response
+      // for an older write in it has landed either.
+      docStore.setDoc({ ...current, ...base }, LOCAL_WRITE)
+      listStore.revertRow(doctype, { ...base, name: docName }, current)
+    }
+  }
 
   type DeleteResponse = 'ok'
   const delete_ = useIsolatedCall<DeleteResponse>({

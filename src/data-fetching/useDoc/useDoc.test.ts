@@ -2,8 +2,10 @@
  * @vitest-environment node
  */
 import { ref } from 'vue'
-import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
-import { useCall, useDoc } from '../index'
+import { delay, http, HttpResponse } from 'msw'
+import { server } from '../../mocks/node'
+import { baseUrl, url, waitUntilValueChanges } from '../../mocks/utils'
+import { useCall, useDoc, useList } from '../index'
 import { docStore } from '../docStore'
 import { LOCAL_WRITE } from '../writeGate'
 
@@ -464,5 +466,173 @@ describe('useDoc concurrency', () => {
     expect(quick).toMatchObject({ method: 'run', tag: 'quick-second' })
     expect(user.run.error).toBe(null)
     expect(user.run.loading).toBe(false)
+  })
+})
+
+// `setValue` writes the submitted values into the stores before the request
+// goes out, like the legacy `createDocumentResource`. The response replaces
+// them; a failure reverts them, but never over a write that landed since.
+describe('useDoc setValue is optimistic', () => {
+  interface User {
+    name: string
+    email: string
+  }
+
+  async function setup() {
+    await docStore.setDoc(
+      { doctype: 'User', name: 'user1', email: 'old@example.com' },
+      LOCAL_WRITE,
+    )
+    server.use(
+      http.get(url('/api/v2/document/User'), () =>
+        HttpResponse.json({
+          data: [{ name: 'user1', email: 'old@example.com' }],
+        }),
+      ),
+    )
+    const list = useList<User>({
+      doctype: 'User',
+      baseUrl,
+      immediate: false,
+      refetch: false,
+    })
+    await list.reload()
+    server.resetHandlers()
+
+    const user = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+    })
+    const rowEmail = () => list.data?.find((row) => row.name === 'user1')?.email
+    return { user, list, rowEmail }
+  }
+
+  it('shows the submitted values at once, then the server answer', async () => {
+    const { user, rowEmail } = await setup()
+    server.use(
+      http.put(url('/api/v2/document/User/user1'), async () => {
+        await delay(20)
+        return HttpResponse.json({
+          data: { name: 'user1', email: 'saved@example.com' },
+        })
+      }),
+    )
+
+    const save = user.setValue.submit({ email: 'typed@example.com' })
+    expect(user.doc!.email).toBe('typed@example.com')
+    expect(rowEmail()).toBe('typed@example.com')
+
+    await save
+    expect(user.doc!.email).toBe('saved@example.com')
+    expect(rowEmail()).toBe('saved@example.com')
+  })
+
+  it('reverts a failed submit', async () => {
+    const { user, rowEmail } = await setup()
+
+    const save = user.setValue.submit({ email: 'quickfail' })
+    expect(user.doc!.email).toBe('quickfail')
+
+    await expect(save).rejects.toThrow('setValue user1 failed')
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('old@example.com')
+  })
+
+  it('does not revert over a later submit', async () => {
+    const { user, rowEmail } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    const later = user.setValue.submit({ email: 'new@example.com' })
+    await later
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('new@example.com')
+    expect(rowEmail()).toBe('new@example.com')
+  })
+
+  it('reverts overlapping failures on one field to the original value', async () => {
+    const { user, rowEmail } = await setup()
+
+    const first = user.setValue.submit({ email: 'quickfail' })
+    const second = user.setValue.submit({ email: 'slow-fail' })
+    await expect(first).rejects.toThrow('setValue user1 failed')
+    // The second submit is still in flight, so its value stays.
+    expect(user.doc!.email).toBe('slow-fail')
+    await expect(second).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('old@example.com')
+  })
+
+  it('does not revert over a fetch that landed', async () => {
+    const { user } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    // The default handler answers with the server's copy at once.
+    await user.reload()
+    expect(user.doc!.email).toBe('user1@example.com')
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('user1@example.com')
+  })
+
+  it('does not revert over a newer submit of the same value', async () => {
+    const { user, rowEmail } = await setup()
+    // The first save fails slowly, the second succeeds at once. Both send the
+    // same value, so only the order of writes tells them apart.
+    let calls = 0
+    server.use(
+      http.put(url('/api/v2/document/User/user1'), async () => {
+        if (++calls === 1) {
+          await delay(60)
+          return HttpResponse.json({ errors: [] }, { status: 500 })
+        }
+        return HttpResponse.json({
+          data: { name: 'user1', email: 'same@example.com' },
+        })
+      }),
+    )
+
+    const failed = user.setValue.submit({ email: 'same@example.com' })
+    await user.setValue.submit({ email: 'same@example.com' })
+    await expect(failed).rejects.toThrow()
+
+    expect(user.doc!.email).toBe('same@example.com')
+    expect(rowEmail()).toBe('same@example.com')
+  })
+
+  it('does not revert a list row that was refetched', async () => {
+    const { user, list, rowEmail } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    server.use(
+      http.get(url('/api/v2/document/User'), () =>
+        HttpResponse.json({
+          data: [{ name: 'user1', email: 'listed@example.com' }],
+        }),
+      ),
+    )
+    await list.reload()
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('listed@example.com')
+  })
+
+  it('keeps a row field the doc did not have', async () => {
+    const { user, rowEmail } = await setup()
+    // A partial doc, as the `docs` side channel can publish.
+    await docStore.setDoc({ doctype: 'User', name: 'user1' }, LOCAL_WRITE)
+
+    const save = user.setValue.submit({ email: 'quickfail' })
+    expect(user.doc!.email).toBe('quickfail')
+    // The doc has no value to revert the row to, so the row is not touched.
+    expect(rowEmail()).toBe('old@example.com')
+    await expect(save).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe(undefined)
+    expect(rowEmail()).toBe('old@example.com')
   })
 })

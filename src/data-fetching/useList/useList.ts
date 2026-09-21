@@ -164,6 +164,21 @@ export function useList<T extends { name: string }>(
     }
   }
 
+  // Internal, for `listStore.revertRow`; not on the returned object.
+  const revertRow = (
+    doc: { name: string } & Record<string, unknown>,
+    expected: Record<string, unknown>,
+  ) => {
+    const row = allData.value?.find((row) => row.name === doc.name)
+    if (!row) return
+    const reverted: Record<string, unknown> = { name: doc.name }
+    for (const key in doc) {
+      const value = (row as Record<string, unknown>)[key]
+      if (value === expected[key]) reverted[key] = doc[key]
+    }
+    updateRow(reverted)
+  }
+
   const removeRow = (name: string) => {
     if (allData.value == null) return
     const index = allData.value.findIndex((row) => row.name === name)
@@ -273,7 +288,7 @@ export function useList<T extends { name: string }>(
     delete: delete_,
   })
 
-  listStore.addList(doctype, out)
+  listStore.addList(doctype, { updateRow, removeRow, revertRow })
 
   return out
 }
