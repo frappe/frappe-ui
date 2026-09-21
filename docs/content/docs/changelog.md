@@ -1310,7 +1310,7 @@ unless it says otherwise. The
   same shape as `ReferenceLine.dashed` and drawn in the same dash.
   `SankeyChart`'s `orient="vertical"` is `vertical`, beside `BarChart`'s
   `horizontal`, and the `SankeyOrient` type is gone.
-- `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
+- `DonutChart` takes `v-model:hiddenSlices`, and `AxisChartEmits` and
   `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
 
 Settled after the audit, on the same footing:
@@ -1331,6 +1331,11 @@ Settled after the audit, on the same footing:
   prop above — one mechanism per concept. Series draw and take palette slots in
   `y` order and then `y2` order, `splitBy` splits `y` only, and a `y2` column
   draws as the chart's own mark until `seriesConfig[key].type` says otherwise.
+- **Breaking:** `DonutChart`'s model is `v-model:hiddenSlices`, and its emit
+  `update:hiddenSlices`. A donut has no series — `maxSlices`, `DonutSlice` and
+  `DonutSliceEvent` all say slice — so the one prop that said series was the odd
+  one out. `hiddenSeries` is unchanged on the axis charts and on `ScatterChart`,
+  and so is `ChartLegend`'s own API.
 
 `useChart`, `registerChartModules` and their three types stay on
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and

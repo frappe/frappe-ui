@@ -141,7 +141,7 @@ registerChartModules([PieSeries])
 
 const props = defineProps<DonutChartProps>()
 
-const hiddenSlices = defineModel<string[]>('hiddenSeries', {
+const hiddenSlices = defineModel<string[]>('hiddenSlices', {
   default: () => [],
 })
 

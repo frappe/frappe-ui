@@ -878,12 +878,11 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
-   * Slices the legend has switched off, by name. A slice is the donut's series,
-   * so this is the same `hiddenSeries` an axis chart takes. Bind it with
-   * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
    * legend owns it.
    */
-  hiddenSeries?: string[]
+  hiddenSlices?: string[]
   /**
    * Prints each slice's name and share beside the ring, and drops the readout
    * in the middle. Off by default. The legend already names every slice and its
@@ -1177,7 +1176,7 @@ export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
   /** The legend switched a slice off or back on. Carries the new list. */
-  'update:hiddenSeries': [value: string[]]
+  'update:hiddenSlices': [value: string[]]
   /**
    * A slice was selected, by click or by Enter on the keyboard cursor. `name`
    * identifies the slice and `label` is what it printed. The collapsed tail is

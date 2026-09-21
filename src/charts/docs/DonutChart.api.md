@@ -60,8 +60,8 @@
     type: 'number'
   },
   {
-    name: 'hiddenSeries',
-    description: 'Slices the legend has switched off, by name. A slice is the donut\'s series,\nso this is the same `hiddenSeries` an axis chart takes. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app. Left unbound, the\nlegend owns it.',
+    name: 'hiddenSlices',
+    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app. Left unbound, the\nlegend owns it.',
     required: false,
     type: 'string[]',
     default: '[]'
@@ -144,7 +144,7 @@
     type: '[event: DonutSliceEvent]'
   },
   {
-    name: 'update:hiddenSeries',
+    name: 'update:hiddenSlices',
     description: 'The legend switched a slice off or back on. Carries the new list.',
     type: '[value: string[]]'
   }

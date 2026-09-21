@@ -4780,6 +4780,35 @@ horizontal bar chart ignores `y2`, as it ignored `axis: 'y2'`.
 
 `ReferenceLine.axis` is unchanged: it still takes `'y'`, `'y2'` and `'x'`.
 
+### `DonutChart` hides slices, not series
+
+`v-model:hiddenSeries` on a donut is `v-model:hiddenSlices`, and the emit with
+it. A **silent break** in a plain template: Vue passes the unknown prop through
+as an attribute and the handler for the old emit never fires, so the app's list
+stops tracking the legend.
+
+```vue
+<!-- Before -->
+<DonutChart
+  :data="rows"
+  category="channel"
+  value="sessions"
+  v-model:hidden-series="hidden"
+/>
+
+<!-- After -->
+<DonutChart
+  :data="rows"
+  category="channel"
+  value="sessions"
+  v-model:hidden-slices="hidden"
+/>
+```
+
+`DonutChart` only. The axis charts and `ScatterChart` keep `hiddenSeries`, and
+`ChartLegend` is unchanged. Grep for `hidden-series` and `hiddenSeries` on
+`DonutChart`.
+
 ### The loud ones
 
 The build or the type-check reports the rest.
