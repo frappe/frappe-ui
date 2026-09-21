@@ -86,13 +86,13 @@ All from the `frappe-ui` root entry.
 Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Props are flat and name the columns of your rows; the column names differ per family. Every chart draws its own header, tooltip and states, and fills the box you give it, so size it from the wrapper: there is no `height` prop.
 
 - [Overview](https://ui.frappe.io/docs/charts/overview): the shared prop model and how a chart reads its data.
-- [BarChart](https://ui.frappe.io/docs/charts/barchart): bars for comparing categories, or a measure over time; `x`, `y`, optional `series` and `horizontal`.
-- [LineChart](https://ui.frappe.io/docs/charts/linechart): lines for a measure over time; `x`, `y`, optional `series`.
+- [BarChart](https://ui.frappe.io/docs/charts/barchart): bars for comparing categories, or a measure over time; `x`, `y`, optional `y2`, `splitBy` and `horizontal`.
+- [LineChart](https://ui.frappe.io/docs/charts/linechart): lines for a measure over time; `x`, `y`, optional `y2` and `splitBy`.
 - [AreaChart](https://ui.frappe.io/docs/charts/areachart): the line family with a fill; same props as LineChart.
 - [DonutChart](https://ui.frappe.io/docs/charts/donutchart): share of a total; `category`, `value`.
 - [FunnelChart](https://ui.frappe.io/docs/charts/funnelchart): stage-to-stage drop-off; `category`, `value`.
 - [HeatmapChart](https://ui.frappe.io/docs/charts/heatmapchart): magnitude across two dimensions; `x`, `y`, `value`.
-- [ScatterChart](https://ui.frappe.io/docs/charts/scatterchart): two measures against each other; `x`, `y`, optional `size` and `series`.
+- [ScatterChart](https://ui.frappe.io/docs/charts/scatterchart): two measures against each other; `x`, `y`, optional `size` and `splitBy`.
 - [SankeyChart](https://ui.frappe.io/docs/charts/sankeychart): flow between two sets of nodes; `source`, `target`, `value`.
 - [NumberCard](https://ui.frappe.io/docs/charts/numbercard): the KPI tile: one reading plus the change against a comparison period. Required `title` and `value`.
 - [ChartCard](https://ui.frappe.io/docs/charts/chartcard): the card surface a chart sits on, for a plot you draw yourself.

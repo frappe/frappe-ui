@@ -1186,15 +1186,9 @@ Landed so far:
   a spinner and the words "Loading chart…". A dashboard fills in a card at a
   time, and a placeholder that holds the grid's shape reads better than eight
   spinners turning out of step. `#loading` takes it back.
-- `seriesConfig[key].axis` puts a series on the second value axis. It replaces
-  the `y2` prop, **which is removed**: `y` names every series once, in the order
-  they are drawn and colored, so a series no longer changes color when it
-  changes axis. Long data reaches the second axis for the first time, keyed by a
-  value of the `series` column, and `y2Axis` is unchanged. To migrate, move each
-  `y2` column into `y` at the position it should draw at and add `axis: 'y2'` to
-  that column's `seriesConfig` entry. TypeScript reports the removed prop, but a
-  plain template passes it through as an attribute and draws the column not at
-  all — grep for `y2` on the v2 charts after upgrading.
+- `y2` names the value column or columns measured against the second value
+  axis, completing the pairs `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis`. The axis
+  is drawn only when `y2` names a column, and `y2Axis` is unchanged.
 - `ScatterChart` takes `showDataLabels`, which prints each point's `label`
   beside it. Names that collide with a neighbour are dropped.
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
@@ -1316,8 +1310,32 @@ unless it says otherwise. The
   same shape as `ReferenceLine.dashed` and drawn in the same dash.
   `SankeyChart`'s `orient="vertical"` is `vertical`, beside `BarChart`'s
   `horizontal`, and the `SankeyOrient` type is gone.
-- `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
+- `DonutChart` takes `v-model:hiddenSlices`, and `AxisChartEmits` and
   `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
+
+Settled after the audit, on the same footing:
+
+- **Breaking:** the column that splits long data into series is `splitBy`, not
+  `series`, on the axis charts and on `ScatterChart`. "Series" now names a drawn
+  series only, which is what `seriesConfig`, `hiddenSeries` and `maxSeries` are
+  keyed by. TypeScript reports the removed prop, but a plain template passes it
+  through as an attribute and draws every row as one series — grep for `series=`
+  and `:series=` on the charts after upgrading.
+- The axis charts take `smooth`, `showDataPoints` and `dashed` at the chart
+  level, beside `showDataLabels` and `connectNulls`, and `connectNulls` joins
+  the four in `seriesConfig`. One rule for all five: the chart-level value is
+  every series' default, and a `seriesConfig` entry overrides it for one series,
+  on or off. With `splitBy` the series are named by the data, so a chart-level
+  value is the only way to reach all of them.
+- **Breaking:** `SeriesStyle.axis` is **removed**, replaced by the `y2` column
+  prop above — one mechanism per concept. Series draw and take palette slots in
+  `y` order and then `y2` order, `splitBy` splits `y` only, and a `y2` column
+  draws as the chart's own mark until `seriesConfig[key].type` says otherwise.
+- **Breaking:** `DonutChart`'s model is `v-model:hiddenSlices`, and its emit
+  `update:hiddenSlices`. A donut has no series — `maxSlices`, `DonutSlice` and
+  `DonutSliceEvent` all say slice — so the one prop that said series was the odd
+  one out. `hiddenSeries` is unchanged on the axis charts and on `ScatterChart`,
+  and so is `ChartLegend`'s own API.
 
 `useChart`, `registerChartModules` and their three types stay on
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and

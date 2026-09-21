@@ -310,7 +310,7 @@ function pinNormalizedAxes(
     if (shares.has(entry.series.name)) continue
     if (!pinned.has(valueAxisIndex(entry.series, hasSecondary))) continue
     warn(
-      `\`stacked: "normalized"\` pins that value axis to 0-100, but series "${entry.series.name}" stacks with nothing — a line never stacks, and a mark alone in its stack has no whole to be part of — so it draws its own numbers against that scale. Give it \`axis: "y2"\`, or stack it with the rest.`,
+      `\`stacked: "normalized"\` pins that value axis to 0-100, but series "${entry.series.name}" stacks with nothing — a line never stacks, and a mark alone in its stack has no whole to be part of — so it draws its own numbers against that scale. Move it to \`y2\`, or stack it with the rest.`,
     )
   }
 
@@ -508,7 +508,7 @@ function buildLineSeries(
     z: MARK_Z[mark],
     stack: entry.stack,
     // Nulls read as gaps: bridging them invents data that was never measured.
-    connectNulls: Boolean(config.connectNulls),
+    connectNulls: Boolean(series.connectNulls),
     smooth: Boolean(series.smooth),
     showSymbol: Boolean(series.showDataPoints),
     symbol: 'circle',

@@ -46,7 +46,7 @@ unchanged — what entered still entered. See the
 | Scatter | `ScatterChart`, with an optional size measure | Convention 1. It is a way to read two measures against each other. With `referenceLines` it also covers Insights' quadrant lines, so no `show_quadrants` prop. |
 | Sankey | `SankeyChart` | Convention 1. A flow between a source and a target is a reading of the data. |
 | Numeric x axis | `xAxis.type: 'value'` | Convention 1. Reading a measure against a quantity — conversion against discount, revenue against distance — is a statement about the data, the same one `'time'` already makes about a date. It is a third reading of the x column the axis is typed with, not a prop beside it, and the caller still says only what the column means. |
-| Series axis (2nd pass) | `seriesConfig[key].axis: 'y' \| 'y2'` | Convention 4. Which scale a series is measured against is per-series meaning, and `seriesConfig` is the one place per-series meaning lives. It replaces `y2`, which said the same thing in a second place and said it by moving the series — see Leaves. |
+| Series axis (3rd pass, 2026-09-21) | `y2`, a column prop beside `y` | Convention 4, read from the caller's side. The column props pair with the axis options — `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis` — so which scale a column is measured against is said where the column is named. It replaces `seriesConfig[key].axis`, which the 2nd pass had put in its place — see Leaves. |
 | Scatter point labels (2nd pass) | `showDataLabels` on `ScatterChart` | Convention 4. A donut prints `showInlineLabels` and an axis series prints `showDataLabels`, so a scatter that cannot name its points is the odd one out. It prints the `label` column: both measures are already on the axes. |
 | `NumberCard` value color (2nd pass) | `color` on `NumberCardProps` | Consistency, against convention 2. See below. |
 
@@ -113,23 +113,13 @@ Convention 3 turns two requested options into library work.
 
 ### Leaves
 
-- **`y2`** (2nd pass) — the column list naming what the second value axis
-  measures. Convention 4: beside `seriesConfig[key].axis` it is a second
-  spelling of one idea. It is not sugar over the first either, because the two
-  can disagree — `y2` naming a column whose entry says `axis: 'y'` needs a
-  precedence rule, and a shorthand that needs one is a mechanism. It also
-  carried a side effect the per-series key does not. The series list was
-  `[...y, ...y2]` and series colors are handed out along it, so a caller moving
-  a column from `y` to `y2` moved it down the list and changed its color. v2 is
-  in beta, Insights is the only consumer and is updated in the same cycle, so
-  `y2` goes rather than staying on as a second way in. `y2Axis` stays: it
-  configures the axis, and one axis is one thing.
+- **`seriesConfig[key].axis`** (3rd pass, 2026-09-21) — which value axis a series is measured against, set per series. The 2nd pass put it in place of `y2` on three grounds, and this pass reverses that. Two spellings of one idea: still true, so one of them goes, and `axis` is the one. The precedence rule the pair needed goes with it, and a stale `axis` in a saved config is dropped before it reaches the series. A column changing color when it moves to the second axis: series draw and take palette slots in `y` order then `y2` order, so the last `y` column keeps its slot and any other does not. That cost is accepted. What decided it is how a chart reads when written by hand. `axis` spread a two-axis chart over `y`, two `seriesConfig` keys and `y2Axis`, and left `y2Axis` as the one axis option with no column prop beside it. `y2Axis` stays: it configures the axis, and one axis is one thing.
 
 ### Not a gap: the adapter layer
 
 Insights configs reference columns through `Dimension` and `Measure` objects,
 and Insights pivots wide before it plots. Library props take plain row keys and
-read long data through the `series` prop. Insights needs a mapping layer
+read long data through the `splitBy` prop. Insights needs a mapping layer
 whatever the library does, and convention 5 puts that layer in the app. Library
 props are not shaped around a stored config format.
 
@@ -191,10 +181,7 @@ These decisions fell out of the work and answer questions this record raised.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.
-- **A long-data series can reach the second axis.** `y2` named columns, and long
-  data has none to name — the series come out of a grouping column — so a
-  grouped chart had no way to put one group on its own scale. Keying the axis by
-  series identity gives it one, and drops a branch instead of adding a prop.
+- **A long-data series cannot reach the second axis.** `y2` names columns, and long data has none to name — the series come out of the `splitBy` column — so a grouped chart cannot put one group on its own scale. `splitBy` splits `y` only, and a `y2` column beside it draws as one unsplit series, read from the first row at each `x`. The 2nd pass had closed this by keying the axis by series identity. The 3rd pass reopens it knowingly.
 - **`NumberCard` prints through `format`.** `compact` and `precision` named in
   the "already present" list above left before 1.0.0: they were a second
   formatting mechanism beside the `ChartValueFormatter` every other chart takes,

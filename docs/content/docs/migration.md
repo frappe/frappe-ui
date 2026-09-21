@@ -1568,8 +1568,8 @@ chart that scales or draws differently:
 | `colors`                      | `palette`, or `seriesConfig[key].color`                            |
 
 Combo charts survive the port: `seriesConfig[key].type` takes
-`'bar' | 'line' | 'area'`, and `seriesConfig[key].axis: 'y2'` moves one series
-to the second value axis, configured with the chart-level `y2Axis` prop.
+`'bar' | 'line' | 'area'`, and the `y2` prop names the columns measured against
+the second value axis, configured with the chart-level `y2Axis` prop.
 
 ## Sprite icons — moved to `frappe-ui/experimental`
 
@@ -4706,6 +4706,108 @@ longer fires on Enter for a cell the plot drew no mark for.
 Grep for `FunnelChart` data that can carry a blank or negative value, and for
 `#empty` slots on bar, line and area, which now render for a `y` key no row
 carries.
+
+### The grouping column is `splitBy`
+
+`series` named the column that splits long data into one series per value. It is
+now `splitBy`, the word Insights already stores it under, and "series" is left
+to mean a drawn series — what `seriesConfig`, `hiddenSeries` and `maxSeries` are
+keyed by. A **silent break** in a plain template: Vue passes the unknown prop
+through as an attribute and the chart draws one series over every row.
+
+```vue
+<!-- Before -->
+<BarChart :data="rows" x="week" y="tickets" series="priority" stacked />
+
+<!-- After -->
+<BarChart :data="rows" x="week" y="tickets" split-by="priority" stacked />
+```
+
+`ScatterChart` renames the same prop. Grep for `series=` and `:series=`, and for
+`series:` in a saved chart object.
+
+### Chart-level looks default every series
+
+`showDataLabels` was already a chart prop that a `seriesConfig` entry could
+override. `smooth`, `showDataPoints` and `dashed` now work the same way, and
+`connectNulls` — a chart prop already — joins the four in `seriesConfig`.
+Nothing that ran before draws differently; the chart-level keys are additive.
+
+```vue
+<!-- Before: one entry per series, and no way to reach a splitBy series -->
+<LineChart
+  :data="rows"
+  x="month"
+  :y="['plan', 'actual']"
+  :series-config="{ plan: { smooth: true }, actual: { smooth: true } }"
+/>
+
+<!-- After -->
+<LineChart :data="rows" x="month" :y="['plan', 'actual']" smooth />
+```
+
+### The second value axis is a column prop
+
+`seriesConfig[key].axis: 'y2'` is removed. `y2` names the columns measured
+against the second axis, so the three column props pair with the three axis
+options: `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis`. Move each column out of `y`
+and into `y2`; the series still draw and take their palette slots in `y` order
+then `y2` order, so a chart that listed its y2 columns last keeps every color.
+
+```vue
+<!-- Before -->
+<BarChart
+  :data="rows"
+  x="quarter"
+  :y="['revenue', 'expenses', 'margin']"
+  :series-config="{ margin: { type: 'line', axis: 'y2' } }"
+/>
+
+<!-- After -->
+<BarChart
+  :data="rows"
+  x="quarter"
+  :y="['revenue', 'expenses']"
+  y2="margin"
+  :series-config="{ margin: { type: 'line' } }"
+/>
+```
+
+`splitBy` splits `y` only, so a `y2` column draws as one unsplit series beside
+the ones `splitBy` produced and `maxSeries` caps only those. A long-data series
+can no longer be moved to the second axis — it has no column to name. A
+horizontal bar chart ignores `y2`, as it ignored `axis: 'y2'`.
+
+`ReferenceLine.axis` is unchanged: it still takes `'y'`, `'y2'` and `'x'`.
+
+### `DonutChart` hides slices, not series
+
+`v-model:hiddenSeries` on a donut is `v-model:hiddenSlices`, and the emit with
+it. A **silent break** in a plain template: Vue passes the unknown prop through
+as an attribute and the handler for the old emit never fires, so the app's list
+stops tracking the legend.
+
+```vue
+<!-- Before -->
+<DonutChart
+  :data="rows"
+  category="channel"
+  value="sessions"
+  v-model:hidden-series="hidden"
+/>
+
+<!-- After -->
+<DonutChart
+  :data="rows"
+  category="channel"
+  value="sessions"
+  v-model:hidden-slices="hidden"
+/>
+```
+
+`DonutChart` only. The axis charts and `ScatterChart` keep `hiddenSeries`, and
+`ChartLegend` is unchanged. Grep for `hidden-series` and `hiddenSeries` on
+`DonutChart`.
 
 ### The loud ones
 

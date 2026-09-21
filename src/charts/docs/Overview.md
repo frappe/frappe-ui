@@ -2,7 +2,7 @@
 
 Nine chart components under the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
-your data — `x`, `y`, `series`, `category`, `value` — so a saved or serialized
+your data — `x`, `y`, `y2`, `splitBy`, `category`, `value` — so a saved or serialized
 chart is one typed object spread with `v-bind="savedChart"`.
 
 ```js
@@ -23,7 +23,7 @@ both draw their own SVG.
 
 The axis charts read either shape of the same data. Wide data keeps one column
 per series, so `y` lists the columns to draw. Long data keeps one row per point,
-so `y` names the single value column and `series` names the column that splits
+so `y` names the single value column and `splitBy` names the column that splits
 the rows apart. Pick whichever shape your query already returns.
 
 ## Marks

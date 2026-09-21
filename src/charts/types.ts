@@ -80,9 +80,9 @@ export type AxisChartSeriesConfig = {
   /** Mark this series draws as. Defaults to the chart's own mark. */
   type?: ChartMark
   /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * a different unit or magnitude its own scale, opposite the primary. Ignored
-   * on a horizontal bar chart, which has no second value axis.
+   * Which value axis this series is measured against, i.e. which of `y` and
+   * `y2` named its column. `'y2'` is ignored on a horizontal bar chart, which
+   * has no second value axis.
    */
   axis?: 'y' | 'y2'
   showDataLabels?: boolean
@@ -100,6 +100,11 @@ export type AxisChartSeriesConfig = {
   showDataPoints?: boolean
   /** Rounds the corners of the line instead of drawing straight segments. */
   smooth?: boolean
+  /**
+   * Bridges gaps left by null or non-numeric values. Off by default: a break in
+   * the line is how missing data should read. Line and area series only.
+   */
+  connectNulls?: boolean
   echartOptions?: EchartOptionsOverride
 }
 
@@ -157,7 +162,7 @@ export type AxisChartBaseConfig = {
   yAxis?: ChartYAxisConfig
   /**
    * The second value axis, drawn opposite the primary. Only read when a series
-   * sets `axis: 'y2'`, and never on a horizontal bar chart — two value axes
+   * carries `axis: 'y2'`, and never on a horizontal bar chart — two value axes
    * along the top and bottom of the plot are unreadable.
    */
   y2Axis?: ChartYAxisConfig
@@ -195,11 +200,6 @@ export type AxisChartConfig = AxisChartBaseConfig & {
   stacked?: boolean | 'normalized'
   /** Bars run left-to-right; the category axis moves to Y. Bars only. */
   horizontal?: boolean
-  /**
-   * Bridges gaps left by null or non-numeric values. Off by default: a break in
-   * the line is how missing data should read. Line and area series only.
-   */
-  connectNulls?: boolean
 }
 
 export type DonutChartConfig = {
@@ -511,8 +511,8 @@ export type ScatterChartConfig = {
   yColumn: string
   /** Row key holding the magnitude each point is sized by. */
   sizeColumn?: string
-  /** Grouping column: one series per distinct value. */
-  seriesColumn?: string
+  /** Splits the points into one series per distinct value. */
+  splitByColumn?: string
   /** Row key holding the point's own name, which heads its tooltip. */
   labelColumn?: string
   /** Prints the point's own name beside it. Needs `labelColumn` to have one. */
@@ -550,7 +550,7 @@ export type ScatterPoint = {
   row: Record<string, any>
 }
 
-/** One group of points, i.e. one value of the grouping column. */
+/** One group of points, i.e. one value of `splitBy`. */
 export type ScatterSeries = {
   /** The grouping value as it reads, or the y column when nothing groups. Unique. */
   name: string
@@ -707,6 +707,10 @@ export type ChartValueAxisOptions = {
  * defaults. One style covers every mark, so a series keeps its label and color
  * when `type` changes, and the keys the mark it draws as does not read are
  * ignored rather than dropped.
+ *
+ * `showDataLabels`, `smooth`, `showDataPoints`, `dashed` and `connectNulls` are
+ * chart-level props as well. The chart-level value is every series' default,
+ * and an entry here overrides it for one series, on or off.
  */
 export type SeriesStyle = {
   /** Display name. The `seriesConfig` key stays the identity. */
@@ -718,21 +722,7 @@ export type SeriesStyle = {
    * sits in, so `BarChart` with one `'line'` series is a combo chart.
    */
   type?: ChartMark
-  /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * another unit or magnitude its own scale, drawn opposite the primary.
-   * Defaults to `'y'`. Ignored on a horizontal bar chart, which has no second
-   * value axis, and on a chart where no series asks for `'y2'` the second axis
-   * is not drawn at all.
-   *
-   * Moving a series here never moves it in the chart: the series are drawn in
-   * `y` order whatever axis each one sits on, so a series keeps its color.
-   */
-  axis?: 'y' | 'y2'
-  /**
-   * Prints this series' value beside each of its marks, overriding the chart's
-   * own `showDataLabels`.
-   */
+  /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -748,6 +738,8 @@ export type SeriesStyle = {
   showDataPoints?: boolean
   /** Line and area series. */
   smooth?: boolean
+  /** Bridges gaps left by nulls in this series. Line and area series. */
+  connectNulls?: boolean
   /** Escape hatch: deep-merged into this series' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
@@ -770,27 +762,64 @@ export type AxisChartProps = ChartBaseProps & {
   /** Column holding the category or time each point sits at. */
   x: string
   /**
-   * Value column(s). A list reads wide data: one series per column, drawn and
-   * colored in the order given. `seriesConfig[key].axis` moves one of them to
-   * the second value axis without moving it in the list.
+   * Value column(s) measured against the primary value axis. A list reads wide
+   * data: one series per column, drawn and colored in the order given.
    */
   y: string | string[]
-  /** Grouping column, i.e. long data. Use with a single `y`. */
-  series?: string
   /**
-   * Caps how many series the `series` column produces. The rest are summed
+   * Value column(s) measured against the second value axis, for a measure in
+   * another unit or magnitude. The axis is only drawn when this names a column,
+   * and it is ignored on a horizontal bar chart, which has no second value
+   * axis.
+   *
+   * These series draw and take their palette slots after every `y` column, and
+   * they draw as the chart component's own mark unless `seriesConfig[key].type`
+   * says otherwise.
+   *
+   * With `splitBy` the column is not split: it reads per category, so it must
+   * hold one value per `x` and the first row at each `x` is the one read. Rows
+   * that disagree there warn in development.
+   */
+  y2?: string | string[]
+  /**
+   * Splits `y` into one series per distinct value, i.e. long data. Use with a
+   * single `y`. A `y2` column is not split: it draws as one series of its own.
+   */
+  splitBy?: string
+  /**
+   * Caps how many series `splitBy` produces. The rest are summed
    * into a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can
    * style it. Uncapped by default, and ignored when `y` names the columns:
    * those the caller chose one by one.
    */
   maxSeries?: number
-  /** Keyed by series identity: a `y` column, or a value of the `series` column. */
+  /** Keyed by series identity: a `y` or `y2` column, or a value of `splitBy`. */
   seriesConfig?: Record<string, SeriesStyle>
   /**
    * Prints every series' value beside its marks. A `seriesConfig` entry
    * overrides it for one series, on or off.
    */
   showDataLabels?: boolean
+  /**
+   * Rounds the corners of every line instead of drawing straight segments. Line
+   * and area series. A `seriesConfig` entry overrides it for one series.
+   */
+  smooth?: boolean
+  /**
+   * Marks every datapoint with a dot, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  showDataPoints?: boolean
+  /**
+   * Breaks every series' line into a dash. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  dashed?: boolean
+  /**
+   * Bridges gaps left by nulls, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  connectNulls?: boolean
   /**
    * Series the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app, or to keep what a
@@ -802,13 +831,17 @@ export type AxisChartProps = ChartBaseProps & {
    * no palette slot, and no effect on the value axis. For context in another
    * unit, such as the count behind a rate. They print after the series rows,
    * in the order given: a value in another unit cannot be ranked among them.
+   *
+   * With `splitBy` a column reads per category, so it must hold one value per
+   * `x` and the first row at each `x` is the one read. Rows that disagree there
+   * warn in development.
    */
   tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */
   yAxis?: ChartValueAxisOptions
-  /** The second value axis. Only drawn when a series sits on `axis: 'y2'`. */
+  /** The second value axis. Only drawn when `y2` names a column. */
   y2Axis?: ChartValueAxisOptions
   /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
   palette?: ChartPalette
@@ -818,8 +851,6 @@ export type AxisChartProps = ChartBaseProps & {
    * instead of its own magnitude, and pins that value axis to 0-100.
    */
   stacked?: boolean | 'normalized'
-  /** Bridges gaps left by nulls. Line and area series. */
-  connectNulls?: boolean
   /**
    * Targets, thresholds and other fixed marks drawn over the plot. They are
    * annotations, not series: no legend entry, and no way to switch one off.
@@ -855,12 +886,11 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
-   * Slices the legend has switched off, by name. A slice is the donut's series,
-   * so this is the same `hiddenSeries` an axis chart takes. Bind it with
-   * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
    * legend owns it.
    */
-  hiddenSeries?: string[]
+  hiddenSlices?: string[]
   /**
    * Prints each slice's name and share beside the ring, and drops the readout
    * in the middle. Off by default. The legend already names every slice and its
@@ -955,8 +985,8 @@ export type ScatterChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude each point is sized by. */
   size?: string
-  /** Grouping column: one series per distinct value. */
-  series?: string
+  /** Splits the points into one series per distinct value. */
+  splitBy?: string
   /**
    * Groups the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
@@ -1165,7 +1195,7 @@ export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
   /** The legend switched a slice off or back on. Carries the new list. */
-  'update:hiddenSeries': [value: string[]]
+  'update:hiddenSlices': [value: string[]]
   /**
    * A slice was selected, by click or by Enter on the keyboard cursor. `name`
    * identifies the slice and `label` is what it printed. The collapsed tail is

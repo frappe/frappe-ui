@@ -471,7 +471,7 @@ describe('normalized stacking with maxSeries', () => {
   // the tail is one series by the time anything is divided.
   it('takes the shares after the tail has collapsed, so they sum to 100', () => {
     const option = buildAxisChartOption(
-      fromProps({ data: longRows, series: 'region', maxSeries: 3 }),
+      fromProps({ data: longRows, splitBy: 'region', maxSeries: 3 }),
       { tokens },
     ) as any
     expect(option.series.map((s: any) => s.name)).toEqual([
@@ -487,7 +487,7 @@ describe('normalized stacking with maxSeries', () => {
   it('pins the axis and labels the collapsed series “Others”', () => {
     const config = fromProps({
       data: longRows,
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 3,
     })
     const option = buildAxisChartOption(config, { tokens }) as any

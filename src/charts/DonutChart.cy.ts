@@ -98,7 +98,7 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-legend"]').should('contain.text', '60%')
   })
 
-  it('round-trips v-model:hiddenSeries', () => {
+  it('round-trips v-model:hiddenSlices', () => {
     const hidden = ref<string[]>([])
     cy.mount(
       defineComponent({
@@ -110,8 +110,8 @@ describe('DonutChart', () => {
                 category: 'source',
                 value: 'visits',
                 echartOptions: { animation: false },
-                hiddenSeries: hidden.value,
-                'onUpdate:hiddenSeries': (v: string[]) => (hidden.value = v),
+                hiddenSlices: hidden.value,
+                'onUpdate:hiddenSlices': (v: string[]) => (hidden.value = v),
               }),
             ])
         },

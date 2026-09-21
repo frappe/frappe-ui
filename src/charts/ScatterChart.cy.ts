@@ -66,7 +66,7 @@ describe('ScatterChart', () => {
   })
 
   it('splits the rows into groups the legend names', () => {
-    mountChart({ series: 'region' })
+    mountChart({ splitBy: 'region' })
     points().should('have.length', data.length)
     cy.get('[data-slot="chart-legend"] button')
       .should('have.length', 2)
@@ -75,7 +75,7 @@ describe('ScatterChart', () => {
   })
 
   it('colors a group from the palette', () => {
-    mountChart({ series: 'region' })
+    mountChart({ splitBy: 'region' })
     points().then((els) => {
       const fills = [...els].map((el) => el.getAttribute('fill'))
       expect(new Set(fills).size).to.eq(2)
@@ -83,7 +83,7 @@ describe('ScatterChart', () => {
   })
 
   it('takes a group out of the plot when its legend entry is pressed', () => {
-    mountChart({ series: 'region' })
+    mountChart({ splitBy: 'region' })
     points().should('have.length', 4)
     cy.get('[data-slot="chart-legend"] button').first().click()
     points().should('have.length', 2)
@@ -162,7 +162,7 @@ describe('ScatterChart', () => {
     })
 
     it('labels the points of every group', () => {
-      mountChart({ label: 'account', series: 'region', showDataLabels: true })
+      mountChart({ label: 'account', splitBy: 'region', showDataLabels: true })
       cy.get('[data-slot="chart-plot"] svg text')
         .should('contain.text', 'Acme')
         .and('contain.text', 'Initech')
@@ -172,7 +172,7 @@ describe('ScatterChart', () => {
   describe('reference lines', () => {
     it('draws a labelled rule across the plot with no legend entry of its own', () => {
       mountChart({
-        series: 'region',
+        splitBy: 'region',
         referenceLines: [{ value: 1000, label: 'Target' }],
       })
       cy.get('[data-slot="chart-plot"] svg text').should(
@@ -199,7 +199,7 @@ describe('ScatterChart', () => {
 
     it('keeps the rule while a legend toggle hides a group', () => {
       mountChart({
-        series: 'region',
+        splitBy: 'region',
         referenceLines: [{ value: 1000, label: 'Target' }],
       })
       cy.get('[data-slot="chart-legend"] button').first().click()
@@ -223,7 +223,7 @@ describe('ScatterChart', () => {
                   data,
                   x: 'spend',
                   y: 'revenue',
-                  series: 'region',
+                  splitBy: 'region',
                   echartOptions: { animation: false },
                   referenceLines: [{ value: 1000, label: 'Target' }],
                   hiddenSeries: hidden.value,

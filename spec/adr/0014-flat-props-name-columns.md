@@ -20,9 +20,10 @@ v2 compared four API shapes against that constraint.
 ## Decision
 
 A chart is one tag whose props are plain data. Column props are strings that name
-columns of `data` — `x`, `y`, `series`, `category`, `value`. Axis options sit in
-`xAxis` / `yAxis` / `y2Axis`. Per-series styling sits in `seriesConfig`, keyed by
-series identity rather than by display name.
+columns of `data` — `x`, `y`, `y2`, `splitBy`, `category`, `value`. Axis
+options sit in `xAxis` / `yAxis` / `y2Axis`, pairing with the column props that
+name what each axis measures. Per-series styling sits in `seriesConfig`,
+keyed by series identity rather than by display name.
 
 There is no `config` object. A saved chart is one typed object, spread with
 `v-bind="savedChart"`. Each component exports its props type — `BarChartProps`,

@@ -109,7 +109,6 @@ const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
   type: 'line',
   stacked: props.stacked,
-  connectNulls: props.connectNulls,
 }))
 
 const {

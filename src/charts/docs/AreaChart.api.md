@@ -49,31 +49,61 @@
   },
   {
     name: 'y',
-    description: 'Value column(s). A list reads wide data: one series per column, drawn and\ncolored in the order given. `seriesConfig[key].axis` moves one of them to\nthe second value axis without moving it in the list.',
+    description: 'Value column(s) measured against the primary value axis. A list reads wide\ndata: one series per column, drawn and colored in the order given.',
     required: true,
     type: 'string | string[]'
   },
   {
-    name: 'series',
-    description: 'Grouping column, i.e. long data. Use with a single `y`.',
+    name: 'y2',
+    description: 'Value column(s) measured against the second value axis, for a measure in\nanother unit or magnitude. The axis is only drawn when this names a column,\nand it is ignored on a horizontal bar chart, which has no second value\naxis.\n\nThese series draw and take their palette slots after every `y` column, and\nthey draw as the chart component\'s own mark unless `seriesConfig[key].type`\nsays otherwise.\n\nWith `splitBy` the column is not split: it reads per category, so it must\nhold one value per `x` and the first row at each `x` is the one read. Rows\nthat disagree there warn in development.',
+    required: false,
+    type: 'string | string[]'
+  },
+  {
+    name: 'splitBy',
+    description: 'Splits `y` into one series per distinct value, i.e. long data. Use with a\nsingle `y`. A `y2` column is not split: it draws as one series of its own.',
     required: false,
     type: 'string'
   },
   {
     name: 'maxSeries',
-    description: 'Caps how many series the `series` column produces. The rest are summed\ninto a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can\nstyle it. Uncapped by default, and ignored when `y` names the columns:\nthose the caller chose one by one.',
+    description: 'Caps how many series `splitBy` produces. The rest are summed\ninto a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can\nstyle it. Uncapped by default, and ignored when `y` names the columns:\nthose the caller chose one by one.',
     required: false,
     type: 'number'
   },
   {
     name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
+    description: 'Keyed by series identity: a `y` or `y2` column, or a value of `splitBy`.',
     required: false,
     type: 'Record<string, SeriesStyle>'
   },
   {
     name: 'showDataLabels',
     description: 'Prints every series\' value beside its marks. A `seriesConfig` entry\noverrides it for one series, on or off.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'smooth',
+    description: 'Rounds the corners of every line instead of drawing straight segments. Line\nand area series. A `seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'showDataPoints',
+    description: 'Marks every datapoint with a dot, on every series. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'dashed',
+    description: 'Breaks every series\' line into a dash. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'connectNulls',
+    description: 'Bridges gaps left by nulls, on every series. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
     required: false,
     type: 'boolean'
   },
@@ -86,7 +116,7 @@
   },
   {
     name: 'tooltipColumns',
-    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit, such as the count behind a rate. They print after the series rows,\nin the order given: a value in another unit cannot be ranked among them.',
+    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit, such as the count behind a rate. They print after the series rows,\nin the order given: a value in another unit cannot be ranked among them.\n\nWith `splitBy` a column reads per category, so it must hold one value per\n`x` and the first row at each `x` is the one read. Rows that disagree there\nwarn in development.',
     required: false,
     type: 'ChartTooltipColumn[]'
   },
@@ -104,7 +134,7 @@
   },
   {
     name: 'y2Axis',
-    description: 'The second value axis. Only drawn when a series sits on `axis: \'y2\'`.',
+    description: 'The second value axis. Only drawn when `y2` names a column.',
     required: false,
     type: 'ChartValueAxisOptions'
   },
@@ -119,12 +149,6 @@
     description: 'Series sum on top of each other. Bar and area series; a line never stacks.\n`\'normalized\'` reads each value as its share of the stack it sits in\ninstead of its own magnitude, and pins that value axis to 0-100.',
     required: false,
     type: 'boolean | "normalized"'
-  },
-  {
-    name: 'connectNulls',
-    description: 'Bridges gaps left by nulls. Line and area series.',
-    required: false,
-    type: 'boolean'
   },
   {
     name: 'referenceLines',

@@ -24,7 +24,7 @@ it sits. Data with one distinct magnitude draws every bubble at the middle of
 the range: it has no relative size to show, and drawing them all at the floor
 would claim they were the smallest there is.
 
-`series` splits the rows into one group per distinct value, colored from the
+`splitBy` splits the rows into one group per distinct value, colored from the
 palette and named in the legend. Press a legend entry to take a group out of the
 plot, or bind `v-model:hiddenSeries` to own that list yourself.
 

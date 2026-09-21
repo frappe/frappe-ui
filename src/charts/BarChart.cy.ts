@@ -223,7 +223,9 @@ describe('BarChart', () => {
 
     it('measures a line series against a second axis', () => {
       mountChart({
-        seriesConfig: { refunds: { type: 'line', axis: 'y2' } },
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { type: 'line' } },
       })
       bars().should('have.length', data.length)
       lines().should('have.length', 1)
@@ -283,7 +285,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
       })
       cy.get('[data-slot="chart-legend"] button')
@@ -297,7 +299,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 2,
         seriesConfig: { __others__: { label: 'Everywhere else' } },
       })
@@ -311,7 +313,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
         stacked: 'normalized',
       })

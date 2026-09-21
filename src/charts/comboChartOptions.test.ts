@@ -353,10 +353,15 @@ describe('combo stacking', () => {
 describe('combo line options', () => {
   it('applies the line keys to line and area series and no others', () => {
     const option = build({
-      connectNulls: true,
       series: [
-        { name: 'sales', smooth: true, dashed: true },
-        { name: 'refunds', type: 'line', smooth: true, dashed: true },
+        { name: 'sales', smooth: true, dashed: true, connectNulls: true },
+        {
+          name: 'refunds',
+          type: 'line',
+          smooth: true,
+          dashed: true,
+          connectNulls: true,
+        },
         { name: 'rate', type: 'area', showDataPoints: true },
       ],
     })

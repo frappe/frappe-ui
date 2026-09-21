@@ -60,8 +60,8 @@
     type: 'string'
   },
   {
-    name: 'series',
-    description: 'Grouping column: one series per distinct value.',
+    name: 'splitBy',
+    description: 'Splits the points into one series per distinct value.',
     required: false,
     type: 'string'
   },

@@ -124,7 +124,7 @@ const config = computed<ScatterChartConfig>(() => ({
   xColumn: props.x,
   yColumn: props.y,
   sizeColumn: props.size,
-  seriesColumn: props.series,
+  splitByColumn: props.splitBy,
   labelColumn: props.label,
   showDataLabels: props.showDataLabels,
   xAxis: toValueAxis(props.xAxis),
@@ -255,7 +255,7 @@ function showHit(hit: ScatterHit, x: number, y: number) {
 
   // What identifies the point: its own name, and the group it belongs to. With
   // neither, the two measures underneath already say everything there is.
-  const parts = [point.label, props.series ? entry.label : undefined]
+  const parts = [point.label, props.splitBy ? entry.label : undefined]
   const label = parts.filter(Boolean).join(' · ')
 
   tooltip.label = label || undefined

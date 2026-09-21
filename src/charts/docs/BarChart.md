@@ -13,7 +13,7 @@ as this one is.
 
 ## Long data and stacking
 
-Long data is the other shape: one row per point, with `series` naming the column
+Long data is the other shape: one row per point, with `splitBy` naming the column
 that splits the rows apart. `stacked` sums those series into one column per
 category.
 
@@ -23,7 +23,7 @@ category.
 
 `stacked="normalized"` is the 100% stacked reading: each value is drawn as its
 share of the column it sits in, and that value axis is pinned to 0-100 so every
-column fills the plot. `maxSeries` caps how many series the grouping column
+column fills the plot. `maxSeries` caps how many series `splitBy`
 produces — the tail is summed into a single "Others" series, the way `maxSlices`
 groups the tail of a donut. The cap keeps the series that carry the chart,
 measured over every x, and the survivors stay in the order the data put them in.
@@ -39,11 +39,11 @@ The share is taken per stack, so two stacks under different `stackName`s each
 reach 100 on their own, and a bar stack and an area stack are two wholes. A
 series that stacks with nothing — a line always, a lone bar or band otherwise —
 keeps its own numbers, with a dev-mode warning if the axis under it is pinned;
-put it on `axis: "y2"` to give it its own scale. A `min` or `max` set on a
+move it to `y2` to give it its own scale. A `min` or `max` set on a
 pinned axis is overruled, also with a warning: a column that stops short of the
 top no longer reads as a whole.
 
-`maxSeries` applies to the `series` column only. A `y` list names its columns
+`maxSeries` applies to `splitBy` only. A `y` list names its columns
 one by one, so nothing there is dropped; asking for a cap warns instead. The
 collapsed series has the reserved identity `__others__`, so a group whose name
 really is "Others" cannot collide with it, and a `seriesConfig.__others__` entry
@@ -81,7 +81,7 @@ and drops to a coarser interval rather than crowd them.
 `seriesConfig[key].type` sets the mark a single series draws as: `'bar'`,
 `'line'` or `'area'`. The chart component sets the default for the rest, so a
 `BarChart` with one `'line'` series is a combo chart. A rate belongs on its own
-scale, which `axis: 'y2'` in the same entry gives it.
+scale, which naming it in `y2` instead of `y` gives it.
 
 <ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
 
@@ -130,7 +130,7 @@ left.
 
 `v-model:hiddenSeries` binds that list, so the app can start with a series
 hidden, or drive the same toggles from a control of its own. It holds series
-identities: a `y` column name on wide data, a value of the `series` column on
+identities: a `y` column name on wide data, a value of the `splitBy` column on
 long data, or `__others__` for a capped tail. `LineChart`, `AreaChart` and
 `ScatterChart` take the same model.
 

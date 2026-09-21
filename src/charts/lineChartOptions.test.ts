@@ -176,7 +176,10 @@ describe('line chart option series', () => {
       ['Apr', null],
       ['May', 30],
     ])
-    expect(build({ connectNulls: true }).series[0].connectNulls).toBe(true)
+    expect(
+      build({ series: [{ name: 'sales', connectNulls: true }] }).series[0]
+        .connectNulls,
+    ).toBe(true)
   })
 
   it('never emphasises a line, so the others keep their opacity', () => {

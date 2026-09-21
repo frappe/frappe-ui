@@ -4,9 +4,14 @@ Lines for a measure that moves over time.
 
 ## Trends
 
-Two series on a time axis, one dashed as the comparison. `dashed`, `smooth` and
-`showDataPoints` are per-series settings in `seriesConfig`. `dashed` breaks the
+Two series on a time axis, one dashed as the comparison. `dashed` breaks the
 line for a projection or a comparison that was not measured like the rest.
+
+`dashed`, `smooth`, `showDataPoints`, `connectNulls` and `showDataLabels` are
+chart props and `seriesConfig` keys both. The chart-level value is every
+series' default and a `seriesConfig` entry overrides it for one series, on or
+off. That is the only way to reach every series of a `splitBy` chart, whose
+series are named by the data rather than by the caller.
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
@@ -27,19 +32,24 @@ chart has none.
 
 ## A second value axis
 
-`seriesConfig[key].axis` measures a series against a second value axis, drawn
-opposite the primary — for a series in another unit, like a rate against
+`y2` names the value column or columns measured against a second value axis,
+drawn opposite the primary — for a measure in another unit, like a rate against
 dollars. `y2Axis.min` / `max` pin that scale so the line reads as over or under
-plan rather than as its own trend. The axis is only drawn when a series asks for
-it.
+plan rather than as its own trend. The axis is only drawn when `y2` names a
+column.
 
 <ComponentPreview name="Charts-LineDualAxis" csr="true" self-layout />
 
-Which scale a series is read against is per-series meaning, so it sits in the
-same entry as that series' label and mark. It is not a second column list: `y`
-names every series once, in the order they are drawn and colored, and moving one
-across to the second axis leaves it where it was. Long data reaches the axis the
-same way, keyed by a value of the `series` column.
+`y` and `y2` are one list read in order: every `y` column draws and takes its
+palette slot first, then every `y2` column. So the three column props pair with
+the three axis options — `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis` — and which
+scale a series is read against is which prop named it. A `y2` series draws as
+the chart component's own mark, and `seriesConfig[key].type` makes it a line
+among bars like any other series.
+
+`splitBy` splits `y` only. A `y2` column reads per category rather than per
+group, so it draws as one unsplit series beside the ones `splitBy` produced, and
+`maxSeries` caps only those.
 
 ## Filling one series
 
@@ -111,7 +121,8 @@ list yourself. It is described under
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.
-`connectNulls` bridges them instead.
+`connectNulls` bridges them instead, on every series or on one through
+`seriesConfig`.
 
 <ComponentPreview name="Charts-LineGaps" csr="true" self-layout />
 

@@ -73,13 +73,13 @@ describe('area chart option', () => {
 
   it('keeps the line options a line chart has', () => {
     const option = build({
-      connectNulls: true,
       series: [
         {
           name: 'sales',
           dashed: true,
           showDataPoints: true,
           smooth: true,
+          connectNulls: true,
         },
       ],
     })

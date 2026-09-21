@@ -38,8 +38,9 @@ each entry still carries its slice's share.
 
 ## Hiding slices
 
-A slice is the donut's series, so `v-model:hiddenSeries` works here the way it
-does on an axis chart: bind it to drive the legend from the app, or to keep what
-a reader hid across a reload. Left unbound, the legend owns the list.
+`v-model:hiddenSlices` works the way `v-model:hiddenSeries` does on an axis
+chart: bind it to drive the legend from the app, or to keep what a reader hid
+across a reload. Left unbound, the legend owns the list. A donut draws slices,
+not series, which is why it is the only chart that spells the model this way.
 
 <!-- @include: ./DonutChart.api.md -->
