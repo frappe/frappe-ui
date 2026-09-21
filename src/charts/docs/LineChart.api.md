@@ -55,7 +55,7 @@
   },
   {
     name: 'y2',
-    description: 'Value column(s) measured against the second value axis, for a measure in\nanother unit or magnitude. The axis is only drawn when this names a column,\nand it is ignored on a horizontal bar chart, which has no second value\naxis.\n\nThese series draw and take their palette slots after every `y` column, and\nthey draw as the chart component\'s own mark unless `seriesConfig[key].type`\nsays otherwise.',
+    description: 'Value column(s) measured against the second value axis, for a measure in\nanother unit or magnitude. The axis is only drawn when this names a column,\nand it is ignored on a horizontal bar chart, which has no second value\naxis.\n\nThese series draw and take their palette slots after every `y` column, and\nthey draw as the chart component\'s own mark unless `seriesConfig[key].type`\nsays otherwise.\n\nWith `splitBy` the column is not split: it reads per category, so it must\nhold one value per `x` and the first row at each `x` is the one read. Rows\nthat disagree there warn in development.',
     required: false,
     type: 'string | string[]'
   },
@@ -116,7 +116,7 @@
   },
   {
     name: 'tooltipColumns',
-    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit, such as the count behind a rate. They print after the series rows,\nin the order given: a value in another unit cannot be ranked among them.',
+    description: 'Columns that reach the tooltip and nothing else: no mark, no legend entry,\nno palette slot, and no effect on the value axis. For context in another\nunit, such as the count behind a rate. They print after the series rows,\nin the order given: a value in another unit cannot be ranked among them.\n\nWith `splitBy` a column reads per category, so it must hold one value per\n`x` and the first row at each `x` is the one read. Rows that disagree there\nwarn in development.',
     required: false,
     type: 'ChartTooltipColumn[]'
   },

@@ -225,9 +225,11 @@ function toColumns(value?: string | string[]): string[] {
  * Both orders follow first appearance in the data, so the caller's sort
  * survives. Duplicate (x, splitBy) pairs are last-write-wins.
  *
- * `carry` names columns to copy across untouched. A tooltip column reads per
- * category, not per group, so the first row to reach a category decides its
- * value.
+ * `carry` names columns to copy across untouched — the `y2` columns and the
+ * tooltip columns. Both read per category, not per group, so each holds one
+ * value per x and the first row to reach a category decides it. Rows that
+ * disagree there warn in development: picking one of them is a reading of the
+ * data, and summing them would be computing the caller's number.
  */
 function pivot(
   rows: Record<string, any>[],
@@ -240,20 +242,42 @@ function pivot(
   // Keyed by the stringified x value: `Date` objects and numbers still have to
   // collapse onto one row per category.
   const byCategory = new Map<string, Record<string, any>>()
+  // What each category's first row carried, read back to spot a disagreement.
+  // Kept apart from the wide row, which a series named like a carried column
+  // overwrites.
+  const carriedFirst = new Map<string, Record<string, any>>()
+  const varied = new Set<string>()
 
   for (const row of rows) {
     const key = String(row[x])
     let wide = byCategory.get(key)
     if (!wide) {
       wide = { [x]: row[x] }
-      for (const column of carry) wide[column] = row[column]
+      const first: Record<string, any> = {}
+      for (const column of carry) {
+        wide[column] = row[column]
+        first[column] = row[column]
+      }
       byCategory.set(key, wide)
+      carriedFirst.set(key, first)
+    } else {
+      const first = carriedFirst.get(key) ?? {}
+      for (const column of carry) {
+        if (String(first[column]) !== String(row[column])) varied.add(column)
+      }
     }
     const name = String(row[splitBy])
     if (!names.includes(name)) names.push(name)
     // Written after the carried columns, so a series named like one of them
     // keeps the plot's number rather than losing it to the tooltip's.
     wide[name] = row[y]
+  }
+
+  if (import.meta.env.DEV && varied.size) {
+    const named = [...varied].map((column) => `"${column}"`).join(', ')
+    console.warn(
+      `[frappe-ui] ${named} is carried across \`splitBy="${splitBy}"\` once per "${x}", because it reads per category rather than per group. The rows at one "${x}" disagree, and the first one is read. Give the column one value per "${x}" before it reaches the chart.`,
+    )
   }
 
   const data = [...byCategory.values()]

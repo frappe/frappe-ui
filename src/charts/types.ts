@@ -775,6 +775,10 @@ export type AxisChartProps = ChartBaseProps & {
    * These series draw and take their palette slots after every `y` column, and
    * they draw as the chart component's own mark unless `seriesConfig[key].type`
    * says otherwise.
+   *
+   * With `splitBy` the column is not split: it reads per category, so it must
+   * hold one value per `x` and the first row at each `x` is the one read. Rows
+   * that disagree there warn in development.
    */
   y2?: string | string[]
   /**
@@ -827,6 +831,10 @@ export type AxisChartProps = ChartBaseProps & {
    * no palette slot, and no effect on the value axis. For context in another
    * unit, such as the count behind a rate. They print after the series rows,
    * in the order given: a value in another unit cannot be ranked among them.
+   *
+   * With `splitBy` a column reads per category, so it must hold one value per
+   * `x` and the first row at each `x` is the one read. Rows that disagree there
+   * warn in development.
    */
   tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */

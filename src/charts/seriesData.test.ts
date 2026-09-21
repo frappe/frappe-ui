@@ -412,6 +412,52 @@ describe('normalizeAxisChartProps: long data', () => {
   })
 })
 
+// A carried column reads per category, so the pivot takes one value per x. The
+// library says so rather than summing them: adding up a caller's rows is the
+// caller's arithmetic, not the library's (charts.md, convention 5).
+describe('normalizeAxisChartProps: carried columns that disagree', () => {
+  const disagreeing = [
+    { month: 'Jan', region: 'East', amount: 10, rate: 3, orders: 100 },
+    { month: 'Jan', region: 'West', amount: 5, rate: 9, orders: 100 },
+    { month: 'Feb', region: 'East', amount: 12, rate: 4, orders: 200 },
+  ]
+
+  const split = (props: Partial<AxisChartProps> = {}) =>
+    normalize({ data: disagreeing, y: 'amount', splitBy: 'region', ...props })
+
+  it('reads the first row at each x and warns, naming the column', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { config } = split({ y2: 'rate' })
+    expect(config.data.map((row) => row.rate)).toEqual([3, 4])
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0][0]).toContain('"rate"')
+    // Not a total: 3 and 9 at Jan stay the 3 the first row carried.
+    expect(warn.mock.calls[0][0]).toContain('the first one is read')
+  })
+
+  it('warns for a tooltip column the same way', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    split({ tooltipColumns: [{ name: 'rate' }] })
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0][0]).toContain('"rate"')
+  })
+
+  it('names every disagreeing column in one warning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    split({ y2: 'rate', tooltipColumns: [{ name: 'orders' }] })
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0][0]).toContain('"rate"')
+    // `orders` agrees within each month, so only `rate` is named.
+    expect(warn.mock.calls[0][0]).not.toContain('"orders"')
+  })
+
+  it('stays quiet when every row at an x carries the same value', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    split({ y2: 'orders' })
+    expect(warn).not.toHaveBeenCalled()
+  })
+})
+
 describe('normalizeAxisChartProps: maxSeries', () => {
   // One row, so a series' weight is plain to read off the data.
   const regions = [
