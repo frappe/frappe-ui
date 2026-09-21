@@ -124,8 +124,13 @@ on their own axis. The chart-level one is the fallback because the size column
 sits on no scale, so no axis formatter can reach it; an axis that states its own
 units overrides the fallback there.
 
-`tooltipColumns[].format` is the one other place, and it is the same rule: a
-tooltip column is drawn on no axis, so it carries its own.
+`tooltipColumns[].format` is another place, and it is the same rule: a tooltip
+column is drawn on no axis, so it carries its own.
+
+`SeriesStyle.format` is the same rule one level down. Two series can share an
+axis without sharing a unit, so a series whose unit differs from its axis
+carries its own. It prints that series' values in the tooltip. The ticks keep
+the axis' `format`, since an axis draws one scale.
 
 `HeatmapAxisOptions` carries `format` and no `title`, where every other axis
 options type carries both. That is a gap, not a decision: a title on a heatmap
