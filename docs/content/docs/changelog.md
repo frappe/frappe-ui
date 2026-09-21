@@ -13,9 +13,9 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 `setValue.submit(values)` writes `values` into `doc` and into matching
 `useList` rows before the request goes out, as `createDocumentResource` did.
-The response replaces them when it lands. A failed submit reverts each field
-that still holds the submitted value, so a later submit, reload or realtime
-update is kept. `submit()` still rejects on failure.
+The response replaces them when it lands. A failed submit reverts them, unless
+a response, reload or realtime update has replaced them since. `submit()`
+still rejects on failure.
 
 - **Who is affected:** code that reads `doc` while a `setValue` is in flight
   and expects the old values, e.g. to compare against them.

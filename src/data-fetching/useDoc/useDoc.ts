@@ -55,6 +55,13 @@ const RESERVED_DOC_MEMBERS = new Set([
   'onSuccess',
 ])
 
+/**
+ * For each doc object an optimistic `setValue` wrote: the confirmed values,
+ * from before the chain of pending submits that led to it, of every field
+ * that chain set. A failed submit restores them.
+ */
+const baseValues = new WeakMap<object, Record<string, unknown>>()
+
 interface UseDocOptions<TDoc> {
   doctype: string
   name: MaybeRefOrGetter<string>
@@ -199,9 +206,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   // server does not hold. The cost: an older response that settles first shows
   // its value until this one lands.
   //
-  // The revert is per field. It restores only a field that still holds the
-  // submitted value, so it does not undo a newer submit, fetch or realtime
-  // update that landed in the meantime.
+  // The revert is guarded by identity, not by value. Every publish stores a
+  // new doc object, so if the store no longer holds the object this submit
+  // wrote, a response, fetch or realtime update has replaced it and there is
+  // nothing to revert, whatever values it holds.
   //
   // The casts only resolve `submit`'s conditional type, which TypeScript
   // cannot evaluate while `TDoc` is still generic.
@@ -218,33 +226,33 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
   setValue.submit = optimisticSubmit as typeof setValue.submit
 
-  function writeOptimistic(submitted: Partial<TDoc>) {
-    // A copy: a caller may keep editing the object it submitted (a reactive
-    // form), and the revert compares against what was sent.
-    const values = { ...submitted }
+  function writeOptimistic(values: Partial<TDoc>) {
     const nameStr = toValue(name)?.trim()
     if (!nameStr) return null
     const getStored = () =>
       docStore.getDoc(doctype, nameStr, { staleOnError }).value
-    const previous = getStored()
+    const stored = getStored()
     // Nothing loaded to merge into. The response still lands as before.
-    if (!previous) return null
-    const docName = previous.name
-    docStore.setDoc({ ...previous, ...values, name: docName }, LOCAL_WRITE)
+    if (!stored) return null
+    const docName = stored.name
+    // Submits that overlap build on each other's objects, so the base carries
+    // the confirmed value of every field the chain has touched.
+    const base = { ...baseValues.get(stored) }
+    for (const field in values) {
+      if (field !== 'name' && !(field in base)) base[field] = stored[field]
+    }
+    docStore.setDoc({ ...stored, ...values, name: docName }, LOCAL_WRITE)
+    const written = getStored()
+    if (written) baseValues.set(written, base)
     listStore.updateRow(doctype, { ...values, name: docName }, LOCAL_WRITE)
 
     return () => {
       const current = getStored()
-      if (!current) return
-      const reverted: Record<string, unknown> = {}
-      for (const key in values) {
-        if (key !== 'name' && current[key] === values[key]) {
-          reverted[key] = previous[key]
-        }
-      }
-      if (Object.keys(reverted).length === 0) return
-      docStore.setDoc({ ...current, ...reverted }, LOCAL_WRITE)
-      listStore.updateRow(doctype, { ...reverted, name: docName }, LOCAL_WRITE)
+      if (!written || current !== written) return
+      // The whole chain reverts: with this object still stored, no response
+      // for an older write in it has landed either.
+      docStore.setDoc({ ...current, ...base }, LOCAL_WRITE)
+      listStore.updateRow(doctype, { ...base, name: docName }, LOCAL_WRITE)
     }
   }
 

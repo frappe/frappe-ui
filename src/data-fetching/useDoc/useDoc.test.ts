@@ -552,6 +552,20 @@ describe('useDoc setValue is optimistic', () => {
     expect(rowEmail()).toBe('new@example.com')
   })
 
+  it('reverts overlapping failures on one field to the original value', async () => {
+    const { user, rowEmail } = await setup()
+
+    const first = user.setValue.submit({ email: 'quickfail' })
+    const second = user.setValue.submit({ email: 'slow-fail' })
+    await expect(first).rejects.toThrow('setValue user1 failed')
+    // The second submit is still in flight, so its value stays.
+    expect(user.doc!.email).toBe('slow-fail')
+    await expect(second).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('old@example.com')
+  })
+
   it('does not revert over a fetch that landed', async () => {
     const { user } = await setup()
 
@@ -562,5 +576,30 @@ describe('useDoc setValue is optimistic', () => {
     await expect(failed).rejects.toThrow('setValue user1 failed')
 
     expect(user.doc!.email).toBe('user1@example.com')
+  })
+
+  it('does not revert over a newer submit of the same value', async () => {
+    const { user, rowEmail } = await setup()
+    // The first save fails slowly, the second succeeds at once. Both send the
+    // same value, so only the order of writes tells them apart.
+    let calls = 0
+    server.use(
+      http.put(url('/api/v2/document/User/user1'), async () => {
+        if (++calls === 1) {
+          await delay(60)
+          return HttpResponse.json({ errors: [] }, { status: 500 })
+        }
+        return HttpResponse.json({
+          data: { name: 'user1', email: 'same@example.com' },
+        })
+      }),
+    )
+
+    const failed = user.setValue.submit({ email: 'same@example.com' })
+    await user.setValue.submit({ email: 'same@example.com' })
+    await expect(failed).rejects.toThrow()
+
+    expect(user.doc!.email).toBe('same@example.com')
+    expect(rowEmail()).toBe('same@example.com')
   })
 })
