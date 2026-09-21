@@ -129,8 +129,8 @@ column is drawn on no axis, so it carries its own.
 
 `SeriesStyle.format` is the same rule one level down. Two series can share an
 axis without sharing a unit, so a series whose unit differs from its axis
-carries its own. It prints that series' values in the tooltip. The ticks keep
-the axis' `format`, since an axis draws one scale.
+carries its own. It prints that series' values in the tooltip and its data
+labels. The ticks keep the axis' `format`, since an axis draws one scale.
 
 `HeatmapAxisOptions` carries `format` and no `title`, where every other axis
 options type carries both. That is a gap, not a decision: a title on a heatmap

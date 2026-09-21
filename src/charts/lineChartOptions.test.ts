@@ -198,6 +198,15 @@ describe('line chart option series', () => {
     )
   })
 
+  it('prints data labels in the series format', () => {
+    const option = build({
+      series: [{ name: 'sales', showDataLabels: true, format: (v) => `$${v}` }],
+    })
+    expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
+      '$2500',
+    )
+  })
+
   it('draws no fill', () => {
     expect(build().series[0].areaStyle).toBeUndefined()
   })

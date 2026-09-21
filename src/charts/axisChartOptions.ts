@@ -479,6 +479,7 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
       formatter: (params: any) =>
         plottedLabel(
           horizontal ? params.value?.[0] : params.value?.[1],
+          series,
           Boolean(ctx.share),
         ),
     },
@@ -529,7 +530,7 @@ function buildLineSeries(
       color: tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
       formatter: (params: any) =>
-        plottedLabel(params.value?.[1], Boolean(ctx.share)),
+        plottedLabel(params.value?.[1], series, Boolean(ctx.share)),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -546,9 +547,14 @@ function buildLineSeries(
  * What a data label prints. A normalized series plots a share, so printing it
  * as a number would read as a count of something.
  */
-function plottedLabel(value: any, normalized: boolean) {
+function plottedLabel(
+  value: any,
+  series: AxisChartSeriesConfig,
+  normalized: boolean,
+) {
   if (value === null || value === undefined || isNaN(value)) return ''
-  return normalized ? formatPercent(value) : formatValue(value, 1, true)
+  if (normalized) return formatPercent(value)
+  return series.format ? series.format(value) : formatValue(value, 1, true)
 }
 
 /**

@@ -86,8 +86,10 @@ export type AxisChartSeriesConfig = {
    */
   axis?: 'y' | 'y2'
   /**
-   * Prints this series' values in the tooltip, for a series whose unit differs
-   * from the others on its axis. Defaults to its axis' `format`.
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
    */
   format?: ChartValueFormatter
   showDataLabels?: boolean
@@ -728,8 +730,10 @@ export type SeriesStyle = {
    */
   type?: ChartMark
   /**
-   * Prints this series' values in the tooltip, for a series whose unit differs
-   * from the others on its axis. Defaults to its axis' `format`.
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
    */
   format?: ChartValueFormatter
   /** Prints this series' value beside each of its marks. */

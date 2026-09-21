@@ -544,6 +544,15 @@ describe('bar chart option series', () => {
     )
   })
 
+  it('prints data labels in the series format', () => {
+    const option = build({
+      series: [{ name: 'sales', showDataLabels: true, format: (v) => `$${v}` }],
+    })
+    expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
+      '$2500',
+    )
+  })
+
   it('moves data labels to the bar end when horizontal', () => {
     expect(
       build({ horizontal: true, series: [{ name: 'sales' }] }).series[0].label

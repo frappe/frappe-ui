@@ -11,10 +11,11 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ### A series can carry its own number `format`
 
-`SeriesStyle.format` prints one series' values in the tooltip, for a series
-whose unit differs from the others on its axis, like a margin in percent beside
-revenue in currency. Without it, a series reads in its axis' `format`, as
-before. The axis ticks keep the axis' `format`.
+`SeriesStyle.format` prints one series' values in the tooltip and its data
+labels, for a series whose unit differs from the others on its axis, like a
+margin in percent beside revenue in currency. Without it, the tooltip reads in
+the axis' `format` and a label prints a compact number, as before. The axis
+ticks keep the axis' `format`.
 
 ### `SidebarItem` attributes land on the link or the button (breaking, silent)
 
