@@ -7,7 +7,7 @@
 ```bash
 npm uninstall tailwindcss @tailwindcss/vite
 npm install -D tailwindcss@^3.4 postcss autoprefixer vite@^7 @vitejs/plugin-vue@^6
-npm install frappe-ui@beta vue-router@^4
+npm install frappe-ui@rc vue-router@^4
 ```
 
 - **Tailwind v3.** frappe-ui ships a Tailwind v3 preset (`darkMode`, `theme`, `plugins`, `safelist`). Tailwind v4 ignores that shape and the design tokens never load.
