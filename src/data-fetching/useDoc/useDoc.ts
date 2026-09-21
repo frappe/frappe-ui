@@ -13,6 +13,7 @@ import { useCall } from '../useCall/useCall'
 import { useIsolatedCall } from '../useIsolatedCall'
 import { UseCallOptions } from '../useCall/types'
 import { docStore } from '../docStore'
+import { unrefObject } from '../utils'
 import { listStore } from '../useList/listStore'
 
 // Transform method signatures into useCall return type
@@ -208,8 +209,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   //
   // The revert is guarded by identity, not by value. Every publish stores a
   // new doc object, so if the store no longer holds the object this submit
-  // wrote, a response, fetch or realtime update has replaced it and there is
-  // nothing to revert, whatever values it holds.
+  // wrote, a response or fetch has replaced it and there is nothing to revert,
+  // whatever values it holds. A list reload does not go through `docStore`,
+  // so each row field is guarded on its own value too (`listStore.revertRow`).
   //
   // The casts only resolve `submit`'s conditional type, which TypeScript
   // cannot evaluate while `TDoc` is still generic.
@@ -226,7 +228,10 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   }
   setValue.submit = optimisticSubmit as typeof setValue.submit
 
-  function writeOptimistic(values: Partial<TDoc>) {
+  function writeOptimistic(submitted: Partial<TDoc>) {
+    // Unwrapped the way `useIsolatedCall` sends them, so a Ref value does not
+    // land in the doc or the row.
+    const values = unrefObject(submitted as Parameters<typeof unrefObject>[0])
     const nameStr = toValue(name)?.trim()
     if (!nameStr) return null
     const getStored = () =>
@@ -252,7 +257,7 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
       // The whole chain reverts: with this object still stored, no response
       // for an older write in it has landed either.
       docStore.setDoc({ ...current, ...base }, LOCAL_WRITE)
-      listStore.updateRow(doctype, { ...base, name: docName }, LOCAL_WRITE)
+      listStore.revertRow(doctype, { ...base, name: docName }, current)
     }
   }
 

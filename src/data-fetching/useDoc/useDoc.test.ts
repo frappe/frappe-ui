@@ -506,7 +506,7 @@ describe('useDoc setValue is optimistic', () => {
       immediate: false,
     })
     const rowEmail = () => list.data?.find((row) => row.name === 'user1')?.email
-    return { user, rowEmail }
+    return { user, list, rowEmail }
   }
 
   it('shows the submitted values at once, then the server answer', async () => {
@@ -602,4 +602,23 @@ describe('useDoc setValue is optimistic', () => {
     expect(user.doc!.email).toBe('same@example.com')
     expect(rowEmail()).toBe('same@example.com')
   })
+
+  it('does not revert a list row that was refetched', async () => {
+    const { user, list, rowEmail } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    server.use(
+      http.get(url('/api/v2/document/User'), () =>
+        HttpResponse.json({
+          data: [{ name: 'user1', email: 'listed@example.com' }],
+        }),
+      ),
+    )
+    await list.reload()
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('listed@example.com')
+  })
+
 })
