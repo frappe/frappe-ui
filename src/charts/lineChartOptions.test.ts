@@ -150,6 +150,19 @@ describe('line chart option series', () => {
     ).toBe(true)
   })
 
+  it('keeps the symbols that carry data labels, drawn at no size', () => {
+    const labelled = build({
+      series: [{ name: 'sales', showDataLabels: true }],
+    }).series[0]
+    expect(labelled.showSymbol).toBe(true)
+    expect(labelled.symbolSize).toBe(0)
+
+    const both = build({
+      series: [{ name: 'sales', showDataLabels: true, showDataPoints: true }],
+    }).series[0]
+    expect(both.symbolSize).toBeGreaterThan(0)
+  })
+
   it('draws straight segments unless smoothing is asked for', () => {
     expect(build().series[0].smooth).toBe(false)
     expect(

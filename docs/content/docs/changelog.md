@@ -17,6 +17,13 @@ margin in percent beside revenue in currency. Without it, the tooltip reads in
 the axis' `format` and a label prints a compact number, as before. The axis
 ticks keep the axis' `format`.
 
+### Line and area data labels show without data points
+
+A line or area series with `showDataLabels` and no `showDataPoints` drew no
+labels, because echarts hangs a line's labels on its point symbols. The labels
+now show, with the points drawn at no size. This also reaches a combo chart's
+line series when `showDataLabels` is set on the chart.
+
 ### `SidebarItem` attributes land on the link or the button (breaking, silent)
 
 A `SidebarItem` is a row container holding the link or the button, with the

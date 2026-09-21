@@ -495,6 +495,9 @@ function buildLineSeries(
 ) {
   const { series, mark } = entry
   const { rows, color, tokens, yAxisIndex, banded } = ctx
+  // echarts draws a line's labels on its symbols, so labels alone keep the
+  // symbols but shrink them away. `symbol: 'none'` would drop the labels too.
+  const labelsOnly = Boolean(series.showDataLabels && !series.showDataPoints)
 
   const data = rows.map((row, index) => [
     ctx.xValue(row),
@@ -511,9 +514,9 @@ function buildLineSeries(
     // Nulls read as gaps: bridging them invents data that was never measured.
     connectNulls: Boolean(series.connectNulls),
     smooth: Boolean(series.smooth),
-    showSymbol: Boolean(series.showDataPoints),
+    showSymbol: Boolean(series.showDataPoints || series.showDataLabels),
     symbol: 'circle',
-    symbolSize: SYMBOL_SIZE,
+    symbolSize: labelsOnly ? 0 : SYMBOL_SIZE,
     itemStyle: { color },
     lineStyle: {
       color,
