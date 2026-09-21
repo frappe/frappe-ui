@@ -79,9 +79,11 @@ describe('normalizeAxisChartProps', () => {
       horizontal: true,
     }
     const line: AxisChartConfig = {
-      ...normalize({ seriesConfig: { sales: { smooth: true } } }).config,
+      ...normalize({
+        connectNulls: true,
+        seriesConfig: { sales: { smooth: true } },
+      }).config,
       type: 'line',
-      connectNulls: true,
     }
     expect([bar.series.length, line.series.length]).toEqual([2, 2])
   })
@@ -168,6 +170,50 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
       true,
       false,
     ])
+  })
+})
+
+// The five keys a chart sets for every series at once. With `splitBy` the
+// names come from the data, so this is the only way to reach all of them.
+describe.each([
+  ['showDataLabels'],
+  ['smooth'],
+  ['showDataPoints'],
+  ['dashed'],
+  ['connectNulls'],
+] as const)('normalizeAxisChartProps: chart-level %s', (key) => {
+  const looks = (props: Partial<AxisChartProps>) =>
+    normalize(props).config.series.map((series) => series[key])
+
+  it('is every series default', () => {
+    expect(looks({ [key]: true })).toEqual([true, true])
+  })
+
+  it('is overridden off by a seriesConfig entry', () => {
+    expect(
+      looks({ [key]: true, seriesConfig: { refunds: { [key]: false } } }),
+    ).toEqual([true, false])
+  })
+
+  it('is overridden on by a seriesConfig entry', () => {
+    expect(looks({ seriesConfig: { refunds: { [key]: true } } })).toEqual([
+      undefined,
+      true,
+    ])
+  })
+
+  it('leaves the key off every series when the chart names neither', () => {
+    expect(looks({})).toEqual([undefined, undefined])
+  })
+
+  it('reaches a series splitBy named, which no seriesConfig key could', () => {
+    const { config } = normalize({
+      data: longRows,
+      y: 'amount',
+      splitBy: 'region',
+      [key]: true,
+    })
+    expect(config.series.map((series) => series[key])).toEqual([true, true])
   })
 })
 

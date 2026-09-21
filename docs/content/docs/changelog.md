@@ -1327,6 +1327,12 @@ Settled after the audit, on the same footing:
   keyed by. TypeScript reports the removed prop, but a plain template passes it
   through as an attribute and draws every row as one series — grep for `series=`
   and `:series=` on the charts after upgrading.
+- The axis charts take `smooth`, `showDataPoints` and `dashed` at the chart
+  level, beside `showDataLabels` and `connectNulls`, and `connectNulls` joins
+  the four in `seriesConfig`. One rule for all five: the chart-level value is
+  every series' default, and a `seriesConfig` entry overrides it for one series,
+  on or off. With `splitBy` the series are named by the data, so a chart-level
+  value is the only way to reach all of them.
 
 `useChart`, `registerChartModules` and their three types stay on
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and

@@ -4726,6 +4726,26 @@ through as an attribute and the chart draws one series over every row.
 `ScatterChart` renames the same prop. Grep for `series=` and `:series=`, and for
 `series:` in a saved chart object.
 
+### Chart-level looks default every series
+
+`showDataLabels` was already a chart prop that a `seriesConfig` entry could
+override. `smooth`, `showDataPoints` and `dashed` now work the same way, and
+`connectNulls` — a chart prop already — joins the four in `seriesConfig`.
+Nothing that ran before draws differently; the chart-level keys are additive.
+
+```vue
+<!-- Before: one entry per series, and no way to reach a splitBy series -->
+<LineChart
+  :data="rows"
+  x="month"
+  :y="['plan', 'actual']"
+  :series-config="{ plan: { smooth: true }, actual: { smooth: true } }"
+/>
+
+<!-- After -->
+<LineChart :data="rows" x="month" :y="['plan', 'actual']" smooth />
+```
+
 ### The loud ones
 
 The build or the type-check reports the rest.

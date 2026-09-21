@@ -4,9 +4,14 @@ Lines for a measure that moves over time.
 
 ## Trends
 
-Two series on a time axis, one dashed as the comparison. `dashed`, `smooth` and
-`showDataPoints` are per-series settings in `seriesConfig`. `dashed` breaks the
+Two series on a time axis, one dashed as the comparison. `dashed` breaks the
 line for a projection or a comparison that was not measured like the rest.
+
+`dashed`, `smooth`, `showDataPoints`, `connectNulls` and `showDataLabels` are
+chart props and `seriesConfig` keys both. The chart-level value is every
+series' default and a `seriesConfig` entry overrides it for one series, on or
+off. That is the only way to reach every series of a `splitBy` chart, whose
+series are named by the data rather than by the caller.
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
@@ -111,7 +116,8 @@ list yourself. It is described under
 ## Gaps
 
 Null readings break the line, because a gap in the data should read as a gap.
-`connectNulls` bridges them instead.
+`connectNulls` bridges them instead, on every series or on one through
+`seriesConfig`.
 
 <ComponentPreview name="Charts-LineGaps" csr="true" self-layout />
 

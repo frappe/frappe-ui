@@ -100,6 +100,11 @@ export type AxisChartSeriesConfig = {
   showDataPoints?: boolean
   /** Rounds the corners of the line instead of drawing straight segments. */
   smooth?: boolean
+  /**
+   * Bridges gaps left by null or non-numeric values. Off by default: a break in
+   * the line is how missing data should read. Line and area series only.
+   */
+  connectNulls?: boolean
   echartOptions?: EchartOptionsOverride
 }
 
@@ -195,11 +200,6 @@ export type AxisChartConfig = AxisChartBaseConfig & {
   stacked?: boolean | 'normalized'
   /** Bars run left-to-right; the category axis moves to Y. Bars only. */
   horizontal?: boolean
-  /**
-   * Bridges gaps left by null or non-numeric values. Off by default: a break in
-   * the line is how missing data should read. Line and area series only.
-   */
-  connectNulls?: boolean
 }
 
 export type DonutChartConfig = {
@@ -707,6 +707,10 @@ export type ChartValueAxisOptions = {
  * defaults. One style covers every mark, so a series keeps its label and color
  * when `type` changes, and the keys the mark it draws as does not read are
  * ignored rather than dropped.
+ *
+ * `showDataLabels`, `smooth`, `showDataPoints`, `dashed` and `connectNulls` are
+ * chart-level props as well. The chart-level value is every series' default,
+ * and an entry here overrides it for one series, on or off.
  */
 export type SeriesStyle = {
   /** Display name. The `seriesConfig` key stays the identity. */
@@ -729,10 +733,7 @@ export type SeriesStyle = {
    * `y` order whatever axis each one sits on, so a series keeps its color.
    */
   axis?: 'y' | 'y2'
-  /**
-   * Prints this series' value beside each of its marks, overriding the chart's
-   * own `showDataLabels`.
-   */
+  /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -748,6 +749,8 @@ export type SeriesStyle = {
   showDataPoints?: boolean
   /** Line and area series. */
   smooth?: boolean
+  /** Bridges gaps left by nulls in this series. Line and area series. */
+  connectNulls?: boolean
   /** Escape hatch: deep-merged into this series' echarts option. */
   echartOptions?: EchartOptionsOverride
 }
@@ -795,6 +798,26 @@ export type AxisChartProps = ChartBaseProps & {
    */
   showDataLabels?: boolean
   /**
+   * Rounds the corners of every line instead of drawing straight segments. Line
+   * and area series. A `seriesConfig` entry overrides it for one series.
+   */
+  smooth?: boolean
+  /**
+   * Marks every datapoint with a dot, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  showDataPoints?: boolean
+  /**
+   * Breaks every series' line into a dash. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  dashed?: boolean
+  /**
+   * Bridges gaps left by nulls, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  connectNulls?: boolean
+  /**
    * Series the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app, or to keep what a
    * reader hid across a reload. Left unbound, the legend owns it.
@@ -821,8 +844,6 @@ export type AxisChartProps = ChartBaseProps & {
    * instead of its own magnitude, and pins that value axis to 0-100.
    */
   stacked?: boolean | 'normalized'
-  /** Bridges gaps left by nulls. Line and area series. */
-  connectNulls?: boolean
   /**
    * Targets, thresholds and other fixed marks drawn over the plot. They are
    * annotations, not series: no legend entry, and no way to switch one off.

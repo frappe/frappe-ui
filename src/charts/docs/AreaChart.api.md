@@ -78,6 +78,30 @@
     type: 'boolean'
   },
   {
+    name: 'smooth',
+    description: 'Rounds the corners of every line instead of drawing straight segments. Line\nand area series. A `seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'showDataPoints',
+    description: 'Marks every datapoint with a dot, on every series. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'dashed',
+    description: 'Breaks every series\' line into a dash. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
+    name: 'connectNulls',
+    description: 'Bridges gaps left by nulls, on every series. Line and area series. A\n`seriesConfig` entry overrides it for one series.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'hiddenSeries',
     description: 'Series the legend has switched off, by name. Bind it with\n`v-model:hiddenSeries` to drive the legend from the app, or to keep what a\nreader hid across a reload. Left unbound, the legend owns it.',
     required: false,
@@ -119,12 +143,6 @@
     description: 'Series sum on top of each other. Bar and area series; a line never stacks.\n`\'normalized\'` reads each value as its share of the stack it sits in\ninstead of its own magnitude, and pins that value axis to 0-100.',
     required: false,
     type: 'boolean | "normalized"'
-  },
-  {
-    name: 'connectNulls',
-    description: 'Bridges gaps left by nulls. Line and area series.',
-    required: false,
-    type: 'boolean'
   },
   {
     name: 'referenceLines',

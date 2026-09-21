@@ -7,6 +7,7 @@ import type {
   ChartValueAxisOptions,
   ChartValueFormatter,
   ChartYAxisConfig,
+  SeriesStyle,
 } from './types'
 import { toNumber } from './axisChartCommon'
 import { formatLabel } from './format'
@@ -130,6 +131,19 @@ export function seriesLabel(series: AxisChartSeriesConfig) {
 }
 
 /**
+ * The look keys a chart sets for every series at once. With `splitBy` the
+ * series names come from the data, so a chart-level default is the only way to
+ * reach all of them.
+ */
+const LOOK_KEYS = [
+  'showDataLabels',
+  'smooth',
+  'showDataPoints',
+  'dashed',
+  'connectNulls',
+] as const
+
+/**
  * One series, i.e. one column of wide data or one value of `splitBy`.
  * The style is spread whole, `axis` included: which scale a series is measured
  * against is per-series meaning, and it lives where the rest of that meaning
@@ -148,10 +162,26 @@ function buildSeries(
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.
     ...(name === OTHERS_KEY ? { label: OTHERS_LABEL } : {}),
-    showDataLabels: props.showDataLabels,
     ...style,
+    ...seriesLook(props, style),
     name,
   }
+}
+
+/**
+ * Each look key as the series draws it: its own value, else the chart's. The
+ * one place the chart-level default is resolved, so nothing downstream reads
+ * two sources for one key.
+ */
+function seriesLook(props: AxisChartProps, style?: SeriesStyle) {
+  const look: Pick<SeriesStyle, (typeof LOOK_KEYS)[number]> = {}
+  for (const key of LOOK_KEYS) {
+    const value = style?.[key] ?? props[key]
+    // An unset key stays absent rather than arriving as `undefined`, so a
+    // series still equals the plain object it would have been without one.
+    if (value !== undefined) look[key] = value
+  }
+  return look
 }
 
 function toColumns(value?: string | string[]): string[] {

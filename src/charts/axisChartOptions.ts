@@ -508,7 +508,7 @@ function buildLineSeries(
     z: MARK_Z[mark],
     stack: entry.stack,
     // Nulls read as gaps: bridging them invents data that was never measured.
-    connectNulls: Boolean(config.connectNulls),
+    connectNulls: Boolean(series.connectNulls),
     smooth: Boolean(series.smooth),
     showSymbol: Boolean(series.showDataPoints),
     symbol: 'circle',
