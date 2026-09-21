@@ -189,6 +189,65 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     },
   })
 
+  // Optimistic, like the legacy `createDocumentResource`: the submitted values
+  // land in the stores at once, and the response replaces them through
+  // `onStoreWrite`. A failed submit reverts them.
+  //
+  // The optimistic write and the revert are `LOCAL_WRITE`: neither records a
+  // sequence in the gate. Recording would gate out an older save still in
+  // flight, and if this submit then fails, the stores would end on a value the
+  // server does not hold. The cost: an older response that settles first shows
+  // its value until this one lands.
+  //
+  // The revert is per field. It restores only a field that still holds the
+  // submitted value, so it does not undo a newer submit, fetch or realtime
+  // update that landed in the meantime.
+  //
+  // The casts only resolve `submit`'s conditional type, which TypeScript
+  // cannot evaluate while `TDoc` is still generic.
+  type SetValueSubmit = (values?: Partial<TDoc>) => Promise<TDoc | null>
+  const submitSetValue = setValue.submit as SetValueSubmit
+  const optimisticSubmit: SetValueSubmit = async (values) => {
+    const revert = values ? writeOptimistic(values) : null
+    try {
+      return await submitSetValue(values)
+    } catch (e) {
+      revert?.()
+      throw e
+    }
+  }
+  setValue.submit = optimisticSubmit as typeof setValue.submit
+
+  function writeOptimistic(submitted: Partial<TDoc>) {
+    // A copy: a caller may keep editing the object it submitted (a reactive
+    // form), and the revert compares against what was sent.
+    const values = { ...submitted }
+    const nameStr = toValue(name)?.trim()
+    if (!nameStr) return null
+    const getStored = () =>
+      docStore.getDoc(doctype, nameStr, { staleOnError }).value
+    const previous = getStored()
+    // Nothing loaded to merge into. The response still lands as before.
+    if (!previous) return null
+    const docName = previous.name
+    docStore.setDoc({ ...previous, ...values, name: docName }, LOCAL_WRITE)
+    listStore.updateRow(doctype, { ...values, name: docName }, LOCAL_WRITE)
+
+    return () => {
+      const current = getStored()
+      if (!current) return
+      const reverted: Record<string, unknown> = {}
+      for (const key in values) {
+        if (key !== 'name' && current[key] === values[key]) {
+          reverted[key] = previous[key]
+        }
+      }
+      if (Object.keys(reverted).length === 0) return
+      docStore.setDoc({ ...current, ...reverted }, LOCAL_WRITE)
+      listStore.updateRow(doctype, { ...reverted, name: docName }, LOCAL_WRITE)
+    }
+  }
+
   type DeleteResponse = 'ok'
   const delete_ = useIsolatedCall<DeleteResponse>({
     url: computed(() => `/api/v2/document/${doctype}/${toValue(name)}`),

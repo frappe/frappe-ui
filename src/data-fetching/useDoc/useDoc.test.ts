@@ -2,8 +2,10 @@
  * @vitest-environment node
  */
 import { ref } from 'vue'
-import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
-import { useCall, useDoc } from '../index'
+import { delay, http, HttpResponse } from 'msw'
+import { server } from '../../mocks/node'
+import { baseUrl, url, waitUntilValueChanges } from '../../mocks/utils'
+import { useCall, useDoc, useList } from '../index'
 import { docStore } from '../docStore'
 import { LOCAL_WRITE } from '../writeGate'
 
@@ -464,5 +466,101 @@ describe('useDoc concurrency', () => {
     expect(quick).toMatchObject({ method: 'run', tag: 'quick-second' })
     expect(user.run.error).toBe(null)
     expect(user.run.loading).toBe(false)
+  })
+})
+
+// `setValue` writes the submitted values into the stores before the request
+// goes out, like the legacy `createDocumentResource`. The response replaces
+// them; a failure reverts them, but never over a write that landed since.
+describe('useDoc setValue is optimistic', () => {
+  interface User {
+    name: string
+    email: string
+  }
+
+  async function setup() {
+    await docStore.setDoc(
+      { doctype: 'User', name: 'user1', email: 'old@example.com' },
+      LOCAL_WRITE,
+    )
+    server.use(
+      http.get(url('/api/v2/document/User'), () =>
+        HttpResponse.json({
+          data: [{ name: 'user1', email: 'old@example.com' }],
+        }),
+      ),
+    )
+    const list = useList<User>({
+      doctype: 'User',
+      baseUrl,
+      immediate: false,
+      refetch: false,
+    })
+    await list.reload()
+    server.resetHandlers()
+
+    const user = useDoc<User>({
+      doctype: 'User',
+      name: 'user1',
+      baseUrl,
+      immediate: false,
+    })
+    const rowEmail = () => list.data?.find((row) => row.name === 'user1')?.email
+    return { user, rowEmail }
+  }
+
+  it('shows the submitted values at once, then the server answer', async () => {
+    const { user, rowEmail } = await setup()
+    server.use(
+      http.put(url('/api/v2/document/User/user1'), async () => {
+        await delay(20)
+        return HttpResponse.json({
+          data: { name: 'user1', email: 'saved@example.com' },
+        })
+      }),
+    )
+
+    const save = user.setValue.submit({ email: 'typed@example.com' })
+    expect(user.doc!.email).toBe('typed@example.com')
+    expect(rowEmail()).toBe('typed@example.com')
+
+    await save
+    expect(user.doc!.email).toBe('saved@example.com')
+    expect(rowEmail()).toBe('saved@example.com')
+  })
+
+  it('reverts a failed submit', async () => {
+    const { user, rowEmail } = await setup()
+
+    const save = user.setValue.submit({ email: 'quickfail' })
+    expect(user.doc!.email).toBe('quickfail')
+
+    await expect(save).rejects.toThrow('setValue user1 failed')
+    expect(user.doc!.email).toBe('old@example.com')
+    expect(rowEmail()).toBe('old@example.com')
+  })
+
+  it('does not revert over a later submit', async () => {
+    const { user, rowEmail } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    const later = user.setValue.submit({ email: 'new@example.com' })
+    await later
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('new@example.com')
+    expect(rowEmail()).toBe('new@example.com')
+  })
+
+  it('does not revert over a fetch that landed', async () => {
+    const { user } = await setup()
+
+    const failed = user.setValue.submit({ email: 'slow-fail' })
+    // The default handler answers with the server's copy at once.
+    await user.reload()
+    expect(user.doc!.email).toBe('user1@example.com')
+    await expect(failed).rejects.toThrow('setValue user1 failed')
+
+    expect(user.doc!.email).toBe('user1@example.com')
   })
 })
