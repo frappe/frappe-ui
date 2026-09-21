@@ -171,14 +171,10 @@ export function useList<T extends { name: string }>(
   ) => {
     const row = allData.value?.find((row) => row.name === doc.name)
     if (!row) return
-    const fields = row as Record<string, unknown>
     const reverted: Record<string, unknown> = { name: doc.name }
     for (const key in doc) {
-      if (fields[key] !== expected[key]) continue
-      // The doc did not have this field. `updateRow` skips `undefined`, so the
-      // key is removed here; `row` is reactive, so readers see the delete.
-      if (doc[key] === undefined) delete fields[key]
-      else reverted[key] = doc[key]
+      const value = (row as Record<string, unknown>)[key]
+      if (value === expected[key]) reverted[key] = doc[key]
     }
     updateRow(reverted)
   }

@@ -249,7 +249,15 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
     docStore.setDoc({ ...stored, ...values, name: docName }, LOCAL_WRITE)
     const written = getStored()
     if (written) baseValues.set(written, base)
-    listStore.updateRow(doctype, { ...values, name: docName }, LOCAL_WRITE)
+    // Rows get only fields the confirmed doc has. A row may hold a field the
+    // doc lacks (a partial doc), and the base has no value to revert it to.
+    const rowValues: { name: string } & Record<string, unknown> = {
+      name: docName,
+    }
+    for (const field in values) {
+      if (base[field] !== undefined) rowValues[field] = values[field]
+    }
+    listStore.updateRow(doctype, rowValues, LOCAL_WRITE)
 
     return () => {
       const current = getStored()

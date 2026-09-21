@@ -621,18 +621,18 @@ describe('useDoc setValue is optimistic', () => {
     expect(rowEmail()).toBe('listed@example.com')
   })
 
-
-  it('removes a field from the row when the doc did not have it', async () => {
+  it('keeps a row field the doc did not have', async () => {
     const { user, rowEmail } = await setup()
     // A partial doc, as the `docs` side channel can publish.
     await docStore.setDoc({ doctype: 'User', name: 'user1' }, LOCAL_WRITE)
 
-    await expect(user.setValue.submit({ email: 'quickfail' })).rejects.toThrow(
-      'setValue user1 failed',
-    )
+    const save = user.setValue.submit({ email: 'quickfail' })
+    expect(user.doc!.email).toBe('quickfail')
+    // The doc has no value to revert the row to, so the row is not touched.
+    expect(rowEmail()).toBe('old@example.com')
+    await expect(save).rejects.toThrow('setValue user1 failed')
 
     expect(user.doc!.email).toBe(undefined)
-    expect(rowEmail()).toBe(undefined)
+    expect(rowEmail()).toBe('old@example.com')
   })
-
 })
