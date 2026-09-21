@@ -39,7 +39,7 @@ Which scale a series is read against is per-series meaning, so it sits in the
 same entry as that series' label and mark. It is not a second column list: `y`
 names every series once, in the order they are drawn and colored, and moving one
 across to the second axis leaves it where it was. Long data reaches the axis the
-same way, keyed by a value of the `series` column.
+same way, keyed by a value of the `splitBy` column.
 
 ## Filling one series
 

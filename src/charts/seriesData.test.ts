@@ -133,7 +133,7 @@ describe('normalizeAxisChartProps: seriesConfig', () => {
     const { config } = normalize({
       data: longRows,
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       seriesConfig: { West: { label: 'Westside', smooth: true } },
     })
     expect(config.series[1]).toEqual({
@@ -228,7 +228,7 @@ describe('normalizeAxisChartProps: the second value axis', () => {
     const { config } = normalize({
       data: longRows,
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       seriesConfig: { West: { axis: 'y2' } },
     })
     expect(config.series).toEqual([
@@ -239,11 +239,11 @@ describe('normalizeAxisChartProps: the second value axis', () => {
 })
 
 describe('normalizeAxisChartProps: long data', () => {
-  it('pivots rows to wide, one series per value of the grouping column', () => {
+  it('pivots rows to wide, one series per value of splitBy', () => {
     const { config } = normalize({
       data: longRows,
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
     })
     expect(namesOf(config)).toEqual(['East', 'West'])
     expect(config.data).toEqual([
@@ -256,7 +256,7 @@ describe('normalizeAxisChartProps: long data', () => {
     const { config } = normalize({
       data: longRows,
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
     })
     expect(config.data[1].West).toBeNull()
   })
@@ -269,7 +269,7 @@ describe('normalizeAxisChartProps: long data', () => {
         { month: 'Mar', region: 'East', amount: 3 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
     })
     expect(config.data.map((row) => row.month)).toEqual(['Mar', 'Jan'])
     expect(namesOf(config)).toEqual(['West', 'East'])
@@ -282,17 +282,17 @@ describe('normalizeAxisChartProps: long data', () => {
         { month: 'Jan', region: 'East', amount: 99 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
     })
     expect(config.data).toEqual([{ month: 'Jan', East: 99 }])
   })
 
-  it('warns and reads the first y column when series meets a y list', () => {
+  it('warns and reads the first y column when splitBy meets a y list', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { config } = normalize({
       data: longRows,
       y: ['amount', 'other'],
-      series: 'region',
+      splitBy: 'region',
     })
     expect(warn).toHaveBeenCalledOnce()
     expect(warn.mock.calls[0][0]).toContain('amount')
@@ -301,7 +301,7 @@ describe('normalizeAxisChartProps: long data', () => {
 
   it('does not warn for a single y column', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    normalize({ data: longRows, y: 'amount', series: 'region' })
+    normalize({ data: longRows, y: 'amount', splitBy: 'region' })
     expect(warn).not.toHaveBeenCalled()
   })
 })
@@ -316,7 +316,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
   ]
 
   const grouped = (props: Partial<AxisChartProps> = {}) =>
-    normalize({ data: regions, y: 'amount', series: 'region', ...props })
+    normalize({ data: regions, y: 'amount', splitBy: 'region', ...props })
 
   it('leaves the series alone when nothing is capped', () => {
     expect(namesOf(grouped().config)).toEqual([
@@ -371,7 +371,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Jan', region: 'North', amount: 5 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 2,
     })
     expect(namesOf(config)).toEqual(['Others', '__others__'])
@@ -386,7 +386,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Jan', region: 'Mid', amount: 40 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 2,
     })
     expect(namesOf(config)).toEqual(['Huge', '__others__'])
@@ -403,7 +403,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Feb', region: 'Small', amount: 1 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 2,
     })
     expect(namesOf(config)).toEqual(['Steady', '__others__'])
@@ -419,7 +419,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Jan', region: 'Fees', amount: 3 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 2,
     })
     expect(namesOf(config)).toEqual(['Sales', '__others__'])
@@ -436,7 +436,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Jan', region: 'Mid', amount: 50 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 3,
     })
     expect(namesOf(config)).toEqual(['Big', 'Mid', '__others__'])
@@ -451,7 +451,7 @@ describe('normalizeAxisChartProps: maxSeries', () => {
         { month: 'Feb', region: 'East', amount: 20 },
       ],
       y: 'amount',
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 2,
     })
     expect(config.data).toEqual([

@@ -116,8 +116,8 @@ export function buildScatterSeries(
 const BLANK_GROUP = '(Blank)'
 
 function seriesName(config: ScatterChartConfig, row: Record<string, any>) {
-  if (!config.seriesColumn) return config.yColumn
-  const value = row[config.seriesColumn]
+  if (!config.splitByColumn) return config.yColumn
+  const value = row[config.splitByColumn]
   return value === null || value === undefined || value === ''
     ? BLANK_GROUP
     : String(value)

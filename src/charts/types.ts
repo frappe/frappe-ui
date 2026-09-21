@@ -511,8 +511,8 @@ export type ScatterChartConfig = {
   yColumn: string
   /** Row key holding the magnitude each point is sized by. */
   sizeColumn?: string
-  /** Grouping column: one series per distinct value. */
-  seriesColumn?: string
+  /** Splits the points into one series per distinct value. */
+  splitByColumn?: string
   /** Row key holding the point's own name, which heads its tooltip. */
   labelColumn?: string
   /** Prints the point's own name beside it. Needs `labelColumn` to have one. */
@@ -550,7 +550,7 @@ export type ScatterPoint = {
   row: Record<string, any>
 }
 
-/** One group of points, i.e. one value of the grouping column. */
+/** One group of points, i.e. one value of `splitBy`. */
 export type ScatterSeries = {
   /** The grouping value as it reads, or the y column when nothing groups. Unique. */
   name: string
@@ -775,16 +775,19 @@ export type AxisChartProps = ChartBaseProps & {
    * the second value axis without moving it in the list.
    */
   y: string | string[]
-  /** Grouping column, i.e. long data. Use with a single `y`. */
-  series?: string
   /**
-   * Caps how many series the `series` column produces. The rest are summed
+   * Splits `y` into one series per distinct value, i.e. long data. Use with a
+   * single `y`.
+   */
+  splitBy?: string
+  /**
+   * Caps how many series `splitBy` produces. The rest are summed
    * into a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can
    * style it. Uncapped by default, and ignored when `y` names the columns:
    * those the caller chose one by one.
    */
   maxSeries?: number
-  /** Keyed by series identity: a `y` column, or a value of the `series` column. */
+  /** Keyed by series identity: a `y` column, or a value of the `splitBy` column. */
   seriesConfig?: Record<string, SeriesStyle>
   /**
    * Prints every series' value beside its marks. A `seriesConfig` entry
@@ -955,8 +958,8 @@ export type ScatterChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude each point is sized by. */
   size?: string
-  /** Grouping column: one series per distinct value. */
-  series?: string
+  /** Splits the points into one series per distinct value. */
+  splitBy?: string
   /**
    * Groups the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the

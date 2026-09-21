@@ -40,8 +40,8 @@ export type NormalizedAxisChart = {
 
 /**
  * Flat props to the shape the option builders read: the series list, and wide
- * data for them to index into. Long data (`series` naming a grouping column) is
- * pivoted here, which is what keeps the builders unaware of the two layouts.
+ * data for them to index into. Long data (`splitBy` naming the column to split
+ * on) is pivoted here, which is what keeps the builders unaware of the two layouts.
  */
 export function normalizeAxisChartProps(
   props: AxisChartProps,
@@ -49,15 +49,15 @@ export function normalizeAxisChartProps(
   const rows = props.data ?? []
   const yColumns = toColumns(props.y)
 
-  if (import.meta.env.DEV && props.series && yColumns.length > 1) {
+  if (import.meta.env.DEV && props.splitBy && yColumns.length > 1) {
     console.warn(
-      `[frappe-ui] \`series="${props.series}"\` reads long data, which has one value column. Reading \`y\` as "${yColumns[0]}" and ignoring the rest.`,
+      `[frappe-ui] \`splitBy="${props.splitBy}"\` reads long data, which has one value column. Reading \`y\` as "${yColumns[0]}" and ignoring the rest.`,
     )
   }
 
-  if (import.meta.env.DEV && props.maxSeries !== undefined && !props.series) {
+  if (import.meta.env.DEV && props.maxSeries !== undefined && !props.splitBy) {
     console.warn(
-      `[frappe-ui] \`maxSeries\` caps the series a \`series\` column produces. \`y\` names its columns one by one, so nothing is capped.`,
+      `[frappe-ui] \`maxSeries\` caps the series \`splitBy\` produces. \`y\` names its columns one by one, so nothing is capped.`,
     )
   }
 
@@ -66,13 +66,13 @@ export function normalizeAxisChartProps(
     label: column.label ?? formatLabel(column.name),
   }))
 
-  const { data, names } = props.series
+  const { data, names } = props.splitBy
     ? capSeries(
         pivot(
           rows,
           props.x,
           yColumns[0],
-          props.series,
+          props.splitBy,
           tooltipColumns.map((column) => column.name),
         ),
         props.maxSeries,
@@ -82,14 +82,14 @@ export function normalizeAxisChartProps(
   // A pivoted row holds one value per key, so a group value equal to a tooltip
   // column's name lands on the same key and the plotted measure wins. Keeping
   // the column would print the measure under the column's label.
-  const clobbered = props.series
+  const clobbered = props.splitBy
     ? tooltipColumns.filter((column) => names.includes(column.name))
     : []
 
   if (import.meta.env.DEV && clobbered.length) {
     const named = clobbered.map((column) => `"${column.name}"`).join(', ')
     console.warn(
-      `[frappe-ui] \`series="${props.series}"\` produces a series named ${named}, which \`tooltipColumns\` also names. The series keeps the key and the column is dropped. Rename the column, or change the values in "${props.series}".`,
+      `[frappe-ui] \`splitBy="${props.splitBy}"\` produces a series named ${named}, which \`tooltipColumns\` also names. The series keeps the key and the column is dropped. Rename the column, or change the values in "${props.splitBy}".`,
     )
   }
 
@@ -130,7 +130,7 @@ export function seriesLabel(series: AxisChartSeriesConfig) {
 }
 
 /**
- * One series, i.e. one column of wide data or one value of the grouping column.
+ * One series, i.e. one column of wide data or one value of `splitBy`.
  * The style is spread whole, `axis` included: which scale a series is measured
  * against is per-series meaning, and it lives where the rest of that meaning
  * does. Nothing here reads the axis, so a series never leaves the place `y` put
@@ -160,9 +160,9 @@ function toColumns(value?: string | string[]): string[] {
 }
 
 /**
- * Long rows to wide: one row per x value, one column per value of the grouping
- * column. Both orders follow first appearance in the data, so the caller's sort
- * survives. Duplicate (x, series) pairs are last-write-wins.
+ * Long rows to wide: one row per x value, one column per value of `splitBy`.
+ * Both orders follow first appearance in the data, so the caller's sort
+ * survives. Duplicate (x, splitBy) pairs are last-write-wins.
  *
  * `carry` names columns to copy across untouched. A tooltip column reads per
  * category, not per group, so the first row to reach a category decides its
@@ -172,7 +172,7 @@ function pivot(
   rows: Record<string, any>[],
   x: string,
   y: string,
-  series: string,
+  splitBy: string,
   carry: string[] = [],
 ) {
   const names: string[] = []
@@ -188,7 +188,7 @@ function pivot(
       for (const column of carry) wide[column] = row[column]
       byCategory.set(key, wide)
     }
-    const name = String(row[series])
+    const name = String(row[splitBy])
     if (!names.includes(name)) names.push(name)
     // Written after the carried columns, so a series named like one of them
     // keeps the plot's number rather than losing it to the tooltip's.

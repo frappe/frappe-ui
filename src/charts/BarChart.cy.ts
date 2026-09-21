@@ -283,7 +283,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
       })
       cy.get('[data-slot="chart-legend"] button')
@@ -297,7 +297,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 2,
         seriesConfig: { __others__: { label: 'Everywhere else' } },
       })
@@ -311,7 +311,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
         stacked: 'normalized',
       })

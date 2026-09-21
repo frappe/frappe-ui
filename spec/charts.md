@@ -23,7 +23,7 @@ release, and the current family covers everything the earlier one drew.
 ## The conventions
 
 1. **A prop says what the data means. It does not say what the renderer should
-   do.** `x`, `y`, `series`, `stacked`, and `horizontal` describe a reading of
+   do.** `x`, `y`, `splitBy`, `stacked`, and `horizontal` describe a reading of
    the data. `barGap: '-100%'` is an instruction to echarts. Instructions go
    through `echartOptions`.
 2. **The library owns the look. The caller owns the meaning.** Dotted gridlines,

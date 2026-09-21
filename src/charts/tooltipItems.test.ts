@@ -196,7 +196,7 @@ describe('what a tooltip-only column is kept out of', () => {
       ],
       x: 'month',
       y: 'conversion',
-      series: 'region',
+      splitBy: 'region',
       tooltipColumns: [{ name: 'orders' }],
     })
     expect(config.data.map((row) => row.orders)).toEqual([1840, 2100])
@@ -212,7 +212,7 @@ describe('what a tooltip-only column is kept out of', () => {
       ],
       x: 'month',
       y: 'conversion',
-      series: 'region',
+      splitBy: 'region',
       tooltipColumns: [{ name: 'orders' }],
     })
     expect(config.data).toHaveLength(1)
@@ -231,7 +231,7 @@ describe('what a tooltip-only column is kept out of', () => {
       ],
       x: 'month',
       y: 'sales',
-      series: 'region',
+      splitBy: 'region',
       tooltipColumns: [{ name: 'orders' }],
     })
     // The plot keeps the key: the series is what the reader can point at.
@@ -246,7 +246,7 @@ describe('what a tooltip-only column is kept out of', () => {
       data: [{ month: 'Jan', region: 'North', sales: 12, orders: 1840 }],
       x: 'month',
       y: 'sales',
-      series: 'region',
+      splitBy: 'region',
       tooltipColumns: [{ name: 'orders' }],
     })
     expect(tooltipColumns).toEqual([{ name: 'orders', label: 'Orders' }])

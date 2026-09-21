@@ -54,20 +54,20 @@
     type: 'string | string[]'
   },
   {
-    name: 'series',
-    description: 'Grouping column, i.e. long data. Use with a single `y`.',
+    name: 'splitBy',
+    description: 'Splits `y` into one series per distinct value, i.e. long data. Use with a\nsingle `y`.',
     required: false,
     type: 'string'
   },
   {
     name: 'maxSeries',
-    description: 'Caps how many series the `series` column produces. The rest are summed\ninto a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can\nstyle it. Uncapped by default, and ignored when `y` names the columns:\nthose the caller chose one by one.',
+    description: 'Caps how many series `splitBy` produces. The rest are summed\ninto a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can\nstyle it. Uncapped by default, and ignored when `y` names the columns:\nthose the caller chose one by one.',
     required: false,
     type: 'number'
   },
   {
     name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `series` column.',
+    description: 'Keyed by series identity: a `y` column, or a value of the `splitBy` column.',
     required: false,
     type: 'Record<string, SeriesStyle>'
   },

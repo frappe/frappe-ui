@@ -4707,6 +4707,25 @@ Grep for `FunnelChart` data that can carry a blank or negative value, and for
 `#empty` slots on bar, line and area, which now render for a `y` key no row
 carries.
 
+### The grouping column is `splitBy`
+
+`series` named the column that splits long data into one series per value. It is
+now `splitBy`, the word Insights already stores it under, and "series" is left
+to mean a drawn series — what `seriesConfig`, `hiddenSeries` and `maxSeries` are
+keyed by. A **silent break** in a plain template: Vue passes the unknown prop
+through as an attribute and the chart draws one series over every row.
+
+```vue
+<!-- Before -->
+<BarChart :data="rows" x="week" y="tickets" series="priority" stacked />
+
+<!-- After -->
+<BarChart :data="rows" x="week" y="tickets" split-by="priority" stacked />
+```
+
+`ScatterChart` renames the same prop. Grep for `series=` and `:series=`, and for
+`series:` in a saved chart object.
+
 ### The loud ones
 
 The build or the type-check reports the rest.

@@ -1319,6 +1319,15 @@ unless it says otherwise. The
 - `DonutChart` takes `v-model:hiddenSeries`, and `AxisChartEmits` and
   `ScatterChartEmits` declare `update:hiddenSeries`, which both already fired.
 
+Settled after the audit, on the same footing:
+
+- **Breaking:** the column that splits long data into series is `splitBy`, not
+  `series`, on the axis charts and on `ScatterChart`. "Series" now names a drawn
+  series only, which is what `seriesConfig`, `hiddenSeries` and `maxSeries` are
+  keyed by. TypeScript reports the removed prop, but a plain template passes it
+  through as an attribute and draws every row as one series — grep for `series=`
+  and `:series=` on the charts after upgrading.
+
 `useChart`, `registerChartModules` and their three types stay on
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and
 lifecycle; echarts owns the option and instance types it carries. The four

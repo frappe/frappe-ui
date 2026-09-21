@@ -49,7 +49,7 @@ const markets = [
       x="arpu"
       y="retention"
       size="seats"
-      series="region"
+      split-by="region"
       label="market"
       :x-axis="{ title: 'ARPU', format: (value: number) => `$${value}` }"
       :y-axis="{ title: 'Retention', format: (value: number) => `${value}%` }"
