@@ -13,9 +13,11 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 When the document is loaded, `setValue.submit(values)` writes `values` into
 `doc` and into matching `useList` rows before the request goes out, as
-`createDocumentResource` did. The response replaces them when it lands. A
-failed submit reverts them, unless a response or fetch has replaced them since.
-`submit()` still rejects on failure.
+`createDocumentResource` did. The response replaces them when it lands. On a
+failed submit, `doc` reverts unless a response or fetch has replaced the doc
+since; each list row field reverts unless the row no longer holds the
+optimistic value, e.g. after a list reload. `submit()` still rejects on
+failure.
 
 The optimistic value is also written to the IndexedDB cache. If the tab closes
 while the request is in flight, the cache can hold an unconfirmed value until

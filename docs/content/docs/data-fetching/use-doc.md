@@ -110,8 +110,10 @@ todo.reassign.submit({ allocated_to: 'jane@example.com' })
 - `setValue` — a [`useCall`](./use-call.md)-shaped member;
   `setValue.submit(values)` `PUT`s a partial update. When the document is
   loaded, `doc` and matching `useList` rows show `values` at once; the response
-  replaces them when it lands. It **rejects** when the update fails, and reverts
-  `values` unless a response or fetch has replaced them since.
+  replaces them when it lands. It **rejects** when the update fails. `doc`
+  reverts unless a response or fetch has replaced the doc since; each list row
+  field reverts unless the row no longer holds the optimistic value, e.g. after
+  a list reload.
 - `delete` — a `useCall`-shaped member; `delete.submit()` deletes the document
   and clears it from every `useDoc`/`useList` reading it. It **rejects** when
   the delete fails.
