@@ -95,6 +95,66 @@ describe('ChartContainer', () => {
         })
     })
 
+    it('sets the title suffix against the end of the title text', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        'title-suffix': () => h('span', { id: 'lock' }, '*'),
+      } as any)
+
+      cy.get('#lock')
+        .then(($mark) => $mark[0].getBoundingClientRect())
+        .as('mark')
+
+      // Against the text, not against the far edge `#actions` holds.
+      cy.contains('[data-slot="chart-header"] span', 'Revenue')
+        .then(($title) => $title[0].getBoundingClientRect())
+        .then((title) => {
+          cy.get<DOMRect>('@mark').should((mark) => {
+            expect(mark.left).to.be.closeTo(title.right, 6)
+            expect(mark.top + mark.height / 2).to.be.closeTo(
+              title.top + title.height / 2,
+              0.5,
+            )
+          })
+        })
+    })
+
+    // The mark reads the title's font size, so an app sizing it in `em` gets
+    // one that matches whichever title it sits on.
+    it('renders the title suffix in the title’s font size', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        'title-suffix': () =>
+          h('span', { id: 'lock', style: 'display: block; width: 1em' }),
+      } as any)
+
+      cy.get('#lock').should(($mark) => {
+        expect($mark[0].getBoundingClientRect().width).to.be.closeTo(14, 0.5)
+      })
+    })
+
+    it('keeps the title truncating with a suffix beside it', () => {
+      mountContainer(
+        {
+          title:
+            'Revenue by region, quarter over quarter, across every account we bill',
+        },
+        {
+          default: () => h('div', 'Plot'),
+          'title-suffix': () => h('span', { id: 'lock' }, '*'),
+          actions: () => h('button', { id: 'period' }, 'Last 30 days'),
+        } as any,
+      )
+
+      cy.contains('[data-slot="chart-header"] span', 'Revenue by').should(
+        ($title) => {
+          expect($title[0].scrollWidth).to.be.greaterThan($title[0].clientWidth)
+        },
+      )
+      cy.get('#lock').should('be.visible')
+      cy.get('#period').should('be.visible')
+    })
+
     // A card with only controls still needs the row to hang them on.
     it('draws the header for actions alone', () => {
       mountContainer({}, {

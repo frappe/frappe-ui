@@ -59,6 +59,7 @@ export type {
   ChartLegendEmits,
   ChartLegendProps,
   ChartStateSlots,
+  ChartTitleSuffixSlot,
   ChartTooltipFormatter,
   ChartTooltipProps,
   ChartTooltipSlotProps,

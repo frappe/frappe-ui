@@ -126,6 +126,11 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'center',
     description: 'Replaces the readout in the middle of the ring. Reads the total, or the\nhovered slice while one is hovered.',
     type: '{ label: string; value: number; formattedValue: string; percent?: number | undefined; }'

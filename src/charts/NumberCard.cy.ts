@@ -198,6 +198,48 @@ describe('NumberCard', () => {
       card().should('contain.text', 'Week').and('contain.text', '12,300')
     })
 
+    it('sets a title suffix beside the title, without moving the number', () => {
+      mountCard()
+      cy.contains('[data-slot="chart-card"] span', '12,300')
+        .then(($value) => $value[0].getBoundingClientRect().top)
+        .as('valueTop')
+
+      mountCard({}, {
+        'title-suffix': () => h('span', { id: 'lock', style: 'height: 20px' }),
+      } as any)
+
+      cy.contains('[data-slot="chart-card"] span', 'Revenue')
+        .then(($title) => $title[0].getBoundingClientRect())
+        .then((title) => {
+          cy.get('#lock').should(($mark) => {
+            const mark = $mark[0].getBoundingClientRect()
+            expect(mark.left).to.be.closeTo(title.right, 6)
+            expect(mark.top + mark.height / 2).to.be.closeTo(
+              title.top + title.height / 2,
+              0.5,
+            )
+          })
+        })
+
+      cy.contains('[data-slot="chart-card"] span', '12,300').then(($value) => {
+        const top = $value[0].getBoundingClientRect().top
+        cy.get<number>('@valueTop').should('be.closeTo', top, 0.5)
+      })
+    })
+
+    // The card's title is smaller than a chart's, so a mark sized in `em` is
+    // smaller here than the same mark on a ChartContainer.
+    it('renders the title suffix in the title’s font size', () => {
+      mountCard({}, {
+        'title-suffix': () =>
+          h('span', { id: 'lock', style: 'display: block; width: 1em' }),
+      } as any)
+
+      cy.get('#lock').should(($mark) => {
+        expect($mark[0].getBoundingClientRect().width).to.be.closeTo(13, 0.5)
+      })
+    })
+
     it('replaces the delta caption with the app’s own', () => {
       mountCard(
         { delta: 12.5, deltaSuffix: '%', deltaCaption: 'vs last month' },

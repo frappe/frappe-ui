@@ -162,6 +162,11 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
     description: 'Replaces the tooltip body. `items` holds one entry per visible series at\nthe hovered category, biggest first. `rows` holds the data row behind\nthem, so a replacement body can read a column the chart never plotted.',
     type: 'ChartTooltipSlotProps'
