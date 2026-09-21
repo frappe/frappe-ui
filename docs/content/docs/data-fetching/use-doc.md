@@ -109,8 +109,8 @@ todo.reassign.submit({ allocated_to: 'jane@example.com' })
 - `abort()` — aborts the in-flight fetch.
 - `setValue` — a [`useCall`](./use-call.md)-shaped member;
   `setValue.submit(values)` `PUT`s a partial update. When the document is
-  loaded, `doc` and matching `useList` rows show `values` at once; the response
-  replaces them when it lands. It **rejects** when the update fails. `doc`
+  loaded, `doc` shows `values` at once, and so do matching `useList` rows for
+  the fields the loaded doc has; the response replaces them when it lands. It **rejects** when the update fails. `doc`
   reverts unless a response or fetch has replaced the doc since; each list row
   field reverts unless the row no longer holds the optimistic value, e.g. after
   a list reload.

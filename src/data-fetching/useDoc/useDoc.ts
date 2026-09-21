@@ -198,8 +198,9 @@ export function useDoc<TDoc extends { name: string }, TMethods = {}>(
   })
 
   // Optimistic, like the legacy `createDocumentResource`: the submitted values
-  // land in the stores at once, and the response replaces them through
-  // `onStoreWrite`. A failed submit reverts them.
+  // land in the stores at once (in list rows, only the fields the loaded doc
+  // has), and the response replaces them through `onStoreWrite`. A failed
+  // submit reverts them.
   //
   // The optimistic write and the revert are `LOCAL_WRITE`: neither records a
   // sequence in the gate. Recording would gate out an older save still in

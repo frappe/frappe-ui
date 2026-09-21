@@ -12,7 +12,8 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 ### Data fetching (v2) — `useDoc().setValue` is optimistic
 
 When the document is loaded, `setValue.submit(values)` writes `values` into
-`doc` and into matching `useList` rows before the request goes out, as
+`doc`, and the fields the loaded doc has into matching `useList` rows, before
+the request goes out, as
 `createDocumentResource` did. The response replaces them when it lands. On a
 failed submit, `doc` reverts unless a response or fetch has replaced the doc
 since; each list row field reverts unless the row no longer holds the
