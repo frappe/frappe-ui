@@ -2475,13 +2475,13 @@ and `toast.dismiss(...)`.
 Run the v2 token codemod from the app you are migrating:
 
 ```sh
-npx --package frappe-ui@beta tokens-v2 --dry-run .
+npx --package frappe-ui@rc tokens-v2 --dry-run .
 ```
 
 Review the output, then run it without `--dry-run`:
 
 ```sh
-npx --package frappe-ui@beta tokens-v2 .
+npx --package frappe-ui@rc tokens-v2 .
 ```
 
 The codemod renames espresso color tokens like `bg-surface-white` to
@@ -2595,7 +2595,7 @@ one shade off after the token update.
 Run the codemod once with `--ink-shift`:
 
 ```sh
-npx --package frappe-ui@beta tokens-v2 --ink-shift .
+npx --package frappe-ui@rc tokens-v2 --ink-shift .
 ```
 
 Run the codemod in the same change as the frappe-ui upgrade that ships the
@@ -2605,7 +2605,7 @@ codemod without the upgrade also renders one shade off. Land both together.
 Add `--dry-run` first to review the renames before they apply:
 
 ```sh
-npx --package frappe-ui@beta tokens-v2 --ink-shift --dry-run .
+npx --package frappe-ui@rc tokens-v2 --ink-shift --dry-run .
 ```
 
 `--ink-shift` cannot be combined with `--force` or `--radius-only`; the run
@@ -2931,8 +2931,8 @@ SuggestionExtension.configure({ ...options, listComponent: SuggestionList })
 codemod before checking the two suggestion shapes manually:
 
 ```sh
-npx --package frappe-ui@beta editor-v1 --dry-run .
-npx --package frappe-ui@beta editor-v1 .
+npx --package frappe-ui@rc editor-v1 --dry-run .
+npx --package frappe-ui@rc editor-v1 .
 ```
 
 ```vue
@@ -4062,13 +4062,13 @@ Two dialog behaviors are worth knowing before you diff its output:
 migrating:
 
 ```sh
-npx --package frappe-ui@beta shortcuts-v1 --dry-run .
+npx --package frappe-ui@rc shortcuts-v1 --dry-run .
 ```
 
 Review the output, then run it without `--dry-run`:
 
 ```sh
-npx --package frappe-ui@beta shortcuts-v1 .
+npx --package frappe-ui@rc shortcuts-v1 .
 ```
 
 It renames `useShortcut`, `KeyboardShortcutsModal` and `ShortcutConfig`, folds
@@ -5063,8 +5063,8 @@ Start with a dry run so globally registered app components that reuse these
 names are easy to spot:
 
 ```sh
-npx --package frappe-ui@beta base-props-v1 --dry-run src
-npx --package frappe-ui@beta base-props-v1 src
+npx --package frappe-ui@rc base-props-v1 --dry-run src
+npx --package frappe-ui@rc base-props-v1 src
 ```
 
 - Icon `name` remains supported. `icon` is the canonical spelling and takes
