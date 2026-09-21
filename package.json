@@ -56,8 +56,6 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json && vue-tsc --noEmit -p tsconfig.node.json",
     "type-check:tsc": "tsc --noEmit -p tsconfig.app.json",
     "format": "prettier -w ./src",
-    "bump-and-release": "yarn test && git pull --rebase origin main && yarn run release-patch",
-    "release-patch": "yarn version --patch && git push && git push --tags",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
