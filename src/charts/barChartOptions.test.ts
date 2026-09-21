@@ -594,6 +594,7 @@ describe('bar chart option series', () => {
 })
 
 describe('bar chart option second value axis', () => {
+  // What `y: 'sales', y2: 'refunds'` normalizes to.
   const dualSeries = [
     { name: 'sales' },
     { name: 'refunds', axis: 'y2' as const },
@@ -607,7 +608,7 @@ describe('bar chart option second value axis', () => {
     expect(option.series.map((s: any) => s.yAxisIndex)).toEqual([0, 1])
   })
 
-  it('ignores the second axis on horizontal bars, where the value axis is x', () => {
+  it('ignores y2 on horizontal bars, where the value axis is x', () => {
     const option = build({
       horizontal: true,
       y2Axis: { title: 'rate' },

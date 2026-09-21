@@ -2,7 +2,7 @@
 
 Nine chart components under the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
-your data — `x`, `y`, `splitBy`, `category`, `value` — so a saved or serialized
+your data — `x`, `y`, `y2`, `splitBy`, `category`, `value` — so a saved or serialized
 chart is one typed object spread with `v-bind="savedChart"`.
 
 ```js

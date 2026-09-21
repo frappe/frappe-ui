@@ -1568,8 +1568,8 @@ chart that scales or draws differently:
 | `colors`                      | `palette`, or `seriesConfig[key].color`                            |
 
 Combo charts survive the port: `seriesConfig[key].type` takes
-`'bar' | 'line' | 'area'`, and `seriesConfig[key].axis: 'y2'` moves one series
-to the second value axis, configured with the chart-level `y2Axis` prop.
+`'bar' | 'line' | 'area'`, and the `y2` prop names the columns measured against
+the second value axis, configured with the chart-level `y2Axis` prop.
 
 ## Sprite icons — moved to `frappe-ui/experimental`
 
@@ -4745,6 +4745,40 @@ Nothing that ran before draws differently; the chart-level keys are additive.
 <!-- After -->
 <LineChart :data="rows" x="month" :y="['plan', 'actual']" smooth />
 ```
+
+### The second value axis is a column prop
+
+`seriesConfig[key].axis: 'y2'` is removed. `y2` names the columns measured
+against the second axis, so the three column props pair with the three axis
+options: `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis`. Move each column out of `y`
+and into `y2`; the series still draw and take their palette slots in `y` order
+then `y2` order, so a chart that listed its y2 columns last keeps every color.
+
+```vue
+<!-- Before -->
+<BarChart
+  :data="rows"
+  x="quarter"
+  :y="['revenue', 'expenses', 'margin']"
+  :series-config="{ margin: { type: 'line', axis: 'y2' } }"
+/>
+
+<!-- After -->
+<BarChart
+  :data="rows"
+  x="quarter"
+  :y="['revenue', 'expenses']"
+  y2="margin"
+  :series-config="{ margin: { type: 'line' } }"
+/>
+```
+
+`splitBy` splits `y` only, so a `y2` column draws as one unsplit series beside
+the ones `splitBy` produced and `maxSeries` caps only those. A long-data series
+can no longer be moved to the second axis — it has no column to name. A
+horizontal bar chart ignores `y2`, as it ignored `axis: 'y2'`.
+
+`ReferenceLine.axis` is unchanged: it still takes `'y'`, `'y2'` and `'x'`.
 
 ### The loud ones
 

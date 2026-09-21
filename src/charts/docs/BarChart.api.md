@@ -49,13 +49,19 @@
   },
   {
     name: 'y',
-    description: 'Value column(s). A list reads wide data: one series per column, drawn and\ncolored in the order given. `seriesConfig[key].axis` moves one of them to\nthe second value axis without moving it in the list.',
+    description: 'Value column(s) measured against the primary value axis. A list reads wide\ndata: one series per column, drawn and colored in the order given.',
     required: true,
     type: 'string | string[]'
   },
   {
+    name: 'y2',
+    description: 'Value column(s) measured against the second value axis, for a measure in\nanother unit or magnitude. The axis is only drawn when this names a column,\nand it is ignored on a horizontal bar chart, which has no second value\naxis.\n\nThese series draw and take their palette slots after every `y` column, and\nthey draw as the chart component\'s own mark unless `seriesConfig[key].type`\nsays otherwise.',
+    required: false,
+    type: 'string | string[]'
+  },
+  {
     name: 'splitBy',
-    description: 'Splits `y` into one series per distinct value, i.e. long data. Use with a\nsingle `y`.',
+    description: 'Splits `y` into one series per distinct value, i.e. long data. Use with a\nsingle `y`. A `y2` column is not split: it draws as one series of its own.',
     required: false,
     type: 'string'
   },
@@ -67,7 +73,7 @@
   },
   {
     name: 'seriesConfig',
-    description: 'Keyed by series identity: a `y` column, or a value of the `splitBy` column.',
+    description: 'Keyed by series identity: a `y` or `y2` column, or a value of `splitBy`.',
     required: false,
     type: 'Record<string, SeriesStyle>'
   },
@@ -128,7 +134,7 @@
   },
   {
     name: 'y2Axis',
-    description: 'The second value axis. Only drawn when a series sits on `axis: \'y2\'`.',
+    description: 'The second value axis. Only drawn when `y2` names a column.',
     required: false,
     type: 'ChartValueAxisOptions'
   },

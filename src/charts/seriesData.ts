@@ -49,6 +49,7 @@ export function normalizeAxisChartProps(
 ): NormalizedAxisChart {
   const rows = props.data ?? []
   const yColumns = toColumns(props.y)
+  const y2Columns = toColumns(props.y2)
 
   if (import.meta.env.DEV && props.splitBy && yColumns.length > 1) {
     console.warn(
@@ -67,15 +68,14 @@ export function normalizeAxisChartProps(
     label: column.label ?? formatLabel(column.name),
   }))
 
-  const { data, names } = props.splitBy
+  // `splitBy` splits `y` and nothing else, so a `y2` column is carried across
+  // the pivot untouched and drawn as one series of its own.
+  const { data, names: primary } = props.splitBy
     ? capSeries(
-        pivot(
-          rows,
-          props.x,
-          yColumns[0],
-          props.splitBy,
-          tooltipColumns.map((column) => column.name),
-        ),
+        pivot(rows, props.x, yColumns[0], props.splitBy, [
+          ...y2Columns,
+          ...tooltipColumns.map((column) => column.name),
+        ]),
         props.maxSeries,
       )
     : { data: rows, names: yColumns }
@@ -84,7 +84,7 @@ export function normalizeAxisChartProps(
   // column's name lands on the same key and the plotted measure wins. Keeping
   // the column would print the measure under the column's label.
   const clobbered = props.splitBy
-    ? tooltipColumns.filter((column) => names.includes(column.name))
+    ? tooltipColumns.filter((column) => primary.includes(column.name))
     : []
 
   if (import.meta.env.DEV && clobbered.length) {
@@ -93,6 +93,24 @@ export function normalizeAxisChartProps(
       `[frappe-ui] \`splitBy="${props.splitBy}"\` produces a series named ${named}, which \`tooltipColumns\` also names. The series keeps the key and the column is dropped. Rename the column, or change the values in "${props.splitBy}".`,
     )
   }
+
+  // A series is its own column name, so a name the primary axis already drew
+  // cannot come back on the second one.
+  const shadowed = y2Columns.filter((name) => primary.includes(name))
+
+  if (import.meta.env.DEV && shadowed.length) {
+    const named = shadowed.map((name) => `"${name}"`).join(', ')
+    console.warn(
+      `[frappe-ui] \`y2\` names ${named}, which the chart already draws against the primary axis. A series is its own name, so the second one is dropped.`,
+    )
+  }
+
+  const names = [
+    ...primary.map((name) => ({ name, axis: 'y' as const })),
+    ...y2Columns
+      .filter((name) => !shadowed.includes(name))
+      .map((name) => ({ name, axis: 'y2' as const })),
+  ]
 
   return {
     config: {
@@ -106,7 +124,7 @@ export function normalizeAxisChartProps(
       },
       yAxis: toValueAxis(props.yAxis),
       y2Axis: toValueAxis(props.y2Axis),
-      series: names.map((name) => buildSeries(name, props)),
+      series: names.map(({ name, axis }) => buildSeries(name, axis, props)),
       referenceLines: props.referenceLines,
       title: props.title,
       subtitle: props.subtitle,
@@ -144,14 +162,14 @@ const LOOK_KEYS = [
 ] as const
 
 /**
- * One series, i.e. one column of wide data or one value of `splitBy`.
- * The style is spread whole, `axis` included: which scale a series is measured
- * against is per-series meaning, and it lives where the rest of that meaning
- * does. Nothing here reads the axis, so a series never leaves the place `y` put
- * it — which is what keeps the palette on the caller's column order.
+ * One series, i.e. one column of wide data or one value of `splitBy`. `axis`
+ * comes from the prop that named the column rather than from the style: which
+ * scale a series is read against is which list it was written in, so the
+ * series draw and take their palette slots in that one order.
  */
 function buildSeries(
   name: string,
+  axis: 'y' | 'y2',
   props: AxisChartProps,
 ): AxisChartSeriesConfig {
   // A saved config outlives the query behind it, so a `seriesConfig` entry for a
@@ -162,10 +180,23 @@ function buildSeries(
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.
     ...(name === OTHERS_KEY ? { label: OTHERS_LABEL } : {}),
-    ...style,
+    ...styleWithoutAxis(style),
     ...seriesLook(props, style),
+    ...(axis === 'y2' ? { axis } : {}),
     name,
   }
+}
+
+/**
+ * The entry as a series wears it. `axis` is dropped rather than spread: a
+ * stored config written against the removed `seriesConfig[key].axis` still
+ * carries the key, and letting it through would move a `y` column across and
+ * leave a second spelling of what `y2` alone now says.
+ */
+function styleWithoutAxis(style?: SeriesStyle) {
+  if (!style) return undefined
+  const { axis: _axis, ...rest } = style as SeriesStyle & { axis?: unknown }
+  return rest
 }
 
 /**

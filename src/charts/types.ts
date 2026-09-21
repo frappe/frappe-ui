@@ -80,9 +80,9 @@ export type AxisChartSeriesConfig = {
   /** Mark this series draws as. Defaults to the chart's own mark. */
   type?: ChartMark
   /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * a different unit or magnitude its own scale, opposite the primary. Ignored
-   * on a horizontal bar chart, which has no second value axis.
+   * Which value axis this series is measured against, i.e. which of `y` and
+   * `y2` named its column. `'y2'` is ignored on a horizontal bar chart, which
+   * has no second value axis.
    */
   axis?: 'y' | 'y2'
   showDataLabels?: boolean
@@ -162,7 +162,7 @@ export type AxisChartBaseConfig = {
   yAxis?: ChartYAxisConfig
   /**
    * The second value axis, drawn opposite the primary. Only read when a series
-   * sets `axis: 'y2'`, and never on a horizontal bar chart — two value axes
+   * carries `axis: 'y2'`, and never on a horizontal bar chart — two value axes
    * along the top and bottom of the plot are unreadable.
    */
   y2Axis?: ChartYAxisConfig
@@ -722,17 +722,6 @@ export type SeriesStyle = {
    * sits in, so `BarChart` with one `'line'` series is a combo chart.
    */
   type?: ChartMark
-  /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * another unit or magnitude its own scale, drawn opposite the primary.
-   * Defaults to `'y'`. Ignored on a horizontal bar chart, which has no second
-   * value axis, and on a chart where no series asks for `'y2'` the second axis
-   * is not drawn at all.
-   *
-   * Moving a series here never moves it in the chart: the series are drawn in
-   * `y` order whatever axis each one sits on, so a series keeps its color.
-   */
-  axis?: 'y' | 'y2'
   /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**
@@ -773,14 +762,24 @@ export type AxisChartProps = ChartBaseProps & {
   /** Column holding the category or time each point sits at. */
   x: string
   /**
-   * Value column(s). A list reads wide data: one series per column, drawn and
-   * colored in the order given. `seriesConfig[key].axis` moves one of them to
-   * the second value axis without moving it in the list.
+   * Value column(s) measured against the primary value axis. A list reads wide
+   * data: one series per column, drawn and colored in the order given.
    */
   y: string | string[]
   /**
+   * Value column(s) measured against the second value axis, for a measure in
+   * another unit or magnitude. The axis is only drawn when this names a column,
+   * and it is ignored on a horizontal bar chart, which has no second value
+   * axis.
+   *
+   * These series draw and take their palette slots after every `y` column, and
+   * they draw as the chart component's own mark unless `seriesConfig[key].type`
+   * says otherwise.
+   */
+  y2?: string | string[]
+  /**
    * Splits `y` into one series per distinct value, i.e. long data. Use with a
-   * single `y`.
+   * single `y`. A `y2` column is not split: it draws as one series of its own.
    */
   splitBy?: string
   /**
@@ -790,7 +789,7 @@ export type AxisChartProps = ChartBaseProps & {
    * those the caller chose one by one.
    */
   maxSeries?: number
-  /** Keyed by series identity: a `y` column, or a value of the `splitBy` column. */
+  /** Keyed by series identity: a `y` or `y2` column, or a value of `splitBy`. */
   seriesConfig?: Record<string, SeriesStyle>
   /**
    * Prints every series' value beside its marks. A `seriesConfig` entry
@@ -834,7 +833,7 @@ export type AxisChartProps = ChartBaseProps & {
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */
   yAxis?: ChartValueAxisOptions
-  /** The second value axis. Only drawn when a series sits on `axis: 'y2'`. */
+  /** The second value axis. Only drawn when `y2` names a column. */
   y2Axis?: ChartValueAxisOptions
   /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
   palette?: ChartPalette

@@ -16,7 +16,8 @@ const quarterly = [
     <BarChart
       :data="quarterly"
       x="quarter"
-      :y="['revenue', 'expenses', 'margin']"
+      :y="['revenue', 'expenses']"
+      y2="margin"
       :y-axis="{
         title: 'Amount',
         format: (value) => `$${(value / 1000).toFixed(0)}k`,
@@ -26,7 +27,6 @@ const quarterly = [
         margin: {
           type: 'line',
           label: 'Margin',
-          axis: 'y2',
           showDataPoints: true,
         },
       }"

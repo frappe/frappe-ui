@@ -39,7 +39,7 @@ The share is taken per stack, so two stacks under different `stackName`s each
 reach 100 on their own, and a bar stack and an area stack are two wholes. A
 series that stacks with nothing — a line always, a lone bar or band otherwise —
 keeps its own numbers, with a dev-mode warning if the axis under it is pinned;
-put it on `axis: "y2"` to give it its own scale. A `min` or `max` set on a
+move it to `y2` to give it its own scale. A `min` or `max` set on a
 pinned axis is overruled, also with a warning: a column that stops short of the
 top no longer reads as a whole.
 
@@ -81,7 +81,7 @@ and drops to a coarser interval rather than crowd them.
 `seriesConfig[key].type` sets the mark a single series draws as: `'bar'`,
 `'line'` or `'area'`. The chart component sets the default for the rest, so a
 `BarChart` with one `'line'` series is a combo chart. A rate belongs on its own
-scale, which `axis: 'y2'` in the same entry gives it.
+scale, which naming it in `y2` instead of `y` gives it.
 
 <ComponentPreview name="Charts-BarCombo" csr="true" self-layout />
 

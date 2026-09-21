@@ -223,7 +223,9 @@ describe('BarChart', () => {
 
     it('measures a line series against a second axis', () => {
       mountChart({
-        seriesConfig: { refunds: { type: 'line', axis: 'y2' } },
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { type: 'line' } },
       })
       bars().should('have.length', data.length)
       lines().should('have.length', 1)

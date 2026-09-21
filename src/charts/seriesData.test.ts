@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { normalizeAxisChartProps } from './seriesData'
-import { resolveSeriesColors } from './axisChartCommon'
+import { hasSecondaryValueAxis, resolveSeriesColors } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
-import type { AxisChartConfig, AxisChartProps } from './types'
+import type { AxisChartConfig, AxisChartProps, SeriesStyle } from './types'
 
 const wideRows = [
   { month: 'Jan', sales: 10, refunds: 2 },
@@ -218,36 +218,53 @@ describe.each([
 })
 
 describe('normalizeAxisChartProps: the second value axis', () => {
-  it('puts a series on the second axis from its style', () => {
-    const { config } = normalize({
-      seriesConfig: { refunds: { axis: 'y2' } },
-    })
+  it('puts every y2 column on the second axis', () => {
+    const { config } = normalize({ y: 'sales', y2: 'refunds' })
     expect(config.series).toEqual([
       { name: 'sales' },
       { name: 'refunds', axis: 'y2' },
     ])
   })
 
-  // The axis a series is measured against says nothing about where it is drawn.
-  // Series colors are handed out in this order, so a series that changed axis
-  // and changed place would silently change color with it.
-  it('keeps the series in y order whatever axis each one sits on', () => {
-    const { config } = normalize({
-      y: ['sales', 'refunds', 'rate'],
-      seriesConfig: { sales: { axis: 'y2' }, refunds: { axis: 'y' } },
-    })
-    expect(namesOf(config)).toEqual(['sales', 'refunds', 'rate'])
+  it('reads a y2 list as one series per column, in order', () => {
+    const { config } = normalize({ y: 'sales', y2: ['rate', 'refunds'] })
+    expect(namesOf(config)).toEqual(['sales', 'rate', 'refunds'])
   })
 
-  it('leaves series off the second axis by default', () => {
+  // Series colors are handed out along this list, so the order the two props
+  // are read in is what decides which stop each series takes.
+  it('draws every y column before the first y2 column', () => {
+    const { config } = normalize({ y: ['sales', 'refunds'], y2: 'rate' })
+    expect(namesOf(config)).toEqual(['sales', 'refunds', 'rate'])
+    expect(config.series.map((series) => series.axis)).toEqual([
+      undefined,
+      undefined,
+      'y2',
+    ])
+  })
+
+  it('leaves series off the second axis when y2 names nothing', () => {
     const { config } = normalize()
     expect(config.series.every((series) => !series.axis)).toBe(true)
   })
 
-  // The reading a chart is changed to make: give the second series its own
-  // scale. Colors are handed out along the series list, so the series that
-  // moved has to come back in the same color it went in.
-  it('keeps a series in its own color when it changes axis', () => {
+  it('styles a y2 series from its seriesConfig entry like any other', () => {
+    const { config } = normalize({
+      y: 'sales',
+      y2: 'rate',
+      seriesConfig: { rate: { type: 'line', label: 'Conversion' } },
+    })
+    expect(config.series[1]).toEqual({
+      name: 'rate',
+      type: 'line',
+      label: 'Conversion',
+      axis: 'y2',
+    })
+  })
+
+  // Colors are handed out along the series list, so moving the last column
+  // from `y` to `y2` must not repaint the chart.
+  it('keeps a series in its own color when it moves to y2', () => {
     const tokens: ChartTokens = {
       categorical: ['#111111', '#222222', '#333333'],
       sequential: ['#000011', '#000022', '#000033'],
@@ -263,24 +280,67 @@ describe('normalizeAxisChartProps: the second value axis', () => {
     const colorsOf = (props: Partial<AxisChartProps>) =>
       resolveSeriesColors({ ...normalize(props).config, type: 'bar' }, tokens)
 
-    expect(colorsOf({ seriesConfig: { refunds: { axis: 'y2' } } })).toEqual(
-      colorsOf({}),
-    )
+    expect(colorsOf({ y: 'sales', y2: 'refunds' })).toEqual(colorsOf({}))
   })
 
-  // Long data reaches the second axis the same way, which the column list it
-  // has no columns to name could not do.
-  it('moves a long-data series by its grouping value', () => {
+  // `splitBy` splits `y`. A y2 column is per category, so it rides the pivot
+  // across as itself rather than being split with the rest.
+  it('draws a y2 column unsplit beside the series splitBy produced', () => {
     const { config } = normalize({
-      data: longRows,
+      data: [
+        { month: 'Jan', region: 'East', amount: 10, rate: 3 },
+        { month: 'Jan', region: 'West', amount: 5, rate: 3 },
+        { month: 'Feb', region: 'East', amount: 12, rate: 4 },
+      ],
       y: 'amount',
+      y2: 'rate',
       splitBy: 'region',
-      seriesConfig: { West: { axis: 'y2' } },
     })
     expect(config.series).toEqual([
       { name: 'East' },
-      { name: 'West', axis: 'y2' },
+      { name: 'West' },
+      { name: 'rate', axis: 'y2' },
     ])
+    expect(config.data).toEqual([
+      { month: 'Jan', rate: 3, East: 10, West: 5 },
+      { month: 'Feb', rate: 4, East: 12, West: null },
+    ])
+  })
+
+  it('caps only what splitBy produced, never a y2 column', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', region: 'East', amount: 50, rate: 3 },
+        { month: 'Jan', region: 'West', amount: 30, rate: 3 },
+        { month: 'Jan', region: 'North', amount: 15, rate: 3 },
+        { month: 'Jan', region: 'South', amount: 5, rate: 3 },
+      ],
+      y: 'amount',
+      y2: 'rate',
+      splitBy: 'region',
+      maxSeries: 3,
+    })
+    expect(namesOf(config)).toEqual(['East', 'West', '__others__', 'rate'])
+  })
+
+  // `y2` is the one thing that says which scale a series is read against. A
+  // config saved against the removed `seriesConfig[key].axis` still carries the
+  // key, and reading it would leave the old spelling working beside the new.
+  it('ignores a stale seriesConfig axis on a y column', () => {
+    const { config } = normalize({
+      seriesConfig: { refunds: { axis: 'y2' } as SeriesStyle },
+    })
+    expect(config.series).toEqual([{ name: 'sales' }, { name: 'refunds' }])
+    expect(hasSecondaryValueAxis(config)).toBe(false)
+  })
+
+  it('warns and drops a y2 column the primary axis already draws', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { config } = normalize({ y: ['sales', 'refunds'], y2: 'refunds' })
+    expect(namesOf(config)).toEqual(['sales', 'refunds'])
+    expect(config.series[1].axis).toBeUndefined()
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0][0]).toContain('"refunds"')
   })
 })
 

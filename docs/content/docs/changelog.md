@@ -1186,15 +1186,9 @@ Landed so far:
   a spinner and the words "Loading chart…". A dashboard fills in a card at a
   time, and a placeholder that holds the grid's shape reads better than eight
   spinners turning out of step. `#loading` takes it back.
-- `seriesConfig[key].axis` puts a series on the second value axis. It replaces
-  the `y2` prop, **which is removed**: `y` names every series once, in the order
-  they are drawn and colored, so a series no longer changes color when it
-  changes axis. Long data reaches the second axis for the first time, keyed by a
-  value of the `series` column, and `y2Axis` is unchanged. To migrate, move each
-  `y2` column into `y` at the position it should draw at and add `axis: 'y2'` to
-  that column's `seriesConfig` entry. TypeScript reports the removed prop, but a
-  plain template passes it through as an attribute and draws the column not at
-  all — grep for `y2` on the v2 charts after upgrading.
+- `y2` names the value column or columns measured against the second value
+  axis, completing the pairs `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis`. The axis
+  is drawn only when `y2` names a column, and `y2Axis` is unchanged.
 - `ScatterChart` takes `showDataLabels`, which prints each point's `label`
   beside it. Names that collide with a neighbour are dropped.
 - `NumberCard` takes `color`, the ink the reading is printed in, for a card
@@ -1333,6 +1327,10 @@ Settled after the audit, on the same footing:
   every series' default, and a `seriesConfig` entry overrides it for one series,
   on or off. With `splitBy` the series are named by the data, so a chart-level
   value is the only way to reach all of them.
+- **Breaking:** `SeriesStyle.axis` is **removed**, replaced by the `y2` column
+  prop above — one mechanism per concept. Series draw and take palette slots in
+  `y` order and then `y2` order, `splitBy` splits `y` only, and a `y2` column
+  draws as the chart's own mark until `seriesConfig[key].type` says otherwise.
 
 `useChart`, `registerChartModules` and their three types stay on
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and
