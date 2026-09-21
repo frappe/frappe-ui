@@ -221,11 +221,11 @@ observation.
 ## Overflow
 
 `<CodeEditorContent>` emits `overflow: [boolean]` when the content crosses its
-height cap, and only on transitions. It also sets `data-overflowing="true"` on
-its root, so a fade mask needs no JavaScript:
+height cap, and only on transitions. It also sets `data-overflowing` on its
+root, so a fade mask needs no JavaScript:
 
 ```css
-[data-slot='code-editor-content'][data-overflowing='true']::after {
+[data-slot='code-editor-content'][data-overflowing]::after {
   /* the mask */
 }
 ```
@@ -235,10 +235,10 @@ and no selector matches "this element is scrolling". frappe-ui draws no expand
 affordance itself. It emits the boolean and sets the attribute. The button, the
 pill and the dialog belong to your app.
 
-The part also sets `data-scrolled-x="true"` while the code is scrolled sideways.
-The frappe chrome uses it to fade a shadow in beside the gutter. It is an
-internal flag, not part of the frozen surface: read it if it helps, but it can
-change in a minor release.
+The part also sets `data-scrolled-x` while the code is scrolled sideways. The
+frappe chrome uses it to fade a shadow in beside the gutter. It is an internal
+flag, not part of the frozen surface: read it if it helps, but it can change in
+a minor release.
 
 ## Build your own field
 

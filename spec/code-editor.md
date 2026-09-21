@@ -369,11 +369,11 @@ implementation note. Tests pin it.
 ## 9. Overflow
 
 `<CodeEditorContent>` emits `overflow: [boolean]` when the content crosses its
-height cap, and only on transitions. It also sets `data-overflowing="true"` on
-its root, so a fade mask needs no JavaScript:
+height cap, and only on transitions. It also sets `data-overflowing` on its
+root, so a fade mask needs no JavaScript:
 
 ```css
-[data-slot='code-editor-content'][data-overflowing='true']::after {
+[data-slot='code-editor-content'][data-overflowing]::after {
   /* the mask */
 }
 ```
