@@ -9,6 +9,18 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Data fetching (v2) — `useDoc().setValue` is optimistic
+
+`setValue.submit(values)` writes `values` into `doc` and into matching
+`useList` rows before the request goes out, as `createDocumentResource` did.
+The response replaces them when it lands. A failed submit reverts each field
+that still holds the submitted value, so a later submit, reload or realtime
+update is kept. `submit()` still rejects on failure.
+
+- **Who is affected:** code that reads `doc` while a `setValue` is in flight
+  and expects the old values, e.g. to compare against them.
+- **How to fix:** keep the old values in your own state before you submit.
+
 ### `SidebarItem` attributes land on the link or the button (breaking, silent)
 
 A `SidebarItem` is a row container holding the link or the button, with the
