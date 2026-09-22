@@ -191,7 +191,7 @@ This is additive, and it is the replacement for the removed
 `tailwind/tokens.js`. The names and shapes differ from that module; the
 [migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed)
 gives the before and after, and
-[Tailwind Setup](/docs/foundations/tailwind#the-token-exports) documents each
+[Tailwind Setup](/docs/getting-started/tailwind#the-token-exports) documents each
 export.
 
 ### Tailwind tokens — one committed source, no vendored Figma export
@@ -343,7 +343,7 @@ thumb touched stayed filled behind it.
   on touch unless a tap also reaches it. Give it a touch path: add
   `[@media(hover:none)]:opacity-100` so a device that cannot hover shows it
   outright, as the library's own editor controls now do. See
-  [Tailwind setup](/docs/foundations/tailwind#hover-styles).
+  [Tailwind setup](/docs/getting-started/tailwind#hover-styles).
 
 ### Base component contracts for v1 (breaking)
 
@@ -2210,7 +2210,7 @@ pagination-state restore.
 `frappe-ui/tailwind` exports `content`, the glob list of frappe-ui source
 directories that emit Tailwind classes. Spread it into your app's
 `tailwind.config.js` `content` array instead of hand-maintaining the paths —
-see the new [Tailwind Setup](/docs/foundations/tailwind) docs page. Tailwind
+see the new [Tailwind Setup](/docs/getting-started/tailwind) docs page. Tailwind
 v3 doesn't merge a preset's `content`, so this was previously unavoidable
 hand-maintenance, and it had already drifted: some apps on
 `frappe-ui@1.0.0-beta` glob `src/components/**` only, silently dropping every

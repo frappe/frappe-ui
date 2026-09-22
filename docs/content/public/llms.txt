@@ -18,7 +18,10 @@ Three cross-cutting conventions to know before reading anything else:
 ## Getting started
 
 - [Introduction](https://ui.frappe.io/docs/introduction): what frappe-ui is, motivation, products using it.
-- [Getting started](https://ui.frappe.io/docs/getting-started): installation, Tailwind preset wiring, `FrappeUIProvider` setup.
+- [Getting started](https://ui.frappe.io/docs/getting-started): the install every setup shares: Tailwind preset wiring, `FrappeUIProvider`, TypeScript config.
+- [Frappe app](https://ui.frappe.io/docs/getting-started/frappe): the Vite plugin, dev proxy, CSRF, boot data, the `www` page and the production build.
+- [Standalone app](https://ui.frappe.io/docs/getting-started/standalone): a plain Vite app; which sub-plugins to drop and which APIs assume a Frappe server.
+- [Tailwind setup](https://ui.frappe.io/docs/getting-started/tailwind): wiring the preset into an app, what it replaces, the `content` export.
 - [Migration from v0](https://ui.frappe.io/docs/migration): moving an app off the v0 API.
 
 ## Components
@@ -109,7 +112,6 @@ Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Pro
 
 ## Foundations
 
-- [Tailwind setup](https://ui.frappe.io/docs/foundations/tailwind): wiring the preset into an app.
 - [Base colors](https://ui.frappe.io/docs/foundations/colors/base): the raw color scales.
 - [Semantic colors](https://ui.frappe.io/docs/foundations/colors/semantic): `bg-surface-*`, `text-ink-*`, `border-outline-*` tokens.
 - [Chart colors](https://ui.frappe.io/docs/foundations/colors/charts): the categorical chart palette.

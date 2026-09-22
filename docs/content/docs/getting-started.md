@@ -1,71 +1,21 @@
 # Getting Started
 
-Two paths: the starter template, or a manual setup you can paste into an
-existing Vite app.
+frappe-ui is a Vue 3 component library. It runs in any Vite app, with or without
+a Frappe server behind it. This page is the install that both setups share. The
+guide for your backend covers the rest:
+
+- [Frappe app](./getting-started/frappe): the frontend for a Frappe app. Dev
+  server proxy, CSRF, boot data, the production build and the page that serves
+  it.
+- [Standalone app](./getting-started/standalone): a plain Vite app. Which
+  sub-plugins to turn off, and which parts of the library assume a Frappe
+  server.
 
 Requires **Node `>=20.19.0`**, **Vite**, **Vue 3** and **Tailwind CSS
 `>=3.4.2 <4`**. `vue`, `vue-router` and `tailwindcss` are peer dependencies;
 install them in your app.
 
-## Quick start
-
-You can set up `frappe-ui` with
-[`frappe-ui-starter`](https://github.com/netchampfaris/frappe-ui-starter). If
-you already have a Frappe app for which you want to build a frontend, start with
-**Step 2**.
-
-### Create your Frappe app
-
-```sh
-bench new-app todo
-```
-
-### Setup frappe-ui
-
-```sh
-cd apps/todo
-# this will setup a vue project with frappe-ui set up
-# inside the frontend directory
-npx degit netchampfaris/frappe-ui-starter frontend
-```
-
-Refer [frappe-ui-starter](https://github.com/netchampfaris/frappe-ui-starter)
-for more details.
-
-### Ignore_csrf config
-
-```sh
-bench --site todo.test set-config ignore_csrf 1
-```
-
-This will prevent CSRFToken errors while using the vite dev server. In
-production environment, the csrf_token is attached to the window object in
-index.html for you.
-
-### Start dev server
-
-```sh
-cd frontend
-yarn
-yarn dev
-```
-
-The Vite dev server will start on the port `8080`. This can be changed from
-`vite.config.js`. The development server is configured to proxy your frappe app
-(usually running on port 8000). If you have a site named `todo.test`, open
-`http://todo.test:8080` in your browser. If you see a button named "Click to
-send 'ping' request", congratulations!
-
-If you notice the browser URL is `/frontend`, this is the base URL where your
-frontend app will run in production. To change this, open `src/router.js` and
-change the base URL passed to `createWebHistory`.
-
-## Manual setup
-
-Five files. Every step below is required; skipping the Tailwind `content` entry
-is the single most common cause of an app that renders unstyled.
-
-### Install
+## Install
 
 `npm create vite@latest` currently scaffolds Tailwind v4, which frappe-ui does
 not support. Replace it:
@@ -76,31 +26,8 @@ npm install -D tailwindcss@^3.4 postcss autoprefixer
 npm install frappe-ui vue-router
 ```
 
-### `vite.config.ts`
-
-```ts
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import frappeui from 'frappe-ui/vite'
-
-export default defineConfig({
-  plugins: [frappeui({ frontendRoute: '/todo' }), vue()],
-})
-```
-
-`frontendRoute` is the route the app is served on. It drives the dev-server site
-banner and the production `indexHtmlPath`.
-
-Every sub-plugin except `lucideIcons` and `frappeTypes` is on by default. Pass
-`false` to turn one off. For a prototype with no Frappe backend:
-
-```ts
-frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false })
-```
-
-Add `lucideIcons: true` only if your own code imports `~icons/lucide/*` or
-writes `<LucideX />` tags. frappe-ui's own icons are class names and need
-nothing from Vite. See [Icons](./other/icons).
+Then five files. Every step below is required; skipping the Tailwind `content`
+entry is the single most common cause of an app that renders unstyled.
 
 ### `tailwind.config.js`
 
@@ -117,7 +44,7 @@ export default {
 Spread the exported `content`. Tailwind v3 does not merge a preset's `content`
 into the app config, so frappe-ui's own source globs have to be listed by the
 app or none of its utility classes compile. See
-[Tailwind Setup](./foundations/tailwind) for what the preset replaces.
+[Tailwind Setup](./getting-started/tailwind) for what the preset replaces.
 
 ### `postcss.config.js`
 
@@ -169,7 +96,13 @@ import { FrappeUIProvider } from 'frappe-ui'
 `FrappeUIProvider` renders the `dialog.*` and `toast.*` portals and adds no
 element of its own. Mount exactly one.
 
-### TypeScript
+### Vite config
+
+`vite.config.ts` is the one file that differs between the two setups. The
+[Frappe](./getting-started/frappe#vite-config) and
+[standalone](./getting-started/standalone#vite-config) guides each give theirs.
+
+## TypeScript
 
 frappe-ui ships a base config. Extend it: it sets `moduleResolution: bundler`
 and `allowImportingTsExtensions`, which the package needs to resolve its own
@@ -198,13 +131,13 @@ import { Editor, type RichTextKitOptions } from 'frappe-ui/editor'
 
 Only the paths in the package `exports` map resolve: `frappe-ui`,
 `frappe-ui/list`, `frappe-ui/editor`, `frappe-ui/code-editor`,
-`frappe-ui/charts`, `frappe-ui/icons`,
-`frappe-ui/experimental`, `frappe-ui/tailwind`, `frappe-ui/vite`,
-`frappe-ui/vite/lucideIconsPlugin`, `frappe-ui/vitepress`, `frappe-ui/style.css`
-and `frappe-ui/tsconfig.base.json`. Anything else (`frappe-ui/src/...`) fails
-with `Package subpath '…' is not defined`.
+`frappe-ui/charts`, `frappe-ui/icons`, `frappe-ui/experimental`,
+`frappe-ui/tailwind`, `frappe-ui/vite`, `frappe-ui/vite/lucideIconsPlugin`,
+`frappe-ui/vitepress`, `frappe-ui/style.css` and `frappe-ui/tsconfig.base.json`.
+Anything else (`frappe-ui/src/...`) fails with
+`Package subpath '…' is not defined`.
 
-### Check it works
+## Check it works
 
 After `npm run dev`:
 

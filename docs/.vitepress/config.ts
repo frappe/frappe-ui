@@ -51,6 +51,15 @@ function buildSidebar(): SidebarSection[] {
       items: [
         { text: 'Introduction', link: '/docs/introduction' },
         { text: 'Getting Started', link: '/docs/getting-started' },
+        {
+          text: 'Frappe app',
+          link: '/docs/getting-started/frappe',
+        },
+        {
+          text: 'Standalone app',
+          link: '/docs/getting-started/standalone',
+        },
+        { text: 'Tailwind Setup', link: '/docs/getting-started/tailwind' },
         { text: 'Migration from v0', link: '/docs/migration' },
         { text: 'Changelog', link: '/docs/changelog' },
       ],
@@ -58,7 +67,6 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
-        { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
         { text: 'Base Colors', link: '/docs/foundations/colors/base' },
         { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
         { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },

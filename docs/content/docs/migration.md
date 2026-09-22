@@ -102,7 +102,7 @@ Vue and vue-router are unchanged: `vue >=3.5.0` and `vue-router ^4.1.6`
 
 Tailwind stays on **v3**. `frappe-ui/tailwind` is a v3 preset and frappe-ui
 declares no `tailwindcss` peer dependency, so a v4 project installs cleanly and
-then fails at build time. See the [Tailwind page](/docs/foundations/tailwind).
+then fails at build time. See the [Tailwind page](/docs/getting-started/tailwind).
 
 v1 also depends on **`@vueuse/core` `^14.1.0`**, up from `^10.4.1` in the 0.1.x
 line. VueUse 14 requires Vue `^3.5.0`, which v1 already requires. If your app
@@ -3298,7 +3298,7 @@ handed either one renders an empty swatch. The new exports carry no sentinel.
 
 `colors`, `focusRing`, `fontFamily`, `fontWeight`, `screens`, `spacing` and
 `tracking` are exported from the same subpath. See
-[Tailwind Setup](/docs/foundations/tailwind#the-token-exports).
+[Tailwind Setup](/docs/getting-started/tailwind#the-token-exports).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 
@@ -3348,7 +3348,7 @@ so this line in `tailwind.config.js` scans nothing:
 ```
 
 Better: replace the hand-copied list with the
-[`content` export](/docs/foundations/tailwind#the-content-export), which tracks
+[`content` export](/docs/getting-started/tailwind#the-content-export), which tracks
 the library's source directories for you.
 
 ## Autocomplete (removed)
