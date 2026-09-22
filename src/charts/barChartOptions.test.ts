@@ -107,6 +107,45 @@ describe('resolveSeriesColors', () => {
     ])
   })
 
+  describe('on a ramp of five dark and light pairs', () => {
+    const pairs = ['d1', 'l1', 'd2', 'l2', 'd3', 'l3', 'd4', 'l4', 'd5', 'l5']
+    const colorsOn = (series: AxisChartSeriesConfig[]) =>
+      Object.values(
+        resolveSeriesColors(config({ series }), {
+          ...tokens,
+          categorical: pairs,
+        }),
+      )
+
+    it('keeps bars and a lone line among them on the sequential ramp', () => {
+      expect(colorsOn(named(3))).toEqual(['#000011', '#000022', '#000033'])
+      expect(colorsOn([{ name: 'a' }, { name: 'b', type: 'line' }])).toEqual([
+        '#000033',
+        '#000011',
+      ])
+    })
+
+    it('keeps a bar among two lines on the sequential ramp', () => {
+      expect(
+        colorsOn([
+          { name: 'a' },
+          { name: 'b', type: 'line' },
+          { name: 'c', type: 'line' },
+        ]),
+      ).toEqual(['#000033', '#000011', '#000022'])
+    })
+
+    it('draws two or more lines and nothing else in separate hues', () => {
+      expect(
+        colorsOn([
+          { name: 'a', type: 'line' },
+          { name: 'b', type: 'line' },
+          { name: 'c', type: 'line' },
+        ]),
+      ).toEqual(['d1', 'l2', 'd3'])
+    })
+  })
+
   it('cycles an explicit color list from palette', () => {
     expect(colorsFor({ palette: ['a', 'b'] }).sales).toBe('a')
     expect(colorsFor({ palette: ['a', 'b'] }).refunds).toBe('b')

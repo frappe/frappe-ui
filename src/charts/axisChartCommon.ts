@@ -18,6 +18,7 @@ import type {
   AxisChartConfig,
   AxisChartSeriesConfig,
   ChartMark,
+  ChartPalette,
   ChartPaletteName,
   ChartYAxisConfig,
 } from './types'
@@ -106,6 +107,35 @@ export const AXIS_LABEL_MARGIN = 8
 
 const DEFAULT_PALETTE: ChartPaletteName = 'sequential'
 
+/**
+ * The categorical ramp is five hue families, each a dark member then its light
+ * partner. Two strengths of one hue tangle where lines cross, so lines take the
+ * partners shifted one family along: no two neighbouring lines share a hue.
+ */
+const LINE_ORDER = [0, 3, 4, 7, 8, 1, 2, 5, 6, 9]
+
+/**
+ * One hue getting paler reads as a single series once two lines cross, so a
+ * chart of two or more lines, and nothing else, is drawn in separate hues. A
+ * bar among them keeps the sequential ramp: see `colorSlots`.
+ */
+function defaultPalette(
+  config: AxisChartConfig,
+  tokens: ChartTokens,
+): ChartPalette {
+  const lines = config.series.filter(
+    (series) => resolveMark(series, config, true) === 'line',
+  )
+  const ramp = tokens.categorical
+  if (
+    lines.length < 2 ||
+    lines.length < config.series.length ||
+    ramp.length !== LINE_ORDER.length
+  )
+    return DEFAULT_PALETTE
+  return LINE_ORDER.map((i) => ramp[i])
+}
+
 const MARKS: ChartMark[] = ['bar', 'line', 'area']
 
 /**
@@ -120,13 +150,9 @@ export function resolveSeriesColors(
   config: AxisChartConfig,
   tokens: ChartTokens,
 ): Record<string, string> {
-  const assigned = paletteColors(
-    config.palette,
-    tokens,
-    config.series.length,
-    DEFAULT_PALETTE,
-  )
-  const slots = colorSlots(config)
+  const palette = config.palette ?? defaultPalette(config, tokens)
+  const assigned = paletteColors(palette, tokens, config.series.length)
+  const slots = colorSlots(config, palette)
   const colors: Record<string, string> = {}
   config.series.forEach((series, index) => {
     colors[series.name] = series.color || assigned[slots[index]]
@@ -144,10 +170,9 @@ export function resolveSeriesColors(
  * list is drawn as it was written, a diverging ramp's direction is its meaning,
  * and a categorical set is unrelated hues with no ramp to reorder.
  */
-function colorSlots(config: AxisChartConfig): number[] {
+function colorSlots(config: AxisChartConfig, palette: ChartPalette): number[] {
   const identity = config.series.map((_, index) => index)
-  if (Array.isArray(config.palette)) return identity
-  if ((config.palette ?? DEFAULT_PALETTE) !== 'sequential') return identity
+  if (palette !== 'sequential') return identity
 
   const weights = config.series.map(
     (series) => INK_WEIGHT[resolveMark(series, config, true)],

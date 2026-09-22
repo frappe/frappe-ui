@@ -140,7 +140,7 @@
   },
   {
     name: 'palette',
-    description: 'Ramp series colors are drawn from. Defaults to `\'sequential\'`.',
+    description: 'Ramp series colors are drawn from. Defaults to `\'sequential\'`, or to the\ncategorical ramp for a chart of two or more lines and no other mark.',
     required: false,
     type: 'ChartPalette'
   },

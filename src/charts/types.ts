@@ -175,7 +175,9 @@ export type AxisChartBaseConfig = {
    * Ramp series colors are drawn from. Defaults to `'sequential'`: one series
    * gets a single mid-blue, more get evenly spaced stops running dark to light.
    * A chart of mixed marks spends those stops by mark rather than by series
-   * order: see `resolveSeriesColors`.
+   * order: see `resolveSeriesColors`. A chart of two or more lines and no other
+   * mark defaults to the categorical ramp instead, its light partners shifted
+   * one hue along so no two neighbouring lines share a hue.
    */
   palette?: ChartPalette
   /** Forces layout direction; defaults to document.documentElement.dir */
@@ -843,7 +845,10 @@ export type AxisChartProps = ChartBaseProps & {
   yAxis?: ChartValueAxisOptions
   /** The second value axis. Only drawn when `y2` names a column. */
   y2Axis?: ChartValueAxisOptions
-  /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
+  /**
+   * Ramp series colors are drawn from. Defaults to `'sequential'`, or to the
+   * categorical ramp for a chart of two or more lines and no other mark.
+   */
   palette?: ChartPalette
   /**
    * Series sum on top of each other. Bar and area series; a line never stacks.
