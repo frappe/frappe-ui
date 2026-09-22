@@ -1,5 +1,27 @@
 import { describe, expect, test } from "bun:test";
-import { parseCommentId, resolveMarkerFile } from "./add-comment.ts";
+import {
+  parseCommentArgs,
+  parseCommentId,
+  resolveMarkerFile,
+} from "./add-comment.ts";
+
+describe("parseCommentArgs", () => {
+  test("treats help flags as help requests", () => {
+    expect(parseCommentArgs(["--help"])).toEqual({ type: "help" });
+    expect(parseCommentArgs(["-h"])).toEqual({ type: "help" });
+  });
+
+  test("preserves comment bodies and files", () => {
+    expect(parseCommentArgs(["Review complete"])).toEqual({
+      type: "body",
+      body: "Review complete",
+    });
+    expect(parseCommentArgs(["--file", "review.md"])).toEqual({
+      type: "file",
+      file: "review.md",
+    });
+  });
+});
 
 describe("parseCommentId", () => {
   test("extracts the id from a gh issue comment URL", () => {
