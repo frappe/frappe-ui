@@ -14,6 +14,21 @@
 import { $ } from "bun";
 import { readFileSync } from "node:fs";
 
+const USAGE = `Usage:
+  ./add-comment.ts "Body text, multi-line OK"
+  ./add-comment.ts --file body.md`;
+
+type CommentArgs =
+  | { type: "help" }
+  | { type: "file"; file: string | undefined }
+  | { type: "body"; body: string | undefined };
+
+export function parseCommentArgs(argv: string[]): CommentArgs {
+  if (argv[0] === "--help" || argv[0] === "-h") return { type: "help" };
+  if (argv[0] === "--file") return { type: "file", file: argv[1] };
+  return { type: "body", body: argv[0] };
+}
+
 // Exported for tests — pure parsing, no I/O.
 export function parseCommentId(ghOutputUrl: string): string | undefined {
   return ghOutputUrl.match(/issuecomment-(\d+)/)?.[1];
@@ -24,6 +39,12 @@ export function resolveMarkerFile(env: NodeJS.ProcessEnv = process.env): string 
 }
 
 async function main() {
+  const input = parseCommentArgs(process.argv.slice(2));
+  if (input.type === "help") {
+    console.log(USAGE);
+    return;
+  }
+
   let issue = process.env.BARISTA_ISSUE ?? "";
   if (!/^\d+$/.test(issue)) {
     const eventPath = process.env.GITHUB_EVENT_PATH;
@@ -39,10 +60,9 @@ async function main() {
     process.exit(1);
   }
 
-  const argv = process.argv.slice(2);
   let url: string;
-  if (argv[0] === "--file") {
-    const file = argv[1];
+  if (input.type === "file") {
+    const file = input.file;
     if (!file) { console.error("Error: --file requires a path"); process.exit(1); }
     if (!(await Bun.file(file).exists())) {
       console.error(`Error: file not found: ${file}`);
@@ -50,7 +70,7 @@ async function main() {
     }
     url = (await $`gh issue comment ${issue} --body-file ${file}`.text()).trim();
   } else {
-    const body = argv[0];
+    const body = input.body;
     if (!body) { console.error("Error: body required"); process.exit(1); }
     url = (await $`gh issue comment ${issue} --body ${body}`.text()).trim();
   }
